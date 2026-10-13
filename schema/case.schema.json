@@ -791,6 +791,10 @@
         "editorial": {
           "type": "boolean",
           "description": "Written for the game, not taken from the story."
+        },
+        "after": {
+          "type": "string",
+          "description": "A quote from the story: the gloss shows only once the reader has reached it (when the card it explains is mentioned earlier than the thing it explains)."
         }
       }
     },

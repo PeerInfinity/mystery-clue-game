@@ -240,3 +240,21 @@ As built:
 - Open: givens still come only from a claim's top-level `eq`, so a doubtful claim that only says `ne`/`same`
   fills nothing either way; and a trusted false claim can quietly fill a detail (Hunter's time for the drugging)
   until the player doubts it — intended, but worth watching in play.
+
+## Round 6 (user, 2026-10-13): no card speaks of what the story has not told
+
+> "I don't want any of the cards to refer to future events that haven't been directly mentioned in the story yet."
+
+`npm run foreshadow-log` (`scripts/foreshadow-log.js` → `.cache/foreshadow-log.txt`) prints every card's text and
+every gloss at the paragraph where it first appears, with the words the story has not used yet; it was read end
+to end. Fixed: Holmes "about to leave for Dartmoor" (¶1); "The train to Exeter, Thursday"; "The other two King's
+Pyland horses" (Bayard comes at ¶28); "The chaff-cutting loft" at ¶19 (named at ¶34 — now a dated note);
+Mapleton "to the west" (¶69 — now a note); "Brown's hunting-crop" and dog before he is named; the race card's
+"Wessex Plate" before the card is shown; "Opium is put into Hunter's supper" a paragraph before opium; "The
+overcoat is put on the bush" and "The horse is taken to the hollow" (which take sides); "Silver Blaze is bridled"
+dealt at ¶33 (the stall being empty no longer asserts the bridling — the missing bridle at ¶46 does); and the
+remarks about what the story will never tell (the inquest's verdict, the disguise, the second household, the
+A.D.P. initials, the boot comparison's result). Glosses may now carry an `after` quote and show only once it is
+read (Ross's eye-glass at ¶47, the Telegraph and Chronicle, curried mutton); the tout, bookmaking and laying-against
+glosses no longer sit on Simpson's card from ¶14; Doyle's loose Tavistock geography is a note at ¶47.
+Background rules on topic cards are general facts, not events, and stay as they are (Round 4).

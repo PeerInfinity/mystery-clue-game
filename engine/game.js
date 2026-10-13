@@ -212,6 +212,17 @@ export class Game {
         return this.paraCache.get(quote);
     }
 
+    /** Glosses on a card: with its first mention, or once the reader reaches the gloss's `after` quote. */
+    #glossesOn(id, first) {
+        const out = [];
+        for (const g of this.model.data.glosses ?? []) {
+            if (!g.attaches_to.includes(id)) continue;
+            const para = g.after ? Math.max(first, this.#paraOf(g.after)) : first;
+            if (para < this.read) out.push({ key: g.id, para, kind: 'background', term: g.term, text: g.text, editorial: true });
+        }
+        return out;
+    }
+
     /**
      * Everything the player has learned about a card, as dated pieces, oldest first:
      * {key, para, kind: 'intro'|'background'|'note'|'clue', text, ...where it came from}.
@@ -225,9 +236,7 @@ export class Game {
         const out = [];
         if (c.section === 'entities') {
             out.push({ key: 'intro', para: first, kind: 'intro', text: c.description });
-            for (const g of this.model.data.glosses ?? []) {
-                if (g.attaches_to.includes(id)) out.push({ key: g.id, para: first, kind: 'background', term: g.term, text: g.text, editorial: true });
-            }
+            out.push(...this.#glossesOn(id, first));
             for (const r of this.rulesOn.get(id) ?? []) out.push({ key: r, para: first, kind: 'background', text: this.model.cards.get(r).text, card: r });
             (c.notes ?? []).forEach((n, i) => {
                 const para = this.#paraOf(n.source[0]);
@@ -235,11 +244,7 @@ export class Game {
             });
         }
         if (c.section === 'events') out.push({ key: 'intro', para: first, kind: 'intro', text: c.label });
-        if (c.section !== 'entities') {
-            for (const g of this.model.data.glosses ?? []) {
-                if (g.attaches_to.includes(id)) out.push({ key: g.id, para: first, kind: 'background', term: g.term, text: g.text, editorial: true });
-            }
-        }
+        if (c.section !== 'entities') out.push(...this.#glossesOn(id, first));
         for (const k of this.model.data.claims ?? []) {
             if (k.derived || !this.knows(k.id) || k.id === id) continue;
             const relevant = (k.about ?? []).includes(id) || (this.claimEvents.get(k.id) ?? []).includes(id);
