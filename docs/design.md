@@ -133,3 +133,42 @@ Story: "Silver Blaze" only, fully fleshed out before a second story. The v0.1 ex
    knife); the action graph enforces that.
 5. **The minimal conflict set is one of several.** The police theory is broken by the dog argument alone, or the
    curry argument, or the knife; the UI shows the first minimal set found. A later version could list them all.
+
+## Round 2 (user, 2026-10-13): play by reading
+
+Rulings:
+- The old Easy mode is kept and renamed **Trivial**. **Easy** = every possible connection listed; the player must
+  identify the evidence that eliminates each option (cross-outs need accepted citations). **Hard** = the player
+  first proposes connections, then eliminates them with evidence. Default difficulty: **Easy**.
+- The game revealed too much too soon (incl. the opening summary). Now: a **story panel** advancing **one
+  paragraph per press**; the button carries Holmes's next action as a short neutral cue. Easy/Trivial: the text
+  links to cards, questions and timeline windows. **Hard: a card is collected only by clicking the text that
+  mentions it.** Later: a mode where the player types the text instead of clicking.
+- **Every entity's card appears at its first mention**, and gains information as the story goes on. Cards start
+  with **background** (period notes + general facts) mixed so the clue-relevant facts (opium's taste) do not stand
+  out. (This replaced separate "rule cards" and the "as told / from the start" setting.)
+- **Pace** is a separate setting: *Free* (no restrictions) or *Wait for deductions* (the story waits where
+  Holmes acts on, or announces, a deduction until the player has made it). A scored "keep up with Holmes" mode,
+  with an optional warning, is deferred.
+
+As built:
+- `cases/silver-blaze/mentions.json` names every entity's phrases in the text (scoped by paragraph where a phrase
+  is ambiguous: "the trainer" is Straker until Mapleton, where it is Brown). `engine/story.js` splits the 232
+  paragraphs, resolves overlapping mentions to the longest, and locates every clue quote, event, question,
+  action and route step.
+- Rules now carry `attaches_to` and general wording; glosses are also citable, so the citation list does not
+  single out the facts that matter.
+- Answer lists never show a card the story has not mentioned yet. Ruling out every *visible* option but one
+  does not settle a question (the answer may not have been mentioned yet); proving it does.
+- Gates sit where Holmes acts on a deduction (actions' required steps) or announces one (his route steps that
+  settle or rule out one answer), but never before the step's last premise has been told. A test reads the
+  whole story under *Wait* and proves every gate from what has been read; it found two gates that came before
+  their evidence (the coat: rebased on the coat seen on the bush; Brown: the gate moves past paragraph 146).
+- Event labels and entity names/descriptions were rewritten so they give nothing away before the text does
+  ("The horse is taken to the hollow", "The knife from Straker's hand").
+
+Open:
+- Easy marks every clue sentence in the text, which is busy and itself a hint. Options: mark only entity names
+  and let clue sentences be found by clicking (as in Hard), or a toggle.
+- The background note on opium ("no master has an honest reason to dose a servant") still leans towards the
+  answer; the general facts may need more neutral company on each card.

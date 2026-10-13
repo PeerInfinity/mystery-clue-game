@@ -189,13 +189,16 @@ export class Game {
         if (g) return [g.value];
         const m = this.marks.get(slot);
         if (m?.proven) return [m.proven.value];
-        const base = m?.listed ? [...m.listed] : this.difficulty === HARD ? [] : this.model.slots.get(slot).domain;
-        return base.filter((v) => !m?.struck.has(v));
+        const s = this.model.slots.get(slot);
+        const base = m?.listed ? [...m.listed] : this.difficulty === HARD ? [] : s.domain;
+        // Never list a card the story has not shown the player yet: that would give it away.
+        return base.filter((v) => !m?.struck.has(v) && (v === s.on || !this.model.cards.has(v) || this.knows(v)));
     }
 
     /** Hard mode: propose a candidate. Refused when it is the wrong kind of thing for the slot. */
     addCandidate(slot, value) {
         if (!this.shapeFits(slot, value)) return { ok: false, why: 'shape' };
+        if (this.model.cards.has(value) && !this.knows(value) && value !== this.model.slots.get(slot).on) return { ok: false, why: 'unknown' };
         const m = this.#mark(slot);
         if (!m.listed) m.listed = new Set();
         m.listed.add(value);

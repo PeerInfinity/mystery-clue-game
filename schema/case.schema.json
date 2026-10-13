@@ -1137,6 +1137,10 @@
         },
         "source": {
           "$ref": "#/$defs/source"
+        },
+        "cue": {
+          "type": "string",
+          "description": "Short, spoiler-free label for the read-on button."
         }
       }
     },

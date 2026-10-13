@@ -1,7 +1,7 @@
 # Mystery clue game
 
-A deduction game built from fair-play mystery stories. You collect clues by investigating, and every person,
-place, thing, event and clue becomes a card. Every card has open questions (who did it, where, when, whose is it,
+A deduction game built from fair-play mystery stories. You read the story a paragraph at a time; every person,
+place, thing, event and clue becomes a card when the text first mentions it (in Hard mode, when you click it). Every card has open questions (who did it, where, when, whose is it,
 is it true?), each with a list of candidate answers, like pencil marks in sudoku. You rule answers out, alone or
 with cited reasons that the game checks MetaMath-style, until only one solution is left. Any sufficient set of
 reasons is accepted, not just the detective's.
@@ -22,11 +22,13 @@ No build step and no runtime dependencies. `ajv` (a dev dependency) checks the J
 
 | Path | What |
 |---|---|
-| `index.html`, `ui/` | The casebook page: investigate, cards, questions, theories, three timelines. |
+| `index.html`, `ui/` | The casebook page: the story panel, cards, questions, theories, three timelines. |
+| `engine/story.js` | Paragraphs, and where every mention, clue, question, action and deduction sits in them; the gates. |
+| `cases/silver-blaze/mentions.json` | Which phrases in the text name each card. |
 | `engine/logic.js` | The formula language for constraints, in three-valued logic. |
 | `engine/solver.js` | A finite-domain solver: candidates per slot, checked eliminations, uniqueness, minimal conflict sets. |
 | `engine/caseModel.js` | Turns a case into cards, slots and constraints; `checkStep` checks a cited elimination or conclusion. |
-| `engine/game.js` | Player state: collecting, pencil marks, givens, proofs, theories, the three time axes. |
+| `engine/game.js` | Player state: reading, collecting, pencil marks, givens, proofs, theories, the three time axes. Difficulties Trivial / Easy / Hard; pace Free / Wait. |
 | `cases/silver-blaze/` | The case: `case.json` (meta, time windows, scenes, questions, theories) and its parts. |
 | `cases/silver-blaze/report.md` | Generated: fair-play table, theories and what breaks them, the route check, every slot's status, the fabula. |
 | `schema/case.schema.json` | JSON Schema for case format 0.2. |

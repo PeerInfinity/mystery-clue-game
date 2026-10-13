@@ -57,6 +57,8 @@ test('Hard: reading collects nothing; clicking the text does', () => {
     assert.deepEqual(game.collect(p, ['opium']).includes('opium'), true);
     assert.ok(game.knows('r.opium_taste'), 'the background fact arrives with its card');
     assert.equal(game.addCandidate('e.opium_added.agent', 'stable').ok, false, 'a place cannot drug anyone');
+    assert.equal(game.addCandidate('e.opium_added.agent', 'simpson').ok, false, 'only cards already collected');
+    game.collect(model.story.firstAt.get('simpson'), ['simpson']);
     assert.ok(game.addCandidate('e.opium_added.agent', 'simpson').ok);
     assert.deepEqual(game.pencil('e.opium_added.agent'), ['simpson']);
 });
@@ -84,11 +86,12 @@ test('the police theory survives the first part of the story and is broken by th
 
 test('save and load round-trip', () => {
     const game = new Game(model, { difficulty: HARD });
-    while (game.read < 25) game.advance();
+    while (game.read < 45) game.advance();
     game.collect(21, ['the_stranger']);
+    game.collect(model.story.firstAt.get('simpson'), ['simpson']);
     game.addCandidate('the_stranger.identity', 'simpson');
     const copy = new Game(model, { state: JSON.parse(JSON.stringify(game.save())) });
-    assert.equal(copy.read, 25);
+    assert.equal(copy.read, 45);
     assert.ok(copy.knows('the_stranger'));
     assert.deepEqual(copy.pencil('the_stranger.identity'), ['simpson']);
 });

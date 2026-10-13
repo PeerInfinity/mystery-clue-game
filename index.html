@@ -10,37 +10,42 @@
 <header class="top">
   <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">a casebook</span></h1>
   <div class="controls">
-    <label title="Easy: the game lists every option and flags the ones your clues rule out. Hard: you list the options yourself and the game checks only that they are the right kind of thing.">
-      Mode
-      <select id="difficulty"><option value="easy">Easy</option><option value="hard">Hard</option></select>
+    <label title="Trivial: every answer listed, the ones your clues rule out are greyed. Easy: every answer listed; you must cite the evidence that rules each one out. Hard: cards are collected only by clicking the text; you propose the answers yourself, then rule them out with evidence.">
+      Difficulty
+      <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="hard">Hard</option></select>
     </label>
-    <label title="Holmes's general knowledge (rule cards). 'From the start' gives you all of it; 'As told' only once the story states each rule — which is mostly at the very end.">
-      Rule cards
-      <select id="rules"><option value="all">From the start</option><option value="told">As told</option></select>
+    <label title="Free: read on whenever you like. Wait for deductions: when Holmes acts on a deduction, the story waits until you have made it too.">
+      Pace
+      <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option></select>
     </label>
     <span id="progress" class="progress"></span>
     <button id="reset" class="quiet">Start over</button>
   </div>
 </header>
 <main class="layout">
-  <nav class="side">
+  <section class="story-pane">
+    <div id="story" class="story"></div>
+    <div id="reader" class="reader"></div>
+  </section>
+  <section class="tools">
     <div class="tabs" role="tablist">
-      <button data-tab="investigate" class="tab on">Investigate</button>
+      <button data-tab="card" class="tab on">Card</button>
       <button data-tab="cards" class="tab">Cards</button>
       <button data-tab="questions" class="tab">Questions</button>
       <button data-tab="theories" class="tab">Theories</button>
       <button data-tab="timeline" class="tab">Timeline</button>
     </div>
-    <div id="side" class="side-body"></div>
-  </nav>
-  <section id="detail" class="detail"></section>
+    <div id="tool" class="tool-body"></div>
+  </section>
 </main>
+<div id="pop" class="pop" hidden></div>
+<div id="toast" class="toast" hidden></div>
 <dialog id="cite">
   <form method="dialog" class="cite">
     <h2 id="cite-title"></h2>
     <p id="cite-help" class="muted"></p>
     <div id="cite-chosen" class="chips"></div>
-    <input id="cite-search" type="search" placeholder="Search your clues and rule cards…" autocomplete="off">
+    <input id="cite-search" type="search" placeholder="Search your clues and background notes…" autocomplete="off">
     <div id="cite-list" class="cite-list"></div>
     <p id="cite-result" class="result"></p>
     <div class="row">
