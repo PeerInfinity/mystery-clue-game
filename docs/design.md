@@ -70,10 +70,9 @@ Story: "Silver Blaze" only, fully fleshed out before a second story. The v0.1 ex
 
 ### Slices
 
-1. Data v0.2 + schema + validator with the uniqueness check (in the worktree).
-2. Engine + vitest.
-3. UI.
-Each slice is reviewed with the user before the next.
+1. Data v0.2 + schema + validator with the uniqueness check. **Done 2026-10-13.**
+2. Engine + tests. **Done 2026-10-13** (node's built-in test runner, no vitest).
+3. UI. **First prototype done 2026-10-13**; collection v1 = Holmes's own actions (actions.json).
 
 ## Rulings (user, 2026-10-13)
 
@@ -99,3 +98,38 @@ Each slice is reviewed with the user before the next.
 - Uniqueness (validator): all constraints active → exactly one solution. Police check: police-known constraints →
   the Simpson theory is consistent.
 - v0.1's inference hyperedges are kept as **Holmes's route** (documentation / hints), not as the checker.
+
+## As built (2026-10-13)
+
+- **Cards:** 170 entities (every named or described person, animal, place, object, document — including
+  hypothetical ones like the duplicate key and the chemist, and Holmes's invented Plymouth garden-party),
+  92 events, 146 atomic claims, 32 rule cards, 49 period glosses. 465 quotes, all found in the text.
+- **Slots:** 344; **givens:** 239 are filled by a plain clue the moment it is found (sudoku's printed digits);
+  **105 are real puzzle cells** (who did what in the hidden part of the night, the identities, the truth of
+  the testimony, purposes and motive). 23 slots are left open because the story never settles them (when the
+  cravat was dropped, whether the opium went in in the kitchen or elsewhere in the house, …).
+- **Givens rule (my choice):** a non-testimony claim whose assertion contains `eq(slot, value)` fills that slot.
+  Testimony never does — it might be false.
+- **Steps gate actions:** some of Holmes's actions need a reasoning step (search the wet hollow needs "where is
+  the horse?" settled). A step counts once the player has proved its conclusion, by any route.
+- **Placeholders:** "the stranger", "the midnight visitor", "the track man", "the neighbour", "the bay",
+  "William Derbyshire" are cards whose identity is a slot. Claims link events to them (`same(event.agent,
+  placeholder.identity)`), so identifying the stranger is itself a jigsaw step.
+
+## Findings worth a decision
+
+1. **Easy mode + all rule cards = the engine solves it for you.** With every rule card known from the start, the
+   moment the papers are read Easy mode greys out everyone but Straker as the drugger. Options: (a) rule cards are
+   earned (an action like "think about the curry" hands them over); (b) Easy's auto-check only uses rule cards the
+   player has already cited somewhere; (c) default to "rule cards as told" — but the story states most of them
+   only in the final explanation, so the case is then unsolvable before the end (that IS the fair-play finding).
+2. **Holmes never rules out Colonel Ross for the night visit.** The dog argument alone leaves Straker and anyone
+   else the dog knew who is not otherwise accounted for; only the curry argument closes it. The game accepts
+   either route but a player using only the dog will be stuck on Ross.
+3. **Several of the puzzle's links are editorial** (`by: "editorial"` in constraints.json): e.g. Mrs. Straker was
+   at home all night; Straker never left the house that evening. The story assumes them silently. They are
+   listed so a game can show them as rule cards or leave them out.
+4. **Watson's self-wound suggestion is only a sound step after the landau** (when Gregory reports Simpson had no
+   knife); the action graph enforces that.
+5. **The minimal conflict set is one of several.** The police theory is broken by the dog argument alone, or the
+   curry argument, or the knife; the UI shows the first minimal set found. A later version could list them all.

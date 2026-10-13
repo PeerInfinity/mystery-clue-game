@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casebook: Silver Blaze</title>
+<link rel="stylesheet" href="ui/style.css">
+</head>
+<body>
+<header class="top">
+  <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">a casebook</span></h1>
+  <div class="controls">
+    <label title="Easy: the game lists every option and flags the ones your clues rule out. Hard: you list the options yourself and the game checks only that they are the right kind of thing.">
+      Mode
+      <select id="difficulty"><option value="easy">Easy</option><option value="hard">Hard</option></select>
+    </label>
+    <label title="Holmes's general knowledge (rule cards). 'From the start' gives you all of it; 'As told' only once the story states each rule — which is mostly at the very end.">
+      Rule cards
+      <select id="rules"><option value="all">From the start</option><option value="told">As told</option></select>
+    </label>
+    <span id="progress" class="progress"></span>
+    <button id="reset" class="quiet">Start over</button>
+  </div>
+</header>
+<main class="layout">
+  <nav class="side">
+    <div class="tabs" role="tablist">
+      <button data-tab="investigate" class="tab on">Investigate</button>
+      <button data-tab="cards" class="tab">Cards</button>
+      <button data-tab="questions" class="tab">Questions</button>
+      <button data-tab="theories" class="tab">Theories</button>
+      <button data-tab="timeline" class="tab">Timeline</button>
+    </div>
+    <div id="side" class="side-body"></div>
+  </nav>
+  <section id="detail" class="detail"></section>
+</main>
+<dialog id="cite">
+  <form method="dialog" class="cite">
+    <h2 id="cite-title"></h2>
+    <p id="cite-help" class="muted"></p>
+    <div id="cite-chosen" class="chips"></div>
+    <input id="cite-search" type="search" placeholder="Search your clues and rule cards…" autocomplete="off">
+    <div id="cite-list" class="cite-list"></div>
+    <p id="cite-result" class="result"></p>
+    <div class="row">
+      <button id="cite-check" value="check" type="button">Check</button>
+      <button value="close" class="quiet">Close</button>
+    </div>
+  </form>
+</dialog>
+<script type="module" src="ui/app.js"></script>
+</body>
+</html>
