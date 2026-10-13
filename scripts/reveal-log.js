@@ -14,7 +14,7 @@ const show = (p) => {
         const c = model.cards.get(id);
         if (!seen.cards.has(id)) {
             seen.cards.add(id);
-            if (c.section !== 'rules' && c.section !== 'glosses') out.push(`  + ${c.section.slice(0, -1)} ${id}: ${c.name ?? c.label ?? c.text}${c.description ? ` — ${c.description}` : ''}`);
+            if (c.section !== 'rules' && c.section !== 'glosses') out.push(`  + ${c.section.slice(0, -1)} ${id}: ${game.nameOf(id)}`);
         }
         for (const it of game.info(id)) {
             const key = `${id}|${it.key}`;

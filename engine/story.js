@@ -139,6 +139,29 @@ export class Story {
         for (const list of this.spans) list.sort((a, b) => a.start - b.start || b.end - a.end);
     }
 
+    /** The sentence of paragraph `para` that contains [start, end): what the story said at that mention. */
+    sentenceAround(para, start, end = start) {
+        const text = this.paragraphs[para].display;
+        // A sentence ends at . ! or ? (optionally followed by closing quotes) and a space; abbreviations such as
+        // "Mr." or "Dr." do not end one.
+        const ends = [];
+        for (const m of text.matchAll(/[.!?][”’"')]*\s+/g)) {
+            const before = text.slice(Math.max(0, m.index - 4), m.index + 1);
+            if (/\b(Mr|Mrs|Dr|St|Co)\.$/.test(before)) continue;
+            ends.push(m.index + m[0].length);
+        }
+        const from = [0, ...ends].filter((x) => x <= start).pop();
+        const to = ends.find((x) => x >= end) ?? text.length;
+        return text.slice(from, to).trim();
+    }
+
+    /** The sentence where a card is first mentioned, or null. */
+    firstSentence(id) {
+        const para = this.firstAt.get(id);
+        const span = para === undefined ? null : this.spans[para].find((s) => s.ids.includes(id));
+        return span ? { para, text: this.sentenceAround(para, span.start, span.end) } : null;
+    }
+
     /** Split a paragraph into segments, each with the ids of every span covering it. */
     segments(para) {
         const p = this.paragraphs[para];

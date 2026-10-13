@@ -258,3 +258,25 @@ A.D.P. initials, the boot comparison's result). Glosses may now carry an `after`
 read (Ross's eye-glass at ¶47, the Telegraph and Chronicle, curried mutton); the tout, bookmaking and laying-against
 glosses no longer sit on Simpson's card from ¶14; Doyle's loose Tavistock geography is a note at ¶47.
 Background rules on topic cards are general facts, not events, and stay as they are (Round 4).
+
+## Round 7 (user, 2026-10-13): a systematic fix — step 1, every piece of card text is dated by a quote
+
+> "The cards are full of information that hasn't yet been revealed by the story. We'll need a more systematic way
+> of fixing this." (Proposed: an LLM rewrites each card's content per paragraph, from the story so far.)
+
+Agreed plan: (1) make every piece of card text carry a quote and show only once it is read, validated;
+(2) build an LLM checker and measure it on the known leaks; (3) draft paraphrases from quotes; (4) review what the
+checker flags. Step 1, as built:
+- Entities have `names` and events `labels`: a history, in story order, of what the player sees it called, each
+  with the line that gives it. The first must be read by the time the card appears (validated by reading the
+  story through); `Game.nameOf` returns the latest one read. The case's own `name`/`label` are for reports and
+  authoring only. Silver Blaze is "The favourite" until ¶10, Straker "The trainer", the landau "An open carriage".
+  Topic headings are the one `editorial` exception.
+- A card's first section is the **sentence where the story first mentions it**, not a written description. The
+  old descriptions became notes (`from_description: true`, 175 of them), dated by their quote like every note;
+  step 2 checks them.
+- The 21 events dealt before their label's line got neutral first labels resting on the clue that deals them
+  ("Silver Blaze is gone from his stall" before "…is taken out of the stable").
+- The validator caught six names quoted with the wrong capitals (one, "Powdered opium", resolved to ¶218) and a
+  note dated before its card.
+- `npm run foreshadow-log` now lists every piece of card text where it first appears — the checker's input.

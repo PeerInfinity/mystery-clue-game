@@ -151,3 +151,16 @@ test('doubt: citing clues that cannot all be true is refused, naming the clash',
     game.suspect('c.straker_honest_record');
     assert.ok(game.prove('straker.honest', 'false', step.premises).ok);
 });
+
+test('a card is called only what the story has called it so far', () => {
+    const game = new Game(model);
+    while (!game.knows('silver_blaze')) game.advance();
+    assert.equal(game.nameOf('silver_blaze'), 'The favourite');
+    assert.equal(game.nameOf('straker'), 'The trainer');
+    const first = game.info('silver_blaze')[0];
+    assert.equal(first.kind, 'mention');
+    assert.match(first.text, /the favourite for the Wessex Cup/);
+    while (game.read <= 10) game.advance();
+    assert.equal(game.nameOf('silver_blaze'), 'Silver Blaze');
+    assert.ok(game.info('silver_blaze').some((it) => it.kind === 'name' && it.text === 'Silver Blaze'));
+});

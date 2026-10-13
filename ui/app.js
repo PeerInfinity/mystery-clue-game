@@ -26,8 +26,7 @@ const cache = new Map();
 function cardName(id) {
     const c = model.cards.get(id);
     if (!c) return model.windows.find((w) => w.id === id)?.label ?? model.data.questions.find((q) => q.id === id)?.text ?? id;
-    if (c.section === 'entities') return c.name;
-    if (c.section === 'events') return c.label;
+    if (c.section === 'entities' || c.section === 'events') return game.nameOf(id);
     if (c.section === 'claims' || c.section === 'rules') return c.text;
     if (c.section === 'glosses') return c.term;
     return id;
@@ -161,11 +160,10 @@ function toolCard() {
     const hideFlags = ['placeholder', 'fiction_within_story', 'implied'];
     let h = `<div class="card-head"><span class="kind">${kindOf(id)}</span>${(c.flags ?? []).filter((f) => !hideFlags.includes(f)).map((f) => `<span class="flag">${esc(f.replace(/_/g, ' '))}</span>`).join('')}`;
     if (game.isSuspected(id)) h += '<span class="flag doubted">suspected</span>';
-    if (c.section === 'entities') h += `<h2>${esc(c.name)}</h2>`;
-    else if (c.section === 'events') h += `<h2>${esc(c.label)}</h2>`;
+    if (c.section === 'entities' || c.section === 'events') h += `<h2>${esc(game.nameOf(id))}</h2>`;
     else h += `<p class="desc">${esc(c.text)}</p>`;
     const names = [...new Set(story.spans.slice(0, game.read).flatMap((list, p) => list.filter((sp) => sp.kind === 'entity' && sp.ids.includes(id)).map((sp) => story.paragraphs[p].display.slice(sp.start, sp.end))))]
-        .filter((n, i, all) => n.toLowerCase() !== (c.name ?? '').toLowerCase() && all.findIndex((m) => m.toLowerCase() === n.toLowerCase()) === i);
+        .filter((n, i, all) => n.toLowerCase() !== game.nameOf(id).toLowerCase() && all.findIndex((m) => m.toLowerCase() === n.toLowerCase()) === i);
     if (names.length) h += `<div class="small muted">called: ${names.slice(0, 8).map(esc).join(' · ')}</div>`;
     h += '</div>';
 
@@ -183,6 +181,8 @@ function toolCard() {
         const bg = g.items.filter((it) => it.kind === 'background').sort((x, y) => (x.term ?? x.text).localeCompare(y.term ?? y.text));
         for (const it of g.items) {
             if (it.kind === 'intro') h += `<p class="desc">${esc(it.text)}</p>`;
+            else if (it.kind === 'mention') h += `<p class="quote">${esc(it.text)}</p>`;
+            else if (it.kind === 'name') h += `<p>${it.event ? 'Now described as' : 'Now known as'} <b>${esc(it.text)}</b></p><p class="quote">${esc(it.quote.replace(/\s+/g, ' '))}</p>`;
             else if (it.kind === 'note') h += `<p>${esc(it.text)}</p><p class="quote">${esc(it.quote.replace(/\s+/g, ' '))}</p>`;
             else if (it.kind === 'clue') h += `<p>${link(it.claim, it.text)} <span class="small muted">· ${source(it)}</span></p>`;
             else if (it.kind === 'attestation') h += `<p class="small">${source(it)}${it.to && game.knows(it.to) ? ` to ${link(it.to)}` : ''}</p><p class="quote">${esc(it.quote.replace(/\s+/g, ' '))}</p>`;

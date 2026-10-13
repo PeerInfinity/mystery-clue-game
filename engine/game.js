@@ -234,16 +234,25 @@ export class Game {
         if (!c || !this.knows(id)) return [];
         const first = this.story.firstAt.get(id) ?? this.unlocked.get(id).para;
         const out = [];
+        // What the story said where it first mentions the card: never more than the story has told.
+        const said = this.story.firstSentence(id);
+        if (said) out.push({ key: 'mention', para: first, kind: 'mention', text: said.text });
+        // Later names (and, for events, later descriptions), each from the line of the story that gives it.
+        (c.names ?? c.labels ?? []).forEach((n, i) => {
+            if (i === 0 || n.editorial) return;
+            const para = Math.max(first, this.#paraOf(n.source[0]));
+            const hit = this.story.find(n.source[0]);
+            const quote = hit ? this.story.sentenceAround(hit.para, hit.start, hit.end) : n.source[0];
+            if (para < this.read) out.push({ key: `name${i}`, para, kind: 'name', text: n.name ?? n.label, quote, event: c.section === 'events' });
+        });
         if (c.section === 'entities') {
-            out.push({ key: 'intro', para: first, kind: 'intro', text: c.description });
             out.push(...this.#glossesOn(id, first));
             for (const r of this.rulesOn.get(id) ?? []) out.push({ key: r, para: first, kind: 'background', text: this.model.cards.get(r).text, card: r });
             (c.notes ?? []).forEach((n, i) => {
-                const para = this.#paraOf(n.source[0]);
+                const para = Math.max(first, this.#paraOf(n.source[0]));
                 if (para < this.read) out.push({ key: `note${i}`, para, kind: 'note', text: n.text, quote: n.source[0] });
             });
         }
-        if (c.section === 'events') out.push({ key: 'intro', para: first, kind: 'intro', text: c.label });
         if (c.section !== 'entities') out.push(...this.#glossesOn(id, first));
         for (const k of this.model.data.claims ?? []) {
             if (k.derived || !this.knows(k.id) || k.id === id) continue;
@@ -261,6 +270,21 @@ export class Game {
             });
         }
         return out.sort((a, b) => a.para - b.para);
+    }
+
+    /**
+     * The name a card goes by now: the latest of its `names` (entities) or `labels` (events) whose line of the
+     * story has been read. Never the case's own `name`/`label`, which may know more than the reader does.
+     */
+    nameOf(id) {
+        const c = this.model.cards.get(id);
+        if (!c) return id;
+        if (c.section === 'claims' || c.section === 'rules') return c.text;
+        if (c.section === 'glosses') return c.term;
+        const list = c.names ?? c.labels ?? [];
+        let cur = list[0];
+        for (const n of list) if (n.editorial || this.#paraOf(n.source[0]) < this.read) cur = n;
+        return cur ? cur.name ?? cur.label : id;
     }
 
     /** Has this piece arrived since the player last looked at the card? */

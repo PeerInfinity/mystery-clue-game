@@ -15,6 +15,7 @@ import { mergeCase, buildModel, activeConstraints, checkStep } from '../engine/c
 import { evaluate, literalsOf, render } from '../engine/logic.js';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { Story } from '../engine/story.js';
+import { Game } from '../engine/game.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -109,6 +110,34 @@ for (const e of data.entities ?? []) {
         const hit = storyIndex.find(n.source[0]);
         if (!hit) err(`${e.id}: note quote not within one paragraph: "${n.source[0].slice(0, 50)}"`);
         else if (hit.para < first) err(`${e.id}: note at paragraph ${hit.para} comes before the first mention (${first})`);
+    }
+}
+
+// Names and labels: everything a card is called must come from a line the reader has read. The first must be
+// read by the time the card appears (reading the story through, Easy); later ones come in story order.
+{
+    model.story = storyIndex;
+    const reader = new Game(model);
+    while (!reader.finished()) reader.advance();
+    for (const [sec, key, field] of [['entities', 'names', 'name'], ['events', 'labels', 'label']]) {
+        for (const c of data[sec] ?? []) {
+            const list = c[key] ?? [];
+            if (!list.length) { err(`${c.id}: no ${key}`); continue; }
+            const appears = reader.unlocked.get(c.id)?.para;
+            let last = -1;
+            list.forEach((n, i) => {
+                if (n.editorial) {
+                    if (c.kind !== 'topic') err(`${c.id}: only a topic card may have an editorial ${field}`);
+                    return;
+                }
+                checkQuotes(c.id, n.source);
+                const hit = storyIndex.find(n.source[0]);
+                if (!hit) return;
+                if (i === 0 && appears !== undefined && hit.para > appears) err(`${c.id}: its first ${field} "${n[field]}" rests on paragraph ${hit.para}, but the card appears at ${appears}`);
+                if (hit.para < last) err(`${c.id}: ${key} out of story order at "${n[field]}"`);
+                last = Math.max(last, hit.para);
+            });
+        }
     }
 }
 
