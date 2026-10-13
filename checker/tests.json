@@ -1,0 +1,17 @@
+{
+  "description": "Known answers for measuring the card checker. 'leak' cases are earlier versions of card text (or the current text, where it still leaks); 'ok' cases are current text the story supports. 'para' is the paragraph after which the text first shows.",
+  "cases": [
+    {"id": "holmes-old-intro", "card": "holmes", "para": 1, "kind": "intro", "text": "Sherlock Holmes, Watson's companion, about to leave for Dartmoor.", "expect": "leak", "why": "Dartmoor is first named at ¶3; 'Sherlock' at ¶7"},
+    {"id": "holmes-note", "card": "holmes", "para": 1, "kind": "note", "text": "Sherlock Holmes, Watson's companion, who says at breakfast that he shall have to go.", "expect": "leak", "why": "'Sherlock' is first used at ¶7"},
+    {"id": "other-two-horses", "card": "kp_other_horses", "para": 19, "kind": "name", "text": "The other two King's Pyland horses", "expect": "leak", "why": "four horses in all; that two of them are Silver Blaze and Bayard is not told until ¶28"},
+    {"id": "chaff-loft", "card": "loft", "para": 19, "kind": "name", "text": "The chaff-cutting loft", "expect": "leak", "why": "'chaff-cutting' comes at ¶34"},
+    {"id": "mapleton-west", "card": "mapleton", "para": 19, "kind": "intro", "text": "Lord Backwater's larger training establishment, about two miles across the moor (to the west, as seen from King's Pyland), managed by Silas Brown.", "expect": "leak", "why": "¶19 puts Tavistock to the west, not Mapleton (that is ¶69)"},
+    {"id": "opium-early", "card": "e.opium_added", "para": 36, "kind": "label", "text": "Opium is put into Hunter's supper", "expect": "leak", "why": "opium is first mentioned at ¶37"},
+    {"id": "straker-named-early", "card": "e.straker_dies", "para": 4, "kind": "label", "text": "John Straker dies", "expect": "leak", "why": "the trainer is first named at ¶10"},
+    {"id": "favourite", "card": "silver_blaze", "para": 4, "kind": "name", "text": "The favourite", "expect": "ok"},
+    {"id": "villa", "card": "straker_villa", "para": 19, "kind": "note", "text": "Straker's small villa, about two hundred yards from the stables.", "expect": "ok"},
+    {"id": "stall", "card": "e.horse_led_out", "para": 33, "kind": "label", "text": "Silver Blaze is gone from his stall", "expect": "ok"},
+    {"id": "hunting-crop", "card": "hunting_crop", "para": 128, "kind": "note", "text": "Swinging in the hand of the fierce-looking elderly man who strides out from the Mapleton gate.", "expect": "ok"},
+    {"id": "trainer-dies", "card": "e.straker_dies", "para": 4, "kind": "label", "text": "The favourite's trainer dies", "expect": "ok"}
+  ]
+}
