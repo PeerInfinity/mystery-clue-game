@@ -99,6 +99,7 @@ export function buildModel(data) {
             answer: Array.isArray(s.answer) || s.answer === null ? null : s.answer,
             undetermined: Array.isArray(s.answer) ? s.answer : s.answer === null ? true : undefined,
             labels: s.domain.labels,
+            reveal: s.domain.reveal,
             note: s.note,
         });
     }

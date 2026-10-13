@@ -5,7 +5,8 @@
   "description": "A deduction game built from fair-play mystery stories: collect clues, connect them, eliminate what does not fit.",
   "scripts": {
     "test": "node --test",
-    "validate": "node scripts/validate-case.js cases/silver-blaze"
+    "validate": "node scripts/validate-case.js cases/silver-blaze",
+    "reveal-log": "node scripts/reveal-log.js cases/silver-blaze > .cache/reveal-log.txt"
   },
   "devDependencies": {
     "ajv": "^8.17.1"

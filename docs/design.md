@@ -190,3 +190,25 @@ As built:
 - `lastSeen` per card (paragraph read + collection counter) is saved with the game. A card is marked seen when
   the player opens it; pieces after that are highlighted, and the card list shows "new" (never opened) and
   "updated" (new information since last opened), with filters for both.
+
+## Round 4 (user, 2026-10-13): nothing on a card before the story says it
+
+The user found the title "Silver Blaze" clickable before the story starts, opening a card full of information,
+and expected more such cases. A reveal log (`npm run reveal-log` → `.cache/reveal-log.txt`: everything that
+appears, paragraph by paragraph) was read end to end. Fixed:
+- The title paragraph no longer counts as a mention.
+- Questions appear only once raised: event questions with their event; identity and truth questions with their
+  card; others when a held clue speaks of them, the story raises the case question, or Holmes reaches the point
+  where he settles it (the card holding that question is dealt to the player just before such a point).
+- Multiple-choice answers carry `reveal` quotes and are offered only once the story suggests them ("for early
+  exercise" with the lads' hope, "to steal him" with the police theory, "to injure him" with Holmes's question —
+  "lame" and "kill" merged into "injure" so the true answer is not on offer from the start).
+- Background facts moved off the cards they solve onto **topic cards** (The turf and betting, Horses, Training
+  stables, Households and servants, Medicine and injuries, Holmes's methods; and the moor), each mixed with true
+  but irrelevant facts (`editorial: true`), and each appearing where the story first touches its topic.
+- Period notes that gave answers away were rewritten (the bay "dyed over", Simpson's stick "weighted with
+  lead", the trainer's fraud in "laying against", …).
+- Event labels, entity names and first descriptions that ran ahead of the text were rewritten ("Simpson's
+  clothing" → "The stranger's clothes", "Dawson" → "The Mapleton groom" until he is named, "Heavy rain, and no
+  wind" → "Heavy rain", …).
+- The fair-play test now also checks, at every gate, that the question is visible and the answer on offer.

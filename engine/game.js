@@ -55,6 +55,7 @@ export class Game {
             if (!k) continue;
             this.claimEvents.set(c.id, [...slotsIn(k.formula)].map((s) => model.slots.get(s)?.on).filter((o) => model.cards.get(o)?.section === 'events'));
         }
+        this.story.stepsBefore(0, model.data); // builds the gate map
         this.reset();
         if (state) this.load(state);
     }
@@ -137,6 +138,11 @@ export class Game {
             for (const i of a.yields?.items ?? []) this.items.add(i);
         }
         if (this.difficulty !== HARD) for (const s of this.story.spans[p]) for (const id of s.ids) this.#unlock(id, p);
+        // The story is about to wait on a deduction: the card that holds its question is dealt now.
+        for (const id of this.story.gates?.get(p + 1) ?? []) {
+            const c = this.routeById.get(id).concludes;
+            this.#unlock(this.model.slots.get(c.slot ?? c.formula.eq[0])?.on, p);
+        }
     }
 
     /** Hard mode: the player clicked text in paragraph `para` covering these ids. Returns the newly collected. */
@@ -247,8 +253,51 @@ export class Game {
     }
 
     // ---------- slots ----------
-    visibleSlots() { return [...this.model.slots.values()].filter((s) => this.knows(s.on)); }
-    slotsOn(cardId) { return [...this.model.slots.values()].filter((s) => s.on === cardId); }
+    /**
+     * A question shows only once the story has raised it: it belongs to an event the player holds, asks who a
+     * placeholder really is, asks whether a held statement is true, is spoken of by a held clue, is a case
+     * question the story has raised, or Holmes has reached the point where he settles it.
+     */
+    slotVisible(slotId) {
+        const s = this.model.slots.get(slotId);
+        if (!s || !this.knows(s.on)) return false;
+        const owner = this.model.cards.get(s.on);
+        if (owner.section === 'events' || owner.section === 'claims' || s.facet === 'identity') return true;
+        if (!this.slotRaisers) {
+            this.slotRaisers = new Map();
+            const add = (slot, test) => {
+                if (!this.slotRaisers.has(slot)) this.slotRaisers.set(slot, []);
+                this.slotRaisers.get(slot).push(test);
+            };
+            for (const c of this.model.data.claims ?? []) {
+                const k = this.model.constraints.get(`k.${c.id}`);
+                if (k && !c.derived) for (const x of slotsIn(k.formula)) add(x, () => this.knows(c.id));
+            }
+            for (const q of this.model.data.questions ?? []) add(q.slot, () => this.questionRaised(q.id));
+            for (const [para, steps] of this.story.gates ?? new Map()) {
+                for (const id of steps) {
+                    const c = this.routeById.get(id).concludes;
+                    add(c.slot ?? c.formula?.eq?.[0], () => para <= this.read);
+                }
+            }
+        }
+        return (this.slotRaisers.get(slotId) ?? []).some((t) => t());
+    }
+
+    visibleSlots() { return [...this.model.slots.values()].filter((s) => this.slotVisible(s.id)); }
+    slotsOn(cardId) { return [...this.model.slots.values()].filter((s) => s.on === cardId && this.slotVisible(s.id)); }
+
+    /** A listed answer must be something the story has already put in front of the player. */
+    offered(slot, v) {
+        const s = this.model.slots.get(slot);
+        if (s.reveal?.[v]) {
+            if (!this.revealCache) this.revealCache = new Map();
+            const key = `${slot}|${v}`;
+            if (!this.revealCache.has(key)) this.revealCache.set(key, this.story.find(s.reveal[v])?.para ?? Infinity);
+            if (this.revealCache.get(key) >= this.read) return false;
+        }
+        return v === s.on || !this.model.cards.has(v) || this.knows(v);
+    }
 
     #mark(slot) {
         if (!this.marks.has(slot)) this.marks.set(slot, { listed: this.difficulty === HARD ? new Set() : null, struck: new Map(), proven: null });
@@ -264,13 +313,13 @@ export class Game {
         const s = this.model.slots.get(slot);
         const base = m?.listed ? [...m.listed] : this.difficulty === HARD ? [] : s.domain;
         // Never list a card the story has not shown the player yet: that would give it away.
-        return base.filter((v) => !m?.struck.has(v) && (v === s.on || !this.model.cards.has(v) || this.knows(v)));
+        return base.filter((v) => !m?.struck.has(v) && this.offered(slot, v));
     }
 
     /** Hard mode: propose a candidate. Refused when it is the wrong kind of thing for the slot. */
     addCandidate(slot, value) {
         if (!this.shapeFits(slot, value)) return { ok: false, why: 'shape' };
-        if (this.model.cards.has(value) && !this.knows(value) && value !== this.model.slots.get(slot).on) return { ok: false, why: 'unknown' };
+        if (!this.offered(slot, value)) return { ok: false, why: 'unknown' };
         const m = this.#mark(slot);
         if (!m.listed) m.listed = new Set();
         m.listed.add(value);

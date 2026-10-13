@@ -321,7 +321,8 @@
         "group",
         "place",
         "object",
-        "document"
+        "document",
+        "topic"
       ]
     },
     "flag": {
@@ -330,7 +331,8 @@
         "hypothetical",
         "fiction_within_story",
         "implied",
-        "stereotype"
+        "stereotype",
+        "topic"
       ],
       "description": "placeholder: a card standing for someone not yet identified (its identity is a slot). hypothetical: only mentioned as a possibility. fiction_within_story: a character's invention. implied: the text infers it rather than shows it. stereotype: period prejudice voiced in the story."
     },
@@ -462,6 +464,13 @@
         },
         "prompt": {
           "type": "string"
+        },
+        "reveal": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "value → a quote: the value is offered as an answer only once the story has reached it."
         }
       },
       "oneOf": [
@@ -710,7 +719,6 @@
       "required": [
         "id",
         "text",
-        "source",
         "attaches_to"
       ],
       "additionalProperties": false,
@@ -746,6 +754,10 @@
             "$ref": "#/$defs/id"
           },
           "description": "The card(s) this fact is background on; it appears with them."
+        },
+        "editorial": {
+          "type": "boolean",
+          "description": "Written for the game; plays no part in the solution."
         }
       },
       "description": "A background fact that serves as a premise. It is shown on the card(s) it attaches to, mixed with the period notes, so that it does not stand out as a clue."

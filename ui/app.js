@@ -261,7 +261,7 @@ function renderSlot(s) {
     let h = `<div class="slot ${settled !== null ? 'settled' : ''}" id="slot-${s.id.replace(/\./g, '-')}"><div class="slot-head"><b>${esc(s.prompt)}</b><span class="state">${state}</span></div>`;
     h += `<div class="chips">${chips.join('') || '<span class="empty">no candidates yet</span>'}</div>`;
     if (game.difficulty === HARD && settled === null) {
-        const options = s.domain.filter((v) => game.knows(v) || !model.cards.has(v));
+        const options = s.domain.filter((v) => game.offered(s.id, v));
         h += `<div class="chips"><input list="dl-${s.id}" data-add="${s.id}" placeholder="+ propose an answer" size="26"><datalist id="dl-${s.id}">${options.map((v) => `<option value="${esc(valueName(s.id, v))}">`).join('')}</datalist></div>`;
     }
     if (struckChips.length) h += `<div class="chips small"><span class="muted">ruled out:</span>${struckChips.join('')}</div>`;

@@ -32,6 +32,10 @@ test("fair play under the 'wait' pace: every gate can be passed with what has be
         if (res.ok) continue;
         for (const s of res.needs) {
             const step = game.routeById.get(s);
+            const c = step.concludes;
+            const slot = c.slot ?? c.formula.eq[0];
+            if (!game.slotVisible(slot)) stuck.push(`${s}: question ${slot} not visible at paragraph ${game.read}`);
+            if (c.formula?.eq && !game.offered(slot, c.formula.eq[1])) stuck.push(`${s}: answer ${c.formula.eq[1]} not offered at paragraph ${game.read}`);
             const unread = step.premises.filter((p) => !game.knows(p));
             const proof = unread.length ? { ok: false } : proveStep(game, s);
             if (!proof.ok) stuck.push(`${s} before paragraph ${game.read}${unread.length ? ` (not yet read: ${unread.join(', ')})` : ''}`);

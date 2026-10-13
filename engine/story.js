@@ -40,7 +40,7 @@ export class Story {
     }
 
     /** Find a quote: {para, start, end} in display coordinates, or null. `from` = first paragraph to search. */
-    find(quote, from = 0, to = this.paragraphs.length - 1) {
+    find(quote, from = 1, to = this.paragraphs.length - 1) {
         const q = normalize(quote);
         for (let i = from; i <= to; i++) {
             const p = this.paragraphs[i];
@@ -89,7 +89,8 @@ export class Story {
         for (const [id, phrases, kind] of mentionSpecs) {
             for (const ph of phrases) {
                 const spec = typeof ph === 'string' ? { text: ph } : ph;
-                const [from, to] = spec.paras ?? [0, this.paragraphs.length - 1];
+                // Paragraph 0 is the title: it names the story, it does not introduce anyone.
+                const [from, to] = spec.paras ?? [1, this.paragraphs.length - 1];
                 const found = this.findAll(spec.text, from, to);
                 if (!found.length) this.problems.push(`${id}: mention "${spec.text.replace(/\s+/g, ' ')}" not found`);
                 for (const f of found) hits.push({ ...f, id, kind });
