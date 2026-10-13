@@ -1,17 +1,226 @@
 {
-  "description": "Known answers for measuring the card checker. 'leak' cases are earlier versions of card text (or the current text, where it still leaks); 'ok' cases are current text the story supports. 'para' is the paragraph after which the text first shows.",
-  "cases": [
-    {"id": "holmes-old-intro", "card": "holmes", "para": 1, "kind": "intro", "text": "Sherlock Holmes, Watson's companion, about to leave for Dartmoor.", "expect": "leak", "why": "Dartmoor is first named at ¶3; 'Sherlock' at ¶7"},
-    {"id": "holmes-note", "card": "holmes", "para": 1, "kind": "note", "text": "Sherlock Holmes, Watson's companion, who says at breakfast that he shall have to go.", "expect": "leak", "why": "'Sherlock' is first used at ¶7"},
-    {"id": "other-two-horses", "card": "kp_other_horses", "para": 19, "kind": "name", "text": "The other two King's Pyland horses", "expect": "leak", "why": "four horses in all; that two of them are Silver Blaze and Bayard is not told until ¶28"},
-    {"id": "chaff-loft", "card": "loft", "para": 19, "kind": "name", "text": "The chaff-cutting loft", "expect": "leak", "why": "'chaff-cutting' comes at ¶34"},
-    {"id": "mapleton-west", "card": "mapleton", "para": 19, "kind": "intro", "text": "Lord Backwater's larger training establishment, about two miles across the moor (to the west, as seen from King's Pyland), managed by Silas Brown.", "expect": "leak", "why": "¶19 puts Tavistock to the west, not Mapleton (that is ¶69)"},
-    {"id": "opium-early", "card": "e.opium_added", "para": 36, "kind": "label", "text": "Opium is put into Hunter's supper", "expect": "leak", "why": "opium is first mentioned at ¶37"},
-    {"id": "straker-named-early", "card": "e.straker_dies", "para": 4, "kind": "label", "text": "John Straker dies", "expect": "leak", "why": "the trainer is first named at ¶10"},
-    {"id": "favourite", "card": "silver_blaze", "para": 4, "kind": "name", "text": "The favourite", "expect": "ok"},
-    {"id": "villa", "card": "straker_villa", "para": 19, "kind": "note", "text": "Straker's small villa, about two hundred yards from the stables.", "expect": "ok"},
-    {"id": "stall", "card": "e.horse_led_out", "para": 33, "kind": "label", "text": "Silver Blaze is gone from his stall", "expect": "ok"},
-    {"id": "hunting-crop", "card": "hunting_crop", "para": 128, "kind": "note", "text": "Swinging in the hand of the fierce-looking elderly man who strides out from the Mapleton gate.", "expect": "ok"},
-    {"id": "trainer-dies", "card": "e.straker_dies", "para": 4, "kind": "label", "text": "The favourite's trainer dies", "expect": "ok"}
-  ]
+ "description": "Known answers for measuring the card checker. 'leak' cases are earlier versions of card text (or the current text, where it still leaks); 'ok' cases are current text the story supports. 'para' is the paragraph after which the text first shows.",
+ "cases": [
+  {
+   "id": "holmes-old-intro",
+   "card": "holmes",
+   "para": 1,
+   "kind": "intro",
+   "text": "Sherlock Holmes, Watson's companion, about to leave for Dartmoor.",
+   "expect": "leak",
+   "why": "Dartmoor is first named at ¶3; 'Sherlock' at ¶7"
+  },
+  {
+   "id": "holmes-note",
+   "card": "holmes",
+   "para": 1,
+   "kind": "note",
+   "text": "Sherlock Holmes, Watson's companion, who says at breakfast that he shall have to go.",
+   "expect": "leak",
+   "why": "'Sherlock' is first used at ¶7"
+  },
+  {
+   "id": "other-two-horses",
+   "card": "kp_other_horses",
+   "para": 19,
+   "kind": "name",
+   "text": "The other two King's Pyland horses",
+   "expect": "leak",
+   "why": "four horses in all; that two of them are Silver Blaze and Bayard is not told until ¶28"
+  },
+  {
+   "id": "chaff-loft",
+   "card": "loft",
+   "para": 19,
+   "kind": "name",
+   "text": "The chaff-cutting loft",
+   "expect": "leak",
+   "why": "'chaff-cutting' comes at ¶34"
+  },
+  {
+   "id": "mapleton-west",
+   "card": "mapleton",
+   "para": 19,
+   "kind": "intro",
+   "text": "Lord Backwater's larger training establishment, about two miles across the moor (to the west, as seen from King's Pyland), managed by Silas Brown.",
+   "expect": "leak",
+   "why": "¶19 puts Tavistock to the west, not Mapleton (that is ¶69)"
+  },
+  {
+   "id": "opium-early",
+   "card": "e.opium_added",
+   "para": 36,
+   "kind": "label",
+   "text": "Opium is put into Hunter's supper",
+   "expect": "leak",
+   "why": "opium is first mentioned at ¶37"
+  },
+  {
+   "id": "straker-named-early",
+   "card": "e.straker_dies",
+   "para": 4,
+   "kind": "label",
+   "text": "John Straker dies",
+   "expect": "leak",
+   "why": "the trainer is first named at ¶10"
+  },
+  {
+   "id": "favourite",
+   "card": "silver_blaze",
+   "para": 4,
+   "kind": "name",
+   "text": "The favourite",
+   "expect": "ok"
+  },
+  {
+   "id": "villa",
+   "card": "straker_villa",
+   "para": 19,
+   "kind": "note",
+   "text": "Straker's small villa, about two hundred yards from the stables.",
+   "expect": "ok"
+  },
+  {
+   "id": "stall",
+   "card": "e.horse_led_out",
+   "para": 33,
+   "kind": "label",
+   "text": "Silver Blaze is gone from his stall",
+   "expect": "ok"
+  },
+  {
+   "id": "hunting-crop",
+   "card": "hunting_crop",
+   "para": 128,
+   "kind": "note",
+   "text": "Swinging in the hand of the fierce-looking elderly man who strides out from the Mapleton gate.",
+   "expect": "ok"
+  },
+  {
+   "id": "trainer-dies",
+   "card": "e.straker_dies",
+   "para": 4,
+   "kind": "label",
+   "text": "The favourite's trainer dies",
+   "expect": "ok"
+  },
+  {
+   "id": "gypsies-gloss-old",
+   "card": "gypsies",
+   "para": 19,
+   "kind": "gloss",
+   "group": "background",
+   "text": "Gypsies: Romani travellers, who camped on moors and commons. The story repeats the period's prejudice that they are thieves who flee the police.",
+   "expect": "leak",
+   "why": "says what the story will go on to say about them (Holmes's view comes much later)"
+  },
+  {
+   "id": "dartmoor-gloss-old",
+   "card": "moor",
+   "para": 3,
+   "kind": "gloss",
+   "group": "background",
+   "text": "Dartmoor: A high, wild moorland in Devon, with granite tors, bogs, scattered farms and old tin-mine workings. Doyle's geography is loose: Tavistock is on its western edge, not its middle.",
+   "expect": "leak",
+   "why": "comments on how the story places Tavistock, which it does at ¶47; Tavistock is not even mentioned until ¶19"
+  },
+  {
+   "id": "adp-meta",
+   "card": "briar_pipe",
+   "para": 78,
+   "kind": "gloss",
+   "group": "background",
+   "text": "A.D.P. briar-root pipe: A pipe of briar root, the usual material. The story does not explain the initials.",
+   "expect": "leak",
+   "why": "a claim about what the rest of the story will (not) say"
+  },
+  {
+   "id": "coat-rule",
+   "card": "moor",
+   "para": 3,
+   "kind": "background",
+   "group": "background",
+   "text": "On a night with no wind a coat cannot be blown onto a bush: if it hangs there, someone put it there.",
+   "expect": "unsettled",
+   "why": "design question for the user: should a general fact that applies to an event the story has not told yet wait? Haiku says leak ('applies to this story's coat, not yet introduced')"
+  },
+  {
+   "id": "field-glass",
+   "card": "field_glass",
+   "para": 6,
+   "kind": "gloss",
+   "group": "background",
+   "text": "Field-glass: Binoculars.",
+   "expect": "ok"
+  },
+  {
+   "id": "isonomy",
+   "card": "isonomy",
+   "para": 18,
+   "kind": "gloss",
+   "group": "background",
+   "text": "Isonomy: A real and very famous racehorse (foaled 1875), twice winner of the Ascot Gold Cup. To be 'of the Isonomy stock' is to come from a champion's bloodline.",
+   "expect": "ok",
+   "why": "real-world fact about a real horse"
+  },
+  {
+   "id": "coat-put",
+   "card": "e.coat_off",
+   "para": 95,
+   "kind": "label",
+   "group": "implied",
+   "text": "The overcoat is put on the furze-bush",
+   "expect": "ok",
+   "why": "¶93 already says 'the furze-bush upon which the coat had been hung' (my first expectation was wrong; the checker found it)"
+  },
+  {
+   "id": "drugged",
+   "card": "e.opium_added",
+   "para": 36,
+   "kind": "label",
+   "group": "implied",
+   "text": "Hunter's supper is drugged",
+   "expect": "ok"
+  },
+  {
+   "id": "stops-edith",
+   "card": "e.stranger_stops_edith",
+   "para": 21,
+   "kind": "label",
+   "group": "implied",
+   "text": "Within thirty yards of the stables a man stops Edith",
+   "expect": "ok",
+   "why": "the label said 'Thirty yards from'; the story says 'within thirty yards' (Haiku caught it)"
+  },
+  {
+   "id": "stranger-is-simpson",
+   "card": "the_stranger",
+   "para": 21,
+   "kind": "name",
+   "group": "wrong-referent",
+   "text": "Fitzroy Simpson",
+   "expect": "leak",
+   "why": "Simpson is named at ¶14 as the man arrested, but nothing yet says he is the man who stopped Edith (¶39–40)"
+  },
+  {
+   "id": "bay-is-silver-blaze",
+   "card": "the_bay",
+   "para": 198,
+   "kind": "name",
+   "group": "wrong-referent",
+   "text": "Silver Blaze",
+   "expect": "leak",
+   "why": "at ¶197 the story itself presents the bay as Silver Blaze ('This must be he', ¶196 — both models rightly passed it there); from ¶198 the owner denies it, and the truth comes at ¶202"
+  },
+  {
+   "id": "long-hollow",
+   "card": "fatal_hollow",
+   "para": 116,
+   "kind": "name",
+   "group": "wrong-referent",
+   "text": "The long hollow towards Mapleton",
+   "expect": "leak",
+   "why": "that is a different hollow (¶116); this card is the bowl-shaped one where the body lay"
+  }
+ ]
 }

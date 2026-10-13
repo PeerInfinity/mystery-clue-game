@@ -39,6 +39,18 @@ that the story so far has not used for it is unsupported (for example, a full na
 appeared, or a specific detail that only a later part of the story could supply). Counts and directions count
 too.
 
+Three things to watch:
+- THE SUBJECT. A name or description is supported only if the story so far uses it for THIS card's subject (the
+  thing in the sentence you are given). A name that appears in the story but for something or someone else —
+  or that the story has not yet connected with this subject — is unsupported. Example: if the story has named
+  a man who was arrested, and separately described a stranger, calling the stranger by the arrested man's name
+  is unsupported until the story says they are the same person.
+- THE FUTURE. Statements about what the story will or will not do later ("the story never explains…", "its
+  verdict is never told", "the story repeats…") are unsupported: the reader cannot know that yet.
+- THE REAL WORLD. Facts about real places, real people, real horses, real things as they are in reality
+  (Dartmoor is in Devon; Isonomy was a real champion racehorse) are general knowledge and supported, as long as
+  they say nothing about this story's events or characters.
+
 Be strict but fair: ordinary paraphrase of what is stated is fine.`;
 
 const SCHEMA = {
@@ -109,12 +121,14 @@ let cost = 0;
 for (const r of results) {
     cost += r.cost;
     const got = r.answer?.verdict ?? 'error';
+    const unscored = r.item.expect === 'unsettled';
     const ok = got === r.item.expect;
     if (ok) right++;
-    console.log(`${ok ? '✓' : '✗'} ${r.item.id}: expected ${r.item.expect}, got ${got}${r.error ? ` (${r.error})` : ''}`);
+    if (unscored) { console.log(`· ${r.item.group ? `[${r.item.group}] ` : ''}${r.item.id}: unscored, got ${got}`); continue; }
+    console.log(`${ok ? "✓" : "✗"} ${r.item.group ? `[${r.item.group}] ` : ""}${r.item.id}: expected ${r.item.expect}, got ${got}${r.error ? ` (${r.error})` : ''}`);
     for (const f of r.answer?.facts ?? []) if (!f.supported || !ok) console.log(`    ${f.supported ? '+' : '−'} ${f.fact} — ${f.evidence}`);
     if (r.item.why && !ok) console.log(`    (known: ${r.item.why})`);
 }
-console.log(`\n${right}/${results.length} right · model ${modelName} · $${cost.toFixed(4)}`);
+console.log(`\n${right}/${results.filter((r) => r.item.expect !== 'unsettled').length} right · model ${modelName} · $${cost.toFixed(4)}`);
 fs.mkdirSync('.cache', { recursive: true });
 fs.writeFileSync(`.cache/checker-${modelName}.json`, JSON.stringify(results, null, 1));
