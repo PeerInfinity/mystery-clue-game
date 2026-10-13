@@ -161,3 +161,11 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .bg-note:last-child { border-bottom: 0; }
 .bg-note b { font-family: var(--serif); }
 .chip .x { cursor: pointer; }
+
+.info { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; margin: 10px 0; }
+.info.fresh { border-left-color: var(--accent); }
+.info-head { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.info p { margin: 4px 0; }
+.info .bg { margin-top: 6px; }
+.new-badge { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; background: var(--accent); color: #fff; border-radius: 4px; padding: 0 5px; vertical-align: 1px; }
+.new-badge.quiet { background: var(--chip); color: var(--muted); }

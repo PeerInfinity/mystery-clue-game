@@ -528,7 +528,8 @@
           }
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Only what the story says at the first mention."
         },
         "within": {
           "$ref": "#/$defs/id",
@@ -551,6 +552,26 @@
         },
         "source": {
           "$ref": "#/$defs/source"
+        },
+        "notes": {
+          "type": "array",
+          "description": "Details the story adds after the first mention, each with the quote that reveals it.",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "source"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            }
+          }
         }
       }
     },

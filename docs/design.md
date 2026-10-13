@@ -2,7 +2,7 @@
 
 Status: PROPOSAL, awaiting the user's answers on the open questions at the bottom. Nothing is implemented.
 Story: "Silver Blaze" only, fully fleshed out before a second story. The v0.1 extraction is kept in
-`reference/v0.1/`. Code: this repository (`~/CC/mystery-clue-game`, local only, no remote).
+`reference/v0.1/`. Code: this repository (`~/CC/mystery-clue-game`; private GitHub repo `PeerInfinity/mystery-clue-game` since 2026-10-13).
 
 ## The user's requirements (2026-10-13, in their words, condensed)
 
@@ -172,3 +172,21 @@ Open:
   and let clue sentences be found by clicking (as in Hard), or a toggle.
 - The background note on opium ("no master has an honest reason to dose a servant") still leans towards the
   answer; the general facts may need more neutral company on each card.
+
+## Round 3 (user, 2026-10-13): cards reveal nothing early
+
+Rulings: a card is split into sections. The first holds only what is known at the entity's first mention, plus
+general background; each later section holds only the new piece of information, and says where it came from.
+The interface marks cards with information added since the player last looked. The repository went to GitHub
+as a private repo.
+
+As built:
+- Entity `description` = the first mention only (rewritten for every entity against its first-mention
+  paragraph). Later descriptive details became `notes`, each with its quote; the validator refuses a note whose
+  quote comes before the first mention (it caught one).
+- `Game.info(card)` lists every piece known about a card, dated by paragraph: the intro, the background, notes,
+  and each attestation of each clue about it (who said it, how). The card view groups them by paragraph:
+  "First mentioned ¶12", "Then ¶39", … The "called:" line lists the phrases the text has used so far.
+- `lastSeen` per card (paragraph read + collection counter) is saved with the game. A card is marked seen when
+  the player opens it; pieces after that are highlighted, and the card list shows "new" (never opened) and
+  "updated" (new information since last opened), with filters for both.

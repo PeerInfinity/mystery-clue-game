@@ -123,6 +123,8 @@ function scrollStory() {
 function renderTool() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
     $('#tool').innerHTML = { card: toolCard, cards: toolCards, questions: toolQuestions, theories: toolTheories, timeline: toolTimeline }[ui.tab]();
+    const updated = [...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section) && game.lastSeen.has(k) && game.hasNew(k)).length;
+    document.querySelector('.tab[data-tab="cards"]').textContent = updated ? `Cards (${updated} updated)` : 'Cards';
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
         ui.focusSlot = null;
@@ -146,53 +148,59 @@ function intro() {
 </ul>`;
 }
 
+function source(it) {
+    const who = it.by && game.knows(it.by) ? link(it.by) : it.by ? 'someone' : '';
+    const via = { testimony: 'says', admission: 'admits', report: 'reports', document: 'a document', physical: 'the object itself', observation: 'seen', absence: 'what did not happen', inference: 'reasons', narration: 'the narrator' }[it.via] ?? it.via;
+    return `${who ? `${who} — ` : ''}${esc(via)}`;
+}
+
 function toolCard() {
     const id = ui.selected;
     if (!id || !game.knows(id)) return intro();
     const c = model.cards.get(id);
-    let h = `<div class="card-head"><span class="kind">${kindOf(id)}</span>${(c.flags ?? []).filter((f) => f !== 'placeholder').map((f) => `<span class="flag">${esc(f.replace(/_/g, ' '))}</span>`).join('')}`;
-    if (c.section === 'entities') h += `<h2>${esc(c.name)}</h2>${c.aliases ? `<div class="small muted">also: ${c.aliases.map(esc).join(', ')}</div>` : ''}<p class="desc">${esc(c.description)}</p>${c.within && game.knows(c.within) ? `<div class="small muted">in ${link(c.within)}</div>` : ''}`;
+    const hideFlags = ['placeholder', 'fiction_within_story', 'implied'];
+    let h = `<div class="card-head"><span class="kind">${kindOf(id)}</span>${(c.flags ?? []).filter((f) => !hideFlags.includes(f)).map((f) => `<span class="flag">${esc(f.replace(/_/g, ' '))}</span>`).join('')}`;
+    if (c.section === 'entities') h += `<h2>${esc(c.name)}</h2>`;
     else if (c.section === 'events') h += `<h2>${esc(c.label)}</h2>`;
     else h += `<p class="desc">${esc(c.text)}</p>`;
+    const names = [...new Set(story.spans.slice(0, game.read).flatMap((list, p) => list.filter((sp) => sp.kind === 'entity' && sp.ids.includes(id)).map((sp) => story.paragraphs[p].display.slice(sp.start, sp.end))))]
+        .filter((n, i, all) => n.toLowerCase() !== (c.name ?? '').toLowerCase() && all.findIndex((m) => m.toLowerCase() === n.toLowerCase()) === i);
+    if (names.length) h += `<div class="small muted">called: ${names.slice(0, 8).map(esc).join(' · ')}</div>`;
     h += '</div>';
 
-    if (c.section === 'claims') {
-        h += '<h3 class="section">Who says so</h3><ul class="list">';
-        for (const a of c.attested) {
-            const at = story.find(a.source[0]);
-            if (at && at.para >= game.read) continue;
-            h += `<li>${esc(a.via)}${a.by && game.knows(a.by) ? ` by ${link(a.by)}` : ''}${a.to && game.knows(a.to) ? ` to ${link(a.to)}` : ''}${at ? ` <span class="small link" data-goto="${at.para}">(${paraLabel(at.para)})</span>` : ''}${a.source.map((q) => `<p class="quote">${esc(q.replace(/\s+/g, ' '))}</p>`).join('')}</li>`;
+    // What is known, in the order the story told it: one section per paragraph, only what is new there.
+    const items = game.info(id);
+    const groups = [];
+    for (const it of items) {
+        const last = groups[groups.length - 1];
+        if (last && last.para === it.para) last.items.push(it); else groups.push({ para: it.para, items: [it] });
+    }
+    groups.forEach((g, gi) => {
+        const isNew = g.items.some((it) => game.isNew(id, it));
+        const title = gi === 0 && c.section !== 'claims' ? 'First mentioned' : 'Then';
+        h += `<div class="info ${isNew ? 'fresh' : ''}"><div class="info-head"><span>${title}</span> <span class="link small" data-goto="${g.para}">${paraLabel(g.para)}</span>${isNew ? ' <span class="new-badge">new</span>' : ''}</div>`;
+        const bg = g.items.filter((it) => it.kind === 'background').sort((x, y) => (x.term ?? x.text).localeCompare(y.term ?? y.text));
+        for (const it of g.items) {
+            if (it.kind === 'intro') h += `<p class="desc">${esc(it.text)}</p>`;
+            else if (it.kind === 'note') h += `<p>${esc(it.text)}</p><p class="quote">${esc(it.quote.replace(/\s+/g, ' '))}</p>`;
+            else if (it.kind === 'clue') h += `<p>${link(it.claim, it.text)} <span class="small muted">· ${source(it)}</span></p>`;
+            else if (it.kind === 'attestation') h += `<p class="small">${source(it)}${it.to && game.knows(it.to) ? ` to ${link(it.to)}` : ''}</p><p class="quote">${esc(it.quote.replace(/\s+/g, ' '))}</p>`;
         }
-        h += '</ul>';
+        if (bg.length) {
+            h += '<div class="bg"><div class="small muted">Background</div>';
+            for (const n of bg) h += `<div class="bg-note">${n.term ? `<b>${esc(n.term)}.</b> ` : ''}${esc(n.text)}</div>`;
+            h += '</div>';
+        }
+        h += '</div>';
+    });
+    if (c.section === 'claims') {
         if (c.truth_slot) h += '<p class="small muted">People can be wrong, or lie: whether this is true is one of the questions below.</p>';
         const about = (c.about ?? []).filter((x) => game.knows(x));
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
 
-    // Background: period notes and general facts together, in one neutral list.
-    const bg = [
-        ...(model.data.glosses ?? []).filter((g) => g.attaches_to.includes(id) || g.attaches_to.some((x) => x === id)),
-        ...(model.data.rules ?? []).filter((r) => (r.attaches_to ?? []).includes(id) && game.knows(r.id)),
-    ].sort((a, b) => (a.term ?? a.text).localeCompare(b.term ?? b.text));
-    if (bg.length) {
-        h += '<h3 class="section">Background</h3>';
-        for (const n of bg) h += `<div class="bg-note">${n.term ? `<b>${esc(n.term)}.</b> ${esc(n.text)}` : esc(n.text)}</div>`;
-    }
-
-    const clues = (model.data.claims ?? []).filter((k) => game.knows(k.id) && k.about?.includes(id));
-    if (clues.length) h += `<h3 class="section">What you know (${clues.length})</h3><ul class="list">${clues.map((k) => `<li>${link(k.id, k.text)}</li>`).join('')}</ul>`;
-
-    h += '<h3 class="section">When</h3><dl class="times">';
-    if (c.section === 'events') {
-        const ts = `${id}.time`;
-        const v = model.slots.has(ts) ? game.settled(ts) : null;
-        h += `<dt>It happened</dt><dd>${model.slots.has(ts) ? (v ? esc(cardName(v)) : 'not settled yet') : 'the story gives no time'}</dd>`;
-    }
     const u = game.unlocked.get(id);
-    h += `<dt>You found it</dt><dd>${u.para === 0 ? 'at the start' : `<span class="link" data-goto="${u.para}">${paraLabel(u.para)}</span>`} (card ${u.at + 1})</dd>`;
-    const told = game.disclosure(id);
-    if (told !== null && Number.isFinite(told)) h += `<dt>First mentioned</dt><dd><span class="link" data-goto="${told}">${paraLabel(told)}</span></dd>`;
-    h += '</dl>';
+    h += `<p class="small muted">You collected this card at ${paraLabel(u.para)} (card ${u.at + 1}).${c.section === 'events' && model.slots.has(`${id}.time`) && game.settled(`${id}.time`) ? ` It happened: ${esc(cardName(game.settled(`${id}.time`)))}.` : ''}</p>`;
 
     const slots = game.slotsOn(id);
     if (slots.length) {
@@ -296,16 +304,16 @@ function toolCards() {
         counts[k] = (counts[k] ?? 0) + 1;
     }
     let h = `<input type="search" id="card-search" placeholder="Search your cards…" value="${esc(ui.search)}">`;
-    h += `<div class="filters"><button data-kind="" class="${ui.kind ? '' : 'on'}">All ${known.length}</button>${KIND_GROUPS.filter(([k]) => counts[k]).map(([k, label]) => `<button data-kind="${k}" class="${ui.kind === k ? 'on' : ''}">${label} ${counts[k]}</button>`).join('')}</div>`;
+    h += `<div class="filters"><button data-kind="" class="${ui.kind ? '' : 'on'}">All ${known.length}</button><button data-kind="new" class="${ui.kind === 'new' ? 'on' : ''}">Updated</button><button data-kind="unread" class="${ui.kind === 'unread' ? 'on' : ''}">Not yet opened</button>${KIND_GROUPS.filter(([k]) => counts[k]).map(([k, label]) => `<button data-kind="${k}" class="${ui.kind === k ? 'on' : ''}">${label} ${counts[k]}</button>`).join('')}</div>`;
     const q = ui.search.toLowerCase();
     const shown = known.filter((id) => {
         const c = model.cards.get(id);
         const k = c.section === 'entities' ? c.kind : c.section;
-        return (!ui.kind || k === ui.kind) && (!q || cardName(id).toLowerCase().includes(q));
+        return (!ui.kind || k === ui.kind || (ui.kind === 'new' && game.lastSeen.has(id) && game.hasNew(id)) || (ui.kind === 'unread' && !game.lastSeen.has(id))) && (!q || cardName(id).toLowerCase().includes(q));
     });
     h += shown.length ? `<ul class="list">${shown.map((id) => {
         const open = game.slotsOn(id).filter((s) => game.settled(s.id) === null).length;
-        return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id, shortName(id, 90))}${open ? ` <span class="small muted">· ${open} open</span>` : ''}</li>`;
+        return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id, shortName(id, 90))}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${open ? ` <span class="small muted">· ${open} open</span>` : ''}</li>`;
     }).join('')}</ul>` : `<p class="empty">${game.difficulty === HARD ? 'No cards yet. Click the words in the story that mention someone or something.' : 'No cards yet. Start reading.'}</p>`;
     return h;
 }
@@ -439,9 +447,11 @@ function openCard(id) {
     ui.tab = 'card';
     ui.menu = null;
     ui.menuNote = '';
-    save();
     renderTool();
     $('#tool').scrollTop = 0;
+    // Shown with its new pieces highlighted; from now on they count as seen.
+    if (game.knows(id)) game.markSeen(id);
+    save();
 }
 
 function onStoryClick(e) {

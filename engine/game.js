@@ -68,6 +68,7 @@ export class Game {
         this.told = [];                 // reasoning steps the story revealed before the player made them
         this.marks = new Map();         // slot id → {listed: Set|null, struck: Map value → {cited, used}|{}, proven}
         this.theories = [];
+        this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
         this.#process(0);
     }
 
@@ -80,6 +81,7 @@ export class Game {
             collected: this.difficulty === HARD ? [...this.unlocked].map(([id, u]) => [id, u.para]) : null,
             marks: [...this.marks].map(([slot, m]) => [slot, { listed: m.listed ? [...m.listed] : null, struck: [...m.struck], proven: m.proven }]),
             theories: this.theories,
+            lastSeen: [...this.lastSeen],
         };
     }
 
@@ -95,6 +97,7 @@ export class Game {
             this.marks.set(slot, { listed: m.listed ? new Set(m.listed) : null, struck: new Map(m.struck), proven: m.proven });
         }
         this.theories = state.theories ?? [];
+        this.lastSeen = new Map(state.lastSeen ?? []);
     }
 
     // ---------- reading ----------
@@ -172,6 +175,75 @@ export class Game {
         }
         const f = c.formula ?? this.model.cards.get(c.claim)?.asserts;
         return this.#entailedBySettled(f);
+    }
+
+    // ---------- what is known about a card, and when it was learned ----------
+    #paraOf(quote) {
+        if (!this.paraCache) this.paraCache = new Map();
+        if (!this.paraCache.has(quote)) this.paraCache.set(quote, this.story.find(quote)?.para ?? Infinity);
+        return this.paraCache.get(quote);
+    }
+
+    /**
+     * Everything the player has learned about a card, as dated pieces, oldest first:
+     * {key, para, kind: 'intro'|'background'|'note'|'clue', text, ...where it came from}.
+     * The first mention brings the intro and the background; every later piece is only the new information,
+     * with the paragraph and the witness or document it came from.
+     */
+    info(id) {
+        const c = this.model.cards.get(id);
+        if (!c || !this.knows(id)) return [];
+        const first = this.story.firstAt.get(id) ?? this.unlocked.get(id).para;
+        const out = [];
+        if (c.section === 'entities') {
+            out.push({ key: 'intro', para: first, kind: 'intro', text: c.description });
+            for (const g of this.model.data.glosses ?? []) {
+                if (g.attaches_to.includes(id)) out.push({ key: g.id, para: first, kind: 'background', term: g.term, text: g.text, editorial: true });
+            }
+            for (const r of this.rulesOn.get(id) ?? []) out.push({ key: r, para: first, kind: 'background', text: this.model.cards.get(r).text, card: r });
+            (c.notes ?? []).forEach((n, i) => {
+                const para = this.#paraOf(n.source[0]);
+                if (para < this.read) out.push({ key: `note${i}`, para, kind: 'note', text: n.text, quote: n.source[0] });
+            });
+        }
+        if (c.section === 'events') out.push({ key: 'intro', para: first, kind: 'intro', text: c.label });
+        if (c.section !== 'entities') {
+            for (const g of this.model.data.glosses ?? []) {
+                if (g.attaches_to.includes(id)) out.push({ key: g.id, para: first, kind: 'background', term: g.term, text: g.text, editorial: true });
+            }
+        }
+        for (const k of this.model.data.claims ?? []) {
+            if (k.derived || !this.knows(k.id) || k.id === id) continue;
+            const relevant = (k.about ?? []).includes(id) || (this.claimEvents.get(k.id) ?? []).includes(id);
+            if (!relevant) continue;
+            k.attested.forEach((a, i) => {
+                const para = this.#paraOf(a.source[0]);
+                if (para < this.read) out.push({ key: `${k.id}#${i}`, para, kind: 'clue', claim: k.id, text: k.text, via: a.via, by: a.by, to: a.to, quote: a.source[0], at: this.unlocked.get(k.id).at });
+            });
+        }
+        if (c.section === 'claims') {
+            c.attested.forEach((a, i) => {
+                const para = this.#paraOf(a.source[0]);
+                if (para < this.read) out.push({ key: `att${i}`, para, kind: 'attestation', via: a.via, by: a.by, to: a.to, quote: a.source[0] });
+            });
+        }
+        return out.sort((a, b) => a.para - b.para);
+    }
+
+    /** Has this piece arrived since the player last looked at the card? */
+    isNew(id, item) {
+        const seen = this.lastSeen.get(id);
+        if (!seen) return true;
+        if (item.para >= seen.read) return true;
+        return item.at !== undefined && item.at >= seen.seq;
+    }
+
+    hasNew(id) {
+        return !this.lastSeen.has(id) || this.info(id).some((it) => this.isNew(id, it));
+    }
+
+    markSeen(id) {
+        this.lastSeen.set(id, { read: this.read, seq: this.seq });
     }
 
     // ---------- slots ----------

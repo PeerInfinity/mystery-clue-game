@@ -88,6 +88,7 @@ for (const x of data.inconsistencies ?? []) checkQuotes(x.id, x.source);
 for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'route']) {
     for (const item of data[sec] ?? []) checkQuotes(item.id, item.source);
 }
+for (const e of data.entities ?? []) for (const n of e.notes ?? []) checkQuotes(e.id, n.source);
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes(c.id, a.source);
 
 // ---------- the story index: mentions, quotes per paragraph, gates ----------
@@ -100,6 +101,15 @@ for (const r of data.rules ?? []) {
     for (const e of r.attaches_to ?? []) if (!model.cards.has(e)) err(`${r.id}: attaches_to unknown ${e}`);
 }
 for (const q of data.questions ?? []) if (!storyIndex.anchors.questions.has(q.id)) err(`${q.id}: 'raised' quote not found`);
+// A note is something learned AFTER the first mention: its quote must be found, and not before the mention.
+for (const e of data.entities ?? []) {
+    const first = storyIndex.firstAt.get(e.id);
+    for (const n of e.notes ?? []) {
+        const hit = storyIndex.find(n.source[0]);
+        if (!hit) err(`${e.id}: note quote not within one paragraph: "${n.source[0].slice(0, 50)}"`);
+        else if (hit.para < first) err(`${e.id}: note at paragraph ${hit.para} comes before the first mention (${first})`);
+    }
+}
 
 // ---------- references ----------
 const ID = /^[a-z][a-z0-9_.]*$/;
