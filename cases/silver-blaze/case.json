@@ -26,7 +26,8 @@
     ],
     "challenge_scene": "s08_departure",
     "summary": "Silver Blaze, favourite for the Wessex Cup, has vanished from the King's Pyland stables on Dartmoor, and his trainer John Straker has been found dead on the moor with his skull crushed, a knife in one hand and a stranger's cravat in the other. The stable-lad on guard was drugged with opium in his supper. The police have arrested Fitzroy Simpson, a bookmaker who was seen at the stables that evening trying to bribe his way to a tip. Holmes is asked to find the horse and the murderer.",
-    "solution_summary": "Straker, deep in debt from a secret second household kept under the name William Derbyshire, planned to lame his own horse so that it would lose. Curried mutton was served that night, and Straker put opium in the stable-lad's portion, where the curry hid its taste. At one in the morning he went down to the stable (the dog knew him and kept quiet), led Silver Blaze to a hollow out of sight, took off his coat, and struck a match to light his candle and nick the horse's tendon with a cataract knife. The startled horse kicked him in the head and killed him; falling, he cut his own thigh. The horse bolted towards Mapleton, where Silas Brown found it at dawn and hid it, disguising its white markings, until Holmes made him produce it for the race."
+    "solution_summary": "Straker, deep in debt from a secret second household kept under the name William Derbyshire, planned to lame his own horse so that it would lose. Curried mutton was served that night, and Straker put opium in the stable-lad's portion, where the curry hid its taste. At one in the morning he went down to the stable (the dog knew him and kept quiet), led Silver Blaze to a hollow out of sight, took off his coat, and struck a match to light his candle and nick the horse's tendon with a cataract knife. The startled horse kicked him in the head and killed him; falling, he cut his own thigh. The horse bolted towards Mapleton, where Silas Brown found it at dawn and hid it, disguising its white markings, until Holmes made him produce it for the race.",
+    "teaser": "A Sherlock Holmes story by Arthur Conan Doyle, first published in 1892."
   },
   "parts": [
     "entities.json",
@@ -38,6 +39,7 @@
     "actions.json",
     "route.json"
   ],
+  "mentions_file": "mentions.json",
   "facet_types": {
     "agent": {
       "kinds": [
@@ -361,62 +363,74 @@
     {
       "id": "q.who_drugged",
       "slot": "e.opium_added.agent",
-      "text": "Who drugged Ned Hunter's supper?"
+      "text": "Who drugged Ned Hunter's supper?",
+      "raised": "an appreciable quantity of\n      powdered opium"
     },
     {
       "id": "q.where_drugged",
       "slot": "e.opium_added.place",
-      "text": "Where was the opium put into the dish?"
+      "text": "Where was the opium put into the dish?",
+      "raised": "drugged his\n      curried mutton"
     },
     {
       "id": "q.who_took_horse",
       "slot": "e.horse_led_out.agent",
-      "text": "Who took Silver Blaze out of the stable?"
+      "text": "Who took Silver Blaze out of the stable?",
+      "raised": "the favourite’s stall was empty"
     },
     {
       "id": "q.why_taken",
       "slot": "e.horse_led_out.purpose",
-      "text": "Why was the horse taken out?"
+      "text": "Why was the horse taken out?",
+      "raised": "Why should he take the horse out of the stable?"
     },
     {
       "id": "q.who_killed",
       "slot": "e.fatal_blow.agent",
-      "text": "Who killed John Straker?"
+      "text": "Who killed John Straker?",
+      "raised": "the tragic\n      murder of its trainer"
     },
     {
       "id": "q.thigh_cut",
       "slot": "e.thigh_cut.instrument",
-      "text": "What made the cut on Straker's thigh?"
+      "text": "What made the cut on Straker's thigh?",
+      "raised": "a long, clean cut"
     },
     {
       "id": "q.where_horse",
       "slot": "silver_blaze.hidden_at",
-      "text": "Where is Silver Blaze?"
+      "text": "Where is Silver Blaze?",
+      "raised": "no news has come of\n      him"
     },
     {
       "id": "q.who_hid",
       "slot": "e.horse_hidden.agent",
-      "text": "Who is hiding the horse?"
+      "text": "Who is hiding the horse?",
+      "raised": "Where is he, then?"
     },
     {
       "id": "q.derbyshire",
       "slot": "william_derbyshire.identity",
-      "text": "Who is William Derbyshire?"
+      "text": "Who is William Derbyshire?",
+      "raised": "to William Derbyshire"
     },
     {
       "id": "q.motive",
       "slot": "straker.motive",
-      "text": "What drove Straker to it?"
+      "text": "What drove Straker to it?",
+      "raised": "John Straker was a man who was\n      entirely unworthy of your confidence"
     },
     {
       "id": "q.stranger",
       "slot": "the_stranger.identity",
-      "text": "Who was the stranger at the stable window?"
+      "text": "Who was the stranger at the stable window?",
+      "raised": "a man\n      appeared out of the darkness"
     },
     {
       "id": "q.bay",
       "slot": "the_bay.identity",
-      "text": "Which horse is the bay in Ross's colours?"
+      "text": "Which horse is the bay in Ross's colours?",
+      "raised": "a powerful bay horse swept out from the weighing\n      enclosure"
     }
   ],
   "theories": [
@@ -649,5 +663,9 @@
     "External note (not from this text): Doyle later admitted his ignorance of racing rules — a disguised horse could never have been allowed to run (Memories and Adventures, 1924).",
     "r.gypsies_avoid_trouble is a period stereotype voiced by Holmes; flagged for any adaptation.",
     "Glosses marked editorial are written for this game, not taken from the story; they say what an 1892 reader would have known."
-  ]
+  ],
+  "settings_defaults": {
+    "difficulty": "easy",
+    "pace": "free"
+  }
 }

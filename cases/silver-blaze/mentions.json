@@ -1,0 +1,880 @@
+{
+ "description": "How the text names each card. A phrase is matched exactly (curly quotes and dashes normalised), on word boundaries; overlapping mentions resolve to the longest. A phrase may be limited to paragraphs [from, to] (inclusive, 0-based, as engine/story.js splits story.txt). An entity's card appears at its first mention; with no mention found it appears with its source quote. Windows are time expressions that link to the timeline.",
+ "entities": {
+  "holmes": [
+   "Holmes",
+   "Sherlock Holmes",
+   "my companion",
+   {
+    "text": "my friend",
+    "paras": [
+     157,
+     231
+    ]
+   }
+  ],
+  "watson": [
+   "Watson",
+   "Dr. Watson"
+  ],
+  "straker": [
+   "John Straker",
+   "Straker",
+   "its trainer",
+   "the trainer’s house",
+   {
+    "text": "the trainer",
+    "paras": [
+     18,
+     112
+    ]
+   },
+   "the dead man",
+   "the murdered man",
+   "poor Straker",
+   "the unfortunate trainer",
+   {
+    "text": "his trainer",
+    "paras": [
+     33,
+     33
+    ]
+   }
+  ],
+  "mrs_straker": [
+   "Mrs. Straker",
+   "his wife",
+   "Straker and his wife",
+   {
+    "text": "the lady",
+    "paras": [
+     92,
+     92
+    ]
+   },
+   {
+    "text": "a woman, who had been waiting\n      in the passage",
+    "paras": [
+     86,
+     86
+    ]
+   }
+  ],
+  "edith_baxter": [
+   "Edith Baxter",
+   {
+    "text": "the maid",
+    "paras": [
+     20,
+     163
+    ]
+   },
+   {
+    "text": "The girl",
+    "paras": [
+     25,
+     29
+    ]
+   }
+  ],
+  "ned_hunter": [
+   "Ned Hunter",
+   "Hunter",
+   "the stable-boy",
+   "the stable-lad",
+   "the lad on duty",
+   {
+    "text": "the lad",
+    "paras": [
+     27,
+     29
+    ]
+   },
+   {
+    "text": "the boy",
+    "paras": [
+     24,
+     31
+    ]
+   }
+  ],
+  "other_lads": [
+   "the two lads",
+   "his fellow-grooms",
+   "Two of the\n      lads",
+   "The two lads"
+  ],
+  "sheep_lad": [
+   {
+    "text": "one of the stable-lads",
+    "paras": [
+     169,
+     169
+    ]
+   }
+  ],
+  "colonel_ross": [
+   "Colonel Ross",
+   "the Colonel",
+   "The Colonel",
+   "the owner",
+   "the owner of the horse"
+  ],
+  "gregory": [
+   "Inspector Gregory",
+   "Gregory",
+   "the Inspector",
+   "The Inspector"
+  ],
+  "simpson": [
+   "Fitzroy Simpson",
+   "Simpson",
+   "this man Simpson",
+   "the accused"
+  ],
+  "silas_brown": [
+   "Silas Brown",
+   "Master Silas Brown",
+   "Mr. Brown",
+   "Brown",
+   {
+    "text": "the trainer",
+    "paras": [
+     132,
+     137
+    ]
+   },
+   {
+    "text": "a fierce-looking elderly man",
+    "paras": [
+     128,
+     128
+    ]
+   }
+  ],
+  "dawson": [
+   "Dawson",
+   {
+    "text": "a\n      groom",
+    "paras": [
+     124,
+     124
+    ]
+   }
+  ],
+  "madame_lesurier": [
+   "Madame Lesurier",
+   "the milliner"
+  ],
+  "mrs_derbyshire": [
+   "Madam Derbyshire",
+   "a very dashing wife",
+   "this woman"
+  ],
+  "william_derbyshire": [
+   "William Derbyshire",
+   "Derbyshire",
+   "the mythical\n      Derbyshire"
+  ],
+  "the_stranger": [
+   {
+    "text": "a man\n      appeared out of the darkness",
+    "paras": [
+     21,
+     21
+    ]
+   },
+   "the stranger",
+   "the\n      stranger",
+   "this stranger"
+  ],
+  "midnight_visitor": [
+   "the midnight visitor"
+  ],
+  "track_man": [
+   "A man’s track"
+  ],
+  "the_neighbour": [
+   "one of your neighbours",
+   "a faker"
+  ],
+  "lord_backwater": [
+   "Lord Backwater"
+  ],
+  "news_agent": [
+   "our news agent"
+  ],
+  "coachman": [
+   "our driver",
+   "coachman"
+  ],
+  "ross_jockey": [
+   "your jockey"
+  ],
+  "heath_newton": [
+   "Mr. Heath Newton"
+  ],
+  "colonel_wardlaw": [
+   "Colonel Wardlaw"
+  ],
+  "duke_balmoral": [
+   "Duke of Balmoral"
+  ],
+  "lord_singleford": [
+   "Lord Singleford"
+  ],
+  "tavistock_contractor": [
+   "a\n      Tavistock contractor"
+  ],
+  "chemist": [
+   "What chemist"
+  ],
+  "clever_counsel": [
+   "A clever counsel"
+  ],
+  "gypsies": [
+   "gypsies",
+   "a party of gypsies",
+   "these gypsies",
+   "These people"
+  ],
+  "police": [
+   "the police"
+  ],
+  "the_ring": [
+   "the ring"
+  ],
+  "racing_public": [
+   "the racing public"
+  ],
+  "invalids": [
+   "invalids"
+  ],
+  "jury": [
+   "a jury"
+  ],
+  "silver_blaze": [
+   "Silver Blaze",
+   "the favourite",
+   "the missing favourite",
+   "the missing horse",
+   "my horse",
+   "our horse",
+   "your horse",
+   {
+    "text": "the horse",
+    "paras": [
+     30,
+     231
+    ]
+   },
+   "the thoroughbred",
+   "the same old Silver Blaze"
+  ],
+  "bayard": [
+   "Bayard",
+   "our other one"
+  ],
+  "kp_other_horses": [
+   "four\n      horses in all"
+  ],
+  "desborough": [
+   "Desborough",
+   "the second\n      favourite"
+  ],
+  "stable_dog": [
+   "the dog",
+   "the hound",
+   "a dog was\n      kept in the stables"
+  ],
+  "mapleton_dog": [
+   "a dog at your heels"
+  ],
+  "sheep": [
+   "a few sheep",
+   "the sheep"
+  ],
+  "lame_sheep": [
+   "three of them have gone\n      lame"
+  ],
+  "isonomy": [
+   "Isonomy"
+  ],
+  "the_negro": [
+   "The Negro"
+  ],
+  "pugilist": [
+   "Pugilist"
+  ],
+  "iris": [
+   "Iris"
+  ],
+  "rasper": [
+   "Rasper"
+  ],
+  "the_bay": [
+   "a powerful bay horse",
+   "That beast"
+  ],
+  "london": [
+   "London",
+   "to town"
+  ],
+  "baker_street": [
+   {
+    "text": "the room",
+    "paras": [
+     0,
+     7
+    ]
+   },
+   "our rooms"
+  ],
+  "paddington": [
+   "Paddington"
+  ],
+  "london_clubs": [
+   "the sporting clubs of London"
+  ],
+  "bond_street_shop": [
+   "Bond Street",
+   "the milliner’s address"
+  ],
+  "derbyshire_household": [
+   "a second\n      establishment"
+  ],
+  "first_class_carriage": [
+   "a first-class carriage"
+  ],
+  "reading": [
+   "Reading"
+  ],
+  "exeter": [
+   "Exeter"
+  ],
+  "pullman_car": [
+   "a Pullman car"
+  ],
+  "clapham_junction": [
+   "Clapham\n      Junction"
+  ],
+  "victoria": [
+   "Victoria"
+  ],
+  "devonshire": [
+   "Devonshire"
+  ],
+  "moor": [
+   "Dartmoor",
+   "the moor",
+   "the open moor",
+   "the moors"
+  ],
+  "tavistock": [
+   "Tavistock"
+  ],
+  "tavistock_station": [
+   {
+    "text": "the\n      station",
+    "paras": [
+     47,
+     47
+    ]
+   }
+  ],
+  "landau": [
+   "a comfortable landau",
+   "an open carriage",
+   {
+    "text": "the carriage",
+    "paras": [
+     69,
+     69
+    ]
+   }
+  ],
+  "kings_pyland": [
+   "King’s Pyland",
+   "King’s Pyland training-stables"
+  ],
+  "stable": [
+   "the stables",
+   "the stable",
+   "the Colonel’s training-stable",
+   "a long grey-tiled\n      out-building"
+  ],
+  "stable_window": [
+   {
+    "text": "the window",
+    "paras": [
+     24,
+     31
+    ]
+   },
+   "the window through which she was accustomed to hand\n      the meals"
+  ],
+  "favourite_stall": [
+   "the favourite’s stall"
+  ],
+  "loft": [
+   "the chaff-cutting loft",
+   "the loft"
+  ],
+  "harness_room": [
+   "harness-room"
+  ],
+  "paddock": [
+   "the paddock",
+   "a paddock"
+  ],
+  "moor_path": [
+   "the path"
+  ],
+  "straker_villa": [
+   "a small\n      villa",
+   "the trainer’s house",
+   "the house",
+   "a neat little\n      red-brick villa"
+  ],
+  "villa_kitchen": [
+   "the kitchen"
+  ],
+  "sitting_room": [
+   "the sitting-room",
+   "the front room"
+  ],
+  "parlour": [
+   {
+    "text": "the parlour",
+    "paras": [
+     157,
+     157
+    ]
+   }
+  ],
+  "passage": [
+   "the passage"
+  ],
+  "straker_bedroom": [
+   {
+    "text": "the room",
+    "paras": [
+     82,
+     82
+    ]
+   }
+  ],
+  "upstairs_room": [
+   "upstairs"
+  ],
+  "knoll": [
+   "the knoll"
+  ],
+  "fatal_hollow": [
+   "the fatal hollow",
+   "a bowl-shaped depression",
+   {
+    "text": "the hollow",
+    "paras": [
+     93,
+     112
+    ]
+   },
+   "the hollow in which the body had been found"
+  ],
+  "hard_moor": [
+   "very hard and dry",
+   "dry, hard turf"
+  ],
+  "wet_hollow": [
+   "a long hollow",
+   "the hollow in question",
+   "the marshy bottom"
+  ],
+  "near_mapleton": [
+   "quite close to Mapleton"
+  ],
+  "mapleton": [
+   "Mapleton",
+   "the Mapleton stables",
+   "the stables of Mapleton"
+  ],
+  "mapleton_gates": [
+   "the gates of the Mapleton stables",
+   "the gate"
+  ],
+  "mapleton_parlour": [
+   "your parlour"
+  ],
+  "invalid_villas": [
+   "a small cluster of villas",
+   "those villas"
+  ],
+  "gypsy_camp": [
+   "encamped"
+  ],
+  "pits_and_mines": [
+   "the pits or old mines"
+  ],
+  "tavistock_stables": [
+   "every stable and out-house"
+  ],
+  "plymouth_garden_party": [
+   "Plymouth",
+   "a garden-party"
+  ],
+  "winchester": [
+   "Winchester"
+  ],
+  "winchester_station": [
+   {
+    "text": "the station",
+    "paras": [
+     183,
+     183
+    ]
+   }
+  ],
+  "racecourse": [
+   "the course"
+  ],
+  "enclosure": [
+   "the enclosure near the grand stand"
+  ],
+  "weighing_enclosure": [
+   "the weighing\n      enclosure",
+   "the weighing enclosure"
+  ],
+  "curried_mutton": [
+   "curried mutton",
+   "curried\n      mutton",
+   "the curried\n      mutton",
+   "the same\n      dish",
+   "a dish of curried\n      mutton",
+   "curry"
+  ],
+  "hunter_portion": [
+   "his supper",
+   "the remains of his\n      supper",
+   {
+    "text": "the dish",
+    "paras": [
+     200,
+     231
+    ]
+   },
+   "that dish"
+  ],
+  "opium": [
+   "powdered opium",
+   "Powdered opium",
+   "The opium",
+   "the powdered opium"
+  ],
+  "lantern": [
+   "a lantern",
+   "your lantern",
+   "the lantern"
+  ],
+  "water_tap": [
+   "a water-tap"
+  ],
+  "small_table": [
+   "the\n      small table"
+  ],
+  "hunter_chair": [
+   "a chair"
+  ],
+  "stable_door": [
+   "the door",
+   "The door",
+   "the stable\n      door"
+  ],
+  "stable_key": [],
+  "duplicate_key": [
+   "a duplicate key",
+   "The key"
+  ],
+  "paper_packet": [
+   "a piece of white paper",
+   "the little paper packet",
+   "the paper"
+  ],
+  "new_dress": [
+   "a new dress",
+   "the prettiest frock"
+  ],
+  "ten_pound_note": [
+   "a ten-pound note"
+  ],
+  "simpson_purse": [
+   "his\n      purse"
+  ],
+  "cravat": [
+   "a red and black silk cravat",
+   "the cravat",
+   "his cravat"
+  ],
+  "penang_lawyer": [
+   "a heavy stick",
+   "his stick",
+   "a Penang-lawyer",
+   "his heavy stick"
+  ],
+  "simpson_clothes": [
+   "a\n      grey suit of tweeds",
+   "His wet clothing"
+  ],
+  "betting_book": [
+   "betting-book"
+  ],
+  "bridle": [
+   "His bridle"
+  ],
+  "overcoat": [
+   "overcoat",
+   "his large mackintosh",
+   "the coat"
+  ],
+  "furze_bush": [
+   "a furze-bush",
+   "the furze-bush",
+   "the bush"
+  ],
+  "cataract_knife": [
+   "a small knife",
+   "Straker’s knife",
+   "a very singular knife",
+   "a cataract knife",
+   "this knife",
+   "the singular knife",
+   "the knife",
+   "his knife",
+   "an ivory-handled knife"
+  ],
+  "assailant_blade": [
+   "some very sharp instrument"
+  ],
+  "cork_disk": [
+   "a disk of cork"
+  ],
+  "dressing_table": [
+   "the dressing-table"
+  ],
+  "pocket_contents": [
+   "what he had in his\n      pockets",
+   "the contents of his pockets",
+   "his belongings"
+  ],
+  "tin_box": [
+   "a square tin\n      box"
+  ],
+  "vesta_box": [
+   "a box of\n      vestas"
+  ],
+  "tallow_candle": [
+   "tallow candle",
+   "the candle"
+  ],
+  "briar_pipe": [
+   "briar-root pipe"
+  ],
+  "tobacco_pouch": [
+   "pouch of seal-skin"
+  ],
+  "silver_watch": [
+   "silver watch"
+  ],
+  "sovereigns": [
+   "five sovereigns"
+  ],
+  "pencil_case": [
+   "pencil-case"
+  ],
+  "hay_accounts": [
+   "hay-dealers’ accounts"
+  ],
+  "ross_letter": [
+   "a letter of instructions"
+  ],
+  "milliner_bill": [
+   "a milliner’s account",
+   "the account",
+   "the bill"
+  ],
+  "billed_costume": [
+   "a single costume",
+   "twenty-guinea walking dresses"
+  ],
+  "dove_silk_costume": [
+   "a costume of\n      dove-coloured silk",
+   "such a dress"
+  ],
+  "matting": [
+   "A piece of matting",
+   "the matting"
+  ],
+  "evidence_bag": [
+   "this bag",
+   "the bag"
+  ],
+  "straker_boot": [
+   "one of the boots"
+  ],
+  "simpson_shoe": [
+   "Fitzroy Simpson’s shoes"
+  ],
+  "horseshoe": [
+   "a cast horseshoe",
+   "this\n      horseshoe",
+   "the shoe"
+  ],
+  "wax_vesta": [
+   "a wax vesta",
+   "the match"
+  ],
+  "brown_boots": [
+   "his own boots"
+  ],
+  "hunting_crop": [
+   "a hunting-crop",
+   "the hunting-crop"
+  ],
+  "half_crown": [
+   "the half-crown"
+  ],
+  "photograph": [
+   "a photograph",
+   "Straker’s photograph"
+  ],
+  "envelope": [
+   "an envelope"
+  ],
+  "field_glass": [
+   "field-glass"
+  ],
+  "holmes_pipe": [
+   "his pipe"
+  ],
+  "newspapers": [
+   "Fresh editions\n      of every paper",
+   "_Telegraph_",
+   "_Chronicle_",
+   "fresh papers",
+   "the newspaper reports"
+  ],
+  "travelling_cap": [
+   "travelling-cap"
+  ],
+  "cigar_case": [
+   "cigar-case"
+  ],
+  "holmes_watch": [
+   "his watch"
+  ],
+  "telegraph_posts": [
+   "the telegraph posts"
+  ],
+  "telegrams": [
+   "telegrams"
+  ],
+  "special_wire": [
+   "a\n      special wire"
+  ],
+  "reward": [
+   "a large reward"
+  ],
+  "drag": [
+   "his drag",
+   "the drag",
+   "our drag"
+  ],
+  "race_card": [
+   {
+    "text": "the card",
+    "paras": [
+     183,
+     200
+    ]
+   }
+  ],
+  "number_board": [
+   "the numbers up"
+  ],
+  "ross_colours": [
+   "My colours",
+   "black and red",
+   "black cap, red jacket"
+  ],
+  "spirits_of_wine": [
+   "spirits of wine"
+  ],
+  "disguise_dye": [
+   "wash his face and his leg"
+  ],
+  "race_bell": [
+   "the bell"
+  ],
+  "cigars": [
+   "cigar",
+   "a cigar"
+  ],
+  "steel_shoe": [
+   "the steel shoe"
+  ]
+ },
+ "windows": {
+  "w.mon_2100": [
+   "at nine o’clock"
+  ],
+  "w.mon_2105": [
+   "a few minutes after nine"
+  ],
+  "w.mon_late": [
+   "last Monday night",
+   "Monday night",
+   "on Monday night"
+  ],
+  "w.tue_0100": [
+   "one in the morning",
+   "in the dead of the night"
+  ],
+  "w.tue_0700": [
+   "seven in the morning"
+  ],
+  "w.tue_evening": [
+   "Tuesday evening"
+  ],
+  "w.wed": [
+   {
+    "text": "yesterday",
+    "paras": [
+     13,
+     16
+    ]
+   }
+  ],
+  "w.thu_morning": [
+   "Thursday morning",
+   "one morning"
+  ],
+  "w.thu_evening": [
+   "evening before we reached"
+  ],
+  "w.race_day": [
+   "Four days later"
+  ],
+  "w.race_evening": [
+   "that evening"
+  ],
+  "w.race_eve": [
+   {
+    "text": "yesterday",
+    "paras": [
+     188,
+     188
+    ]
+   }
+  ]
+ }
+}

@@ -14,6 +14,7 @@ import path from 'node:path';
 import { mergeCase, buildModel, activeConstraints, checkStep } from '../engine/caseModel.js';
 import { evaluate, literalsOf, render } from '../engine/logic.js';
 import Ajv2020 from 'ajv/dist/2020.js';
+import { Story } from '../engine/story.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -26,6 +27,10 @@ const readJson = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
 const main = readJson('case.json');
 const parts = Object.fromEntries((main.parts ?? []).map((p) => [p, readJson(p)]));
 const data = mergeCase(main, parts);
+if (main.mentions_file) {
+    const m = readJson(main.mentions_file);
+    data.mentions = { entities: m.entities, windows: m.windows };
+}
 const model = buildModel(data);
 const errors = [...model.errors];
 {
@@ -78,11 +83,23 @@ const checkQuotes = (owner, quotes) => {
     }
 };
 for (const s of data.scenes) checkQuotes(s.id, s.source);
+for (const q of data.questions ?? []) checkQuotes(q.id, [q.raised]);
 for (const x of data.inconsistencies ?? []) checkQuotes(x.id, x.source);
 for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'route']) {
     for (const item of data[sec] ?? []) checkQuotes(item.id, item.source);
 }
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes(c.id, a.source);
+
+// ---------- the story index: mentions, quotes per paragraph, gates ----------
+const storyIndex = new Story(storyRaw, data);
+for (const p of storyIndex.problems) err(`story: ${p}`);
+for (const id of Object.keys(data.mentions?.entities ?? {})) if (!model.cards.has(id)) err(`mentions: unknown entity ${id}`);
+for (const id of Object.keys(data.mentions?.windows ?? {})) if (!model.windows.some((w) => w.id === id)) err(`mentions: unknown window ${id}`);
+for (const r of data.rules ?? []) {
+    if (!(r.attaches_to ?? []).length) err(`${r.id}: a rule must sit on at least one card (attaches_to)`);
+    for (const e of r.attaches_to ?? []) if (!model.cards.has(e)) err(`${r.id}: attaches_to unknown ${e}`);
+}
+for (const q of data.questions ?? []) if (!storyIndex.anchors.questions.has(q.id)) err(`${q.id}: 'raised' quote not found`);
 
 // ---------- references ----------
 const ID = /^[a-z][a-z0-9_.]*$/;

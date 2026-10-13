@@ -1,85 +1,94 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
-import { Game, HARD } from './game.js';
+import { Game, TRIVIAL, EASY, HARD, WAIT } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 
-/** Make a route step's conclusion count as proved, citing the step's own premises. */
+/** Prove a route step's conclusion, citing the step's own premises. */
 function proveStep(game, stepId) {
     const step = game.routeById.get(stepId);
     const c = step.concludes;
     if (c.slot) return game.strike(c.slot, c.value, step.premises);
-    const [slot, value] = c.formula.eq;
-    return game.prove(slot, value, step.premises);
+    if (c.formula.eq) return game.prove(c.formula.eq[0], c.formula.eq[1], step.premises);
+    return { ok: false, reason: 'not an eq step' };
 }
 
-test("Holmes's investigation replays, proving each step it needs from the story's premises", () => {
+test('reading the whole story (free pace, Easy) collects every clue, entity and event', () => {
     const game = new Game(model);
-    for (const a of game.actions) {
-        for (const s of game.missingFor(a).steps) {
-            const res = proveStep(game, s);
-            assert.ok(res.ok, `${a.id}: could not prove ${s}`);
+    while (!game.finished()) assert.ok(game.advance().ok);
+    const missing = [...model.cards.values()]
+        .filter((c) => ['entities', 'events', 'rules'].includes(c.section) || (c.section === 'claims' && !c.derived))
+        .filter((c) => !game.knows(c.id)).map((c) => c.id);
+    assert.deepEqual(missing, []);
+    assert.equal(game.done.length, game.actions.length, 'every action is reached');
+});
+
+test("fair play under the 'wait' pace: every gate can be passed with what has been read", () => {
+    const game = new Game(model, { pace: WAIT });
+    const stuck = [];
+    while (!game.finished()) {
+        const res = game.advance();
+        if (res.ok) continue;
+        for (const s of res.needs) {
+            const step = game.routeById.get(s);
+            const unread = step.premises.filter((p) => !game.knows(p));
+            const proof = unread.length ? { ok: false } : proveStep(game, s);
+            if (!proof.ok) stuck.push(`${s} before paragraph ${game.read}${unread.length ? ` (not yet read: ${unread.join(', ')})` : ''}`);
         }
-        const res = game.perform(a.id);
-        assert.ok(res?.ok, `${a.id}: ${JSON.stringify(res?.missing)}`);
+        if (game.blockers().length) break;
     }
-    assert.equal(game.done.length, game.actions.length);
+    assert.deepEqual(stuck, []);
+    assert.ok(game.finished());
+});
+
+test('Easy needs evidence to cross out; Trivial allows a plain pencil mark', () => {
+    const easy = new Game(model, { difficulty: EASY });
+    assert.equal(easy.strike('e.opium_added.agent', 'watson').ok, false);
+    const trivial = new Game(model, { difficulty: TRIVIAL });
+    assert.ok(trivial.strike('e.opium_added.agent', 'watson').ok);
+});
+
+test('Hard: reading collects nothing; clicking the text does', () => {
+    const game = new Game(model, { difficulty: HARD });
+    while (game.read < 40) game.advance();
+    assert.equal(game.knows('opium'), false);
+    const p = model.story.firstAt.get('opium');
+    assert.deepEqual(game.collect(p, ['opium']).includes('opium'), true);
+    assert.ok(game.knows('r.opium_taste'), 'the background fact arrives with its card');
+    assert.equal(game.addCandidate('e.opium_added.agent', 'stable').ok, false, 'a place cannot drug anyone');
+    assert.ok(game.addCandidate('e.opium_added.agent', 'simpson').ok);
+    assert.deepEqual(game.pencil('e.opium_added.agent'), ['simpson']);
 });
 
 test('a citation is accepted by any sufficient route, and refused when it is not enough', () => {
     const game = new Game(model);
-    for (const a of game.actions) {
-        for (const s of game.missingFor(a).steps) proveStep(game, s);
-        game.perform(a.id);
-    }
-    // The curry route and the dog route both clear Simpson of taking the horse.
+    while (!game.finished()) game.advance();
     const curry = game.routeById.get('i.straker_took_horse').premises;
     const dog = game.routeById.get('i.visitor_known_to_dog').premises;
     assert.ok(game.checkElimination('e.horse_led_out.agent', 'simpson', curry).ok);
     assert.ok(game.checkElimination('e.horse_led_out.agent', 'simpson', dog).ok);
-    // The dog alone does not clear the Colonel.
     assert.equal(game.checkElimination('e.horse_led_out.agent', 'colonel_ross', dog).ok, false);
-    // Citing a card the player has not found is refused.
     const fresh = new Game(model);
-    assert.equal(fresh.checkElimination('e.opium_added.agent', 'simpson', curry).ok, false);
+    assert.equal(fresh.checkElimination('e.opium_added.agent', 'simpson', curry).ok, false, 'cards not yet found cannot be cited');
 });
 
-test('easy mode lists what the unlocked clues allow; hard mode starts empty', () => {
-    const easy = new Game(model);
-    easy.perform('a.receive_telegrams');
-    easy.perform('a.read_papers');
-    assert.ok(easy.plausible('e.opium_added.agent', 'simpson').plausible === false, 'with the rule cards, the curry argument already rules Simpson out');
-    const noRules = new Game(model, { allRules: false });
-    noRules.perform('a.receive_telegrams');
-    noRules.perform('a.read_papers');
-    assert.ok(noRules.plausible('e.opium_added.agent', 'simpson').plausible, 'without the rules, Simpson still fits');
-    const hard = new Game(model, { difficulty: HARD });
-    hard.perform('a.receive_telegrams');
-    hard.perform('a.read_papers');
-    assert.deepEqual(hard.pencil('e.opium_added.agent'), []);
-    assert.ok(hard.plausible('e.opium_added.agent', 'simpson').plausible, 'hard mode checks shape only');
-    assert.equal(hard.plausible('e.opium_added.agent', 'stable').plausible, false, 'a place cannot drug anyone');
-});
-
-test('the police theory fits the early clues without the key rules, and breaks with them', () => {
-    const game = new Game(model, { allRules: false });
-    game.perform('a.receive_telegrams');
-    game.perform('a.read_papers');
+test('the police theory survives the first part of the story and is broken by the end', () => {
+    const game = new Game(model);
+    while (game.read < 30) game.advance();
     const police = model.data.theories.find((t) => t.id === 't.police');
     assert.ok(game.checkTheory(police).fits);
-    const withRules = new Game(model);
-    withRules.load(game.save());
-    withRules.allRules = true;
-    withRules.load({ ...game.save(), allRules: true });
-    assert.equal(withRules.checkTheory(police).fits, false);
+    while (!game.finished()) game.advance();
+    assert.equal(game.checkTheory(police).fits, false);
 });
 
 test('save and load round-trip', () => {
-    const game = new Game(model);
-    game.perform('a.receive_telegrams');
-    game.strike('e.opium_added.agent', 'watson');
+    const game = new Game(model, { difficulty: HARD });
+    while (game.read < 25) game.advance();
+    game.collect(21, ['the_stranger']);
+    game.addCandidate('the_stranger.identity', 'simpson');
     const copy = new Game(model, { state: JSON.parse(JSON.stringify(game.save())) });
-    assert.deepEqual(copy.done, game.done);
-    assert.equal(copy.pencil('e.opium_added.agent').includes('watson'), false);
+    assert.equal(copy.read, 25);
+    assert.ok(copy.knows('the_stranger'));
+    assert.deepEqual(copy.pencil('the_stranger.identity'), ['simpson']);
 });
