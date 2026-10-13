@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { mergeCase, buildModel, activeConstraints, checkStep } from '../engine/caseModel.js';
 import { evaluate, literalsOf, render } from '../engine/logic.js';
+import Ajv2020 from 'ajv/dist/2020.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -27,6 +28,13 @@ const parts = Object.fromEntries((main.parts ?? []).map((p) => [p, readJson(p)])
 const data = mergeCase(main, parts);
 const model = buildModel(data);
 const errors = [...model.errors];
+{
+    const schema = JSON.parse(fs.readFileSync(new URL('../schema/case.schema.json', import.meta.url), 'utf8'));
+    const validate = new Ajv2020({ allErrors: true, strict: false }).compile(schema);
+    if (!validate(data)) {
+        for (const e of validate.errors.slice(0, 40)) errors.push(`schema: ${e.instancePath || '/'} ${e.message}`);
+    }
+}
 const warnings = [];
 const err = (m) => errors.push(m);
 const warn = (m) => warnings.push(m);

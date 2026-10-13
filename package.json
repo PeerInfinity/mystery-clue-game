@@ -6,5 +6,8 @@
   "scripts": {
     "test": "node --test",
     "validate": "node scripts/validate-case.js cases/silver-blaze"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
   }
 }

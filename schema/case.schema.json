@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mystery-clue-game/case.schema.json",
+  "title": "Mystery case, format 0.2 (merged: case.json plus every part it lists)",
+  "description": "A case is a constraint puzzle over the story's fabula. Cards (entities, events, claims, rules, glosses) are what the player sees and connects. Slots are the open questions on cards (an event's agent, place, time...). Constraints rest on cards: once all of a constraint's premises are known it rules values out. The engine (engine/caseModel.js) builds slots from event and entity facets, claim truth slots and the declared slots; scripts/validate-case.js checks everything the schema cannot (references, quotes, uniqueness, theories, route, playability).",
+  "type": "object",
+  "required": ["schema_version", "case", "parts", "facet_types", "time", "scenes", "questions", "entities", "events", "claims", "rules", "glosses", "slots", "constraints", "actions", "route"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "0.2" },
+    "case": { "$ref": "#/$defs/caseMeta" },
+    "parts": { "type": "array", "items": { "type": "string", "pattern": "\\.json$" } },
+    "facet_types": {
+      "type": "object",
+      "description": "Facet name → what values it takes. A facet on an event or entity becomes the slot '<card id>.<facet>'.",
+      "additionalProperties": { "$ref": "#/$defs/domainSpec" }
+    },
+    "time": {
+      "type": "object",
+      "required": ["windows"],
+      "properties": {
+        "note": { "type": "string" },
+        "windows": {
+          "type": "array",
+          "description": "Ordered time points. A time slot takes one of these; 'before' compares their order.",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "day"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^w\\.[a-z0-9_]+$" },
+              "label": { "type": "string" },
+              "day": { "type": ["integer", "null"], "description": "Day number, 0 = the day of the crime; null = before the story." },
+              "clock": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+            }
+          }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "description": "The disclosure axis: the order in which the reader is told things.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "time", "place", "summary", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^s[0-9]{2}_[a-z0-9_]+$" },
+          "title": { "type": "string" },
+          "time": { "$ref": "#/$defs/windowId" },
+          "place": { "$ref": "#/$defs/id" },
+          "summary": { "type": "string" },
+          "source": { "$ref": "#/$defs/source" }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "description": "The case's headline questions; each points at a slot.",
+      "items": {
+        "type": "object",
+        "required": ["id", "slot", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^q\\.[a-z0-9_]+$" },
+          "slot": { "$ref": "#/$defs/id" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "theories": { "type": "array", "items": { "$ref": "#/$defs/theory" } },
+    "inconsistencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^x\\.[a-z0-9_]+$" },
+          "summary": { "type": "string" },
+          "source": { "$ref": "#/$defs/source" }
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/event" } },
+    "claims": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
+    "rules": { "type": "array", "items": { "$ref": "#/$defs/rule" } },
+    "glosses": { "type": "array", "items": { "$ref": "#/$defs/gloss" } },
+    "slots": { "type": "array", "items": { "$ref": "#/$defs/slot" } },
+    "constraints": { "type": "array", "items": { "$ref": "#/$defs/constraint" } },
+    "actions": { "type": "array", "items": { "$ref": "#/$defs/action" } },
+    "route": { "type": "array", "items": { "$ref": "#/$defs/routeStep" } }
+  },
+
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_.]*$" },
+    "windowId": { "type": "string", "pattern": "^w\\.[a-z0-9_]+$" },
+    "sceneId": { "type": "string", "pattern": "^s[0-9]{2}_[a-z0-9_]+$" },
+    "source": {
+      "type": "array",
+      "description": "Verbatim quotes from the story. The validator finds each one (curly quotes, dashes, underscores and whitespace normalised).",
+      "items": { "type": "string", "minLength": 3 }
+    },
+    "kind": { "enum": ["person", "animal", "group", "place", "object", "document"] },
+    "flag": {
+      "enum": ["placeholder", "hypothetical", "fiction_within_story", "implied", "stereotype"],
+      "description": "placeholder: a card standing for someone not yet identified (its identity is a slot). hypothetical: only mentioned as a possibility. fiction_within_story: a character's invention. implied: the text infers it rather than shows it. stereotype: period prejudice voiced in the story."
+    },
+
+    "caseMeta": {
+      "type": "object",
+      "required": ["id", "title", "author", "source", "protagonists", "challenge_scene", "summary", "solution_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "source": {
+          "type": "object",
+          "required": ["text_file"],
+          "properties": {
+            "text_file": { "type": "string" },
+            "gutenberg_id": { "type": "integer" },
+            "collection": { "type": "string" },
+            "first_published": { "type": "integer" },
+            "word_count": { "type": "integer" },
+            "public_domain": { "type": "string" }
+          }
+        },
+        "setting": { "type": "object", "properties": { "region": { "type": "string" }, "period": { "type": "string" } } },
+        "protagonists": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "narrator": { "$ref": "#/$defs/id" },
+        "starting_items": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "challenge_scene": { "$ref": "#/$defs/sceneId", "description": "The last scene before the solution is revealed: the fair-play cut." },
+        "summary": { "type": "string" },
+        "solution_summary": { "type": "string" }
+      }
+    },
+
+    "domainSpec": {
+      "type": "object",
+      "description": "kinds: every entity card of these kinds (placeholders and fiction excluded). time: every window. values: a fixed list.",
+      "properties": {
+        "kinds": { "type": "array", "items": { "$ref": "#/$defs/kind" } },
+        "time": { "const": true },
+        "values": { "type": "array", "items": { "type": "string" } },
+        "labels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "include_self": { "type": "boolean", "description": "Add the slot's own card as a value: 'nobody else in the story'." },
+        "also": { "type": "array", "items": { "type": "string" } },
+        "prompt": { "type": "string" }
+      },
+      "oneOf": [{ "required": ["kinds"] }, { "required": ["time"] }, { "required": ["values"] }]
+    },
+
+    "facetValue": {
+      "description": "The true value; an array = the story narrows it to these values but never settles it; null = the story never says.",
+      "oneOf": [
+        { "$ref": "#/$defs/id" },
+        { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 2 },
+        { "type": "null" }
+      ]
+    },
+
+    "entity": {
+      "type": "object",
+      "required": ["id", "kind", "name", "description", "first_mentioned", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "$ref": "#/$defs/kind" },
+        "name": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "description": { "type": "string" },
+        "within": { "$ref": "#/$defs/id", "description": "For places: the larger place this one is part of." },
+        "first_mentioned": { "$ref": "#/$defs/sceneId" },
+        "flags": { "type": "array", "items": { "$ref": "#/$defs/flag" } },
+        "facets": { "type": "object", "additionalProperties": { "$ref": "#/$defs/facetValue" } },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+
+    "event": {
+      "type": "object",
+      "required": ["id", "label", "fabula_order", "facets", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^e\\.[a-z0-9_]+$" },
+        "label": { "type": "string" },
+        "fabula_order": { "type": "integer", "description": "True chronological order (the fabula axis); ties broken by this number inside one time window." },
+        "implied": { "type": "boolean" },
+        "facets": { "type": "object", "additionalProperties": { "$ref": "#/$defs/facetValue" } },
+        "told_in": { "$ref": "#/$defs/sceneId" },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+
+    "attestation": {
+      "type": "object",
+      "required": ["via", "scene", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "via": { "enum": ["narration", "report", "testimony", "admission", "document", "physical", "observation", "absence", "inference"] },
+        "by": { "$ref": "#/$defs/id" },
+        "to": { "$ref": "#/$defs/id" },
+        "scene": { "$ref": "#/$defs/sceneId" },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+
+    "claim": {
+      "type": "object",
+      "required": ["id", "text", "about", "truth", "attested"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^c\\.[a-z0-9_]+$" },
+        "text": { "type": "string" },
+        "about": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "asserts": { "$ref": "#/$defs/formula", "description": "What the claim says in slot terms. Becomes the constraint 'k.<claim id>' resting on the claim." },
+        "truth": { "type": "boolean" },
+        "truth_slot": { "type": "boolean", "description": "The claim may be false (testimony, opinion): whether it is true is a slot '<claim id>.truth'." },
+        "truth_undetermined": { "type": "boolean", "description": "The story never settles whether this claim is true." },
+        "derived": { "type": "boolean", "description": "A conclusion to be proved, not a clue to collect. Excluded from the uniqueness evidence." },
+        "attested": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/attestation" } },
+        "note": { "type": "string" }
+      }
+    },
+
+    "rule": {
+      "type": "object",
+      "required": ["id", "text", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^r\\.[a-z0-9_]+$" },
+        "text": { "type": "string" },
+        "stated_in": { "$ref": "#/$defs/sceneId", "description": "Where the story itself states the rule (often only in the explanation)." },
+        "period": { "type": "boolean", "description": "Knowledge an 1890s reader had and a modern one may not." },
+        "flags": { "type": "array", "items": { "$ref": "#/$defs/flag" } },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+
+    "gloss": {
+      "type": "object",
+      "required": ["id", "term", "text", "attaches_to"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^g\\.[a-z0-9_]+$" },
+        "term": { "type": "string" },
+        "text": { "type": "string" },
+        "attaches_to": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "editorial": { "type": "boolean", "description": "Written for the game, not taken from the story." }
+      }
+    },
+
+    "slot": {
+      "type": "object",
+      "required": ["id", "on", "prompt", "domain", "answer"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "on": { "$ref": "#/$defs/id" },
+        "facet": { "type": "string" },
+        "prompt": { "type": "string" },
+        "domain": { "$ref": "#/$defs/domainSpec" },
+        "answer": { "$ref": "#/$defs/facetValue" },
+        "note": { "type": "string" }
+      }
+    },
+
+    "formula": {
+      "description": "A formula over slots. eq/ne/in/nin compare a slot with literal values; same/diff compare two slots; before/not_after compare time slots (or {lit: window}).",
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "true": { "const": true },
+        "false": { "const": true },
+        "eq": { "$ref": "#/$defs/slotValue" },
+        "ne": { "$ref": "#/$defs/slotValue" },
+        "in": { "$ref": "#/$defs/slotValues" },
+        "nin": { "$ref": "#/$defs/slotValues" },
+        "same": { "$ref": "#/$defs/twoSlots" },
+        "diff": { "$ref": "#/$defs/twoSlots" },
+        "before": { "$ref": "#/$defs/twoTimes" },
+        "not_after": { "$ref": "#/$defs/twoTimes" },
+        "and": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/formula" } },
+        "or": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/formula" } },
+        "not": { "$ref": "#/$defs/formula" },
+        "implies": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/formula" } }
+      },
+      "additionalProperties": false
+    },
+    "slotValue": { "type": "array", "prefixItems": [{ "$ref": "#/$defs/id" }, { "type": "string" }], "minItems": 2, "maxItems": 2 },
+    "slotValues": { "type": "array", "prefixItems": [{ "$ref": "#/$defs/id" }, { "type": "array", "items": { "type": "string" } }], "minItems": 2, "maxItems": 2 },
+    "twoSlots": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 2, "maxItems": 2 },
+    "timeArg": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "object", "required": ["lit"], "additionalProperties": false, "properties": { "lit": { "$ref": "#/$defs/windowId" } } }] },
+    "twoTimes": { "type": "array", "items": { "$ref": "#/$defs/timeArg" }, "minItems": 2, "maxItems": 2 },
+
+    "constraint": {
+      "type": "object",
+      "required": ["id", "label", "premises", "formula"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^k\\.[a-z0-9_.]+$" },
+        "label": { "type": "string", "description": "The reasoning in words, as a player would read it." },
+        "by": { "type": "string", "description": "Who in the story reasons this way ('editorial' = needed by the puzzle, not voiced by anyone)." },
+        "premises": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" } },
+        "formula": { "$ref": "#/$defs/formula" },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+
+    "theory": {
+      "type": "object",
+      "required": ["id", "label", "held_by", "assignment"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^t\\.[a-z0-9_]+$" },
+        "label": { "type": "string" },
+        "held_by": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "held_in": { "type": "array", "items": { "$ref": "#/$defs/sceneId" } },
+        "holder_knows_by_scene": { "$ref": "#/$defs/sceneId", "description": "The holders know every claim the reader has by this scene, and every rule…" },
+        "holder_knows": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "holder_lacks": { "type": "array", "items": { "$ref": "#/$defs/id" }, "description": "…except these (typically the rules they never thought to apply)." },
+        "assignment": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Slot → value under this theory." },
+        "false": { "type": "boolean", "description": "Default true. A theory marked false: false is right, and must survive all the evidence." },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+
+    "action": {
+      "type": "object",
+      "required": ["id", "order", "actor", "label", "requires", "yields", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^a\\.[a-z0-9_]+$" },
+        "order": { "type": "integer", "description": "The investigation axis: the order things were done." },
+        "actor": { "$ref": "#/$defs/id" },
+        "label": { "type": "string" },
+        "time": { "$ref": "#/$defs/windowId" },
+        "place": { "$ref": "#/$defs/id" },
+        "during_scene": { "oneOf": [{ "$ref": "#/$defs/sceneId" }, { "type": "null" }], "description": "null = offstage." },
+        "narrated_in": { "$ref": "#/$defs/sceneId" },
+        "requires": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "actions": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "cards": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "steps": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "items": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "access": { "type": "array", "items": { "$ref": "#/$defs/id" } }
+          }
+        },
+        "yields": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cards": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "steps": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "items": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "unknown": { "type": "string" }
+          }
+        },
+        "note": { "type": "string" },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    },
+
+    "routeStep": {
+      "type": "object",
+      "required": ["id", "premises", "concludes"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^i\\.[a-z0-9_]+$" },
+        "premises": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "concludes": {
+          "oneOf": [
+            { "type": "object", "required": ["slot", "value"], "additionalProperties": false, "properties": { "slot": { "$ref": "#/$defs/id" }, "value": { "type": "string" } }, "description": "An elimination: slot ≠ value." },
+            { "type": "object", "required": ["formula"], "additionalProperties": false, "properties": { "formula": { "$ref": "#/$defs/formula" } } },
+            { "type": "object", "required": ["claim"], "additionalProperties": false, "properties": { "claim": { "$ref": "#/$defs/id" } } }
+          ]
+        },
+        "pattern": { "enum": ["deduction", "elimination", "abduction", "identification", "corroboration", "prediction_confirmed"] },
+        "reasoner": { "$ref": "#/$defs/id" },
+        "explained_in": { "$ref": "#/$defs/sceneId" },
+        "note": { "type": "string" },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    }
+  }
+}
