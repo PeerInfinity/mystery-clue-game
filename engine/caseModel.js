@@ -2,9 +2,15 @@
 // solver Problem over them.
 //
 // Cards: entities, events, claims, rules, glosses (every one has a unique id across the case).
-// Slots: one per event facet, per entity facet, per testimony truth, plus the explicitly declared slots.
+// Slots: one per event facet, per entity facet, per claim truth, plus the explicitly declared slots.
 // Constraints: one per claim that asserts something (premise: the claim itself), plus the authored reasoning
 //   constraints (premises: the claims and rules they rest on).
+//
+// TRUST: every claim has two readings. TRUSTED: what it says holds. DOUBTED: what it says holds exactly when its
+// truth slot is 'true'. The case's own reading (what the validator checks) doubts the claims marked `truth_slot`
+// and trusts the rest; a player trusts every claim until they mark it suspect. The reading the case does not use
+// is a VARIANT constraint, and the truth slot of a claim the case trusts is LATENT: both exist only for the
+// player's view, and the validator skips them.
 
 import { Problem } from './solver.js';
 import { slotsOf } from './logic.js';
@@ -89,6 +95,8 @@ export function buildModel(data) {
                 answer: c.truth_undetermined ? null : c.truth ? 'true' : 'false',
                 undetermined: c.truth_undetermined ? true : undefined,
             });
+        } else if (c.asserts && !c.derived) {
+            addSlot({ id: `${c.id}.truth`, on: c.id, facet: 'truth', prompt: 'Is it true?', domain: ['true', 'false'], answer: 'true', latent: true });
         }
     }
     for (const s of data.slots ?? []) {
@@ -110,19 +118,27 @@ export function buildModel(data) {
         if (constraints.has(k.id)) errors.push(`duplicate constraint ${k.id}`);
         constraints.set(k.id, k);
     };
+    const claimForms = new Map();   // claim id -> {trusted, doubted} constraint ids
     for (const c of data.claims ?? []) {
         if (!c.asserts) continue;
-        const formula = c.truth_slot
-            ? {
-                and: [
-                    { implies: [{ eq: [`${c.id}.truth`, 'true'] }, c.asserts] },
-                    { implies: [{ eq: [`${c.id}.truth`, 'false'] }, { not: c.asserts }] },
-                ],
-            }
-            : c.asserts;
+        const doubted = {
+            and: [
+                { implies: [{ eq: [`${c.id}.truth`, 'true'] }, c.asserts] },
+                { implies: [{ eq: [`${c.id}.truth`, 'false'] }, { not: c.asserts }] },
+            ],
+        };
+        const base = { label: c.text, premises: [c.id], from_claim: c.id, derived: !!c.derived };
         // A derived claim's constraint is what the player earns by proving it; it is never part of the
         // evidence the uniqueness check runs on.
-        addConstraint({ id: `k.${c.id}`, label: c.text, premises: [c.id], formula, from_claim: c.id, derived: !!c.derived });
+        addConstraint({ ...base, id: `k.${c.id}`, formula: c.truth_slot ? doubted : c.asserts });
+        if (c.derived) continue;
+        if (c.truth_slot) {
+            addConstraint({ ...base, id: `k.${c.id}#trusted`, formula: c.asserts, variant: true });
+            claimForms.set(c.id, { trusted: `k.${c.id}#trusted`, doubted: `k.${c.id}` });
+        } else {
+            addConstraint({ ...base, id: `k.${c.id}#doubted`, formula: doubted, variant: true });
+            claimForms.set(c.id, { trusted: `k.${c.id}`, doubted: `k.${c.id}#doubted` });
+        }
     }
     for (const k of data.constraints ?? []) addConstraint({ ...k });
 
@@ -141,14 +157,28 @@ export function buildModel(data) {
             timeOrder,
         });
 
-    return { data, cards, slots, constraints, problem, timeOrder, sceneOrder, windows, scenes, errors };
+    return { data, cards, slots, constraints, claimForms, problem, timeOrder, sceneOrder, windows, scenes, errors };
 }
 
-/** Constraint ids whose premises are all in `known` (a Set of card ids). */
-export function activeConstraints(model, known) {
+/**
+ * Constraint ids whose premises are all in `known` (a Set of card ids).
+ * With `doubted` (a Set of claim ids) this is a PLAYER's view: every claim is trusted unless it is in `doubted`.
+ * Without it, the case's own reading.
+ */
+export function activeConstraints(model, known, doubted = null) {
     const out = [];
-    for (const k of model.constraints.values()) if (k.premises.every((p) => known.has(p))) out.push(k.id);
+    for (const k of model.constraints.values()) {
+        if (k.variant || !k.premises.every((p) => known.has(p))) continue;
+        const forms = doubted && k.from_claim ? model.claimForms.get(k.from_claim) : null;
+        out.push(forms ? (doubted.has(k.from_claim) ? forms.doubted : forms.trusted) : k.id);
+    }
     return out;
+}
+
+/** The claim a constraint trusts, if it is a claim's trusted reading. */
+export function trustedClaim(model, kid) {
+    const k = model.constraints.get(kid);
+    return k?.from_claim && model.claimForms.get(k.from_claim)?.trusted === kid ? k.from_claim : null;
 }
 
 /**
@@ -156,8 +186,11 @@ export function activeConstraints(model, known) {
  * `claim` is either {slot, value} (meaning "slot ≠ value") or {formula} (meaning "formula holds").
  * Returns {ok, used} where `used` is a minimal set of constraints that does it.
  */
-export function checkStep(model, cited, claim) {
-    const active = activeConstraints(model, new Set(cited));
+export function checkStep(model, cited, claim, doubted = null) {
+    const active = activeConstraints(model, new Set(cited), doubted);
+    // Cited clues that cannot all be true prove anything at all: say so instead. (One of them must be false.)
+    const clash = model.problem.explainConflict(active);
+    if (clash) return { ok: false, contradiction: clash };
     const fixed = claim.slot ? { [claim.slot]: claim.value } : {};
     const extra = claim.formula ? [{ not: claim.formula }] : [];
     const res = model.problem.consistent(active, fixed, { extra });

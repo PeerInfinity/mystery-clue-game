@@ -212,3 +212,31 @@ appears, paragraph by paragraph) was read end to end. Fixed:
   clothing" → "The stranger's clothes", "Dawson" → "The Mapleton groom" until he is named, "Heavy rain, and no
   wind" → "Heavy rain", …).
 - The fair-play test now also checks, at every gate, that the question is visible and the answer on offer.
+
+## Round 5 (user, 2026-10-13): doubt is the player's move
+
+> "Rather than automatically adding questions for things like whether the servant is honest, it might be
+> better to have a more general mechanic where the player can mark claims they have encountered that they
+> suspect might be false."
+
+As built:
+- **Every claim card has "I suspect this may be false".** Until then the game takes the claim at its word; no
+  claim asks "Is it true?" by itself (it used to, for the 13 the case marks `truth_slot`, which singled them out).
+- **Two readings per claim** (`caseModel.js`): TRUSTED (what it says holds) and DOUBTED (it holds exactly when
+  its truth slot is 'true'). The case's own reading — what the validator checks — is unchanged; the other
+  reading is a `variant` constraint, and the truth slot of a claim the case holds true is `latent`. The player's
+  view (`activeConstraints(model, known, suspected)`) trusts every claim not suspected.
+- **Givens** now come from every trusted claim, testimony included, but **never fill a case question** (those
+  are always proved). Doubting a claim withdraws what it filled in. A given no longer raises its own question:
+  "he is an honest servant" opens "Was Straker an honest servant?" only once the player doubts it, or when
+  Holmes reaches the point where he settles it.
+- **Proofs lapse.** A cross-out or proof whose accepted constraints trusted a claim the player later doubts
+  stops counting (and comes back if they trust it again); the slot says which doubt broke it. A proof that
+  disagrees with a trusted given wins, and the given's claim is flagged ("but X, which you trust, says …").
+- **Contradictions are named.** Citing clues that cannot all be true is refused with the clash ("One of them
+  must be false"), with a "doubt it" link on each claim. In Trivial a question with nothing left says
+  "something you trust must be false" and can find the clash (a whole-hand check, ~3 s late in the story).
+- The Questions tab lists the statements you doubt, with their state (open / false / true after all).
+- Open: givens still come only from a claim's top-level `eq`, so a doubtful claim that only says `ne`/`same`
+  fills nothing either way; and a trusted false claim can quietly fill a detail (Hunter's time for the drugging)
+  until the player doubts it — intended, but worth watching in play.

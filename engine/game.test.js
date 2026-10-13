@@ -5,10 +5,14 @@ import { Game, TRIVIAL, EASY, HARD, WAIT } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 
-/** Prove a route step's conclusion, citing the step's own premises. */
+/** Prove a route step's conclusion, citing the step's own premises. Like Holmes, first doubt what disagrees. */
 function proveStep(game, stepId) {
     const step = game.routeById.get(stepId);
     const c = step.concludes;
+    const slot = c.slot ?? c.formula?.eq?.[0];
+    for (const g of game.givers.get(slot) ?? []) {
+        if (game.knows(g.claim) && (c.slot ? g.value === c.value : g.value !== c.formula.eq[1])) game.suspect(g.claim);
+    }
     if (c.slot) return game.strike(c.slot, c.value, step.premises);
     if (c.formula.eq) return game.prove(c.formula.eq[0], c.formula.eq[1], step.premises);
     return { ok: false, reason: 'not an eq step' };
@@ -98,4 +102,52 @@ test('save and load round-trip', () => {
     assert.equal(copy.read, 45);
     assert.ok(copy.knows('the_stranger'));
     assert.deepEqual(copy.pencil('the_stranger.identity'), ['simpson']);
+});
+
+test('doubt: no claim asks "is it true?" until the player suspects it', () => {
+    const game = new Game(model);
+    while (!game.knows('c.straker_honest_record')) game.advance();
+    for (const id of ['c.straker_honest_record.truth', 'straker.honest']) assert.equal(game.slotVisible(id), false, id);
+    game.suspect('c.straker_honest_record');
+    assert.ok(game.slotVisible('c.straker_honest_record.truth'));
+    assert.ok(game.slotVisible('straker.honest'), 'doubting it opens what it filled in');
+    // A claim the case holds true is suspected the same way.
+    while (!game.knows('c.stall_empty')) game.advance();
+    assert.equal(game.slotVisible('c.stall_empty.truth'), false);
+    game.suspect('c.stall_empty');
+    assert.ok(game.slotVisible('c.stall_empty.truth'));
+});
+
+test('doubt: a trusted claim fills its details but never a case question; doubting it reopens them', () => {
+    const game = new Game(model);
+    while (!game.finished()) game.advance();
+    assert.equal(game.given('straker.honest')?.value, 'true');
+    assert.equal(game.given('the_bay.identity'), null, 'a case question is proved, not given');
+    game.suspect('c.straker_honest_record');
+    assert.equal(game.given('straker.honest')?.claim, 'c.straker_said_anxious', 'the other account still says so');
+    game.suspect('c.straker_said_anxious');
+    assert.equal(game.given('straker.honest'), null);
+});
+
+test('doubt: a proof resting on a claim lapses when the claim is suspected', () => {
+    const game = new Game(model);
+    while (!game.finished()) game.advance();
+    assert.ok(game.prove('the_bay.identity', 'silver_blaze', ['c.wash_with_spirits']).ok);
+    assert.equal(game.settled('the_bay.identity'), 'silver_blaze');
+    game.suspect('c.wash_with_spirits');
+    assert.equal(game.settled('the_bay.identity'), null);
+    assert.ok(game.proofLapsed('the_bay.identity'));
+    game.unsuspect('c.wash_with_spirits');
+    assert.equal(game.settled('the_bay.identity'), 'silver_blaze');
+});
+
+test('doubt: citing clues that cannot all be true is refused, naming the clash', () => {
+    const game = new Game(model);
+    while (!game.finished()) game.advance();
+    const step = game.routeById.get('i.straker_dishonest');
+    const res = game.prove('straker.honest', 'false', [...step.premises, 'c.straker_honest_record']);
+    assert.equal(res.ok, false);
+    assert.ok(res.contradiction.includes('k.c.straker_honest_record#trusted'), res.contradiction.join(' '));
+    game.suspect('c.straker_honest_record');
+    assert.ok(game.prove('straker.honest', 'false', step.premises).ok);
 });

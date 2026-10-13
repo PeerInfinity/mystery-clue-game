@@ -160,6 +160,7 @@ function toolCard() {
     const c = model.cards.get(id);
     const hideFlags = ['placeholder', 'fiction_within_story', 'implied'];
     let h = `<div class="card-head"><span class="kind">${kindOf(id)}</span>${(c.flags ?? []).filter((f) => !hideFlags.includes(f)).map((f) => `<span class="flag">${esc(f.replace(/_/g, ' '))}</span>`).join('')}`;
+    if (game.isSuspected(id)) h += '<span class="flag doubted">suspected</span>';
     if (c.section === 'entities') h += `<h2>${esc(c.name)}</h2>`;
     else if (c.section === 'events') h += `<h2>${esc(c.label)}</h2>`;
     else h += `<p class="desc">${esc(c.text)}</p>`;
@@ -194,7 +195,11 @@ function toolCard() {
         h += '</div>';
     });
     if (c.section === 'claims') {
-        if (c.truth_slot) h += '<p class="small muted">People can be wrong, or lie: whether this is true is one of the questions below.</p>';
+        if (game.canSuspect(id)) {
+            h += game.isSuspected(id)
+                ? `<p class="doubt on">You suspect this may be false: it counts as fact nowhere, and “Is it true?” is open below. <button data-unsuspect="${id}" class="quiet">Trust it again</button></p>`
+                : `<p class="doubt">Until you doubt it, the game takes this at its word. <button data-suspect="${id}">I suspect this may be false</button></p>`;
+        }
         const about = (c.about ?? []).filter((x) => game.knows(x));
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
@@ -233,7 +238,8 @@ function renderSlot(s) {
     let ruledCount = 0;
     if (settled !== null) {
         chips.push(`<span class="chip proven" data-slot="${s.id}" data-val="${esc(settled)}">${esc(valueName(s.id, settled))}</span>`);
-        if (given) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))}</span>`);
+        if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
+        for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k, shortName(k, 60))}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
     } else {
         const pencil = game.pencil(s.id);
         let live = pencil;
@@ -253,7 +259,8 @@ function renderSlot(s) {
             else chips.push(`<span class="link more" data-expand="${s.id}|ruled">${ruled.length} your clues already rule out — show</span>`);
         }
     }
-    const struckChips = struck.filter(([v]) => v !== settled).map(([v, p]) => chip(s.id, v, p.cited ? 'proved' : 'struck'));
+    const struckChips = struck.filter(([v]) => v !== settled && !game.strikeLapsed(s.id, v)).map(([v, p]) => chip(s.id, v, p.cited ? 'proved' : 'struck'));
+    const lapsed = [...struck.filter(([v]) => game.strikeLapsed(s.id, v)).map(([, p]) => p.used), ...(game.proofLapsed(s.id) ? [m.proven.used] : [])];
     let state;
     if (settled !== null) state = given ? 'given' : 'settled';
     else if (game.difficulty === HARD) state = `${game.pencil(s.id).length} proposed`;
@@ -265,6 +272,14 @@ function renderSlot(s) {
         h += `<div class="chips"><input list="dl-${s.id}" data-add="${s.id}" placeholder="+ propose an answer" size="26"><datalist id="dl-${s.id}">${options.map((v) => `<option value="${esc(valueName(s.id, v))}">`).join('')}</datalist></div>`;
     }
     if (struckChips.length) h += `<div class="chips small"><span class="muted">ruled out:</span>${struckChips.join('')}</div>`;
+    if (lapsed.length) {
+        const why = [...new Set(lapsed.flatMap((u) => game.lapsedBy(u)))];
+        h += `<div class="small bad">${lapsed.length === 1 ? 'A proof here' : `${lapsed.length} proofs here`} rested on ${why.map((k) => link(k, shortName(k, 50))).join(', ')}, which you now doubt.</div>`;
+    }
+    if (game.difficulty === TRIVIAL && settled === null && cache.get(s.id)?.length === 0) {
+        h += `<div class="small bad">Nothing fits: something you trust must be false. <span class="link" data-clash="${s.id}">Find the clash</span></div>`;
+        if (ui.clash?.slot === s.id) h += `<div class="why">${ui.clash.html}</div>`;
+    }
     if (ui.menu?.slot === s.id) h += slotMenu(s, ui.menu.value);
     return `${h}</div>`;
 }
@@ -277,12 +292,12 @@ function chip(slot, v, cls) {
 function slotMenu(s, v) {
     const m = game.marks.get(s.id);
     const st = m?.struck.get(v);
-    const isProven = m?.proven?.value === v;
+    const isProven = game.provenValue(s.id) === v;
     const isGiven = !!game.given(s.id);
     const b = [];
-    if (isGiven) b.push('<span class="small muted">Given by a clue.</span>');
+    if (isGiven && !isProven) b.push(`<span class="small muted">Given by a clue you trust.</span> <button data-suspect="${game.given(s.id).claim}" class="quiet">Doubt that clue</button>`);
     else if (isProven) b.push('<button data-op="unprove">Undo the proof</button>');
-    else if (st) b.push('<button data-op="unstrike">Restore</button>');
+    else if (st && !game.strikeLapsed(s.id, v)) b.push('<button data-op="unstrike">Restore</button>');
     else {
         if (game.difficulty === TRIVIAL) b.push('<button data-op="strike">Cross out</button>');
         b.push('<button data-op="strike-why">Rule out, with evidence…</button>', '<button data-op="prove">Prove it\'s this…</button>');
@@ -320,7 +335,17 @@ function toolCards() {
 
 function toolQuestions() {
     const raised = model.data.questions.filter((q) => game.questionRaised(q.id));
-    if (!raised.length) return '<p class="empty">The story has not raised any questions yet.</p>';
+    const doubts = [...game.suspected].filter((c) => game.knows(c));
+    let d = '';
+    if (doubts.length) {
+        d = '<h3 class="section">Statements you doubt</h3><ul class="list">';
+        for (const c of doubts) {
+            const v = game.settled(`${c}.truth`);
+            d += `<li class="q"><span>${link(c, shortName(c, 90))}</span><span class="state ${v !== null ? 'done' : ''}">${v === 'true' ? 'true after all' : v === 'false' ? 'false' : 'open'}</span></li>`;
+        }
+        d += '</ul>';
+    }
+    if (!raised.length) return `<p class="empty">The story has not raised any questions yet.</p>${d}`;
     let h = '<p class="small muted">The questions the case turns on, as the story raises them.</p><ul class="list">';
     for (const q of raised) {
         const slot = model.slots.get(q.slot);
@@ -329,7 +354,7 @@ function toolQuestions() {
         const state = !visible ? (game.difficulty === HARD ? 'collect the card first' : '') : settled !== null ? esc(valueName(q.slot, settled)) : game.difficulty === HARD ? `${game.pencil(q.slot).length} proposed` : `${game.pencil(q.slot).length} left`;
         h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(q.text)}</span>` : esc(q.text)}</span><span class="state ${settled !== null ? 'done' : ''}">${state}</span></li>`;
     }
-    return `${h}</ul>`;
+    return `${h}</ul>${d}`;
 }
 
 function toolTheories() {
@@ -425,6 +450,13 @@ function drawCite() {
     $('#cite-chosen').innerHTML = [...chosen].map((k) => `<span class="chip" data-unchoose="${k}">${esc(shortName(k, 50))} <span class="x">✕</span></span>`).join('') || '<span class="empty">nothing cited yet</span>';
     $('#cite-list').innerHTML = shown.slice(0, 250).map((k) => `<label><input type="checkbox" data-choose="${k}" ${chosen.has(k) ? 'checked' : ''}><span><span class="kind">${kindOf(k)}</span>${esc(text(k))}</span></label>`).join('');
 }
+/** A set of clues that cannot all hold, with a way to doubt each claim in it. */
+function clashHtml(ids) {
+    const claims = [...new Set(ids.map((k) => model.constraints.get(k).from_claim).filter(Boolean))];
+    const rest = ids.filter((k) => !model.constraints.get(k).from_claim);
+    return `${claims.map((c) => `${link(c, shortName(c, 70))} <span class="link small" data-suspect="${c}">doubt it</span>`).join(' · ')}${rest.length ? ` <span class="muted">(with: ${rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')})</span>` : ''}. One of them must be false.`;
+}
+
 function runCite() {
     const cited = [...chosen].filter((k) => model.cards.get(k).section !== 'glosses');
     const { kind, slot, value } = citeFor;
@@ -432,9 +464,14 @@ function runCite() {
     const out = $('#cite-result');
     if (res.ok) {
         out.className = 'result ok';
-        out.innerHTML = game.difficulty === TRIVIAL && res.used?.length ? `Accepted. It rests on: ${res.used.map((k) => esc(model.constraints.get(k).label)).join(' · ')}` : 'Accepted.';
+        const word = game.restsOn(res.used);
+        out.innerHTML = (game.difficulty === TRIVIAL && res.used?.length ? `Accepted. It rests on: ${res.used.map((k) => esc(model.constraints.get(k).label)).join(' · ')}` : 'Accepted.')
+            + (word.length ? ` <span class="muted">It takes ${word.map((k) => esc(shortName(k, 50))).join('; ')} on trust.</span>` : '');
         ui.menu = null;
         changed();
+    } else if (res.contradiction) {
+        out.className = 'result no';
+        out.innerHTML = `Those cannot all be true: ${clashHtml(res.contradiction)}`;
     } else {
         out.className = 'result no';
         out.textContent = res.reason && !res.reason.startsWith('cite') ? `Not accepted: ${res.reason}.` : 'Not enough: those do not rule it out yet. Something is missing — a clue, or the fact that connects them.';
@@ -500,6 +537,24 @@ document.addEventListener('click', (e) => {
         }
         changed();
         scrollStory();
+        return;
+    }
+    const d = e.target.closest('[data-suspect],[data-unsuspect],[data-clash]');
+    if (d) {
+        if (d.dataset.suspect) { game.suspect(d.dataset.suspect); toast(`You now doubt: ${esc(shortName(d.dataset.suspect, 60))}`); }
+        else if (d.dataset.unsuspect) game.unsuspect(d.dataset.unsuspect);
+        else {
+            ui.clash = { slot: d.dataset.clash, html: '<span class="muted">Checking everything you trust… (a few seconds)</span>' };
+            renderTool();
+            setTimeout(() => {
+                const ids = game.contradiction();
+                ui.clash = { slot: d.dataset.clash, html: ids ? `These cannot all be true: ${clashHtml(ids)}` : 'No clash found among what you trust.' };
+                renderTool();
+            }, 20);
+            return;
+        }
+        ui.clash = null;
+        changed();
         return;
     }
     const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],.tab');

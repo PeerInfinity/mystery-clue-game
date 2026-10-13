@@ -12,7 +12,7 @@
 //   Hard: the player proposes candidates first (only their type is checked); cross-outs need evidence.
 // Background facts (rule cards) sit on the entity cards they belong to and arrive with them.
 
-import { activeConstraints, checkStep } from './caseModel.js';
+import { activeConstraints, checkStep, trustedClaim } from './caseModel.js';
 
 export const TRIVIAL = 'trivial';
 export const EASY = 'easy';
@@ -29,13 +29,15 @@ export class Game {
         this.actions = [...(model.data.actions ?? [])].sort((a, b) => a.order - b.order);
         this.actionById = new Map(this.actions.map((a) => [a.id, a]));
         this.routeById = new Map((model.data.route ?? []).map((r) => [r.id, r]));
-        // GIVENS (sudoku's printed digits): a clue that is not testimony and states a slot's value outright fills
-        // that slot as soon as the clue is held. Testimony (truth-slotted claims) never does: it may be false.
+        // GIVENS (sudoku's printed digits): a clue that states a slot's value outright fills that slot as soon as
+        // the clue is held, while the player trusts it. Never a case question: those the player must prove. Every
+        // claim is treated alike here (whether the case knows it to be false must not show).
+        const caseQuestions = new Set((model.data.questions ?? []).map((q) => q.slot));
         this.givers = new Map();
         for (const c of model.data.claims ?? []) {
-            if (c.derived || c.truth_slot || !c.asserts) continue;
+            if (c.derived || !c.asserts) continue;
             for (const f of c.asserts.and ?? [c.asserts]) {
-                if (!f.eq) continue;
+                if (!f.eq || caseQuestions.has(f.eq[0])) continue;
                 const [slot, value] = f.eq;
                 if (!this.givers.has(slot)) this.givers.set(slot, []);
                 this.givers.get(slot).push({ claim: c.id, value });
@@ -70,6 +72,7 @@ export class Game {
         this.marks = new Map();         // slot id → {listed: Set|null, struck: Map value → {cited, used}|{}, proven}
         this.theories = [];
         this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
+        this.suspected = new Set();     // claim ids the player doubts
         this.#process(0);
     }
 
@@ -83,6 +86,7 @@ export class Game {
             marks: [...this.marks].map(([slot, m]) => [slot, { listed: m.listed ? [...m.listed] : null, struck: [...m.struck], proven: m.proven }]),
             theories: this.theories,
             lastSeen: [...this.lastSeen],
+            suspected: [...this.suspected],
         };
     }
 
@@ -99,6 +103,24 @@ export class Game {
         }
         this.theories = state.theories ?? [];
         this.lastSeen = new Map(state.lastSeen ?? []);
+        this.suspected = new Set((state.suspected ?? []).filter((id) => this.model.claimForms.has(id)));
+    }
+
+    // ---------- doubt ----------
+    /** Any claim the player holds can be doubted. Its question "Is it true?" opens, and it stops counting as fact. */
+    canSuspect(id) { return this.knows(id) && this.model.claimForms.has(id); }
+    suspect(id) { if (this.canSuspect(id)) this.suspected.add(id); }
+    unsuspect(id) { this.suspected.delete(id); }
+    isSuspected(id) { return this.suspected.has(id); }
+
+    /** The doubted claims a proof's constraints trusted: the proof no longer stands. */
+    lapsedBy(used) {
+        return (used ?? []).map((k) => trustedClaim(this.model, k)).filter((c) => c && this.suspected.has(c));
+    }
+
+    /** The claims a proof takes on trust (those someone in the story told, rather than the narrator). */
+    restsOn(used) {
+        return (used ?? []).map((k) => trustedClaim(this.model, k)).filter((c) => c && (this.model.cards.get(c).attested ?? []).some((a) => ['testimony', 'admission', 'report', 'inference'].includes(a.via)));
     }
 
     // ---------- reading ----------
@@ -262,16 +284,20 @@ export class Game {
         const s = this.model.slots.get(slotId);
         if (!s || !this.knows(s.on)) return false;
         const owner = this.model.cards.get(s.on);
-        if (owner.section === 'events' || owner.section === 'claims' || s.facet === 'identity') return true;
+        if (owner.section === 'events' || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
         if (!this.slotRaisers) {
             this.slotRaisers = new Map();
             const add = (slot, test) => {
                 if (!this.slotRaisers.has(slot)) this.slotRaisers.set(slot, []);
                 this.slotRaisers.get(slot).push(test);
             };
+            // A held clue raises what it speaks of, except what it simply fills in (that shows once it is doubted:
+            // "he is an honest servant" asks nothing until the player wonders whether he was).
             for (const c of this.model.data.claims ?? []) {
-                const k = this.model.constraints.get(`k.${c.id}`);
-                if (k && !c.derived) for (const x of slotsIn(k.formula)) add(x, () => this.knows(c.id));
+                if (c.derived || !c.asserts) continue;
+                add(`${c.id}.truth`, () => this.suspected.has(c.id));
+                const fills = new Set((c.asserts.and ?? [c.asserts]).filter((f) => f.eq).map((f) => f.eq[0]));
+                for (const x of slotsIn(c.asserts)) add(x, fills.has(x) ? () => this.knows(c.id) && this.suspected.has(c.id) : () => this.knows(c.id));
             }
             for (const q of this.model.data.questions ?? []) add(q.slot, () => this.questionRaised(q.id));
             for (const [para, steps] of this.story.gates ?? new Map()) {
@@ -306,14 +332,14 @@ export class Game {
 
     /** The values the player is still considering for a slot. */
     pencil(slot) {
+        const m = this.marks.get(slot);
+        if (this.provenValue(slot) !== null) return [this.provenValue(slot)];
         const g = this.given(slot);
         if (g) return [g.value];
-        const m = this.marks.get(slot);
-        if (m?.proven) return [m.proven.value];
         const s = this.model.slots.get(slot);
         const base = m?.listed ? [...m.listed] : this.difficulty === HARD ? [] : s.domain;
         // Never list a card the story has not shown the player yet: that would give it away.
-        return base.filter((v) => !m?.struck.has(v) && this.offered(slot, v));
+        return base.filter((v) => (!m?.struck.has(v) || this.strikeLapsed(slot, v)) && this.offered(slot, v));
     }
 
     /** Hard mode: propose a candidate. Refused when it is the wrong kind of thing for the slot. */
@@ -344,8 +370,23 @@ export class Game {
     }
 
     unstrike(slot, value) { this.marks.get(slot)?.struck.delete(value); }
-    isStruckWithProof(slot, value) { return !!this.marks.get(slot)?.struck.get(value)?.cited; }
-    provenValue(slot) { return this.marks.get(slot)?.proven?.value ?? null; }
+    isStruckWithProof(slot, value) {
+        const st = this.marks.get(slot)?.struck.get(value);
+        return !!st?.cited && !this.lapsedBy(st.used).length;
+    }
+    /** Struck with a proof that rested on a claim the player has since doubted. */
+    strikeLapsed(slot, value) {
+        const st = this.marks.get(slot)?.struck.get(value);
+        return !!st?.cited && this.lapsedBy(st.used).length > 0;
+    }
+    provenValue(slot) {
+        const p = this.marks.get(slot)?.proven;
+        return p && !this.lapsedBy(p.used).length ? p.value : null;
+    }
+    proofLapsed(slot) {
+        const p = this.marks.get(slot)?.proven;
+        return !!p && this.lapsedBy(p.used).length > 0;
+    }
 
     /** Prove a value outright: the cited cards must leave nothing else possible. */
     prove(slot, value, cited) {
@@ -359,16 +400,24 @@ export class Game {
         if (m) m.proven = null;
     }
 
+    /** Trusted claims that fill this slot with something other than what the player proved. */
+    givenClash(slot) {
+        const v = this.provenValue(slot);
+        if (v === null) return [];
+        return (this.givers.get(slot) ?? []).filter((g) => this.knows(g.claim) && !this.suspected.has(g.claim) && g.value !== v).map((g) => g.claim);
+    }
+
     /** The held clue that hands this slot its value, if any. */
     given(slot) {
-        return (this.givers.get(slot) ?? []).find((g) => this.knows(g.claim)) ?? null;
+        return (this.givers.get(slot) ?? []).find((g) => this.knows(g.claim) && !this.suspected.has(g.claim)) ?? null;
     }
 
     /** Settled = given by a clue, proven, or every other value struck with a proof. */
     settled(slot) {
+        // A proof outranks a given: when they disagree, the player is shown the clash (givenClash).
+        if (this.provenValue(slot) !== null) return this.provenValue(slot);
         const g = this.given(slot);
         if (g) return g.value;
-        if (this.provenValue(slot) !== null) return this.provenValue(slot);
         const s = this.model.slots.get(slot);
         const left = s.domain.filter((v) => !this.isStruckWithProof(slot, v));
         return left.length === 1 ? left[0] : null;
@@ -381,11 +430,11 @@ export class Game {
     }
 
     checkElimination(slot, value, cited) {
-        return this.#citable(cited) ?? checkStep(this.model, cited, { slot, value });
+        return this.#citable(cited) ?? checkStep(this.model, cited, { slot, value }, this.suspected);
     }
 
     checkConclusion(formula, cited) {
-        return this.#citable(cited) ?? checkStep(this.model, cited, { formula });
+        return this.#citable(cited) ?? checkStep(this.model, cited, { formula }, this.suspected);
     }
 
     shapeFits(slot, value) { return this.model.slots.get(slot).domain.includes(value); }
@@ -405,7 +454,12 @@ export class Game {
     }
 
     activeConstraints() {
-        return activeConstraints(this.model, this.known()).filter((id) => !this.model.constraints.get(id).derived);
+        return activeConstraints(this.model, this.known(), this.suspected).filter((id) => !this.model.constraints.get(id).derived);
+    }
+
+    /** Clues the player trusts that cannot all be true (a minimal set), or null. Trivial shows it. */
+    contradiction() {
+        return this.model.problem.explainConflict(this.activeConstraints());
     }
 
     #entailedBySettled(formula) {

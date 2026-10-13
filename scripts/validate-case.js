@@ -157,11 +157,13 @@ if (errors.length || !model.problem) finish();
 
 // ---------- the solution satisfies every constraint ----------
 const truth = new Map();
-for (const s of model.slots.values()) if (s.answer !== null && s.answer !== undefined) truth.set(s.id, s.answer);
+for (const s of model.slots.values()) if (!s.latent && s.answer !== null && s.answer !== undefined) truth.set(s.id, s.answer);
+// Variant constraints and latent slots are the player's other reading of a claim (see caseModel): not the case's.
 for (const k of model.constraints.values()) {
+    if (k.variant) continue;
     if (evaluate(k.formula, truth, model.timeOrder) === false) err(`the true solution violates ${k.id}: ${k.label}`);
 }
-const allIds = [...model.constraints.keys()];
+const allIds = [...model.constraints.keys()].filter((id) => !model.constraints.get(id).variant);
 const evidenceIds = allIds.filter((id) => !model.constraints.get(id).derived);
 // Undetermined slots: the solution must still extend to them.
 const fullCheck = model.problem.consistent(allIds, Object.fromEntries(truth));
@@ -172,6 +174,7 @@ if (errors.length) finish();
 // ---------- uniqueness ----------
 const slotRows = [];
 for (const s of model.slots.values()) {
+    if (s.latent) continue;
     const cands = model.problem.candidates(evidenceIds, s.id);
     let status;
     if (Array.isArray(s.undetermined)) {
@@ -327,7 +330,7 @@ function writeReport() {
     const byKind = {};
     for (const e of data.entities) byKind[e.kind] = (byKind[e.kind] ?? 0) + 1;
     out(`- cards: ${model.cards.size} — entities ${count('entities')} (${Object.entries(byKind).map(([k, v]) => `${v} ${k}`).join(', ')}), events ${count('events')}, claims ${count('claims')} (${data.claims.filter((c) => c.derived).length} derived), rules ${count('rules')}, glosses ${count('glosses')}`);
-    out(`- slots: ${model.slots.size}; constraints: ${model.constraints.size} (${count('constraints')} reasoning, the rest from claims)`);
+    out(`- slots: ${[...model.slots.values()].filter((s) => !s.latent).length}; constraints: ${allIds.length} (${count('constraints')} reasoning, the rest from claims); plus the player's other reading of each claim (${[...model.slots.values()].filter((s) => s.latent).length} latent truth slots)`);
     out(`- quotes: ${nQuotes}, all found in the story`);
     const unique = slotRows.filter((r) => r.status === 'unique').length;
     const open = slotRows.filter((r) => r.slot.undetermined).length;
