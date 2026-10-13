@@ -1,0 +1,653 @@
+{
+  "schema_version": "0.2",
+  "case": {
+    "id": "silver_blaze",
+    "title": "Silver Blaze",
+    "author": "Arthur Conan Doyle",
+    "source": {
+      "text_file": "story.txt",
+      "gutenberg_id": 834,
+      "collection": "The Memoirs of Sherlock Holmes",
+      "first_published": 1892,
+      "word_count": 9574,
+      "public_domain": "US and life+70 countries (Doyle died 1930)"
+    },
+    "setting": {
+      "region": "Dartmoor, Devon, England",
+      "period": "c. 1890"
+    },
+    "protagonists": [
+      "holmes",
+      "watson"
+    ],
+    "narrator": "watson",
+    "starting_items": [
+      "half_crown"
+    ],
+    "challenge_scene": "s08_departure",
+    "summary": "Silver Blaze, favourite for the Wessex Cup, has vanished from the King's Pyland stables on Dartmoor, and his trainer John Straker has been found dead on the moor with his skull crushed, a knife in one hand and a stranger's cravat in the other. The stable-lad on guard was drugged with opium in his supper. The police have arrested Fitzroy Simpson, a bookmaker who was seen at the stables that evening trying to bribe his way to a tip. Holmes is asked to find the horse and the murderer.",
+    "solution_summary": "Straker, deep in debt from a secret second household kept under the name William Derbyshire, planned to lame his own horse so that it would lose. Curried mutton was served that night, and Straker put opium in the stable-lad's portion, where the curry hid its taste. At one in the morning he went down to the stable (the dog knew him and kept quiet), led Silver Blaze to a hollow out of sight, took off his coat, and struck a match to light his candle and nick the horse's tendon with a cataract knife. The startled horse kicked him in the head and killed him; falling, he cut his own thigh. The horse bolted towards Mapleton, where Silas Brown found it at dawn and hid it, disguising its white markings, until Holmes made him produce it for the race."
+  },
+  "parts": [
+    "entities.json",
+    "events.json",
+    "claims.json",
+    "knowledge.json",
+    "slots.json",
+    "constraints.json",
+    "actions.json",
+    "route.json"
+  ],
+  "facet_types": {
+    "agent": {
+      "kinds": [
+        "person",
+        "animal",
+        "group"
+      ],
+      "prompt": "Who did it?"
+    },
+    "patient": {
+      "kinds": [
+        "person",
+        "animal",
+        "group",
+        "object"
+      ],
+      "prompt": "To whom or what was it done?"
+    },
+    "recipient": {
+      "kinds": [
+        "person",
+        "group"
+      ],
+      "prompt": "To whom?"
+    },
+    "object": {
+      "kinds": [
+        "object",
+        "document"
+      ],
+      "prompt": "What thing was involved?"
+    },
+    "instrument": {
+      "kinds": [
+        "object",
+        "document",
+        "animal"
+      ],
+      "prompt": "With what?"
+    },
+    "place": {
+      "kinds": [
+        "place"
+      ],
+      "prompt": "Where?"
+    },
+    "time": {
+      "time": true,
+      "prompt": "When?"
+    },
+    "owner": {
+      "kinds": [
+        "person",
+        "group"
+      ],
+      "prompt": "Whose is it?"
+    },
+    "identity": {
+      "kinds": [
+        "person",
+        "animal"
+      ],
+      "prompt": "Who is this really?"
+    },
+    "truth": {
+      "values": [
+        "true",
+        "false"
+      ],
+      "prompt": "Is it true?"
+    }
+  },
+  "time": {
+    "note": "Windows are ordered points, not clock readings. Where the text gives a clock time the window carries it; the four windows after 1 a.m. on Tuesday only order the night's events.",
+    "windows": [
+      {
+        "id": "w.years_before",
+        "label": "Years before",
+        "day": null
+      },
+      {
+        "id": "w.weeks_before",
+        "label": "In the weeks before the crime",
+        "day": null
+      },
+      {
+        "id": "w.mon_day",
+        "label": "Monday, during the day",
+        "day": 0
+      },
+      {
+        "id": "w.mon_2100",
+        "label": "Monday, about 9 p.m.",
+        "day": 0,
+        "clock": "21:00"
+      },
+      {
+        "id": "w.mon_2105",
+        "label": "Monday, a few minutes after 9",
+        "day": 0,
+        "clock": "21:05"
+      },
+      {
+        "id": "w.mon_2110",
+        "label": "Monday, at the stable window",
+        "day": 0,
+        "clock": "21:10"
+      },
+      {
+        "id": "w.mon_late",
+        "label": "Monday, later that evening",
+        "day": 0
+      },
+      {
+        "id": "w.tue_0100",
+        "label": "Tuesday, 1 a.m.",
+        "day": 1,
+        "clock": "01:00"
+      },
+      {
+        "id": "w.tue_stable",
+        "label": "Tuesday, after 1 a.m. — at the stable",
+        "day": 1
+      },
+      {
+        "id": "w.tue_hollow",
+        "label": "Tuesday, after 1 a.m. — in the hollow",
+        "day": 1
+      },
+      {
+        "id": "w.tue_blow",
+        "label": "Tuesday, after 1 a.m. — the blow",
+        "day": 1
+      },
+      {
+        "id": "w.tue_after",
+        "label": "Tuesday, after 1 a.m. — after the blow",
+        "day": 1
+      },
+      {
+        "id": "w.tue_dawn",
+        "label": "Tuesday, at dawn",
+        "day": 1
+      },
+      {
+        "id": "w.tue_0700",
+        "label": "Tuesday, 7 a.m.",
+        "day": 1,
+        "clock": "07:00"
+      },
+      {
+        "id": "w.tue_morning",
+        "label": "Tuesday morning",
+        "day": 1
+      },
+      {
+        "id": "w.tue_day",
+        "label": "Tuesday, during the day",
+        "day": 1
+      },
+      {
+        "id": "w.tue_evening",
+        "label": "Tuesday evening",
+        "day": 1
+      },
+      {
+        "id": "w.wed",
+        "label": "Wednesday",
+        "day": 2
+      },
+      {
+        "id": "w.thu_morning",
+        "label": "Thursday morning",
+        "day": 3
+      },
+      {
+        "id": "w.thu_journey",
+        "label": "Thursday, on the train",
+        "day": 3
+      },
+      {
+        "id": "w.thu_evening",
+        "label": "Thursday evening, on Dartmoor",
+        "day": 3
+      },
+      {
+        "id": "w.thu_dusk",
+        "label": "Thursday, at dusk",
+        "day": 3
+      },
+      {
+        "id": "w.thu_night",
+        "label": "Thursday night",
+        "day": 3
+      },
+      {
+        "id": "w.fri",
+        "label": "Friday",
+        "day": 4
+      },
+      {
+        "id": "w.race_eve",
+        "label": "The day before the race",
+        "day": 6
+      },
+      {
+        "id": "w.race_day",
+        "label": "Race day",
+        "day": 7
+      },
+      {
+        "id": "w.race_evening",
+        "label": "Race day, evening",
+        "day": 7
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "id": "s01_baker_street",
+      "title": "Breakfast at Baker Street",
+      "time": "w.thu_morning",
+      "place": "baker_street",
+      "summary": "Holmes announces he must go to Dartmoor; Watson joins him and brings his field-glass.",
+      "source": [
+        "I am afraid, Watson, that I shall have to go"
+      ]
+    },
+    {
+      "id": "s02_train_down",
+      "title": "The train: the facts of the case",
+      "time": "w.thu_journey",
+      "place": "first_class_carriage",
+      "summary": "Holmes states the facts from the papers and telegrams, and the police theory. Watson suggests the knife wound was self-inflicted.",
+      "source": [
+        "We are going well"
+      ]
+    },
+    {
+      "id": "s03_landau",
+      "title": "Tavistock and the drive with Gregory",
+      "time": "w.thu_evening",
+      "place": "landau",
+      "summary": "Gregory gives the latest: Simpson's answers, the gypsies, Mapleton searched. Holmes falls silent and arrives 'day-dreaming'.",
+      "source": [
+        "It was evening before we reached the little town of Tavistock"
+      ]
+    },
+    {
+      "id": "s04_villa",
+      "title": "Straker's villa: the pockets and Mrs. Straker",
+      "time": "w.thu_evening",
+      "place": "sitting_room",
+      "summary": "Holmes examines what Straker had in his pockets, including a cataract knife and a milliner's bill to 'William Derbyshire'. He tests Mrs. Straker about a dress.",
+      "source": [
+        "Excuse me,"
+      ]
+    },
+    {
+      "id": "s05_hollow",
+      "title": "The hollow",
+      "time": "w.thu_evening",
+      "place": "fatal_hollow",
+      "summary": "The overcoat was placed, not blown. Holmes finds a buried wax vesta, compares boots, pockets the horseshoe, and tells Ross to keep the horse entered.",
+      "source": [
+        "A short walk across the moor took us to the hollow"
+      ]
+    },
+    {
+      "id": "s06_to_mapleton",
+      "title": "Across the moor to Mapleton",
+      "time": "w.thu_dusk",
+      "place": "wet_hollow",
+      "summary": "Holmes reasons the horse must be at Mapleton, finds its tracks, then a man's tracks beside them looping towards King's Pyland and back. He confronts Silas Brown, who capitulates.",
+      "source": [
+        "It’s this way, Watson"
+      ]
+    },
+    {
+      "id": "s07_walk_back",
+      "title": "The walk back",
+      "time": "w.thu_dusk",
+      "place": "moor",
+      "summary": "Holmes tells Watson how he broke Brown: square-toed boots, Brown always first up, the horse recognised by its white forehead. He announces their return to London.",
+      "source": [
+        "A more perfect compound of the bully, coward, and sneak"
+      ]
+    },
+    {
+      "id": "s08_departure",
+      "title": "Departure: the photograph, the sheep, the dog",
+      "time": "w.thu_night",
+      "place": "straker_villa",
+      "summary": "Holmes asks for Straker's photograph, puts a question to the maid, asks about the sheep, and points Gregory to the dog in the night-time.",
+      "source": [
+        "Not a word more could I draw from him"
+      ]
+    },
+    {
+      "id": "s09_race",
+      "title": "The Wessex Cup",
+      "time": "w.race_day",
+      "place": "racecourse",
+      "summary": "A horse in Ross's colours with no white hair wins. Holmes reveals it is Silver Blaze in disguise — and that the horse is Straker's killer.",
+      "source": [
+        "Four days later Holmes and I were again in the train"
+      ]
+    },
+    {
+      "id": "s10_explanation",
+      "title": "The explanation on the train home",
+      "time": "w.race_evening",
+      "place": "pullman_car",
+      "summary": "Holmes explains the curry, the dog, the knife, the bill, the sheep, the milliner, and the death in the hollow.",
+      "source": [
+        "We had the corner of a Pullman car to ourselves that evening"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q.who_drugged",
+      "slot": "e.opium_added.agent",
+      "text": "Who drugged Ned Hunter's supper?"
+    },
+    {
+      "id": "q.where_drugged",
+      "slot": "e.opium_added.place",
+      "text": "Where was the opium put into the dish?"
+    },
+    {
+      "id": "q.who_took_horse",
+      "slot": "e.horse_led_out.agent",
+      "text": "Who took Silver Blaze out of the stable?"
+    },
+    {
+      "id": "q.why_taken",
+      "slot": "e.horse_led_out.purpose",
+      "text": "Why was the horse taken out?"
+    },
+    {
+      "id": "q.who_killed",
+      "slot": "e.fatal_blow.agent",
+      "text": "Who killed John Straker?"
+    },
+    {
+      "id": "q.thigh_cut",
+      "slot": "e.thigh_cut.instrument",
+      "text": "What made the cut on Straker's thigh?"
+    },
+    {
+      "id": "q.where_horse",
+      "slot": "silver_blaze.hidden_at",
+      "text": "Where is Silver Blaze?"
+    },
+    {
+      "id": "q.who_hid",
+      "slot": "e.horse_hidden.agent",
+      "text": "Who is hiding the horse?"
+    },
+    {
+      "id": "q.derbyshire",
+      "slot": "william_derbyshire.identity",
+      "text": "Who is William Derbyshire?"
+    },
+    {
+      "id": "q.motive",
+      "slot": "straker.motive",
+      "text": "What drove Straker to it?"
+    },
+    {
+      "id": "q.stranger",
+      "slot": "the_stranger.identity",
+      "text": "Who was the stranger at the stable window?"
+    },
+    {
+      "id": "q.bay",
+      "slot": "the_bay.identity",
+      "text": "Which horse is the bay in Ross's colours?"
+    }
+  ],
+  "theories": [
+    {
+      "id": "t.police",
+      "label": "The police theory: Simpson drugged the lad at the window, let himself in with a duplicate key, led the horse off to steal it, and beat Straker to death with his loaded stick when the trainer overtook him.",
+      "held_by": [
+        "gregory",
+        "police",
+        "ned_hunter"
+      ],
+      "held_in": [
+        "s02_train_down",
+        "s03_landau"
+      ],
+      "holder_knows_by_scene": "s03_landau",
+      "holder_lacks": [
+        "r.no_coincidence",
+        "r.menu_chosen_by_household",
+        "r.dog_barks_at_strangers",
+        "r.cataract_knife_use",
+        "r.honest_men_dont_drug",
+        "r.horse_gregarious",
+        "r.gypsies_avoid_trouble",
+        "r.famous_horse_unsellable",
+        "r.others_bills",
+        "r.tendon_nick",
+        "r.startled_horse_kicks"
+      ],
+      "assignment": {
+        "the_stranger.identity": "simpson",
+        "e.opium_added.agent": "simpson",
+        "e.opium_added.place": "stable_window",
+        "e.opium_added.time": "w.mon_2110",
+        "c.hunter_blames_stranger.truth": "true",
+        "e.horse_led_out.agent": "simpson",
+        "e.horse_led_out.purpose": "steal",
+        "simpson.purpose": "steal_horse",
+        "e.fatal_blow.agent": "simpson",
+        "e.fatal_blow.instrument": "penang_lawyer",
+        "e.thigh_cut.agent": "straker"
+      },
+      "source": [
+        "The police imagine, I\n      take it, that this Fitzroy Simpson, having drugged the lad"
+      ]
+    },
+    {
+      "id": "t.gypsies",
+      "label": "Gregory's addition: Simpson was leading the horse to gypsies he had an understanding with, and they have it now.",
+      "held_by": [
+        "gregory"
+      ],
+      "held_in": [
+        "s03_landau"
+      ],
+      "holder_knows_by_scene": "s03_landau",
+      "holder_lacks": [
+        "r.no_coincidence",
+        "r.menu_chosen_by_household",
+        "r.dog_barks_at_strangers",
+        "r.cataract_knife_use",
+        "r.honest_men_dont_drug",
+        "r.horse_gregarious",
+        "r.gypsies_avoid_trouble",
+        "r.famous_horse_unsellable",
+        "r.others_bills",
+        "r.tendon_nick",
+        "r.startled_horse_kicks"
+      ],
+      "assignment": {
+        "e.horse_led_out.agent": "simpson",
+        "e.horse_led_out.purpose": "steal",
+        "simpson.purpose": "steal_horse",
+        "e.horse_hidden.agent": "gypsies",
+        "silver_blaze.hidden_at": "gypsy_camp"
+      },
+      "source": [
+        "might he\n      not have been leading the horse to them when he was overtaken"
+      ]
+    },
+    {
+      "id": "t.honest_trainer",
+      "label": "Everyone's view of Straker: an honest, zealous servant who went down at one because he was anxious about the horses.",
+      "held_by": [
+        "colonel_ross",
+        "mrs_straker",
+        "gregory"
+      ],
+      "held_in": [
+        "s02_train_down",
+        "s04_villa"
+      ],
+      "holder_knows_by_scene": "s04_villa",
+      "holder_lacks": [
+        "r.no_coincidence",
+        "r.menu_chosen_by_household",
+        "r.dog_barks_at_strangers",
+        "r.cataract_knife_use",
+        "r.honest_men_dont_drug",
+        "r.horse_gregarious",
+        "r.gypsies_avoid_trouble",
+        "r.famous_horse_unsellable",
+        "r.others_bills",
+        "r.tendon_nick",
+        "r.startled_horse_kicks"
+      ],
+      "assignment": {
+        "straker.honest": "true",
+        "c.straker_said_anxious.truth": "true"
+      },
+      "source": [
+        "has always shown\n      himself to be a zealous and honest servant"
+      ]
+    },
+    {
+      "id": "t.derbyshire_a_friend",
+      "label": "Mrs. Straker's belief: Derbyshire is a friend of her husband's whose letters come to the house.",
+      "held_by": [
+        "mrs_straker"
+      ],
+      "held_in": [
+        "s04_villa"
+      ],
+      "holder_knows_by_scene": "s04_villa",
+      "holder_lacks": [
+        "r.no_coincidence",
+        "r.menu_chosen_by_household",
+        "r.dog_barks_at_strangers",
+        "r.cataract_knife_use",
+        "r.honest_men_dont_drug",
+        "r.horse_gregarious",
+        "r.gypsies_avoid_trouble",
+        "r.famous_horse_unsellable",
+        "r.others_bills",
+        "r.tendon_nick",
+        "r.startled_horse_kicks"
+      ],
+      "assignment": {
+        "c.derbyshire_a_friend.truth": "true"
+      },
+      "source": [
+        "Derbyshire was a friend of her husband’s"
+      ]
+    },
+    {
+      "id": "t.not_my_horse",
+      "label": "Colonel Ross at the race: the bay has not a white hair, so it is not Silver Blaze.",
+      "held_by": [
+        "colonel_ross"
+      ],
+      "held_in": [
+        "s09_race"
+      ],
+      "holder_knows_by_scene": "s09_race",
+      "holder_lacks": [
+        "c.wash_with_spirits",
+        "c.found_with_faker",
+        "r.disguise_washes_off",
+        "r.colours_identify_owner"
+      ],
+      "assignment": {
+        "silver_blaze.disguised": "false",
+        "c.ross_not_my_horse.truth": "true"
+      },
+      "source": [
+        "That’s not my horse,” cried the owner"
+      ]
+    },
+    {
+      "id": "t.self_wound",
+      "label": "Watson's suggestion, adopted by the police: Straker cut his own thigh with his knife in the convulsions after the blow. (Right.)",
+      "held_by": [
+        "watson",
+        "gregory"
+      ],
+      "held_in": [
+        "s02_train_down",
+        "s03_landau"
+      ],
+      "false": false,
+      "holder_knows_by_scene": "s03_landau",
+      "holder_lacks": [],
+      "assignment": {
+        "e.thigh_cut.instrument": "cataract_knife",
+        "e.thigh_cut.agent": "straker"
+      },
+      "source": [
+        "It is more than possible; it is probable"
+      ]
+    }
+  ],
+  "inconsistencies": [
+    {
+      "id": "x.race_day",
+      "summary": "The race is 'next Tuesday', but the narration puts it 'four days later' than the Thursday of the investigation — a Monday. The time windows stay abstract (w.race_eve, w.race_day) so neither reading is baked in.",
+      "source": [
+        "preventing Silver Blaze from being there at the fall of the flag next Tuesday",
+        "I have every hope, however, that your horse will start upon Tuesday",
+        "Four days later Holmes and I were again in the train"
+      ]
+    },
+    {
+      "id": "x.cup_plate",
+      "summary": "The race is called the Wessex Cup throughout, but the race card names it the Wessex Plate.",
+      "source": [
+        "the race for the Wessex Cup",
+        "Wessex Plate."
+      ]
+    },
+    {
+      "id": "x.bolted_amnesty",
+      "summary": "Holmes tells Ross the horse 'bolted, and was cared for by one of your neighbours', though in s07 he says Brown deliberately hid it. The first is Holmes softening it for Ross, under the 'amnesty' he grants.",
+      "source": [
+        "Ah, it bolted, and was cared for by one of your neighbours.",
+        "We must have an amnesty in that direction"
+      ]
+    },
+    {
+      "id": "x.sitting_room_parlour",
+      "summary": "The room where the pockets are examined is the 'sitting-room' / 'front room'; Ross and Gregory later wait in the 'parlour'. They may be the same room; kept as two places because the text never says so.",
+      "source": [
+        "We all filed into the front room",
+        "The Colonel and the Inspector were awaiting us in the parlour."
+      ]
+    }
+  ],
+  "notes": [
+    "Holmes keeps almost all his reasoning back until s10; a game hands that reasoning to the player.",
+    "The one investigative action whose result is never told is Holmes's question to the maid (a.question_maid). A game adaptation must invent it or drop it.",
+    "External note (not from this text): Doyle later admitted his ignorance of racing rules — a disguised horse could never have been allowed to run (Memories and Adventures, 1924).",
+    "r.gypsies_avoid_trouble is a period stereotype voiced by Holmes; flagged for any adaptation.",
+    "Glosses marked editorial are written for this game, not taken from the story; they say what an 1892 reader would have known."
+  ]
+}

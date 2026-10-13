@@ -28,7 +28,10 @@ export class Problem {
             for (const s of scope) {
                 if (!domains.has(s)) throw new Error(`constraint ${c.id} names unknown slot ${s}`);
             }
-            this.constraints.set(c.id, { id: c.id, formula: c.formula, scope });
+            // The search works on small PARTS: a conjunction (also under an implication) is split, so most
+            // constraints become one- or two-slot checks that propagate cheaply.
+            const parts = splitConjunctions(c.formula).map((formula) => ({ formula, scope: [...slotsOf(formula)] }));
+            this.constraints.set(c.id, { id: c.id, formula: c.formula, scope, parts });
         }
     }
 
@@ -43,15 +46,17 @@ export class Problem {
      * @returns {{ok:boolean, witness?:Map<string,string>}}
      */
     consistent(active, fixed = {}, { focus = false, extra = [] } = {}) {
-        const cons = [...active].map((id) => this.#get(id));
+        const cons = [...active].flatMap((id) => this.#get(id).parts);
         const want = new Set(Object.keys(fixed));
-        extra.forEach((formula, i) => {
-            const scope = [...slotsOf(formula)];
-            for (const s of scope) {
-                if (!this.domains.has(s)) throw new Error(`formula names unknown slot ${s}`);
-                want.add(s);
+        extra.forEach((formula) => {
+            for (const part of splitConjunctions(formula)) {
+                const scope = [...slotsOf(part)];
+                for (const s of scope) {
+                    if (!this.domains.has(s)) throw new Error(`formula names unknown slot ${s}`);
+                    want.add(s);
+                }
+                cons.push({ formula: part, scope });
             }
-            cons.push({ id: `_extra${i}`, formula, scope });
         });
         let groups = components(cons, Object.keys(fixed));
         if (focus) {
@@ -68,17 +73,21 @@ export class Problem {
 
     /** Values of `slot` that some full solution of the active constraints allows. */
     candidates(active, slot, fixed = {}) {
+        const cons = [...active].flatMap((id) => this.#get(id).parts);
+        const group = components(cons, [slot, ...Object.keys(fixed)]).find((g) => g.slots.includes(slot));
+        // Propagate once for the whole group, then try each surviving value from that state.
+        const root = this.#search(group, fixed, 0);
+        if (!root.domains) return [];
         const out = [];
-        for (const v of this.domains.get(slot)) {
-            if (slot in fixed && fixed[slot] !== v) continue;
-            if (this.consistent(active, { ...fixed, [slot]: v }, { focus: true }).ok) out.push(v);
+        for (const v of root.domains.get(slot)) {
+            if (this.#search(group, { ...fixed, [slot]: v }, 1, root.domains).count) out.push(v);
         }
         return out;
     }
 
     /** Number of solutions over the slots the active constraints mention, capped at `limit`. */
     countSolutions(active, limit = 2) {
-        const cons = [...active].map((id) => this.#get(id));
+        const cons = [...active].flatMap((id) => this.#get(id).parts);
         let total = 1;
         for (const g of components(cons, [])) {
             const n = this.#search(g, {}, limit).count;
@@ -108,10 +117,15 @@ export class Problem {
         return c;
     }
 
-    #search(group, fixed, limit) {
+    /**
+     * Search one component. limit = 0 only propagates and returns the reduced domains ({domains} or {} when
+     * inconsistent); otherwise counts solutions up to `limit`. `start` = domains to begin from (already
+     * propagated for the same constraints).
+     */
+    #search(group, fixed, limit, start = null) {
         const domains = new Map();
         for (const s of group.slots) {
-            let d = this.domains.get(s);
+            let d = (start ?? this.domains).get(s);
             if (s in fixed) d = d.includes(fixed[s]) ? [fixed[s]] : [];
             domains.set(s, d);
         }
@@ -119,48 +133,78 @@ export class Problem {
         for (const c of group.cons) for (const s of c.scope) bySlot.get(s).push(c);
         const assign = new Map();
         const order = this.timeOrder;
-        const ok = (c) => evaluate(c.formula, assign, order) !== false;
-
-        // Node consistency first: no-slot constraints, then one-slot constraints filter domains.
-        for (const c of group.cons) {
-            if (c.scope.length === 0 && evaluate(c.formula, assign, order) === false) return { count: 0 };
-            if (c.scope.length === 1) {
-                const s = c.scope[0];
-                const d = domains.get(s).filter((v) => {
-                    assign.set(s, v);
-                    const r = ok(c);
-                    assign.delete(s);
-                    return r;
-                });
-                domains.set(s, d);
-            }
-        }
-        for (const d of domains.values()) if (d.length === 0) return { count: 0 };
-
-        let count = 0;
-        let first = null;
         const trail = [];
-        const prune = (slot) => {
-            for (const c of bySlot.get(slot)) {
-                if (!ok(c)) return false;
-                const open = c.scope.filter((s) => !assign.has(s));
-                if (open.length !== 1) continue;
-                const u = open[0];
-                const d = domains.get(u);
-                const nd = d.filter((v) => {
-                    assign.set(u, v);
-                    const r = ok(c);
-                    assign.delete(u);
-                    return r;
-                });
-                if (nd.length !== d.length) {
-                    trail.push([u, d]);
-                    domains.set(u, nd);
+        const setDomain = (x, d) => {
+            trail.push([x, domains.get(x)]);
+            domains.set(x, d);
+        };
+
+        // Does value v of slot x have a support in constraint c: some values of c's other open slots (from their
+        // current domains) under which c is not false? Three-valued evaluation cuts the enumeration short; past
+        // SUPPORT_BUDGET steps the value is kept (sound: it only weakens pruning, never the answer).
+        const supported = (c, x, v) => {
+            const others = c.scope.filter((s) => s !== x && !assign.has(s))
+                .sort((a, b) => domains.get(a).length - domains.get(b).length);
+            assign.set(x, v);
+            let steps = 0;
+            const dfs = (i) => {
+                const r = evaluate(c.formula, assign, order);
+                if (r === false) return false;
+                if (r === true || i === others.length) return true;
+                if (++steps > SUPPORT_BUDGET) return true;
+                const s = others[i];
+                for (const w of domains.get(s)) {
+                    assign.set(s, w);
+                    const found = dfs(i + 1);
+                    assign.delete(s);
+                    if (found) return true;
+                }
+                return false;
+            };
+            const found = dfs(0);
+            assign.delete(x);
+            return found;
+        };
+
+        // Generalised arc consistency over a queue of constraints.
+        const propagate = (queue) => {
+            const queued = new Set(queue);
+            while (queue.length) {
+                const c = queue.pop();
+                queued.delete(c);
+                if (c.scope.every((s) => assign.has(s))) {
+                    if (evaluate(c.formula, assign, order) === false) return false;
+                    continue;
+                }
+                const open = c.scope.filter((x) => !assign.has(x));
+                if (open.length > GAC_MAX_SCOPE) continue; // checked once few enough of its slots stay open
+                for (const x of open) {
+                    const d = domains.get(x);
+                    const nd = d.filter((v) => supported(c, x, v));
+                    if (nd.length === d.length) continue;
+                    setDomain(x, nd);
                     if (nd.length === 0) return false;
+                    for (const c2 of bySlot.get(x)) {
+                        if (c2 !== c && !queued.has(c2)) {
+                            queued.add(c2);
+                            queue.push(c2);
+                        }
+                    }
                 }
             }
             return true;
         };
+
+        for (const d of domains.values()) if (d.length === 0) return { count: 0 };
+        if (start) {
+            const queue = new Set();
+            for (const s of Object.keys(fixed)) for (const c of bySlot.get(s) ?? []) queue.add(c);
+            if (!propagate([...queue])) return { count: 0 };
+        } else if (!propagate([...group.cons])) return { count: 0 };
+        if (limit === 0) return { count: 0, domains: new Map(domains) };
+
+        let count = 0;
+        let first = null;
         const step = () => {
             let best = null;
             for (const s of group.slots) {
@@ -175,7 +219,8 @@ export class Problem {
             for (const v of domains.get(best)) {
                 const mark = trail.length;
                 assign.set(best, v);
-                if (prune(best) && step()) return true;
+                setDomain(best, [v]);
+                if (propagate([...bySlot.get(best)]) && step()) return true;
                 assign.delete(best);
                 while (trail.length > mark) {
                     const [u, d] = trail.pop();
@@ -187,6 +232,16 @@ export class Problem {
         step();
         return { count, first };
     }
+}
+
+const SUPPORT_BUDGET = 5000;
+const GAC_MAX_SCOPE = 3;
+
+/** Split a formula into parts whose conjunction is equivalent: and(a,b) → a, b; implies(p, and(a,b)) → implies(p,a), implies(p,b). */
+export function splitConjunctions(f) {
+    if (f.and) return f.and.flatMap(splitConjunctions);
+    if (f.implies && f.implies[1].and) return f.implies[1].and.flatMap((g) => splitConjunctions({ implies: [f.implies[0], g] }));
+    return [f];
 }
 
 /** Connected components of the constraint graph; `extra` slots with no constraint form their own groups. */
