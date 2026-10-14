@@ -113,6 +113,8 @@ export class Game {
         this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
         this.suspected = new Set();     // claim ids the player doubts
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
+        this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
+        this.clashCache = null;
         if (this.background === BG_START) for (const r of this.model.data.rules ?? []) this.#unlock(r.id, 0);
         this.#process(0);
     }
@@ -131,6 +133,7 @@ export class Game {
             background: this.background,
             autoPace: this.autoPace,
             asked: this.asked,
+            clashLog: this.clashLog,
             version: 3,
         };
     }
@@ -156,6 +159,8 @@ export class Game {
         this.theories = state.theories ?? [];
         this.lastSeen = new Map(state.lastSeen ?? []);
         this.suspected = new Set((state.suspected ?? []).filter((id) => this.model.claimForms.has(id)));
+        this.clashLog = (state.clashLog ?? []).filter((ids) => ids.every((id) => this.model.constraints.has(id)));
+        this.clashCache = null;
     }
 
     // ---------- doubt ----------
@@ -620,9 +625,12 @@ export class Game {
     plausible(slot, value) {
         if (!this.shapeFits(slot, value)) return { plausible: false, why: 'shape' };
         if (!this.assisted()) return { plausible: true, why: 'shape only' };
-        const active = this.activeConstraints();
-        if (this.model.problem.consistent(active, { [slot]: value }, { focus: true }).ok) return { plausible: true };
-        return { plausible: false, why: 'clues', conflict: this.model.problem.explainConflict(active, { [slot]: value }) };
+        // Judged against what the player trusts, setting aside the claims caught in a clash: a clash elsewhere
+        // says nothing about this answer.
+        const active = this.workingConstraints();
+        const aside = this.clashes().length;
+        if (this.model.problem.consistent(active, { [slot]: value }, { focus: true }).ok) return { plausible: true, aside };
+        return { plausible: false, why: 'clues', aside, conflict: this.model.problem.explainConflict(active, { [slot]: value }) };
     }
 
     /** Trivial and Easy: the game helps (lists what the clues allow, or does it outright). */
@@ -687,9 +695,75 @@ export class Game {
         return (this.model.problem.explainConflict(active, { [slot]: value }) ?? []).map((k) => ({ text: this.model.constraints.get(k).label }));
     }
 
-    /** Easy's automatic list: every value the held clues still allow (as the player reads them). */
+    /**
+     * Easy's automatic list: every value the held clues still allow (as the player reads them), setting aside the
+     * claims caught in a clash; otherwise one clash anywhere would leave nothing open anywhere.
+     */
     openValues(slot) {
-        return this.model.problem.candidates(this.activeConstraints(), slot);
+        return this.model.problem.candidates(this.workingConstraints(), slot);
+    }
+
+    /**
+     * The clashes among what the player trusts: minimal sets of active clues that cannot all hold, found one at a
+     * time, each set aside (its claims read as doubted) before looking for the next. Claims are tried last, so a
+     * clash rests on as few claims as it can. Cached, and incremental: a clash whose clues are all still active
+     * still clashes, so only new ones are searched for. Each: {ids, claims}.
+     */
+    clashes() {
+        const active = this.activeConstraints();
+        const key = active.join('|');
+        if (this.clashCache?.key === key) return this.clashCache.list;
+        const isClaim = (id) => !!trustedClaim(this.model, id);
+        const list = [];
+        let set = [...active];
+        const setAside = (c) => {
+            const drop = new Set(c.claims.length ? c.ids.filter(isClaim) : c.ids);
+            set = set.filter((id) => !drop.has(id));
+            for (const claim of c.claims) {
+                const doubted = this.model.claimForms.get(claim)?.doubted;
+                if (doubted && !set.includes(doubted)) set.push(doubted);
+            }
+        };
+        for (const c of this.clashCache?.list ?? []) {
+            if (c.ids.every((id) => set.includes(id))) { list.push(c); setAside(c); }
+        }
+        while (!this.model.problem.consistent(set).ok) {
+            const ids = this.model.problem.explainConflict([...set.filter((id) => !isClaim(id)), ...set.filter(isClaim)]);
+            const c = { ids, claims: [...new Set(ids.map((id) => trustedClaim(this.model, id)).filter(Boolean))] };
+            list.push(c);
+            setAside(c);
+            const k = ids.join('|');
+            if (!this.clashLog.some((x) => x.join('|') === k)) this.clashLog.push(ids);
+        }
+        this.clashCache = { key, list, working: set };
+        return list;
+    }
+
+    /** What the player trusts, with the claims caught in a clash set aside (read as doubted). */
+    workingConstraints() {
+        this.clashes();
+        return this.clashCache.working;
+    }
+
+    /**
+     * Clashes the player has met that no longer stand because they doubted one of its claims: {ids, claims,
+     * doubted}. (A clash whose clue the player has not reached again, after a reload of an earlier point, is left out.)
+     */
+    resolvedClashes() {
+        const current = new Set(this.clashes().map((c) => c.ids.join('|')));
+        const out = [];
+        for (const ids of this.clashLog) {
+            if (current.has(ids.join('|'))) continue;
+            const claims = [...new Set(ids.map((id) => this.model.constraints.get(id)?.from_claim).filter(Boolean))];
+            const doubted = claims.filter((c) => this.suspected.has(c));
+            if (doubted.length) out.push({ ids, claims, doubted });
+        }
+        return out;
+    }
+
+    /** A clash replayed as a chain of steps (see Problem.steps), optionally starting from an assumed answer. */
+    chain(ids, fixed = {}) {
+        return this.model.problem.steps(ids, fixed);
     }
 
     activeConstraints() {
@@ -698,7 +772,7 @@ export class Game {
 
     /** Clues the player trusts that cannot all be true (a minimal set), or null. Trivial shows it. */
     contradiction() {
-        return this.model.problem.explainConflict(this.activeConstraints());
+        return this.clashes()[0]?.ids ?? null;
     }
 
     #entailedBySettled(formula) {

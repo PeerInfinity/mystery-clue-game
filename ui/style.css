@@ -209,3 +209,10 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 /* New / updated counts on the card filters */
 .tally { font-size: 11px; color: var(--accent); margin-left: 2px; }
 .filters button.on .tally { color: inherit; }
+/* Clashes and chains of reasoning */
+.chain { margin: 6px 0 4px 0; padding-left: 22px; }
+.chain li { margin: 3px 0; }
+.chain li.suppose { font-style: italic; }
+.chain .so { font-size: 13px; color: var(--muted, #777); margin-left: 2px; }
+.clash { border-left: 3px solid var(--bad, #b33); padding: 4px 0 4px 10px; margin: 8px 0; }
+.means { margin: 6px 0; }

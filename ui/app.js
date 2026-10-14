@@ -132,6 +132,8 @@ function renderTool() {
     $('#tool').innerHTML = { card: toolCard, cards: toolCards, questions: toolQuestions, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
     const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)));
     document.querySelector('.tab[data-tab="cards"]').textContent = `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`;
+    const clashes = game.difficulty === EASY ? game.clashes().length : 0;
+    document.querySelector('.tab[data-tab="questions"]').textContent = `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`;
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
         ui.focusSlot = null;
@@ -221,6 +223,9 @@ function toolCard() {
                 ? `<p class="doubt on">You suspect this may be false: it counts as fact nowhere, and “Is it true?” is open below. <button data-unsuspect="${id}" class="quiet">Trust it again</button></p>`
                 : `<p class="doubt">Until you doubt it, the game takes this at its word. <button data-suspect="${id}">I suspect this may be false</button></p>`;
         }
+        const form = model.claimForms.get(id);
+        const f = form && model.constraints.get(form.trusted)?.formula;
+        if (f) h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(f))}</p>`;
         const about = (c.about ?? []).filter((x) => game.knows(x));
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
@@ -444,8 +449,9 @@ function toolQuestions() {
         }
         d += '</ul>';
     }
-    if (!raised.length) return `<p class="empty">The story has not raised any questions yet.</p>${d}`;
-    let h = '<p class="small muted">The questions the case turns on, as the story raises them.</p><ul class="list">';
+    const c = game.difficulty === EASY ? clashesHtml() : '';
+    if (!raised.length) return `${c}<p class="empty">The story has not raised any questions yet.</p>${d}`;
+    let h = `${c}<p class="small muted">The questions the case turns on, as the story raises them.</p><ul class="list">`;
     for (const q of raised) {
         const slot = model.slots.get(q.slot);
         const visible = game.knows(slot.on);
@@ -455,6 +461,24 @@ function toolQuestions() {
         h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(game.questionText(q))}</span>` : esc(game.questionText(q))}</span><span class="state ${settled !== null ? 'done' : ''}">${state}${picks.length ? ` · circled: ${picks.map((v) => esc(valueName(q.slot, v))).join(', ')}` : ''}</span></li>`;
     }
     return `${h}</ul>${d}`;
+}
+
+/** Easy: the clashes among the clues the player trusts, each as a chain, and the ones a doubt has resolved. */
+function clashesHtml() {
+    const list = game.clashes();
+    const resolved = game.resolvedClashes();
+    if (!list.length && !resolved.length) return '';
+    let h = `<h3 class="section" id="clashes">Clashes${list.length ? ` (${list.length})` : ''}</h3>`;
+    if (list.length) {
+        h += '<p class="small muted">Clues you trust that cannot all be true. Until you doubt one, the game sets aside the claims caught in a clash when it greys answers, so a clash here does not rule out answers elsewhere.</p>';
+        list.forEach((cl, i) => { h += `<div class="clash"><b>Clash ${i + 1}</b>${clashHtml(cl.ids)}</div>`; });
+    }
+    if (resolved.length) {
+        h += `<details class="resolved"><summary class="small">${resolved.length} resolved by a doubt</summary><ul class="list">`;
+        for (const rc of resolved) h += `<li>${rc.doubted.map((x) => `You doubt ${link(x, shortName(x, 80))} <span class="link small" data-unsuspect="${x}">trust it again</span>`).join('; ')}</li>`;
+        h += '</ul></details>';
+    }
+    return h;
 }
 
 function toolTheories() {
@@ -530,6 +554,175 @@ function render() {
     renderTool();
 }
 
+// ---------- plain readings ----------
+// Every clue is a small formula over the case's questions; these read one back in words, so the player can see
+// what a clue does, not just what it says.
+const NOT_MET = 'one the story has not brought up yet';
+const lowerArticle = (n) => n.replace(/^(The|A|An) /, (a) => a.toLowerCase());
+const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+/** A card's name mid-sentence, or a stand-in for one the player has not met (nothing leaks). */
+function heldName(id) {
+    if (model.cards.has(id) && !game.knows(id)) return NOT_MET;
+    return lowerArticle(cardName(id));
+}
+function valueText(slot, v) {
+    if (model.cards.has(v) && !game.knows(v) && !model.slots.get(slot)?.labels?.[v]) return NOT_MET;
+    if (model.windows.some((w) => w.id === v)) {
+        if (slot && !game.offered(slot, v)) return 'a time the story has not reached yet';
+        // "Years before", "Race day" mid-sentence; a day's name keeps its capital.
+        return cardName(v).replace(/^([A-Z])(?![a-z]*day\b)/, (ch) => ch.toLowerCase());
+    }
+    // An answer's own label ("For early exercise") reads mid-sentence in lower case; a name keeps its capitals.
+    if (model.slots.get(slot)?.labels?.[v]) return valueName(slot, v).replace(/^[A-Z](?=[a-z ])/, (ch) => ch.toLowerCase());
+    return lowerArticle(valueName(slot, v));
+}
+const FACET_SUBJECT = {
+    agent: (e) => `the one who did “${e}”`,
+    patient: (e) => `the one “${e}” was done to`,
+    time: (e) => `the time of “${e}”`,
+    place: (e) => `the place of “${e}”`,
+    object: (e) => `the thing involved in “${e}”`,
+    instrument: (e) => `what “${e}” was done with`,
+    recipient: (e) => `the one “${e}” was for`,
+    purpose: (e) => `the purpose of “${e}”`,
+    identity: (n) => `the true identity of ${n}`,
+    owner: (n) => `the owner of ${n}`,
+    contents: (n) => `the contents of ${n}`,
+    whereabouts: (n) => `where ${n} has been`,
+    motive: (n) => `the motive of ${n}`,
+};
+const EVENT_FACETS = new Set(['agent', 'patient', 'time', 'place', 'object', 'instrument', 'recipient', 'purpose']);
+// Several facts about one event read as one line: "“Heavy rain”: at Dartmoor, Tuesday, 1 a.m.".
+const EVENT_PART = { agent: 'done by', patient: 'done to', object: 'involving', instrument: 'done with', recipient: 'for', place: 'at', time: '', purpose: 'purpose:' };
+const EVENT_ORDER = ['agent', 'patient', 'object', 'instrument', 'recipient', 'place', 'time', 'purpose'];
+/** One fact about an event, as a phrase for its line ("done by John Straker", "not at the hollow"), or null. */
+function eventPart(f) {
+    const op = Object.keys(f)[0];
+    if (!['eq', 'ne', 'in', 'nin'].includes(op)) return null;
+    const [slotId, val] = f[op];
+    const sl = model.slots.get(slotId);
+    if (!sl || !EVENT_FACETS.has(sl.facet) || model.cards.get(sl.on)?.section !== 'events') return null;
+    const vals = [...new Set((Array.isArray(val) ? val : [val]).map((v) => valueText(slotId, v)))];
+    const neg = op === 'ne' || op === 'nin';
+    const lead = EVENT_PART[sl.facet];
+    const body = vals.length > 1 ? `${sl.facet === 'time' ? 'some time from ' : ''}${orList(vals, neg ? 'nor' : 'or')}` : vals[0];
+    return { on: sl.on, facet: sl.facet, text: `${neg ? (vals.length > 1 ? 'neither ' : 'not ') : ''}${lead ? `${lead} ` : ''}${body}` };
+}
+
+/** A question as the subject of a sentence: "the owner of the milliner's bill". */
+function subjectOf(slotId) {
+    const sl = model.slots.get(slotId);
+    const on = sl.on;
+    const known = game.knows(on);
+    const isEvent = model.cards.get(on)?.section === 'events';
+    const name = known ? (isEvent ? game.nameOf(on) : heldName(on)) : 'something not yet told';
+    if (FACET_SUBJECT[sl.facet] && isEvent === EVENT_FACETS.has(sl.facet)) return FACET_SUBJECT[sl.facet](name);
+    return `the answer to “${game.promptOf(slotId)}”`;
+}
+/** "X is Y", with yes/no questions and a statement's truth read naturally. */
+function isPhrase(slotId, v, negated = false) {
+    const sl = model.slots.get(slotId);
+    if (sl.facet === 'truth') {
+        const text = game.knows(sl.on) ? `“${cardName(sl.on)}”` : 'a statement not yet met';
+        return `${text} is ${(v === 'true') !== negated ? 'true' : 'false'}`;
+    }
+    if (sl.domain.length === 2 && sl.domain.includes('true')) return `“${game.promptOf(slotId)}” — ${(v === 'true') !== negated ? 'yes' : 'no'}`;
+    return `${subjectOf(slotId)} is ${negated ? 'not ' : ''}${valueText(slotId, v)}`;
+}
+const orList = (xs, word = 'or') => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${word} ${xs[xs.length - 1]}`);
+function reading(f) {
+    const op = Object.keys(f)[0];
+    const a = f[op];
+    const term = (x) => (typeof x === 'string' ? subjectOf(x) : valueText(null, x.lit));
+    switch (op) {
+        case 'true': return 'always so';
+        case 'false': return 'never so';
+        case 'eq': return isPhrase(a[0], a[1]);
+        case 'ne': return isPhrase(a[0], a[1], true);
+        case 'in': return `${subjectOf(a[0])} is ${orList([...new Set(a[1].map((v) => valueText(a[0], v)))])}`;
+        case 'nin': return `${subjectOf(a[0])} is not ${orList([...new Set(a[1].map((v) => valueText(a[0], v)))])}`;
+        case 'same': return `${subjectOf(a[0])} is the same as ${subjectOf(a[1])}`;
+        case 'diff': return `${subjectOf(a[0])} is not the same as ${subjectOf(a[1])}`;
+        case 'before': return `${term(a[0])} comes before ${term(a[1])}`;
+        case 'not_after': return `${term(a[0])} comes no later than ${term(a[1])}`;
+        case 'and': {
+            // Facts about the same event gather into one line; the rest read as they are.
+            const lines = [];
+            const byEvent = new Map();
+            for (const g of a) {
+                const part = eventPart(g);
+                if (!part) { lines.push(reading(g)); continue; }
+                if (!byEvent.has(part.on)) { byEvent.set(part.on, []); lines.push(part.on); }
+                byEvent.get(part.on).push(part);
+            }
+            return lines.map((x) => {
+                const parts = byEvent.get(x);
+                if (!parts) return x;
+                if (parts.length === 1) return reading(a.find((g) => eventPart(g)?.on === x));
+                parts.sort((p, q) => EVENT_ORDER.indexOf(p.facet) - EVENT_ORDER.indexOf(q.facet));
+                return `“${game.knows(x) ? game.nameOf(x) : 'something not yet told'}”: ${parts.map((p) => p.text).join(', ')}`;
+            }).map((t, i, all) => (i < all.length - 1 && !t.endsWith('.') ? `${t}.` : t)).join(' ');
+        }
+        case 'or': return `either ${a.map(reading).join(', or ')}`;
+        case 'not': return `it is not so that ${reading(a)}`;
+        case 'implies': return `if ${reading(a[0])}, then ${reading(a[1])}`;
+    }
+    return '?';
+}
+const readingOf = (f) => reading(f).split('. ').map(cap).join('. ').replace(/([^.])$/, '$1.');
+globalThis.mysteryDebug = { readingOf };
+
+/** A clue in a chain: a claim links to its card, with a way to doubt it. */
+function clueHtml(id) {
+    const k = model.constraints.get(id);
+    const c = k.from_claim;
+    if (!c) return esc(k.label);
+    return `${link(c, shortName(c, 90))} ${game.suspected.has(c) ? '<span class="small muted">doubted</span>' : `<span class="link small" data-suspect="${c}">doubt it</span>`}`;
+}
+
+/**
+ * Clues that cannot all hold, replayed as numbered steps: what each one narrows ("so the owner of the bill is
+ * John Straker"), ending where some question is left with nothing. `fixed` is an assumed answer to start from.
+ */
+function chainHtml(ids, fixed = {}) {
+    const { steps, contradiction } = game.chain(ids, fixed);
+    if (!steps.length) return doubtableHtml(ids);
+    // A narrowing is worth saying if it pins or empties a question, or a later step builds on it.
+    const later = (i, slot) => steps.slice(i + 1).some((st) => st.changes.some((c) => c.slot === slot));
+    const say = (c) => {
+        const removed = c.before.filter((v) => !c.after.includes(v));
+        if (!c.after.length) {
+            return c.before.length === 1
+                ? `${isPhrase(c.slot, c.before[0], true)}: but that was the only possibility left <span class="bad">✗</span>`
+                : `none of the possibilities left for ${subjectOf(c.slot)} will do <span class="bad">✗</span>`;
+        }
+        if (c.after.length === 1) return isPhrase(c.slot, c.after[0]);
+        const named = (vs) => [...new Set(vs.map((v) => valueText(c.slot, v)))];
+        if (removed.length <= 3) return `${subjectOf(c.slot)} is not ${orList(named(removed))}`;
+        if (c.after.length <= 8) return `${subjectOf(c.slot)} is ${orList(named(c.after))}`;
+        return `${subjectOf(c.slot)} has ${c.after.length} possibilities left`;
+    };
+    // Worth saying: what empties a question, or what a later step builds on; failing that, the step's plainest
+    // effect (a question pinned, else a few answers struck), so no step reads as doing nothing.
+    const plain = (c) => (c.after.length === 1 ? 2 : c.before.length - c.after.length <= 3 ? 1 : c.after.length <= 8 ? 0.75 : 0) - (model.slots.get(c.slot).facet === 'time' ? 0.5 : 0);
+    const pick = (i, st) => {
+        const key = st.changes.filter((c) => !c.after.length || (later(i, c.slot) && plain(c) > 0));
+        if (key.length) return key;
+        const best = [...st.changes].sort((x, y) => plain(y) - plain(x))[0];
+        return best && plain(best) > 0 ? [best] : [];
+    };
+    let h = '<ol class="chain">';
+    for (const [slot, v] of Object.entries(fixed)) h += `<li class="suppose">Suppose ${esc(isPhrase(slot, v))}.</li>`;
+    steps.forEach((st, i) => {
+        const shown = pick(i, st);
+        h += `<li>${clueHtml(st.id)}${shown.length ? `<div class="so">so ${shown.map(say).join('; and ')}</div>` : ''}</li>`;
+    });
+    h += '</ol>';
+    const unused = ids.filter((id) => !steps.some((st) => st.id === id));
+    if (!contradiction || unused.length) h += `<div class="small muted">${contradiction ? 'Also involved' : 'Together with'}: ${unused.map(clueHtml).join(' · ')}</div>`;
+    return h;
+}
+
 // ---------- citing ----------
 let citeFor = null;
 const chosen = new Set();
@@ -563,9 +756,10 @@ function runFit(slot, value) {
     renderTool();
     setTimeout(() => {
         const r = game.plausible(slot, value);
-        if (r.plausible) ui.menuNote = '<span class="good">It could fit everything you trust so far.</span>';
+        const aside = r.aside ? ` <span class="small muted">(Setting aside the claims in ${r.aside === 1 ? 'the clash' : `the ${r.aside} clashes`} listed under <span class="link" data-show-clashes>Questions</span>.)</span>` : '';
+        if (r.plausible) ui.menuNote = `<span class="good">It could fit everything you trust so far.</span>${aside}`;
         else if (r.why === 'shape') ui.menuNote = '<span class="bad">Wrong kind of thing for this question.</span>';
-        else ui.menuNote = `<span class="bad">It does not fit what you trust:</span> ${doubtableHtml(r.conflict)}`;
+        else ui.menuNote = `<span class="bad">It does not fit what you trust:</span>${chainHtml(r.conflict, { [slot]: value })}${aside}`;
         renderTool();
     }, 10);
 }
@@ -579,7 +773,7 @@ function doubtableHtml(ids) {
 }
 /** A set of clues that cannot all hold, with a way to doubt each claim in it. */
 function clashHtml(ids) {
-    return `${doubtableHtml(ids)}. One of them must be false.`;
+    return `${chainHtml(ids)}<div class="small">One of the claims must be false.</div>`;
 }
 
 function runCite() {
@@ -673,6 +867,12 @@ document.addEventListener('click', (e) => {
         const got = game.ask(asking.dataset.ask);
         toast(got.length ? `You recall ${got.length} fact${got.length > 1 ? 's' : ''} about it.` : 'Nothing in particular comes to mind.');
         changed();
+        return;
+    }
+    if (e.target.closest('[data-show-clashes]')) {
+        ui.tab = 'questions';
+        renderTool();
+        document.getElementById('clashes')?.scrollIntoView({ block: 'start' });
         return;
     }
     const d = e.target.closest('[data-suspect],[data-unsuspect],[data-clash]');

@@ -74,3 +74,16 @@ test('a theory that fits some clues fails on others, with a minimal explanation'
     assert.deepEqual(p.explainConflict(all, theory).sort(), ['k.alibi', 'k.late']);
     assert.equal(p.explainConflict(['k.household'], theory), null);
 });
+
+test('steps replays a clash as a chain that ends with a question left empty', () => {
+    const p = new Problem({
+        domains: new Map([['a', ['x', 'y']], ['b', ['x', 'y']]]),
+        constraints: [{ id: 'k1', formula: { eq: ['a', 'x'] } }, { id: 'k2', formula: { same: ['a', 'b'] } }, { id: 'k3', formula: { ne: ['b', 'x'] } }],
+        timeOrder: new Map(),
+    });
+    const r = p.steps(['k1', 'k2', 'k3']);
+    assert.equal(r.contradiction, true);
+    assert.deepEqual(r.steps.map((s) => s.id), ['k1', 'k2', 'k3']);
+    assert.deepEqual(r.steps[1].changes, [{ slot: 'b', before: ['x', 'y'], after: ['x'] }]);
+    assert.deepEqual(r.steps[2].changes[0].after, []);
+});

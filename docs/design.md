@@ -440,3 +440,24 @@ not at ¶4, where asking about it recalled nothing; every topic now appears wher
 - Wording: "crossed out" is the player's own mark without evidence (Easy); "ruled out" is with evidence the game
   checked, or what the clues rule out on their own. The two kinds now show on separate rows ("crossed out:" and
   "ruled out, with evidence:") instead of both under "ruled out:".
+
+## Round 17 (user, 2026-10-13): what each clue implies; clashes get their own section
+
+- The user could not see how "Mrs. Straker says Derbyshire was a friend of her husband's…" kept Straker from
+  having taken the horse. It did not: by ¶85 three trusted clues clash over who Derbyshire is, and once trusted
+  clues clash every answer "does not fit", so "Could it fit?" reported that clash against any answer.
+- Clashes (`Game.clashes`): the minimal clashes among trusted clues, found one at a time, each set aside (its
+  claims read as doubted) before the next. Claims go last in the search, so each clash rests on as few claims
+  as it can (in Silver Blaze every clash has exactly one). Cached and incremental. Easy's greying and "Could it
+  fit?" judge answers against what is left (`workingConstraints`), so a clash elsewhere rules nothing out. As a
+  result Easy at ¶90 leaves only Straker for who took the horse (before, a clash greyed everyone).
+- `explainConflict` is now QuickXplain (about 10× faster: every clash to the end of the story in 2.5 s, once).
+- Chains (`Problem.steps`): a clash is replayed one clue at a time, each step saying what it narrows ("so the
+  owner of the milliner's account is John Straker"), ending at the question left with nothing (✗). "Could it
+  fit?" starts the chain from the answer ("Suppose …"); clashes found when citing show the same chain.
+- Plain readings: every claim card says "What it means for the case", read from its formula ("The true identity
+  of William Derbyshire is not John Straker."); several facts about one event gather into one line ("“Heavy
+  rain”: at Dartmoor, Tuesday, 1 a.m."). Unmet cards and unreached times are never named.
+- Clashes section (Easy): at the top of the Questions tab, each clash as a chain with "doubt it" on its claims;
+  the tab says "Questions (6 clashes)"; clashes a doubt resolved are kept (saved) under "N resolved by a doubt",
+  with "trust it again". Medium and Hard do not list clashes: finding them is the player's work there.

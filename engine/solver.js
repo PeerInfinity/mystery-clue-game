@@ -131,13 +131,101 @@ export class Problem {
      * Returns null when `fixed` is consistent with all of `active`.
      */
     explainConflict(active, fixed = {}) {
-        let keep = [...active];
-        if (this.consistent(keep, fixed).ok) return null;
-        for (const id of [...keep]) {
-            const without = keep.filter((x) => x !== id);
-            if (!this.consistent(without, fixed).ok) keep = without;
+        const all = [...active];
+        if (this.consistent(all, fixed).ok) return null;
+        // QuickXplain (Junker 2004): halve the candidates, keeping a half whenever the rest already clashes, so a
+        // clash of k among n costs about k·log n checks instead of n.
+        const ok = (ids) => this.consistent(ids, fixed).ok;
+        const qx = (base, added, cands) => {
+            if (added && !ok(base)) return [];
+            if (cands.length === 1) return cands;
+            const mid = cands.length >> 1;
+            const c1 = cands.slice(0, mid);
+            const c2 = cands.slice(mid);
+            const d2 = qx([...base, ...c1], c1.length > 0, c2);
+            const d1 = qx([...base, ...d2], d2.length > 0, c1);
+            return [...d1, ...d2];
+        };
+        const found = qx([], false, all);
+        return all.filter((id) => found.includes(id));
+    }
+
+    /**
+     * Replay a clash one clue at a time, for showing it as a chain of reasoning. Starting from the full domains
+     * (narrowed by `fixed`), each step applies the clue that narrows most decisively (empties a slot, then pins
+     * one, then prunes most) and records what it narrowed. Stops when a slot has nothing left (contradiction:
+     * true) or no clue narrows anything more (a clash too tangled to replay this simply).
+     * @returns {{steps: {id:string, changes:{slot:string, before:string[], after:string[]}[]}[], contradiction:boolean}}
+     */
+    steps(ids, fixed = {}) {
+        const domains = new Map();
+        for (const id of ids) {
+            for (const sl of this.#get(id).scope) {
+                if (domains.has(sl)) continue;
+                const d = this.domains.get(sl);
+                domains.set(sl, sl in fixed ? d.filter((v) => v === fixed[sl]) : d);
+            }
         }
-        return keep;
+        const used = new Set();
+        const out = [];
+        for (let round = 0; round < ids.length * 3; round++) {
+            let best = null;
+            for (const id of ids) {
+                const changed = this.#narrow(id, domains);
+                if (!changed.size) continue;
+                const emptied = [...changed.values()].some((d) => d.length === 0);
+                const pinned = [...changed.values()].filter((d) => d.length === 1).length;
+                const pruned = [...changed].reduce((n, [sl, d]) => n + domains.get(sl).length - d.length, 0);
+                const score = [emptied ? 1 : 0, pinned, used.has(id) ? 0 : 1, -pruned];
+                if (!best || compare(score, best.score) > 0) best = { id, changed, score };
+            }
+            if (!best) return { steps: out, contradiction: false };
+            used.add(best.id);
+            out.push({ id: best.id, changes: [...best.changed].map(([slot, after]) => ({ slot, before: domains.get(slot), after })) });
+            for (const [sl, d] of best.changed) domains.set(sl, d);
+            if (best.score[0]) return { steps: out, contradiction: true };
+        }
+        return { steps: out, contradiction: false };
+    }
+
+    /** What one constraint alone removes from the given domains: Map slot -> narrowed domain (changed slots only). */
+    #narrow(id, domains) {
+        const local = new Map();
+        const dom = (sl) => local.get(sl) ?? domains.get(sl);
+        const order = this.timeOrder;
+        let progress = true;
+        while (progress) {
+            progress = false;
+            for (const part of this.#get(id).parts) {
+                for (const x of part.scope) {
+                    const d = dom(x);
+                    const others = part.scope.filter((sl) => sl !== x);
+                    const nd = d.filter((v) => {
+                        const assign = new Map([[x, v]]);
+                        let budget = SUPPORT_BUDGET;
+                        const dfs = (i) => {
+                            const r = evaluate(part.formula, assign, order);
+                            if (r === false) return false;
+                            if (r === true || i === others.length || --budget < 0) return true;
+                            for (const w of dom(others[i])) {
+                                assign.set(others[i], w);
+                                const ok = dfs(i + 1);
+                                assign.delete(others[i]);
+                                if (ok) return true;
+                            }
+                            return false;
+                        };
+                        return dfs(0);
+                    });
+                    if (nd.length < d.length) {
+                        local.set(x, nd);
+                        progress = nd.length > 0;
+                        if (!nd.length) return local;
+                    }
+                }
+            }
+        }
+        return local;
     }
 
     #get(id) {
@@ -264,6 +352,12 @@ export class Problem {
 }
 
 const SUPPORT_BUDGET = 5000;
+
+/** Lexicographic comparison of two score arrays. */
+function compare(a, b) {
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
+    return 0;
+}
 const GAC_MAX_SCOPE = 3;
 
 /** Split a formula into parts whose conjunction is equivalent: and(a,b) → a, b; implies(p, and(a,b)) → implies(p,a), implies(p,b). */

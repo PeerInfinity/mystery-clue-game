@@ -246,3 +246,24 @@ test('circling marks an answer the player favours: it is saved, and proves and r
     again.uncircle(slot, 'straker');
     assert.ok(!again.isCircled(slot, 'straker'));
 });
+
+test('Easy: clashes are found and set aside, so one clash does not rule out answers elsewhere; a doubt resolves one', () => {
+    const game = new Game(model, { difficulty: EASY });
+    while (game.read < 90) game.advance();
+    const clashes = game.clashes();
+    assert.ok(clashes.length > 0);
+    assert.ok(clashes.every((c) => c.claims.length >= 1));
+    assert.ok(model.problem.consistent(game.workingConstraints()).ok, 'what is left is consistent');
+    // The Derbyshire clash says nothing about who took the horse.
+    assert.equal(game.plausible('e.horse_led_out.agent', 'straker').plausible, true);
+    const derbyshire = clashes.find((c) => c.claims.includes('c.derbyshire_a_friend'));
+    assert.ok(derbyshire);
+    const chain = game.chain(derbyshire.ids);
+    assert.equal(chain.contradiction, true);
+    game.suspect('c.derbyshire_a_friend');
+    assert.ok(!game.clashes().some((c) => c.claims.includes('c.derbyshire_a_friend')));
+    assert.deepEqual(game.resolvedClashes().map((r) => r.doubted), [['c.derbyshire_a_friend']]);
+    const again = new Game(model);
+    again.load(JSON.parse(JSON.stringify(game.save())));
+    assert.deepEqual(again.resolvedClashes().map((r) => r.doubted), [['c.derbyshire_a_friend']]);
+});
