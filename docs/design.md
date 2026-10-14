@@ -424,3 +424,19 @@ not at ¶4, where asking about it recalled nothing; every topic now appears wher
 - (Round 15, continued) A question's count says "N so far" while the story could still bring answers not yet on
   offer (a time it has not reached, someone not yet mentioned — `Game.moreToCome`), and "N left" once every
   answer is on the table; Trivial says "N possible so far". So "When? 1 so far" at ¶4 no longer reads as solved.
+
+## Round 16 (user, 2026-10-13): what "nothing fits" means; circling; doubting from "Could it fit?"
+
+- Easy's "Nothing fits: something you trust must be false" read as if the answer just had not come up yet. It
+  only ever showed on a real clash (the check counts answers not yet offered), so it now says so: "Nothing could
+  fit, not even an answer the story has yet to bring up…". When the trusted clues are consistent but no answer
+  on offer fits, the question says "None of the answers met so far fits your clues. The answer may be one the
+  story has not brought up yet."
+- "Could it fit?" names the clues in the way as before, now with a link to each claim among them and "doubt it"
+  beside it; doubting from there re-runs the check.
+- Circling: beside "Cross out", a "Circle" button marks an answer the player favours (Easy, Medium, Hard). It is
+  tracked per question like crossing out (`marks.circled`, saved), proves and rules out nothing, sorts first and
+  shows with a ring, and the Questions tab lists it ("circled: …"). The word may change.
+- Wording: "crossed out" is the player's own mark without evidence (Easy); "ruled out" is with evidence the game
+  checked, or what the clues rule out on their own. The two kinds now show on separate rows ("crossed out:" and
+  "ruled out, with evidence:") instead of both under "ruled out:".

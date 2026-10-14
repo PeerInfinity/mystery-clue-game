@@ -108,7 +108,7 @@ export class Game {
         this.items = new Set(this.model.data.case.starting_items ?? []);
         this.done = [];                 // Holmes's actions the text has reached
         this.told = [];                 // reasoning steps the story revealed before the player made them
-        this.marks = new Map();         // slot id → {listed: Set|null, struck: Map value → {cited, used}|{}, proven}
+        this.marks = new Map();         // slot id → {listed: Set|null, struck: Map value → {cited, used}|{}, proven, circled: Set}
         this.theories = [];
         this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
         this.suspected = new Set();     // claim ids the player doubts
@@ -124,7 +124,7 @@ export class Game {
             pace: this.pace,
             read: this.read,
             collected: this.difficulty === HARD ? [...this.unlocked].map(([id, u]) => [id, u.para]) : null,
-            marks: [...this.marks].map(([slot, m]) => [slot, { listed: m.listed ? [...m.listed] : null, struck: [...m.struck], proven: m.proven }]),
+            marks: [...this.marks].map(([slot, m]) => [slot, { listed: m.listed ? [...m.listed] : null, struck: [...m.struck], proven: m.proven, circled: [...m.circled] }]),
             theories: this.theories,
             lastSeen: [...this.lastSeen],
             suspected: [...this.suspected],
@@ -151,7 +151,7 @@ export class Game {
         if (this.difficulty === HARD) for (const [id, para] of state.collected ?? []) this.#unlock(id, para);
         for (const [slot, m] of state.marks ?? []) {
             if (!this.model.slots.has(slot)) continue;
-            this.marks.set(slot, { listed: m.listed ? new Set(m.listed) : null, struck: new Map(m.struck), proven: m.proven });
+            this.marks.set(slot, { listed: m.listed ? new Set(m.listed) : null, struck: new Map(m.struck), proven: m.proven, circled: new Set(m.circled ?? []) });
         }
         this.theories = state.theories ?? [];
         this.lastSeen = new Map(state.lastSeen ?? []);
@@ -493,7 +493,7 @@ export class Game {
     }
 
     #mark(slot) {
-        if (!this.marks.has(slot)) this.marks.set(slot, { listed: this.difficulty === HARD ? new Set() : null, struck: new Map(), proven: null });
+        if (!this.marks.has(slot)) this.marks.set(slot, { listed: this.difficulty === HARD ? new Set() : null, struck: new Map(), proven: null, circled: new Set() });
         return this.marks.get(slot);
     }
 
@@ -538,6 +538,11 @@ export class Game {
     }
 
     unstrike(slot, value) { this.marks.get(slot)?.struck.delete(value); }
+
+    /** Circle a value: the player's own pick among the answers. A mark only; it proves and rules out nothing. */
+    circle(slot, value) { this.#mark(slot).circled.add(value); }
+    uncircle(slot, value) { this.marks.get(slot)?.circled.delete(value); }
+    isCircled(slot, value) { return !!this.marks.get(slot)?.circled.has(value); }
     isStruckWithProof(slot, value) {
         const st = this.marks.get(slot)?.struck.get(value);
         return !!st?.cited && !this.lapsedBy(st.used).length;

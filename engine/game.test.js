@@ -230,3 +230,19 @@ test('Next scene reads to the start of the next scene', () => {
     assert.equal(game.read, game.sceneStarts[1]);
     assert.ok(res.read > 1);
 });
+
+test('circling marks an answer the player favours: it is saved, and proves and rules out nothing', () => {
+    const game = new Game(model, { difficulty: EASY });
+    while (game.read < 38) game.advance();
+    const slot = 'e.horse_led_out.agent';
+    const before = game.pencil(slot);
+    game.circle(slot, 'straker');
+    assert.ok(game.isCircled(slot, 'straker'));
+    assert.deepEqual(game.pencil(slot), before);
+    assert.equal(game.settled(slot), null);
+    const again = new Game(model);
+    again.load(JSON.parse(JSON.stringify(game.save())));
+    assert.ok(again.isCircled(slot, 'straker'));
+    again.uncircle(slot, 'straker');
+    assert.ok(!again.isCircled(slot, 'straker'));
+});

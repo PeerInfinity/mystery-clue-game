@@ -20,7 +20,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { tab: 'card', selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null };
+const ui = { tab: 'card', selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -150,7 +150,7 @@ function intro() {
 <li>Read the story on the left, one paragraph at a time.</li>
 <li>Everything the story mentions — people, places, things, events, statements — becomes a card. ${game.difficulty === HARD ? 'In Hard mode you collect a card by clicking the words in the story that mention it.' : 'Click the marked words in the story to open a card.'}</li>
 <li>Cards have <b>open questions</b>: who did it, where, when, whose is it, is it true. Each question lists its possible answers, like pencil marks in sudoku${game.difficulty === HARD ? ' — in Hard mode you list them yourself' : ''}.</li>
-<li>${game.difficulty === TRIVIAL ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : game.difficulty === EASY ? 'Cross answers out; the game greys the ones your clues already rule out.' : 'Rule answers out by citing the clues and background notes that exclude them. The game checks the reasoning; any sufficient set of reasons is accepted.'}</li>
+<li>${game.difficulty === TRIVIAL ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : game.difficulty === EASY ? 'Cross answers out; the game greys the ones your clues already rule out. Circle the answers you favour.' : 'Rule answers out by citing the clues and background notes that exclude them. The game checks the reasoning; any sufficient set of reasons is accepted. Circle the answers you favour.'}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
@@ -282,15 +282,24 @@ function renderSlot(s) {
             ruled = pencil.filter((v) => !open.includes(v));
             ruledCount = ruled.length;
         }
+        live = [...live.filter((v) => game.isCircled(s.id, v)), ...live.filter((v) => !game.isCircled(s.id, v))];
         const shown = ui.expanded.has(s.id) ? live : live.slice(0, CHIP_LIMIT);
         chips = shown.map((v) => chip(s.id, v, ''));
         if (live.length > shown.length) chips.push(`<span class="link more" data-expand="${s.id}">+ ${live.length - shown.length} more</span>`);
         if (ruled.length) {
-            if (ui.expanded.has(`${s.id}|ruled`)) chips.push(...ruled.map((v) => chip(s.id, v, 'ruled')));
-            else chips.push(`<span class="link more" data-expand="${s.id}|ruled">${ruled.length} your clues already rule out — show</span>`);
+            // A circled answer the clues rule out stays in view: the player should see their pick has gone.
+            const circledRuled = ruled.filter((v) => game.isCircled(s.id, v));
+            if (ui.expanded.has(`${s.id}|ruled`)) chips.push(...[...circledRuled, ...ruled.filter((v) => !circledRuled.includes(v))].map((v) => chip(s.id, v, 'ruled')));
+            else {
+                chips.push(...circledRuled.map((v) => chip(s.id, v, 'ruled')));
+                const rest = ruled.length - circledRuled.length;
+                if (rest) chips.push(`<span class="link more" data-expand="${s.id}|ruled">${circledRuled.length ? `${rest} more` : rest} your clues already rule out — show</span>`);
+            }
         }
     }
-    const struckChips = struck.filter(([v]) => v !== settled && !game.strikeLapsed(s.id, v)).map(([v, p]) => chip(s.id, v, p.cited ? 'proved' : 'struck'));
+    const standing = struck.filter(([v]) => v !== settled && !game.strikeLapsed(s.id, v));
+    const crossedChips = standing.filter(([, p]) => !p.cited).map(([v]) => chip(s.id, v, 'struck'));
+    const ruledOutChips = standing.filter(([, p]) => p.cited).map(([v]) => chip(s.id, v, 'proved'));
     const lapsed = [...struck.filter(([v]) => game.strikeLapsed(s.id, v)).map(([, p]) => p.used), ...(game.proofLapsed(s.id) ? [m.proven.used] : [])];
     let state;
     if (settled !== null) state = given ? 'given' : 'settled';
@@ -303,7 +312,8 @@ function renderSlot(s) {
         const options = s.domain.filter((v) => game.offered(s.id, v));
         h += `<div class="chips"><input list="dl-${s.id}" data-add="${s.id}" placeholder="+ propose an answer" size="26"><datalist id="dl-${s.id}">${options.map((v) => `<option value="${esc(valueName(s.id, v))}">`).join('')}</datalist></div>`;
     }
-    if (struckChips.length) h += `<div class="chips small"><span class="muted">ruled out:</span>${struckChips.join('')}</div>`;
+    if (crossedChips.length) h += `<div class="chips small"><span class="muted">crossed out:</span>${crossedChips.join('')}</div>`;
+    if (ruledOutChips.length) h += `<div class="chips small"><span class="muted">ruled out, with evidence:</span>${ruledOutChips.join('')}</div>`;
     if (lapsed.length) {
         const why = [...new Set(lapsed.flatMap((u) => game.lapsedBy(u)))];
         h += `<div class="small bad">${lapsed.length === 1 ? 'A proof here' : `${lapsed.length} proofs here`} rested on ${why.map((k) => link(k, shortName(k, 50))).join(', ')}, which you now doubt.</div>`;
@@ -327,7 +337,8 @@ function countLeft(slot) {
 
 function chip(slot, v, cls) {
     const picked = ui.menu?.slot === slot && ui.menu?.value === v ? ' picked' : '';
-    return `<span class="chip ${cls}${picked}" data-slot="${slot}" data-val="${esc(v)}">${esc(valueName(slot, v))}${cls === 'proved' ? ' <span class="x">✓</span>' : ''}</span>`;
+    const circled = game.difficulty !== TRIVIAL && game.isCircled(slot, v) ? ' circled' : '';
+    return `<span class="chip ${cls}${circled}${picked}" data-slot="${slot}" data-val="${esc(v)}">${esc(valueName(slot, v))}${cls === 'proved' ? ' <span class="x">✓</span>' : ''}</span>`;
 }
 
 function slotMenu(s, v) {
@@ -348,6 +359,7 @@ function slotMenu(s, v) {
     else if (isProven) b.push('<button data-op="unprove">Undo the proof</button>');
     else if (st && !game.strikeLapsed(s.id, v)) b.push('<button data-op="unstrike">Restore</button>');
     else {
+        b.push(game.isCircled(s.id, v) ? '<button data-op="uncircle">Uncircle</button>' : '<button data-op="circle">Circle</button>');
         if (game.difficulty === EASY) b.push('<button data-op="strike">Cross out</button>');
         b.push('<button data-op="strike-why">Rule out, with evidence…</button>', '<button data-op="prove">Prove it\'s this…</button>');
         if (game.difficulty === EASY) b.push('<button data-op="fit" class="quiet">Could it fit?</button>');
@@ -439,7 +451,8 @@ function toolQuestions() {
         const visible = game.knows(slot.on);
         const settled = game.settled(q.slot);
         const state = !visible ? (game.difficulty === HARD ? 'collect the card first' : '') : settled !== null ? esc(valueName(q.slot, settled)) : game.difficulty === HARD ? `${game.pencil(q.slot).length} proposed` : game.difficulty === TRIVIAL ? `${game.pencil(q.slot).length} possible${game.moreToCome(q.slot) ? ' so far' : ''}` : countLeft(q.slot);
-        h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(game.questionText(q))}</span>` : esc(game.questionText(q))}</span><span class="state ${settled !== null ? 'done' : ''}">${state}</span></li>`;
+        const picks = visible && settled === null && game.difficulty !== TRIVIAL ? game.pencil(q.slot).filter((v) => game.isCircled(q.slot, v)) : [];
+        h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(game.questionText(q))}</span>` : esc(game.questionText(q))}</span><span class="state ${settled !== null ? 'done' : ''}">${state}${picks.length ? ` · circled: ${picks.map((v) => esc(valueName(q.slot, v))).join(', ')}` : ''}</span></li>`;
     }
     return `${h}</ul>${d}`;
 }
@@ -543,11 +556,30 @@ function drawCite() {
     $('#cite-chosen').innerHTML = [...chosen].map((k) => `<span class="chip" data-unchoose="${k}">${esc(shortName(k, 50))} <span class="x">✕</span></span>`).join('') || '<span class="empty">nothing cited yet</span>';
     $('#cite-list').innerHTML = shown.slice(0, 250).map((k) => `<label><input type="checkbox" data-choose="${k}" ${chosen.has(k) ? 'checked' : ''}><span><span class="kind">${kindOf(k)}</span>${esc(text(k))}</span></label>`).join('');
 }
-/** A set of clues that cannot all hold, with a way to doubt each claim in it. */
-function clashHtml(ids) {
+/** "Could it fit?": check the answer against everything trusted; when it does not fit, offer to doubt the claims in the way. */
+function runFit(slot, value) {
+    ui.fit = { slot, value };
+    ui.menuNote = '<span class="muted">Checking…</span>';
+    renderTool();
+    setTimeout(() => {
+        const r = game.plausible(slot, value);
+        if (r.plausible) ui.menuNote = '<span class="good">It could fit everything you trust so far.</span>';
+        else if (r.why === 'shape') ui.menuNote = '<span class="bad">Wrong kind of thing for this question.</span>';
+        else ui.menuNote = `<span class="bad">It does not fit what you trust:</span> ${doubtableHtml(r.conflict)}`;
+        renderTool();
+    }, 10);
+}
+
+/** Clues that together exclude something: each claim among them linked, with a way to doubt it; the rest named. */
+function doubtableHtml(ids) {
     const claims = [...new Set(ids.map((k) => model.constraints.get(k).from_claim).filter(Boolean))];
     const rest = ids.filter((k) => !model.constraints.get(k).from_claim);
-    return `${claims.map((c) => `${link(c, shortName(c, 70))} <span class="link small" data-suspect="${c}">doubt it</span>`).join(' · ')}${rest.length ? ` <span class="muted">(with: ${rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')})</span>` : ''}. One of them must be false.`;
+    const doubt = (c) => (game.suspected.has(c) ? '<span class="small muted">doubted</span>' : `<span class="link small" data-suspect="${c}">doubt it</span>`);
+    return `${claims.map((c) => `${link(c, shortName(c, 70))} ${doubt(c)}`).join(' · ')}${rest.length ? (claims.length ? ` <span class="muted">(with: ${rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')})</span>` : rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')) : ''}`;
+}
+/** A set of clues that cannot all hold, with a way to doubt each claim in it. */
+function clashHtml(ids) {
+    return `${doubtableHtml(ids)}. One of them must be false.`;
 }
 
 function runCite() {
@@ -659,6 +691,8 @@ document.addEventListener('click', (e) => {
         }
         ui.clash = null;
         changed();
+        // Doubting from a "Could it fit?" answer: check again, so the player sees whether it fits now.
+        if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
     const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],.tab');
@@ -696,6 +730,7 @@ document.addEventListener('click', (e) => {
         const same = ui.menu?.slot === t.dataset.slot && ui.menu?.value === t.dataset.val;
         ui.menu = same ? null : { slot: t.dataset.slot, value: t.dataset.val };
         ui.menuNote = '';
+        ui.fit = null;
         renderTool();
         return;
     }
@@ -705,6 +740,8 @@ document.addEventListener('click', (e) => {
         const value = menu.dataset.menuVal;
         const op = t.dataset.op;
         if (op === 'strike') { game.strike(slot, value); ui.menu = null; changed(); }
+        else if (op === 'circle') { game.circle(slot, value); ui.menu = null; changed(); }
+        else if (op === 'uncircle') { game.uncircle(slot, value); ui.menu = null; changed(); }
         else if (op === 'unstrike') { game.unstrike(slot, value); ui.menu = null; changed(); }
         else if (op === 'unprove') { game.unprove(slot); ui.menu = null; changed(); }
         else if (op === 'unpropose') { game.removeCandidate(slot, value); ui.menu = null; changed(); }
@@ -732,17 +769,7 @@ document.addEventListener('click', (e) => {
             ui.menuNote = '<span class="good">Added to the theory.</span>';
             save();
             renderTool();
-        } else if (op === 'fit') {
-            ui.menuNote = '<span class="muted">Checking…</span>';
-            renderTool();
-            setTimeout(() => {
-                const r = game.plausible(slot, value);
-                if (r.plausible) ui.menuNote = '<span class="good">It could fit everything you hold so far.</span>';
-                else if (r.why === 'shape') ui.menuNote = '<span class="bad">Wrong kind of thing for this question.</span>';
-                else ui.menuNote = `<span class="bad">It does not fit what you hold:</span> ${r.conflict.map((k) => esc(model.constraints.get(k).label)).join(' · ')}`;
-                renderTool();
-            }, 10);
-        }
+        } else if (op === 'fit') runFit(slot, value);
     }
 });
 document.addEventListener('input', (e) => {
