@@ -600,6 +600,10 @@
               }
             ]
           }
+        },
+        "summary": {
+          "type": "string",
+          "description": "Topic cards only: what the topic covers, written for the game (a topic is a subject, not a thing in the story)."
         }
       }
     },

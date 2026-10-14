@@ -398,3 +398,12 @@ checker passes all six survivors; its 19 remaining flags are the false alarms of
   letters), unless its `after` quote dates it. Checked by undoing three of the fixes in a scratch copy: all three
   are reported. "Laying against a horse" — a phrase the story never uses — became "Betting against a horse
   ('laying')", dated by "registered by him against the favourite" (¶39).
+
+## Round 14 (user, 2026-10-13): topic cards read as topics
+
+The racing topic showed "topictopic", "called: the singular disappearance of the favourite…", the disappearance
+sentence, and its old description with that phrase as if it were the quote. Now a topic card shows its kind once
+(the redundant `topic` flag is gone), no "called" line, a `summary` written for the game ("A topic: Horse-racing
+and the betting on it. Ask what you know about it."), and the sentence where it comes up under "Comes up". The
+racing topic now comes up where the story first touches betting (¶18, "the betting being three to one on him"),
+not at ¶4, where asking about it recalled nothing; every topic now appears where its first fact becomes relevant.

@@ -174,7 +174,9 @@ function toolCard() {
     const names = [...new Set(story.spans.slice(0, game.read).flatMap((list, p) => list.filter((sp) => sp.kind === 'entity' && sp.ids.includes(id)).map((sp) => story.paragraphs[p].display.slice(sp.start, sp.end))))]
         // Compared without case or apostrophe style (the story's ’ against a card name's '), so a name is never listed as another name for itself.
         .filter((n, i, all) => same(n) !== same(game.nameOf(id)) && all.findIndex((m) => same(m) === same(n)) === i);
-    if (names.length) h += `<div class="small muted">called: ${names.slice(0, 8).map(esc).join(' · ')}</div>`;
+    // A topic is a subject, not a thing in the story: what it covers instead of other names for it.
+    if (c.kind === 'topic') h += `<p class="desc topic-summary">A topic: ${esc(c.summary ?? '')}${game.background === BG_ASK ? ' Ask what you know about it.' : ''}</p>`;
+    else if (names.length) h += `<div class="small muted">called: ${names.slice(0, 8).map(esc).join(' · ')}</div>`;
     h += '</div>';
 
     // What is known, in the order the story told it: one section per paragraph, only what is new there.
@@ -186,7 +188,7 @@ function toolCard() {
     }
     groups.forEach((g, gi) => {
         const isNew = g.items.some((it) => game.isNew(id, it));
-        const title = gi === 0 && c.section !== 'claims' ? 'First mentioned' : 'Then';
+        const title = gi === 0 && c.section !== 'claims' ? (c.kind === 'topic' ? 'Comes up' : 'First mentioned') : 'Then';
         h += `<div class="info ${isNew ? 'fresh' : ''}"><div class="info-head"><span>${title}</span> <span class="link small" data-goto="${g.para}">${paraLabel(g.para)}</span>${isNew ? ' <span class="new-badge">new</span>' : ''}</div>`;
         const bg = g.items.filter((it) => it.kind === 'background').sort((x, y) => (x.term ?? x.text).localeCompare(y.term ?? y.text));
         for (const it of g.items) {
