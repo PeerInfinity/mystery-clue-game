@@ -184,7 +184,12 @@ export class Story {
      * moves to the paragraph after it.
      */
     #gates(data) {
-        const ruleAt = (r) => Math.min(...(r.attaches_to ?? []).map((e) => this.firstAt.get(e) ?? Infinity));
+        // A background fact counts as told where the story first touches its subject (its `relevant_from`), and
+        // never before one of its cards is mentioned: the latest point any background setting makes it available.
+        const ruleAt = (r) => Math.max(
+            Math.min(...(r.attaches_to ?? []).map((e) => this.firstAt.get(e) ?? Infinity)),
+            r.relevant_from ? this.find(r.relevant_from)?.para ?? Infinity : -1,
+        );
         const rules = new Map((data.rules ?? []).map((r) => [r.id, r]));
         const premiseAt = (step) => Math.max(-1, ...step.premises.map((p) => (rules.has(p) ? ruleAt(rules.get(p)) : this.firstAt.get(p) ?? Infinity)));
         const route = new Map((data.route ?? []).map((r) => [r.id, r]));

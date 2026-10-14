@@ -91,6 +91,7 @@ for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'rou
 }
 for (const e of data.entities ?? []) for (const n of e.notes ?? []) checkQuotes(e.id, n.source);
 for (const g of data.glosses ?? []) if (g.after) checkQuotes(g.id, [g.after]);
+for (const r of data.rules ?? []) if (r.relevant_from) checkQuotes(r.id, [r.relevant_from]);
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes(c.id, a.source);
 
 // ---------- the story index: mentions, quotes per paragraph, gates ----------

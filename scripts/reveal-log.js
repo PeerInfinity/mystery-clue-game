@@ -6,7 +6,7 @@ import { loadCase } from '../engine/loadCase.js';
 import { Game } from '../engine/game.js';
 
 const model = await loadCase(process.argv[2]);
-const game = new Game(model);
+const game = new Game(model, { background: 'relevant' }); // facts appear where the story reaches them
 const seen = { cards: new Set(), slots: new Set(), options: new Set(), info: new Set() };
 const show = (p) => {
     const out = [];

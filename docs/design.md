@@ -280,3 +280,31 @@ checker flags. Step 1, as built:
 - The validator caught six names quoted with the wrong capitals (one, "Powdered opium", resolved to ¶218) and a
   note dated before its card.
 - `npm run foreshadow-log` now lists every piece of card text where it first appears — the checker's input.
+
+## Round 8 (user, 2026-10-13): a Background setting
+
+> "…a separate setting for whether the background facts are all available from the beginning, whether they
+> appear when they become relevant, or whether we have a mechanic where the player has to ask for background
+> information on topics from the cards before they are revealed?"
+
+As built (`Game.background`, saved with the game; changing difficulty brings that difficulty's default):
+- **All at once** (`start`): every fact is held from paragraph 0 — a reference book in the new Background tab.
+- **When relevant** (`relevant`, Trivial's default): each fact arrives at its `relevant_from` line, never before one
+  of its cards is mentioned. Filler facts have their own triggers spread through the story ("a shoe that comes
+  off is 'cast'" with the cast horseshoe, "bracken turns bronze" with the bronze ferns), so the facts that matter
+  do not stand out by arriving later.
+- **When asked** (`ask`, Easy and Hard default): each card has "What do I know about this?"; asking recalls every
+  fact attached to it. Topic cards hold the general facts. Asking is saved and replayed on load.
+- Every fact is attached to the cards it is about (and its topic). Gates count a fact as told at its
+  `relevant_from` line — the latest point any setting makes it available — and the fair-play test passes under
+  all three settings (the ideal player asks about the cards a step turns on).
+- The Background tab groups facts by topic, sorted by text (sorting by id put the filler apart from the facts that
+  matter), and never names a card the story has not reached.
+- The checker has a `--background` mode: is each fact true general knowledge rather than a story fact? It
+  flagged 7 (three overstated rules: "only a key", "never honest", "will wake the soundest sleeper"; three story
+  facts in disguise: "the houses round about", "the posts on this line", "so famous a horse"; and a "Holmes's
+  habit" that is really this story's), all reworded. One stays borderline: the same-dish rule (Haiku passes it 1
+  run in 3, objecting that a drug could be spread unevenly — the ordinary reasoning the deduction needs).
+- Known weakness of **When asked**: a card that answers with a fact (the mackintosh recalls only the coat rule)
+  hints that it matters. Fix to discuss: every card answers something (filler about its kind), or asking about a
+  card also recalls its topic's facts.

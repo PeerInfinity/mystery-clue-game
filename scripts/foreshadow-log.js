@@ -8,7 +8,7 @@ import { loadCase } from '../engine/loadCase.js';
 import { Game } from '../engine/game.js';
 
 const model = await loadCase(process.argv[2]);
-const game = new Game(model);
+const game = new Game(model, { background: 'relevant' }); // facts appear where the story reaches them
 const STOP = new Set('that this with from have been were they them their there what when which while would could should about into also only than then upon some such your more most other being does did done each very will shall just like over after before where whose whom these those here every once still even said says'.split(' '));
 const stem = (w) => w.toLowerCase().replace(/[^a-z]/g, '').slice(0, 5);
 const words = (t) => (t.match(/[A-Za-z][A-Za-z'’-]{3,}/g) ?? []).filter((w) => !STOP.has(w.toLowerCase()));

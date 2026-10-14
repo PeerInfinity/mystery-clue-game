@@ -790,11 +790,15 @@
           "items": {
             "$ref": "#/$defs/id"
           },
-          "description": "The card(s) this fact is background on; it appears with them."
+          "description": "The cards this fact is about (and its topic card): it shows on them, and in 'ask' mode asking about any of them recalls it."
         },
         "editorial": {
           "type": "boolean",
           "description": "Written for the game; plays no part in the solution."
+        },
+        "relevant_from": {
+          "type": "string",
+          "description": "A quote: where the story first touches this fact's subject. With background facts shown 'when relevant', the fact appears there."
         }
       },
       "description": "A background fact that serves as a premise. It is shown on the card(s) it attaches to, mixed with the period notes, so that it does not stand out as a clue."

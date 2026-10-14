@@ -53,6 +53,23 @@ Three things to watch:
 
 Be strict but fair: ordinary paraphrase of what is stated is fine.`;
 
+// Background facts are checked for one thing only: are they general knowledge, rather than facts about this
+// story? (When they appear is the Background setting's business.)
+const SYSTEM_BACKGROUND = `You check the background facts of a mystery game built from a Sherlock Holmes story.
+
+Background facts are meant to be GENERAL KNOWLEDGE that a reader of the 1890s had (and a modern reader may lack):
+how horses, racing, stables, households, medicine, the weather, the moor, money and the law worked; what words
+meant; real places, people and horses as they really were; and Sherlock Holmes's well-known habits and sayings
+as a character.
+
+A background fact must NOT be a fact about this particular story: its events, its characters' actions or
+circumstances, what happened at a particular place in it, or what the story will say. A general rule that
+happens to be useful for solving the mystery is fine, as long as it is phrased as general knowledge and is true.
+Watch for a "general" fact that smuggles in a detail only this story could supply (a specific sum, place, name,
+or object from the plot).
+
+Judge every fact in the text. Also say whether each fact is TRUE as general knowledge.`;
+
 const SCHEMA = {
     type: 'object',
     properties: {
@@ -83,9 +100,13 @@ function prompt(item) {
     return `THE STORY SO FAR (paragraphs 1 to ${item.para}):\n\n${so}\n\n---\n\n${subject}\n\nTHE CARD TEXT (a ${item.kind}):\n"${item.text}"\n\nJudge every fact in the card text.`;
 }
 
+function promptBackground(item) {
+    return `THE BACKGROUND FACT (${item.kind}):\n"${item.text}"\n\nJudge every fact in it: is it general knowledge (and true), or a fact about this particular story?`;
+}
+
 function ask(item) {
     return new Promise((resolve) => {
-        const child = spawn('claude', ['-p', '--model', modelName, '--system-prompt', SYSTEM, '--tools', '', '--strict-mcp-config',
+        const child = spawn('claude', ['-p', '--model', modelName, '--system-prompt', item.background ? SYSTEM_BACKGROUND : SYSTEM, '--tools', '', '--strict-mcp-config',
             '--setting-sources', '', '--no-session-persistence', '--output-format', 'json', '--json-schema', JSON.stringify(SCHEMA)],
         { cwd: here, stdio: ['pipe', 'pipe', 'pipe'] });
         let out = '';
@@ -100,13 +121,17 @@ function ask(item) {
                 resolve({ item, answer: null, cost: 0, error: `${e.message}: ${(out || errText).slice(0, 300)}` });
             }
         });
-        child.stdin.end(prompt(item));
+        child.stdin.end(item.background ? promptBackground(item) : prompt(item));
     });
 }
 
 let items;
 if (args.includes('--tests')) items = JSON.parse(fs.readFileSync(path.join(here, 'tests.json'), 'utf8')).cases;
-else throw new Error('only --tests for now');
+else if (args.includes('--background')) {
+    // Every background fact. (Glosses explain words in the text and show only once the text has used them: the
+    // story-so-far check covers them.) Expected 'ok' is the hope, not a known answer: misses are the findings.
+    items = (model.data.rules ?? []).map((r) => ({ id: r.id, kind: 'background fact', text: r.text, expect: 'ok', background: true }));
+} else throw new Error('use --tests or --background');
 if (only) items = items.filter((x) => only.includes(x.id));
 
 const results = [];

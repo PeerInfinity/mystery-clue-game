@@ -18,6 +18,10 @@
       Pace
       <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option></select>
     </label>
+    <label title="Background facts (general knowledge a reader of the time had). All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.">
+      Background
+      <select id="background"><option value="start">All at once</option><option value="relevant">When relevant</option><option value="ask">When asked</option></select>
+    </label>
     <span id="progress" class="progress"></span>
     <button id="reset" class="quiet">Start over</button>
   </div>
@@ -34,6 +38,7 @@
       <button data-tab="questions" class="tab">Questions</button>
       <button data-tab="theories" class="tab">Theories</button>
       <button data-tab="timeline" class="tab">Timeline</button>
+      <button data-tab="background" class="tab">Background</button>
     </div>
     <div id="tool" class="tool-body"></div>
   </section>

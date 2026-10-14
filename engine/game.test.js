@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
-import { Game, TRIVIAL, EASY, HARD, WAIT } from './game.js';
+import { Game, TRIVIAL, EASY, HARD, WAIT, BG_START, BG_RELEVANT, BG_ASK } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 
@@ -18,8 +18,8 @@ function proveStep(game, stepId) {
     return { ok: false, reason: 'not an eq step' };
 }
 
-test('reading the whole story (free pace, Easy) collects every clue, entity and event', () => {
-    const game = new Game(model);
+test('reading the whole story (free pace, Easy, background when relevant) collects every clue, entity, event and fact', () => {
+    const game = new Game(model, { background: BG_RELEVANT });
     while (!game.finished()) assert.ok(game.advance().ok);
     const missing = [...model.cards.values()]
         .filter((c) => ['entities', 'events', 'rules'].includes(c.section) || (c.section === 'claims' && !c.derived))
@@ -28,26 +28,52 @@ test('reading the whole story (free pace, Easy) collects every clue, entity and 
     assert.equal(game.done.length, game.actions.length, 'every action is reached');
 });
 
-test("fair play under the 'wait' pace: every gate can be passed with what has been read", () => {
-    const game = new Game(model, { pace: WAIT });
-    const stuck = [];
-    while (!game.finished()) {
-        const res = game.advance();
-        if (res.ok) continue;
-        for (const s of res.needs) {
-            const step = game.routeById.get(s);
-            const c = step.concludes;
-            const slot = c.slot ?? c.formula.eq[0];
-            if (!game.slotVisible(slot)) stuck.push(`${s}: question ${slot} not visible at paragraph ${game.read}`);
-            if (c.formula?.eq && !game.offered(slot, c.formula.eq[1])) stuck.push(`${s}: answer ${c.formula.eq[1]} not offered at paragraph ${game.read}`);
-            const unread = step.premises.filter((p) => !game.knows(p));
-            const proof = unread.length ? { ok: false } : proveStep(game, s);
-            if (!proof.ok) stuck.push(`${s} before paragraph ${game.read}${unread.length ? ` (not yet read: ${unread.join(', ')})` : ''}`);
+for (const background of [BG_ASK, BG_RELEVANT, BG_START]) {
+    test(`fair play under the 'wait' pace, background '${background}': every gate can be passed with what has been read`, () => {
+        const game = new Game(model, { pace: WAIT, background });
+        const stuck = [];
+        while (!game.finished()) {
+            const res = game.advance();
+            if (res.ok) continue;
+            for (const s of res.needs) {
+                const step = game.routeById.get(s);
+                const c = step.concludes;
+                const slot = c.slot ?? c.formula.eq[0];
+                if (!game.slotVisible(slot)) stuck.push(`${s}: question ${slot} not visible at paragraph ${game.read}`);
+                if (c.formula?.eq && !game.offered(slot, c.formula.eq[1])) stuck.push(`${s}: answer ${c.formula.eq[1]} not offered at paragraph ${game.read}`);
+                // Like Holmes, recall what is known about the things the step turns on.
+                for (const p of step.premises) {
+                    if (game.knows(p) || model.cards.get(p)?.section !== 'rules') continue;
+                    for (const card of model.cards.get(p).attaches_to) game.ask(card);
+                }
+                const unread = step.premises.filter((p) => !game.knows(p));
+                const proof = unread.length ? { ok: false } : proveStep(game, s);
+                if (!proof.ok) stuck.push(`${s} before paragraph ${game.read}${unread.length ? ` (not yet available: ${unread.join(', ')})` : ''}`);
+            }
+            if (game.blockers().length) break;
         }
-        if (game.blockers().length) break;
-    }
-    assert.deepEqual(stuck, []);
-    assert.ok(game.finished());
+        assert.deepEqual(stuck, []);
+        assert.ok(game.finished());
+    });
+}
+
+test('background: all at once, when the story touches the subject, or when asked', () => {
+    const start = new Game(model, { background: BG_START });
+    assert.ok(start.knows('r.wind_and_coats'), 'a reference book from the start');
+    const relevant = new Game(model, { background: BG_RELEVANT });
+    while (relevant.read <= 34) relevant.advance();
+    assert.equal(relevant.knows('r.wind_and_coats'), false, 'not before the coat is on the bush');
+    relevant.advance();
+    assert.ok(relevant.knows('r.wind_and_coats'));
+    assert.ok(relevant.knows('r.bg_moor_27'), 'a filler fact arrives at the same point');
+    const ask = new Game(model, { background: BG_ASK });
+    while (ask.read <= 35) ask.advance();
+    assert.equal(ask.knows('r.wind_and_coats'), false, 'nothing until asked');
+    assert.deepEqual(ask.ask('overcoat'), ['r.wind_and_coats']);
+    assert.ok(ask.info('overcoat').some((it) => it.card === 'r.wind_and_coats'));
+    assert.deepEqual(ask.ask('simpson'), [], 'not a card the player holds yet');
+    const again = new Game(model, { state: ask.save() });
+    assert.ok(again.knows('r.wind_and_coats'), 'asking is saved');
 });
 
 test('Easy needs evidence to cross out; Trivial allows a plain pencil mark', () => {
@@ -63,7 +89,8 @@ test('Hard: reading collects nothing; clicking the text does', () => {
     assert.equal(game.knows('opium'), false);
     const p = model.story.firstAt.get('opium');
     assert.deepEqual(game.collect(p, ['opium']).includes('opium'), true);
-    assert.ok(game.knows('r.opium_taste'), 'the background fact arrives with its card');
+    assert.equal(game.knows('r.opium_taste'), false, 'background waits to be asked for (Hard defaults to asking)');
+    assert.ok(game.ask('opium').includes('r.opium_taste'));
     assert.equal(game.addCandidate('e.opium_added.agent', 'stable').ok, false, 'a place cannot drug anyone');
     assert.equal(game.addCandidate('e.opium_added.agent', 'simpson').ok, false, 'only cards already collected');
     game.collect(model.story.firstAt.get('simpson'), ['simpson']);
@@ -72,7 +99,7 @@ test('Hard: reading collects nothing; clicking the text does', () => {
 });
 
 test('a citation is accepted by any sufficient route, and refused when it is not enough', () => {
-    const game = new Game(model);
+    const game = new Game(model, { background: BG_START });
     while (!game.finished()) game.advance();
     const curry = game.routeById.get('i.straker_took_horse').premises;
     const dog = game.routeById.get('i.visitor_known_to_dog').premises;
@@ -142,7 +169,7 @@ test('doubt: a proof resting on a claim lapses when the claim is suspected', () 
 });
 
 test('doubt: citing clues that cannot all be true is refused, naming the clash', () => {
-    const game = new Game(model);
+    const game = new Game(model, { background: BG_START });
     while (!game.finished()) game.advance();
     const step = game.routeById.get('i.straker_dishonest');
     const res = game.prove('straker.honest', 'false', [...step.premises, 'c.straker_honest_record']);

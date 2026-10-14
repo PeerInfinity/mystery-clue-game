@@ -19,13 +19,20 @@ export const EASY = 'easy';
 export const HARD = 'hard';
 export const FREE = 'free';
 export const WAIT = 'wait';
+// When background facts become available: all at once, where the story first touches each one's subject, or
+// when the player asks about a card they hold.
+export const BG_START = 'start';
+export const BG_RELEVANT = 'relevant';
+export const BG_ASK = 'ask';
+export const BACKGROUND_DEFAULTS = { trivial: BG_RELEVANT, easy: BG_ASK, hard: BG_ASK };
 
 export class Game {
-    constructor(model, { difficulty = EASY, pace = FREE, state = null } = {}) {
+    constructor(model, { difficulty = EASY, pace = FREE, background = null, state = null } = {}) {
         this.model = model;
         this.story = model.story;
         this.difficulty = difficulty;
         this.pace = pace;
+        this.background = background ?? BACKGROUND_DEFAULTS[difficulty];
         this.actions = [...(model.data.actions ?? [])].sort((a, b) => a.order - b.order);
         this.actionById = new Map(this.actions.map((a) => [a.id, a]));
         this.routeById = new Map((model.data.route ?? []).map((r) => [r.id, r]));
@@ -57,6 +64,12 @@ export class Game {
             if (!k) continue;
             this.claimEvents.set(c.id, [...slotsIn(k.formula)].map((s) => model.slots.get(s)?.on).filter((o) => model.cards.get(o)?.section === 'events'));
         }
+        // Where each background fact becomes relevant: its `relevant_from` line, never before one of its cards.
+        this.ruleAt = new Map();
+        for (const r of model.data.rules ?? []) {
+            const held = Math.min(...(r.attaches_to ?? []).map((e) => this.story.firstAt.get(e) ?? Infinity));
+            this.ruleAt.set(r.id, Math.max(held, r.relevant_from ? this.#paraOf(r.relevant_from) : -1));
+        }
         this.story.stepsBefore(0, model.data); // builds the gate map
         this.reset();
         if (state) this.load(state);
@@ -73,6 +86,8 @@ export class Game {
         this.theories = [];
         this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
         this.suspected = new Set();     // claim ids the player doubts
+        this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
+        if (this.background === BG_START) for (const r of this.model.data.rules ?? []) this.#unlock(r.id, 0);
         this.#process(0);
     }
 
@@ -87,15 +102,22 @@ export class Game {
             theories: this.theories,
             lastSeen: [...this.lastSeen],
             suspected: [...this.suspected],
+            background: this.background,
+            asked: this.asked,
         };
     }
 
     load(state) {
         this.difficulty = state.difficulty ?? this.difficulty;
         this.pace = state.pace ?? this.pace;
+        this.background = state.background ?? BACKGROUND_DEFAULTS[this.difficulty];
         this.reset();
         const target = Math.min(state.read ?? 1, this.story.paragraphs.length);
-        while (this.read < target) this.#readNext();
+        const asked = [...(state.asked ?? [])].sort((a, b) => a[1] - b[1]);
+        while (this.read < target) {
+            this.#readNext();
+            while (asked.length && asked[0][1] < this.read) this.ask(asked.shift()[0]);
+        }
         if (this.difficulty === HARD) for (const [id, para] of state.collected ?? []) this.#unlock(id, para);
         for (const [slot, m] of state.marks ?? []) {
             if (!this.model.slots.has(slot)) continue;
@@ -154,6 +176,7 @@ export class Game {
     }
 
     #process(p) {
+        if (this.background === BG_RELEVANT) for (const [r, at] of this.ruleAt) if (at === p) this.#unlock(r, p);
         for (const a of this.actions) {
             if (this.story.anchors.actions.get(a.id) !== p) continue;
             this.done.push(a.id);
@@ -179,8 +202,25 @@ export class Game {
         const c = this.model.cards.get(id);
         if (!c || this.unlocked.has(id)) return;
         this.unlocked.set(id, { para, at: this.seq++ });
-        if (c.section === 'entities') for (const r of this.rulesOn.get(id) ?? []) this.#unlock(r, para);
         if (c.section === 'claims') for (const e of this.claimEvents.get(id) ?? []) this.#unlock(e, para);
+    }
+
+    // ---------- background ----------
+    /** Can the player ask what they know about this card? (Background 'ask': any card they hold.) */
+    canAsk(id) {
+        const c = this.model.cards.get(id);
+        return this.background === BG_ASK && this.knows(id) && (c.section === 'entities' || c.section === 'events');
+    }
+
+    hasAsked(id) { return this.asked.some(([x]) => x === id); }
+
+    /** "What do I know about this?" Recalls every background fact about the card. Returns the newly recalled. */
+    ask(id) {
+        if (!this.canAsk(id)) return [];
+        if (!this.hasAsked(id)) this.asked.push([id, this.read - 1]);
+        const got = (this.rulesOn.get(id) ?? []).filter((r) => !this.knows(r));
+        for (const r of got) this.#unlock(r, this.read - 1);
+        return got;
     }
 
     knows(cardId) { return this.unlocked.has(cardId); }
@@ -247,7 +287,9 @@ export class Game {
         });
         if (c.section === 'entities') {
             out.push(...this.#glossesOn(id, first));
-            for (const r of this.rulesOn.get(id) ?? []) out.push({ key: r, para: first, kind: 'background', text: this.model.cards.get(r).text, card: r });
+            for (const r of this.rulesOn.get(id) ?? []) {
+                if (this.knows(r)) out.push({ key: r, para: Math.max(first, this.unlocked.get(r).para), kind: 'background', text: this.model.cards.get(r).text, card: r });
+            }
             (c.notes ?? []).forEach((n, i) => {
                 const para = Math.max(first, this.#paraOf(n.source[0]));
                 if (para < this.read) out.push({ key: `note${i}`, para, kind: 'note', text: n.text, quote: n.source[0] });
@@ -532,7 +574,7 @@ export class Game {
     /** Disclosure: the paragraph where the story first mentions a card. */
     disclosure(cardId) {
         const c = this.model.cards.get(cardId);
-        if (c?.section === 'rules') return Math.min(...(c.attaches_to ?? []).map((e) => this.story.firstAt.get(e) ?? Infinity));
+        if (c?.section === 'rules') return this.ruleAt.get(cardId);
         return this.story.firstAt.get(cardId) ?? null;
     }
 }

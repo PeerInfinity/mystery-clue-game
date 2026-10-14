@@ -3,7 +3,7 @@
 // All the logic is in engine/; this file only draws and dispatches.
 
 import { loadCase } from '../engine/loadCase.js';
-import { Game, TRIVIAL, EASY, HARD, WAIT } from '../engine/game.js';
+import { Game, TRIVIAL, EASY, HARD, WAIT, BG_START, BG_ASK, BACKGROUND_DEFAULTS } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -121,7 +121,7 @@ function scrollStory() {
 // ---------- tools ----------
 function renderTool() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
-    $('#tool').innerHTML = { card: toolCard, cards: toolCards, questions: toolQuestions, theories: toolTheories, timeline: toolTimeline }[ui.tab]();
+    $('#tool').innerHTML = { card: toolCard, cards: toolCards, questions: toolQuestions, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
     const updated = [...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section) && game.lastSeen.has(k) && game.hasNew(k)).length;
     document.querySelector('.tab[data-tab="cards"]').textContent = updated ? `Cards (${updated} updated)` : 'Cards';
     if (ui.focusSlot) {
@@ -144,6 +144,7 @@ function intro() {
 <li>Cards have <b>open questions</b>: who did it, where, when, whose is it, is it true. Each question lists its possible answers, like pencil marks in sudoku${game.difficulty === HARD ? ' — in Hard mode you list them yourself' : ''}.</li>
 <li>${game.difficulty === TRIVIAL ? 'Cross answers out; the game greys the ones your clues already rule out.' : 'Rule answers out by citing the clues and background notes that exclude them. The game checks the reasoning; any sufficient set of reasons is accepted.'}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
+<li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
 }
 
@@ -204,6 +205,11 @@ function toolCard() {
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
 
+    if (game.canAsk(id)) {
+        h += game.hasAsked(id)
+            ? `<p class="small muted">${(game.rulesOn.get(id) ?? []).length ? 'You have recalled what you know about this (under Background above).' : 'You asked: nothing in particular comes to mind.'}</p>`
+            : `<p><button data-ask="${id}">What do I know about this?</button></p>`;
+    }
     const u = game.unlocked.get(id);
     h += `<p class="small muted">You collected this card at ${paraLabel(u.para)} (card ${u.at + 1}).${c.section === 'events' && model.slots.has(`${id}.time`) && game.settled(`${id}.time`) ? ` It happened: ${esc(cardName(game.settled(`${id}.time`)))}.` : ''}</p>`;
 
@@ -333,6 +339,29 @@ function toolCards() {
     return h;
 }
 
+function toolBackground() {
+    const facts = [...game.unlocked.keys()].filter((k) => model.cards.get(k).section === 'rules');
+    const how = game.background === BG_ASK ? 'You recall a fact when you ask about a card it concerns.' : game.background === BG_START ? 'Everything a reader of the time knew, from the start.' : 'Each fact appears where the story first touches its subject.';
+    if (!facts.length) return `<p class="empty">No background facts yet. ${how}</p>`;
+    // Grouped under the topic (or card) each sits on; a fact on several cards is listed once, under the first held.
+    const groups = new Map();
+    for (const r of facts) {
+        const on = model.cards.get(r).attaches_to.find((c) => model.cards.get(c)?.kind === 'topic' || c === 'moor') ?? model.cards.get(r).attaches_to[0];
+        if (!groups.has(on)) groups.set(on, []);
+        groups.get(on).push(r);
+    }
+    let h = `<p class="small muted">${how} Some of these matter to the case; most do not.</p>`;
+    for (const [on, list] of groups) {
+        // Never name a card the story has not reached: a topic heading is fine, anything else waits.
+        const heading = game.knows(on) ? link(on) : model.cards.get(on)?.kind === 'topic' ? esc(game.nameOf(on)) : 'Other';
+        h += `<h3 class="section">${heading}</h3><ul class="list">`;
+        // By text, not id: ids would sort the filler apart from the facts that matter.
+        for (const r of list.sort((a, b) => model.cards.get(a).text.localeCompare(model.cards.get(b).text))) h += `<li>${esc(model.cards.get(r).text)}</li>`;
+        h += '</ul>';
+    }
+    return h;
+}
+
 function toolQuestions() {
     const raised = model.data.questions.filter((q) => game.questionRaised(q.id));
     const doubts = [...game.suspected].filter((c) => game.knows(c));
@@ -420,6 +449,7 @@ function render() {
     $('#progress').textContent = `${found} cards · ${settledQ} of ${raised} questions settled`;
     $('#difficulty').value = game.difficulty;
     $('#pace').value = game.pace;
+    $('#background').value = game.background;
     renderStory();
     renderTool();
 }
@@ -539,6 +569,13 @@ document.addEventListener('click', (e) => {
         scrollStory();
         return;
     }
+    const asking = e.target.closest('[data-ask]');
+    if (asking) {
+        const got = game.ask(asking.dataset.ask);
+        toast(got.length ? `You recall ${got.length} fact${got.length > 1 ? 's' : ''} about it.` : 'Nothing in particular comes to mind.');
+        changed();
+        return;
+    }
     const d = e.target.closest('[data-suspect],[data-unsuspect],[data-clash]');
     if (d) {
         if (d.dataset.suspect) { game.suspect(d.dataset.suspect); toast(`You now doubt: ${esc(shortName(d.dataset.suspect, 60))}`); }
@@ -651,13 +688,15 @@ document.addEventListener('change', (e) => {
         const other = [...game.unlocked.keys()].find((k) => cardName(k).toLowerCase() === typed);
         toast(other ? 'That is not the right kind of thing for this question.' : 'No card of yours by that name.');
     }
-    if (e.target.id === 'difficulty' || e.target.id === 'pace') {
+    if (e.target.id === 'difficulty' || e.target.id === 'pace' || e.target.id === 'background') {
         const state = game.save();
         if (e.target.id === 'difficulty' && state.difficulty !== $('#difficulty').value) {
             if (!confirm('Changing difficulty clears your answers (each difficulty keeps them differently). Your place in the story is kept.')) { render(); return; }
             state.marks = [];
             state.collected = null;
         }
+        // A new difficulty brings its own background default (When relevant for Trivial, When asked otherwise).
+        state.background = e.target.id === 'difficulty' ? BACKGROUND_DEFAULTS[$('#difficulty').value] : $('#background').value;
         state.difficulty = $('#difficulty').value;
         state.pace = $('#pace').value;
         game.load(state);
