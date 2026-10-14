@@ -130,12 +130,12 @@ export class Problem {
      * A minimal subset of `active` that is still inconsistent with `fixed` (deletion filter).
      * Returns null when `fixed` is consistent with all of `active`.
      */
-    explainConflict(active, fixed = {}) {
+    explainConflict(active, fixed = {}, { extra = [] } = {}) {
         const all = [...active];
-        if (this.consistent(all, fixed).ok) return null;
+        if (this.consistent(all, fixed, { extra }).ok) return null;
         // QuickXplain (Junker 2004): halve the candidates, keeping a half whenever the rest already clashes, so a
         // clash of k among n costs about k·log n checks instead of n.
-        const ok = (ids) => this.consistent(ids, fixed).ok;
+        const ok = (ids) => this.consistent(ids, fixed, { extra }).ok;
         const qx = (base, added, cands) => {
             if (added && !ok(base)) return [];
             if (cands.length === 1) return cands;

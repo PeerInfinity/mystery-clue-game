@@ -1,7 +1,12 @@
 // Turns a case (case.json + its parts, already parsed) into the game model: cards, slots, constraints, and a
 // solver Problem over them.
 //
-// Cards: entities, events, claims, rules, glosses (every one has a unique id across the case).
+// Cards: entities, events, claims, rules, glosses, and inferences (every one has a unique id across the case).
+// INFERENCES (constraints.json): reasoning written into the case, each resting on premise cards (clues and
+//   background facts), with a formula. An inference is a card too: the player builds it (or hears a character
+//   state it), holds it, and can doubt it, like a clue. Some are false (`truth: false`): a character's wrong
+//   reasoning. Two readings decide when one counts: the case's own (validator, route checks), where it holds once
+//   its premises are in hand; and a player's (Game, outside Trivial), where it holds while its card is held.
 // Slots: one per event facet, per entity facet, per claim truth, plus the explicitly declared slots.
 // Constraints: one per claim that asserts something (premise: the claim itself), plus the authored reasoning
 //   constraints (premises: the claims and rules they rest on).
@@ -43,6 +48,7 @@ export function buildModel(data) {
         cards.set(item.id, { ...item, section });
     };
     for (const section of CARD_SECTIONS) for (const item of data[section] ?? []) addCard(section, item);
+    for (const item of data.constraints ?? []) addCard('inferences', { ...item, text: item.label });
 
     const windows = data.time.windows;
     const timeOrder = new Map(windows.map((w, i) => [w.id, i]));
@@ -99,6 +105,11 @@ export function buildModel(data) {
             addSlot({ id: `${c.id}.truth`, on: c.id, facet: 'truth', prompt: 'Is it true?', domain: ['true', 'false'], answer: 'true', latent: true });
         }
     }
+    // An inference's truth, like a clue's: open in the case's reading when it is false, latent when it is true.
+    for (const k of data.constraints ?? []) {
+        const isFalse = k.truth === false;
+        addSlot({ id: `${k.id}.truth`, on: k.id, facet: 'truth', prompt: 'Does it hold?', domain: ['true', 'false'], answer: isFalse ? 'false' : 'true', ...(isFalse ? {} : { latent: true }) });
+    }
     for (const s of data.slots ?? []) {
         const domain = s.domain.values ? [...s.domain.values] : domainFor(s.domain, s.domain.include_self ? s.on : null);
         for (const extra of s.domain.also ?? []) if (!domain.includes(extra)) domain.push(extra);
@@ -140,7 +151,26 @@ export function buildModel(data) {
             claimForms.set(c.id, { trusted: `k.${c.id}`, doubted: `k.${c.id}#doubted` });
         }
     }
-    for (const k of data.constraints ?? []) addConstraint({ ...k });
+    for (const k of data.constraints ?? []) {
+        // Trusted: the formula holds. Doubted: it holds exactly when the inference's truth slot is 'true'. The
+        // case reads a false inference doubted (so its truth slot comes out 'false'), a true one trusted.
+        const doubted = {
+            and: [
+                { implies: [{ eq: [`${k.id}.truth`, 'true'] }, k.formula] },
+                { implies: [{ eq: [`${k.id}.truth`, 'false'] }, { not: k.formula }] },
+            ],
+        };
+        const base = { label: k.label, by: k.by, premises: k.premises, from_claim: k.id, inference: k.id };
+        if (k.truth === false) {
+            addConstraint({ ...base, id: k.id, formula: doubted });
+            addConstraint({ ...base, id: `${k.id}#trusted`, formula: k.formula, variant: true });
+            claimForms.set(k.id, { trusted: `${k.id}#trusted`, doubted: k.id });
+        } else {
+            addConstraint({ ...base, id: k.id, formula: k.formula });
+            addConstraint({ ...base, id: `${k.id}#doubted`, formula: doubted, variant: true });
+            claimForms.set(k.id, { trusted: k.id, doubted: `${k.id}#doubted` });
+        }
+    }
 
     for (const k of constraints.values()) {
         for (const s of slotsOf(k.formula)) {
@@ -162,13 +192,16 @@ export function buildModel(data) {
 
 /**
  * Constraint ids whose premises are all in `known` (a Set of card ids).
- * With `doubted` (a Set of claim ids) this is a PLAYER's view: every claim is trusted unless it is in `doubted`.
- * Without it, the case's own reading.
+ * With `doubted` (a Set of claim and inference ids) this is a PLAYER's view: every claim and inference is
+ * trusted unless it is in `doubted`. Without it, the case's own reading.
+ * `heldInferences`: an inference counts while its own card is in `known` (a player who builds inferences),
+ * instead of once its premises are (the case's reading, and Trivial).
  */
-export function activeConstraints(model, known, doubted = null) {
+export function activeConstraints(model, known, doubted = null, { heldInferences = false } = {}) {
     const out = [];
     for (const k of model.constraints.values()) {
-        if (k.variant || !k.premises.every((p) => known.has(p))) continue;
+        if (k.variant) continue;
+        if (heldInferences && k.inference ? !known.has(k.inference) : !k.premises.every((p) => known.has(p))) continue;
         const forms = doubted && k.from_claim ? model.claimForms.get(k.from_claim) : null;
         out.push(forms ? (doubted.has(k.from_claim) ? forms.doubted : forms.trusted) : k.id);
     }

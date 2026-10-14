@@ -5,7 +5,7 @@ import { Game, TRIVIAL, EASY, MEDIUM, HARD, WAIT, BG_START, BG_RELEVANT, BG_ASK 
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 
-/** Prove a route step's conclusion, citing the step's own premises. Like Holmes, first doubt what disagrees. */
+/** Prove a route step's conclusion against everything held. Like Holmes, first doubt what disagrees. */
 function proveStep(game, stepId) {
     const step = game.routeById.get(stepId);
     const c = step.concludes;
@@ -13,9 +13,29 @@ function proveStep(game, stepId) {
     for (const g of game.givers.get(slot) ?? []) {
         if (game.knows(g.claim) && (c.slot ? g.value === c.value : g.value !== c.formula.eq[1])) game.suspect(g.claim);
     }
-    if (c.slot) return game.strike(c.slot, c.value, step.premises);
-    if (c.formula.eq) return game.prove(c.formula.eq[0], c.formula.eq[1], step.premises);
+    if (c.slot) return game.strike(c.slot, c.value);
+    if (c.formula.eq) return game.prove(c.formula.eq[0], c.formula.eq[1]);
     return { ok: false, reason: 'not an eq step' };
+}
+
+/** Build an inference the way a player would: connect what it needs (naming its kind in Hard). */
+function build(game, id) {
+    const kind = game.difficulty === HARD ? game.conclusionKinds(id)[0] : null;
+    return game.propose(game.connectSet(id), kind);
+}
+
+/** Make Holmes's step: build the inferences it needs, or (when it needs none) prove its conclusion. */
+function makeStep(game, stepId) {
+    const needs = game.stepInferences(stepId);
+    if (!needs) return proveStep(game, stepId);
+    for (const id of needs) if (!game.knows(id)) build(game, id);
+    const missing = needs.filter((id) => !game.knows(id));
+    return missing.length ? { ok: false, reason: `could not build ${missing.join(', ')}` } : { ok: true };
+}
+
+/** Build everything buildable from what is held. */
+function buildAll(game) {
+    for (const id of game.buildable()) build(game, id);
 }
 
 test('reading the whole story (free pace, Easy, background when relevant) collects every clue, entity, event and fact', () => {
@@ -39,15 +59,18 @@ for (const background of [BG_ASK, BG_RELEVANT, BG_START]) {
                 const step = game.routeById.get(s);
                 const c = step.concludes;
                 const slot = c.slot ?? c.formula.eq[0];
-                if (!game.slotVisible(slot)) stuck.push(`${s}: question ${slot} not visible at paragraph ${game.read}`);
-                if (c.formula?.eq && !game.offered(slot, c.formula.eq[1])) stuck.push(`${s}: answer ${c.formula.eq[1]} not offered at paragraph ${game.read}`);
+                if (!game.stepInferences(s)) {
+                    if (!game.slotVisible(slot)) stuck.push(`${s}: question ${slot} not visible at paragraph ${game.read}`);
+                    if (c.formula?.eq && !game.offered(slot, c.formula.eq[1])) stuck.push(`${s}: answer ${c.formula.eq[1]} not offered at paragraph ${game.read}`);
+                }
                 // Like Holmes, recall what is known about the things the step turns on.
-                for (const p of step.premises) {
+                const premises = [...new Set([...step.premises, ...(game.stepInferences(s) ?? []).flatMap((id) => game.inferenceById.get(id).premises)])];
+                for (const p of premises) {
                     if (game.knows(p) || model.cards.get(p)?.section !== 'rules') continue;
                     for (const card of model.cards.get(p).attaches_to) game.ask(card);
                 }
-                const unread = step.premises.filter((p) => !game.knows(p));
-                const proof = unread.length ? { ok: false } : proveStep(game, s);
+                const unread = premises.filter((p) => !game.knows(p));
+                const proof = unread.length ? { ok: false } : makeStep(game, s);
                 if (!proof.ok) stuck.push(`${s} before paragraph ${game.read}${unread.length ? ` (not yet available: ${unread.join(', ')})` : ''}`);
             }
             if (game.blockers().length) break;
@@ -119,16 +142,62 @@ test('Hard: reading collects nothing; clicking the text does', () => {
     assert.deepEqual(game.pencil('e.opium_added.agent'), ['simpson']);
 });
 
-test('a citation is accepted by any sufficient route, and refused when it is not enough', () => {
+test('a cross-out is checked against everything held and trusted, inferences included', () => {
+    const game = new Game(model, { background: BG_START });
+    while (game.read < 60) game.advance();
+    // Before the curry inference is held, nothing rules Simpson out as the drugger.
+    assert.equal(game.checkElimination('e.opium_added.agent', 'simpson').ok, false);
+    // Connecting the curry clues builds both inferences that rest on them (background implicit).
+    assert.ok(build(game, 'k.drugger_knew_the_dish').built.includes('k.drugger_knew_the_dish'));
+    const res = game.checkElimination('e.opium_added.agent', 'simpson');
+    assert.ok(res.ok);
+    assert.ok(res.used.includes('k.drugger_knew_the_dish'), res.used.join(' '));
+    // Doubting the inference takes the proof away.
+    assert.ok(game.strike('e.opium_added.agent', 'simpson').ok);
+    game.suspect('k.drugger_knew_the_dish');
+    assert.ok(game.strikeLapsed('e.opium_added.agent', 'simpson'));
+});
+
+test('building an inference: one card may complete it; otherwise the game says how many connections are left', () => {
     const game = new Game(model, { background: BG_START });
     while (!game.finished()) game.advance();
-    const curry = game.routeById.get('i.straker_took_horse').premises;
-    const dog = game.routeById.get('i.visitor_known_to_dog').premises;
-    assert.ok(game.checkElimination('e.horse_led_out.agent', 'simpson', curry).ok);
-    assert.ok(game.checkElimination('e.horse_led_out.agent', 'simpson', dog).ok);
-    assert.equal(game.checkElimination('e.horse_led_out.agent', 'colonel_ross', dog).ok, false);
-    const fresh = new Game(model);
-    assert.equal(fresh.checkElimination('e.opium_added.agent', 'simpson', curry).ok, false, 'cards not yet found cannot be cited');
+    const fresh = (id) => !game.knows(id);
+    // A two-clue inference, not stated in the story: the first card is onto something, the second builds it.
+    const two = game.inferences.find((k) => fresh(k.id) && game.connectSet(k.id).length === 2 && game.buildable().includes(k.id));
+    assert.ok(two, 'a two-clue inference to build');
+    const [a, b] = game.connectSet(two.id);
+    const first = game.propose([a]);
+    assert.ok(first.onto && first.more >= 1, JSON.stringify(first));
+    assert.ok(!game.knows(two.id));
+    const second = game.propose([a, b]);
+    assert.ok(second.built.includes(two.id), JSON.stringify(second));
+    // Unrelated cards are onto nothing.
+    const nothing = game.propose(['c.straker_rode_for_ross', 'c.geography']);
+    assert.deepEqual([nothing.built, nothing.onto], [[], false]);
+});
+
+test('Hard: background facts are connections too, and the conclusion\'s kind must be named', () => {
+    const game = new Game(model, { difficulty: HARD, background: BG_START });
+    while (!game.finished()) game.advance();
+    for (const p of game.story.spans.keys()) game.collect(p, game.story.spans[p].flatMap((sp) => sp.ids));
+    const id = 'k.drugger_chose_the_dish';
+    assert.ok(game.connectSet(id).some((x) => model.cards.get(x).section === 'rules'));
+    if (game.knows(id)) return;
+    const clues = game.connectSet(id).filter((x) => model.cards.get(x).section !== 'rules');
+    assert.equal(game.propose(clues, 'who').built.length, 0, 'clues alone are not enough in Hard');
+    assert.ok(game.propose(game.connectSet(id), null).needsKind);
+    assert.ok(game.propose(game.connectSet(id), 'when').wrongKind);
+    assert.deepEqual(game.propose(game.connectSet(id), 'who').built, [id]);
+});
+
+test("Holmes's inferences arrive where he states them; other readers must build the rest", () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    const step = 'i.visitor_known_to_dog';
+    const needs = game.stepInferences(step);
+    assert.deepEqual(needs, ['k.dog_knew_the_visitor']);
+    while (!game.finished() && !game.knows(needs[0])) game.advance();
+    assert.equal(game.howHeld(needs[0]).how, 'stated');
+    assert.equal(game.howHeld(needs[0]).by, 'holmes');
 });
 
 test('the police theory survives the first part of the story and is broken by the end', () => {
@@ -180,24 +249,24 @@ test('doubt: a trusted claim fills its details but never a case question; doubti
 test('doubt: a proof resting on a claim lapses when the claim is suspected', () => {
     const game = new Game(model);
     while (!game.finished()) game.advance();
-    assert.ok(game.prove('the_bay.identity', 'silver_blaze', ['c.wash_with_spirits']).ok);
+    const res = game.prove('the_bay.identity', 'silver_blaze');
+    assert.ok(res.ok);
     assert.equal(game.settled('the_bay.identity'), 'silver_blaze');
-    game.suspect('c.wash_with_spirits');
+    const claim = game.lapsedBy(res.used).length ? null : res.used.map((k) => model.constraints.get(k).from_claim).find(Boolean);
+    game.suspect(claim);
     assert.equal(game.settled('the_bay.identity'), null);
     assert.ok(game.proofLapsed('the_bay.identity'));
-    game.unsuspect('c.wash_with_spirits');
+    game.unsuspect(claim);
     assert.equal(game.settled('the_bay.identity'), 'silver_blaze');
 });
 
-test('doubt: citing clues that cannot all be true is refused, naming the clash', () => {
+test('a clash among what the player trusts is set aside when checking a proof', () => {
     const game = new Game(model, { background: BG_START });
     while (!game.finished()) game.advance();
-    const step = game.routeById.get('i.straker_dishonest');
-    const res = game.prove('straker.honest', 'false', [...step.premises, 'c.straker_honest_record']);
-    assert.equal(res.ok, false);
-    assert.ok(res.contradiction.includes('k.c.straker_honest_record#trusted'), res.contradiction.join(' '));
-    game.suspect('c.straker_honest_record');
-    assert.ok(game.prove('straker.honest', 'false', step.premises).ok);
+    assert.ok(game.clashes().some((c) => c.claims.includes('c.straker_honest_record')));
+    const res = game.prove('straker.honest', 'false');
+    assert.ok(res.ok);
+    assert.ok(!res.used.includes('k.c.straker_honest_record'));
 });
 
 test('a card is called only what the story has called it so far', () => {
@@ -250,6 +319,7 @@ test('circling marks an answer the player favours: it is saved, and proves and r
 test('Easy: clashes are found and set aside, so one clash does not rule out answers elsewhere; a doubt resolves one', () => {
     const game = new Game(model, { difficulty: EASY });
     while (game.read < 90) game.advance();
+    buildAll(game);
     const clashes = game.clashes();
     assert.ok(clashes.length > 0);
     assert.ok(clashes.every((c) => c.claims.length >= 1));
