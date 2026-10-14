@@ -2,14 +2,17 @@
 //
 // Reading: the story advances one paragraph at a time. Holmes's actions happen as the text reaches them. With
 //   the 'wait' pace, a paragraph where Holmes acts on (or announces) a deduction cannot be read until the
-//   player has made that deduction.
-// Collecting: in Trivial and Easy, every card mentioned in a paragraph is collected as it is read. In Hard,
-//   a card is collected only when the player clicks the text that mentions it.
+//   player holds the inferences that deduction needs.
+// Collecting: in Trivial, Easy and Medium, every card mentioned in a paragraph is collected as it is read. In
+//   Hard, a card is collected only when the player clicks the text that mentions it.
+// Inferences: reasoning that connects clues. The player builds them from cards (propose), hears characters
+//   state them (Holmes's where the story tells his step), or, in Trivial, is given them. Held inferences count
+//   like trusted clues until doubted.
 // Connecting: every visible slot has candidates.
-//   Trivial: the whole domain, the values the collected clues already rule out are greyed; cross-outs may be
-//     plain pencil marks.
-//   Easy: the whole domain, nothing greyed; every cross-out needs cited evidence the game accepts.
-//   Hard: the player proposes candidates first (only their type is checked); cross-outs need evidence.
+//   Trivial: the game settles questions itself.
+//   Easy: every answer listed, the ones the held clues and inferences rule out greyed; plain pencil cross-outs.
+//   Medium: every answer listed; a cross-out is checked against everything held and trusted.
+//   Hard: the player proposes candidates first (only their type is checked); cross-outs are checked.
 // Background facts (rule cards) sit on the entity cards they belong to and arrive with them.
 
 import { activeConstraints, trustedClaim } from './caseModel.js';

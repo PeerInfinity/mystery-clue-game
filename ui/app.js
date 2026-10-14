@@ -4,7 +4,8 @@
 
 import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
-import { Game, TRIVIAL, EASY, MEDIUM, HARD, WAIT, BG_START, BG_ASK, BACKGROUND_DEFAULTS } from '../engine/game.js';
+import { evaluate } from '../engine/logic.js';
+import { Game, TRIVIAL, EASY, MEDIUM, HARD, WAIT, BG_START, BG_ASK, BACKGROUND_DEFAULTS, CONNECT_DEFAULTS, INF_CONNECT, CONCLUSION_KINDS } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -21,7 +22,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { tab: 'card', selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null };
+const ui = { tab: 'card', selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -29,7 +30,7 @@ function cardName(id) {
     const c = model.cards.get(id);
     if (!c) return model.windows.find((w) => w.id === id)?.label ?? model.data.questions.find((q) => q.id === id)?.text ?? id;
     if (c.section === 'entities' || c.section === 'events') return game.nameOf(id);
-    if (c.section === 'claims' || c.section === 'rules') return c.text;
+    if (c.section === 'claims' || c.section === 'rules' || c.section === 'inferences') return c.text;
     if (c.section === 'glosses') return c.term;
     return id;
 }
@@ -45,7 +46,7 @@ function kindOf(id) {
     const c = model.cards.get(id);
     if (!c) return '';
     if (c.section === 'entities') return c.kind;
-    return { events: 'event', claims: 'clue', rules: 'background', glosses: 'background' }[c.section];
+    return { events: 'event', claims: 'clue', rules: 'background', glosses: 'background', inferences: 'inference' }[c.section];
 }
 const paraLabel = (p) => `paragraph ${p}`;
 
@@ -100,7 +101,13 @@ function renderReader() {
     const aheadScene = game.nextSceneAt() - game.read;
     const blocked = blockers.length && game.pace === WAIT;
     let note = '';
-    if (blockers.length) {
+    if (blockers.length && blockers.some((s) => game.stepInferences(s))) {
+        // Holmes is about to reason: the story waits until the player has built the inferences he uses.
+        const needs = [...new Set(blockers.flatMap((s) => game.stepInferences(s) ?? []))].filter((id) => !game.knows(id));
+        note = blocked
+            ? `<div class="note block">Holmes has worked something out. Before reading on, build the ${needs.length === 1 ? 'inference' : `${needs.length} inferences`} he is about to draw (see <span class="link" data-tab-open="inferences">Inferences</span>).${game.difficulty === EASY ? ` They start from: ${[...new Set(needs.flatMap((id) => game.connectSet(id)))].filter((x) => game.knows(x)).map((x) => link(x, shortName(x, 40))).join(', ')}.` : ''}</div>`
+            : '<div class="note">Holmes is a step ahead of you here.</div>';
+    } else if (blockers.length) {
         const prompts = blockers.map((s) => {
             const c = game.routeById.get(s).concludes;
             const slot = model.slots.get(c.slot ?? c.formula.eq[0]);
@@ -130,7 +137,11 @@ function scrollStory() {
 // ---------- tools ----------
 function renderTool() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
-    $('#tool').innerHTML = { card: toolCard, cards: toolCards, questions: toolQuestions, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
+    $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
+    const infTab = document.querySelector('.tab[data-tab="inferences"]');
+    infTab.hidden = game.difficulty === TRIVIAL && !game.heldInferences().length;
+    const left = game.difficulty === EASY ? game.buildable().length : 0;
+    infTab.textContent = `Inferences${left ? ` (${left} to build)` : ''}`;
     const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)));
     document.querySelector('.tab[data-tab="cards"]').textContent = `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`;
     const clashes = game.difficulty === EASY ? game.clashes().length : 0;
@@ -153,7 +164,8 @@ function intro() {
 <li>Read the story on the left, one paragraph at a time.</li>
 <li>Everything the story mentions — people, places, things, events, statements — becomes a card. ${game.difficulty === HARD ? 'In Hard mode you collect a card by clicking the words in the story that mention it.' : 'Click the marked words in the story to open a card.'}</li>
 <li>Cards have <b>open questions</b>: who did it, where, when, whose is it, is it true. Each question lists its possible answers, like pencil marks in sudoku${game.difficulty === HARD ? ' — in Hard mode you list them yourself' : ''}.</li>
-<li>${game.difficulty === TRIVIAL ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : game.difficulty === EASY ? 'Cross answers out; the game greys the ones your clues already rule out. Circle the answers you favour.' : 'Rule answers out by citing the clues and background notes that exclude them. The game checks the reasoning; any sufficient set of reasons is accepted. Circle the answers you favour.'}</li>
+<li>${game.difficulty === TRIVIAL ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : game.difficulty === EASY ? 'Cross answers out; the game greys the ones your clues already rule out. Circle the answers you favour.' : 'Rule answers out: the game checks each against every clue and inference you hold and trust. Circle the answers you favour.'}</li>
+<li>${game.difficulty === TRIVIAL ? 'The game draws the inferences for you; they are listed under Inferences.' : `<b>Inferences</b> are the reasoning that connects clues. Open a clue or background card and press “Infer from this”, then connect further cards; the game tells you when you are onto something${game.difficulty === HARD ? ', and you name what the conclusion is about' : ''}. Holmes and the others state some inferences themselves.`}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
@@ -218,14 +230,21 @@ function toolCard() {
         }
         h += '</div>';
     });
-    if (c.section === 'claims') {
+    if (['claims', 'rules'].includes(c.section) && game.difficulty !== TRIVIAL) h += inferButton(id);
+    if (c.section === 'inferences') {
+        const how = game.howHeld(id);
+        h += `<p class="small muted">${how?.how === 'built' ? 'You built this inference' : how?.how === 'stated' ? `${esc(cardName(how.by))} drew this inference` : 'Worked out for you'} · ${paraLabel(game.unlocked.get(id).para)}</p>`;
+        h += `<div class="small">Rests on: ${model.cards.get(id).premises.map((x) => (game.knows(x) ? link(x, shortName(x, 60)) : '<span class="muted">something you do not know yet</span>')).join(' · ')}</div>`;
+    }
+    if (c.section === 'claims' || c.section === 'inferences') {
+        if (c.section === 'inferences') h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(c.formula))}</p>`;
         if (game.canSuspect(id)) {
             h += game.isSuspected(id)
                 ? `<p class="doubt on">You suspect this may be false: it counts as fact nowhere, and “Is it true?” is open below. <button data-unsuspect="${id}" class="quiet">Trust it again</button></p>`
                 : `<p class="doubt">Until you doubt it, the game takes this at its word. <button data-suspect="${id}">I suspect this may be false</button></p>`;
         }
         const form = model.claimForms.get(id);
-        const f = form && model.constraints.get(form.trusted)?.formula;
+        const f = c.section === 'claims' && form && model.constraints.get(form.trusted)?.formula;
         if (f) h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(f))}</p>`;
         const about = (c.about ?? []).filter((x) => game.knows(x));
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
@@ -367,7 +386,8 @@ function slotMenu(s, v) {
     else {
         b.push(game.isCircled(s.id, v) ? '<button data-op="uncircle">Uncircle</button>' : '<button data-op="circle">Circle</button>');
         if (game.difficulty === EASY) b.push('<button data-op="strike">Cross out</button>');
-        b.push('<button data-op="strike-why">Rule out, with evidence…</button>', '<button data-op="prove">Prove it\'s this…</button>');
+        else b.push('<button data-op="rule" title="Checked against every clue and inference you hold and trust">Rule it out</button>');
+        b.push('<button data-op="prove" title="Checked against every clue and inference you hold and trust">Prove it\'s this</button>');
         if (game.difficulty === EASY) b.push('<button data-op="fit" class="quiet">Could it fit?</button>');
         if (game.difficulty === HARD) b.push('<button data-op="unpropose" class="quiet">Take back</button>');
     }
@@ -483,7 +503,7 @@ function clashesHtml() {
 }
 
 function toolTheories() {
-    let h = '<p class="small muted">A theory is a set of answers held together. It fits until a clue you hold breaks it. To add answers, pick an answer on any question and choose “Add to theory”.</p>';
+    let h = '<p class="small muted">A theory is a set of answers held together. It fits until a clue or inference you hold breaks it. To add answers, pick an answer on any question and choose “Add to theory”.</p>';
     const story_ = (model.data.theories ?? []).filter((t) => {
         const at = t.source?.length ? story.find(t.source[0]) : null;
         return at && at.para < game.read && Object.keys(t.assignment).every((s) => game.knows(model.slots.get(s).on));
@@ -493,11 +513,25 @@ function toolTheories() {
         const res = game.checkTheory(t);
         h += `<div class="theory ${res.fits ? 'fits' : 'broken'}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
         h += `<ul class="small">${Object.entries(t.assignment).map(([s, v]) => `<li><span class="link" data-slot-open="${s}">${esc(game.promptOf(s))}</span> → ${esc(valueName(s, v))}${t.story ? '' : ` <span class="link" data-untheory="${t.id}|${s}">remove</span>`}</li>`).join('') || '<li class="empty">no answers yet</li>'}</ul>`;
+        // The inferences the theory rests on (the ones its holders drew) and, among those the player holds, the
+        // ones its answers agree with and the ones they go against.
+        const restsOn = (t.rests_on ?? []).filter((x) => game.knows(x));
+        if (restsOn.length) h += `<div class="small">Rests on: ${restsOn.map((x) => link(x, shortName(x, 70))).join(' · ')}</div>`;
+        const assign = new Map(Object.entries(t.assignment));
+        const agree = [];
+        const against = [];
+        for (const k of game.heldInferences()) {
+            if (game.isSuspected(k) || restsOn.includes(k)) continue;
+            const v = evaluate(model.cards.get(k).formula, assign, model.timeOrder);
+            if (v === true) agree.push(k); else if (v === false) against.push(k);
+        }
+        if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
+        if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
         if (game.assisted()) {
             h += res.fits ? '<div class="small good">Fits everything you hold so far.</div>'
-                : `<div class="small bad">Broken by your clues:</div><ul class="small">${res.conflict.map((k) => `<li>${esc(model.constraints.get(k).label)}</li>`).join('')}</ul>`;
+                : `<div class="small bad">Broken by what you hold:</div><div class="small">${chainHtml(res.conflict, t.assignment)}</div>`;
         } else {
-            h += res.fits ? '<div class="small good">Nothing you hold rules it out yet.</div>' : '<div class="small bad">Something you hold rules it out. Find it: rule out one of its answers with evidence.</div>';
+            h += res.fits ? '<div class="small good">Nothing you hold rules it out yet.</div>' : '<div class="small bad">Something you hold and trust rules it out. Find it: try ruling out its answers.</div>';
         }
         if (!t.story) h += `<div class="small"><span class="link" data-theory-current="${t.id}">${ui.theory === t.id ? '★ new answers go here' : 'add answers here'}</span> · <span class="link" data-del-theory="${t.id}">delete</span></div>`;
         h += '</div>';
@@ -547,6 +581,8 @@ function render() {
     $('#pace').value = game.pace;
     $('#background').value = game.background;
     $('#autopace').value = game.autoPace;
+    $('#connect').value = game.connect;
+    $('#connect-label').hidden = game.difficulty === TRIVIAL;
     $('#autopace-label').hidden = game.difficulty !== TRIVIAL;
     const pick = (id) => $(`#${id}`).selectedOptions[0]?.textContent ?? '';
     $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('background').toLowerCase()}`;
@@ -585,31 +621,69 @@ function chainHtml(ids, fixed = {}) {
     return h;
 }
 
-// ---------- citing ----------
-let citeFor = null;
-const chosen = new Set();
-function openCite(kind, slot, value) {
-    citeFor = { kind, slot, value };
-    chosen.clear();
-    const s = model.slots.get(slot);
-    $('#cite-title').textContent = kind === 'prove' ? `Prove: ${game.promptOf(slot)} → ${valueName(slot, value)}` : `Rule out: ${game.promptOf(slot)} — not ${valueName(slot, value)}`;
-    $('#cite-help').textContent = 'Pick the clues and background notes that, together, settle it. Any sufficient set is accepted.';
-    $('#cite-search').value = '';
-    $('#cite-result').textContent = '';
-    $('#cite-result').className = 'result';
-    drawCite();
-    $('#cite').showModal();
+// ---------- building inferences ----------
+// The player builds an inference from a card ("Infer from this"), then connects further cards; the game says
+// when they are onto something and how many connections are left, and builds the inference when they complete it.
+
+/** The button on a clue or background card. */
+function inferButton(id) {
+    const b = ui.building;
+    if (b?.cards.includes(id)) return `<p class="infer"><span class="small muted">In your connection.</span> <span class="link small" data-unbuild="${id}">take it out</span></p>`;
+    return `<p class="infer"><button data-infer="${id}" class="quiet" title="Propose an inference that starts from this card">${b?.cards.length ? 'Connect to this' : 'Infer from this'}</button></p>`;
 }
-function drawCite() {
-    const q = $('#cite-search').value.toLowerCase();
-    // Background notes (period glosses and general facts alike) are all citable, so the list does not
-    // reveal which of them matter.
-    const notes = (model.data.glosses ?? []).filter((g) => g.attaches_to.some((x) => game.knows(x))).map((g) => g.id);
-    const pool = [...[...game.unlocked.keys()].filter((k) => ['claims', 'rules'].includes(model.cards.get(k).section)), ...notes];
-    const text = (k) => (model.cards.get(k).section === 'glosses' ? `${cardName(k)}: ${model.cards.get(k).text}` : cardName(k));
-    const shown = pool.filter((k) => chosen.has(k) || !q || text(k).toLowerCase().includes(q));
-    $('#cite-chosen').innerHTML = [...chosen].map((k) => `<span class="chip" data-unchoose="${k}">${esc(shortName(k, 50))} <span class="x">✕</span></span>`).join('') || '<span class="empty">nothing cited yet</span>';
-    $('#cite-list').innerHTML = shown.slice(0, 250).map((k) => `<label><input type="checkbox" data-choose="${k}" ${chosen.has(k) ? 'checked' : ''}><span><span class="kind">${kindOf(k)}</span>${esc(text(k))}</span></label>`).join('');
+
+/** The connection in progress, above whatever tab is open. */
+function buildingBar() {
+    const b = ui.building;
+    if (!b) return '';
+    let h = '<div class="building"><b>Building an inference</b> ';
+    h += b.cards.map((x) => `<span class="chip">${link(x, shortName(x, 40))} <span class="x" data-unbuild="${x}">✕</span></span>`).join(' + ') || '<span class="small muted">open a clue or background card and press “Infer from this”</span>';
+    if (game.difficulty === HARD) {
+        h += ` <label class="small">about <select id="build-kind"><option value="">…choose</option>${Object.entries(CONCLUSION_KINDS).map(([k, label]) => `<option value="${k}" ${b.kind === k ? 'selected' : ''}>${esc(label)}</option>`).join('')}</select></label>`;
+    }
+    h += ` <button class="quiet small" data-build-clear>Done</button>`;
+    if (b.note) h += `<div class="small build-note">${b.note}</div>`;
+    return `${h}</div>`;
+}
+
+/** Try the connection as it stands, and say what came of it. */
+function runPropose() {
+    const b = ui.building;
+    if (!b) return;
+    if (!b.cards.length) { b.note = ''; renderTool(); return; }
+    if (game.difficulty === HARD && !b.kind) { b.note = 'Choose what the conclusion would be about.'; renderTool(); return; }
+    const res = game.propose(b.cards, b.kind);
+    if (res.built.length) {
+        b.note = `<span class="good">You inferred:</span> ${res.built.map((x) => link(x, shortName(x, 90))).join('; ')}${res.onto ? ' <span class="muted">— and these cards are onto something more.</span>' : ''}`;
+        toast(`New inference: ${esc(shortName(res.built[0], 70))}`);
+        if (!res.onto) b.cards = [];
+        changed();
+        return;
+    }
+    if (res.lacking) b.note = `You're onto something, but it needs knowledge you do not have yet.${game.background === BG_ASK ? ' Try asking what you know about the things involved.' : ''}`;
+    else if (res.wrongKind) b.note = 'You\'re onto something, but the conclusion would not be about that.';
+    else if (res.onto) b.note = res.more === 1 ? 'You\'re onto something: connect one more card.' : `You're onto something, but it needs ${res.more} more connections.`;
+    else if (b.cards.length === 1) { b.note = 'Nothing follows from that card.'; b.cards = []; }
+    else { const last = b.cards.pop(); b.note = `${esc(shortName(last, 50))} does not connect with the others.`; }
+    renderTool();
+}
+
+function toolInferences() {
+    const held = game.heldInferences().sort((a, b) => game.unlocked.get(a).at - game.unlocked.get(b).at);
+    let h = '<p class="small muted">Conclusions drawn from the clues and what you know. You hold the ones you have built and the ones you have heard someone draw; until you doubt one, the game takes it as so. To build one, open a clue or background card and press “Infer from this”.</p>';
+    if (game.difficulty === EASY) {
+        const n = game.buildable().length;
+        h += `<p class="${n ? '' : 'small muted'}">${n ? `<b>${n}</b> more can be built from what you hold.` : 'Nothing more can be built from what you hold yet.'}</p>`;
+    }
+    if (!held.length) return `${h}<p class="empty">No inferences yet.</p>`;
+    h += '<ul class="list inferences">';
+    for (const id of held) {
+        const how = game.howHeld(id);
+        const by = how?.how === 'built' ? 'you' : how?.how === 'stated' ? cardName(how.by) : 'worked out';
+        h += `<li class="${game.isSuspected(id) ? 'doubted' : ''}">${link(id, shortName(id, 140))} <span class="small muted">· ${esc(by)}, ${paraLabel(game.unlocked.get(id).para)}${game.isSuspected(id) ? ' · doubted' : ''}</span>`
+            + `<div class="small muted">${esc(readingOf(model.cards.get(id).formula))}</div></li>`;
+    }
+    return `${h}</ul>`;
 }
 /** "Could it fit?": check the answer against everything trusted; when it does not fit, offer to doubt the claims in the way. */
 function runFit(slot, value) {
@@ -636,27 +710,6 @@ function doubtableHtml(ids) {
 /** A set of clues that cannot all hold, with a way to doubt each claim in it. */
 function clashHtml(ids) {
     return `${chainHtml(ids)}<div class="small">One of the claims must be false.</div>`;
-}
-
-function runCite() {
-    const cited = [...chosen].filter((k) => model.cards.get(k).section !== 'glosses');
-    const { kind, slot, value } = citeFor;
-    const res = kind === 'prove' ? game.prove(slot, value, cited) : game.strike(slot, value, cited);
-    const out = $('#cite-result');
-    if (res.ok) {
-        out.className = 'result ok';
-        const word = game.restsOn(res.used);
-        out.innerHTML = (game.assisted() && res.used?.length ? `Accepted. It rests on: ${res.used.map((k) => esc(model.constraints.get(k).label)).join(' · ')}` : 'Accepted.')
-            + (word.length ? ` <span class="muted">It takes ${word.map((k) => esc(shortName(k, 50))).join('; ')} on trust.</span>` : '');
-        ui.menu = null;
-        changed();
-    } else if (res.contradiction) {
-        out.className = 'result no';
-        out.innerHTML = `Those cannot all be true: ${clashHtml(res.contradiction)}`;
-    } else {
-        out.className = 'result no';
-        out.textContent = res.reason && !res.reason.startsWith('cite') ? `Not accepted: ${res.reason}.` : 'Not enough: those do not rule it out yet. Something is missing — a clue, or the fact that connects them.';
-    }
 }
 
 // ---------- events ----------
@@ -731,6 +784,23 @@ document.addEventListener('click', (e) => {
         changed();
         return;
     }
+    const inf = e.target.closest('[data-infer]');
+    if (inf) {
+        ui.building ??= { cards: [], kind: null, note: '' };
+        if (!ui.building.cards.includes(inf.dataset.infer)) ui.building.cards.push(inf.dataset.infer);
+        runPropose();
+        return;
+    }
+    const unb = e.target.closest('[data-unbuild]');
+    if (unb) {
+        ui.building.cards = ui.building.cards.filter((x) => x !== unb.dataset.unbuild);
+        ui.building.note = '';
+        renderTool();
+        return;
+    }
+    if (e.target.closest('[data-build-clear]')) { ui.building = null; renderTool(); return; }
+    const tabOpen = e.target.closest('[data-tab-open]');
+    if (tabOpen) { ui.tab = tabOpen.dataset.tabOpen; renderTool(); return; }
     if (e.target.closest('[data-show-clashes]')) {
         ui.tab = 'questions';
         renderTool();
@@ -807,8 +877,21 @@ document.addEventListener('click', (e) => {
         else if (op === 'unstrike') { game.unstrike(slot, value); ui.menu = null; changed(); }
         else if (op === 'unprove') { game.unprove(slot); ui.menu = null; changed(); }
         else if (op === 'unpropose') { game.removeCandidate(slot, value); ui.menu = null; changed(); }
-        else if (op === 'strike-why') openCite('strike', slot, value);
-        else if (op === 'prove') openCite('prove', slot, value);
+        else if (op === 'rule' || op === 'prove') {
+            ui.menuNote = '<span class="muted">Checking against everything you hold…</span>';
+            renderTool();
+            setTimeout(() => {
+                const res = op === 'prove' ? game.prove(slot, value) : game.strike(slot, value);
+                if (res.ok) {
+                    ui.menu = null;
+                    toast(`${op === 'prove' ? 'Proved' : 'Ruled out'}. It rests on ${res.used.length} of your clues and inferences.`);
+                    changed();
+                } else {
+                    ui.menuNote = `<span class="bad">Not yet: nothing you hold and trust ${op === 'prove' ? 'leaves only this answer' : 'rules it out'}.</span> <span class="small muted">Build the inference that would${game.clashes().length ? ', or resolve a clash' : ''}.</span>`;
+                    renderTool();
+                }
+            }, 10);
+        }
         else if (op === 'open') openCard(value);
         else if (op === 'why' || op === 'whynot') {
             ui.menuNote = '<span class="muted">Checking…</span>';
@@ -843,13 +926,9 @@ document.addEventListener('input', (e) => {
         box.focus();
         box.setSelectionRange(pos, pos);
     }
-    if (e.target.id === 'cite-search') drawCite();
 });
 document.addEventListener('change', (e) => {
-    if (e.target.dataset.choose) {
-        if (e.target.checked) chosen.add(e.target.dataset.choose); else chosen.delete(e.target.dataset.choose);
-        drawCite();
-    }
+    if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }
     if (e.target.dataset.add) {
         const slot = e.target.dataset.add;
         const s = model.slots.get(slot);
@@ -860,7 +939,7 @@ document.addEventListener('change', (e) => {
         const other = [...game.unlocked.keys()].find((k) => cardName(k).toLowerCase() === typed);
         toast(other ? 'That is not the right kind of thing for this question.' : 'No card of yours by that name.');
     }
-    if (['difficulty', 'pace', 'background', 'autopace'].includes(e.target.id)) {
+    if (['difficulty', 'pace', 'background', 'autopace', 'connect'].includes(e.target.id)) {
         const state = game.save();
         if (e.target.id === 'difficulty' && state.difficulty !== $('#difficulty').value) {
             if (!confirm('Changing difficulty clears your answers (each difficulty keeps them differently). Your place in the story is kept.')) { render(); return; }
@@ -872,14 +951,11 @@ document.addEventListener('change', (e) => {
         state.difficulty = $('#difficulty').value;
         state.pace = $('#pace').value;
         state.autoPace = $('#autopace').value;
+        state.connect = e.target.id === 'difficulty' ? CONNECT_DEFAULTS[$('#difficulty').value] : $('#connect').value;
+        ui.building = null;
         game.load(state);
         changed();
     }
-});
-$('#cite-check').addEventListener('click', runCite);
-$('#cite-chosen').addEventListener('click', (e) => {
-    const k = e.target.closest('[data-unchoose]')?.dataset.unchoose;
-    if (k) { chosen.delete(k); drawCite(); }
 });
 $('#reset').addEventListener('click', () => {
     if (!confirm('Start the case over? Your place, marks and theories will be lost.')) return;

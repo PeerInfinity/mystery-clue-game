@@ -26,6 +26,10 @@
         Trivial answers
         <select id="autopace"><option value="holmes">Keep pace with Holmes</option><option value="logic">As soon as the clues allow</option></select>
       </label>
+      <label id="connect-label" title="Building an inference. Needed in hand: connect its clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.">
+        Inferences
+        <select id="connect"><option value="implicit">Background needed in hand</option><option value="connect">Background connected too</option></select>
+      </label>
       <label title="Background facts (general knowledge a reader of the time had). All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.">
         Background
         <select id="background"><option value="start">All at once</option><option value="relevant">When relevant</option><option value="ask">When asked</option></select>
@@ -45,6 +49,7 @@
       <button data-tab="card" class="tab on">Card</button>
       <button data-tab="cards" class="tab">Cards</button>
       <button data-tab="questions" class="tab">Questions</button>
+      <button data-tab="inferences" class="tab">Inferences</button>
       <button data-tab="theories" class="tab">Theories</button>
       <button data-tab="timeline" class="tab">Timeline</button>
       <button data-tab="background" class="tab">Background</button>
@@ -54,20 +59,6 @@
 </main>
 <div id="pop" class="pop" hidden></div>
 <div id="toast" class="toast" hidden></div>
-<dialog id="cite">
-  <form method="dialog" class="cite">
-    <h2 id="cite-title"></h2>
-    <p id="cite-help" class="muted"></p>
-    <div id="cite-chosen" class="chips"></div>
-    <input id="cite-search" type="search" placeholder="Search your clues and background notes…" autocomplete="off">
-    <div id="cite-list" class="cite-list"></div>
-    <p id="cite-result" class="result"></p>
-    <div class="row">
-      <button id="cite-check" value="check" type="button">Check</button>
-      <button value="close" class="quiet">Close</button>
-    </div>
-  </form>
-</dialog>
 <script type="module" src="ui/app.js"></script>
 </body>
 </html>
