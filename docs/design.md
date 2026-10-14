@@ -308,3 +308,30 @@ As built (`Game.background`, saved with the game; changing difficulty brings tha
 - Known weakness of **When asked**: a card that answers with a fact (the mackintosh recalls only the coat rule)
   hints that it matters. Fix to discuss: every card answers something (filler about its kind), or asking about a
   card also recalls its topic's facts.
+
+## Round 9 (2026-10-13): the full checker run
+
+`node checker/check.js cases/silver-blaze --all --runs 2` asks Haiku about every piece of card text at the
+paragraph where it first shows (712 pieces: names, event labels, notes, glosses, clue statements; topic headings
+are editorial and skipped), twice each; a piece is flagged if either answer finds a leak. Answers are cached by
+prompt in `.cache/checker-answers-haiku.json`, so a rerun asks only about what changed.
+`node checker/report.js > .cache/checker-report.md` lists the flags in story order. First run: $2.26, 67 flagged.
+
+What it found, besides wording:
+- **Clue statements that sum up a passage running past their paragraph**, so the card said at ¶N what the story
+  says at ¶N+1 or later: the man "asked where he was" (¶22, dealt ¶21), "only five have passed" (¶196, dealt
+  ¶194), the dove-coloured silk (¶91, dealt ¶89), the woman in the passage named as Mrs. Straker (¶89, dealt ¶87),
+  the "mottled off-foreleg… a child would know him" (later, dealt ¶146).
+- **Logic leaks**, where the solver got a fact early: "Hunter ate the curried mutton" at ¶34 (now at ¶37, "the
+  remains of his supper left by the stable-lad"); the tracks ending at the Mapleton gates at ¶122 (now ¶124);
+  Desborough's owner at ¶40 (now ¶66, "their horse").
+- **Two plain errors of mine**: the race result said Silver Blaze won "by six lengths from Desborough" (the story
+  never says who was second); the knoll was put "a quarter of a mile from the stables" (that was the coat).
+- **Names a paragraph or more early**: "Dawson" (¶129) in two ¶127 clues; "The stable key" when only a lock had
+  been mentioned; "Heavy rain" (¶95) for rain "pattering against the window" (¶32); a "tin box" a paragraph early.
+
+After the fixes and two cheap reruns (only changed pieces are re-asked): 20 flagged, all judged false alarms —
+real-world facts in glosses ("the Wessex Cup is a fictional race", "tallow is cheap"), a question taken as a claim
+(Holmes's "What chemist sold him the powdered opium?" supports a card naming the chemist), descriptive names close
+to the text ("The stable dog" for "the dog… in the stable"), and two misreadings (Gregory's ¶58 reply taken as
+Holmes's). The fair-play test still passes under all three Background settings after the moves.

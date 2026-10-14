@@ -6,7 +6,9 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { loadCase } from '../engine/loadCase.js';
+import { Game } from '../engine/game.js';
 
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : dflt; };
@@ -131,15 +133,85 @@ else if (args.includes('--background')) {
     // Every background fact. (Glosses explain words in the text and show only once the text has used them: the
     // story-so-far check covers them.) Expected 'ok' is the hope, not a known answer: misses are the findings.
     items = (model.data.rules ?? []).map((r) => ({ id: r.id, kind: 'background fact', text: r.text, expect: 'ok', background: true }));
-} else throw new Error('use --tests or --background');
-if (only) items = items.filter((x) => only.includes(x.id));
+} else if (args.includes('--all')) items = allPieces();
+else throw new Error('use --tests, --background or --all');
 
-const results = [];
-const queue = [...items];
+/**
+ * Every piece of card text the player reads, at the paragraph where it first shows (reading the story through,
+ * Easy, background when relevant): names and labels as cards are dealt, claim texts, and every later piece
+ * (names, notes, glosses). Not the story's own words (mentions, attestations), nor background facts (--background).
+ */
+function allPieces() {
+    const game = new Game(model, { background: 'relevant' });
+    const out = [];
+    const seen = new Set();
+    const add = (card, para, kind, key, text) => {
+        const id = `${card}|${key}`;
+        if (seen.has(id) || !text) return;
+        seen.add(id);
+        out.push({ id, card, para, kind, text, expect: 'ok' });
+    };
+    const scan = () => {
+        for (const [id, u] of game.unlocked) {
+            const c = model.cards.get(id);
+            // Topic headings ("Horses") are written for the game on purpose (editorial): not checked.
+            if ((c.section === 'entities' && !c.names?.[0]?.editorial) || c.section === 'events') add(id, u.para, c.section === 'events' ? 'event label' : 'name', 'name0', game.nameOf(id));
+            if (c.section === 'claims') add(id, u.para, 'statement of a clue', 'text', c.text);
+            if (c.section === 'rules') continue;
+            for (const it of game.info(id)) {
+                if (['mention', 'attestation', 'clue'].includes(it.kind) || (it.kind === 'background' && !it.term)) continue;
+                add(id, it.para, it.kind === 'background' ? 'gloss' : it.kind === 'name' ? (it.event ? 'event label' : 'name') : it.kind, it.key, it.term ? `${it.term}: ${it.text}` : it.text);
+            }
+        }
+    };
+    while (!game.finished()) { game.advance(); scan(); }
+    return out;
+}
+if (only) items = items.filter((x) => only.includes(x.id));
+if (args.includes('--dry')) {
+    const by = {};
+    for (const i of items) by[i.kind] = (by[i.kind] ?? 0) + 1;
+    const words = items.reduce((a, i) => a + story.paragraphs.slice(1, i.para + 1).reduce((b, p) => b + p.display.split(/\s+/).length, 0), 0);
+    console.log(`${items.length} pieces`, by, `story words sent in all: ${words} (≈${Math.round(words * 1.35 / 1e6 * 10) / 10}M tokens per run)`);
+    process.exit(0);
+}
+
+// Answers are cached per (model, run, prompt), so an interrupted run resumes and an unchanged piece is not
+// asked again. --runs N asks every piece N times; a piece is flagged if any answer says it leaks.
+const runs = Number(opt('runs', 1));
+const cacheFile = `.cache/checker-answers-${modelName}.json`;
+const answers = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : {};
+const keyOf = (item, run) => crypto.createHash('sha1').update(`${run}|${item.background ? SYSTEM_BACKGROUND : SYSTEM}|${item.background ? promptBackground(item) : prompt(item)}`).digest('hex');
+const useCache = args.includes('--all');
+const jobs = [];
+for (const item of items) for (let run = 0; run < runs; run++) jobs.push({ item, run });
+let done = 0;
+const perItem = new Map(items.map((i) => [i, []]));
 await Promise.all(Array.from({ length: concurrency }, async () => {
-    while (queue.length) results.push(await ask(queue.shift()));
+    while (jobs.length) {
+        const { item, run } = jobs.shift();
+        const key = keyOf(item, run);
+        let r = useCache && answers[key] ? { item, ...answers[key], cost: 0 } : null;
+        if (!r) {
+            r = await ask(item);
+            if (r.error) r = await ask(item); // one retry
+            if (useCache && !r.error) {
+                answers[key] = { answer: r.answer };
+                if (++done % 20 === 0) fs.writeFileSync(cacheFile, JSON.stringify(answers));
+            }
+        }
+        perItem.get(item).push(r);
+        if (useCache && done % 50 === 0 && done) process.stderr.write(`${done} asked, ${jobs.length} left\n`);
+    }
 }));
-results.sort((a, b) => items.indexOf(a.item) - items.indexOf(b.item));
+if (useCache) fs.writeFileSync(cacheFile, JSON.stringify(answers));
+// One result per item: the first answer that says it leaks, else the first answer.
+const results = items.map((item) => {
+    const rs = perItem.get(item);
+    const leak = rs.find((r) => r.answer?.verdict === 'leak');
+    const r = leak ?? rs[0];
+    return { ...r, item, cost: rs.reduce((a, x) => a + (x.cost ?? 0), 0), votes: rs.map((x) => x.answer?.verdict ?? 'error') };
+});
 
 let right = 0;
 let cost = 0;
@@ -156,4 +228,4 @@ for (const r of results) {
 }
 console.log(`\n${right}/${results.filter((r) => r.item.expect !== 'unsettled').length} right · model ${modelName} · $${cost.toFixed(4)}`);
 fs.mkdirSync('.cache', { recursive: true });
-fs.writeFileSync(`.cache/checker-${modelName}.json`, JSON.stringify(results, null, 1));
+fs.writeFileSync(`.cache/checker-${args.includes('--all') ? 'all-' : ''}${modelName}.json`, JSON.stringify(results, null, 1));
