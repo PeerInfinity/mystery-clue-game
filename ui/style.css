@@ -46,6 +46,23 @@ a:hover, .link:hover { text-decoration: underline; }
 .subtitle { font-size: 14px; color: var(--muted); font-style: italic; font-weight: 400; }
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; }
 .progress { color: var(--muted); }
+/* Settings: a compact summary; the selects open in a panel over the page, so collapsed it takes no row. */
+.settings { position: relative; }
+.settings > summary { list-style: none; cursor: pointer; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); white-space: nowrap; }
+.settings > summary::-webkit-details-marker { display: none; }
+.settings > summary::after { content: " ▾"; }
+.settings[open] > summary::after { content: " ▴"; }
+.settings[open] > summary { color: var(--ink); }
+.settings-panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; display: grid; gap: 10px; min-width: 240px; max-width: calc(100vw - 32px); padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 20px rgba(0, 0, 0, .15); }
+.settings-panel label { display: grid; gap: 3px; }
+.settings-panel select { width: 100%; }
+.settings .short { display: none; }
+@media (max-width: 600px) {
+  .settings .long { display: none; }
+  .settings .short { display: inline; }
+  .settings-panel { right: auto; left: 0; }
+  .progress { flex-basis: 100%; }
+}
 
 .layout { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(340px, 1fr); height: calc(100vh - 56px); }
 .story-pane { display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--panel); min-width: 0; min-height: 0; }

@@ -450,6 +450,9 @@ function render() {
     $('#difficulty').value = game.difficulty;
     $('#pace').value = game.pace;
     $('#background').value = game.background;
+    const pick = (id) => $(`#${id}`).selectedOptions[0]?.textContent ?? '';
+    $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('background').toLowerCase()}`;
+    $('#settings-short').textContent = pick('difficulty');
     renderStory();
     renderTool();
 }
@@ -557,6 +560,9 @@ function onStoryClick(e) {
 }
 
 document.addEventListener('click', (e) => {
+    // A click anywhere outside the settings panel closes it.
+    const settings = document.querySelector('.settings');
+    if (settings?.open && !e.target.closest('.settings')) settings.open = false;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
     if (e.target.id === 'read') {

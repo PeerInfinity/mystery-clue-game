@@ -10,19 +10,24 @@
 <header class="top">
   <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">a casebook</span></h1>
   <div class="controls">
-    <label title="Trivial: every answer listed, the ones your clues rule out are greyed. Easy: every answer listed; you must cite the evidence that rules each one out. Hard: cards are collected only by clicking the text; you propose the answers yourself, then rule them out with evidence.">
-      Difficulty
-      <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="hard">Hard</option></select>
-    </label>
-    <label title="Free: read on whenever you like. Wait for deductions: when Holmes acts on a deduction, the story waits until you have made it too.">
-      Pace
-      <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option></select>
-    </label>
-    <label title="Background facts (general knowledge a reader of the time had). All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.">
-      Background
-      <select id="background"><option value="start">All at once</option><option value="relevant">When relevant</option><option value="ask">When asked</option></select>
-    </label>
     <span id="progress" class="progress"></span>
+    <details class="settings">
+      <summary title="Game settings"><span class="gear" aria-hidden="true">⚙</span> <span id="settings-summary" class="long">Settings</span><span id="settings-short" class="short">Settings</span></summary>
+      <div class="settings-panel">
+      <label title="Trivial: every answer listed, the ones your clues rule out are greyed. Easy: every answer listed; you must cite the evidence that rules each one out. Hard: cards are collected only by clicking the text; you propose the answers yourself, then rule them out with evidence.">
+        Difficulty
+        <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="hard">Hard</option></select>
+      </label>
+      <label title="Free: read on whenever you like. Wait for deductions: when Holmes acts on a deduction, the story waits until you have made it too.">
+        Pace
+        <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option></select>
+      </label>
+      <label title="Background facts (general knowledge a reader of the time had). All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.">
+        Background
+        <select id="background"><option value="start">All at once</option><option value="relevant">When relevant</option><option value="ask">When asked</option></select>
+      </label>
+      </div>
+    </details>
     <button id="reset" class="quiet">Start over</button>
   </div>
 </header>
