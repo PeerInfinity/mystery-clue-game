@@ -439,7 +439,10 @@ export class Game {
         const s = this.model.slots.get(slotId);
         if (!s || !this.knows(s.on)) return false;
         const owner = this.model.cards.get(s.on);
-        if (owner.section === 'events' || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
+        // An event's own facets (who, what, where, when) show with it; a question declared on it (why was it done?)
+        // waits, like any other, until the story raises it.
+        const declared = this.declaredSlots ?? (this.declaredSlots = new Set((this.model.data.slots ?? []).map((x) => x.id)));
+        if ((owner.section === 'events' && !declared.has(slotId)) || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
         if (!this.slotRaisers) {
             this.slotRaisers = new Map();
             const add = (slot, test) => {
@@ -471,6 +474,10 @@ export class Game {
     /** A listed answer must be something the story has already put in front of the player. */
     offered(slot, v) {
         const s = this.model.slots.get(slot);
+        // A time window is an answer only once the story has reached it (its `reveal` line): its very label can
+        // describe what happened ("after 1 a.m. — the blow").
+        const w = this.windowById?.get(v) ?? (this.windowById = new Map(this.model.windows.map((x) => [x.id, x]))).get(v);
+        if (w?.reveal && this.#paraOf(w.reveal) >= this.read) return false;
         if (s.reveal?.[v]) {
             if (!this.revealCache) this.revealCache = new Map();
             const key = `${slot}|${v}`;

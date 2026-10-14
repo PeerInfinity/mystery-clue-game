@@ -407,3 +407,17 @@ sentence, and its old description with that phrase as if it were the quote. Now 
 and the betting on it. Ask what you know about it."), and the sentence where it comes up under "Comes up". The
 racing topic now comes up where the story first touches betting (¶18, "the betting being three to one on him"),
 not at ¶4, where asking about it recalled nothing; every topic now appears where its first fact becomes relevant.
+
+## Round 15 (user, 2026-10-13): the disappearance is an event; time answers wait for the story
+
+- "the singular disappearance of the favourite for the Wessex Cup" (¶4) lost its link when the racing topic
+  moved to ¶18. It now links to the event of the horse being taken out, whose labels run "The favourite
+  disappears" (¶4) → "Silver Blaze is gone from his stall" (¶33) → "…is taken out of the stable" (¶220).
+- Dealing that event at ¶4 showed two more leaks. Its declared question "Why was the horse taken out?" showed
+  with the card: a declared question on an event now waits, like any other, until the story raises it (only an
+  event's own facets — who, what, where, when — show with it). And "When?" offered all 27 time windows, whose
+  labels describe hidden events ("Tuesday, after 1 a.m. — the blow"): every window now has a `reveal` quote
+  and is offered only once the story has reached it ("the blow" at ¶35, "in the hollow" at ¶37, "at dawn" at
+  ¶126; "Race day, evening" at ¶215, where it had been tied to ¶20's Monday "that evening").
+- Validator: every window needs a `reveal` quote, and no clue may give an event a time before that time's
+  reveal (found four; two reveals moved earlier; verified by reverting one).

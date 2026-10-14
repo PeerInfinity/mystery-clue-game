@@ -92,6 +92,8 @@ for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'rou
 for (const e of data.entities ?? []) for (const n of e.notes ?? []) checkQuotes(e.id, n.source);
 for (const g of data.glosses ?? []) if (g.after) checkQuotes(g.id, [g.after]);
 for (const r of data.rules ?? []) if (r.relevant_from) checkQuotes(r.id, [r.relevant_from]);
+// Every time window says where the story first reaches it: before that it is not offered as an answer.
+for (const w of model.windows) { if (!w.reveal) err(`${w.id}: no 'reveal' quote`); else checkQuotes(w.id, [w.reveal]); }
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes(c.id, a.source);
 
 // ---------- the story index: mentions, quotes per paragraph, gates ----------
@@ -111,6 +113,21 @@ for (const e of data.entities ?? []) {
         const hit = storyIndex.find(n.source[0]);
         if (!hit) err(`${e.id}: note quote not within one paragraph: "${n.source[0].slice(0, 50)}"`);
         else if (hit.para < first) err(`${e.id}: note at paragraph ${hit.para} comes before the first mention (${first})`);
+    }
+}
+
+// No clue may give an event a time the story has not reached yet (its label would show early).
+{
+    const reader = new Game({ ...model, story: storyIndex }, { background: 'relevant' });
+    while (!reader.finished()) reader.advance();
+    const win = new Map(model.windows.map((w) => [w.id, w]));
+    for (const [slot, gs] of reader.givers) {
+        for (const g of gs) {
+            const w = win.get(g.value);
+            const at = reader.unlocked.get(g.claim)?.para;
+            const shown = w?.reveal ? storyIndex.find(w.reveal)?.para : undefined;
+            if (w && at !== undefined && shown !== undefined && at < shown) err(`${g.claim} gives ${slot} = ${w.id} at paragraph ${at}, but that time is only revealed at ${shown}`);
+        }
     }
 }
 

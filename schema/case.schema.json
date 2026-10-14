@@ -83,6 +83,10 @@
               "clock": {
                 "type": "string",
                 "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+              },
+              "reveal": {
+                "type": "string",
+                "description": "A quote: where the story first reaches this time. Before it, the window is not offered as an answer."
               }
             }
           }

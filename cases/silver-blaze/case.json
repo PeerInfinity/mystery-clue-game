@@ -118,142 +118,142 @@
       {
         "id": "w.years_before",
         "label": "Years before",
-        "day": null
+        "day": null, "reveal": "He has served the Colonel for five years as jockey"
       },
       {
         "id": "w.weeks_before",
         "label": "In the weeks before the crime",
-        "day": null
+        "day": null, "reveal": "Up to the time of the catastrophe"
       },
       {
         "id": "w.mon_day",
         "label": "Monday, during the day",
-        "day": 0
+        "day": 0, "reveal": "exercised and watered as usual"
       },
       {
         "id": "w.mon_2100",
         "label": "Monday, about 9 p.m.",
         "day": 0,
-        "clock": "21:00"
+        "clock": "21:00", "reveal": "at nine o’clock"
       },
       {
         "id": "w.mon_2105",
         "label": "Monday, a few minutes after 9",
         "day": 0,
-        "clock": "21:05"
+        "clock": "21:05", "reveal": "a few minutes after nine"
       },
       {
         "id": "w.mon_2110",
         "label": "Monday, at the stable window",
         "day": 0,
-        "clock": "21:10"
+        "clock": "21:10", "reveal": "ran past him to the window"
       },
       {
         "id": "w.mon_late",
         "label": "Monday, later that evening",
-        "day": 0
+        "day": 0, "reveal": "last Monday night"
       },
       {
         "id": "w.tue_0100",
         "label": "Tuesday, 1 a.m.",
         "day": 1,
-        "clock": "01:00"
+        "clock": "01:00", "reveal": "one in the morning"
       },
       {
         "id": "w.tue_stable",
         "label": "Tuesday, after 1 a.m. — at the stable",
-        "day": 1
+        "day": 1, "reveal": "the favourite’s stall was empty"
       },
       {
         "id": "w.tue_hollow",
         "label": "Tuesday, after 1 a.m. — in the hollow",
-        "day": 1
+        "day": 1, "reveal": "the fatal hollow"
       },
       {
         "id": "w.tue_blow",
         "label": "Tuesday, after 1 a.m. — the blow",
-        "day": 1
+        "day": 1, "reveal": "a savage blow"
       },
       {
         "id": "w.tue_after",
         "label": "Tuesday, after 1 a.m. — after the blow",
-        "day": 1
+        "day": 1, "reveal": "a savage blow"
       },
       {
         "id": "w.tue_dawn",
         "label": "Tuesday, at dawn",
-        "day": 1
+        "day": 1, "reveal": "five o’clock to-morrow morning"
       },
       {
         "id": "w.tue_0700",
         "label": "Tuesday, 7 a.m.",
         "day": 1,
-        "clock": "07:00"
+        "clock": "07:00", "reveal": "seven in the morning"
       },
       {
         "id": "w.tue_morning",
         "label": "Tuesday morning",
-        "day": 1
+        "day": 1, "reveal": "ran out in search of the absentees"
       },
       {
         "id": "w.tue_day",
         "label": "Tuesday, during the day",
-        "day": 1
+        "day": 1, "reveal": "on recovering from his stupor"
       },
       {
         "id": "w.tue_evening",
         "label": "Tuesday evening",
-        "day": 1
+        "day": 1, "reveal": "On Tuesday evening"
       },
       {
         "id": "w.wed",
         "label": "Wednesday",
-        "day": 2
+        "day": 2, "reveal": "From hour to hour yesterday"
       },
       {
         "id": "w.thu_morning",
         "label": "Thursday morning",
-        "day": 3
+        "day": 3, "reveal": "one morning"
       },
       {
         "id": "w.thu_journey",
         "label": "Thursday, on the train",
-        "day": 3
+        "day": 3, "reveal": "a first-class carriage"
       },
       {
         "id": "w.thu_evening",
         "label": "Thursday evening, on Dartmoor",
-        "day": 3
+        "day": 3, "reveal": "It was evening before we reached"
       },
       {
         "id": "w.thu_dusk",
         "label": "Thursday, at dusk",
-        "day": 3
+        "day": 3, "reveal": "before the light fails"
       },
       {
         "id": "w.thu_night",
         "label": "Thursday night",
-        "day": 3
+        "day": 3, "reveal": "by the night train"
       },
       {
         "id": "w.fri",
         "label": "Friday",
-        "day": 4
+        "day": 4, "reveal": "The inquest is to-morrow"
       },
       {
         "id": "w.race_eve",
         "label": "The day before the race",
-        "day": 6
+        "day": 6, "reveal": "You could have got fifteen to one yesterday"
       },
       {
         "id": "w.race_day",
         "label": "Race day",
-        "day": 7
+        "day": 7, "reveal": "Four days later"
       },
       {
         "id": "w.race_evening",
         "label": "Race day, evening",
-        "day": 7
+        "day": 7, "reveal": "a Pullman car to ourselves that evening"
       }
     ]
   },
