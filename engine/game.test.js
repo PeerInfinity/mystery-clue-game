@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
-import { Game, TRIVIAL, EASY, MEDIUM, HARD, WAIT, BG_START, BG_RELEVANT, BG_ASK } from './game.js';
+import { Game, TRIVIAL, EASY, MEDIUM, HARD, CUSTOM, WAIT, BG_START, BG_RELEVANT, BG_ASK, PRESETS, presetOf } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 
@@ -20,7 +20,7 @@ function proveStep(game, stepId) {
 
 /** Build an inference the way a player would: connect what it needs (naming its kind in Hard). */
 function build(game, id) {
-    const kind = game.difficulty === HARD ? game.conclusionKinds(id)[0] : null;
+    const kind = game.opts.kind === 'on' ? game.conclusionKinds(id)[0] : null;
     return game.propose(game.connectSet(id), kind);
 }
 
@@ -337,4 +337,58 @@ test('Easy: clashes are found and set aside, so one clash does not rule out answ
     const again = new Game(model);
     again.load(JSON.parse(JSON.stringify(game.save())));
     assert.deepEqual(again.resolvedClashes().map((r) => r.doubted), [['c.derbyshire_a_friend']]);
+});
+
+test('the difficulties are presets of the options; any other mix is Custom', () => {
+    for (const d of [TRIVIAL, EASY, MEDIUM, HARD]) assert.equal(new Game(model, { difficulty: d }).difficulty, d);
+    const g = new Game(model, { difficulty: MEDIUM, options: { greying: 'on' } });
+    assert.equal(g.difficulty, CUSTOM);
+    assert.ok(g.helps('greying') && g.opts.crossOut === 'checked', 'Medium with greying: checked cross-outs, greyed answers');
+    assert.equal(new Game(model, { state: g.save() }).difficulty, CUSTOM, 'a custom mix is saved');
+    // With the game solving, the player's options do not count against Trivial.
+    assert.equal(presetOf({ ...PRESETS.trivial, kind: 'on' }), TRIVIAL);
+    assert.equal(presetOf({ ...PRESETS.trivial, irrelevant: 'half' }), CUSTOM);
+    // A save from before options keeps its background and connect choices.
+    const old = { difficulty: 'medium', background: BG_START, connect: 'connect', pace: 'free', read: 3, version: 3 };
+    const back = new Game(model, { state: old });
+    assert.equal(back.background, BG_START);
+    assert.equal(back.connect, 'connect');
+    assert.equal(back.difficulty, CUSTOM);
+});
+
+test('pencil cross-outs and collecting cards are options of their own', () => {
+    const g = new Game(model, { difficulty: HARD, options: { crossOut: 'pencil' } });
+    g.addCandidate('e.opium_added.agent', 'straker');
+    assert.equal(g.strike('e.opium_added.agent', 'watson').ok, true, 'pencil, though Hard otherwise');
+    assert.equal(new Game(model, { difficulty: EASY, options: { cards: 'collect' } }).collecting(), true);
+});
+
+test('cards the solution does not need can be left out, and never one it needs', () => {
+    const all = new Game(model, { difficulty: MEDIUM });
+    const none = new Game(model, { difficulty: MEDIUM, options: { irrelevant: 'none' } });
+    const half = new Game(model, { difficulty: MEDIUM, options: { irrelevant: 'half' } });
+    for (const g of [all, none, half]) while (!g.finished()) g.advance();
+    for (const id of model.relevant) if (all.knows(id)) assert.ok(none.knows(id), `${id} is needed, so it is dealt`);
+    const left = (g) => [...all.unlocked.keys()].filter((id) => !g.knows(id));
+    assert.ok(left(none).length > 50, `left out with none: ${left(none).length}`);
+    assert.ok(left(half).length > 0 && left(half).length < left(none).length, 'half leaves out fewer');
+    assert.ok(left(half).every((id) => left(none).includes(id)), 'a larger share keeps every card a smaller one did');
+    assert.ok(all.knows('paddington') && !none.knows('paddington') && !none.knows('g.odds'), 'the station and the glossary are colour');
+    // Every answer the case reaches is dealt.
+    const solved = new Game(model, { difficulty: TRIVIAL, autoPace: 'logic' });
+    while (!solved.finished()) solved.advance();
+    let answers = 0;
+    for (const q of model.data.questions) {
+        const truth = solved.settled(q.slot);
+        if (truth && model.cards.has(truth)) { answers++; assert.ok(none.knows(truth), `the answer to ${q.slot} is dealt`); }
+    }
+    assert.ok(answers >= 9, `answers checked: ${answers}`);
+    // Left-out answers are not answers the player waits for or must rule out.
+    assert.ok(!none.pencil('e.opium_added.agent').includes('chemist'));
+    assert.equal(none.moreToCome('e.opium_added.agent'), false);
+    // Trivial still reaches the same answers.
+    const t = new Game(model, { difficulty: TRIVIAL, options: { irrelevant: 'none' } });
+    while (!t.finished()) t.advance();
+    assert.equal(t.settled('e.opium_added.agent'), 'straker');
+    assert.equal(t.settled('the_bay.identity'), 'silver_blaze');
 });

@@ -18,7 +18,7 @@
 // player's view, and the validator skips them.
 
 import { Problem } from './solver.js';
-import { slotsOf } from './logic.js';
+import { slotsOf, literalsOf } from './logic.js';
 
 export const CARD_SECTIONS = ['entities', 'events', 'claims', 'rules', 'glosses'];
 
@@ -187,7 +187,45 @@ export function buildModel(data) {
             timeOrder,
         });
 
-    return { data, cards, slots, constraints, claimForms, problem, timeOrder, sceneOrder, windows, scenes, errors };
+    const model = { data, cards, slots, constraints, claimForms, problem, timeOrder, sceneOrder, windows, scenes, errors };
+    model.relevant = relevantCards(model);
+    return model;
+}
+
+/**
+ * The cards the solution has any use for: every premise and inference, everything a formula (a constraint's, a
+ * theory's, a step of Holmes's route) speaks of, the cards that hold the case's questions, whoever told a clue
+ * that is used, and the cards a used background fact is recalled from. The rest is colour: the game can leave
+ * some of it out (the "Irrelevant cards" option).
+ */
+export function relevantCards(model) {
+    const { data, cards, slots } = model;
+    const rel = new Set();
+    const owner = (s) => { const o = slots.get(s)?.on; if (o) rel.add(o); };
+    const formula = (f) => {
+        for (const s of slotsOf(f)) owner(s);
+        for (const [, v] of literalsOf(f)) if (cards.has(v)) rel.add(v);
+    };
+    for (const k of model.constraints.values()) {
+        k.premises.forEach((p) => rel.add(p));
+        if (k.inference) rel.add(k.inference);
+        formula(k.formula);
+    }
+    for (const q of data.questions ?? []) owner(q.slot);
+    for (const t of data.theories ?? []) {
+        (t.rests_on ?? []).forEach((x) => rel.add(x));
+        for (const [s, v] of Object.entries(t.assignment ?? {})) { owner(s); if (cards.has(v)) rel.add(v); }
+    }
+    for (const r of data.route ?? []) {
+        r.premises.forEach((p) => rel.add(p));
+        if (r.concludes.formula) formula(r.concludes.formula); else owner(r.concludes.slot);
+    }
+    for (const id of [...rel]) {
+        const c = cards.get(id);
+        for (const a of [...(c?.attested ?? []), ...(c?.stated ?? [])]) if (cards.has(a.by)) rel.add(a.by);
+        if (c?.section === 'rules') for (const x of c.attaches_to ?? []) if (cards.has(x)) rel.add(x);
+    }
+    return rel;
 }
 
 /**

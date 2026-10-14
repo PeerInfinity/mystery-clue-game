@@ -154,11 +154,14 @@ function viewInferences() {
 ${reading(k.formula)}<div class="refs">${(k.premises ?? []).map((p) => ref(p, 50)).join(' ')}</div></div>`).join('');
 }
 
+/** A card the solution has no use for (the "Cards the solution does not need" option can leave it out). */
+const notNeeded = (id) => (model.relevant.has(id) ? '' : ' <span class="tag" title="The solution has no use for it: the irrelevant-cards option can leave it out">not needed</span>');
+
 function viewClues() {
     const rows = claims.filter((c) => matches(c.id, c.text, c.asserts ? R.readingOf(c.asserts) : ''))
         .sort((a, b) => (para(a.id) ?? 1e9) - (para(b.id) ?? 1e9));
     return `<p class="small muted">What the story tells, with what each asserts. Sorted by where it arrives.</p>` + rows.map((c) => `
-<div class="item" data-id="${esc(c.id)}"><div class="item-head">${paraTag(para(c.id))} ${c.truth === false ? '<span class="tag bad">false</span>' : ''} <b>${esc(c.text)}</b></div>
+<div class="item" data-id="${esc(c.id)}"><div class="item-head">${paraTag(para(c.id))} ${c.truth === false ? '<span class="tag bad">false</span>' : ''}${notNeeded(c.id)} <b>${esc(c.text)}</b></div>
 ${c.asserts ? reading(c.asserts) : '<p class="small muted">Asserts nothing the questions can hold (colour only).</p>'}
 ${(usingCard.get(c.id) ?? []).length ? `<div class="small muted">premise of ${usingCard.get(c.id).length}</div>` : ''}</div>`).join('');
 }
@@ -166,7 +169,7 @@ ${(usingCard.get(c.id) ?? []).length ? `<div class="small muted">premise of ${us
 function viewBackground() {
     const rows = rules.filter((r) => matches(r.id, r.text)).sort((a, b) => (para(a.id) ?? 1e9) - (para(b.id) ?? 1e9));
     return `<p class="small muted">General knowledge. A fact does nothing alone: it switches on the inferences it is a premise of.</p>` + rows.map((r) => `
-<div class="item" data-id="${esc(r.id)}"><div class="item-head">${paraTag(para(r.id))} <b>${esc(r.text)}</b></div>
+<div class="item" data-id="${esc(r.id)}"><div class="item-head">${paraTag(para(r.id))}${notNeeded(r.id)} <b>${esc(r.text)}</b></div>
 <div class="refs">${(usingCard.get(r.id) ?? []).map((k) => ref(k, 60)).join(' ') || '<span class="small muted">switches on nothing (filler)</span>'}</div></div>`).join('');
 }
 

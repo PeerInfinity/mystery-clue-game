@@ -14,26 +14,22 @@
     <details class="settings">
       <summary title="Game settings"><span class="gear" aria-hidden="true">⚙</span> <span id="settings-summary" class="long">Settings</span><span id="settings-short" class="short">Settings</span></summary>
       <div class="settings-panel">
-      <label title="Trivial: the game works out what your clues allow and settles each question itself; you read and watch. Easy: every answer listed, the ones your clues rule out are greyed; cross out freely. Medium: every answer listed; you must cite the evidence that rules each one out. Hard: cards are collected only by clicking the text; you propose the answers yourself, then rule them out with evidence.">
+      <label title="Each difficulty is a preset of the options below. Change any option and the difficulty reads Custom.">
         Difficulty
-        <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
+        <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option><option value="custom" disabled>Custom</option></select>
       </label>
       <label title="Free: read on whenever you like. Wait for deductions: when Holmes acts on a deduction, the story waits until you have made it too.">
         Pace
         <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option></select>
       </label>
-      <label id="autopace-label" title="Trivial only. Keep pace with Holmes: an answer settles when Holmes reaches it in the story. As soon as the clues allow: an answer settles the moment the clues you hold decide it, which can be long before Holmes says so.">
-        Trivial answers
-        <select id="autopace"><option value="holmes">Keep pace with Holmes</option><option value="logic">As soon as the clues allow</option></select>
+      <label id="autopace-label" title="When the game works out the answers. Keep pace with Holmes: an answer settles when Holmes reaches it in the story. As soon as the clues allow: an answer settles the moment the clues you hold decide it, which can be long before Holmes says so.">
+        The game settles answers
+        <select id="autopace"><option value="holmes">Keeping pace with Holmes</option><option value="logic">As soon as the clues allow</option></select>
       </label>
-      <label id="connect-label" title="Building an inference. Needed in hand: connect its clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.">
-        Inferences
-        <select id="connect"><option value="implicit">Background needed in hand</option><option value="connect">Background connected too</option></select>
-      </label>
-      <label title="Background facts (general knowledge a reader of the time had). All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.">
-        Background
-        <select id="background"><option value="start">All at once</option><option value="relevant">When relevant</option><option value="ask">When asked</option></select>
-      </label>
+      <details class="difficulty-options" id="difficulty-options">
+        <summary>Difficulty options</summary>
+        <div id="options" class="options-grid"></div>
+      </details>
       </div>
     </details>
     <button id="reset" class="quiet">Start over</button>

@@ -504,3 +504,29 @@ inferences arrive when he states them and 'wait' waits for them; false character
   provenance (never by truth): the story's clues, then inferences others stated, then the player's and Holmes's.
 - Theories panel: what a theory rests on, and the held inferences its answers agree with or go against.
 - Not yet: freestyle formulas (the player writes the formula; the game runs it without comparing).
+
+## Round 20 (user, 2026-10-14): difficulties become presets of separate options
+
+The user: make Trivial, Easy, Medium and Hard presets; add Custom, selected by itself when the options match no
+preset; split everything a difficulty decided into options of its own; and add an option for how many cards
+irrelevant to the solution are shown.
+
+- `OPTIONS` (engine/game.js), with `PRESETS` and `presetOf`: who works out the answers (the game: Trivial; you),
+  cards (dealt; collected by clicking), answers (all listed; you propose them), crossing out (pencil; checked),
+  greying (answers your clues rule out greyed, "Could it fit?", theory checks), clashes listed, inference hints
+  (count left to build; the cards a waiting deduction starts from), naming an inference's kind, background in
+  inferences (needed in hand; connected), background facts (all at once; when relevant; when asked), and cards
+  the solution does not need (none, one in four, half, three in four, all). Pace and Trivial's settling pace
+  stay outside the presets.
+- `game.difficulty` is derived: the matching preset, or Custom. While the game solves, the player's options do not
+  count against Trivial (they are shown dimmed). Saves carry `options` (version 4); older saves map their
+  difficulty, background and connect onto options.
+- Changing who solves, how answers are listed or how they are crossed out clears the answers (asked first);
+  switching to collecting keeps the cards already dealt as collected.
+- Relevance (`relevantCards`, caseModel.js): every premise and inference, everything a constraint, theory or route
+  step speaks of, the cards holding the case questions, whoever told a used clue, and the cards a used background
+  fact attaches to. Silver Blaze: 73 entities, 28 claims, 33 background facts and all 49 glosses are not needed.
+  A left-out card is never dealt or collected, its words are not marked, it is not offered as an answer, not
+  waited for ("so far"), and not counted against settling a question by elimination. Which cards go is a hash of
+  the id, so it is stable and a larger share keeps every card a smaller one kept. The logic viewer tags them
+  "not needed". Every preset shows all of them (unchanged behaviour); the option is the player's choice.

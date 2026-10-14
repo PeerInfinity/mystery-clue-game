@@ -18,14 +18,16 @@
 import { activeConstraints, trustedClaim } from './caseModel.js';
 import { evaluate } from './logic.js';
 
-// Difficulty. TRIVIAL: the game works out what the held clues allow and settles questions itself; the player
-// reads and watches. EASY: every answer is listed and the ones the player's clues rule out are greyed; plain
-// pencil cross-outs. MEDIUM: every answer listed; each cross-out needs cited evidence. HARD: cards are collected
-// by clicking the text, and the player proposes the answers.
+// Difficulty is a set of OPTIONS; the four difficulties are presets of them, and any other mix is CUSTOM.
+// TRIVIAL: the game works out what the held clues allow and settles questions itself; the player reads and
+// watches. EASY: every answer is listed and the ones the player's clues rule out are greyed; plain pencil
+// cross-outs. MEDIUM: every answer listed; a cross-out must follow from what the player holds. HARD: cards are
+// collected by clicking the text, the player proposes the answers, and names what each inference is about.
 export const TRIVIAL = 'trivial';
 export const EASY = 'easy';
 export const MEDIUM = 'medium';
 export const HARD = 'hard';
+export const CUSTOM = 'custom';
 export const DIFFICULTIES = [TRIVIAL, EASY, MEDIUM, HARD];
 // Trivial's pace: settle each answer when Holmes reaches it in the story, or as soon as the held clues allow.
 export const AUTO_HOLMES = 'holmes';
@@ -37,11 +39,54 @@ export const WAIT = 'wait';
 export const BG_START = 'start';
 export const BG_RELEVANT = 'relevant';
 export const BG_ASK = 'ask';
-export const BACKGROUND_DEFAULTS = { trivial: BG_RELEVANT, easy: BG_RELEVANT, medium: BG_ASK, hard: BG_ASK };
 // Building an inference: are its background premises connected like its clues, or only needed in hand?
 export const INF_IMPLICIT = 'implicit';
 export const INF_CONNECT = 'connect';
-export const CONNECT_DEFAULTS = { trivial: INF_IMPLICIT, easy: INF_IMPLICIT, medium: INF_IMPLICIT, hard: INF_CONNECT };
+// The difficulty options, each with its values (the first is the easiest).
+//   solver      who works out the answers: the game (Trivial) or the player
+//   cards       dealt as the story mentions them, or collected by clicking the words
+//   answers     every possible answer listed, or the player proposes them
+//   crossOut    pencil: anything can be crossed out; checked: only what the player's clues rule out
+//   greying     grey the answers the player's clues rule out, and offer "Could it fit?" (and theory checks)
+//   clashes     list the clashes among the player's clues on the Questions tab
+//   hints       count the inferences left to build, and name where a waiting deduction starts
+//   kind        building an inference: the player names what its conclusion is about
+//   connect     building an inference: background facts needed in hand, or connected like clues
+//   background  when background facts arrive (BG_*)
+//   irrelevant  how many of the cards the solution has no use for are shown at all
+export const OPTIONS = {
+    solver: ['game', 'player'],
+    cards: ['dealt', 'collect'],
+    answers: ['listed', 'propose'],
+    crossOut: ['pencil', 'checked'],
+    greying: ['on', 'off'],
+    clashes: ['on', 'off'],
+    hints: ['on', 'off'],
+    kind: ['off', 'on'],
+    connect: [INF_IMPLICIT, INF_CONNECT],
+    background: [BG_START, BG_RELEVANT, BG_ASK],
+    irrelevant: ['none', 'few', 'half', 'most', 'all'],
+};
+// The options that only mean something while the player works out the answers.
+export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'hints', 'kind', 'connect'];
+const IRRELEVANT_SHARE = { none: 0, few: 0.25, half: 0.5, most: 0.75, all: 1 };
+export const PRESETS = {
+    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
+    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
+    medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all' },
+    hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all' },
+};
+/** The preset these options match, or CUSTOM. With the game solving, the player's options do not count. */
+export function presetOf(opts) {
+    const applies = (k) => opts.solver === 'player' || !PLAYER_OPTIONS.includes(k);
+    return DIFFICULTIES.find((d) => Object.keys(OPTIONS).every((k) => !applies(k) || PRESETS[d][k] === opts[k])) ?? CUSTOM;
+}
+/** Options from a preset, with any given ones laid over it (unknown keys and values dropped). */
+export function optionsFrom(difficulty, over = {}) {
+    const out = { ...PRESETS[DIFFICULTIES.includes(difficulty) ? difficulty : MEDIUM] };
+    for (const [k, v] of Object.entries(over ?? {})) if (OPTIONS[k]?.includes(v)) out[k] = v;
+    return out;
+}
 // What an inference is about, by the facets its conclusion speaks of (Hard asks the player to name it).
 export const CONCLUSION_KINDS = { who: 'Who', when: 'When', where: 'Where', what: 'What or with what', why: 'Why', whether: 'Whether it is so' };
 const KIND_OF_FACET = {
@@ -53,13 +98,11 @@ const KIND_OF_FACET = {
 const OLD_DIFFICULTY = { trivial: EASY, easy: MEDIUM, hard: HARD };
 
 export class Game {
-    constructor(model, { difficulty = MEDIUM, pace = FREE, background = null, autoPace = AUTO_HOLMES, connect = null, state = null } = {}) {
+    constructor(model, { difficulty = MEDIUM, options = null, pace = FREE, background = null, autoPace = AUTO_HOLMES, connect = null, state = null } = {}) {
         this.model = model;
         this.story = model.story;
-        this.difficulty = difficulty;
+        this.opts = optionsFrom(difficulty, { ...options, ...(background && { background }), ...(connect && { connect }) });
         this.pace = pace;
-        this.background = background ?? BACKGROUND_DEFAULTS[difficulty];
-        this.connect = connect ?? CONNECT_DEFAULTS[difficulty];
         this.autoPace = autoPace;
         this.actions = [...(model.data.actions ?? [])].sort((a, b) => a.order - b.order);
         this.actionById = new Map(this.actions.map((a) => [a.id, a]));
@@ -145,7 +188,34 @@ export class Game {
         if (state) this.load(state);
     }
 
+    /** The preset the options match, or CUSTOM. */
+    get difficulty() { return presetOf(this.opts); }
+    get background() { return this.opts.background; }
+    get connect() { return this.opts.connect; }
+    /** The game works out the answers (Trivial). */
+    autoSolves() { return this.opts.solver === 'game'; }
+    collecting() { return this.opts.cards === 'collect'; }
+    proposing() { return this.opts.answers === 'propose' && !this.autoSolves(); }
+    /** Player's option `k` is 'on' (always off while the game solves). */
+    helps(k) { return !this.autoSolves() && this.opts[k] === 'on'; }
+
+    /** Left out of this game: a card the solution has no use for, beyond the share the player asked to see. */
+    isHidden(id) { return this.hidden.has(id); }
+    #hideIrrelevant() {
+        const share = IRRELEVANT_SHARE[this.opts.irrelevant] ?? 1;
+        this.hidden = new Set();
+        if (share >= 1 || !this.model.relevant) return;
+        for (const id of this.model.cards.keys()) {
+            if (this.model.relevant.has(id) || this.model.cards.get(id).section === 'inferences') continue;
+            // The same cards every time (a hash of the id), and a larger share keeps every card a smaller one did.
+            let h = 2166136261;
+            for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
+            if ((h >>> 0) / 4294967296 >= share) this.hidden.add(id);
+        }
+    }
+
     reset() {
+        this.#hideIrrelevant();
         this.read = 1;                  // paragraphs [0, read) have been read; paragraph 0 is the title
         this.seq = 0;                   // discovery counter (the investigation axis)
         this.unlocked = new Map();      // card id → {para, at}
@@ -168,30 +238,29 @@ export class Game {
     save() {
         return {
             difficulty: this.difficulty,
+            options: { ...this.opts },
             pace: this.pace,
             read: this.read,
-            collected: this.difficulty === HARD ? [...this.unlocked].map(([id, u]) => [id, u.para]) : null,
+            collected: this.collecting() ? [...this.unlocked].map(([id, u]) => [id, u.para]) : null,
             marks: [...this.marks].map(([slot, m]) => [slot, { listed: m.listed ? [...m.listed] : null, struck: [...m.struck], proven: m.proven, circled: [...m.circled] }]),
             theories: this.theories,
             lastSeen: [...this.lastSeen],
             suspected: [...this.suspected],
-            background: this.background,
             autoPace: this.autoPace,
             asked: this.asked,
             clashLog: this.clashLog,
-            connect: this.connect,
             built: [...this.inferenceHow].filter(([, h]) => h.how === 'built').map(([id]) => [id, this.unlocked.get(id).para]),
-            version: 3,
+            version: 4,
         };
     }
 
     load(state) {
         if (state.difficulty && !state.version) state = { ...state, difficulty: OLD_DIFFICULTY[state.difficulty] ?? state.difficulty };
-        this.difficulty = state.difficulty ?? this.difficulty;
+        // Saves before options (version < 4): a difficulty, with background and connect kept beside it.
+        if (state.options) this.opts = optionsFrom(MEDIUM, state.options);
+        else if (state.difficulty) this.opts = optionsFrom(state.difficulty, { background: state.background, connect: state.connect });
         this.pace = state.pace ?? this.pace;
-        this.background = state.background ?? BACKGROUND_DEFAULTS[this.difficulty];
         this.autoPace = state.autoPace ?? this.autoPace;
-        this.connect = state.connect ?? CONNECT_DEFAULTS[this.difficulty];
         this.reset();
         const target = Math.min(state.read ?? 1, this.story.paragraphs.length);
         const asked = [...(state.asked ?? [])].sort((a, b) => a[1] - b[1]);
@@ -199,7 +268,7 @@ export class Game {
             this.#readNext();
             while (asked.length && asked[0][1] < this.read) this.ask(asked.shift()[0]);
         }
-        if (this.difficulty === HARD) for (const [id, para] of state.collected ?? []) this.#unlock(id, para);
+        if (this.collecting()) for (const [id, para] of state.collected ?? []) this.#unlock(id, para);
         for (const [id, para] of state.built ?? []) {
             if (!this.inferenceById.has(id) || this.knows(id)) continue;
             this.#unlock(id, para);
@@ -306,7 +375,7 @@ export class Game {
             this.done.push(a.id);
             for (const i of a.yields?.items ?? []) this.items.add(i);
         }
-        if (this.difficulty !== HARD) for (const s of this.story.spans[p]) for (const id of s.ids) this.#unlock(id, p);
+        if (!this.collecting()) for (const s of this.story.spans[p]) for (const id of s.ids) this.#unlock(id, p);
         // Inferences a character states here (Holmes's where the story tells his step) arrive by themselves.
         for (const { id, by } of this.statedAt.get(p) ?? []) {
             if (this.knows(id)) continue;
@@ -330,11 +399,11 @@ export class Game {
 
     #unlock(id, para) {
         const c = this.model.cards.get(id);
-        if (!c || this.unlocked.has(id)) return;
+        if (!c || this.unlocked.has(id) || this.hidden.has(id)) return;
         this.unlocked.set(id, { para, at: this.seq++ });
         if (c.section === 'claims' || c.section === 'inferences') for (const e of this.claimEvents.get(id) ?? []) this.#unlock(e, para);
         // Trivial: an inference comes as soon as its premises are held (the game does the reasoning).
-        if (this.difficulty === TRIVIAL) {
+        if (this.autoSolves()) {
             for (const k of this.inferencesUsing.get(id) ?? []) {
                 if (this.knows(k) || !this.inferenceById.get(k).premises.every((x) => this.unlocked.has(x))) continue;
                 this.#unlock(k, para);
@@ -377,7 +446,7 @@ export class Game {
      * Trivial. Background implicit: a background premise not yet known still blocks it.)
      */
     buildable() {
-        if (this.difficulty === TRIVIAL) return [];
+        if (this.autoSolves()) return [];
         return this.inferences.filter((k) => !this.knows(k.id) && k.premises.every((x) => this.knows(x))).map((k) => k.id);
     }
 
@@ -392,7 +461,7 @@ export class Game {
     propose(cards, kind = null) {
         const S = new Set(cards.filter((x) => this.knows(x)));
         const out = { built: [], onto: false, more: 0, lacking: false, wrongKind: false, needsKind: false };
-        if (!S.size || this.difficulty === TRIVIAL) return out;
+        if (!S.size || this.autoSolves()) return out;
         let more = Infinity;
         for (const k of this.inferences) {
             if (this.knows(k.id)) continue;
@@ -401,7 +470,7 @@ export class Game {
             const missing = need.filter((x) => !S.has(x));
             if (missing.length) { more = Math.min(more, missing.length); continue; }
             if (!k.premises.every((x) => this.knows(x))) { out.lacking = true; continue; }
-            if (this.difficulty === HARD) {
+            if (this.opts.kind === 'on') {
                 if (!kind) { out.needsKind = true; continue; }
                 if (!this.conclusionKinds(k.id).includes(kind)) { out.wrongKind = true; continue; }
             }
@@ -472,7 +541,7 @@ export class Game {
         if (!step) return false;
         // Holmes's step is made once the player holds the inferences it needs (trusting them).
         const needs = this.stepInferences(stepId);
-        if (needs && this.difficulty !== TRIVIAL) return needs.every((id) => this.knows(id) && !this.suspected.has(id));
+        if (needs && !this.autoSolves()) return needs.every((id) => this.knows(id) && !this.suspected.has(id));
         const c = step.concludes;
         if (c.slot) {
             if (this.isStruckWithProof(c.slot, c.value)) return true;
@@ -662,11 +731,11 @@ export class Game {
 
     /** Could the story still bring answers to this question that are not on offer yet (a time, a person)? */
     moreToCome(slot) {
-        return this.model.slots.get(slot).domain.some((v) => !this.offered(slot, v));
+        return this.model.slots.get(slot).domain.some((v) => !this.offered(slot, v) && !this.hidden.has(v));
     }
 
     #mark(slot) {
-        if (!this.marks.has(slot)) this.marks.set(slot, { listed: this.difficulty === HARD ? new Set() : null, struck: new Map(), proven: null, circled: new Set() });
+        if (!this.marks.has(slot)) this.marks.set(slot, { listed: this.proposing() ? new Set() : null, struck: new Map(), proven: null, circled: new Set() });
         return this.marks.get(slot);
     }
 
@@ -674,11 +743,11 @@ export class Game {
     pencil(slot) {
         const m = this.marks.get(slot);
         if (this.provenValue(slot) !== null) return [this.provenValue(slot)];
-        if (this.difficulty === TRIVIAL) return this.trivialValues(slot).filter((v) => this.offered(slot, v));
+        if (this.autoSolves()) return this.trivialValues(slot).filter((v) => this.offered(slot, v));
         const g = this.given(slot);
         if (g) return [g.value];
         const s = this.model.slots.get(slot);
-        const base = m?.listed ? [...m.listed] : this.difficulty === HARD ? [] : s.domain;
+        const base = m?.listed ? [...m.listed] : this.proposing() ? [] : s.domain;
         // Never list a card the story has not shown the player yet: that would give it away.
         return base.filter((v) => (!m?.struck.has(v) || this.strikeLapsed(slot, v)) && this.offered(slot, v));
     }
@@ -697,15 +766,14 @@ export class Game {
         this.marks.get(slot)?.listed?.delete(value);
     }
 
-    /** Cross a value out. Outside Trivial, it must come with cited evidence the game accepts. */
     /**
-     * Cross a value out. Easy: a plain pencil mark. Medium and Hard: only if what the player holds and trusts
+     * Cross a value out. Pencil (Easy): a plain mark. Checked (Medium and Hard): only if what the player holds and trusts
      * (clues and inferences, with any clash set aside) rules it out; the proof records what it rests on, and
      * lapses if the player later doubts one of those.
      */
     strike(slot, value) {
         const m = this.#mark(slot);
-        if (this.assisted()) {
+        if (this.opts.crossOut === 'pencil') {
             m.struck.set(value, {});
             return { ok: true, proof: false };
         }
@@ -766,14 +834,15 @@ export class Game {
     settled(slot) {
         // A proof outranks a given: when they disagree, the player is shown the clash (givenClash).
         if (this.provenValue(slot) !== null) return this.provenValue(slot);
-        if (this.difficulty === TRIVIAL) {
+        if (this.autoSolves()) {
             const left = this.trivialValues(slot);
             return left.length === 1 ? left[0] : null;
         }
         const g = this.given(slot);
         if (g) return g.value;
         const s = this.model.slots.get(slot);
-        const left = s.domain.filter((v) => !this.isStruckWithProof(slot, v));
+        // A card left out of the game is no answer the player has to rule out.
+        const left = s.domain.filter((v) => !this.hidden.has(v) && !this.isStruckWithProof(slot, v));
         return left.length === 1 ? left[0] : null;
     }
 
@@ -808,8 +877,8 @@ export class Game {
         return { plausible: false, why: 'clues', aside, conflict: this.model.problem.explainConflict(active, { [slot]: value }) };
     }
 
-    /** Trivial and Easy: the game helps (lists what the clues allow, or does it outright). */
-    assisted() { return this.difficulty === TRIVIAL || this.difficulty === EASY; }
+    /** The game checks answers against the clues for the player (Trivial outright; greying on). */
+    assisted() { return this.autoSolves() || this.helps('greying'); }
 
     /**
      * Trivial: every value the held clues allow, read the way the case reads them (a statement the case knows to
@@ -955,7 +1024,7 @@ export class Game {
     }
 
     activeConstraints() {
-        return activeConstraints(this.model, this.known(), this.suspected, { heldInferences: this.difficulty !== TRIVIAL }).filter((id) => !this.model.constraints.get(id).derived);
+        return activeConstraints(this.model, this.known(), this.suspected, { heldInferences: !this.autoSolves() }).filter((id) => !this.model.constraints.get(id).derived);
     }
 
     /** Clues the player trusts that cannot all be true (a minimal set), or null. Trivial shows it. */

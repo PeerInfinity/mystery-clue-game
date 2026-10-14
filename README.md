@@ -28,7 +28,7 @@ No build step and no runtime dependencies. `ajv` (a dev dependency) checks the J
 | `engine/logic.js` | The formula language for constraints, in three-valued logic. |
 | `engine/solver.js` | A finite-domain solver: candidates per slot, checked eliminations, uniqueness, minimal conflict sets. |
 | `engine/caseModel.js` | Turns a case into cards, slots and constraints; `checkStep` checks a cited elimination or conclusion. |
-| `engine/game.js` | Player state: reading, collecting, pencil marks, givens, proofs, theories, the three time axes. Difficulties Trivial / Easy / Hard; pace Free / Wait. |
+| `engine/game.js` | Player state: reading, collecting, pencil marks, givens, proofs, theories, the three time axes. Difficulty options (`OPTIONS`) with Trivial / Easy / Medium / Hard as presets and Custom for any other mix; pace Free / Wait. |
 | `cases/silver-blaze/` | The case: `case.json` (meta, time windows, scenes, questions, theories) and its parts. |
 | `cases/silver-blaze/report.md` | Generated: fair-play table, theories and what breaks them, the route check, every slot's status, the fabula. |
 | `schema/case.schema.json` | JSON Schema for case format 0.2. |

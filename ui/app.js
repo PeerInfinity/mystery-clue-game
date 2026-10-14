@@ -5,7 +5,7 @@
 import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { evaluate } from '../engine/logic.js';
-import { Game, TRIVIAL, EASY, MEDIUM, HARD, WAIT, BG_START, BG_ASK, BACKGROUND_DEFAULTS, CONNECT_DEFAULTS, INF_CONNECT, CONCLUSION_KINDS } from '../engine/game.js';
+import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -73,13 +73,13 @@ function toast(html) {
 // ---------- the story ----------
 function renderStory() {
     const el = $('#story');
-    const hard = game.difficulty === HARD;
+    const hard = game.collecting();
     el.classList.toggle('hard', hard);
     let h = '';
     for (let i = 0; i < game.read; i++) {
         const segs = story.segments(i);
         const body = segs.map((s) => {
-            const ids = s.ids.filter((id) => model.cards.has(id) || s.kinds.includes('window') || s.kinds.includes('question'));
+            const ids = s.ids.filter((id) => (model.cards.has(id) && !game.isHidden(id)) || s.kinds.includes('window') || s.kinds.includes('question'));
             if (!ids.length) return esc(s.text);
             const got = ids.some((id) => game.knows(id));
             const kind = s.kinds.includes('entity') ? 'entity' : s.kinds.includes('question') ? 'question' : s.kinds.includes('event') ? 'event' : s.kinds.includes('window') ? 'window' : 'claim';
@@ -105,7 +105,7 @@ function renderReader() {
         // Holmes is about to reason: the story waits until the player has built the inferences he uses.
         const needs = [...new Set(blockers.flatMap((s) => game.stepInferences(s) ?? []))].filter((id) => !game.knows(id));
         note = blocked
-            ? `<div class="note block">Holmes has worked something out. Before reading on, build the ${needs.length === 1 ? 'inference' : `${needs.length} inferences`} he is about to draw (see <span class="link" data-tab-open="inferences">Inferences</span>).${game.difficulty === EASY ? ` They start from: ${[...new Set(needs.flatMap((id) => game.connectSet(id)))].filter((x) => game.knows(x)).map((x) => link(x, shortName(x, 40))).join(', ')}.` : ''}</div>`
+            ? `<div class="note block">Holmes has worked something out. Before reading on, build the ${needs.length === 1 ? 'inference' : `${needs.length} inferences`} he is about to draw (see <span class="link" data-tab-open="inferences">Inferences</span>).${game.helps('hints') ? ` They start from: ${[...new Set(needs.flatMap((id) => game.connectSet(id)))].filter((x) => game.knows(x)).map((x) => link(x, shortName(x, 40))).join(', ')}.` : ''}</div>`
             : '<div class="note">Holmes is a step ahead of you here.</div>';
     } else if (blockers.length) {
         const prompts = blockers.map((s) => {
@@ -139,12 +139,12 @@ function renderTool() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
     $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
     const infTab = document.querySelector('.tab[data-tab="inferences"]');
-    infTab.hidden = game.difficulty === TRIVIAL && !game.heldInferences().length;
-    const left = game.difficulty === EASY ? game.buildable().length : 0;
+    infTab.hidden = game.autoSolves() && !game.heldInferences().length;
+    const left = game.helps('hints') ? game.buildable().length : 0;
     infTab.textContent = `Inferences${left ? ` (${left} to build)` : ''}`;
     const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)));
     document.querySelector('.tab[data-tab="cards"]').textContent = `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`;
-    const clashes = game.difficulty === EASY ? game.clashes().length : 0;
+    const clashes = game.helps('clashes') ? game.clashes().length : 0;
     document.querySelector('.tab[data-tab="questions"]').textContent = `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`;
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
@@ -162,10 +162,10 @@ function intro() {
 <h3 class="section">How to play</h3>
 <ul>
 <li>Read the story on the left, one paragraph at a time.</li>
-<li>Everything the story mentions — people, places, things, events, statements — becomes a card. ${game.difficulty === HARD ? 'In Hard mode you collect a card by clicking the words in the story that mention it.' : 'Click the marked words in the story to open a card.'}</li>
-<li>Cards have <b>open questions</b>: who did it, where, when, whose is it, is it true. Each question lists its possible answers, like pencil marks in sudoku${game.difficulty === HARD ? ' — in Hard mode you list them yourself' : ''}.</li>
-<li>${game.difficulty === TRIVIAL ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : game.difficulty === EASY ? 'Cross answers out; the game greys the ones your clues already rule out. Circle the answers you favour.' : 'Rule answers out: the game checks each against every clue and inference you hold and trust. Circle the answers you favour.'}</li>
-<li>${game.difficulty === TRIVIAL ? 'The game draws the inferences for you; they are listed under Inferences.' : `<b>Inferences</b> are the reasoning that connects clues. Open a clue or background card and press “Infer from this”, then connect further cards; the game tells you when you are onto something${game.difficulty === HARD ? ', and you name what the conclusion is about' : ''}. Holmes and the others state some inferences themselves.`}</li>
+<li>Everything the story mentions — people, places, things, events, statements — becomes a card. ${game.collecting() ? 'You collect a card by clicking the words in the story that mention it.' : 'Click the marked words in the story to open a card.'}</li>
+<li>Cards have <b>open questions</b>: who did it, where, when, whose is it, is it true. Each question lists its possible answers, like pencil marks in sudoku${game.proposing() ? ' — you list them yourself' : ''}.</li>
+<li>${game.autoSolves() ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : `${game.opts.crossOut === 'pencil' ? 'Cross answers out as you see fit' : 'Rule answers out: the game checks each against every clue and inference you hold and trust'}${game.helps('greying') ? '; the game greys the ones your clues already rule out' : ''}. Circle the answers you favour.`}</li>
+<li>${game.autoSolves() ? 'The game draws the inferences for you; they are listed under Inferences.' : `<b>Inferences</b> are the reasoning that connects clues. Open a clue or background card and press “Infer from this”, then connect further cards; the game tells you when you are onto something${game.opts.kind === 'on' ? ', and you name what the conclusion is about' : ''}. Holmes and the others state some inferences themselves.`}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
@@ -230,7 +230,7 @@ function toolCard() {
         }
         h += '</div>';
     });
-    if (['claims', 'rules'].includes(c.section) && game.difficulty !== TRIVIAL) h += inferButton(id);
+    if (['claims', 'rules'].includes(c.section) && !game.autoSolves()) h += inferButton(id);
     if (c.section === 'inferences') {
         const how = game.howHeld(id);
         h += `<p class="small muted">${how?.how === 'built' ? 'You built this inference' : how?.how === 'stated' ? `${esc(cardName(how.by))} drew this inference` : 'Worked out for you'} · ${paraLabel(game.unlocked.get(id).para)}</p>`;
@@ -268,7 +268,7 @@ function toolCard() {
         const placed = game.visibleSlots().filter((s) => s.on !== id && game.settled(s.id) === id);
         const maybe = game.visibleSlots().filter((s) => s.on !== id && game.settled(s.id) === null && (() => {
             const p = game.pencil(s.id);
-            return p.includes(id) && (game.difficulty === HARD || p.length <= 8);
+            return p.includes(id) && (game.proposing() || p.length <= 8);
         })());
         if (placed.length || maybe.length) {
             h += '<h3 class="section">Where it fits</h3><ul class="list">';
@@ -289,18 +289,18 @@ function renderSlot(s) {
     let ruledCount = 0;
     if (settled !== null) {
         chips.push(`<span class="chip proven" data-slot="${s.id}" data-val="${esc(settled)}">${esc(valueName(s.id, settled))}</span>`);
-        if (game.difficulty === TRIVIAL) chips.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'settled by the story' : 'worked out from your clues'}</span>`);
+        if (game.autoSolves()) chips.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'settled by the story' : 'worked out from your clues'}</span>`);
         else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
         for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k, shortName(k, 60))}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
     } else {
         const pencil = game.pencil(s.id);
         let live = pencil;
         let ruled = [];
-        if (game.difficulty === TRIVIAL) {
+        if (game.autoSolves()) {
             // The pencil is already what the clues allow; show the rest as ruled out, with a "why" on each.
             ruled = s.domain.filter((v) => !live.includes(v) && game.offered(s.id, v));
             ruledCount = ruled.length;
-        } else if (game.difficulty === EASY) {
+        } else if (game.helps('greying')) {
             if (!cache.has(s.id)) cache.set(s.id, game.openValues(s.id));
             const open = cache.get(s.id);
             live = pencil.filter((v) => open.includes(v));
@@ -328,12 +328,12 @@ function renderSlot(s) {
     const lapsed = [...struck.filter(([v]) => game.strikeLapsed(s.id, v)).map(([, p]) => p.used), ...(game.proofLapsed(s.id) ? [m.proven.used] : [])];
     let state;
     if (settled !== null) state = given ? 'given' : 'settled';
-    else if (game.difficulty === HARD) state = `${game.pencil(s.id).length} proposed`;
-    else if (game.difficulty === TRIVIAL) state = `${game.pencil(s.id).length} possible${game.moreToCome(s.id) ? ' so far' : ''}`;
+    else if (game.proposing()) state = `${game.pencil(s.id).length} proposed`;
+    else if (game.autoSolves()) state = `${game.pencil(s.id).length} possible${game.moreToCome(s.id) ? ' so far' : ''}`;
     else state = `${countLeft(s.id)}${ruledCount ? `, ${ruledCount} ruled out by your clues` : ''}`;
     let h = `<div class="slot ${settled !== null ? 'settled' : ''}" id="slot-${s.id.replace(/\./g, '-')}"><div class="slot-head"><b>${esc(game.promptOf(s.id))}</b><span class="state">${state}</span></div>`;
     h += `<div class="chips">${chips.join('') || '<span class="empty">no candidates yet</span>'}</div>`;
-    if (game.difficulty === HARD && settled === null) {
+    if (game.proposing() && settled === null) {
         const options = s.domain.filter((v) => game.offered(s.id, v));
         h += `<div class="chips"><input list="dl-${s.id}" data-add="${s.id}" placeholder="+ propose an answer" size="26"><datalist id="dl-${s.id}">${options.map((v) => `<option value="${esc(valueName(s.id, v))}">`).join('')}</datalist></div>`;
     }
@@ -343,11 +343,11 @@ function renderSlot(s) {
         const why = [...new Set(lapsed.flatMap((u) => game.lapsedBy(u)))];
         h += `<div class="small bad">${lapsed.length === 1 ? 'A proof here' : `${lapsed.length} proofs here`} rested on ${why.map((k) => link(k, shortName(k, 50))).join(', ')}, which you now doubt.</div>`;
     }
-    if (game.difficulty === EASY && settled === null && cache.get(s.id)?.length === 0) {
+    if (game.helps('greying') && settled === null && cache.get(s.id)?.length === 0) {
         // No value at all fits, met or not: the trusted clues contradict each other.
         h += `<div class="small bad">Nothing could fit, not even an answer the story has yet to bring up: some of the clues you trust contradict each other, so one of them must be false. <span class="link" data-clash="${s.id}">Find the clash</span></div>`;
         if (ui.clash?.slot === s.id) h += `<div class="why">${ui.clash.html}</div>`;
-    } else if (game.difficulty === EASY && settled === null && (game.pencil(s.id).length || !game.moreToCome(s.id)) && !game.pencil(s.id).some((v) => cache.get(s.id)?.includes(v))) {
+    } else if (game.helps('greying') && settled === null && (game.pencil(s.id).length || !game.moreToCome(s.id)) && !game.pencil(s.id).some((v) => cache.get(s.id)?.includes(v))) {
         // Something fits, but not among the answers on offer yet.
         h += `<div class="small muted">${game.moreToCome(s.id) ? 'None of the answers met so far fits your clues. The answer may be one the story has not brought up yet.' : 'Every answer has been ruled out.'}</div>`;
     }
@@ -362,7 +362,7 @@ function countLeft(slot) {
 
 function chip(slot, v, cls) {
     const picked = ui.menu?.slot === slot && ui.menu?.value === v ? ' picked' : '';
-    const circled = game.difficulty !== TRIVIAL && game.isCircled(slot, v) ? ' circled' : '';
+    const circled = !game.autoSolves() && game.isCircled(slot, v) ? ' circled' : '';
     return `<span class="chip ${cls}${circled}${picked}" data-slot="${slot}" data-val="${esc(v)}">${esc(valueName(slot, v))}${cls === 'proved' ? ' <span class="x">✓</span>' : ''}</span>`;
 }
 
@@ -372,7 +372,7 @@ function slotMenu(s, v) {
     const isProven = game.provenValue(s.id) === v;
     const isGiven = !!game.given(s.id);
     const b = [];
-    if (game.difficulty === TRIVIAL) {
+    if (game.autoSolves()) {
         // The game does the deducing: offer the reasons, nothing to do.
         if (game.settled(s.id) === v) b.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'Settled by the story.' : 'Worked out from your clues.'}</span> <button data-op="why" class="quiet">Why?</button>`);
         else if (!game.pencil(s.id).includes(v)) b.push('<button data-op="whynot" class="quiet">Why not?</button>');
@@ -385,11 +385,11 @@ function slotMenu(s, v) {
     else if (st && !game.strikeLapsed(s.id, v)) b.push('<button data-op="unstrike">Restore</button>');
     else {
         b.push(game.isCircled(s.id, v) ? '<button data-op="uncircle">Uncircle</button>' : '<button data-op="circle">Circle</button>');
-        if (game.difficulty === EASY) b.push('<button data-op="strike">Cross out</button>');
+        if (game.opts.crossOut === 'pencil') b.push('<button data-op="strike">Cross out</button>');
         else b.push('<button data-op="rule" title="Checked against every clue and inference you hold and trust">Rule it out</button>');
         b.push('<button data-op="prove" title="Checked against every clue and inference you hold and trust">Prove it\'s this</button>');
-        if (game.difficulty === EASY) b.push('<button data-op="fit" class="quiet">Could it fit?</button>');
-        if (game.difficulty === HARD) b.push('<button data-op="unpropose" class="quiet">Take back</button>');
+        if (game.helps('greying')) b.push('<button data-op="fit" class="quiet">Could it fit?</button>');
+        if (game.proposing()) b.push('<button data-op="unpropose" class="quiet">Take back</button>');
     }
     const mine = game.theories.find((t) => t.id === ui.theory);
     if (mine && !isGiven) b.push(`<button data-op="theory" class="quiet">Add to “${esc(mine.label)}”</button>`);
@@ -431,7 +431,7 @@ function toolCards() {
     h += shown.length ? `<ul class="list">${shown.map((id) => {
         const open = game.slotsOn(id).filter((s) => game.settled(s.id) === null).length;
         return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id, shortName(id, 90))}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${open ? ` <span class="small muted">· ${open} open</span>` : ''}</li>`;
-    }).join('')}</ul>` : `<p class="empty">${game.difficulty === HARD ? 'No cards yet. Click the words in the story that mention someone or something.' : 'No cards yet. Start reading.'}</p>`;
+    }).join('')}</ul>` : `<p class="empty">${game.collecting() ? 'No cards yet. Click the words in the story that mention someone or something.' : 'No cards yet. Start reading.'}</p>`;
     return h;
 }
 
@@ -470,15 +470,15 @@ function toolQuestions() {
         }
         d += '</ul>';
     }
-    const c = game.difficulty === EASY ? clashesHtml() : '';
+    const c = game.helps('clashes') ? clashesHtml() : '';
     if (!raised.length) return `${c}<p class="empty">The story has not raised any questions yet.</p>${d}`;
     let h = `${c}<p class="small muted">The questions the case turns on, as the story raises them.</p><ul class="list">`;
     for (const q of raised) {
         const slot = model.slots.get(q.slot);
         const visible = game.knows(slot.on);
         const settled = game.settled(q.slot);
-        const state = !visible ? (game.difficulty === HARD ? 'collect the card first' : '') : settled !== null ? esc(valueName(q.slot, settled)) : game.difficulty === HARD ? `${game.pencil(q.slot).length} proposed` : game.difficulty === TRIVIAL ? `${game.pencil(q.slot).length} possible${game.moreToCome(q.slot) ? ' so far' : ''}` : countLeft(q.slot);
-        const picks = visible && settled === null && game.difficulty !== TRIVIAL ? game.pencil(q.slot).filter((v) => game.isCircled(q.slot, v)) : [];
+        const state = !visible ? (game.collecting() ? 'collect the card first' : '') : settled !== null ? esc(valueName(q.slot, settled)) : game.proposing() ? `${game.pencil(q.slot).length} proposed` : game.autoSolves() ? `${game.pencil(q.slot).length} possible${game.moreToCome(q.slot) ? ' so far' : ''}` : countLeft(q.slot);
+        const picks = visible && settled === null && !game.autoSolves() ? game.pencil(q.slot).filter((v) => game.isCircled(q.slot, v)) : [];
         h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(game.questionText(q))}</span>` : esc(game.questionText(q))}</span><span class="state ${settled !== null ? 'done' : ''}">${state}${picks.length ? ` · circled: ${picks.map((v) => esc(valueName(q.slot, v))).join(', ')}` : ''}</span></li>`;
     }
     return `${h}</ul>${d}`;
@@ -491,7 +491,7 @@ function clashesHtml() {
     if (!list.length && !resolved.length) return '';
     let h = `<h3 class="section" id="clashes">Clashes${list.length ? ` (${list.length})` : ''}</h3>`;
     if (list.length) {
-        h += '<p class="small muted">Clues you trust that cannot all be true. Until you doubt one, the game sets aside the claims caught in a clash when it greys answers, so a clash here does not rule out answers elsewhere.</p>';
+        h += '<p class="small muted">Clues you trust that cannot all be true. Until you doubt one, the game sets aside the claims caught in a clash when it checks answers, so a clash here does not rule out answers elsewhere.</p>';
         list.forEach((cl, i) => { h += `<div class="clash"><b>Clash ${i + 1}</b>${clashHtml(cl.ids)}</div>`; });
     }
     if (resolved.length) {
@@ -579,13 +579,16 @@ function render() {
     $('#progress').textContent = `${found} cards · ${settledQ} of ${raised} questions settled`;
     $('#difficulty').value = game.difficulty;
     $('#pace').value = game.pace;
-    $('#background').value = game.background;
     $('#autopace').value = game.autoPace;
-    $('#connect').value = game.connect;
-    $('#connect-label').hidden = game.difficulty === TRIVIAL;
-    $('#autopace-label').hidden = game.difficulty !== TRIVIAL;
+    $('#autopace-label').hidden = !game.autoSolves();
+    for (const k of Object.keys(OPTIONS)) {
+        $(`#opt-${k}`).value = game.opts[k];
+        // With the game working out the answers, the player's options have nothing to act on.
+        $(`#opt-${k}`).closest('label').classList.toggle('opt-off', game.autoSolves() && PLAYER_OPTIONS.includes(k));
+    }
+    if (game.difficulty === CUSTOM) $('#difficulty-options').open = true;
     const pick = (id) => $(`#${id}`).selectedOptions[0]?.textContent ?? '';
-    $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('background').toLowerCase()}`;
+    $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('opt-background').toLowerCase()}`;
     $('#settings-short').textContent = pick('difficulty');
     renderStory();
     renderTool();
@@ -638,7 +641,7 @@ function buildingBar() {
     if (!b) return '';
     let h = '<div class="building"><b>Building an inference</b> ';
     h += b.cards.map((x) => `<span class="chip">${link(x, shortName(x, 40))} <span class="x" data-unbuild="${x}">✕</span></span>`).join(' + ') || '<span class="small muted">open a clue or background card and press “Infer from this”</span>';
-    if (game.difficulty === HARD) {
+    if (game.opts.kind === 'on') {
         h += ` <label class="small">about <select id="build-kind"><option value="">…choose</option>${Object.entries(CONCLUSION_KINDS).map(([k, label]) => `<option value="${k}" ${b.kind === k ? 'selected' : ''}>${esc(label)}</option>`).join('')}</select></label>`;
     }
     h += ` <button class="quiet small" data-build-clear>Done</button>`;
@@ -651,7 +654,7 @@ function runPropose() {
     const b = ui.building;
     if (!b) return;
     if (!b.cards.length) { b.note = ''; renderTool(); return; }
-    if (game.difficulty === HARD && !b.kind) { b.note = 'Choose what the conclusion would be about.'; renderTool(); return; }
+    if (game.opts.kind === 'on' && !b.kind) { b.note = 'Choose what the conclusion would be about.'; renderTool(); return; }
     const res = game.propose(b.cards, b.kind);
     if (res.built.length) {
         b.note = `<span class="good">You inferred:</span> ${res.built.map((x) => link(x, shortName(x, 90))).join('; ')}${res.onto ? ' <span class="muted">— and these cards are onto something more.</span>' : ''}`;
@@ -671,7 +674,7 @@ function runPropose() {
 function toolInferences() {
     const held = game.heldInferences().sort((a, b) => game.unlocked.get(a).at - game.unlocked.get(b).at);
     let h = '<p class="small muted">Conclusions drawn from the clues and what you know. You hold the ones you have built and the ones you have heard someone draw; until you doubt one, the game takes it as so. To build one, open a clue or background card and press “Infer from this”.</p>';
-    if (game.difficulty === EASY) {
+    if (game.helps('hints')) {
         const n = game.buildable().length;
         h += `<p class="${n ? '' : 'small muted'}">${n ? `<b>${n}</b> more can be built from what you hold.` : 'Nothing more can be built from what you hold yet.'}</p>`;
     }
@@ -730,7 +733,7 @@ function onStoryClick(e) {
     const p = e.target.closest('p[data-p]');
     $('#pop').hidden = true;
     if (!p) return;
-    if (game.difficulty === HARD) {
+    if (game.collecting()) {
         const para = Number(p.dataset.p);
         const ids = m ? m.dataset.ids.split(' ').filter((id) => model.cards.has(id)) : [];
         const got = game.collect(para, ids).filter((id) => !['rules'].includes(model.cards.get(id).section));
@@ -769,7 +772,7 @@ document.addEventListener('click', (e) => {
     const readBtn = e.target.closest('#read, #read-scene, #read-deduction');
     if (readBtn) {
         const res = readBtn.id === 'read' ? game.advance() : readBtn.id === 'read-scene' ? game.readToNextScene() : game.readToNextDeduction();
-        if (game.difficulty !== HARD && res.newCards?.length) {
+        if (!game.collecting() && res.newCards?.length) {
             const shown = res.newCards.filter((c) => !['rules'].includes(model.cards.get(c).section));
             if (shown.length) toast(`New: ${shown.slice(0, 5).map((c) => esc(shortName(c, 30))).join(', ')}${shown.length > 5 ? ` and ${shown.length - 5} more` : ''}`);
         }
@@ -939,19 +942,21 @@ document.addEventListener('change', (e) => {
         const other = [...game.unlocked.keys()].find((k) => cardName(k).toLowerCase() === typed);
         toast(other ? 'That is not the right kind of thing for this question.' : 'No card of yours by that name.');
     }
-    if (['difficulty', 'pace', 'background', 'autopace', 'connect'].includes(e.target.id)) {
+    if (['difficulty', 'pace', 'autopace'].includes(e.target.id) || e.target.id.startsWith('opt-')) {
         const state = game.save();
-        if (e.target.id === 'difficulty' && state.difficulty !== $('#difficulty').value) {
-            if (!confirm('Changing difficulty clears your answers (each difficulty keeps them differently). Your place in the story is kept.')) { render(); return; }
+        const opts = e.target.id === 'difficulty'
+            ? { ...(PRESETS[e.target.value] ?? game.opts) }
+            : { ...game.opts, ...(e.target.id.startsWith('opt-') && { [e.target.id.slice(4)]: e.target.value }) };
+        // Answers are kept differently by who works them out, how they are listed and how they are crossed out.
+        if (['solver', 'answers', 'crossOut'].some((k) => opts[k] !== game.opts[k]) && game.marks.size) {
+            if (!confirm('This change clears your answers (they are kept differently under it). Your place in the story, your cards and your inferences are kept.')) { render(); return; }
             state.marks = [];
-            state.collected = null;
         }
-        // A new difficulty brings its own background default (When relevant for Trivial, When asked otherwise).
-        state.background = e.target.id === 'difficulty' ? BACKGROUND_DEFAULTS[$('#difficulty').value] : $('#background').value;
-        state.difficulty = $('#difficulty').value;
+        // Starting to collect cards by clicking: the cards already dealt count as collected.
+        if (opts.cards === 'collect' && !game.collecting()) state.collected = [...game.unlocked].map(([id, u]) => [id, u.para]);
+        state.options = opts;
         state.pace = $('#pace').value;
         state.autoPace = $('#autopace').value;
-        state.connect = e.target.id === 'difficulty' ? CONNECT_DEFAULTS[$('#difficulty').value] : $('#connect').value;
         ui.building = null;
         game.load(state);
         changed();
@@ -963,6 +968,28 @@ $('#reset').addEventListener('click', () => {
     ui.selected = null;
     changed();
 });
+
+// ---------- difficulty options ----------
+// Labels for OPTIONS (engine/game.js), in its order of values.
+const OPTION_UI = {
+    solver: ['Who works out the answers', { game: 'The game', player: 'You' }, 'The game: it works out what your clues allow and settles each question itself; you read and watch. You: you rule answers out and prove them.'],
+    cards: ['Cards', { dealt: 'Dealt as you read', collect: 'Collected by clicking the text' }, 'Dealt: a card comes as the story first mentions it. Collected: you collect a card only by clicking the words in the story that mention it.'],
+    answers: ['Answers to a question', { listed: 'All listed', propose: 'You propose them' }, 'All listed: every possible answer you have met is listed. You propose them: the list starts empty and you add the answers you think possible.'],
+    crossOut: ['Crossing out', { pencil: 'Freely, in pencil', checked: 'Checked by the game' }, 'In pencil: cross out what you like. Checked: an answer is ruled out only if what you hold and trust rules it out (the game checks).'],
+    greying: ['Answers your clues rule out', { on: 'Greyed out', off: 'Not shown' }, 'Greyed out: the game greys the answers your clues already rule out, and offers “Could it fit?” on each answer and a check on each theory.'],
+    clashes: ['Clashes among your clues', { on: 'Listed', off: 'Not listed' }, 'Listed: the Questions tab lists the clues you trust that cannot all be true.'],
+    hints: ['Inference hints', { on: 'How many, and where to start', off: 'None' }, 'How many: the Inferences tab counts how many more you could build; when the story waits on a deduction, it names the cards to start from.'],
+    kind: ['Building an inference', { off: 'Connect the cards', on: 'Also name what it is about' }, 'Also name it: you say whether the conclusion is about who, when, where, what, why, or whether something is so.'],
+    connect: ['Background in inferences', { implicit: 'Needed in hand', connect: 'Connected too' }, 'Needed in hand: connect an inference\'s clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.'],
+    background: ['Background facts', { start: 'All at once', relevant: 'When relevant', ask: 'When asked' }, 'General knowledge a reader of the time had. All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.'],
+    irrelevant: ['Cards the solution does not need', { none: 'None', few: 'One in four', half: 'Half', most: 'Three in four', all: 'All' }, 'How many of the cards with no part in the solution you get at all (the people, places, things and facts that are only colour). The rest are left out of the game: no card, and nothing to click in the text.'],
+};
+function buildOptions() {
+    $('#options').innerHTML = Object.entries(OPTIONS).map(([k, values]) => {
+        const [label, names, help] = OPTION_UI[k];
+        return `<label title="${esc(help)}">${esc(label)}<select id="opt-${k}">${values.map((v) => `<option value="${v}">${esc(names[v])}</option>`).join('')}</select></label>`;
+    }).join('');
+}
 
 // ---------- start ----------
 model = await loadCase(CASE);
@@ -976,6 +1003,7 @@ R = makeReadings({
     cardName: (id) => cardName(id),
     valueName: (slot, v) => valueName(slot, v),
 });
+buildOptions();
 const saved = restore();
 const defaults = model.data.settings_defaults ?? {};
 game = new Game(model, { difficulty: defaults.difficulty ?? MEDIUM, pace: defaults.pace ?? 'free', state: saved?.game ?? null });
