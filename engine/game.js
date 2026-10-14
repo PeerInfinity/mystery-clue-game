@@ -13,6 +13,7 @@
 // Background facts (rule cards) sit on the entity cards they belong to and arrive with them.
 
 import { activeConstraints, checkStep, trustedClaim } from './caseModel.js';
+import { evaluate } from './logic.js';
 
 // Difficulty. TRIVIAL: the game works out what the held clues allow and settles questions itself; the player
 // reads and watches. EASY: every answer is listed and the ones the player's clues rule out are greyed; plain
@@ -23,6 +24,9 @@ export const EASY = 'easy';
 export const MEDIUM = 'medium';
 export const HARD = 'hard';
 export const DIFFICULTIES = [TRIVIAL, EASY, MEDIUM, HARD];
+// Trivial's pace: settle each answer when Holmes reaches it in the story, or as soon as the held clues allow.
+export const AUTO_HOLMES = 'holmes';
+export const AUTO_LOGIC = 'logic';
 export const FREE = 'free';
 export const WAIT = 'wait';
 // When background facts become available: all at once, where the story first touches each one's subject, or
@@ -35,12 +39,13 @@ export const BACKGROUND_DEFAULTS = { trivial: BG_RELEVANT, easy: BG_RELEVANT, me
 const OLD_DIFFICULTY = { trivial: EASY, easy: MEDIUM, hard: HARD };
 
 export class Game {
-    constructor(model, { difficulty = MEDIUM, pace = FREE, background = null, state = null } = {}) {
+    constructor(model, { difficulty = MEDIUM, pace = FREE, background = null, autoPace = AUTO_HOLMES, state = null } = {}) {
         this.model = model;
         this.story = model.story;
         this.difficulty = difficulty;
         this.pace = pace;
         this.background = background ?? BACKGROUND_DEFAULTS[difficulty];
+        this.autoPace = autoPace;
         this.actions = [...(model.data.actions ?? [])].sort((a, b) => a.order - b.order);
         this.actionById = new Map(this.actions.map((a) => [a.id, a]));
         this.routeById = new Map((model.data.route ?? []).map((r) => [r.id, r]));
@@ -72,6 +77,19 @@ export class Game {
             if (!k) continue;
             this.claimEvents.set(c.id, [...slotsIn(k.formula)].map((s) => model.slots.get(s)?.on).filter((o) => model.cards.get(o)?.section === 'events'));
         }
+        // Trivial at Holmes's pace: what the narrator states outright (any slot, case questions too, never a
+        // statement the case knows may be false), and where the story tells each of Holmes's deductions.
+        this.statedBy = new Map();
+        for (const c of model.data.claims ?? []) {
+            if (c.derived || c.truth_slot || !c.asserts) continue;
+            for (const f of c.asserts.and ?? [c.asserts]) {
+                if (!f.eq) continue;
+                if (!this.statedBy.has(f.eq[0])) this.statedBy.set(f.eq[0], []);
+                this.statedBy.get(f.eq[0]).push({ claim: c.id, value: f.eq[1] });
+            }
+        }
+        // Scenes start where their first quote is.
+        this.sceneStarts = (model.data.scenes ?? []).map((sc) => this.story.find(sc.source?.[0] ?? '')?.para).filter((p) => p !== undefined).sort((a, b) => a - b);
         // Where each background fact becomes relevant: its `relevant_from` line, never before one of its cards.
         this.ruleAt = new Map();
         for (const r of model.data.rules ?? []) {
@@ -111,6 +129,7 @@ export class Game {
             lastSeen: [...this.lastSeen],
             suspected: [...this.suspected],
             background: this.background,
+            autoPace: this.autoPace,
             asked: this.asked,
             version: 3,
         };
@@ -121,6 +140,7 @@ export class Game {
         this.difficulty = state.difficulty ?? this.difficulty;
         this.pace = state.pace ?? this.pace;
         this.background = state.background ?? BACKGROUND_DEFAULTS[this.difficulty];
+        this.autoPace = state.autoPace ?? this.autoPace;
         this.reset();
         const target = Math.min(state.read ?? 1, this.story.paragraphs.length);
         const asked = [...(state.asked ?? [])].sort((a, b) => a[1] - b[1]);
@@ -179,18 +199,13 @@ export class Game {
         return { ok: true, para: this.read - 1, newCards: [...this.unlocked.keys()].filter((k) => !before.has(k)) };
     }
 
-    /** The paragraph just before Holmes's next deduction (where the story would wait for it), or the end. */
-    nextDeductionAt() {
-        const ahead = [...(this.story.gates?.keys() ?? [])].filter((p) => p > this.read).sort((a, b) => a - b);
-        return ahead[0] ?? this.story.paragraphs.length;
+    /** The first paragraph of the next scene, or the end. */
+    nextSceneAt() {
+        return this.sceneStarts.find((p) => p > this.read) ?? this.story.paragraphs.length;
     }
 
-    /**
-     * Read on to just before Holmes's next deduction, so the player can try it first. Stops early where the
-     * story waits (the 'wait' pace). Returns how many paragraphs were read and the cards they brought.
-     */
-    readToNextDeduction() {
-        const target = this.nextDeductionAt();
+    /** Read on until paragraph `target` is the next to read (stopping early where the story waits). */
+    readTo(target) {
         const newCards = [];
         let read = 0;
         while (this.read < target) {
@@ -201,6 +216,20 @@ export class Game {
         }
         return { read, newCards };
     }
+
+    readToNextScene() { return this.readTo(this.nextSceneAt()); }
+
+    /** The paragraph just before Holmes's next deduction (where the story would wait for it), or the end. */
+    nextDeductionAt() {
+        const ahead = [...(this.story.gates?.keys() ?? [])].filter((p) => p > this.read).sort((a, b) => a - b);
+        return ahead[0] ?? this.story.paragraphs.length;
+    }
+
+    /**
+     * Read on to just before Holmes's next deduction, so the player can try it first. Stops early where the
+     * story waits (the 'wait' pace). Returns how many paragraphs were read and the cards they brought.
+     */
+    readToNextDeduction() { return this.readTo(this.nextDeductionAt()); }
 
     #readNext() {
         const p = this.read;
@@ -452,7 +481,7 @@ export class Game {
     pencil(slot) {
         const m = this.marks.get(slot);
         if (this.provenValue(slot) !== null) return [this.provenValue(slot)];
-        if (this.difficulty === TRIVIAL) return this.autoValues(slot).filter((v) => this.offered(slot, v));
+        if (this.difficulty === TRIVIAL) return this.trivialValues(slot).filter((v) => this.offered(slot, v));
         const g = this.given(slot);
         if (g) return [g.value];
         const s = this.model.slots.get(slot);
@@ -536,7 +565,7 @@ export class Game {
         // A proof outranks a given: when they disagree, the player is shown the clash (givenClash).
         if (this.provenValue(slot) !== null) return this.provenValue(slot);
         if (this.difficulty === TRIVIAL) {
-            const left = this.autoValues(slot);
+            const left = this.trivialValues(slot);
             return left.length === 1 ? left[0] : null;
         }
         const g = this.given(slot);
@@ -589,10 +618,48 @@ export class Game {
         return this.autoCache.get(slot) ?? this.model.slots.get(slot).domain;
     }
 
-    /** Trivial: why a value is ruled out — the fewest held clues that exclude it (the case's reading). */
+    /** Trivial: what is still possible, at the chosen pace. */
+    trivialValues(slot) {
+        if (this.autoPace === AUTO_LOGIC) return this.autoValues(slot);
+        return this.slotDomain(slot).filter((v) => !this.holmesReasons(slot, v).length);
+    }
+
+    slotDomain(slot) { return this.model.slots.get(slot).domain; }
+
+    /** A deduction counts as made once the story has told it. */
+    stepTold(stepId) {
+        const at = this.story.anchors.steps.get(stepId) ?? [...(this.story.gates ?? [])].find(([, ids]) => ids.has(stepId))?.[0];
+        return at !== undefined && at < this.read;
+    }
+
+    /**
+     * Trivial at Holmes's pace: what rules `value` out so far — a held statement of the narrator's that gives the
+     * slot another value ({claim}), or a deduction of Holmes's the story has told that excludes it ({step}).
+     */
+    holmesReasons(slot, value) {
+        const out = [];
+        for (const g of this.statedBy.get(slot) ?? []) if (this.knows(g.claim) && g.value !== value) out.push({ claim: g.claim });
+        for (const step of this.model.data.route ?? []) {
+            const c = step.concludes;
+            if (!this.stepTold(step.id)) continue;
+            if (c.slot === slot && c.value === value) out.push({ step: step.id });
+            else if (c.formula && evaluate(c.formula, new Map([[slot, value]]), this.model.timeOrder) === false) out.push({ step: step.id });
+        }
+        return out;
+    }
+
+    /**
+     * Trivial: why a value is ruled out. At Holmes's pace: the statements and told deductions that exclude it; as
+     * soon as the clues allow: the fewest held clues that exclude it (the case's reading). Returns [{text}].
+     */
     whyNot(slot, value) {
+        if (this.autoPace === AUTO_HOLMES) {
+            return this.holmesReasons(slot, value).map((r) => (r.claim
+                ? { text: `The story says: ${this.model.cards.get(r.claim).text}` }
+                : { text: `Holmes: “${(this.routeById.get(r.step).source?.[0] ?? '').replace(/\s+/g, ' ')}”` }));
+        }
         const active = activeConstraints(this.model, this.known()).filter((id) => !this.model.constraints.get(id).derived);
-        return this.model.problem.explainConflict(active, { [slot]: value });
+        return (this.model.problem.explainConflict(active, { [slot]: value }) ?? []).map((k) => ({ text: this.model.constraints.get(k).label }));
     }
 
     /** Easy's automatic list: every value the held clues still allow (as the player reads them). */

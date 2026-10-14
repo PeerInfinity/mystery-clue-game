@@ -352,5 +352,10 @@ Holmes's). The fair-play test still passes under all three Background settings a
   so false statements never mislead — shows only those answers, settles a question when one is left, and says
   why any answer was ruled out. Saves from before keep their meaning (`version: 3`). `Problem.allCandidates`
   does every question in one pass per group of linked questions (late story: 2.7 s → 80 ms).
-- Open: Trivial settles answers as soon as the logic allows — at ¶115 it already names the killer and Derbyshire,
-  some 85 paragraphs before Holmes. "Next deduction" from the start jumps 95 paragraphs (the first gate).
+- Trivial settled answers as soon as the logic allowed — at ¶115 it already named the killer and Derbyshire, some
+  85 paragraphs before Holmes. User ruling: **make it a setting** ("Trivial answers", shown only in Trivial):
+  *Keep pace with Holmes* (default) applies what the narrator states outright and each of Holmes's deductions
+  once the story has told it (`holmesReasons`), so "Why?" quotes Holmes; *As soon as the clues allow* is the
+  solver's reading above.
+- "Next deduction" from the start jumped 95 paragraphs, so (user ruling) there is also **Next scene (N ¶)**, to the
+  start of the next of the 10 scenes.

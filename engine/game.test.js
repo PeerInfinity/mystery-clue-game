@@ -209,3 +209,21 @@ test('a card is called only what the story has called it so far', () => {
     assert.equal(game.nameOf('silver_blaze'), 'Silver Blaze');
     assert.ok(game.info('silver_blaze').some((it) => it.kind === 'name' && it.text === 'Silver Blaze'));
 });
+
+test("Trivial at Holmes's pace settles an answer only when the story tells it", () => {
+    const holmes = new Game(model, { difficulty: TRIVIAL });
+    const logic = new Game(model, { difficulty: TRIVIAL, autoPace: 'logic' });
+    for (const g of [holmes, logic]) while (g.read <= 120) g.advance();
+    assert.equal(holmes.settled('e.fatal_blow.agent'), null, 'Holmes has not said who killed him yet');
+    assert.equal(logic.settled('e.fatal_blow.agent'), 'silver_blaze', 'the clues already decide it');
+    while (!holmes.finished()) holmes.advance();
+    assert.equal(holmes.settled('e.fatal_blow.agent'), 'silver_blaze');
+    assert.match(holmes.whyNot('e.fatal_blow.agent', 'simpson')[0].text, /^Holmes: /);
+});
+
+test('Next scene reads to the start of the next scene', () => {
+    const game = new Game(model);
+    const res = game.readToNextScene();
+    assert.equal(game.read, game.sceneStarts[1]);
+    assert.ok(res.read > 1);
+});

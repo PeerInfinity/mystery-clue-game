@@ -95,6 +95,7 @@ function renderReader() {
     if (game.finished()) { el.innerHTML = '<span class="muted">The end.</span>'; return; }
     const blockers = game.blockers();
     const ahead = game.nextDeductionAt() - game.read;
+    const aheadScene = game.nextSceneAt() - game.read;
     const blocked = blockers.length && game.pace === WAIT;
     let note = '';
     if (blockers.length) {
@@ -112,7 +113,10 @@ function renderReader() {
     const jump = ahead > 1
         ? `<button id="read-deduction" class="quiet" ${blocked ? 'disabled' : ''} title="${toEnd ? 'Read to the end of the story' : 'Read on to just before Holmes works something out, so you can try it first'}">${toEnd ? 'To the end' : 'Next deduction'} <span class="small">(${ahead} ¶)</span></button>`
         : '';
-    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${jump}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}`;
+    const sceneJump = aheadScene > 1 && game.nextSceneAt() < story.paragraphs.length
+        ? `<button id="read-scene" class="quiet" ${blocked ? 'disabled' : ''} title="Read on to the start of the next scene">Next scene <span class="small">(${aheadScene} ¶)</span></button>`
+        : '';
+    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}`;
 }
 
 function scrollStory() {
@@ -247,7 +251,7 @@ function renderSlot(s) {
     let ruledCount = 0;
     if (settled !== null) {
         chips.push(`<span class="chip proven" data-slot="${s.id}" data-val="${esc(settled)}">${esc(valueName(s.id, settled))}</span>`);
-        if (game.difficulty === TRIVIAL) chips.push('<span class="small muted">worked out from your clues</span>');
+        if (game.difficulty === TRIVIAL) chips.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'settled by the story' : 'worked out from your clues'}</span>`);
         else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
         for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k, shortName(k, 60))}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
     } else {
@@ -312,7 +316,7 @@ function slotMenu(s, v) {
     const b = [];
     if (game.difficulty === TRIVIAL) {
         // The game does the deducing: offer the reasons, nothing to do.
-        if (game.settled(s.id) === v) b.push('<span class="small muted">Worked out from your clues.</span> <button data-op="why" class="quiet">Why?</button>');
+        if (game.settled(s.id) === v) b.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'Settled by the story.' : 'Worked out from your clues.'}</span> <button data-op="why" class="quiet">Why?</button>`);
         else if (!game.pencil(s.id).includes(v)) b.push('<button data-op="whynot" class="quiet">Why not?</button>');
         else b.push('<span class="small muted">Still possible.</span>');
         if (model.cards.has(v) && game.knows(v)) b.push(`<button data-op="open" class="quiet">Open ${esc(shortName(v, 30))}</button>`);
@@ -482,6 +486,8 @@ function render() {
     $('#difficulty').value = game.difficulty;
     $('#pace').value = game.pace;
     $('#background').value = game.background;
+    $('#autopace').value = game.autoPace;
+    $('#autopace-label').hidden = game.difficulty !== TRIVIAL;
     const pick = (id) => $(`#${id}`).selectedOptions[0]?.textContent ?? '';
     $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('background').toLowerCase()}`;
     $('#settings-short').textContent = pick('difficulty');
@@ -597,9 +603,9 @@ document.addEventListener('click', (e) => {
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
-    const readBtn = e.target.closest('#read, #read-deduction');
+    const readBtn = e.target.closest('#read, #read-scene, #read-deduction');
     if (readBtn) {
-        const res = readBtn.id === 'read' ? game.advance() : game.readToNextDeduction();
+        const res = readBtn.id === 'read' ? game.advance() : readBtn.id === 'read-scene' ? game.readToNextScene() : game.readToNextDeduction();
         if (game.difficulty !== HARD && res.newCards?.length) {
             const shown = res.newCards.filter((c) => !['rules'].includes(model.cards.get(c).section));
             if (shown.length) toast(`New: ${shown.slice(0, 5).map((c) => esc(shortName(c, 30))).join(', ')}${shown.length > 5 ? ` and ${shown.length - 5} more` : ''}`);
@@ -687,11 +693,14 @@ document.addEventListener('click', (e) => {
             ui.menuNote = '<span class="muted">Checking…</span>';
             renderTool();
             setTimeout(() => {
-                const reasons = (v) => (game.whyNot(slot, v) ?? []).map((k) => esc(model.constraints.get(k).label)).join(' · ');
+                const reasons = (v) => game.whyNot(slot, v).map((r) => esc(r.text)).join(' · ') || 'nothing yet';
                 if (op === 'whynot') ui.menuNote = `Ruled out by: ${reasons(value)}`;
                 else {
-                    const others = model.slots.get(slot).domain.filter((v) => v !== value && game.offered(slot, v)).slice(0, 6);
-                    ui.menuNote = others.map((v) => `<div><b>Not ${esc(valueName(slot, v))}:</b> ${reasons(v)}</div>`).join('') || 'Nothing else was ever on offer.';
+                    // The same reasons for every other answer are said once.
+                    const others = model.slots.get(slot).domain.filter((v) => v !== value && game.offered(slot, v));
+                    const groups = new Map();
+                    for (const v of others) { const r = reasons(v); if (!groups.has(r)) groups.set(r, []); groups.get(r).push(v); }
+                    ui.menuNote = [...groups].slice(0, 6).map(([r, vs]) => `<div><b>${groups.size === 1 && vs.length > 1 ? 'Every other answer' : `Not ${vs.slice(0, 3).map((v) => esc(valueName(slot, v))).join(', ')}${vs.length > 3 ? ` and ${vs.length - 3} more` : ''}`}:</b> ${r}</div>`).join('') || 'Nothing else was ever on offer.';
                 }
                 renderTool();
             }, 10);
@@ -740,7 +749,7 @@ document.addEventListener('change', (e) => {
         const other = [...game.unlocked.keys()].find((k) => cardName(k).toLowerCase() === typed);
         toast(other ? 'That is not the right kind of thing for this question.' : 'No card of yours by that name.');
     }
-    if (e.target.id === 'difficulty' || e.target.id === 'pace' || e.target.id === 'background') {
+    if (['difficulty', 'pace', 'background', 'autopace'].includes(e.target.id)) {
         const state = game.save();
         if (e.target.id === 'difficulty' && state.difficulty !== $('#difficulty').value) {
             if (!confirm('Changing difficulty clears your answers (each difficulty keeps them differently). Your place in the story is kept.')) { render(); return; }
@@ -751,6 +760,7 @@ document.addEventListener('change', (e) => {
         state.background = e.target.id === 'difficulty' ? BACKGROUND_DEFAULTS[$('#difficulty').value] : $('#background').value;
         state.difficulty = $('#difficulty').value;
         state.pace = $('#pace').value;
+        state.autoPace = $('#autopace').value;
         game.load(state);
         changed();
     }
