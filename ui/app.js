@@ -295,8 +295,8 @@ function renderSlot(s) {
     let state;
     if (settled !== null) state = given ? 'given' : 'settled';
     else if (game.difficulty === HARD) state = `${game.pencil(s.id).length} proposed`;
-    else if (game.difficulty === TRIVIAL) state = `${game.pencil(s.id).length} still possible`;
-    else state = `${game.pencil(s.id).length} left${ruledCount ? `, ${ruledCount} ruled out by your clues` : ''}`;
+    else if (game.difficulty === TRIVIAL) state = `${game.pencil(s.id).length} possible${game.moreToCome(s.id) ? ' so far' : ''}`;
+    else state = `${countLeft(s.id)}${ruledCount ? `, ${ruledCount} ruled out by your clues` : ''}`;
     let h = `<div class="slot ${settled !== null ? 'settled' : ''}" id="slot-${s.id.replace(/\./g, '-')}"><div class="slot-head"><b>${esc(game.promptOf(s.id))}</b><span class="state">${state}</span></div>`;
     h += `<div class="chips">${chips.join('') || '<span class="empty">no candidates yet</span>'}</div>`;
     if (game.difficulty === HARD && settled === null) {
@@ -314,6 +314,11 @@ function renderSlot(s) {
     }
     if (ui.menu?.slot === s.id) h += slotMenu(s, ui.menu.value);
     return `${h}</div>`;
+}
+
+/** "3 left", or "3 so far" while the story may still bring answers not yet on offer (a time, a person). */
+function countLeft(slot) {
+    return `${game.pencil(slot).length} ${game.moreToCome(slot) ? 'so far' : 'left'}`;
 }
 
 function chip(slot, v, cls) {
@@ -429,7 +434,7 @@ function toolQuestions() {
         const slot = model.slots.get(q.slot);
         const visible = game.knows(slot.on);
         const settled = game.settled(q.slot);
-        const state = !visible ? (game.difficulty === HARD ? 'collect the card first' : '') : settled !== null ? esc(valueName(q.slot, settled)) : game.difficulty === HARD ? `${game.pencil(q.slot).length} proposed` : `${game.pencil(q.slot).length} left`;
+        const state = !visible ? (game.difficulty === HARD ? 'collect the card first' : '') : settled !== null ? esc(valueName(q.slot, settled)) : game.difficulty === HARD ? `${game.pencil(q.slot).length} proposed` : game.difficulty === TRIVIAL ? `${game.pencil(q.slot).length} possible${game.moreToCome(q.slot) ? ' so far' : ''}` : countLeft(q.slot);
         h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(game.questionText(q))}</span>` : esc(game.questionText(q))}</span><span class="state ${settled !== null ? 'done' : ''}">${state}</span></li>`;
     }
     return `${h}</ul>${d}`;

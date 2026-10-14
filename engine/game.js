@@ -487,6 +487,11 @@ export class Game {
         return v === s.on || !this.model.cards.has(v) || this.knows(v);
     }
 
+    /** Could the story still bring answers to this question that are not on offer yet (a time, a person)? */
+    moreToCome(slot) {
+        return this.model.slots.get(slot).domain.some((v) => !this.offered(slot, v));
+    }
+
     #mark(slot) {
         if (!this.marks.has(slot)) this.marks.set(slot, { listed: this.difficulty === HARD ? new Set() : null, struck: new Map(), proven: null });
         return this.marks.get(slot);

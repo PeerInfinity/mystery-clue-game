@@ -421,3 +421,6 @@ not at ¶4, where asking about it recalled nothing; every topic now appears wher
   ¶126; "Race day, evening" at ¶215, where it had been tied to ¶20's Monday "that evening").
 - Validator: every window needs a `reveal` quote, and no clue may give an event a time before that time's
   reveal (found four; two reveals moved earlier; verified by reverting one).
+- (Round 15, continued) A question's count says "N so far" while the story could still bring answers not yet on
+  offer (a time it has not reached, someone not yet mentioned — `Game.moreToCome`), and "N left" once every
+  answer is on the table; Trivial says "N possible so far". So "When? 1 so far" at ¶4 no longer reads as solved.
