@@ -1,0 +1,42 @@
+/* The logic viewer (logic.html): a list of items on the left, the selected item's connections on the right. */
+.logic-page .top { position: sticky; top: 0; z-index: 2; }
+.logic-tabs { position: sticky; top: var(--head, 53px); z-index: 2; display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.logic-tabs .tab { background: transparent; color: var(--muted); border: 1px solid transparent; border-radius: 6px; padding: 4px 10px; }
+.logic-tabs .tab.on { color: var(--ink); border-color: var(--line); background: var(--bg); font-weight: 600; }
+.logic-main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; padding: 12px 16px 40px; }
+.logic-list, .logic-detail { min-width: 0; }
+.logic-detail { position: sticky; top: calc(var(--head, 53px) + var(--tabs, 50px) + 12px); align-self: start; max-height: calc(100vh - 140px); overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.logic-detail h2 { font-size: 19px; margin: 6px 0; }
+.logic-detail h3 { font-size: 14px; margin: 14px 0 4px; color: var(--muted); font-family: var(--sans); }
+.detail-head code { font-size: 12px; color: var(--muted); }
+.item { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; cursor: pointer; }
+.item:hover { border-color: var(--accent); }
+.item-head { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.reading { margin: 4px 0; font-family: var(--serif); }
+.para { font-size: 12px; color: var(--muted); background: var(--chip); border-radius: 8px; padding: 0 6px; white-space: nowrap; }
+.para.none { color: var(--bad); }
+.tag { font-size: 12px; border-radius: 8px; padding: 0 6px; }
+.tag.bad { background: var(--bad-soft); color: var(--bad); }
+.refs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.refs.col { flex-direction: column; align-items: flex-start; }
+.ref { display: inline-flex; gap: 5px; align-items: baseline; background: var(--chip); border-radius: 10px; padding: 1px 8px; font-size: 13px; cursor: pointer; }
+.ref:hover { outline: 1px solid var(--accent); }
+.ref .kind { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.k-clue .kind { color: #b5651d; } .k-background .kind { color: #6b7f3a; } .k-inference .kind { color: #7a3b8a; }
+.k-route .kind { color: #2f5f8a; } .k-question .kind { color: var(--bad); }
+.quote { font-family: var(--serif); font-style: italic; color: var(--muted); }
+.raw summary { cursor: pointer; font-size: 12px; color: var(--muted); }
+.raw pre { font-size: 11px; background: var(--bg); padding: 6px; border-radius: 6px; overflow: auto; max-height: 300px; }
+.qtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.qtable th, .qtable td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.qtable tr[data-id] { cursor: pointer; }
+.qtable tr[data-id]:hover { background: var(--accent-soft); }
+.prose { max-width: 70ch; } .prose h2 { margin: 12px 0 6px; } .prose li { margin: 4px 0; }
+.tl-part { margin-top: 4px; }
+#cy { height: 70vh; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.graph-bar { margin-bottom: 6px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 900px) {
+  .logic-main { grid-template-columns: 1fr; }
+  .logic-detail { position: static; max-height: none; }
+  .qtable th:nth-child(n+4), .qtable td:nth-child(n+4) { display: none; }
+}

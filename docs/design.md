@@ -461,3 +461,18 @@ not at ¶4, where asking about it recalled nothing; every topic now appears wher
 - Clashes section (Easy): at the top of the Questions tab, each clash as a chain with "doubt it" on its claims;
   the tab says "Questions (6 clashes)"; clashes a doubt resolved are kept (saved) under "N resolved by a doubt",
   with "trust it again". Medium and Hard do not list clashes: finding them is the player's work there.
+
+## Round 18 (user, 2026-10-14): how evidence is checked; a page that lays the logic open
+
+- How a citation is checked: the cited clues' formulas, plus every authored inference (`constraints.json`) whose
+  premises are all cited, are searched with the answer supposed (to rule out) or its negation (to prove); no
+  solution means accepted, and the formulas are trimmed to a minimal "rests on" set. Background facts carry no
+  formula: they only switch inferences on. The inference layer is the part the player never sees directly.
+- Proposed, not built: (A) the citation dialog shows the inferences the ticked cards switch on, and an accepted
+  step shows its chain; (B) inferences become a step of their own, a card the player derives and then cites.
+- `logic.html` (deployed with the game, not linked from it; it shows every answer): Overview (how checking
+  works), Inferences, Clues (true/false), Background (what each switches on, or "filler"), Questions (answer;
+  how many clues, inferences and Holmes steps speak of each; 23 the story leaves open), Holmes's route (in hand
+  vs told), Timeline (per paragraph: what arrives, which inferences switch on, what Holmes concludes), Graph (a
+  neighbourhood, cytoscape). Anything clicked shows everything connected to it. Readings are shared with the
+  game through `ui/readings.js` (the viewer names everything; the game only what the player has met).

@@ -1,4 +1,4 @@
-// Collects the files the live game loads into _site/, for GitHub Pages: the page, its stylesheet, the modules
+// Collects the files the live game loads into _site/, for GitHub Pages: the pages (the game and the logic viewer), their stylesheets, the modules
 // it imports (followed from ui/app.js), and each case's runtime files. Nothing else is published — not the docs,
 // the tests, the reports or the reference material.
 //   node scripts/build-site.js [outDir=_site]
@@ -8,15 +8,18 @@ import { execSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const out = path.resolve(root, process.argv[2] ?? '_site');
-const files = new Set(['index.html']);
+const PAGES = ['index.html', 'logic.html'];
+const files = new Set(PAGES);
 // Every reference to a page file carries the build's version (?v=<commit>), so a browser that caches files for a
 // while (GitHub Pages allows 10 minutes) never pairs a new page with an old stylesheet or module.
 const version = (process.env.GITHUB_SHA ?? execSync('git rev-parse HEAD', { cwd: root }).toString()).trim().slice(0, 10);
 const stamp = (ref) => `${ref}?v=${version}`;
 
 // Stylesheets and scripts the page names.
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-for (const [, ref] of html.matchAll(/(?:href|src)="([^"#?:]+)"/g)) files.add(path.normalize(ref));
+for (const page of PAGES) {
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    for (const [, ref] of html.matchAll(/(?:href|src)="([^"#?:]+)"/g)) if (ref !== './') files.add(path.normalize(ref));
+}
 
 // ES modules, followed through their relative imports.
 const todo = [...files].filter((f) => f.endsWith('.js'));

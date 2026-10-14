@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case Logic: Silver Blaze</title>
+<link rel="stylesheet" href="ui/style.css">
+<link rel="stylesheet" href="ui/logic.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js" defer></script>
+</head>
+<body class="logic-page">
+<header class="top">
+  <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">the case's logic</span></h1>
+  <div class="controls">
+    <input type="search" id="search" placeholder="Filter this view…" size="22">
+    <a href="./" class="small">Back to the game</a>
+  </div>
+</header>
+<nav id="views" class="logic-tabs"></nav>
+<main class="logic-main">
+  <section id="list" class="logic-list"><p class="empty">Reading the case… (a few seconds)</p></section>
+  <aside id="detail" class="logic-detail"><p class="empty">Click anything to see everything connected to it.</p></aside>
+</main>
+<script type="module" src="ui/logic.js"></script>
+</body>
+</html>
