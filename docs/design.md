@@ -382,3 +382,14 @@ sitting-room; the hollow "just beyond the furze-bush, about a quarter of a mile 
 the model's draft gave the coat's distance). The rewrite of "the ring" lost that it means the bookmakers, so it
 was dropped (the gloss says it). No note carries `from_description` any more except the topic cards'. The
 checker passes all six survivors; its 19 remaining flags are the false alarms of Round 9.
+
+## Round 13 (user, 2026-10-13): King's Pyland's confusing background
+
+- The owner/trainer/jockey gloss sat on King's Pyland at ¶3, before the story says it is a training stable (¶19);
+  it now sits on the King's Pyland stable card. An audit of every gloss against where the story first uses its
+  term found four more shown early, now dated with `after`: Odds (¶18, was on Silver Blaze at ¶4), Off-foreleg
+  (¶186), Penang-lawyer (¶40, was on the stick at ¶21), Landau (¶51, was on "an open carriage" at ¶50).
+- "called: King’s Pyland" repeated the card's own name: the story's ’ did not match the name's '. Names are now
+  compared without case, apostrophe style or a leading article.
+- Cards now show glossary notes under **Words** (always shown: they explain a word the story uses) and recalled
+  facts under **Background** (by the Background setting), so it is clear why one appears before asking.

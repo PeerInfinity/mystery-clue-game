@@ -14,6 +14,7 @@ const KIND_GROUPS = [
 const CHIP_LIMIT = 30;
 
 const $ = (sel) => document.querySelector(sel);
+const same = (s) => s.toLowerCase().replace(/[’‘`]/g, "'").replace(/^(the|a|an) /, '');
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 let model;
@@ -171,7 +172,8 @@ function toolCard() {
     if (c.section === 'entities' || c.section === 'events') h += `<h2>${esc(game.nameOf(id))}</h2>`;
     else h += `<p class="desc">${esc(c.text)}</p>`;
     const names = [...new Set(story.spans.slice(0, game.read).flatMap((list, p) => list.filter((sp) => sp.kind === 'entity' && sp.ids.includes(id)).map((sp) => story.paragraphs[p].display.slice(sp.start, sp.end))))]
-        .filter((n, i, all) => n.toLowerCase() !== game.nameOf(id).toLowerCase() && all.findIndex((m) => m.toLowerCase() === n.toLowerCase()) === i);
+        // Compared without case or apostrophe style (the story's ’ against a card name's '), so a name is never listed as another name for itself.
+        .filter((n, i, all) => same(n) !== same(game.nameOf(id)) && all.findIndex((m) => same(m) === same(n)) === i);
     if (names.length) h += `<div class="small muted">called: ${names.slice(0, 8).map(esc).join(' · ')}</div>`;
     h += '</div>';
 
@@ -195,9 +197,18 @@ function toolCard() {
             else if (it.kind === 'clue') h += `<p>${link(it.claim, it.text)} <span class="small muted">· ${source(it)}</span></p>`;
             else if (it.kind === 'attestation') h += `<p class="small">${source(it)}${it.to && game.knows(it.to) ? ` to ${link(it.to)}` : ''}</p><p class="quote">${esc(it.quote.replace(/\s+/g, ' '))}</p>`;
         }
-        if (bg.length) {
+        // Glossary notes explain a word the story uses (always shown); background facts are what the player
+        // knows or recalls (by the Background setting). Two headings, so it is clear which is which.
+        const words = bg.filter((n) => n.term);
+        const facts = bg.filter((n) => !n.term);
+        if (words.length) {
+            h += '<div class="bg"><div class="small muted">Words</div>';
+            for (const n of words) h += `<div class="bg-note"><b>${esc(n.term)}.</b> ${esc(n.text)}</div>`;
+            h += '</div>';
+        }
+        if (facts.length) {
             h += '<div class="bg"><div class="small muted">Background</div>';
-            for (const n of bg) h += `<div class="bg-note">${n.term ? `<b>${esc(n.term)}.</b> ` : ''}${esc(n.text)}</div>`;
+            for (const n of facts) h += `<div class="bg-note">${esc(n.text)}</div>`;
             h += '</div>';
         }
         h += '</div>';
