@@ -4,10 +4,15 @@
 //   node scripts/build-site.js [outDir=_site]
 import fs from 'node:fs';
 import path from 'node:path';
+import { execSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const out = path.resolve(root, process.argv[2] ?? '_site');
 const files = new Set(['index.html']);
+// Every reference to a page file carries the build's version (?v=<commit>), so a browser that caches files for a
+// while (GitHub Pages allows 10 minutes) never pairs a new page with an old stylesheet or module.
+const version = (process.env.GITHUB_SHA ?? execSync('git rev-parse HEAD', { cwd: root }).toString()).trim().slice(0, 10);
+const stamp = (ref) => `${ref}?v=${version}`;
 
 // Stylesheets and scripts the page names.
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -34,7 +39,13 @@ for (const dir of fs.readdirSync(path.join(root, 'cases'))) {
 fs.rmSync(out, { recursive: true, force: true });
 for (const f of [...files].sort()) {
     fs.mkdirSync(path.dirname(path.join(out, f)), { recursive: true });
-    fs.copyFileSync(path.join(root, f), path.join(out, f));
+    if (f.endsWith('.html')) {
+        const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:href|src)=")([^"#?:]+\.(?:css|js))"/g, (m, a, ref) => `${a}${stamp(ref)}"`);
+        fs.writeFileSync(path.join(out, f), text);
+    } else if (f.endsWith('.js')) {
+        const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:import|export)\b[^'"]*?from\s*['"])(\.{1,2}\/[^'"?]+)(['"])/g, (m, a, ref, b) => `${a}${stamp(ref)}${b}`);
+        fs.writeFileSync(path.join(out, f), text);
+    } else fs.copyFileSync(path.join(root, f), path.join(out, f));
 }
 fs.writeFileSync(path.join(out, '.nojekyll'), '');
-console.log(`${files.size} files → ${path.relative(root, out)}/\n${[...files].sort().map((f) => `  ${f}`).join('\n')}`);
+console.log(`${files.size} files → ${path.relative(root, out)}/ (version ${version})\n${[...files].sort().map((f) => `  ${f}`).join('\n')}`);
