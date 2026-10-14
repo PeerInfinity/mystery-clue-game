@@ -85,6 +85,35 @@ export class Problem {
         return out;
     }
 
+    /**
+     * candidates() for many slots at once. Every solution found supports all the values in it, so per group of
+     * linked slots: propagate once, take one solution, and search again only for values no solution has shown yet.
+     * Returns Map slot -> values (slots no active constraint touches keep their whole domain).
+     */
+    allCandidates(active, slots) {
+        const cons = [...active].flatMap((id) => this.#get(id).parts);
+        const want = new Set(slots);
+        const out = new Map();
+        for (const group of components(cons, [...want])) {
+            const mine = group.slots.filter((s) => want.has(s));
+            if (!mine.length) continue;
+            const root = this.#search(group, {}, 0);
+            if (!root.domains) { for (const s of mine) out.set(s, []); continue; }
+            const seen = new Map(group.slots.map((s) => [s, new Set()]));
+            const note = (sol) => { for (const [s, v] of sol ?? []) seen.get(s)?.add(v); };
+            note(this.#search(group, {}, 1, root.domains).first);
+            for (const s of mine) {
+                for (const v of root.domains.get(s)) {
+                    if (seen.get(s).has(v)) continue;
+                    const r = this.#search(group, { [s]: v }, 1, root.domains);
+                    if (r.count) note(r.first);
+                }
+                out.set(s, root.domains.get(s).filter((v) => seen.get(s).has(v)));
+            }
+        }
+        return out;
+    }
+
     /** Number of solutions over the slots the active constraints mention, capped at `limit`. */
     countSolutions(active, limit = 2) {
         const cons = [...active].flatMap((id) => this.#get(id).parts);

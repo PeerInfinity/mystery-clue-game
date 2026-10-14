@@ -169,6 +169,10 @@ for (const c of data.claims) {
 for (const r of data.rules ?? []) if (r.stated_in && !sceneIds.has(r.stated_in)) err(`${r.id}: unknown scene ${r.stated_in}`);
 for (const g of data.glosses ?? []) for (const a of g.attaches_to ?? []) if (!has(a)) err(`${g.id}: attaches_to unknown ${a}`);
 for (const q of data.questions ?? []) if (!model.slots.has(q.slot)) err(`${q.id}: unknown slot ${q.slot}`);
+// Question wording names cards only through {card} placeholders, filled with what the story calls them so far.
+for (const [owner, text] of [...(data.questions ?? []).map((q) => [q.id, q.text]), ...(data.slots ?? []).map((sl) => [sl.id, sl.prompt])]) {
+    for (const [, id] of text.matchAll(/\{([^}]+)\}/g)) if (!model.cards.has(id)) err(`${owner}: {${id}} is not a card`);
+}
 
 // ---------- slots ----------
 for (const s of model.slots.values()) {

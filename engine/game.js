@@ -14,9 +14,15 @@
 
 import { activeConstraints, checkStep, trustedClaim } from './caseModel.js';
 
+// Difficulty. TRIVIAL: the game works out what the held clues allow and settles questions itself; the player
+// reads and watches. EASY: every answer is listed and the ones the player's clues rule out are greyed; plain
+// pencil cross-outs. MEDIUM: every answer listed; each cross-out needs cited evidence. HARD: cards are collected
+// by clicking the text, and the player proposes the answers.
 export const TRIVIAL = 'trivial';
 export const EASY = 'easy';
+export const MEDIUM = 'medium';
 export const HARD = 'hard';
+export const DIFFICULTIES = [TRIVIAL, EASY, MEDIUM, HARD];
 export const FREE = 'free';
 export const WAIT = 'wait';
 // When background facts become available: all at once, where the story first touches each one's subject, or
@@ -24,10 +30,12 @@ export const WAIT = 'wait';
 export const BG_START = 'start';
 export const BG_RELEVANT = 'relevant';
 export const BG_ASK = 'ask';
-export const BACKGROUND_DEFAULTS = { trivial: BG_RELEVANT, easy: BG_ASK, hard: BG_ASK };
+export const BACKGROUND_DEFAULTS = { trivial: BG_RELEVANT, easy: BG_RELEVANT, medium: BG_ASK, hard: BG_ASK };
+// Saves made before Medium existed: their 'trivial' is today's Easy, their 'easy' today's Medium.
+const OLD_DIFFICULTY = { trivial: EASY, easy: MEDIUM, hard: HARD };
 
 export class Game {
-    constructor(model, { difficulty = EASY, pace = FREE, background = null, state = null } = {}) {
+    constructor(model, { difficulty = MEDIUM, pace = FREE, background = null, state = null } = {}) {
         this.model = model;
         this.story = model.story;
         this.difficulty = difficulty;
@@ -104,10 +112,12 @@ export class Game {
             suspected: [...this.suspected],
             background: this.background,
             asked: this.asked,
+            version: 3,
         };
     }
 
     load(state) {
+        if (state.difficulty && !state.version) state = { ...state, difficulty: OLD_DIFFICULTY[state.difficulty] ?? state.difficulty };
         this.difficulty = state.difficulty ?? this.difficulty;
         this.pace = state.pace ?? this.pace;
         this.background = state.background ?? BACKGROUND_DEFAULTS[this.difficulty];
@@ -167,6 +177,29 @@ export class Game {
         const before = new Set(this.unlocked.keys());
         this.#readNext();
         return { ok: true, para: this.read - 1, newCards: [...this.unlocked.keys()].filter((k) => !before.has(k)) };
+    }
+
+    /** The paragraph just before Holmes's next deduction (where the story would wait for it), or the end. */
+    nextDeductionAt() {
+        const ahead = [...(this.story.gates?.keys() ?? [])].filter((p) => p > this.read).sort((a, b) => a - b);
+        return ahead[0] ?? this.story.paragraphs.length;
+    }
+
+    /**
+     * Read on to just before Holmes's next deduction, so the player can try it first. Stops early where the
+     * story waits (the 'wait' pace). Returns how many paragraphs were read and the cards they brought.
+     */
+    readToNextDeduction() {
+        const target = this.nextDeductionAt();
+        const newCards = [];
+        let read = 0;
+        while (this.read < target) {
+            const res = this.advance();
+            if (!res.ok) return { read, newCards, stopped: res };
+            read++;
+            newCards.push(...res.newCards);
+        }
+        return { read, newCards };
     }
 
     #readNext() {
@@ -329,6 +362,20 @@ export class Game {
         return cur ? cur.name ?? cur.label : id;
     }
 
+    /**
+     * Fill a question's {card} placeholders with what the story calls each card so far ("Who killed {straker}?"
+     * reads "Who killed the trainer?" until the story names him). A leading article is lower-cased mid-sentence.
+     */
+    phrase(template) {
+        return template.replace(/\{([a-z0-9_.]+)\}/g, (m, id, at) => {
+            const name = this.nameOf(id);
+            return at > 0 ? name.replace(/^(The|A|An) /, (a) => a.toLowerCase()) : name;
+        });
+    }
+
+    questionText(q) { return this.phrase(q.text); }
+    promptOf(slotId) { return this.phrase(this.model.slots.get(slotId).prompt); }
+
     /** Has this piece arrived since the player last looked at the card? */
     isNew(id, item) {
         const seen = this.lastSeen.get(id);
@@ -405,6 +452,7 @@ export class Game {
     pencil(slot) {
         const m = this.marks.get(slot);
         if (this.provenValue(slot) !== null) return [this.provenValue(slot)];
+        if (this.difficulty === TRIVIAL) return this.autoValues(slot).filter((v) => this.offered(slot, v));
         const g = this.given(slot);
         if (g) return [g.value];
         const s = this.model.slots.get(slot);
@@ -431,7 +479,7 @@ export class Game {
     strike(slot, value, cited = null) {
         const m = this.#mark(slot);
         if (!cited || !cited.length) {
-            if (this.difficulty !== TRIVIAL) return { ok: false, reason: 'cite the evidence that rules it out' };
+            if (!this.assisted()) return { ok: false, reason: 'cite the evidence that rules it out' };
             m.struck.set(value, {});
             return { ok: true, proof: false };
         }
@@ -487,6 +535,10 @@ export class Game {
     settled(slot) {
         // A proof outranks a given: when they disagree, the player is shown the clash (givenClash).
         if (this.provenValue(slot) !== null) return this.provenValue(slot);
+        if (this.difficulty === TRIVIAL) {
+            const left = this.autoValues(slot);
+            return left.length === 1 ? left[0] : null;
+        }
         const g = this.given(slot);
         if (g) return g.value;
         const s = this.model.slots.get(slot);
@@ -513,13 +565,37 @@ export class Game {
     /** Could `value` fill `slot`? Trivial checks the held clues; Easy and Hard only the type. */
     plausible(slot, value) {
         if (!this.shapeFits(slot, value)) return { plausible: false, why: 'shape' };
-        if (this.difficulty !== TRIVIAL) return { plausible: true, why: 'shape only' };
+        if (!this.assisted()) return { plausible: true, why: 'shape only' };
         const active = this.activeConstraints();
         if (this.model.problem.consistent(active, { [slot]: value }, { focus: true }).ok) return { plausible: true };
         return { plausible: false, why: 'clues', conflict: this.model.problem.explainConflict(active, { [slot]: value }) };
     }
 
-    /** Trivial's automatic list: every value the held clues still allow. */
+    /** Trivial and Easy: the game helps (lists what the clues allow, or does it outright). */
+    assisted() { return this.difficulty === TRIVIAL || this.difficulty === EASY; }
+
+    /**
+     * Trivial: every value the held clues allow, read the way the case reads them (a statement the case knows to
+     * be false is not taken at its word), so nothing misleads. Cached until the player holds more.
+     */
+    autoValues(slot) {
+        const key = this.unlocked.size;
+        if (this.autoKey !== key) {
+            // Everything at once: one pass per group of linked questions is far cheaper than one per question.
+            this.autoKey = key;
+            const active = activeConstraints(this.model, this.known()).filter((id) => !this.model.constraints.get(id).derived);
+            this.autoCache = this.model.problem.allCandidates(active, [...this.model.slots.keys()]);
+        }
+        return this.autoCache.get(slot) ?? this.model.slots.get(slot).domain;
+    }
+
+    /** Trivial: why a value is ruled out — the fewest held clues that exclude it (the case's reading). */
+    whyNot(slot, value) {
+        const active = activeConstraints(this.model, this.known()).filter((id) => !this.model.constraints.get(id).derived);
+        return this.model.problem.explainConflict(active, { [slot]: value });
+    }
+
+    /** Easy's automatic list: every value the held clues still allow (as the player reads them). */
     openValues(slot) {
         return this.model.problem.candidates(this.activeConstraints(), slot);
     }

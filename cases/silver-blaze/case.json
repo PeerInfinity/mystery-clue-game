@@ -363,19 +363,19 @@
     {
       "id": "q.who_drugged",
       "slot": "e.opium_added.agent",
-      "text": "Who drugged Ned Hunter's supper?",
+      "text": "Who drugged {ned_hunter}'s supper?",
       "raised": "an appreciable quantity of\n      powdered opium"
     },
     {
       "id": "q.where_drugged",
       "slot": "e.opium_added.place",
-      "text": "Where was the opium put into the dish?",
+      "text": "Where was the drug put into the supper?",
       "raised": "drugged his\n      curried mutton"
     },
     {
       "id": "q.who_took_horse",
       "slot": "e.horse_led_out.agent",
-      "text": "Who took Silver Blaze out of the stable?",
+      "text": "Who took {silver_blaze} out of the stable?",
       "raised": "the favourite’s stall was empty"
     },
     {
@@ -387,19 +387,19 @@
     {
       "id": "q.who_killed",
       "slot": "e.fatal_blow.agent",
-      "text": "Who killed John Straker?",
+      "text": "Who killed {straker}?",
       "raised": "the tragic\n      murder of its trainer"
     },
     {
       "id": "q.thigh_cut",
       "slot": "e.thigh_cut.instrument",
-      "text": "What made the cut on Straker's thigh?",
+      "text": "What made the cut on {straker}'s thigh?",
       "raised": "a long, clean cut"
     },
     {
       "id": "q.where_horse",
       "slot": "silver_blaze.hidden_at",
-      "text": "Where is Silver Blaze?",
+      "text": "Where is {silver_blaze}?",
       "raised": "no news has come of\n      him"
     },
     {
@@ -411,25 +411,25 @@
     {
       "id": "q.derbyshire",
       "slot": "william_derbyshire.identity",
-      "text": "Who is William Derbyshire?",
+      "text": "Who is {william_derbyshire}?",
       "raised": "to William Derbyshire"
     },
     {
       "id": "q.motive",
       "slot": "straker.motive",
-      "text": "What drove Straker to it?",
+      "text": "What drove {straker} to it?",
       "raised": "John Straker was a man who was\n      entirely unworthy of your confidence"
     },
     {
       "id": "q.stranger",
       "slot": "the_stranger.identity",
-      "text": "Who was the stranger at the stable window?",
+      "text": "Who was {the_stranger}?",
       "raised": "a man\n      appeared out of the darkness"
     },
     {
       "id": "q.bay",
       "slot": "the_bay.identity",
-      "text": "Which horse is the bay in Ross's colours?",
+      "text": "Which horse is {the_bay}?",
       "raised": "a powerful bay horse swept out from the weighing\n      enclosure"
     }
   ],
@@ -665,7 +665,7 @@
     "Glosses marked editorial are written for this game, not taken from the story; they say what an 1892 reader would have known."
   ],
   "settings_defaults": {
-    "difficulty": "easy",
+    "difficulty": "medium",
     "pace": "free"
   }
 }

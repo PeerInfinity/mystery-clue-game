@@ -335,3 +335,22 @@ real-world facts in glosses ("the Wessex Cup is a fictional race", "tallow is ch
 (Holmes's "What chemist sold him the powdered opium?" supports a card naming the chemist), descriptive names close
 to the text ("The stable dog" for "the dog… in the stable"), and two misreadings (Gregory's ¶58 reply taken as
 Holmes's). The fair-play test still passes under all three Background settings after the moves.
+
+## Round 10 (user, 2026-10-13): question wording, counts, reading ahead, difficulty
+
+- **Question wording names cards through `{card}` placeholders**, filled with what the story calls them so far
+  (`Game.phrase`, `questionText`, `promptOf`): "Who killed {straker}?" reads "Who killed the trainer?" at ¶4.
+  The validator checks every placeholder is a card. "Where was the opium put…" became "the drug" (opium is named
+  a paragraph after the question is raised).
+- **New and updated counts** on the Cards tab ("Cards (12 new, 3 updated)") and on every category button; New =
+  never opened, Updated = opened and added to since.
+- **Reading**: the button always says "Next paragraph"; "Next deduction (N ¶)" reads on to just before Holmes's
+  next deduction (the next gate), so the player can try it first, stopping where the Wait pace waits. The action
+  cues ("Read the papers") are no longer shown.
+- **Difficulty**: old Trivial → **Easy**, old Easy → **Medium** (the default, same behaviour as before), Hard
+  unchanged, and a new **Trivial**: the game works out what the held clues allow — read as the case reads them,
+  so false statements never mislead — shows only those answers, settles a question when one is left, and says
+  why any answer was ruled out. Saves from before keep their meaning (`version: 3`). `Problem.allCandidates`
+  does every question in one pass per group of linked questions (late story: 2.7 s → 80 ms).
+- Open: Trivial settles answers as soon as the logic allows — at ¶115 it already names the killer and Derbyshire,
+  some 85 paragraphs before Holmes. "Next deduction" from the start jumps 95 paragraphs (the first gate).

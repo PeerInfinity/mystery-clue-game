@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
-import { Game, TRIVIAL, EASY, HARD, WAIT, BG_START, BG_RELEVANT, BG_ASK } from './game.js';
+import { Game, TRIVIAL, EASY, MEDIUM, HARD, WAIT, BG_START, BG_RELEVANT, BG_ASK } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 
@@ -76,11 +76,29 @@ test('background: all at once, when the story touches the subject, or when asked
     assert.ok(again.knows('r.wind_and_coats'), 'asking is saved');
 });
 
-test('Easy needs evidence to cross out; Trivial allows a plain pencil mark', () => {
+test('Medium needs evidence to cross out; Easy allows a plain pencil mark', () => {
+    const medium = new Game(model, { difficulty: MEDIUM });
+    assert.equal(medium.strike('e.opium_added.agent', 'watson').ok, false);
     const easy = new Game(model, { difficulty: EASY });
-    assert.equal(easy.strike('e.opium_added.agent', 'watson').ok, false);
-    const trivial = new Game(model, { difficulty: TRIVIAL });
-    assert.ok(trivial.strike('e.opium_added.agent', 'watson').ok);
+    assert.ok(easy.strike('e.opium_added.agent', 'watson').ok);
+});
+
+test('Trivial works it out: questions settle themselves as the clues come in, and false statements do not mislead', () => {
+    const game = new Game(model, { difficulty: TRIVIAL });
+    while (!game.knows('c.hunter_blames_stranger')) game.advance();
+    assert.ok(!game.pencil('e.opium_added.agent').includes('watson') || game.pencil('e.opium_added.agent').length > 1);
+    while (!game.finished()) game.advance();
+    assert.equal(game.settled('e.opium_added.agent'), 'straker', "Hunter's false account does not mislead it");
+    assert.equal(game.settled('the_bay.identity'), 'silver_blaze');
+    assert.ok(game.whyNot('the_bay.identity', 'bayard').length > 0);
+});
+
+test('a save from before Medium existed keeps its meaning', () => {
+    const old = { difficulty: 'easy', pace: 'free', read: 5 };
+    assert.equal(new Game(model, { state: old }).difficulty, MEDIUM);
+    assert.equal(new Game(model, { state: { ...old, difficulty: 'trivial' } }).difficulty, EASY);
+    const now = new Game(model, { difficulty: TRIVIAL });
+    assert.equal(new Game(model, { state: now.save() }).difficulty, TRIVIAL);
 });
 
 test('Hard: reading collects nothing; clicking the text does', () => {

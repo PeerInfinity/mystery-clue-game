@@ -17,18 +17,18 @@ states after it.
 
 | Question | Answer | All evidence | By the challenge | Strict |
 |---|---|---|---|---|
-| Who drugged Ned Hunter's supper? | straker | straker | straker | 21 left |
-| Where was the opium put into the dish? | one of straker_villa,villa_kitchen | straker_villa, villa_kitchen | straker_villa, villa_kitchen | 49 left |
-| Who took Silver Blaze out of the stable? | straker | straker | straker | 21 left |
+| Who drugged {ned_hunter}'s supper? | straker | straker | straker | 21 left |
+| Where was the drug put into the supper? | one of straker_villa,villa_kitchen | straker_villa, villa_kitchen | straker_villa, villa_kitchen | 49 left |
+| Who took {silver_blaze} out of the stable? | straker | straker | straker | 21 left |
 | Why was the horse taken out? | injure | injure | injure | injure, steal, exercise |
-| Who killed John Straker? | silver_blaze | silver_blaze | silver_blaze | simpson, silver_blaze |
-| What made the cut on Straker's thigh? | cataract_knife | cataract_knife | cataract_knife | cataract_knife |
-| Where is Silver Blaze? | mapleton | mapleton | mapleton | mapleton |
+| Who killed {straker}? | silver_blaze | silver_blaze | silver_blaze | simpson, silver_blaze |
+| What made the cut on {straker}'s thigh? | cataract_knife | cataract_knife | cataract_knife | cataract_knife |
+| Where is {silver_blaze}? | mapleton | mapleton | mapleton | mapleton |
 | Who is hiding the horse? | silas_brown | silas_brown | silas_brown | silas_brown |
-| Who is William Derbyshire? | straker | straker | straker | 25 left |
-| What drove Straker to it? | debts_of_second_household | debts_of_second_household | debts_of_second_household | debts_of_second_household, other |
-| Who was the stranger at the stable window? | simpson | simpson | simpson | simpson |
-| Which horse is the bay in Ross's colours? | silver_blaze | silver_blaze | 13 left | 13 left |
+| Who is {william_derbyshire}? | straker | straker | straker | 25 left |
+| What drove {straker} to it? | debts_of_second_household | debts_of_second_household | debts_of_second_household | debts_of_second_household, other |
+| Who was {the_stranger}? | simpson | simpson | simpson | simpson |
+| Which horse is {the_bay}? | silver_blaze | silver_blaze | 13 left | 13 left |
 
 ## Theories
 

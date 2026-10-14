@@ -3,7 +3,7 @@
 // All the logic is in engine/; this file only draws and dispatches.
 
 import { loadCase } from '../engine/loadCase.js';
-import { Game, TRIVIAL, EASY, HARD, WAIT, BG_START, BG_ASK, BACKGROUND_DEFAULTS } from '../engine/game.js';
+import { Game, TRIVIAL, EASY, MEDIUM, HARD, WAIT, BG_START, BG_ASK, BACKGROUND_DEFAULTS } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -94,22 +94,25 @@ function renderReader() {
     const el = $('#reader');
     if (game.finished()) { el.innerHTML = '<span class="muted">The end.</span>'; return; }
     const blockers = game.blockers();
-    const next = game.nextAction();
-    const label = game.read === 1 ? 'Begin' : next ? `${next.cue} →` : 'Read on →';
+    const ahead = game.nextDeductionAt() - game.read;
     const blocked = blockers.length && game.pace === WAIT;
     let note = '';
     if (blockers.length) {
         const prompts = blockers.map((s) => {
             const c = game.routeById.get(s).concludes;
             const slot = model.slots.get(c.slot ?? c.formula.eq[0]);
-            const text = `${shortName(slot.on, 60)} — ${slot.prompt}`;
+            const text = `${shortName(slot.on, 60)} — ${game.promptOf(slot.id)}`;
             return game.knows(slot.on) ? `<span class="link" data-slot-open="${slot.id}">${esc(text)}</span>` : esc(text);
         });
         note = blocked
             ? `<div class="note block">Holmes has worked something out. Before reading on, settle: ${prompts.join('; ')}${blockers.some((s) => game.routeById.get(s).concludes.slot) ? ' (at least rule out what Holmes rules out)' : ''}</div>`
             : '<div class="note">Holmes is a step ahead of you here.</div>';
     }
-    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>${esc(label)}</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}`;
+    const toEnd = game.nextDeductionAt() >= story.paragraphs.length;
+    const jump = ahead > 1
+        ? `<button id="read-deduction" class="quiet" ${blocked ? 'disabled' : ''} title="${toEnd ? 'Read to the end of the story' : 'Read on to just before Holmes works something out, so you can try it first'}">${toEnd ? 'To the end' : 'Next deduction'} <span class="small">(${ahead} ¶)</span></button>`
+        : '';
+    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${jump}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}`;
 }
 
 function scrollStory() {
@@ -122,8 +125,8 @@ function scrollStory() {
 function renderTool() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
     $('#tool').innerHTML = { card: toolCard, cards: toolCards, questions: toolQuestions, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
-    const updated = [...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section) && game.lastSeen.has(k) && game.hasNew(k)).length;
-    document.querySelector('.tab[data-tab="cards"]').textContent = updated ? `Cards (${updated} updated)` : 'Cards';
+    const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)));
+    document.querySelector('.tab[data-tab="cards"]').textContent = `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`;
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
         ui.focusSlot = null;
@@ -142,7 +145,7 @@ function intro() {
 <li>Read the story on the left, one paragraph at a time.</li>
 <li>Everything the story mentions — people, places, things, events, statements — becomes a card. ${game.difficulty === HARD ? 'In Hard mode you collect a card by clicking the words in the story that mention it.' : 'Click the marked words in the story to open a card.'}</li>
 <li>Cards have <b>open questions</b>: who did it, where, when, whose is it, is it true. Each question lists its possible answers, like pencil marks in sudoku${game.difficulty === HARD ? ' — in Hard mode you list them yourself' : ''}.</li>
-<li>${game.difficulty === TRIVIAL ? 'Cross answers out; the game greys the ones your clues already rule out.' : 'Rule answers out by citing the clues and background notes that exclude them. The game checks the reasoning; any sufficient set of reasons is accepted.'}</li>
+<li>${game.difficulty === TRIVIAL ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : game.difficulty === EASY ? 'Cross answers out; the game greys the ones your clues already rule out.' : 'Rule answers out by citing the clues and background notes that exclude them. The game checks the reasoning; any sufficient set of reasons is accepted.'}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
@@ -227,8 +230,8 @@ function toolCard() {
         })());
         if (placed.length || maybe.length) {
             h += '<h3 class="section">Where it fits</h3><ul class="list">';
-            for (const s of placed) h += `<li class="good">✓ ${link(s.on)} — ${esc(s.prompt)}</li>`;
-            for (const s of maybe) h += `<li>? ${link(s.on)} — ${esc(s.prompt)} <span class="small muted">(${game.pencil(s.id).length} candidates)</span></li>`;
+            for (const s of placed) h += `<li class="good">✓ ${link(s.on)} — ${esc(game.promptOf(s.id))}</li>`;
+            for (const s of maybe) h += `<li>? ${link(s.on)} — ${esc(game.promptOf(s.id))} <span class="small muted">(${game.pencil(s.id).length} candidates)</span></li>`;
             h += '</ul>';
         }
     }
@@ -244,13 +247,18 @@ function renderSlot(s) {
     let ruledCount = 0;
     if (settled !== null) {
         chips.push(`<span class="chip proven" data-slot="${s.id}" data-val="${esc(settled)}">${esc(valueName(s.id, settled))}</span>`);
-        if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
+        if (game.difficulty === TRIVIAL) chips.push('<span class="small muted">worked out from your clues</span>');
+        else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
         for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k, shortName(k, 60))}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
     } else {
         const pencil = game.pencil(s.id);
         let live = pencil;
         let ruled = [];
         if (game.difficulty === TRIVIAL) {
+            // The pencil is already what the clues allow; show the rest as ruled out, with a "why" on each.
+            ruled = s.domain.filter((v) => !live.includes(v) && game.offered(s.id, v));
+            ruledCount = ruled.length;
+        } else if (game.difficulty === EASY) {
             if (!cache.has(s.id)) cache.set(s.id, game.openValues(s.id));
             const open = cache.get(s.id);
             live = pencil.filter((v) => open.includes(v));
@@ -270,8 +278,9 @@ function renderSlot(s) {
     let state;
     if (settled !== null) state = given ? 'given' : 'settled';
     else if (game.difficulty === HARD) state = `${game.pencil(s.id).length} proposed`;
+    else if (game.difficulty === TRIVIAL) state = `${game.pencil(s.id).length} still possible`;
     else state = `${game.pencil(s.id).length} left${ruledCount ? `, ${ruledCount} ruled out by your clues` : ''}`;
-    let h = `<div class="slot ${settled !== null ? 'settled' : ''}" id="slot-${s.id.replace(/\./g, '-')}"><div class="slot-head"><b>${esc(s.prompt)}</b><span class="state">${state}</span></div>`;
+    let h = `<div class="slot ${settled !== null ? 'settled' : ''}" id="slot-${s.id.replace(/\./g, '-')}"><div class="slot-head"><b>${esc(game.promptOf(s.id))}</b><span class="state">${state}</span></div>`;
     h += `<div class="chips">${chips.join('') || '<span class="empty">no candidates yet</span>'}</div>`;
     if (game.difficulty === HARD && settled === null) {
         const options = s.domain.filter((v) => game.offered(s.id, v));
@@ -282,7 +291,7 @@ function renderSlot(s) {
         const why = [...new Set(lapsed.flatMap((u) => game.lapsedBy(u)))];
         h += `<div class="small bad">${lapsed.length === 1 ? 'A proof here' : `${lapsed.length} proofs here`} rested on ${why.map((k) => link(k, shortName(k, 50))).join(', ')}, which you now doubt.</div>`;
     }
-    if (game.difficulty === TRIVIAL && settled === null && cache.get(s.id)?.length === 0) {
+    if (game.difficulty === EASY && settled === null && cache.get(s.id)?.length === 0) {
         h += `<div class="small bad">Nothing fits: something you trust must be false. <span class="link" data-clash="${s.id}">Find the clash</span></div>`;
         if (ui.clash?.slot === s.id) h += `<div class="why">${ui.clash.html}</div>`;
     }
@@ -301,13 +310,21 @@ function slotMenu(s, v) {
     const isProven = game.provenValue(s.id) === v;
     const isGiven = !!game.given(s.id);
     const b = [];
+    if (game.difficulty === TRIVIAL) {
+        // The game does the deducing: offer the reasons, nothing to do.
+        if (game.settled(s.id) === v) b.push('<span class="small muted">Worked out from your clues.</span> <button data-op="why" class="quiet">Why?</button>');
+        else if (!game.pencil(s.id).includes(v)) b.push('<button data-op="whynot" class="quiet">Why not?</button>');
+        else b.push('<span class="small muted">Still possible.</span>');
+        if (model.cards.has(v) && game.knows(v)) b.push(`<button data-op="open" class="quiet">Open ${esc(shortName(v, 30))}</button>`);
+        return `<div class="menu" data-menu-slot="${s.id}" data-menu-val="${esc(v)}"><b>${esc(valueName(s.id, v))}</b>${b.join('')}${ui.menuNote ? `<div class="why">${ui.menuNote}</div>` : ''}</div>`;
+    }
     if (isGiven && !isProven) b.push(`<span class="small muted">Given by a clue you trust.</span> <button data-suspect="${game.given(s.id).claim}" class="quiet">Doubt that clue</button>`);
     else if (isProven) b.push('<button data-op="unprove">Undo the proof</button>');
     else if (st && !game.strikeLapsed(s.id, v)) b.push('<button data-op="unstrike">Restore</button>');
     else {
-        if (game.difficulty === TRIVIAL) b.push('<button data-op="strike">Cross out</button>');
+        if (game.difficulty === EASY) b.push('<button data-op="strike">Cross out</button>');
         b.push('<button data-op="strike-why">Rule out, with evidence…</button>', '<button data-op="prove">Prove it\'s this…</button>');
-        if (game.difficulty === TRIVIAL) b.push('<button data-op="fit" class="quiet">Could it fit?</button>');
+        if (game.difficulty === EASY) b.push('<button data-op="fit" class="quiet">Could it fit?</button>');
         if (game.difficulty === HARD) b.push('<button data-op="unpropose" class="quiet">Take back</button>');
     }
     const mine = game.theories.find((t) => t.id === ui.theory);
@@ -316,16 +333,31 @@ function slotMenu(s, v) {
     return `<div class="menu" data-menu-slot="${s.id}" data-menu-val="${esc(v)}"><b>${esc(valueName(s.id, v))}</b>${b.join('')}${ui.menuNote ? `<div class="why">${ui.menuNote}</div>` : ''}</div>`;
 }
 
+/** New = never opened; updated = opened, and something has been added since. */
+function cardTally(ids) {
+    let fresh = 0;
+    let updated = 0;
+    for (const id of ids) {
+        if (!game.lastSeen.has(id)) fresh++;
+        else if (game.hasNew(id)) updated++;
+    }
+    return { fresh, updated };
+}
+const tallyText = ({ fresh, updated }) => [fresh && `${fresh} new`, updated && `${updated} updated`].filter(Boolean).join(', ');
+
 function toolCards() {
     const known = [...game.unlocked.keys()].filter((id) => !['glosses', 'rules'].includes(model.cards.get(id)?.section));
     const counts = {};
+    const members = {};
     for (const id of known) {
         const c = model.cards.get(id);
         const k = c.section === 'entities' ? c.kind : c.section;
         counts[k] = (counts[k] ?? 0) + 1;
+        (members[k] ??= []).push(id);
     }
+    const badge = (ids) => { const t = tallyText(cardTally(ids)); return t ? ` <span class="tally">· ${t}</span>` : ''; };
     let h = `<input type="search" id="card-search" placeholder="Search your cards…" value="${esc(ui.search)}">`;
-    h += `<div class="filters"><button data-kind="" class="${ui.kind ? '' : 'on'}">All ${known.length}</button><button data-kind="new" class="${ui.kind === 'new' ? 'on' : ''}">Updated</button><button data-kind="unread" class="${ui.kind === 'unread' ? 'on' : ''}">Not yet opened</button>${KIND_GROUPS.filter(([k]) => counts[k]).map(([k, label]) => `<button data-kind="${k}" class="${ui.kind === k ? 'on' : ''}">${label} ${counts[k]}</button>`).join('')}</div>`;
+    h += `<div class="filters"><button data-kind="" class="${ui.kind ? '' : 'on'}">All ${known.length}${badge(known)}</button><button data-kind="unread" class="${ui.kind === 'unread' ? 'on' : ''}">New ${cardTally(known).fresh}</button><button data-kind="new" class="${ui.kind === 'new' ? 'on' : ''}">Updated ${cardTally(known).updated}</button>${KIND_GROUPS.filter(([k]) => counts[k]).map(([k, label]) => `<button data-kind="${k}" class="${ui.kind === k ? 'on' : ''}">${label} ${counts[k]}${badge(members[k])}</button>`).join('')}</div>`;
     const q = ui.search.toLowerCase();
     const shown = known.filter((id) => {
         const c = model.cards.get(id);
@@ -381,7 +413,7 @@ function toolQuestions() {
         const visible = game.knows(slot.on);
         const settled = game.settled(q.slot);
         const state = !visible ? (game.difficulty === HARD ? 'collect the card first' : '') : settled !== null ? esc(valueName(q.slot, settled)) : game.difficulty === HARD ? `${game.pencil(q.slot).length} proposed` : `${game.pencil(q.slot).length} left`;
-        h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(q.text)}</span>` : esc(q.text)}</span><span class="state ${settled !== null ? 'done' : ''}">${state}</span></li>`;
+        h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(game.questionText(q))}</span>` : esc(game.questionText(q))}</span><span class="state ${settled !== null ? 'done' : ''}">${state}</span></li>`;
     }
     return `${h}</ul>${d}`;
 }
@@ -396,8 +428,8 @@ function toolTheories() {
     for (const t of all) {
         const res = game.checkTheory(t);
         h += `<div class="theory ${res.fits ? 'fits' : 'broken'}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
-        h += `<ul class="small">${Object.entries(t.assignment).map(([s, v]) => `<li><span class="link" data-slot-open="${s}">${esc(model.slots.get(s).prompt)}</span> → ${esc(valueName(s, v))}${t.story ? '' : ` <span class="link" data-untheory="${t.id}|${s}">remove</span>`}</li>`).join('') || '<li class="empty">no answers yet</li>'}</ul>`;
-        if (game.difficulty === TRIVIAL) {
+        h += `<ul class="small">${Object.entries(t.assignment).map(([s, v]) => `<li><span class="link" data-slot-open="${s}">${esc(game.promptOf(s))}</span> → ${esc(valueName(s, v))}${t.story ? '' : ` <span class="link" data-untheory="${t.id}|${s}">remove</span>`}</li>`).join('') || '<li class="empty">no answers yet</li>'}</ul>`;
+        if (game.assisted()) {
             h += res.fits ? '<div class="small good">Fits everything you hold so far.</div>'
                 : `<div class="small bad">Broken by your clues:</div><ul class="small">${res.conflict.map((k) => `<li>${esc(model.constraints.get(k).label)}</li>`).join('')}</ul>`;
         } else {
@@ -464,7 +496,7 @@ function openCite(kind, slot, value) {
     citeFor = { kind, slot, value };
     chosen.clear();
     const s = model.slots.get(slot);
-    $('#cite-title').textContent = kind === 'prove' ? `Prove: ${s.prompt} → ${valueName(slot, value)}` : `Rule out: ${s.prompt} — not ${valueName(slot, value)}`;
+    $('#cite-title').textContent = kind === 'prove' ? `Prove: ${game.promptOf(slot)} → ${valueName(slot, value)}` : `Rule out: ${game.promptOf(slot)} — not ${valueName(slot, value)}`;
     $('#cite-help').textContent = 'Pick the clues and background notes that, together, settle it. Any sufficient set is accepted.';
     $('#cite-search').value = '';
     $('#cite-result').textContent = '';
@@ -498,7 +530,7 @@ function runCite() {
     if (res.ok) {
         out.className = 'result ok';
         const word = game.restsOn(res.used);
-        out.innerHTML = (game.difficulty === TRIVIAL && res.used?.length ? `Accepted. It rests on: ${res.used.map((k) => esc(model.constraints.get(k).label)).join(' · ')}` : 'Accepted.')
+        out.innerHTML = (game.assisted() && res.used?.length ? `Accepted. It rests on: ${res.used.map((k) => esc(model.constraints.get(k).label)).join(' · ')}` : 'Accepted.')
             + (word.length ? ` <span class="muted">It takes ${word.map((k) => esc(shortName(k, 50))).join('; ')} on trust.</span>` : '');
         ui.menu = null;
         changed();
@@ -547,7 +579,7 @@ function onStoryClick(e) {
         if (model.cards.has(id)) return game.knows(id) ? `<span class="item link" data-card="${id}"><span class="kind">${kindOf(id)}</span>${esc(shortName(id, 60))}</span>` : '';
         if (id.startsWith('w.')) return `<span class="item link" data-window="${id}"><span class="kind">time</span>${esc(cardName(id))}</span>`;
         const q = model.data.questions.find((x) => x.id === id);
-        if (q) return `<span class="item link" data-slot-open="${q.slot}"><span class="kind">question</span>${esc(q.text)}</span>`;
+        if (q) return `<span class="item link" data-slot-open="${q.slot}"><span class="kind">question</span>${esc(game.questionText(q))}</span>`;
         return '';
     }).filter(Boolean);
     if (items.length === 1 && ids.length === 1) { $('#pop').innerHTML = items[0]; $('#pop').querySelector('.item').click(); return; }
@@ -565,9 +597,10 @@ document.addEventListener('click', (e) => {
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
-    if (e.target.id === 'read') {
-        const res = game.advance();
-        if (res.ok && game.difficulty !== HARD && res.newCards.length) {
+    const readBtn = e.target.closest('#read, #read-deduction');
+    if (readBtn) {
+        const res = readBtn.id === 'read' ? game.advance() : game.readToNextDeduction();
+        if (game.difficulty !== HARD && res.newCards?.length) {
             const shown = res.newCards.filter((c) => !['rules'].includes(model.cards.get(c).section));
             if (shown.length) toast(`New: ${shown.slice(0, 5).map((c) => esc(shortName(c, 30))).join(', ')}${shown.length > 5 ? ` and ${shown.length - 5} more` : ''}`);
         }
@@ -650,6 +683,19 @@ document.addEventListener('click', (e) => {
         else if (op === 'strike-why') openCite('strike', slot, value);
         else if (op === 'prove') openCite('prove', slot, value);
         else if (op === 'open') openCard(value);
+        else if (op === 'why' || op === 'whynot') {
+            ui.menuNote = '<span class="muted">Checking…</span>';
+            renderTool();
+            setTimeout(() => {
+                const reasons = (v) => (game.whyNot(slot, v) ?? []).map((k) => esc(model.constraints.get(k).label)).join(' · ');
+                if (op === 'whynot') ui.menuNote = `Ruled out by: ${reasons(value)}`;
+                else {
+                    const others = model.slots.get(slot).domain.filter((v) => v !== value && game.offered(slot, v)).slice(0, 6);
+                    ui.menuNote = others.map((v) => `<div><b>Not ${esc(valueName(slot, v))}:</b> ${reasons(v)}</div>`).join('') || 'Nothing else was ever on offer.';
+                }
+                renderTool();
+            }, 10);
+        }
         else if (op === 'theory') {
             game.theories.find((x) => x.id === ui.theory).assignment[slot] = value;
             ui.menuNote = '<span class="good">Added to the theory.</span>';
@@ -726,7 +772,7 @@ model = await loadCase(CASE);
 story = model.story;
 const saved = restore();
 const defaults = model.data.settings_defaults ?? {};
-game = new Game(model, { difficulty: defaults.difficulty ?? EASY, pace: defaults.pace ?? 'free', state: saved?.game ?? null });
+game = new Game(model, { difficulty: defaults.difficulty ?? MEDIUM, pace: defaults.pace ?? 'free', state: saved?.game ?? null });
 ui.selected = saved?.selected ?? null;
 render();
 scrollStory();

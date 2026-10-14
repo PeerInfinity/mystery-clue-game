@@ -204,3 +204,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .doubt button { margin-left: 6px; }
 .flag.doubted { color: var(--bad); }
 .small.bad, div.bad { color: var(--bad); }
+
+/* New / updated counts on the card filters */
+.tally { font-size: 11px; color: var(--accent); margin-left: 2px; }
+.filters button.on .tally { color: inherit; }

@@ -24,7 +24,7 @@ const show = (p) => {
         }
     }
     for (const s of game.visibleSlots()) {
-        if (!seen.slots.has(s.id)) { seen.slots.add(s.id); out.push(`  ? ${s.id}: ${s.prompt}`); }
+        if (!seen.slots.has(s.id)) { seen.slots.add(s.id); out.push(`  ? ${s.id}: ${game.promptOf(s.id)}`); }
         if (s.domain.length <= 6) for (const v of game.pencil(s.id)) {
             const key = `${s.id}|${v}`;
             if (!seen.options.has(key)) { seen.options.add(key); out.push(`    option ${s.id} = ${s.labels?.[v] ?? v}`); }
