@@ -436,6 +436,7 @@
   "theories": [
     {
       "id": "t.police",
+      "rests_on": ["k.police_simpson_drugged", "k.police_simpson_took_horse", "k.police_stick_killed", "k.bridled_by_taker", "k.led_by_taker", "k.knife_marks_assailant"],
       "label": "The police theory: Simpson drugged the lad at the window, let himself in with a duplicate key, led the horse off to steal it, and beat Straker to death with his loaded stick when the trainer overtook him.",
       "held_by": [
         "gregory",
@@ -479,6 +480,7 @@
     },
     {
       "id": "t.gypsies",
+      "rests_on": ["k.gregory_gypsies", "k.police_simpson_took_horse"],
       "label": "Gregory's addition: Simpson was leading the horse to gypsies he had an understanding with, and they have it now.",
       "held_by": [
         "gregory"
@@ -577,6 +579,7 @@
     },
     {
       "id": "t.not_my_horse",
+      "rests_on": ["k.markings_identify"],
       "label": "Colonel Ross at the race: the bay has not a white hair, so it is not Silver Blaze.",
       "held_by": [
         "colonel_ross"
@@ -601,6 +604,7 @@
     },
     {
       "id": "t.self_wound",
+      "rests_on": ["k.only_one_blade"],
       "label": "Watson's suggestion, adopted by the police: Straker cut his own thigh with his knife in the convulsions after the blow. (Right.)",
       "held_by": [
         "watson",

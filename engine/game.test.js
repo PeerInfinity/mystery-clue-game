@@ -151,10 +151,11 @@ test('a cross-out is checked against everything held and trusted, inferences inc
     assert.ok(build(game, 'k.drugger_knew_the_dish').built.includes('k.drugger_knew_the_dish'));
     const res = game.checkElimination('e.opium_added.agent', 'simpson');
     assert.ok(res.ok);
-    assert.ok(res.used.includes('k.drugger_knew_the_dish'), res.used.join(' '));
-    // Doubting the inference takes the proof away.
-    assert.ok(game.strike('e.opium_added.agent', 'simpson').ok);
-    game.suspect('k.drugger_knew_the_dish');
+    assert.ok(res.used.some((k) => ['k.drugger_knew_the_dish', 'k.drugger_chose_the_dish'].includes(k)), res.used.join(' '));
+    // Doubting the inference it rests on takes the proof away.
+    const struck = game.strike('e.opium_added.agent', 'simpson');
+    assert.ok(struck.ok);
+    game.suspect(struck.used.map((k) => model.constraints.get(k).inference).find(Boolean));
     assert.ok(game.strikeLapsed('e.opium_added.agent', 'simpson'));
 });
 

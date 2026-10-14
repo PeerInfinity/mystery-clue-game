@@ -1044,6 +1044,23 @@
         },
         "source": {
           "$ref": "#/$defs/source"
+        },
+        "truth": {
+          "type": "boolean",
+          "description": "false: a character's wrong reasoning. The case reads it doubted (its truth comes out false); a player trusts it until they doubt it."
+        },
+        "stated": {
+          "type": "array",
+          "description": "Where a character states this inference in the story: the player is given it there.",
+          "items": {
+            "type": "object",
+            "required": ["by", "source"],
+            "additionalProperties": false,
+            "properties": {
+              "by": { "$ref": "#/$defs/id" },
+              "source": { "$ref": "#/$defs/source" }
+            }
+          }
         }
       }
     },
@@ -1075,6 +1092,13 @@
           "items": {
             "$ref": "#/$defs/sceneId"
           }
+        },
+        "rests_on": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "The inferences the theory's holders drew, that it stands on."
         },
         "holder_knows_by_scene": {
           "$ref": "#/$defs/sceneId",

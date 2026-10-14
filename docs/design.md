@@ -476,3 +476,31 @@ not at ¶4, where asking about it recalled nothing; every topic now appears wher
   vs told), Timeline (per paragraph: what arrives, which inferences switch on, what Holmes concludes), Graph (a
   neighbourhood, cytoscape). Anything clicked shows everything connected to it. Readings are shared with the
   game through `ui/readings.js` (the viewer names everything; the game only what the player has met).
+
+## Round 19 (user, 2026-10-14): inferences are held, built, stated and doubted, like clues
+
+The user: inferences get their own panel; instead of choosing evidence for each claim, inferences are accepted or
+rejected globally, like claims; theories show the inferences they rest on; inferences stated by characters appear by
+themselves (Holmes's too, driving the pace); the player constructs new ones from cards. Rulings: cross-outs are
+checked against everything held ("Check against all"); background premises are a setting by difficulty; Holmes's
+inferences arrive when he states them and 'wait' waits for them; false character inferences are in.
+
+- Model: every inference (constraints.json) is a card with a truth slot and trusted/doubted readings. A player
+  (outside Trivial) holds it once built or stated; the case (validator, route checks) and Trivial still switch it on
+  when its premises are in hand (`activeConstraints(…, {heldInferences})`).
+- Building: "Infer from this" on a clue or background card, then "Connect to this" on others. A connection builds
+  every inference it completes; otherwise the game says "onto something: connect one more card" or "needs N more
+  connections", or that some knowledge is lacking. Only inferences whose connections are all in hand count (no
+  hint of what is unmet). Setting "Inferences": background needed in hand (Trivial–Medium) or connected too
+  (Hard). Hard names what the conclusion is about (who, when, where, what, why, whether). Easy shows how many
+  can be built. A false inference can be built too.
+- Stated: `stated` quotes (Ross's "not a white hair", the police's bridle and knife reasoning, Holmes on the
+  dresses and on running the horse as sent over). Holmes's: each route step needs a fewest set of inferences
+  (computed), given where the story tells the step; 'wait' waits until they are held.
+- Four false inferences (truth false), stated where the police and Gregory voice them: Simpson drugged the lad,
+  took the horse to steal it, killed Straker with his stick; the gypsies have the horse. Theories list `rests_on`.
+- No citations: "Rule it out" / "Prove it's this" check against everything held and trusted, clashes set aside;
+  a proof records what it rests on and lapses if that is doubted. A clash sets aside what weighs least by
+  provenance (never by truth): the story's clues, then inferences others stated, then the player's and Holmes's.
+- Theories panel: what a theory rests on, and the held inferences its answers agree with or go against.
+- Not yet: freestyle formulas (the player writes the formula; the game runs it without comparing).

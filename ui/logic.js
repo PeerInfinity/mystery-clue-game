@@ -40,7 +40,7 @@ const rules = D.rules ?? [];
 const route = D.route ?? [];
 const questionBySlot = new Map((D.questions ?? []).map((q) => [q.slot, q]));
 const byId = new Map([...inferences.map((x) => [x.id, { kind: 'inference', x }]), ...claims.map((x) => [x.id, { kind: 'clue', x }]),
-    ...rules.map((x) => [x.id, { kind: 'background', x }]), ...route.map((x) => [x.id, { kind: 'route', x }])]);
+    ...rules.map((x) => [x.id, { kind: 'background', x }]), ...route.map((x) => [x.id, { kind: 'route', x }]), ...(D.theories ?? []).map((x) => [x.id, { kind: 'theory', x }])]);
 const kindOf = (id) => byId.get(id)?.kind ?? (model.slots.has(id) ? 'question' : model.cards.get(id)?.section === 'events' ? 'event'
     : model.cards.has(id) ? 'thing' : model.windows.some((w) => w.id === id) ? 'time' : 'unknown');
 
@@ -68,10 +68,10 @@ for (const c of claims) for (const s of formulaSlots(c.asserts)) addOn(s, 'clues
 for (const st of route) for (const s of formulaSlots(concl(st))) addOn(s, 'route', st.id);
 
 // ---------- small renderers ----------
-const KIND_LABEL = { inference: 'inference', clue: 'clue', background: 'background', route: 'Holmes', question: 'question', event: 'event', thing: 'card', time: 'time' };
+const KIND_LABEL = { theory: 'theory', inference: 'inference', clue: 'clue', background: 'background', route: 'Holmes', question: 'question', event: 'event', thing: 'card', time: 'time' };
 const shortText = (id, n = 90) => {
     const k = kindOf(id);
-    const t = k === 'inference' ? byId.get(id).x.label : k === 'route' ? routeTitle(byId.get(id).x) : k === 'question' ? questionTitle(id) : cardName(id);
+    const t = k === 'inference' || k === 'theory' ? byId.get(id).x.label : k === 'route' ? routeTitle(byId.get(id).x) : k === 'question' ? questionTitle(id) : cardName(id);
     return t.length > n ? `${t.slice(0, n - 1)}…` : t;
 };
 const ref = (id, n) => `<span class="ref k-${kindOf(id)}" data-id="${esc(id)}"><span class="kind">${KIND_LABEL[kindOf(id)] ?? ''}</span>${esc(shortText(id, n))}</span>`;
@@ -89,6 +89,13 @@ function routeTitle(st) {
     return f ? R.readingOf(f) : st.id;
 }
 /** The case's answer; some questions the story never settles (where the opium went in), and the case leaves open. */
+/** Where the player is given an inference: a character states it, or Holmes where the story tells his step. */
+const statedAt = new Map();
+for (const k of inferences) for (const st of k.stated ?? []) statedAt.set(k.id, [...(statedAt.get(k.id) ?? []), { by: st.by, at: paraOfQuote(st.source[0]) }]);
+for (const st of route) {
+    for (const id of game.stepInferences(st.id) ?? []) if (!statedAt.has(id)) statedAt.set(id, [{ by: 'holmes', at: routeTold(st) }]);
+}
+const statedText = (k) => (statedAt.has(k.id) ? ` · stated by ${statedAt.get(k.id).map((x) => `${esc(cardName(x.by))} ¶${x.at ?? '?'}`).join(', ')}` : ' · never stated: built by the player');
 const answerOf = (slot) => {
     const a = model.slots.get(slot).answer;
     return a === null || a === undefined ? '— left open by the story' : valueName(slot, a);
@@ -111,20 +118,23 @@ is each statement true…), each with a fixed list of possible answers. Everythi
 <ol>
 <li><b>Clues</b> (${claims.length}) are what the story tells, each with a formula for what it asserts. A clue is
 taken at its word until the player doubts it; ${claims.filter((c) => c.truth === false).length} of them are false.</li>
-<li><b>Background</b> facts (${rules.length}) are general knowledge. They have no formula of their own: they only
-switch on inferences.</li>
-<li><b>Inferences</b> (${inferences.length}) are written into the case: each has premises (clues and background facts)
-and a formula. An inference switches on when the player cites <i>every</i> one of its premises; this is the
-hidden layer the player never cites directly.</li>
+<li><b>Background</b> facts (${rules.length}) are general knowledge. They have no formula of their own: they are
+premises of inferences.</li>
+<li><b>Inferences</b> (${inferences.length}) are reasoning written into the case: each rests on premises (clues and
+background facts) and has a formula. The player <i>holds</i> an inference once they have built it (connecting its
+premises: “Infer from this”), or heard a character state it (Holmes's arrive where the story tells his step), or, in
+Trivial, as soon as its premises are known. A held inference counts like a trusted clue until it is doubted;
+${inferences.filter((k) => k.truth === false).length} are false — the police's and Gregory's wrong reasoning.</li>
 <li><b>Holmes's route</b> (${route.length} steps) is the reasoning Holmes does in the story, each step a conclusion
-with its premises. It paces the game (“wait for deductions”, Trivial at Holmes's pace) and is checked to be
-reachable with what the reader holds.</li>
+with its premises. Each step needs a fewest set of inferences; with “wait for deductions” the story waits until the
+player holds them.</li>
 </ol>
-<p>To <b>rule out</b> an answer, the game takes the formulas of the cited clues and of every inference their
-premises switch on, <i>supposes the answer</i>, and searches for any way to fill in every question that satisfies
-all of them. None means the answer is ruled out (a proof by contradiction), and the game then trims the formulas
-to a smallest set that still does it (“rests on”). To <b>prove</b> an answer it supposes the opposite. Cited clues
-that already contradict each other prove nothing; the game names the clash instead.</p>
+<p>To <b>rule out</b> an answer, the game takes everything the player holds and trusts — the clues' formulas and the
+held inferences, with any clash among them set aside — <i>supposes the answer</i>, and searches for any way to fill in
+every question that satisfies all of them. None means the answer is ruled out (a proof by contradiction); the game
+then trims the formulas to a smallest set that still does it (“rests on”), and the proof lapses if one of those is
+later doubted. To <b>prove</b> an answer it supposes the opposite. Nothing is cited: the player's work is building
+the inferences and choosing what to doubt.</p>
 <p>The ${qs.length} case questions: ${qs.map((q) => ref(q.slot)).join(' ')}</p>
 <h2>Views</h2>
 <ul><li><b>Inferences</b>, <b>Clues</b>, <b>Background</b>, <b>Questions</b>, <b>Holmes's route</b>: every item, with
@@ -139,8 +149,8 @@ function viewInferences() {
     const rows = inferences.filter((k) => matches(k.id, k.label, k.by ?? '', R.readingOf(k.formula)))
         .map((k) => ({ k, at: availableAt(k.premises ?? []) }))
         .sort((a, b) => (a.at ?? 1e9) - (b.at ?? 1e9));
-    return `<p class="small muted">Written into the case; each switches on when every premise is cited. Sorted by when the last premise arrives.</p>` + rows.map(({ k, at }) => `
-<div class="item" data-id="${esc(k.id)}"><div class="item-head">${paraTag(at)} <b>${esc(k.label)}</b> <span class="small muted">${esc(k.by ?? '')}</span></div>
+    return `<p class="small muted">Written into the case. The player holds one once they build it (connecting its premises) or hear it stated. Sorted by when the last premise arrives.</p>` + rows.map(({ k, at }) => `
+<div class="item" data-id="${esc(k.id)}"><div class="item-head">${paraTag(at)} ${k.truth === false ? '<span class="tag bad">false</span> ' : ''}<b>${esc(k.label)}</b> <span class="small muted">${esc(k.by ?? '')}${statedText(k)}</span></div>
 ${reading(k.formula)}<div class="refs">${(k.premises ?? []).map((p) => ref(p, 50)).join(' ')}</div></div>`).join('');
 }
 
@@ -280,8 +290,10 @@ function detail(id) {
     let h = `<div class="detail-head"><span class="kind">${KIND_LABEL[k] ?? k}</span> <code>${esc(id)}</code> <span class="link small" data-graph="${esc(id)}">graph</span></div>`;
     if (k === 'inference') {
         const x = byId.get(id).x;
-        h += `<h2>${esc(x.label)}</h2><p class="small muted">by ${esc(x.by ?? '?')} · in hand ${paraTag(availableAt(x.premises ?? []))}</p>${reading(x.formula)}${raw(x.formula)}`;
-        h += list('Premises (cite all of these to switch it on)', x.premises ?? []);
+        h += `<h2>${esc(x.label)}</h2><p class="small muted">${x.truth === false ? '<span class="tag bad">false</span> ' : ''}by ${esc(x.by ?? '?')} · premises in hand ${paraTag(availableAt(x.premises ?? []))}${statedText(x)}</p>${reading(x.formula)}${raw(x.formula)}`;
+        h += (x.stated ?? []).map((st) => `<p class="quote">${esc(cardName(st.by))}: “${esc(st.source[0].replace(/\s+/g, ' '))}”</p>`).join('');
+        h += list('Theories resting on it', (D.theories ?? []).filter((t) => (t.rests_on ?? []).includes(id)).map((t) => t.id));
+        h += list('Premises (connect these to build it)', x.premises ?? []);
         h += list('Questions it speaks of', formulaSlots(x.formula));
         h += list('Holmes steps sharing its premises', route.filter((st) => (x.premises ?? []).every((p) => (st.premises ?? []).includes(p))).map((st) => st.id));
     } else if (k === 'clue') {
@@ -304,6 +316,11 @@ function detail(id) {
         h += (x.source ?? []).map((q) => `<p class="quote">${esc(q.replace(/\s+/g, ' '))}</p>`).join('');
         h += list('Premises', x.premises ?? []);
         h += list('Questions it settles', formulaSlots(f));
+    } else if (k === 'theory') {
+        const x = byId.get(id).x;
+        h += `<h2>${esc(x.label)}</h2><p class="small muted">held by ${x.held_by.map((b) => esc(cardName(b))).join(', ')}</p>`;
+        h += `<h3>Its answers</h3><ul class="small">${Object.entries(x.assignment).map(([sl, v]) => `<li>${ref(sl, 60)} → ${esc(valueName(sl, v))}${model.slots.get(sl).answer === v ? '' : ' <span class="tag bad">wrong</span>'}</li>`).join('')}</ul>`;
+        h += list('Rests on', x.rests_on ?? []);
     } else if (k === 'question') {
         const s = model.slots.get(id);
         const o = onSlot.get(id) ?? { inferences: [], clues: [], route: [] };
