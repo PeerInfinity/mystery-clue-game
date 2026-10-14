@@ -359,3 +359,11 @@ Holmes's). The fair-play test still passes under all three Background settings a
   solver's reading above.
 - "Next deduction" from the start jumped 95 paragraphs, so (user ruling) there is also **Next scene (N ¶)**, to the
   start of the next of the 10 scenes.
+
+## Round 11 (user, 2026-10-13): asking recalls only what the story has reached
+
+Asking about Dartmoor at ¶3 recalled every fact on the card — a light in a hollow, a coat on a bush — long before
+the story has either. Now asking recalls only the facts whose `relevant_from` the story has reached, and a card
+once asked about goes on recalling the rest as the story reaches them, without asking again (a button that came
+back would itself say "something new is relevant here"). The stale old description "Dartmoor, where Holmes must
+go." was dropped from the moor's notes.

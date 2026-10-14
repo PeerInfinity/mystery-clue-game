@@ -239,6 +239,10 @@ export class Game {
 
     #process(p) {
         if (this.background === BG_RELEVANT) for (const [r, at] of this.ruleAt) if (at === p) this.#unlock(r, p);
+        // Asked about already: the card recalls each further fact as the story reaches its subject.
+        if (this.background === BG_ASK) {
+            for (const [card] of this.asked) for (const r of this.rulesOn.get(card) ?? []) if (this.ruleAt.get(r) === p) this.#unlock(r, p);
+        }
         for (const a of this.actions) {
             if (this.story.anchors.actions.get(a.id) !== p) continue;
             this.done.push(a.id);
@@ -276,11 +280,15 @@ export class Game {
 
     hasAsked(id) { return this.asked.some(([x]) => x === id); }
 
-    /** "What do I know about this?" Recalls every background fact about the card. Returns the newly recalled. */
+    /**
+     * "What do I know about this?" Recalls the background facts about the card whose subject the story has
+     * reached (as 'relevant' would show them); from then on the card goes on recalling the rest as the story
+     * reaches them, without asking again. Returns the newly recalled.
+     */
     ask(id) {
         if (!this.canAsk(id)) return [];
         if (!this.hasAsked(id)) this.asked.push([id, this.read - 1]);
-        const got = (this.rulesOn.get(id) ?? []).filter((r) => !this.knows(r));
+        const got = (this.rulesOn.get(id) ?? []).filter((r) => !this.knows(r) && this.ruleAt.get(r) < this.read);
         for (const r of got) this.#unlock(r, this.read - 1);
         return got;
     }

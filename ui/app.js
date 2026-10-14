@@ -214,7 +214,7 @@ function toolCard() {
 
     if (game.canAsk(id)) {
         h += game.hasAsked(id)
-            ? `<p class="small muted">${(game.rulesOn.get(id) ?? []).length ? 'You have recalled what you know about this (under Background above).' : 'You asked: nothing in particular comes to mind.'}</p>`
+            ? `<p class="small muted">${(game.rulesOn.get(id) ?? []).some((r) => game.knows(r)) ? 'You have recalled what you know about this (under Background above); more will come to mind as the story goes on.' : 'You asked: nothing in particular comes to mind yet.'}</p>`
             : `<p><button data-ask="${id}">What do I know about this?</button></p>`;
     }
     const u = game.unlocked.get(id);

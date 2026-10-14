@@ -67,10 +67,13 @@ test('background: all at once, when the story touches the subject, or when asked
     assert.ok(relevant.knows('r.wind_and_coats'));
     assert.ok(relevant.knows('r.bg_moor_27'), 'a filler fact arrives at the same point');
     const ask = new Game(model, { background: BG_ASK });
+    while (ask.read <= 3) ask.advance();
+    assert.deepEqual(ask.ask('moor').sort(), ['r.bg_moor_25', 'r.bg_moor_26'], 'only what the story has reached');
     while (ask.read <= 35) ask.advance();
-    assert.equal(ask.knows('r.wind_and_coats'), false, 'nothing until asked');
-    assert.deepEqual(ask.ask('overcoat'), ['r.wind_and_coats']);
-    assert.ok(ask.info('overcoat').some((it) => it.card === 'r.wind_and_coats'));
+    assert.ok(ask.knows('r.light_hidden_in_hollow'), 'an asked card goes on recalling as the story reaches each subject');
+    assert.equal(ask.knows('r.bg_moor_28'), false, 'but nothing ahead of the story (bracken: ¶69)');
+    assert.equal(ask.knows('r.cataract_knife_use'), false, 'nothing about cards never asked about');
+    assert.ok(ask.info('moor').some((it) => it.card === 'r.wind_and_coats'));
     assert.deepEqual(ask.ask('simpson'), [], 'not a card the player holds yet');
     const again = new Game(model, { state: ask.save() });
     assert.ok(again.knows('r.wind_and_coats'), 'asking is saved');
