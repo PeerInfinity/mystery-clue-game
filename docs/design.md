@@ -367,3 +367,18 @@ the story has either. Now asking recalls only the facts whose `relevant_from` th
 once asked about goes on recalling the rest as the story reaches them, without asking again (a button that came
 back would itself say "something new is relevant here"). The stale old description "Dartmoor, where Holmes must
 go." was dropped from the moor's notes.
+
+## Round 12 (2026-10-13): step 3 — the old descriptions redrafted
+
+`node checker/draft-notes.js cases/silver-blaze > .cache/drafts.json` asks Sonnet, for each old description kept as
+a note in step 1 (168; the six topic cards are editorial and skipped), to drop, keep or rewrite it, with the
+story so far, the card's first-mention sentence and its other notes and clues in front of it; a kept or rewritten
+note must carry a verbatim quote, which the script checks. Cost $5.84.
+
+Result, all reviewed by hand: 162 dropped (nearly all restated the first-mention sentence the card opens with;
+two more dropped because their only quote came before the card's first mention, which the validator caught),
+4 kept (Watson "who tells the story", Ross's drag, Simpson's purse, the midnight visitor), 2 rewritten (the
+sitting-room; the hollow "just beyond the furze-bush, about a quarter of a mile from the stables" — my correction:
+the model's draft gave the coat's distance). The rewrite of "the ring" lost that it means the bookmakers, so it
+was dropped (the gloss says it). No note carries `from_description` any more except the topic cards'. The
+checker passes all six survivors; its 19 remaining flags are the false alarms of Round 9.
