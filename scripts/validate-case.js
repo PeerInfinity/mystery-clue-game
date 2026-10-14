@@ -114,6 +114,40 @@ for (const e of data.entities ?? []) {
     }
 }
 
+// Glossary notes explain a word the story uses: none may show on a card before the story uses its term. The term
+// is found in the text (each part of "Owner, trainer, jockey" counts; a long word also by its first five letters,
+// so "lame" finds "lameness"); a gloss with an `after` quote is dated by that quote instead, which is how a term the
+// story words differently is placed ("Betting against a horse" → "registered by him against the favourite").
+{
+    const norm = (t) => t.toLowerCase().replace(/[’‘]/g, "'");
+    const paras = storyIndex.paragraphs.map((p) => norm(p.display));
+    const STOP = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'with', 'and', 'or', 'his', 'its']);
+    const termAt = (term) => {
+        let best = Infinity;
+        for (const part of term.replace(/[()'‘’]/g, ' ').split(/,|…|\band\b/)) {
+            const words = norm(part).split(/[^a-z0-9-]+/).filter((w) => w && !STOP.has(w));
+            if (!words.length) continue;
+            const phrase = words.join(' ');
+            const head = words.find((w) => w.length >= 3) ?? words[0];
+            const re = head.length > 5 ? new RegExp(`\\b${head.slice(0, 5)}`) : new RegExp(`\\b${head}\\b`);
+            for (let p = 1; p < paras.length && p < best; p++) if (paras[p].includes(phrase) || re.test(paras[p])) best = p;
+        }
+        return best;
+    };
+    for (const g of data.glosses ?? []) {
+        const after = g.after ? storyIndex.find(g.after)?.para : null;
+        const at = after ?? termAt(g.term);
+        if (at === Infinity) { err(`${g.id}: the story never uses "${g.term}" — give it an 'after' quote where the thing it explains is used`); continue; }
+        for (const c of g.attaches_to ?? []) {
+            if (model.cards.get(c)?.section === 'rules') continue; // shown with its fact, by the Background setting
+            const first = storyIndex.firstAt.get(c);
+            if (first === undefined) continue;
+            const shows = Math.max(first, after ?? -1);
+            if (shows < at) err(`${g.id}: shows on ${c} at paragraph ${shows}, but the story first uses "${g.term}" at ${at} — add an 'after' quote`);
+        }
+    }
+}
+
 // Names and labels: everything a card is called must come from a line the reader has read. The first must be
 // read by the time the card appears (reading the story through, Easy); later ones come in story order.
 {

@@ -393,3 +393,8 @@ checker passes all six survivors; its 19 remaining flags are the false alarms of
   compared without case, apostrophe style or a leading article.
 - Cards now show glossary notes under **Words** (always shown: they explain a word the story uses) and recalled
   facts under **Background** (by the Background setting), so it is clear why one appears before asking.
+- (Round 13, continued) The gloss audit is now a validator rule: a gloss may not show on any card before the story
+  first uses its term (found in the text, each part of a list term counting, long words also by their first five
+  letters), unless its `after` quote dates it. Checked by undoing three of the fixes in a scratch copy: all three
+  are reported. "Laying against a horse" — a phrase the story never uses — became "Betting against a horse
+  ('laying')", dated by "registered by him against the favourite" (¶39).
