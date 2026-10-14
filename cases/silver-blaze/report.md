@@ -38,7 +38,7 @@ Held by Inspector Gregory, The police, Ned Hunter. Fits what they knew: yes.
 
 Broken by (a minimal set):
 
-- `k.dog_knew_the_visitor` — A dog was in the stable; someone came in and took out a horse; the dog did not bark enough to wake the lads. A dog barks at strangers — so the visitor was someone it knew well: someone of King's Pyland. *(rests on c.dog_kept_in_stable, c.dog_did_nothing, c.lads_heard_nothing, c.stall_empty, r.dog_barks_at_strangers)*
+- `k.drugger_knew_the_dish` — Opium can be tasted; only a curry hides it; bringing opium on the one night a curry is served is too great a coincidence — so the drugger knew what the supper would be, i.e. was someone at the house that evening. *(rests on c.curry_for_supper, c.opium_in_remains, r.opium_taste, r.curry_masks, r.no_coincidence)*
 
 ### Gregory's addition: Simpson was leading the horse to gypsies he had an understanding with, and they have it now.
 
@@ -46,7 +46,7 @@ Held by Inspector Gregory. Fits what they knew: yes.
 
 Broken by (a minimal set):
 
-- `k.brown_broke` — Brown gave in to Holmes: 'Your instructions will be done … It shall be there.' He has the horse. *(rests on c.brown_capitulates)*
+- `k.c.double_track_loops` — The double track turns off towards King's Pyland, then comes back the other way and ends at the asphalt before the Mapleton gates. *(rests on c.double_track_loops)*
 
 ### Everyone's view of Straker: an honest, zealous servant who went down at one because he was anxious about the horses.
 
@@ -66,8 +66,7 @@ Held by Mrs. Straker. Fits what they knew: yes.
 Broken by (a minimal set):
 
 - `k.c.derbyshire_a_friend` — Mrs. Straker says Derbyshire was a friend of her husband's, and his letters were sometimes addressed to the house. *(rests on c.derbyshire_a_friend)*
-- `k.bill_is_his_own` — Men do not carry other people's bills: the milliner's account in Straker's pocket was his own. *(rests on c.milliner_bill, c.papers_in_pocket, r.others_bills)*
-- `k.bill_names_its_debtor` — The account is made out to William Derbyshire: whoever really owes it is 'Derbyshire'. *(rests on c.milliner_bill)*
+- `k.c.milliner_knows_straker` — Madame Lesurier recognised Straker's photograph as an excellent customer named Derbyshire, with a very dashing wife fond of expensive dresses. *(rests on c.milliner_knows_straker)*
 
 ### Colonel Ross at the race: the bay has not a white hair, so it is not Silver Blaze.
 
@@ -75,8 +74,7 @@ Held by Colonel Ross. Fits what they knew: yes.
 
 Broken by (a minimal set):
 
-- `k.markings_identify` — Silver Blaze has a white forehead and a mottled leg; the bay has not a white hair — so, unless the markings are hidden, the bay is not Silver Blaze. *(rests on c.silver_blaze_markings, c.bay_no_white, r.markings_identify_horse)*
-- `k.bay_is_ross_entry` — The bay carries Ross's colours; all six numbers are up, Bayard is scratched, and no other Ross horse is entered: the bay is Ross's runner, Silver Blaze. *(rests on c.bay_in_ross_colours, c.race_card, c.all_six_there, c.bayard_scratched, r.colours_identify_owner)*
+- `k.c.wash_with_spirits` — Wash his face and his leg in spirits of wine and you will find the same old Silver Blaze. *(rests on c.wash_with_spirits)*
 
 ### Watson's suggestion, adopted by the police: Straker cut his own thigh with his knife in the convulsions after the blow. (Right.)
 
