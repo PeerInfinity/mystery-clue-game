@@ -309,8 +309,12 @@ function renderSlot(s) {
         h += `<div class="small bad">${lapsed.length === 1 ? 'A proof here' : `${lapsed.length} proofs here`} rested on ${why.map((k) => link(k, shortName(k, 50))).join(', ')}, which you now doubt.</div>`;
     }
     if (game.difficulty === EASY && settled === null && cache.get(s.id)?.length === 0) {
-        h += `<div class="small bad">Nothing fits: something you trust must be false. <span class="link" data-clash="${s.id}">Find the clash</span></div>`;
+        // No value at all fits, met or not: the trusted clues contradict each other.
+        h += `<div class="small bad">Nothing could fit, not even an answer the story has yet to bring up: some of the clues you trust contradict each other, so one of them must be false. <span class="link" data-clash="${s.id}">Find the clash</span></div>`;
         if (ui.clash?.slot === s.id) h += `<div class="why">${ui.clash.html}</div>`;
+    } else if (game.difficulty === EASY && settled === null && (game.pencil(s.id).length || !game.moreToCome(s.id)) && !game.pencil(s.id).some((v) => cache.get(s.id)?.includes(v))) {
+        // Something fits, but not among the answers on offer yet.
+        h += `<div class="small muted">${game.moreToCome(s.id) ? 'None of the answers met so far fits your clues. The answer may be one the story has not brought up yet.' : 'Every answer has been ruled out.'}</div>`;
     }
     if (ui.menu?.slot === s.id) h += slotMenu(s, ui.menu.value);
     return `${h}</div>`;
