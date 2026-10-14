@@ -60,8 +60,19 @@ a:hover, .link:hover { text-decoration: underline; }
 @media (max-width: 600px) {
   .settings .long { display: none; }
   .settings .short { display: inline; }
-  .settings-panel { right: auto; left: 0; }
-  .progress { flex-basis: 100%; }
+  /* Two rows: the title with the buttons, then the progress line. */
+  .controls { display: contents; }
+  .top h1 { margin-right: auto; }
+  .top .settings { order: 2; }
+  .top #reset { order: 3; }
+  .top .progress { order: 4; flex-basis: 100%; font-size: 13px; }
+  .settings-panel { right: 0; left: auto; }
+}
+@media (max-width: 420px) {
+  .subtitle { display: none; }
+}
+@media (max-width: 360px) {
+  .top { padding: 8px 12px; gap: 6px 8px; }
 }
 
 .layout { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(340px, 1fr); height: calc(100vh - 56px); }
