@@ -26,3 +26,19 @@
   fact, trait or claim must read as plain description, never as a hint of what matters.
 - Case data files are one JSON object per line; edit lines, do not reformat whole files.
 - Discuss design alternatives before proposing changes; Robert decides direction, then the work proceeds.
+
+## Launching the next session
+`~/bin/wsl-launch-claude.sh` (Robert's launcher; see the Archipelago-CC memory `reference_wsl_launch_claude`) opens a
+new Windows Terminal tab with a Claude Code session in this tree, the prompt read from a file. Write a kickoff
+document in `docs/` first, then a short prompt file pointing at it, and run (from the harness's Bash the Windows
+dirs must be on PATH):
+
+```
+PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows" ~/bin/wsl-launch-claude.sh -m opus \
+  -C /home/robert/CC/mystery-clue-game -d true -t "<label>" -f <prompt file>
+```
+
+`-C` makes the session start here (so it loads this CLAUDE.md and this project's memory); `-d true` skips the
+Archipelago venv; `-m opus` is the standing ruling unless Robert asks for Fable. A successful launch prints
+nothing: verify by the new socket under `/run/user/1000/cc-socks/<pid>.sock` whose `/proc/<pid>/cwd` is this tree.
+The handing-off session may end itself once its record is written, committed and pushed.
