@@ -62,8 +62,15 @@ night. No new kind of card text: every state a claim fills is quoted from the cl
 
 ## The timeline (the player's view)
 
-- **Rows** are the entities the player follows (added from the hand; the story's principals offered); **columns**
-  are the time windows, the story's own order; **events** sit in their cells.
+- **Two layouts of the same states, a setting** (Robert, Round 40: try both, keep both if both work):
+  - **by place** (Robert's suggestion): rows are the time windows, columns are places (the ones in play, plus
+    "unknown"); a cell holds the cards of whoever and whatever is there then, and the events that happen there.
+    Placing Straker's card in the hollow column of the one-o'clock row answers "where is Straker at one?"; a card
+    in the "unknown" column leaves it open; the same card in two cells of one row is two hypotheses.
+  - **by thing**: rows are the entities the player follows, columns are the time windows; a cell holds the place
+    (and, for the other aspects, the holder, the condition).
+  The location aspect reads naturally by place; possession, condition, knowledge and intention read naturally by
+  thing. Both are views over the same state questions, so the setting changes nothing in the model.
 - **A cell is a question** with the usual marks. Placing a card on a cell circles that candidate; moving it changes
   the candidate; leaving it empty is "unknown"; several cards in a cell are several hypotheses held at once; a
   struck card stays visible, crossed out.
@@ -81,7 +88,8 @@ night. No new kind of card text: every state a claim fills is quoted from the cl
    filling location, possession and condition. Validator: every declared state quoted through a claim or derived;
    uniqueness for declared states. Solver cost watched.
 2. **Re-derive the bookkeeping** with state rules; the implicit inferences shrink (record which).
-3. **A minimal timeline view** (read-only, then placement with pencil marks), early, so the model can be seen.
+3. **A minimal timeline view** (read-only, then placement with pencil marks), early, so the model can be seen;
+   both layouts, so they can be compared.
 4. **Layers** over theories, with fit checking.
 5. **Knowledge, intention, belief**, with workstream 4 for belief.
 6. The full board UI with workstream 9.
@@ -93,3 +101,4 @@ night. No new kind of card text: every state a claim fills is quoted from the cl
    a minimal timeline view comes early.
 3. Placement is a free pencil mark by default, checked at commit in the harder settings, with the existing
    difficulty options.
+4. (Round 40) The timeline has two layouts, by place (rows times, columns places) and by thing, as a setting.

@@ -4,6 +4,8 @@
 **Parent:** `docs/format-0.3.md` (the format as built, decisions), `docs/redesign.md` (why), `docs/design.md`
 Round 22 (what shipped). Read those first; this document says what to do next and what not to re-open.
 
+**SUPERSEDED (2026-10-15, Round 40)** by `docs/kickoff-short-chains.md`. Slice 3 closed at chains 1–8; its open items were ruled in Rounds 33–35; slice 4 waits on workstream 3.
+
 **Status (2026-10-15, Opus session):** slices 1 (traits) and 2 (the establishment relation) are DONE, see
 `docs/format-0.3.md` "As built (2026-10-15)" and `docs/design.md` Round 23. The report now lists 7 verified and
 46 asserted inferences (the "47" below predates one). Start at slice 3. Anchors that changed: the two editorial

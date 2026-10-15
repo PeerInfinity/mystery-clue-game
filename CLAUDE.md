@@ -1,7 +1,7 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-0.3-migration.md` — the current slice: mission, settled rulings, what to build next.
+- `docs/kickoff-short-chains.md` — the current work (workstream 2, short chains): mission, settled rulings, steps.
 - `docs/format-0.3.md` — the case format as built, and the decisions taken on it.
 - `docs/redesign.md` — the design discussion the format serves: the reader's process, what the logic and the
   gameplay are missing, the alternatives, and the order of work.

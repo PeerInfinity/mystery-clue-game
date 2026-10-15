@@ -938,3 +938,12 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Order:** the chains first; then the states, re-deriving the night's bookkeeping (Q5 of `short-chains.md`: the
   implicit list is provisional); a minimal timeline view early; layers; then knowledge, intention and belief; the
   full board with the UI workstream.
+
+## Round 40 (2026-10-15): the timeline's layout; handing over
+
+- **Layout (Robert):** rows for times and columns for places, or the other way round; try both, or make it a
+  setting. Recorded in `docs/world-model.md`: two layouts over the same state questions, *by place* (rows the
+  time windows, columns the places plus "unknown", a cell holding whoever and whatever is there) and *by thing*
+  (rows the followed entities, columns the windows), chosen by a setting; both built with the first timeline view.
+- **Handover:** this session (annotation, gap analysis, thoughts as data, the rulings of Rounds 33–35, the designs
+  of Rounds 38–40) ends here; the next session builds workstream 2 from `docs/kickoff-short-chains.md`.
