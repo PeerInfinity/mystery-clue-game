@@ -1060,3 +1060,30 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Still open, workstream 5:** `c.dog_did_nothing` is dealt at ¶34, so the game makes the absence (`t34.2`) for
   the player.
 - **Moved:** nothing in the reveal or foreshadow logs or the case report; thoughts report 19/43.
+
+## Round 45 (2026-10-15): short chains, chain 4 — the knife
+
+- **Model:** a new question "Why did Straker take the knife?" (`e.knife_taken.purpose`: to defend himself, for
+  some delicate work), raised by Holmes's "A strange thing for a man to carry with him upon a rough expedition"
+  (¶81), both readings offered there. The knife's taking (`e.knife_taken`) now appears at ¶35 ("Straker has a knife
+  with him", quoting "in his right hand he held a small knife"; `c.knife_in_right_hand` names who took what) and
+  keeps the dressing-table label at ¶82: before, the question could not exist until ¶82, a paragraph after the
+  reader's thoughts. `r.cataract_knife_use` is split: a cataract knife is no weapon, so a man who takes one takes it
+  for delicate work (`t81.4`); new `r.operation_on_the_horse`: a man who takes a blade for delicate work out to a
+  horse at night means an operation on it (`t81.5`). Same content, now two steps.
+- **The chain** (all verified; 52 verified, 10 asserted):
+  - `t81.4` → `k.knife_not_a_weapon` (new). Annotation: cites `t35.4` (the knife in his hand) as well.
+  - `t81.5` → `k.knife_for_an_operation` (re-cited: `k.knife_not_a_weapon`, `k.operation_in_the_open`,
+    `r.operation_on_the_horse`): if Straker took the horse, it was to injure it, away from the stable. Annotation:
+    no longer cites the hypothesis `t46.4`, which is the conditional's antecedent, not a premise; its prose says so.
+  - `t81.3` (the HYPOTHESIS "why carry it") now maps the new question; `t57.3` holds `k.operation_in_the_open`
+    (still asserted). Checker: a cited thought that holds a question the inference (or a premise inference)
+    answers counts as agreeing.
+- **Gates:** a script compares each route step's gate paragraph and needed inferences (scratchpad, against a
+  worktree of HEAD and of the session's first commit): no gate moved in chains 1–4; `i.done_in_the_open` needs one
+  inference fewer (`k.operation_in_the_open` is now inside `k.knife_for_an_operation`'s chain). Route steps citing
+  the knife rule gain `r.operation_on_the_horse` and `c.knife_in_right_hand` (and two, the hollow's rules).
+- **Moved:** reveal log: the knife's taking and its four questions at ¶35 (was ¶82), the new question and both
+  options at ¶81, the split rule's two texts at ¶80 (where the old one was). Foreshadow log: the same. Case
+  report: the new question in the table (settled in every column but Strict), the chain's inferences. Thoughts
+  report: 21/43 deductions have an inference.

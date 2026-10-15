@@ -645,12 +645,13 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t81.3` **HYPOTHESIS** · *fair* · careful · from `t81.2`, `t57.2`, `t78.3`
   Why carry it: {the nearest weapon; **to operate on something that night**}? The only possible patient within
   a quarter mile is the horse.
-- `t81.4` **AGENT** · *fair* · careful · from `t81.1`, `bk.weapon_choice` · strains `t81.3 (weapon)` · Holmes ¶221 ("no sane man would choose for a weapon")
+- `t81.4` **AGENT** · *fair* · careful · from `t81.1`, `t35.4`, `bk.weapon_choice` · strains `t81.3 (weapon)` · Holmes ¶221 ("no sane man would choose for a weapon")
   A man arming himself takes a stick or a poker.
-- `t81.5` **INFER** · *fair* · careful · from `t81.3`, `t81.4`, `t57.3`, `t46.4` · Holmes ¶221, ¶223
+- `t81.5` **INFER** · *fair* · careful · from `t81.3`, `t81.4`, `t57.3` · Holmes ¶221, ¶223
   He meant to **injure the horse, delicately, away from the stable**: away from the loft's hearing, by candle.
   The specific operation (nicking a tendon under the skin, ¶221) is specialist knowledge. The general form is
-  enough to carry the chain, and the game should accept it.
+  enough to carry the chain, and the game should accept it. The game holds it as a conditional: if Straker took
+  the horse out (`t46.4`).
 
 **¶82**
 - `t82.1` **RECORD** · typical

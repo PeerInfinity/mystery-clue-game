@@ -428,6 +428,12 @@
       "raised": "the favourite’s stall was empty"
     },
     {
+      "id": "q.why_knife",
+      "slot": "e.knife_taken.purpose",
+      "text": "Why did {straker} take the knife?",
+      "raised": "A strange thing for a man to carry with him upon a rough expedition"
+    },
+    {
       "id": "q.why_taken",
       "slot": "e.horse_led_out.purpose",
       "text": "Why was the horse taken out?",

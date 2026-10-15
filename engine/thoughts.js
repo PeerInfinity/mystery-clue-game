@@ -208,9 +208,13 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
         namedBy.get(k.id).push(t.id);
         const premises = new Set(k.premises);
         const covered = new Set();
+        // The questions the step answers: its formula's, and its premise inferences' (a cited HYPOTHESIS or
+        // QUESTION stands for the question it poses).
+        const asked = new Set([k, ...k.premises.map((p) => inferenceById.get(p)).filter(Boolean)].flatMap((x) => [...slotsOf(x.formula)]));
         for (const p of t.from ?? []) {
             const cards = cardsOf(p);
             const hit = [...cards].filter((c) => premises.has(c));
+            if (!hit.length && [...cards].some((c) => asked.has(c))) continue;
             if (hit.length) hit.forEach((c) => covered.add(c));
             else if (cards.size) row.uncited.push(p);
             else row.unheld.push(p); // a thought no card holds yet (a NOTICE, a WEIGH): later workstreams

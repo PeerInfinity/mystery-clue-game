@@ -47,7 +47,7 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 43; with an inference: 19; earliest-date misses: 3 (and 2 explained); premise disagreements: 8
+- deduction-type thoughts: 43; with an inference: 21; earliest-date misses: 3 (and 2 explained); premise disagreements: 8
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -73,8 +73,8 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t62.3` | DEFAULT | — | ¶62 | — |  |  |  |  |  |
 | `t68.3` | IDENTIFY | — | ¶68 | — |  |  |  |  |  |
 | `t78.2` | INFER | — | ¶78 | — |  |  |  |  |  |
-| `t81.4` | AGENT | — | ¶81 | — |  |  |  |  |  |
-| `t81.5` | INFER | — | ¶81 | — |  |  |  |  |  |
+| `t81.4` | AGENT | `k.knife_not_a_weapon` | ¶81 | ¶81 |  |  |  |  |  |
+| `t81.5` | INFER | `k.knife_for_an_operation` | ¶81 | ¶81 |  |  |  |  |  |
 | `t82.3` | INFER | — | ¶82 | — |  |  |  |  |  |
 | `t84.6` | IDENTIFY | — | ¶84 | — |  |  |  |  |  |
 | `t92.2` | INFER | — | ¶92 | — |  |  |  |  |  |
@@ -114,7 +114,7 @@ Granted as soon as their premises are held; never gate, never score (Q4). Provis
 
 Each becomes a thought's inference or is marked `implicit` as the chains are done (a warning until then).
 
-`k.drugger_took_the_horse`, `k.visitor_is_taker`, `k.hunter_was_drugged`, `k.lads_slept`, `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence`, `k.found_before_seven`, `k.vesta_from_strakers_box`, `k.hollow_order`, `k.knife_for_an_operation`, `k.drugging_is_dishonest`, `k.operation_in_the_open`, `k.horse_kicked`, `k.blow_needs_a_wielder`, `k.only_one_blade`, `k.knife_marks_assailant`, `k.cravat_order`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.bill_is_his_own`, `k.bill_names_its_debtor`, `k.second_household`, `k.dresses_for_the_other_woman`, `k.lame_plan`, `k.boots_identify`, `k.found_at_dawn`, `k.disguised_to_survive_search`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
+`k.drugger_took_the_horse`, `k.visitor_is_taker`, `k.hunter_was_drugged`, `k.lads_slept`, `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence`, `k.found_before_seven`, `k.vesta_from_strakers_box`, `k.hollow_order`, `k.drugging_is_dishonest`, `k.operation_in_the_open`, `k.horse_kicked`, `k.blow_needs_a_wielder`, `k.only_one_blade`, `k.knife_marks_assailant`, `k.cravat_order`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.bill_is_his_own`, `k.bill_names_its_debtor`, `k.second_household`, `k.dresses_for_the_other_woman`, `k.lame_plan`, `k.boots_identify`, `k.found_at_dawn`, `k.disguised_to_survive_search`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
 
 ### Characters' wrong reasoning
 
