@@ -735,8 +735,9 @@ export class Game {
         const first = this.story.firstAt.get(id) ?? this.unlocked.get(id).para;
         const out = [];
         // What the story said where it first mentions the card: never more than the story has told.
+        // (A card spoken of by an early clue may be quoted only from a later line: that line waits to be read.)
         const said = this.story.firstSentence(id);
-        if (said) out.push({ key: 'mention', para: first, kind: 'mention', text: said.text });
+        if (said && said.para < this.read) out.push({ key: 'mention', para: said.para, kind: 'mention', text: said.text });
         // Later names (and, for events, later descriptions), each from the line of the story that gives it.
         (c.names ?? c.labels ?? []).forEach((n, i) => {
             if (i === 0 || n.editorial) return;

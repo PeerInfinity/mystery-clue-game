@@ -10,7 +10,7 @@
 // Search: MRV backtracking with forward checking, run per connected component of the constraint graph, so a
 // question about one slot only searches the slots tied to it.
 
-import { evaluate, slotsOf } from './logic.js';
+import { evaluate, slotsOf, U } from './logic.js';
 
 export class Problem {
     /**
@@ -397,6 +397,8 @@ export class Problem {
             const lookup = c.index ? c.formula : c.lookup;
             return lookup ? [(lookup.index ?? lookup.nindex)[0], ...(c.guard ? slotsOf(c.guard) : [])] : [];
         }))];
+        // Conditional parts, for `urgent` below.
+        const conditionals = group.cons.filter((c) => c.cond);
 
         for (const d of domains.values()) if (d.length === 0) return { count: 0 };
         if (start) {
@@ -431,6 +433,19 @@ export class Problem {
             let count = 0;
             let first = null;
             const pools = [{ open: slots.filter((x) => pivotSet.has(x)), at: 0 }, { open: slots.filter((x) => !pivotSet.has(x)), at: 0 }];
+            // A condition with at most two slots still open, not yet decided: settling one of them lets the
+            // implication act (or drop) instead of being rediscovered under every combination of the other slots.
+            const urgent = () => {
+                let out = null;
+                for (const c of conditionals) {
+                    let open = 0;
+                    for (const x of c.condSlots) if (!assign.has(x) && ++open > 2) break;
+                    if (open === 0 || open > 2 || evaluate(c.cond, assign, order) !== U) continue;
+                    out ??= new Set();
+                    for (const x of c.condSlots) if (!assign.has(x)) out.add(x);
+                }
+                return out;
+            };
             const step = () => {
                 const pool = pools.find((p) => p.at < p.open.length);
                 if (!pool) {
@@ -439,10 +454,12 @@ export class Problem {
                     return count >= cap;
                 }
                 const { open, at } = pool;
+                const hot = conditionals.length ? urgent() : null;
                 let pick = at;
-                for (let i = at, size = Infinity; i < open.length; i++) {
+                for (let i = at, best = [Infinity, Infinity]; i < open.length; i++) {
                     const n = domains.get(open[i]).length;
-                    if (n < size) { pick = i; size = n; if (n <= 1) break; } // nothing beats a settled slot
+                    const score = [n <= 1 ? -1 : hot?.has(open[i]) ? 0 : 1, n];
+                    if (compare(score, best) < 0) { pick = i; best = score; if (n <= 1) break; } // nothing beats a settled slot
                 }
                 [open[at], open[pick]] = [open[pick], open[at]];
                 const best = open[at];
@@ -545,7 +562,7 @@ function makePart(formula) {
     const guarded = formula.implies && isIndex(formula.implies[1]) ? { guard: formula.implies[0], lookup: formula.implies[1] } : {};
     // Any other implication: once its condition is settled, either nothing is left to enforce or only the
     // consequent is (a rule application's "if these facts hold" is usually settled by the clues).
-    const conditional = formula.implies && !guarded.guard ? { cond: formula.implies[0], then: { formula: formula.implies[1], scope: [...slotsOf(formula.implies[1])] } } : {};
+    const conditional = formula.implies && !guarded.guard ? { cond: formula.implies[0], condSlots: [...slotsOf(formula.implies[0])], then: { formula: formula.implies[1], scope: [...slotsOf(formula.implies[1])] } } : {};
     return { formula, scope: [...slotsOf(formula)], index: isIndex(formula), ...guarded, ...conditional };
 }
 

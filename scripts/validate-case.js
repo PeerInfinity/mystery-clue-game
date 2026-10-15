@@ -43,6 +43,7 @@ const errors = [...model.errors];
     }
 }
 const warnings = [];
+const lateQuotes = []; // cards that appear before the line they are first quoted from (their quote waits to be read)
 const err = (m) => errors.push(m);
 const warn = (m) => warnings.push(m);
 
@@ -190,6 +191,12 @@ for (const e of data.entities ?? []) for (const t of e.traits ?? []) if (!storyI
                 const hit = storyIndex.find(n.source[0]);
                 if (!hit) return;
                 if (i === 0 && appears !== undefined && hit.para > appears) err(`${c.id}: its first ${field} "${n[field]}" rests on paragraph ${hit.para}, but the card appears at ${appears}`);
+                // A card spoken of by an early clue but quoted only from a later line (an implied event, say) shows
+                // its quote only once that line is read; list these, so an earlier quote can be given where one exists.
+                if (i === 0 && appears !== undefined) {
+                    const firstAt = storyIndex.firstAt.get(c.id);
+                    if (firstAt !== undefined && firstAt > appears) lateQuotes.push({ id: c.id, appears, firstAt });
+                }
                 if (hit.para < last) err(`${c.id}: ${key} out of story order at "${n[field]}"`);
                 last = Math.max(last, hit.para);
             });
@@ -525,6 +532,17 @@ function writeReport() {
         out(`| \`${r.k.id}\` | ${(r.k.rules ?? []).map((u) => `${u.rule}(${Object.entries(u.bind ?? {}).map(([v, c]) => `${v}=${c}`).join(', ')})`).join('; ') || '—'} | ${r.status}${r.status === 'asserted' && r.k.asserted ? `: ${r.k.asserted}` : ''} |`);
     }
     out();
+    if (lateQuotes.length) {
+        out('## Quoted later than they appear');
+        out('');
+        out('Cards an early clue speaks of, quoted only from a later line: the card shows its quote once that line is read.');
+        out('An earlier quote, where the story has one, would let the card carry its words from the start.');
+        out('');
+        out('| Card | Appears at ¶ | First quoted at ¶ |');
+        out('|---|---|---|');
+        for (const q of lateQuotes) out(`| \`${q.id}\` | ${q.appears} | ${q.firstAt} |`);
+        out('');
+    }
     out('## Derived claims');
     out();
     for (const r of derivedRows) out(`- \`${r.claim.id}\` ${r.ok ? '✓' : '✗'} — ${r.claim.text} *(via ${r.used.join(', ')})*`);

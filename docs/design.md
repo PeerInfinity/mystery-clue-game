@@ -639,3 +639,36 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   first told (¶32 to ¶37).
 - **Gates:** question table unchanged from Round 24; uniqueness 399 forced (the supper's time is the new slot), 142
   open. Report: 16 verified, 37 asserted. 44 tests pass, about 96 s.
+
+## Round 26 (2026-10-15): slice 3, chain 3 — the coat and the vesta; a leak in first mentions
+
+- **Verified:** `k.coat_placed`, `k.vesta_from_strakers_box`, `k.led_by_taker` and a new `k.hollow_order` (20
+  verified, 34 asserted). `r.wind_and_coats` carries a schema (the one who wore the coat out put it there, after
+  he went out); new rules `r.dead_men_do_nothing` (hard), `r.vesta_from_box`, `r.acts_after_arriving`,
+  `r.taker_leads_on` (defaults with `unless`). `c.coat_on_bush_seen` now says the coat came to be on the bush by
+  the hollow. The two hollow inferences keep what their own premises give (the wearer placed the coat; the match
+  was Straker's and he struck it; both before the blow); the narrative order "the horse came first, then the coat
+  and the light" is `k.hollow_order`, a *conditional* conclusion (if the man who did those things brought the
+  horse, he did them no earlier than he came) which the full model closes once the horse's leader is known
+  through `k.led_by_taker`. Without that split the two inferences would have needed the whole ancestry of
+  "Straker took the horse" as premises; with it the fabula's windows stay forced.
+- **Solver, twice more.** The conditional inference hung the validator: the search branched on the time windows
+  before the agents and rediscovered the contradiction under every pair of windows. Branching on every
+  condition's slots first fixed that and broke everything else (the quick tests ran for minutes). What works: a
+  dynamic pick, an *urgent* slot first, one of at most two still open in a condition not yet decided, then the
+  pools as before. The scan is allocation-free (condition slots precomputed). Suite about 120 s; test 27 (minimal
+  sets of cards) is the one that grew, 13 s → 27 s, and the validator 26 s → 36 s.
+- **A leak in first mentions, pre-existing.** A card shows, under "First mentioned ¶n", the sentence of the
+  story's first quote for it. An implied event quoted only from Holmes's explanation, but spoken of by an early
+  clue's `asserts`, appears early and showed that sentence at once: the drugging card (¶36) carried "The opium was
+  added after the dish was set aside for the stable-boy…", the curry card (¶20) "Therefore Simpson becomes
+  eliminated from the case…", the dog's silence (¶34) "The dog did nothing in the night-time." The chain-3 change
+  to `c.coat_on_bush_seen` moved the coat event from ¶95 to ¶35 and made it visible in the reveal log. Fixed in
+  the engine: `Game.info` shows the first-mention quote only once its paragraph is read, like every other piece
+  of card text. The validator lists the 19 cards quoted later than they appear in a new report section ("Quoted
+  later than they appear"), for an earlier quote to be given where the story has one; `e.coat_off` got its
+  (the flapping overcoat, ¶35).
+- **Gates:** question table unchanged from Round 24; uniqueness unchanged (399 forced, 142 open). Reveal log: the
+  five rules at their topics from ¶35 on, the coat event and its four questions at ¶35 (the lads see the coat
+  there), and the 19 first-mention quotes now at their own paragraphs. Foreshadow log: nothing new before its
+  paragraph. 44 tests pass.

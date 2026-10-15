@@ -1,7 +1,7 @@
 # Case format 0.3: checkable inferences
 
 Status: STEP 1 BUILT (2026-10-14); traits and the establishment relation built (2026-10-15); migration of the
-asserted inferences in progress (chains 1 and 2, the night and the drugging, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
+asserted inferences in progress (chains 1 to 3, the night, the drugging, the coat and the vesta, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
 (entities, events, claims, mentions, disclosure dating, the validator's leak checks) is unchanged. The
 reasoning layer gains the pieces that let the engine *check* an inference instead of looking it up.
 
@@ -156,6 +156,15 @@ specific thing stay ground facts with a formula and no schema.
 - **`asserted: "<why>"`** on an inference the engine cannot verify: the reason shows in the report's table, and
   the validator warns if the engine verifies it after all. Used by `k.straker_home_all_evening`,
   `k.window_drugging_time` and `k.drugged_in_house_means_before_nine_five`.
+- **A conditional inference** states "if X then Y" and is verified from small premises; the full model closes
+  the condition through other inferences (`k.hollow_order`). The shape to prefer when an ordering depends on an
+  identity the inference's own premises do not settle.
+- **First mentions wait for their paragraph.** `Game.info` shows a card's first-mention quote only once that
+  paragraph is read; the report's "Quoted later than they appear" lists the cards whose quote lies ahead of the
+  clue that deals them.
+- **Solver:** an implication part whose condition has at most two slots still open, and is not yet decided, gets
+  one of those slots branched on first (the *urgent* pick); without it a conditional conclusion over two open
+  agent slots made the search enumerate every pair of time windows.
 - **A rule's `relevant_from` must not run ahead of the story.** A rule about a drugged guard surfaces with the
   opium (¶37), not with the guard (¶20): check the foreshadow log's diff for every new rule, not its tail.
 
@@ -169,7 +178,7 @@ specific thing stay ground facts with a formula and no schema.
   the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
   the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the
   villa (the answer becomes "straker_villa"), or keep it: Robert's call.
-- **The suite grows with each chain** (67 s → 100 s after one chain). The remaining cost is the extra wide
+- **The suite grows with each chain** (67 s → 100 s after one chain, about 120 s after three). The remaining cost is the extra wide
   constraints themselves; watch it as the chains land.
 
 - **Unplaced people.** Twenty-odd people and animals have no establishment in the story; the dog argument
