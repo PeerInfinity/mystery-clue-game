@@ -179,6 +179,17 @@ specific thing stay ground facts with a formula and no schema.
 - **A rule's `relevant_from` must not run ahead of the story.** A rule about a drugged guard surfaces with the
   opium (¶37), not with the guard (¶20): check the foreshadow log's diff for every new rule, not its tail.
 
+## As built (2026-10-15): the sheep's cause (Round 34)
+
+- **Facet types may carry labels and reveals.** A `facet_types` entry with `values` can give `labels` (and
+  `reveal`, as a declared slot can); every event facet of that type gets them. New facet types: `cause` ("What
+  caused it?": *ordinary* or *someone*) and `subject` ("Who or what was affected?").
+- **An observation with an open cause is its own event.** `e.sheep_go_lame` (¶173: subject, place, time, cause)
+  is what the lad reports; `e.practice_on_sheep` (agent, patient, place, time) is what Holmes infers, and appears
+  at ¶228. `r.practise_first` binds the lameness too: given an outing to injure, the lameness is someone's doing
+  and the practice shares its subject, place and time. Holmes's step `i.practised_on_sheep` concludes the cause
+  (its gate would otherwise deal the practice card a paragraph before the text names it).
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
@@ -203,7 +214,7 @@ specific thing stay ground facts with a formula and no schema.
 - **Cards quoted later than they appear** (19, listed in the report): an earlier quote where the story has one.
   *Ruled (Round 33):* handle with the annotation's fair-play table and late-disclosure typing, in the gap analysis.
 - **The sheep event at ¶173** now shows its four questions, "Who did it?" among them, when the lad reports the
-  lameness; whether that runs ahead of the story is Robert's call. *Ruled (Round 33):* at ¶173 the question is
+  lameness; whether that runs ahead of the story is Robert's call. *Done (Round 34).* *Ruled (Round 33):* at ¶173 the question is
   first what caused the lameness, not who did it. The lameness is an observation whose cause is open (the
   annotation's `t173.1`, `t175.1`); someone's practice is one candidate cause, and the agent question belongs to
   the practice event once the player or Holmes reaches it.

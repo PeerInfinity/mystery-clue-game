@@ -825,3 +825,23 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   practice is one candidate, and "who did it?" belongs to the practice event once the player or Holmes reaches it
   (annotation `t173.1`, `t173.2`, `t175.1`, Holmes ¶228).
 - **The kitchen** (fold into the villa or keep it): still open.
+
+## Round 34 (2026-10-15): the sheep's cause before its culprit
+
+- **Ruling applied (Round 33):** at ¶173 the lad's report raises *what caused it?*, not *who did it?*. The one
+  event that served both (first labelled "Three of the sheep go lame", then "Someone practises the operation
+  first") is split. `e.sheep_go_lame` is the observation: subject, place, time and a new `cause` facet ("What
+  caused it?": "Something ordinary: illness, a strain, an accident" or "Someone's doing"). `e.practice_on_sheep`
+  keeps agent, patient, place and time and now appears at ¶228, where Holmes names it.
+- **Engine:** a `facet_types` entry may carry `labels` and `reveal` like a declared slot; new facet types `cause`
+  and `subject`. `c.sheep_lame` now speaks of the lameness only.
+- **Rule:** `r.practise_first` binds the lameness (`lameness` variable): an outing to injure means the lameness is
+  someone's doing, and the practice shares its subject, place and time; its `unless` ("the sheep went lame of
+  themselves") is now the other value of that slot. `k.practice_first` and `k.lame_plan` stay verified.
+- **Route:** `i.practised_on_sheep` concludes `e.sheep_go_lame.cause = someone`. Concluding the practice's agent,
+  as before, made its gate deal the practice card at ¶227, one paragraph before any text names it (the validator
+  refused it); the cause is also what Holmes's ¶228 actually settles. Straker as the one who practised still
+  follows from `k.practice_first`.
+- **Reveal and foreshadow logs:** only the intended changes (the lameness and its four questions at ¶173, the
+  practice card and its four at ¶228). Cards quoted later than they appear: 19 → 18. Uniqueness: 402 forced, 143
+  left open as recorded. 45 tests pass, about 145 s.

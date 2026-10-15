@@ -118,6 +118,8 @@ export function buildModel(data) {
             domain: facet === 'identity' ? domainFor({ kinds: [owner.kind] }, owner.id) : domainFor(type),
             answer: Array.isArray(value) || value === null ? null : value,
             undetermined: Array.isArray(value) ? value : value === null ? true : undefined,
+            labels: type.labels,
+            reveal: type.reveal,
         });
     };
     for (const e of data.events ?? []) for (const [facet, value] of Object.entries(e.facets ?? {})) facetSlot(e, facet, value);

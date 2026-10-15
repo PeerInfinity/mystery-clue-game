@@ -112,6 +112,26 @@
         "false"
       ],
       "prompt": "Is it true?"
+    },
+    "subject": {
+      "kinds": [
+        "person",
+        "animal",
+        "group",
+        "object"
+      ],
+      "prompt": "Who or what was affected?"
+    },
+    "cause": {
+      "values": [
+        "ordinary",
+        "someone"
+      ],
+      "labels": {
+        "ordinary": "Something ordinary: illness, a strain, an accident",
+        "someone": "Someone's doing"
+      },
+      "prompt": "What caused it?"
     }
   },
   "time": {
