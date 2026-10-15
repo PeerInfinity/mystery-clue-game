@@ -296,7 +296,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 **¶33**
 - `t33.1` **RECORD** · *strong* · typical
   reads "The door was open"; "Hunter was sunk in a state of absolute stupor, the favourite's stall was empty, and there were no signs of his trainer"
-- `t33.2` **INFER** · *strong* · careful · from `t33.1`, `t31.1`
+- `t33.2` **INFER** · *strong* · careful · from `t33.1`, `t31.1`, `t31.3`
   The door was opened with a key, from outside or from inside before Hunter went under.
 
 **¶34**
@@ -370,7 +370,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t37.4` **INFER** · *strong* · careful · from `t37.3`, `t20.2` · Holmes ¶218
   The opium went in after the lad's portion was separated from the household's: in the kitchen after dishing up,
   on the walk, or at the window.
-- `t37.5` **INFER** · *strong* · careful · from `t37.1`, `t33.1`, `t31.3` · Holmes ¶220
+- `t37.5` **INFER** · *strong* · careful · from `t37.1`, `t33.2` · Holmes ¶220
   The horse was led out of a locked stable to the hollow by someone with a key.
 - `t37.6` **REVISE** · *fair* · careful · from `t37.3`, `t20.4`, `bk.opium_taste` · revises `t20.4` · Holmes ¶218
   The curry now matters: it is the dish that hides the taste of opium. ⚠ low: the story dwells on the dish,
@@ -456,7 +456,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 **¶46**
 - `t46.1` **HYPOTHESIS·scenario** (the police theory) · *weak* · typical · from `t39.4`
   reads "this Fitzroy Simpson, having drugged the lad, and having in some way obtained a duplicate key, opened the stable door and took out the horse"; "His bridle is missing"; "he was either met or overtaken by the trainer"; "beat out the trainer's brains with his heavy stick"; "either led the horse on to some secret hiding-place, or else it may have bolted"
-- `t46.2` **INFER** · *fair* · careful · from `t46.1`
+- `t46.2` **INFER** · *fair* · careful · from `t33.1`
   reads "His bridle is missing"
   The horse was bridled and led by someone who knew how.
 - `t46.3` **RESIDUE** · *strong* · careful · strains `t46.1` · Holmes ¶46 ("improbable"), ¶57 (part)

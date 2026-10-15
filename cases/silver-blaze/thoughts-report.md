@@ -47,7 +47,7 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 42; with an inference: 15; earliest-date misses: 3 (and 1 explained); premise disagreements: 9
+- deduction-type thoughts: 42; with an inference: 18; earliest-date misses: 3 (and 2 explained); premise disagreements: 8
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -58,17 +58,17 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t24.2` | AGENT | — | ¶24 | — |  |  |  |  |  |
 | `t24.4` | AGENT | — | ¶24 | — |  |  |  |  |  |
 | `t29.3` | INFER | `k.window_drugging_time` | ¶29 | ¶36 **late** |  | `c.stranger_asked_for_tip` |  |  | `t25.1` |
-| `t31.3` | INFER | — | ¶31 | — |  |  |  |  |  |
-| `t33.2` | INFER | — | ¶33 | — |  |  |  |  |  |
+| `t31.3` | INFER | `k.later_entry_needs_key` | ¶31 | ¶33 (explained) |  |  |  |  |  |
+| `t33.2` | INFER | `k.door_opened_with_key` | ¶33 | ¶33 |  |  |  |  |  |
 | `t34.5` | AGENT | — | ¶34 | — |  |  |  |  |  |
 | `t37.4` | INFER | `k.drugged_after_set_aside` | ¶37 | ¶37 |  |  | `r.same_dish_safe` | `k.portion_dished_at_supper` |  |
-| `t37.5` | INFER | — | ¶37 | — |  |  |  |  |  |
+| `t37.5` | INFER | `k.taker_had_a_key` | ¶37 | ¶37 |  |  |  | `k.entrant_took_the_horse`, `k.led_by_taker` |  |
 | `t37.7` | DEFAULT | `k.drugger_knew_the_menu` | ¶37 | ¶37 |  |  |  |  |  |
 | `t37.8` | INFER | `k.drugger_knew_the_dish` | ¶37 | ¶37 |  |  | `r.menu_known_at_home` |  | `t26.1` |
-| `t37.14` | DEFAULT | `k.menu_choosers` | ¶37 | ¶37 |  |  | `r.menu_chosen_by_household` |  |  |
-| `t37.15` | DEFAULT | `k.drugger_chose_the_dish` | ¶37 | ¶37 |  |  | `r.planned_the_dish` |  |  |
+| `t37.14` | DEFAULT | `k.menu_choosers` | ¶37 | ¶37 |  |  |  |  |  |
+| `t37.15` | DEFAULT | `k.drugger_chose_the_dish` | ¶37 | ¶37 |  |  |  |  |  |
 | `t40.4` | INFER | — | ¶40 | — |  |  |  |  |  |
-| `t46.2` | INFER | `k.bridled_by_taker` | ¶46 | ¶46 | `t46.1` | `c.bridle_missing`, `c.stall_empty` | `r.bridle_needs_a_hand` |  |  |
+| `t46.2` | INFER | `k.bridled_by_taker` | ¶46 | ¶46 |  |  | `r.bridle_needs_a_hand` |  |  |
 | `t62.3` | DEFAULT | — | ¶62 | — |  |  |  |  |  |
 | `t68.3` | IDENTIFY | — | ¶68 | — |  |  |  |  |  |
 | `t78.2` | INFER | — | ¶78 | — |  |  |  |  |  |
@@ -78,7 +78,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t84.6` | IDENTIFY | — | ¶84 | — |  |  |  |  |  |
 | `t92.2` | INFER | — | ¶92 | — |  |  |  |  |  |
 | `t92.14` | AGENT | `k.practice_first` | ¶92 | ¶228 **late** | `t81.5` | `c.sheep_lame`, `r.tendon_nick` |  |  |  |
-| `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  | `c.straker_left_in_mackintosh`, `c.head_shattered` | `r.wind_and_coats`, `r.dead_men_do_nothing` |  |  |
+| `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  | `c.straker_left_in_mackintosh`, `c.head_shattered` | `r.dead_men_do_nothing` |  |  |
 | `t97.2` | AGENT | — | ¶97 | — |  |  |  |  |  |
 | `t100.1` | PHYSICAL | — | ¶100 | — |  |  |  |  |  |
 | `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶62 | `t37.1` | `r.famous_horse_unsellable`, `c.gypsies_gone`, `c.no_news_of_horse`, `c.stall_empty` | `r.gypsies_avoid_trouble` |  |  |
@@ -87,7 +87,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t120.2` | INFER | — | ¶120 | — |  |  |  |  |  |
 | `t123.2` | AGENT | — | ¶123 | — |  |  |  |  |  |
 | `t124.2` | INFER | `k.tracks_end_at_mapleton` | ¶124 | ¶124 |  | `c.horse_track_in_wet_hollow` | `r.tracks_lead_in` |  | `t123.2` |
-| `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶146 **late** | `t124.2` | `c.brown_first_up`, `c.no_subordinate`, `c.dawson_fears_master`, `c.mapleton_brown` | `r.first_up_takes_it_in` |  |  |
+| `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶146 **late** | `t124.2` | `c.brown_first_up`, `c.dawson_fears_master`, `c.mapleton_brown` | `r.first_up_takes_it_in` |  |  |
 | `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 | `t124.2`, `t111.2` |  | `r.undertaking_means_possession` |  |  |
 | `t148.2` | INFER | — | ¶148 | — |  |  |  |  |  |
 | `t150.1` | AGENT | — | ¶150 | — |  |  |  |  |  |
@@ -97,6 +97,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 ### Earliest-date misses explained
 
 - `t20.6` (¶20, dealt ¶37): The reader anticipates the drugging at ¶20; the game can pose the question only once the drugging is told (Hunter's charge, ¶36) and the opium found (¶37), where this rule becomes relevant. Holmes never states it, so nothing gates or scores on it.
+- `t31.3` (¶31, dealt ¶33): The reader's conditional at ¶31 is about an entry the story has not yet told: the entry's card (and its "with what?") comes with the open door at ¶33.
 
 ### Inferences named by more than one thought
 
@@ -106,13 +107,13 @@ None.
 
 Granted as soon as their premises are held; never gate, never score (Q4). Provisional: the world model will re-derive much of it (Q5).
 
-`k.portion_dished_at_supper`, `k.portion_set_aside_before_edith`, `k.straker_home_all_evening`, `k.drugged_in_house_means_before_nine_five`
+`k.portion_dished_at_supper`, `k.portion_set_aside_before_edith`, `k.straker_home_all_evening`, `k.drugged_in_house_means_before_nine_five`, `k.entrant_took_the_horse`, `k.led_by_taker`
 
 ### Inferences no thought names, not marked implicit
 
 Each becomes a thought's inference or is marked `implicit` as the chains are done (a warning until then).
 
-`k.drugger_took_the_horse`, `k.visitor_is_taker`, `k.dog_knew_the_visitor`, `k.hunter_was_drugged`, `k.lads_slept`, `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence`, `k.found_before_seven`, `k.vesta_from_strakers_box`, `k.hollow_order`, `k.led_by_taker`, `k.knife_for_an_operation`, `k.drugging_is_dishonest`, `k.operation_in_the_open`, `k.horse_kicked`, `k.blow_needs_a_wielder`, `k.only_one_blade`, `k.knife_marks_assailant`, `k.cravat_order`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.bill_is_his_own`, `k.bill_names_its_debtor`, `k.second_household`, `k.dresses_for_the_other_woman`, `k.lame_plan`, `k.boots_identify`, `k.found_at_dawn`, `k.disguised_to_survive_search`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
+`k.drugger_took_the_horse`, `k.visitor_is_taker`, `k.dog_knew_the_visitor`, `k.hunter_was_drugged`, `k.lads_slept`, `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence`, `k.found_before_seven`, `k.vesta_from_strakers_box`, `k.hollow_order`, `k.knife_for_an_operation`, `k.drugging_is_dishonest`, `k.operation_in_the_open`, `k.horse_kicked`, `k.blow_needs_a_wielder`, `k.only_one_blade`, `k.knife_marks_assailant`, `k.cravat_order`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.bill_is_his_own`, `k.bill_names_its_debtor`, `k.second_household`, `k.dresses_for_the_other_woman`, `k.lame_plan`, `k.boots_identify`, `k.found_at_dawn`, `k.disguised_to_survive_search`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
 
 ### Characters' wrong reasoning
 

@@ -1026,3 +1026,26 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Test:** the cross-out test builds both curry conclusions, as connecting the flat premises used to (the menu
   inference alone clashes with the police's "Simpson drugged" and is set aside with it). The test helper builds
   a chained inference's premise inferences first. 49 tests pass, about 118 s.
+
+## Round 43 (2026-10-15): short chains, chain 2 — the key and the door
+
+- **Model:** the night's entry (`e.stable_entered`) gains an `instrument` facet ("With what?"), recorded as one of
+  the stable key and a duplicate (the story never says whose key it was: left open, 143 slots so). Both keys carry a
+  new trait *key* ("A key to the stable door"). `r.locked_door_needs_key` gets a schema (a door locked before an
+  opening is opened with a key; text now "with a key, from outside or from inside"); new `r.opened_between` (a
+  door locked at night and found open in the morning was opened in between, relevant at ¶33).
+- **The chain** (all verified; 51 verified, 10 asserted):
+  - `t31.3` → `k.later_entry_needs_key` (new): locked door, window too small: whoever came in by the door
+    afterwards had a key. Dealt at ¶33 against ¶31: explained (the entry has no card before the open door).
+  - `t33.2` → `k.door_opened_with_key` (new): that conditional, the door found open at seven: it was opened with
+    a key. Annotation: cites `t31.3` as well.
+  - `t37.5` → `k.taker_had_a_key` (new): the key, and the horse led to the hollow by the one who came in.
+    Bookkeeping, implicit: `k.entrant_took_the_horse` (new; whoever came in took the horse, by `r.taker_entered`)
+    and `k.led_by_taker` (now implicit). Annotation: cites `t37.1`, `t33.2` (was `t37.1`, `t33.1`, `t31.3`).
+  - `t46.2` → `k.bridled_by_taker` (unchanged). Annotation: cites `t33.1` (the empty stall) instead of the police
+    theory `t46.1`; the bridle is its own reading. Checker: a deduction holds the claims it maps to itself.
+- **Moved:** `r.taker_entered` relevant at ¶33 (the open door, was ¶46) and `r.taker_leads_on` at ¶37 (the
+  hollow, was ¶46), so the implicit steps come where the reader has the facts; both plain common sense. Reveal log:
+  those rules, the new rule and trait, the "With what?" question at ¶33, `k.entrant_took_the_horse` at ¶33 and
+  `k.led_by_taker` at ¶37 (was ¶46). Foreshadow log: the same. Case report: the chain's inferences, one more slot
+  left open; no gate, need or question-table change. Thoughts report: 18/42 deductions have an inference.

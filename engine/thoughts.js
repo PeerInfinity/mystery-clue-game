@@ -215,6 +215,8 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
             else if (cards.size) row.uncited.push(p);
             else row.unheld.push(p); // a thought no card holds yet (a NOTICE, a WEIGH): later workstreams
         }
+        // A deduction that itself reads a clause (its own `reads`) holds the claims it maps to.
+        for (const c of t.maps ?? []) if (premises.has(c) && !inferenceById.has(c)) covered.add(c);
         const warrants = new Set((k.rules ?? []).map((u) => u.rule));
         for (const p of k.premises.filter((x) => !covered.has(x))) {
             if (warrants.has(p)) row.warrant.push(p);
