@@ -758,3 +758,19 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   background (¶18), as that rule always has.
 - **Gates:** question table unchanged from Round 27; needs per step unchanged; uniqueness unchanged. 45 tests pass,
   about 140 s.
+
+## Round 31 (2026-10-15): slice 3, chain 8 — the visitor, the bridle, the cravat
+
+- **Verified:** `k.visitor_is_taker`, `k.went_out_to_the_stables`, `k.bridled_by_taker`, `k.cravat_order`,
+  `k.cravat_worn_at_window` (43 verified, 11 asserted). New `r.taker_entered` (whoever took the horse came in for
+  it; the night's visitor, a placeholder, is the one who came in), `r.dropped_before_found`, `r.not_his_so_found_out`
+  (a thing on a dead man that was not his came to his hand after he last left home: this replaces the editorial
+  "picked up after one"), `r.worn_then_lost_later` (hard); schema on `r.bridle_needs_a_hand`.
+  `c.cravat_in_left_hand` says what he clasped. `k.cravat_order` no longer rests on the knife or the dressing.
+- **Asserted, with their reasons:** `k.simpson_purpose` and `k.paper_held_opium_means_nobbling`: they state what the
+  purpose values mean (to drug the guard, to steal the horse); there is nothing to derive them from. Seven
+  asserted inferences now carry a reason; the four left without one are the police's.
+- **Strict column:** "who took the horse" 25 → 45 left. The visitor-is-taker link used to be an editorial formula
+  with no rule; its rule is never stated by the story, so Strict drops it and the dog argument no longer reaches
+  the taker there. "By the challenge" unchanged throughout slice 3.
+- **Gates:** needs per step unchanged; uniqueness unchanged. 45 tests pass, about 130 s.
