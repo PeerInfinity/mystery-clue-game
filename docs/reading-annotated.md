@@ -777,11 +777,11 @@ ahead by predicting what each action will find.
 **¶94–¶97**
 - `t95.1` **RECORD** · *strong* · typical
   reads "There was no wind that night, I understand," "None; but very heavy rain."
-- `t96.1` **PHYSICAL** · *strong* · typical · from `t95.1`, `t35.1` · refutes `t35.9 (blown)`; supports `t92.10` · Holmes ¶96
+- `t96.1` **PHYSICAL** · *strong* · typical · from `t95.1`, `t35.1`, `t32.2` · refutes `t35.9 (blown)`; supports `t92.10` · Holmes ¶96
   With no wind, the coat wasn't blown onto the bush: it was put there. A reader who made `t92.10` scores it here.
 - `t97.1` **RECORD** · typical
   reads "Yes, it was laid across the bush."
-- `t97.2` **AGENT** · *fair* · careful · from `t96.1`, `t97.1`, `t35.6`, `bk.coat_work` · strains `t46.1`; supports `t92.6` · Holmes ¶226
+- `t97.2` **AGENT** · *fair* · careful · from `t96.1`, `t97.1`, `t35.2`, `t35.6`, `bk.coat_work` · strains `t46.1`; supports `t92.6` · Holmes ¶226
   A man in a desperate fight doesn't lay his coat across a bush. Straker took it off himself, before whatever
   happened, to do something that needed his arms free.
 
@@ -802,7 +802,7 @@ ahead by predicting what each action will find.
 **¶102–¶106**
 - `t102.1` **RECORD** · *strong* · typical
   reads "It was a wax vesta half burned, which was so coated with mud that it looked at first like a little chip of wood"
-- `t102.2` **TEST** · *strong* · careful · from `t102.1` · supports `t78.5`, `t92.9`, `t92.6` · Holmes ¶224
+- `t102.2` **TEST** · *strong* · careful · from `t102.1`, `t78.1`, `t35.2` · supports `t78.5`, `t92.9`, `t92.6` · Holmes ¶224
   A light was struck in the hollow, as predicted. Step 7 of the inside story holds.
 - `t102.3` **HYPOTHESIS** · *fair* · careful · from `t102.1`, `t78.1`, `t78.3`
   Why strike a match in the hollow at one in the morning: {to light his pipe; to light the candle and see to

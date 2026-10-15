@@ -428,6 +428,12 @@
       "raised": "the favourite’s stall was empty"
     },
     {
+      "id": "q.why_coat",
+      "slot": "e.coat_off.purpose",
+      "text": "Why did {straker} take off his coat?",
+      "raised": "it was laid across the bush"
+    },
+    {
       "id": "q.why_knife",
       "slot": "e.knife_taken.purpose",
       "text": "Why did {straker} take the knife?",

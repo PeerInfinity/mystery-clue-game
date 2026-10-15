@@ -1121,3 +1121,22 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Moved:** reveal log: the new rule at ¶12; the dove silk's gloss and question at ¶91; `k.bill_names_its_debtor`
   (implicit) at ¶84; the other-woman inference's label. Foreshadow log: the same. Case report: the chain's
   inferences, the new question (unique). Thoughts report: 25/45.
+
+## Round 47 (2026-10-15): short chains, chain 6 — the coat and the vesta
+
+- **Model:** a new question "Why did Straker take off his coat?" (`e.coat_off.purpose`: to fight, to have his
+  arms free for some work), raised by Holmes's "it was laid across the bush" (¶97); Holmes answers it at ¶226 ("taken
+  off his overcoat in order to do his delicate task"). `bk.coat_work` gets its rule, `r.coat_off_to_work` ("A man
+  takes his coat off to work with his arms free, not to stand in the rain, and not in the middle of a fight"),
+  shown where the coat first appears (¶35, with `r.wind_and_coats`). Shown at ¶97 it sat beside the question it
+  answers; a first wording ("lay his coat across a bush") ran ahead of Holmes's finding at ¶97.
+- **The chain** (all verified; 55 verified, 10 asserted):
+  - `t96.1` → `k.coat_placed`, trimmed to its own step: no wind, so the coat was put there by the man who wore it
+    out (the "before the blow" part moves on). Annotation: cites `t32.2` (he left in his mackintosh).
+  - `t97.2` → `k.coat_off_to_work` (new): he laid it there himself, before the blow, to work. Annotation: cites
+    `t35.2` (the blow) as well.
+  - `t102.2` (TEST) → `k.vesta_from_strakers_box` (unchanged). Annotation: cites `t78.1` (his vesta box) and
+    `t35.2`.
+- **Gates:** none moved, no need changed. **Moved:** reveal log: the coat rule at ¶35, the new question and both
+  options at ¶97, `k.coat_placed`'s label. Foreshadow log: the rule at ¶35. Case report: the new question
+  (settled in every column but Strict), the chain's inferences. Thoughts report: 27/46.

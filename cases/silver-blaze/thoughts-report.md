@@ -47,7 +47,7 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 45; with an inference: 25; earliest-date misses: 3 (and 2 explained); premise disagreements: 8
+- deduction-type thoughts: 46; with an inference: 27; earliest-date misses: 3 (and 2 explained); premise disagreements: 7
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -81,9 +81,10 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t92.2` | INFER | `k.dove_silk_on_the_bill` | ¶92 | ¶89 |  |  |  |  | `t85.2` |
 | `t92.4` | TEST | `k.dresses_for_the_other_woman` | ¶92 | ¶92 |  |  | `r.no_finery_for_servants` |  | `t92.3` |
 | `t92.14` | AGENT | `k.practice_first` | ¶92 | ¶228 **late** | `t81.5` | `c.sheep_lame`, `r.tendon_nick` |  |  |  |
-| `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  | `c.straker_left_in_mackintosh`, `c.head_shattered` | `r.dead_men_do_nothing` |  |  |
-| `t97.2` | AGENT | — | ¶97 | — |  |  |  |  |  |
+| `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  |  |  |  |  |
+| `t97.2` | AGENT | `k.coat_off_to_work` | ¶97 | ¶97 |  |  | `r.dead_men_do_nothing` |  | `t35.6` |
 | `t100.1` | PHYSICAL | — | ¶100 | — |  |  |  |  |  |
+| `t102.2` | TEST | `k.vesta_from_strakers_box` | ¶102 | ¶102 |  |  | `r.vesta_from_box`, `r.dead_men_do_nothing` |  |  |
 | `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶62 | `t37.1` | `r.famous_horse_unsellable`, `c.gypsies_gone`, `c.no_news_of_horse`, `c.stall_empty` | `r.gypsies_avoid_trouble` |  |  |
 | `t116.2` | PHYSICAL | — | ¶116 | — |  |  |  |  |  |
 | `t120.1` | INFER | — | ¶120 | — |  |  |  |  |  |
@@ -116,7 +117,7 @@ Granted as soon as their premises are held; never gate, never score (Q4). Provis
 
 Each becomes a thought's inference or is marked `implicit` as the chains are done (a warning until then).
 
-`k.drugger_took_the_horse`, `k.visitor_is_taker`, `k.hunter_was_drugged`, `k.lads_slept`, `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence`, `k.found_before_seven`, `k.vesta_from_strakers_box`, `k.hollow_order`, `k.drugging_is_dishonest`, `k.operation_in_the_open`, `k.horse_kicked`, `k.blow_needs_a_wielder`, `k.only_one_blade`, `k.knife_marks_assailant`, `k.cravat_order`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.second_household`, `k.lame_plan`, `k.boots_identify`, `k.found_at_dawn`, `k.disguised_to_survive_search`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
+`k.drugger_took_the_horse`, `k.visitor_is_taker`, `k.hunter_was_drugged`, `k.lads_slept`, `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence`, `k.found_before_seven`, `k.hollow_order`, `k.drugging_is_dishonest`, `k.operation_in_the_open`, `k.horse_kicked`, `k.blow_needs_a_wielder`, `k.only_one_blade`, `k.knife_marks_assailant`, `k.cravat_order`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.second_household`, `k.lame_plan`, `k.boots_identify`, `k.found_at_dawn`, `k.disguised_to_survive_search`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
 
 ### Characters' wrong reasoning
 
@@ -126,4 +127,4 @@ Each becomes a thought's inference or is marked `implicit` as the chains are don
 
 ## Background cards with no rule
 
-`bk.one_culprit`, `bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alarm`, `bk.coat_work`, `bk.alias_post`, `bk.guilty_denial`
+`bk.one_culprit`, `bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alarm`, `bk.alias_post`, `bk.guilty_denial`
