@@ -97,3 +97,25 @@ Bindings are checked: a variable with `kind` binds only an entity of that kind (
 - **`conclude` on the big component late in the story** can take a few seconds when the conclusion is not
   entailed (the solver must find a witness). A time budget or a weaker first check may be wanted for the UI.
 - The UI does not yet offer `applyRule` or `conclude`; it still builds inferences by connecting premises.
+
+## Decisions and next steps (user, 2026-10-14)
+
+- **Closed-world facts go relational.** Instead of editorial claims that list who the dog knew or who knew
+  the menu, a general rule over an establishment relation: `of_establishment(person) → place` (and the same
+  for the household), with "a stable dog knows the people of its own establishment" and "the people of a
+  house know what it will eat" as rules. People whose establishment the story never gives are not eliminated
+  by the dog argument alone; that is the honest result, and the curry route closes them. Migrate the two
+  editorial `only` claims (`c.dog_knows_household`, `c.menu_known_to_household`) first, then the other 47
+  asserted inferences chain by chain, checking the fair-play test after each.
+- **Rules bound to one card** (`r.curry_masks` only on curried mutton) stay for now. Recommendation for later:
+  give entity cards *traits* (`traits: ["spiced"]`, shown on the card as a gloss, where it reads naturally) and
+  let a variable range over a trait (`{kind: "object", trait: "spiced"}`), so the rule reads "a strongly spiced
+  dish hides other tastes" and applies to any spiced dish. Facts that really are about one specific thing
+  ("Weiss & Co. make surgical knives") stay ground facts attached to that card, with a formula and no schema.
+- **A busy indicator in the UI.** Checks against the whole hand (`conclude`, `prove`, clashes) can take
+  seconds late in the story. The engine is synchronous, so the page should run the solver in a Web Worker (or
+  yield between steps) and show that it is working, with a time budget and a "still checking…" state. Needed
+  before `applyRule` and `conclude` get their UI.
+- **Order of work:** the migration above; then step 2 of `redesign.md` (propositions as citable intermediate
+  conclusions, short chains, route steps re-expressed as chains); then the UI for applying rules and
+  concluding, with the busy indicator; then step 3 (coverage and the scenario board).
