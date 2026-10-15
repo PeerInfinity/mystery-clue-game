@@ -824,7 +824,7 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   did it*. The lameness is an observation with an open cause (ordinary causes among the candidates); someone's
   practice is one candidate, and "who did it?" belongs to the practice event once the player or Holmes reaches it
   (annotation `t173.1`, `t173.2`, `t175.1`, Holmes ¶228).
-- **The kitchen** (fold into the villa or keep it): still open.
+- **The kitchen** (fold into the villa or keep it): still open (ruled in Round 35).
 
 ## Round 34 (2026-10-15): the sheep's cause before its culprit
 
@@ -845,3 +845,16 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Reveal and foreshadow logs:** only the intended changes (the lameness and its four questions at ¶173, the
   practice card and its four at ¶228). Cards quoted later than they appear: 19 → 18. Uniqueness: 402 forced, 143
   left open as recorded. 45 tests pass, about 145 s.
+
+## Round 35 (2026-10-15): the kitchen is the house
+
+- **Ruling (Robert):** treat the kitchen as the same place as the house, unless something makes the difference
+  meaningful. Nothing does: the story puts the lads' supper "in the kitchen" of the trainer's house and the
+  household's meal "at the house", and neither it nor Holmes ever sets the kitchen against the rest of the house
+  (Holmes's open question, ¶218, is who had access to the dish without the maid seeing, not where in the house).
+- **Done:** the `villa_kitchen` place card is gone; "the kitchen" is a mention of `straker_villa`; the lads sup at
+  the villa; the drugging's place is `straker_villa` (was "one of straker_villa, villa_kitchen", left open).
+  `k.straker_home_all_evening` and `k.drugged_in_house_means_before_nine_five` name the villa; the second is now
+  verified (44 verified, 10 asserted: six with a reason, the police's four). Question table: "Where was the drug
+  put into the supper?" is settled as the villa in every column.
+- **Reveal and foreshadow logs:** only the kitchen card's appearance at ¶20 is gone. 45 tests pass, about 130 s.

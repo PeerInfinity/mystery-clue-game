@@ -200,7 +200,8 @@ specific thing stay ground facts with a formula and no schema.
 - **The kitchen as a place of its own.** The drugging's place is recorded as "one of straker_villa, villa_kitchen";
   the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
   the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the
-  villa (the answer becomes "straker_villa"), or keep it: Robert's call.
+  villa (the answer becomes "straker_villa"), or keep it: Robert's call. *Done (Round 35):* folded into the villa; nothing
+  in the story turns on the difference.
 - **The police's four false inferences** (`k.police_simpson_drugged`, `k.police_simpson_took_horse`,
   `k.police_stick_killed`, `k.gregory_gypsies`) are the asserted inferences without a reason. To verify them as
   the police's reasoning, their rule applications must take the inference's reading: today a `#rule` constraint of
