@@ -66,7 +66,9 @@ for (const background of [BG_ASK, BG_RELEVANT, BG_START]) {
                     if (c.formula?.eq && !game.offered(slot, c.formula.eq[1])) stuck.push(`${s}: answer ${c.formula.eq[1]} not offered at paragraph ${game.read}`);
                 }
                 // Like Holmes, recall what is known about the things the step turns on.
-                const premises = [...new Set([...step.premises, ...(game.stepInferences(s) ?? []).flatMap((id) => game.inferenceById.get(id).premises)])];
+                // A needed inference's premises, down its chain (the inferences it cites are built on the way).
+                const below = (id) => game.inferenceById.get(id).premises.flatMap((p) => (game.inferenceById.has(p) ? below(p) : [p]));
+                const premises = [...new Set([...step.premises, ...(game.stepInferences(s) ?? []).flatMap(below)])];
                 for (const p of premises) {
                     if (game.knows(p) || model.cards.get(p)?.section !== 'rules') continue;
                     for (const card of model.cards.get(p).attaches_to) game.ask(card);

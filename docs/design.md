@@ -1087,3 +1087,8 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   options at ¶81, the split rule's two texts at ¶80 (where the old one was). Foreshadow log: the same. Case
   report: the new question in the table (settled in every column but Strict), the chain's inferences. Thoughts
   report: 21/43 deductions have an inference.
+- **Slip and fix:** the chain was committed and pushed with the fair-play test failing under all three background
+  settings (the commit command did not wait on the test's exit code). The test counted a needed inference's
+  premise inferences (`k.knife_not_a_weapon`, `k.operation_in_the_open`) as "not yet available"; it now expands
+  premises down the chain, as its helper builds them. Fixed in the next commit; from now on a commit runs only
+  after `npm test` exits green.
