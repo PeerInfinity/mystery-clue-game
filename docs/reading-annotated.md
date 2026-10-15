@@ -190,8 +190,8 @@ trainer while doing it.
   (¶29). Someone came in the night and took out a horse, and the dog did nothing anyone heard. *fair* for a
   careful reader; most first-time readers miss it. This is the hardest notice in the story because nothing in
   the text points at the gap.
-- WEIGH: "both sound sleepers" is the text's own defeater: the dog might have barked unheard. Being in the
-  loft over the harness-room, the lads are close enough that loud barking would be hard to sleep through.
+- WEIGH: "both sound sleepers" is the text's own defeater: the dog might have barked unheard. But the lads
+  sleep in the loft over the harness-room, close enough that loud barking would be hard to sleep through.
   The defeater weakens the inference without killing it. *fair*
 - HYPOTHESIS: Why was the dog quiet? (a) drugged too: nothing says so, and only the lad's supper was analysed
   (¶37); (b) barked, and the sleepers slept: possible; (c) **the visitor was someone the dog knew**. *fair*
