@@ -161,7 +161,7 @@ export class Problem {
         const ok = (ids) => this.consistent(ids, fixed, { extra }).ok;
         const qx = (base, added, cands) => {
             if (added && !ok(base)) return [];
-            if (cands.length === 1) return cands;
+            if (cands.length <= 1) return cands; // none: the clash is in `fixed` and `extra` alone
             const mid = cands.length >> 1;
             const c1 = cands.slice(0, mid);
             const c2 = cands.slice(mid);

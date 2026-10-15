@@ -741,3 +741,20 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   playability walk refused it). Bound to the taking (`c.stall_empty`, s02) instead.
 - **Gates:** question table unchanged from Round 27; needs per step unchanged; the new rules surface at ¶124
   (the gates), ¶127 (the groom), ¶140 (Brown's capitulation). 44 tests pass, about 115 s.
+
+## Round 30 (2026-10-15): slice 3, chain 7 — the disguise and the bay
+
+- **Verified:** `k.disguised_to_survive_search`, `k.markings_identify`, `k.bay_is_ross_entry` (38 verified, 16
+  asserted). The seven horses in for the Cup carry the trait *entered* (quoted from the race card, and for
+  Silver Blaze and Bayard from "two horses in for the Wessex Cup"), so `r.colours_identify_owner` can say what it
+  means: a horse on the course in a man's colours is one of the runners (`exists` over the entered horses) and his
+  (`forall`: whichever it is, that horse's owner is he). `r.scratched_horse_does_not_run` (hard) and
+  `r.searched_and_not_found` are new; `r.markings_identify_horse` carries a schema. The bay and the other
+  placeholder animal bind through `placeholder: true`.
+- **Solver:** QuickXplain recursed forever when the clash lay in the extra formulas alone (an inference whose only
+  claim premises carry no formula, so no constraint is active); guarded, with a test.
+- **Placement:** the searched-and-not-found rule first took the Mapleton search's quote (¶66), which would have
+  pointed at the disguise long before Holmes reaches it; it now surfaces with the disguise rule among the racing
+  background (¶18), as that rule always has.
+- **Gates:** question table unchanged from Round 27; needs per step unchanged; uniqueness unchanged. 45 tests pass,
+  about 140 s.

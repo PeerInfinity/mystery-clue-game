@@ -106,3 +106,8 @@ test('a wide implication whose other slots the constraints settle is still enfor
     assert.equal(p.consistent(active, {}, { extra: [{ not: { same: ['x', 'y'] } }] }).ok, false);
     assert.deepEqual(p.candidates(active, 'y', { x: 'c' }), ['c']);
 });
+
+test('explainConflict with no candidate constraints: the clash lies in the extra formulas alone', () => {
+    const p = problem();
+    assert.deepEqual(p.explainConflict([], {}, { extra: [{ eq: ['drugger', 'ann'] }, { ne: ['drugger', 'ann'] }] }), []);
+});
