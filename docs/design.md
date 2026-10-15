@@ -858,3 +858,20 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   verified (44 verified, 10 asserted: six with a reason, the police's four). Question table: "Where was the drug
   put into the supper?" is settled as the villa in every column.
 - **Reveal and foreshadow logs:** only the kitchen card's appearance at ¶20 is gone. 45 tests pass, about 130 s.
+
+## Round 36 (2026-10-15): the gap analysis
+
+- **`docs/gap-analysis.md`** (draft for review): every tag, field and relation of the annotated reading against
+  the format and the game as of Round 35, each *covered*, *partial* or *missing*. Covered: RECORD, INFER (no UI
+  yet), refutes, clause-level quotes, Holmes's dates, slot-shaped candidate sets. Missing: NOTICE, RESIDUE,
+  PREDICT, GENRE, SET ASIDE, confidence, reader profiles, supports and strains. Everything else is partial.
+- **Two findings that change existing behaviour:** the dog's silence (`c.dog_did_nothing`, `via: absence`) is
+  dealt to the player at ¶34, so the game makes the story's hardest move for them; and default rules' `strength`
+  and `unless` are display only, so nothing can undercut a rule application.
+- **Workstreams in order:** thoughts as data (a `thoughts.json` with a crosswalk to the case's cards) → short
+  chains (step 2 re-specified; the two dates replace the gate machinery) → then, largely independent:
+  defeasibility (with the police's four and slice 4), testimony and sources, noticing and absence, hypotheses
+  with scenarios and residue, prediction and test plans, the reader layer (1892/modern availability replacing
+  Strict, disclosure typing, profiles, genre, set aside) → the UI.
+- **Four decisions put to Robert:** where thoughts live; what scores; graded relations authored or computed;
+  the policy for facts the story withholds.

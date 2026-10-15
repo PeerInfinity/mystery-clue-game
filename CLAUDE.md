@@ -7,6 +7,8 @@
   gameplay are missing, the alternatives, and the order of work.
 - `docs/reading-annotated.md` — a careful reader's thoughts through the whole story, tagged, with premises and dates:
   the spec for player actions (Round 32: the game should let the player perform every step).
+- `docs/gap-analysis.md` — the annotation against the format and the game: what is covered, partial or missing,
+  and the workstreams in order (Round 36).
 - `docs/design.md` — the round-by-round log (one entry per session or ruling; append, never rewrite).
 
 ## Commands
