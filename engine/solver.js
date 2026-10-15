@@ -47,12 +47,13 @@ export class Problem {
      * @returns {{ok:boolean, witness?:Map<string,string>}}
      */
     consistent(active, fixed = {}, { focus = false, extra = [] } = {}) {
-        // A negated conjunction (a conclusion of several parts, denied) is a disjunction, which the search cannot
-        // propagate: try denying each part in turn.
-        const split = extra.findIndex((f) => f.not?.and);
+        // A denied conclusion of several parts is a disjunction (one part fails), which the search cannot propagate:
+        // try each alternative in turn. `alternatives` pushes the negation inward, so "if P then A and B", denied,
+        // becomes "P and not A" or "P and not B" rather than one wide part the search would have to enumerate.
+        const split = extra.findIndex((f) => alternatives(f).length > 1);
         if (split >= 0) {
-            for (const g of extra[split].not.and) {
-                const res = this.consistent(active, fixed, { focus, extra: extra.map((f, i) => (i === split ? { not: g } : f)) });
+            for (const alt of alternatives(extra[split])) {
+                const res = this.consistent(active, fixed, { focus, extra: [...extra.slice(0, split), ...alt, ...extra.slice(split + 1)] });
                 if (res.ok) return res;
             }
             return { ok: false };
@@ -516,6 +517,34 @@ function indexPrune(formula, dom) {
         out.set(target, dom(target).filter((w) => (w === value) === pos));
     }
     return out;
+}
+
+/**
+ * A formula as a list of alternatives, each a list of formulas to hold together (their disjunction is the
+ * formula): a denied conjunction is one denied part or another; a denied implication is its condition with a
+ * denied consequent; a conjunction combines its members' alternatives. Anything else is itself, alone.
+ */
+export function alternatives(f) {
+    if (f.not) {
+        const g = f.not;
+        if (g.not) return alternatives(g.not);
+        if (g.and) return g.and.flatMap((q) => alternatives({ not: q }));
+        if (g.implies) return alternatives({ not: g.implies[1] }).map((alt) => [g.implies[0], ...alt]);
+        if (g.or) return [g.or.map((q) => ({ not: q }))];
+        return [[f]];
+    }
+    if (f.or) return f.or.flatMap(alternatives);
+    if (f.and) {
+        let out = [[]];
+        for (const g of f.and) {
+            const alts = alternatives(g);
+            if (alts.length === 1) { out = out.map((o) => [...o, ...alts[0]]); continue; }
+            if (out.length * alts.length > 64) { out = out.map((o) => [...o, g]); continue; } // too many: keep it whole
+            out = out.flatMap((o) => alts.map((a) => [...o, ...a]));
+        }
+        return out;
+    }
+    return [[f]];
 }
 
 /** Does formula `f` already hold, reading every slot whose domain is down to one value as assigned? */

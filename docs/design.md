@@ -701,3 +701,24 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   stated by the story. "By the challenge" unchanged for every question; uniqueness unchanged.
 - **Validator:** stops with the model's build errors instead of crashing on a model without a solver.
   `engine/reasoning.test.js` names `k.window_drugging_time` as its asserted example. 44 tests pass, about 135 s.
+
+## Round 28 (2026-10-15): slice 3, chain 5 — the second household and the plot
+
+- **Verified:** `k.second_household`, `k.dresses_for_the_other_woman`, `k.practice_first`, `k.lame_plan` (30
+  verified, 24 asserted). New rules `r.second_establishment` (a married man who buys fine dresses for a woman not
+  his wife keeps a second establishment, and its debts drive him) and `r.no_finery_for_servants`; schemas on
+  `r.servant_wages` (the buyer is in debt), `r.practise_first` (the lame sheep are the practice; the plot came
+  before it) and `r.laying_against` (the plot and the money laid, before the horse went out). The maid carries the
+  trait *in service*. `c.sheep_lame` now says what the lad says (which sheep, where, lately); the second
+  household's place comes from the milliner's recognition at s10. `k.second_household` keeps its conditional
+  form (if Derbyshire is Straker…) and drops the place conjunct; `k.lame_plan` bounds the laying by the night
+  the horse went out instead of a literal one o'clock, so `e.lays_against.time` records one o'clock as open too.
+- **Solver: denied conclusions split wherever the negation sits.** "If P then A and B and C", denied, is "P and
+  not A" or "P and not B" or "P and not C"; the search had been handed one wide part to enumerate and ran past
+  five minutes. `alternatives()` pushes a negation inward (through conjunctions, implications and double
+  negations) and `consistent` tries each alternative; the suite is faster for it (about 107 s).
+- **Reveal:** the sheep event ("Three of the sheep go lame") and its four questions now appear at ¶173, where the
+  lad reports the lameness and Holmes asks about it, instead of at Holmes's explanation; its label is quoted
+  there. The agent question ("Who did it?") is the usual one for an event with an agent. Robert may judge
+  whether that runs ahead; the story's own hint at ¶173 is Holmes's interest in the sheep.
+- **Gates:** question table unchanged from Round 27; needs per step unchanged; uniqueness unchanged. 44 tests pass.

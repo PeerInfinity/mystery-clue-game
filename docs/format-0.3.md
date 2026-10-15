@@ -1,7 +1,7 @@
 # Case format 0.3: checkable inferences
 
 Status: STEP 1 BUILT (2026-10-14); traits and the establishment relation built (2026-10-15); migration of the
-asserted inferences in progress (chains 1 to 4, the night, the drugging, the hollow, the knife, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
+asserted inferences in progress (chains 1 to 5, the night, the drugging, the hollow, the knife, the plot, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
 (entities, events, claims, mentions, disclosure dating, the validator's leak checks) is unchanged. The
 reasoning layer gains the pieces that let the engine *check* an inference instead of looking it up.
 
@@ -165,6 +165,8 @@ specific thing stay ground facts with a formula and no schema.
 - **Solver:** an implication part whose condition has at most two slots still open, and is not yet decided, gets
   one of those slots branched on first (the *urgent* pick); without it a conditional conclusion over two open
   agent slots made the search enumerate every pair of time windows.
+- **Solver:** a denied conclusion is tried alternative by alternative wherever its negation sits (`alternatives`
+  in `engine/solver.js`): "if P then A and B" denied is "P and not A" or "P and not B".
 - **A rule's `relevant_from` must not run behind a gate either.** A route step's gate waits for its premises;
   a rule first relevant at ¶226 moved a gate from ¶202 to ¶227. Check each step's gate paragraph and needed
   inferences against HEAD after every chain.
@@ -183,7 +185,7 @@ specific thing stay ground facts with a formula and no schema.
   the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
   the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the
   villa (the answer becomes "straker_villa"), or keep it: Robert's call.
-- **The suite grows with each chain** (67 s → 100 s after one chain, about 135 s after four). The remaining cost is the extra wide
+- **The suite grows with each chain** (67 s → 100 s after one chain, about 135 s after four, 107 s after five once denied conclusions split properly). The remaining cost is the extra wide
   constraints themselves; watch it as the chains land.
 
 - **Unplaced people.** Twenty-odd people and animals have no establishment in the story; the dog argument
