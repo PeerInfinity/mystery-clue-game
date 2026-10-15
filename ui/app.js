@@ -233,7 +233,7 @@ function toolCard() {
     if (['claims', 'rules'].includes(c.section) && !game.autoSolves()) h += inferButton(id);
     if (c.section === 'inferences') {
         const how = game.howHeld(id);
-        h += `<p class="small muted">${how?.how === 'built' ? 'You built this inference' : how?.how === 'stated' ? `${esc(cardName(how.by))} drew this inference` : 'Worked out for you'} · ${paraLabel(game.unlocked.get(id).para)}</p>`;
+        h += `<p class="small muted">${how?.how === 'built' ? 'You built this inference' : how?.how === 'stated' ? `${esc(cardName(how.by))} drew this inference` : how?.how === 'implicit' ? 'Follows from what you hold' : 'Worked out for you'} · ${paraLabel(game.unlocked.get(id).para)}</p>`;
         h += `<div class="small">Rests on: ${model.cards.get(id).premises.map((x) => (game.knows(x) ? link(x, shortName(x, 60)) : '<span class="muted">something you do not know yet</span>')).join(' · ')}</div>`;
     }
     if (c.section === 'claims' || c.section === 'inferences') {
@@ -682,7 +682,7 @@ function toolInferences() {
     h += '<ul class="list inferences">';
     for (const id of held) {
         const how = game.howHeld(id);
-        const by = how?.how === 'built' ? 'you' : how?.how === 'stated' ? cardName(how.by) : 'worked out';
+        const by = how?.how === 'built' ? 'you' : how?.how === 'stated' ? cardName(how.by) : how?.how === 'implicit' ? 'follows' : 'worked out';
         h += `<li class="${game.isSuspected(id) ? 'doubted' : ''}">${link(id, shortName(id, 140))} <span class="small muted">· ${esc(by)}, ${paraLabel(game.unlocked.get(id).para)}${game.isSuspected(id) ? ' · doubted' : ''}</span>`
             + `<div class="small muted">${esc(readingOf(model.cards.get(id).formula))}</div></li>`;
     }

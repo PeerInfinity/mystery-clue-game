@@ -41,9 +41,18 @@ test('short chains: an inference on a non-deduction or unknown, implicit yet nam
     assert.ok(!r2.errors.some((e) => e.startsWith('k.police_stick_killed')), "a character's wrong reasoning needs no thought");
 
     const row = (res, id) => res.chains.rows.find((x) => x.thought === id);
-    assert.deepEqual(row(r, 't29.3').uncited, ['t25.1']);
+    assert.deepEqual(row(r, 't29.3').unheld, ['t25.1'], 'a question no card holds yet');
     assert.deepEqual(row(r, 't29.3').unmatched, ['c.stranger_asked_for_tip']);
     const dated = checkThoughts(data, model, { dates: true });
-    assert.equal(row(dated, 't92.14').dealt, 173, 'the practice inference needs the sheep, dealt at ¶173');
-    assert.equal(row(dated, 't29.3').dealt, 29);
+    assert.equal(row(dated, 't92.14').dealt, 228, 'the practice inference speaks of the practice on the sheep, dealt at ¶228');
+    assert.equal(row(dated, 't29.3').dealt, 36, 'its conclusion speaks of the drugging, whose card comes at ¶36');
+});
+
+test('short chains: a rule the inference applies is its warrant; a miss can be explained', () => {
+    const r = checkThoughts(data, model);
+    const row = r.chains.rows.find((x) => x.thought === 't37.4');
+    assert.ok(row.warrant.includes('r.same_dish_safe') && !row.unmatched.includes('r.same_dish_safe'));
+    const bad = structuredClone(data);
+    bad.thoughts.find((x) => x.id === 't20.3').date_note = 'a RECORD has no inference';
+    assert.ok(checkThoughts(bad, model).errors.includes("t20.3: date_note explains the date of a thought's inference"));
 });

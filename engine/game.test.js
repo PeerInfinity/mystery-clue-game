@@ -20,6 +20,8 @@ function proveStep(game, stepId) {
 
 /** Build an inference the way a player would: connect what it needs (naming its kind in Hard). */
 function build(game, id) {
+    // A chained inference wants the inferences it cites held first (implicit ones come by themselves).
+    for (const p of game.inferenceById.get(id)?.premises ?? []) if (game.inferenceById.has(p) && !game.knows(p)) build(game, p);
     const kind = game.opts.kind === 'on' ? game.conclusionKinds(id)[0] : null;
     return game.propose(game.connectSet(id), kind);
 }
@@ -147,8 +149,10 @@ test('a cross-out is checked against everything held and trusted, inferences inc
     while (game.read < 60) game.advance();
     // Before the curry inference is held, nothing rules Simpson out as the drugger.
     assert.equal(game.checkElimination('e.opium_added.agent', 'simpson').ok, false);
-    // Connecting the curry clues builds both inferences that rest on them (background implicit).
+    // Connecting the curry clues builds the inferences that rest on them (background implicit), the menu first.
     assert.ok(build(game, 'k.drugger_knew_the_dish').built.includes('k.drugger_knew_the_dish'));
+    assert.ok(game.knows('k.drugger_knew_the_menu'));
+    assert.ok(build(game, 'k.drugger_chose_the_dish').built.includes('k.drugger_chose_the_dish'));
     const res = game.checkElimination('e.opium_added.agent', 'simpson');
     assert.ok(res.ok);
     assert.ok(res.used.some((k) => ['k.drugger_knew_the_dish', 'k.drugger_chose_the_dish'].includes(k)), res.used.join(' '));

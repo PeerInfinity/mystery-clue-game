@@ -480,6 +480,9 @@ export function relevantCards(model) {
  */
 export function activeConstraints(model, known, doubted = null, { heldInferences = false } = {}) {
     const out = [];
+    // Premises known cover an inference whose premises they cover, and so on up a chain (short chains: an
+    // inference may cite another inference, and counts wherever its flat ancestry would).
+    if (!heldInferences) known = closeOverInferences(model, known);
     for (const k of model.constraints.values()) {
         if (k.variant) continue;
         if (k.definition) { out.push(k.id); continue; }
@@ -487,6 +490,17 @@ export function activeConstraints(model, known, doubted = null, { heldInferences
         if (k.doubt_with && doubted?.has(k.doubt_with)) continue;
         const forms = doubted && k.from_claim ? model.claimForms.get(k.from_claim) : null;
         out.push(forms ? (doubted.has(k.from_claim) ? forms.doubted : forms.trusted) : k.id);
+    }
+    return out;
+}
+
+/** `known` with every inference added whose premises it holds, repeatedly (a chain closes in a few rounds). */
+export function closeOverInferences(model, known) {
+    const out = new Set(known);
+    const infs = [...model.cards.values()].filter((c) => c.section === 'inferences' && c.premises);
+    for (let grew = true; grew;) {
+        grew = false;
+        for (const k of infs) if (!out.has(k.id) && k.premises.every((p) => out.has(p))) { out.add(k.id); grew = true; }
     }
     return out;
 }

@@ -183,6 +183,12 @@ export class Game {
             for (const id of needs ?? []) stateAt(at, id, 'holmes');
         }
         for (const k of this.inferences) this.claimEvents.set(k.id, this.#spokenOf(model.cards.get(k.id).formula));
+        // An inference the game grants by itself waits for the story to deal the events it speaks of, so that it
+        // never deals them early: those events are watched too.
+        for (const k of this.inferences) for (const e of this.claimEvents.get(k.id)) {
+            if (!this.inferencesUsing.has(e)) this.inferencesUsing.set(e, []);
+            if (!this.inferencesUsing.get(e).includes(k.id)) this.inferencesUsing.get(e).push(k.id);
+        }
         this.dynamicIds = [];
         this.reset();
         if (state) this.load(state);
@@ -229,7 +235,7 @@ export class Game {
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
         this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
         this.clashCache = null;
-        this.inferenceHow = new Map();  // inference id → {how: 'built'|'stated'|'auto'|'applied'|'concluded', by?}
+        this.inferenceHow = new Map();  // inference id → {how: 'built'|'stated'|'auto'|'implicit'|'applied'|'concluded', by?}
         // The player's own cards: applied rules and concluded inferences (format 0.3). Each is a card in the model.
         for (const id of this.dynamicIds ?? []) removeDynamic(this.model, id);
         this.dynamicIds = [];
@@ -423,13 +429,15 @@ export class Game {
         if (!c || this.unlocked.has(id) || this.hidden.has(id)) return;
         this.unlocked.set(id, { para, at: this.seq++ });
         if (['claims', 'inferences', 'applied'].includes(c.section)) for (const e of this.claimEvents.get(id) ?? []) this.#unlock(e, para);
-        // Trivial: an inference comes as soon as its premises are held (the game does the reasoning).
-        if (this.autoSolves()) {
-            for (const k of this.inferencesUsing.get(id) ?? []) {
-                if (this.knows(k) || !this.inferenceById.get(k).premises.every((x) => this.unlocked.has(x))) continue;
-                this.#unlock(k, para);
-                this.inferenceHow.set(k, { how: 'auto' });
-            }
+        // Trivial: an inference comes as soon as its premises are held (the game does the reasoning). An implicit
+        // inference (a step no reader notices making) comes so at every level, shown as following from them.
+        for (const k of this.inferencesUsing.get(id) ?? []) {
+            const inf = this.inferenceById.get(k);
+            if (!this.autoSolves() && !inf.implicit) continue;
+            if (this.knows(k) || !inf.premises.every((x) => this.unlocked.has(x))) continue;
+            if (!this.claimEvents.get(k).every((e) => this.unlocked.has(e))) continue;
+            this.#unlock(k, para);
+            this.inferenceHow.set(k, { how: inf.implicit ? 'implicit' : 'auto' });
         }
     }
 
@@ -470,7 +478,7 @@ export class Game {
      */
     buildable() {
         if (this.autoSolves()) return [];
-        return this.inferences.filter((k) => !this.knows(k.id) && k.premises.every((x) => this.knows(x))).map((k) => k.id);
+        return this.inferences.filter((k) => !k.implicit && !this.knows(k.id) && k.premises.every((x) => this.knows(x))).map((k) => k.id);
     }
 
     /**
@@ -511,6 +519,7 @@ export class Game {
         const c = step.concludes;
         const formula = c.formula ?? (c.claim ? this.model.cards.get(c.claim)?.asserts : null);
         if (!c.slot && !formula) return null;
+        // The step's premises cover an inference whose premises they cover, and up a chain (activeConstraints).
         const known = new Set(step.premises);
         const ids = activeConstraints(this.model, known);
         const fixed = c.slot ? { [c.slot]: c.value } : {};

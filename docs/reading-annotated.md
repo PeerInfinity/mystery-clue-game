@@ -367,7 +367,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   reads "although a large reward has been offered, and all the gypsies of Dartmoor are on the alert, no news has come of him"
 - `t37.3` **RECORD** · *strong* · typical
   reads "the remains of his supper left by the stable-lad contain an appreciable quantity of powdered opium, while the people at the house partook of the same dish on the same night without any ill effect"
-- `t37.4` **INFER** · *strong* · careful · from `t37.3` · Holmes ¶218
+- `t37.4` **INFER** · *strong* · careful · from `t37.3`, `t20.2` · Holmes ¶218
   The opium went in after the lad's portion was separated from the household's: in the kitchen after dishing up,
   on the walk, or at the window.
 - `t37.5` **INFER** · *strong* · careful · from `t37.1`, `t33.1`, `t31.3` · Holmes ¶220
@@ -375,9 +375,9 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t37.6` **REVISE** · *fair* · careful · from `t37.3`, `t20.4`, `bk.opium_taste` · revises `t20.4` · Holmes ¶218
   The curry now matters: it is the dish that hides the taste of opium. ⚠ low: the story dwells on the dish,
   but the step needs `bk.opium_taste`, which modern readers may lack.
-- `t37.7` **DEFAULT** · *fair* · careful · from `t37.6`, `bk.coincidence` · Holmes ¶218 ("too monstrous a coincidence")
+- `t37.7` **DEFAULT** · *fair* · careful · from `t37.6`, `t37.3`, `t20.2`, `bk.coincidence` · Holmes ¶218 ("too monstrous a coincidence")
   The drugger knew or chose the menu. Exception: the drugger had a method that didn't depend on the dish.
-- `t37.8` **INFER** · *fair* · careful · from `t37.7`, `t24.1`, `t26.1` · refutes `t29.3`; strains `t24.3 (drug)` · Holmes ¶218
+- `t37.8` **INFER** · *fair* · careful · from `t37.7`, `t24.1`, `t26.1`, `t19.1` · refutes `t29.3`; strains `t24.3 (drug)` · Holmes ¶218
   The stranger came with his paper already made up and couldn't have known what was for supper. **The drugger
   is of the household.**
 - `t37.9` **HYPOTHESIS·opportunity** · *fair* · careful · from `t37.8`, `t20.2`, `t20.7` · Holmes ¶218 (names Straker and his wife)
@@ -394,6 +394,13 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t37.13` **HYPOTHESIS** (PHYSICAL) · *weak* · expert · from `t35.2`, `t37.1`, `bk.horse_kick` · Holmes ¶212, ¶226
   The horse killed Straker: one crushing blow to the head, with the horse present at the time. ⚠ high: a
   first-time reader is primed for a human killer and rarely considers the horse before ¶212.
+- `t37.14` **DEFAULT·period** · *fair* · careful · from `t19.1`, `t37.3` · Holmes ¶218 ("the only two people who could have chosen curried mutton")
+  In a small household with one maid, the master or the mistress decides what is cooked: Straker or his wife
+  chose the curry. (Added in Round 42: Holmes's step, which a careful reader can take here.)
+- `t37.15` **DEFAULT** · *weak* · careful · from `t37.6`, `t37.3`, `t20.2`, `t19.1` · strains `t37.9 (maid)` · Holmes ¶218 ("our attention centres upon Straker and his wife")
+  If the drugger chose the dish rather than merely knew of it, the drugger is one of the two who decide what the
+  house eats: Straker or his wife. Exception: the maid knew the menu without choosing it, so she survives through
+  `t37.7`'s "knew". (Added in Round 42.)
 
 **¶38**
 - `t38.1` **GENRE** · *fair* · careful · from `t35.6`, `t36.2`

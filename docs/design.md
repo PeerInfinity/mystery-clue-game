@@ -977,3 +977,52 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   `k.first_up_and_no_subordinate`, whose `c.no_subordinate` is dealt at ¶146: the Mapleton chain.
 - **Logs:** reveal and foreshadow logs and the case report unchanged; only the thoughts report gained its section.
   Tests: one new (`engine/thoughts.test.js`, negative cases and two dates).
+
+## Round 42 (2026-10-15): short chains, chain 1 — the curry
+
+- **Ruling (Robert): a rule the inference applies is its warrant** and need not be cited by the thought; claims
+  and inference premises must agree both ways, and a cited `bk.*` must stand for a premise. The `bk.*` cards keep
+  their purpose (knowledge that differs between an 1892 and a modern reader).
+- **Checker refinements:** the earliest date also waits for the event cards the conclusion speaks of (before that
+  the player has no question to answer, and a card stating it would deal them early); a thought may explain an
+  accepted miss in `date_note`; a cited thought no card holds yet (a NOTICE, a WEIGH) and an implicit premise
+  (bookkeeping) are listed apart, not as mismatches.
+- **Engine:** an `implicit` inference is granted when its premises are held, at every level (`how: 'implicit'`,
+  shown as "Follows from what you hold"), and is never offered to build. An inference the game grants by itself
+  (implicit, or anything in Trivial) waits until the story has dealt the events its formula speaks of: before, it
+  dealt them early (in Trivial, `k.straker_home_all_evening` brought the drugging card at ¶32, four paragraphs
+  before Hunter's charge). `activeConstraints` closes the known cards over inferences (premises known cover an
+  inference, and an inference citing it, and so on), so a re-cited inference counts wherever its flat ancestry
+  did: route steps, `stepNeeds`, hints.
+- **The chain** (all verified; 47 verified, 10 asserted):
+  - `t20.6` → `k.drugged_in_food` (new): the lad drank only from the stable tap, so a drug was in his food
+    (`c.no_liquid`, new rule `r.tap_water_not_dosed` over a new trait *running water* on the tap, relevant with the
+    opium at ¶37). Dealt at ¶37 against the thought's ¶20: explained (the drugging has no card before ¶36; Holmes
+    never states it, so it neither gates nor scores).
+  - `t37.4` → `k.drugged_after_set_aside` (re-cited): the household's dish, the portion's opium, the curry, and the
+    implicit `k.portion_dished_at_supper` (new: the portion was taken from the dish at the house at nine, by
+    `r.set_aside_at_the_meal`); formula now the order alone. `e.portion_set_aside` was first dealt at ¶218, which
+    made the thought unplayable at ¶37: it now appears at ¶37 ("Hunter's portion is taken from the household's
+    dish", quoting "the people at the house partook of the same dish"; `c.household_same_dish` names the portion),
+    and keeps Holmes's label at ¶218. Annotation: `t37.4` also cites `t20.2` (the supper was the dish).
+  - `t37.7` → `k.drugger_knew_the_menu` (new): opium's taste, the curry, the coincidence: the drugger knew the
+    menu. Annotation: cites `t37.3` and `t20.2` as well.
+  - `t37.8` → `k.drugger_knew_the_dish` (re-cited: `k.drugger_knew_the_menu`, the household, the stranger's ready
+    paper `c.bribe_to_edith`, `r.menu_known_at_home`): the drugger was of King's Pyland. Annotation: cites `t19.1`
+    (who the household are). Route `i.not_simpson_drugger` gains `c.bribe_to_edith`.
+  - Implicit (bookkeeping): `k.portion_dished_at_supper`, `k.portion_set_aside_before_edith`,
+    `k.drugged_in_house_means_before_nine_five`, `k.straker_home_all_evening` (asserted: the editorial reading of
+    the evening; the world model should re-derive it).
+- **Moved:** reveal log: the tap's gloss at ¶20, its rule at ¶37; `e.portion_set_aside` and its three questions at
+  ¶37 instead of ¶218; the implicit inferences appear (Easy) at ¶36–¶37. Foreshadow log: the same, nothing early.
+  Case report: the chain's inferences; no gate, need or question-table change; quoted-late unchanged (18). Thoughts
+  report: 15/42 deductions have an inference, premise disagreements 11 → 9; curry thoughts all agree and are dealt
+  on time.
+- **Ruling (Robert): Holmes's steps that no thought makes get reader thoughts** (marking them implicit would hand
+  the player Holmes's conclusion). Added to the annotation and the data: `t37.14` (DEFAULT·period: in a one-maid
+  household the master or mistress chooses supper; → `k.menu_choosers`) and `t37.15` (DEFAULT, weak: if the
+  drugger *chose* the dish, it is Straker or his wife; strains the maid of `t37.9`, who survives through `t37.7`'s
+  "knew" until `t92.7`; → `k.drugger_chose_the_dish`). Both Holmes ¶218. 42 deduction-type thoughts now.
+- **Test:** the cross-out test builds both curry conclusions, as connecting the flat premises used to (the menu
+  inference alone clashes with the police's "Simpson drugged" and is set aside with it). The test helper builds
+  a chained inference's premise inferences first. 49 tests pass, about 118 s.

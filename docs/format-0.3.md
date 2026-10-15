@@ -198,6 +198,11 @@ specific thing stay ground facts with a formula and no schema.
   the game, with background facts where relevant, has dealt every premise (recursively through inference premises)
   must not be later than the thought's. The thoughts report lists every deduction with its inference, its dates and
   its premise mismatches, and the inferences no thought names.
+- (Round 42) A rule the inference applies is its warrant and needs no citation. The earliest date also waits for
+  the event cards the conclusion speaks of. `date_note` on a thought explains an accepted miss.
+- (Round 42) An implicit inference is granted when its premises are held, at every level; an inference the game
+  grants by itself waits for the story to deal the events it speaks of. `activeConstraints` closes the known cards
+  over inferences, so a chained inference counts wherever its flat ancestry would.
 
 ## Open
 

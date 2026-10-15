@@ -9,9 +9,12 @@
 // `k.*` id in constraints.json) whose premises are its cited thoughts' cards. The checker reports, as warnings,
 // the thoughts with no inference yet, premises that do not agree with what the thought cites, an inference named
 // by two thoughts, inferences no thought names that are not marked `implicit`, and the thoughts whose inference
-// the game cannot have dealt by the thought's own paragraph (the earliest date).
+// the game cannot have dealt by the thought's own paragraph (the earliest date). A rule the inference applies is
+// the step's warrant and need not be cited (Round 42); a premise that is an implicit inference is bookkeeping and
+// need not be either. A thought may explain an accepted earliest-date miss in `date_note`.
 
 import { Game, BG_RELEVANT } from './game.js';
+import { slotsOf } from './logic.js';
 
 export const TAGS = ['RECORD', 'NOTICE', 'ABSENCE', 'QUESTION', 'HYPOTHESIS', 'INFER', 'DEFAULT', 'AGENT', 'PHYSICAL',
     'IDENTIFY', 'WEIGH', 'SOURCE', 'TEST', 'RESIDUE', 'PREDICT', 'TEST PLAN', 'GENRE', 'SET ASIDE', 'DROP', 'REVISE'];
@@ -119,6 +122,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             if (!DEDUCTION.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${DEDUCTION.join(', ')} do)`);
             else if (!inferenceById.has(t.inference)) err(`${t.id}: inference ${t.inference} is not in constraints.json`);
         }
+        if (t.date_note !== undefined && (typeof t.date_note !== 'string' || !t.inference)) err(`${t.id}: date_note explains the date of a thought's inference`);
     }
 
     // The Markdown mirror: the same ids with the same tags.
@@ -168,8 +172,11 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
     };
 
     // Where the game, read through with background facts arriving where relevant, has dealt each card. An
-    // inference is available once all its premises are (whether or not a character states it then).
+    // inference is available once all its premises are (whether or not a character states it then), and once the
+    // story has dealt the event and proposition cards its conclusion speaks of: before that the player has no
+    // question to answer, and a card stating it would deal them early.
     let avail = null;
+    let askable = null;
     if (model) {
         const reader = new Game(model, { background: BG_RELEVANT });
         while (!reader.finished()) reader.advance();
@@ -185,12 +192,15 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
             memo.set(id, at);
             return at;
         };
+        askable = (k) => Math.max(-1, ...[...slotsOf(k.formula)].map((x) => model.slots.get(x)?.on)
+            .filter((o) => ['events', 'propositions'].includes(model.cards.get(o)?.section))
+            .map((o) => reader.unlocked.get(o)?.para ?? Infinity));
     }
 
     const rows = [];
     const namedBy = new Map();
     for (const t of deductions) {
-        const row = { thought: t.id, tag: t.tag, para: t.para, inference: t.inference ?? null, uncited: [], unmatched: [], dealt: null };
+        const row = { thought: t.id, tag: t.tag, para: t.para, inference: t.inference ?? null, uncited: [], unheld: [], unmatched: [], warrant: [], bookkeeping: [], dealt: null, note: t.date_note ?? null };
         rows.push(row);
         const k = inferenceById.get(t.inference);
         if (!k) continue;
@@ -199,12 +209,19 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
         const premises = new Set(k.premises);
         const covered = new Set();
         for (const p of t.from ?? []) {
-            const hit = [...cardsOf(p)].filter((c) => premises.has(c));
+            const cards = cardsOf(p);
+            const hit = [...cards].filter((c) => premises.has(c));
             if (hit.length) hit.forEach((c) => covered.add(c));
-            else row.uncited.push(p);
+            else if (cards.size) row.uncited.push(p);
+            else row.unheld.push(p); // a thought no card holds yet (a NOTICE, a WEIGH): later workstreams
         }
-        row.unmatched = k.premises.filter((p) => !covered.has(p));
-        if (avail) row.dealt = avail(k.id);
+        const warrants = new Set((k.rules ?? []).map((u) => u.rule));
+        for (const p of k.premises.filter((x) => !covered.has(x))) {
+            if (warrants.has(p)) row.warrant.push(p);
+            else if (inferenceById.get(p)?.implicit) row.bookkeeping.push(p);
+            else row.unmatched.push(p);
+        }
+        if (avail) row.dealt = Math.max(avail(k.id), askable(k));
     }
     const shared = [...namedBy].filter(([, ts]) => ts.length > 1).map(([inference, ts]) => ({ inference, thoughts: ts }));
     const implicit = [...inferenceById.values()].filter((k) => k.implicit).map((k) => k.id);
