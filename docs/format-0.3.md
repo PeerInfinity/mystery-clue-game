@@ -190,6 +190,15 @@ specific thing stay ground facts with a formula and no schema.
   and the practice shares its subject, place and time. Holmes's step `i.practised_on_sheep` concludes the cause
   (its gate would otherwise deal the practice card a paragraph before the text names it).
 
+## As built (2026-10-15): short chains, the checker (Round 41)
+
+- A deduction-type thought in `thoughts.json` names its inference (`inference: "k.*"`); an inference may carry
+  `implicit: true` (a step no thought names, granted when its premises are held). `engine/thoughts.js` checks that
+  the thought's `from` and the inference's premises agree both ways, and the earliest date: the paragraph by which
+  the game, with background facts where relevant, has dealt every premise (recursively through inference premises)
+  must not be later than the thought's. The thoughts report lists every deduction with its inference, its dates and
+  its premise mismatches, and the inferences no thought names.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

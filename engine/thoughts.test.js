@@ -24,3 +24,26 @@ test('the checker catches a premise from the future, a quote ahead of its though
     assert.ok(r.errors.some((e) => e.startsWith('t20.1: reads ¶216')));
     assert.ok(r.errors.some((e) => e === 't35.4: maps to unknown c.no_such_claim'));
 });
+
+test('short chains: an inference on a non-deduction or unknown, implicit yet named, premises and dates checked', () => {
+    const bad = structuredClone(data);
+    bad.thoughts.find((x) => x.id === 't35.4').inference = 'k.coat_placed';
+    bad.thoughts.find((x) => x.id === 't37.8').inference = 'k.no_such_inference';
+    const r = checkThoughts(bad, model);
+    assert.ok(r.errors.some((e) => e.startsWith('t35.4: a RECORD thought names no inference')));
+    assert.ok(r.errors.includes('t37.8: inference k.no_such_inference is not in constraints.json'));
+
+    const named = Object.create(model);
+    named.data = { ...model.data, constraints: model.data.constraints.map((k) => (k.id === 'k.coat_placed' ? { ...k, implicit: true } : k)) };
+    const r2 = checkThoughts(data, named, { implicitRequired: true });
+    assert.ok(r2.errors.includes('k.coat_placed: marked implicit, but t96.1 names it'));
+    assert.ok(r2.errors.some((e) => e === 'k.lads_slept: no thought names this inference, and it is not marked implicit'));
+    assert.ok(!r2.errors.some((e) => e.startsWith('k.police_stick_killed')), "a character's wrong reasoning needs no thought");
+
+    const row = (res, id) => res.chains.rows.find((x) => x.thought === id);
+    assert.deepEqual(row(r, 't29.3').uncited, ['t25.1']);
+    assert.deepEqual(row(r, 't29.3').unmatched, ['c.stranger_asked_for_tip']);
+    const dated = checkThoughts(data, model, { dates: true });
+    assert.equal(row(dated, 't92.14').dealt, 173, 'the practice inference needs the sheep, dealt at ¶173');
+    assert.equal(row(dated, 't29.3').dealt, 29);
+});

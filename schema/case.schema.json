@@ -1212,6 +1212,10 @@
         "asserted": {
           "type": "string",
           "description": "Why this inference is not (yet) derivable by the engine from its premises."
+        },
+        "implicit": {
+          "type": "boolean",
+          "description": "A step the engine needs but a reader makes without noticing (no thought in thoughts.json names it): granted as soon as its premises are held, never gates, never scores, shown as following from its premises and doubtable (short chains Q4)."
         }
       }
     },

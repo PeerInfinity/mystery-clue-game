@@ -947,3 +947,33 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   (rows the followed entities, columns the windows), chosen by a setting; both built with the first timeline view.
 - **Handover:** this session (annotation, gap analysis, thoughts as data, the rulings of Rounds 33–35, the designs
   of Rounds 38–40) ends here; the next session builds workstream 2 from `docs/kickoff-short-chains.md`.
+
+## Round 41 (2026-10-15): short chains, step 1 — the checker
+
+- **`inference` on thoughts** (`thoughts.json`): a deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL,
+  IDENTIFY: 40) names its one authored inference, separate from `maps`. Set now where an existing inference
+  already is the thought's step (11): `t29.3`, `t37.4`, `t37.7`, `t46.2`, `t92.14`, `t96.1`, `t114.2`, `t124.2`,
+  `t127.3`, `t140.2`, `t198.2`. Where a thought maps to two inferences, or its inference is the conclusion of a
+  later thought too (`t37.8`, `t81.5`, `t84.6`, `t97.2`, `t175.1`, `t37.5`, `t120.1`), its chain decides.
+- **`implicit: true`** on inferences (schema): granted when its premises are held, never gates, never scores (Q4).
+  None marked yet.
+- **Checks** (`engine/thoughts.js`, `checkChains`): `inference` only on deduction tags and only to a known
+  inference (errors); an inference marked implicit that a thought names (error); an inference that no thought
+  names and is not implicit (a warning; an error under `implicitRequired`, to be switched on once the chains are
+  done); an inference named by two thoughts; premises agree, both ways: each cited thought or background card
+  stands for some premise card (its inference, its `maps`, a `bk.*`'s rules), and each premise is stood for by a
+  cited item. A character's wrong reasoning (`truth: false`, the police's four) needs no thought (ruling 6) and is
+  listed apart.
+- **Earliest date:** the story read through with background facts arriving where relevant; an inference is
+  available once all its premises are (recursively, whether or not a character states it then); a thought whose
+  inference becomes available after the thought's paragraph is a miss.
+- **Report** (`thoughts-report.md`, "Short chains"): one row per deduction (inference, the thought's paragraph,
+  dealt, cited-not-a-premise, premise-not-cited), the shared, implicit, unnamed and wrong-reasoning lists.
+- **What it shows now:** 11/40 deductions have an inference; all 11 disagree on premises, as expected of flat
+  inferences (e.g. `k.drugged_after_set_aside` lists the curry, the supper and two rules that `t37.4` reaches
+  through `t37.3`); 39 inferences are neither named nor implicit. Two earliest-date misses: `t92.14` (Straker
+  practised first, ¶92) uses `k.practice_first`, which needs the lame sheep (¶173): the sheep chain splits the
+  prediction from its confirmation; `t127.3` (only Brown could have hidden him, ¶127) uses
+  `k.first_up_and_no_subordinate`, whose `c.no_subordinate` is dealt at ¶146: the Mapleton chain.
+- **Logs:** reveal and foreshadow logs and the case report unchanged; only the thoughts report gained its section.
+  Tests: one new (`engine/thoughts.test.js`, negative cases and two dates).

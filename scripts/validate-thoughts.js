@@ -7,7 +7,9 @@
 // known; premises and relation targets exist and come no later; every quote is found and none lies ahead; a
 // relation to one member of a set names a candidate the target lists; `maps` resolve to case cards; the data
 // mirrors docs/reading-annotated.md. Reports, without failing: how many thoughts of each tag a case card holds,
-// where the game deals a RECORD's card later than the reader could have it, and background cards with no rule.
+// where the game deals a RECORD's card later than the reader could have it, and background cards with no rule;
+// and the short chains: each deduction-type thought's inference, premises that disagree with what it cites, the
+// earliest-date misses, inferences named twice, and inferences no thought names (implicit or not yet marked).
 // Writes <case>/thoughts-report.md.
 
 import fs from 'node:fs';
@@ -38,11 +40,27 @@ if (r.dateGaps.length) {
     out.push('| Thought | Card | Reader | Game |', '|---|---|---|---|');
     for (const g of r.dateGaps) out.push(`| \`${g.thought}\` | \`${g.card}\` | ¶${g.reader} | ¶${g.game} |`);
 } else out.push('None.');
+const c = r.chains;
+const fmt = (p) => (p === Infinity ? 'never' : p === null ? '—' : `¶${p}`);
+out.push('', '## Short chains', '', 'Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). A miss is a dealt paragraph later than the thought\'s own: a late card to fix or an annotation date to correct.', '');
+out.push(`- deduction-type thoughts: ${c.rows.length}; with an inference: ${c.rows.filter((x) => x.inference).length}; earliest-date misses: ${c.rows.filter((x) => x.dealt !== null && x.dealt > x.para).length}; premise disagreements: ${c.rows.filter((x) => x.uncited.length || x.unmatched.length).length}`, '');
+out.push('| Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited |', '|---|---|---|---|---|---|---|');
+for (const x of c.rows) {
+    const miss = x.dealt !== null && x.dealt > x.para ? ' **late**' : '';
+    out.push(`| \`${x.thought}\` | ${x.tag} | ${x.inference ? `\`${x.inference}\`` : '—'} | ¶${x.para} | ${fmt(x.dealt)}${miss} | ${x.uncited.map((y) => `\`${y}\``).join(', ')} | ${x.unmatched.map((y) => `\`${y}\``).join(', ')} |`);
+}
+out.push('', '### Inferences named by more than one thought', '', c.shared.length ? c.shared.map((x) => `- \`${x.inference}\`: ${x.thoughts.map((y) => `\`${y}\``).join(', ')}`).join('\n') : 'None.');
+out.push('', '### Implicit inferences', '', 'Granted as soon as their premises are held; never gate, never score (Q4). Provisional: the world model will re-derive much of it (Q5).', '', c.implicit.length ? c.implicit.map((x) => `\`${x}\``).join(', ') : 'None.');
+out.push('', '### Inferences no thought names, not marked implicit', '', 'Each becomes a thought\'s inference or is marked `implicit` as the chains are done (a warning until then).', '', c.unnamed.length ? c.unnamed.map((x) => `\`${x}\``).join(', ') : 'None.');
+out.push('', '### Characters\' wrong reasoning', '', '`truth: false` inferences (the police\'s four): candidates for workstream 3, not reader steps.', '', c.wrong.length ? c.wrong.map((x) => `\`${x}\``).join(', ') : 'None.');
 out.push('', '## Background cards with no rule', '', r.unmappedBackground.length ? r.unmappedBackground.map((b) => `\`${b}\``).join(', ') : 'None.', '');
 if (r.errors.length) out.push('## Errors', '', ...r.errors.map((e) => `- ${e}`), '');
 fs.writeFileSync(path.join(dir, 'thoughts-report.md'), out.join('\n'));
 
 for (const e of r.errors) console.error(`ERROR: ${e}`);
 console.log(`wrote ${path.join(dir, 'thoughts-report.md')}`);
+const late = c.rows.filter((x) => x.dealt !== null && x.dealt > x.para);
+for (const x of late) console.warn(`warning: ${x.thought}: its inference ${x.inference} is dealt at ${fmt(x.dealt)}, after ¶${x.para}`);
+console.log(`short chains: ${c.rows.filter((x) => x.inference).length}/${c.rows.length} deductions have an inference; ${late.length} earliest-date miss(es); ${c.unnamed.length} inference(s) neither named nor implicit`);
 console.log(`${r.errors.length} error(s)`);
 process.exit(r.errors.length ? 1 : 0);

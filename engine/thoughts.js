@@ -4,8 +4,14 @@
 //
 // checkThoughts() returns errors (the data is wrong) and a report: how far the case's cards cover the thoughts,
 // and where the game deals a mapped card later than the reader could have it.
+//
+// Short chains (docs/short-chains.md): each deduction-type thought names one authored inference (`inference`, a
+// `k.*` id in constraints.json) whose premises are its cited thoughts' cards. The checker reports, as warnings,
+// the thoughts with no inference yet, premises that do not agree with what the thought cites, an inference named
+// by two thoughts, inferences no thought names that are not marked `implicit`, and the thoughts whose inference
+// the game cannot have dealt by the thought's own paragraph (the earliest date).
 
-import { Game } from './game.js';
+import { Game, BG_RELEVANT } from './game.js';
 
 export const TAGS = ['RECORD', 'NOTICE', 'ABSENCE', 'QUESTION', 'HYPOTHESIS', 'INFER', 'DEFAULT', 'AGENT', 'PHYSICAL',
     'IDENTIFY', 'WEIGH', 'SOURCE', 'TEST', 'RESIDUE', 'PREDICT', 'TEST PLAN', 'GENRE', 'SET ASIDE', 'DROP', 'REVISE'];
@@ -19,14 +25,18 @@ const PROFILES = ['typical', 'careful', 'expert'];
 const READERS = /^(yes|likely|partial|rare|period|specialist|racing public|racing-literate|needs the text's gloss)/;
 // Moves that need no confidence: a fact read, a question asked, a detail set aside, a passage re-read.
 const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag) || t.subtype === 're-read';
+// The deduction-type tags: each such thought becomes one authored inference (short chains, Q1).
+export const DEDUCTION = ['INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY'];
 
 /**
  * @param data   the parsed thoughts.json
  * @param model  a loaded case model (with .story)
  * @param opts   { markdown: text of docs/reading-annotated.md (checked to mirror the data), dates: true to compare
- *               each RECORD's paragraph with where the game deals its cards (reads the story through once) }
+ *               each RECORD's paragraph with where the game deals its cards, and each deduction's paragraph with
+ *               where the game has dealt every premise of its inference (reads the story through once),
+ *               implicitRequired: true to make an inference that no thought names and is not `implicit` an error }
  */
-export function checkThoughts(data, model, { markdown = null, dates = false } = {}) {
+export function checkThoughts(data, model, { markdown = null, dates = false, implicitRequired = false } = {}) {
     const errors = [];
     const err = (m) => errors.push(m);
     const story = model.story;
@@ -47,6 +57,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false } = 
 
     // Case cards a thought may map to.
     const d = model.data;
+    const inferenceById = new Map((d.constraints ?? []).map((k) => [k.id, k]));
     const caseIds = new Set([...model.cards.keys(), ...(d.actions ?? []).map((a) => a.id), ...(d.route ?? []).map((s) => s.id), ...model.slots.keys(), ...(d.theories ?? []).map((x) => x.id)]);
     for (const b of background) for (const m of b.maps ?? []) if (!caseIds.has(m)) err(`${b.id}: maps to unknown ${m}`);
 
@@ -104,6 +115,10 @@ export function checkThoughts(data, model, { markdown = null, dates = false } = 
         }
         if (t.holmes && !t.holmes.never) for (const p of t.holmes.paras ?? []) if (p < 0 || p > last) err(`${t.id}: Holmes paragraph ${p} is outside the story`);
         for (const x of t.maps ?? []) if (!caseIds.has(x)) err(`${t.id}: maps to unknown ${x}`);
+        if (t.inference !== undefined) {
+            if (!DEDUCTION.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${DEDUCTION.join(', ')} do)`);
+            else if (!inferenceById.has(t.inference)) err(`${t.id}: inference ${t.inference} is not in constraints.json`);
+        }
     }
 
     // The Markdown mirror: the same ids with the same tags.
@@ -135,5 +150,68 @@ export function checkThoughts(data, model, { markdown = null, dates = false } = 
             }
         }
     }
-    return { errors, coverage, dateGaps, unmappedBackground: background.filter((b) => !(b.maps ?? []).length).map((b) => b.id) };
+    const chains = checkChains(thoughts, background, inferenceById, byId, dates ? model : null);
+    for (const k of chains.unnamed) if (implicitRequired) err(`${k}: no thought names this inference, and it is not marked implicit`);
+    for (const x of chains.implicitNamed) err(`${x.inference}: marked implicit, but ${x.thought} names it`);
+    return { errors, coverage, dateGaps, chains, unmappedBackground: background.filter((b) => !(b.maps ?? []).length).map((b) => b.id) };
+}
+
+// The short chains: each deduction-type thought against its inference.
+function checkChains(thoughts, background, inferenceById, byId, model) {
+    const deductions = thoughts.filter((t) => DEDUCTION.includes(t.tag));
+    const bkById = new Map(background.map((b) => [b.id, b]));
+    // The case cards a cited item stands for: a thought's inference and the cards it maps to; a background card's rules.
+    const cardsOf = (id) => {
+        if (id.startsWith('bk.')) return new Set(bkById.get(id)?.maps ?? []);
+        const o = byId.get(id);
+        return new Set([...(o?.inference ? [o.inference] : []), ...(o?.maps ?? [])]);
+    };
+
+    // Where the game, read through with background facts arriving where relevant, has dealt each card. An
+    // inference is available once all its premises are (whether or not a character states it then).
+    let avail = null;
+    if (model) {
+        const reader = new Game(model, { background: BG_RELEVANT });
+        while (!reader.finished()) reader.advance();
+        const memo = new Map();
+        avail = (id, seen = new Set()) => {
+            if (memo.has(id)) return memo.get(id);
+            const k = inferenceById.get(id);
+            let at;
+            if (k && !seen.has(id)) {
+                seen.add(id);
+                at = Math.max(-1, ...k.premises.map((p) => avail(p, seen)));
+            } else at = reader.unlocked.get(id)?.para ?? Infinity;
+            memo.set(id, at);
+            return at;
+        };
+    }
+
+    const rows = [];
+    const namedBy = new Map();
+    for (const t of deductions) {
+        const row = { thought: t.id, tag: t.tag, para: t.para, inference: t.inference ?? null, uncited: [], unmatched: [], dealt: null };
+        rows.push(row);
+        const k = inferenceById.get(t.inference);
+        if (!k) continue;
+        if (!namedBy.has(k.id)) namedBy.set(k.id, []);
+        namedBy.get(k.id).push(t.id);
+        const premises = new Set(k.premises);
+        const covered = new Set();
+        for (const p of t.from ?? []) {
+            const hit = [...cardsOf(p)].filter((c) => premises.has(c));
+            if (hit.length) hit.forEach((c) => covered.add(c));
+            else row.uncited.push(p);
+        }
+        row.unmatched = k.premises.filter((p) => !covered.has(p));
+        if (avail) row.dealt = avail(k.id);
+    }
+    const shared = [...namedBy].filter(([, ts]) => ts.length > 1).map(([inference, ts]) => ({ inference, thoughts: ts }));
+    const implicit = [...inferenceById.values()].filter((k) => k.implicit).map((k) => k.id);
+    const implicitNamed = [...namedBy].filter(([id]) => inferenceById.get(id).implicit).map(([inference, ts]) => ({ inference, thought: ts[0] }));
+    // A character's wrong reasoning (`truth: false`, the police's four) is not a reader's step: it becomes a
+    // candidate defeated by undercut, strain and drop in workstream 3 (Round 33), so it needs no thought here.
+    const wrong = [...inferenceById.values()].filter((k) => k.truth === false && !namedBy.has(k.id)).map((k) => k.id);
+    const unnamed = [...inferenceById.values()].filter((k) => !k.implicit && k.truth !== false && !namedBy.has(k.id)).map((k) => k.id);
+    return { rows, shared, implicit, implicitNamed, unnamed, wrong };
 }
