@@ -11,6 +11,10 @@ claims are gone; `relations.json` has 8 relations (`knew_menu` is now `knew_menu
 takes about 67 s; the solver gained guarded lookups and branching on lookup keys first (read its notes before
 adding relations that range over many open slots).
 
+**Status (2026-10-15, Fable session):** slice 3, chain 1 (the night sequence and whereabouts) is DONE: 14 verified,
+39 asserted; see `docs/design.md` Round 24. Robert ruled: no `at` relation, rules over events bound to the event in
+question; propositions wait for step 2. Next chain: the drugging's place and time.
+
 ## 0. Mission in one paragraph
 
 Finish making the case's reasoning checkable. Add traits so rules read generally; replace the two editorial

@@ -31,6 +31,7 @@ export class Problem {
             // The search works on small PARTS: a conjunction (also under an implication) is split, so most
             // constraints become one- or two-slot checks that propagate cheaply.
             const parts = splitConjunctions(c.formula).map(makePart);
+            for (const p of parts) p.key = JSON.stringify(p.formula);
             this.constraints.set(c.id, { id: c.id, formula: c.formula, scope, parts });
         }
     }
@@ -56,7 +57,7 @@ export class Problem {
             }
             return { ok: false };
         }
-        const cons = [...active].flatMap((id) => this.#get(id).parts);
+        const cons = this.#parts(active);
         const want = new Set(Object.keys(fixed));
         extra.forEach((formula) => {
             for (const part of splitConjunctions(formula).map(makePart)) {
@@ -82,7 +83,7 @@ export class Problem {
 
     /** Values of `slot` that some full solution of the active constraints allows. */
     candidates(active, slot, fixed = {}) {
-        const cons = [...active].flatMap((id) => this.#get(id).parts);
+        const cons = this.#parts(active);
         const group = components(cons, [slot, ...Object.keys(fixed)]).find((g) => g.slots.includes(slot));
         // Propagate once for the whole group, then try each surviving value from that state.
         const root = this.#search(group, fixed, 0);
@@ -100,7 +101,7 @@ export class Problem {
      * Returns Map slot -> values (slots no active constraint touches keep their whole domain).
      */
     allCandidates(active, slots) {
-        const cons = [...active].flatMap((id) => this.#get(id).parts);
+        const cons = this.#parts(active);
         const want = new Set(slots);
         const out = new Map();
         for (const group of components(cons, [...want])) {
@@ -137,7 +138,7 @@ export class Problem {
 
     /** Number of solutions over the slots the active constraints mention, capped at `limit`. */
     countSolutions(active, limit = 2) {
-        const cons = [...active].flatMap((id) => this.#get(id).parts);
+        const cons = this.#parts(active);
         let total = 1;
         for (const g of components(cons, [])) {
             const n = this.#search(g, {}, limit).count;
@@ -261,6 +262,14 @@ export class Problem {
         return local;
     }
 
+    /** The parts of the active constraints, one copy of each distinct formula (several inferences may carry the same rule application). */
+    #parts(active) {
+        const seen = new Set();
+        const out = [];
+        for (const id of active) for (const p of this.#get(id).parts) if (!seen.has(p.key)) { seen.add(p.key); out.push(p); }
+        return out;
+    }
+
     #get(id) {
         const c = this.constraints.get(id);
         if (!c) throw new Error(`unknown constraint ${id}`);
@@ -281,12 +290,25 @@ export class Problem {
         }
         const bySlot = new Map(group.slots.map((s) => [s, []]));
         for (const c of group.cons) for (const s of c.scope) bySlot.get(s).push(c);
+        // `assign`: every slot down to one value, whether the search chose it or propagation (or a fixed value)
+        // settled it. A constraint is checked once all its slots are in here, and only the rest count as open:
+        // a wide part whose other slots the clues pin would otherwise never be enforced.
         const assign = new Map();
+        for (const [s, d] of domains) if (d.length === 1) assign.set(s, d[0]);
         const order = this.timeOrder;
         const trail = [];
         const setDomain = (x, d) => {
-            trail.push([x, domains.get(x)]);
+            const settledNow = d.length === 1 && !assign.has(x);
+            trail.push([x, domains.get(x), settledNow]);
             domains.set(x, d);
+            if (settledNow) assign.set(x, d[0]);
+        };
+        const undoTo = (mark) => {
+            while (trail.length > mark) {
+                const [u, d, settledNow] = trail.pop();
+                domains.set(u, d);
+                if (settledNow) assign.delete(u);
+            }
         };
 
         // Does value v of slot x have a support in constraint c: some values of c's other open slots (from their
@@ -342,10 +364,17 @@ export class Problem {
                 }
                 // A guarded lookup whose key is settled is a small implication: "if the guard holds, this target
                 // has this value". Check that, though its guard may span more slots than a plain part may.
-                const p = c.guard ? settledLookup(c, (s) => domains.get(s)) : c;
-                if (!p) continue;
+                let p = c;
+                if (c.guard) {
+                    p = settledLookup(c, (s) => domains.get(s));
+                    if (!p) continue;
+                } else if (c.cond) {
+                    const g = evaluate(c.cond, assign, order);
+                    if (g === false) continue; // the condition fails: the part holds whatever the rest
+                    if (g === true) p = c.then; // only the consequent is left to enforce
+                }
                 const open = p.scope.filter((x) => !assign.has(x));
-                if (open.length > (p === c ? GAC_MAX_SCOPE : GUARD_MAX_SCOPE)) continue; // checked once few enough of its slots stay open
+                if (open.length > (p === c || p === c.then ? GAC_MAX_SCOPE : GUARD_MAX_SCOPE)) continue; // checked once few enough of its slots stay open
                 for (const x of open) {
                     const d = domains.get(x);
                     const nd = d.filter((v) => supported(p, x, v));
@@ -424,10 +453,7 @@ export class Problem {
                     setDomain(best, [v]);
                     if (propagate([...bySlot.get(best)]) && step()) { pool.at--; return true; }
                     assign.delete(best);
-                    while (trail.length > mark) {
-                        const [u, d] = trail.pop();
-                        domains.set(u, d);
-                    }
+                    undoTo(mark);
                 }
                 pool.at--;
                 return false;
@@ -517,7 +543,10 @@ const isIndex = (f) => 'index' in f || 'nindex' in f;
  */
 function makePart(formula) {
     const guarded = formula.implies && isIndex(formula.implies[1]) ? { guard: formula.implies[0], lookup: formula.implies[1] } : {};
-    return { formula, scope: [...slotsOf(formula)], index: isIndex(formula), ...guarded };
+    // Any other implication: once its condition is settled, either nothing is left to enforce or only the
+    // consequent is (a rule application's "if these facts hold" is usually settled by the clues).
+    const conditional = formula.implies && !guarded.guard ? { cond: formula.implies[0], then: { formula: formula.implies[1], scope: [...slotsOf(formula.implies[1])] } } : {};
+    return { formula, scope: [...slotsOf(formula)], index: isIndex(formula), ...guarded, ...conditional };
 }
 
 /**

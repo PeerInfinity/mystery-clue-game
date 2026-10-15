@@ -87,3 +87,22 @@ test('steps replays a clash as a chain that ends with a question left empty', ()
     assert.deepEqual(r.steps[1].changes, [{ slot: 'b', before: ['x', 'y'], after: ['x'] }]);
     assert.deepEqual(r.steps[2].changes[0].after, []);
 });
+
+test('a wide implication whose other slots the constraints settle is still enforced', () => {
+    // Eight slots pinned by one-slot constraints, two left open: the implication's condition is settled true, so its
+    // consequent must hold. A search that counted the pinned slots as open skipped the part as too wide.
+    const vals = ['a', 'b', 'c'];
+    const pinned = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8'];
+    const p = new Problem({
+        domains: new Map([...pinned.map((s) => [s, vals]), ['x', vals], ['y', vals]]),
+        constraints: [
+            ...pinned.map((s) => ({ id: `pin.${s}`, formula: { eq: [s, 'a'] } })),
+            { id: 'k.wide', formula: { implies: [{ and: pinned.map((s) => ({ eq: [s, 'a'] })) }, { same: ['x', 'y'] }] } },
+        ],
+        timeOrder,
+    });
+    const active = [...pinned.map((s) => `pin.${s}`), 'k.wide'];
+    assert.equal(p.consistent(active, { x: 'a', y: 'b' }).ok, false);
+    assert.equal(p.consistent(active, {}, { extra: [{ not: { same: ['x', 'y'] } }] }).ok, false);
+    assert.deepEqual(p.candidates(active, 'y', { x: 'c' }), ['c']);
+});

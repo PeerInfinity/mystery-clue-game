@@ -570,3 +570,44 @@ steps 2 and 3 of `redesign.md` go to a later session.
   unchanged. The reveal log differs only by the two retired claims and the two new rules shown as background
   where they were (¶20 menu, ¶29 dog). Report: 7 verified, 46 asserted. 43 tests pass; `npm test` about 67 s.
 
+
+## Round 24 (2026-10-15): slice 3, chain 1 — the night sequence and whereabouts
+
+From `docs/kickoff-0.3-migration.md` slice 3, first chain. Robert's rulings (2026-10-15): no `at(person, window)`
+relation; whereabouts the story gives are already event facets, so general rules over events, each bound to the
+event in question (no `forall`, no new slots); propositions wait for step 2; Edith leaves the whereabouts
+inference (the story never places her between ten past nine and seven; the curry route closes her); the sheep
+lad is a person card the lads' claim does not reach, and is left to the curry route too.
+
+- **Seven general rules** (`knowledge.json`, after `r.bridle_needs_a_hand`): `r.one_place_at_a_time` (hard),
+  `r.sleeper_stays_put` (default: in bed at night and woke there, so at home in between), `r.stupor_is_helpless`
+  (hard), `r.drugged_guard` (default: whoever drugged the guard took what he guarded, after the draught worked and
+  after he was last seen about his duties), `r.gone_before_found` (hard), `r.leaves_before_arriving` (default),
+  `r.blow_is_the_death` (default). Each has a schema over events, a strength and `unless` where it is a default;
+  none is stated by the story, so none has `stated_in`.
+- **Claims say what the story says.** `c.horse_was_in_hollow`: the horse was there *at the time of* the struggle
+  (`not_after`); `c.horse_alone`: the horse's track ran *alone before* the man's; `c.head_shattered` pins the blow
+  to its window, as `c.thigh_cut` already did; `c.lads_heard_nothing` makes the lads the agents of their rousing
+  (`e.lads_roused.agent`, so the sleeper rule binds).
+- **Seven inferences verified**: `k.drugger_took_the_horse` (now also: the horse went after Hunter was last seen
+  at his duties, sending word of the tout), `k.found_before_seven`, `k.hunter_was_drugged`, `k.lads_slept`,
+  `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence`. Formulas narrowed to the honest result:
+  the wife alone, the two lads alone, the horse in the hollow no later than the blow. The whole derivation of
+  "the horse went between one and seven" is: drugged guard (after the message at `w.mon_late`), gone before found
+  (before seven), so the sleeper rule bites.
+- **Premises are flat.** An inference as a premise of another is not yet playable (`buildable` wants it held, a
+  route step cites claims and rules), so each inference lists the rule applications it needs; nine route steps
+  that carry the ancestry of "Straker took the horse" gained the same premises. Step 2 (chains) is the remedy.
+  `i.straker_took_horse_by_dog` now concludes the honest set (not the wife, Hunter or the two lads).
+- **Solver.** A soundness gap, found because the first verification came back "asserted" with a witness that broke
+  the rule: the search counted only its own choices as assigned, so a wide part whose other slots the clues had
+  settled was skipped as too wide and never enforced at the leaves. Settled slots now count as assigned (undone
+  on backtrack); an ordinary implication part is dropped once its condition fails and shrinks to its consequent
+  once it holds; one copy of identical parts per search (several inferences carry the same rule application).
+  Regression test in `engine/solver.test.js`. The fix made the suite faster, not slower; the new constraints cost
+  the rest: `npm test` about 100 s (67 s before), `npm run validate` about 26 s (20 s).
+- **Gates.** "By the challenge" unchanged for every question; uniqueness unchanged (398 forced, 142 open). The
+  Strict column moved for two questions (who drugged: 21 → 45 left; who took the horse: 21 → 25), because strict
+  drops rules the story never states, and the editorial inferences used to carry that common sense with no rule
+  at all. Reveal log: the seven facts appear as background at their topic cards and nowhere earlier; the
+  foreshadow log shows nothing new. Report: 14 verified, 39 asserted. 44 tests pass.

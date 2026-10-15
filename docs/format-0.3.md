@@ -1,7 +1,7 @@
 # Case format 0.3: checkable inferences
 
 Status: STEP 1 BUILT (2026-10-14); traits and the establishment relation built (2026-10-15); migration of the
-asserted inferences in progress. Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
+asserted inferences in progress (chain 1, the night sequence and whereabouts, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
 (entities, events, claims, mentions, disclosure dating, the validator's leak checks) is unchanged. The
 reasoning layer gains the pieces that let the engine *check* an inference instead of looking it up.
 
@@ -129,7 +129,33 @@ specific thing stay ground facts with a formula and no schema.
   relation slots are checked for a second possible value only, the rest in one `allCandidates` batch.
 - Timings: `npm test` about 67 s (55 s before); `npm run validate` about 20 s (16 s before).
 
+## As built (2026-10-15): the night chain (slice 3, chain 1)
+
+- **Whereabouts without a relation.** Where the story places someone is already an event facet; the chain's
+  rules range over events and are bound to the event in question: `r.one_place_at_a_time`, `r.sleeper_stays_put`,
+  `r.stupor_is_helpless`, `r.drugged_guard`, `r.gone_before_found`, `r.leaves_before_arriving`,
+  `r.blow_is_the_death`. A default rule carries `unless` (its named defeaters, for display). Verified:
+  `k.drugger_took_the_horse`, `k.found_before_seven`, `k.hunter_was_drugged`, `k.lads_slept`,
+  `k.wife_stayed_home`, `k.straker_went_out_first`, `k.night_sequence` (14 verified, 39 asserted).
+- **Premises stay flat until step 2.** An inference may cite another inference for verification
+  (`verifyInference` counts it as held), but in play `buildable` wants the premise inference held first and a
+  route step cites only claims and rules, so the migrated inferences list every rule application they need and
+  the route steps carry the ancestry. Several inferences therefore repeat the same application.
+- **Solver** (`engine/solver.js`): slots settled by propagation or by a fixed value count as assigned, so a wide
+  part is checked once its *open* slots are few and enforced when all are settled (before, a part whose other
+  slots the clues pinned was never enforced: unsound, caught by the first wide rule application). An implication
+  part is dropped once its condition fails and shrinks to its consequent once it holds. One copy of identical
+  parts per search.
+- Timings: `npm test` about 100 s; `npm run validate` about 26 s.
+
 ## Open
+
+- **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
+  rules are common sense the story never states, so two questions show more candidates under Strict than before
+  (the editorial inferences used to carry the same common sense with no rule). Whether unstated general rules
+  should count as known from the start under Strict is open.
+- **The suite grows with each chain** (67 s → 100 s after one chain). The remaining cost is the extra wide
+  constraints themselves; watch it as the chains land.
 
 - **Unplaced people.** Twenty-odd people and animals have no establishment in the story; the dog argument
   leaves them open and the curry route closes them. Should a later chain need them placed, add the value to the
