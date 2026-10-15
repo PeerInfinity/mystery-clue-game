@@ -1092,3 +1092,32 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   premise inferences (`k.knife_not_a_weapon`, `k.operation_in_the_open`) as "not yet available"; it now expands
   premises down the chain, as its helper builds them. Fixed in the next commit; from now on a commit runs only
   after `npm test` exits green.
+
+## Round 46 (2026-10-15): short chains, chain 5 — the bill and the second household
+
+- **Ruling (Robert): the bill's items stay withheld; the reader infers the dress link from Holmes.** Holmes read
+  the bill item by item (¶85) and then asked about one costume (¶91–¶92); a heuristic rule
+  `r.asks_about_what_he_read` ("When a detective who has just studied a document item by item asks a witness about
+  one particular thing, that thing is in the document") lets the reader conclude that the dove-coloured silk is
+  among the clothes on Derbyshire's account. Worded generally and shown with the reasoning notes from ¶12 (as
+  `r.no_coincidence` is): on the costume's own card it read as a pointer to the step. Before, Mrs. Straker's
+  denial (`c.wife_never_had_dress`) asserted outright that the billed clothes did not go to her, so the game made
+  the reader's link (`t92.2`) for them.
+- **Model:** the dove silk loses the `fiction_within_story` flag (the garden-party is Holmes's fiction, the
+  costume is real: it is on the bill), gains a gloss trait *asked about* and a question "Who had a dove-coloured
+  silk costume?" (answer: Mrs. Derbyshire); the denial now says only that it was not Mrs. Straker.
+- **The chain** (all verified; 54 verified, 10 asserted):
+  - `t84.9` (new reader thought, DEFAULT, Holmes ¶225, under the Round 42 ruling) → `k.bill_is_his_own`.
+  - `t84.6` → `k.derbyshire_is_straker` (new): his own bill, made out to Derbyshire. `k.bill_names_its_debtor` is
+    implicit (bookkeeping). Annotation: cites `t84.9` instead of `t84.3`.
+  - `t92.2` → `k.dove_silk_on_the_bill` (new). Annotation: cites `t84.1`, `t85.1`, `t85.2`, `t92.1`; `t92.1` maps
+    Holmes's ruse claim too.
+  - `t92.4` (TEST) → `k.dresses_for_the_other_woman` (re-cited on `k.dove_silk_on_the_bill`). The checker now
+    lets a TEST that concludes name its inference. Annotation: cites `t92.1`, `t85.1` as well.
+  - `k.second_household` re-cited on `k.dresses_for_the_other_woman` (it relied on the denial's old reading);
+    still held by `t84.7` (NOTICE·calculate), left for "the rest". Route `i.debt_motive` gains the ruse, the new
+    rule and `r.no_finery_for_servants`.
+- **Gates:** none moved, no need changed (script against HEAD).
+- **Moved:** reveal log: the new rule at ¶12; the dove silk's gloss and question at ¶91; `k.bill_names_its_debtor`
+  (implicit) at ¶84; the other-woman inference's label. Foreshadow log: the same. Case report: the chain's
+  inferences, the new question (unique). Thoughts report: 25/45.

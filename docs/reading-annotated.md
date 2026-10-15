@@ -677,7 +677,7 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t84.5` **SOURCE** · *fair* · careful · from `t84.2`, `bk.alias_post` · supports `t84.4 (Straker)`
   Mrs. Straker passes on what her husband told her: honest, but second-hand. "His letters were addressed here" is
   just how an alias gets its post, so her evidence for "friend" fits "alias" equally well.
-- `t84.6` **IDENTIFY·merge** · *fair* · careful · from `t84.3`, `t84.4`, `t84.5` · Holmes ¶225
+- `t84.6` **IDENTIFY·merge** · *fair* · careful · from `t84.9`, `t84.4`, `t84.5` · Holmes ¶225
   Derbyshire = Straker, provisionally.
 - `t84.7` **NOTICE·calculate** · *fair* · careful · from `t84.1`, `t84.6`, `t19.1`, `bk.milliner_prices` · Holmes ¶225, ¶229
   £37 15s at a Bond Street milliner, for a man "comfortably off" on a trainer's means. There is a **lady** with
@@ -685,6 +685,10 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t84.8` **REVISE** · *fair* · careful · from `t84.7`, `t28.3`, `bk.lay_against` · revises `t28.3`; answers `t46.5` · Holmes ¶220
   The motive: a man who needs money, and who controls the favourite, bets against him through others and makes
   sure he loses.
+- `t84.9` **DEFAULT** · *fair* · careful · from `t84.1`, `t84.3`, `bk.bills` · Holmes ¶225 ("men do not carry other people's bills about in their pockets")
+  Men don't carry other people's bills: the account in Straker's pocket was his own, whatever name it bears.
+  Exception: settling it for a friend (`t84.4`). (Added in Round 46: Holmes's step, which `t84.3` notices and
+  `t84.6` uses.)
 
 **¶85**
 - `t85.1` **RECORD** · typical
@@ -699,12 +703,12 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 **¶89–¶92**
 - `t92.1` **RECORD** · typical
   reads "You wore a costume of dove-coloured silk with ostrich-feather trimming."; "I never had such a dress, sir"
-- `t92.2` **INFER** · *fair* · careful · from `t85.1`, `t92.1` · Holmes ¶225
+- `t92.2` **INFER** · *fair* · careful · from `t84.1`, `t85.1`, `t85.2`, `t92.1` · Holmes ¶225
   The dress Holmes describes must come from the bill: he is running `t85.3`. The reader has to supply this link.
   Fair-play note: the reader is shown the test and its result, not the item it tests.
 - `t92.3` **WEIGH** · *fair* · careful · from `t92.1`
   Her denial is honest; she doesn't know what is being asked, which is why the trick works.
-- `t92.4` **TEST** · *fair* · careful · from `t92.2`, `t92.3` · supports `t84.7`; refutes `t85.3 (a)` · Holmes ¶93, ¶225
+- `t92.4` **TEST** · *fair* · careful · from `t92.2`, `t92.3`, `t92.1`, `t85.1` · supports `t84.7`; refutes `t85.3 (a)` · Holmes ¶93, ¶225
   She never had it, so the costume went to another woman. (Holmes says as much at once, ¶93.)
 - `t92.5` **TEST PLAN** · *fair* · careful · from `t84.6` · Holmes ¶161, ¶225, ¶229
   Show Straker's photograph at Madame Lesurier's: the milliner will recognise him as Derbyshire.

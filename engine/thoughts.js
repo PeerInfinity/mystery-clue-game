@@ -30,6 +30,8 @@ const READERS = /^(yes|likely|partial|rare|period|specialist|racing public|racin
 const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag) || t.subtype === 're-read';
 // The deduction-type tags: each such thought becomes one authored inference (short chains, Q1).
 export const DEDUCTION = ['INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY'];
+// A TEST that concludes something (the costume went to another woman) may name its inference too (Round 46).
+const CAN_NAME = [...DEDUCTION, 'TEST'];
 
 /**
  * @param data   the parsed thoughts.json
@@ -119,7 +121,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         if (t.holmes && !t.holmes.never) for (const p of t.holmes.paras ?? []) if (p < 0 || p > last) err(`${t.id}: Holmes paragraph ${p} is outside the story`);
         for (const x of t.maps ?? []) if (!caseIds.has(x)) err(`${t.id}: maps to unknown ${x}`);
         if (t.inference !== undefined) {
-            if (!DEDUCTION.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${DEDUCTION.join(', ')} do)`);
+            if (!CAN_NAME.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${CAN_NAME.join(', ')} do)`);
             else if (!inferenceById.has(t.inference)) err(`${t.id}: inference ${t.inference} is not in constraints.json`);
         }
         if (t.date_note !== undefined && (typeof t.date_note !== 'string' || !t.inference)) err(`${t.id}: date_note explains the date of a thought's inference`);
@@ -162,7 +164,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
 
 // The short chains: each deduction-type thought against its inference.
 function checkChains(thoughts, background, inferenceById, byId, model) {
-    const deductions = thoughts.filter((t) => DEDUCTION.includes(t.tag));
+    const deductions = thoughts.filter((t) => DEDUCTION.includes(t.tag) || (CAN_NAME.includes(t.tag) && t.inference));
     const bkById = new Map(background.map((b) => [b.id, b]));
     // The case cards a cited item stands for: a thought's inference and the cards it maps to; a background card's rules.
     const cardsOf = (id) => {

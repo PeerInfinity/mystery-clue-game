@@ -19,6 +19,7 @@
     { "id": "tallow_candle.owner", "on": "tallow_candle", "facet": "owner", "prompt": "Whose is the candle?",        "domain": { "kinds": ["person", "group"] }, "answer": "straker" },
     { "id": "wax_vesta.owner",     "on": "wax_vesta",     "facet": "owner", "prompt": "Whose match was struck in the hollow?", "domain": { "kinds": ["person", "group"] }, "answer": "straker" },
     { "id": "milliner_bill.owner", "on": "milliner_bill", "facet": "owner", "prompt": "Whose bill was it really?",   "domain": { "kinds": ["person", "group"] }, "answer": "straker" },
+    { "id": "dove_silk_costume.recipient", "on": "dove_silk_costume", "facet": "recipient", "prompt": "Who had {dove_silk_costume}?", "domain": { "kinds": ["person", "group"] }, "answer": "mrs_derbyshire" },
     { "id": "silver_blaze.owner",  "on": "silver_blaze",  "facet": "owner", "prompt": "Who owns {silver_blaze}?",      "domain": { "kinds": ["person", "group"] }, "answer": "colonel_ross" },
     { "id": "bayard.owner",        "on": "bayard",        "facet": "owner", "prompt": "Who owns {bayard}?",            "domain": { "kinds": ["person", "group"] }, "answer": "colonel_ross" },
     { "id": "desborough.owner",    "on": "desborough",    "facet": "owner", "prompt": "Who owns {desborough}?",        "domain": { "kinds": ["person", "group"] }, "answer": "lord_backwater" },
