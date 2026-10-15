@@ -16,7 +16,8 @@ adding relations that range over many open slots).
 question; propositions wait for step 2. Chain 2 (the drugging's place and time) is DONE too: 16 verified, 37 asserted, three of them
 `asserted: "<why>"` (Round 25). Chain 3 (the coat and the vesta, with `k.led_by_taker` and a
 conditional `k.hollow_order`) is DONE: 20 verified, 34 asserted (Round 26). Chain 4 (the knife and the purpose) is DONE (Round 27); chain 5 (the second household and the plot) is DONE:
-30 verified, 24 asserted (Round 28). Next: the horse and Brown, the disguise and the bay, the police's four, the rest.
+30 verified, 24 asserted (Round 28). Chain 6 (the horse and Brown) is DONE: 35 verified, 19 asserted (Round 29). Next: the disguise and the bay,
+the police's four, the rest.
 
 ## 0. Mission in one paragraph
 

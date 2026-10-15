@@ -1622,6 +1622,10 @@
         "trait": {
           "type": "string",
           "description": "Only cards that carry this trait (an entity's `traits`)."
+        },
+        "placeholder": {
+          "type": "boolean",
+          "description": "range over the cards standing for someone not yet identified (flag placeholder), of the given kind(s)"
         }
       }
     },

@@ -722,3 +722,22 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   there. The agent question ("Who did it?") is the usual one for an event with an agent. Robert may judge
   whether that runs ahead; the story's own hint at ¶173 is Holmes's interest in the sheep.
 - **Gates:** question table unchanged from Round 27; needs per step unchanged; uniqueness unchanged. 44 tests pass.
+
+## Round 29 (2026-10-15): slice 3, chain 6 — the horse's whereabouts and Brown
+
+- **Verified:** `k.horse_goes_home`, `k.tracks_end_at_mapleton`, `k.boots_identify`, `k.first_up_and_no_subordinate`,
+  `k.brown_broke` (35 verified, 19 asserted). Schemas on `r.horse_gregarious` (a horse taken out and loose is at
+  its own stable or the nearest other one: the binding names the two), `r.gypsies_avoid_trouble` (a band that has
+  gone did not take the horse) and `r.prints_identify_boots`; new `r.tracks_lead_in`, `r.first_up_takes_it_in`
+  (the master's establishment through `of_establishment`, from `c.mapleton_brown`) and
+  `r.undertaking_means_possession`. `k.horse_goes_home` also says the gypsies did not take it.
+- **Asserted, with its reason:** `k.found_at_dawn`: the hour is Holmes's reconstruction, told only as his account
+  at s07 (`c.brown_story_told`, a derived claim); no earlier claim gives it.
+- **A rule variable may range over the placeholder cards** (`{kind: "person", placeholder: true}`): the man whose
+  track joins the horse's is a placeholder, excluded from ordinary domains, and the boot rule needs it
+  (`?walker.identity`). Schema and `describeSpec` updated.
+- **A premise order trap.** Binding the gregarious rule to the horse's bolting needed `c.horse_alone`, an
+  observation of s06 that comes after the action which yields the step `i.horse_at_mapleton` (the validator's
+  playability walk refused it). Bound to the taking (`c.stall_empty`, s02) instead.
+- **Gates:** question table unchanged from Round 27; needs per step unchanged; the new rules surface at ¶124
+  (the gates), ¶127 (the groom), ¶140 (Brown's capitulation). 44 tests pass, about 115 s.

@@ -86,6 +86,7 @@ export function buildModel(data) {
     const cardsOf = (spec) => {
         let out;
         if (spec.only) out = [...spec.only];
+        else if (spec.placeholder) out = entities.filter((e) => (e.flags ?? []).includes('placeholder') && (!(spec.kind || spec.kinds) || (spec.kinds ?? [spec.kind]).includes(e.kind))).map((e) => e.id); // a card standing for someone not yet identified
         else if (spec.section === 'event' || spec.section === 'events') out = (data.events ?? []).map((e) => e.id);
         else if (spec.kind || spec.kinds) out = domainFor({ kinds: spec.kinds ?? [spec.kind] });
         else if (spec.trait) out = entities.filter((e) => !(e.flags ?? []).some((f) => EXCLUDED_FROM_DOMAINS.includes(f))).map((e) => e.id);
@@ -367,7 +368,7 @@ export function instantiateRule(model, ruleId, bind = {}) {
 }
 
 function describeSpec(spec) {
-    const what = spec.only ? `one of ${spec.only.join(', ')}` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
+    const what = spec.only ? `one of ${spec.only.join(', ')}` : spec.placeholder ? `a ${(spec.kinds ?? [spec.kind] ?? ['card']).join(' or ')} not yet identified` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
     return spec.trait ? `${what} that is ${spec.trait}` : what;
 }
 

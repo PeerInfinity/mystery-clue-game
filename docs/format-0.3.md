@@ -1,7 +1,7 @@
 # Case format 0.3: checkable inferences
 
 Status: STEP 1 BUILT (2026-10-14); traits and the establishment relation built (2026-10-15); migration of the
-asserted inferences in progress (chains 1 to 5, the night, the drugging, the hollow, the knife, the plot, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
+asserted inferences in progress (chains 1 to 6, the night, the drugging, the hollow, the knife, the plot, Brown, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
 (entities, events, claims, mentions, disclosure dating, the validator's leak checks) is unchanged. The
 reasoning layer gains the pieces that let the engine *check* an inference instead of looking it up.
 
@@ -165,6 +165,8 @@ specific thing stay ground facts with a formula and no schema.
 - **Solver:** an implication part whose condition has at most two slots still open, and is not yet decided, gets
   one of those slots branched on first (the *urgent* pick); without it a conditional conclusion over two open
   agent slots made the search enumerate every pair of time windows.
+- **Variable specs** may say `placeholder: true`: the variable ranges over the cards that stand for someone not yet
+  identified (flag `placeholder`), which ordinary kind domains leave out.
 - **Solver:** a denied conclusion is tried alternative by alternative wherever its negation sits (`alternatives`
   in `engine/solver.js`): "if P then A and B" denied is "P and not A" or "P and not B".
 - **A rule's `relevant_from` must not run behind a gate either.** A route step's gate waits for its premises;
