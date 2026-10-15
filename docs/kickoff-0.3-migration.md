@@ -13,7 +13,8 @@ adding relations that range over many open slots).
 
 **Status (2026-10-15, Fable session):** slice 3, chain 1 (the night sequence and whereabouts) is DONE: 14 verified,
 39 asserted; see `docs/design.md` Round 24. Robert ruled: no `at` relation, rules over events bound to the event in
-question; propositions wait for step 2. Next chain: the drugging's place and time.
+question; propositions wait for step 2. Chain 2 (the drugging's place and time) is DONE too: 16 verified, 37 asserted, three of them
+`asserted: "<why>"` (Round 25). Next chain: the coat and the vesta.
 
 ## 0. Mission in one paragraph
 

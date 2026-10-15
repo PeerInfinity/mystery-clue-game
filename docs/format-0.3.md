@@ -1,7 +1,7 @@
 # Case format 0.3: checkable inferences
 
 Status: STEP 1 BUILT (2026-10-14); traits and the establishment relation built (2026-10-15); migration of the
-asserted inferences in progress (chain 1, the night sequence and whereabouts, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
+asserted inferences in progress (chains 1 and 2, the night and the drugging, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
 (entities, events, claims, mentions, disclosure dating, the validator's leak checks) is unchanged. The
 reasoning layer gains the pieces that let the engine *check* an inference instead of looking it up.
 
@@ -148,12 +148,27 @@ specific thing stay ground facts with a formula and no schema.
   parts per search.
 - Timings: `npm test` about 100 s; `npm run validate` about 26 s.
 
+## As built (2026-10-15): the drugging chain (slice 3, chain 2)
+
+- `r.same_dish_safe` carries a schema; `r.set_aside_at_the_meal` and `r.dosed_before_carried_off` are new.
+  `e.household_sups` has a time (nine, from `c.household_same_dish`). Verified: `k.drugged_after_set_aside`,
+  `k.portion_set_aside_before_edith` (16 verified, 37 asserted).
+- **`asserted: "<why>"`** on an inference the engine cannot verify: the reason shows in the report's table, and
+  the validator warns if the engine verifies it after all. Used by `k.straker_home_all_evening`,
+  `k.window_drugging_time` and `k.drugged_in_house_means_before_nine_five`.
+- **A rule's `relevant_from` must not run ahead of the story.** A rule about a drugged guard surfaces with the
+  opium (¶37), not with the guard (¶20): check the foreshadow log's diff for every new rule, not its tail.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
   rules are common sense the story never states, so two questions show more candidates under Strict than before
   (the editorial inferences used to carry the same common sense with no rule). Whether unstated general rules
   should count as known from the start under Strict is open.
+- **The kitchen as a place of its own.** The drugging's place is recorded as "one of straker_villa, villa_kitchen";
+  the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
+  the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the
+  villa (the answer becomes "straker_villa"), or keep it: Robert's call.
 - **The suite grows with each chain** (67 s → 100 s after one chain). The remaining cost is the extra wide
   constraints themselves; watch it as the chains land.
 

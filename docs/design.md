@@ -611,3 +611,31 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   drops rules the story never states, and the editorial inferences used to carry that common sense with no rule
   at all. Reveal log: the seven facts appear as background at their topic cards and nowhere earlier; the
   foreshadow log shows nothing new. Report: 14 verified, 39 asserted. 44 tests pass.
+
+## Round 25 (2026-10-15): slice 3, chain 2 — the drugging's place and time
+
+- **Verified:** `k.drugged_after_set_aside` and `k.portion_set_aside_before_edith`, by two rules: `r.same_dish_safe`
+  gains a schema (a drug found in one portion while the others ate the dish unharmed went into the portion after
+  it was set aside), and `r.set_aside_at_the_meal` (a portion set aside for someone absent is set aside at the
+  meal where the dish is served, and where it is served). The household's supper (`e.household_sups`) gets a
+  time, nine, given by `c.household_same_dish`; giving it through the lads' claim at ¶20 would have pulled the
+  card ahead of ¶37, where the story first says the household ate the same dish, and the validator refused it.
+  `k.drugged_after_set_aside` no longer lists the five places on the portion's way (the premises never said
+  that; the place question is unchanged, since `k.straker_home_all_evening` still narrows it).
+- **Asserted, with their reasons in the file** (`asserted: "<why>"`, shown in the report): `k.straker_home_all_evening`
+  (the story never places Straker between nine and the message that reached him at the house), `k.window_drugging_time`
+  (Gregory's conditional rests on the stranger standing at the window at ten past nine and nothing more), and
+  `k.drugged_in_house_means_before_nine_five`: its new rule `r.dosed_before_carried_off` (what was tampered with where
+  it was kept was tampered with before it was carried away) reaches the villa half; the kitchen half does not
+  follow, because the kitchen is a place card of its own (the lads supped there) while the portion was set aside
+  at the villa. **Open for Robert:** fold the kitchen into the villa as the drugging's place (the question's answer
+  would read "straker_villa" instead of "one of straker_villa, villa_kitchen"), or keep the kitchen and leave the
+  inference asserted.
+- **Foreshadow check, done properly this time** (the Round 24 entry had looked only at the tail of the log). Three
+  of the new rules surfaced before the story says opium (¶37): `r.drugged_guard` at ¶20 ("remained on guard"),
+  `r.stupor_is_helpless` at ¶35 ("absolute stupor") and `r.dosed_before_carried_off` at ¶20 ("carried down to"). A
+  rule about a drugged guard before the reader knows of any drug runs ahead of the story, so all three now take
+  the opium's quote as their `relevant_from`, like `r.opium_taste`. The other six surface where their subject is
+  first told (¶32 to ¶37).
+- **Gates:** question table unchanged from Round 24; uniqueness 399 forced (the supper's time is the new slot), 142
+  open. Report: 16 verified, 37 asserted. 44 tests pass, about 96 s.
