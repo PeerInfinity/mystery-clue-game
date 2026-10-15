@@ -5,6 +5,8 @@
 - `docs/format-0.3.md` — the case format as built, and the decisions taken on it.
 - `docs/redesign.md` — the design discussion the format serves: the reader's process, what the logic and the
   gameplay are missing, the alternatives, and the order of work.
+- `docs/reading-annotated.md` — a careful reader's thoughts through the whole story, tagged, with premises and dates:
+  the spec for player actions (Round 32: the game should let the player perform every step).
 - `docs/design.md` — the round-by-round log (one entry per session or ruling; append, never rewrite).
 
 ## Commands

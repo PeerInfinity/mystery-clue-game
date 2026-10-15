@@ -774,3 +774,35 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   with no rule; its rule is never stated by the story, so Strict drops it and the dog argument no longer reaches
   the taker there. "By the challenge" unchanged throughout slice 3.
 - **Gates:** needs per step unchanged; uniqueness unchanged. 45 tests pass, about 130 s.
+
+## Round 32 (2026-10-15): the annotated reading, and a change of direction
+
+- **The idea (Robert):** the project should have started with a document that annotates the story with every
+  thought a reader has while trying to solve it; the game mechanics are then planned around letting the player
+  perform those steps, or a valid alternative. Written in a separate worktree while slice 3 ran on main:
+  `docs/reading-annotated.md`, about 280 thoughts over ¶0–¶231, written without reference to the case files so
+  that it describes the reader, not the format.
+- **Its format:** each thought has an id `t<¶>.<n>` whose paragraph is its earliest possible date; a tag (RECORD,
+  NOTICE, ABSENCE, QUESTION, HYPOTHESIS, INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY, WEIGH, SOURCE, TEST, RESIDUE,
+  PREDICT, TEST PLAN, GENRE, SET ASIDE, DROP, REVISE, some with subtypes); a confidence; a reader profile (typical,
+  careful, expert); premises (thoughts and `bk.*` background cards, each marked for an 1892 and a modern reader);
+  typed relations (supports, strains, refutes, undercuts, revises, drops, addressable to one member of a candidate
+  set); clause-level quotes; and Holmes's date. Wrong turns are a HYPOTHESIS plus a DROP citing its reason; the
+  game never names them as wrong. A pilot (¶0–¶92) fixed the format before the rest was written.
+- **What it shows:** most of the reader's decisive work is noticing (including absences: the dog), weighing
+  testimony as speech (Hunter's "certainty", the "assailants"), and listing a theory's residue; INFER steps are
+  short and few. From ¶93 on the reader mostly scores earlier predictions and anticipates Holmes's tests. The audit
+  at its end gives the beat-Holmes windows, the fair-play gaps (opium's taste, laying against one's own horse and
+  the blaze are stated only after they are needed; the boot comparison, the bill's items and the question to the
+  maid are never reported) and what the story leaves open.
+- **Ruling (Robert):** the game should let the player perform every step of the annotation, each tag becoming a
+  game action; as many of its ideas as possible are to be implemented, starting with the infrastructure they need.
+- **Slice 3 paused** at 07181e3 (chains 1–8, Round 31) by agreement with the session running it. Its assessment:
+  the rule library, the verified inferences (as regression cases), the solver fixes, first-mention gating and the
+  per-chain leak checks stay; propositions and short chains (step 2) should be re-specified from the thoughts, which
+  are those propositions; the route's gate machinery would give way to the thoughts' two dates; the police's four
+  become HYPOTHESIS and WEIGH thoughts in a pruned set rather than inferences to verify; undercut needs defeasible
+  rules; the Strict column and `asserted: "<why>"` likely give way to SOURCE, GENRE and late-disclosure typing.
+- **Next:** a gap analysis of the annotation against the format and the engine as of slice 3 (each tag, field and
+  relation: covered, partial or missing), which orders the infrastructure work; then a machine-readable form of the
+  annotation that the validator can check.
