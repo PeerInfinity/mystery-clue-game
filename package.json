@@ -7,7 +7,8 @@
     "test": "node --test",
     "validate": "node scripts/validate-case.js cases/silver-blaze",
     "reveal-log": "node scripts/reveal-log.js cases/silver-blaze > .cache/reveal-log.txt",
-    "foreshadow-log": "node scripts/foreshadow-log.js cases/silver-blaze > .cache/foreshadow-log.txt"
+    "foreshadow-log": "node scripts/foreshadow-log.js cases/silver-blaze > .cache/foreshadow-log.txt",
+    "validate-thoughts": "node scripts/validate-thoughts.js cases/silver-blaze"
   },
   "devDependencies": {
     "ajv": "^8.17.1"

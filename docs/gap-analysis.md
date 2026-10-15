@@ -1,6 +1,6 @@
 # Gap analysis: the annotated reading against format 0.3 and the game
 
-Status: DRAFT for Robert's review, 2026-10-15. Compares `docs/reading-annotated.md` (the spec, Round 32) with the
+Status: AGREED (Robert accepted the recommendations of §6, Round 37), 2026-10-15. Workstream 1 built (Round 37). Compares `docs/reading-annotated.md` (the spec, Round 32) with the
 case format and engine as of Round 35 (slice 3 paused at chains 1–8; the sheep and kitchen rulings applied).
 Purpose: order the infrastructure work that lets a player perform every step of the annotation.
 

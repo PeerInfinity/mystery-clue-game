@@ -18,6 +18,7 @@
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Validate the case and rewrite `cases/silver-blaze/report.md` | `npm run validate` |
 | Serve the game | `node scripts/serve.js` → http://localhost:8321/ (`logic.html` lays the case's logic open) |
+| Check the annotated reading (`thoughts.json`) and rewrite `cases/silver-blaze/thoughts-report.md` | `npm run validate-thoughts` |
 | What appears at each paragraph (leak checks) | `npm run reveal-log`, `npm run foreshadow-log` (→ `.cache/`) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 

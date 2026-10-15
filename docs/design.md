@@ -875,3 +875,34 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   Strict, disclosure typing, profiles, genre, set aside) → the UI.
 - **Four decisions put to Robert:** where thoughts live; what scores; graded relations authored or computed;
   the policy for facts the story withholds.
+
+## Round 37 (2026-10-15): the gap analysis agreed; the annotated reading as data
+
+- **Decisions (Robert accepted the gap analysis's recommendations, §6):** thoughts live in their own file that
+  points to the case's cards; deductions and sealed predictions made before Holmes score, notices score only in
+  aggregate by later use, watch-holmes and genre moves only hint, wrong turns cost nothing; supports and strains
+  are authored first (from the annotation) and computed later from explains-links; facts the story withholds stay
+  withheld and are marked, the bill's items being the one to discuss (the dress test is unplayable without them).
+- **Workstream 1 built.** `cases/silver-blaze/thoughts.json`: 284 thoughts and 24 background cards, one per line,
+  converted once from `docs/reading-annotated.md` (id with its earliest paragraph, scene, tag, subtype, confidence,
+  profile, premises, typed relations with set members, Holmes's paragraphs, quotes, hindsight, prose) plus a
+  crosswalk `maps` to the case cards that hold each thought: claims for 87 of the 92 RECORDs (matched by quote, the
+  rest by hand: actions and rules), claims, rules, inferences, question slots, actions, route steps and theories for
+  the others, rules for 16 of the 24 background cards. From now on the JSON is the data and the Markdown the prose.
+- **`engine/thoughts.js`** (`checkThoughts`): ids carry their paragraph and scene; tags, subtypes, confidence,
+  profile known; premises and relation targets exist and come no later; every quote found and none ahead of its
+  thought; a relation to a set member names a candidate the target lists; `maps` resolve; the data mirrors the
+  annotation's ids and tags. Reports coverage by tag, RECORDs the game deals later than the reader has them, and
+  background cards with no rule. `scripts/validate-thoughts.js` (`npm run validate-thoughts`) writes
+  `cases/silver-blaze/thoughts-report.md`; `engine/thoughts.test.js` runs the checks and three negative cases. 47 tests pass, about 120 s.
+- **What the checks found in the annotation:** ¶70 belongs to s04 (the ¶69–¶70 block moved there); `t92.1`
+  quoted Holmes's "that quite settles it", which is ¶93 (`t92.4` now gives ¶93 as a Holmes paragraph); two set
+  members named no candidate; four quotes carried their speech tags. All fixed in the Markdown before conversion.
+- **What the report shows about the case:** coverage is high where the format is strong (RECORD 87/92,
+  HYPOTHESIS 22/27, TEST 22/30, INFER 15/21) and near nothing where the gap analysis said so (WEIGH 3/17, GENRE
+  3/20, SOURCE, RESIDUE, SET ASIDE 0). Four RECORDs are dealt late: Holmes's "not yet found" at ¶14 has its card
+  only at ¶37; the doubled track's turn (¶122) and return (¶123) share one claim dealt at ¶124; the photograph a
+  paragraph late. Eight background cards have no rule (one culprit, the two genre conventions, the drug paper, the
+  alarm, the coat taken off to work, the alias's post, the guilty denial).
+- **Next:** workstream 2, short chains: the INFER, DEFAULT, AGENT, PHYSICAL and IDENTIFY thoughts become small
+  verified inferences citing other thoughts; the route becomes chains of them; the two dates replace the gates.

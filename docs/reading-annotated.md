@@ -4,6 +4,11 @@ Status: COMPLETE, ¶0–¶231. Written 2026-10-15: the pilot (¶0–¶92) first,
 ids, premises and two dates, then the rest of the story in the same format. Not yet machine-readable; not yet
 compared with the case format (that is the gap analysis, next).
 
+**Data:** the thoughts and background cards are mirrored, one per line, in `cases/silver-blaze/thoughts.json`
+(generated once from this document, Round 37), which also maps each thought to the case cards that hold it.
+From now on the JSON is the data and this document the prose: change both together; `npm test` checks that the
+ids and tags agree, and `npm run validate-thoughts` checks the rest and writes `thoughts-report.md`.
+
 ## What this is
 
 A record of the thoughts a careful reader has while reading the story and trying to make each deduction before
@@ -348,7 +353,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 **¶36**
 - `t36.1` **RECORD** · typical
   reads "Hunter ... was also quite positive as to the ownership of the cravat"; "He was equally certain that the same stranger had, while standing at the window, drugged his curried mutton"
-- `t36.2` **WEIGH** · *strong* · careful · from `t36.1` · undercuts `t36.1 (drugging)`, `t29.3` · Holmes ¶218
+- `t36.2` **WEIGH** · *strong* · careful · from `t36.1` · undercuts `t36.1 (drugged)`, `t29.3` · Holmes ¶218
   Hunter couldn't have **seen** the drugging: had he seen it, he wouldn't have eaten the food. His certainty is a
   conclusion (the stranger was at the window, and later I was drugged) from a man just out of an opium stupor.
   Downgrade it to "Hunter believes".
@@ -442,7 +447,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   he cut himself while using the knife. Keep the conclusion and leave the mechanism open.
 
 **¶46**
-- `t46.1` **HYPOTHESIS·scenario** (the police theory) · typical · from `t39.4`
+- `t46.1` **HYPOTHESIS·scenario** (the police theory) · *weak* · typical · from `t39.4`
   reads "this Fitzroy Simpson, having drugged the lad, and having in some way obtained a duplicate key, opened the stable door and took out the horse"; "His bridle is missing"; "he was either met or overtaken by the trainer"; "beat out the trainer's brains with his heavy stick"; "either led the horse on to some secret hiding-place, or else it may have bolted"
 - `t46.2` **INFER** · *fair* · careful · from `t46.1`
   reads "His bridle is missing"
@@ -583,15 +588,6 @@ the horse is (`t14.3`).
   The one-culprit default breaks. The night is **three stories**: who took the horse out (inside), what killed
   Straker (open), who has the horse now (perhaps Mapleton). They may involve different people.
 
-**¶69–¶70**
-- `t70.1` **GENRE·watch-holmes** · *strong* · careful · Holmes ¶216
-  reads "There was a gleam in his eyes and a suppressed excitement in his manner which convinced me ... that his hand was upon a clue, though I could not imagine where he had found it"
-  Holmes has had the key insight in the carriage. Nothing new has reached him except Gregory's answers, so the
-  clue is among facts the reader also has.
-- `t70.2` **GENRE·re-read** · careful · from `t70.1`
-  Go back over the recital with one question: which fact would make a man start? For a reader who missed
-  `t37.6`, this is the prompt; a reader who already has it can confirm being there first.
-
 ### State of mind after s03
 
 The police theory is losing (`t58.3`, `t58.4`, `t56.1`). The night has split into three stories (`t68.3`): who
@@ -601,6 +597,15 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 ---
 
 ## s04 Straker's villa: the pockets and Mrs. Straker (¶70–¶92)
+
+**¶69–¶70**
+- `t70.1` **GENRE·watch-holmes** · *strong* · careful · Holmes ¶216
+  reads "There was a gleam in his eyes and a suppressed excitement in his manner which convinced me ... that his hand was upon a clue, though I could not imagine where he had found it"
+  Holmes has had the key insight in the carriage. Nothing new has reached him except Gregory's answers, so the
+  clue is among facts the reader also has.
+- `t70.2` **GENRE·re-read** · careful · from `t70.1`
+  Go back over the recital with one question: which fact would make a man start? For a reader who missed
+  `t37.6`, this is the prompt; a reader who already has it can confirm being there first.
 
 **¶72–¶75**
 - `t75.1` **GENRE·watch-holmes** · *fair* · careful · from `t70.1`, `t46.4`
@@ -681,14 +686,14 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 
 **¶89–¶92**
 - `t92.1` **RECORD** · typical
-  reads "You wore a costume of dove-coloured silk with ostrich-feather trimming." "I never had such a dress, sir," answered the lady. "Ah, that quite settles it,"
+  reads "You wore a costume of dove-coloured silk with ostrich-feather trimming."; "I never had such a dress, sir"
 - `t92.2` **INFER** · *fair* · careful · from `t85.1`, `t92.1` · Holmes ¶225
   The dress Holmes describes must come from the bill: he is running `t85.3`. The reader has to supply this link.
   Fair-play note: the reader is shown the test and its result, not the item it tests.
 - `t92.3` **WEIGH** · *fair* · careful · from `t92.1`
   Her denial is honest; she doesn't know what is being asked, which is why the trick works.
-- `t92.4` **TEST** · *fair* · careful · from `t92.2`, `t92.3` · supports `t84.7`; refutes `t85.3 (a)` · Holmes ¶225
-  She never had it, so the costume went to another woman. "That quite settles it."
+- `t92.4` **TEST** · *fair* · careful · from `t92.2`, `t92.3` · supports `t84.7`; refutes `t85.3 (a)` · Holmes ¶93, ¶225
+  She never had it, so the costume went to another woman. (Holmes says as much at once, ¶93.)
 - `t92.5` **TEST PLAN** · *fair* · careful · from `t84.6` · Holmes ¶161, ¶225, ¶229
   Show Straker's photograph at Madame Lesurier's: the milliner will recognise him as Derbyshire.
 
@@ -813,7 +818,7 @@ ahead by predicting what each action will find.
 
 **¶110–¶111**
 - `t111.1` **RECORD** · typical
-  reads "whether we do not owe it to the public to remove our horse's name from the entries"; "Certainly not," cried Holmes, with decision. "I should let the name stand."
+  reads "whether we do not owe it to the public to remove our horse's name from the entries"; "Certainly not"; "I should let the name stand."
 - `t111.2` **GENRE·watch-holmes** · *fair* · careful · from `t111.1` · supports `t92.13`, `t40.4`; strains `t14.3 (dead)` · Holmes ¶161
   Holmes expects the horse to be alive and back in time to run. A reader who made `t92.13` scores it here.
 
@@ -858,7 +863,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 **¶119–¶121**
 - `t119.1` **RECORD** · *strong* · typical
   reads "Then we lost them for half a mile, but only to pick them up once more quite close to Mapleton"; "A man's track was visible beside the horse's."
-- `t120.1` **INFER** · *strong* · typical · from `t117.1`, `t119.1` · strains `t46.1 (led away)`; supports `t92.6` · Holmes ¶231
+- `t120.1` **INFER** · *strong* · typical · from `t117.1`, `t119.1` · strains `t46.1 (led the horse on)`; supports `t92.6` · Holmes ¶231
   reads "The horse was alone before"
   The horse went from the hollow alone; he wasn't led away by whoever was with Straker. He bolted, and the man's
   tracks join him only near Mapleton.
@@ -912,7 +917,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 - `t140.2` **INFER** · *strong* · careful · from `t140.1`, `t124.2`, `t111.2` · supports `t127.4` · Holmes ¶146, ¶204
   Brown has the horse and has agreed to produce it ("it shall be there"), and the obvious place is the race.
 - `t141.1` **HYPOTHESIS** · *fair* · careful · from `t140.1`, `t64.3` · supports `t64.3` · Holmes ¶202–¶204
-  reads "Should I change it first or not?" "No, don't," said he; "I shall write to you about it."
+  reads "Should I change it first or not?"; "No, don't"; "I shall write to you about it."
   "Change it": the horse is **not in his own appearance** now, and Brown offers to restore it before the race.
   Holmes laughs and says no. ⚠ medium: the reader needs `t64.3` already in mind to read "change it" this way.
 - `t141.2` **PREDICT** · *fair* · careful · from `t141.1`, `t111.2` · Holmes ¶197–¶202
@@ -1053,7 +1058,7 @@ are what killed Straker (`t46.6`) and what Holmes asked the maid (`t163.2`).
 
 **¶205–¶214**
 - `t212.1` **RECORD** · *strong* · typical
-  reads "The real murderer is standing immediately behind you." He stepped past and laid his hand upon the glossy neck of the thoroughbred.
+  reads "The real murderer is standing immediately behind you."; "He stepped past and laid his hand upon the glossy neck of the thoroughbred."
 - `t212.2` **TEST** · *strong* · expert · from `t212.1` · supports `t37.13`, `t120.2`, `t156.2`
   A reader who made `t37.13` scores the hardest step in the story.
 - `t212.3` **REVISE** · *strong* · typical · from `t212.1`, `t35.2` · revises `t35.2`, `t35.6`; refutes `t46.1`
