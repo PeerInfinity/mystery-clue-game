@@ -184,7 +184,8 @@ specific thing stay ground facts with a formula and no schema.
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
   rules are common sense the story never states, so two questions show more candidates under Strict than before
   (the editorial inferences used to carry the same common sense with no rule). Whether unstated general rules
-  should count as known from the start under Strict is open.
+  should count as known from the start under Strict is open. *Ruled (Round 33):* superseded by the annotation's
+  background cards (`bk.*`, each marked for an 1892 and a modern reader); settle it in the gap analysis.
 - **The kitchen as a place of its own.** The drugging's place is recorded as "one of straker_villa, villa_kitchen";
   the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
   the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the
@@ -195,9 +196,17 @@ specific thing stay ground facts with a formula and no schema.
   a `truth: false` inference is checked against the true solution like any other and the validator refuses it
   ("the true solution violates k.police_stick_killed#rule1"). Robert's ruling on the kickoff's open question 2
   (their own wrong rule cards, or stated only) decides the shape; slice 4 (the report gate) waits on it.
+  *Ruled (Round 33):* neither as asked. Model them as the annotation does: each police conclusion is a member of
+  a candidate set (`t39.4`, `t46.1`, `t62.2`), the police's rules are defeasible defaults, and the reader defeats
+  them by undercut, strain and drop (`t36.2`, `t40.5`, `t46.3`, `t62.4`). Built as part of the infrastructure the
+  gap analysis lays out, not separately; slice 4 waits on that.
 - **Cards quoted later than they appear** (19, listed in the report): an earlier quote where the story has one.
+  *Ruled (Round 33):* handle with the annotation's fair-play table and late-disclosure typing, in the gap analysis.
 - **The sheep event at ¶173** now shows its four questions, "Who did it?" among them, when the lad reports the
-  lameness; whether that runs ahead of the story is Robert's call.
+  lameness; whether that runs ahead of the story is Robert's call. *Ruled (Round 33):* at ¶173 the question is
+  first what caused the lameness, not who did it. The lameness is an observation whose cause is open (the
+  annotation's `t173.1`, `t175.1`); someone's practice is one candidate cause, and the agent question belongs to
+  the practice event once the player or Holmes reaches it.
 - **The suite grows with each chain** (67 s → 100 s after one chain, about 135 s after four, 107 s after five once denied conclusions split properly). The remaining cost is the extra wide
   constraints themselves; watch it as the chains land.
 

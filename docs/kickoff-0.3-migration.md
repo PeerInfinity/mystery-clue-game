@@ -100,7 +100,8 @@ UI for the player's two new moves, behind a busy indicator.
 
 - Whether `at(person, window)` should be one relation or the existing event facets suffice for whereabouts.
 - Whether the police's false inferences should list their own (wrong) rules as rule cards the player can
-  hold and doubt, or stay stated-only.
+  hold and doubt, or stay stated-only. *Answered in Round 33 of `docs/design.md`:* neither; candidate sets and
+  defeasible rules, following `docs/reading-annotated.md`.
 
 ## 6. Acceptance
 

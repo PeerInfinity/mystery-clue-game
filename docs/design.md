@@ -806,3 +806,22 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Next:** a gap analysis of the annotation against the format and the engine as of slice 3 (each tag, field and
   relation: covered, partial or missing), which orders the infrastructure work; then a machine-readable form of the
   annotation that the validator can check.
+
+## Round 33 (2026-10-15): rulings on the open items of slice 3
+
+- **The police's four false inferences** (kickoff open question 2): neither their own wrong rule cards as asked,
+  nor stated only. They are modelled as the annotated reading has them: each police conclusion is one member of a
+  candidate set (the police scenario `t39.4` / `t46.1`, the gypsies `t62.2`); the police's rules are defeasible
+  defaults with named exceptions; the reader defeats them by undercut (`t36.2`: Hunter could not have seen the
+  drugging), strain (`t40.5`: repeated blows against one), residue (`t46.3`) and drop (`t62.4`). This is option A
+  built on the infrastructure the annotation needs anyway (candidate sets, defeasible rules, undercut), so it is
+  built as part of that work, not separately. Slice 4 (the report gate) waits on it; no temporary
+  `asserted: "<why>"` is added meanwhile.
+- **The Strict column:** superseded by the annotation's background cards, each marked for what an 1892 and a modern
+  reader knows. **Cards quoted later than they appear:** handled by the annotation's fair-play table and
+  late-disclosure typing. Both are settled in the gap analysis.
+- **The sheep (¶173):** the question raised when the lad reports the lameness is first *what caused it*, not *who
+  did it*. The lameness is an observation with an open cause (ordinary causes among the candidates); someone's
+  practice is one candidate, and "who did it?" belongs to the practice event once the player or Holmes reaches it
+  (annotation `t173.1`, `t173.2`, `t175.1`, Holmes ¶228).
+- **The kitchen** (fold into the villa or keep it): still open.
