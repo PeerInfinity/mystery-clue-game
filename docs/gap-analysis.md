@@ -105,7 +105,8 @@ LLM checker), fair play under every background setting, uniqueness of answers.
 9. **UI** for all of the above, behind the busy indicator; the timeline board.
 
 Workstreams 3 to 8 depend on 1 and 2 but are largely independent of each other, so their order can follow
-Robert's priorities for play.
+Robert's priorities for play. *Round 39:* a **world model** (states over time, and the timeline) comes between 2 and
+6, which it serves; see `docs/world-model.md`.
 
 ## 6. Decisions for Robert
 

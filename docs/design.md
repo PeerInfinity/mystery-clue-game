@@ -918,3 +918,23 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   with chained premises. Q4, steps the engine needs but a reader makes unnoticed (20 inferences match no thought,
   mostly the night's bookkeeping): implicit inferences granted when their premises are held, visible and doubtable,
   folded into rules where cheap (recommended), versus thoughts for each, versus rules only.
+
+## Round 39 (2026-10-15): short chains agreed; a world model
+
+- **Short chains** (`docs/short-chains.md`): Robert accepted the recommendations. Each deduction-type thought maps
+  to one authored inference citing its premise thoughts' cards; flat inferences are split and re-cited chain by
+  chain; the gates come from the thoughts' Holmes paragraphs (earliest dates checked against the engine,
+  `route.json` retired) with scoring of deductions made before Holmes; inferences with no thought are `implicit`,
+  granted when their premises are held, visible and doubtable.
+- **The world model (Robert):** the game should have a timeline on which the player places cards (where each thing
+  was at each time), moves them, marks a cell unknown or holds several hypotheses, and the idea should extend
+  beyond location and time to actions, knowledge and intentions. Agreed design in `docs/world-model.md`: sparse
+  **state** questions (one thing, one time window, one aspect: location, possession, condition first; knowledge,
+  intention, belief second), general rules tying states to events (agents are where their acts happen;
+  persistence; one place at a time; conditions last from cause to end), claims filling states from their own
+  lines; the timeline as rows of followed entities by the 27 time windows, each cell a question with the usual
+  marks (place = circle, unknown = open, several cards = several hypotheses), checked by the existing difficulty
+  options, proven placements citable, named hypotheses as layers stored as theories.
+- **Order:** the chains first; then the states, re-deriving the night's bookkeeping (Q5 of `short-chains.md`: the
+  implicit list is provisional); a minimal timeline view early; layers; then knowledge, intention and belief; the
+  full board with the UI workstream.

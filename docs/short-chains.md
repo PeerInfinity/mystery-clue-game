@@ -1,6 +1,6 @@
 # Workstream 2, short chains: the options
 
-Status: DISCUSSION, 2026-10-15. Workstream 2 of `docs/gap-analysis.md`. The deduction-type thoughts of the annotated
+Status: AGREED (Robert accepted the recommendations of Q1–Q4, Round 39), 2026-10-15. Q5 added for the world model. Workstream 2 of `docs/gap-analysis.md`. The deduction-type thoughts of the annotated
 reading (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY: 40 of them) are to become small checkable steps that cite other
 thoughts; Holmes's route is to become chains of them; the thoughts' two dates are to replace the gate machinery.
 Four questions, each with options and a recommendation.
@@ -107,6 +107,14 @@ are held, as Trivial does for everything. It never gates and never scores.
 
 **Recommendation: B, and C where it comes cheap.** Each implicit inference is listed in the thoughts report so the
 set stays small and deliberate; if Robert later wants one to be a player move, it gets a thought.
+
+## Q5. What the world model changes (Round 39)
+
+The world model (`docs/world-model.md`) adds states over time (location, possession, condition first) and general
+rules tying them to events. Much of the night's bookkeeping (who stayed home, who slept, when the horse was gone)
+is then a rule application over states rather than an implicit inference. So the implicit set of Q4 is provisional:
+build the chains first, then the states, then re-derive the bookkeeping and shrink the implicit list. Chains that
+lean on bookkeeping should cite it through one inference, so that swapping it for state rules later touches one place.
 
 ## Order of work, if the recommendations stand
 
