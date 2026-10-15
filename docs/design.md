@@ -530,3 +530,12 @@ irrelevant to the solution are shown.
   waited for ("so far"), and not counted against settling a question by elimination. Which cards go is a hash of
   the id, so it is stable and a larger share keeps every card a smaller one kept. The logic viewer tags them
   "not needed". Every preset shows all of them (unchanged behaviour); the option is the player's choice.
+
+## Round 21 (user, 2026-10-14): a redesign discussion before any change
+
+The user is not satisfied with the first draft and asked, before any proposal, for the real process a reader
+uses to solve the mystery, what the representation of the logic is missing, and what the gameplay is missing,
+each with a from-scratch design and as many alternatives as possible; the inference system above all. The
+discussion is in `docs/redesign.md`. Decision: implement as many of its ideas as are technically possible,
+starting with the infrastructure they need; continue from the current state as a new case format with a
+migration, re-authoring the reasoning layer and keeping the reading layer.

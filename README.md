@@ -34,6 +34,7 @@ No build step and no runtime dependencies. `ajv` (a dev dependency) checks the J
 | `schema/case.schema.json` | JSON Schema for case format 0.2. |
 | `scripts/validate-case.js` | Checks everything the schema can't, and writes the report. |
 | `docs/design.md` | Requirements, rulings, the model, open questions. |
+| `docs/redesign.md` | The redesign discussion: the reader's real process, what the logic and the gameplay are missing, alternatives, where to start. |
 | `reference/v0.1/` | The first extraction (one big hand-built clue graph), kept for comparison. |
 
 ## The model in one paragraph
