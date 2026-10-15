@@ -92,6 +92,11 @@ export function makeReadings({ model, knows, offered, nameOf, promptOf, cardName
             case 'nin': return `${subjectOf(a[0])} is not ${orList([...new Set(a[1].map((v) => valueText(a[0], v)))])}`;
             case 'same': return `${subjectOf(a[0])} is the same as ${subjectOf(a[1])}`;
             case 'diff': return `${subjectOf(a[0])} is not the same as ${subjectOf(a[1])}`;
+            case 'index': case 'nindex': {
+                const some = Object.values(a[1])[0] ?? '';
+                const rel = some.split('.')[1] ?? '?';
+                return `${subjectOf(a[0])} is ${op === 'index' ? '' : 'not '}one for whom “${rel.replace(/_/g, ' ')}” is ${a[2]}`;
+            }
             case 'before': return `${term(a[0])} comes before ${term(a[1])}`;
             case 'not_after': return `${term(a[0])} comes no later than ${term(a[1])}`;
             case 'and': {

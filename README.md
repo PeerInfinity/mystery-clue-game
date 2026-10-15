@@ -25,15 +25,16 @@ No build step and no runtime dependencies. `ajv` (a dev dependency) checks the J
 | `index.html`, `ui/` | The casebook page: the story panel, cards, questions, theories, three timelines. |
 | `engine/story.js` | Paragraphs, and where every mention, clue, question, action and deduction sits in them; the gates. |
 | `cases/silver-blaze/mentions.json` | Which phrases in the text name each card. |
-| `engine/logic.js` | The formula language for constraints, in three-valued logic. |
+| `engine/logic.js` | The formula language for constraints, in three-valued logic; schemas with variables, grounded against cards (format 0.3). |
 | `engine/solver.js` | A finite-domain solver: candidates per slot, checked eliminations, uniqueness, minimal conflict sets. |
 | `engine/caseModel.js` | Turns a case into cards, slots and constraints; `checkStep` checks a cited elimination or conclusion. |
 | `engine/game.js` | Player state: reading, collecting, pencil marks, givens, proofs, theories, the three time axes. Difficulty options (`OPTIONS`) with Trivial / Easy / Medium / Hard as presets and Custom for any other mix; pace Free / Wait. |
-| `cases/silver-blaze/` | The case: `case.json` (meta, time windows, scenes, questions, theories) and its parts. |
+| `cases/silver-blaze/` | The case: `case.json` (meta, time windows, scenes, questions, theories) and its parts, including `relations.json` and `propositions.json` (0.3). |
 | `cases/silver-blaze/report.md` | Generated: fair-play table, theories and what breaks them, the route check, every slot's status, the fabula. |
-| `schema/case.schema.json` | JSON Schema for case format 0.2. |
+| `schema/case.schema.json` | JSON Schema for case format 0.3. |
 | `scripts/validate-case.js` | Checks everything the schema can't, and writes the report. |
 | `docs/design.md` | Requirements, rulings, the model, open questions. |
+| `docs/format-0.3.md` | Case format 0.3: rule schemas, relations, propositions, verified inferences, the player's applyRule and conclude. |
 | `docs/redesign.md` | The redesign discussion: the reader's real process, what the logic and the gameplay are missing, alternatives, where to start. |
 | `reference/v0.1/` | The first extraction (one big hand-built clue graph), kept for comparison. |
 

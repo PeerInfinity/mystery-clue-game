@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "mystery-clue-game/case.schema.json",
   "title": "Mystery case, format 0.2 (merged: case.json plus every part it lists)",
-  "description": "A case is a constraint puzzle over the story's fabula. Cards (entities, events, claims, rules, glosses) are what the player sees and connects. Slots are the open questions on cards (an event's agent, place, time...). Constraints rest on cards: once all of a constraint's premises are known it rules values out. The engine (engine/caseModel.js) builds slots from event and entity facets, claim truth slots and the declared slots; scripts/validate-case.js checks everything the schema cannot (references, quotes, uniqueness, theories, route, playability).",
+  "description": "A case is a constraint puzzle over the story's fabula. Cards (entities, events, claims, rules, glosses) are what the player sees and connects. Slots are the open questions on cards (an event's agent, place, time...). Constraints rest on cards: once all of a constraint's premises are known it rules values out. The engine (engine/caseModel.js) builds slots from event and entity facets, claim truth slots and the declared slots; scripts/validate-case.js checks everything the schema cannot (references, quotes, uniqueness, theories, route, playability). Format 0.3 adds relations, propositions, rule schemas and verified inferences (docs/format-0.3.md).",
   "type": "object",
   "required": [
     "schema_version",
@@ -26,7 +26,7 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "0.2"
+      "const": "0.3"
     },
     "case": {
       "$ref": "#/$defs/caseMeta"
@@ -295,6 +295,18 @@
             "wait"
           ]
         }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relation"
+      }
+    },
+    "propositions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/proposition"
       }
     }
   },
@@ -688,7 +700,8 @@
             "physical",
             "observation",
             "absence",
-            "inference"
+            "inference",
+            "editorial"
           ]
         },
         "by": {
@@ -808,6 +821,45 @@
         "relevant_from": {
           "type": "string",
           "description": "A quote: where the story first touches this fact's subject. With background facts shown 'when relevant', the fact appears there."
+        },
+        "schema": {
+          "type": "object",
+          "required": [
+            "vars",
+            "formula"
+          ],
+          "additionalProperties": false,
+          "description": "The fact as a formula with variables, grounded when applied to cards.",
+          "properties": {
+            "vars": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/varSpec"
+              }
+            },
+            "formula": {
+              "$ref": "#/$defs/formula"
+            }
+          }
+        },
+        "formula": {
+          "$ref": "#/$defs/formula",
+          "description": "A ground formula the fact asserts outright (no variables)."
+        },
+        "strength": {
+          "enum": [
+            "hard",
+            "default",
+            "heuristic"
+          ],
+          "description": "hard: always so; default: so unless a named defeater holds; heuristic: usually so."
+        },
+        "unless": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Named defeaters: what would make the fact not apply (shown to the player; not checked)."
         }
       },
       "description": "A background fact that serves as a premise. It is shown on the card(s) it attaches to, mixed with the period notes, so that it does not stand out as a clue."
@@ -883,7 +935,7 @@
       }
     },
     "formula": {
-      "description": "A formula over slots. eq/ne/in/nin compare a slot with literal values; same/diff compare two slots; before/not_after compare time slots (or {lit: window}).",
+      "description": "A formula over slots (ground), or a schema with variables (rules). eq/ne/in/nin compare a term with values; same/diff compare two terms; before/not_after compare time slots (or {lit: window}); forall/exists range a variable over cards; only sets a relation's last argument.",
       "type": "object",
       "minProperties": 1,
       "maxProperties": 1,
@@ -942,6 +994,38 @@
           "items": {
             "$ref": "#/$defs/formula"
           }
+        },
+        "forall": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/varSpec"
+            },
+            {
+              "$ref": "#/$defs/formula"
+            }
+          ]
+        },
+        "exists": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/varSpec"
+            },
+            {
+              "$ref": "#/$defs/formula"
+            }
+          ]
+        },
+        "only": {
+          "type": "array",
+          "minItems": 2,
+          "items": {},
+          "description": "[relation, fixedArg..., [cards for which it is true]]"
         }
       },
       "additionalProperties": false
@@ -950,10 +1034,10 @@
       "type": "array",
       "prefixItems": [
         {
-          "$ref": "#/$defs/id"
+          "$ref": "#/$defs/term"
         },
         {
-          "type": "string"
+          "$ref": "#/$defs/value"
         }
       ],
       "minItems": 2,
@@ -963,12 +1047,12 @@
       "type": "array",
       "prefixItems": [
         {
-          "$ref": "#/$defs/id"
+          "$ref": "#/$defs/term"
         },
         {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/value"
           }
         }
       ],
@@ -978,7 +1062,7 @@
     "twoSlots": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/id"
+        "$ref": "#/$defs/term"
       },
       "minItems": 2,
       "maxItems": 2
@@ -986,7 +1070,8 @@
     "timeArg": {
       "oneOf": [
         {
-          "$ref": "#/$defs/id"
+          "type": "string",
+          "pattern": "^\\??[a-z][a-z0-9_.]*$"
         },
         {
           "type": "object",
@@ -1054,13 +1139,50 @@
           "description": "Where a character states this inference in the story: the player is given it there.",
           "items": {
             "type": "object",
-            "required": ["by", "source"],
+            "required": [
+              "by",
+              "source"
+            ],
             "additionalProperties": false,
             "properties": {
-              "by": { "$ref": "#/$defs/id" },
-              "source": { "$ref": "#/$defs/source" }
+              "by": {
+                "$ref": "#/$defs/id"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
             }
           }
+        },
+        "rules": {
+          "type": "array",
+          "description": "The rule applications the inference uses: each rule must be among its premises.",
+          "items": {
+            "type": "object",
+            "required": [
+              "rule"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "rule": {
+                "$ref": "#/$defs/id"
+              },
+              "bind": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "pattern": {
+          "type": "string",
+          "description": "deduction, elimination, abduction, coincidence, identification, prediction_confirmed…"
+        },
+        "asserted": {
+          "type": "string",
+          "description": "Why this inference is not (yet) derivable by the engine from its premises."
         }
       }
     },
@@ -1403,6 +1525,183 @@
           ]
         }
       ]
+    },
+    "term": {
+      "description": "A slot: its id, '?v.facet' (a slot of a bound card), or {rel: [name, arg...]} (a relation slot; an arg is a card id, '?v', or a slot whose value indexes the relation).",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^\\??[a-z][a-z0-9_.]*$"
+        },
+        {
+          "type": "object",
+          "required": [
+            "rel"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "rel": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "value": {
+      "description": "A literal value, or '?v' for a bound card.",
+      "type": "string"
+    },
+    "varSpec": {
+      "type": "object",
+      "description": "What a variable, quantifier or relation argument ranges over: entity kinds, events, or a list.",
+      "additionalProperties": false,
+      "properties": {
+        "var": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/kind"
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/kind"
+          }
+        },
+        "section": {
+          "enum": [
+            "event",
+            "events"
+          ]
+        },
+        "only": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "also": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "required": [
+        "id",
+        "args"
+      ],
+      "additionalProperties": false,
+      "description": "A relation between cards; every argument tuple is a slot rel.<id>.<arg>...",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "text": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/varSpec"
+          }
+        },
+        "values": {
+          "$ref": "#/$defs/domainSpec",
+          "description": "The slot's values (default true/false)."
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "prompt": {
+          "type": "string",
+          "description": "The question, with {0}, {1}… for the arguments."
+        },
+        "default_answer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "[arg..., value] rows; the rest take default_answer (null = left open)."
+        },
+        "open": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "Argument tuples the story leaves open."
+        },
+        "outside": {
+          "enum": [
+            "error",
+            "true",
+            "false"
+          ],
+          "description": "What the relation is for arguments outside its declared range when a slot's value falls there (default: an error)."
+        }
+      }
+    },
+    "proposition": {
+      "type": "object",
+      "required": [
+        "id",
+        "text"
+      ],
+      "additionalProperties": false,
+      "description": "An intermediate conclusion as a boolean slot p.<name>, and a card.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^p\\.[a-z0-9_]+$"
+        },
+        "text": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "answer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "true",
+            "false",
+            null
+          ]
+        },
+        "means": {
+          "$ref": "#/$defs/formula",
+          "description": "Its meaning in slot terms: the model adds a definition tying the two."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
     }
   }
 }

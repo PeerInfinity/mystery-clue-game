@@ -30,7 +30,7 @@ function cardName(id) {
     const c = model.cards.get(id);
     if (!c) return model.windows.find((w) => w.id === id)?.label ?? model.data.questions.find((q) => q.id === id)?.text ?? id;
     if (c.section === 'entities' || c.section === 'events') return game.nameOf(id);
-    if (c.section === 'claims' || c.section === 'rules' || c.section === 'inferences') return c.text;
+    if (['claims', 'rules', 'inferences', 'propositions', 'applied'].includes(c.section)) return c.text;
     if (c.section === 'glosses') return c.term;
     return id;
 }
@@ -46,7 +46,7 @@ function kindOf(id) {
     const c = model.cards.get(id);
     if (!c) return '';
     if (c.section === 'entities') return c.kind;
-    return { events: 'event', claims: 'clue', rules: 'background', glosses: 'background', inferences: 'inference' }[c.section];
+    return { events: 'event', claims: 'clue', rules: 'background', glosses: 'background', inferences: 'inference', propositions: 'proposition', applied: 'applied fact' }[c.section] ?? c.section;
 }
 const paraLabel = (p) => `paragraph ${p}`;
 

@@ -15,8 +15,8 @@
 //   Hard: the player proposes candidates first (only their type is checked); cross-outs are checked.
 // Background facts (rule cards) sit on the entity cards they belong to and arrive with them.
 
-import { activeConstraints, trustedClaim } from './caseModel.js';
-import { evaluate } from './logic.js';
+import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic } from './caseModel.js';
+import { evaluate, render, slotsOf } from './logic.js';
 
 // Difficulty is a set of OPTIONS; the four difficulties are presets of them, and any other mix is CUSTOM.
 // TRIVIAL: the game works out what the held clues allow and settles questions itself; the player reads and
@@ -113,8 +113,9 @@ export class Game {
         const caseQuestions = new Set((model.data.questions ?? []).map((q) => q.slot));
         this.givers = new Map();
         for (const c of model.data.claims ?? []) {
-            if (c.derived || !c.asserts) continue;
-            for (const f of c.asserts.and ?? [c.asserts]) {
+            const asserts = model.cards.get(c.id)?.asserts;
+            if (c.derived || !asserts) continue;
+            for (const f of asserts.and ?? [asserts]) {
                 if (!f.eq || caseQuestions.has(f.eq[0])) continue;
                 const [slot, value] = f.eq;
                 if (!this.givers.has(slot)) this.givers.set(slot, []);
@@ -133,14 +134,15 @@ export class Game {
         for (const c of model.data.claims ?? []) {
             const k = model.constraints.get(`k.${c.id}`);
             if (!k) continue;
-            this.claimEvents.set(c.id, [...slotsIn(k.formula)].map((s) => model.slots.get(s)?.on).filter((o) => model.cards.get(o)?.section === 'events'));
+            this.claimEvents.set(c.id, this.#spokenOf(k.formula));
         }
         // Trivial at Holmes's pace: what the narrator states outright (any slot, case questions too, never a
         // statement the case knows may be false), and where the story tells each of Holmes's deductions.
         this.statedBy = new Map();
         for (const c of model.data.claims ?? []) {
-            if (c.derived || c.truth_slot || !c.asserts) continue;
-            for (const f of c.asserts.and ?? [c.asserts]) {
+            const asserts = model.cards.get(c.id)?.asserts;
+            if (c.derived || c.truth_slot || !asserts) continue;
+            for (const f of asserts.and ?? [asserts]) {
                 if (!f.eq) continue;
                 if (!this.statedBy.has(f.eq[0])) this.statedBy.set(f.eq[0], []);
                 this.statedBy.get(f.eq[0]).push({ claim: c.id, value: f.eq[1] });
@@ -180,10 +182,8 @@ export class Game {
             const at = [...(this.story.gates ?? [])].find(([, ids]) => ids.has(step.id))?.[0] ?? this.story.anchors.steps.get(step.id);
             for (const id of needs ?? []) stateAt(at, id, 'holmes');
         }
-        this.claimEvents ??= new Map();
-        for (const k of this.inferences) {
-            this.claimEvents.set(k.id, [...slotsIn(k.formula)].map((x) => model.slots.get(x)?.on).filter((o) => model.cards.get(o)?.section === 'events'));
-        }
+        for (const k of this.inferences) this.claimEvents.set(k.id, this.#spokenOf(model.cards.get(k.id).formula));
+        this.dynamicIds = [];
         this.reset();
         if (state) this.load(state);
     }
@@ -229,7 +229,12 @@ export class Game {
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
         this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
         this.clashCache = null;
-        this.inferenceHow = new Map();  // inference id → {how: 'built'|'stated'|'auto', by?}
+        this.inferenceHow = new Map();  // inference id → {how: 'built'|'stated'|'auto'|'applied'|'concluded', by?}
+        // The player's own cards: applied rules and concluded inferences (format 0.3). Each is a card in the model.
+        for (const id of this.dynamicIds ?? []) removeDynamic(this.model, id);
+        this.dynamicIds = [];
+        this.applied = [];              // [{id, rule, bind, para}]
+        this.concluded = [];            // [{id, cited, formula, label, para}]
         if (this.background === BG_START) for (const r of this.model.data.rules ?? []) this.#unlock(r.id, 0);
         this.#process(0);
     }
@@ -250,7 +255,9 @@ export class Game {
             asked: this.asked,
             clashLog: this.clashLog,
             built: [...this.inferenceHow].filter(([, h]) => h.how === 'built').map(([id]) => [id, this.unlocked.get(id).para]),
-            version: 4,
+            applied: this.applied.map((a) => [a.id, a.rule, a.bind, a.para]),
+            concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
+            version: 5,
         };
     }
 
@@ -273,6 +280,20 @@ export class Game {
             if (!this.inferenceById.has(id) || this.knows(id)) continue;
             this.#unlock(id, para);
             this.inferenceHow.set(id, { how: 'built' });
+        }
+        // The player's own cards, in the order they were made (applied rules may be cited by conclusions).
+        const made = [
+            ...(state.applied ?? []).map(([id, rule, bind, para]) => ({ kind: 'applied', id, rule, bind, para })),
+            ...(state.concluded ?? []).map(([id, cited, formula, label, para]) => ({ kind: 'concluded', id, cited, formula, label, para })),
+        ].sort((a, b) => a.para - b.para || a.id.localeCompare(b.id, undefined, { numeric: true }));
+        const renamed = new Map();
+        for (const m of made) {
+            const id = this.model.cards.has(m.id) ? null : m.id;
+            const res = m.kind === 'applied'
+                ? this.applyRule(m.rule, m.bind, { id, para: m.para })
+                : this.conclude(m.cited.map((c) => renamed.get(c) ?? c), m.formula, { id, label: m.label, para: m.para });
+            if (!res.ok) console.warn(`could not restore ${m.id}: ${res.error ?? res.reason ?? 'refused'}`);
+            else if (res.id !== m.id) renamed.set(m.id, res.id);
         }
         for (const [slot, m] of state.marks ?? []) {
             if (!this.model.slots.has(slot)) continue;
@@ -401,7 +422,7 @@ export class Game {
         const c = this.model.cards.get(id);
         if (!c || this.unlocked.has(id) || this.hidden.has(id)) return;
         this.unlocked.set(id, { para, at: this.seq++ });
-        if (c.section === 'claims' || c.section === 'inferences') for (const e of this.claimEvents.get(id) ?? []) this.#unlock(e, para);
+        if (['claims', 'inferences', 'applied'].includes(c.section)) for (const e of this.claimEvents.get(id) ?? []) this.#unlock(e, para);
         // Trivial: an inference comes as soon as its premises are held (the game does the reasoning).
         if (this.autoSolves()) {
             for (const k of this.inferencesUsing.get(id) ?? []) {
@@ -414,7 +435,9 @@ export class Game {
 
     // ---------- inferences ----------
     /** The inferences the player holds (built, stated to them, or in Trivial worked out for them). */
-    heldInferences() { return this.inferences.filter((k) => this.knows(k.id)).map((k) => k.id); }
+    heldInferences() { return [...this.inferences.filter((k) => this.knows(k.id)).map((k) => k.id), ...this.concluded.map((c) => c.id).filter((id) => this.knows(id))]; }
+    /** The applied rules the player holds. */
+    heldApplied() { return this.applied.map((a) => a.id).filter((id) => this.knows(id)); }
     howHeld(id) { return this.inferenceHow.get(id) ?? null; }
 
     /** What the player must connect to build an inference: its premises, or (background implicit) its clues. */
@@ -505,6 +528,124 @@ export class Game {
         return needs?.length ? needs : null;
     }
 
+    // ---------- the player's own reasoning (format 0.3) ----------
+    /** The event and proposition cards a formula speaks of (dealt along with whatever states the formula). */
+    #spokenOf(formula) {
+        return [...slotsOf(formula)].map((s) => this.model.slots.get(s)?.on).filter((o) => ['events', 'propositions'].includes(this.model.cards.get(o)?.section));
+    }
+
+    /** Background facts the player holds that can be applied (they carry a schema or a formula). */
+    applicableRules() {
+        return (this.model.data.rules ?? []).filter((r) => this.knows(r.id) && (r.schema || r.formula)).map((r) => r.id);
+    }
+
+    /** A rule's variables and what each may bind to among the cards the player holds. */
+    ruleBindings(ruleId) {
+        const rule = this.model.cards.get(ruleId);
+        if (!rule?.schema) return {};
+        const out = {};
+        for (const [v, spec] of Object.entries(rule.schema.vars ?? {})) out[v] = this.model.env.cards(spec).filter((id) => this.knows(id) && !this.hidden.has(id));
+        return out;
+    }
+
+    /**
+     * Apply a background fact to cards: hold its grounded formula as a card the player can cite and doubt.
+     * Returns {ok, id, formula, existing?} or {ok: false, error}. The same application twice returns the first.
+     */
+    applyRule(ruleId, bind = {}, { id = null, para = null } = {}) {
+        if (this.autoSolves()) return { ok: false, error: 'the game is working the answers out itself' };
+        if (!this.knows(ruleId)) return { ok: false, error: 'you do not hold that fact yet' };
+        for (const card of Object.values(bind)) if (!this.knows(card) && !this.model.windows.some((w) => w.id === card)) return { ok: false, error: `you have not met ${card} yet` };
+        const key = `${ruleId}|${JSON.stringify(Object.entries(bind).sort())}`;
+        const existing = this.applied.find((a) => a.key === key);
+        if (existing) return { ok: true, id: existing.id, formula: this.model.cards.get(existing.id).formula, existing: true };
+        const res = instantiateRule(this.model, ruleId, bind);
+        if (!res.ok) return res;
+        const rule = this.model.cards.get(ruleId);
+        const cardId = id ?? `a.${ruleId.slice(2)}_${(this.model.dynamicSeq = (this.model.dynamicSeq ?? 0) + 1)}`;
+        const bound = Object.entries(bind).map(([v, c]) => `${v} = ${this.nameOf(c)}`).join(', ');
+        const label = `${rule.text}${bound ? ` (applied: ${bound})` : ''}`;
+        try {
+            addDynamic(this.model, { id: cardId, section: 'applied', label, rule: ruleId, bind, premises: res.premises, formula: res.formula, by: 'player' });
+        } catch (e) { return { ok: false, error: e.message }; }
+        this.dynamicIds.push(cardId);
+        this.claimEvents.set(cardId, this.#spokenOf(res.formula));
+        const at = para ?? this.read - 1;
+        this.applied.push({ id: cardId, key, rule: ruleId, bind, para: at });
+        this.#unlock(cardId, at);
+        this.inferenceHow.set(cardId, { how: 'applied' });
+        this.clashCache = null;
+        return { ok: true, id: cardId, formula: res.formula };
+    }
+
+    /** Take back an applied rule or a concluded inference (and what rested on it lapses with it). */
+    retract(id) {
+        if (!this.dynamicIds.includes(id)) return false;
+        removeDynamic(this.model, id);
+        this.dynamicIds = this.dynamicIds.filter((x) => x !== id);
+        this.applied = this.applied.filter((a) => a.id !== id);
+        this.concluded = this.concluded.filter((c) => c.id !== id);
+        this.unlocked.delete(id);
+        this.inferenceHow.delete(id);
+        this.suspected.delete(id);
+        this.clashCache = null;
+        return true;
+    }
+
+    /**
+     * Draw a conclusion from cited cards. `formula` is a ground formula (a slot's value, a set of values, a
+     * proposition…); the cited cards (clues, background facts, applied rules, propositions, inferences), read as
+     * the player trusts them, must entail it. On success the conclusion becomes an inference card the player
+     * holds (and can cite and doubt), resting on the cited cards that were needed.
+     * Returns {ok, id, used, premises, matches: authored inferences this conclusion covers} or
+     *   {ok: false, reason} / {ok: false, contradiction: [constraint ids]} / {ok: false, error}.
+     */
+    conclude(cited, formula, { id = null, label = null, para = null } = {}) {
+        if (this.autoSolves()) return { ok: false, error: 'the game is working the answers out itself' };
+        const S = [...new Set(cited)].filter((x) => this.knows(x));
+        if (!S.length) return { ok: false, error: 'cite at least one card you hold' };
+        try { for (const s of slotsOf(formula)) if (!this.model.slots.has(s)) throw new Error(`unknown question ${s}`); } catch (e) { return { ok: false, error: e.message }; }
+        for (const [slot, v] of literalsIn(formula)) if (slot && !this.model.slots.get(slot).domain.includes(v)) return { ok: false, error: `${v} is no answer to ${slot}` };
+        const known = new Set(S);
+        // Everything the cited cards switch on, in the player's reading; the player's own cards count when cited.
+        const active = activeConstraints(this.model, known, this.suspected, { heldInferences: true }).filter((kid) => {
+            const k = this.model.constraints.get(kid);
+            return k.definition || !k.inference || known.has(k.inference);
+        });
+        const clash = this.model.problem.explainConflict(active);
+        if (clash) return { ok: false, contradiction: clash };
+        if (this.model.problem.consistent(active, {}, { extra: [{ not: formula }] }).ok) return { ok: false, reason: 'the cards you cite do not settle that' };
+        const used = this.model.problem.explainConflict(active, {}, { extra: [{ not: formula }] }) ?? [];
+        const premises = [...new Set(used.map((kid) => this.model.constraints.get(kid)).filter((k) => !k.definition).flatMap((k) => k.inference ? [k.inference] : k.premises))];
+        const cardId = id ?? `k.player_${(this.model.dynamicSeq = (this.model.dynamicSeq ?? 0) + 1)}`;
+        const text = label ?? this.readingOf(formula);
+        try {
+            addDynamic(this.model, { id: cardId, section: 'inferences', label: text, premises: premises.length ? premises : S, formula, by: 'player', pattern: 'player' });
+        } catch (e) { return { ok: false, error: e.message }; }
+        this.dynamicIds.push(cardId);
+        this.claimEvents.set(cardId, this.#spokenOf(formula));
+        const at = para ?? this.read - 1;
+        this.concluded.push({ id: cardId, cited: S, formula, label: text, para: at });
+        this.#unlock(cardId, at);
+        this.inferenceHow.set(cardId, { how: 'concluded' });
+        this.clashCache = null;
+        return { ok: true, id: cardId, used, premises, matches: this.conclusionMatches(formula) };
+    }
+
+    /** Authored inferences, not yet held, whose formula this conclusion alone entails. */
+    conclusionMatches(formula) {
+        return this.inferences.filter((k) => !this.knows(k.id) && k.truth !== false
+            && !this.model.problem.consistent([], {}, { extra: [formula, { not: this.model.cards.get(k.id).formula }] }).ok).map((k) => k.id);
+    }
+
+    /** A plain rendering of a formula, naming cards as the player knows them (the UI may replace this). */
+    readingOf(formula) {
+        return render(formula, (slot) => {
+            const s = this.model.slots.get(slot);
+            return s ? `${this.nameOf(s.on)} · ${this.phrase(s.prompt)}` : slot;
+        });
+    }
+
     // ---------- background ----------
     /** Can the player ask what they know about this card? (Background 'ask': any card they hold.) */
     canAsk(id) {
@@ -539,17 +680,29 @@ export class Game {
     stepMade(stepId) {
         const step = this.routeById.get(stepId);
         if (!step) return false;
-        // Holmes's step is made once the player holds the inferences it needs (trusting them).
+        // Holmes's step is made once the player holds the inferences it needs (trusting them), or whatever they
+        // hold and trust yields its conclusion by any route.
         const needs = this.stepInferences(stepId);
-        if (needs && !this.autoSolves()) return needs.every((id) => this.knows(id) && !this.suspected.has(id));
+        if (needs && !this.autoSolves() && needs.every((id) => this.knows(id) && !this.suspected.has(id))) return true;
         const c = step.concludes;
         if (c.slot) {
             if (this.isStruckWithProof(c.slot, c.value)) return true;
             const v = this.settled(c.slot);
-            return v !== null && v !== c.value;
+            if (v !== null && v !== c.value) return true;
         }
-        const f = c.formula ?? this.model.cards.get(c.claim)?.asserts;
-        return this.#entailedBySettled(f);
+        const f = c.slot ? { ne: [c.slot, c.value] } : c.formula ?? this.model.cards.get(c.claim)?.asserts;
+        if (!f) return false;
+        if (this.#entailedBySettled(f)) return true;
+        // A conclusion the player stated (or heard stated) that covers Holmes's: checked formula against formula,
+        // which is cheap; the whole-hand entailment is what conclude() does when the player commits to it.
+        if (this.autoSolves()) return false;
+        return [...this.heldInferences(), ...this.heldApplied()].some((id) => !this.suspected.has(id) && this.#covers(this.model.cards.get(id).formula, f));
+    }
+
+    /** Does formula `a` alone entail formula `b`? (A small search over the slots the two mention.) */
+    #covers(a, b) {
+        if (!a || !b) return false;
+        return !this.model.problem.consistent([], {}, { extra: [a, { not: b }] }).ok;
     }
 
     // ---------- what is known about a card, and when it was learned ----------
@@ -628,7 +781,7 @@ export class Game {
     nameOf(id) {
         const c = this.model.cards.get(id);
         if (!c) return id;
-        if (c.section === 'claims' || c.section === 'rules') return c.text;
+        if (['claims', 'rules', 'propositions', 'applied', 'inferences'].includes(c.section)) return c.text;
         if (c.section === 'glosses') return c.term;
         const list = c.names ?? c.labels ?? [];
         let cur = list[0];
@@ -679,7 +832,7 @@ export class Game {
         // An event's own facets (who, what, where, when) show with it; a question declared on it (why was it done?)
         // waits, like any other, until the story raises it.
         const declared = this.declaredSlots ?? (this.declaredSlots = new Set((this.model.data.slots ?? []).map((x) => x.id)));
-        if ((owner.section === 'events' && !declared.has(slotId)) || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
+        if ((owner.section === 'events' && !declared.has(slotId) && s.facet !== 'relation') || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
         if (!this.slotRaisers) {
             this.slotRaisers = new Map();
             const add = (slot, test) => {
@@ -689,15 +842,16 @@ export class Game {
             // A held clue raises what it speaks of, except what it simply fills in (that shows once it is doubted:
             // "he is an honest servant" asks nothing until the player wonders whether he was).
             for (const c of this.model.data.claims ?? []) {
-                if (c.derived || !c.asserts) continue;
+                const asserts = this.model.cards.get(c.id)?.asserts;
+                if (c.derived || !asserts) continue;
                 add(`${c.id}.truth`, () => this.suspected.has(c.id));
-                const fills = new Set((c.asserts.and ?? [c.asserts]).filter((f) => f.eq).map((f) => f.eq[0]));
-                for (const x of slotsIn(c.asserts)) add(x, fills.has(x) ? () => this.knows(c.id) && this.suspected.has(c.id) : () => this.knows(c.id));
+                const fills = new Set((asserts.and ?? [asserts]).filter((f) => f.eq).map((f) => f.eq[0]));
+                for (const x of slotsIn(asserts)) add(x, fills.has(x) ? () => this.knows(c.id) && this.suspected.has(c.id) : () => this.knows(c.id));
             }
             // A held inference raises what it speaks of, as a clue does; its "Does it hold?" once doubted.
             for (const k of this.inferences) {
                 add(`${k.id}.truth`, () => this.suspected.has(k.id));
-                for (const x of slotsIn(k.formula)) add(x, () => this.knows(k.id));
+                for (const x of slotsIn(this.model.cards.get(k.id).formula)) add(x, () => this.knows(k.id));
             }
             for (const q of this.model.data.questions ?? []) add(q.slot, () => this.questionRaised(q.id));
             for (const [para, steps] of this.story.gates ?? new Map()) {
@@ -859,7 +1013,8 @@ export class Game {
 
     #checkAgainstAll(fixed, extra) {
         const active = this.workingConstraints();
-        if (this.model.problem.consistent(active, fixed, { extra }).ok) return { ok: false, reason: 'nothing you hold and trust rules it out yet' };
+        // Only the questions tied to the answer or the formula need searching: what is held is consistent already.
+        if (this.model.problem.consistent(active, fixed, { extra, focus: true }).ok) return { ok: false, reason: 'nothing you hold and trust rules it out yet' };
         return { ok: true, used: this.model.problem.explainConflict(active, fixed, { extra }) };
     }
 
@@ -1078,14 +1233,17 @@ export class Game {
     }
 }
 
-function slotsIn(f, out = new Set()) {
+function literalsIn(f, out = []) {
     for (const [op, a] of Object.entries(f)) {
-        if (['eq', 'ne', 'in', 'nin'].includes(op)) out.add(a[0]);
-        else if (['same', 'diff'].includes(op)) { out.add(a[0]); out.add(a[1]); }
-        else if (['before', 'not_after'].includes(op)) for (const x of a) { if (typeof x === 'string') out.add(x); }
-        else if (op === 'and' || op === 'or') for (const g of a) slotsIn(g, out);
-        else if (op === 'not') slotsIn(a, out);
-        else if (op === 'implies') { slotsIn(a[0], out); slotsIn(a[1], out); }
+        if (['eq', 'ne'].includes(op)) out.push([a[0], a[1]]);
+        else if (['in', 'nin'].includes(op)) for (const v of a[1]) out.push([a[0], v]);
+        else if (op === 'and' || op === 'or') for (const g of a) literalsIn(g, out);
+        else if (op === 'not') literalsIn(a, out);
+        else if (op === 'implies') { literalsIn(a[0], out); literalsIn(a[1], out); }
     }
     return out;
+}
+
+function slotsIn(f, out = new Set()) {
+    return slotsOf(f, out);
 }

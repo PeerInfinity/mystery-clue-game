@@ -30,7 +30,7 @@ export class Problem {
             }
             // The search works on small PARTS: a conjunction (also under an implication) is split, so most
             // constraints become one- or two-slot checks that propagate cheaply.
-            const parts = splitConjunctions(c.formula).map((formula) => ({ formula, scope: [...slotsOf(formula)] }));
+            const parts = splitConjunctions(c.formula).map((formula) => ({ formula, scope: [...slotsOf(formula)], index: 'index' in formula || 'nindex' in formula }));
             this.constraints.set(c.id, { id: c.id, formula: c.formula, scope, parts });
         }
     }
@@ -197,6 +197,17 @@ export class Problem {
         while (progress) {
             progress = false;
             for (const part of this.#get(id).parts) {
+                if (part.index) {
+                    const changed = indexPrune(part.formula, dom);
+                    if (!changed) { local.set(part.scope[0], []); return local; }
+                    for (const [x, nd] of changed) {
+                        if (nd.length === dom(x).length) continue;
+                        local.set(x, nd);
+                        progress = nd.length > 0;
+                        if (!nd.length) return local;
+                    }
+                    continue;
+                }
                 for (const x of part.scope) {
                     const d = dom(x);
                     const others = part.scope.filter((sl) => sl !== x);
@@ -293,6 +304,19 @@ export class Problem {
                     if (evaluate(c.formula, assign, order) === false) return false;
                     continue;
                 }
+                if (c.index) {
+                    // A lookup: prune the key's values whose target cannot hold what is required; a settled key
+                    // settles its target.
+                    const changed = indexPrune(c.formula, (s) => domains.get(s));
+                    if (!changed) return false;
+                    for (const [x, nd] of changed) {
+                        if (nd.length === domains.get(x).length) continue;
+                        setDomain(x, nd);
+                        if (nd.length === 0) return false;
+                        for (const c2 of bySlot.get(x)) if (c2 !== c && !queued.has(c2)) { queued.add(c2); queue.push(c2); }
+                    }
+                    continue;
+                }
                 const open = c.scope.filter((x) => !assign.has(x));
                 if (open.length > GAC_MAX_SCOPE) continue; // checked once few enough of its slots stay open
                 for (const x of open) {
@@ -352,6 +376,32 @@ export class Problem {
 }
 
 const SUPPORT_BUDGET = 5000;
+
+/**
+ * Propagate one lookup part ({index: [key, map, value, outside]} or nindex) over domains read through `dom`.
+ * Returns a Map of narrowed domains (key, and the target when the key is settled), or null when the key has no
+ * value left. index: a key value whose target cannot be `value` goes; a settled key pins its target to `value`.
+ * nindex: a key value whose target can only be `value` goes; a settled key removes `value` from its target.
+ */
+function indexPrune(formula, dom) {
+    const op = 'index' in formula ? 'index' : 'nindex';
+    const [key, map, value, outside] = formula[op];
+    const pos = op === 'index';
+    const out = new Map();
+    const keys = dom(key).filter((v) => {
+        const target = map[v];
+        if (target === undefined) return (outside === value) === pos; // beyond the relation's range: a fixed value
+        const d = dom(target);
+        return pos ? d.includes(value) : d.some((w) => w !== value);
+    });
+    if (!keys.length) return null;
+    out.set(key, keys);
+    if (keys.length === 1 && map[keys[0]] !== undefined) {
+        const target = map[keys[0]];
+        out.set(target, dom(target).filter((w) => (w === value) === pos));
+    }
+    return out;
+}
 
 /** Lexicographic comparison of two score arrays. */
 function compare(a, b) {

@@ -539,3 +539,11 @@ each with a from-scratch design and as many alternatives as possible; the infere
 discussion is in `docs/redesign.md`. Decision: implement as many of its ideas as are technically possible,
 starting with the infrastructure they need; continue from the current state as a new case format with a
 migration, re-authoring the reasoning layer and keeping the reading layer.
+
+## Round 22 (2026-10-14): format 0.3, step 1 — checkable inferences
+
+Built from `docs/redesign.md`, "Where to start", item 1 (see `docs/format-0.3.md` for the format and what is
+open): rule schemas with variables grounded against cards, relations and propositions as slots, a native lookup
+constraint in the solver, inferences verified by the engine from their premises (6 of 53 so far; the report
+lists the rest as asserted), and the player's own moves `applyRule` and `conclude`, which pass Holmes's gates
+by any route. 42 tests pass; the case validates with 0 errors.

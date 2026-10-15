@@ -11,7 +11,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { mergeCase, buildModel, activeConstraints, checkStep } from '../engine/caseModel.js';
+import { mergeCase, buildModel, activeConstraints, checkStep, verifyInference } from '../engine/caseModel.js';
 import { evaluate, literalsOf, render } from '../engine/logic.js';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { Story } from '../engine/story.js';
@@ -220,6 +220,25 @@ for (const c of data.claims) {
 for (const r of data.rules ?? []) if (r.stated_in && !sceneIds.has(r.stated_in)) err(`${r.id}: unknown scene ${r.stated_in}`);
 for (const g of data.glosses ?? []) for (const a of g.attaches_to ?? []) if (!has(a)) err(`${g.id}: attaches_to unknown ${a}`);
 for (const q of data.questions ?? []) if (!model.slots.has(q.slot)) err(`${q.id}: unknown slot ${q.slot}`);
+// Format 0.3: relations, propositions, rule schemas and the rule applications inferences list.
+for (const r of data.relations ?? []) for (const row of [...(r.answers ?? []), ...(r.open ?? [])]) {
+    const args = r.answers?.includes(row) ? row.slice(0, -1) : row;
+    if (!model.relations.get(r.id)?.slotId(args)) err(`relation ${r.id}: (${args.join(', ')}) is outside its arguments`);
+}
+for (const p of data.propositions ?? []) if (p.means && !model.cards.get(p.id)?.means) err(`${p.id}: its meaning did not ground`);
+for (const r of data.rules ?? []) {
+    if (!r.schema) continue;
+    for (const [v, spec] of Object.entries(r.schema.vars ?? {})) if (!model.env.cards(spec).length) err(`${r.id}: ?${v} ranges over nothing`);
+    for (const c of Object.values(r.schema.vars ?? {}).flatMap((spec) => spec.only ?? [])) if (!has(c)) err(`${r.id}: only → unknown ${c}`);
+}
+for (const k of data.constraints ?? []) {
+    for (const use of k.rules ?? []) {
+        const rule = model.cards.get(use.rule);
+        if (!rule || rule.section !== 'rules') { err(`${k.id}: applies ${use.rule}, which is not a background fact`); continue; }
+        if (!rule.schema && !rule.formula) err(`${k.id}: applies ${use.rule}, which carries no formula`);
+        for (const c of Object.values(use.bind ?? {})) if (!has(c) && !windowIds.has(c)) err(`${k.id}: binds unknown card ${c}`);
+    }
+}
 // Question wording names cards only through {card} placeholders, filled with what the story calls them so far.
 for (const [owner, text] of [...(data.questions ?? []).map((q) => [q.id, q.text]), ...(data.slots ?? []).map((sl) => [sl.id, sl.prompt])]) {
     for (const [, id] of text.matchAll(/\{([^}]+)\}/g)) if (!model.cards.has(id)) err(`${owner}: {${id}} is not a card`);
@@ -233,6 +252,7 @@ for (const s of model.slots.values()) {
 }
 for (const k of model.constraints.values()) {
     for (const [slot, value] of literalsOf(k.formula)) {
+        if (slot?.startsWith('rel.') && !model.slots.has(slot)) { err(`${k.id}: lookup names unknown slot ${slot}`); continue; }
         if (slot === null) { if (!windowIds.has(value)) err(`${k.id}: unknown window ${value}`); continue; }
         const s = model.slots.get(slot);
         if (s && !s.domain.includes(value)) err(`${k.id}: ${slot} is compared with ${value}, which is not in its domain`);
@@ -316,6 +336,16 @@ const fairRows = [];
             strict: model.problem.candidates(actStrict, q.slot),
         });
     }
+}
+
+// ---------- inferences: verified (the engine derives the formula from the premises) or asserted ----------
+const inferenceRows = [];
+for (const k of data.constraints ?? []) {
+    const v = model.verified.get(k.id) ?? verifyInference(model, k);
+    if (v.status === 'error') err(`inference ${k.id}: ${v.error}`);
+    if (v.status === 'vacuous') err(`inference ${k.id}: its premises cannot all hold`);
+    if (v.status === 'verified' && k.asserted) warn(`inference ${k.id} is marked asserted but the engine verifies it`);
+    inferenceRows.push({ k, ...v });
 }
 
 // ---------- theories ----------
@@ -418,6 +448,8 @@ function writeReport() {
     out(`- cards: ${model.cards.size} — entities ${count('entities')} (${Object.entries(byKind).map(([k, v]) => `${v} ${k}`).join(', ')}), events ${count('events')}, claims ${count('claims')} (${data.claims.filter((c) => c.derived).length} derived), rules ${count('rules')}, glosses ${count('glosses')}`);
     out(`- slots: ${[...model.slots.values()].filter((s) => !s.latent).length}; constraints: ${allIds.length} (${count('constraints')} reasoning, the rest from claims); plus the player's other reading of each claim (${[...model.slots.values()].filter((s) => s.latent).length} latent truth slots)`);
     out(`- quotes: ${nQuotes}, all found in the story`);
+    out(`- relations: ${count('relations')} (${[...model.slots.values()].filter((s) => s.facet === 'relation').length} slots); propositions: ${count('propositions')}`);
+    out(`- inferences: ${inferenceRows.filter((r) => r.status === 'verified').length} verified by the engine from their premises, ${inferenceRows.filter((r) => r.status === 'asserted').length} asserted (format 0.3 migration in progress)`);
     const unique = slotRows.filter((r) => r.status === 'unique').length;
     const open = slotRows.filter((r) => r.slot.undetermined).length;
     out(`- uniqueness: ${unique} slots forced by the evidence, ${open} recorded as left open by the story`);
@@ -452,6 +484,17 @@ function writeReport() {
         }
         out();
     }
+    out('## Inferences');
+    out();
+    out('Verified: the engine derives the formula from the claim premises (trusted), the rule applications listed and any');
+    out('premise propositions or inferences. Asserted: it stands on the author\'s word until its rules carry formulas.');
+    out();
+    out('| Inference | Rules applied | Status |');
+    out('|---|---|---|');
+    for (const r of inferenceRows) {
+        out(`| \`${r.k.id}\` | ${(r.k.rules ?? []).map((u) => `${u.rule}(${Object.entries(u.bind ?? {}).map(([v, c]) => `${v}=${c}`).join(', ')})`).join('; ') || '—'} | ${r.status}${r.status === 'asserted' && r.k.asserted ? `: ${r.k.asserted}` : ''} |`);
+    }
+    out();
     out('## Derived claims');
     out();
     for (const r of derivedRows) out(`- \`${r.claim.id}\` ${r.ok ? '✓' : '✗'} — ${r.claim.text} *(via ${r.used.join(', ')})*`);

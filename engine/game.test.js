@@ -195,10 +195,10 @@ test("Holmes's inferences arrive where he states them; other readers must build 
     const game = new Game(model, { difficulty: MEDIUM });
     const step = 'i.visitor_known_to_dog';
     const needs = game.stepInferences(step);
-    assert.deepEqual(needs, ['k.dog_knew_the_visitor']);
-    while (!game.finished() && !game.knows(needs[0])) game.advance();
-    assert.equal(game.howHeld(needs[0]).how, 'stated');
-    assert.equal(game.howHeld(needs[0]).by, 'holmes');
+    assert.ok(needs.includes('k.dog_knew_the_visitor'), needs.join(' '));
+    while (!game.finished() && !game.knows('k.dog_knew_the_visitor')) game.advance();
+    assert.equal(game.howHeld('k.dog_knew_the_visitor').how, 'stated');
+    assert.equal(game.howHeld('k.dog_knew_the_visitor').by, 'holmes');
 });
 
 test('the police theory survives the first part of the story and is broken by the end', () => {

@@ -5,6 +5,10 @@
 //   {in: [slot, [values]]}   {nin: [slot, [values]]}
 //   {same: [slotA, slotB]}   {diff: [slotA, slotB]}
 //   {before: [a, b]}         {not_after: [a, b]}    a/b = a time slot id, or {lit: windowId}
+//   {index: [slot, {value: slotId...}, value, outside?]}   the slot the first slot's value selects holds `value`
+//   {nindex: [...]}                                        ... does not hold `value`
+//     (a relation looked up by a slot's value: rel.acquainted.dog.<visitor>. A value with no entry in the map
+//      reads as `outside`, the relation's value beyond its range; with no `outside`, as impossible.)
 //   {and: [f...]} {or: [f...]} {not: f} {implies: [f, g]}
 //   {true: true} / {false: true}
 //
@@ -70,6 +74,15 @@ export function evaluate(f, assign, timeOrder) {
             if (x === U || y === U) return U;
             return op === 'before' ? x < y : x <= y;
         }
+        case 'index': case 'nindex': {
+            const key = get(a[0]);
+            if (key === U) return U;
+            const target = a[1][key];
+            let held;
+            if (target === undefined) { if (a[3] === undefined || a[3] === null) return op === 'nindex'; held = a[3]; }
+            else { held = get(target); if (held === U) return U; }
+            return (held === a[2]) === (op === 'index');
+        }
         case 'and': return and3(a.map((g) => evaluate(g, assign, timeOrder)));
         case 'or': return or3(a.map((g) => evaluate(g, assign, timeOrder)));
         case 'not': return not3(evaluate(a, assign, timeOrder));
@@ -79,7 +92,7 @@ export function evaluate(f, assign, timeOrder) {
 }
 
 export const OPERATORS = ['true', 'false', 'eq', 'ne', 'in', 'nin', 'same', 'diff', 'before', 'not_after',
-    'and', 'or', 'not', 'implies'];
+    'index', 'nindex', 'and', 'or', 'not', 'implies'];
 
 export function opOf(f) {
     const keys = Object.keys(f);
@@ -100,6 +113,7 @@ export function slotsOf(f, out = new Set()) {
         case 'before': case 'not_after':
             for (const x of a) if (typeof x === 'string') out.add(x);
             break;
+        case 'index': case 'nindex': out.add(a[0]); for (const s of Object.values(a[1])) out.add(s); break;
         case 'and': case 'or': for (const g of a) slotsOf(g, out); break;
         case 'not': slotsOf(a, out); break;
         case 'implies': slotsOf(a[0], out); slotsOf(a[1], out); break;
@@ -117,6 +131,7 @@ export function literalsOf(f, out = []) {
         case 'before': case 'not_after':
             for (const x of a) if (x && typeof x === 'object') out.push([null, x.lit]);
             break;
+        case 'index': case 'nindex': for (const s of Object.values(a[1])) out.push([s, a[2]]); break;
         case 'and': case 'or': for (const g of a) literalsOf(g, out); break;
         case 'not': literalsOf(a, out); break;
         case 'implies': literalsOf(a[0], out); literalsOf(a[1], out); break;
@@ -140,10 +155,229 @@ export function render(f, name = (x) => x) {
         case 'diff': return `${name(a[0])} ≠ ${name(a[1])}`;
         case 'before': return `${t(a[0])} < ${t(a[1])}`;
         case 'not_after': return `${t(a[0])} ≤ ${t(a[1])}`;
+        case 'index': case 'nindex': {
+            const some = Object.values(a[1])[0] ?? '';
+            const prefix = some.slice(0, some.lastIndexOf('.')) || '?';
+            return `${prefix}[${name(a[0])}] ${op === 'index' ? '=' : '≠'} ${a[2]}`;
+        }
         case 'and': return a.map((g) => `(${render(g, name)})`).join(' ∧ ');
         case 'or': return a.map((g) => `(${render(g, name)})`).join(' ∨ ');
         case 'not': return `¬(${render(a, name)})`;
         case 'implies': return `(${render(a[0], name)}) → (${render(a[1], name)})`;
     }
     return '?';
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// SCHEMAS: formulas with variables, grounded against a case (format 0.3).
+//
+// A schema term may be: a slot id; '?v' (a variable bound to a card); '?v.facet' (a slot of the bound card);
+// {rel: [name, arg...]} (a relation slot; an arg is a card id, '?v', or a slot whose VALUE indexes the relation,
+// in which case the formula is expanded over that slot's domain); {lit: window} as before.
+// Extra operators: {forall: [{var, kind|kinds|only|section}, body]}, {exists: [...]} expand over cards;
+// {only: [name, fixedArg..., [trueFor]]} sets the relation's last argument true for the listed cards and false
+// for every other card it ranges over.
+//
+// ground(f, env) returns an ordinary formula. env:
+//   bind: {var -> card id}
+//   hasSlot(id), domainOf(slotId) -> values
+//   relation(name) -> {argValues: [ids[]...], slotId(args[]) -> slot id or null, outside: 'false'|'true'|'error'}
+//   cards(spec) -> card ids a quantifier ranges over ({kind|kinds|only|section})
+// Throws Error with a readable message when a variable is unbound, a facet is missing, etc.
+
+export const SCHEMA_OPERATORS = [...OPERATORS, 'forall', 'exists', 'only'];
+
+export const isVar = (x) => typeof x === 'string' && x.startsWith('?');
+
+/** Variables a schema formula mentions ('?v' and '?v.facet' both name v). */
+export function varsOf(f, out = new Set()) {
+    const term = (x) => {
+        if (isVar(x)) out.add(x.slice(1).split('.')[0]);
+        else if (x && typeof x === 'object' && x.rel) x.rel.slice(1).forEach(term);
+    };
+    const keys = Object.keys(f);
+    if (keys.length !== 1) throw new Error(`a formula has exactly one operator key, got ${JSON.stringify(f)}`);
+    const op = keys[0];
+    const a = f[op];
+    switch (op) {
+        case 'true': case 'false': break;
+        case 'eq': case 'ne': term(a[0]); term(a[1]); break;
+        case 'in': case 'nin': term(a[0]); a[1].forEach(term); break;
+        case 'same': case 'diff': case 'before': case 'not_after': term(a[0]); term(a[1]); break;
+        case 'index': case 'nindex': break;
+        case 'and': case 'or': for (const g of a) varsOf(g, out); break;
+        case 'not': varsOf(a, out); break;
+        case 'implies': varsOf(a[0], out); varsOf(a[1], out); break;
+        case 'forall': case 'exists': { const inner = new Set(); varsOf(a[1], inner); inner.delete(a[0].var); for (const v of inner) out.add(v); break; }
+        case 'only': a.slice(1, -1).forEach(term); a[a.length - 1].forEach(term); break;
+        default: throw new Error(`unknown operator ${op}`);
+    }
+    return out;
+}
+
+/** True when a formula uses no variables, relations or quantifiers: it needs no grounding. */
+export function isGround(f) {
+    const plain = (x) => typeof x === 'string' ? !isVar(x) : !(x && typeof x === 'object' && x.rel);
+    const op = Object.keys(f)[0];
+    const a = f[op];
+    switch (op) {
+        case 'true': case 'false': return true;
+        case 'eq': case 'ne': return plain(a[0]) && plain(a[1]);
+        case 'in': case 'nin': return plain(a[0]) && a[1].every(plain);
+        case 'same': case 'diff': case 'before': case 'not_after': return plain(a[0]) && plain(a[1]);
+        case 'index': case 'nindex': return true;
+        case 'and': case 'or': return a.every(isGround);
+        case 'not': return isGround(a);
+        case 'implies': return isGround(a[0]) && isGround(a[1]);
+        default: return false;
+    }
+}
+
+export function ground(f, env) {
+    const bind = env.bind ?? {};
+    const card = (x) => {
+        if (!isVar(x)) return x;
+        const v = x.slice(1);
+        if (v.includes('.')) throw new Error(`${x} names a slot where a card was expected`);
+        if (!(v in bind)) throw new Error(`variable ?${v} is not bound`);
+        return bind[v];
+    };
+    // A slot term: a slot id or '?v.facet'. Returns the slot id (checked to exist).
+    const slotOf = (x) => {
+        let id = x;
+        if (isVar(x)) {
+            const [v, ...rest] = x.slice(1).split('.');
+            if (!rest.length) throw new Error(`${x} names a card where a slot was expected`);
+            if (!(v in bind)) throw new Error(`variable ?${v} is not bound`);
+            id = `${bind[v]}.${rest.join('.')}`;
+        }
+        if (!env.hasSlot(id)) throw new Error(`no such slot ${id}${isVar(x) ? ` (${x})` : ''}`);
+        return id;
+    };
+    // Resolve a term to {slot} or {alts: [{cond: [[slot, value]...], slot}]} (a relation indexed by slot values).
+    const resolve = (x) => {
+        if (typeof x === 'string') return { slot: slotOf(x) };
+        if (!x || typeof x !== 'object' || !x.rel) throw new Error(`bad term ${JSON.stringify(x)}`);
+        const [name, ...args] = x.rel;
+        const rel = env.relation(name);
+        if (!rel) throw new Error(`unknown relation ${name}`);
+        if (args.length !== rel.argValues.length) throw new Error(`relation ${name} takes ${rel.argValues.length} argument(s), got ${args.length}`);
+        // Each arg: a card (literal or ?v), or a slot whose value indexes the relation.
+        const fixed = args.map((a) => {
+            if (typeof a === 'string' && (isVar(a) ? a.slice(1).includes('.') : env.hasSlot(a))) return { slot: slotOf(a) };
+            return { card: card(a) };
+        });
+        if (fixed.every((a) => a.card)) {
+            const id = rel.slotId(fixed.map((a) => a.card));
+            if (!id) throw new Error(`relation ${name} is not defined for (${fixed.map((a) => a.card).join(', ')})`);
+            return { slot: id };
+        }
+        // Expand over the indexing slots' domains.
+        let combos = [{ cond: [], args: [] }];
+        fixed.forEach((a) => {
+            combos = combos.flatMap((c) => (a.card
+                ? [{ cond: c.cond, args: [...c.args, a.card] }]
+                : env.domainOf(a.slot).map((v) => ({ cond: [...c.cond, [a.slot, v]], args: [...c.args, v] }))));
+        });
+        const alts = [];
+        for (const c of combos) {
+            const id = rel.slotId(c.args);
+            if (id) alts.push({ cond: c.cond, slot: id });
+            else if (rel.outside === 'error') throw new Error(`relation ${name} is not defined for (${c.args.join(', ')}); widen its arguments or set "outside"`);
+            else alts.push({ cond: c.cond, value: rel.outside }); // a fixed value outside the relation's range
+        }
+        return { alts };
+    };
+    const value = (x) => card(x);
+    // Build a formula from resolved terms: with alternatives, guard each combination by its conditions.
+    const lift = (terms, build) => {
+        if (terms.every((t) => t.slot)) return build(terms.map((t) => ({ slot: t.slot })));
+        let combos = [{ cond: [], ts: [] }];
+        for (const t of terms) {
+            combos = combos.flatMap((c) => (t.slot
+                ? [{ cond: c.cond, ts: [...c.ts, { slot: t.slot }] }]
+                : t.alts.map((a) => ({ cond: [...c.cond, ...a.cond], ts: [...c.ts, a.slot ? { slot: a.slot } : { value: a.value }] }))));
+        }
+        const parts = combos.map((c) => {
+            const body = build(c.ts);
+            if (!c.cond.length) return body;
+            const ante = c.cond.length === 1 ? { eq: c.cond[0] } : { and: c.cond.map((p) => ({ eq: p })) };
+            return { implies: [ante, body] };
+        });
+        return parts.length === 1 ? parts[0] : { and: parts };
+    };
+    // A relation indexed by ONE slot, compared with one literal: a native lookup, which the solver propagates
+    // directly instead of one implication per value of the slot.
+    const lookup = (op, x, val) => {
+        if (typeof x !== 'object' || !x.rel) return null;
+        const [name, ...args] = x.rel;
+        const rel = env.relation(name);
+        if (!rel) return null;
+        const idx = args.map((a) => typeof a === 'string' && (isVar(a) ? a.slice(1).includes('.') : env.hasSlot(a)));
+        if (idx.filter(Boolean).length !== 1) return null;
+        const i = idx.indexOf(true);
+        const key = slotOf(args[i]);
+        const fixed = args.map((a, j) => (j === i ? null : card(a)));
+        const map = {};
+        for (const v of env.domainOf(key)) {
+            const id = rel.slotId(fixed.map((a, j) => (j === i ? v : a)));
+            if (id) map[v] = id;
+            else if (rel.outside === 'error') throw new Error(`relation ${name} is not defined for (${fixed.map((a, j) => (j === i ? v : a)).join(', ')}); widen its arguments or set "outside"`);
+        }
+        return { [op === 'eq' ? 'index' : 'nindex']: [key, map, val, rel.outside === 'error' ? null : rel.outside] };
+    };
+    const cmp = (op, t, vals) => lift([t], ([a]) => {
+        if (a.slot) return { [op]: [a.slot, vals] };
+        // The term resolved to a fixed value (a relation outside its range): compare constants.
+        const hit = Array.isArray(vals) ? vals.includes(a.value) : a.value === vals;
+        const pos = op === 'eq' || op === 'in';
+        return hit === pos ? { true: true } : { false: true };
+    });
+    const g = (f) => {
+        const keys = Object.keys(f);
+        if (keys.length !== 1) throw new Error(`a formula has exactly one operator key, got ${JSON.stringify(f)}`);
+        const op = keys[0];
+        const a = f[op];
+        switch (op) {
+            case 'true': case 'false': return f;
+            case 'eq': case 'ne': return lookup(op, a[0], value(a[1])) ?? cmp(op, resolve(a[0]), value(a[1]));
+            case 'in': case 'nin': return cmp(op, resolve(a[0]), a[1].map(value));
+            case 'same': case 'diff': return lift([resolve(a[0]), resolve(a[1])], ([x, y]) => {
+                if (x.slot && y.slot) return { [op]: [x.slot, y.slot] };
+                if (x.slot || y.slot) return { [op === 'same' ? 'eq' : 'ne']: [x.slot ?? y.slot, x.slot ? y.value : x.value] };
+                return (x.value === y.value) === (op === 'same') ? { true: true } : { false: true };
+            });
+            case 'before': case 'not_after': {
+                const t = (x) => (x && typeof x === 'object' && x.lit ? x : slotOf(x));
+                return { [op]: [t(a[0]), t(a[1])] };
+            }
+            case 'and': case 'or': return { [op]: a.map(g) };
+            case 'not': return { not: g(a) };
+            case 'implies': return { implies: [g(a[0]), g(a[1])] };
+            case 'forall': case 'exists': {
+                const [spec, body] = a;
+                const ids = env.cards(spec);
+                const parts = ids.map((id) => ground(body, { ...env, bind: { ...bind, [spec.var]: id } }));
+                if (!parts.length) return op === 'forall' ? { true: true } : { false: true };
+                return parts.length === 1 ? parts[0] : { [op === 'forall' ? 'and' : 'or']: parts };
+            }
+            case 'only': {
+                const [name, ...rest] = a;
+                const trueFor = new Set(rest[rest.length - 1].map(card));
+                const fixed = rest.slice(0, -1).map(card);
+                const rel = env.relation(name);
+                if (!rel) throw new Error(`unknown relation ${name}`);
+                if (fixed.length !== rel.argValues.length - 1) throw new Error(`only: relation ${name} needs ${rel.argValues.length - 1} fixed argument(s)`);
+                const parts = [];
+                for (const v of rel.argValues[rel.argValues.length - 1]) {
+                    const id = rel.slotId([...fixed, v]);
+                    if (id) parts.push({ eq: [id, trueFor.has(v) ? 'true' : 'false'] });
+                }
+                for (const v of trueFor) if (!rel.argValues[rel.argValues.length - 1].includes(v)) throw new Error(`only: ${v} is not in the range of ${name}`);
+                return parts.length === 1 ? parts[0] : { and: parts };
+            }
+            default: throw new Error(`unknown operator ${op}`);
+        }
+    };
+    return g(f);
 }

@@ -1,0 +1,12 @@
+{
+ "description": "Relations between cards (format 0.3). Every argument tuple is a slot rel.<name>.<arg>..., with the values given here as its answer; claims give the player these values (often with 'only'), rule applications derive them.",
+ "relations": [
+  {"id": "acquainted", "text": "Does this animal know this person well?", "args": [{"kind": "animal", "only": ["stable_dog"]}, {"kinds": ["person", "animal", "group"]}], "prompt": "Does {0} know {1} well?", "default_answer": "false", "answers": [["stable_dog", "straker", "true"], ["stable_dog", "mrs_straker", "true"], ["stable_dog", "edith_baxter", "true"], ["stable_dog", "ned_hunter", "true"], ["stable_dog", "other_lads", "true"], ["stable_dog", "sheep_lad", "true"], ["stable_dog", "colonel_ross", "true"]]},
+  {"id": "knew_menu", "text": "Did this person know what the supper at the trainer's house would be that night?", "args": [{"kinds": ["person", "animal", "group"]}], "prompt": "Did {0} know what the supper would be?", "default_answer": "false", "answers": [["straker", "true"], ["mrs_straker", "true"], ["edith_baxter", "true"], ["other_lads", "true"]]},
+  {"id": "heads_household", "text": "Is this person the master or mistress of this house?", "args": [{"kind": "place", "only": ["straker_villa"]}, {"kinds": ["person", "animal", "group"]}], "prompt": "Is {1} master or mistress at {0}?", "default_answer": "false", "answers": [["straker_villa", "straker", "true"], ["straker_villa", "mrs_straker", "true"]]},
+  {"id": "dish_of", "text": "Which dish was this portion a helping of?", "args": [{"kind": "object", "only": ["hunter_portion"]}], "values": {"kinds": ["object"]}, "prompt": "What dish was {0} a helping of?", "answers": [["hunter_portion", "curried_mutton"]]},
+  {"id": "needed_hiding", "text": "Would the eater have noticed this, had its taste not been hidden?", "args": [{"section": "event", "only": ["e.opium_added"]}], "prompt": "Would the drug have been noticed unless its taste was hidden?", "answers": [["e.opium_added", "true"]]},
+  {"id": "masks_taste", "text": "Does this dish hide other tastes?", "args": [{"kind": "object", "only": ["curried_mutton"]}], "prompt": "Does {0} hide other tastes?", "answers": [["curried_mutton", "true"]]},
+  {"id": "found_on", "text": "In whose pockets or hands was this found?", "args": [{"kind": "document"}], "values": {"kinds": ["person", "group"]}, "prompt": "On whom was {0} found?", "default_answer": null, "answers": [["milliner_bill", "straker"], ["hay_accounts", "straker"], ["ross_letter", "straker"]]}
+ ]
+}
