@@ -56,6 +56,14 @@ domain; and `only`: `{"only": [name, fixedArg..., [trueFor]]}` fixes the last ar
 Bindings are checked: a variable with `kind` binds only an entity of that kind (`event` binds an event card);
 `only` lists the cards it may bind to. A facet the bound card lacks fails the binding.
 
+**Traits** (slice 2, 2026-10-14). An entity may carry `traits: [{id, term, text, source}]`, general properties a
+rule can range over: a variable spec `{kind: "object", trait: "spiced"}` binds only cards that carry the trait,
+so `r.curry_masks` reads "a strongly spiced dish hides other tastes" instead of naming the curried mutton. A
+trait shows on its card like a gloss (under "Words": term and text), dated by the card's first mention or its
+quote, whichever is later; its text must be plain description. The validator checks the quote, that every
+trait a rule or relation names is carried by some card, and that no card lists a trait twice. Facts about one
+specific thing stay ground facts with a formula and no schema.
+
 ## As built (2026-10-14)
 
 - `engine/logic.js`: `ground(schema, env)` with variables, `?v.facet` slots, relation terms, `forall`/`exists`,

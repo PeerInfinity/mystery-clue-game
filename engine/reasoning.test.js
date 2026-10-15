@@ -43,7 +43,7 @@ test('instantiateRule checks the bindings against the variables', () => {
     assert.deepEqual(ok.premises, ['r.dog_barks_at_strangers', 'stable_dog', 'e.stable_entered', 'e.dog_silent']);
     assert.match(instantiateRule(model, 'r.dog_barks_at_strangers', { dog: 'straker', visit: 'e.stable_entered', silence: 'e.dog_silent' }).error, /must be a animal/);
     assert.match(instantiateRule(model, 'r.dog_barks_at_strangers', { dog: 'stable_dog' }).error, /not bound/);
-    assert.match(instantiateRule(model, 'r.curry_masks', { dish: 'hunter_portion' }).error, /one of curried_mutton/);
+    assert.match(instantiateRule(model, 'r.curry_masks', { dish: 'hunter_portion' }).error, /a object that is spiced/);
     assert.match(instantiateRule(model, 'r.curry_masks', { dish: 'hay' }).error, /not a card/);
     assert.match(instantiateRule(model, 'r.wet_ground_holds_tracks').error, /no formula/);
 });
@@ -141,4 +141,19 @@ test('relation and proposition slots: a relation question shows only once a held
     assert.ok(game.slotVisible('rel.acquainted.stable_dog.simpson'), 'doubting it opens the question');
     assert.match(game.promptOf('rel.acquainted.stable_dog.simpson'), /know .* well\?/);
     assert.equal(game.slotVisible('rel.needed_hiding.e.opium_added'), false, 'a relation on an event waits to be raised too');
+});
+
+test('traits: a variable may range over the cards that carry a trait; the trait shows on its card like a gloss', () => {
+    assert.deepEqual(model.env.cards({ kind: 'object', trait: 'spiced' }), ['curried_mutton']);
+    assert.deepEqual(model.env.cards({ trait: 'spiced' }), ['curried_mutton']);
+    assert.deepEqual(model.env.cards({ kind: 'person', trait: 'spiced' }), []);
+    const ok = instantiateRule(model, 'r.curry_masks', { dish: 'curried_mutton' });
+    assert.ok(ok.ok, ok.error);
+    assert.deepEqual(ok.formula, { eq: ['rel.masks_taste.curried_mutton', 'true'] });
+    // Shown with the card's first mention, as a word explained, never before the story names the dish.
+    const g = new Game(model);
+    const first = model.story.firstAt.get('curried_mutton');
+    while (g.read <= first) g.advance();
+    const t = g.info('curried_mutton').find((it) => it.trait === 'spiced');
+    assert.ok(t && t.kind === 'background' && t.term === 'Spiced' && t.para === first);
 });

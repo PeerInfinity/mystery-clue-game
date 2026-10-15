@@ -78,16 +78,19 @@ export function buildModel(data) {
         return out;
     };
     /**
-     * The cards a variable, quantifier or relation argument ranges over: {kind|kinds|section|only|also}.
+     * The cards a variable, quantifier or relation argument ranges over: {kind|kinds|section|only|trait|also}.
      * `section: 'event'` ranges over event cards; kinds over entities (placeholders and fiction excluded);
-     * `only` restricts to a list; `also` adds cards.
+     * `only` restricts to a list; `trait` keeps the cards that carry it; `also` adds cards.
      */
+    const hasTrait = (id, trait) => (cards.get(id)?.traits ?? []).some((t) => t.id === trait);
     const cardsOf = (spec) => {
         let out;
         if (spec.only) out = [...spec.only];
         else if (spec.section === 'event' || spec.section === 'events') out = (data.events ?? []).map((e) => e.id);
         else if (spec.kind || spec.kinds) out = domainFor({ kinds: spec.kinds ?? [spec.kind] });
+        else if (spec.trait) out = entities.filter((e) => !(e.flags ?? []).some((f) => EXCLUDED_FROM_DOMAINS.includes(f))).map((e) => e.id);
         else out = [];
+        if (spec.trait) out = out.filter((id) => hasTrait(id, spec.trait));
         for (const x of spec.also ?? []) if (!out.includes(x)) out.push(x);
         return out;
     };
@@ -355,9 +358,8 @@ export function instantiateRule(model, ruleId, bind = {}) {
 }
 
 function describeSpec(spec) {
-    if (spec.only) return `one of ${spec.only.join(', ')}`;
-    if (spec.section) return 'an event';
-    return `a ${(spec.kinds ?? [spec.kind]).join(' or ')}`;
+    const what = spec.only ? `one of ${spec.only.join(', ')}` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
+    return spec.trait ? `${what} that is ${spec.trait}` : what;
 }
 
 /**

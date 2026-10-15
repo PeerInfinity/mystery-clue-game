@@ -747,6 +747,11 @@ export class Game {
         });
         if (c.section === 'entities') {
             out.push(...this.#glossesOn(id, first));
+            // Traits: plain properties a rule may range over, shown like a gloss, with the line that gives them.
+            for (const t of c.traits ?? []) {
+                const para = Math.max(first, this.#paraOf(t.source[0]));
+                if (para < this.read) out.push({ key: `trait.${t.id}`, para, kind: 'background', term: t.term, text: t.text, trait: t.id, quote: t.source[0] });
+            }
             for (const r of this.rulesOn.get(id) ?? []) {
                 if (this.knows(r)) out.push({ key: r, para: Math.max(first, this.unlocked.get(r).para), kind: 'background', text: this.model.cards.get(r).text, card: r });
             }

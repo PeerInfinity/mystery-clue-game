@@ -90,6 +90,7 @@ for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'rou
     for (const item of data[sec] ?? []) checkQuotes(item.id, item.source);
 }
 for (const e of data.entities ?? []) for (const n of e.notes ?? []) checkQuotes(e.id, n.source);
+for (const e of data.entities ?? []) for (const t of e.traits ?? []) checkQuotes(`${e.id} trait ${t.id}`, t.source);
 for (const g of data.glosses ?? []) if (g.after) checkQuotes(g.id, [g.after]);
 for (const r of data.rules ?? []) if (r.relevant_from) checkQuotes(r.id, [r.relevant_from]);
 // Every time window says where the story first reaches it: before that it is not offered as an answer.
@@ -115,6 +116,8 @@ for (const e of data.entities ?? []) {
         else if (hit.para < first) err(`${e.id}: note at paragraph ${hit.para} comes before the first mention (${first})`);
     }
 }
+// A trait shows with the card, or with its quote if that comes later: the quote must lie within one paragraph.
+for (const e of data.entities ?? []) for (const t of e.traits ?? []) if (!storyIndex.find(t.source[0])) err(`${e.id}: trait ${t.id} quote not within one paragraph: "${t.source[0].slice(0, 50)}"`);
 
 // No clue may give an event a time the story has not reached yet (its label would show early).
 {
@@ -230,6 +233,19 @@ for (const r of data.rules ?? []) {
     if (!r.schema) continue;
     for (const [v, spec] of Object.entries(r.schema.vars ?? {})) if (!model.env.cards(spec).length) err(`${r.id}: ?${v} ranges over nothing`);
     for (const c of Object.values(r.schema.vars ?? {}).flatMap((spec) => spec.only ?? [])) if (!has(c)) err(`${r.id}: only → unknown ${c}`);
+}
+// Traits: every trait a rule or relation ranges over is carried by some card; a card names each trait once.
+{
+    const carried = new Set((data.entities ?? []).flatMap((e) => (e.traits ?? []).map((t) => t.id)));
+    const specs = [
+        ...(data.rules ?? []).flatMap((r) => Object.entries(r.schema?.vars ?? {}).map(([v, spec]) => [`${r.id} ?${v}`, spec])),
+        ...(data.relations ?? []).flatMap((r) => [...(r.args ?? []), ...(r.values ? [r.values] : [])].map((spec, i) => [`relation ${r.id} argument ${i}`, spec])),
+    ];
+    for (const [where, spec] of specs) if (spec.trait && !carried.has(spec.trait)) err(`${where}: no card carries the trait ${spec.trait}`);
+    for (const e of data.entities ?? []) {
+        const ids = (e.traits ?? []).map((t) => t.id);
+        if (new Set(ids).size !== ids.length) err(`${e.id}: a trait listed twice`);
+    }
 }
 for (const k of data.constraints ?? []) {
     for (const use of k.rules ?? []) {
