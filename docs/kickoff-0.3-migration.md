@@ -15,7 +15,8 @@ adding relations that range over many open slots).
 39 asserted; see `docs/design.md` Round 24. Robert ruled: no `at` relation, rules over events bound to the event in
 question; propositions wait for step 2. Chain 2 (the drugging's place and time) is DONE too: 16 verified, 37 asserted, three of them
 `asserted: "<why>"` (Round 25). Chain 3 (the coat and the vesta, with `k.led_by_taker` and a
-conditional `k.hollow_order`) is DONE: 20 verified, 34 asserted (Round 26). Next chain: the knife and the purpose.
+conditional `k.hollow_order`) is DONE: 20 verified, 34 asserted (Round 26). Chain 4 (the knife and the purpose) is DONE: 26 verified, 28 asserted (Round 27). Next: the second household,
+then the horse and Brown, the disguise and the bay, the police's four.
 
 ## 0. Mission in one paragraph
 

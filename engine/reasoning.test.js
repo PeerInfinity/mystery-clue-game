@@ -53,7 +53,7 @@ test('verified inferences: the engine derives the conclusion; an asserted one on
     assert.equal(verifyInference(model, k('k.dog_knew_the_visitor')).status, 'verified');
     assert.equal(verifyInference(model, k('k.drugger_chose_the_dish')).status, 'verified');
     assert.equal(verifyInference(model, k('k.bill_is_his_own')).status, 'verified');
-    assert.equal(verifyInference(model, k('k.horse_kicked')).status, 'asserted');
+    assert.equal(verifyInference(model, k('k.window_drugging_time')).status, 'asserted');
     // Without the rule application the premises alone do not reach the conclusion.
     assert.equal(verifyInference(model, { ...k('k.dog_knew_the_visitor'), rules: [] }).status, 'asserted');
     // The rule application is part of the inference in the case's reading: the route step still checks.

@@ -1,7 +1,7 @@
 # Case format 0.3: checkable inferences
 
 Status: STEP 1 BUILT (2026-10-14); traits and the establishment relation built (2026-10-15); migration of the
-asserted inferences in progress (chains 1 to 3, the night, the drugging, the coat and the vesta, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
+asserted inferences in progress (chains 1 to 4, the night, the drugging, the hollow, the knife, done 2026-10-15). Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
 (entities, events, claims, mentions, disclosure dating, the validator's leak checks) is unchanged. The
 reasoning layer gains the pieces that let the engine *check* an inference instead of looking it up.
 
@@ -165,6 +165,11 @@ specific thing stay ground facts with a formula and no schema.
 - **Solver:** an implication part whose condition has at most two slots still open, and is not yet decided, gets
   one of those slots branched on first (the *urgent* pick); without it a conditional conclusion over two open
   agent slots made the search enumerate every pair of time windows.
+- **A rule's `relevant_from` must not run behind a gate either.** A route step's gate waits for its premises;
+  a rule first relevant at ¶226 moved a gate from ¶202 to ¶227. Check each step's gate paragraph and needed
+  inferences against HEAD after every chain.
+- **Traits carry the general reading of specific things:** the knife is *surgical*, the stick *weighted*, the shoe
+  a *shod hoof*; the rules range over the trait, the binding names the card.
 - **A rule's `relevant_from` must not run ahead of the story.** A rule about a drugged guard surfaces with the
   opium (¶37), not with the guard (¶20): check the foreshadow log's diff for every new rule, not its tail.
 
@@ -178,7 +183,7 @@ specific thing stay ground facts with a formula and no schema.
   the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
   the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the
   villa (the answer becomes "straker_villa"), or keep it: Robert's call.
-- **The suite grows with each chain** (67 s → 100 s after one chain, about 120 s after three). The remaining cost is the extra wide
+- **The suite grows with each chain** (67 s → 100 s after one chain, about 135 s after four). The remaining cost is the extra wide
   constraints themselves; watch it as the chains land.
 
 - **Unplaced people.** Twenty-odd people and animals have no establishment in the story; the dog argument

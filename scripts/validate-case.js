@@ -46,6 +46,8 @@ const warnings = [];
 const lateQuotes = []; // cards that appear before the line they are first quoted from (their quote waits to be read)
 const err = (m) => errors.push(m);
 const warn = (m) => warnings.push(m);
+// A model that did not build (a schema that cannot ground, say) has no solver: report why and stop here.
+if (errors.length) finish();
 
 // ---------- quotes ----------
 const normalize = (s) => s

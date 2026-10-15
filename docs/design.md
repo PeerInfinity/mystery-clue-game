@@ -672,3 +672,32 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   five rules at their topics from ¶35 on, the coat event and its four questions at ¶35 (the lads see the coat
   there), and the 19 first-mention quotes now at their own paragraphs. Foreshadow log: nothing new before its
   paragraph. 44 tests pass.
+
+## Round 27 (2026-10-15): slice 3, chain 4 — the knife and the purpose
+
+- **Verified:** `k.knife_for_an_operation`, `k.horse_kicked`, `k.blow_needs_a_wielder`, `k.only_one_blade`,
+  `k.knife_marks_assailant`, `k.drugging_is_dishonest` (26 verified, 28 asserted). Three **traits** carry the
+  general reading: the knife is *surgical* ("a surgeon's instrument, made for the most delicate operations", at
+  "cataract knife"), the stick is *weighted* ("heavy enough to serve as a weapon"), the steel shoe is a *shod
+  hoof*. Schemas on `r.cataract_knife_use` (a man who takes a surgeon's knife out to a horse at night means an
+  operation: `purpose = injure`), `r.horse_would_wake_sleepers`, `r.startled_horse_kicks` (a light struck beside
+  the horse in the dark, a man struck down there: the horse lashed out), `r.convulsions_after_brain_injury`,
+  `r.knife_marks_assailant`, `r.honest_men_dont_drug`; new `r.hoof_strikes_as_horse_kicks` (hard),
+  `r.stick_needs_a_hand`, `r.wounds_in_a_struggle`. `k.horse_kicked` now concludes unconditionally (the rule
+  needs the light and the horse in the hollow, not the purpose); `k.blow_needs_a_wielder` drops its two editorial
+  exclusions (the cast shoe, the hunting-crop), which nothing needed.
+- **Asserted, with its reason:** `k.operation_in_the_open`. "It was absolutely necessary to do it in the open air"
+  explains why the horse had to be taken out at all; as a derivation it needs the hollow event tied to the horse,
+  which only the marks in the hollow give, and those already give the place. Cause and explanation are redesign
+  step 3. The route step `i.done_in_the_open` now concludes by a strike (the horse was not led to the stable)
+  instead of naming the hollow, which its cited premises could only reach through the asserted inference.
+- **Two gate slips caught by the needs check and undone.** Citing the marks in the step made it trivial (no
+  inference needed, and the five inferences Holmes states there would have moved to a later step). The hoof rule
+  anchored at the steel shoe (¶226) moved the gate of `i.horse_killed_straker` from ¶202 to ¶227, after Holmes's
+  explanation; it now arrives with the other horse rules (¶18). A per-step listing of gate paragraph and needed
+  inferences, diffed against HEAD, is the check to run with every chain (`scratchpad/needs.mjs` this session).
+- **Strict column:** "Who killed Straker" went from "simpson, silver_blaze" to 45 left, for the reason of Round 24:
+  the editorial exclusions carried that narrowing without a rule, and the rules that replace them are never
+  stated by the story. "By the challenge" unchanged for every question; uniqueness unchanged.
+- **Validator:** stops with the model's build errors instead of crashing on a model without a solver.
+  `engine/reasoning.test.js` names `k.window_drugging_time` as its asserted example. 44 tests pass, about 135 s.
