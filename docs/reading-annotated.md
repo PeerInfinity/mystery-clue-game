@@ -321,6 +321,10 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   reads "They still had hopes that the trainer had for some reason taken out the horse for early exercise"
   The household's first thought is that the trainer took the horse out himself. ⚠ medium: on a first reading
   this is just the household's hope.
+- `t34.7` **DEFAULT** · *fair* · careful · from `t34.2`, `t29.1`, `t33.1`, `bk.guard_dog` · supports `t34.4 (knew)` · Holmes ¶219 ("the midnight visitor was some one whom the dog knew well")
+  Someone came in and took a horse while the dog was there, and nobody heard it: a guard dog barks at strangers,
+  so the visitor was someone the dog knew, one of King's Pyland. Exceptions: the dog was drugged too, or barked
+  unheard (`t34.3`). (Added in Round 44: Holmes's step, which a careful reader can take here.)
 
 **¶35**
 - `t35.1` **RECORD** · typical

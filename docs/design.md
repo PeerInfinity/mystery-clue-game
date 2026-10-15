@@ -1049,3 +1049,14 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   those rules, the new rule and trait, the "With what?" question at ¶33, `k.entrant_took_the_horse` at ¶33 and
   `k.led_by_taker` at ¶37 (was ¶46). Foreshadow log: the same. Case report: the chain's inferences, one more slot
   left open; no gate, need or question-table change. Thoughts report: 18/42 deductions have an inference.
+
+## Round 44 (2026-10-15): short chains, chain 3 — the dog
+
+- **No deduction-type thought held Holmes's step** (`k.dog_knew_the_visitor`, ¶219): the annotation has the
+  hypothesis set (`t34.4`: drugged, barked unheard, someone it knew) and Holmes's TEST (`t219.1`). Under the ruling
+  of Round 42, a reader thought is added: `t34.7` (DEFAULT, fair, careful; from `t34.2`, `t29.1`, `t33.1`,
+  `bk.guard_dog`; supports `t34.4 (knew)`; Holmes ¶219) → `k.dog_knew_the_visitor`, unchanged (already short;
+  verified). Premises agree; dealt at ¶34.
+- **Still open, workstream 5:** `c.dog_did_nothing` is dealt at ¶34, so the game makes the absence (`t34.2`) for
+  the player.
+- **Moved:** nothing in the reveal or foreshadow logs or the case report; thoughts report 19/43.
