@@ -16,7 +16,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | ABSENCE | 5 | 2 |
 | QUESTION | 10 | 4 |
 | HYPOTHESIS | 27 | 22 |
-| INFER | 21 | 16 |
+| INFER | 21 | 17 |
 | DEFAULT | 8 | 7 |
 | AGENT | 9 | 4 |
 | PHYSICAL | 3 | 2 |
@@ -47,13 +47,13 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 46; with an inference: 27; earliest-date misses: 3 (and 2 explained); premise disagreements: 7
+- deduction-type thoughts: 46; with an inference: 31; earliest-date misses: 2 (and 2 explained); premise disagreements: 3
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
 | `t4.2` | DEFAULT | — | ¶4 | — |  |  |  |  |  |
 | `t18.3` | INFER | — | ¶18 | — |  |  |  |  |  |
-| `t19.5` | INFER | — | ¶19 | — |  |  |  |  |  |
+| `t19.5` | INFER | `k.at_a_stable_in_reach` | ¶19 | ¶19 |  |  |  |  |  |
 | `t20.6` | INFER | `k.drugged_in_food` | ¶20 | ¶37 (explained) |  |  | `r.tap_water_not_dosed` |  | `t20.5` |
 | `t24.2` | AGENT | — | ¶24 | — |  |  |  |  |  |
 | `t24.4` | AGENT | — | ¶24 | — |  |  |  |  |  |
@@ -68,9 +68,9 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t37.8` | INFER | `k.drugger_knew_the_dish` | ¶37 | ¶37 |  |  | `r.menu_known_at_home` |  | `t26.1` |
 | `t37.14` | DEFAULT | `k.menu_choosers` | ¶37 | ¶37 |  |  |  |  |  |
 | `t37.15` | DEFAULT | `k.drugger_chose_the_dish` | ¶37 | ¶37 |  |  |  |  |  |
-| `t40.4` | INFER | — | ¶40 | — |  |  |  |  |  |
+| `t40.4` | INFER | `k.horse_at_mapleton_by_reach` | ¶40 | ¶37 |  |  |  |  | `t40.3` |
 | `t46.2` | INFER | `k.bridled_by_taker` | ¶46 | ¶46 |  |  | `r.bridle_needs_a_hand` |  |  |
-| `t62.3` | DEFAULT | — | ¶62 | — |  |  |  |  |  |
+| `t62.3` | DEFAULT | `k.gypsies_did_not_take_him` | ¶62 | ¶62 |  |  |  |  |  |
 | `t68.3` | IDENTIFY | — | ¶68 | — |  |  |  |  |  |
 | `t78.2` | INFER | — | ¶78 | — |  |  |  |  |  |
 | `t81.4` | AGENT | `k.knife_not_a_weapon` | ¶81 | ¶81 |  |  |  |  |  |
@@ -85,14 +85,14 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t97.2` | AGENT | `k.coat_off_to_work` | ¶97 | ¶97 |  |  | `r.dead_men_do_nothing` |  | `t35.6` |
 | `t100.1` | PHYSICAL | — | ¶100 | — |  |  |  |  |  |
 | `t102.2` | TEST | `k.vesta_from_strakers_box` | ¶102 | ¶102 |  |  | `r.vesta_from_box`, `r.dead_men_do_nothing` |  |  |
-| `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶62 | `t37.1` | `r.famous_horse_unsellable`, `c.gypsies_gone`, `c.no_news_of_horse`, `c.stall_empty` | `r.gypsies_avoid_trouble` |  |  |
+| `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶37 |  |  |  |  |  |
 | `t116.2` | PHYSICAL | — | ¶116 | — |  |  |  |  |  |
-| `t120.1` | INFER | — | ¶120 | — |  |  |  |  |  |
+| `t120.1` | INFER | `k.horse_left_alone` | ¶120 | ¶119 |  |  |  |  |  |
 | `t120.2` | INFER | — | ¶120 | — |  |  |  |  |  |
 | `t123.2` | AGENT | — | ¶123 | — |  |  |  |  |  |
-| `t124.2` | INFER | `k.tracks_end_at_mapleton` | ¶124 | ¶124 |  | `c.horse_track_in_wet_hollow` | `r.tracks_lead_in` |  | `t123.2` |
-| `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶146 **late** | `t124.2` | `c.brown_first_up`, `c.dawson_fears_master`, `c.mapleton_brown` | `r.first_up_takes_it_in` |  |  |
-| `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 | `t124.2`, `t111.2` |  | `r.undertaking_means_possession` |  |  |
+| `t124.2` | INFER | `k.tracks_end_at_mapleton` | ¶124 | ¶124 |  |  | `r.tracks_lead_in` |  | `t123.2` |
+| `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶127 |  |  | `r.first_up_takes_it_in` |  |  |
+| `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 |  |  | `r.undertaking_means_possession` |  |  |
 | `t148.2` | INFER | — | ¶148 | — |  |  |  |  |  |
 | `t150.1` | AGENT | — | ¶150 | — |  |  |  |  |  |
 | `t175.1` | INFER | — | ¶175 | — |  |  |  |  |  |

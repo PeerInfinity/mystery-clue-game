@@ -1140,3 +1140,33 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Gates:** none moved, no need changed. **Moved:** reveal log: the coat rule at ¶35, the new question and both
   options at ¶97, `k.coat_placed`'s label. Foreshadow log: the rule at ¶35. Case report: the new question
   (settled in every column but Strict), the chain's inferences. Thoughts report: 27/46.
+
+## Round 48 (2026-10-15): short chains, chain 7 — Mapleton and Brown
+
+- **Model:** King's Pyland and Mapleton carry a trait *training stable*; new heuristic rule `r.hidden_among_horses`
+  ("A famous horse is known on sight: one that goes missing and is not seen on open country is hidden among other
+  horses, at a stable"; `bk.famous_horse` now maps it too), shown where Holmes raises concealment (¶14). A first
+  wording added "then at another training stable within reach", which spelled out the reader's step at ¶19.
+  Gregory's gypsy theory lacks the rule (`holder_lacks`), as it lacks the curry's and the dog's.
+- **The chain** (all verified; 59 verified, 10 asserted):
+  - `t19.5` → `k.at_a_stable_in_reach` (new): if he is not at King's Pyland, he is at Mapleton (the reader's
+    conditional at ¶19; the horse's absence from King's Pyland has no card before ¶37).
+  - `t40.4` → `k.horse_at_mapleton_by_reach` (new): with "no news of him" (`c.no_news_of_horse`, ¶37). Annotation:
+    cites `t37.2`. Holmes reaches Mapleton by another route (¶116).
+  - `t114.2` → `k.horse_goes_home`, split: the horse instinct alone (bound to the horse loose in the hollow);
+    the gypsies' part is `t62.3` → `k.gypsies_did_not_take_him` (new). Premises now agree.
+  - `t120.1` → `k.horse_left_alone` (new, the reading of the two tracks): he bolted from the hollow alone and
+    was met later. It no longer points at the flat `k.night_sequence` (left for the bookkeeping).
+  - `t124.2` → `k.tracks_end_at_mapleton` (unchanged). Annotation: cites `t117.1` (the track in the hollow).
+  - `t127.3` → `k.first_up_and_no_subordinate`, re-cited (the tracks into Mapleton, Brown first stirring, Brown
+    its master): unconditional now, and dealt at ¶127. It waited for Holmes's "no subordinate would have dared"
+    (¶146), which the rule's text carries. Annotation: cites `t127.1`, `t19.3` (which maps `c.mapleton_brown`).
+  - `t140.2` → `k.brown_broke` (unchanged). Annotation: cites `t140.1` only; `t124.2` and `t111.2` corroborate,
+    they are not premises.
+  - `t116.2` (PHYSICAL: hard ground takes no tracks) has no inference: it explains an absence of tracks and
+    settles no question (workstream 6, explains-links). Listed for Robert at the end of the chains.
+- **Gates:** none moved; `i.brown_hid_horse` needs one inference fewer (the tracks are inside the chain now).
+  Route `i.horse_at_mapleton` and `i.horse_disguised` gain `c.horse_was_in_hollow`.
+- **Moved:** reveal log: the training-stable glosses at ¶19, the new rule at ¶14–¶18, two inference labels.
+  Foreshadow log: the same. Case report: the chain's inferences. Thoughts report: 31/46, two earliest-date misses
+  left (`t29.3`, `t92.14`).

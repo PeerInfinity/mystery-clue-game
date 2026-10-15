@@ -432,7 +432,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   reads "When confronted with his cravat, he turned very pale, and was utterly unable to account for its presence"; "His wet clothing showed that he had been out in the storm"; "a Penang-lawyer weighted with lead, was just such a weapon as might, by repeated blows, have inflicted the terrible injuries"
 - `t40.3` **HYPOTHESIS·motive** · *fair* · careful · from `t40.1`, `t18.2`
   Mapleton gains if Silver Blaze doesn't run.
-- `t40.4` **INFER** · *fair* · careful · from `t40.3`, `t19.5`, `t14.3` · Holmes ¶116 (by another route: horse instinct)
+- `t40.4` **INFER** · *fair* · careful · from `t40.3`, `t19.5`, `t14.3`, `t37.2` · Holmes ¶116 (by another route: horse instinct)
   The horse is at, or was taken to, Mapleton: it has a motive, the means to hide a horse among horses, and it
   is two miles away.
 - `t40.5` **NOTICE** · *weak* · expert · from `t35.2`, `t40.2` · strains `t39.4`
@@ -901,7 +901,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 **¶124**
 - `t124.1` **RECORD** · *strong* · typical
   reads "It ended at the paving of asphalt which led up to the gates of the Mapleton stables"
-- `t124.2` **INFER** · *strong* · typical · from `t124.1`, `t123.2` · supports `t40.4`, `t64.3` · Holmes ¶146
+- `t124.2` **INFER** · *strong* · typical · from `t124.1`, `t123.2`, `t117.1` · supports `t40.4`, `t64.3` · Holmes ¶146
   The horse was taken into Mapleton. Since Mapleton was searched (`t64.1`), the searchers missed him, and the
   disguise (`t64.3`) or some trick explains how.
 
@@ -910,7 +910,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
   reads "Should I be too early to see your master, Mr. Silas Brown, if I were to call at five o'clock to-morrow morning?" "Bless you, sir, if any one is about he will be, for he is always the first stirring."
 - `t127.2` **GENRE·watch-holmes** · *fair* · careful · from `t127.1`
   Holmes asks who is about at dawn. He is testing who could have found a loose horse early on Tuesday morning.
-- `t127.3` **AGENT** · *fair* · careful · from `t124.2` · Holmes ¶146
+- `t127.3` **AGENT** · *fair* · careful · from `t124.2`, `t127.1`, `t19.3` · Holmes ¶146
   No groom would dare to hide a stolen favourite on his own account. Whoever did it at Mapleton had the authority
   to.
 - `t127.4` **HYPOTHESIS** · *fair* · careful · from `t127.1`, `t127.3`, `t124.2`, `t66.1` · answers `t120.3` · Holmes ¶146
@@ -930,7 +930,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
   reads "His face was ashy pale ... he cringed along at my companion's side like a dog with its master"
 - `t140.1` **RECORD** · *strong* · typical
   reads "Your instructions will be done. It shall all be done"; "Oh no, there shall be no mistake. It shall be there. Should I change it first or not?"
-- `t140.2` **INFER** · *strong* · careful · from `t140.1`, `t124.2`, `t111.2` · supports `t127.4` · Holmes ¶146, ¶204
+- `t140.2` **INFER** · *strong* · careful · from `t140.1` · supports `t127.4` · Holmes ¶146, ¶204
   Brown has the horse and has agreed to produce it ("it shall be there"), and the obvious place is the race.
 - `t141.1` **HYPOTHESIS** · *fair* · careful · from `t140.1`, `t64.3` · supports `t64.3` · Holmes ¶202–¶204
   reads "Should I change it first or not?"; "No, don't"; "I shall write to you about it."

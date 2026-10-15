@@ -562,6 +562,7 @@
       ],
       "holder_knows_by_scene": "s03_landau",
       "holder_lacks": [
+        "r.hidden_among_horses",
         "r.no_coincidence",
         "r.menu_chosen_by_household",
         "r.dog_barks_at_strangers",
