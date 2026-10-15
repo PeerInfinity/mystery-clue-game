@@ -71,7 +71,11 @@ test('applyRule: the player grounds a background fact against cards and holds it
     assert.ok(res.ok, res.error);
     assert.ok(game.knows(res.id) && game.heldApplied().includes(res.id));
     assert.equal(game.applyRule('r.dog_barks_at_strangers', { dog: 'stable_dog', visit: 'e.stable_entered', silence: 'e.dog_silent' }).existing, true);
-    // The applied rule, with the clues, rules Simpson out as the one who came in.
+    // The dog knew whoever came in; it knows only its own establishment; Simpson lodged at the villas: not him.
+    assert.equal(game.checkElimination('e.stable_entered.agent', 'simpson').ok, false, 'who the dog knows is still open');
+    while (!game.knows('c.simpson_lives_at_villas')) game.advance();
+    const own = game.applyRule('r.dog_knows_its_own', { dog: 'stable_dog' });
+    assert.ok(own.ok, own.error);
     assert.ok(game.checkElimination('e.stable_entered.agent', 'simpson').ok);
     game.suspect(res.id);
     assert.equal(game.checkElimination('e.stable_entered.agent', 'simpson').ok, false, 'doubting the application takes it away');
@@ -83,17 +87,19 @@ test('applyRule: the player grounds a background fact against cards and holds it
 test('conclude: a stated conclusion the cited cards entail becomes an inference card; one they do not is refused', () => {
     const game = new Game(model, { background: BG_START });
     while (game.read < 60) game.advance();
-    const cited = ['c.dog_kept_in_stable', 'c.dog_did_nothing', 'c.stall_empty', 'c.stable_door_open', 'c.dog_knows_household'];
+    const cited = ['c.dog_kept_in_stable', 'c.dog_did_nothing', 'c.stall_empty', 'c.stable_door_open', 'c.simpson_lives_at_villas'];
     const nope = game.conclude(cited, { ne: ['e.stable_entered.agent', 'simpson'] });
     assert.equal(nope.ok, false, 'the clues alone do not say who the dog knew');
     const applied = game.applyRule('r.dog_barks_at_strangers', { dog: 'stable_dog', visit: 'e.stable_entered', silence: 'e.dog_silent' });
-    const res = game.conclude([...cited, applied.id], { ne: ['e.stable_entered.agent', 'simpson'] });
+    const own = game.applyRule('r.dog_knows_its_own', { dog: 'stable_dog' });
+    assert.equal(game.conclude([...cited, applied.id], { ne: ['e.stable_entered.agent', 'simpson'] }).ok, false, 'nor who it knows');
+    const res = game.conclude([...cited, applied.id, own.id], { ne: ['e.stable_entered.agent', 'simpson'] });
     assert.ok(res.ok, JSON.stringify(res));
     assert.ok(game.knows(res.id) && game.heldInferences().includes(res.id));
-    assert.ok(res.premises.includes(applied.id) && res.premises.includes('c.dog_knows_household'), res.premises.join(' '));
-    assert.ok(!res.premises.includes('c.dog_kept_in_stable'), 'only what was needed is kept as a premise');
-    // A wider conclusion covers the authored inference.
-    const wide = game.conclude([...cited, applied.id], { in: ['e.stable_entered.agent', ['straker', 'mrs_straker', 'edith_baxter', 'ned_hunter', 'other_lads', 'sheep_lad', 'colonel_ross']] });
+    assert.ok(res.premises.includes(applied.id) && res.premises.includes(own.id) && res.premises.includes('c.simpson_lives_at_villas'), res.premises.join(' '));
+    assert.ok(!res.premises.includes('c.stall_empty'), 'only what was needed is kept as a premise');
+    // The authored inference's own conclusion: the visitor belonged to King's Pyland.
+    const wide = game.conclude([...cited, applied.id, own.id], model.cards.get('k.dog_knew_the_visitor').formula);
     assert.ok(wide.ok && wide.matches.includes('k.dog_knew_the_visitor'), JSON.stringify(wide.matches));
     // Citing clues that clash is refused as a contradiction, not accepted as a proof of anything.
     while (!game.knows('c.derbyshire_a_friend') || !game.knows('c.milliner_knows_straker')) game.advance();
@@ -135,11 +141,12 @@ test('relation and proposition slots: a relation question shows only once a held
     const game = new Game(model);
     while (!game.knows('stable_dog')) game.advance();
     assert.equal(game.slotVisible('rel.acquainted.stable_dog.simpson'), false, 'nothing has spoken of it yet');
-    while (!game.knows('c.dog_knows_household')) game.advance();
-    assert.equal(game.slotVisible('rel.acquainted.stable_dog.simpson'), false, 'a given fills it without raising it');
-    game.suspect('c.dog_knows_household');
-    assert.ok(game.slotVisible('rel.acquainted.stable_dog.simpson'), 'doubting it opens the question');
-    assert.match(game.promptOf('rel.acquainted.stable_dog.simpson'), /know .* well\?/);
+    assert.equal(game.slotVisible('rel.of_establishment.stable_dog'), false);
+    while (!game.knows('c.dog_kept_in_stable')) game.advance();
+    assert.equal(game.slotVisible('rel.of_establishment.stable_dog'), false, 'a given fills it without raising it');
+    game.suspect('c.dog_kept_in_stable');
+    assert.ok(game.slotVisible('rel.of_establishment.stable_dog'), 'doubting it opens the question');
+    assert.match(game.promptOf('rel.of_establishment.stable_dog'), /belong\?/);
     assert.equal(game.slotVisible('rel.needed_hiding.e.opium_added'), false, 'a relation on an event waits to be raised too');
 });
 

@@ -547,3 +547,26 @@ open): rule schemas with variables grounded against cards, relations and proposi
 constraint in the solver, inferences verified by the engine from their premises (6 of 53 so far; the report
 lists the rest as asserted), and the player's own moves `applyRule` and `conclude`, which pass Holmes's gates
 by any route. 42 tests pass; the case validates with 0 errors.
+
+## Round 23 (2026-10-15): traits and the establishment relation (kickoff slices 1 and 2)
+
+From `docs/kickoff-0.3-migration.md`; Robert's rulings of 2026-10-14 (closed-world facts go relational; traits
+first). Scope narrowed with Robert to slices 1 and 2; slice 3 (the asserted inferences) and the discussion of
+steps 2 and 3 of `redesign.md` go to a later session.
+
+- **Traits.** Entities may carry `traits` (id, term, text, quote); a rule variable or relation argument may say
+  `trait`. `r.curry_masks` and `masks_taste` range over spiced dishes, not over the curried mutton by name. The
+  curried mutton's trait ("Spiced: a curry is a strongly spiced dish") shows under Words at its first mention;
+  it is the one new piece of card text, plain description, and the foreshadow log lists "spiced" as a word the
+  story never uses.
+- **Establishment.** `of_establishment(x) → place`, given by claims the story already makes; two general rules
+  (`r.dog_knows_its_own`, `r.menu_known_at_home`) replace the editorial claims `c.dog_knows_household` and
+  `c.menu_known_to_household`, which are retired. The dog and curry inferences now conclude "belonged to King's
+  Pyland" and are verified; the people the story never places stay open to the dog argument (the honest result)
+  and the curry route closes them. The route step that leaned on the dog alone now says exactly that.
+- **Solver and game** changes the open relation slots required (guarded lookups, branching on lookup keys first,
+  independent parts searched apart, negations pushed inward; a lookup raises only its key). See the format doc.
+- **Gates:** no fair-play gate moved; the question table and every non-relation slot in the report are
+  unchanged. The reveal log differs only by the two retired claims and the two new rules shown as background
+  where they were (¶20 menu, ¶29 dog). Report: 7 verified, 46 asserted. 43 tests pass; `npm test` about 67 s.
+

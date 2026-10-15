@@ -1,6 +1,7 @@
 # Case format 0.3: checkable inferences
 
-Status: STEP 1 BUILT (2026-10-14), migration of the inferences in progress. Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
+Status: STEP 1 BUILT (2026-10-14); traits and the establishment relation built (2026-10-15); migration of the
+asserted inferences in progress. Step 1 of the plan in `redesign.md` ("Where to start"). The reading layer
 (entities, events, claims, mentions, disclosure dating, the validator's leak checks) is unchanged. The
 reasoning layer gains the pieces that let the engine *check* an inference instead of looking it up.
 
@@ -56,7 +57,7 @@ domain; and `only`: `{"only": [name, fixedArg..., [trueFor]]}` fixes the last ar
 Bindings are checked: a variable with `kind` binds only an entity of that kind (`event` binds an event card);
 `only` lists the cards it may bind to. A facet the bound card lacks fails the binding.
 
-**Traits** (slice 2, 2026-10-14). An entity may carry `traits: [{id, term, text, source}]`, general properties a
+**Traits** (kickoff slice 1, 2026-10-14). An entity may carry `traits: [{id, term, text, source}]`, general properties a
 rule can range over: a variable spec `{kind: "object", trait: "spiced"}` binds only cards that carry the trait,
 so `r.curry_masks` reads "a strongly spiced dish hides other tastes" instead of naming the curried mutton. A
 trait shows on its card like a gloss (under "Words": term and text), dated by the card's first mention or its
@@ -94,14 +95,45 @@ specific thing stay ground facts with a formula and no schema.
 - Tests: `engine/reasoning.test.js` (grounding, bindings, verification, applyRule, conclude, a gate passed by
   the player's own route, relation questions waiting to be raised). The whole suite runs in about 55 s.
 
+## As built (2026-10-15): the establishment relation (slice 2 of the kickoff)
+
+- **`of_establishment(x) → place`** (`relations.json`): people, animals, groups and Straker's villa, valued among
+  the establishments the story names (King's Pyland, Mapleton, the villas, the gypsy camp, Tavistock, London,
+  the Derbyshire household). Answers only where a claim gives them; every other one is open (`default_answer:
+  null`), so the uniqueness check records it as left open by the story. The values are added to claims the
+  story already makes: `c.straker_trainer_seven_years` (Straker, the Colonel), `c.straker_household` (wife, maid,
+  the villa), `c.kp_establishment` (Hunter, the other lads), `c.dog_kept_in_stable` (the dog),
+  `c.simpson_lives_at_villas`, `c.mapleton_brown` (Brown, Lord Backwater), `c.gypsies_camped`.
+- **Two general rules** replace the editorial `only` claims (`c.dog_knows_household`, `c.menu_known_to_household`,
+  retired): `r.dog_knows_its_own` ("a stable dog knows well the people of its own establishment; anyone else is
+  a stranger to it": acquainted(dog, p) → p belongs where the dog belongs) and `r.menu_known_at_home` ("what a
+  house will have for supper is known beforehand only to the people of its own establishment"). `knew_menu`
+  becomes `knew_menu(house, person)`; `r.no_coincidence` binds the choosing event and the house.
+- **The honest result.** `k.dog_knew_the_visitor` now concludes "the visitor belonged to King's Pyland" and
+  `k.drugger_knew_the_dish` "the drugger belonged to King's Pyland" (both lookups, both verified). The dog
+  alone no longer rules out people the story never places; the route step `i.straker_took_horse_by_dog` says
+  so (the taker belonged to King's Pyland and was none of its people accounted for that night). Simpson is
+  ruled out by the dog or the curry because the story places him at the villas, and the route steps that do
+  that cite `c.simpson_lives_at_villas`. No fair-play gate moved; the report's question table is unchanged.
+- **Solver** (`engine/solver.js`), needed because the relation slots are now open instead of fixed by `only`:
+  a lookup under an implication (a rule's "if the dog was silent while someone came in, the dog knew them") is
+  a *guarded* part, propagated as a lookup once its guard is settled, and as a small implication once its key
+  is; the search branches first on the keys and guards of lookups, then on everything else; after propagation
+  it splits the still-open slots into independent parts and searches each alone; negations are pushed inward
+  (`not index` = `nindex`, `not (a → b)` = `a ∧ ¬b`, nested implications flattened), so a doubted rule
+  application still splits; `consistent` with a denied conjunction tries each conjunct. `allCandidates` accepts
+  a value the first solution satisfies with only that slot changed, and searches try unseen values first.
+- **Game:** a held clue that fills a relation slot through a nested conjunction (an `only` inside `and`) fills
+  it without raising it; a lookup raises only its key ("who came in?"), not every person's establishment.
+- **Validator:** the schema is checked on the files as written (route conclusions are grounded in place); open
+  relation slots are checked for a second possible value only, the rest in one `allCandidates` batch.
+- Timings: `npm test` about 67 s (55 s before); `npm run validate` about 20 s (16 s before).
+
 ## Open
 
-- **Editorial closed-world claims leak a little.** "The stable dog knows the people of King's Pyland and no
-  one else" appears with the dog and says the dog matters. The relational version (`of_establishment(person)`
-  with the general rule "a stable dog knows its own establishment") would need an establishment for every
-  person in the agent domain, or the dog argument leaves the unplaced ones open, which is the honest result.
-  Decide when the knowledge library is redesigned.
-- **Rules bound to one card** (`r.curry_masks` on curried mutton) are ground facts in disguise; fine for now.
+- **Unplaced people.** Twenty-odd people and animals have no establishment in the story; the dog argument
+  leaves them open and the curry route closes them. Should a later chain need them placed, add the value to the
+  claim the story makes, never an editorial list.
 - **`conclude` on the big component late in the story** can take a few seconds when the conclusion is not
   entailed (the solver must find a witness). A time budget or a weaker first check may be wanted for the UI.
 - The UI does not yet offer `applyRule` or `conclude`; it still builds inferences by connecting premises.

@@ -30,7 +30,7 @@ export class Problem {
             }
             // The search works on small PARTS: a conjunction (also under an implication) is split, so most
             // constraints become one- or two-slot checks that propagate cheaply.
-            const parts = splitConjunctions(c.formula).map((formula) => ({ formula, scope: [...slotsOf(formula)], index: 'index' in formula || 'nindex' in formula }));
+            const parts = splitConjunctions(c.formula).map(makePart);
             this.constraints.set(c.id, { id: c.id, formula: c.formula, scope, parts });
         }
     }
@@ -46,16 +46,25 @@ export class Problem {
      * @returns {{ok:boolean, witness?:Map<string,string>}}
      */
     consistent(active, fixed = {}, { focus = false, extra = [] } = {}) {
+        // A negated conjunction (a conclusion of several parts, denied) is a disjunction, which the search cannot
+        // propagate: try denying each part in turn.
+        const split = extra.findIndex((f) => f.not?.and);
+        if (split >= 0) {
+            for (const g of extra[split].not.and) {
+                const res = this.consistent(active, fixed, { focus, extra: extra.map((f, i) => (i === split ? { not: g } : f)) });
+                if (res.ok) return res;
+            }
+            return { ok: false };
+        }
         const cons = [...active].flatMap((id) => this.#get(id).parts);
         const want = new Set(Object.keys(fixed));
         extra.forEach((formula) => {
-            for (const part of splitConjunctions(formula)) {
-                const scope = [...slotsOf(part)];
-                for (const s of scope) {
+            for (const part of splitConjunctions(formula).map(makePart)) {
+                for (const s of part.scope) {
                     if (!this.domains.has(s)) throw new Error(`formula names unknown slot ${s}`);
                     want.add(s);
                 }
-                cons.push({ formula: part, scope });
+                cons.push(part);
             }
         });
         let groups = components(cons, Object.keys(fixed));
@@ -101,11 +110,23 @@ export class Problem {
             if (!root.domains) { for (const s of mine) out.set(s, []); continue; }
             const seen = new Map(group.slots.map((s) => [s, new Set()]));
             const note = (sol) => { for (const [s, v] of sol ?? []) seen.get(s)?.add(v); };
-            note(this.#search(group, {}, 1, root.domains).first);
+            // Each search tries the values no solution has shown yet first, so one solution covers many of them.
+            const unseenFirst = (x, d) => { const fresh = d.filter((v) => !seen.get(x).has(v)); return fresh.length && fresh.length < d.length ? [...fresh, ...d.filter((v) => seen.get(x).has(v))] : d; };
+            const base = this.#search(group, {}, 1, root.domains).first;
+            note(base);
+            // A value that the first solution, with only this slot changed, still satisfies needs no search.
+            const touching = new Map(group.slots.map((s) => [s, []]));
+            for (const c of group.cons) for (const x of c.scope) touching.get(x).push(c);
+            const repairs = (s, v) => {
+                if (!base) return false;
+                const sol = new Map(base).set(s, v);
+                return touching.get(s).every((c) => evaluate(c.formula, sol, this.timeOrder) !== false);
+            };
             for (const s of mine) {
                 for (const v of root.domains.get(s)) {
                     if (seen.get(s).has(v)) continue;
-                    const r = this.#search(group, { [s]: v }, 1, root.domains);
+                    if (repairs(s, v)) { seen.get(s).add(v); continue; }
+                    const r = this.#search(group, { [s]: v }, 1, root.domains, unseenFirst);
                     if (r.count) note(r.first);
                 }
                 out.set(s, root.domains.get(s).filter((v) => seen.get(s).has(v)));
@@ -197,8 +218,9 @@ export class Problem {
         while (progress) {
             progress = false;
             for (const part of this.#get(id).parts) {
-                if (part.index) {
-                    const changed = indexPrune(part.formula, dom);
+                const lookup = part.index ? part.formula : part.guard && settled(part.guard, dom, order) ? part.lookup : null;
+                if (lookup) {
+                    const changed = indexPrune(lookup, dom);
                     if (!changed) { local.set(part.scope[0], []); return local; }
                     for (const [x, nd] of changed) {
                         if (nd.length === dom(x).length) continue;
@@ -248,9 +270,9 @@ export class Problem {
     /**
      * Search one component. limit = 0 only propagates and returns the reduced domains ({domains} or {} when
      * inconsistent); otherwise counts solutions up to `limit`. `start` = domains to begin from (already
-     * propagated for the same constraints).
+     * propagated for the same constraints). `valueOrder(slot, values)` may reorder the values tried.
      */
-    #search(group, fixed, limit, start = null) {
+    #search(group, fixed, limit, start = null, valueOrder = null) {
         const domains = new Map();
         for (const s of group.slots) {
             let d = (start ?? this.domains).get(s);
@@ -304,10 +326,11 @@ export class Problem {
                     if (evaluate(c.formula, assign, order) === false) return false;
                     continue;
                 }
-                if (c.index) {
+                const lookup = c.index ? c.formula : c.guard && settled(c.guard, (s) => domains.get(s), order) ? c.lookup : null;
+                if (lookup) {
                     // A lookup: prune the key's values whose target cannot hold what is required; a settled key
                     // settles its target.
-                    const changed = indexPrune(c.formula, (s) => domains.get(s));
+                    const changed = indexPrune(lookup, (s) => domains.get(s));
                     if (!changed) return false;
                     for (const [x, nd] of changed) {
                         if (nd.length === domains.get(x).length) continue;
@@ -317,11 +340,15 @@ export class Problem {
                     }
                     continue;
                 }
-                const open = c.scope.filter((x) => !assign.has(x));
-                if (open.length > GAC_MAX_SCOPE) continue; // checked once few enough of its slots stay open
+                // A guarded lookup whose key is settled is a small implication: "if the guard holds, this target
+                // has this value". Check that, though its guard may span more slots than a plain part may.
+                const p = c.guard ? settledLookup(c, (s) => domains.get(s)) : c;
+                if (!p) continue;
+                const open = p.scope.filter((x) => !assign.has(x));
+                if (open.length > (p === c ? GAC_MAX_SCOPE : GUARD_MAX_SCOPE)) continue; // checked once few enough of its slots stay open
                 for (const x of open) {
                     const d = domains.get(x);
-                    const nd = d.filter((v) => supported(c, x, v));
+                    const nd = d.filter((v) => supported(p, x, v));
                     if (nd.length === d.length) continue;
                     setDomain(x, nd);
                     if (nd.length === 0) return false;
@@ -336,6 +363,12 @@ export class Problem {
             return true;
         };
 
+        // The keys of lookups and the slots of their guards: the search branches on these first (see `step`).
+        const pivots = [...new Set(group.cons.flatMap((c) => {
+            const lookup = c.index ? c.formula : c.lookup;
+            return lookup ? [(lookup.index ?? lookup.nindex)[0], ...(c.guard ? slotsOf(c.guard) : [])] : [];
+        }))];
+
         for (const d of domains.values()) if (d.length === 0) return { count: 0 };
         if (start) {
             const queue = new Set();
@@ -344,33 +377,72 @@ export class Problem {
         } else if (!propagate([...group.cons])) return { count: 0 };
         if (limit === 0) return { count: 0, domains: new Map(domains) };
 
-        let count = 0;
-        let first = null;
-        const step = () => {
-            let best = null;
-            for (const s of group.slots) {
-                if (assign.has(s)) continue;
-                if (best === null || domains.get(s).length < domains.get(best).length) best = s;
-            }
-            if (best === null) {
-                count++;
-                if (!first) first = new Map(assign);
-                return count >= limit;
-            }
-            for (const v of domains.get(best)) {
-                const mark = trail.length;
-                assign.set(best, v);
-                setDomain(best, [v]);
-                if (propagate([...bySlot.get(best)]) && step()) return true;
-                assign.delete(best);
-                while (trail.length > mark) {
-                    const [u, d] = trail.pop();
-                    domains.set(u, d);
+        // Slots propagation has settled link nothing: split what is still open into independent parts and search
+        // each alone (a solution is one solution of each part). A constraint whose slots are all settled is checked
+        // here, since propagation skips a wide one.
+        for (const c of group.cons) if (c.scope.every((x) => domains.get(x).length === 1)) {
+            if (evaluate(c.formula, new Map(c.scope.map((x) => [x, domains.get(x)[0]])), order) === false) return { count: 0 };
+        }
+        const parent = new Map();
+        const find = (x) => { while (parent.get(x) !== x) { parent.set(x, parent.get(parent.get(x))); x = parent.get(x); } return x; };
+        const openSlots = group.slots.filter((x) => domains.get(x).length > 1);
+        for (const x of openSlots) parent.set(x, x);
+        for (const c of group.cons) {
+            const open = c.scope.filter((x) => parent.has(x));
+            for (let i = 1; i < open.length; i++) parent.set(find(open[i]), find(open[0]));
+        }
+        const parts = new Map();
+        for (const x of openSlots) { const r = find(x); if (!parts.has(r)) parts.set(r, []); parts.get(r).push(x); }
+
+        // Smallest domain first, but the keys and guards of lookups before everything else: once they are settled
+        // the lookups act, and the many small relation slots they range over need no branching. The open slots of
+        // each pool are kept from `at` on: the chosen one is swapped to `at`, which moves past it while it is set.
+        const pivotSet = new Set(pivots);
+        const solve = (slots, cap) => {
+            let count = 0;
+            let first = null;
+            const pools = [{ open: slots.filter((x) => pivotSet.has(x)), at: 0 }, { open: slots.filter((x) => !pivotSet.has(x)), at: 0 }];
+            const step = () => {
+                const pool = pools.find((p) => p.at < p.open.length);
+                if (!pool) {
+                    count++;
+                    if (!first) first = new Map(slots.map((x) => [x, assign.get(x)]));
+                    return count >= cap;
                 }
-            }
-            return false;
+                const { open, at } = pool;
+                let pick = at;
+                for (let i = at, size = Infinity; i < open.length; i++) {
+                    const n = domains.get(open[i]).length;
+                    if (n < size) { pick = i; size = n; if (n <= 1) break; } // nothing beats a settled slot
+                }
+                [open[at], open[pick]] = [open[pick], open[at]];
+                const best = open[at];
+                pool.at++;
+                for (const v of valueOrder ? valueOrder(best, domains.get(best)) : domains.get(best)) {
+                    const mark = trail.length;
+                    assign.set(best, v);
+                    setDomain(best, [v]);
+                    if (propagate([...bySlot.get(best)]) && step()) { pool.at--; return true; }
+                    assign.delete(best);
+                    while (trail.length > mark) {
+                        const [u, d] = trail.pop();
+                        domains.set(u, d);
+                    }
+                }
+                pool.at--;
+                return false;
+            };
+            step();
+            return { count, first };
         };
-        step();
+        const first = new Map(group.slots.filter((x) => domains.get(x).length === 1).map((x) => [x, domains.get(x)[0]]));
+        let count = 1;
+        for (const slots of parts.values()) {
+            const r = solve(slots, limit);
+            if (!r.count) return { count: 0 };
+            count = Math.min(limit, count * r.count);
+            for (const [x, v] of r.first) first.set(x, v);
+        }
         return { count, first };
     }
 }
@@ -403,17 +475,80 @@ function indexPrune(formula, dom) {
     return out;
 }
 
+/** Does formula `f` already hold, reading every slot whose domain is down to one value as assigned? */
+function settled(f, dom, order) {
+    const assign = new Map();
+    for (const s of slotsOf(f)) {
+        const d = dom(s);
+        if (d.length === 1) assign.set(s, d[0]);
+    }
+    return evaluate(f, assign, order) === true;
+}
+
 /** Lexicographic comparison of two score arrays. */
 function compare(a, b) {
     for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
     return 0;
 }
 const GAC_MAX_SCOPE = 3;
+const GUARD_MAX_SCOPE = 8;
 
-/** Split a formula into parts whose conjunction is equivalent: and(a,b) → a, b; implies(p, and(a,b)) → implies(p,a), implies(p,b). */
+/**
+ * A guarded lookup part ({implies: [guard, index]}) once its key is settled: {formula: implies(guard, target is /
+ * is not value), scope}. Null while the key is open.
+ */
+function settledLookup(part, dom) {
+    const pos = 'index' in part.lookup;
+    const [key, map, value, outside] = part.lookup.index ?? part.lookup.nindex;
+    const kd = dom(key);
+    if (kd.length !== 1) return null;
+    const target = map[kd[0]];
+    const then = target === undefined ? ((outside === value) === pos ? { true: true } : { false: true }) : pos ? { eq: [target, value] } : { ne: [target, value] };
+    const formula = { implies: [part.guard, then] };
+    return { formula, scope: [...slotsOf(formula)] };
+}
+
+const isIndex = (f) => 'index' in f || 'nindex' in f;
+
+/**
+ * One part of a constraint for the search. A lookup part propagates as a lookup. A lookup under an implication
+ * ("if these hold, the visitor's relation is true") is GUARDED: its scope spans every target of the lookup, so it
+ * is propagated as a lookup once its condition is settled.
+ */
+function makePart(formula) {
+    const guarded = formula.implies && isIndex(formula.implies[1]) ? { guard: formula.implies[0], lookup: formula.implies[1] } : {};
+    return { formula, scope: [...slotsOf(formula)], index: isIndex(formula), ...guarded };
+}
+
+/**
+ * Push a negation inward where that keeps the parts small: not(not f) = f, not(a → b) = a ∧ ¬b, and the negation
+ * of a lookup is the opposite lookup (with the same reading beyond the relation's range).
+ */
+function pushNot(f) {
+    if (!f.not) return f;
+    const g = f.not;
+    if (g.not) return pushNot(g.not);
+    if (g.implies) return { and: [g.implies[0], pushNot({ not: g.implies[1] })] };
+    if (g.index) return { nindex: g.index };
+    if (g.nindex) return { index: g.nindex };
+    return f;
+}
+
+/**
+ * Split a formula into parts whose conjunction is equivalent: and(a,b) → a, b; implies(p, and(a,b)) →
+ * implies(p,a), implies(p,b); implies(p, implies(q, r)) → implies(p ∧ q, r). (A doubted rule application,
+ * "if it is false, the rule fails here", so splits into a guard and a lookup the search can propagate.)
+ */
 export function splitConjunctions(f) {
+    f = pushNot(f);
     if (f.and) return f.and.flatMap(splitConjunctions);
-    if (f.implies && f.implies[1].and) return f.implies[1].and.flatMap((g) => splitConjunctions({ implies: [f.implies[0], g] }));
+    if (f.implies) {
+        const [p, q0] = f.implies;
+        const q = pushNot(q0);
+        if (q.and) return q.and.flatMap((g) => splitConjunctions({ implies: [p, g] }));
+        if (q.implies) return splitConjunctions({ implies: [{ and: [p, q.implies[0]] }, q.implies[1]] });
+        if (q !== q0) return [{ implies: [p, q] }];
+    }
     return [f];
 }
 

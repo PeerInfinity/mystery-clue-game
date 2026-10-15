@@ -276,6 +276,15 @@ export function buildModel(data) {
         });
     }
 
+    // A route step's conclusion may use relation terms too: ground it once.
+    for (const step of data.route ?? []) {
+        const f = step.concludes?.formula;
+        if (f && !isGround(f)) {
+            const g = groundOrError(step.id, f);
+            if (g) step.concludes = { ...step.concludes, formula: g };
+        }
+    }
+
     for (const k of constraints.values()) {
         for (const s of slotsOf(k.formula)) {
             if (!slots.has(s)) errors.push(`constraint ${k.id} names unknown slot ${s}`);

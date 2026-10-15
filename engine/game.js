@@ -850,7 +850,8 @@ export class Game {
                 const asserts = this.model.cards.get(c.id)?.asserts;
                 if (c.derived || !asserts) continue;
                 add(`${c.id}.truth`, () => this.suspected.has(c.id));
-                const fills = new Set((asserts.and ?? [asserts]).filter((f) => f.eq).map((f) => f.eq[0]));
+                const conjuncts = (f) => (f.and ? f.and.flatMap(conjuncts) : [f]);
+                const fills = new Set(conjuncts(asserts).filter((f) => f.eq).map((f) => f.eq[0]));
                 for (const x of slotsIn(asserts)) add(x, fills.has(x) ? () => this.knows(c.id) && this.suspected.has(c.id) : () => this.knows(c.id));
             }
             // A held inference raises what it speaks of, as a clue does; its "Does it hold?" once doubted.
@@ -1249,6 +1250,17 @@ function literalsIn(f, out = []) {
     return out;
 }
 
+/**
+ * The questions a formula speaks of. A lookup ("the visitor's establishment is King's Pyland") speaks of its key,
+ * the visitor, not of every person's establishment it might select.
+ */
 function slotsIn(f, out = new Set()) {
-    return slotsOf(f, out);
+    if (!f || typeof f !== 'object') return out;
+    const lookup = f.index ?? f.nindex;
+    if (lookup) { out.add(lookup[0]); return out; }
+    if (f.and || f.or) for (const g of f.and ?? f.or) slotsIn(g, out);
+    else if (f.implies) { slotsIn(f.implies[0], out); slotsIn(f.implies[1], out); }
+    else if (f.not) slotsIn(f.not, out);
+    else slotsOf(f, out);
+    return out;
 }

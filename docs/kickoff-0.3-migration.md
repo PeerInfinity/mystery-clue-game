@@ -4,6 +4,13 @@
 **Parent:** `docs/format-0.3.md` (the format as built, decisions), `docs/redesign.md` (why), `docs/design.md`
 Round 22 (what shipped). Read those first; this document says what to do next and what not to re-open.
 
+**Status (2026-10-15, Opus session):** slices 1 (traits) and 2 (the establishment relation) are DONE, see
+`docs/format-0.3.md` "As built (2026-10-15)" and `docs/design.md` Round 23. The report now lists 7 verified and
+46 asserted inferences (the "47" below predates one). Start at slice 3. Anchors that changed: the two editorial
+claims are gone; `relations.json` has 8 relations (`knew_menu` is now `knew_menu(house, person)`); `npm test`
+takes about 67 s; the solver gained guarded lookups and branching on lookup keys first (read its notes before
+adding relations that range over many open slots).
+
 ## 0. Mission in one paragraph
 
 Finish making the case's reasoning checkable. Add traits so rules read generally; replace the two editorial

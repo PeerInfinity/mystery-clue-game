@@ -32,12 +32,13 @@ if (main.mentions_file) {
     const m = readJson(main.mentions_file);
     data.mentions = { entities: m.entities, windows: m.windows };
 }
+const raw = structuredClone(data); // the model grounds some formulas in place (route conclusions): check the schema on the file's own
 const model = buildModel(data);
 const errors = [...model.errors];
 {
     const schema = JSON.parse(fs.readFileSync(new URL('../schema/case.schema.json', import.meta.url), 'utf8'));
     const validate = new Ajv2020({ allErrors: true, strict: false }).compile(schema);
-    if (!validate(data)) {
+    if (!validate(raw)) {
         for (const e of validate.errors.slice(0, 40)) errors.push(`schema: ${e.instancePath || '/'} ${e.message}`);
     }
 }
@@ -295,11 +296,24 @@ if (errors.length) finish();
 
 // ---------- uniqueness ----------
 const slotRows = [];
+// A relation slot the story leaves open (whose establishment is never given…) needs only a second possible value;
+// every other slot gets its whole candidate list, all in one batch.
+const quickOpen = (s) => s.facet === 'relation' && s.undetermined === true;
+const witness = model.problem.consistent(evidenceIds).witness ?? new Map();
+const batch = model.problem.allCandidates(evidenceIds, [...model.slots.values()].filter((s) => !s.latent && !quickOpen(s)).map((s) => s.id));
+const twoValues = (s) => {
+    const v0 = witness.get(s.id) ?? s.domain[0];
+    const other = model.problem.consistent(evidenceIds, {}, { extra: [{ ne: [s.id, v0] }] });
+    return other.ok ? [v0, other.witness.get(s.id)] : [v0];
+};
 for (const s of model.slots.values()) {
     if (s.latent) continue;
-    const cands = model.problem.candidates(evidenceIds, s.id);
+    const cands = quickOpen(s) ? twoValues(s) : batch.get(s.id) ?? s.domain;
     let status;
-    if (Array.isArray(s.undetermined)) {
+    if (quickOpen(s)) {
+        status = cands.length > 1 ? 'open' : `DETERMINED as ${cands[0]} though recorded open`;
+        if (cands.length <= 1) warn(`slot ${s.id}: recorded as open but the evidence fixes it to ${cands[0]}`);
+    } else if (Array.isArray(s.undetermined)) {
         const want = [...s.undetermined].sort().join(',');
         status = [...cands].sort().join(',') === want ? 'open as recorded' : `OPEN SET DIFFERS (left: ${cands.join(', ')})`;
         if (!status.startsWith('open as')) warn(`slot ${s.id}: recorded as one of [${s.undetermined}] but the evidence leaves [${cands}]`);
