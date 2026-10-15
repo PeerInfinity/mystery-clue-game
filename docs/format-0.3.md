@@ -189,6 +189,15 @@ specific thing stay ground facts with a formula and no schema.
   the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
   the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the
   villa (the answer becomes "straker_villa"), or keep it: Robert's call.
+- **The police's four false inferences** (`k.police_simpson_drugged`, `k.police_simpson_took_horse`,
+  `k.police_stick_killed`, `k.gregory_gypsies`) are the asserted inferences without a reason. To verify them as
+  the police's reasoning, their rule applications must take the inference's reading: today a `#rule` constraint of
+  a `truth: false` inference is checked against the true solution like any other and the validator refuses it
+  ("the true solution violates k.police_stick_killed#rule1"). Robert's ruling on the kickoff's open question 2
+  (their own wrong rule cards, or stated only) decides the shape; slice 4 (the report gate) waits on it.
+- **Cards quoted later than they appear** (19, listed in the report): an earlier quote where the story has one.
+- **The sheep event at ¶173** now shows its four questions, "Who did it?" among them, when the lad reports the
+  lameness; whether that runs ahead of the story is Robert's call.
 - **The suite grows with each chain** (67 s → 100 s after one chain, about 135 s after four, 107 s after five once denied conclusions split properly). The remaining cost is the extra wide
   constraints themselves; watch it as the chains land.
 
