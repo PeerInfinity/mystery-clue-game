@@ -906,3 +906,15 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
   alarm, the coat taken off to work, the alias's post, the guilty denial).
 - **Next:** workstream 2, short chains: the INFER, DEFAULT, AGENT, PHYSICAL and IDENTIFY thoughts become small
   verified inferences citing other thoughts; the route becomes chains of them; the two dates replace the gates.
+
+## Round 38 (2026-10-15): short chains, the options
+
+- **`docs/short-chains.md`** (discussion): four questions for workstream 2, each with options and a
+  recommendation. Q1, how a thought becomes checkable: map each deduction-type thought to one authored inference
+  whose premises are its cited thoughts' cards (recommended), versus logic in the thought file, versus no authored
+  inferences. Q2, the 54 existing inferences: split and re-cite chain by chain (recommended), versus keeping both,
+  versus regenerating. Q3, the gates: from the thoughts' Holmes paragraphs, with the earliest date checked against
+  the engine and `route.json` retired, plus scoring (recommended), versus scoring only, versus keeping the route
+  with chained premises. Q4, steps the engine needs but a reader makes unnoticed (20 inferences match no thought,
+  mostly the night's bookkeeping): implicit inferences granted when their premises are held, visible and doubtable,
+  folded into rules where cheap (recommended), versus thoughts for each, versus rules only.
