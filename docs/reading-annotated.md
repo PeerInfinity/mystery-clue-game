@@ -1,14 +1,15 @@
 # Silver Blaze, read slowly: an annotated attempt to solve it ahead of Holmes
 
-Status: PILOT, ¶0–¶92 (from Baker Street through the villa, stopping before the hollow). Written 2026-10-15.
-The rest of the story waits until the granularity and the tags below are agreed.
+Status: PILOT, ¶0–¶92 (from Baker Street through the villa, stopping before the hollow). Written 2026-10-15;
+moved to the extended tag set with ids, premises and two dates the same day. The rest of the story follows
+once this format is agreed.
 
 ## What this is
 
-A record of the thoughts a careful reader has while reading the story and trying to make each deduction
-before Holmes announces it. Each thought is tied to the paragraph that makes it possible. Using it as a spec,
-we can (1) design player actions that match those thoughts, and (2) check the case format against every line
-(covered, partial, missing) instead of only against Holmes's route.
+A record of the thoughts a careful reader has while reading the story and trying to make each deduction before
+Holmes announces it. Each thought is tied to the earliest paragraph that makes it possible. The document has two
+uses: as a spec for player actions (the game should let a player perform every thought here), and as a yardstick
+for the case format (every thought is covered, partial or missing).
 
 The annotation is written without reference to the case files (`claims.json`, `knowledge.json`, ...). That is
 deliberate: it should describe the reader, not the format we already have.
@@ -18,518 +19,714 @@ deliberate: it should describe the reader, not the format we already have.
 I am not a first-time reader: I know how the story ends. So this is a disciplined reconstruction, not a
 transcript. The rules I followed:
 
-- A thought may use only what the text has disclosed up to its paragraph, plus background knowledge a reader of
-  1892 or today plausibly has. The background is always named.
-- Every thought carries a **confidence** a reader could justify at that point: *weak* (a flag, an itch),
-  *fair* (a live hypothesis worth acting on), *strong* (would bet on it).
+- A thought may use only what the text has disclosed up to its paragraph, plus background knowledge, which is
+  always named as a card (below).
+- Every thought carries a **confidence** a reader could justify at that point: *weak* (a flag, an itch), *fair*
+  (a live hypothesis worth acting on), *strong* (would bet on it).
 - Where my knowledge of the ending probably makes a thought easier than it would be on a first reading, it
-  carries **⚠ hindsight** and a note on what a first-time reader would need in order to have it.
-- Wrong turns are recorded and labelled as wrong turns, because a real reader makes them and the game has to
-  give them somewhere to go.
-- Where Holmes later states the same step, the thought points to the paragraph (`→ ¶218`), so this reading can
-  be lined up with his route.
+  carries **⚠** and a note on what a first-time reader would need in order to have it.
+- Wrong turns are recorded: a HYPOTHESIS the reader takes up, then a DROP that cites the reason.
 
 A real think-aloud reading by someone who doesn't know the story would be the best check on this
 reconstruction.
 
-### Paragraph numbers
+## Notation
+
+### Paragraphs and spans
 
 `¶N` is the 0-based paragraph index used by `engine/story.js` (story.txt split on blank lines), the same
-numbering as the reveal and foreshadow logs. Scene ids are those of `case.json`.
+numbering as the reveal and foreshadow logs. Scene ids are those of `case.json`. A thought that reads the text
+quotes the clause it reads (`reads "..."`). That quote, not the whole paragraph, is the thought's span.
 
-### Kinds of thought
+### A thought
 
-| Tag | What the reader is doing |
+```
+- `t35.6` **WEIGH** · *strong* · careful · from `t12.2` · Holmes ¶226 (contradicts)
+  reads "It was clear, however, that Straker had defended himself vigorously against his assailants"
+  The prose of the thought.
+```
+
+| Field | Meaning |
 |---|---|
-| RECORD | Putting a fact into the picture of Monday night. Recorded only when it shapes what follows. |
-| NOTICE | Flagging a detail that a normal version of this story wouldn't contain, or a thing that is missing. |
-| QUESTION | Naming a blank. |
-| HYPOTHESIS | Proposing one or more candidate explanations, held open. |
-| INFER | A step that is as good as certain given its premises. |
-| DEFAULT | A step through background knowledge that usually holds but has exceptions; the default and its exceptions are named. |
-| WEIGH | Treating testimony as speech: who says it, did they see it or conclude it, could they know, would they lie. |
-| TEST | Checking new information against a live hypothesis: supports, strains or refutes it. |
-| RESIDUE | What a theory leaves unexplained. |
-| PREDICT | What a hypothesis says we will find later. |
-| GENRE | Reading the narrator's or Holmes's behaviour as a signal (the contract of the detective story). |
-| WRONG TURN | A hypothesis the reader takes up and later drops, with the reason. |
-| REVISE | An earlier item changes meaning. |
+| id | `t<¶>.<n>`. The paragraph in the id is the thought's **earliest date**: the first paragraph at which every premise is available. Checkpoint thoughts at the end of a scene use the scene's last paragraph. |
+| tag | The kind of move (table below), with a subtype after a dot where useful (`HYPOTHESIS·motive`). |
+| confidence | *weak*, *fair*, *strong*. |
+| profile | Who makes this move: **typical** (a first-time reader paying normal attention), **careful** (a reader playing it as a puzzle), **expert** (needs specialist knowledge, or a leap almost nobody makes). That makes three hint tiers and a difficulty setting. |
+| `from` | The premises: thought ids and background cards (`bk.*`). All of them are needed. |
+| relations | `supports`, `strains` (makes the target less likely), `refutes`, `undercuts` (attacks the link from the target's premises to its conclusion, not the conclusion itself), `revises` (changes what an earlier item means), `drops` (abandons a hypothesis). A target may name a member of a set: `t24.3 (drug)`. |
+| Holmes date | `Holmes ¶N`: where Holmes (or the story) states or confirms the same step; `(contradicts)` where it overturns it; `Holmes —` where he never states it. The gap between the earliest date and Holmes's date is the window in which the reader can beat Holmes. RECORDs have no Holmes date. |
+| ⚠ | Hindsight risk, with a note. |
 
-At the end of each scene, a **State of mind** block gives the reader's picture of the night: the timeline with
-its gaps, the open questions, and the live hypotheses with what each one leaves unexplained.
+### Tags
+
+| Tag | Subtypes | What the reader is doing | Game action it suggests |
+|---|---|---|---|
+| RECORD | | Putting a fact from the text into the picture of Monday night. One fact per record, quoted at clause level. | Place a card on the timeline and map board. |
+| NOTICE | ·calculate | Flagging a detail that a normal version of this story wouldn't contain. `·calculate`: the oddity shows only after arithmetic on stated figures. | Highlight a span and say which expectation it breaks. |
+| ABSENCE | | Expecting something the text doesn't report. | File an expectation (set up earlier in the text) as "expected, not reported". |
+| QUESTION | ·opportunity ·motive ·turn-around | Naming a blank. `·turn-around`: inverting a question to make it productive. | Pin a "?" card on a blank or a card. |
+| HYPOTHESIS | ·opportunity ·motive ·scenario | Proposing a set of candidate explanations, held open. `·scenario`: a whole story of the night. | Put candidates on a blank; sets stay open until pruned. |
+| INFER | | A step as good as certain given its premises. | Combine cards; the engine checks the step. |
+| DEFAULT | ·period | A step through background knowledge that usually holds, with named exceptions. `·period`: a belief of 1892 that the game presents in period terms without endorsing it. | Combine cards under a rule card whose exceptions can later be played against it. |
+| AGENT | | Reasoning about what a person in that position would do or would have done. | As DEFAULT, with a rule about people. |
+| PHYSICAL | | Reasoning about what could physically happen. | As DEFAULT, with a rule about the world. |
+| IDENTIFY | ·merge ·split | Two names or descriptions are one thing, or one thing is really two. | Merge two entity or event cards, or split one. |
+| WEIGH | | Treating testimony as speech: saw versus concluded, could they know, would they lie. | Split a testimony card into its observed and concluded parts; set credibility. |
+| SOURCE | | Tracing a "fact" back along its chain of reporting. | Show and annotate a card's chain of reporting (who heard it from whom). |
+| TEST | | Checking new information against a live hypothesis. | Drag a fact onto a hypothesis: supports, strains or refutes. |
+| RESIDUE | | Listing what a theory leaves unexplained. | Each scenario has a tray of unexplained items; the player argues items out of it. |
+| PREDICT | | Saying what a hypothesis implies we'll find. | Seal a prediction; scored when the story reveals it. |
+| TEST PLAN | | Choosing a check that would tell two hypotheses apart. | Name the check; scored when Holmes runs it, or when the story answers it. |
+| GENRE | ·re-read ·watch-holmes | Reading the narrator's or Holmes's behaviour as a signal. `·re-read`: going back to earlier text with a new question. `·watch-holmes`: inferring from what the detective looks at. | A "this matters" card; a re-read action; a card saying Holmes is interested in X (worth less than reasoning from the evidence). |
+| SET ASIDE | | Marking a detail as scenery. | Costs nothing; clears the board. |
+| DROP | | Abandoning a hypothesis, citing why. (This is where wrong turns end; the game never calls them wrong turns.) | Retract a candidate with a reason card. |
+| REVISE | | An earlier item changes meaning. | Re-tag a card's interpretation. |
+
+### Background knowledge cards
+
+| Card | Content | 1892 reader | Modern reader |
+|---|---|---|---|
+| `bk.one_culprit` | Two crimes at the same place and time share a cause and a culprit. Exceptions: one caused the other; two agents acted independently. | yes | yes |
+| `bk.genre_obvious` | In a detective story the obvious suspect arrested in the first act is usually not the answer, and the unimaginative policeman is usually wrong. | yes | yes |
+| `bk.genre_named_detail` | A detail the narrator spells out without need tends to matter. | yes | yes |
+| `bk.famous_horse` | A famous racehorse is recognised on sight; a loose one on open country is soon seen. | yes | yes |
+| `bk.drug_paper` | Powders, drugs among them, come folded in paper. | yes | yes |
+| `bk.guard_dog` | A guard dog barks at strangers and at the unusual at night, not at people it knows. | yes | yes |
+| `bk.alarm` | Someone who discovers a theft and a drugged guard raises the alarm. | yes | yes |
+| `bk.opium_taste` | Powdered opium has a perceptible taste; a strongly spiced dish would hide it. | likely | partial |
+| `bk.coincidence` | An exactly-right coincidence is not to be believed when an explanation by intention is available. | yes | yes |
+| `bk.coat_work` | Men take a coat off to work, not to stand in the rain. | yes | yes |
+| `bk.horse_kick` | A frightened horse kicks out behind; a shod hoof can kill a man with one blow. | yes | partial |
+| `bk.blaze` | A *blaze* is a white mark down a horse's face; markings can be dyed out. | racing public | rare |
+| `bk.lay_against` | An owner or trainer can bet against his own horse through agents and then stop it winning. | racing-literate | rare |
+| `bk.weapon_choice` | A man arming himself against intruders takes a stick, a poker or a gun, not a precision blade that won't fold. | yes | yes |
+| `bk.bills` | People don't carry other people's bills; they have enough of their own. | yes | yes |
+| `bk.alias_post` | A man living under another name needs an address where that name's post can reach him. | yes | yes |
+| `bk.milliner_prices` | A Bond Street milliner's costume of twenty-odd guineas is far beyond what a trainer's household spends on dress. | yes | needs the text's gloss (¶225) |
+| `bk.gypsies` | Period belief: travellers clear out when there is trouble, to avoid the police, and couldn't sell a famous horse. | period | period (presented, not endorsed) |
 
 ---
 
 ## s01 Breakfast at Baker Street (¶1–¶7)
 
-**¶4** "the singular disappearance of the favourite for the Wessex Cup, and the tragic murder of its trainer"
-- RECORD: Two events: a horse gone and a trainer dead. *strong*
-- DEFAULT: One incident, one culprit: whoever took the horse killed the trainer. (Default: two crimes at the same
-  place and time share a cause. Exception: one event caused the other without a second human agent, or two
-  agents acted independently.) *fair*. The reader holds this assumption without noticing it; it has to be
-  broken later.
+**¶4**
+- `t4.1` **RECORD** · *strong* · typical
+  reads "the singular disappearance of the favourite for the Wessex Cup, and the tragic murder of its trainer"
+  Two events: a horse gone and a trainer dead.
+- `t4.2` **DEFAULT** · *fair* · typical · from `t4.1`, `bk.one_culprit` · Holmes ¶14 (names it as part of a blunder)
+  Whoever took the horse killed the trainer. The reader holds this without noticing it; it has to be broken
+  later (`t68.3`).
 
-**¶6** "points about the case which promise to make it an absolutely unique one" / "your very excellent field-glass"
-- GENRE: Holmes calls the case unique, so the obvious explanation is likely to be wrong. *weak*
-- GENRE / PREDICT: An object asked for by name will be used later. Something will be watched from a distance.
-  *weak*. (It is: the race, ¶199. It carries no inference: this is a flag that pays off only as scenery, and the
-  game shouldn't reward it.)
+**¶6**
+- `t6.1` **GENRE** · *weak* · careful · from `bk.genre_obvious`
+  reads "points about the case which promise to make it an absolutely unique one"
+  Holmes calls the case unique, so the obvious explanation is likely to be wrong.
+- `t6.2` **SET ASIDE** · typical
+  reads "You would oblige me by bringing with you your very excellent field-glass."
+  An object asked for by name, so a reader might expect it to matter. It is used only to watch the race (¶199)
+  and carries no inference. A player who instead files it as a prediction shouldn't be penalised, and nothing
+  should follow from it.
 
 ### State of mind after s01
-Only the headline is known. Background expectation: a valuable horse has been stolen by someone who killed the
-trainer while doing it.
+Only the headline: a valuable horse stolen by someone who killed the trainer while doing it (`t4.2`).
 
 ---
 
 ## s02 The train: the facts of the case (¶8–¶46)
 
-**¶12** "the art of the reasoner should be used rather for the sifting of details than for the acquiring of fresh evidence"
-- GENRE: The solution is in facts that are already public. Whatever Holmes is about to list is enough, so the
-  recital deserves a careful reading. *fair* (Holmes later confirms "there were indications there", ¶216.)
-- GENRE: "detach the framework of fact ... from the embellishments": some of what follows will be inference
-  passed off as fact. Each item is to be sorted into *seen* or *concluded*. *fair*
+**¶10**
+- `t10.1` **SET ASIDE** · typical
+  reads "the telegraph posts upon this line are sixty yards apart, and the calculation is a simple one"
+  Holmes's speed calculation shows his method and carries no case content.
 
-**¶14** "I could not believe it possible that the most remarkable horse in England could long remain concealed ... I expected ... that his abductor was the murderer"
-- NOTICE: The horse has been missing since Tuesday morning in thinly populated country and hasn't turned up.
-  *strong*
-- QUESTION: Where can a famous horse be hidden for days?
-- HYPOTHESIS: (a) dead (in a pit or mine); (b) taken far away; (c) hidden in plain sight among other horses, at
-  a stable, by someone who can keep a horse; (d) loose on the moor. Option (d) strains: a loose horse would have been seen. (c) needs a stable nearby.
-  *fair* for (c) as the most interesting candidate.
-- NOTICE: Holmes names "his abductor was the murderer" as part of a blunder. The two-crimes-one-culprit default
-  (¶4) has just been flagged as an assumption. *weak*
+**¶12**
+- `t12.1` **GENRE** · *fair* · careful · Holmes ¶216
+  reads "the art of the reasoner should be used rather for the sifting of details than for the acquiring of fresh evidence"
+  The solution is in facts that are already public, so the recital that follows deserves a careful reading.
+- `t12.2` **GENRE** · *fair* · careful
+  reads "to detach the framework of fact—of absolute undeniable fact—from the embellishments of theorists and reporters"
+  Some of what follows will be inference presented as fact; each item is to be sorted into seen or concluded.
+  This licenses the WEIGH moves below.
 
-**¶18** "many people who had the strongest interest in preventing Silver Blaze from being there at the fall of the flag"
-- RECORD: Motive class: anyone who profits if the favourite doesn't run or doesn't win: people who bet against
-  him, bookmakers, rival stables. *strong*
-- INFER: That aim doesn't require taking the horse. Injuring, laming or hiding him until Tuesday would do.
-  *fair*. This becomes a question once we learn the horse was led out (¶37): why move him at all? (→ Holmes ¶57.)
+**¶14**
+- `t14.1` **RECORD** · *strong* · typical
+  reads "I could not believe it possible that the most remarkable horse in England could long remain concealed"; "beyond the arrest of young Fitzroy Simpson nothing had been done"
+  The horse has been missing since Tuesday morning in thinly populated country.
+- `t14.2` **QUESTION** · typical · from `t14.1`
+  Where can a famous horse be hidden for days?
+- `t14.3` **HYPOTHESIS** · *fair* · careful · from `t14.2`, `bk.famous_horse`
+  {dead, in a pit or mine; taken far away; **hidden among horses, at a stable**; loose on the moor}.
+  `bk.famous_horse` strains "loose": he would have been seen. "At a stable" is the live candidate.
+- `t14.4` **GENRE** · *weak* · careful · strains `t4.2`
+  reads "his abductor was the murderer of John Straker"
+  Holmes names the one-culprit assumption as part of his blunder.
 
-**¶19** The stable, the people and the map
-- RECORD: Straker: former jockey, twelve years with the Colonel, "zealous and honest", married, no children, one
-  maid, "comfortably off", lives in a villa 200 yards from the stables. Three lads with good characters, one on
-  watch each night and two sleeping in the loft. Four horses. Invalid villas half a mile north, Tavistock two
-  miles west, **Mapleton** (Lord Backwater, run by **Silas Brown**) two miles across the moor, gypsies.
-- WEIGH: "zealous and honest" and "excellent characters" are reputation reported by the employer side, not
-  observation. They weigh a little against suspecting these people, and no more. *weak*
-- INFER: There are only two stables in reach: King's Pyland and Mapleton. Combined with ¶14(c), Mapleton is
-  the one place nearby where a horse could be hidden among horses. *fair*
-- ⚠ hindsight (low): "comfortably off" reads as a baseline that a later money detail can break. A first-time
-  reader would probably register it only as setting.
+**¶18**
+- `t18.1` **RECORD** · *strong* · typical
+  reads "he was the first favourite for the Wessex Cup"; "enormous sums of money have been laid upon him"
+- `t18.2` **HYPOTHESIS·motive** · *strong* · typical · from `t18.1`
+  reads "there were many people who had the strongest interest in preventing Silver Blaze from being there at the fall of the flag"
+  Who gains if he doesn't run or win: {people who bet against him, bookmakers, rival stables}.
+- `t18.3` **INFER** · *fair* · careful · from `t18.2` · Holmes ¶57
+  That aim doesn't need the horse taken: injuring, laming or hiding him until Tuesday would do. This becomes a
+  question once we learn the horse was led out (`t57.3`).
 
-**¶20** "his supper, which consisted of a dish of curried mutton. She took no liquid, as there was a water-tap ... it was the rule that the lad on duty should drink nothing else"
-- RECORD: Stables locked at nine. Two lads eat in the trainer's kitchen; Ned Hunter stays on guard. The maid,
-  Edith Baxter, carries his supper down with a lantern; it is very dark.
-- NOTICE: The narrator names the dish. *weak* now; it becomes strong at ¶37.
-- NOTICE: The no-liquid rule is spelled out in detail. The story is ruling out drink as a vehicle. *fair*
-- INFER: If the lad is drugged later, the drug was in the food (the tap water is fixed and shared). *fair*
-- QUESTION: Who handles the dish between the kitchen and the lad: whoever dishes it up, the maid on the walk,
-  anyone at the window?
+**¶19**
+- `t19.1` **RECORD** · typical
+  reads "a retired jockey"; "five years as jockey and for seven as trainer"; "a married man"; "no children, keeps one maid-servant, and is comfortably off"; "a small villa about two hundred yards from the stables"
+  Straker. (⚠ low: "comfortably off" is the baseline `t84.7` breaks; a first-time reader files it as setting.)
+- `t19.2` **RECORD** · typical
+  reads "three lads"; "only four horses in all"; "One of these lads sat up each night in the stable, while the others slept in the loft"
+- `t19.3` **RECORD** · typical
+  reads "half a mile to the north there is a small cluster of villas"; "Tavistock itself lies two miles to the west"; "about two miles distant, is the larger training establishment of Mapleton ... managed by Silas Brown"; "a few roaming gypsies"
+  The map.
+- `t19.4` **WEIGH** · *weak* · careful
+  reads "has always shown himself to be a zealous and honest servant"; "All three bore excellent characters"
+  Reputation reported from the employer's side, not observation. It counts a little against suspecting these
+  people, and no more.
+- `t19.5` **INFER** · *fair* · careful · from `t19.3`, `t14.3` · supports `t14.3 (stable)` · Holmes ¶116
+  Only two stables are in reach: King's Pyland and Mapleton. If the horse is hidden among horses nearby, it is at
+  Mapleton.
 
-**¶21** The stranger: "gentlemanly bearing ... grey suit of tweeds ... a heavy stick with a knob ... extreme pallor ... nervousness"
-- RECORD: Description of the stranger. The heavy stick is a possible weapon. *fair*
-- NOTICE: No cravat in the description. (Small; it matters when the maid identifies a cravat at ¶35. Her later
-  recognition is of something she didn't mention here.) *weak*
+**¶20**
+- `t20.1` **RECORD** · *strong* · typical
+  reads "the stables were locked up at nine o'clock"; "Two of the lads walked up to the trainer's house, where they had supper in the kitchen, while the third, Ned Hunter, remained on guard"
+- `t20.2` **RECORD** · *strong* · typical
+  reads "the maid, Edith Baxter, carried down to the stables his supper, which consisted of a dish of curried mutton"; "it was very dark"
+- `t20.3` **RECORD** · typical
+  reads "She took no liquid, as there was a water-tap in the stables, and it was the rule that the lad on duty should drink nothing else"
+- `t20.4` **NOTICE** · *weak* · careful · from `t20.2`, `bk.genre_named_detail` · Holmes ¶216
+  The narrator names the dish. Weak now; it becomes strong at `t37.6`.
+- `t20.5` **NOTICE** · *fair* · careful · from `t20.3`, `bk.genre_named_detail`
+  The no-liquid rule is spelled out in detail: the story is ruling out drink as a vehicle.
+- `t20.6` **INFER** · *fair* · careful · from `t20.3`, `t20.5`
+  If the lad is drugged, the drug was in the food.
+- `t20.7` **QUESTION·opportunity** · careful · from `t20.2`
+  Who handles the dish between the kitchen and the lad?
 
-**¶22–¶24** "Can you tell me where I am? ... I understand that a stable-boy sleeps there alone every night ... See that the boy has this to-night"
-- WEIGH: He claims to be lost, but knows the night arrangements of the stable. The "lost" story is a cover: he
-  came on purpose. *strong*
-- HYPOTHESIS: What is in the folded white paper? (a) a drug (folded paper is the classic powder wrapper);
-  (b) money, a bribe; (c) a message. Most readers jump to (a). *fair* for (a), *fair* for (b).
-- NOTICE: He asks the maid openly to pass the paper. A poisoner would hardly announce himself to a witness
-  and offer her a dress. That favours (b). *weak*
-- RECORD: The bribe offered to the maid is "the price of a new dress". (A dress returns at ¶84 and ¶91. The
-  echo is an accident of the text; nothing follows from it, and the game shouldn't treat it as a clue.)
+**¶21**
+- `t21.1` **RECORD** · typical
+  reads "a person of gentlemanly bearing, dressed in a grey suit of tweeds, with a cloth cap"; "carried a heavy stick with a knob to it"; "the extreme pallor of his face and ... the nervousness of his manner"
+- `t21.2` **ABSENCE** · *weak* · expert · Holmes —
+  The description has no cravat. The maid later recognises one (`t35.5`) that she didn't describe here. That is
+  small and leads nowhere certain, but it is the kind of gap a careful reader logs.
 
-**¶25–¶26** "ran past him to the window ... It was already opened ... the corner of the little paper packet protruding from his closed hand"
-- QUESTION: Where was the dish during this scene: in the maid's hands, on the sill, or already on Hunter's
-  table? The text doesn't say. That is the window of opportunity on which the police theory depends.
-- WEIGH: The maid "has sworn" that the packet was still in his closed hand at the window. Sworn and specific,
-  so it is good evidence that he hadn't given the paper to anyone yet. *fair*
+**¶22–¶24**
+- `t24.1` **RECORD** · typical
+  reads "I had almost made up my mind to sleep on the moor"; "I understand that a stable-boy sleeps there alone every night"; "See that the boy has this to-night, and you shall have the prettiest frock that money can buy"; "a piece of white paper folded up"
+- `t24.2` **AGENT** · *strong* · careful · from `t24.1` · Holmes —
+  A lost man wouldn't know the stable's night arrangements. The "lost" story is a cover: he came on purpose.
+- `t24.3` **HYPOTHESIS** · *fair* · typical · from `t24.1`, `bk.drug_paper`
+  What is in the folded paper: {drug, money, message}. Most readers jump to the drug.
+- `t24.4` **AGENT** · *weak* · careful · from `t24.1` · supports `t24.3 (money)`, strains `t24.3 (drug)`
+  A poisoner would hardly ask a witness openly to pass the poison, and offer her a dress for it.
+- `t24.5` **SET ASIDE** · careful
+  reads "the price of a new dress"
+  A dress returns at ¶84 and ¶91. The echo is an accident of the text and nothing follows from it.
 
-**¶28** "You've two horses in for the Wessex Cup—Silver Blaze and Bayard ... Is it a fact that ... the stable have put their money on him?"
-- RECORD: King's Pyland has a second entry, Bayard.
-- WEIGH: His questions fit a tout after information. *fair*
-- HYPOTHESIS (seed): His question puts a pattern on the table: *people inside the stable betting against their
-  own favourite*. If anyone at King's Pyland has money on another horse, they gain if Silver Blaze doesn't win.
-  *weak*. The Bayard version is a wrong turn (Bayard is scratched and plays no part, ¶192), but the general
-  pattern is the true motive (→ ¶220).
-- ⚠ hindsight (medium): A first-time reader reads this line as colour from a tout. To use it, the reader has to
-  know that a stable can lay against its own horse, which a racing-literate reader of 1892 would know.
+**¶25–¶26**
+- `t25.1` **QUESTION·opportunity** · careful · from `t20.7`
+  reads "ran past him to the window through which she was accustomed to hand the meals"; "Hunter was seated at the small table inside"
+  Where was the dish during this scene: in her hands, on the sill, or on Hunter's table? The text doesn't
+  say. The police theory depends on the answer.
+- `t26.1` **WEIGH** · *fair* · careful
+  reads "The girl has sworn that as he spoke she noticed the corner of the little paper packet protruding from his closed hand"
+  Sworn and specific: good evidence that he hadn't yet given the paper to anyone.
 
-**¶29** "rushed across the stable to unloose the dog ... the stranger was leaning through the window ... though he ran all round the buildings he failed to find any trace of him"
-- RECORD: **The stable has a dog**, a hound that is set on intruders. *strong*. This is the fact the dog
-  inference later rests on, and it arrives inside an action scene, which makes it easy to miss.
-- INFER: While Hunter crossed the stable to the dog, the stranger was leaning in through the window with nobody
-  watching him. If the dish was on the table, he had a few seconds of opportunity. *fair*
-- DEFAULT: A guard dog barks at strangers and at anything unusual at night. (Exceptions: it knows the visitor;
-  it is drugged, shut away or asleep.) *strong*
-- PREDICT: If anyone came to the stable in the night, the dog should have made itself heard. *fair*
+**¶28**
+- `t28.1` **RECORD** · typical
+  reads "You've two horses in for the Wessex Cup—Silver Blaze and Bayard"
+- `t28.2` **WEIGH** · *fair* · typical · supports `t24.2`
+  reads "Let me have the straight tip and you won't be a loser"
+  His questions are those of a tout after information.
+- `t28.3` **HYPOTHESIS·motive** · *weak* · expert · from `t28.1`, `bk.lay_against` · Holmes ¶220 (the general pattern)
+  reads "Is it a fact that ... the stable have put their money on him?"
+  His question puts a pattern on the table: people inside the stable betting against their own favourite.
+  ⚠ medium: a first-time reader takes the line as a tout's colour; using it needs `bk.lay_against`. The
+  Bayard-specific version leads nowhere (Bayard is scratched, ¶192); the general pattern is the true motive.
 
-**¶30–¶31** "The boy locked the door before he left it. The window ... was not large enough for a man to get through."
-- GENRE: Holmes praises the question and has had it checked by wire. Access to the stable matters. *fair*
-- INFER: The stranger couldn't get in during the scene: the door was locked and the window too small. Whoever
-  later got the horse out used a key or was let in. *strong*
-- QUESTION: Who has a key? Hunter (on guard), the trainer (certainly), anyone with a copy.
+**¶29**
+- `t29.1` **RECORD** · *strong* · careful
+  reads "He sprang up and rushed across the stable to unloose the dog"; "Hunter rushed out with the hound"
+  **The stable has a dog**, set on intruders. A typical reader passes over it inside the action; the dog
+  inference later rests on it.
+- `t29.2` **RECORD** · typical
+  reads "as she ran she looked back and saw that the stranger was leaning through the window"; "though he ran all round the buildings he failed to find any trace of him"
+- `t29.3` **INFER·opportunity** · *fair* · careful · from `t29.2`, `t25.1` · Holmes ¶36 (Hunter's version)
+  While Hunter crossed the stable to the dog, the stranger was leaning in through the window with nobody
+  watching him. If the dish was on the table, he had a few seconds of opportunity.
+- `t29.4` **PREDICT** · *fair* · careful · from `t29.1`, `bk.guard_dog` · Holmes ¶219
+  If anyone came to the stable in the night, the dog should have made itself heard.
 
-**¶32** "Straker was excited ... vaguely uneasy ... Mrs. Straker, waking at one in the morning, found that he was dressing ... anxiety about the horses ... the rain pattering against the window ... pulled on his large mackintosh"
-- RECORD: Timeline: about 9 the stranger; later the lads return and the message goes to Straker; **1 a.m.
-  Straker goes out in heavy rain**, saying he means to check the horses.
-- WEIGH: The only source is Mrs. Straker reporting what he said. She is probably honest, but the reason is his,
-  not hers. *fair*
-- NOTICE: "does not seem to have quite realized its true significance" is the narrator's (or Holmes's) gloss, not
-  an observation. It frames Straker as slow to worry, yet four hours later he is worried enough to go out in the
-  rain. *weak*
+**¶30–¶31**
+- `t31.1` **RECORD** · *strong* · typical
+  reads "The boy locked the door before he left it. The window ... was not large enough for a man to get through."
+- `t31.2` **GENRE·watch-holmes** · *fair* · careful
+  reads "The importance of the point struck me so forcibly that I sent a special wire"
+  Access to the stable matters.
+- `t31.3` **INFER** · *strong* · careful · from `t31.1` · Holmes ¶57
+  The stranger couldn't get in during the scene. Whoever later took the horse used a key or was let in.
+- `t31.4` **QUESTION·opportunity** · careful · from `t31.3`
+  Who has a key: {Hunter, the trainer, anyone with a copy}?
 
-**¶33** "The door was open ... Hunter was sunk in a state of absolute stupor, the favourite's stall was empty, and there were no signs of his trainer."
-- RECORD: 7 a.m.: door open, Hunter stupefied, horse gone, trainer gone.
-- INFER: The door was opened from outside with a key, or from inside before Hunter went under. *strong* (¶31)
+**¶32**
+- `t32.1` **RECORD** · typical
+  reads "he sent a message to the trainer"; "Straker was excited at hearing the account"; "It left him, however, vaguely uneasy"
+- `t32.2` **RECORD** · *strong* · typical
+  reads "Mrs. Straker, waking at one in the morning, found that he was dressing"; "he intended to walk down to the stables to see that all was well"; "she could hear the rain pattering against the window"; "he pulled on his large mackintosh and left the house"
+- `t32.3` **SOURCE** · *fair* · careful · from `t32.2`
+  Chain of reporting: Straker's words → Mrs. Straker → police → papers → Holmes. What she saw (dressing at one,
+  going out) is her own observation; the reason is Straker's statement, which she passes on in good faith.
+- `t32.4` **WEIGH** · *weak* · expert · from `t32.1`
+  reads "he does not seem to have quite realized its true significance"
+  That is a gloss, not an observation. It frames Straker as slow to worry, yet four hours later he is worried
+  enough to go out in the rain.
 
-**¶34** "They had heard nothing during the night, for they are both sound sleepers ... They still had hopes that the trainer had for some reason taken out the horse for early exercise"
-- NOTICE (an absence): **Nobody mentions the dog.** The stable had a dog that went for a stranger at nine
-  (¶29). Someone came in the night and took out a horse, and the dog did nothing anyone heard. *fair* for a
-  careful reader; most first-time readers miss it. This is the hardest notice in the story because nothing in
-  the text points at the gap.
-- WEIGH: "both sound sleepers" is the text's own defeater: the dog might have barked unheard. But the lads
-  sleep in the loft over the harness-room, close enough that loud barking would be hard to sleep through.
-  The defeater weakens the inference without killing it. *fair*
-- HYPOTHESIS: Why was the dog quiet? (a) drugged too: nothing says so, and only the lad's supper was analysed
-  (¶37); (b) barked, and the sleepers slept: possible; (c) **the visitor was someone the dog knew**. *fair*
-  for (c). (→ Holmes ¶219.)
-- INFER: Straker went out at one, by his own account to the stables. Either he never got there, or he got there
-  and **raised no alarm**: he didn't wake the lads in the loft above the harness-room about a drugged guard and an empty stall. A
-  trainer who found that would wake the loft. *fair*
-- GENRE: The household's first thought is that **the trainer took the horse out himself**. The story voices the
-  true scenario in an innocent form and then buries it under the tragedy. *weak* (⚠ hindsight, medium: on a first
-  reading this is just the household's hope.)
+**¶33**
+- `t33.1` **RECORD** · *strong* · typical
+  reads "The door was open"; "Hunter was sunk in a state of absolute stupor, the favourite's stall was empty, and there were no signs of his trainer"
+- `t33.2` **INFER** · *strong* · careful · from `t33.1`, `t31.1`
+  The door was opened with a key, from outside or from inside before Hunter went under.
 
-**¶35** "overcoat was flapping from a furze-bush ... His head had been shattered by a savage blow from some heavy weapon ... a long, clean cut ... very sharp instrument ... It was clear, however, that Straker had defended himself vigorously against his assailants ... a small knife, clotted with blood up to the handle ... a red and black silk cravat ... recognised by the maid"
-- RECORD: Body in a hollow a quarter mile from the stables. Head: **a** savage blow (singular) from something
-  heavy. Thigh: a clean cut from something very sharp. Small bloody knife in the right hand, the stranger's
-  cravat in the left. The coat is on a bush at the rim.
-- WEIGH: "It was clear ... defended himself vigorously against his assailants" is an inference written as fact,
-  and it includes a plural, "assailants", that nothing observed supports. Re-file it as the police reading.
-  *strong* (this is the "embellishment" ¶12 warned about).
-- HYPOTHESIS: Whose blood is on the knife? (a) an assailant's; (b) Straker's own, from the thigh. The thigh cut
-  is "clean" from "a very sharp instrument", and he is holding a very sharp instrument. (b) is *fair*.
-- NOTICE: **The coat is off.** He set out in a mackintosh in heavy rain, and a quarter mile on the coat is on a
-  bush. Torn off in a fight and blown there, or taken off? Men take off coats to work, not to stand in the
-  rain. *weak* (wind not yet known; it strengthens at ¶94–¶96).
-- HYPOTHESIS: The cravat in his hand: (a) torn from the assailant in the fight (police); (b) planted on the
-  body; (c) Straker had it for some reason of his own. *weak* for each; (a) is the default.
-- ⚠ HYPOTHESIS: The horse was in the hollow (¶37), and a single crushing blow to the head is what a horse's hoof
-  does. (Background: horses kick, and a shod hoof can kill.) *weak*. Hindsight high: a first-time reader is
-  primed for a human killer and rarely considers the horse before ¶212.
+**¶34**
+- `t34.1` **RECORD** · typical
+  reads "They had heard nothing during the night, for they are both sound sleepers"
+- `t34.2` **ABSENCE** · *fair* · careful · from `t29.1`, `t29.4`, `t33.2`, `t34.1` · Holmes ¶180–¶182, ¶219
+  **Nobody mentions the dog.** Someone came in the night and took out a horse, and the dog did nothing anyone
+  heard. Most first-time readers miss this. It is the hardest move in the story, because nothing in the text
+  points at the gap.
+- `t34.3` **WEIGH** · *fair* · careful · undercuts `t34.2`
+  reads "for they are both sound sleepers"
+  This is the text's own defeater: the dog might have barked unheard. But the lads sleep in the loft over the
+  harness-room, close enough that loud barking would be hard to sleep through. It weakens `t34.2` without
+  defeating it.
+- `t34.4` **HYPOTHESIS** · *fair* · careful · from `t34.2` · Holmes ¶219
+  Why was the dog quiet: {drugged too; barked unheard; **the visitor was someone the dog knew**}. Nothing says
+  the dog was drugged (only the lad's supper was analysed, `t37.3`).
+- `t34.5` **AGENT** · *fair* · careful · from `t32.2`, `t33.1`, `t34.1`, `bk.alarm` · Holmes —
+  Straker went out at one, by his own account to the stables. Either he never got there, or he got there and
+  **raised no alarm**: he didn't wake the lads in the loft about a drugged guard and an empty stall.
+- `t34.6` **GENRE** · *weak* · expert · Holmes ¶220
+  reads "They still had hopes that the trainer had for some reason taken out the horse for early exercise"
+  The household's first thought is that the trainer took the horse out himself. ⚠ medium: on a first reading
+  this is just the household's hope.
 
-**¶36** "He was equally certain that the same stranger had, while standing at the window, drugged his curried mutton"
-- WEIGH: Hunter **could not have seen** the drugging. If he had, he wouldn't have eaten the food. His "certainty"
-  is a conclusion: the stranger was at the window, and later I was drugged. It comes from a man just out of an
-  opium stupor. Downgrade it to "Hunter believes". *strong*
-- WEIGH: The cravat identification, from the maid and from Hunter, is observation, two witnesses agreeing.
-  Keep it as a fact: the cravat belongs to the stranger. *strong*
+**¶35**
+- `t35.1` **RECORD** · typical
+  reads "About a quarter of a mile from the stables John Straker's overcoat was flapping from a furze-bush"
+- `t35.2` **RECORD** · *strong* · typical
+  reads "the dead body of the unfortunate trainer. His head had been shattered by a savage blow from some heavy weapon"
+  **A** blow, singular.
+- `t35.3` **RECORD** · typical
+  reads "he was wounded on the thigh, where there was a long, clean cut, inflicted evidently by some very sharp instrument"
+- `t35.4` **RECORD** · typical
+  reads "in his right hand he held a small knife, which was clotted with blood up to the handle"
+- `t35.5` **RECORD** · *strong* · typical
+  reads "in his left he clasped a red and black silk cravat, which was recognised by the maid as having been worn on the preceding evening by the stranger"
+- `t35.6` **WEIGH** · *strong* · careful · from `t12.2` · Holmes ¶226 (contradicts)
+  reads "It was clear, however, that Straker had defended himself vigorously against his assailants"
+  An inference written as fact, including a plural ("assailants") that nothing observed supports. Re-file it as
+  the police reading. This is the "embellishment" `t12.2` warned about.
+- `t35.7` **HYPOTHESIS** · *fair* · careful · from `t35.3`, `t35.4`
+  Whose blood is on the knife: {an assailant's, **Straker's own**}? The thigh cut is "clean" from "a very sharp
+  instrument", and he is holding one.
+- `t35.8` **NOTICE** · *weak* · careful · from `t32.2`, `t35.1`, `bk.coat_work` · Holmes ¶226
+  **The coat is off.** He set out in a mackintosh in heavy rain; a quarter mile on, the coat is on a bush. It
+  stays weak until the wind is known (¶94–¶96).
+- `t35.9` **HYPOTHESIS** · *weak* · careful · from `t35.8`
+  {torn off in a fight and blown onto the bush; taken off}.
+- `t35.10` **HYPOTHESIS** · *weak* · typical · from `t35.5`
+  The cravat in his hand: {torn from the assailant (the police reading); planted on the body; Straker had it for
+  some reason of his own}.
 
-**¶37** "abundant proofs in the mud ... that he had been there at the time of the struggle ... powdered opium ... the people at the house partook of the same dish on the same night without any ill effect"
-- RECORD: The horse was in the hollow. The drug was powdered opium, in the lad's portion only.
-- INFER: The opium went in **after the lad's portion was separated from the household dish**: in the kitchen
-  after dishing up, on the walk, or at the window. *strong* (→ Holmes ¶218, last sentences.)
-- INFER: The horse was led out of a locked stable to the hollow: by a person with a key, and the bridle went
-  with it (the bridle is mentioned at ¶46). *strong*
-- REVISE: The curry (¶20) now matters. Background: powdered opium has a taste, and a curry is the dish that
-  would hide it. So either the drugger was lucky in the menu, or **the drugger knew or chose the menu**.
-  DEFAULT: a coincidence of exactly the right dish on exactly the right night is not to be believed when an
-  explanation by intention is available. (Exception: the drugger had a tasteless method, or would have used
-  another vehicle on another night.) *fair*, strong for a reader who knows opium is perceptible.
-  (→ Holmes ¶218, "too monstrous a coincidence".)
-- INFER from that: The stranger came with his packet already made up and couldn't have known what was for
-  supper. The drugger is **of the household**: whoever chose or knew the menu and could get at the lad's portion.
-  *fair*
-- HYPOTHESIS: Who in the household? Straker, Mrs. Straker, the maid (who presumably cooks, and certainly carried
-  the dish the whole way). The maid had the most opportunity. *fair* for "one of the three".
-- WRONG TURN (available): **The maid did it**, bribed by the stranger, or on her own account. She held the dish
-  from kitchen to window, and her account of the encounter is mostly her own testimony. What weighs against
-  it: Hunter confirms the stranger's presence and manner; she ran from him; and the drugging is only half the
-  night's work. Someone with a key took out the horse four hours later, and a maid leading a racehorse across the
-  moor at one in the morning is a strained picture. The game should let a player hold this and drop it. (Holmes
-  silently narrows to "Straker and his wife", ¶218, but leaves the opportunity question open.)
-- NOTICE: The horse has been missing for days despite a large reward and every gypsy on the alert. This
-  strengthens ¶14(c), that he is hidden among horses. *fair*
+**¶36**
+- `t36.1` **RECORD** · typical
+  reads "Hunter ... was also quite positive as to the ownership of the cravat"; "He was equally certain that the same stranger had, while standing at the window, drugged his curried mutton"
+- `t36.2` **WEIGH** · *strong* · careful · from `t36.1` · undercuts `t36.1 (drugging)`, `t29.3` · Holmes ¶218
+  Hunter couldn't have **seen** the drugging: had he seen it, he wouldn't have eaten the food. His certainty is a
+  conclusion (the stranger was at the window, and later I was drugged) from a man just out of an opium stupor.
+  Downgrade it to "Hunter believes".
+- `t36.3` **WEIGH** · *strong* · careful · from `t36.1`, `t35.5` · supports `t35.5`
+  The cravat identification is observation, and two witnesses agree. Keep it as fact: it is the stranger's.
 
-**¶38** "Those are the main facts of the case, stripped of all surmise"
-- GENRE: They aren't stripped of surmise. Hunter's certainty (¶36) and the "assailants" (¶35) are both in the
-  recital. The reader has just practised telling the two apart. (The game could make this sorting an explicit
-  task.) *fair*
+**¶37**
+- `t37.1` **RECORD** · *strong* · typical
+  reads "there were abundant proofs in the mud which lay at the bottom of the fatal hollow that he had been there at the time of the struggle"
+- `t37.2` **RECORD** · typical
+  reads "although a large reward has been offered, and all the gypsies of Dartmoor are on the alert, no news has come of him"
+- `t37.3` **RECORD** · *strong* · typical
+  reads "the remains of his supper left by the stable-lad contain an appreciable quantity of powdered opium, while the people at the house partook of the same dish on the same night without any ill effect"
+- `t37.4` **INFER** · *strong* · careful · from `t37.3` · Holmes ¶218
+  The opium went in after the lad's portion was separated from the household's: in the kitchen after dishing up,
+  on the walk, or at the window.
+- `t37.5` **INFER** · *strong* · careful · from `t37.1`, `t33.1`, `t31.3` · Holmes ¶220
+  The horse was led out of a locked stable to the hollow by someone with a key.
+- `t37.6` **REVISE** · *fair* · careful · from `t37.3`, `t20.4`, `bk.opium_taste` · revises `t20.4` · Holmes ¶218
+  The curry now matters: it is the dish that hides the taste of opium. ⚠ low: the story dwells on the dish,
+  but the step needs `bk.opium_taste`, which modern readers may lack.
+- `t37.7` **DEFAULT** · *fair* · careful · from `t37.6`, `bk.coincidence` · Holmes ¶218 ("too monstrous a coincidence")
+  The drugger knew or chose the menu. Exception: the drugger had a method that didn't depend on the dish.
+- `t37.8` **INFER** · *fair* · careful · from `t37.7`, `t24.1`, `t26.1` · refutes `t29.3`; strains `t24.3 (drug)` · Holmes ¶218
+  The stranger came with his paper already made up and couldn't have known what was for supper. **The drugger
+  is of the household.**
+- `t37.9` **HYPOTHESIS·opportunity** · *fair* · careful · from `t37.8`, `t20.2`, `t20.7` · Holmes ¶218 (names Straker and his wife)
+  Who in the household: {Straker, Mrs. Straker, the maid}? The maid presumably cooks, and certainly carried the
+  dish the whole way, so she had the most opportunity.
+- `t37.10` **HYPOTHESIS** · *weak* · typical · from `t37.9`, `t24.1`
+  The maid drugged it, bribed by the stranger or on her own account. (Dropped at `t92.7`.)
+- `t37.11` **TEST** · *fair* · careful · from `t36.3`, `t37.5` · strains `t37.10`
+  Hunter corroborates the stranger's presence and manner, and she fled from him. And the drugging is only half
+  the night: someone with a key took the horse out four hours later, and the maid leading a racehorse across
+  the moor at one in the morning is a strained picture.
+- `t37.12` **TEST** · *fair* · careful · from `t37.2` · supports `t14.3 (stable)`
+  Missing for days despite a large reward and every gypsy on the alert.
+- `t37.13` **HYPOTHESIS** (PHYSICAL) · *weak* · expert · from `t35.2`, `t37.1`, `bk.horse_kick` · Holmes ¶212, ¶226
+  The horse killed Straker: one crushing blow to the head, with the horse present at the time. ⚠ high: a
+  first-time reader is primed for a human killer and rarely considers the horse before ¶212.
 
-**¶39** "Inspector Gregory ... Were he but gifted with imagination ... the man upon whom suspicion naturally rested ... Fitzroy Simpson ... bets to the amount of five thousand pounds ... against the favourite"
-- RECORD: Simpson is a ruined gentleman, a bookmaker, lodging in one of the invalid villas, with £5,000 laid
-  against the favourite. Strong motive.
-- GENRE: The detective without imagination arrests the obvious man in the first act. The obvious suspect is
-  probably not the answer. *fair*
+**¶38**
+- `t38.1` **GENRE** · *fair* · careful · from `t35.6`, `t36.2`
+  reads "Those are the main facts of the case, stripped of all surmise"
+  They aren't: the "assailants" and Hunter's certainty are both in the recital. The game could make this
+  sorting an explicit task.
 
-**¶40** "about Desborough, the second favourite, which was in charge of Silas Brown at the Mapleton stables ... When confronted with his cravat, he turned very pale ... His wet clothing ... his stick ... a Penang-lawyer weighted with lead ... by repeated blows"
-- RECORD: Mapleton has the second favourite, Desborough. **Mapleton gains if Silver Blaze doesn't run.**
-- INFER: Mapleton is now strong on three counts: motive (Desborough), the capacity to hide a horse among
-  horses (¶14(c)), and nearness (two miles, ¶19). *fair* for "the horse is at, or was taken to, Mapleton".
-  (→ Holmes ¶116, by a different route: horse instinct.)
-- NOTICE: "by repeated blows" against ¶35's "a savage blow". The police theory about the weapon doesn't fit the
-  wound as reported. *weak*. This kind of small mismatch is exactly what a careful reader collects.
-- WEIGH: Wet clothing says he was out in the rain. He admits being on the moor that evening, and it says
-  nothing about where he was at one a.m. Weak evidence. *fair*
-- WEIGH: He goes pale and can't explain the cravat. That fits guilt, and it equally fits a man frightened to learn
-  that something of his was found in a dead man's hand. Neutral. *fair*
+**¶39**
+- `t39.1` **RECORD** · typical
+  reads "Fitzroy Simpson. He was a man of excellent birth and education, who had squandered a fortune upon the turf"; "he inhabited one of those villas"; "bets to the amount of five thousand pounds had been registered by him against the favourite"
+- `t39.2` **HYPOTHESIS·motive** · *strong* · typical · from `t39.1`, `t18.2`
+  Simpson has a strong motive.
+- `t39.3` **GENRE** · *fair* · careful · from `bk.genre_obvious` · strains `t46.1`
+  reads "Were he but gifted with imagination he might rise to great heights"; "the man upon whom suspicion naturally rested"
+  The unimaginative detective arrests the obvious man in the first act.
 
-**¶41** "there was no wound upon his person, while the state of Straker's knife would show that one at least of his assailants must bear his mark"
-- TEST: Simpson has no wound. Either the knife's blood isn't Simpson's (so there was another assailant), or
-  it is Straker's own. Since there is no second assailant in the evidence, ¶35(b) gains: **the blood is
-  Straker's**. *fair*
+**¶40**
+- `t40.1` **RECORD** · typical
+  reads "some information about the King's Pyland horses, and also about Desborough, the second favourite, which was in charge of Silas Brown at the Mapleton stables"
+- `t40.2` **RECORD** · typical
+  reads "When confronted with his cravat, he turned very pale, and was utterly unable to account for its presence"; "His wet clothing showed that he had been out in the storm"; "a Penang-lawyer weighted with lead, was just such a weapon as might, by repeated blows, have inflicted the terrible injuries"
+- `t40.3` **HYPOTHESIS·motive** · *fair* · careful · from `t40.1`, `t18.2`
+  Mapleton gains if Silver Blaze doesn't run.
+- `t40.4` **INFER** · *fair* · careful · from `t40.3`, `t19.5`, `t14.3` · Holmes ¶116 (by another route: horse instinct)
+  The horse is at, or was taken to, Mapleton: it has a motive, the means to hide a horse among horses, and it
+  is two miles away.
+- `t40.5` **NOTICE** · *weak* · expert · from `t35.2`, `t40.2` · strains `t46.1`
+  "By repeated blows" against "a savage blow": the police account of the weapon doesn't fit the wound as
+  reported.
+- `t40.6` **WEIGH** · *fair* · careful · from `t40.2`, `t24.1`
+  Wet clothing says he was out in the rain, which he admits for the evening. It says nothing about one a.m.
+- `t40.7` **WEIGH** · *fair* · careful · from `t40.2`
+  He goes pale and can't explain the cravat. That fits guilt, and it equally fits a man frightened to learn that
+  something of his was found in a dead man's hand. Neutral.
 
-**¶43–¶44** Watson: "caused by his own knife in the convulsive struggles"; Holmes: "It is more than possible; it is probable"
-- TEST: The self-inflicted cut is accepted. Watson's *mechanism* (convulsions after the head blow) is one
-  option; another is that he cut himself while using the knife. Keep the conclusion (his own knife, his own
-  thigh) and leave the mechanism open. *fair*
+**¶41**
+- `t41.1` **RECORD** · *strong* · typical
+  reads "there was no wound upon his person"
+- `t41.2` **TEST** · *fair* · careful · from `t41.1`, `t35.7` · supports `t35.7 (Straker's own)`
+  Simpson has no wound, and there is no second assailant in the evidence, so the blood is probably Straker's.
 
-**¶46** The police theory: "having drugged the lad, and having in some way obtained a duplicate key ... His bridle is missing ... met or overtaken by the trainer ... beat out the trainer's brains ... without receiving any injury ... either led the horse on to some secret hiding-place, or else it may have bolted"
-- RECORD: The bridle is missing, so the horse was bridled and led by someone who knew how. *fair*
-- RESIDUE, the police theory doesn't explain:
-  1. the curry: a stranger lucky enough to come on the one night when the dish hid the drug (¶37);
-  2. the dog's silence while a stranger took out the horse (¶34);
-  3. a duplicate key nobody has found (¶31);
-  4. why take the horse out at all if the aim was to stop him running (¶18);
-  5. how a stranger hides the most famous horse in England (¶14);
-  6. why the trainer, finding the horse gone and the lad drugged, chased after him alone without waking the
-     lads or loosing the dog (¶34);
-  7. one blow versus "repeated blows"; no wound on Simpson (¶40–¶41);
-  8. the coat off in the rain (¶35).
-  A theory with eight unexplained items is in trouble before anything contradicts it. *strong* that the
-  police theory is wrong somewhere. Holmes himself calls it "improbable".
-- HYPOTHESIS, the rival available now: **Straker himself took the horse out.** For it: he went out at one
-  (¶32); he had a key (¶31); the dog knew him (¶34); his household served the curry (¶37); he raised no alarm
-  (¶34); the coat was taken off for some job (¶35); the household's own first guess (¶34). Against it:
-  reputation (¶19); no motive in evidence; and he is the one who died. *weak to fair*.
-  ⚠ hindsight (high): Every premise is on the page, but holding the victim as the instigator is a big jump for a
-  first-time reader. The game should make this jump possible without forcing it, which probably means letting the
-  residue list push the player towards it.
-- QUESTION, if Straker: why? The ¶28 seed (insiders betting against the favourite) is the only hint of a motive
-  so far.
-- QUESTION, if Straker: then who or what killed him? Simpson met on the moor? Someone else? The horse
-  (¶35 ⚠)?
+**¶43–¶44**
+- `t44.1` **RECORD** · typical
+  reads "that the incised wound upon Straker may have been caused by his own knife in the convulsive struggles which follow any brain injury"; "It is more than possible; it is probable"
+- `t44.2` **TEST** · *fair* · careful · from `t44.1`, `t41.2` · supports `t35.7 (Straker's own)` · Holmes ¶226 (the second mechanism)
+  His own knife, his own thigh. Watson's mechanism (convulsions after the blow) is one option; the other is that
+  he cut himself while using the knife. Keep the conclusion and leave the mechanism open.
+
+**¶46**
+- `t46.1` **HYPOTHESIS·scenario** (the police theory) · typical
+  reads "this Fitzroy Simpson, having drugged the lad, and having in some way obtained a duplicate key, opened the stable door and took out the horse"; "His bridle is missing"; "he was either met or overtaken by the trainer"; "beat out the trainer's brains with his heavy stick"; "either led the horse on to some secret hiding-place, or else it may have bolted"
+- `t46.2` **INFER** · *fair* · careful · from `t46.1`
+  reads "His bridle is missing"
+  The horse was bridled and led by someone who knew how.
+- `t46.3` **RESIDUE** · *strong* · careful · strains `t46.1` · Holmes ¶46 ("improbable"), ¶57 (part)
+  The police theory leaves unexplained:
+  1. the curry: a stranger lucky in the menu (`t37.7`, `t37.8`);
+  2. the dog's silence while a stranger took the horse (`t34.2`, `t34.4`);
+  3. a duplicate key nobody has found (`t31.3`);
+  4. why take the horse out at all (`t18.3`);
+  5. how a stranger hides the most famous horse in England (`t14.3`, `t37.12`);
+  6. the trainer pursuing alone without waking the loft or loosing the dog (`t34.5`);
+  7. one blow against "repeated blows", and no wound on Simpson (`t40.5`, `t41.1`);
+  8. the coat off in the rain (`t35.8`).
+- `t46.4` **HYPOTHESIS·scenario** · *weak* · expert · from `t32.2`, `t31.4`, `t34.4`, `t34.5`, `t37.8`, `t35.8`, `t34.6` · strained by `t19.4` · Holmes ¶220
+  **Straker himself took the horse out.** He went out at one, had a key, was known to the dog, belonged to the
+  household that served the curry, raised no alarm, and took his coat off for some job. Against: his reputation,
+  no motive in evidence, and he is the one who died. ⚠ high: every premise is on the page, but holding the
+  victim as the instigator is a big jump for a first-time reader. The residue list (`t46.3`) is what pushes
+  towards it.
+- `t46.5` **QUESTION·motive** · careful · from `t46.4`
+  If Straker, why? Only `t28.3` hints at a motive so far.
+- `t46.6` **QUESTION** · careful · from `t46.4`
+  If Straker, what killed him: {Simpson met on the moor, someone else, the horse (`t37.13`)}?
 
 ### State of mind after s02
 
 **The night, as far as it is fixed:**
 
-| Time | What | Source |
+| Time | What | Thoughts |
 |---|---|---|
-| 9:00 | stables locked; lads to the kitchen; Hunter on guard | Holmes's recital |
-| just after 9 | the maid carries curried mutton down; the stranger stops her, offers the paper; at the window; the dog; he vanishes | maid, Hunter |
-| ? | the opium goes into the lad's portion | inferred, after dishing up |
-| later | lads return; message to Straker | Hunter |
-| 1:00 | Straker dresses and goes out in heavy rain, in his mackintosh | Mrs. Straker |
-| ? | the stable door is opened with a key; the horse is bridled and led out; the dog makes no sound anyone hears | inferred |
-| ? | horse and Straker in the hollow a quarter mile off; Straker takes, or loses, his coat; one blow to the head; the thigh cut | inferred |
-| ? | the horse leaves the hollow | — |
-| 7:00 | door open, Hunter stupefied, stall empty | Mrs. Straker, lads |
+| 9:00 | stables locked; lads to the kitchen; Hunter on guard | `t20.1` |
+| just after 9 | curried mutton carried down; the stranger, the paper, the window, the dog; he vanishes | `t20.2`, `t24.1`, `t29.1`, `t29.2` |
+| ? | opium into the lad's portion, after dishing up | `t37.4` |
+| later | lads return; message to Straker | `t32.1` |
+| 1:00 | Straker goes out in heavy rain, in his mackintosh | `t32.2` |
+| ? | door opened with a key; horse bridled and led out; the dog unheard | `t33.2`, `t37.5`, `t46.2`, `t34.2` |
+| ? | horse and Straker in the hollow; coat off; one blow; thigh cut | `t37.1`, `t35.1`–`t35.3` |
+| ? | horse leaves the hollow | — |
+| 7:00 | door open, Hunter stupefied, stall empty | `t33.1` |
 
-**Open questions:** who drugged the lad; who opened the door; why the horse was taken out instead of injured
-in the stall; what killed Straker; why the coat is off; why the dog was silent; where the horse is now.
+**Open questions:** who drugged the lad (`t37.9`); who opened the door (`t31.4`); why the horse was taken out
+(`t18.3`); what killed Straker (`t46.6`); why the coat is off (`t35.9`); why the dog was silent (`t34.4`); where
+the horse is (`t14.3`).
 
-**Live hypotheses:**
-- *Police:* Simpson did all of it. Residue: eight items (¶46).
-- *Mapleton:* someone from Mapleton took or now holds the horse. Explains the hiding; nothing yet on the night.
-- *Inside:* someone of the household drugged the lad; Straker most likely took the horse. Explains the curry,
-  the dog, the key and the missing alarm; lacks a motive.
-- *Accident:* the horse killed Straker. Explains the single blow and the absence of a human killer; lacks any
-  account of why they were in the hollow.
+**Live scenarios:**
+- *Police* (`t46.1`): residue of eight (`t46.3`).
+- *Mapleton* (`t40.4`): explains the hiding; says nothing about the night.
+- *Inside* (`t46.4`): explains the curry, the dog, the key and the missing alarm; lacks a motive (`t46.5`).
+- *Accident* (`t37.13`): explains the single blow and the absence of a human killer; doesn't explain why they
+  were in the hollow.
 
 ---
 
 ## s03 Tavistock and the drive with Gregory (¶47–¶69)
 
-**¶52, ¶56** Gregory: "the evidence is purely circumstantial ... He has neither a knife nor any sign of a wound ... He lies under suspicion of having poisoned the stable-boy"
-- WEIGH: Gregory's list is the police theory's evidence. Each item is one already weighed: motive (real),
-  "under suspicion" of the poisoning (that is Hunter's conclusion, ¶36), out in the storm (weak, ¶40), heavy
-  stick (fits weapon, not wound count), cravat (real, but how it got there is open). *fair*
+**¶52–¶56**
+- `t52.1` **RECORD** · typical
+  reads "the evidence is purely circumstantial"
+- `t54.1` **TEST** · *fair* · careful · from `t44.2` · supports `t35.7 (Straker's own)`
+  reads "We have quite come to the conclusion that he wounded himself in his fall"
+  The police accept the cut was self-inflicted. That removes the one piece of physical evidence that an
+  assailant was hurt.
+- `t56.1` **WEIGH** · *fair* · careful · from `t39.2`, `t36.2`, `t40.6`, `t40.5`, `t36.3`, `t35.10`
+  reads "He had a great interest in the disappearance of the favourite. He lies under suspicion of having poisoned the stable-boy, he was undoubtedly out in the storm, he was armed with a heavy stick, and his cravat was found in the dead man's hand"
+  Gregory's case, item by item: the motive is real; the poisoning is Hunter's conclusion; "out in the storm"
+  doesn't fix the hour; the stick fits a weapon but not one blow; the cravat is real, but how it got there is
+  open.
 
-**¶54** "We have quite come to the conclusion that he wounded himself in his fall."
-- TEST: The police accept the thigh cut is self-inflicted. That removes the one piece of physical evidence
-  that implied an assailant was hurt. *fair*
+**¶57**
+- `t57.1` **TEST** · *strong* · careful · supports `t46.3`
+  reads "Why should he take the horse out of the stable? ... Has a duplicate key been found ...? ... where could he, a stranger to the district, hide a horse ...? What is his own explanation as to the paper"
+  Holmes's objections are items 3, 4 and 5 of the reader's list, plus the paper. A reader who built the list can
+  check it against his.
+- `t57.2` **NOTICE** · *weak* · careful
+  reads "If he wished to injure it why could he not do it there?"
+  Holmes puts injuring the horse on the table as a natural aim.
+- `t57.3` **QUESTION·turn-around** · *weak* · expert · from `t18.3`, `t57.2` · Holmes ¶223
+  Turned round: what needed doing **away from** the stable? Something that couldn't be done within earshot of the
+  loft, or that needed light that would be seen. It waits for the knife (`t81.2`) and the candle (`t78.3`).
 
-**¶57** Holmes: "Why should he take the horse out of the stable? If he wished to injure it why could he not do it there? Has a duplicate key been found ...? What chemist sold him the powdered opium? ... where could he, a stranger to the district, hide a horse ...? What is his own explanation as to the paper ...?"
-- GENRE / TEST: Holmes's objections are items 3, 4 and 5 of the reader's residue list (¶46), plus the paper.
-  A reader who built the list can check it against his. *strong*
-- NOTICE: "If he wished to **injure** it". Holmes puts injuring the horse on the table as a natural aim.
-  *weak* as a pointer.
-- QUESTION, turned around: if whoever took the horse out *needed* to do it away from the stable, what was the
-  reason? Something that couldn't be done within earshot of the loft, or needed light that would be seen.
-  *weak*, and it waits for the knife (¶79) and the candle (¶78).
+**¶58**
+- `t58.1` **RECORD** · typical
+  reads "He says that it was a ten-pound note. One was found in his purse."
+- `t58.2` **RECORD** · typical
+  reads "He has twice lodged at Tavistock in the summer. The opium was probably brought from London. The key, having served its purpose, would be hurled away. The horse may be at the bottom of one of the pits"
+- `t58.3` **DROP** · *fair* · careful · from `t58.1`, `t24.4`, `t26.1` · drops `t24.3 (drug)`, supports `t24.3 (money)` · Holmes —
+  The paper was money. The packet-equals-opium link, the strongest tie between Simpson and the drugging, goes.
+- `t58.4` **WEIGH** · *fair* · careful · from `t58.2` · strains `t46.1`
+  Gregory meets each objection with a new assumption, not with evidence. A theory held up by patches is losing.
 
-**¶58** "He says that it was a ten-pound note. One was found in his purse ... He has twice lodged at Tavistock ... The opium was probably brought from London. The key ... would be hurled away. The horse may be at the bottom of one of the pits"
-- TEST: The paper was a ten-pound note, and a note was found on him. This supports ¶22(b), a bribe, over (a), the
-  drug. The packet-equals-opium link, the strongest tie between Simpson and the drugging, weakens. *fair*
-- WEIGH: Gregory answers each objection with a new assumption: he knows the district, opium from London, key
-  thrown away, horse in a pit. None is evidence; each is a patch. A theory held up by patches is losing.
-  *fair*
+**¶60**
+- `t60.1` **RECORD** · typical
+  reads "He acknowledges that it is his, and declares that he had lost it."
+- `t60.2` **WEIGH** · *fair* · careful · from `t60.1`, `t29.2`
+  Unverifiable. If it is true, he most likely lost it on the moor that evening near the stables, running from
+  the dog.
+- `t60.3` **HYPOTHESIS** · *weak* · careful · from `t60.2`, `t32.2`, `t35.10` · Holmes ¶226 (the second)
+  Someone passing the stables later picked it up, for instance a man going down at one in the morning. If it was
+  Straker, why keep it: {to lay it on the stranger later, as a strap or tie}?
 
-**¶60** "He acknowledges that it is his, and declares that he had lost it."
-- WEIGH: Simpson says he lost the cravat. It can't be checked. If it's true, he most likely lost it on the moor
-  that evening, near the stables, during his flight from the dog (¶29), and anyone who passed that way later
-  could have picked it up. *fair* as a possibility.
-- HYPOTHESIS: Who would pass the stables after nine and pick up a cravat? Someone walking to the stables, for
-  instance a man going down at one in the morning. If Straker picked it up: why keep it? To lay it on the
-  stranger later; or because it was useful as a strap or tie. *weak*. (→ Holmes ¶226 offers the second.)
+**¶62**
+- `t62.1` **RECORD** · typical
+  reads "a party of gypsies encamped on Monday night within a mile of the spot where the murder took place. On Tuesday they were gone."
+- `t62.2` **HYPOTHESIS** · *weak* · typical · from `t62.1`, `t37.2`
+  The gypsies have the horse. (Gregory's version adds Simpson leading the horse to them.)
+- `t62.3` **DEFAULT·period** · *fair* · careful · from `t62.1`, `bk.gypsies` · undercuts `t62.2` · Holmes ¶114
+  Under the period belief their leaving is to be expected either way, so it points at nothing. It fits the police
+  theory only by its timing.
+- `t62.4` **DROP** · *fair* · careful · from `t62.3`, `bk.gypsies`, `bk.famous_horse`, `t46.3` · drops `t62.2` · Holmes ¶114
+  They couldn't sell a horse everyone knows, taking him would bring the police down on them, and the theory
+  explains nothing about the curry or the dog.
 
-**¶62** "a party of gypsies encamped on Monday night within a mile of the spot ... On Tuesday they were gone"
-- WEIGH / DEFAULT: The period default is that wandering people clear out when there's trouble with the police,
-  so their leaving is what one would expect either way and points at nothing. It is evidence that "fits" the
-  police theory only because of when it happened. *fair*. (→ Holmes ¶114. This is a default the game should
-  give in period terms and not endorse.)
-- WRONG TURN (available): the gypsies took the horse. What weighs against it: they couldn't sell a horse that
-  everyone knows; it would bring the police down on them; it explains nothing about the curry or the dog.
+**¶64**
+- `t64.1` **RECORD** · typical
+  reads "I have also examined every stable and out-house in Tavistock, and for a radius of ten miles"
+- `t64.2` **TEST** · *fair* · typical · from `t64.1` · strains `t14.3 (stable)`, `t40.4`
+- `t64.3` **HYPOTHESIS** (PHYSICAL) · *weak* · expert · from `bk.blaze`, `bk.famous_horse`, `t64.1` · undercuts `t64.2` · Holmes ¶198, ¶202
+  A search finds a horse only if the searchers recognise him, and his name says how they would: a blaze. A
+  horse with the blaze dyed out is one more bay among bays. ⚠ medium: the reader needs `bk.blaze`, and the
+  disguise isn't confirmed until ¶198.
 
-**¶64** "I have also examined every stable and out-house in Tavistock, and for a radius of ten miles."
-- TEST: That apparently refutes ¶14(c), the horse hidden among horses within ten miles.
-- HYPOTHESIS, to save (c): A search finds a horse only if the searchers *recognise* him. The horse is
-  identified by sight, and his name says how: a *blaze* is a white mark down a horse's face. (Background:
-  horse terminology.) A horse whose blaze has been dyed out is, to a searcher, one more bay in a stable full
-  of bays. *weak to fair*, depending on whether the reader knows what a blaze is.
-  ⚠ hindsight (medium): the disguise is confirmed only at ¶198.
+**¶66**
+- `t66.1` **RECORD** · typical
+  reads "Silas Brown, the trainer, is known to have had large bets upon the event, and he was no friend to poor Straker. We have, however, examined the stables"
+- `t66.2` **TEST** · *fair* · careful · from `t66.1`, `t64.3` · supports `t40.4`
+  Brown adds motive. The search of his stables counts against `t40.4` only as far as `t64.3` lets it.
+- `t66.3` **HYPOTHESIS·scenario** · *weak* · typical · from `t66.1`, `t40.3`
+  Silas Brown organised the night: the drugging and the abduction, through Simpson or someone else.
 
-**¶66** "Silas Brown, the trainer, is known to have had large bets upon the event, and he was no friend to poor Straker. We have, however, examined the stables, and there is nothing to connect him"
-- RECORD: Brown has motive (large bets, Desborough second favourite) and is on bad terms with Straker.
-- TEST: Mapleton was searched (see ¶64 on why that settles less than it seems). The Mapleton hypothesis
-  survives, weakened. *fair*
-- WRONG TURN (available): Silas Brown arranged the whole night, the drugging and the abduction, through
-  Simpson or someone else. What weighs against it: ¶68, and the curry and dog arguments, which point inside
-  King's Pyland, not to Mapleton.
+**¶67–¶68**
+- `t68.1` **RECORD** · typical
+  reads "And nothing to connect this man Simpson with the interests of the Mapleton stables?" "Nothing at all."
+- `t68.2` **DROP** · *fair* · careful · from `t68.1`, `t37.8`, `t34.4` · drops `t66.3` · Holmes —
+  Nothing connects Simpson to Mapleton, and the curry and dog arguments point inside King's Pyland, not to
+  Mapleton.
+- `t68.3` **IDENTIFY·split** · *fair* · careful · from `t14.4`, `t37.8`, `t40.4`, `t68.1` · revises `t4.2`
+  The one-culprit default breaks. The night is **three stories**: who took the horse out (inside), what killed
+  Straker (open), who has the horse now (perhaps Mapleton). They may involve different people.
 
-**¶67–¶68** "And nothing to connect this man Simpson with the interests of the Mapleton stables?" "Nothing at all."
-- GENRE: Holmes checks for a Simpson and Mapleton conspiracy and finds none. The reader can split the case:
-  whoever *holds* the horse (maybe Mapleton) and whoever *took* him out (not necessarily the same) may be
-  different people. *fair*
-- REVISE: The default from ¶4 (one culprit for everything) is now openly in doubt. Taking the horse,
-  killing the trainer and hiding the horse may be three separate stories.
-
-**¶69–¶70** Holmes, "entirely absorbed in his own thoughts ... I was day-dreaming ... his hand was upon a clue, though I could not imagine where he had found it"
-- GENRE: Holmes has the key insight **here, in the carriage**. Nothing new has reached him since the train
-  except Gregory's answers. So the clue is in what the reader also has. This is the story's prompt to stop and
-  re-read the facts. *strong*. (Holmes later says it was the curry, ¶216.)
-- A reader who has already done ¶37 has the satisfaction of having been there first. A reader who hasn't should
-  go back over the recital with this question: which fact would make a man jump?
+**¶69–¶70**
+- `t70.1` **GENRE·watch-holmes** · *strong* · careful · Holmes ¶216
+  reads "There was a gleam in his eyes and a suppressed excitement in his manner which convinced me ... that his hand was upon a clue, though I could not imagine where he had found it"
+  Holmes has had the key insight in the carriage. Nothing new has reached him except Gregory's answers, so the
+  clue is among facts the reader also has.
+- `t70.2` **GENRE·re-read** · careful · from `t70.1`
+  Go back over the recital with one question: which fact would make a man start? For a reader who missed
+  `t37.6`, this is the prompt; a reader who already has it can confirm being there first.
 
 ### State of mind after s03
 
-The police theory is losing on three fronts: Gregory has to patch it, the paper was money, and Simpson's
-account of the cravat is unverified but coherent. The case looks like **three separate questions**: who led the
-horse out (inside, probably Straker), what killed Straker (open, possibly the horse), and where the horse is
-(possibly Mapleton, possibly disguised). The missing piece is a **motive for Straker**.
+The police theory is losing (`t58.3`, `t58.4`, `t56.1`). The night has split into three stories (`t68.3`): who
+took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t46.6`), and where the horse is
+(Mapleton, perhaps disguised, `t40.4`, `t64.3`). The missing piece is **a motive for Straker** (`t46.5`).
 
 ---
 
 ## s04 Straker's villa: the pockets and Mrs. Straker (¶70–¶92)
 
-**¶72–¶75** "Straker was brought back here, I presume?" ... "He has been in your service some years, Colonel Ross?" "I have always found him an excellent servant."
-- GENRE: Right after his insight, Holmes asks the dead man's employer about **the dead man's character**. If
-  his insight implicated Straker, this is the question he would ask. *fair*. Watching what the detective
-  checks is a legitimate reader technique, and an action the game could offer ("what is Holmes looking at?").
+**¶72–¶75**
+- `t75.1` **GENRE·watch-holmes** · *fair* · careful · from `t70.1`, `t46.4`
+  reads "He has been in your service some years, Colonel Ross?" "I have always found him an excellent servant."
+  Right after his insight, Holmes asks the dead man's employer about **the dead man's character**. That is the
+  question he would ask if the insight implicated Straker.
 
-**¶78** "a box of vestas, two inches of tallow candle, an A.D.P. briar-root pipe, a pouch ... a silver watch ... five sovereigns in gold, an aluminium pencil-case, a few papers, and an ivory-handled knife with a very delicate, inflexible blade marked Weiss & Co., London"
-- INFER: Five sovereigns and a gold-chained watch are still on the body. **Not a robbery**, and whoever was with
-  him didn't search him. *strong*
-- NOTICE: **A candle** as well as matches. Matches go with the pipe; a candle is for close work in the dark.
-  He went out on a night walk with no lantern and with a candle. *weak to fair*
-- PREDICT: If he lit the candle or a match in the hollow, there may be a spent match there. *weak*.
-  (→ ¶102: Holmes finds the vesta "because I was looking for it".)
+**¶78**
+- `t78.1` **RECORD** · *strong* · typical
+  reads "a box of vestas, two inches of tallow candle, an A.D.P. briar-root pipe, a pouch of seal-skin ... a silver watch with a gold chain, five sovereigns in gold, an aluminium pencil-case, a few papers, and an ivory-handled knife with a very delicate, inflexible blade"
+- `t78.2` **INFER** · *strong* · typical · from `t78.1`
+  Five sovereigns and a gold-chained watch are still on the body. Not a robbery, and nobody searched him.
+- `t78.3` **NOTICE** · *fair* · careful · from `t78.1` · Holmes ¶224 (the Colonel)
+  **A candle** as well as matches. Matches go with the pipe; a candle is for close work in the dark.
+- `t78.4` **ABSENCE** · *weak* · expert · from `t78.1`, `t32.2`
+  No lantern. He set out on a dark night to inspect the stables and took a candle stub, not a lantern.
+- `t78.5` **PREDICT** · *weak* · careful · from `t78.3`, `t37.1` · Holmes ¶102–¶106
+  If he lit a match in the hollow, a spent one may be in the mud there.
 
-**¶79–¶81** "This is a very singular knife ... It is what we call a cataract knife ... A very delicate blade devised for very delicate work. A strange thing for a man to carry with him upon a rough expedition, especially as it would not shut in his pocket."
-- NOTICE: A horse-trainer carrying a **surgeon's eye-knife**, on a night when he expected trouble. *strong*.
-  This is the loudest clue in the story, and the story says so through Holmes.
-- HYPOTHESIS: Why carry it? (a) the nearest weapon (Gregory, ¶82); (b) **to operate on something**, delicately,
-  that night. The only patient within a quarter mile is the horse. *fair* for (b), strong once tied to ¶57
-  ("injure it") and to the candle.
-- DEFAULT: A man arming himself against intruders picks a stick, a poker or a gun, not a blade that won't fold
-  and is made for precision. (Exception: panic.) *fair*
-- ⚠ The specific operation, nicking a tendon under the skin to cause a lameness that leaves no trace (¶221), is
-  specialist veterinary and racing knowledge. A reader doesn't need it: "he meant to injure the horse
-  invisibly" is enough to carry the chain. The game should accept that general form.
+**¶79–¶81**
+- `t81.1` **RECORD** · *strong* · typical
+  reads "It is what we call a cataract knife"; "A very delicate blade devised for very delicate work"; "it would not shut in his pocket"
+- `t81.2` **NOTICE** · *strong* · typical · from `t81.1`, `t32.1` · Holmes ¶81, ¶221
+  A horse-trainer carrying **a surgeon's eye-knife** on a night when he expected trouble. This is the loudest
+  clue in the story, and the story says so through Holmes.
+- `t81.3` **HYPOTHESIS** · *fair* · careful · from `t81.2`, `t57.2`, `t78.3`
+  Why carry it: {the nearest weapon; **to operate on something that night**}? The only possible patient within
+  a quarter mile is the horse.
+- `t81.4` **AGENT** · *fair* · careful · from `t81.1`, `bk.weapon_choice` · strains `t81.3 (weapon)` · Holmes ¶221 ("no sane man would choose for a weapon")
+  A man arming himself takes a stick or a poker.
+- `t81.5` **INFER** · *fair* · careful · from `t81.3`, `t81.4`, `t57.3`, `t46.4` · Holmes ¶221, ¶223
+  He meant to **injure the horse, delicately, away from the stable**: away from the loft's hearing, by candle.
+  The specific operation (nicking a tendon under the skin, ¶221) is specialist knowledge. The general form is
+  enough to carry the chain, and the game should accept it.
 
-**¶82** "The tip was guarded by a disk of cork which we found beside his body ... the knife had lain upon the dressing-table, and that he had picked it up as he left the room. It was a poor weapon, but perhaps the best that he could lay his hands on"
-- WEIGH: Mrs. Straker's report (that the knife was on the dressing-table and he picked it up as he left) is
-  observation and honest. So **he took it deliberately when he set out**. Gregory's "best he could lay his hands
-  on" is an inference, and a weak one: a man of the house could lay his hands on much better. *fair*
-- INFER: The cork guard was found by the body, so the blade was unsheathed in the hollow. Fits both readings
-  (defending himself, or about to use it). Neutral. *fair*
-- NOTICE: Why does a trainer keep a cataract knife on his dressing-table in the first place? *weak*
+**¶82**
+- `t82.1` **RECORD** · typical
+  reads "The tip was guarded by a disk of cork which we found beside his body"; "His wife tells us that the knife had lain upon the dressing-table, and that he had picked it up as he left the room"; "It was a poor weapon, but perhaps the best that he could lay his hands on"
+- `t82.2` **WEIGH** · *fair* · careful · from `t82.1` · strains `t81.3 (weapon)`
+  Mrs. Straker's report is honest observation: **he took the knife deliberately** as he set out. Gregory's "best
+  he could lay his hands on" is an inference, and a weak one: a man in his own house could lay his hands on much
+  better.
+- `t82.3` **INFER** · *fair* · careful · from `t82.1`
+  The guard was by the body, so the blade was unsheathed in the hollow. That fits both readings.
+- `t82.4` **NOTICE** · *weak* · expert · from `t82.1`
+  Why does a trainer keep a cataract knife on his dressing-table at all?
 
-**¶84** "a milliner's account for thirty-seven pounds fifteen made out by Madame Lesurier, of Bond Street, to William Derbyshire. Mrs. Straker tells us that Derbyshire was a friend of her husband's and that occasionally his letters were addressed here."
-- NOTICE: A dead man carrying **someone else's bill**. *strong*
-- DEFAULT: People don't carry others' bills about; they have enough of their own. (Exception: settling it for
-  a friend, a commission.) *fair*. (→ Holmes ¶225, the same default stated as worldly wisdom.)
-- HYPOTHESIS: (a) Derbyshire is a friend, as Mrs. Straker says; (b) **Derbyshire is Straker**, under another name.
-- WEIGH: Mrs. Straker passes on what her husband told her: honest, but second-hand. And "his letters were
-  addressed here" is exactly how an alias gets its post. Her support for (a) is also support for (b). *fair*
-  for (b).
-- INFER (if b): A Bond Street milliner, £37 15s on one account, for a man described as "comfortably off" (¶19).
-  There is a **lady** with expensive tastes who is not, or not openly, his wife. A second household costs
-  money, and that is a motive. *fair*
-- REVISE: ¶28's seed and the motive gap at ¶46 close: a man who needs money, who controls the favourite, can
-  bet against him (through others) and make sure he loses. Background: a trainer laying against his own horse is
-  a known turf fraud (→ Holmes ¶220). *fair*
+**¶84**
+- `t84.1` **RECORD** · *strong* · typical
+  reads "Three of them are receipted hay-dealers' accounts. One of them is a letter of instructions from Colonel Ross. This other is a milliner's account for thirty-seven pounds fifteen made out by Madame Lesurier, of Bond Street, to William Derbyshire"
+- `t84.2` **RECORD** · typical
+  reads "Mrs. Straker tells us that Derbyshire was a friend of her husband's and that occasionally his letters were addressed here"
+- `t84.3` **NOTICE** · *strong* · careful · from `t84.1`, `bk.bills` · Holmes ¶225
+  A dead man carrying **someone else's bill**. Exception: settling it for a friend.
+- `t84.4` **HYPOTHESIS** · *fair* · careful · from `t84.3`, `t84.2`
+  {Derbyshire is a friend, as Mrs. Straker says; **Derbyshire is Straker**, under another name}.
+- `t84.5` **SOURCE** · *fair* · careful · from `t84.2`, `bk.alias_post` · supports `t84.4 (Straker)`
+  Mrs. Straker passes on what her husband told her: honest, but second-hand. "His letters were addressed here" is
+  just how an alias gets its post, so her evidence for "friend" fits "alias" equally well.
+- `t84.6` **IDENTIFY·merge** · *fair* · careful · from `t84.3`, `t84.4`, `t84.5` · Holmes ¶225
+  Derbyshire = Straker, provisionally.
+- `t84.7` **NOTICE·calculate** · *fair* · careful · from `t84.1`, `t84.6`, `t19.1`, `bk.milliner_prices` · Holmes ¶225, ¶229
+  £37 15s at a Bond Street milliner, for a man "comfortably off" on a trainer's means. There is a **lady** with
+  expensive tastes who is not, or not openly, his wife: a second household, and money pressure.
+- `t84.8` **REVISE** · *fair* · careful · from `t84.7`, `t28.3`, `bk.lay_against` · revises `t28.3`; answers `t46.5` · Holmes ¶220
+  The motive: a man who needs money, and who controls the favourite, bets against him through others and makes
+  sure he loses.
 
-**¶85** "Madam Derbyshire had somewhat expensive tastes ... Twenty-two guineas is rather heavy for a single costume."
-- GENRE: Holmes reads the bill line by line, and the reader learns that one item is a costume of 22 guineas.
-  The reader isn't shown the items. *weak*
-- NOTICE: Holmes says *Madam* Derbyshire. He is reading the bill as a woman's clothes billed to a man.
+**¶85**
+- `t85.1` **RECORD** · typical
+  reads "Madam Derbyshire had somewhat expensive tastes"; "Twenty-two guineas is rather heavy for a single costume"
+- `t85.2` **GENRE·watch-holmes** · *weak* · careful · from `t85.1`
+  Holmes reads the bill line by line. The reader isn't shown the items, only that one is a costume of 22 guineas.
+- `t85.3` **TEST PLAN** · *fair* · expert · from `t84.6`, `t85.1` · Holmes ¶89–¶92
+  If Derbyshire is Straker, there are two versions: (a) Straker dresses **his wife** extravagantly under another
+  name, and (b) there is **another woman**. Ask whether Mrs. Straker ever received that costume. "Friend"
+  predicts no as well, so the test doesn't separate friend from alias; it separates (a) from (b).
 
-**¶89–¶92** "Surely I met you in Plymouth at a garden-party ... You wore a costume of dove-coloured silk with ostrich-feather trimming." "I never had such a dress, sir." "Ah, that quite settles it."
-- INFER: The dress Holmes describes must come from the bill (he has just read it, ¶85). He is testing whether
-  the costume on Derbyshire's bill reached Mrs. Straker. *fair*. The reader has to supply that link: the text
-  doesn't say the bill lists dove-coloured silk. (→ Holmes ¶225 confirms.) Fair-play note: the reader is shown
-  the test and its result, not the evidence it was tested against.
-- TEST: She never had it. Then the costume went to someone else. If Derbyshire is Straker (¶84 b), there is
-  another woman. "That quite settles it": Holmes says the hypothesis is confirmed. *fair to strong*.
-- WEIGH: Mrs. Straker denies the dress honestly, which is why the trick works: she doesn't know what is being
-  asked.
-- PREDICT: The milliner would recognise Straker's photograph as Derbyshire. *fair*. (→ Holmes asks for the
-  photograph at ¶161; the result is at ¶229.)
+**¶89–¶92**
+- `t92.1` **RECORD** · typical
+  reads "You wore a costume of dove-coloured silk with ostrich-feather trimming." "I never had such a dress, sir," answered the lady. "Ah, that quite settles it,"
+- `t92.2` **INFER** · *fair* · careful · from `t85.1`, `t92.1` · Holmes ¶225
+  The dress Holmes describes must come from the bill: he is running `t85.3`. The reader has to supply this link.
+  Fair-play note: the reader is shown the test and its result, not the item it tests.
+- `t92.3` **WEIGH** · *fair* · careful · from `t92.1`
+  Her denial is honest; she doesn't know what is being asked, which is why the trick works.
+- `t92.4` **TEST** · *fair* · careful · from `t92.2`, `t92.3` · supports `t84.7`; refutes `t85.3 (a)` · Holmes ¶225
+  She never had it, so the costume went to another woman. "That quite settles it."
+- `t92.5` **TEST PLAN** · *fair* · careful · from `t84.6` · Holmes ¶161, ¶225, ¶229
+  Show Straker's photograph at Madame Lesurier's: the milliner will recognise him as Derbyshire.
 
 ### State of mind after s04: the checkpoint before the hollow
 
-A reader who has made the steps above can now tell **the inside story** of Monday night with every link either
-evidenced or a named default:
-
-1. Straker, living a double life as Derbyshire with an expensive lady, needs money (¶84–¶92).
-2. He arranges to profit from his own favourite losing (background: laying against one's own horse; ¶28 seed).
-3. He plans to lame the horse invisibly with a cataract knife (¶79–¶82), out of earshot of the loft, so on the
-   moor (¶57 turned round).
-4. The household serves curried mutton; he puts opium in the lad's portion, where the curry hides it (¶20, ¶37).
-5. At one he takes the knife and a candle, goes down, opens the door with his key; the dog knows him and is
-   silent (¶29, ¶31, ¶34, ¶78).
-6. On the way, or at the stable, he picks up the cravat Simpson lost in his flight (¶60; why he kept it is open).
-7. He leads the horse to the hollow, out of sight of the house, takes off his coat to work (¶35), and lights a
-   match or the candle (¶78).
-8. Something kills him with one blow to the head; in falling he cuts his own thigh (¶35, ¶41–¶44). The best
-   candidate for "something" is the horse (⚠): no human killer is needed, there was no robbery (¶78), and the
-   horse was there (¶37).
-9. The horse runs off; the likeliest place a loose horse or a man who found him would take him is the nearest
-   stable, King's Pyland or Mapleton; not King's Pyland, so Mapleton, where a searcher could miss him if his
-   blaze were hidden (¶14, ¶19, ¶40, ¶64, ¶66).
+- `t92.6` **HYPOTHESIS·scenario** · *fair* · careful · from `t84.8`, `t81.5`, `t37.8`, `t46.4`, `t34.4`, `t60.3`, `t35.8`, `t78.3`, `t44.2`, `t37.13`, `t40.4`, `t64.3` · supports `t46.4`; answers `t46.5` · Holmes ¶216–¶231
+  **The inside story** of Monday night, every link either evidenced or a named default:
+  1. Straker, living a double life as Derbyshire with an expensive lady, needs money (`t84.6`–`t84.8`, `t92.4`).
+  2. He means to profit from his own favourite losing (`t84.8`).
+  3. He plans to lame the horse invisibly with the cataract knife, out on the moor, away from the loft
+     (`t81.5`).
+  4. The household serves curried mutton; opium goes into the lad's portion, where the curry hides it (`t37.6`–`t37.8`).
+  5. At one he takes the knife and a candle, opens the door with his key; the dog knows him and keeps quiet
+     (`t32.2`, `t31.4`, `t34.4`, `t78.3`).
+  6. He picks up the cravat Simpson lost (`t60.3`; why he kept it stays open).
+  7. He leads the horse to the hollow, out of sight of the house, takes his coat off to work (`t35.8`), and strikes
+     a light (`t78.3`).
+  8. One blow kills him; falling, he cuts his own thigh (`t35.2`, `t44.2`). The best candidate for the blow is the
+     horse (`t37.13` ⚠): no robbery (`t78.2`), no human killer needed, and the horse was there.
+  9. The horse bolts. The nearest stable he could reach without being seen is Mapleton, where a searcher could
+     miss him if the blaze were hidden (`t40.4`, `t64.3`).
+- `t92.7` **DROP** · *fair* · careful · from `t92.6`, `t37.11` · drops `t37.10` · Holmes —
+  The maid as drugger: the inside story explains the drugging and the night visit with one person, while the
+  maid version needs two, and she has no motive beyond a bribe she ran away from.
+- `t92.8` **QUESTION** · careful · from `t92.6`
+  Who drugged the dish: Straker or his wife? The curry argument names the household; the dog and key arguments
+  name the person who came at one. Holmes leaves the access question open (¶218).
 
 **Predictions a reader can make here, before Holmes checks them:**
-- a spent match in the hollow (¶78 → ¶102);
-- the coat laid on the bush, not blown there, if the night was still (¶35 → ¶94–¶96);
-- the horse's tracks leading towards Mapleton (¶40, ¶66 → ¶116–¶119);
-- the milliner recognising Straker's photograph (¶92 → ¶161, ¶229);
-- Holmes advising that the horse stay entered, if the reader thinks Holmes has guessed he'll be found (→ ¶111);
-- that Straker practised the operation on something first (→ ¶228, the sheep). This one is reachable only by
-  asking "would a careful man do this cold?", and almost no first-time reader asks it. ⚠ hindsight (high).
+- `t92.9` **PREDICT** · *weak* · careful · from `t78.5` · Holmes ¶102–¶106: a spent match in the hollow.
+- `t92.10` **PREDICT** · *fair* · careful · from `t35.8`, `t35.9`, `t92.6` · Holmes ¶94–¶96: the coat was laid on
+  the bush, which will show if the night was still.
+- `t92.11` **PREDICT** · *fair* · careful · from `t40.4` · Holmes ¶116–¶119: the horse's tracks lead towards
+  Mapleton.
+- `t92.12` **PREDICT** · *fair* · careful · from `t92.5` · Holmes ¶229: the milliner recognises Straker's photograph.
+- `t92.13` **PREDICT** · *weak* · expert · from `t40.4`, `t92.6` · Holmes ¶111, ¶161: the horse will be found in
+  time to run, so Holmes will want him kept entered.
+- `t92.14` **AGENT** → **PREDICT** · *weak* · expert · from `t81.5` · Holmes ¶170–¶175, ¶228: a careful man doesn't
+  attempt a delicate operation cold, so Straker practised on something first. ⚠ high: reachable only by asking
+  "would he do this cold?", and almost no first-time reader asks it.
 
-**What remains uncertain at the checkpoint:** what killed Straker (horse or a second person); why he carried
-the cravat; who has the horse now; whether the drugger was Straker or his wife (the curry argument names the
-household; the dog and key arguments name the person who came at one).
+**What remains uncertain:** what killed Straker (`t46.6`); why he carried the cravat (`t60.3`); who has the horse
+(`t40.4`); who drugged the dish (`t92.8`).
 
-**Difficulty, honestly estimated.** A typical first-time reader reaches step 1 to 2 (Derbyshire is Straker)
-and step 4 (curry) only partly, and steps 5 and 8 almost never. A careful reader who plays it as a puzzle
-reaches 1 to 7. Step 8 (the horse as killer) and the sheep are the two places where the story outruns nearly
-everyone, and the game should treat them as expert-level, not as gates.
+**Difficulty, by profile.** A *typical* reader reaches the motive for Simpson, the knife as odd (`t81.2`) and
+perhaps Derbyshire, and holds the police theory with doubts. A *careful* reader reaches the inside story through
+step 7. Step 8 (the horse as killer, `t37.13`), the disguise (`t64.3`) and the practice (`t92.14`) are *expert*
+moves: the game should treat them as bonuses, not as gates.
 
 ---
 
@@ -538,25 +735,28 @@ everyone, and the game should treat them as expert-level, not as gates.
 Observations from writing the pilot that bear on the format and the game. To be turned into a proper gap
 analysis once the whole story is annotated.
 
-- **Most of the work is weighing and noticing, not deducing.** Of the strong moments above, the INFER steps are
-  short and few. The decisive moves are NOTICE (the curry, the knife, the bill, the dog's absence), WEIGH
-  (Hunter's "certainty", "assailants", Mrs. Straker's second-hand Derbyshire), and RESIDUE (the eight-item
-  list at ¶46).
-- **Testimony needs a grain finer than the claim.** Several "facts" are a mixture: ¶35 contains an observation
-  (the body, the knife, the cravat) and an inference ("defended himself against his assailants") in one
-  sentence. ¶36 holds an observation (the cravat) and a conclusion (the drugging) from the same witness.
-- **Hypotheses are held in sets.** At ¶22 the paper is drug or money or message; at ¶34 the dog is drugged or
-  slept-through or knew the visitor. The reader keeps the set open and lets later facts (¶58, ¶37) prune it.
-- **The reader's theories are scenarios, and they split.** By ¶68 the one-culprit default breaks into three
-  separate stories (who took the horse, what killed Straker, where the horse is). The reader carries a
-  timeline with blanks (the table after s02) and fills blanks; the game's board could be that table.
-- **Holmes's behaviour is evidence.** ¶69–¶70 (his insight in the carriage) and ¶74 (his question about
-  Straker's character) are things a reader legitimately uses. Whether the game should model "what is the
-  detective looking at" as an action is a design decision.
-- **Some flags pay off only as scenery** (the field-glass, the dress echo at ¶24). A player who flags them
-  shouldn't be penalised, but nothing should follow from them.
-- **Wrong turns worth supporting:** the maid as drugger (¶37), the gypsies (¶62), Silas Brown as the
-  organiser (¶66), the paper as opium (¶22). Each has a specific later fact that weakens it.
-- **Earliest moment versus Holmes's moment.** The curry argument is possible at ¶37; Holmes has it at ¶69.
-  Mapleton as the horse's place is possible at ¶40; Holmes reaches it at ¶116 by another route (horse instinct
-  rather than motive and capacity). Two valid routes to the same conclusion, at different times.
+- **Most of the work is weighing and noticing, not deducing.** The INFER steps are short and few. The decisive
+  moves are NOTICE and ABSENCE (`t37.6`, `t81.2`, `t84.3`, `t34.2`), WEIGH and SOURCE (`t35.6`, `t36.2`,
+  `t84.5`), and RESIDUE (`t46.3`).
+- **Testimony needs a grain finer than the claim.** `t35.6` is one clause of a paragraph whose other clauses are
+  observations; `t36.1` holds an observation and a conclusion from the same witness. Clause-level spans are
+  needed for WEIGH to work.
+- **Hypotheses are held in sets, and sets are pruned member by member** (`t24.3` loses "drug" at `t58.3`;
+  `t85.3 (a)` falls at `t92.4`). Relations need to address a set member.
+- **The reader's theories are scenarios, and they split** (`t68.3`). The timeline table after s02 is the board
+  the reader is actually using.
+- **Undercut is not refute.** "Sound sleepers" (`t34.3`) attacks the step from "nobody mentions the dog" to "the
+  dog was silent"; it doesn't make the dog bark. Gregory's patches (`t58.4`) strain a theory without refuting
+  it. The engine needs both kinds of attack.
+- **Holmes's behaviour is evidence** (`t31.2`, `t70.1`, `t75.1`, `t85.2`). Whether the game should credit it
+  less than reasoning from the evidence is a design decision.
+- **Some flags pay off only as scenery** (`t6.2`, `t10.1`, `t24.5`). SET ASIDE gives them somewhere to go.
+- **Wrong turns supported so far:** the paper as opium (`t24.3` → `t58.3`), the gypsies (`t62.2` → `t62.4`),
+  Silas Brown as organiser (`t66.3` → `t68.2`), the maid (`t37.10` → `t92.7`). Each one is dropped by citing a
+  specific thought.
+- **Earliest versus Holmes's date.** The curry is possible at ¶37 and Holmes has it at ¶69; Mapleton at ¶40
+  (motive and capacity) and Holmes at ¶116 (horse instinct). Two routes to one conclusion at different times:
+  the format has to allow alternative premises for the same conclusion.
+- **Background cards carry the difficulty.** `bk.opium_taste`, `bk.blaze`, `bk.lay_against` and
+  `bk.horse_kick` are where modern readers fall short. Offering them as optional cards would be a natural hint
+  system.
