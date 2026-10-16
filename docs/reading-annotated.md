@@ -583,7 +583,7 @@ the horse is (`t14.3`).
 
 **¶66**
 - `t66.1` **RECORD** · typical
-  reads "Silas Brown, the trainer, is known to have had large bets upon the event, and he was no friend to poor Straker. We have, however, examined the stables"
+  reads "As Desborough, their horse, was second in the betting"; "Silas Brown, the trainer, is known to have had large bets upon the event, and he was no friend to poor Straker. We have, however, examined the stables"
 - `t66.2` **TEST** · *fair* · careful · from `t66.1`, `t64.3` · supports `t40.4`
   Brown adds motive. The search of his stables counts against `t40.4` only as far as `t64.3` lets it.
 - `t66.3` **HYPOTHESIS·scenario** · *weak* · typical · from `t66.1`, `t40.3`
@@ -964,7 +964,7 @@ Straker, and confirmation of the motive.
 **¶147–¶148**
 - `t148.1` **RECORD** · typical
   reads "But his stables had been searched?" "Oh, an old horse-faker like him has many a dodge."
-- `t148.2` **INFER** · *fair* · careful · from `t148.1`, `bk.horse_faker`, `t141.1` · supports `t64.3` · Holmes ¶204
+- `t148.2` **INFER** · *fair* · careful · from `t148.1`, `bk.horse_faker`, `t141.1`, `t66.1` · supports `t64.3` · Holmes ¶204
   A "faker" is one who disguises horses: that is how the search missed him.
 
 **¶149–¶150**
@@ -1049,6 +1049,10 @@ are what killed Straker (`t46.6`) and what Holmes asked the maid (`t163.2`).
   Odds shortening from 15 to 1 to 3 to 1 means informed money: someone knows the horse will run. (Holmes, ¶214,
   "stand[s] to win a little".)
 
+**¶191**
+- `t191.1` **RECORD** · typical
+  reads "4. Colonel Ross’s Silver Blaze (black cap, red jacket)."
+
 **¶192**
 - `t192.1` **RECORD** · typical
   reads "We scratched our other one, and put all hopes on your word"
@@ -1059,7 +1063,7 @@ are what killed Straker (`t46.6`) and what Holmes asked the maid (`t163.2`).
 **¶194–¶198**
 - `t198.1` **RECORD** · *strong* · typical
   reads "a powerful bay horse swept out from the weighing enclosure ... bearing on its back the well-known black and red of the Colonel"; "That beast has not a white hair upon its body."
-- `t198.2` **IDENTIFY·merge** · *strong* · careful · from `t198.1`, `t141.1`, `t186.1`, `t64.3` · supports `t141.2`, `t64.3` · Holmes ¶202
+- `t198.2` **IDENTIFY·merge** · *strong* · careful · from `t198.1`, `t191.1`, `t192.1`, `t66.1`, `t186.1`, `t141.1`, `t64.3` · supports `t141.2`, `t64.3` · Holmes ¶202
   The bay in Ross's colours is Silver Blaze with his markings hidden. A reader who made `t64.3` or `t141.1`
   scores it before Holmes says so.
 

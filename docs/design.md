@@ -1170,3 +1170,24 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Moved:** reveal log: the training-stable glosses at ¶19, the new rule at ¶14–¶18, two inference labels.
   Foreshadow log: the same. Case report: the chain's inferences. Thoughts report: 31/46, two earliest-date misses
   left (`t29.3`, `t92.14`).
+
+## Round 49 (2026-10-15): short chains, chain 8 — the disguise
+
+- **The chain** (all verified; 60 verified, 10 asserted):
+  - `t148.2` → `k.disguised_to_survive_search`, split like `t114.2`. It now says only "if he is at Mapleton, he
+    is disguised", a slot on the horse, so it can be made at ¶148 (dealt ¶66, where Gregory reports the search).
+    It no longer needs `c.silver_blaze_markings`, which is not told until ¶146–¶186. The details of the event
+    (the hider did it, with dye, at Mapleton) are a new bookkeeping inference, `k.disguised_by_hider` (implicit),
+    which waits until ¶202 deals the event. Annotation: cites `t66.1` (the search). `t148.1` maps
+    `r.disguise_washes_off`: its quote is the rule's source.
+  - `t198.2` → `k.bay_is_ross_entry` (id kept), extended: the bay is Silver Blaze *and* his markings are hidden.
+    Its premises are what the reader cites: the colours (`t198.1`), the race card (new RECORD `t191.1`),
+    Bayard scratched (`t192.1`), Desborough not Ross's (`t66.1` now also reads "As Desborough, their horse, was
+    second in the betting"), the markings (`t186.1`), and `k.markings_identify`, now implicit, for the
+    bookkeeping. `c.all_six_there`, `c.silver_blaze_record` and `c.two_horses_for_cup` were not needed.
+    `t141.1` maps `silver_blaze.disguised`.
+- **Gates:** `i.bay_is_silver_blaze` moves from ¶198 to ¶199: the disguise needs "not a white hair" (¶198).
+  The route step's premises follow the inference (the markings in, the three unneeded claims out).
+- **Moved:** reveal log: `k.disguised_by_hider` and two inference labels. Foreshadow log: nothing. Case report:
+  the new inference and the route step's premises. Thoughts report: 32/46, `t148.2` and `t198.2` agree
+  with no unmatched premise; two earliest-date misses left (`t29.3`, `t92.14`).
