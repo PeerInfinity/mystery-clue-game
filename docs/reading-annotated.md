@@ -178,7 +178,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t18.2` **HYPOTHESIS·motive** · *strong* · typical · from `t18.1`
   reads "there were many people who had the strongest interest in preventing Silver Blaze from being there at the fall of the flag"
   Who gains if he doesn't run or win: {people who bet against him, bookmakers, rival stables}.
-- `t18.3` **INFER** · *fair* · careful · from `t18.2` · Holmes ¶57
+- `t18.3` **NOTICE** · *fair* · careful · from `t18.2` · Holmes ¶57
   That aim doesn't need the horse taken: injuring, laming or hiding him until Tuesday would do. This becomes a
   question once we learn the horse was led out (`t57.3`).
 
@@ -229,7 +229,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   A lost man wouldn't know the stable's night arrangements. The "lost" story is a cover: he came on purpose.
 - `t24.3` **HYPOTHESIS** · *fair* · typical · from `t24.1`, `bk.drug_paper`
   What is in the folded paper: {drug, money, message}. Most readers jump to the drug.
-- `t24.4` **AGENT** · *weak* · careful · from `t24.1` · supports `t24.3 (money)`, strains `t24.3 (drug)`
+- `t24.4` **WEIGH** · *weak* · careful · from `t24.1` · supports `t24.3 (money)`, strains `t24.3 (drug)`
   A poisoner would hardly ask a witness openly to pass the poison, and offer her a dress for it.
 - `t24.5` **SET ASIDE** · careful
   reads "the price of a new dress"
@@ -263,7 +263,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   inference later rests on it.
 - `t29.2` **RECORD** · typical
   reads "as she ran she looked back and saw that the stranger was leaning through the window"; "though he ran all round the buildings he failed to find any trace of him"
-- `t29.3` **INFER·opportunity** · *fair* · careful · from `t29.2`, `t25.1` · Holmes ¶36 (Hunter's version)
+- `t29.3` **INFER·opportunity** · *fair* · careful · from `t29.2`, `t28.2`, `t25.1` · Holmes ¶36 (Hunter's version)
   While Hunter crossed the stable to the dog, the stranger was leaning in through the window with nobody
   watching him. If the dish was on the table, he had a few seconds of opportunity.
 - `t29.4` **PREDICT** · *fair* · careful · from `t29.1`, `bk.guard_dog` · Holmes ¶219
@@ -800,7 +800,7 @@ ahead by predicting what each action will find.
 **¶98–¶100**
 - `t99.1` **RECORD** · typical
   reads "the ground has been trampled up a good deal"; "A piece of matting has been laid here at the side, and we have all stood upon that"
-- `t100.1` **PHYSICAL** · *weak* · careful · from `t99.1`
+- `t100.1` **NOTICE** (PHYSICAL) · *weak* · careful · from `t99.1`
   The surface has been trampled by searchers, so whatever evidence survives is under the mud or under the
   matting.
 
@@ -878,7 +878,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 **¶116**
 - `t116.1` **RECORD** · typical
   reads "He is not at King's Pyland. Therefore he is at Mapleton."; "This part of the moor ... is very hard and dry. But it falls away towards Mapleton ... a long hollow over yonder, which must have been very wet on Monday night"
-- `t116.2` **PHYSICAL** · *fair* · careful · from `t116.1`, `t108.1` · answers `t108.2`
+- `t116.2` **NOTICE** (PHYSICAL) · *fair* · careful · from `t116.1`, `t108.1` · answers `t108.2`
   The ground near the hollow is hard and dry, so it took no tracks. Tracks survive only where the ground was wet.
 - `t116.3` **TEST PLAN** · *fair* · careful · from `t116.2`, `t40.4`, `t101.1` · Holmes ¶116
   Search the wet hollow on the line to Mapleton, with the horseshoe.
@@ -899,7 +899,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
   reads "The horse was alone before"
   The horse went from the hollow alone; he wasn't led away by whoever was with Straker. He bolted, and the man's
   tracks join him only near Mapleton.
-- `t120.2` **INFER** · *weak* · careful · from `t120.1` · supports `t37.13`
+- `t120.2` **WEIGH** · *weak* · careful · from `t120.1` · supports `t37.13`
   Nobody left the hollow with the horse. That fits a death with no human killer present. It is consistent, not
   proof: a human killer could have fled on foot over the hard ground.
 - `t120.3` **QUESTION** · typical · from `t119.1`

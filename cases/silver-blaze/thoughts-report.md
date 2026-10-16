@@ -12,16 +12,16 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | Tag | Thoughts | Held by a card |
 |---|---|---|
 | RECORD | 93 | 89 |
-| NOTICE | 13 | 4 |
+| NOTICE | 16 | 5 |
 | ABSENCE | 5 | 2 |
 | QUESTION | 10 | 4 |
 | HYPOTHESIS | 27 | 22 |
-| INFER | 26 | 22 |
+| INFER | 24 | 22 |
 | DEFAULT | 8 | 7 |
-| AGENT | 9 | 4 |
-| PHYSICAL | 3 | 2 |
+| AGENT | 8 | 4 |
+| PHYSICAL | 1 | 1 |
 | IDENTIFY | 3 | 2 |
-| WEIGH | 17 | 3 |
+| WEIGH | 19 | 4 |
 | SOURCE | 2 | 0 |
 | TEST | 30 | 22 |
 | RESIDUE | 1 | 0 |
@@ -45,22 +45,20 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 ## Short chains
 
-Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
+Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 54; with an inference: 40; earliest-date misses: 1 (and 2 explained); premise disagreements: 1
+- deduction-type thoughts: 49; with an inference: 40; with a reason for none: 9; earliest-date misses: 0 (and 3 explained); premise disagreements: 0
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
-| `t4.2` | DEFAULT | — | ¶4 | — |  |  |  |  |  |
-| `t18.3` | INFER | — | ¶18 | — |  |  |  |  |  |
+| `t4.2` | DEFAULT | none: workstream-3 | ¶4 | — |  |  |  |  |  |
 | `t19.5` | INFER | `k.at_a_stable_in_reach` | ¶19 | ¶19 |  |  |  |  |  |
 | `t20.6` | INFER | `k.drugged_in_food` | ¶20 | ¶37 (explained) |  |  | `r.tap_water_not_dosed` |  | `t20.5` |
-| `t24.2` | AGENT | — | ¶24 | — |  |  |  |  |  |
-| `t24.4` | AGENT | — | ¶24 | — |  |  |  |  |  |
-| `t29.3` | INFER | `k.window_drugging_time` | ¶29 | ¶36 **late** |  | `c.stranger_asked_for_tip` |  |  | `t25.1` |
+| `t24.2` | AGENT | none: world-model | ¶24 | — |  |  |  |  |  |
+| `t29.3` | INFER | `k.window_drugging_time` | ¶29 | ¶36 (explained) |  |  |  |  | `t25.1` |
 | `t31.3` | INFER | `k.later_entry_needs_key` | ¶31 | ¶33 (explained) |  |  |  |  |  |
 | `t33.2` | INFER | `k.door_opened_with_key` | ¶33 | ¶33 |  |  |  |  |  |
-| `t34.5` | AGENT | — | ¶34 | — |  |  |  |  |  |
+| `t34.5` | AGENT | none: world-model | ¶34 | — |  |  |  |  |  |
 | `t34.7` | DEFAULT | `k.dog_knew_the_visitor` | ¶34 | ¶34 |  |  |  |  |  |
 | `t37.4` | INFER | `k.drugged_after_set_aside` | ¶37 | ¶37 |  |  | `r.same_dish_safe` | `k.portion_dished_at_supper` |  |
 | `t37.5` | INFER | `k.taker_had_a_key` | ¶37 | ¶37 |  |  |  | `k.entrant_took_the_horse`, `k.led_by_taker` |  |
@@ -76,40 +74,46 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t46.7` | INFER | `k.drugging_is_dishonest` | ¶46 | ¶37 |  |  | `r.honest_men_dont_drug` |  |  |
 | `t60.4` | INFER | `k.cravat_order` | ¶60 | ¶60 |  |  | `r.dropped_before_found`, `r.not_his_so_found_out`, `r.dead_men_do_nothing` |  |  |
 | `t62.3` | DEFAULT | `k.gypsies_did_not_take_him` | ¶62 | ¶62 |  |  |  |  |  |
-| `t68.3` | IDENTIFY | — | ¶68 | — |  |  |  |  |  |
-| `t78.2` | INFER | — | ¶78 | — |  |  |  |  |  |
+| `t68.3` | IDENTIFY | none: workstream-3 | ¶68 | — |  |  |  |  |  |
+| `t78.2` | INFER | none: world-model | ¶78 | — |  |  |  |  |  |
 | `t81.4` | AGENT | `k.knife_not_a_weapon` | ¶81 | ¶81 |  |  |  |  |  |
 | `t81.5` | INFER | `k.knife_for_an_operation` | ¶81 | ¶81 |  |  |  |  |  |
-| `t82.3` | INFER | — | ¶82 | — |  |  |  |  |  |
+| `t82.3` | INFER | none: world-model | ¶82 | — |  |  |  |  |  |
 | `t84.6` | IDENTIFY | `k.derbyshire_is_straker` | ¶84 | ¶84 |  |  |  | `k.bill_names_its_debtor` | `t84.5` |
 | `t84.9` | DEFAULT | `k.bill_is_his_own` | ¶84 | ¶84 |  |  |  |  |  |
 | `t92.2` | INFER | `k.dove_silk_on_the_bill` | ¶92 | ¶91 |  |  |  |  | `t85.2` |
 | `t92.4` | TEST | `k.dresses_for_the_other_woman` | ¶92 | ¶92 |  |  | `r.no_finery_for_servants` |  | `t92.3` |
-| `t92.14` | AGENT | — | ¶92 | — |  |  |  |  |  |
+| `t92.14` | AGENT | none: action | ¶92 | — |  |  |  |  |  |
 | `t92.15` | INFER | `k.second_household` | ¶92 | ¶92 |  |  | `r.second_establishment` |  |  |
 | `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  |  |  |  |  |
 | `t97.2` | AGENT | `k.coat_off_to_work` | ¶97 | ¶97 |  |  | `r.dead_men_do_nothing` |  | `t35.6` |
-| `t100.1` | PHYSICAL | — | ¶100 | — |  |  |  |  |  |
 | `t102.2` | TEST | `k.vesta_from_strakers_box` | ¶102 | ¶102 |  |  | `r.vesta_from_box`, `r.dead_men_do_nothing` |  |  |
 | `t102.4` | INFER | `k.horse_kicked` | ¶102 | ¶102 |  |  |  |  |  |
 | `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶37 |  |  |  |  |  |
-| `t116.2` | PHYSICAL | — | ¶116 | — |  |  |  |  |  |
 | `t120.1` | INFER | `k.horse_left_alone` | ¶120 | ¶119 |  |  |  |  |  |
-| `t120.2` | INFER | — | ¶120 | — |  |  |  |  |  |
-| `t123.2` | AGENT | — | ¶123 | — |  |  |  |  |  |
+| `t123.2` | AGENT | none: world-model | ¶123 | — |  |  |  |  |  |
 | `t124.2` | INFER | `k.tracks_end_at_mapleton` | ¶124 | ¶124 |  |  | `r.tracks_lead_in` |  | `t123.2` |
 | `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶127 |  |  | `r.first_up_takes_it_in` |  |  |
 | `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 |  |  | `r.undertaking_means_possession` |  |  |
 | `t146.2` | TEST | `k.boots_identify` | ¶146 | ¶146 |  |  | `r.prints_identify_boots` |  |  |
 | `t148.2` | INFER | `k.disguised_to_survive_search` | ¶148 | ¶66 |  |  |  |  |  |
-| `t150.1` | AGENT | — | ¶150 | — |  |  |  |  |  |
+| `t150.1` | AGENT | none: world-model | ¶150 | — |  |  |  |  |  |
 | `t175.1` | INFER | `k.sheep_lamed_by_hand` | ¶175 | ¶173 |  |  |  |  |  |
 | `t198.2` | IDENTIFY | `k.bay_is_ross_entry` | ¶198 | ¶198 |  |  | `r.colours_identify_owner`, `r.scratched_horse_does_not_run` | `k.markings_identify` |  |
 
 ### Earliest-date misses explained
 
 - `t20.6` (¶20, dealt ¶37): The reader anticipates the drugging at ¶20; the game can pose the question only once the drugging is told (Hunter's charge, ¶36) and the opium found (¶37), where this rule becomes relevant. Holmes never states it, so nothing gates or scores on it.
+- `t29.3` (¶29, dealt ¶36): The reader holds the conditional at ¶29, ahead of the drugging; the game can pose it only once the drugging is told (Hunter's charge, ¶36). It is Gregory's asserted conditional: nothing gates or scores on it.
 - `t31.3` (¶31, dealt ¶33): The reader's conditional at ¶31 is about an entry the story has not yet told: the entry's card (and its "with what?") comes with the open door at ¶33.
+
+### Deductions with no inference
+
+Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet.
+
+- workstream-3: `t4.2`, `t68.3`
+- world-model: `t24.2`, `t34.5`, `t78.2`, `t82.3`, `t123.2`, `t150.1`
+- action: `t92.14`
 
 ### Inferences named by more than one thought
 
@@ -123,7 +127,7 @@ Granted as soon as their premises are held; never gate, never score (Q4). Provis
 
 ### Inferences no thought names, not marked implicit
 
-Each becomes a thought's inference or is marked `implicit` as the chains are done (a warning until then).
+Each must be a thought's inference or marked `implicit` (an error since Round 56).
 
 None.
 

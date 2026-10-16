@@ -1330,3 +1330,30 @@ warrants, are unchanged.
 - **Moved:** reveal log: the four implicit inferences and `k.second_household_kept`. Foreshadow log: nothing.
   Case report: the new inference (62 verified, 10 asserted). Thoughts report: 40/54, one earliest-date miss left
   (`t29.3`).
+
+## Round 56 (2026-10-15): the chains closed — no-inference reasons, implicitRequired on
+
+Robert's ruling on the deduction thoughts that can have no inference: **retag the ones that are not deductions,
+mark the rest with a reason.**
+- **Retagged** (both files): `t18.3` (laming would do as well) INFER → NOTICE; `t24.4` (a poisoner would not ask
+  openly) AGENT → WEIGH; `t120.2` (consistent with no human killer, not proof) INFER → WEIGH; `t100.1` (the
+  trampled mud) and `t116.2` (hard ground keeps no tracks) PHYSICAL → NOTICE, `also: PHYSICAL`.
+- **`no_inference`**, a new field on a deduction that names no inference, says why:
+  - `workstream-3` (a default to be defeated, or its revision): `t4.2`, `t68.3`;
+  - `action` (a prediction played as an action, scored when confirmed): `t92.14`;
+  - `world-model` (it needs a slot the case lacks yet): `t24.2` (the "lost" story is a cover), `t34.5` (no alarm
+    raised), `t78.2` (not a robbery), `t82.3` (the blade unsheathed in the hollow), `t123.2` (meant to lead him
+    home, then turned back), `t150.1` (Brown will keep him safe). A ready list for the world model.
+- **Checker:** `no_inference` is one of the three reasons, on a deduction tag, never with an inference.
+  `implicitRequired` is on in `validate-thoughts` and in the main test: an inference that no thought names and
+  is not implicit is an error, and so is a deduction with neither an inference nor a reason. The thoughts report
+  lists the reasons.
+- **The last miss:** `t29.3` (Gregory's asserted conditional on the window, ¶29) gets a `date_note`: the game can
+  pose it only once the drugging is told (¶36). It cites `t28.2`, which now maps the tip it reads
+  (`c.stranger_asked_for_tip`).
+- **State at the end of the chains:** 49 deduction thoughts, 40 with an inference and 9 with a reason; 0 date
+  misses (3 explained); 0 premise disagreements; every inference named or implicit (the police's four apart);
+  62 inferences verified, 10 asserted. The thought tags in `docs/gap-analysis.md` predate this; the counts
+  above are current.
+- **Moved:** thoughts report only (tag counts, the reasons). Reveal and foreshadow logs, case report, gates:
+  nothing.

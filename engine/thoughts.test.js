@@ -9,8 +9,22 @@ const data = JSON.parse(fs.readFileSync(new URL('../cases/silver-blaze/thoughts.
 const markdown = fs.readFileSync(new URL('../docs/reading-annotated.md', import.meta.url), 'utf8');
 
 test('the annotated reading is well-formed, mirrors the annotation and maps to real cards', () => {
-    const r = checkThoughts(data, model, { markdown });
+    const r = checkThoughts(data, model, { markdown, implicitRequired: true });
     assert.deepEqual(r.errors, []);
+});
+
+test('a deduction with no inference says why, and only a deduction with none may', () => {
+    const bad = structuredClone(data);
+    delete bad.thoughts.find((x) => x.id === 't78.2').no_inference;
+    bad.thoughts.find((x) => x.id === 't20.1').no_inference = 'world-model';
+    bad.thoughts.find((x) => x.id === 't37.8').no_inference = 'action';
+    bad.thoughts.find((x) => x.id === 't4.2').no_inference = 'later';
+    const r = checkThoughts(bad, model, { implicitRequired: true });
+    assert.ok(r.errors.includes('t78.2: a INFER thought names no inference and gives no no_inference reason'));
+    assert.ok(r.errors.some((e) => e.startsWith('t20.1: a RECORD thought needs no no_inference')));
+    assert.ok(r.errors.includes('t37.8: names an inference and gives no_inference'));
+    assert.ok(r.errors.some((e) => e.startsWith('t4.2: no_inference is one of')));
+    assert.ok(!checkThoughts(bad, model).errors.some((e) => e.startsWith('t78.2')), 'a warning only until implicitRequired');
 });
 
 test('the checker catches a premise from the future, a quote ahead of its thought, and an unknown card', () => {
@@ -29,6 +43,8 @@ test('short chains: an inference on a non-deduction or unknown, implicit yet nam
     const bad = structuredClone(data);
     bad.thoughts.find((x) => x.id === 't35.4').inference = 'k.coat_placed';
     bad.thoughts.find((x) => x.id === 't37.8').inference = 'k.no_such_inference';
+    const t29 = bad.thoughts.find((x) => x.id === 't29.3');
+    t29.from = t29.from.filter((x) => x !== 't28.2');
     const r = checkThoughts(bad, model);
     assert.ok(r.errors.some((e) => e.startsWith('t35.4: a RECORD thought names no inference')));
     assert.ok(r.errors.includes('t37.8: inference k.no_such_inference is not in constraints.json'));
@@ -44,7 +60,7 @@ test('short chains: an inference on a non-deduction or unknown, implicit yet nam
     assert.deepEqual(row(r, 't29.3').unheld, ['t25.1'], 'a question no card holds yet');
     assert.deepEqual(row(r, 't29.3').unmatched, ['c.stranger_asked_for_tip']);
     const late = structuredClone(data);
-    late.thoughts.find((x) => x.id === 't92.14').inference = 'k.practice_first';
+    Object.assign(late.thoughts.find((x) => x.id === 't92.14'), { inference: 'k.practice_first', no_inference: undefined });
     assert.equal(row(checkThoughts(late, model, { dates: true }), 't92.14').dealt, 228, 'the practice inference speaks of the practice on the sheep, dealt at ¶228');
     const dated = checkThoughts(data, model, { dates: true });
     assert.equal(row(dated, 't29.3').dealt, 36, 'its conclusion speaks of the drugging, whose card comes at ¶36');

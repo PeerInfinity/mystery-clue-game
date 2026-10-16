@@ -11,7 +11,9 @@
 // by two thoughts, inferences no thought names that are not marked `implicit`, and the thoughts whose inference
 // the game cannot have dealt by the thought's own paragraph (the earliest date). A rule the inference applies is
 // the step's warrant and need not be cited (Round 42); a premise that is an implicit inference is bookkeeping and
-// need not be either. A thought may explain an accepted earliest-date miss in `date_note`.
+// need not be either. A thought may explain an accepted earliest-date miss in `date_note`. A deduction that can
+// have no inference says why in `no_inference` (Round 56): `workstream-3` (a default to be defeated, or its
+// revision), `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet).
 
 import { Game, BG_RELEVANT } from './game.js';
 import { slotsOf } from './logic.js';
@@ -32,6 +34,7 @@ const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag)
 export const DEDUCTION = ['INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY'];
 // A TEST that concludes something (the costume went to another woman) may name its inference too (Round 46).
 const CAN_NAME = [...DEDUCTION, 'TEST'];
+export const NO_INFERENCE = ['workstream-3', 'action', 'world-model'];
 
 /**
  * @param data   the parsed thoughts.json
@@ -39,7 +42,8 @@ const CAN_NAME = [...DEDUCTION, 'TEST'];
  * @param opts   { markdown: text of docs/reading-annotated.md (checked to mirror the data), dates: true to compare
  *               each RECORD's paragraph with where the game deals its cards, and each deduction's paragraph with
  *               where the game has dealt every premise of its inference (reads the story through once),
- *               implicitRequired: true to make an inference that no thought names and is not `implicit` an error }
+ *               implicitRequired: true to make an error of an inference that no thought names and is not
+ *               `implicit`, and of a deduction that names no inference and gives no `no_inference` reason }
  */
 export function checkThoughts(data, model, { markdown = null, dates = false, implicitRequired = false } = {}) {
     const errors = [];
@@ -125,6 +129,11 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             else if (!inferenceById.has(t.inference)) err(`${t.id}: inference ${t.inference} is not in constraints.json`);
         }
         if (t.date_note !== undefined && (typeof t.date_note !== 'string' || !t.inference)) err(`${t.id}: date_note explains the date of a thought's inference`);
+        if (t.no_inference !== undefined) {
+            if (!NO_INFERENCE.includes(t.no_inference)) err(`${t.id}: no_inference is one of ${NO_INFERENCE.join(', ')}`);
+            else if (!DEDUCTION.includes(t.tag)) err(`${t.id}: a ${t.tag} thought needs no no_inference (only ${DEDUCTION.join(', ')} name inferences)`);
+            else if (t.inference !== undefined) err(`${t.id}: names an inference and gives no_inference`);
+        } else if (implicitRequired && DEDUCTION.includes(t.tag) && t.inference === undefined) err(`${t.id}: a ${t.tag} thought names no inference and gives no no_inference reason`);
     }
 
     // The Markdown mirror: the same ids with the same tags.
@@ -203,7 +212,7 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
     const rows = [];
     const namedBy = new Map();
     for (const t of deductions) {
-        const row = { thought: t.id, tag: t.tag, para: t.para, inference: t.inference ?? null, uncited: [], unheld: [], unmatched: [], warrant: [], bookkeeping: [], dealt: null, note: t.date_note ?? null };
+        const row = { thought: t.id, tag: t.tag, para: t.para, inference: t.inference ?? null, uncited: [], unheld: [], unmatched: [], warrant: [], bookkeeping: [], dealt: null, note: t.date_note ?? null, none: t.no_inference ?? null };
         rows.push(row);
         const k = inferenceById.get(t.inference);
         if (!k) continue;
