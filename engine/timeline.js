@@ -219,3 +219,63 @@ export function checkLayer(game, layer = MINE) {
     if (game.model.problem.consistent(active, fixed, { extra }).ok) return { fits: true, conflict: null, fixed, checked, unchecked };
     return { fits: false, conflict: game.model.problem.explainConflict(active, fixed, { extra }) ?? [], fixed, checked, unchecked };
 }
+
+/**
+ * One card's own timeline, read off the same board: for a thing (person, animal, group, object), where it was at
+ * each time and what it did or had done to it; for a place, who and what was there and what happened there; for an
+ * event, when and where it happened. Only times the story has reached, and only times with something to show.
+ * Returns {kind: 'thing'|'place'|'event'|null, lines: [{time, label, depth, ...}], undated: [event ids]}.
+ */
+export function cardTimeline(game, id, layer = MINE) {
+    const card = game.model.cards.get(id);
+    const kind = card?.section === 'events' ? 'event' : card?.kind === 'place' ? 'place' : BOARD_KINDS.includes(card?.kind) ? 'thing' : null;
+    if (!kind) return { kind: null, lines: [], undated: [] };
+    const ts = times(game).filter((t) => t.kind !== 'boundary');
+    const events = [...game.unlocked.keys()].filter((e) => game.model.cards.get(e)?.section === 'events');
+    const settledOf = (slot) => (game.model.slots.has(slot) ? game.settled(slot) : null);
+    if (kind === 'event') {
+        const at = eventTime(game, id);
+        const place = settledOf(`${id}.place`);
+        const split = at ? game.board.splits.find((s) => s.time === at && s.by !== id) : null;
+        const t = ts.find((x) => x.id === at);
+        return { kind, lines: at ? [{ time: at, label: t?.label ?? null, depth: t?.depth ?? 0, place, split: split?.by ?? null, placed: game.board.placed.some((p) => p.event === id) }] : [], undated: [], place };
+    }
+    const lines = [];
+    const undated = [];
+    if (kind === 'thing') {
+        const roles = (e) => ['agent', 'patient', 'recipient'].filter((r) => settledOf(`${e}.${r}`) === id);
+        const mine = events.filter((e) => roles(e).length);
+        for (const t of ts) {
+            const line = {
+                time: t.id, label: t.label, depth: t.depth,
+                at: given(game, id, 'at', t.id),
+                held: given(game, id, 'held', t.id),
+                conditions: (game.model.data.state_conditions ?? []).map((c) => ({ id: c.id, value: given(game, id, c.id, t.id) })).filter((c) => c.value !== null),
+                pencil: pencilAt(game, id, t.id, layer),
+                events: mine.filter((e) => eventTime(game, e) === t.id && !game.board.splits.some((s) => s.by === e && s.time === t.id)).map((e) => ({ event: e, roles: roles(e) })),
+            };
+            if (line.at !== null || line.held !== null || line.conditions.length || line.pencil.length || line.events.length) lines.push(line);
+        }
+        for (const e of mine) if (!eventTime(game, e)) undated.push(e);
+        return { kind, lines, undated };
+    }
+    // A place: whoever the board puts there or somewhere inside it, and the events done there.
+    const within = new Map(game.model.data.entities.filter((e) => e.within).map((e) => [e.id, e.within]));
+    const inside = (p) => { for (let q = p, n = 0; q && n < 20; q = within.get(q), n++) if (q === id) return true; return false; };
+    const things = new Set([...followed(game, layer), ...game.board.pencil.filter((p) => layerOf(p) === layer && inside(p.value)).map((p) => p.thing)]);
+    for (const t of ts) {
+        const here = [];
+        for (const thing of things) {
+            const g = given(game, thing, 'at', t.id);
+            if (g !== null && inside(g)) here.push({ thing, given: true, value: g });
+            for (const m of pencilAt(game, thing, t.id, layer)) if (inside(m.value) && m.value !== g) here.push({ thing, pencil: !m.theory, theory: !!m.theory, struck: m.struck, value: m.value });
+        }
+        const evs = events.filter((e) => eventTime(game, e) === t.id && inside(settledOf(`${e}.place`)) && !game.board.splits.some((s) => s.by === e && s.time === t.id));
+        if (here.length || evs.length) lines.push({ time: t.id, label: t.label, depth: t.depth, things: here, events: evs });
+    }
+    for (const e of events) if (!eventTime(game, e) && inside(settledOf(`${e}.place`))) undated.push(e);
+    return { kind, lines, undated };
+}
+
+/** The kinds of card the board follows (a place is a column, an event sits in a cell). */
+export const BOARD_KINDS = ['person', 'animal', 'group', 'object'];

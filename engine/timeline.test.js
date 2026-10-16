@@ -89,3 +89,25 @@ test('layers: a theory\'s night on the board, and whether a layer fits what the 
     assert.ok(game.pencilPlace('simpson', 'w.tue_0100', 'moor', { layer: 't.police' }) === false || game.knows('moor'));
     assert.equal(game.checkLayer('t.police').checked + game.checkLayer('t.police').unchecked, game.board.pencil.filter((p) => p.layer === 't.police').length);
 });
+
+test("a card's own timeline: a thing's places and events, a place's visitors, an event's time; edits show on it", () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    while (game.read <= paraOf('Mrs. Straker awoke at seven') + 3) game.advance();
+    const straker = game.cardTimeline('straker');
+    assert.equal(straker.kind, 'thing');
+    const one = straker.lines.find((l) => l.time === 'w.tue_0100');
+    assert.equal(one.at, 'straker_villa');
+    assert.ok(one.events.some((e) => e.event === 'e.straker_dresses'));
+    assert.ok(straker.lines.every((l) => game.timelineTimes().some((t) => t.id === l.time)), 'only times reached');
+    // A pencil mark made on the board shows on the card, and the stable's card shows whoever is in its loft.
+    assert.ok(!game.cardTimeline('silver_blaze').lines.some((l) => l.time === 'w.tue_0100'));
+    game.pencilPlace('silver_blaze', 'w.tue_0100', 'stable');
+    assert.deepEqual(game.cardTimeline('silver_blaze').lines.find((l) => l.time === 'w.tue_0100').pencil, [{ value: 'stable', struck: false }]);
+    const stable = game.cardTimeline('stable').lines.find((l) => l.time === 'w.tue_0100');
+    assert.ok(stable.things.some((x) => x.thing === 'other_lads' && x.given && x.value === 'loft'), 'the loft lies within the stable');
+    assert.ok(stable.things.some((x) => x.thing === 'silver_blaze' && x.pencil));
+    const ev = game.cardTimeline('e.straker_dresses');
+    assert.equal(ev.kind, 'event');
+    assert.equal(ev.lines[0].time, 'w.tue_0100');
+    assert.equal(game.cardTimeline('c.hunter_stupor').kind, null, 'a clue has no timeline of its own');
+});

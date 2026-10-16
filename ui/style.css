@@ -262,3 +262,14 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .follow { margin: 4px 0 8px; line-height: 1.7; }
 .link.x { color: var(--muted); }
 .pen select, .row select { max-width: 11em; }
+/* The pencil forms wrap on a narrow screen (a .row aligns right, and would push its start off the left edge). */
+.pen { flex-wrap: wrap; justify-content: flex-start; align-items: center; }
+.pen-hint { margin-top: 6px; }
+.board td.picked { outline: 2px solid var(--accent); outline-offset: -2px; }
+.card-layer { justify-content: flex-start; flex-wrap: wrap; align-items: center; }
+.card-timeline li { margin: 3px 0; }
+.card-timeline .when { font-weight: 600; margin-right: 4px; }
+.card-timeline .chip.given { background: var(--accent); color: #fff; }
+.card-timeline .chip.pencil { border: 1px dashed var(--ink); }
+.card-timeline .chip.theory { border: 1px dotted var(--accent); color: var(--accent); }
+.card-timeline .ev { color: var(--muted); font-size: 12px; margin-left: 10px; }

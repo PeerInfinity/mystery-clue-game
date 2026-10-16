@@ -351,6 +351,8 @@ export class Game {
     /** The timeline in one layout ('place' or 'thing'): see engine/timeline.js. */
     timeline(layout = 'place', layer = TL.MINE) { return layout === 'thing' ? TL.byThing(this, layer) : TL.byPlace(this, layer); }
     timelineTimes() { return TL.times(this); }
+    /** One card's own timeline (engine/timeline.js, cardTimeline). */
+    cardTimeline(id, layer = TL.MINE) { return TL.cardTimeline(this, id, layer); }
     followedThings(layer = TL.MINE) { return TL.followed(this, layer); }
     /** The layers of the board: the player's own, then each theory they have met (step 4). */
     layers() { return [{ id: TL.MINE, label: 'Your own board' }, ...this.visibleTheories().map((t) => ({ id: t.id, label: t.label, story: !!t.story }))]; }

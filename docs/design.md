@@ -1692,3 +1692,38 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   runs the same `Problem`, so Trivial's per-paragraph batch gains as above.
 - **Moved:** nothing in the reveal and foreshadow logs, `report.md`, `thoughts-report.md` or the gate listing
   (diffed in full).
+
+## Round 67 (2026-10-16): each card's own timeline; the board's pencil form fixed
+
+- **Robert:** the board's "Pencil it in" said to choose what, when and where, but not how. On a phone the "what"
+  dropdown was not visible. He wants every card to show its own timeline so far, with controls to edit it there
+  and a layer selector, before step B. The board keeps its three dropdowns.
+- **The board's form:**
+  - **Why "what" was hidden on a phone:** the form shared `.row`, which aligns right without wrapping, so a row
+    wider than the screen overflowed off the left edge. The pencil form now wraps and aligns left.
+  - **Hint:** a line above the form says how it works (choose the three and press the button; clicking a cell
+    fills in when and where, or who and when).
+  - **Clicked cell:** it is outlined, so the player can see what the form now holds.
+- **Each card's timeline** (`engine/timeline.js` `cardTimeline`; Game `cardTimeline(id, layer)`; a "Timeline"
+  section on the Card tab):
+  - **A person, animal, group or object:** for each time the story has reached, where it was:
+    - given by a clue (solid), pencilled (dashed) or the layer's theory (dotted);
+    - who held it, and its conditions;
+    - the events the player holds where it is the settled agent, patient or recipient.
+
+    Then the events whose time is not settled yet.
+  - **A place:** for each time, who and what the board puts there or somewhere inside it (the lads in the loft show
+    on the stable, "(The loft)"), and the events done there.
+  - **An event:** when and where it happened; before/after if its window is split.
+  - **Only lines with something on them.** Nothing is shown that the board does not show: same times reached,
+    same clues held, same marks.
+  - **Editing:** the layer selector (shared with the board); strike or erase a mark as on the board; a pencil form
+    with the card itself as who (a thing: when, where) or where (a place: who, when). The marks are the board's,
+    so an edit in one shows in the other.
+- **Checked:**
+  - Test (`timeline.test.js`): a thing's places and events, only times reached; a board mark shown on the card;
+    the loft folded into the stable's card; an event's time; a clue has no timeline.
+  - In headless Chrome at ¶46: Straker's, Silver Blaze's and the stable's cards. A mark pencilled on Silver Blaze's
+    card shows dashed on the stable's.
+  - At 390 px wide: the board's form wraps with all three dropdowns visible, and the clicked cell is outlined.
+- **Moved:** nothing in the logs, reports or gates.

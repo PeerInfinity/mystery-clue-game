@@ -321,6 +321,17 @@ specific thing stay ground facts with a formula and no schema.
   (rows things, columns times). The player's board is saved as `board` (save version 7). Nothing on the board is
   checked yet; a split's parts use the case's subwindow ids.
 
+## As built (2026-10-16): a card's own timeline (Round 67)
+
+- `cardTimeline(game, id, layer)` (`timeline.js`) reads one card's part of the board:
+  - **a thing:** per time, its given place, holder and conditions, its pencil marks, and the events it is the
+    settled agent, patient or recipient of;
+  - **a place:** who or what is given or pencilled there or inside it, and its events;
+  - **an event:** its time and place.
+
+  Only times reached and lines with something on them; undated events are listed apart. The Card tab draws it,
+  with the board's layer selector and pencil marks.
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's
