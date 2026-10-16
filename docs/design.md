@@ -1304,3 +1304,29 @@ warrants, are unchanged.
 - **Gates:** none moved.
 - **Moved:** reveal log: the two framings, the paper and purpose questions at ¶40, a label. Foreshadow log:
   nothing. Case report: the Strict column above, the route step. Thoughts report: 37/51; 7 inferences unnamed.
+
+## Round 55 (2026-10-15): short chains, the rest 3 — motive and the end
+
+- **Named:** `t146.2` (TEST) → `k.boots_identify` (the square toes; it already held it).
+- **Holmes's steps get reader thoughts** (Round 42 ruling):
+  - `t46.7` (INFER, careful, ¶46, where Straker first comes under suspicion) → `k.drugging_is_dishonest`: if
+    Straker drugged his own lad, it was for no honest purpose, and the horse went out for some harm. From the
+    drugging and guard records and `t37.16`; Holmes ¶220.
+  - `t92.15` (INFER, careful, ¶92) → `k.second_household`, split like the disguise (Round 49). It now says only
+    "if Derbyshire is Straker, his motive is the second household's debts" (`straker.motive`, `t46.5`'s
+    question), so it is dealt at ¶92. The events (he kept the establishment from before the dresses, and fell
+    into debt) are a new bookkeeping inference, `k.second_household_kept` (implicit), granted at ¶229 when they
+    are dealt. `t84.7` (NOTICE, ¶84) still holds the idea first.
+- **Marked implicit:** `k.lame_plan` and `k.sent_over_by_hider` (order and identity bookkeeping, ¶229 and
+  ¶204); `k.found_at_dawn` and `k.operation_in_the_open` (asserted, not derivable). Granted earlier now, two
+  labels ran ahead and were reworded to say only what their formulas say:
+  - `k.operation_in_the_open` (¶78, before the knife): "If the horse was taken out to be hurt, that was done away
+    from the stable, where a hurt horse would not wake the sleepers and a light would not show."
+  - `k.found_at_dawn` (¶127) named Brown as the man who met the horse, which is the player's own step
+    (`t127.3`). It now reads "The man whose track joins the horse's met it at dawn, when the first man up is
+    stirring, and led it in then."
+- **Every inference is now named by a thought or marked implicit** (0 unnamed; the police's four stay apart).
+- **Gates:** none moved.
+- **Moved:** reveal log: the four implicit inferences and `k.second_household_kept`. Foreshadow log: nothing.
+  Case report: the new inference (62 verified, 10 asserted). Thoughts report: 40/54, one earliest-date miss left
+  (`t29.3`).

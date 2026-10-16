@@ -486,6 +486,9 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   If Straker, why? Only `t28.3` hints at a motive so far.
 - `t46.6` **QUESTION** · careful · from `t46.4`
   If Straker, what killed him: {Simpson met on the moor, someone else, the horse (`t37.13`)}?
+- `t46.7` **INFER** · *fair* · careful · from `t37.3`, `t33.1`, `t20.1`, `t32.1`, `t37.16` · Holmes ¶220
+  If Straker drugged his own lad, it was for no honest purpose: nobody drugs a guard to take a horse out for
+  exercise. Straker would be a dishonest man, and the horse went out for some harm. (Added in Round 55.)
 
 ### State of mind after s02
 
@@ -743,6 +746,9 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t92.8` **QUESTION** · careful · from `t92.6`
   Who drugged the dish: Straker or his wife? The curry argument names the household; the dog and key arguments
   name the person who came at one. Holmes leaves the access question open (¶218).
+- `t92.15` **INFER** · *fair* · careful · from `t92.4`, `t84.1`, `t85.1`, `bk.milliner_prices`, `bk.lay_against` · Holmes ¶225
+  The costume went to another woman, and a trainer's household does not run to twenty-guinea dresses: if
+  Derbyshire is Straker, Straker is keeping a second household, and its debts are his motive. (Added in Round 55.)
 
 **Predictions a reader can make here, before Holmes checks them:**
 - `t92.9` **PREDICT** · *weak* · careful · from `t78.5` · Holmes ¶102–¶106: a spent match in the hollow.
