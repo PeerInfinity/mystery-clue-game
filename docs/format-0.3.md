@@ -311,6 +311,13 @@ specific thing stay ground facts with a formula and no schema.
   (rows things, columns times). The player's board is saved as `board` (save version 7). Nothing on the board is
   checked yet; a split's parts use the case's subwindow ids.
 
+## As built (2026-10-16): layers (world model, step 4; Round 64)
+
+- A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's
+  answers put agents and patients; `checkLayer(layer)` fixes the theory's answers and requires each pencilled
+  declared state to take one of its marked places, against the working constraints (clashes set aside).
+  `Game.visibleTheories()` decides which theories the player has met.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

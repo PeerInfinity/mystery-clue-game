@@ -1600,3 +1600,31 @@ thoughts, the traps this session met and the items still open for Robert. `CLAUD
   against the rules; a proven placement as a citable card; the order questions that a split raises in the case.
 - **Suite:** 56 tests, green, 878 s.
 - **Moved:** nothing in the logs, reports or gates (engine and UI only).
+
+## Round 64 (2026-10-16): world model, step 4 — layers over theories, with a fit check
+
+- **Layers** (`engine/timeline.js`; Game `layers`, `visibleTheories`, `checkLayer`):
+  - **What a layer is:** one night on the board. Your own board is the default, and every theory the player has
+    met is a layer too: the story's (once its line is read and the cards its answers sit on are held, as the
+    Theories tab showed them; that test moved into the engine) and the player's own.
+  - **Pencil marks** carry their layer.
+  - **A theory's answers place people:** an agent or patient it names is at the event's place and time, from the
+    theory's own answers or else what the player's clues settle, at times the story has reached. A state it names
+    counts too. These marks are drawn dotted and are read-only.
+  - **The police's night:** at ¶46 it puts Simpson at the stable, by its window, while the supper was drugged, and
+    in the hollow at the blow, with Straker.
+- **Fit (`checkLayer`):** the theory's answers fixed, and each pencilled declared state must take one of the places
+  pencilled for it (struck marks left out; several marks are a disjunction). This is checked against what the
+  player trusts with the claims caught in a clash set aside, as "Could it fit?" does. It returns the clash to show,
+  and counts the marks no declared state speaks of (not judged).
+- **UI:** a layer selector on the board; "Does this night fit?" shows the clash as a chain, or "fits"; pencil marks
+  go to the chosen layer. The Theories tab reads its list from the engine.
+- **Test** (`timeline.test.js`, layers):
+  - the police layer once told, with Simpson's theory mark at the stable and not on the player's own board;
+  - a mark against Mrs. Straker's clue does not fit, and the clash names it; a mark with no state is counted, not
+    judged; a second guess in the cell makes it fit again; marks keep to their layer.
+- **Checked in headless Chrome** at ¶46: four layers (yours, the police, the honest trainer, the self-wound), the
+  police layer drawn, "This night fits everything you trust so far".
+- **Suite:** 57 tests, green, 697 s.
+- **Not yet:** what a layer leaves unexplained (workstream 6); an "inside story" layer authored by the case (the
+  player can make it as their own theory); possession and condition on layers.

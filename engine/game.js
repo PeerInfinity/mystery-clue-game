@@ -341,9 +341,25 @@ export class Game {
     }
 
     /** The timeline in one layout ('place' or 'thing'): see engine/timeline.js. */
-    timeline(layout = 'place') { return layout === 'thing' ? TL.byThing(this) : TL.byPlace(this); }
+    timeline(layout = 'place', layer = TL.MINE) { return layout === 'thing' ? TL.byThing(this, layer) : TL.byPlace(this, layer); }
     timelineTimes() { return TL.times(this); }
-    followedThings() { return TL.followed(this); }
+    followedThings(layer = TL.MINE) { return TL.followed(this, layer); }
+    /** The layers of the board: the player's own, then each theory they have met (step 4). */
+    layers() { return [{ id: TL.MINE, label: 'Your own board' }, ...this.visibleTheories().map((t) => ({ id: t.id, label: t.label, story: !!t.story }))]; }
+    /** Does this layer's night fit what the player holds and trusts? (engine/timeline.js, checkLayer) */
+    checkLayer(layer = TL.MINE) { return TL.checkLayer(this, layer); }
+
+    /**
+     * The theories the player has met: the story's, once their line is read and every card their answers sit on is
+     * held, and the player's own.
+     */
+    visibleTheories() {
+        const told = (this.model.data.theories ?? []).filter((t) => {
+            const at = t.source?.length ? this.story.find(t.source[0]) : null;
+            return at && at.para < this.read && Object.keys(t.assignment).every((s) => this.knows(this.model.slots.get(s).on));
+        });
+        return [...told.map((t) => ({ ...t, story: true })), ...this.theories];
+    }
 
     /** Follow a card the player holds on the timeline (a row by thing; its marks by place); or stop following it. */
     follow(id) {
@@ -363,16 +379,18 @@ export class Game {
      * Pencil a place for a thing at a time (a free mark: several are several hypotheses); `struck` crosses it out,
      * and the mark stays visible. Only places the player has met, 'elsewhere', at times shown on the board.
      */
-    pencilPlace(thing, time, value, { struck = false } = {}) {
+    pencilPlace(thing, time, value, { struck = false, layer = TL.MINE } = {}) {
         if (!this.knows(thing) || !this.#shownTime(time)) return false;
         if (value !== TL.ELSEWHERE && !(this.knows(value) && this.model.cards.get(value)?.kind === 'place')) return false;
-        this.board.pencil = this.board.pencil.filter((p) => !(p.thing === thing && p.time === time && p.value === value));
-        this.board.pencil.push({ thing, time, value, ...(struck ? { struck: true } : {}) });
-        if (!this.followedThings().includes(thing)) this.follow(thing);
+        if (layer !== TL.MINE && !this.visibleTheories().some((t) => t.id === layer)) return false;
+        const same = (p) => p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer;
+        this.board.pencil = this.board.pencil.filter((p) => !same(p));
+        this.board.pencil.push({ thing, time, value, ...(struck ? { struck: true } : {}), ...(layer !== TL.MINE ? { layer } : {}) });
+        if (!this.followedThings(layer).includes(thing)) this.follow(thing);
         return true;
     }
-    erasePlace(thing, time, value) {
-        this.board.pencil = this.board.pencil.filter((p) => !(p.thing === thing && p.time === time && p.value === value));
+    erasePlace(thing, time, value, layer = TL.MINE) {
+        this.board.pencil = this.board.pencil.filter((p) => !(p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer));
     }
 
     /**

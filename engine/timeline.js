@@ -46,8 +46,9 @@ export function times(game) {
 }
 
 /** The things the player follows: those a held clue places (unless dropped), and those they chose. */
-export function followed(game) {
+export function followed(game, layer = MINE) {
     const out = new Set();
+    for (const m of theoryMarks(game, layer)) if (game.knows(m.thing)) out.add(m.thing);
     for (const t of game.model.stateTracks.values()) {
         if (t.name !== 'at' || !game.knows(t.of) || game.board.unfollowed.includes(t.of)) continue;
         if (t.times.some((w) => given(game, t.of, 'at', w) !== null)) out.add(t.of);
@@ -71,9 +72,41 @@ export function given(game, thing, name, time) {
     return game.settled(slot);
 }
 
-/** The player's pencil marks for a thing at a time: [{value, struck}]. */
-export function pencilAt(game, thing, time) {
-    return game.board.pencil.filter((p) => p.thing === thing && p.time === time).map((p) => ({ value: p.value, struck: !!p.struck }));
+// LAYERS (step 4): a layer is one night on the board. MINE is the player's own; every theory the player has met
+// (the story's, and their own) is a layer too: its pencil marks are its own, and its answers place their agents
+// and patients where and when the events they answer happened (`theoryMarks`).
+export const MINE = 'mine';
+const layerOf = (p) => p.layer ?? MINE;
+
+/** The player's pencil marks for a thing at a time in a layer: [{value, struck}], then the theory's own marks. */
+export function pencilAt(game, thing, time, layer = MINE) {
+    const own = game.board.pencil.filter((p) => p.thing === thing && p.time === time && layerOf(p) === layer).map((p) => ({ value: p.value, struck: !!p.struck }));
+    const theirs = theoryMarks(game, layer).filter((m) => m.thing === thing && m.time === time && !own.some((o) => o.value === m.value)).map((m) => ({ value: m.value, struck: false, theory: true }));
+    return [...own, ...theirs];
+}
+
+/**
+ * Where a theory's answers put people and things: for an event whose agent or patient it names, at the event's
+ * place and time (its own answers, else what the player's clues settle), at times the story has reached. A state
+ * it names directly counts too.
+ */
+export function theoryMarks(game, layer) {
+    if (layer === MINE) return [];
+    const theory = game.visibleTheories().find((t) => t.id === layer);
+    if (!theory) return [];
+    const a = theory.assignment ?? {};
+    const value = (slot) => a[slot] ?? (game.model.slots.has(slot) ? game.settled(slot) : null);
+    const out = [];
+    for (const [slot, v] of Object.entries(a)) {
+        const st = game.model.slots.get(slot);
+        if (st?.track && st.state === 'at') { if (game.reached(st.root)) out.push({ thing: st.on, time: st.window, value: v }); continue; }
+        const m = slot.match(/^(e\.[a-z0-9_]+)\.(agent|patient)$/);
+        if (!m || !game.model.cards.has(v)) continue;
+        const place = value(`${m[1]}.place`);
+        const time = value(`${m[1]}.time`);
+        if (place && time && game.reached(time)) out.push({ thing: v, time, value: place });
+    }
+    return out;
 }
 
 /** The time an event is shown at: the deepest part the player placed it in, else its settled window, else null. */
@@ -94,36 +127,38 @@ function folder(game, columns) {
 }
 
 /** The place columns: the places of the case's place sets the player has met, then elsewhere and unknown. */
-export function columns(game) {
+export function columns(game, layer = MINE) {
     const sets = game.model.data.state_places ?? [];
     const out = [];
     for (const s of sets) for (const p of s.places) if (game.knows(p) && !out.includes(p)) out.push(p);
-    for (const p of game.board.pencil.map((x) => x.value)) if (!out.includes(p) && p !== ELSEWHERE && p !== UNKNOWN && game.model.cards.has(p)) out.push(p);
+    // A place marked outside the sets gets a column only when no column contains it.
+    const fold = folder(game, [...out]);
+    for (const p of [...game.board.pencil.map((x) => x.value), ...theoryMarks(game, layer).map((m) => m.value)]) if (!out.includes(p) && p !== ELSEWHERE && p !== UNKNOWN && game.model.cards.has(p) && fold(p) === ELSEWHERE) out.push(p);
     return [...out, ELSEWHERE, UNKNOWN];
 }
 
 /** By thing: rows of followed things, a cell per time with what is given and pencilled. */
-export function byThing(game) {
+export function byThing(game, layer = MINE) {
     const ts = times(game).filter((t) => t.kind !== 'boundary');
-    const rows = followed(game).map((thing) => ({
+    const rows = followed(game, layer).map((thing) => ({
         thing,
         cells: ts.map((t) => ({
             time: t.id,
             at: given(game, thing, 'at', t.id),
             held: given(game, thing, 'held', t.id),
             conditions: (game.model.data.state_conditions ?? []).map((c) => ({ id: c.id, value: given(game, thing, c.id, t.id) })).filter((c) => c.value !== null),
-            pencil: pencilAt(game, thing, t.id),
+            pencil: pencilAt(game, thing, t.id, layer),
         })),
     }));
     return { times: ts, rows };
 }
 
 /** By place: a row per time, a cell per place column with the things and events there. */
-export function byPlace(game) {
-    const cols = columns(game);
+export function byPlace(game, layer = MINE) {
+    const cols = columns(game, layer);
     const fold = folder(game, cols.filter((c) => c !== ELSEWHERE && c !== UNKNOWN));
     const ts = times(game);
-    const things = followed(game);
+    const things = followed(game, layer);
     const events = [...game.unlocked.keys()].filter((id) => game.model.cards.get(id)?.section === 'events');
     const rows = ts.map((t) => {
         const cells = new Map(cols.map((c) => [c, { things: [], events: [] }]));
@@ -134,9 +169,9 @@ export function byPlace(game) {
         }
         for (const thing of things) {
             const g = given(game, thing, 'at', t.id);
-            const marks = pencilAt(game, thing, t.id);
+            const marks = pencilAt(game, thing, t.id, layer);
             if (g !== null) cells.get(cols.includes(g) ? g : fold(g)).things.push({ thing, given: true });
-            for (const m of marks) if (m.value !== g) cells.get(cols.includes(m.value) ? m.value : fold(m.value)).things.push({ thing, pencil: true, struck: m.struck });
+            for (const m of marks) if (m.value !== g) cells.get(cols.includes(m.value) ? m.value : fold(m.value)).things.push({ thing, pencil: true, struck: m.struck, theory: !!m.theory, value: m.value });
             if (g === null && !marks.some((m) => !m.struck)) cells.get(UNKNOWN).things.push({ thing });
         }
         for (const e of events) {
@@ -149,4 +184,38 @@ export function byPlace(game) {
         return { time: t, cells };
     });
     return { columns: cols, rows };
+}
+
+/**
+ * Does a layer fit what the player holds and trusts? Its theory's answers are fixed, and each of its declared
+ * states the player has pencilled must take one of the places pencilled there (not struck). Pencil marks at times
+ * or for things the case has no state for cannot be checked: they are counted, not judged.
+ * Returns {fits, conflict (constraint ids, when it does not fit), fixed, checked, unchecked}.
+ */
+export function checkLayer(game, layer = MINE) {
+    const theory = layer === MINE ? null : game.visibleTheories().find((t) => t.id === layer);
+    const fixed = { ...(theory?.assignment ?? {}) };
+    const extra = [];
+    const groups = new Map();
+    for (const p of game.board.pencil) {
+        if (layerOf(p) !== layer || p.struck) continue;
+        const key = `${p.thing}|${p.time}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(p.value);
+    }
+    let checked = 0;
+    let unchecked = 0;
+    for (const [key, values] of groups) {
+        const [thing, time] = key.split('|');
+        const slot = `st.${thing}.at.${time.replace(/^w\./, '')}`;
+        const track = game.model.stateTracks.get(`at|${thing}`);
+        if (!game.model.slots.has(slot) || !track) { unchecked += values.length; continue; }
+        const allowed = [...new Set(values.flatMap((v) => track.overlaps(v)))];
+        extra.push(allowed.length === 1 ? { eq: [slot, allowed[0]] } : { in: [slot, allowed] });
+        checked += values.length;
+    }
+    // As "Could it fit?" does: against what the player trusts, the claims caught in a clash set aside.
+    const active = game.workingConstraints();
+    if (game.model.problem.consistent(active, fixed, { extra }).ok) return { fits: true, conflict: null, fixed, checked, unchecked };
+    return { fits: false, conflict: game.model.problem.explainConflict(active, fixed, { extra }) ?? [], fixed, checked, unchecked };
 }

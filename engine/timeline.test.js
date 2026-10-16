@@ -63,3 +63,29 @@ test('pencil marks, splits and events moved into a part; the board is saved', ()
     assert.ok(has('w.tue_0700', 'e.stable_found_open'));
     assert.equal(game.board.placed.length, 0);
 });
+
+test('layers: a theory\'s night on the board, and whether a layer fits what the player holds', () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    while (game.read <= paraOf('The police imagine, I\n      take it')) game.advance();
+    const police = game.layers().find((l) => l.id === 't.police');
+    assert.ok(police && police.story, 'the police theory is a layer once it is told');
+    // The police's answers put Simpson at the stable (its window) while the supper was drugged.
+    const row = game.timeline('place', 't.police').rows.find((r) => r.time.id === 'w.mon_2110');
+    assert.ok(row.cells.get('stable').things.some((x) => x.thing === 'simpson' && x.theory), 'a theory mark');
+    assert.ok(!game.timeline('place').rows.find((r) => r.time.id === 'w.mon_2110').cells.get('stable').things.some((x) => x.thing === 'simpson'), 'not on the player\'s own board');
+    // A pencil mark against a held clue does not fit; one the case has no question for is not judged.
+    assert.equal(game.checkLayer().fits, true);
+    assert.ok(game.pencilPlace('mrs_straker', 'w.tue_0100', 'elsewhere'));
+    assert.ok(game.pencilPlace('simpson', 'w.tue_0100', 'stable'));
+    const res = game.checkLayer();
+    assert.equal(res.fits, false);
+    assert.ok(res.conflict.includes('k.c.straker_dressing_at_one'), JSON.stringify(res.conflict));
+    assert.equal(res.checked, 1);
+    assert.equal(res.unchecked, 1);
+    // A second guess in the same cell: one of them may hold, so the layer fits again.
+    assert.ok(game.pencilPlace('mrs_straker', 'w.tue_0100', 'straker_villa'));
+    assert.equal(game.checkLayer().fits, true);
+    // Marks belong to their layer.
+    assert.ok(game.pencilPlace('simpson', 'w.tue_0100', 'moor', { layer: 't.police' }) === false || game.knows('moor'));
+    assert.equal(game.checkLayer('t.police').checked + game.checkLayer('t.police').unchecked, game.board.pencil.filter((p) => p.layer === 't.police').length);
+});

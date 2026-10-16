@@ -257,6 +257,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .board .chip.pencil { border: 1px dashed var(--ink); }
 .board .chip.pencil.struck { text-decoration: line-through; opacity: 0.55; }
 .board .chip.open { color: var(--muted); }
+.board .chip.theory { border: 1px dotted var(--accent); color: var(--accent); }
 .board .ev { color: var(--muted); font-size: 11px; line-height: 1.25; }
 .follow { margin: 4px 0 8px; line-height: 1.7; }
 .link.x { color: var(--muted); }

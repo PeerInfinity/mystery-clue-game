@@ -530,11 +530,7 @@ function clashesHtml() {
 
 function toolTheories() {
     let h = '<p class="small muted">A theory is a set of answers held together. It fits until a clue or inference you hold breaks it. To add answers, pick an answer on any question and choose “Add to theory”.</p>';
-    const story_ = (model.data.theories ?? []).filter((t) => {
-        const at = t.source?.length ? story.find(t.source[0]) : null;
-        return at && at.para < game.read && Object.keys(t.assignment).every((s) => game.knows(model.slots.get(s).on));
-    });
-    const all = [...story_.map((t) => ({ ...t, story: true })), ...game.theories];
+    const all = game.visibleTheories();
     for (const t of all) {
         const res = game.checkTheory(t);
         h += `<div class="theory ${res.fits ? 'fits' : 'broken'}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
@@ -568,6 +564,7 @@ function toolTheories() {
 // ---------- the board: where things were, when (world model; engine/timeline.js) ----------
 const BOARD_KINDS = ['person', 'animal', 'group', 'object'];
 const thingChip = (x, time) => {
+    if (x.theory) return `<span class="chip theory" title="The theory's answers put it here">${esc(shortName(x.thing, 24))}</span>`;
     const cls = x.given ? 'given' : x.pencil ? `pencil${x.struck ? ' struck' : ''}` : 'open';
     const name = esc(shortName(x.thing, 24));
     if (!x.pencil) return `<span class="chip ${cls}" title="${x.given ? 'Your clues place it here' : 'Not placed'}">${x.given ? name : `<span class="link" data-pen-pick="${esc(`${x.thing}|${time}`)}">${name}</span>`}</span>`;
@@ -575,13 +572,18 @@ const thingChip = (x, time) => {
 };
 function boardHtml(layout) {
     const pen = ui.pen ?? (ui.pen = { thing: null, time: null, place: null });
+    const layers = game.layers();
+    if (!layers.some((l) => l.id === ui.layer)) ui.layer = 'mine';
+    const layer = ui.layer;
+    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
     const times = game.timelineTimes();
     const shown = times.filter((t) => t.kind !== 'boundary');
-    const followed = game.followedThings();
+    const followed = game.followedThings(ui.layer ?? 'mine');
     const people = [...game.unlocked.keys()].filter((id) => BOARD_KINDS.includes(model.cards.get(id)?.kind) && !game.isHidden(id));
     const places = [...game.unlocked.keys()].filter((id) => model.cards.get(id)?.kind === 'place' && !game.isHidden(id));
-    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
-    let h = '<p class="small muted">Where everyone and everything was, when. Your clues place some of it (solid); the rest is yours to pencil in (dashed: several marks are several guesses; click a mark to strike it). Click a cell to start a mark there.</p>';
+    let h = '<p class="small muted">Where everyone and everything was, when. Your clues place some of it (solid); the rest is yours to pencil in (dashed: several marks are several guesses; click a mark to strike it). Click a cell to start a mark there. Each theory you have met is a night of its own: choose it as the layer to see where its answers put people (dotted), and pencil its night.</p>';
+    h += `<div class="row small">Layer <select id="layer-pick">${layers.map((l) => opt(l.id, l.id === 'mine' ? l.label : `${l.story ? 'Theory' : 'Your theory'}: ${l.label.length > 70 ? `${l.label.slice(0, 69)}…` : l.label}`, layer)).join('')}</select> <button data-layer-check="1" class="quiet">Does this night fit?</button></div>`;
+    if (ui.layerFit?.layer === layer) h += `<div class="note block">${ui.layerFit.html}</div>`;
     h += `<div class="pen row small">Pencil in <select id="pen-thing">${opt('', 'who or what…', pen.thing)}${people.map((id) => opt(id, shortName(id, 30), pen.thing)).join('')}</select>
         at <select id="pen-time">${opt('', 'when…', pen.time)}${shown.map((t) => opt(t.id, `${'· '.repeat(t.depth)}${t.label}`, pen.time)).join('')}</select>
         in <select id="pen-place">${opt('', 'where…', pen.place)}${places.map((id) => opt(id, shortName(id, 30), pen.place)).join('')}${opt('elsewhere', 'somewhere else', pen.place)}</select>
@@ -597,7 +599,7 @@ function boardHtml(layout) {
         return ` <select id="split-pick">${evs.map((id) => opt(id, shortName(id, 40), null)).join('')}</select> <button data-split-go="${esc(t.id)}" class="quiet">Split here</button>`;
     };
     if (layout === 'place') {
-        const bp = game.timeline('place');
+        const bp = game.timeline('place', layer);
         h += `<div class="board-wrap"><table class="board"><thead><tr><th>When</th>${bp.columns.map((c) => `<th>${c === 'elsewhere' ? 'Somewhere else' : c === 'unknown' ? '<i>Not placed</i>' : link(c, shortName(c, 18))}</th>`).join('')}</tr></thead><tbody>`;
         for (const r of bp.rows) {
             const t = r.time;
@@ -611,20 +613,21 @@ function boardHtml(layout) {
                     return `<div class="ev" title="${esc(cardName(e))}">• ${link(e, shortName(e, 26))}${mv}${back}</div>`;
                 }).join('');
                 const pick = t.kind === 'boundary' || c === 'unknown' ? '' : ` data-pen-cell="${esc(`time=${t.id}|place=${c}`)}"`;
-                h += `<td${pick}>${cell.things.map((x) => thingChip({ ...x, value: c }, t.id)).join(' ')}${evs}</td>`;
+                h += `<td${pick}>${cell.things.map((x) => thingChip({ value: c, ...x }, t.id)).join(' ')}${evs}</td>`;
             }
             h += '</tr>';
         }
         h += '</tbody></table></div>';
     } else {
-        const bt = game.timeline('thing');
+        const bt = game.timeline('thing', layer);
         h += `<div class="board-wrap"><table class="board"><thead><tr><th></th>${bt.times.map((t) => `<th title="${esc(t.label)}">${esc(t.label)}</th>`).join('')}</tr></thead><tbody>`;
         for (const r of bt.rows) {
             h += `<tr><th>${link(r.thing, shortName(r.thing, 24))}</th>`;
             for (const c of r.cells) {
                 const bits = [];
                 if (c.at) bits.push(`<span class="chip given">${esc(c.at === 'elsewhere' ? 'somewhere else' : shortName(c.at, 20))}</span>`);
-                for (const m of c.pencil) bits.push(`<span class="chip pencil${m.struck ? ' struck' : ''}"><span class="link" data-pen-toggle="${esc(`${r.thing}|${c.time}|${m.value}|${m.struck ? 0 : 1}`)}">${esc(m.value === 'elsewhere' ? 'somewhere else' : shortName(m.value, 20))}</span> <span class="link x" data-pen-erase="${esc(`${r.thing}|${c.time}|${m.value}`)}">×</span></span>`);
+                for (const m of c.pencil.filter((x) => x.theory)) bits.push(`<span class="chip theory" title="The theory's answers put it here">${esc(m.value === 'elsewhere' ? 'somewhere else' : shortName(m.value, 20))}</span>`);
+                for (const m of c.pencil.filter((x) => !x.theory)) bits.push(`<span class="chip pencil${m.struck ? ' struck' : ''}"><span class="link" data-pen-toggle="${esc(`${r.thing}|${c.time}|${m.value}|${m.struck ? 0 : 1}`)}">${esc(m.value === 'elsewhere' ? 'somewhere else' : shortName(m.value, 20))}</span> <span class="link x" data-pen-erase="${esc(`${r.thing}|${c.time}|${m.value}`)}">×</span></span>`);
                 if (c.held) bits.push(`<span class="small muted">held by ${esc(cardName(c.held))}</span>`);
                 for (const k of c.conditions) bits.push(`<span class="small muted">${k.value === 'true' ? esc(k.id) : `not ${esc(k.id)}`}</span>`);
                 h += `<td data-pen-cell="${esc(`thing=${r.thing}|time=${c.time}`)}">${bits.join(' ')}</td>`;
@@ -931,7 +934,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -958,12 +961,21 @@ function onClick(e) {
     if (t.dataset.penAdd) {
         Object.assign(ui.pen, { thing: $('#pen-thing').value || null, time: $('#pen-time').value || null, place: $('#pen-place').value || null });
         if (!ui.pen.thing || !ui.pen.time || !ui.pen.place) { toast('Choose who or what, when and where.'); renderTool(); return; }
-        if (!game.pencilPlace(ui.pen.thing, ui.pen.time, ui.pen.place)) toast('That cannot be pencilled in here.');
+        if (!game.pencilPlace(ui.pen.thing, ui.pen.time, ui.pen.place, { layer: ui.layer ?? 'mine' })) toast('That cannot be pencilled in here.');
+        ui.layerFit = null;
         changed();
         return;
     }
-    if (t.dataset.penToggle) { const [thing, time, value, struck] = t.dataset.penToggle.split('|'); game.pencilPlace(thing, time, value, { struck: struck === '1' }); changed(); return; }
-    if (t.dataset.penErase) { const [thing, time, value] = t.dataset.penErase.split('|'); game.erasePlace(thing, time, value); changed(); return; }
+    if (t.dataset.penToggle) { const [thing, time, value, struck] = t.dataset.penToggle.split('|'); game.pencilPlace(thing, time, value, { struck: struck === '1', layer: ui.layer ?? 'mine' }); ui.layerFit = null; changed(); return; }
+    if (t.dataset.penErase) { const [thing, time, value] = t.dataset.penErase.split('|'); game.erasePlace(thing, time, value, ui.layer ?? 'mine'); ui.layerFit = null; changed(); return; }
+    if (t.dataset.layerCheck) {
+        const layer = ui.layer ?? 'mine';
+        const r = game.checkLayer(layer);
+        const skip = r.unchecked ? ` <span class="small muted">(${r.unchecked} of your marks are at times or for things none of your clues speaks of: not checked.)</span>` : '';
+        ui.layerFit = { layer, html: r.fits ? `<span class="good">This night fits everything you trust so far.</span>${skip}` : `<span class="bad">This night does not fit what you trust:</span>${chainHtml(r.conflict, r.fixed)}${skip}` };
+        renderTool();
+        return;
+    }
     if (t.dataset.followGo) { game.follow($('#follow-pick').value); changed(); return; }
     if (t.dataset.unfollow) { game.unfollow(t.dataset.unfollow); changed(); return; }
     if (t.dataset.split) { ui.splitting = t.dataset.split; renderTool(); return; }
@@ -1054,6 +1066,7 @@ document.addEventListener('input', (e) => {
 });
 document.addEventListener('change', (e) => game && run(() => onChange(e)));
 function onChange(e) {
+    if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }
     if (e.target.dataset.add) {
         const slot = e.target.dataset.add;
