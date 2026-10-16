@@ -34,7 +34,7 @@ test('short chains: an inference on a non-deduction or unknown, implicit yet nam
     assert.ok(r.errors.includes('t37.8: inference k.no_such_inference is not in constraints.json'));
 
     const named = Object.create(model);
-    named.data = { ...model.data, constraints: model.data.constraints.map((k) => (k.id === 'k.coat_placed' ? { ...k, implicit: true } : k)) };
+    named.data = { ...model.data, constraints: model.data.constraints.map((k) => (k.id === 'k.coat_placed' ? { ...k, implicit: true } : k.id === 'k.lads_slept' ? { ...k, implicit: undefined } : k)) };
     const r2 = checkThoughts(data, named, { implicitRequired: true });
     assert.ok(r2.errors.includes('k.coat_placed: marked implicit, but t96.1 names it'));
     assert.ok(r2.errors.some((e) => e === 'k.lads_slept: no thought names this inference, and it is not marked implicit'));

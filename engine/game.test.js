@@ -398,3 +398,12 @@ test('cards the solution does not need can be left out, and never one it needs',
     assert.equal(t.settled('e.opium_added.agent'), 'straker');
     assert.equal(t.settled('the_bay.identity'), 'silver_blaze');
 });
+
+test('an implicit inference waits for the entities it speaks of, as for its events', () => {
+    const game = new Game(model, { background: BG_RELEVANT });
+    while (game.read < 40) game.advance();
+    assert.equal(game.howHeld('k.went_out_to_the_stables')?.how, 'implicit', 'its premises are held by ¶33');
+    assert.equal(game.knows('k.visitor_is_taker'), false, 'it names the midnight visitor, not met until Holmes speaks of him');
+    while (game.read < 220) game.advance();
+    assert.ok(game.knows('k.visitor_is_taker'));
+});

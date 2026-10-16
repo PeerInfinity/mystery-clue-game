@@ -175,8 +175,9 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
 
     // Where the game, read through with background facts arriving where relevant, has dealt each card. An
     // inference is available once all its premises are (whether or not a character states it then), and once the
-    // story has dealt the event and proposition cards its conclusion speaks of: before that the player has no
-    // question to answer, and a card stating it would deal them early.
+    // story has dealt the event and proposition cards its conclusion speaks of (before that the player has no
+    // question to answer, and a card stating it would deal them early) and the entities whose questions it speaks
+    // of (a card naming one would introduce it early).
     let avail = null;
     let askable = null;
     if (model) {
@@ -195,7 +196,7 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
             return at;
         };
         askable = (k) => Math.max(-1, ...[...slotsOf(k.formula)].map((x) => model.slots.get(x)?.on)
-            .filter((o) => ['events', 'propositions'].includes(model.cards.get(o)?.section))
+            .filter((o) => ['events', 'propositions', 'entities'].includes(model.cards.get(o)?.section))
             .map((o) => reader.unlocked.get(o)?.para ?? Infinity));
     }
 

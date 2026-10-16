@@ -1256,3 +1256,26 @@ warrants, are unchanged.
   "that is where it is").
 - **Moved:** the four texts in the reveal and foreshadow logs (fewer untold words). Gates, case report and
   thoughts report: nothing.
+
+## Round 53 (2026-10-15): short chains, the rest 1 — the night
+
+- **Holmes's step gets a reader thought** (Round 42 ruling): `t37.16` (INFER, typical, ¶37) →
+  `k.drugger_took_the_horse`: the lad on guard was drugged and by morning the horse was gone, so he was drugged so
+  the horse could be taken; whoever drugged him took the horse, after he had eaten and after he sent word of the
+  tout. From `t37.3`, `t33.1`, `t20.1`, `t32.1`; Holmes ¶220.
+- **Bookkeeping marked implicit** (the night's timing and order, no step a reader notices making):
+  `k.visitor_is_taker`, `k.went_out_to_the_stables`, `k.straker_went_out_first`, `k.hunter_was_drugged`,
+  `k.lads_slept`, `k.wife_stayed_home`, `k.found_before_seven`, `k.night_sequence`, `k.hollow_order`,
+  `k.cravat_worn_at_window`. Each is now granted where its premises are held (¶33, ¶37, ¶60, ¶102, ¶119), not
+  where Holmes states it. Their labels were read against those paragraphs. `k.visitor_is_taker`'s label quoted
+  Holmes's later "the midnight visitor" and now reads "Whoever came into the stable in the night is the one who
+  took out the horse."
+- **Engine: an inference the game grants by itself waits for the entities it speaks of**, as it waited for the
+  events (Round 42). `k.visitor_is_taker` speaks of `midnight_visitor.identity`; that entity is not dealt until
+  ¶219, and granting it at ¶33 would have named it early. The checker's earliest date counts entities the same
+  way (`t92.2` is now dealt at ¶91, where the dove-silk costume is dealt, not ¶89). Test: `game.test.js`, "an
+  implicit inference waits for the entities it speaks of". The checker test's example of an unnamed inference
+  (`k.lads_slept`, now implicit) is unflagged on its copy.
+- **Gates:** none moved.
+- **Moved:** reveal log: the ten bookkeeping inferences at the paragraphs above; `k.bill_names_its_debtor`
+  later within ¶84. Foreshadow log and case report: nothing. Thoughts report: 34/48; 12 inferences left unnamed.

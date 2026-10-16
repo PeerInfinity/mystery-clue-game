@@ -184,8 +184,10 @@ export class Game {
         }
         for (const k of this.inferences) this.claimEvents.set(k.id, this.#spokenOf(model.cards.get(k.id).formula));
         // An inference the game grants by itself waits for the story to deal the events it speaks of, so that it
-        // never deals them early: those events are watched too.
-        for (const k of this.inferences) for (const e of this.claimEvents.get(k.id)) {
+        // never deals them early, and the entities it speaks of, so that it never names one the player has not
+        // met: those cards are watched too.
+        this.inferenceWaits = new Map(this.inferences.map((k) => [k.id, this.#spokenOf(model.cards.get(k.id).formula, true)]));
+        for (const k of this.inferences) for (const e of this.inferenceWaits.get(k.id)) {
             if (!this.inferencesUsing.has(e)) this.inferencesUsing.set(e, []);
             if (!this.inferencesUsing.get(e).includes(k.id)) this.inferencesUsing.get(e).push(k.id);
         }
@@ -435,7 +437,7 @@ export class Game {
             const inf = this.inferenceById.get(k);
             if (!this.autoSolves() && !inf.implicit) continue;
             if (this.knows(k) || !inf.premises.every((x) => this.unlocked.has(x))) continue;
-            if (!this.claimEvents.get(k).every((e) => this.unlocked.has(e))) continue;
+            if (!this.inferenceWaits.get(k).every((e) => this.unlocked.has(e))) continue;
             this.#unlock(k, para);
             this.inferenceHow.set(k, { how: inf.implicit ? 'implicit' : 'auto' });
         }
@@ -538,9 +540,11 @@ export class Game {
     }
 
     // ---------- the player's own reasoning (format 0.3) ----------
-    /** The event and proposition cards a formula speaks of (dealt along with whatever states the formula). */
-    #spokenOf(formula) {
-        return [...slotsOf(formula)].map((s) => this.model.slots.get(s)?.on).filter((o) => ['events', 'propositions'].includes(this.model.cards.get(o)?.section));
+    /** The event and proposition cards a formula speaks of (dealt along with whatever states the formula); with
+     *  `entities`, the entities whose questions it speaks of as well. */
+    #spokenOf(formula, entities = false) {
+        const sections = entities ? ['events', 'propositions', 'entities'] : ['events', 'propositions'];
+        return [...new Set([...slotsOf(formula)].map((s) => this.model.slots.get(s)?.on))].filter((o) => sections.includes(this.model.cards.get(o)?.section));
     }
 
     /** Background facts the player holds that can be applied (they carry a schema or a formula). */

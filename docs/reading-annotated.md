@@ -405,6 +405,9 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   If the drugger chose the dish rather than merely knew of it, the drugger is one of the two who decide what the
   house eats: Straker or his wife. Exception: the maid knew the menu without choosing it, so she survives through
   `t37.7`'s "knew". (Added in Round 42.)
+- `t37.16` **INFER** · *strong* · typical · from `t37.3`, `t33.1`, `t20.1`, `t32.1` · Holmes ¶220
+  The lad on guard was drugged and by morning the horse was gone: he was drugged so the horse could be taken.
+  Whoever drugged him took the horse, after he had eaten and after he sent word of the tout. (Added in Round 53.)
 
 **¶38**
 - `t38.1` **GENRE** · *fair* · careful · from `t35.6`, `t36.2`
