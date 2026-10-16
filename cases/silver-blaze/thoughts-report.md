@@ -47,7 +47,7 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 47; with an inference: 33; earliest-date misses: 2 (and 2 explained); premise disagreements: 2
+- deduction-type thoughts: 47; with an inference: 33; earliest-date misses: 1 (and 2 explained); premise disagreements: 1
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -80,7 +80,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t84.9` | DEFAULT | `k.bill_is_his_own` | ¶84 | ¶84 |  |  |  |  |  |
 | `t92.2` | INFER | `k.dove_silk_on_the_bill` | ¶92 | ¶89 |  |  |  |  | `t85.2` |
 | `t92.4` | TEST | `k.dresses_for_the_other_woman` | ¶92 | ¶92 |  |  | `r.no_finery_for_servants` |  | `t92.3` |
-| `t92.14` | AGENT | `k.practice_first` | ¶92 | ¶228 **late** | `t81.5` | `c.sheep_lame`, `r.tendon_nick` |  |  |  |
+| `t92.14` | AGENT | — | ¶92 | — |  |  |  |  |  |
 | `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  |  |  |  |  |
 | `t97.2` | AGENT | `k.coat_off_to_work` | ¶97 | ¶97 |  |  | `r.dead_men_do_nothing` |  | `t35.6` |
 | `t100.1` | PHYSICAL | — | ¶100 | — |  |  |  |  |  |
@@ -96,7 +96,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 |  |  | `r.undertaking_means_possession` |  |  |
 | `t148.2` | INFER | `k.disguised_to_survive_search` | ¶148 | ¶66 |  |  |  |  |  |
 | `t150.1` | AGENT | — | ¶150 | — |  |  |  |  |  |
-| `t175.1` | INFER | — | ¶175 | — |  |  |  |  |  |
+| `t175.1` | INFER | `k.sheep_lamed_by_hand` | ¶175 | ¶173 |  |  |  |  |  |
 | `t198.2` | IDENTIFY | `k.bay_is_ross_entry` | ¶198 | ¶198 |  |  | `r.colours_identify_owner`, `r.scratched_horse_does_not_run` | `k.markings_identify` |  |
 
 ### Earliest-date misses explained
@@ -112,7 +112,7 @@ None.
 
 Granted as soon as their premises are held; never gate, never score (Q4). Provisional: the world model will re-derive much of it (Q5).
 
-`k.portion_dished_at_supper`, `k.portion_set_aside_before_edith`, `k.straker_home_all_evening`, `k.drugged_in_house_means_before_nine_five`, `k.entrant_took_the_horse`, `k.led_by_taker`, `k.blow_needs_a_wielder`, `k.bill_names_its_debtor`, `k.disguised_by_hider`, `k.markings_identify`
+`k.portion_dished_at_supper`, `k.portion_set_aside_before_edith`, `k.straker_home_all_evening`, `k.drugged_in_house_means_before_nine_five`, `k.entrant_took_the_horse`, `k.led_by_taker`, `k.blow_needs_a_wielder`, `k.bill_names_its_debtor`, `k.practice_first`, `k.disguised_by_hider`, `k.markings_identify`
 
 ### Inferences no thought names, not marked implicit
 

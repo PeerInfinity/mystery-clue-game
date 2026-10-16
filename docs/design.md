@@ -1212,3 +1212,26 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Gates:** none moved.
 - **Moved:** reveal log: the rule's wording at ¶18, `k.blow_needs_a_wielder` and the stick question at ¶40, a
   label. Foreshadow log: the rule's wording (fewer untold words). Case report: nothing. Thoughts report: 33/47.
+
+## Round 51 (2026-10-15): short chains, chain 10 — the sheep
+
+- **Leak fixed:** `r.practise_first`, shown as background from ¶12, read "… practises it first on something that
+  does not matter: the lame sheep are the practice for the operation on the horse, and the plot came before the
+  practice." The sheep are not mentioned until ¶173. It now reads only the general fact (up to "does not
+  matter"). This was the second rule text in two chains to spell out the solution (`r.startled_horse_kicks`,
+  Round 50): the other early-shown rule texts get a scan after the chains.
+- **The chain** (split as the kickoff asks: the prediction apart from the confirmation; 61 verified, 10
+  asserted):
+  - `t175.1` → `k.sheep_lamed_by_hand` (new): if Straker took the horse out to operate on him
+    (`k.knife_for_an_operation`, held by the cited `t81.5`), three sheep gone lame are someone's doing. Dealt ¶173.
+  - `k.practice_first` (Straker practised on the sheep, in the paddock, before the plot's night) is implicit
+    now: the practice event has no card until ¶228.
+  - `t92.14` (AGENT then PREDICT, ¶92: "he practised on something first") no longer names `k.practice_first`
+    (dealt ¶228, a miss). Its conclusion is about an event with no card yet, so it is played as its action
+    (`a.ask_about_sheep`) and scored by `t173.2`. Listed for Robert with `t116.2` and `t120.2`.
+- **Test:** the checker test read `t92.14`'s late date from the case; it now names `k.practice_first` on a copy.
+- **Gates:** none moved. `i.practised_on_sheep` needs `k.sheep_lamed_by_hand` in place of
+  `k.knife_for_an_operation` and `k.practice_first`.
+- **Moved:** reveal log: the rule's wording at ¶12, the new inference. Foreshadow log: the rule's wording.
+  Case report: the new inference. Thoughts report: one earliest-date miss left (`t29.3`), one premise
+  disagreement left.

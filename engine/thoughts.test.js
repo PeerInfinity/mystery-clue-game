@@ -43,8 +43,10 @@ test('short chains: an inference on a non-deduction or unknown, implicit yet nam
     const row = (res, id) => res.chains.rows.find((x) => x.thought === id);
     assert.deepEqual(row(r, 't29.3').unheld, ['t25.1'], 'a question no card holds yet');
     assert.deepEqual(row(r, 't29.3').unmatched, ['c.stranger_asked_for_tip']);
+    const late = structuredClone(data);
+    late.thoughts.find((x) => x.id === 't92.14').inference = 'k.practice_first';
+    assert.equal(row(checkThoughts(late, model, { dates: true }), 't92.14').dealt, 228, 'the practice inference speaks of the practice on the sheep, dealt at ¶228');
     const dated = checkThoughts(data, model, { dates: true });
-    assert.equal(row(dated, 't92.14').dealt, 228, 'the practice inference speaks of the practice on the sheep, dealt at ¶228');
     assert.equal(row(dated, 't29.3').dealt, 36, 'its conclusion speaks of the drugging, whose card comes at ¶36');
 });
 
