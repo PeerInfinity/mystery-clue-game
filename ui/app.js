@@ -565,10 +565,83 @@ function toolTheories() {
     return `${h}<div class="row"><button data-new-theory="1">New theory</button></div>`;
 }
 
+// ---------- the board: where things were, when (world model; engine/timeline.js) ----------
+const BOARD_KINDS = ['person', 'animal', 'group', 'object'];
+const thingChip = (x, time) => {
+    const cls = x.given ? 'given' : x.pencil ? `pencil${x.struck ? ' struck' : ''}` : 'open';
+    const name = esc(shortName(x.thing, 24));
+    if (!x.pencil) return `<span class="chip ${cls}" title="${x.given ? 'Your clues place it here' : 'Not placed'}">${x.given ? name : `<span class="link" data-pen-pick="${esc(`${x.thing}|${time}`)}">${name}</span>`}</span>`;
+    return `<span class="chip ${cls}" title="Your pencil mark: click to ${x.struck ? 'restore' : 'strike'} it"><span class="link" data-pen-toggle="${esc(`${x.thing}|${time}|${x.value}|${x.struck ? 0 : 1}`)}">${name}</span> <span class="link x" data-pen-erase="${esc(`${x.thing}|${time}|${x.value}`)}" title="Erase">×</span></span>`;
+};
+function boardHtml(layout) {
+    const pen = ui.pen ?? (ui.pen = { thing: null, time: null, place: null });
+    const times = game.timelineTimes();
+    const shown = times.filter((t) => t.kind !== 'boundary');
+    const followed = game.followedThings();
+    const people = [...game.unlocked.keys()].filter((id) => BOARD_KINDS.includes(model.cards.get(id)?.kind) && !game.isHidden(id));
+    const places = [...game.unlocked.keys()].filter((id) => model.cards.get(id)?.kind === 'place' && !game.isHidden(id));
+    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
+    let h = '<p class="small muted">Where everyone and everything was, when. Your clues place some of it (solid); the rest is yours to pencil in (dashed: several marks are several guesses; click a mark to strike it). Click a cell to start a mark there.</p>';
+    h += `<div class="pen row small">Pencil in <select id="pen-thing">${opt('', 'who or what…', pen.thing)}${people.map((id) => opt(id, shortName(id, 30), pen.thing)).join('')}</select>
+        at <select id="pen-time">${opt('', 'when…', pen.time)}${shown.map((t) => opt(t.id, `${'· '.repeat(t.depth)}${t.label}`, pen.time)).join('')}</select>
+        in <select id="pen-place">${opt('', 'where…', pen.place)}${places.map((id) => opt(id, shortName(id, 30), pen.place)).join('')}${opt('elsewhere', 'somewhere else', pen.place)}</select>
+        <button data-pen-add="1">Pencil it in</button></div>`;
+    const unfollowed = people.filter((id) => !followed.includes(id));
+    h += `<div class="small follow">Following ${followed.map((id) => `${link(id, shortName(id, 24))} <span class="link x" data-unfollow="${esc(id)}" title="Stop following">×</span>`).join(', ') || 'no one yet'}.
+        ${unfollowed.length ? `Follow <select id="follow-pick">${unfollowed.map((id) => opt(id, shortName(id, 30), null)).join('')}</select> <button data-follow-go="1" class="quiet">Follow</button>` : ''}</div>`;
+    const splitCtl = (t) => {
+        if (t.kind === 'boundary') return '';
+        if (game.board.splits.some((x) => x.time === t.id)) return ` <span class="link small" data-unsplit="${esc(t.id)}" title="Undo this split">unsplit</span>`;
+        if (ui.splitting !== t.id) return ` <span class="link small" data-split="${esc(t.id)}" title="Split this time at an event: the part before it and the part after">split</span>`;
+        const evs = [...game.unlocked.keys()].filter((id) => model.cards.get(id)?.section === 'events' && !game.board.splits.some((x) => x.by === id));
+        return ` <select id="split-pick">${evs.map((id) => opt(id, shortName(id, 40), null)).join('')}</select> <button data-split-go="${esc(t.id)}" class="quiet">Split here</button>`;
+    };
+    if (layout === 'place') {
+        const bp = game.timeline('place');
+        h += `<div class="board-wrap"><table class="board"><thead><tr><th>When</th>${bp.columns.map((c) => `<th>${c === 'elsewhere' ? 'Somewhere else' : c === 'unknown' ? '<i>Not placed</i>' : link(c, shortName(c, 18))}</th>`).join('')}</tr></thead><tbody>`;
+        for (const r of bp.rows) {
+            const t = r.time;
+            h += `<tr class="${t.kind}"><th style="padding-left:${4 + 12 * t.depth}px">${t.kind === 'boundary' ? `<i>${esc(shortName(t.event, 40))}</i>` : esc(t.label)}${splitCtl(t)}</th>`;
+            for (const c of bp.columns) {
+                const cell = r.cells.get(c);
+                const evs = cell.events.map((e) => {
+                    const sp = game.board.splits.find((x) => x.time === t.id);
+                    const mv = sp && t.kind !== 'boundary' ? ` <span class="small muted">→ <span class="link" data-move="${esc(`${e}|${t.id}.before.${sp.by.slice(2)}`)}">before</span> / <span class="link" data-move="${esc(`${e}|${t.id}.after.${sp.by.slice(2)}`)}">after</span></span>` : '';
+                    const back = game.board.placed.some((p) => p.event === e) && t.kind === 'part' ? ` <span class="link small" data-move="${esc(`${e}|`)}" title="Back to the whole window">↑</span>` : '';
+                    return `<div class="ev" title="${esc(cardName(e))}">• ${link(e, shortName(e, 26))}${mv}${back}</div>`;
+                }).join('');
+                const pick = t.kind === 'boundary' || c === 'unknown' ? '' : ` data-pen-cell="${esc(`time=${t.id}|place=${c}`)}"`;
+                h += `<td${pick}>${cell.things.map((x) => thingChip({ ...x, value: c }, t.id)).join(' ')}${evs}</td>`;
+            }
+            h += '</tr>';
+        }
+        h += '</tbody></table></div>';
+    } else {
+        const bt = game.timeline('thing');
+        h += `<div class="board-wrap"><table class="board"><thead><tr><th></th>${bt.times.map((t) => `<th title="${esc(t.label)}">${esc(t.label)}</th>`).join('')}</tr></thead><tbody>`;
+        for (const r of bt.rows) {
+            h += `<tr><th>${link(r.thing, shortName(r.thing, 24))}</th>`;
+            for (const c of r.cells) {
+                const bits = [];
+                if (c.at) bits.push(`<span class="chip given">${esc(c.at === 'elsewhere' ? 'somewhere else' : shortName(c.at, 20))}</span>`);
+                for (const m of c.pencil) bits.push(`<span class="chip pencil${m.struck ? ' struck' : ''}"><span class="link" data-pen-toggle="${esc(`${r.thing}|${c.time}|${m.value}|${m.struck ? 0 : 1}`)}">${esc(m.value === 'elsewhere' ? 'somewhere else' : shortName(m.value, 20))}</span> <span class="link x" data-pen-erase="${esc(`${r.thing}|${c.time}|${m.value}`)}">×</span></span>`);
+                if (c.held) bits.push(`<span class="small muted">held by ${esc(cardName(c.held))}</span>`);
+                for (const k of c.conditions) bits.push(`<span class="small muted">${k.value === 'true' ? esc(k.id) : `not ${esc(k.id)}`}</span>`);
+                h += `<td data-pen-cell="${esc(`thing=${r.thing}|time=${c.time}`)}">${bits.join(' ')}</td>`;
+            }
+            h += '</tr>';
+        }
+        h += '</tbody></table></div>';
+    }
+    return h;
+}
+
 function toolTimeline() {
     const sub = (k, label) => `<button data-timeline="${k}" class="${ui.timeline === k ? 'on' : ''}">${label}</button>`;
-    let h = `<div class="subtabs">${sub('fabula', 'What happened')}${sub('found', 'What you found')}${sub('told', 'What the story told')}</div><div class="timeline">`;
-    if (ui.timeline === 'fabula') {
+    let h = `<div class="subtabs">${sub('place', 'By place')}${sub('thing', 'By thing')}${sub('fabula', 'What happened')}${sub('found', 'What you found')}${sub('told', 'What the story told')}</div><div class="timeline">`;
+    if (ui.timeline === 'place' || ui.timeline === 'thing') {
+        h += boardHtml(ui.timeline);
+    } else if (ui.timeline === 'fabula') {
         const rows = game.fabula();
         h += '<p class="small muted">Events you hold, placed once their time is settled.</p>';
         for (const w of model.windows) {
@@ -858,7 +931,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -876,6 +949,27 @@ function onClick(e) {
     if (t.dataset.kind !== undefined && t.closest('.filters')) { ui.kind = t.dataset.kind || null; renderTool(); return; }
     if (t.dataset.expand) { ui.expanded.add(t.dataset.expand); renderTool(); return; }
     if (t.dataset.timeline) { ui.timeline = t.dataset.timeline; renderTool(); return; }
+    if (t.dataset.penCell) {
+        for (const kv of t.dataset.penCell.split('|')) { const [k, v] = kv.split('='); ui.pen[k] = v; }
+        renderTool();
+        return;
+    }
+    if (t.dataset.penPick) { const [thing, time] = t.dataset.penPick.split('|'); Object.assign(ui.pen, { thing, time }); renderTool(); return; }
+    if (t.dataset.penAdd) {
+        Object.assign(ui.pen, { thing: $('#pen-thing').value || null, time: $('#pen-time').value || null, place: $('#pen-place').value || null });
+        if (!ui.pen.thing || !ui.pen.time || !ui.pen.place) { toast('Choose who or what, when and where.'); renderTool(); return; }
+        if (!game.pencilPlace(ui.pen.thing, ui.pen.time, ui.pen.place)) toast('That cannot be pencilled in here.');
+        changed();
+        return;
+    }
+    if (t.dataset.penToggle) { const [thing, time, value, struck] = t.dataset.penToggle.split('|'); game.pencilPlace(thing, time, value, { struck: struck === '1' }); changed(); return; }
+    if (t.dataset.penErase) { const [thing, time, value] = t.dataset.penErase.split('|'); game.erasePlace(thing, time, value); changed(); return; }
+    if (t.dataset.followGo) { game.follow($('#follow-pick').value); changed(); return; }
+    if (t.dataset.unfollow) { game.unfollow(t.dataset.unfollow); changed(); return; }
+    if (t.dataset.split) { ui.splitting = t.dataset.split; renderTool(); return; }
+    if (t.dataset.splitGo) { if (!game.splitTime(t.dataset.splitGo, $('#split-pick').value)) toast('That time cannot be split at that event.'); ui.splitting = null; changed(); return; }
+    if (t.dataset.unsplit) { game.unsplitTime(t.dataset.unsplit); changed(); return; }
+    if (t.dataset.move) { const [ev, time] = t.dataset.move.split('|'); game.placeEvent(ev, time || null); changed(); return; }
     if (t.dataset.newTheory) {
         const label = prompt('Name your theory', `Theory ${game.theories.length + 1}`);
         if (label) { ui.theory = game.addTheory(label); changed(); }

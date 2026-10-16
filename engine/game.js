@@ -19,6 +19,7 @@
 
 import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
+import * as TL from './timeline.js';
 
 // Difficulty is a set of OPTIONS; the four difficulties are presets of them, and any other mix is CUSTOM.
 // TRIVIAL: the game works out what the held clues allow and settles questions itself; the player reads and
@@ -251,6 +252,7 @@ export class Game {
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
         this.moved = false;
+        this.board = TL.emptyBoard(); // the timeline: followed things, pencil marks, splits, events placed (timeline.js)
         if (this.background === BG_START) for (const r of this.model.data.rules ?? []) this.#unlock(r.id, 0);
         this.#process(0);
     }
@@ -274,11 +276,13 @@ export class Game {
             applied: this.applied.map((a) => [a.id, a.rule, a.bind, a.para]),
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             made: [...this.#noteMade()],
-            version: 6,
+            board: this.board,
+            version: 7,
         };
     }
 
     load(state) {
+        const board = state.board ? structuredClone(state.board) : null;
         if (state.difficulty && !state.version) state = { ...state, difficulty: OLD_DIFFICULTY[state.difficulty] ?? state.difficulty };
         // Saves before options (version < 4): a difficulty, with background and connect kept beside it.
         if (state.options) this.opts = optionsFrom(MEDIUM, state.options);
@@ -326,6 +330,77 @@ export class Game {
             this.madeAt = new Map(state.made.filter(([id]) => this.routeById.has(id)));
             this.moved = false;
         }
+        if (board) this.board = { ...TL.emptyBoard(), ...board };
+    }
+
+    // ---------- the timeline (world model; engine/timeline.js) ----------
+    /** Has the story reached this time window (its `reveal` line)? */
+    reached(windowId) {
+        const w = (this.windowById ?? (this.windowById = new Map(this.model.windows.map((x) => [x.id, x])))).get(windowId);
+        return !!w && (!w.reveal || this.#paraOf(w.reveal) < this.read);
+    }
+
+    /** The timeline in one layout ('place' or 'thing'): see engine/timeline.js. */
+    timeline(layout = 'place') { return layout === 'thing' ? TL.byThing(this) : TL.byPlace(this); }
+    timelineTimes() { return TL.times(this); }
+    followedThings() { return TL.followed(this); }
+
+    /** Follow a card the player holds on the timeline (a row by thing; its marks by place); or stop following it. */
+    follow(id) {
+        if (!this.knows(id)) return false;
+        this.board.unfollowed = this.board.unfollowed.filter((x) => x !== id);
+        if (!this.board.followed.includes(id)) this.board.followed.push(id);
+        return true;
+    }
+    unfollow(id) {
+        this.board.followed = this.board.followed.filter((x) => x !== id);
+        if (!this.board.unfollowed.includes(id)) this.board.unfollowed.push(id);
+    }
+
+    #shownTime(time) { return this.timelineTimes().some((t) => t.id === time && t.kind !== 'boundary'); }
+
+    /**
+     * Pencil a place for a thing at a time (a free mark: several are several hypotheses); `struck` crosses it out,
+     * and the mark stays visible. Only places the player has met, 'elsewhere', at times shown on the board.
+     */
+    pencilPlace(thing, time, value, { struck = false } = {}) {
+        if (!this.knows(thing) || !this.#shownTime(time)) return false;
+        if (value !== TL.ELSEWHERE && !(this.knows(value) && this.model.cards.get(value)?.kind === 'place')) return false;
+        this.board.pencil = this.board.pencil.filter((p) => !(p.thing === thing && p.time === time && p.value === value));
+        this.board.pencil.push({ thing, time, value, ...(struck ? { struck: true } : {}) });
+        if (!this.followedThings().includes(thing)) this.follow(thing);
+        return true;
+    }
+    erasePlace(thing, time, value) {
+        this.board.pencil = this.board.pencil.filter((p) => !(p.thing === thing && p.time === time && p.value === value));
+    }
+
+    /**
+     * Split a time shown on the board at an event the player holds, into the part before it and the part after.
+     * The window, and what is in it, stays. Returns the two parts' ids, or null.
+     */
+    splitTime(time, event) {
+        if (!this.knows(event) || this.model.cards.get(event)?.section !== 'events') return null;
+        if (!this.#shownTime(time) || this.board.splits.some((s) => s.time === time || s.by === event)) return null;
+        this.board.splits.push({ time, by: event });
+        return [TL.partId(time, 'before', event), TL.partId(time, 'after', event)];
+    }
+    /** Undo a split: its parts (and any splits inside them) go, and what was placed or pencilled there with them. */
+    unsplitTime(time) {
+        const sp = this.board.splits.find((s) => s.time === time);
+        if (!sp) return;
+        const gone = (id) => id.startsWith(`${TL.partId(time, 'before', sp.by)}`) || id.startsWith(`${TL.partId(time, 'after', sp.by)}`);
+        this.board.splits = this.board.splits.filter((s) => s !== sp && !gone(s.time));
+        this.board.pencil = this.board.pencil.filter((p) => !gone(p.time));
+        this.board.placed = this.board.placed.filter((p) => !gone(p.time));
+    }
+    /** Move an event the player holds into a part of the window it is in (or back out, with null). */
+    placeEvent(event, time) {
+        this.board.placed = this.board.placed.filter((p) => p.event !== event);
+        if (time === null) return true;
+        if (!this.knows(event) || !this.#shownTime(time)) return false;
+        this.board.placed.push({ event, time });
+        return true;
     }
 
     // ---------- doubt ----------

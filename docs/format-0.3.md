@@ -303,6 +303,14 @@ specific thing stay ground facts with a formula and no schema.
 - A game move must ask the solver before it changes anything (or change only what it would change the same way
   again): a slow call makes the move run twice.
 
+## As built (2026-10-16): the board (world model, step 3; Round 63)
+
+- `engine/timeline.js` reads the board off a Game: times reached (and the player's parts), followed things, and
+  per cell what is given (a declared state the player's clues or proofs settle) and pencilled (the player's free
+  marks). Layouts `place` (rows times, columns places + elsewhere + not placed, with the events there) and `thing`
+  (rows things, columns times). The player's board is saved as `board` (save version 7). Nothing on the board is
+  checked yet; a split's parts use the case's subwindow ids.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

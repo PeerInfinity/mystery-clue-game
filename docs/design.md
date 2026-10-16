@@ -1563,3 +1563,40 @@ thoughts, the traps this session met and the items still open for Robert. `CLAUD
 - **Not done:** the cost itself (Round 61); incremental candidates for Trivial; cancelling a check.
 - **Suite:** 54 tests, green, 798 s (a browser run overlapped part of it; 670 s in Round 61).
 - **Moved:** nothing in the logs, reports or gates (engine plumbing and UI).
+
+## Round 63 (2026-10-16): world model, step 3 — the board (timeline) in both layouts, with pencil marks and splits
+
+- **Engine** (`engine/timeline.js`, Game methods `timeline(layout)`, `timelineTimes`, `followedThings`, `follow`,
+  `unfollow`, `pencilPlace`, `erasePlace`, `splitTime`, `unsplitTime`, `placeEvent`, `reached`):
+  - **Times** are the windows the story has reached (their `reveal` line), and the parts the player has split them
+    into. Each part is shown as before it, the splitting event on its boundary row, after it.
+  - **Followed things:** every card a held clue places somewhere (declared state, settled), unless the player drops
+    it, plus any card they choose to follow. Listing every tracked thing would show which ones the case thinks
+    matter.
+  - **A cell** shows what is GIVEN (a held clue or the player's proof settles the declared state; a part's state
+    once the player has made that part) and the player's PENCIL marks. Pencil marks are free: several are several
+    hypotheses, a struck one stays visible, crossed out. Nothing is checked yet.
+  - **Splits** are the player's (Round 61's design) and use the case's ids, so a state the case declares in a part
+    shows once the player makes it. Events stay in the window until moved into a part; undoing a split takes its
+    parts and what was placed there.
+  - **The board** (followed, pencil, splits, placed) is saved (`board`, save version 7).
+  - **By place:** columns are the case's place-set places the player has met, then "somewhere else" and "not
+    placed". Events and given places fold to the nearest column, so the bedroom is the villa. **By thing:** a row
+    per followed thing, a column per time, with what the clues say of its holder and conditions.
+- **UI** (`ui/app.js`, Timeline tab): two new views, "By place" and "By thing", beside the three event views.
+  - Pencil form: who, when, where. Clicking a cell fills it in.
+  - Clicking a mark strikes or restores it, and × erases it.
+  - Follow and unfollow; split a row at an event and unsplit it; "before" and "after" on an event in a split window.
+  - Solid chips are given, dashed ones pencilled. Checked in headless Chrome at ¶40 with screenshots: the Strakers
+    at the villa at one and the lads in the loft through the night are given; two pencil hypotheses for Silver Blaze
+    at one; seven o'clock split at Mrs. Straker's waking.
+- **Test:** `engine/timeline.test.js`:
+  - what held clues place, in both layouts, and only times reached;
+  - pencil marks, struck marks, follow by pencilling;
+  - the split, with the part's given state and the event moved and moved back;
+  - the save.
+- **Not yet** (later steps, or step 3's checking): a placement checked at commit in the harder settings; possession
+  and condition pencilled (shown only when given); a cell the player opens that the case never declared, checked
+  against the rules; a proven placement as a citable card; the order questions that a split raises in the case.
+- **Suite:** 56 tests, green, 878 s.
+- **Moved:** nothing in the logs, reports or gates (engine and UI only).
