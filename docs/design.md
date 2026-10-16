@@ -1401,3 +1401,21 @@ Gregory or the editor do not gate.
 - **Moved:** reveal log: Holmes now states his inferences at their gates (¶93, ¶114, ¶146, ¶218–¶231), the
   `straker.honest` question comes with `t46.7`'s gate at ¶220. Foreshadow log: nothing. Case report: the steps
   section, 1009 quotes (the route's went). Thoughts report: the `i.*` maps gone from coverage.
+
+## Round 58 (2026-10-15): step 4, scoring (engine)
+
+- **What counts as made:** a thought (one of Holmes's steps, Round 57) is made by the player when their own
+  reasoning gives it: every inference it needs built by them, or a conclusion or applied rule of theirs that covers
+  its conclusion, or their proofs (proven values, values left alone by proven cross-outs; a clue's given value is
+  not theirs) entailing it. Inferences stated by a character or Holmes, granted by the game, or implicit do not
+  count, and nothing counts in Trivial.
+- **When:** the game records the last paragraph read at the moment it first finds the thought made. It checks
+  before each paragraph and whenever scores are asked for, only after a player's move (propose, apply, conclude,
+  strike, prove), so reading stays fast. The record is saved (`made`, save version 6) and restored as saved.
+- **Score:** a thought scores when it was made before its Holmes paragraph (the thought's Holmes paragraph, or the
+  line of a conclusion Holmes draws). `thoughtScores()` and `score()` expose it for the UI (workstream 9); 44
+  thoughts can score.
+- **Test:** `game.test.js`, "scoring": building `k.drugger_knew_the_dish` at ¶39 makes `t37.8` (and `t37.7`,
+  whose inference it cites) before Holmes's ¶218; the dog step Holmes hands over is not the player's; the record
+  survives a save; Trivial scores nothing.
+- **Moved:** nothing in the logs or reports (engine only).

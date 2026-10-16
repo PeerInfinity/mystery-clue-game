@@ -407,3 +407,23 @@ test('an implicit inference waits for the entities it speaks of, as for its even
     while (game.read < 220) game.advance();
     assert.ok(game.knows('k.visitor_is_taker'));
 });
+
+test('scoring: a thought the player makes before Holmes states it scores; one Holmes hands over does not', () => {
+    const game = new Game(model, { difficulty: MEDIUM, background: BG_RELEVANT });
+    while (game.read < 40) game.advance();
+    assert.deepEqual(game.thoughtScores().filter((r) => r.made !== null), []);
+    build(game, 'k.drugger_knew_the_dish'); // and the menu inference it cites
+    const row = (id) => game.thoughtScores().find((r) => r.thought === id);
+    assert.deepEqual(row('t37.8'), { thought: 't37.8', holmes: 218, made: 39, scores: true });
+    assert.equal(row('t37.7').scores, true);
+    assert.equal(row('t34.7').made, null, 'the dog step is not the player\'s until they make it');
+    assert.equal(game.score().scored, 2);
+    // Kept in the save, at the paragraph where it was made.
+    const copy = new Game(model, { state: JSON.parse(JSON.stringify(game.save())) });
+    assert.equal(copy.thoughtScores().find((r) => r.thought === 't37.8').made, 39);
+    // Trivial works things out for the player: nothing scores.
+    const trivial = new Game(model, { difficulty: TRIVIAL, background: BG_RELEVANT });
+    while (trivial.read < 40) trivial.advance();
+    trivial.propose(trivial.connectSet('k.drugger_knew_the_menu'));
+    assert.equal(trivial.score().scored, 0);
+});

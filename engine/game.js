@@ -14,6 +14,8 @@
 //   Medium: every answer listed; a cross-out is checked against everything held and trusted.
 //   Hard: the player proposes candidates first (only their type is checked); cross-outs are checked.
 // Background facts (rule cards) sit on the entity cards they belong to and arrive with them.
+// Scoring: Holmes's steps are the annotated reading's thoughts (engine/steps.js); one the player makes by their own
+//   reasoning before the paragraph where Holmes states it scores (thoughtScores, score).
 
 import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
@@ -245,6 +247,10 @@ export class Game {
         this.dynamicIds = [];
         this.applied = [];              // [{id, rule, bind, para}]
         this.concluded = [];            // [{id, cited, formula, label, para}]
+        // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
+        // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
+        this.madeAt = new Map();
+        this.moved = false;
         if (this.background === BG_START) for (const r of this.model.data.rules ?? []) this.#unlock(r.id, 0);
         this.#process(0);
     }
@@ -267,7 +273,8 @@ export class Game {
             built: [...this.inferenceHow].filter(([, h]) => h.how === 'built').map(([id]) => [id, this.unlocked.get(id).para]),
             applied: this.applied.map((a) => [a.id, a.rule, a.bind, a.para]),
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
-            version: 5,
+            made: [...this.#noteMade()],
+            version: 6,
         };
     }
 
@@ -314,6 +321,11 @@ export class Game {
         this.suspected = new Set((state.suspected ?? []).filter((id) => this.model.claimForms.has(id)));
         this.clashLog = (state.clashLog ?? []).filter((ids) => ids.every((id) => this.model.constraints.has(id)));
         this.clashCache = null;
+        // Where the player made each step, as saved (an older save is scored from here on).
+        if (state.made) {
+            this.madeAt = new Map(state.made.filter(([id]) => this.routeById.has(id)));
+            this.moved = false;
+        }
     }
 
     // ---------- doubt ----------
@@ -349,6 +361,7 @@ export class Game {
 
     advance() {
         if (this.finished()) return { ok: false, end: true };
+        this.#noteMade();
         const blocking = this.blockers();
         if (blocking.length && this.pace === WAIT) return { ok: false, needs: blocking };
         this.told.push(...blocking);
@@ -495,6 +508,7 @@ export class Game {
      *   background fact it needs is not known yet), wrongKind: bool, needsKind: bool}.
      */
     propose(cards, kind = null) {
+        this.moved = true;
         const S = new Set(cards.filter((x) => this.knows(x)));
         const out = { built: [], onto: false, more: 0, lacking: false, wrongKind: false, needsKind: false };
         if (!S.size || this.autoSolves()) return out;
@@ -570,6 +584,7 @@ export class Game {
      * Returns {ok, id, formula, existing?} or {ok: false, error}. The same application twice returns the first.
      */
     applyRule(ruleId, bind = {}, { id = null, para = null } = {}) {
+        this.moved = true;
         if (this.autoSolves()) return { ok: false, error: 'the game is working the answers out itself' };
         if (!this.knows(ruleId)) return { ok: false, error: 'you do not hold that fact yet' };
         for (const card of Object.values(bind)) if (!this.knows(card) && !this.model.windows.some((w) => w.id === card)) return { ok: false, error: `you have not met ${card} yet` };
@@ -618,6 +633,7 @@ export class Game {
      *   {ok: false, reason} / {ok: false, contradiction: [constraint ids]} / {ok: false, error}.
      */
     conclude(cited, formula, { id = null, label = null, para = null } = {}) {
+        this.moved = true;
         if (this.autoSolves()) return { ok: false, error: 'the game is working the answers out itself' };
         const S = [...new Set(cited)].filter((x) => this.knows(x));
         if (!S.length) return { ok: false, error: 'cite at least one card you hold' };
@@ -691,6 +707,60 @@ export class Game {
     questionRaised(qid) {
         const p = this.story.anchors.questions.get(qid);
         return p !== undefined && p < this.read;
+    }
+
+    // ---------- scoring (Round 58) ----------
+    /** Where Holmes states a step: its thought's Holmes paragraph, or the line of a conclusion he draws. */
+    holmesAt(stepId) { return this.story.anchors.steps.get(stepId) ?? null; }
+
+    /** Record the steps the player has newly made by their own reasoning, at the last paragraph read. */
+    #noteMade() {
+        if (this.moved) {
+            this.moved = false;
+            for (const id of this.routeById.keys()) if (!this.madeAt.has(id) && this.#madeByPlayer(id)) this.madeAt.set(id, this.read - 1);
+        }
+        return this.madeAt;
+    }
+
+    /**
+     * Holmes's steps (the thoughts) the player can beat him to: each with Holmes's paragraph, the paragraph by
+     * which the player made it by their own reasoning (null if not yet), and whether that was before Holmes's
+     * paragraph (it scores). Inferences stated, granted or worked out by the game do not count; nor anything in Trivial.
+     */
+    thoughtScores() {
+        const made = this.#noteMade();
+        return [...this.routeById.keys()].map((id) => ({ thought: id, holmes: this.holmesAt(id), made: made.get(id) ?? null }))
+            .filter((r) => r.holmes !== null).map((r) => ({ ...r, scores: r.made !== null && r.made < r.holmes }));
+    }
+
+    /** The score: thoughts made before Holmes's paragraph, out of those he states. */
+    score() {
+        const rows = this.thoughtScores();
+        return { scored: rows.filter((r) => r.scores).length, made: rows.filter((r) => r.made !== null).length, possible: rows.length };
+    }
+
+    /** Made by the player's own reasoning: built inferences, their own conclusions and applied rules, their proofs. */
+    #madeByPlayer(stepId) {
+        if (this.autoSolves()) return false;
+        const step = this.routeById.get(stepId);
+        const own = (id) => this.knows(id) && !this.suspected.has(id) && ['built', 'concluded', 'applied'].includes(this.inferenceHow.get(id)?.how);
+        const needs = this.stepInferences(stepId);
+        if (needs && needs.every(own)) return true;
+        const c = step.concludes;
+        if (c.slot && this.isStruckWithProof(c.slot, c.value)) return true;
+        const f = c.slot ? { ne: [c.slot, c.value] } : c.formula;
+        if (!f) return false;
+        if ([...this.heldInferences(), ...this.heldApplied()].some((id) => own(id) && this.#covers(this.model.cards.get(id).formula, f))) return true;
+        // The player's proofs: values proven, or left alone by proven cross-outs (a clue's given value is not theirs).
+        const fixed = {};
+        for (const [s, m] of this.marks) {
+            const v = this.provenValue(s) ?? (() => {
+                const left = this.model.slots.get(s).domain.filter((x) => !this.hidden.has(x) && !this.isStruckWithProof(s, x));
+                return m.struck.size && left.length === 1 ? left[0] : null;
+            })();
+            if (v !== null) fixed[s] = v;
+        }
+        return Object.keys(fixed).length > 0 && !this.model.problem.consistent([], fixed, { extra: [{ not: f }] }).ok;
     }
 
     /** A reasoning step counts as made once the player has proved its conclusion. */
@@ -951,6 +1021,7 @@ export class Game {
      * lapses if the player later doubts one of those.
      */
     strike(slot, value) {
+        this.moved = true;
         const m = this.#mark(slot);
         if (this.opts.crossOut === 'pencil') {
             m.struck.set(value, {});
@@ -987,6 +1058,7 @@ export class Game {
 
     /** Prove a value outright: what the player holds and trusts must leave nothing else possible. */
     prove(slot, value) {
+        this.moved = true;
         const res = this.checkConclusion({ eq: [slot, value] });
         if (res.ok) this.#mark(slot).proven = { value, cited: true, used: res.used };
         return res;

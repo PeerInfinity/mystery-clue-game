@@ -225,6 +225,17 @@ specific thing stay ground facts with a formula and no schema.
 - **Actions** require and yield thoughts (`requires.thoughts`, `yields.thoughts`), where they named route steps.
 - Only Holmes's own steps have their inferences stated by Holmes at the gate.
 
+## As built (2026-10-15): scoring (Round 58)
+
+- The game records, for each of Holmes's steps (thoughts), the last paragraph read when the player first made it
+  by their own reasoning: every inference the step needs built by them, or one of their own conclusions or
+  applied rules covering its conclusion, or their proofs (proven values and proven cross-outs, not a clue's
+  given value) entailing it. Inferences stated by a character, granted by the game or implicit do not count;
+  nothing counts in Trivial. The check runs before each paragraph and on request, after a move of the player's.
+- A thought scores when it was made before its Holmes paragraph. `game.thoughtScores()` gives each thought with
+  `holmes`, `made` and `scores`; `game.score()` gives `{scored, made, possible}` (44 possible in Silver Blaze).
+  The record is saved (`made`, save version 6). The UI is workstream 9.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
