@@ -1191,3 +1191,24 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Moved:** reveal log: `k.disguised_by_hider` and two inference labels. Foreshadow log: nothing. Case report:
   the new inference and the route step's premises. Thoughts report: 32/46, `t148.2` and `t198.2` agree
   with no unmatched premise; two earliest-date misses left (`t29.3`, `t92.14`).
+
+## Round 50 (2026-10-15): short chains, chain 9 — the horse as killer
+
+- **Rule wording:** `r.startled_horse_kicks`, shown from ¶18, read "A horse startled from behind — by a sudden
+  glare, say — lashes out …; a shod hoof can kill a man. A light struck beside a horse in the dark, and a man
+  found struck down there: the horse lashed out." That spelled out the solution's step. It now reads only "A
+  horse startled from behind lashes out with its hind feet; a shod hoof can kill a man."
+- **The chain** (all verified; 60 verified, 10 asserted):
+  - `t37.13` (HYPOTHESIS, expert, ¶37) proposes the horse; it maps `k.horse_kicked` and needs no inference of
+    its own.
+  - `t102.4` (INFER, expert, high hindsight; new under the Round 42 ruling) → `k.horse_kicked`: a match struck
+    beside the horse in the dark, one blow to the head, and a startled horse kicks. From `t102.1`, `t37.1`,
+    `t35.2`, `bk.horse_kick`. Holmes ¶226. The inference drops `r.light_hidden_in_hollow`, which explains the
+    choice of the hollow, not the kick.
+  - `k.blow_needs_a_wielder` (editorial) is implicit. Granted at ¶40, it raises "Whose is the heavy stick?",
+    which the same paragraph answers.
+  - `t120.2` ("nobody left the hollow with the horse; consistent with no human killer, not proof") has no
+    inference: it supports and settles no question, like `t116.2`. Listed for Robert at the end of the chains.
+- **Gates:** none moved.
+- **Moved:** reveal log: the rule's wording at ¶18, `k.blow_needs_a_wielder` and the stick question at ¶40, a
+  label. Foreshadow log: the rule's wording (fewer untold words). Case report: nothing. Thoughts report: 33/47.

@@ -808,6 +808,10 @@ ahead by predicting what each action will find.
   Why strike a match in the hollow at one in the morning: {to light his pipe; to light the candle and see to
   work}? The pipe is in his pockets, but so is the candle. Taken with the knife, the candle reading is the
   stronger.
+- `t102.4` **INFER** · *weak* · expert · from `t102.1`, `t37.1`, `t35.2`, `bk.horse_kick` · supports `t37.13` · Holmes ¶226
+  A match was struck in the dark beside the horse, and the man there died of one blow to the head. A horse
+  startled by a sudden light kicks, and a shod hoof kills: the blow was the horse's. ⚠ high: as with `t37.13`,
+  the reader is primed for a human killer.
 - `t106.1` **GENRE·watch-holmes** · *fair* · careful · from `t102.1` · supports `t92.9`
   reads "I only saw it because I was looking for it." "What! You expected to find it?" "I thought it not unlikely."
   Holmes predicted the match, so he holds the same picture of a light struck in the hollow.
