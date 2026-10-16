@@ -17,13 +17,19 @@ export class OverBudget extends Error {
     constructor() { super('the search ran past its time budget'); }
 }
 
+/** Thrown when a search bounded in steps runs out of them (see the lazy constraints in Problem.consistent). */
+class OverSteps extends Error {}
+
 export class Problem {
     /** When set, a search past this time (Date.now()) throws OverBudget. */
     deadline = null;
     /** When set, called now and then as (done, total, what) during the long calls. */
     onProgress = null;
     #ticks = 0;
+    /** Steps left before a bounded search gives up (OverSteps), or null. */
+    #steps = null;
     #tick() {
+        if (this.#steps !== null && --this.#steps < 0) throw new OverSteps();
         if (this.deadline !== null && (++this.#ticks & 255) === 0 && Date.now() > this.deadline) throw new OverBudget();
     }
 
@@ -61,12 +67,29 @@ export class Problem {
      * @returns {{ok:boolean, witness?:Map<string,string>}}
      */
     consistent(active, fixed = {}, { focus = false, extra = [], eager = false } = {}) {
+        // A recent solution that already keeps everything asked answers at once: the clash search asks about many
+        // subsets of a set it found consistent.
+        if (!eager) {
+            const known = this.#knownSolution(active, fixed, extra);
+            if (known) return { ok: true, witness: known };
+        }
         // LAZY constraints (the world model's ties) only ever add to the rest: when the rest already fails, so does
-        // the whole, and that is found without them (their open states widen a failing search enormously).
+        // the whole, and that is found without them (their open states widen a failing search enormously). Most
+        // checks settle quickly with them all, though, so that is tried first, for a bounded number of steps.
         if (!eager) {
             const list = [...active];
             const strict = list.filter((id) => !this.constraints.get(id)?.lazy);
             if (strict.length < list.length) {
+                if (this.#steps === null) {
+                    this.#steps = EAGER_STEPS;
+                    try {
+                        return this.consistent(list, fixed, { focus, extra, eager: true });
+                    } catch (e) {
+                        if (!(e instanceof OverSteps)) throw e;
+                    } finally {
+                        this.#steps = null;
+                    }
+                }
                 const first = this.consistent(strict, fixed, { focus, extra, eager: true });
                 if (!first.ok) return first;
                 // Often the solution found already keeps them too.
@@ -107,7 +130,27 @@ export class Problem {
             if (sol.count === 0) return { ok: false };
             for (const [k, v] of sol.first) witness.set(k, v);
         }
+        if (!focus) this.#remember(witness);
         return { ok: true, witness };
+    }
+
+    /** The last few whole solutions found (each of every slot its constraints spoke of), newest first. */
+    #solutions = [];
+    #remember(sol) {
+        this.#solutions.unshift(sol);
+        if (this.#solutions.length > KEPT_SOLUTIONS) this.#solutions.pop();
+    }
+
+    /** A remembered solution that keeps the active constraints, `fixed` and the `extra` formulas, if any. */
+    #knownSolution(active, fixed, extra) {
+        if (!this.#solutions.length) return null;
+        const parts = this.#parts(active);
+        const order = this.timeOrder;
+        for (const sol of this.#solutions) {
+            if (!Object.entries(fixed).every(([s, v]) => sol.get(s) === v)) continue;
+            if (extra.every((f) => evaluate(f, sol, order) === true) && parts.every((p) => evaluate(p.formula, sol, order) === true)) return sol;
+        }
+        return null;
     }
 
     /** Values of `slot` that some full solution of the active constraints allows. */
@@ -128,44 +171,97 @@ export class Problem {
      * candidates() for many slots at once. Every solution found supports all the values in it, so per group of
      * linked slots: propagate once, take one solution, and search again only for values no solution has shown yet.
      * Returns Map slot -> values (slots no active constraint touches keep their whole domain).
+     *
+     * Incremental: when the active constraints include all those of the last call (the player holds more), every
+     * solution now was one then, so a value ruled out then stays out, and a solution found then that keeps the
+     * new constraints too still shows its values without a search.
      */
     allCandidates(active, slots) {
+        const ids = new Set(active);
+        const prior = this.#lastAll && [...this.#lastAll.active].every((id) => ids.has(id)) ? this.#lastAll : null;
+        if (prior && prior.active.size === ids.size && slots.every((s) => prior.out.has(s))) return new Map(slots.map((s) => [s, prior.out.get(s)]));
+        let start = null;
+        if (prior) {
+            start = new Map(this.domains);
+            for (const [s, vs] of prior.out) start.set(s, start.get(s).filter((v) => vs.includes(v)));
+        }
         const cons = this.#parts(active);
         const want = new Set(slots);
         const out = new Map();
+        const sols = [];
         let done = 0;
         for (const group of components(cons, [...want])) {
             const mine = group.slots.filter((s) => want.has(s));
             if (!mine.length) continue;
-            const root = this.#search(group, {}, 0);
+            const root = this.#search(group, {}, 0, start, null, true);
             if (!root.domains) { for (const s of mine) out.set(s, []); continue; }
             const seen = new Map(group.slots.map((s) => [s, new Set()]));
-            const note = (sol) => { for (const [s, v] of sol ?? []) seen.get(s)?.add(v); };
+            const note = (sol) => { if (!sol) return; sols.push(sol); for (const [s, v] of sol) seen.get(s)?.add(v); };
             // Each search tries the values no solution has shown yet first, so one solution covers many of them.
             const unseenFirst = (x, d) => { const fresh = d.filter((v) => !seen.get(x).has(v)); return fresh.length && fresh.length < d.length ? [...fresh, ...d.filter((v) => seen.get(x).has(v))] : d; };
             const base = this.#search(group, {}, 1, root.domains).first;
             note(base);
-            // A value that the first solution, with only this slot changed, still satisfies needs no search.
+            if (base && group.slots.some((s) => root.domains.get(s).length > 1)) {
+                // The last call's solutions, completed from this one's, where they keep every constraint now.
+                for (const old of prior?.sols ?? []) {
+                    const sol = new Map(base);
+                    let fresh = false;
+                    for (const s of group.slots) {
+                        const v = old.get(s);
+                        if (v !== undefined && v !== sol.get(s)) { sol.set(s, v); fresh ||= !seen.get(s).has(v); }
+                    }
+                    if (fresh && group.cons.every((c) => evaluate(c.formula, sol, this.timeOrder) === true)) note(sol);
+                }
+            }
+            // A value the first solution, so changed and mended in a few of its other slots, still satisfies needs no
+            // search: most values of a large group differ from a solution in a handful of slots. Mending is greedy
+            // (a broken part takes the change that leaves the fewest parts broken); what it finds is checked whole.
             const touching = new Map(group.slots.map((s) => [s, []]));
             for (const c of group.cons) for (const x of c.scope) touching.get(x).push(c);
-            const repairs = (s, v) => {
-                if (!base) return false;
+            const order = this.timeOrder;
+            const holds = (c, sol) => evaluate(c.formula, sol, order) === true;
+            const mended = (s, v) => {
+                if (!base) return null;
                 const sol = new Map(base).set(s, v);
-                return touching.get(s).every((c) => evaluate(c.formula, sol, this.timeOrder) !== false);
+                const kept = new Set([s]);
+                const broken = (x) => touching.get(x).filter((c) => !holds(c, sol));
+                let todo = broken(s);
+                for (let round = 0; todo.length && round < MEND_STEPS; round++) {
+                    const c = todo[0];
+                    let best = null;
+                    for (const x of c.scope) {
+                        if (kept.has(x)) continue;
+                        const was = sol.get(x);
+                        for (const w of root.domains.get(x)) {
+                            if (w === was) continue;
+                            sol.set(x, w);
+                            if (holds(c, sol)) { const n = broken(x).length; if (!best || n < best.n) best = { x, w, n }; }
+                        }
+                        sol.set(x, was);
+                    }
+                    if (!best) return null;
+                    sol.set(best.x, best.w);
+                    kept.add(best.x);
+                    todo = [...new Set([...todo, ...touching.get(best.x)])].filter((c2) => !holds(c2, sol));
+                }
+                return !todo.length && group.cons.every((c) => holds(c, sol)) ? sol : null;
             };
             for (const s of mine) {
                 this.onProgress?.(++done, slots.length, 'answers');
                 for (const v of root.domains.get(s)) {
                     if (seen.get(s).has(v)) continue;
-                    if (repairs(s, v)) { seen.get(s).add(v); continue; }
+                    const sol = mended(s, v);
+                    if (sol) { note(sol); continue; }
                     const r = this.#search(group, { [s]: v }, 1, root.domains, unseenFirst);
                     if (r.count) note(r.first);
                 }
                 out.set(s, root.domains.get(s).filter((v) => seen.get(s).has(v)));
             }
         }
+        this.#lastAll = { active: ids, out, sols };
         return out;
     }
+    #lastAll = null;
 
     /** Number of solutions over the slots the active constraints mention, capped at `limit`. */
     countSolutions(active, limit = 2) {
@@ -314,9 +410,10 @@ export class Problem {
     /**
      * Search one component. limit = 0 only propagates and returns the reduced domains ({domains} or {} when
      * inconsistent); otherwise counts solutions up to `limit`. `start` = domains to begin from (already
-     * propagated for the same constraints). `valueOrder(slot, values)` may reorder the values tried.
+     * propagated for the same constraints, unless `full`: then propagate them all). `valueOrder(slot, values)` may
+     * reorder the values tried.
      */
-    #search(group, fixed, limit, start = null, valueOrder = null) {
+    #search(group, fixed, limit, start = null, valueOrder = null, full = false) {
         const domains = new Map();
         for (const s of group.slots) {
             let d = (start ?? this.domains).get(s);
@@ -437,7 +534,7 @@ export class Problem {
         const conditionals = group.cons.filter((c) => c.cond);
 
         for (const d of domains.values()) if (d.length === 0) return { count: 0 };
-        if (start) {
+        if (start && !full) {
             const queue = new Set();
             for (const s of Object.keys(fixed)) for (const c of bySlot.get(s) ?? []) queue.add(c);
             if (!propagate([...queue])) return { count: 0 };
@@ -528,6 +625,12 @@ export class Problem {
 }
 
 const SUPPORT_BUDGET = 5000;
+/** How many further slots allCandidates may change to mend a solution for a value before it searches. */
+const MEND_STEPS = 8;
+/** How many whole solutions consistent() remembers. */
+const KEPT_SOLUTIONS = 16;
+/** How many search steps a check with the ties gets before it falls back to checking without them first. */
+const EAGER_STEPS = 20000;
 
 /**
  * Propagate one lookup part ({index: [key, map, value, outside]} or nindex) over domains read through `dom`.

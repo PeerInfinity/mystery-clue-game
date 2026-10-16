@@ -1638,3 +1638,57 @@ hands the next session three pieces of work:
 - the design of knowledge, intention and belief (step 5), to agree with Robert before building.
 
 It carries the rulings of this session and the traps met. `CLAUDE.md` points at it.
+
+## Round 66 (2026-10-16): solver speed (kickoff part 2, A)
+
+- **Where the time went** (profiled before changing anything):
+  - **Building a `Game` took 4–12 s.** It was the step needs (`#inferencesFor`: one QuickXplain per route step),
+    and about 90% of that was the lazy check's second phase, with the ties. The suite builds dozens of Games.
+  - **A Trivial game at logic pace took 200–400 s:** 21 all-candidates batches of 7–16 s each (from `stepMade` →
+    `settled` → `autoValues`).
+  - **The per-component cache (the kickoff's lead) would not have helped.** At the end of the story one component
+    holds 397 slots and 300 constraints, and even after propagation 158 open slots stay linked. A batch made about
+    740 searches, every one backtrack-free, so their cost was propagation, not branching.
+  - **Half of all solver time was `evaluate`:** it read the operator with `Object.keys` and built closures and
+    arrays on every call.
+- **Changes** (each sound by construction: what is shortcut is either a verified solution or a value already
+  proven out):
+  - **`engine/logic.js`: formulas are compiled once** (cached per formula object) into closures with the same
+    three-valued reading; `and`/`or` stop at the first deciding member.
+  - **`engine/game.js`: the step needs are kept per problem** (a WeakMap on `model.problem`), set once complete,
+    so a slow check retried through the worker cannot leave half a map. A player's inference rebuilds the problem
+    and so the needs.
+  - **`Problem.allCandidates` is incremental.** When the active constraints include all those of the last call
+    (Trivial only ever holds more), a value ruled out then stays out, and the last call's solutions that keep the
+    new constraints still show their values. The same active set returns the last answer.
+  - **`Problem.allCandidates` mends before it searches:** a value is shown by the first solution with that value
+    set, mended greedily in up to 8 other slots and checked against every part of the group. Only where mending
+    fails does the full search run.
+  - **`Problem.consistent` remembers its last 16 whole solutions;** one that keeps the active constraints, the
+    fixed values and the extra formulas answers at once.
+  - **`Problem.consistent` tries the ties first:** a check with ties tries everything together for at most 20,000
+    search steps (`OverSteps`), then falls back to Round 61's order (without the ties, then with them). In the
+    clash search most checks passed without the ties only to be decided with them: 129 of 251 passed the first
+    phase and failed the second.
+- **Checked:**
+  - Each of the 21 batches of a full Trivial game was compared with a fresh solver's answer: identical.
+  - The step needs are identical, and the end-of-story clashes are the same twelve.
+- **Timings** (this machine, shared with other sessions' jobs, so there is noise):
+
+  | Measure | Before | After |
+  |---|---|---|
+  | Case load | 10 s | 2.4 s |
+  | First `Game` | 8.6 s | 1.2 s (later ones ≈ 0) |
+  | `npm run validate` | 78.5 s | 39.8 s |
+  | Trivial batch | 7–16 s | 0.4–2.4 s (0 when nothing changed) |
+  | Full Trivial game, solver time | 200–400 s | about 16 s |
+  | End-of-story clash search, Easy | 48–66 s | 21 s |
+  | `npm test` (57 tests) | 970 s (697 s in Round 64) | **216 s** |
+
+  The slowest tests are now validation (72 s), "cards the solution does not need" (40 s, 351 s before) and "a
+  clash … set aside" (32 s, 169 s before).
+- **Not done:** sharing played games between tests (not needed for the target); the ties-fixed first pass for
+  `explainConflict`; witness value ordering (tried, about 5%, dropped). The browser was not re-timed; its worker
+  runs the same `Problem`, so Trivial's per-paragraph batch gains as above.
+- **Moved:** nothing in the reveal and foreshadow logs, `report.md`, `thoughts-report.md` or the gate listing
+  (diffed in full).

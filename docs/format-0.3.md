@@ -303,6 +303,16 @@ specific thing stay ground facts with a formula and no schema.
 - A game move must ask the solver before it changes anything (or change only what it would change the same way
   again): a slow call makes the move run twice.
 
+## As built (2026-10-16): solver speed (Round 66)
+
+- Formulas are compiled once into closures (`logic.js`, cached per formula object); a formula must not be changed
+  after it is first evaluated.
+- `Problem.allCandidates` keeps its last call: a later call whose active constraints include all of the last call's
+  starts from its answers and solutions, and mends a known solution before searching for a value.
+  `Problem.consistent` keeps its last 16 whole solutions, and tries a check with ties eagerly for a bounded number
+  of steps before Round 61's lazy order. A `Problem`'s constraints never change, so these caches live on it.
+- `Game.stepNeeds` is kept per `model.problem`.
+
 ## As built (2026-10-16): the board (world model, step 3; Round 63)
 
 - `engine/timeline.js` reads the board off a Game: times reached (and the player's parts), followed things, and

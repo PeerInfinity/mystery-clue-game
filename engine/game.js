@@ -21,6 +21,9 @@ import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDyn
 import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
 
+/** Holmes's steps' needs (Game.stepNeeds), per problem. */
+const STEP_NEEDS = new WeakMap();
+
 // Difficulty is a set of OPTIONS; the four difficulties are presets of them, and any other mix is CUSTOM.
 // TRIVIAL: the game works out what the held clues allow and settles questions itself; the player reads and
 // watches. EASY: every answer is listed and the ones the player's clues rule out are greyed; plain pencil
@@ -178,10 +181,15 @@ export class Game {
         for (const k of this.inferences) for (const st of k.stated ?? []) stateAt(this.#paraOf(st.source[0]), k.id, st.by);
         // Holmes's steps: the inferences each one needs (a fewest set, among those resting on the step's own
         // premises), stated by Holmes where the story tells the step, and what 'wait' waits for.
-        this.stepNeeds = new Map();
+        // They depend on the case's constraints alone, so they are kept with the problem they were found on (set
+        // once complete: a check handed to the solver's worker comes back here to fill it).
+        this.stepNeeds = STEP_NEEDS.get(model.problem);
+        if (!this.stepNeeds) {
+            this.stepNeeds = new Map((model.data.route ?? []).map((step) => [step.id, this.#inferencesFor(step)]));
+            STEP_NEEDS.set(model.problem, this.stepNeeds);
+        }
         for (const step of model.data.route ?? []) {
-            const needs = this.#inferencesFor(step);
-            this.stepNeeds.set(step.id, needs);
+            const needs = this.stepNeeds.get(step.id);
             // Only Holmes's own steps are his to state (a thought's inference by Watson or Gregory is not).
             if (step.reasoner !== 'holmes') continue;
             const at = [...(this.story.gates ?? [])].find(([, ids]) => ids.has(step.id))?.[0] ?? this.story.anchors.steps.get(step.id);

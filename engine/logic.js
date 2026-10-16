@@ -16,77 +16,121 @@
 
 export const U = undefined;
 
-function and3(values) {
-    let unknown = false;
-    for (const v of values) {
-        if (v === false) return false;
-        if (v === U) unknown = true;
-    }
-    return unknown ? U : true;
-}
-
-function or3(values) {
-    let unknown = false;
-    for (const v of values) {
-        if (v === true) return true;
-        if (v === U) unknown = true;
-    }
-    return unknown ? U : false;
-}
-
-function not3(v) {
-    return v === U ? U : !v;
-}
-
 /**
  * @param {object} f formula
  * @param {Map<string,string>|object} assign slot -> value (partial)
  * @param {Map<string,number>} timeOrder window id -> order index
  */
 export function evaluate(f, assign, timeOrder) {
-    const get = assign instanceof Map ? (s) => assign.get(s) : (s) => assign[s];
-    const time = (arg) => {
-        if (arg && typeof arg === 'object') {
-            if (!timeOrder.has(arg.lit)) throw new Error(`unknown time window ${arg.lit}`);
-            return timeOrder.get(arg.lit);
-        }
-        const v = get(arg);
-        if (v === U) return U;
-        if (!timeOrder.has(v)) throw new Error(`slot ${arg} holds ${v}, not a time window`);
-        return timeOrder.get(v);
-    };
+    return compiled(f)(assign instanceof Map ? assign : new Map(Object.entries(assign)), timeOrder);
+}
+
+// Each formula is compiled once into a closure (cached on the formula object): the search evaluates the same
+// small parts millions of times, and reading the operator, building argument arrays and closures on every call
+// cost most of it. Same three-valued reading as above; `and`/`or` stop at the first deciding member.
+const COMPILED = new WeakMap();
+function compiled(f) {
+    let fn = COMPILED.get(f);
+    if (!fn) { fn = compile(f); COMPILED.set(f, fn); }
+    return fn;
+}
+
+function compile(f) {
     const op = opOf(f);
     const a = f[op];
     switch (op) {
-        case 'true': return true;
-        case 'false': return false;
-        case 'eq': { const v = get(a[0]); return v === U ? U : v === a[1]; }
-        case 'ne': { const v = get(a[0]); return v === U ? U : v !== a[1]; }
-        case 'in': { const v = get(a[0]); return v === U ? U : a[1].includes(v); }
-        case 'nin': { const v = get(a[0]); return v === U ? U : !a[1].includes(v); }
+        case 'true': return () => true;
+        case 'false': return () => false;
+        case 'eq': { const [s, x] = a; return (m) => { const v = m.get(s); return v === U ? U : v === x; }; }
+        case 'ne': { const [s, x] = a; return (m) => { const v = m.get(s); return v === U ? U : v !== x; }; }
+        case 'in': { const [s, xs] = a; const set = new Set(xs); return (m) => { const v = m.get(s); return v === U ? U : set.has(v); }; }
+        case 'nin': { const [s, xs] = a; const set = new Set(xs); return (m) => { const v = m.get(s); return v === U ? U : !set.has(v); }; }
         case 'same': case 'diff': {
-            const x = get(a[0]), y = get(a[1]);
-            if (x === U || y === U) return U;
-            return op === 'same' ? x === y : x !== y;
+            const [x, y] = a;
+            const same = op === 'same';
+            return (m) => {
+                const u = m.get(x);
+                if (u === U) return U;
+                const w = m.get(y);
+                if (w === U) return U;
+                return (u === w) === same;
+            };
         }
         case 'before': case 'not_after': {
-            const x = time(a[0]), y = time(a[1]);
-            if (x === U || y === U) return U;
-            return op === 'before' ? x < y : x <= y;
+            const strict = op === 'before';
+            const time = (arg) => {
+                if (arg && typeof arg === 'object') {
+                    const lit = arg.lit;
+                    return (m, order) => {
+                        if (!order.has(lit)) throw new Error(`unknown time window ${lit}`);
+                        return order.get(lit);
+                    };
+                }
+                return (m, order) => {
+                    const v = m.get(arg);
+                    if (v === U) return U;
+                    if (!order.has(v)) throw new Error(`slot ${arg} holds ${v}, not a time window`);
+                    return order.get(v);
+                };
+            };
+            const tx = time(a[0]), ty = time(a[1]);
+            return (m, order) => {
+                const x = tx(m, order);
+                if (x === U) return U;
+                const y = ty(m, order);
+                if (y === U) return U;
+                return strict ? x < y : x <= y;
+            };
         }
         case 'index': case 'nindex': {
-            const key = get(a[0]);
-            if (key === U) return U;
-            const target = a[1][key];
-            let held;
-            if (target === undefined) { if (a[3] === undefined || a[3] === null) return op === 'nindex'; held = a[3]; }
-            else { held = get(target); if (held === U) return U; }
-            return (held === a[2]) === (op === 'index');
+            const [k, map, value, outside] = a;
+            const pos = op === 'index';
+            const beyond = outside === undefined || outside === null ? !pos : (outside === value) === pos;
+            return (m) => {
+                const key = m.get(k);
+                if (key === U) return U;
+                const target = map[key];
+                if (target === undefined) return beyond;
+                const held = m.get(target);
+                if (held === U) return U;
+                return (held === value) === pos;
+            };
         }
-        case 'and': return and3(a.map((g) => evaluate(g, assign, timeOrder)));
-        case 'or': return or3(a.map((g) => evaluate(g, assign, timeOrder)));
-        case 'not': return not3(evaluate(a, assign, timeOrder));
-        case 'implies': return or3([not3(evaluate(a[0], assign, timeOrder)), evaluate(a[1], assign, timeOrder)]);
+        case 'and': {
+            const gs = a.map(compile);
+            return (m, order) => {
+                let unknown = false;
+                for (const g of gs) {
+                    const v = g(m, order);
+                    if (v === false) return false;
+                    if (v === U) unknown = true;
+                }
+                return unknown ? U : true;
+            };
+        }
+        case 'or': {
+            const gs = a.map(compile);
+            return (m, order) => {
+                let unknown = false;
+                for (const g of gs) {
+                    const v = g(m, order);
+                    if (v === true) return true;
+                    if (v === U) unknown = true;
+                }
+                return unknown ? U : false;
+            };
+        }
+        case 'not': { const g = compile(a); return (m, order) => { const v = g(m, order); return v === U ? U : !v; }; }
+        case 'implies': {
+            const p = compile(a[0]), q = compile(a[1]);
+            return (m, order) => {
+                const c = p(m, order);
+                if (c === false) return true;
+                const v = q(m, order);
+                if (v === true) return true;
+                return c === U || v === U ? U : false;
+            };
+        }
         default: throw new Error(`unknown operator ${op}`);
     }
 }
