@@ -1235,3 +1235,24 @@ lad is a person card the lads' claim does not reach, and is left to the curry ro
 - **Moved:** reveal log: the rule's wording at ¶12, the new inference. Foreshadow log: the rule's wording.
   Case report: the new inference. Thoughts report: one earliest-date miss left (`t29.3`), one premise
   disagreement left.
+
+## Round 52 (2026-10-15): rule texts shown early, trimmed to their general fact
+
+Robert's ruling: trim now, in a commit of its own. The scan after Round 51 ranked every rule shown before the
+story raises its subject by its untold words. Four of them spelled out the solution's step (the fault Rounds 48,
+50 and 51 fixed one at a time). Each is cut back to its general fact. Their schemas, which are the inferences'
+warrants, are unchanged.
+- `r.searched_and_not_found` (¶18): was "Where the police have searched and found nothing, though the horse they
+  sought is there and a child would know it, its markings have been hidden there by the man who hides it: a
+  horse-faker's trick." Now: "Searchers know a horse by its markings: if his markings are hidden, they can look
+  straight at him and not know him."
+- `r.planned_the_dish` (¶12): was "A man who brings a drug that must be hidden, on the one night a dish that hides
+  it is served, arranged for that dish: he is one of those who decide what the house eats." Now: "A plan that
+  needs a particular thing at hand on a particular day is made by someone who can see to it that it is."
+- `r.laying_against` (¶18): the clause "whoever took the horse out to lame it had plotted it and laid his money
+  beforehand" is cut.
+- `r.horse_would_wake_sleepers` (¶18): the clause "work that would hurt it is done away from them" is cut.
+- Left as they are (borderline, plain period knowledge): `r.tendon_nick` (¶18) and `r.horse_gregarious` (¶18,
+  "that is where it is").
+- **Moved:** the four texts in the reveal and foreshadow logs (fewer untold words). Gates, case report and
+  thoughts report: nothing.
