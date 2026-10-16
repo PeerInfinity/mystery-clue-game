@@ -1,5 +1,7 @@
 # Kickoff: workstream 2, short chains
 
+> **Status (2026-10-16): done** (Rounds 41–58 of `docs/design.md`). Superseded by `docs/kickoff-world-model.md`.
+
 **Date:** 2026-10-15 (Opus session, Rounds 32–40 of `docs/design.md`). **Supersedes** `docs/kickoff-0.3-migration.md`
 (slice 3 is closed at chains 1–8; its open items were ruled in Rounds 33–35).
 

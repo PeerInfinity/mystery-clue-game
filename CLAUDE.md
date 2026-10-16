@@ -1,7 +1,8 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-short-chains.md` — the current work (workstream 2, short chains): mission, settled rulings, steps.
+- `docs/kickoff-world-model.md` — the current work (the world model: states over time, the timeline): mission,
+  settled rulings, steps. Workstream 2 (short chains, `docs/kickoff-short-chains.md`) is done (Rounds 41–58).
 - `docs/format-0.3.md` — the case format as built, and the decisions taken on it.
 - `docs/redesign.md` — the design discussion the format serves: the reader's process, what the logic and the
   gameplay are missing, the alternatives, and the order of work.

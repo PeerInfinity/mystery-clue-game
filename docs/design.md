@@ -1419,3 +1419,10 @@ Gregory or the editor do not gate.
   whose inference it cites) before Holmes's ¶218; the dog step Holmes hands over is not the player's; the record
   survives a save; Trivial scores nothing.
 - **Moved:** nothing in the logs or reports (engine only).
+
+## Round 59 (2026-10-16): hand-off to the world model
+
+Workstream 2 is done (Rounds 41–58). `docs/kickoff-world-model.md` hands the next session steps 1–4 of
+`docs/world-model.md`: states (location, possession, condition) in the format, the bookkeeping re-derived with
+state rules, a minimal timeline in both layouts, and layers over theories. It carries the six `world-model`
+thoughts, the traps this session met and the items still open for Robert. `CLAUDE.md` points at it.
