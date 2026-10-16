@@ -77,10 +77,17 @@ export function given(game, thing, name, time) {
 // and patients where and when the events they answer happened (`theoryMarks`).
 export const MINE = 'mine';
 const layerOf = (p) => p.layer ?? MINE;
+/** A pencil mark's aspect: 'at' (where), 'held' (who has it), or a condition's id. */
+export const aspectOf = (p) => p.aspect ?? 'at';
 
-/** The player's pencil marks for a thing at a time in a layer: [{value, struck}], then the theory's own marks. */
-export function pencilAt(game, thing, time, layer = MINE) {
-    const own = game.board.pencil.filter((p) => p.thing === thing && p.time === time && layerOf(p) === layer).map((p) => ({ value: p.value, struck: !!p.struck }));
+/**
+ * The player's pencil marks for a thing at a time in a layer, in one aspect: [{value, struck, status}], then (where
+ * it is) the theory's own marks. `status` (markStatus): proven, ruled out, or excluded by the clues (greying).
+ */
+export function pencilAt(game, thing, time, layer = MINE, aspect = 'at') {
+    const own = game.board.pencil.filter((p) => p.thing === thing && p.time === time && layerOf(p) === layer && aspectOf(p) === aspect)
+        .map((p) => ({ value: p.value, struck: !!p.struck, status: layer === MINE ? markStatus(game, thing, time, p.value, aspect) : null }));
+    if (aspect !== 'at') return own;
     const theirs = theoryMarks(game, layer).filter((m) => m.thing === thing && m.time === time && !own.some((o) => o.value === m.value)).map((m) => ({ value: m.value, struck: false, theory: true }));
     return [...own, ...theirs];
 }
@@ -133,7 +140,7 @@ export function columns(game, layer = MINE) {
     for (const s of sets) for (const p of s.places) if (game.knows(p) && !out.includes(p)) out.push(p);
     // A place marked outside the sets gets a column only when no column contains it.
     const fold = folder(game, [...out]);
-    for (const p of [...game.board.pencil.map((x) => x.value), ...theoryMarks(game, layer).map((m) => m.value)]) if (!out.includes(p) && p !== ELSEWHERE && p !== UNKNOWN && game.model.cards.has(p) && fold(p) === ELSEWHERE) out.push(p);
+    for (const p of [...game.board.pencil.filter((x) => aspectOf(x) === 'at').map((x) => x.value), ...theoryMarks(game, layer).map((m) => m.value)]) if (!out.includes(p) && p !== ELSEWHERE && p !== UNKNOWN && game.model.cards.has(p) && fold(p) === ELSEWHERE) out.push(p);
     return [...out, ELSEWHERE, UNKNOWN];
 }
 
@@ -146,8 +153,9 @@ export function byThing(game, layer = MINE) {
             time: t.id,
             at: given(game, thing, 'at', t.id),
             held: given(game, thing, 'held', t.id),
-            conditions: (game.model.data.state_conditions ?? []).map((c) => ({ id: c.id, value: given(game, thing, c.id, t.id) })).filter((c) => c.value !== null),
+            conditions: conditionsAt(game, thing, t.id, layer),
             pencil: pencilAt(game, thing, t.id, layer),
+            heldPencil: pencilAt(game, thing, t.id, layer, 'held'),
         })),
     }));
     return { times: ts, rows };
@@ -171,7 +179,7 @@ export function byPlace(game, layer = MINE) {
             const g = given(game, thing, 'at', t.id);
             const marks = pencilAt(game, thing, t.id, layer);
             if (g !== null) cells.get(cols.includes(g) ? g : fold(g)).things.push({ thing, given: true });
-            for (const m of marks) if (m.value !== g) cells.get(cols.includes(m.value) ? m.value : fold(m.value)).things.push({ thing, pencil: true, struck: m.struck, theory: !!m.theory, value: m.value });
+            for (const m of marks) if (m.value !== g) cells.get(cols.includes(m.value) ? m.value : fold(m.value)).things.push({ thing, pencil: true, struck: m.struck, status: m.status, theory: !!m.theory, value: m.value });
             if (g === null && !marks.some((m) => !m.struck)) cells.get(UNKNOWN).things.push({ thing });
         }
         for (const e of events) {
@@ -199,16 +207,16 @@ export function checkLayer(game, layer = MINE) {
     const groups = new Map();
     for (const p of game.board.pencil) {
         if (layerOf(p) !== layer || p.struck) continue;
-        const key = `${p.thing}|${p.time}`;
+        const key = `${p.thing}|${p.time}|${aspectOf(p)}`;
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(p.value);
     }
     let checked = 0;
     let unchecked = 0;
     for (const [key, values] of groups) {
-        const [thing, time] = key.split('|');
-        const slot = `st.${thing}.at.${time.replace(/^w\./, '')}`;
-        const track = game.model.stateTracks.get(`at|${thing}`);
+        const [thing, time, aspect] = key.split('|');
+        const slot = `st.${thing}.${aspect}.${time.replace(/^w\./, '')}`;
+        const track = game.model.stateTracks.get(`${aspect}|${thing}`);
         if (!game.model.slots.has(slot) || !track) { unchecked += values.length; continue; }
         const allowed = [...new Set(values.flatMap((v) => track.overlaps(v)))];
         extra.push(allowed.length === 1 ? { eq: [slot, allowed[0]] } : { in: [slot, allowed] });
@@ -250,11 +258,12 @@ export function cardTimeline(game, id, layer = MINE) {
                 time: t.id, label: t.label, depth: t.depth,
                 at: given(game, id, 'at', t.id),
                 held: given(game, id, 'held', t.id),
-                conditions: (game.model.data.state_conditions ?? []).map((c) => ({ id: c.id, value: given(game, id, c.id, t.id) })).filter((c) => c.value !== null),
+                conditions: conditionsAt(game, id, t.id, layer),
                 pencil: pencilAt(game, id, t.id, layer),
+                heldPencil: pencilAt(game, id, t.id, layer, 'held'),
                 events: mine.filter((e) => eventTime(game, e) === t.id && !game.board.splits.some((s) => s.by === e && s.time === t.id)).map((e) => ({ event: e, roles: roles(e) })),
             };
-            if (line.at !== null || line.held !== null || line.conditions.length || line.pencil.length || line.events.length) lines.push(line);
+            if (line.at !== null || line.held !== null || line.conditions.length || line.pencil.length || line.heldPencil.length || line.events.length) lines.push(line);
         }
         for (const e of mine) if (!eventTime(game, e)) undated.push(e);
         return { kind, lines, undated };
@@ -262,13 +271,13 @@ export function cardTimeline(game, id, layer = MINE) {
     // A place: whoever the board puts there or somewhere inside it, and the events done there.
     const within = new Map(game.model.data.entities.filter((e) => e.within).map((e) => [e.id, e.within]));
     const inside = (p) => { for (let q = p, n = 0; q && n < 20; q = within.get(q), n++) if (q === id) return true; return false; };
-    const things = new Set([...followed(game, layer), ...game.board.pencil.filter((p) => layerOf(p) === layer && inside(p.value)).map((p) => p.thing)]);
+    const things = new Set([...followed(game, layer), ...game.board.pencil.filter((p) => layerOf(p) === layer && aspectOf(p) === 'at' && inside(p.value)).map((p) => p.thing)]);
     for (const t of ts) {
         const here = [];
         for (const thing of things) {
             const g = given(game, thing, 'at', t.id);
             if (g !== null && inside(g)) here.push({ thing, given: true, value: g });
-            for (const m of pencilAt(game, thing, t.id, layer)) if (inside(m.value) && m.value !== g) here.push({ thing, pencil: !m.theory, theory: !!m.theory, struck: m.struck, value: m.value });
+            for (const m of pencilAt(game, thing, t.id, layer)) if (inside(m.value) && m.value !== g) here.push({ thing, pencil: !m.theory, theory: !!m.theory, struck: m.struck, status: m.status, value: m.value });
         }
         const evs = events.filter((e) => eventTime(game, e) === t.id && inside(settledOf(`${e}.place`)) && !game.board.splits.some((s) => s.by === e && s.time === t.id));
         if (here.length || evs.length) lines.push({ time: t.id, label: t.label, depth: t.depth, things: here, events: evs });
@@ -279,3 +288,31 @@ export function cardTimeline(game, id, layer = MINE) {
 
 /** The kinds of card the board follows (a place is a column, an event sits in a cell). */
 export const BOARD_KINDS = ['person', 'animal', 'group', 'object'];
+
+/** A thing's conditions at a time: what the clues give, and the player's pencil marks, per condition. */
+function conditionsAt(game, thing, time, layer) {
+    return (game.model.data.state_conditions ?? []).map((c) => ({ id: c.id, value: given(game, thing, c.id, time), pencil: pencilAt(game, thing, time, layer, c.id) }))
+        .filter((c) => c.value !== null || c.pencil.length);
+}
+
+/** The declared state a mark speaks of, and the value of its domain the mark's value stands for: {slot, value} or null. */
+export function stateOf(game, thing, time, aspect, value) {
+    const slot = `st.${thing}.${aspect}.${time.replace(/^w\./, '')}`;
+    const track = game.model.stateTracks.get(`${aspect}|${thing}`);
+    if (!game.model.slots.has(slot) || !track) return null;
+    const v = track.overlaps(value)[0];
+    return v === undefined ? null : { slot, value: v };
+}
+
+/**
+ * Where a mark of the player's stands: 'proven' (they proved that state), 'ruled' (they ruled it out with a proof),
+ * 'excluded' (with greying on, their clues rule it out), or null.
+ */
+export function markStatus(game, thing, time, value, aspect = 'at') {
+    const st = stateOf(game, thing, time, aspect, value);
+    if (!st) return null;
+    if (game.provenValue(st.slot) === st.value) return 'proven';
+    if (game.isStruckWithProof(st.slot, st.value)) return 'ruled';
+    if (game.helps('greying') && game.settled(st.slot) === null && !game.plausible(st.slot, st.value).plausible) return 'excluded';
+    return null;
+}

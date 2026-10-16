@@ -388,19 +388,66 @@ export class Game {
     /**
      * Pencil a place for a thing at a time (a free mark: several are several hypotheses); `struck` crosses it out,
      * and the mark stays visible. Only places the player has met, 'elsewhere', at times shown on the board.
+     * `aspect` 'held' pencils who has it (a person, animal or group the player holds, or a place where it lies);
+     * a condition's id pencils whether it is so ('true' or 'false').
      */
-    pencilPlace(thing, time, value, { struck = false, layer = TL.MINE } = {}) {
+    pencilPlace(thing, time, value, { struck = false, layer = TL.MINE, aspect = 'at' } = {}) {
         if (!this.knows(thing) || !this.#shownTime(time)) return false;
-        if (value !== TL.ELSEWHERE && !(this.knows(value) && this.model.cards.get(value)?.kind === 'place')) return false;
+        const kind = this.model.cards.get(value)?.kind;
+        if (aspect === 'at' && value !== TL.ELSEWHERE && !(this.knows(value) && kind === 'place')) return false;
+        if (aspect === 'held' && value !== TL.ELSEWHERE && !(this.knows(value) && [...TL.BOARD_KINDS.filter((k) => k !== 'object'), 'place'].includes(kind))) return false;
+        if (aspect !== 'at' && aspect !== 'held' && !((this.model.data.state_conditions ?? []).some((c) => c.id === aspect) && ['true', 'false'].includes(value))) return false;
         if (layer !== TL.MINE && !this.visibleTheories().some((t) => t.id === layer)) return false;
-        const same = (p) => p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer;
+        const same = (p) => p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer && TL.aspectOf(p) === aspect;
         this.board.pencil = this.board.pencil.filter((p) => !same(p));
-        this.board.pencil.push({ thing, time, value, ...(struck ? { struck: true } : {}), ...(layer !== TL.MINE ? { layer } : {}) });
+        this.board.pencil.push({ thing, time, value, ...(struck ? { struck: true } : {}), ...(layer !== TL.MINE ? { layer } : {}), ...(aspect !== 'at' ? { aspect } : {}) });
+        // Restoring a mark the player ruled out takes the ruling back too.
+        const st = !struck && layer === TL.MINE ? TL.stateOf(this, thing, time, aspect, value) : null;
+        if (st && this.marks.get(st.slot)?.struck.has(st.value)) this.unstrike(st.slot, st.value);
         if (!this.followedThings(layer).includes(thing)) this.follow(thing);
         return true;
     }
-    erasePlace(thing, time, value, layer = TL.MINE) {
-        this.board.pencil = this.board.pencil.filter((p) => !(p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer));
+    erasePlace(thing, time, value, layer = TL.MINE, aspect = 'at') {
+        this.board.pencil = this.board.pencil.filter((p) => !(p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer && TL.aspectOf(p) === aspect));
+    }
+
+    /**
+     * Commit a mark (step B): prove that the thing was there (had that holder, was in that condition) then. What the
+     * player holds and trusts must leave nothing else possible, as for proving any answer; a proven state becomes a
+     * card of the player's, citable like an inference. Returns {ok, card} or the check's refusal.
+     */
+    proveMark(thing, time, value, aspect = 'at') {
+        const st = TL.stateOf(this, thing, time, aspect, value);
+        if (!st) return { ok: false, reason: 'the case has no question here yet' };
+        const res = this.prove(st.slot, st.value);
+        if (!res.ok) return res.reason ? { ...res, reason: 'what you hold and trust does not settle it yet' } : res;
+        this.pencilPlace(thing, time, value, { aspect });
+        const formula = { eq: [st.slot, st.value] };
+        const had = this.concluded.find((c) => JSON.stringify(c.formula) === JSON.stringify(formula) && this.knows(c.id));
+        if (had) return { ok: true, card: had.id, used: res.used };
+        const cited = [...new Set(res.used.map((k) => this.model.constraints.get(k)).filter((k) => k && !k.definition && !k.world).flatMap((k) => (k.inference ? [k.inference] : k.premises)))].filter((x) => this.knows(x));
+        const made = this.conclude(cited, formula, { label: this.stateText(thing, time, aspect, st.value) });
+        return made.ok ? { ok: true, card: made.id, used: res.used } : { ok: true, card: null, used: res.used, cardRefused: made.reason ?? made.error ?? 'refused' };
+    }
+
+    /** Rule a mark out: as a cross-out of that answer (checked or in pencil, as the options say); the mark is struck. */
+    ruleOutMark(thing, time, value, aspect = 'at') {
+        const st = TL.stateOf(this, thing, time, aspect, value);
+        if (!st) return { ok: false, reason: 'the case has no question here yet' };
+        const res = this.strike(st.slot, st.value);
+        if (res.ok) this.pencilPlace(thing, time, value, { aspect, struck: true });
+        return res;
+    }
+
+    /** A state in words: "John Straker was at Straker's villa (Tuesday, 1 a.m.)". */
+    stateText(thing, time, aspect, value) {
+        const label = this.timelineTimes().find((t) => t.id === time)?.label ?? this.model.windows.find((w) => w.id === time)?.label ?? time;
+        const who = this.nameOf(thing);
+        const what = value === TL.ELSEWHERE ? 'somewhere else' : this.nameOf(value);
+        if (aspect === 'at') return `${who} was ${value === TL.ELSEWHERE ? 'somewhere else' : `at ${what}`} (${label})`;
+        if (aspect === 'held') return this.model.cards.get(value)?.kind === 'place' ? `${who} lay at ${what} (${label})` : `${what} had ${who} (${label})`;
+        const cond = (this.model.data.state_conditions ?? []).find((c) => c.id === aspect);
+        return `${who} was ${value === 'true' ? '' : 'not '}${cond?.id ?? aspect} (${label})`;
     }
 
     /**

@@ -102,7 +102,7 @@ test("a card's own timeline: a thing's places and events, a place's visitors, an
     // A pencil mark made on the board shows on the card, and the stable's card shows whoever is in its loft.
     assert.ok(!game.cardTimeline('silver_blaze').lines.some((l) => l.time === 'w.tue_0100'));
     game.pencilPlace('silver_blaze', 'w.tue_0100', 'stable');
-    assert.deepEqual(game.cardTimeline('silver_blaze').lines.find((l) => l.time === 'w.tue_0100').pencil, [{ value: 'stable', struck: false }]);
+    assert.deepEqual(game.cardTimeline('silver_blaze').lines.find((l) => l.time === 'w.tue_0100').pencil, [{ value: 'stable', struck: false, status: null }]);
     const stable = game.cardTimeline('stable').lines.find((l) => l.time === 'w.tue_0100');
     assert.ok(stable.things.some((x) => x.thing === 'other_lads' && x.given && x.value === 'loft'), 'the loft lies within the stable');
     assert.ok(stable.things.some((x) => x.thing === 'silver_blaze' && x.pencil));
@@ -110,4 +110,43 @@ test("a card's own timeline: a thing's places and events, a place's visitors, an
     assert.equal(ev.kind, 'event');
     assert.equal(ev.lines[0].time, 'w.tue_0100');
     assert.equal(game.cardTimeline('c.hunter_stupor').kind, null, 'a clue has no timeline of its own');
+});
+
+test('checked placements: a mark proven becomes a card; ruling one out is checked in Medium, free in Easy; holder and condition marks', () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    while (game.read <= paraOf('Mrs. Straker awoke at seven') + 3) game.advance();
+    // Proving where he was: the proof is a card the player holds.
+    const res = game.proveMark('straker', 'w.tue_0100', 'straker_villa');
+    assert.ok(res.ok && res.card);
+    assert.ok(game.knows(res.card));
+    assert.match(model.cards.get(res.card).text, /^John Straker was at Straker.s villa \(Tuesday, 1 a\.m\.\)$/);
+    assert.equal(game.cardTimeline('straker').lines.find((l) => l.time === 'w.tue_0100').pencil[0].status, 'proven');
+    assert.equal(game.proveMark('straker', 'w.tue_0100', 'straker_villa').card, res.card, 'proving it again makes no second card');
+    // Not yet provable in Medium: where Mrs. Straker was while the horse was taken needs an inference not held.
+    assert.equal(game.proveMark('mrs_straker', 'w.tue_stable', 'straker_villa').ok, false);
+    assert.equal(game.proveMark('silver_blaze', 'w.tue_0100', 'stable').ok, false, 'no question asks where the horse was at one');
+    // Ruling out is checked in Medium: the lads heard nothing all night, so they were not at the stable door.
+    game.pencilPlace('other_lads', 'w.tue_stable', 'stable');
+    assert.ok(game.ruleOutMark('other_lads', 'w.tue_stable', 'stable').proof);
+    const mark = () => game.cardTimeline('other_lads').lines.find((l) => l.time === 'w.tue_stable').pencil[0];
+    assert.deepEqual([mark().struck, mark().status], [true, 'ruled']);
+    game.pencilPlace('other_lads', 'w.tue_stable', 'stable', { struck: false });
+    assert.deepEqual([mark().struck, mark().status], [false, null], 'restoring a mark takes the ruling back');
+    assert.equal(game.ruleOutMark('other_lads', 'w.tue_stable', 'loft').ok, false, 'they were in the loft: that cannot be ruled out');
+    // Holder and condition marks: kept apart from places, saved, and checked as a layer.
+    assert.ok(game.pencilPlace('ned_hunter', 'w.tue_0700', 'false', { aspect: 'stupefied' }));
+    assert.ok(game.pencilPlace('overcoat', 'w.tue_0100', 'straker', { aspect: 'held' }) || !game.knows('overcoat'));
+    assert.ok(!game.pencilPlace('ned_hunter', 'w.tue_0700', 'stable', { aspect: 'stupefied' }), 'a condition is yes or no');
+    const hunter = game.cardTimeline('ned_hunter').lines.find((l) => l.time === 'w.tue_0700');
+    assert.deepEqual(hunter.conditions.find((c) => c.id === 'stupefied').pencil.map((m) => m.value), ['false']);
+    assert.ok(!hunter.pencil.length, 'a condition mark is no place');
+    assert.equal(game.checkLayer().fits, false, 'he was stupefied: the clue says so');
+    const copy = new Game(model, { difficulty: MEDIUM, state: JSON.parse(JSON.stringify(game.save())) });
+    assert.deepEqual(copy.board, game.board);
+    assert.ok(copy.knows(copy.concluded[0].id), 'the proven placement card is restored');
+    // Easy: crossing out is free (no proof).
+    const easy = new Game(model, { difficulty: 'easy' });
+    while (easy.read <= paraOf('Mrs. Straker awoke at seven') + 3) easy.advance();
+    easy.pencilPlace('other_lads', 'w.tue_stable', 'loft');
+    assert.deepEqual(easy.ruleOutMark('other_lads', 'w.tue_stable', 'loft'), { ok: true, proof: false });
 });

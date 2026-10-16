@@ -1727,3 +1727,41 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
     card shows dashed on the stable's.
   - At 390 px wide: the board's form wraps with all three dropdowns visible, and the clicked cell is outlined.
 - **Moved:** nothing in the logs, reports or gates.
+
+## Round 68 (2026-10-16): checked placements (B, part 1) — prove or rule out a mark; a proven state is a card; holders and conditions pencilled; the split controls behind a button
+
+- **Robert:** go with the plan for B, including the order questions of the player's own splits. If problems
+  come up while building, stop and check with him. The split/unsplit links get a button on the board that shows
+  or hides them.
+- **Split controls:** hidden by default; "Show the split controls" on the board shows them. The before/after
+  links on the events in a split window stay.
+- **Commit, as the question cards do** (Game `proveMark`, `ruleOutMark`; the card timeline's "prove" and
+  "rule out" on each of the player's own marks):
+  - **Prove:** what the player holds and trusts must leave nothing else possible (`prove` on the declared state,
+    with the mark's place folded to the track's: the bedroom proves the villa). Every setting checks it, as
+    proving an answer always is.
+  - **A proven state becomes a card of the player's,** made the way a stated conclusion is (`conclude`, citing the
+    proof's cards). Its text is the player's own: "John Straker was at Straker's villa (Tuesday, 1 a.m.)" (not
+    a quote; it is the player's card). Proving it again makes no second card. It is saved and restored with
+    the concluded cards.
+  - **Rule out:** a cross-out of that answer. It is checked where cross-outs are checked (Medium, Hard) and free
+    where they are free (Easy). The mark is struck. Restoring a struck mark takes the ruling back.
+  - **The free pencil stays the default:** strike, restore and erase as before.
+  - **Status on every mark of the player's board:** proven (green, solid), ruled out (green, struck), or, with
+    greying on, excluded by the clues (faded) (`timeline.js` `markStatus`, `stateOf`).
+- **Holders and conditions pencilled** (`pencilPlace(…, {aspect})`; a mark's `aspect` is `at` by default, `held`,
+  or a condition's id):
+  - A holder mark is a person, animal or group the player holds, or a place where the thing lies; a condition
+    mark is yes or no.
+  - **Where they show:** in the "By thing" board and on the card, beside what the clues give. The card's form has
+    a "was at / was held by / was stupefied?" choice. The board's three dropdowns stay for places.
+  - **Layers:** a layer's fit check takes every aspect.
+- **Not yet:** a cell the case never declared answers "the case has no question here yet". That comes with
+  part 2.
+- **Test** (`timeline.test.js`, checked placements): proven state as a card (text, no duplicate); not provable
+  without the inference; ruled out with the lads' clue in Medium, freely in Easy; restoring takes the ruling
+  back; a condition mark is yes or no, apart from places, and checked by a layer; the save restores the board
+  and the card.
+- **Checked in headless Chrome** at ¶46: the lads ruled out of the stable at the stable hour (struck, green); a
+  failed proof explained; a stupefied mark for Hunter on his card and on the board.
+- **Moved:** nothing in the logs, reports or gates.

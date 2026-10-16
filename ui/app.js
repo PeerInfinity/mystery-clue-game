@@ -570,14 +570,28 @@ const thingChip = (x, time) => {
     const cls = x.given ? 'given' : x.pencil ? `pencil${x.struck ? ' struck' : ''}` : 'open';
     const name = esc(shortName(x.thing, 24));
     if (!x.pencil) return `<span class="chip ${cls}" title="${x.given ? 'Your clues place it here' : 'Not placed'}">${x.given ? name : `<span class="link" data-pen-pick="${esc(`${x.thing}|${time}`)}">${name}</span>`}</span>`;
-    return `<span class="chip ${cls}" title="Your pencil mark: click to ${x.struck ? 'restore' : 'strike'} it"><span class="link" data-pen-toggle="${esc(`${x.thing}|${time}|${x.value}|${x.struck ? 0 : 1}`)}">${name}</span> <span class="link x" data-pen-erase="${esc(`${x.thing}|${time}|${x.value}`)}" title="Erase">×</span></span>`;
+    return markChip(x.thing, time, x.value, name, x);
 };
 const placeName = (v) => esc(v === 'elsewhere' ? 'somewhere else' : shortName(v, 24));
-/** A mark on a card's timeline: given (solid), the layer's theory (dotted), or the player's pencil (strike, erase). */
-function markChip(thing, time, value, label, m) {
+/** A mark's status, as a class and a title (proven, ruled out with a proof, or excluded by the clues when greying). */
+const STATUS = {
+    proven: ['mark-proven', 'You proved it'],
+    ruled: ['mark-ruled', 'You ruled it out'],
+    excluded: ['mark-excluded', 'Your clues rule this out'],
+};
+/**
+ * A mark on the timeline: given (solid), the layer's theory (dotted), or the player's pencil (click to strike or
+ * restore, × to erase). With `commit`, a mark of the player's own board also offers to prove it or rule it out.
+ */
+function markChip(thing, time, value, label, m, { aspect = 'at', commit = false } = {}) {
     if (m.given) return `<span class="chip given" title="Your clues place it here">${label}</span>`;
     if (m.theory) return `<span class="chip theory" title="The theory's answers put it here">${label}</span>`;
-    return `<span class="chip pencil${m.struck ? ' struck' : ''}" title="Your pencil mark: click to ${m.struck ? 'restore' : 'strike'} it"><span class="link" data-pen-toggle="${esc(`${thing}|${time}|${value}|${m.struck ? 0 : 1}`)}">${label}</span> <span class="link x" data-pen-erase="${esc(`${thing}|${time}|${value}`)}" title="Erase">×</span></span>`;
+    const key = `${thing}|${time}|${value}|${aspect}`;
+    const [cls, why] = STATUS[m.status] ?? ['', ''];
+    const title = `${why ? `${why}. ` : ''}Your pencil mark: click to ${m.struck ? 'restore' : 'strike'} it`;
+    let h = `<span class="chip pencil${m.struck ? ' struck' : ''}${cls ? ` ${cls}` : ''}" title="${esc(title)}"><span class="link" data-pen-toggle="${esc(`${thing}|${time}|${value}|${m.struck ? 0 : 1}|${aspect}`)}">${label}</span> <span class="link x" data-pen-erase="${esc(key)}" title="Erase">×</span></span>`;
+    if (commit && !m.struck && m.status !== 'proven') h += ` <span class="small"><span class="link" data-mark-prove="${esc(key)}" title="Prove it from what you hold and trust">prove</span> · <span class="link" data-mark-rule="${esc(key)}" title="${game.opts.crossOut === 'pencil' ? 'Cross it out' : 'Rule it out: the game checks it against what you hold and trust'}">rule out</span></span>`;
+    return h;
 }
 const layerOpt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
 function layerPicker() {
@@ -613,13 +627,20 @@ function cardTimelineHtml(id) {
     for (const l of tl.lines) {
         const bits = [];
         if (tl.kind === 'thing') {
+            const commit = layer === 'mine';
             if (l.at !== null) bits.push(markChip(id, l.time, l.at, placeName(l.at), { given: true }));
-            for (const m of l.pencil) bits.push(markChip(id, l.time, m.value, placeName(m.value), m));
-            if (l.held) bits.push(`<span class="small muted">held by ${esc(cardName(l.held))}</span>`);
-            for (const k of l.conditions) bits.push(`<span class="small muted">${k.value === 'true' ? esc(k.id) : `not ${esc(k.id)}`}</span>`);
+            for (const m of l.pencil) bits.push(markChip(id, l.time, m.value, placeName(m.value), m, { commit }));
+            if (l.held || l.heldPencil.length) bits.push('<span class="small muted">held by</span>');
+            if (l.held) bits.push(markChip(id, l.time, l.held, placeName(l.held), { given: true }));
+            for (const m of l.heldPencil) bits.push(markChip(id, l.time, m.value, placeName(m.value), m, { aspect: 'held', commit }));
+            for (const k of l.conditions) {
+                const yes = (v) => (v === 'true' ? esc(k.id) : `not ${esc(k.id)}`);
+                if (k.value !== null) bits.push(markChip(id, l.time, k.value, yes(k.value), { given: true }));
+                for (const m of k.pencil) bits.push(markChip(id, l.time, m.value, yes(m.value), m, { aspect: k.id, commit }));
+            }
             for (const e of l.events) bits.push(`<div class="ev">• ${evLink(e.event)}</div>`);
         } else {
-            for (const x of l.things) bits.push(markChip(x.thing, l.time, x.value, `${esc(shortName(x.thing, 24))}${x.value !== id ? ` <span class="small">(${placeName(x.value)})</span>` : ''}`, x));
+            for (const x of l.things) bits.push(markChip(x.thing, l.time, x.value, `${esc(shortName(x.thing, 24))}${x.value !== id ? ` <span class="small">(${placeName(x.value)})</span>` : ''}`, x, { commit: layer === 'mine' }));
             for (const e of l.events) bits.push(`<div class="ev">• ${evLink(e)}</div>`);
         }
         h += `<li><span class="when" style="padding-left:${12 * l.depth}px">${esc(l.label)}</span> ${bits.join(' ')}</li>`;
@@ -627,11 +648,17 @@ function cardTimelineHtml(id) {
     h += '</ul>';
     if (tl.undated.length) h += `<p class="small muted">When not yet known: ${tl.undated.map(evLink).join(' · ')}</p>`;
     // The pencil form, with the card itself as who (a thing) or where (a place).
-    const cp = ui.cardPen?.card === id ? ui.cardPen : (ui.cardPen = { card: id, time: null, other: null });
+    const cp = ui.cardPen?.card === id ? ui.cardPen : (ui.cardPen = { card: id, time: null, other: null, aspect: 'at' });
     const whens = `<select id="cpen-time">${layerOpt('', 'when…', cp.time)}${shown.map((t) => layerOpt(t.id, `${'· '.repeat(t.depth)}${t.label}`, cp.time)).join('')}</select>`;
     if (tl.kind === 'thing') {
-        const places = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.kind === 'place' && !game.isHidden(x));
-        h += `<div class="pen row small">Pencil in at ${whens} in <select id="cpen-other">${layerOpt('', 'where…', cp.other)}${places.map((x) => layerOpt(x, shortName(x, 30), cp.other)).join('')}${layerOpt('elsewhere', 'somewhere else', cp.other)}</select> <button data-cpen-add="${esc(id)}">Pencil it in</button></div>`;
+        // What to pencil: where it was, who had it, or one of the case's conditions.
+        const held = (k) => !game.isHidden(k) && (model.cards.get(k)?.kind === 'place' || ['person', 'animal', 'group'].includes(model.cards.get(k)?.kind));
+        const conds = model.data.state_conditions ?? [];
+        const aspects = `<select id="cpen-aspect">${layerOpt('at', 'was at', cp.aspect)}${layerOpt('held', 'was held by', cp.aspect)}${conds.map((c) => layerOpt(c.id, `was ${c.id}?`, cp.aspect)).join('')}</select>`;
+        const values = cp.aspect === 'at' ? [['', 'where…'], ...[...game.unlocked.keys()].filter((x) => model.cards.get(x)?.kind === 'place' && !game.isHidden(x)).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'somewhere else']]
+            : cp.aspect === 'held' ? [['', 'who, or where it lay…'], ...[...game.unlocked.keys()].filter(held).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'someone or somewhere else']]
+                : [['', 'yes or no…'], ['true', 'yes'], ['false', 'no']];
+        h += `<div class="pen row small">Pencil in: at ${whens} it ${aspects} <select id="cpen-other">${values.map(([v, label]) => layerOpt(v, label, cp.other)).join('')}</select> <button data-cpen-add="${esc(id)}">Pencil it in</button></div>`;
     } else {
         const people = [...game.unlocked.keys()].filter((x) => BOARD_KINDS.includes(model.cards.get(x)?.kind) && !game.isHidden(x));
         h += `<div class="pen row small">Pencil in <select id="cpen-other">${layerOpt('', 'who or what…', cp.other)}${people.map((x) => layerOpt(x, shortName(x, 30), cp.other)).join('')}</select> here at ${whens} <button data-cpen-add="${esc(id)}">Pencil it in</button></div>`;
@@ -661,8 +688,9 @@ function boardHtml(layout) {
     const unfollowed = people.filter((id) => !followed.includes(id));
     h += `<div class="small follow">Following ${followed.map((id) => `${link(id, shortName(id, 24))} <span class="link x" data-unfollow="${esc(id)}" title="Stop following">×</span>`).join(', ') || 'no one yet'}.
         ${unfollowed.length ? `Follow <select id="follow-pick">${unfollowed.map((id) => opt(id, shortName(id, 30), null)).join('')}</select> <button data-follow-go="1" class="quiet">Follow</button>` : ''}</div>`;
+    h += `<div class="row small split-toggle"><button data-split-toggle="1" class="quiet">${ui.showSplits ? 'Hide' : 'Show'} the split controls</button></div>`;
     const splitCtl = (t) => {
-        if (t.kind === 'boundary') return '';
+        if (t.kind === 'boundary' || !ui.showSplits) return '';
         if (game.board.splits.some((x) => x.time === t.id)) return ` <span class="link small" data-unsplit="${esc(t.id)}" title="Undo this split">unsplit</span>`;
         if (ui.splitting !== t.id) return ` <span class="link small" data-split="${esc(t.id)}" title="Split this time at an event: the part before it and the part after">split</span>`;
         const evs = [...game.unlocked.keys()].filter((id) => model.cards.get(id)?.section === 'events' && !game.board.splits.some((x) => x.by === id));
@@ -695,11 +723,16 @@ function boardHtml(layout) {
             h += `<tr><th>${link(r.thing, shortName(r.thing, 24))}</th>`;
             for (const c of r.cells) {
                 const bits = [];
-                if (c.at) bits.push(`<span class="chip given">${esc(c.at === 'elsewhere' ? 'somewhere else' : shortName(c.at, 20))}</span>`);
-                for (const m of c.pencil.filter((x) => x.theory)) bits.push(`<span class="chip theory" title="The theory's answers put it here">${esc(m.value === 'elsewhere' ? 'somewhere else' : shortName(m.value, 20))}</span>`);
-                for (const m of c.pencil.filter((x) => !x.theory)) bits.push(`<span class="chip pencil${m.struck ? ' struck' : ''}"><span class="link" data-pen-toggle="${esc(`${r.thing}|${c.time}|${m.value}|${m.struck ? 0 : 1}`)}">${esc(m.value === 'elsewhere' ? 'somewhere else' : shortName(m.value, 20))}</span> <span class="link x" data-pen-erase="${esc(`${r.thing}|${c.time}|${m.value}`)}">×</span></span>`);
-                if (c.held) bits.push(`<span class="small muted">held by ${esc(cardName(c.held))}</span>`);
-                for (const k of c.conditions) bits.push(`<span class="small muted">${k.value === 'true' ? esc(k.id) : `not ${esc(k.id)}`}</span>`);
+                if (c.at) bits.push(markChip(r.thing, c.time, c.at, placeName(c.at), { given: true }));
+                for (const m of c.pencil) bits.push(markChip(r.thing, c.time, m.value, placeName(m.value), m));
+                if (c.held || c.heldPencil.length) bits.push('<span class="small muted">held by</span>');
+                if (c.held) bits.push(markChip(r.thing, c.time, c.held, placeName(c.held), { given: true }));
+                for (const m of c.heldPencil) bits.push(markChip(r.thing, c.time, m.value, placeName(m.value), m, { aspect: 'held' }));
+                for (const k of c.conditions) {
+                    const yes = (v) => (v === 'true' ? esc(k.id) : `not ${esc(k.id)}`);
+                    if (k.value !== null) bits.push(markChip(r.thing, c.time, k.value, yes(k.value), { given: true }));
+                    for (const m of k.pencil) bits.push(markChip(r.thing, c.time, m.value, yes(m.value), m, { aspect: k.id }));
+                }
                 h += `<td data-pen-cell="${esc(`thing=${r.thing}|time=${c.time}`)}"${pen.thing === r.thing && pen.time === c.time ? ' class="picked"' : ''}>${bits.join(' ')}</td>`;
             }
             h += '</tr>';
@@ -1004,7 +1037,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1036,20 +1069,31 @@ function onClick(e) {
         changed();
         return;
     }
+    if (t.dataset.splitToggle) { ui.showSplits = !ui.showSplits; ui.splitting = null; renderTool(); return; }
     if (t.dataset.cpenAdd) {
         const card = t.dataset.cpenAdd;
-        Object.assign(ui.cardPen, { card, time: $('#cpen-time').value || null, other: $('#cpen-other').value || null });
-        const { time, other } = ui.cardPen;
+        Object.assign(ui.cardPen, { card, time: $('#cpen-time').value || null, other: $('#cpen-other').value || null, aspect: $('#cpen-aspect')?.value ?? 'at' });
+        const { time, other, aspect } = ui.cardPen;
         const thing = model.cards.get(card)?.kind === 'place' ? other : card;
         const place = thing === card ? other : card;
-        if (!time || !other) { toast(`Choose when and ${thing === card ? 'where' : 'who or what'}.`); renderTool(); return; }
-        if (!game.pencilPlace(thing, time, place, { layer: ui.layer ?? 'mine' })) toast('That cannot be pencilled in here.');
+        if (!time || !other) { toast(`Choose when and ${thing === card ? 'what' : 'who or what'}.`); renderTool(); return; }
+        if (!game.pencilPlace(thing, time, place, { layer: ui.layer ?? 'mine', aspect })) toast('That cannot be pencilled in here.');
         ui.layerFit = null;
         changed();
         return;
     }
-    if (t.dataset.penToggle) { const [thing, time, value, struck] = t.dataset.penToggle.split('|'); game.pencilPlace(thing, time, value, { struck: struck === '1', layer: ui.layer ?? 'mine' }); ui.layerFit = null; changed(); return; }
-    if (t.dataset.penErase) { const [thing, time, value] = t.dataset.penErase.split('|'); game.erasePlace(thing, time, value, ui.layer ?? 'mine'); ui.layerFit = null; changed(); return; }
+    if (t.dataset.penToggle) { const [thing, time, value, struck, aspect = 'at'] = t.dataset.penToggle.split('|'); game.pencilPlace(thing, time, value, { struck: struck === '1', layer: ui.layer ?? 'mine', aspect }); ui.layerFit = null; changed(); return; }
+    if (t.dataset.penErase) { const [thing, time, value, aspect = 'at'] = t.dataset.penErase.split('|'); game.erasePlace(thing, time, value, ui.layer ?? 'mine', aspect); ui.layerFit = null; changed(); return; }
+    if (t.dataset.markProve || t.dataset.markRule) {
+        const [thing, time, value, aspect] = (t.dataset.markProve ?? t.dataset.markRule).split('|');
+        const res = t.dataset.markProve ? game.proveMark(thing, time, value, aspect) : game.ruleOutMark(thing, time, value, aspect);
+        if (res.ok && t.dataset.markProve) toast(res.card ? `Proven. A new card: ${link(res.card, shortName(res.card, 60))}` : 'Proven.');
+        else if (res.ok) toast(res.proof ? 'Ruled out: your clues exclude it.' : 'Crossed out.');
+        else toast(res.contradiction ? 'Some of the clues you trust clash: one of them must be false.' : esc(res.reason ?? res.error ?? 'Not proven.'));
+        ui.layerFit = null;
+        changed();
+        return;
+    }
     if (t.dataset.layerCheck) {
         const layer = ui.layer ?? 'mine';
         const r = game.checkLayer(layer);
@@ -1148,6 +1192,7 @@ document.addEventListener('input', (e) => {
 });
 document.addEventListener('change', (e) => game && run(() => onChange(e)));
 function onChange(e) {
+    if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }
     if (e.target.dataset.add) {

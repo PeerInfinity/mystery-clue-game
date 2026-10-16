@@ -273,3 +273,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .card-timeline .chip.pencil { border: 1px dashed var(--ink); }
 .card-timeline .chip.theory { border: 1px dotted var(--accent); color: var(--accent); }
 .card-timeline .ev { color: var(--muted); font-size: 12px; margin-left: 10px; }
+.split-toggle { justify-content: flex-start; margin-top: 4px; }
+.chip.pencil.mark-proven { border-style: solid; border-color: var(--good); background: var(--good-soft); }
+.chip.pencil.mark-ruled { border-color: var(--good); }
+.chip.pencil.mark-excluded { opacity: 0.5; }
