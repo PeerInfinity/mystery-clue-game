@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "mystery-clue-game/case.schema.json",
   "title": "Mystery case, format 0.2 (merged: case.json plus every part it lists)",
-  "description": "A case is a constraint puzzle over the story's fabula. Cards (entities, events, claims, rules, glosses) are what the player sees and connects. Slots are the open questions on cards (an event's agent, place, time...). Constraints rest on cards: once all of a constraint's premises are known it rules values out. The engine (engine/caseModel.js) builds slots from event and entity facets, claim truth slots and the declared slots; scripts/validate-case.js checks everything the schema cannot (references, quotes, uniqueness, theories, route, playability). Format 0.3 adds relations, propositions, rule schemas and verified inferences (docs/format-0.3.md).",
+  "description": "A case is a constraint puzzle over the story's fabula. Cards (entities, events, claims, rules, glosses) are what the player sees and connects. Slots are the open questions on cards (an event's agent, place, time...). Constraints rest on cards: once all of a constraint's premises are known it rules values out. The engine (engine/caseModel.js) builds slots from event and entity facets, claim truth slots and the declared slots; scripts/validate-case.js checks everything the schema cannot (references, quotes, uniqueness, theories, Holmes's steps, playability). Format 0.3 adds relations, propositions, rule schemas and verified inferences (docs/format-0.3.md).",
   "type": "object",
   "required": [
     "schema_version",
@@ -20,7 +20,6 @@
     "slots",
     "constraints",
     "actions",
-    "route",
     "mentions_file"
   ],
   "additionalProperties": false,
@@ -243,11 +242,9 @@
         "$ref": "#/$defs/action"
       }
     },
-    "route": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/routeStep"
-      }
+    "thoughts_file": {
+      "type": "string",
+      "description": "The case's annotated reading (thoughts.json): a careful reader's thoughts, checked by scripts/validate-thoughts.js. Holmes's steps come from it (engine/steps.js, Round 57): each thought that names an inference, and each that carries a conclusion of Holmes's (`concludes`)."
     },
     "mentions_file": {
       "type": "string",
@@ -1351,11 +1348,12 @@
                 "$ref": "#/$defs/id"
               }
             },
-            "steps": {
+            "thoughts": {
               "type": "array",
               "items": {
                 "$ref": "#/$defs/id"
-              }
+              },
+              "description": "Thoughts (Holmes's steps, engine/steps.js) made before (requires) or by (yields) this action."
             },
             "items": {
               "type": "array",
@@ -1381,11 +1379,12 @@
                 "$ref": "#/$defs/id"
               }
             },
-            "steps": {
+            "thoughts": {
               "type": "array",
               "items": {
                 "$ref": "#/$defs/id"
-              }
+              },
+              "description": "Thoughts (Holmes's steps, engine/steps.js) made before (requires) or by (yields) this action."
             },
             "items": {
               "type": "array",
@@ -1407,94 +1406,6 @@
         "cue": {
           "type": "string",
           "description": "Short, spoiler-free label for the read-on button."
-        }
-      }
-    },
-    "routeStep": {
-      "type": "object",
-      "required": [
-        "id",
-        "premises",
-        "concludes"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "string",
-          "pattern": "^i\\.[a-z0-9_]+$"
-        },
-        "premises": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/id"
-          }
-        },
-        "concludes": {
-          "oneOf": [
-            {
-              "type": "object",
-              "required": [
-                "slot",
-                "value"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "slot": {
-                  "$ref": "#/$defs/id"
-                },
-                "value": {
-                  "type": "string"
-                }
-              },
-              "description": "An elimination: slot ≠ value."
-            },
-            {
-              "type": "object",
-              "required": [
-                "formula"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "formula": {
-                  "$ref": "#/$defs/formula"
-                }
-              }
-            },
-            {
-              "type": "object",
-              "required": [
-                "claim"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "claim": {
-                  "$ref": "#/$defs/id"
-                }
-              }
-            }
-          ]
-        },
-        "pattern": {
-          "enum": [
-            "deduction",
-            "elimination",
-            "abduction",
-            "identification",
-            "corroboration",
-            "prediction_confirmed"
-          ]
-        },
-        "reasoner": {
-          "$ref": "#/$defs/id"
-        },
-        "explained_in": {
-          "$ref": "#/$defs/sceneId"
-        },
-        "note": {
-          "type": "string"
-        },
-        "source": {
-          "$ref": "#/$defs/source"
         }
       }
     },

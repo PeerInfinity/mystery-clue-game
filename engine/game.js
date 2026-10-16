@@ -179,6 +179,8 @@ export class Game {
         for (const step of model.data.route ?? []) {
             const needs = this.#inferencesFor(step);
             this.stepNeeds.set(step.id, needs);
+            // Only Holmes's own steps are his to state (a thought's inference by Watson or Gregory is not).
+            if (step.reasoner !== 'holmes') continue;
             const at = [...(this.story.gates ?? [])].find(([, ids]) => ids.has(step.id))?.[0] ?? this.story.anchors.steps.get(step.id);
             for (const id of needs ?? []) stateAt(at, id, 'holmes');
         }
@@ -414,7 +416,8 @@ export class Game {
         // The story is about to wait on a deduction: the card that holds its question is dealt now.
         for (const id of this.story.gates?.get(p + 1) ?? []) {
             const c = this.routeById.get(id).concludes;
-            this.#unlock(this.model.slots.get(c.slot ?? c.formula.eq[0])?.on, p);
+            const slot = c.slot ?? c.formula.eq?.[0];
+            if (slot) this.#unlock(this.model.slots.get(slot)?.on, p);
         }
     }
 
@@ -518,6 +521,7 @@ export class Game {
 
     /** The fewest inferences (among those resting on its premises) that give a route step its conclusion. */
     #inferencesFor(step) {
+        if (step.inference) return [step.inference]; // a thought's own inference is its step
         const c = step.concludes;
         const formula = c.formula ?? (c.claim ? this.model.cards.get(c.claim)?.asserts : null);
         if (!c.slot && !formula) return null;
@@ -877,7 +881,8 @@ export class Game {
             for (const [para, steps] of this.story.gates ?? new Map()) {
                 for (const id of steps) {
                     const c = this.routeById.get(id).concludes;
-                    add(c.slot ?? c.formula?.eq?.[0], () => para <= this.read);
+                    const slot = c.slot ?? c.formula?.eq?.[0];
+                    if (slot) add(slot, () => para <= this.read);
                 }
             }
         }
@@ -1108,7 +1113,8 @@ export class Game {
         if (this.autoPace === AUTO_HOLMES) {
             return this.holmesReasons(slot, value).map((r) => (r.claim
                 ? { text: `The story says: ${this.model.cards.get(r.claim).text}` }
-                : { text: `Holmes: “${(this.routeById.get(r.step).source?.[0] ?? '').replace(/\s+/g, ' ')}”` }));
+                : this.routeById.get(r.step).source ? { text: `Holmes: “${this.routeById.get(r.step).source[0].replace(/\s+/g, ' ')}”` }
+                    : { text: `Holmes: ${this.model.constraints.get(this.routeById.get(r.step).inference)?.label ?? ''}` }));
         }
         const active = activeConstraints(this.model, this.known()).filter((id) => !this.model.constraints.get(id).derived);
         return (this.model.problem.explainConflict(active, { [slot]: value }) ?? []).map((k) => ({ text: this.model.constraints.get(k).label }));

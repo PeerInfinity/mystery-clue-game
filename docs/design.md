@@ -1357,3 +1357,47 @@ mark the rest with a reason.**
   above are current.
 - **Moved:** thoughts report only (tag counts, the reasons). Reveal and foreshadow logs, case report, gates:
   nothing.
+
+## Round 57 (2026-10-15): step 3, gates from the thoughts; route.json retired
+
+Robert's rulings: (1) a route step whose answer no deduction thought concludes moves onto the thought that maps it,
+as `concludes`; the steps with no thought are dropped; (2) a thought with an inference gates when the inference is
+Holmes's own and not implicit, at its first Holmes paragraph (never before its premises are told); steps by Watson,
+Gregory or the editor do not gate.
+- **Engine:** `engine/steps.js` builds Holmes's steps from `thoughts.json` (named by `case.json`'s
+  `thoughts_file`) in the shape `route.json` had; the story's gates, `stepNeeds`, `stepMade`, the 'wait' pace,
+  the validator's step checks and the logic page read them. A thought's own inference is its step's need; a
+  `concludes` step's need is the fewest inferences giving its conclusion, as before. Only Holmes's own steps have
+  their inferences stated by Holmes (Gregory's window conditional, the editor's Mapleton steps and Gregory's
+  self-wound no longer arrive as Holmes's; `k.only_one_blade` is built, no longer handed over at ¶54).
+- **Data:** eleven thoughts carry `concludes` (formula, premises, Holmes's line), moved from the route:
+  `t37.9` (drugger in the household), `t46.4` (Straker took the horse; its `_by_dog` twin had the same answer),
+  `t220.3` (Straker drugged the lad), `t81.5` (the purpose was to injure), `t84.8` (the debt motive), `t173.2`
+  (the sheep's cause), `t37.13` (the horse killed him), `t114.2` and `t117.2` (at Mapleton), `t127.4` (the man was
+  Brown), `t141.1` (disguised). Route steps that a thought's inference already gives became that thought:
+  `i.coat_placed` → `t96.1`, `i.not_simpson_drugger` → `t37.8`, `i.after_set_aside` → `t37.4`,
+  `i.derbyshire_is_straker` → `t84.6`, `i.self_wound` → `t44.2`, `i.brown_hid_horse` → `t140.2` (its gate is now
+  `t127.3`'s), `i.bay_is_silver_blaze` → `t198.2`. Dropped: `i.visitor_known_to_dog`, `i.straker_dishonest`,
+  `i.done_in_the_open`, `i.simpson_innocent`, `i.cravat_is_simpsons`; where an action required or yielded one of
+  the first three it now names the thought whose inference carries it (`t34.7`, `t46.7`, `t81.5`). The `i.*`
+  entries leave the thoughts' `maps`. Actions use `requires.thoughts` and `yields.thoughts`.
+- **How the gates moved** (old route → now): ¶96 coat → `t96.1` ¶96; ¶104 open air → `t81.5` ¶104 (by the mud
+  search; now the purpose to injure); ¶111 Straker took the horse → `t46.4` ¶111; ¶116/¶117 Mapleton → `t114.2`
+  ¶116/¶117; ¶125 tracks → `t117.2` ¶125; ¶147 Brown hid the horse → `t127.3` ¶146; ¶147 the man was Brown →
+  `t127.4` ¶147; ¶148 disguise → `t141.1` ¶148; ¶161 Derbyshire → `t84.6` ¶161; ¶170 plan to lame → `t81.5` ¶170;
+  ¶180 the dog → `t34.7` ¶180; ¶199 the bay → `t198.2` ¶202 (Holmes's paragraph); ¶202 killer and disguise →
+  `t37.13`, `t141.1` ¶202; ¶218 Simpson not the drugger → `t37.8` ¶218; ¶219 the dog → `t34.7` ¶219; ¶220 →
+  `t46.4`, `t220.3`, `t46.7` ¶220; ¶221 → `t81.5` ¶221; ¶223 open air: gone (dropped); ¶225 → `t84.6` ¶225;
+  ¶226 → `t37.13` ¶226; ¶228 → `t173.2` ¶228; ¶229 → `t84.6`, `t84.8` ¶229. **New gates** (Holmes's own inferences
+  at his paragraph): ¶57 `t31.3`; ¶93 `t92.4`; ¶114 `t62.3`; ¶146 `t124.2`; ¶204 `t148.2`; ¶218 `t37.4`, `t37.7`,
+  `t37.14`, `t37.15`; ¶220 `t37.5`, `t37.16`; ¶221 `t81.4`; ¶224 `t102.2`; ¶225 `t84.9`, `t92.15`; ¶226 `t60.4`,
+  `t97.2`, `t102.4`; ¶228 `t175.1`; ¶231 `t120.1`.
+- **Fair play:** the 'wait' test replays the thought steps under all three background settings and passes. Tests:
+  the route ids in `reasoning.test.js` and `game.test.js` became their thoughts; the wait-pace conclusion test
+  builds a chained inference's premises first, as the fair-play helper does.
+- **Schema and validator:** `route` and `routeStep` leave the schema; `thoughts_file` joins it; the report's
+  section is "Holmes's steps (from the thoughts)" (all 51 ✓) and lists the Holmes steps no action yields. The site
+  build copies `thoughts.json`. `docs/format-0.3.md` has an "As built" section for this round.
+- **Moved:** reveal log: Holmes now states his inferences at their gates (¶93, ¶114, ¶146, ¶218–¶231), the
+  `straker.honest` question comes with `t46.7`'s gate at ¶220. Foreshadow log: nothing. Case report: the steps
+  section, 1009 quotes (the route's went). Thoughts report: the `i.*` maps gone from coverage.

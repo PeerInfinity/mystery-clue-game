@@ -56,8 +56,8 @@ test('verified inferences: the engine derives the conclusion; an asserted one on
     assert.equal(verifyInference(model, k('k.window_drugging_time')).status, 'asserted');
     // Without the rule application the premises alone do not reach the conclusion.
     assert.equal(verifyInference(model, { ...k('k.dog_knew_the_visitor'), rules: [] }).status, 'asserted');
-    // The rule application is part of the inference in the case's reading: the route step still checks.
-    const step = model.data.route.find((r) => r.id === 'i.visitor_known_to_dog');
+    // The rule application is part of the inference in the case's reading: Holmes's step (the thought) still checks.
+    const step = model.data.route.find((r) => r.id === 't34.7');
     assert.ok(checkStep(model, step.premises, step.concludes).ok);
 });
 
@@ -116,24 +116,29 @@ test("a player's own conclusion passes Holmes's gate under the wait pace", () =>
     for (;;) {
         res = game.advance();
         if (res.ok) continue;
-        if (res.needs.includes('i.derbyshire_is_straker')) break;
-        for (const s of res.needs) for (const id of game.stepInferences(s) ?? []) game.propose(game.connectSet(id));
+        if (res.needs.includes('t84.6')) break;
+        // A chained inference wants the inferences it cites held first (implicit ones come by themselves).
+        const build = (id) => {
+            for (const p of game.inferenceById.get(id)?.premises ?? []) if (game.inferenceById.has(p) && !game.knows(p)) build(p);
+            game.propose(game.connectSet(id));
+        };
+        for (const s of res.needs) for (const id of game.stepInferences(s) ?? []) build(id);
         assert.deepEqual(game.blockers(), [], `stuck at ${game.read} on ${res.needs}`);
     }
-    assert.ok(!game.stepMade('i.derbyshire_is_straker'));
+    assert.ok(!game.stepMade('t84.6'));
     // Now the player's own route: apply "men carry their own bills" to the milliner's bill, and conclude.
     const applied = game.applyRule('r.others_bills', { doc: 'milliner_bill' });
     assert.ok(applied.ok, applied.error);
     const made = game.conclude(['c.milliner_bill', 'c.papers_in_pocket', applied.id], { eq: ['william_derbyshire.identity', 'straker'] });
     assert.ok(made.ok, JSON.stringify(made));
     assert.ok(made.matches.includes('k.bill_is_his_own') || made.premises.includes(applied.id));
-    assert.ok(game.stepMade('i.derbyshire_is_straker'));
+    assert.ok(game.stepMade('t84.6'));
     assert.ok(game.advance().ok, 'the story goes on');
     // Saved and restored, the player's cards come back and the gate stays open.
     const copy = new Game(model, { state: JSON.parse(JSON.stringify(game.save())) });
     // (On the same model the first game still holds its cards, so the copy's get fresh ids.)
     assert.equal(copy.heldApplied().length, 1);
-    assert.ok(copy.stepMade('i.derbyshire_is_straker'));
+    assert.ok(copy.stepMade('t84.6'));
     assert.equal(copy.heldInferences().filter((id) => id.startsWith('k.player_')).length, 1);
 });
 

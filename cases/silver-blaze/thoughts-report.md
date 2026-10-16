@@ -12,10 +12,10 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | Tag | Thoughts | Held by a card |
 |---|---|---|
 | RECORD | 93 | 89 |
-| NOTICE | 16 | 5 |
+| NOTICE | 16 | 4 |
 | ABSENCE | 5 | 2 |
 | QUESTION | 10 | 4 |
-| HYPOTHESIS | 27 | 22 |
+| HYPOTHESIS | 27 | 21 |
 | INFER | 24 | 22 |
 | DEFAULT | 8 | 7 |
 | AGENT | 8 | 4 |
@@ -23,14 +23,14 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | IDENTIFY | 3 | 2 |
 | WEIGH | 19 | 4 |
 | SOURCE | 2 | 0 |
-| TEST | 30 | 22 |
+| TEST | 30 | 17 |
 | RESIDUE | 1 | 0 |
 | PREDICT | 8 | 5 |
 | TEST PLAN | 4 | 4 |
 | GENRE | 20 | 3 |
 | SET ASIDE | 7 | 0 |
 | DROP | 4 | 3 |
-| REVISE | 4 | 4 |
+| REVISE | 4 | 3 |
 
 ## Dealt later than the reader has it
 

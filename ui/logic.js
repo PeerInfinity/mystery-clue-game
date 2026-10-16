@@ -51,7 +51,7 @@ const availableAt = (premises) => {
     const ps = premises.map(para);
     return ps.some((p) => p === undefined) ? undefined : Math.max(0, ...ps);
 };
-const routeTold = (st) => paraOfQuote(st.source?.[0]);
+const routeTold = (st) => st.at ?? paraOfQuote(st.source?.[0]);
 const formulaSlots = (f) => (f ? [...slotsOf(f)] : []);
 const concl = (st) => st.concludes?.formula ?? (st.concludes?.slot ? { ne: [st.concludes.slot, st.concludes.value] } : null);
 

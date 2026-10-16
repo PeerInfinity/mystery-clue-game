@@ -29,6 +29,7 @@
 
 import { Problem } from './solver.js';
 import { slotsOf, literalsOf, ground, isGround, varsOf, render } from './logic.js';
+import { stepsFromThoughts } from './steps.js';
 
 export const CARD_SECTIONS = ['entities', 'events', 'claims', 'rules', 'glosses', 'propositions'];
 export const RULE_STRENGTHS = ['hard', 'default', 'heuristic'];
@@ -52,6 +53,8 @@ export function mergeCase(main, parts) {
 const EXCLUDED_FROM_DOMAINS = ['placeholder', 'fiction_within_story'];
 
 export function buildModel(data) {
+    // Holmes's steps come from the annotated reading (Round 57).
+    if (!data.route && data.thoughts) data.route = stepsFromThoughts(data);
     const cards = new Map();
     const errors = [];
     const addCard = (section, item) => {

@@ -38,10 +38,10 @@
     "propositions.json",
     "slots.json",
     "constraints.json",
-    "actions.json",
-    "route.json"
+    "actions.json"
   ],
   "mentions_file": "mentions.json",
+  "thoughts_file": "thoughts.json",
   "facet_types": {
     "agent": {
       "kinds": [

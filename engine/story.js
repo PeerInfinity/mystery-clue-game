@@ -133,7 +133,8 @@ export class Story {
             else this.anchors.actions.set(a.id, hit.para);
         }
         for (const r of data.route ?? []) {
-            const hit = r.source?.length ? this.find(r.source[0]) : null;
+            // A step from a thought's inference is told at its Holmes paragraph; one Holmes concludes, at his line.
+            const hit = r.at !== undefined ? { para: r.at } : r.source?.length ? this.find(r.source[0]) : null;
             if (hit) this.anchors.steps.set(r.id, hit.para);
         }
         for (const list of this.spans) list.sort((a, b) => a.start - b.start || b.end - a.end);
@@ -202,12 +203,12 @@ export class Story {
         };
         for (const a of data.actions ?? []) {
             const at = this.anchors.actions.get(a.id);
-            if (at !== undefined) for (const s of a.requires?.steps ?? []) add(at, s);
+            if (at !== undefined) for (const s of a.requires?.thoughts ?? []) add(at, s);
         }
         for (const r of data.route ?? []) {
             const at = this.anchors.steps.get(r.id);
-            // Only deductions that settle or rule out one answer gate the reading.
-            const sharp = r.concludes.slot || r.concludes.formula?.eq;
+            // Only deductions that settle or rule out one answer gate the reading, and Holmes's own inferences.
+            const sharp = r.concludes.slot || r.concludes.formula?.eq || r.inference;
             if (r.reasoner === 'holmes' && at !== undefined && sharp) add(at, r.id);
         }
         return gates;

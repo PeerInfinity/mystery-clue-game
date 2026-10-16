@@ -60,7 +60,7 @@ for (const background of [BG_ASK, BG_RELEVANT, BG_START]) {
             for (const s of res.needs) {
                 const step = game.routeById.get(s);
                 const c = step.concludes;
-                const slot = c.slot ?? c.formula.eq[0];
+                const slot = c.slot ?? c.formula.eq?.[0];
                 if (!game.stepInferences(s)) {
                     if (!game.slotVisible(slot)) stuck.push(`${s}: question ${slot} not visible at paragraph ${game.read}`);
                     if (c.formula?.eq && !game.offered(slot, c.formula.eq[1])) stuck.push(`${s}: answer ${c.formula.eq[1]} not offered at paragraph ${game.read}`);
@@ -199,7 +199,7 @@ test('Hard: background facts are connections too, and the conclusion\'s kind mus
 
 test("Holmes's inferences arrive where he states them; other readers must build the rest", () => {
     const game = new Game(model, { difficulty: MEDIUM });
-    const step = 'i.visitor_known_to_dog';
+    const step = 't34.7';
     const needs = game.stepInferences(step);
     assert.ok(needs.includes('k.dog_knew_the_visitor'), needs.join(' '));
     while (!game.finished() && !game.knows('k.dog_knew_the_visitor')) game.advance();

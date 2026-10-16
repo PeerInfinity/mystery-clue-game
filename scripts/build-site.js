@@ -36,7 +36,7 @@ while (todo.length) {
 for (const dir of fs.readdirSync(path.join(root, 'cases'))) {
     const base = path.join('cases', dir);
     const main = JSON.parse(fs.readFileSync(path.join(root, base, 'case.json'), 'utf8'));
-    for (const f of ['case.json', ...(main.parts ?? []), main.mentions_file, main.case?.source?.text_file].filter(Boolean)) files.add(path.join(base, f));
+    for (const f of ['case.json', ...(main.parts ?? []), main.mentions_file, main.thoughts_file, main.case?.source?.text_file].filter(Boolean)) files.add(path.join(base, f));
 }
 
 fs.rmSync(out, { recursive: true, force: true });

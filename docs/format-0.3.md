@@ -203,6 +203,27 @@ specific thing stay ground facts with a formula and no schema.
 - (Round 42) An implicit inference is granted when its premises are held, at every level; an inference the game
   grants by itself waits for the story to deal the events it speaks of. `activeConstraints` closes the known cards
   over inferences, so a chained inference counts wherever its flat ancestry would.
+- (Round 46) A TEST that concludes something may name its inference too.
+- (Round 53) An inference the game grants by itself also waits for the entities whose questions it speaks of.
+- (Round 56) A deduction with no possible inference says why: `no_inference` is `workstream-3`, `action` or
+  `world-model`. `implicitRequired` is on: an inference neither named nor implicit is an error, and so is a
+  deduction with neither an inference nor a reason.
+
+## As built (2026-10-15): Holmes's steps from the thoughts (Round 57)
+
+- **`route.json` is retired.** `case.json` names the annotated reading (`thoughts_file`), and `engine/steps.js`
+  builds Holmes's steps from it when the model is built (`data.route`, in the shape the route file had):
+  - a thought that names an inference is a step whose conclusion is that inference's formula, and whose premises
+    are the clues and rules down its chain. It gates the reading (the 'wait' pace) when the inference is Holmes's
+    own (`by: holmes`) and not implicit and the thought has a Holmes paragraph (not `never`), at the first one
+    (never before its premises are told). Its step's need is its own inference;
+  - a thought that carries a conclusion of Holmes's that no single inference gives has `concludes`: a formula (or
+    a slot and the value ruled out), the cards it rests on (`premises`) and Holmes's line (`source`). It gates the
+    paragraph of that line, and its need is the fewest inferences that give the conclusion, as for route steps.
+    Eleven thoughts carry one: `t37.9`, `t37.13`, `t46.4`, `t81.5`, `t84.8`, `t114.2`, `t117.2`, `t127.4`,
+    `t141.1`, `t173.2`, `t220.3`.
+- **Actions** require and yield thoughts (`requires.thoughts`, `yields.thoughts`), where they named route steps.
+- Only Holmes's own steps have their inferences stated by Holmes at the gate.
 
 ## Open
 

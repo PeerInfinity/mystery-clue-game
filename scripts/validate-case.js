@@ -32,7 +32,9 @@ if (main.mentions_file) {
     const m = readJson(main.mentions_file);
     data.mentions = { entities: m.entities, windows: m.windows };
 }
+if (main.thoughts_file) data.thoughts = readJson(main.thoughts_file).thoughts; // Holmes's steps (Round 57); checked by validate-thoughts
 const raw = structuredClone(data); // the model grounds some formulas in place (route conclusions): check the schema on the file's own
+delete raw.thoughts;
 const model = buildModel(data);
 const errors = [...model.errors];
 {
@@ -443,12 +445,12 @@ const unyielded = { cards: [], steps: [] };
         const r = a.requires ?? {};
         for (const x of r.actions ?? []) if (!done.has(x)) err(`${a.id}: needs action ${x}, not done before it`);
         for (const x of r.cards ?? []) if (!known.has(x)) err(`${a.id}: needs card ${x}, not known before it`);
-        for (const x of r.steps ?? []) if (!steps.has(x)) err(`${a.id}: needs reasoning step ${x}, not made before it`);
+        for (const x of r.thoughts ?? []) if (!steps.has(x)) err(`${a.id}: needs reasoning step ${x}, not made before it`);
         for (const x of r.items ?? []) if (!items.has(x)) err(`${a.id}: needs item ${x}, not held before it`);
         const y = a.yields ?? {};
         for (const x of y.cards ?? []) known.add(x);
         for (const x of y.items ?? []) items.add(x);
-        for (const x of y.steps ?? []) {
+        for (const x of y.thoughts ?? []) {
             const step = routeById.get(x);
             if (!step) { err(`${a.id}: yields unknown step ${x}`); continue; }
             const missing = step.premises.filter((p) => !known.has(p));
@@ -458,7 +460,7 @@ const unyielded = { cards: [], steps: [] };
         done.add(a.id);
     }
     for (const c of data.claims) if (!c.derived && !known.has(c.id)) unyielded.cards.push(c.id);
-    for (const r of data.route ?? []) if (!steps.has(r.id)) unyielded.steps.push(r.id);
+    for (const r of data.route ?? []) if (r.reasoner === 'holmes' && !steps.has(r.id)) unyielded.steps.push(r.id);
 }
 
 writeReport();
@@ -549,7 +551,7 @@ function writeReport() {
     out();
     for (const r of derivedRows) out(`- \`${r.claim.id}\` ${r.ok ? '✓' : '✗'} — ${r.claim.text} *(via ${r.used.join(', ')})*`);
     out();
-    out("## Holmes's route");
+    out("## Holmes's steps (from the thoughts)");
     out();
     out('| Step | Premises | Conclusion | Checked |');
     out('|---|---|---|---|');
@@ -591,7 +593,7 @@ function writeReport() {
         out('Claims no protagonist action yields (the reader is told them, Holmes never collects them):');
         out(unyielded.cards.map((c) => `\`${c}\``).join(', ') || '—');
         out();
-        out('Route steps no action yields: ' + (unyielded.steps.map((c) => `\`${c}\``).join(', ') || '—'));
+        out("Holmes's steps no action yields: " + (unyielded.steps.map((c) => `\`${c}\``).join(', ') || '—'));
         out();
     }
     out('## Inconsistencies in the text');
