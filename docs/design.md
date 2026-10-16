@@ -1526,3 +1526,40 @@ thoughts, the traps this session met and the items still open for Robert. `CLAUD
   - **Case report:** counts, states, 35 order slots, the Strict column for the killer 45 → 44, and one theory's
     minimal break.
   - **Thoughts report:** the implicit list.
+
+## Round 62 (2026-10-16): the solver in a Web Worker, with progress
+
+- **Ruling (Robert):** long waits are tolerable if the page shows progress; move the processing to a worker
+  before the timeline view (agreed 2026-10-14 in principle, never built).
+- **Design: answer quick checks on the spot, hand slow ones over.** The game's code stays synchronous.
+  - `engine/remoteProblem.js`: a `RemoteProblem` wraps the page's own `Problem`. Each slow call (consistent,
+    candidates, allCandidates, countSolutions, explainConflict) first runs here under a 60 ms budget (`deadline`,
+    checked in the search loops; `OverBudget`).
+  - Past the budget it throws `NeedSolve` with the request (method and arguments, plain data). `settle(fn)` catches
+    it, has the worker answer, caches the answer by request, and runs `fn` again; the retry finds it in the cache.
+  - The game's moves ask the solver before they change anything, so a retried move happens once. Two spots changed
+    to keep that true: the scoring check (`#noteMade`) clears its "the player moved" flag only after the check, and
+    Trivial's candidate cache records its key only after it is filled. A browser test caught the second: Trivial
+    read on with an empty cache.
+- **`engine/solverWorker.js`** holds a `Problem` built from the same slots and constraints, re-sent whenever the
+  model rebuilds its problem (`rebuildProblem` calls `model.wrapProblem` when set; a player's new inference
+  rebuilds). It answers requests and posts progress at most every 100 ms: questions weighed of total for the
+  all-candidates batch, checks made while explaining a clash.
+- **`ui/app.js`:** every click and change handler, every delayed check and both render functions run through
+  `run(fn)`. While the worker works, a veil holds clicks and a panel shows "Working it out…" with a bar (a real
+  fraction for the candidates batch, a moving bar while sifting clues) and a line of detail; both appear after
+  250 ms, so quick trips do not flash. The page is driven the same way on loading (the `Game` constructor asks the
+  solver too). The logic page (`logic.html`) stays synchronous.
+- **Site build:** follows `new URL('./x.js', import.meta.url)` as well as imports, so the worker is published and
+  stamped with the version.
+- **Checked:**
+  - Test `engine/remoteProblem.test.js` runs the real handler and client through a stand-in Worker: a slow call
+    goes over with progress, the answer equals the local one and is cached, and a game reads 60 paragraphs, makes
+    a checked cross-out and lists its clashes through `settle`.
+  - In headless Chrome (served, driven over the DevTools protocol): Medium reads all 232 paragraphs in about 14 s.
+    Easy reads all 232 in about 52 s, the page never freezing more than 0.3 s, the panel showing while clashes are
+    sifted. Trivial (the game working everything out) about 2 s per paragraph with the bar, never freezing more
+    than 0.15 s.
+- **Not done:** the cost itself (Round 61); incremental candidates for Trivial; cancelling a check.
+- **Suite:** 54 tests, green, 798 s (a browser run overlapped part of it; 670 s in Round 61).
+- **Moved:** nothing in the logs, reports or gates (engine plumbing and UI).

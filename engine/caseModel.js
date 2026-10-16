@@ -549,11 +549,13 @@ function addInferenceConstraints(into, k) {
 
 /** (Re)build the solver over the model's current slots and constraints. */
 export function rebuildProblem(model) {
-    model.problem = new Problem({
+    const args = {
         domains: new Map([...model.slots.values()].map((s) => [s.id, s.domain])),
         constraints: [...model.constraints.values()],
         timeOrder: model.timeOrder,
-    });
+    };
+    // The page may put the problem at arm's length (engine/remoteProblem.js): its worker gets the same one.
+    model.problem = model.wrapProblem ? model.wrapProblem(new Problem(args), args) : new Problem(args);
     return model.problem;
 }
 

@@ -716,8 +716,9 @@ export class Game {
     /** Record the steps the player has newly made by their own reasoning, at the last paragraph read. */
     #noteMade() {
         if (this.moved) {
-            this.moved = false;
+            // Cleared only once every step is checked: a check handed to the solver's worker comes back here.
             for (const id of this.routeById.keys()) if (!this.madeAt.has(id) && this.#madeByPlayer(id)) this.madeAt.set(id, this.read - 1);
+            this.moved = false;
         }
         return this.madeAt;
     }
@@ -1148,9 +1149,9 @@ export class Game {
         const key = this.unlocked.size;
         if (this.autoKey !== key) {
             // Everything at once: one pass per group of linked questions is far cheaper than one per question.
-            this.autoKey = key;
             const active = activeConstraints(this.model, this.known()).filter((id) => !this.model.constraints.get(id).derived);
             this.autoCache = this.model.problem.allCandidates(active, [...this.model.slots.keys()]);
+            this.autoKey = key; // after: a check handed to the solver's worker comes back here to fill it
         }
         return this.autoCache.get(slot) ?? this.model.slots.get(slot).domain;
     }

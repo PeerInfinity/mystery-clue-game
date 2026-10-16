@@ -5,6 +5,8 @@
 import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { evaluate } from '../engine/logic.js';
+import { rebuildProblem } from '../engine/caseModel.js';
+import { RemoteProblem, workerClient, settle } from '../engine/remoteProblem.js';
 import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
@@ -69,6 +71,29 @@ function toast(html) {
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => { t.hidden = true; }, 2600);
 }
+
+// ---------- the solver at arm's length ----------
+// A check too slow for the page goes to a Web Worker (engine/remoteProblem.js); meanwhile a panel shows how far it
+// has got, and clicks wait. `run(fn)` does a piece of work (a click's, a render's) until it gets through.
+let busyDepth = 0;
+function showBusy(on) {
+    $('#busy').hidden = !on;
+    if (on) { $('#busy-bar').style.width = '0%'; $('#busy-bar').classList.add('indeterminate'); $('#busy-detail').textContent = ''; }
+}
+function busyProgress(done, total, what) {
+    const known = what === 'answers';
+    $('#busy-bar').classList.toggle('indeterminate', !known);
+    if (known) $('#busy-bar').style.width = `${Math.round((100 * done) / Math.max(total, 1))}%`;
+    $('#busy-detail').textContent = known ? `Weighing the answers to ${done} of ${total} questions` : `Sifting the clues: check ${done}`;
+}
+function run(fn) {
+    return settle(fn, () => model.problem, {
+        onBusy: () => { if (busyDepth++ === 0) showBusy(true); },
+        onProgress: busyProgress,
+        onIdle: () => { if (--busyDepth <= 0) { busyDepth = 0; showBusy(false); } },
+    }).catch((e) => { console.error(e); toast(`Something went wrong: ${esc(e.message)}`); });
+}
+const later = (fn, ms) => setTimeout(() => run(fn), ms);
 
 // ---------- the story ----------
 function renderStory() {
@@ -135,7 +160,8 @@ function scrollStory() {
 }
 
 // ---------- tools ----------
-function renderTool() {
+function renderTool() { run(renderToolNow); }
+function renderToolNow() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
     $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
     const infTab = document.querySelector('.tab[data-tab="inferences"]');
@@ -572,7 +598,8 @@ function toolTimeline() {
     return `${h}</div>`;
 }
 
-function render() {
+function render() { run(renderNow); }
+function renderNow() {
     const settledQ = model.data.questions.filter((q) => game.settled(q.slot) !== null).length;
     const raised = model.data.questions.filter((q) => game.questionRaised(q.id)).length;
     const found = [...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)).length;
@@ -591,7 +618,7 @@ function render() {
     $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('opt-background').toLowerCase()}`;
     $('#settings-short').textContent = pick('difficulty');
     renderStory();
-    renderTool();
+    renderToolNow();
 }
 
 // ---------- plain readings (ui/readings.js) ----------
@@ -693,7 +720,7 @@ function runFit(slot, value) {
     ui.fit = { slot, value };
     ui.menuNote = '<span class="muted">Checking…</span>';
     renderTool();
-    setTimeout(() => {
+    later(() => {
         const r = game.plausible(slot, value);
         const aside = r.aside ? ` <span class="small muted">(Setting aside the claims in ${r.aside === 1 ? 'the clash' : `the ${r.aside} clashes`} listed under <span class="link" data-show-clashes>Questions</span>.)</span>` : '';
         if (r.plausible) ui.menuNote = `<span class="good">It could fit everything you trust so far.</span>${aside}`;
@@ -763,7 +790,8 @@ function onStoryClick(e) {
     pop.hidden = false;
 }
 
-document.addEventListener('click', (e) => {
+document.addEventListener('click', (e) => game && run(() => onClick(e)));
+function onClick(e) {
     // A click anywhere outside the settings panel closes it.
     const settings = document.querySelector('.settings');
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
@@ -817,7 +845,7 @@ document.addEventListener('click', (e) => {
         else {
             ui.clash = { slot: d.dataset.clash, html: '<span class="muted">Checking everything you trust… (a few seconds)</span>' };
             renderTool();
-            setTimeout(() => {
+            later(() => {
                 const ids = game.contradiction();
                 ui.clash = { slot: d.dataset.clash, html: ids ? `These cannot all be true: ${clashHtml(ids)}` : 'No clash found among what you trust.' };
                 renderTool();
@@ -883,7 +911,7 @@ document.addEventListener('click', (e) => {
         else if (op === 'rule' || op === 'prove') {
             ui.menuNote = '<span class="muted">Checking against everything you hold…</span>';
             renderTool();
-            setTimeout(() => {
+            later(() => {
                 const res = op === 'prove' ? game.prove(slot, value) : game.strike(slot, value);
                 if (res.ok) {
                     ui.menu = null;
@@ -899,7 +927,7 @@ document.addEventListener('click', (e) => {
         else if (op === 'why' || op === 'whynot') {
             ui.menuNote = '<span class="muted">Checking…</span>';
             renderTool();
-            setTimeout(() => {
+            later(() => {
                 const reasons = (v) => game.whyNot(slot, v).map((r) => esc(r.text)).join(' · ') || 'nothing yet';
                 if (op === 'whynot') ui.menuNote = `Ruled out by: ${reasons(value)}`;
                 else {
@@ -919,7 +947,7 @@ document.addEventListener('click', (e) => {
             renderTool();
         } else if (op === 'fit') runFit(slot, value);
     }
-});
+}
 document.addEventListener('input', (e) => {
     if (e.target.id === 'card-search') {
         ui.search = e.target.value;
@@ -930,7 +958,8 @@ document.addEventListener('input', (e) => {
         box.setSelectionRange(pos, pos);
     }
 });
-document.addEventListener('change', (e) => {
+document.addEventListener('change', (e) => game && run(() => onChange(e)));
+function onChange(e) {
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }
     if (e.target.dataset.add) {
         const slot = e.target.dataset.add;
@@ -961,13 +990,13 @@ document.addEventListener('change', (e) => {
         game.load(state);
         changed();
     }
-});
-$('#reset').addEventListener('click', () => {
+}
+$('#reset').addEventListener('click', () => run(() => {
     if (!confirm('Start the case over? Your place, marks and theories will be lost.')) return;
     game.reset();
     ui.selected = null;
     changed();
-});
+}));
 
 // ---------- difficulty options ----------
 // Labels for OPTIONS (engine/game.js), in its order of values.
@@ -1006,7 +1035,13 @@ R = makeReadings({
 buildOptions();
 const saved = restore();
 const defaults = model.data.settings_defaults ?? {};
-game = new Game(model, { difficulty: defaults.difficulty ?? MEDIUM, pace: defaults.pace ?? 'free', state: saved?.game ?? null });
-ui.selected = saved?.selected ?? null;
-render();
-scrollStory();
+// The solver's worker: the page answers quick checks itself and hands the slow ones over.
+const client = workerClient(new Worker(new URL('../engine/solverWorker.js', import.meta.url), { type: 'module' }));
+model.wrapProblem = (local, args) => { client.init(args); return new RemoteProblem(local, client); };
+rebuildProblem(model);
+run(() => {
+    game = new Game(model, { difficulty: defaults.difficulty ?? MEDIUM, pace: defaults.pace ?? 'free', state: saved?.game ?? null });
+    ui.selected = saved?.selected ?? null;
+    renderNow();
+    scrollStory();
+});

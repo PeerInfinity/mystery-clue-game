@@ -293,6 +293,16 @@ specific thing stay ground facts with a formula and no schema.
   with no declared state, or fully states (who, when and where); a stated place gives a one-branch tie. A player
   who doubts that very clue loses those ties, never gains a wrong one.
 
+## As built (2026-10-16): the solver in a Web Worker (Round 62)
+
+- `model.wrapProblem(local, args)`, when set, wraps every problem `rebuildProblem` makes; the page sets it to a
+  `RemoteProblem` (`engine/remoteProblem.js`) that answers a call on the spot within 60 ms, or throws `NeedSolve`
+  for `settle` to have `engine/solverWorker.js` answer it, with progress. Node (tests, validator) leaves it unset.
+- `Problem.deadline` (a `Date.now()` value; past it a search throws `OverBudget`) and `Problem.onProgress(done,
+  total, what)` (`what`: `answers` in the candidates batch, `clues` while explaining a clash).
+- A game move must ask the solver before it changes anything (or change only what it would change the same way
+  again): a slow call makes the move run twice.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

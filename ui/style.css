@@ -230,3 +230,13 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 @media (min-width: 720px) { .difficulty-options[open] .options-grid { grid-template-columns: 1fr 1fr; min-width: 480px; } }
 .options-grid .opt-off { opacity: .5; }
 .settings-panel [hidden] { display: none; }
+
+/* The solver's worker at work: clicks wait behind a veil, with progress. */
+.busy { position: fixed; inset: 0; z-index: 20; background: transparent; cursor: progress; animation: busy-veil 0s 0.25s forwards; }
+.busy-box { position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%); min-width: 280px; max-width: 90vw; background: var(--bg); color: var(--ink); border: 1px solid var(--ink); border-radius: 8px; padding: 10px 14px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); opacity: 0; animation: busy-show 0.2s 0.25s forwards; }
+.busy-track { height: 6px; margin: 8px 0 4px; border-radius: 3px; background: rgba(127, 127, 127, 0.25); overflow: hidden; }
+.busy-bar { height: 100%; width: 0; background: var(--ink); transition: width 0.15s; }
+.busy-bar.indeterminate { width: 30% !important; animation: busy-slide 1.2s ease-in-out infinite; }
+@keyframes busy-veil { to { background: rgba(0, 0, 0, 0.08); } }
+@keyframes busy-show { to { opacity: 1; } }
+@keyframes busy-slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }

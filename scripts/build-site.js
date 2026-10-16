@@ -26,7 +26,8 @@ const todo = [...files].filter((f) => f.endsWith('.js'));
 while (todo.length) {
     const f = todo.pop();
     const src = fs.readFileSync(path.join(root, f), 'utf8');
-    for (const [, ref] of src.matchAll(/(?:import|export)\b[^'"]*?from\s*['"](\.{1,2}\/[^'"]+)['"]/g)) {
+    // `import … from './x.js'`, and a worker's module: `new URL('./x.js', import.meta.url)`.
+    for (const [, ref] of src.matchAll(/(?:(?:import|export)\b[^'"]*?from\s*|new URL\(\s*)['"](\.{1,2}\/[^'"]+)['"]/g)) {
         const dep = path.normalize(path.join(path.dirname(f), ref));
         if (!files.has(dep)) { files.add(dep); todo.push(dep); }
     }
@@ -46,7 +47,7 @@ for (const f of [...files].sort()) {
         const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:href|src)=")([^"#?:]+\.(?:css|js))"/g, (m, a, ref) => `${a}${stamp(ref)}"`);
         fs.writeFileSync(path.join(out, f), text);
     } else if (f.endsWith('.js')) {
-        const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:import|export)\b[^'"]*?from\s*['"])(\.{1,2}\/[^'"?]+)(['"])/g, (m, a, ref, b) => `${a}${stamp(ref)}${b}`);
+        const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:(?:import|export)\b[^'"]*?from\s*|new URL\(\s*)['"])(\.{1,2}\/[^'"?]+)(['"])/g, (m, a, ref, b) => `${a}${stamp(ref)}${b}`);
         fs.writeFileSync(path.join(out, f), text);
     } else fs.copyFileSync(path.join(root, f), path.join(out, f));
 }

@@ -12,7 +12,21 @@
 
 import { evaluate, slotsOf, U } from './logic.js';
 
+/** Thrown when a search runs past `problem.deadline` (a Date.now() value): the caller may hand it elsewhere. */
+export class OverBudget extends Error {
+    constructor() { super('the search ran past its time budget'); }
+}
+
 export class Problem {
+    /** When set, a search past this time (Date.now()) throws OverBudget. */
+    deadline = null;
+    /** When set, called now and then as (done, total, what) during the long calls. */
+    onProgress = null;
+    #ticks = 0;
+    #tick() {
+        if (this.deadline !== null && (++this.#ticks & 255) === 0 && Date.now() > this.deadline) throw new OverBudget();
+    }
+
     /**
      * @param {object} p
      * @param {Map<string,string[]>} p.domains slot id -> possible values
@@ -119,6 +133,7 @@ export class Problem {
         const cons = this.#parts(active);
         const want = new Set(slots);
         const out = new Map();
+        let done = 0;
         for (const group of components(cons, [...want])) {
             const mine = group.slots.filter((s) => want.has(s));
             if (!mine.length) continue;
@@ -139,6 +154,7 @@ export class Problem {
                 return touching.get(s).every((c) => evaluate(c.formula, sol, this.timeOrder) !== false);
             };
             for (const s of mine) {
+                this.onProgress?.(++done, slots.length, 'answers');
                 for (const v of root.domains.get(s)) {
                     if (seen.get(s).has(v)) continue;
                     if (repairs(s, v)) { seen.get(s).add(v); continue; }
@@ -172,7 +188,8 @@ export class Problem {
         if (this.consistent(all, fixed, { extra }).ok) return null;
         // QuickXplain (Junker 2004): halve the candidates, keeping a half whenever the rest already clashes, so a
         // clash of k among n costs about k·log n checks instead of n.
-        const ok = (ids) => this.consistent(ids, fixed, { extra }).ok;
+        let checks = 0;
+        const ok = (ids) => { this.onProgress?.(++checks, Math.max(checks, 2 * Math.ceil(Math.log2(all.length + 1)) * 4), 'clues'); return this.consistent(ids, fixed, { extra }).ok; };
         const qx = (base, added, cands) => {
             if (added && !ok(base)) return [];
             if (cands.length <= 1) return cands; // none: the clash is in `fixed` and `extra` alone
@@ -360,6 +377,7 @@ export class Problem {
         const propagate = (queue) => {
             const queued = new Set(queue);
             while (queue.length) {
+                this.#tick();
                 const c = queue.pop();
                 queued.delete(c);
                 if (c.scope.every((s) => assign.has(s))) {
@@ -465,6 +483,7 @@ export class Problem {
                 return out;
             };
             const step = () => {
+                this.#tick();
                 const pool = pools.find((p) => p.at < p.open.length);
                 if (!pool) {
                     count++;
