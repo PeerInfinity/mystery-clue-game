@@ -450,13 +450,13 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 **¶41**
 - `t41.1` **RECORD** · *strong* · typical
   reads "there was no wound upon his person"
-- `t41.2` **TEST** · *fair* · careful · from `t41.1`, `t35.7` · supports `t35.7 (Straker's own)`
+- `t41.2` **TEST** · *fair* · careful · from `t41.1`, `t35.4`, `t35.3`, `t35.2` · supports `t35.7 (Straker's own)`
   Simpson has no wound, and there is no second assailant in the evidence, so the blood is probably Straker's.
 
 **¶43–¶44**
 - `t44.1` **RECORD** · typical
   reads "that the incised wound upon Straker may have been caused by his own knife in the convulsive struggles which follow any brain injury"; "It is more than possible; it is probable"
-- `t44.2` **TEST** · *fair* · careful · from `t44.1`, `t41.2` · supports `t35.7 (Straker's own)` · Holmes ¶226 (the second mechanism)
+- `t44.2` **TEST** · *fair* · careful · from `t44.1`, `t41.2`, `t35.4`, `t35.3`, `t35.2` · supports `t35.7 (Straker's own)` · Holmes ¶226 (the second mechanism)
   His own knife, his own thigh. Watson's mechanism (convulsions after the blow) is one option; the other is that
   he cut himself while using the knife. Keep the conclusion and leave the mechanism open.
 
@@ -562,6 +562,9 @@ the horse is (`t14.3`).
 - `t60.3` **HYPOTHESIS** · *weak* · careful · from `t60.2`, `t32.2`, `t35.10` · Holmes ¶226 (the second)
   Someone passing the stables later picked it up, for instance a man going down at one in the morning. If it was
   Straker, why keep it: {to lay it on the stranger later, as a strap or tie}?
+- `t60.4` **INFER** · *strong* · careful · from `t60.1`, `t35.5`, `t32.2`, `t35.2` · Holmes ¶226
+  The cravat is Simpson's, and it was in Straker's dead hand. Simpson parted with it before it came into
+  Straker's hand, and Straker had it only after he left home at one and before he died. (Added in Round 54.)
 
 **¶62**
 - `t62.1` **RECORD** · typical

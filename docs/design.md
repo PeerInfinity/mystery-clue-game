@@ -1279,3 +1279,28 @@ warrants, are unchanged.
 - **Gates:** none moved.
 - **Moved:** reveal log: the ten bookkeeping inferences at the paragraphs above; `k.bill_names_its_debtor`
   later within ¶84. Foreshadow log and case report: nothing. Thoughts report: 34/48; 12 inferences left unnamed.
+
+## Round 54 (2026-10-15): short chains, the rest 2 — Simpson, the knife, the cravat
+
+- **The knife and the wound** (TESTs name their inference, Round 46):
+  - `t41.2` → `k.knife_marks_assailant`: Simpson bears no wound, so Straker's knife did not cut him. It now cites
+    the ¶35 records (`t35.4`, `t35.3`, `t35.2`); `t35.7`, the question it bears on, stays linked by "supports".
+  - `t44.2` → `k.only_one_blade`, re-cited as the reader makes it: Watson's mechanism (`t44.1`, the source of
+    `r.convulsions_after_brain_injury`, which it now maps) plus "no wound on Simpson" (`k.knife_marks_assailant`,
+    held by `t41.2`). It no longer needs `c.simpson_no_knife` (¶56), which dated it after ¶44; the label is
+    reworded to match. Route `i.self_wound` (Gregory, ¶54) gains `c.simpson_no_wound` and the two wound rules:
+    his source line says both, "neither a knife nor any sign of a wound".
+  - The case report's Strict column now leaves the thigh cut open (`cataract_knife`, `assailant_blade`): the step
+    passes through a default rule ("a bloody knife usually wounded someone"). Watson calls the self-wound only
+    "probable", so the defeasible reading is the honest one.
+- **The cravat** (Round 42 ruling): `t60.4` (INFER, careful, ¶60, new) → `k.cravat_order`: the cravat is
+  Simpson's and was in Straker's dead hand, so Simpson parted with it before Straker had it, after Straker left
+  home at one and before he died. Holmes ¶226.
+- **The police's framings marked implicit:** `k.simpson_purpose` (the three purposes) and
+  `k.paper_held_opium_means_nobbling` (true conditionals and option lists, not steps). Granted at ¶26, the second
+  would have tied the stranger at the window to Simpson before ¶40. It now also rests on
+  `c.simpson_admits_visit`, which it needed anyway to speak of Simpson. Both come at ¶40, and so does
+  "What was in the folded paper?" (`t24.3`'s question), which no card raised before.
+- **Gates:** none moved.
+- **Moved:** reveal log: the two framings, the paper and purpose questions at ¶40, a label. Foreshadow log:
+  nothing. Case report: the Strict column above, the route step. Thoughts report: 37/51; 7 inferences unnamed.
