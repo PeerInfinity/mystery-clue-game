@@ -1628,3 +1628,13 @@ thoughts, the traps this session met and the items still open for Robert. `CLAUD
 - **Suite:** 57 tests, green, 697 s.
 - **Not yet:** what a layer leaves unexplained (workstream 6); an "inside story" layer authored by the case (the
   player can make it as their own theory); possession and condition on layers.
+
+## Round 65 (2026-10-16): hand-off to the world model, part 2
+
+World-model steps 1–4 are done (Rounds 60–64), with the solver in a Web Worker. `docs/kickoff-world-model-2.md`
+hands the next session three pieces of work:
+- solver speed: the suite is back above 10 minutes since the ties, and incremental candidates are the main lead;
+- checked placements on the board, cells the case never declared, and proven placements as cards;
+- the design of knowledge, intention and belief (step 5), to agree with Robert before building.
+
+It carries the rulings of this session and the traps met. `CLAUDE.md` points at it.
