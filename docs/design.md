@@ -1461,3 +1461,68 @@ thoughts, the traps this session met and the items still open for Robert. `CLAUD
 - **Moved:** reveal and foreshadow logs: the five rule texts as background at ¶32 (four, with "found that he was
   dressing") and ¶33 (`r.condition_lasts`, with the stupor). Case report: counts, the States section, eleven more
   slots unique. Thoughts report and the gate listing: nothing.
+
+## Round 61 (2026-10-16): world model, step 2 — the world's workings and the night re-derived
+
+- **Rulings (Robert):**
+  - The hard rules (whoever does a thing is where it is done; a holder is where the held thing is) are not rule
+    cards but how the world model works by default, always on.
+  - No hard-coded window splits. A window may be **split at an event** into the part before and the part after
+    it, and split again inside a part; the window itself stays, and what is placed in it stays there until moved
+    into a part. A cell means **throughout** its time: a thing that moves within a window has no single place in
+    it. Which part an event falls in is an **order question** (before or after the splitting event), answered by a
+    clue where the story tells it and otherwise left open; the true order is the events' fabula order. The case
+    lists the splits its own reasoning needs (`state_splits`); the player will split any window (step 3).
+- **Places, corrected:** a listed place means itself apart from the listed places inside it ("the stable" is the
+  stable apart from its loft), so a place folds to the nearest listed place containing it. An overlap reading,
+  tried in between, made the lads in the loft compatible with the horse led out of the stable.
+- **Engine:**
+  - `engine/caseModel.js` builds subwindows (`w.tue_0700.before.wife_wakes`) and order slots
+    (`ord.<event>.<splitter>`, before/after) for every event whose time no trusted clue puts in another window.
+    It also builds the world's **ties** (`k.world.*`): for each tracked thing and each event it may take part in, its
+    state agrees with the event's place when it is the agent or patient. Order runs through (transitivity), and a
+    nested splitter lies in its part. Ties are skipped where a clue gives the event to someone else or puts it in a
+    window with no state, and where clues state who, when and where outright.
+  - A tie is active wherever an active card speaks of its thing's states (`activeConstraints`, `stateThings`).
+    Verifying an inference adds the ties for the things its formula or rule applications speak of.
+  - `engine/solver.js`: ties are **lazy**. A check first runs without them, since what fails without them fails
+    with them, and adds them only if it succeeds and its solution does not already keep them. An explanation
+    keeps them as background, never as the clash.
+  - `engine/game.js`: an order question waits to be raised; a part's state waits for the events that split it.
+- **The night re-derived:**
+  - **Gone:** `k.lads_slept` (the lads' own line, "they had heard nothing during the night", now places them in
+    the loft through every night window, and the ties do the rest) and `k.straker_went_out_first` (Straker at home
+    at one is a state; the ties and the taking's window give the rest).
+  - **Rewritten:** `k.wife_stayed_home` now concludes states: at home in each night window, by `r.stays_put` from
+    one o'clock. `k.found_before_seven` now carries when the horse was taken: after Hunter's message, before seven
+    (the bound the old inferences each built in). Without it, "Straker is honest" clashed through two of the
+    story's clues at once, and the clash rule set both aside.
+  - **New, implicit:** `k.met_after_bolting`, the other half of the old `k.found_before_seven`.
+  - **Retired:** `r.sleeper_stays_put`, `r.one_place_at_a_time` and the three hard-rule cards of Round 60.
+  - **Stay as they were:** `k.hunter_was_drugged` (needs "a stupefied man does nothing", a condition-to-action
+    default not yet in the world model) and the event-order bookkeeping (`k.night_sequence`, `k.hollow_order`,
+    `k.cravat_worn_at_window`, ...).
+  - The implicit list goes from 28 to 27.
+- **The six `world-model` thoughts stay without an inference:**
+  - `t24.2` (the lost story is a cover), `t123.2` (meant to lead him home, then turned back) and `t150.1` (Brown will
+    keep him safe) are intention and knowledge (step 5).
+  - `t34.5` (no alarm raised) needs what Straker would have done had he found the stall empty (intention).
+  - `t78.2` (not a robbery): his money and watch on the body would be possession states, but "a robbery" is a
+    motive question the case has no slot for.
+  - `t82.3` (the blade unsheathed in the hollow) could be a condition, but it settles no question ("fits both
+    readings").
+- **Data:** `states.json` gains `state_splits` (seven o'clock at Mrs. Straker's waking), the lads' night
+  windows and Mrs. Straker's (22 states). Five `concludes` steps cite `r.stays_put` for `r.sleeper_stays_put`.
+- **Timings:** `npm run validate` 47 s → 74–77 s; `npm test` 207 s → 670 s. Most of it is Trivial play (an
+  all-candidates batch per card, 2× per batch) and the clash search (22 s → 52 s at the end of the story). The ties
+  join the night's events into larger search components. Pruning, laziness and background explanation brought the
+  suite down from 1359 s; the rest is structural. Robert: accepted for now; the solver moves to a Web Worker with a
+  progress display next, and incremental candidates come later.
+- **Moved:**
+  - **Reveal and foreshadow logs:** the five retired rule texts gone. `k.wife_stayed_home` comes at ¶33 with its
+    new label, and `k.found_before_seven` where the old three came (¶37). Mrs. Straker's state questions appear as
+    their windows are reached (¶33 to ¶126).
+  - **Gates:** none moved; `t81.5`, `t46.4`, `t220.3` and `t173.2` need `k.found_before_seven` as well.
+  - **Case report:** counts, states, 35 order slots, the Strict column for the killer 45 → 44, and one theory's
+    minimal break.
+  - **Thoughts report:** the implicit list.

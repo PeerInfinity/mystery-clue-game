@@ -97,7 +97,7 @@ export function buildModel(data) {
         else if (spec.placeholder) out = entities.filter((e) => (e.flags ?? []).includes('placeholder') && (!(spec.kind || spec.kinds) || (spec.kinds ?? [spec.kind]).includes(e.kind))).map((e) => e.id); // a card standing for someone not yet identified
         else if (spec.section === 'event' || spec.section === 'events') out = (data.events ?? []).map((e) => e.id);
         else if (spec.kind || spec.kinds) out = domainFor({ kinds: spec.kinds ?? [spec.kind] });
-        else if (spec.window) out = windows.map((w) => w.id);
+        else if (spec.window) out = [...windows.map((w) => w.id), ...subwindows.keys()];
         else if (spec.condition) out = (data.state_conditions ?? []).map((c) => c.id);
         else if (spec.trait) out = entities.filter((e) => !(e.flags ?? []).some((f) => EXCLUDED_FROM_DOMAINS.includes(f))).map((e) => e.id);
         else out = [];
@@ -190,13 +190,64 @@ export function buildModel(data) {
         }
         relations.set(r.id, { ...r, argValues, values, slotId, outside: r.outside ?? 'error' });
     }
-    // States: one track per thing and aspect, one slot per declared window.
+    // Splits (the world model): a window, or a part of one, split at an event into the part before it and the part
+    // after it (`<parent>.before.<event>`, `<parent>.after.<event>`), each a time a state can be declared at. Which
+    // part an event falls in is an ORDER question, `ord.<event>.<splitter>` (before/after), one per event that may
+    // share the window; its answer is the events' fabula order, open unless a claim states it.
+    const subwindows = new Map();   // id -> {id, parent, root, path: [[dir, event]...], label}
+    const orderSlot = (a, e) => `ord.${a.replace(/^e\./, '')}.${e.replace(/^e\./, '')}`;
+    {
+        const events = data.events ?? [];
+        const eventById = new Map(events.map((e) => [e.id, e]));
+        const statedEarly = new Map();
+        for (const c of data.claims ?? []) {
+            if (c.truth_slot || c.derived || !c.asserts) continue;
+            for (const f of c.asserts.and ?? [c.asserts]) if (f.eq && typeof f.eq[0] === 'string') statedEarly.set(f.eq[0], f.eq[1]);
+        }
+        const claimed = new Set();
+        for (const c of data.claims ?? []) for (const m of JSON.stringify(c.asserts ?? {}).matchAll(/"(ord\.[a-z0-9_.]+)"/g)) claimed.add(m[1]);
+        for (const sp of data.state_splits ?? []) {
+            const parent = timeOrder.has(sp.window) ? { id: sp.window, root: sp.window, path: [] } : subwindows.get(sp.window);
+            if (!parent) { errors.push(`split: unknown window ${sp.window}`); continue; }
+            const by = eventById.get(sp.by);
+            if (!by) { errors.push(`split of ${sp.window}: unknown event ${sp.by}`); continue; }
+            for (const dir of ['before', 'after']) {
+                const id = `${parent.id}.${dir}.${sp.by.replace(/^e\./, '')}`;
+                if (subwindows.has(id)) { errors.push(`split ${id} declared twice`); continue; }
+                subwindows.set(id, { id, parent: parent.id, root: parent.root, by: sp.by, dir, path: [...parent.path, [dir, sp.by]] });
+            }
+            for (const e of events) {
+                // An event may fall in the split part unless a clue the case trusts puts it in another window.
+                const when = statedEarly.get(`${e.id}.time`);
+                if (e.id === sp.by || !e.facets?.time || (when !== undefined && when !== parent.root)) continue;
+                const id = orderSlot(e.id, sp.by);
+                if (slots.has(id)) continue;
+                addSlot({
+                    id, on: e.id, facet: 'order', prompt: `Did it happen before or after {${sp.by}}?`, domain: ['before', 'after'],
+                    answer: (e.fabula_order ?? 0) < (by.fabula_order ?? 0) ? 'before' : 'after',
+                    undetermined: claimed.has(id) ? undefined : true,
+                    labels: { before: 'Before', after: 'After' },
+                });
+            }
+        }
+    }
+    const isTime = (id) => timeOrder.has(id) || subwindows.has(id);
+    const rootOf = (id) => (timeOrder.has(id) ? id : subwindows.get(id)?.root);
+    // States: one track per thing and aspect, one slot per declared window or part of one. A state holds THROUGHOUT
+    // its time: a thing that moves within a window has no state there, only in the parts on either side of the move.
+    // A listed place stands for itself apart from the listed places inside it; 'elsewhere' is outside them all.
     const stateTracks = new Map();
     {
         const sets = new Map((data.state_places ?? []).map((x) => [x.id, x.places]));
         const within = new Map(entities.filter((e) => e.within).map((e) => [e.id, e.within]));
+        const up = (p) => { const out = []; for (let q = within.get(p); q && !out.includes(q); q = within.get(q)) out.push(q); return out; };
         const conditions = new Map((data.state_conditions ?? []).map((x) => [x.id, x]));
         const windowLabel = new Map(windows.map((w) => [w.id, w.label]));
+        const timeLabel = (id) => {
+            if (timeOrder.has(id)) return windowLabel.get(id);
+            const sw = subwindows.get(id);
+            return `${timeLabel(sw.parent)}, ${sw.dir} {${sw.by}}`;
+        };
         for (const t of data.states ?? []) {
             const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.condition;
             if (t.aspect === 'condition' && !conditions.has(t.condition)) errors.push(`${t.id}: unknown condition ${t.condition}`);
@@ -204,30 +255,35 @@ export function buildModel(data) {
             if (!places) errors.push(`${t.id}: unknown place set ${t.places}`);
             const domain = t.aspect === 'condition' ? ['true', 'false']
                 : [...new Set([...(t.aspect === 'possession' ? domainFor({ kinds: t.holders ?? ['person', 'animal', 'group'] }) : []), ...(places ?? []), 'elsewhere'])];
+            // A listed place stands for itself apart from the listed places inside it (the stable apart from its
+            // loft): a thing at a place is at the nearest listed place containing it, or 'elsewhere'. `overlaps(v)`:
+            // the value a thing at v takes; `inside(v)`: the values a thing NOT at v cannot take.
             const fold = (v) => {
                 if (domain.includes(v)) return v;
                 if (t.aspect === 'condition') return null;
-                const seen = new Set();
-                for (let p = within.get(v); p && !seen.has(p); p = within.get(p)) { seen.add(p); if (domain.includes(p)) return p; }
+                for (const p of up(v)) if (domain.includes(p)) return p;
                 return 'elsewhere';
             };
+            const overlaps = (v) => { const f = fold(v); return f === null ? [] : [f]; };
+            const inside = (v) => (domain.includes(v) && v !== 'elsewhere' ? [v] : []);
             const key = `${name}|${t.of}`;
             if (stateTracks.has(key)) errors.push(`${t.id}: a second ${name} track for ${t.of}`);
-            const slotOfWindow = new Map();
+            const slotOfTime = new Map();
             const ask = t.aspect === 'location' ? `Where was {${t.of}}?` : t.aspect === 'possession' ? `Who had {${t.of}}?`
                 : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
             for (const [w, answer] of Object.entries(t.windows ?? {})) {
-                if (!timeOrder.has(w)) { errors.push(`${t.id}: unknown window ${w}`); continue; }
+                if (!isTime(w)) { errors.push(`${t.id}: unknown window ${w}`); continue; }
                 const id = `${t.id}.${w.replace(/^w\./, '')}`;
-                slotOfWindow.set(w, id);
+                slotOfTime.set(w, id);
                 addSlot({
-                    id, on: t.of, facet: 'state', aspect: t.aspect, state: name, track: t.id, window: w,
-                    prompt: `${ask} (${windowLabel.get(w)})`, domain,
+                    id, on: t.of, facet: 'state', aspect: t.aspect, state: name, track: t.id, window: w, root: rootOf(w),
+                    splitBy: subwindows.get(w)?.path.map(([, e]) => e) ?? [],
+                    prompt: `${ask} (${timeLabel(w)})`, domain,
                     answer, undetermined: answer === null ? true : undefined,
                     labels: t.aspect === 'condition' ? undefined : { elsewhere: 'Somewhere else' },
                 });
             }
-            stateTracks.set(key, { ...t, name, domain, fold, slotFor: (w) => slotOfWindow.get(w) ?? null });
+            stateTracks.set(key, { ...t, name, domain, overlaps, inside, times: [...slotOfTime.keys()], slotFor: (w) => slotOfTime.get(w) ?? null });
         }
     }
     // Propositions: boolean slots, each on its own card.
@@ -238,6 +294,7 @@ export function buildModel(data) {
         });
     }
 
+    const model_isPlace = (id) => entities.some((e) => e.id === id && e.kind === 'place');
     // ---- grounding environment (schemas, relation terms, quantifiers) ----
     const env = {
         bind: {},
@@ -245,7 +302,7 @@ export function buildModel(data) {
         domainOf: (id) => slots.get(id)?.domain ?? [],
         relation: (name) => relations.get(name) ?? null,
         state: (name, thing) => stateTracks.get(`${name}|${thing}`) ?? null,
-        isWindow: (id) => timeOrder.has(id),
+        isWindow: isTime,
         cards: cardsOf,
     };
     const groundOrError = (owner, f, bind = {}) => {
@@ -313,6 +370,114 @@ export function buildModel(data) {
             formula: { and: [{ implies: [{ eq: [p.id, 'true'] }, means] }, { implies: [{ eq: [p.id, 'false'] }, { not: means }] }] },
         });
     }
+    // The world model's own workings (definitions, always active, no card): whoever does a thing, or has it done to
+    // them, is where it is done when it is done; a holder is where the thing held is; a thing held at a place lies
+    // there; the events that split a window keep their order. Stated over the declared states only (sparse).
+    {
+        // A tie between a thing and its events holds wherever the thing's states are in play: once some active card
+        // speaks of them (activeConstraints). Ties for things nothing speaks of would only widen every search.
+        const world = (id, label, formula, thing = null) => {
+            if (formula.true) return;
+            addConstraint({ id, label, premises: [], world: true, thing, ...(thing ? {} : { definition: true }), formula });
+        };
+        const g = (f) => ground(f, env);
+        const inTime = (a, w) => {
+            const root = timeOrder.has(w) ? w : subwindows.get(w).root;
+            const conds = [{ eq: [`${a}.time`, root] }];
+            for (const [dir, e] of subwindows.get(w)?.path ?? []) {
+                if (e === a) continue; // the splitting event itself lies on the boundary of both parts
+                const o = orderSlot(a, e);
+                if (!slots.has(o)) return null;
+                conds.push({ eq: [o, dir] });
+            }
+            return conds;
+        };
+        // What the clues state outright (a top-level `eq` of a claim the case trusts): an event a clue gives to someone
+        // else, or puts in a window no state is declared for, is not tied to the thing (the ties are many, and the
+        // solver pays for each; the pruning holds in the case's reading, and loses only those ties for a player who
+        // doubts that very clue).
+        const stated = new Map();
+        for (const c of data.claims ?? []) {
+            if (c.truth_slot || c.derived || !c.asserts) continue;
+            const top = c.asserts.and ?? [c.asserts];
+            for (const f of top) if (f.eq && typeof f.eq[0] === 'string') stated.set(f.eq[0], f.eq[1]);
+        }
+        for (const t of stateTracks.values()) {
+            if (t.name === 'at') {
+                for (const e of data.events ?? []) {
+                    if (!slots.has(`${e.id}.place`) || !slots.has(`${e.id}.time`)) continue;
+                    const when = stated.get(`${e.id}.time`);
+                    // A stated place needs only its own branch (the others are ruled out by the same clue).
+                    const where = stated.get(`${e.id}.place`);
+                    const there = (time) => g(where !== undefined ? { eq: [{ state: ['at', t.of, time] }, where] } : { same: [{ state: ['at', t.of, time] }, `${e.id}.place`] });
+                    for (const role of ['agent', 'patient']) {
+                        if (!slots.get(`${e.id}.${role}`)?.domain.includes(t.of)) continue;
+                        const who = stated.get(`${e.id}.${role}`);
+                        if (who !== undefined && who !== t.of) continue;
+                        // Everything stated (who, when, where): the clues already place the thing; a tie would only
+                        // join this event to every other the thing takes part in, and widen every search.
+                        if (who === t.of && when !== undefined && where !== undefined && timeOrder.has(when) && t.times.every((w) => !subwindows.has(w) || subwindows.get(w).root !== when)) continue;
+                        const parts = [];
+                        // The windows: one lookup by the event's time over the thing's declared windows.
+                        if (t.times.some((w) => timeOrder.has(w) && (when === undefined || w === when))) {
+                            const then = there(`${e.id}.time`);
+                            if (!then.true) parts.push({ implies: [{ eq: [`${e.id}.${role}`, t.of] }, then] });
+                        }
+                        // The parts of windows: guarded by the event's window and its order against the splitters.
+                        for (const w of t.times) {
+                            if (timeOrder.has(w)) continue;
+                            if (when !== undefined && subwindows.get(w).root !== when) continue;
+                            const conds = inTime(e.id, w);
+                            if (!conds) continue;
+                            const then = there(w);
+                            if (!then.true) parts.push({ implies: [{ and: [{ eq: [`${e.id}.${role}`, t.of] }, ...conds] }, then] });
+                        }
+                        if (parts.length) world(`k.world.${t.of}.${e.id.slice(2)}.${role}`, `Whoever ${role === 'agent' ? 'does a thing' : 'has a thing done to them'} is where it is done, when it is done (${t.of}, ${e.id}).`, parts.length === 1 ? parts[0] : { and: parts }, t.of);
+                    }
+                }
+            }
+            if (t.name === 'held') {
+                const place = stateTracks.get(`at|${t.of}`);
+                for (const w of t.times) {
+                    const parts = [];
+                    for (const h of t.domain) {
+                        if (h === 'elsewhere') continue;
+                        const holder = stateTracks.get(`at|${h}`);
+                        let then = { true: true };
+                        if (holder?.slotFor(w) && place?.slotFor(w)) then = g({ same: [{ state: ['at', h, w] }, { state: ['at', t.of, w] }] });
+                        else if (!holder && place?.slotFor(w) && model_isPlace(h)) then = g({ eq: [{ state: ['at', t.of, w] }, h] });
+                        if (!then.true) parts.push({ implies: [{ eq: [t.slotFor(w), h] }, then] });
+                    }
+                    if (parts.length) world(`k.world.${t.of}.held.${w.slice(2)}`, `Whoever has a thing in hand is where the thing is; a thing left lying is where it lies (${t.of}).`, { and: parts }, t.of);
+                }
+            }
+        }
+        // A part split off inside another part: its splitting event lies in that part. Two splitters order each other
+        // one way only, and order runs through: before F, and F before E, is before E.
+        for (const sw of subwindows.values()) {
+            if (sw.dir !== 'before' || !subwindows.has(sw.parent)) continue;
+            const conds = inTime(sw.by, sw.parent);
+            if (conds && conds.length > 1) world(`k.world.split.${sw.parent.slice(2)}.${sw.by.slice(2)}`, `${sw.by} lies within ${sw.parent}.`, { implies: [conds[0], { and: conds.slice(1) }] });
+        }
+        const splitters = [...new Set([...subwindows.values()].map((sw) => sw.by))];
+        for (const e of splitters) for (const f of splitters) {
+            if (e >= f || !slots.has(orderSlot(e, f)) || !slots.has(orderSlot(f, e))) continue;
+            world(`k.world.order.${e.slice(2)}.${f.slice(2)}`, `${e} and ${f}: one is before the other.`, { and: [
+                { implies: [{ eq: [orderSlot(e, f), 'before'] }, { eq: [orderSlot(f, e), 'after'] }] },
+                { implies: [{ eq: [orderSlot(e, f), 'after'] }, { eq: [orderSlot(f, e), 'before'] }] },
+            ] });
+        }
+        for (const a of data.events ?? []) for (const e of splitters) for (const f of splitters) {
+            if (a.id === e || a.id === f || e === f) continue;
+            const [ae, af, fe] = [orderSlot(a.id, e), orderSlot(a.id, f), orderSlot(f, e)];
+            if (!slots.has(ae) || !slots.has(af) || !slots.has(fe)) continue;
+            const same = { and: [{ same: [`${a.id}.time`, `${e}.time`] }, { same: [`${f}.time`, `${e}.time`] }] };
+            world(`k.world.order.${a.id.slice(2)}.${f.slice(2)}.${e.slice(2)}`, `Order runs through (${a.id}, ${f}, ${e}).`, { and: [
+                { implies: [{ and: [same, { eq: [af, 'before'] }, { eq: [fe, 'before'] }] }, { eq: [ae, 'before'] }] },
+                { implies: [{ and: [same, { eq: [af, 'after'] }, { eq: [fe, 'after'] }] }, { eq: [ae, 'after'] }] },
+            ] });
+        }
+    }
     for (const k of data.constraints ?? []) {
         if (!isGround(k.formula)) {
             const g = groundOrError(k.id, k.formula);
@@ -327,7 +492,7 @@ export function buildModel(data) {
             if (!rule || rule.section !== 'rules' || !(rule.schema || rule.formula)) { errors.push(`${k.id}: applies ${use.rule}, which is not a background fact with a formula`); return; }
             let g;
             try { g = rule.schema ? ground(rule.schema.formula, { ...env, bind: use.bind ?? {} }) : rule.formula; } catch (e) { errors.push(`${k.id}: ${use.rule}: ${e.message}`); return; }
-            addConstraint({ id: `${k.id}#rule${i + 1}`, label: `${rule.text} (as applied in: ${k.label})`, by: k.by, premises: [...new Set([...k.premises, ...Object.values(use.bind ?? {})])], inference: k.id, doubt_with: k.id, rule: use.rule, bind: use.bind ?? {}, formula: g });
+            addConstraint({ id: `${k.id}#rule${i + 1}`, label: `${rule.text} (as applied in: ${k.label})`, by: k.by, premises: [...new Set([...k.premises, ...Object.values(use.bind ?? {}).filter((c) => cards.has(c))])], inference: k.id, doubt_with: k.id, rule: use.rule, bind: use.bind ?? {}, formula: g });
         });
     }
 
@@ -352,7 +517,7 @@ export function buildModel(data) {
         }
     }
 
-    const model = { data, cards, slots, constraints, claimForms, relations, stateTracks, env, timeOrder, sceneOrder, windows, scenes, errors, problem: null, dynamic: new Map() };
+    const model = { data, cards, slots, constraints, claimForms, relations, stateTracks, subwindows, env, timeOrder, sceneOrder, windows, scenes, errors, problem: null, dynamic: new Map() };
     if (!errors.length) rebuildProblem(model);
     model.relevant = relevantCards(model);
     // Verify every authored inference once (the report shows which are checked, which merely asserted).
@@ -409,13 +574,13 @@ export function instantiateRule(model, ruleId, bind = {}) {
     for (const [v, card] of Object.entries(bind)) {
         const spec = vars[v];
         if (!spec) return { ok: false, error: `the rule has no variable ?${v}` };
-        if (!model.cards.has(card) && !model.windows.some((w) => w.id === card) && !(spec?.condition && model.env.cards(spec).includes(card))) return { ok: false, error: `${card} is not a card` };
+        if (!model.cards.has(card) && !model.windows.some((w) => w.id === card) && !model.subwindows.has(card) && !(spec?.condition && model.env.cards(spec).includes(card))) return { ok: false, error: `${card} is not a card` };
         const allowed = model.env.cards(spec);
         if (!allowed.includes(card)) return { ok: false, error: `?${v} cannot be ${card}: it must be ${describeSpec(spec)}` };
     }
     try {
         const formula = ground(rule.schema.formula, { ...model.env, bind });
-        return { ok: true, formula, premises: [ruleId, ...new Set(Object.values(bind))] };
+        return { ok: true, formula, premises: [ruleId, ...new Set(Object.values(bind).filter((c) => model.cards.has(c)))] };
     } catch (e) {
         return { ok: false, error: e.message };
     }
@@ -450,6 +615,13 @@ export function verifyInference(model, k) {
     }
     for (const c of model.constraints.values()) if (c.definition) active.push(c.id);
     const formula = model.cards.get(k.id)?.formula ?? k.formula;
+    // The world model's ties, for the things whose states the inference speaks of (its formula, its rule
+    // applications): the rest only widen the search, which must refute every combination of them.
+    const things = new Set();
+    const spoken = [formula, ...extra];
+    for (const f of spoken) for (const s of slotsOf(f)) { const sl = model.slots.get(s); if (sl?.track) things.add(sl.on); }
+    for (const c of model.constraints.values()) if (c.world && c.thing && things.has(c.thing)) active.push(c.id);
+    for (const id of active) if (model.constraints.get(id)?.world === undefined) for (const t of stateThings(model, id)) if (!things.has(t)) { things.add(t); for (const c of model.constraints.values()) if (c.world && c.thing === t) active.push(c.id); }
     if (!model.problem.consistent(active, {}, { extra }).ok) return { status: 'vacuous' };
     if (model.problem.consistent(active, {}, { extra: [...extra, { not: formula }] }).ok) return { status: 'asserted' };
     const used = model.problem.explainConflict(active, {}, { extra: [...extra, { not: formula }] }) ?? [];
@@ -501,6 +673,7 @@ export function relevantCards(model) {
         for (const [, v] of literalsOf(f)) if (cards.has(v)) rel.add(v);
     };
     for (const k of model.constraints.values()) {
+        if (k.world) continue; // the world model ties every tracked thing to its events: that makes nothing needed
         k.premises.forEach((p) => rel.add(p));
         if (k.inference) rel.add(k.inference);
         formula(k.formula);
@@ -535,15 +708,33 @@ export function activeConstraints(model, known, doubted = null, { heldInferences
     // Premises known cover an inference whose premises they cover, and so on up a chain (short chains: an
     // inference may cite another inference, and counts wherever its flat ancestry would).
     if (!heldInferences) known = closeOverInferences(model, known);
+    const ties = [];
     for (const k of model.constraints.values()) {
         if (k.variant) continue;
         if (k.definition) { out.push(k.id); continue; }
+        if (k.world) { ties.push(k); continue; }
         if (heldInferences && k.inference ? !known.has(k.inference) : !k.premises.every((p) => known.has(p))) continue;
         if (k.doubt_with && doubted?.has(k.doubt_with)) continue;
         const forms = doubted && k.from_claim ? model.claimForms.get(k.from_claim) : null;
         out.push(forms ? (doubted.has(k.from_claim) ? forms.doubted : forms.trusted) : k.id);
     }
+    // The world model's ties, for the things whose states the active cards speak of.
+    const things = new Set();
+    for (const id of out) for (const t of stateThings(model, id)) things.add(t);
+    for (const k of ties) if (things.has(k.thing)) out.push(k.id);
     return out;
+}
+
+/** The things whose declared states a constraint's formula speaks of (cached on the constraint). */
+export function stateThings(model, id) {
+    const k = model.constraints.get(id);
+    if (!k) return [];
+    if (!k.stateThings) {
+        const out = new Set();
+        for (const s of slotsOf(k.formula)) { const sl = model.slots.get(s); if (sl?.track) out.add(sl.on); }
+        k.stateThings = [...out];
+    }
+    return k.stateThings;
 }
 
 /** `known` with every inference added whose premises it holds, repeatedly (a chain closes in a few rounds). */

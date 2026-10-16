@@ -32,7 +32,7 @@ export class Problem {
             // constraints become one- or two-slot checks that propagate cheaply.
             const parts = splitConjunctions(c.formula).map(makePart);
             for (const p of parts) p.key = JSON.stringify(p.formula);
-            this.constraints.set(c.id, { id: c.id, formula: c.formula, scope, parts });
+            this.constraints.set(c.id, { id: c.id, formula: c.formula, scope, parts, lazy: !!c.world });
         }
     }
 
@@ -46,7 +46,21 @@ export class Problem {
      * @param {object[]} [opts.extra] further formulas to hold, e.g. the negation of a claimed conclusion
      * @returns {{ok:boolean, witness?:Map<string,string>}}
      */
-    consistent(active, fixed = {}, { focus = false, extra = [] } = {}) {
+    consistent(active, fixed = {}, { focus = false, extra = [], eager = false } = {}) {
+        // LAZY constraints (the world model's ties) only ever add to the rest: when the rest already fails, so does
+        // the whole, and that is found without them (their open states widen a failing search enormously).
+        if (!eager) {
+            const list = [...active];
+            const strict = list.filter((id) => !this.constraints.get(id)?.lazy);
+            if (strict.length < list.length) {
+                const first = this.consistent(strict, fixed, { focus, extra, eager: true });
+                if (!first.ok) return first;
+                // Often the solution found already keeps them too.
+                const lazy = list.filter((id) => this.constraints.get(id)?.lazy);
+                if (first.witness && lazy.every((id) => evaluate(this.constraints.get(id).formula, first.witness, this.timeOrder) === true)) return first;
+                return this.consistent(list, fixed, { focus, extra, eager: true });
+            }
+        }
         // A denied conclusion of several parts is a disjunction (one part fails), which the search cannot propagate:
         // try each alternative in turn. `alternatives` pushes the negation inward, so "if P then A and B", denied,
         // becomes "P and not A" or "P and not B" rather than one wide part the search would have to enumerate.
@@ -169,7 +183,10 @@ export class Problem {
             const d1 = qx([...base, ...d2], d2.length > 0, c1);
             return [...d1, ...d2];
         };
-        const found = qx([], false, all);
+        // The world model's ties are background: always in, never the explanation (no one doubts them).
+        const background = all.filter((id) => this.constraints.get(id)?.lazy);
+        const cands = all.filter((id) => !this.constraints.get(id)?.lazy);
+        const found = background.length && ok(cands) ? qx(background, false, cands) : qx([], false, cands);
         return all.filter((id) => found.includes(id));
     }
 

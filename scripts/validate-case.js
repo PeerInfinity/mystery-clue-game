@@ -253,6 +253,7 @@ const stateRows = [];
 {
     const placeIds = new Set((data.entities ?? []).filter((e) => e.kind === 'place').map((e) => e.id));
     for (const ps of data.state_places ?? []) for (const p of ps.places) if (!placeIds.has(p)) err(`place set ${ps.id}: ${p} is not a place`);
+    for (const sp of data.state_splits ?? []) if (!has(sp.by)) err(`split of ${sp.window}: unknown event ${sp.by}`);
     const trackIds = new Set();
     for (const t of data.states ?? []) {
         if (trackIds.has(t.id)) err(`${t.id}: declared twice`);
@@ -265,7 +266,7 @@ const stateRows = [];
     // JSON keeps the last of two equal keys: look for a window declared twice in the file's own lines.
     const statesFile = (main.parts ?? []).find((p) => (parts[p].states ?? []).length);
     if (statesFile) for (const line of fs.readFileSync(path.join(dir, statesFile), 'utf8').split('\n')) {
-        const ws = [...line.matchAll(/"(w\.[a-z0-9_]+)":/g)].map((m) => m[1]);
+        const ws = [...line.matchAll(/"(w\.[a-z0-9_.]+)":/g)].map((m) => m[1]);
         if (new Set(ws).size !== ws.length) err(`${statesFile}: a window declared twice in ${line.slice(0, 60)}`);
     }
     const filledBy = new Map();
@@ -354,7 +355,10 @@ for (const s of model.slots.values()) {
     if (s.latent) continue;
     const cands = quickOpen(s) ? twoValues(s) : batch.get(s.id) ?? s.domain;
     let status;
-    if (quickOpen(s)) {
+    if (s.facet === 'order') {
+        // The order of two events in one window: settled where the story or the world model fixes it, else open.
+        status = cands.length > 1 ? 'open' : `settled: ${cands[0]}`;
+    } else if (quickOpen(s)) {
         status = cands.length > 1 ? 'open' : `DETERMINED as ${cands[0]} though recorded open`;
         if (cands.length <= 1) warn(`slot ${s.id}: recorded as open but the evidence fixes it to ${cands[0]}`);
     } else if (Array.isArray(s.undetermined)) {

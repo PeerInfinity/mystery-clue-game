@@ -3,13 +3,16 @@
  "state_places": [
   {"id": "night", "text": "The places of Monday night on Dartmoor.", "places": ["straker_villa", "stable", "loft", "kings_pyland", "fatal_hollow", "moor", "mapleton", "invalid_villas", "gypsy_camp", "tavistock"]}
  ],
+ "state_splits": [
+  {"window": "w.tue_0700", "by": "e.wife_wakes", "why": "Mrs. Straker woke at the villa at seven and then went down to the stables."}
+ ],
  "state_conditions": [
   {"id": "stupefied", "prompt": "Was {0} stupefied?"}
  ],
  "states": [
   {"id": "st.straker.at", "of": "straker", "aspect": "location", "places": "night", "windows": {"w.tue_0100": "straker_villa", "w.tue_morning": "fatal_hollow"}},
-  {"id": "st.mrs_straker.at", "of": "mrs_straker", "aspect": "location", "places": "night", "windows": {"w.tue_0100": "straker_villa", "w.tue_0700": "straker_villa"}},
-  {"id": "st.other_lads.at", "of": "other_lads", "aspect": "location", "places": "night", "windows": {"w.tue_0700": "loft"}},
+  {"id": "st.mrs_straker.at", "of": "mrs_straker", "aspect": "location", "places": "night", "windows": {"w.tue_0100": "straker_villa", "w.tue_stable": "straker_villa", "w.tue_hollow": "straker_villa", "w.tue_blow": "straker_villa", "w.tue_after": "straker_villa", "w.tue_dawn": "straker_villa", "w.tue_0700.before.wife_wakes": "straker_villa"}},
+  {"id": "st.other_lads.at", "of": "other_lads", "aspect": "location", "places": "night", "windows": {"w.tue_0100": "loft", "w.tue_stable": "loft", "w.tue_hollow": "loft", "w.tue_blow": "loft", "w.tue_after": "loft", "w.tue_dawn": "loft", "w.tue_0700": "loft"}},
   {"id": "st.ned_hunter.at", "of": "ned_hunter", "aspect": "location", "places": "night", "windows": {"w.mon_2100": "stable", "w.tue_0700": "stable"}},
   {"id": "st.ned_hunter.stupefied", "of": "ned_hunter", "aspect": "condition", "condition": "stupefied", "windows": {"w.tue_0700": "true"}},
   {"id": "st.overcoat.held", "of": "overcoat", "aspect": "possession", "places": "night", "windows": {"w.tue_0100": "straker", "w.tue_morning": "fatal_hollow"}},

@@ -928,10 +928,12 @@ export class Game {
         // A state's question names its time window, whose label may describe what happened then: not before the
         // story reaches that window (as for a window offered as an answer).
         if (s.track) {
-            const w = (this.windowById ?? (this.windowById = new Map(this.model.windows.map((x) => [x.id, x])))).get(s.window);
+            const w = (this.windowById ?? (this.windowById = new Map(this.model.windows.map((x) => [x.id, x])))).get(s.root);
             if (w?.reveal && this.#paraOf(w.reveal) >= this.read) return false;
+            if (s.splitBy.some((e) => !this.knows(e))) return false; // a part of a window names the events that split it
         }
-        if ((owner.section === 'events' && !declared.has(slotId) && s.facet !== 'relation') || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
+        // An order question (before or after a splitting event) waits to be raised, like a declared one.
+        if ((owner.section === 'events' && !declared.has(slotId) && s.facet !== 'relation' && s.facet !== 'order') || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
         if (!this.slotRaisers) {
             this.slotRaisers = new Map();
             const add = (slot, test) => {

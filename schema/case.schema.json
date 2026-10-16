@@ -360,6 +360,30 @@
       "items": {
         "$ref": "#/$defs/stateTrack"
       }
+    },
+    "state_splits": {
+      "type": "array",
+      "description": "Splits of a window (or a part of one) at an event, into the part before and the part after it: <window>.before.<event> and <window>.after.<event>.",
+      "items": {
+        "type": "object",
+        "required": [
+          "window",
+          "by"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "window": {
+            "type": "string",
+            "pattern": "^w\\.[a-z0-9_.]+$"
+          },
+          "by": {
+            "$ref": "#/$defs/id"
+          },
+          "why": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -1786,7 +1810,7 @@
         "windows": {
           "type": "object",
           "propertyNames": {
-            "pattern": "^w\\.[a-z0-9_]+$"
+            "pattern": "^w\\.[a-z0-9_.]+$"
           },
           "additionalProperties": {
             "type": [

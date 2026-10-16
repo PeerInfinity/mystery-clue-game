@@ -177,9 +177,9 @@ export function render(f, name = (x) => x) {
 // {state: [name, thing, time]} (a declared state, format 0.3 world model: the thing's location `at`, its holder
 // `held`, or a condition by name, in one time window; `time` is a window id, '?w' bound to one, or a time slot such
 // as '?e.time', which grounds to a lookup over the thing's declared windows. A window the thing has no state for
-// is unconstrained: the comparison holds there. Values are folded into the track's domain (a place inside a listed
-// place reads as that place, any other as 'elsewhere'). It may be compared with a value (eq, ne), with a slot or
-// another state (same, diff).
+// is unconstrained: the comparison holds there. A place is folded to the nearest listed place containing it (a thing
+// in the bedroom is at the villa; the stable means the stable apart from its listed loft). It may be compared with a
+// value (eq, ne), with a slot or another state (same, diff).
 // Extra operators: {forall: [{var, kind|kinds|only|section}, body]}, {exists: [...]} expand over cards;
 // {only: [name, fixedArg..., [trueFor]]} sets the relation's last argument true for the listed cards and false
 // for every other card it ranges over.
@@ -189,7 +189,7 @@ export function render(f, name = (x) => x) {
 //   hasSlot(id), domainOf(slotId) -> values
 //   relation(name) -> {argValues: [ids[]...], slotId(args[]) -> slot id or null, outside: 'false'|'true'|'error'}
 //   cards(spec) -> card ids a quantifier ranges over ({kind|kinds|only|section})
-//   state(name, thing) -> {domain, slotFor(window) -> slot id or null, fold(value) -> value or null} or null
+//   state(name, thing) -> {domain, slotFor(window) -> slot id or null, overlaps(v), inside(v) -> domain values} or null
 //   isWindow(id)
 // Throws Error with a readable message when a variable is unbound, a facet is missing, etc.
 
@@ -350,61 +350,68 @@ export function ground(f, env) {
         else time = { slot: slotOf(t) };
         return { name, thing, track, time };
     };
-    // The state is (pos) or is not (!pos) the value v, a member of its domain; true wherever it is not declared.
-    const stateIs = (st, v, pos) => {
+    // The state takes one of `allowed` (a subset of its domain); true wherever it is not declared.
+    const stateIn = (st, allowed) => {
         if (!st.track) return TRUE;
+        const dom = st.track.domain;
+        const out = dom.filter((v) => !allowed.includes(v));
+        if (!out.length) return TRUE;
         if (st.time.window) {
             const id = st.track.slotFor(st.time.window);
-            return id ? { [pos ? 'eq' : 'ne']: [id, v] } : TRUE;
+            if (!id) return TRUE;
+            return allowed.length === 1 ? { eq: [id, allowed[0]] } : out.length === 1 ? { ne: [id, out[0]] } : { in: [id, allowed] };
         }
         const map = {};
         for (const w of env.domainOf(st.time.slot)) { const id = st.track.slotFor(w); if (id) map[w] = id; }
         if (!Object.keys(map).length) return TRUE;
-        // Outside the declared windows the lookup reads a value that makes it hold: `v` itself, or one never equal.
-        return { [pos ? 'index' : 'nindex']: [st.time.slot, map, v, pos ? v : '*'] };
+        // A lookup by the time slot: outside the declared windows it reads a value that never matches, so it holds.
+        if (allowed.length === 1) return { index: [st.time.slot, map, allowed[0], allowed[0]] };
+        return conj(out.map((v) => ({ nindex: [st.time.slot, map, v, '*'] })));
     };
     const conj = (parts) => {
         const kept = parts.filter((p) => !p.true);
         return kept.length === 0 ? TRUE : kept.length === 1 ? kept[0] : { and: kept };
     };
+    const without = (dom, xs) => dom.filter((v) => !xs.includes(v));
     const stateCmp = (op, st, val) => {
         if (!st.track) return TRUE;
         if (op === 'eq') {
-            const v = st.track.fold(val);
-            if (v === null) throw new Error(`${val} is not a value of ${st.name}(${st.thing})`);
-            return stateIs(st, v, true);
+            const ok = st.track.overlaps(val);
+            if (!ok.length) throw new Error(`${val} is not a value of ${st.name}(${st.thing})`);
+            return stateIn(st, ok);
         }
-        // "is not there": only a value of the domain itself says anything (not being in the bedroom leaves the villa).
-        return st.track.domain.includes(val) && val !== 'elsewhere' ? stateIs(st, val, false) : TRUE;
+        // "is not there": none of the places inside it (not being in the bedroom says nothing of the villa).
+        return stateIn(st, without(st.track.domain, st.track.inside(val)));
     };
     const stateVsSlot = (op, st, slot) => {
         if (!st.track) return TRUE;
-        const parts = [];
-        if (op === 'same') {
-            const groups = new Map();
-            for (const v of env.domainOf(slot)) {
-                const f = st.track.fold(v);
-                if (f === null) continue;
-                if (!groups.has(f)) groups.set(f, []);
-                groups.get(f).push(v);
-            }
-            for (const [f, vs] of groups) parts.push({ implies: [vs.length === 1 ? { eq: [slot, vs[0]] } : { in: [slot, vs] }, stateIs(st, f, true)] });
-        } else {
-            for (const v of env.domainOf(slot)) if (v !== 'elsewhere' && st.track.domain.includes(v)) parts.push({ implies: [{ eq: [slot, v] }, stateIs(st, v, false)] });
+        const groups = new Map();
+        for (const v of env.domainOf(slot)) {
+            const allowed = op === 'same' ? st.track.overlaps(v) : without(st.track.domain, st.track.inside(v));
+            const key = allowed.join('|');
+            if (!groups.has(key)) groups.set(key, { allowed, vs: [] });
+            groups.get(key).vs.push(v);
         }
-        return conj(parts.filter((p) => !p.implies[1].true));
+        const parts = [];
+        for (const { allowed, vs } of groups.values()) {
+            const then = stateIn(st, allowed);
+            if (then.true) continue;
+            parts.push({ implies: [vs.length === 1 ? { eq: [slot, vs[0]] } : { in: [slot, vs] }, then] });
+        }
+        return conj(parts);
     };
     const stateVsState = (op, a, b) => {
         if (!a.track || !b.track) return TRUE;
         if (!a.time.window || !b.time.window) throw new Error('two states compared must both be at a given window');
-        const ia = a.track.slotFor(a.time.window), ib = b.track.slotFor(b.time.window);
+        const ia = a.track.slotFor(a.time.window);
+        const ib = b.track.slotFor(b.time.window);
         if (!ia || !ib) return TRUE;
-        if (a.track.domain.join() === b.track.domain.join()) return { [op]: [ia, ib] };
+        if (a.track.domain.join('|') === b.track.domain.join('|')) return { [op]: [ia, ib] };
         const parts = [];
-        for (const v of a.track.domain) {
-            if (v === 'elsewhere') continue;
-            if (op === 'same') { const f = b.track.fold(v); if (f !== null) parts.push({ implies: [{ eq: [ia, v] }, { eq: [ib, f] }] }); }
-            else if (b.track.domain.includes(v)) parts.push({ implies: [{ eq: [ia, v] }, { ne: [ib, v] }] });
+        for (const u of a.track.domain) {
+            const allowed = op === 'same' ? b.track.overlaps(u) : without(b.track.domain, b.track.inside(u));
+            const then = stateIn(b, allowed);
+            if (!then.true) parts.push({ implies: [{ eq: [ia, u] }, then] });
         }
         return conj(parts);
     };

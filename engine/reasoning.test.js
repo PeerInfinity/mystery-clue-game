@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
 import { ground, isGround, varsOf } from './logic.js';
-import { instantiateRule, verifyInference, checkStep, buildModel } from './caseModel.js';
+import { instantiateRule, verifyInference, checkStep, activeConstraints } from './caseModel.js';
 import { Game, WAIT, BG_START, TRIVIAL } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
@@ -170,35 +170,31 @@ test('traits: a variable may range over the cards that carry a trait; the trait 
     assert.ok(t && t.kind === 'background' && t.term === 'Spiced' && t.para === first);
 });
 
-test('states: declared windows are slots; rule terms fold places, look up by time, and leave undeclared windows free', () => {
+test('states: declared windows are slots; the world model ties them to events; windows split at an event', () => {
     const s = model.slots.get('st.straker.at.tue_0100');
     assert.equal(s.on, 'straker');
     assert.equal(s.answer, 'straker_villa');
     assert.ok(s.domain.includes('elsewhere') && s.domain.includes('fatal_hollow') && !s.domain.includes('straker_bedroom'));
     assert.ok(!model.slots.has('st.straker.at.tue_stable'), 'sparse: only declared windows');
-    // The bedroom folds into the villa; a time slot becomes a lookup over the declared windows.
-    const at = instantiateRule(model, 'r.agent_is_there', { who: 'straker', act: 'e.straker_dresses' });
-    assert.ok(at.ok, at.error);
-    const villa = at.formula.implies[1].and.find((p) => p.implies[0].in?.[1].includes('straker_bedroom'));
-    assert.deepEqual(villa.implies[1].index.slice(0, 1), ['e.straker_dresses.time']);
-    assert.equal(villa.implies[1].index[2], 'straker_villa');
-    assert.equal(instantiateRule(model, 'r.stays_put', { thing: 'mrs_straker', from: 'w.tue_0100', to: 'w.tue_0700' }).formula.same[0], 'st.mrs_straker.at.tue_0100');
-    assert.match(instantiateRule(model, 'r.stays_put', { thing: 'mrs_straker', from: 'straker', to: 'w.tue_0700' }).error, /time window/);
-    // No declared window at the time asked: the rule says nothing there.
+    // A rule's state term: a window with no declared state says nothing.
     assert.deepEqual(ground({ same: [{ state: ['at', 'straker', 'w.tue_blow'] }, 'e.fatal_blow.place'] }, model.env), { true: true });
-    // With an open window at the stable hour, staying put in the loft until seven rules the lads out as the taker.
-    const data = structuredClone(model.data);
-    data.states.find((t) => t.id === 'st.other_lads.at').windows['w.tue_stable'] = null;
-    const m2 = buildModel(data);
-    assert.deepEqual(m2.errors, []);
-    const rules = [
-        instantiateRule(m2, 'r.agent_is_there', { who: 'other_lads', act: 'e.horse_led_out' }).formula,
-        instantiateRule(m2, 'r.stays_put', { thing: 'other_lads', from: 'w.tue_stable', to: 'w.tue_0700' }).formula,
-    ];
+    assert.equal(instantiateRule(model, 'r.stays_put', { thing: 'mrs_straker', from: 'w.tue_0100', to: 'w.tue_stable' }).formula.same[0], 'st.mrs_straker.at.tue_0100');
+    assert.match(instantiateRule(model, 'r.stays_put', { thing: 'mrs_straker', from: 'straker', to: 'w.tue_0700' }).error, /time window/);
+    // The world model's tie: whoever does a thing is where it is done (the stable is not its loft). It holds
+    // wherever a held card speaks of the thing's states.
+    const tie = model.constraints.get('k.world.other_lads.horse_led_out.agent');
+    assert.ok(activeConstraints(model, new Set(['c.lads_heard_nothing'])).includes(tie.id));
+    assert.ok(!activeConstraints(model, new Set(['c.stall_empty'])).includes(tie.id));
     const fixed = { 'e.horse_led_out.place': 'stable', 'e.horse_led_out.time': 'w.tue_stable' };
-    const active = ['k.c.lads_heard_nothing'];
-    assert.equal(m2.problem.consistent(active, { ...fixed, 'e.horse_led_out.agent': 'other_lads' }, { extra: rules }).ok, false);
-    assert.equal(m2.problem.consistent(active, { ...fixed, 'e.horse_led_out.agent': 'straker' }, { extra: rules }).ok, true);
-    // Without persistence the loft at seven says nothing about the stable hour.
-    assert.equal(m2.problem.consistent(active, { ...fixed, 'e.horse_led_out.agent': 'other_lads' }, { extra: rules.slice(0, 1) }).ok, true);
+    assert.equal(model.problem.consistent(['k.c.lads_heard_nothing', tie.id], { ...fixed, 'e.horse_led_out.agent': 'other_lads' }).ok, false);
+    assert.equal(model.problem.consistent(['k.c.lads_heard_nothing', tie.id], { ...fixed, 'e.horse_led_out.agent': 'straker' }).ok, true);
+    assert.equal(model.problem.consistent(['k.c.lads_heard_nothing'], { ...fixed, 'e.horse_led_out.agent': 'other_lads' }).ok, true);
+    // Seven o'clock split at Mrs. Straker's waking: she was at home before it, and the stable was found open after.
+    assert.ok(model.subwindows.has('w.tue_0700.before.wife_wakes'));
+    const ord = model.slots.get('ord.stable_found_open.wife_wakes');
+    assert.equal(ord.answer, 'after');
+    const found = model.constraints.get('k.world.mrs_straker.stable_found_open.agent');
+    const active = ['k.c.wife_woke_at_seven', 'k.c.stable_door_open', found.id];
+    assert.equal(model.problem.consistent(active, { [ord.id]: 'before' }).ok, false);
+    assert.equal(model.problem.consistent(active, { [ord.id]: 'after' }).ok, true);
 });

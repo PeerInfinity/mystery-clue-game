@@ -274,6 +274,25 @@ specific thing stay ground facts with a formula and no schema.
   declared answer is stated by a claim or appears in an inference's formula or rule application; uniqueness as for
   every slot. The report counts tracks and lists every state with what gives it.
 
+## As built (2026-10-16): the world's workings, splits and order (world model, step 2; Round 61)
+
+- **Places fold** to the nearest listed place that contains them: a listed place means itself apart from the
+  listed places inside it. A state holds **throughout** its time.
+- **Splits** (`state_splits: [{window, by, why}]`): a window or a part of one, split at an event into
+  `<parent>.before.<event>` and `<parent>.after.<event>`; a track may declare states at those parts. Every event
+  whose time no trusted clue puts elsewhere gets an **order slot** `ord.<event>.<splitter>` (before/after; answer
+  from `fabula_order`; open unless a clue asserts it). The validator reports order slots as settled or open,
+  never as a uniqueness failure.
+- **The world's ties** (`k.world.<thing>.<event>.<role>`, `k.world.<thing>.held.<window>`, `k.world.order.*`,
+  `k.world.split.*`): built by the engine, never written in the case. Agent or patient of an event is where it is
+  done, at the event's window (a lookup by its time slot) or in the part of a split window its order puts it in.
+  A holder is where the held thing is, and a thing held by a place lies there. Order runs through. A tie is active
+  where an active card speaks of the thing's states; the solver treats ties as lazy (checked after the rest) and
+  as background in explanations.
+- **Pruning (by the case's trusted clues):** no tie for an event a clue gives to someone else, puts in a window
+  with no declared state, or fully states (who, when and where); a stated place gives a one-branch tie. A player
+  who doubts that very clue loses those ties, never gains a wrong one.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
