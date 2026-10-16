@@ -1426,3 +1426,38 @@ Workstream 2 is done (Rounds 41–58). `docs/kickoff-world-model.md` hands the n
 `docs/world-model.md`: states (location, possession, condition) in the format, the bookkeeping re-derived with
 state rules, a minimal timeline in both layouts, and layers over theories. It carries the six `world-model`
 thoughts, the traps this session met and the items still open for Robert. `CLAUDE.md` points at it.
+
+## Round 60 (2026-10-16): world model, step 1 — states in the format
+
+- **Ruling (Robert): the shape as proposed.** One track per line in a new part `states.json` (one thing, one aspect,
+  its declared windows); each window a slot `st.<thing>.<at|held|condition>.<window>`; location over a named place set
+  folded through the places' `within` (the entities already carried it), plus `elsewhere`; possession over holders,
+  the set's places and `elsewhere`; conditions true/false. "Unknown" is no value: `null` for the case, an empty cell
+  for the player. The older state-like slots (`silver_blaze.hidden_at`, `.disguised`, `simpson.wounded`,
+  `simpson.out_in_storm`) stay as they are until step 2.
+- **Engine:** `engine/logic.js` grounds a schema term `{state: [name, thing, time]}`: at a window, the slot (or nothing
+  where none is declared); at a time slot (`?act.time`), a lookup over the declared windows whose outside value makes
+  the comparison hold, so a window with no state is unconstrained, and its denial fails there. `same` with a place
+  slot is expanded over that slot's values grouped by their folded place (the bedroom reads as the villa).
+  `engine/caseModel.js` builds the tracks (`model.stateTracks`, `env.state`); variable specs `{window: true}` and
+  `{condition: true}`. `engine/game.js`: a state's question also waits for its window's `reveal` line (its prompt
+  names the window).
+- **Rules** (`knowledge.json`, general, none applied yet): `r.agent_is_there`, `r.patient_is_there`,
+  `r.holder_with_held` (hard), `r.stays_put`, `r.condition_lasts` (default, with their `unless`). One place at a time
+  is the slot itself.
+- **Data:** seven tracks, eleven states, each from its claim's own line (nine claims gain a conjunct;
+  `c.hunter_stupor`, which asserted nothing, gains its `asserts`): Straker at one and in the morning, Mrs. Straker at
+  one and at seven, the lads at seven, Hunter at nine and at seven and stupefied at seven, the overcoat at one and in
+  the morning, the cravat in the morning.
+- **Validator and schema:** the three sections, the `state` term and the new variable specs in the schema; place
+  sets list places, a track's id matches its thing and aspect, no window twice, every declared answer stated by a
+  claim or derived by an inference; uniqueness as for every slot. The report counts the tracks and lists the states
+  with what gives each.
+- **Test:** `reasoning.test.js`, "states": sparse slots, the folding, the lookup by time, undeclared windows free;
+  on a copy with an open window at the stable hour, staying put in the loft until seven rules the lads out as the
+  taker, and without persistence it does not.
+- **Timings:** `npm run validate` 50 s before, 45–47 s after; `npm test` 221 s before, 207 s after (53 tests) (this machine
+  runs both slower than the figures of Round 58; same machine, before and after).
+- **Moved:** reveal and foreshadow logs: the five rule texts as background at ¶32 (four, with "found that he was
+  dressing") and ¶33 (`r.condition_lasts`, with the stupor). Case report: counts, the States section, eleven more
+  slots unique. Thoughts report and the gate listing: nothing.

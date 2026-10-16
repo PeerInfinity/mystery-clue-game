@@ -925,6 +925,12 @@ export class Game {
         // An event's own facets (who, what, where, when) show with it; a question declared on it (why was it done?)
         // waits, like any other, until the story raises it.
         const declared = this.declaredSlots ?? (this.declaredSlots = new Set((this.model.data.slots ?? []).map((x) => x.id)));
+        // A state's question names its time window, whose label may describe what happened then: not before the
+        // story reaches that window (as for a window offered as an answer).
+        if (s.track) {
+            const w = (this.windowById ?? (this.windowById = new Map(this.model.windows.map((x) => [x.id, x])))).get(s.window);
+            if (w?.reveal && this.#paraOf(w.reveal) >= this.read) return false;
+        }
         if ((owner.section === 'events' && !declared.has(slotId) && s.facet !== 'relation') || (owner.section === 'claims' && s.facet !== 'truth') || s.facet === 'identity') return true;
         if (!this.slotRaisers) {
             this.slotRaisers = new Map();

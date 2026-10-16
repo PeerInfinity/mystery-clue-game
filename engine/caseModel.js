@@ -16,6 +16,11 @@
 // RELATIONS (relations.json): acquainted(animal, person), knew_menu(person)…; every argument tuple is a slot
 //   `rel.<name>.<arg>.<arg>`. PROPOSITIONS (propositions.json): intermediate conclusions as boolean slots `p.<name>`,
 //   each a card; one with a `means` formula gets a definitional constraint tying it to the world.
+// STATES (states.json, the world model): one TRACK per thing and aspect (location `at`, possession `held`, or a
+//   named condition), declaring the time windows the case's logic turns on; each is a slot
+//   `st.<thing>.<name>.<window>` on the thing's card. Sparse: a window not declared has no slot, and a rule's state
+//   term is unconstrained there. Location and possession domains are a place set plus 'elsewhere' (and, for
+//   possession, the holders); a place's `within` folds it into the listed place that contains it.
 // Slots: one per event facet, per entity facet, per claim truth, per relation tuple, per proposition, plus the
 //   explicitly declared slots.
 // Constraints: one per claim that asserts something (premise: the claim itself), plus the authored reasoning
@@ -92,6 +97,8 @@ export function buildModel(data) {
         else if (spec.placeholder) out = entities.filter((e) => (e.flags ?? []).includes('placeholder') && (!(spec.kind || spec.kinds) || (spec.kinds ?? [spec.kind]).includes(e.kind))).map((e) => e.id); // a card standing for someone not yet identified
         else if (spec.section === 'event' || spec.section === 'events') out = (data.events ?? []).map((e) => e.id);
         else if (spec.kind || spec.kinds) out = domainFor({ kinds: spec.kinds ?? [spec.kind] });
+        else if (spec.window) out = windows.map((w) => w.id);
+        else if (spec.condition) out = (data.state_conditions ?? []).map((c) => c.id);
         else if (spec.trait) out = entities.filter((e) => !(e.flags ?? []).some((f) => EXCLUDED_FROM_DOMAINS.includes(f))).map((e) => e.id);
         else out = [];
         if (spec.trait) out = out.filter((id) => hasTrait(id, spec.trait));
@@ -183,6 +190,46 @@ export function buildModel(data) {
         }
         relations.set(r.id, { ...r, argValues, values, slotId, outside: r.outside ?? 'error' });
     }
+    // States: one track per thing and aspect, one slot per declared window.
+    const stateTracks = new Map();
+    {
+        const sets = new Map((data.state_places ?? []).map((x) => [x.id, x.places]));
+        const within = new Map(entities.filter((e) => e.within).map((e) => [e.id, e.within]));
+        const conditions = new Map((data.state_conditions ?? []).map((x) => [x.id, x]));
+        const windowLabel = new Map(windows.map((w) => [w.id, w.label]));
+        for (const t of data.states ?? []) {
+            const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.condition;
+            if (t.aspect === 'condition' && !conditions.has(t.condition)) errors.push(`${t.id}: unknown condition ${t.condition}`);
+            const places = typeof t.places === 'string' ? sets.get(t.places) : t.places ?? [];
+            if (!places) errors.push(`${t.id}: unknown place set ${t.places}`);
+            const domain = t.aspect === 'condition' ? ['true', 'false']
+                : [...new Set([...(t.aspect === 'possession' ? domainFor({ kinds: t.holders ?? ['person', 'animal', 'group'] }) : []), ...(places ?? []), 'elsewhere'])];
+            const fold = (v) => {
+                if (domain.includes(v)) return v;
+                if (t.aspect === 'condition') return null;
+                const seen = new Set();
+                for (let p = within.get(v); p && !seen.has(p); p = within.get(p)) { seen.add(p); if (domain.includes(p)) return p; }
+                return 'elsewhere';
+            };
+            const key = `${name}|${t.of}`;
+            if (stateTracks.has(key)) errors.push(`${t.id}: a second ${name} track for ${t.of}`);
+            const slotOfWindow = new Map();
+            const ask = t.aspect === 'location' ? `Where was {${t.of}}?` : t.aspect === 'possession' ? `Who had {${t.of}}?`
+                : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
+            for (const [w, answer] of Object.entries(t.windows ?? {})) {
+                if (!timeOrder.has(w)) { errors.push(`${t.id}: unknown window ${w}`); continue; }
+                const id = `${t.id}.${w.replace(/^w\./, '')}`;
+                slotOfWindow.set(w, id);
+                addSlot({
+                    id, on: t.of, facet: 'state', aspect: t.aspect, state: name, track: t.id, window: w,
+                    prompt: `${ask} (${windowLabel.get(w)})`, domain,
+                    answer, undetermined: answer === null ? true : undefined,
+                    labels: t.aspect === 'condition' ? undefined : { elsewhere: 'Somewhere else' },
+                });
+            }
+            stateTracks.set(key, { ...t, name, domain, fold, slotFor: (w) => slotOfWindow.get(w) ?? null });
+        }
+    }
     // Propositions: boolean slots, each on its own card.
     for (const p of data.propositions ?? []) {
         addSlot({
@@ -197,6 +244,8 @@ export function buildModel(data) {
         hasSlot: (id) => slots.has(id),
         domainOf: (id) => slots.get(id)?.domain ?? [],
         relation: (name) => relations.get(name) ?? null,
+        state: (name, thing) => stateTracks.get(`${name}|${thing}`) ?? null,
+        isWindow: (id) => timeOrder.has(id),
         cards: cardsOf,
     };
     const groundOrError = (owner, f, bind = {}) => {
@@ -303,7 +352,7 @@ export function buildModel(data) {
         }
     }
 
-    const model = { data, cards, slots, constraints, claimForms, relations, env, timeOrder, sceneOrder, windows, scenes, errors, problem: null, dynamic: new Map() };
+    const model = { data, cards, slots, constraints, claimForms, relations, stateTracks, env, timeOrder, sceneOrder, windows, scenes, errors, problem: null, dynamic: new Map() };
     if (!errors.length) rebuildProblem(model);
     model.relevant = relevantCards(model);
     // Verify every authored inference once (the report shows which are checked, which merely asserted).
@@ -360,7 +409,7 @@ export function instantiateRule(model, ruleId, bind = {}) {
     for (const [v, card] of Object.entries(bind)) {
         const spec = vars[v];
         if (!spec) return { ok: false, error: `the rule has no variable ?${v}` };
-        if (!model.cards.has(card) && !model.windows.some((w) => w.id === card)) return { ok: false, error: `${card} is not a card` };
+        if (!model.cards.has(card) && !model.windows.some((w) => w.id === card) && !(spec?.condition && model.env.cards(spec).includes(card))) return { ok: false, error: `${card} is not a card` };
         const allowed = model.env.cards(spec);
         if (!allowed.includes(card)) return { ok: false, error: `?${v} cannot be ${card}: it must be ${describeSpec(spec)}` };
     }
@@ -373,7 +422,7 @@ export function instantiateRule(model, ruleId, bind = {}) {
 }
 
 function describeSpec(spec) {
-    const what = spec.only ? `one of ${spec.only.join(', ')}` : spec.placeholder ? `a ${(spec.kinds ?? [spec.kind] ?? ['card']).join(' or ')} not yet identified` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
+    const what = spec.window ? 'a time window' : spec.condition ? 'a condition' : spec.only ? `one of ${spec.only.join(', ')}` : spec.placeholder ? `a ${(spec.kinds ?? [spec.kind] ?? ['card']).join(' or ')} not yet identified` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
     return spec.trait ? `${what} that is ${spec.trait}` : what;
 }
 

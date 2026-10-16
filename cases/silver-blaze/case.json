@@ -36,6 +36,7 @@
     "knowledge.json",
     "relations.json",
     "propositions.json",
+    "states.json",
     "slots.json",
     "constraints.json",
     "actions.json"

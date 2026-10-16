@@ -236,6 +236,44 @@ specific thing stay ground facts with a formula and no schema.
   `holmes`, `made` and `scores`; `game.score()` gives `{scored, made, possible}` (44 possible in Silver Blaze).
   The record is saved (`made`, save version 6). The UI is workstream 9.
 
+## As built (2026-10-16): states (world model, step 1; Round 60)
+
+- **`states.json`** (a case part; one track per line). A **track** is one thing in one aspect over the time windows the
+  case's logic turns on: `{"id": "st.<thing>.<name>", "of", "aspect": "location"|"possession"|"condition",
+  "condition"?, "places"?, "holders"?, "windows": {window: answer|null}}`, where `<name>` is `at`, `held` or the
+  condition's id. Each declared window is a slot `st.<thing>.<name>.<window without "w.">` on the thing's card
+  (`facet: 'state'`, with `track` and `window`). `null` is left open by the story. **Sparse:** a window not declared
+  has no slot. A second track for the same thing and aspect is an error.
+- **Domains.** Location: a named place set (`state_places`) or an inline list, plus `elsewhere` ("a place not
+  listed"). Possession: the holders (people, animals, groups by default; `holders` gives other kinds), the set's
+  places (lying there) and `elsewhere`. Condition: true/false, the condition named in `state_conditions` with its
+  prompt. A place's `within` (on its entity) folds it into the listed place that contains it: the bedroom reads
+  as the villa, the stable window as the stable, Mapleton's parlour as Mapleton, London as `elsewhere`.
+- **Unknown is not a value:** for the case it is `null`, for the player an empty cell.
+- **Claims fill states** by naming the slot in `asserts` (`{"eq": ["st.mrs_straker.at.tue_0700", "straker_villa"]}`),
+  quoted from the claim's own line. As with any value a clue fills in, the question shows only once the clue is
+  doubted; a state's question also waits for its window's `reveal` line, since the prompt names the window.
+- **Rules reach states** with a schema term `{"state": [name, thing, time]}`: `name` and `thing` are literals or
+  bound variables; `time` is a window, a variable bound to one (variable spec `{"window": true}`; a condition name
+  binds with `{"condition": true}`), or a time slot (`?e.time`), which grounds to a lookup over the thing's declared
+  windows. A window with no declared state is unconstrained: the lookup's outside value makes the comparison hold
+  (and its denial fail). Comparisons: `eq`/`ne` with a value (`eq` folds the value; `ne` says something only for a
+  value of the domain itself), `same`/`diff` with a slot (expanded over the slot's values, grouped by their folded
+  place) or with another state at a given window. A thing with no track is unconstrained too.
+- **Tying rules** (`knowledge.json`, shown from ¶32 and ¶33): `r.agent_is_there` and `r.patient_is_there` (hard:
+  whoever does a thing, or has it done to them, is where it is done when it is done), `r.stays_put` (default: a
+  thing stays where it is from one window to a later one unless moved), `r.holder_with_held` (hard: a holder is
+  where the held thing is), `r.condition_lasts` (default: a condition holds from its cause to its end). One place at
+  a time needs no rule: a state slot has one value. None is applied by an inference yet (step 2).
+- **Silver Blaze:** seven tracks, eleven states, all from claims: Straker at one (the villa) and in the morning (the
+  hollow); Mrs. Straker at one and at seven (the villa); the lads at seven (the loft); Hunter at nine and at seven
+  (the stable) and stupefied at seven (`c.hunter_stupor` gains its `asserts`); the overcoat held by Straker at one,
+  lying in the hollow in the morning; the cravat in Straker's hand in the morning. The older state-like slots
+  (`silver_blaze.hidden_at`, `.disguised`, `simpson.wounded`, `simpson.out_in_storm`) are unchanged until step 2.
+- **Validator:** place sets list places; a track's id matches its thing and aspect; no window twice on a line; a
+  declared answer is stated by a claim or appears in an inference's formula or rule application; uniqueness as for
+  every slot. The report counts tracks and lists every state with what gives it.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

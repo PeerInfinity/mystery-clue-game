@@ -305,6 +305,61 @@
       "items": {
         "$ref": "#/$defs/proposition"
       }
+    },
+    "state_places": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "places"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "text": {
+            "type": "string"
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        }
+      },
+      "description": "Named place sets a location or possession track ranges over (plus 'elsewhere')."
+    },
+    "state_conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "prompt"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The question, with {0} for the thing."
+          }
+        }
+      },
+      "description": "Conditions a condition track may name (true/false in each window)."
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stateTrack"
+      }
     }
   },
   "$defs": {
@@ -1471,7 +1526,7 @@
       ]
     },
     "term": {
-      "description": "A slot: its id, '?v.facet' (a slot of a bound card), or {rel: [name, arg...]} (a relation slot; an arg is a card id, '?v', or a slot whose value indexes the relation).",
+      "description": "A slot: its id, '?v.facet' (a slot of a bound card), or {rel: [name, arg...]} (a relation slot; an arg is a card id, '?v', or a slot whose value indexes the relation). Or {state: [name, thing, time]}: a declared state (location 'at', possession 'held', or a condition) of a card in a window; time is a window, '?w', or a time slot.",
       "oneOf": [
         {
           "type": "string",
@@ -1487,6 +1542,23 @@
             "rel": {
               "type": "array",
               "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
               "items": {
                 "type": "string"
               }
@@ -1541,6 +1613,14 @@
         "placeholder": {
           "type": "boolean",
           "description": "range over the cards standing for someone not yet identified (flag placeholder), of the given kind(s)"
+        },
+        "window": {
+          "type": "boolean",
+          "description": "range over the time windows"
+        },
+        "condition": {
+          "type": "boolean",
+          "description": "range over the declared state conditions"
         }
       }
     },
@@ -1654,6 +1734,98 @@
           "type": "string"
         }
       }
+    },
+    "stateTrack": {
+      "type": "object",
+      "required": [
+        "id",
+        "of",
+        "aspect",
+        "windows"
+      ],
+      "additionalProperties": false,
+      "description": "One thing in one aspect over the time windows the case declares: each window is a slot <id>.<window without 'w.'>; null = left open by the story.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^st\\.[a-z0-9_]+\\.[a-z0-9_]+$"
+        },
+        "of": {
+          "$ref": "#/$defs/id"
+        },
+        "aspect": {
+          "enum": [
+            "location",
+            "possession",
+            "condition"
+          ]
+        },
+        "condition": {
+          "type": "string"
+        },
+        "places": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          ]
+        },
+        "holders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/kind"
+          },
+          "description": "Possession: the kinds of card that may hold it (default person, animal, group)."
+        },
+        "windows": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^w\\.[a-z0-9_]+$"
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "aspect": {
+                "const": "condition"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "condition"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "aspect": {
+                "const": "location"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "places"
+            ]
+          }
+        }
+      ]
     }
   }
 }

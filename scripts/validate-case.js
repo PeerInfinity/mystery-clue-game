@@ -12,7 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { mergeCase, buildModel, activeConstraints, checkStep, verifyInference } from '../engine/caseModel.js';
-import { evaluate, literalsOf, render } from '../engine/logic.js';
+import { evaluate, literalsOf, render, slotsOf } from '../engine/logic.js';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { Story } from '../engine/story.js';
 import { Game } from '../engine/game.js';
@@ -245,6 +245,39 @@ for (const r of data.rules ?? []) {
     if (!r.schema) continue;
     for (const [v, spec] of Object.entries(r.schema.vars ?? {})) if (!model.env.cards(spec).length) err(`${r.id}: ?${v} ranges over nothing`);
     for (const c of Object.values(r.schema.vars ?? {}).flatMap((spec) => spec.only ?? [])) if (!has(c)) err(`${r.id}: only → unknown ${c}`);
+}
+// States (the world model): a track names a card and its aspect; a place set lists places; a track is declared
+// once per thing and aspect (the model refuses a second); every declared answer is quoted through a claim's own
+// line or derived by an inference (its formula or a rule application it lists).
+const stateRows = [];
+{
+    const placeIds = new Set((data.entities ?? []).filter((e) => e.kind === 'place').map((e) => e.id));
+    for (const ps of data.state_places ?? []) for (const p of ps.places) if (!placeIds.has(p)) err(`place set ${ps.id}: ${p} is not a place`);
+    const trackIds = new Set();
+    for (const t of data.states ?? []) {
+        if (trackIds.has(t.id)) err(`${t.id}: declared twice`);
+        trackIds.add(t.id);
+        if (!has(t.of)) err(`${t.id}: of → unknown ${t.of}`);
+        const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.condition;
+        if (t.id !== `st.${t.of}.${name}`) err(`${t.id}: a track's id is st.<thing>.<at|held|condition>, here st.${t.of}.${name}`);
+        if (t.aspect === 'location' && !t.places) err(`${t.id}: a location track needs its places`);
+    }
+    // JSON keeps the last of two equal keys: look for a window declared twice in the file's own lines.
+    const statesFile = (main.parts ?? []).find((p) => (parts[p].states ?? []).length);
+    if (statesFile) for (const line of fs.readFileSync(path.join(dir, statesFile), 'utf8').split('\n')) {
+        const ws = [...line.matchAll(/"(w\.[a-z0-9_]+)":/g)].map((m) => m[1]);
+        if (new Set(ws).size !== ws.length) err(`${statesFile}: a window declared twice in ${line.slice(0, 60)}`);
+    }
+    const filledBy = new Map();
+    const note = (slot, by) => { if (!filledBy.has(slot)) filledBy.set(slot, []); filledBy.get(slot).push(by); };
+    for (const c of data.claims ?? []) { const f = model.cards.get(c.id)?.asserts; if (f) for (const x of slotsOf(f)) note(x, c.id); }
+    for (const k of model.constraints.values()) if (!k.from_claim || k.inference) for (const x of slotsOf(k.formula)) note(x, k.inference ?? k.id);
+    for (const s of model.slots.values()) {
+        if (!s.track) continue;
+        const by = [...new Set(filledBy.get(s.id) ?? [])];
+        if (s.answer !== null && !by.length) err(`state ${s.id}: answered ${s.answer} but no claim states it and no inference derives it`);
+        stateRows.push({ slot: s, by });
+    }
 }
 // Traits: every trait a rule or relation ranges over is carried by some card; a card names each trait once.
 {
@@ -490,6 +523,7 @@ function writeReport() {
     out(`- slots: ${[...model.slots.values()].filter((s) => !s.latent).length}; constraints: ${allIds.length} (${count('constraints')} reasoning, the rest from claims); plus the player's other reading of each claim (${[...model.slots.values()].filter((s) => s.latent).length} latent truth slots)`);
     out(`- quotes: ${nQuotes}, all found in the story`);
     out(`- relations: ${count('relations')} (${[...model.slots.values()].filter((s) => s.facet === 'relation').length} slots); propositions: ${count('propositions')}`);
+    out(`- states: ${count('states')} tracks, ${stateRows.length} declared states (${stateRows.filter((r) => r.slot.answer === null).length} left open)`);
     out(`- inferences: ${inferenceRows.filter((r) => r.status === 'verified').length} verified by the engine from their premises, ${inferenceRows.filter((r) => r.status === 'asserted').length} asserted (format 0.3 migration in progress)`);
     const unique = slotRows.filter((r) => r.status === 'unique').length;
     const open = slotRows.filter((r) => r.slot.undetermined).length;
@@ -561,6 +595,19 @@ function writeReport() {
         out(`| \`${r.step.id}\` | ${r.step.premises.join(', ')} | ${what} | ${r.ok === null ? 'not checkable' : r.ok ? '✓' : '✗'} |`);
     }
     out();
+    if (stateRows.length) {
+        out('## States');
+        out();
+        out('Declared states (the world model), by track: each answer is quoted through a claim or derived by an inference.');
+        out();
+        out('| State | Window | Answer | Given by | Status |');
+        out('|---|---|---|---|---|');
+        for (const r of stateRows) {
+            const status = slotRows.find((x) => x.slot.id === r.slot.id)?.status ?? '';
+            out(`| \`${r.slot.track}\` | ${r.slot.window} | ${r.slot.answer ?? '—'} | ${r.by.join(', ') || '—'} | ${status} |`);
+        }
+        out();
+    }
     out('## Slots');
     out();
     out('| Slot | Answer | Status |');

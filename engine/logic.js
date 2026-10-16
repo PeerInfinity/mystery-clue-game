@@ -174,6 +174,12 @@ export function render(f, name = (x) => x) {
 // A schema term may be: a slot id; '?v' (a variable bound to a card); '?v.facet' (a slot of the bound card);
 // {rel: [name, arg...]} (a relation slot; an arg is a card id, '?v', or a slot whose VALUE indexes the relation,
 // in which case the formula is expanded over that slot's domain); {lit: window} as before.
+// {state: [name, thing, time]} (a declared state, format 0.3 world model: the thing's location `at`, its holder
+// `held`, or a condition by name, in one time window; `time` is a window id, '?w' bound to one, or a time slot such
+// as '?e.time', which grounds to a lookup over the thing's declared windows. A window the thing has no state for
+// is unconstrained: the comparison holds there. Values are folded into the track's domain (a place inside a listed
+// place reads as that place, any other as 'elsewhere'). It may be compared with a value (eq, ne), with a slot or
+// another state (same, diff).
 // Extra operators: {forall: [{var, kind|kinds|only|section}, body]}, {exists: [...]} expand over cards;
 // {only: [name, fixedArg..., [trueFor]]} sets the relation's last argument true for the listed cards and false
 // for every other card it ranges over.
@@ -183,6 +189,8 @@ export function render(f, name = (x) => x) {
 //   hasSlot(id), domainOf(slotId) -> values
 //   relation(name) -> {argValues: [ids[]...], slotId(args[]) -> slot id or null, outside: 'false'|'true'|'error'}
 //   cards(spec) -> card ids a quantifier ranges over ({kind|kinds|only|section})
+//   state(name, thing) -> {domain, slotFor(window) -> slot id or null, fold(value) -> value or null} or null
+//   isWindow(id)
 // Throws Error with a readable message when a variable is unbound, a facet is missing, etc.
 
 export const SCHEMA_OPERATORS = [...OPERATORS, 'forall', 'exists', 'only'];
@@ -194,6 +202,8 @@ export function varsOf(f, out = new Set()) {
     const term = (x) => {
         if (isVar(x)) out.add(x.slice(1).split('.')[0]);
         else if (x && typeof x === 'object' && x.rel) x.rel.slice(1).forEach(term);
+        else if (x && typeof x === 'object' && x.state) x.state.forEach(term);
+        else if (x && typeof x === 'object' && x.lit) term(x.lit);
     };
     const keys = Object.keys(f);
     if (keys.length !== 1) throw new Error(`a formula has exactly one operator key, got ${JSON.stringify(f)}`);
@@ -217,7 +227,7 @@ export function varsOf(f, out = new Set()) {
 
 /** True when a formula uses no variables, relations or quantifiers: it needs no grounding. */
 export function isGround(f) {
-    const plain = (x) => typeof x === 'string' ? !isVar(x) : !(x && typeof x === 'object' && x.rel);
+    const plain = (x) => typeof x === 'string' ? !isVar(x) : !(x && typeof x === 'object' && (x.rel || x.state || isVar(x.lit)));
     const op = Object.keys(f)[0];
     const a = f[op];
     switch (op) {
@@ -326,6 +336,78 @@ export function ground(f, env) {
         }
         return { [op === 'eq' ? 'index' : 'nindex']: [key, map, val, rel.outside === 'error' ? null : rel.outside] };
     };
+    // ---- states (world model) ----
+    const TRUE = { true: true };
+    const isState = (x) => !!(x && typeof x === 'object' && Array.isArray(x.state));
+    const stateOf = (x) => {
+        if (x.state.length !== 3) throw new Error(`a state term takes [name, thing, time], got ${JSON.stringify(x)}`);
+        const [n, th, t] = x.state;
+        const name = card(n), thing = card(th);
+        const track = env.state?.(name, thing) ?? null; // no track: nothing declared, nothing constrained
+        let time;
+        if (typeof t === 'string' && !isVar(t) && env.isWindow?.(t)) time = { window: t };
+        else if (isVar(t) && !t.slice(1).includes('.')) time = { window: card(t) };
+        else time = { slot: slotOf(t) };
+        return { name, thing, track, time };
+    };
+    // The state is (pos) or is not (!pos) the value v, a member of its domain; true wherever it is not declared.
+    const stateIs = (st, v, pos) => {
+        if (!st.track) return TRUE;
+        if (st.time.window) {
+            const id = st.track.slotFor(st.time.window);
+            return id ? { [pos ? 'eq' : 'ne']: [id, v] } : TRUE;
+        }
+        const map = {};
+        for (const w of env.domainOf(st.time.slot)) { const id = st.track.slotFor(w); if (id) map[w] = id; }
+        if (!Object.keys(map).length) return TRUE;
+        // Outside the declared windows the lookup reads a value that makes it hold: `v` itself, or one never equal.
+        return { [pos ? 'index' : 'nindex']: [st.time.slot, map, v, pos ? v : '*'] };
+    };
+    const conj = (parts) => {
+        const kept = parts.filter((p) => !p.true);
+        return kept.length === 0 ? TRUE : kept.length === 1 ? kept[0] : { and: kept };
+    };
+    const stateCmp = (op, st, val) => {
+        if (!st.track) return TRUE;
+        if (op === 'eq') {
+            const v = st.track.fold(val);
+            if (v === null) throw new Error(`${val} is not a value of ${st.name}(${st.thing})`);
+            return stateIs(st, v, true);
+        }
+        // "is not there": only a value of the domain itself says anything (not being in the bedroom leaves the villa).
+        return st.track.domain.includes(val) && val !== 'elsewhere' ? stateIs(st, val, false) : TRUE;
+    };
+    const stateVsSlot = (op, st, slot) => {
+        if (!st.track) return TRUE;
+        const parts = [];
+        if (op === 'same') {
+            const groups = new Map();
+            for (const v of env.domainOf(slot)) {
+                const f = st.track.fold(v);
+                if (f === null) continue;
+                if (!groups.has(f)) groups.set(f, []);
+                groups.get(f).push(v);
+            }
+            for (const [f, vs] of groups) parts.push({ implies: [vs.length === 1 ? { eq: [slot, vs[0]] } : { in: [slot, vs] }, stateIs(st, f, true)] });
+        } else {
+            for (const v of env.domainOf(slot)) if (v !== 'elsewhere' && st.track.domain.includes(v)) parts.push({ implies: [{ eq: [slot, v] }, stateIs(st, v, false)] });
+        }
+        return conj(parts.filter((p) => !p.implies[1].true));
+    };
+    const stateVsState = (op, a, b) => {
+        if (!a.track || !b.track) return TRUE;
+        if (!a.time.window || !b.time.window) throw new Error('two states compared must both be at a given window');
+        const ia = a.track.slotFor(a.time.window), ib = b.track.slotFor(b.time.window);
+        if (!ia || !ib) return TRUE;
+        if (a.track.domain.join() === b.track.domain.join()) return { [op]: [ia, ib] };
+        const parts = [];
+        for (const v of a.track.domain) {
+            if (v === 'elsewhere') continue;
+            if (op === 'same') { const f = b.track.fold(v); if (f !== null) parts.push({ implies: [{ eq: [ia, v] }, { eq: [ib, f] }] }); }
+            else if (b.track.domain.includes(v)) parts.push({ implies: [{ eq: [ia, v] }, { ne: [ib, v] }] });
+        }
+        return conj(parts);
+    };
     const cmp = (op, t, vals) => lift([t], ([a]) => {
         if (a.slot) return { [op]: [a.slot, vals] };
         // The term resolved to a fixed value (a relation outside its range): compare constants.
@@ -340,15 +422,27 @@ export function ground(f, env) {
         const a = f[op];
         switch (op) {
             case 'true': case 'false': return f;
-            case 'eq': case 'ne': return lookup(op, a[0], value(a[1])) ?? cmp(op, resolve(a[0]), value(a[1]));
-            case 'in': case 'nin': return cmp(op, resolve(a[0]), a[1].map(value));
-            case 'same': case 'diff': return lift([resolve(a[0]), resolve(a[1])], ([x, y]) => {
+            case 'eq': case 'ne':
+                if (isState(a[0])) return stateCmp(op, stateOf(a[0]), value(a[1]));
+                return lookup(op, a[0], value(a[1])) ?? cmp(op, resolve(a[0]), value(a[1]));
+            case 'in': case 'nin':
+                if (isState(a[0])) throw new Error('a state is compared with eq, ne, same or diff');
+                return cmp(op, resolve(a[0]), a[1].map(value));
+            case 'same': case 'diff':
+                if (isState(a[0]) && isState(a[1])) return stateVsState(op, stateOf(a[0]), stateOf(a[1]));
+                if (isState(a[0]) || isState(a[1])) {
+                    const [st, other] = isState(a[0]) ? [a[0], a[1]] : [a[1], a[0]];
+                    const r = resolve(other);
+                    if (!r.slot) throw new Error('a state is compared with a plain slot');
+                    return stateVsSlot(op, stateOf(st), r.slot);
+                }
+                return lift([resolve(a[0]), resolve(a[1])], ([x, y]) => {
                 if (x.slot && y.slot) return { [op]: [x.slot, y.slot] };
                 if (x.slot || y.slot) return { [op === 'same' ? 'eq' : 'ne']: [x.slot ?? y.slot, x.slot ? y.value : x.value] };
                 return (x.value === y.value) === (op === 'same') ? { true: true } : { false: true };
             });
             case 'before': case 'not_after': {
-                const t = (x) => (x && typeof x === 'object' && x.lit ? x : slotOf(x));
+                const t = (x) => (x && typeof x === 'object' && x.lit ? { lit: card(x.lit) } : isVar(x) && !x.slice(1).includes('.') ? { lit: card(x) } : slotOf(x));
                 return { [op]: [t(a[0]), t(a[1])] };
             }
             case 'and': case 'or': return { [op]: a.map(g) };
