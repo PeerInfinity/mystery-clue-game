@@ -581,7 +581,7 @@ the horse is (`t14.3`).
 - `t62.3` **DEFAULT·period** · *fair* · careful · from `t62.1`, `bk.gypsies` · undercuts `t62.2` · Holmes ¶114
   Under the period belief their leaving is to be expected either way, so it points at nothing. It fits the police
   theory only by its timing.
-- `t62.4` **DROP** · *fair* · careful · from `t62.3`, `bk.gypsies`, `bk.famous_horse`, `t46.3` · drops `t62.2` · Holmes ¶114
+- `t62.4` **DROP** · *fair* · careful · from `t62.1`, `t62.3`, `bk.gypsies`, `bk.famous_horse`, `t46.3` · drops `t62.2` · Holmes ¶114
   They couldn't sell a horse everyone knows, taking him would bring the police down on them, and the theory
   explains nothing about the curry or the dog.
 

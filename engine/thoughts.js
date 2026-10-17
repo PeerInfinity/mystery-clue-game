@@ -33,7 +33,7 @@ const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag)
 // The deduction-type tags: each such thought becomes one authored inference (short chains, Q1).
 export const DEDUCTION = ['INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY'];
 // A TEST that concludes something (the costume went to another woman) may name its inference too (Round 46).
-const CAN_NAME = [...DEDUCTION, 'TEST', 'WEIGH', 'SOURCE']; // WEIGH and SOURCE: a belief weighed (workstream 4, Round 87)
+const CAN_NAME = [...DEDUCTION, 'TEST', 'WEIGH', 'SOURCE', 'DROP']; // WEIGH and SOURCE: a belief weighed (workstream 4, Round 87); DROP: a candidate dropped, "not X" (Round 96)
 export const NO_INFERENCE = ['workstream-3', 'action', 'world-model', 'absence'];
 
 /**

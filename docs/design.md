@@ -2580,3 +2580,24 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Thoughts report:** "Dealt later than the reader has it": none (was 2). Explained date misses 5 → 4
     (`t122.3`'s note is gone: dealt ¶122, as the reader has it).
   - **Gates:** `t123.2` at ¶146 is `t122.3`; nothing moves.
+
+## Round 96 (2026-10-17): review batch 3 — the gypsies, argued as Holmes and the reader argue it
+
+- **The fault** (review, `t62.3`): `r.gypsies_avoid_trouble` read "a band that has gone did not take the horse with
+  it", so `k.gypsies_did_not_take_him` concluded from their departure. The reader's `t62.3` says the departure
+  points at nothing (under the period belief they would leave either way), and Holmes (¶114) argues from what they
+  would risk: "They could not hope to sell such a horse. They would run a great risk and gain nothing".
+- **Data:**
+  - `r.gypsies_avoid_trouble` (still flagged a stereotype): "(A prejudice of the period.) Gypsies were said to keep
+    clear of anything that would bring the police on them: they would not steal a horse they could never sell."
+    Quoted from both of Holmes's lines; its schema says a band camped near does not hide the horse.
+  - `k.gypsies_did_not_take_him` (verified): from the band camped near the hollow (`c.gypsies_camped`), the
+    famous horse no one could sell (`r.famous_horse_unsellable`) and the rule. No longer from their departure.
+- **Annotation:** `t62.3` gets `no_inference: workstream-3` (the departure undercut, ws 3's); `t62.4` (DROP) names
+  the inference and cites `t62.1`; `t114.3` maps it in place of the horse-instinct step.
+- **Checker:** a DROP thought may name an inference (a dropped candidate is a conclusion, "not X").
+- **Moved:**
+  - **Reveal and foreshadow logs:** the rule's new text at ¶19; the inference's new label at its gate.
+  - **Case report:** quotes 1036 → 1037; the inference's rule binding; the route row is `t62.4`'s.
+  - **Thoughts report:** deduction-type thoughts 53 → 54 (a DROP that names one), reasons `workstream-3` 2 → 3.
+  - **Gates:** ¶114 `t62.3` → `t62.4`, same inference.
