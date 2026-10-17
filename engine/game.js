@@ -76,6 +76,10 @@ export const OPTIONS = {
     irrelevant: ['none', 'few', 'half', 'most', 'all'],
 };
 // The options that only mean something while the player works out the answers.
+// What a clash sets aside first (Game.#clashWeight, docs/clashes.md): the classes, lightest first, and within the
+// clues, how a clue was told (anything else, seen, found or written, weighs most).
+export const CLASH_CLASSES = ['others-inference', 'heuristic', 'statement', 'inference'];
+const CLASH_TOLD = { testimony: 0, inference: 0, report: 1, admission: 2 };
 export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'hints', 'kind', 'connect'];
 const IRRELEVANT_SHARE = { none: 0, few: 0.25, half: 0.5, most: 0.75, all: 1 };
 export const PRESETS = {
@@ -1802,34 +1806,38 @@ export class Game {
     /**
      * The clashes among what the player trusts: minimal sets of active clues that cannot all hold, found one at a
      * time, each set aside (its claims read as doubted) before looking for the next. Claims are tried last, so a
-     * clash rests on as few claims as it can. Cached, and incremental: a clash whose clues are all still active
-     * still clashes, so only new ones are searched for. Each: {ids, claims}.
+     * clash rests on as light a member as it can. Cached, and incremental: a clash whose clues are all still active
+     * still clashes, so only new ones are searched for. Each: {ids, claims, aside, why}: `aside` the cards set
+     * aside, `why` their class (CLASH_CLASSES), `tie` when more than one weighed least.
      */
     clashes() {
         const active = this.activeConstraints();
         const key = active.join('|');
         if (this.clashCache?.key === key) return this.clashCache.list;
-        // Doubtable: a trusted clue or inference. A clash sets aside what weighs least, by where it came from (never
-        // by whether it is true): a story's clue first, then an inference someone else stated, and last one the
-        // player built or Holmes drew.
-        // A rule application counts as part of its inference (workstream 3: a character's step the true story
-        // defeats is false): caught in a clash, it is set aside with the inference, at the inference's weight.
+        // Doubtable: a trusted clue or inference. A rule application counts as part of its inference (workstream 3:
+        // a character's step the true story defeats is false): caught in a clash, it is set aside with the inference,
+        // at the inference's weight.
         const ownerOf = (id) => trustedClaim(this.model, id) ?? this.model.constraints.get(id).doubt_with ?? null;
         const isClaim = (id) => !!ownerOf(id);
+        const weights = new Map();
         const weight = (id) => {
-            const inf = this.model.constraints.get(id).inference;
-            if (!inf) return 0;
-            const how = this.inferenceHow.get(inf);
-            return how?.how === 'stated' && how.by !== 'holmes' ? 1 : 2;
+            if (!weights.has(id)) weights.set(id, this.#clashWeight(ownerOf(id), this.model.constraints.get(id).inference));
+            return weights.get(id);
         };
+        const lighter = (a, b) => weight(a)[0] - weight(b)[0] || weight(a)[1] - weight(b)[1];
         const list = [];
         let set = [...active];
         const setAside = (c) => {
             const doubtable = c.ids.filter(isClaim);
-            const least = Math.min(...doubtable.map(weight));
-            const drop = new Set(doubtable.length ? doubtable.filter((id) => weight(id) === least) : c.ids);
+            // One member is enough to break a minimal clash: the lightest goes, and on a tie every tied member (the
+            // game has no ground to choose between them).
+            const least = doubtable.reduce((m, id) => (m === null || lighter(id, m) < 0 ? id : m), null);
+            const drop = new Set(doubtable.length ? doubtable.filter((id) => lighter(id, least) === 0) : c.ids);
             // A card set aside goes whole: its trusted reading and its rule applications.
             const gone = new Set([...drop].map(ownerOf).filter(Boolean));
+            c.aside = [...gone];
+            c.why = least ? CLASH_CLASSES[weight(least)[0]] : null;
+            c.tie = gone.size > 1;
             set = set.filter((id) => !drop.has(id) && !gone.has(ownerOf(id)));
             for (const claim of gone) {
                 const doubted = this.model.claimForms.get(claim)?.doubted;
@@ -1840,8 +1848,8 @@ export class Game {
             if (c.ids.every((id) => set.includes(id))) { list.push(c); setAside(c); }
         }
         while (!this.model.problem.consistent(set).ok) {
-            const byWeight = (w) => set.filter((id) => isClaim(id) && weight(id) === w);
-            const ids = this.model.problem.explainConflict([...set.filter((id) => !isClaim(id)), ...byWeight(2), ...byWeight(1), ...byWeight(0)]);
+            // The heaviest are tried first and the lightest last, so a clash rests on as light a member as it can.
+            const ids = this.model.problem.explainConflict([...set.filter((id) => !isClaim(id)), ...set.filter(isClaim).sort((a, b) => lighter(b, a))]);
             const c = { ids, claims: [...new Set(ids.map(ownerOf).filter(Boolean))] };
             list.push(c);
             setAside(c);
@@ -1850,6 +1858,24 @@ export class Game {
         }
         this.clashCache = { key, list, working: set };
         return list;
+    }
+
+    /**
+     * How much a card caught in a clash weighs: [class, within it], lightest given up first (docs/clashes.md, Round
+     * 108). Never by whether it is true, only by what the player can see:
+     *   0 an inference someone other than Holmes stated (the police's, Gregory's);
+     *   1 an inference of the player's or Holmes's that applies a heuristic (a rule of thumb, held without ground);
+     *   2 a clue: by how it was told, someone's word (or their inference stated as fact), then a report, then an
+     *     admission, then what was seen, found or written;
+     *   3 the player's or Holmes's other inferences.
+     */
+    #clashWeight(owner, inference) {
+        const card = this.model.cards.get(owner);
+        if (!inference) return [2, Math.max(0, ...(card?.attested ?? []).map((a) => CLASH_TOLD[a.via] ?? 3))];
+        const how = this.inferenceHow.get(inference);
+        if (how?.how === 'stated' && how.by !== 'holmes') return [0, 0];
+        const rules = card?.section === 'applied' ? [card.rule] : (card?.rules ?? []).map((r) => r.rule);
+        return [rules.some((r) => this.model.cards.get(r)?.strength === 'heuristic') ? 1 : 3, 0];
     }
 
     /** What the player trusts, with the claims caught in a clash set aside (read as doubted). */

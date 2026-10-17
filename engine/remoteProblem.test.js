@@ -40,7 +40,7 @@ test('a slow solver call goes to the worker, with progress, and the retry finds 
         const game = await settle(() => new Game(model, { difficulty: MEDIUM }), () => model.problem);
         while (game.read < 60) await settle(() => game.advance(), () => model.problem);
         assert.equal(game.read, 60, 'a retried advance reads each paragraph once');
-        const res = await settle(() => game.strike('e.horse_led_out.agent', 'other_lads'), () => model.problem);
+        const res = await settle(() => game.strike('e.opium_added.agent', 'holmes'), () => model.problem);
         assert.ok(res.ok, JSON.stringify(res));
         assert.ok(Array.isArray(await settle(() => game.clashes(), () => model.problem)));
     } finally {

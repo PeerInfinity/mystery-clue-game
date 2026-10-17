@@ -19,6 +19,8 @@ then acquainted(dog, visit.agent)
 Applying the rule means binding its variables to cards. The engine grounds the schema into an ordinary
 formula over slots (`ground()` in `engine/logic.js`) and the solver uses it like any constraint. A rule also
 has a `strength` (`hard`, `default`, `heuristic`) and may list `unless` (its named defeaters) for display.
+A clash sets aside an inference that applies a `heuristic` before a clue (`docs/clashes.md`, Round 109), so strength
+is authored as the rule's general reliability, never by whether its use in this case is true.
 
 **Relations are slots.** `relations.json` declares relations such as `acquainted(animal, person)` or
 `knew_menu(person)`; each argument tuple becomes a slot `rel.<name>.<arg>.<arg>` (default domain

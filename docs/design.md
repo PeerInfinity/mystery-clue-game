@@ -2917,3 +2917,35 @@ and belief (workstream 4). It carries the open items and this session's traps. `
 - **Robert:** agreed to all of it. The clash system is a convenience of the lower difficulties and need not be
   perfect.
 - **Moved:** nothing (documents only).
+
+## Round 109 (2026-10-17): clashes, step 1 — the weighing
+
+- **Engine** (`Game.clashes`, `#clashWeight`, `CLASH_CLASSES`): a member caught in a clash weighs `[class, within]`,
+  and the lightest gives way first. The classes:
+  - an inference someone other than Holmes stated;
+  - an inference of the player's or Holmes's that applies a `heuristic`;
+  - a clue, ordered within by how it was told: someone's word (testimony, or an inference stated as fact), then a
+    report, then an admission, then anything seen, found or written;
+  - the player's or Holmes's other inferences.
+
+  One member is set aside, the lightest. On a tie every tied member goes, and the clash says so. The search tries
+  members heaviest first, so a clash rests on as light a member as it can. Each clash now carries `aside`, `why`
+  (its class) and `tie`. Nothing reads the answer key.
+- **Played** (Easy, the whole story, building nothing): every card set aside is false. At ¶46 the police's "took
+  the horse to steal it" goes, and the hope of early exercise (false) stays until Holmes's chain at ¶104. At ¶104
+  Hunter's charge goes, and Simpson's admission stays (before, both went). A player who doubts Holmes's curry step
+  keeps Simpson's lodging at ¶182, and the police's "Simpson drugged him" goes (before, the lodging went and the
+  police's two steps stayed to the end). That replay takes 17 s, against 64 s before: fewer clashes are found
+  along the way.
+- **Left as a tie:** a player who builds the police's "Simpson drugged him" (¶40) beside Holmes's dish step holds
+  both as their own, so both go. A doubt of either resolves it.
+- **Test** (`clashes.test.js`, new, about 30 s): the passive player loses no true card, and the police and Hunter
+  cases above; the doubter of the curry step; the tie, and its resolution by a doubt. Every other clash test is
+  unchanged and passes.
+- **An expectation that changed:** `remoteProblem.test.js` drove a Medium game to ¶60 and crossed out "the other
+  lads" for who led the horse out. That cross-out rested on the police's "Simpson took the horse", which ¶46 now
+  sets aside (the hope of early exercise stays). At ¶60 nothing a passive player trusts rules anyone out for that
+  question. The test is about the worker round-trip, so it now crosses out Holmes as the one who added the opium.
+- **`docs/format-0.3.md`:** rule strength is authored as the rule's general reliability (a heuristic now gives way
+  in a clash).
+- **Moved:** nothing in the reveal and foreshadow logs, the case report, the thoughts report or the gates.
