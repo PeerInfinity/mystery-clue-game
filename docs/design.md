@@ -2894,3 +2894,26 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   working), what workstream 3 gives a better rule, the questions the paper must answer, and the traps of Rounds
   60–106. It supersedes `docs/kickoff-workstream-3.md`. `CLAUDE.md` points at it.
 - **Moved:** nothing (documents only).
+
+## Round 108 (2026-10-17): how clashes weigh what they set aside — agreed (`docs/clashes.md`)
+
+- **Measured** (a scratch script, four players over the whole story on Easy: one builds everything; one is passive
+  and keeps the police's account; one doubts Holmes's curry step; one applies one culprit from ¶4). Today's rule
+  loses true cards:
+  - Simpson's admission with Hunter's charge (¶104);
+  - Simpson's lodging to the police's steps (¶60, ¶182);
+  - with one culprit applied, the empty stall and the open door (¶102), and "the horse kicked him" (¶219).
+
+  Which minimal clash is found depends on the search order as much as on the weights. The kickoff's first case
+  (`c.simpson_came_for_information`) no longer arises since Round 104.
+- **Proposed** (the paper):
+  - Q1: four classes, the lowest given up first: others' inferences; the player's heuristics; statements
+    (testimony, then report, then admission); the player's and Holmes's inferences;
+  - Q2: "never by truth" kept;
+  - Q3: one member set aside, ties all; Easy says which and why;
+  - Q4: Medium and Hard unchanged;
+  - Q5: `r.one_culprit` an applied heuristic with a formula; `t68.3` to workstream 6;
+  - an order of work in three steps.
+- **Robert:** agreed to all of it. The clash system is a convenience of the lower difficulties and need not be
+  perfect.
+- **Moved:** nothing (documents only).
