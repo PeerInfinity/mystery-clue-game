@@ -2834,3 +2834,33 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     (Q6, deferred); premise disagreements 1 → 2 (`t36.2` cites Hunter's charge, where the reader takes his eating;
     the inference rests on the analysed remains, ¶37); date misses explained 4 → 5.
   - **Gates:** nothing.
+
+## Round 105 (2026-10-17): workstream 3, step 4 — the exceptions the annotation counts, and their scoring
+
+- **Annotation** (`thoughts.json`): `raises: [{target, exception}]`, the plays that count for a thought. The field
+  is named for the action (as `notices` and `files` are), not `undercuts` as the paper had it: that is already a
+  relation type on thoughts.
+  - `t34.3` (the sleepers against `k.dog_knew_the_visitor`), now with Holmes ¶219 (his "not barked enough to
+    arouse", `t219.1`); mirrored in `reading-annotated.md`;
+  - `t36.2` (could not have seen it, against `k.police_simpson_drugged`), Holmes ¶218;
+  - `t62.3` (gone anyway, against `k.gregory_gypsies`), Holmes ¶114;
+  - `t56.1` (the poisoning and the cravat items of Gregory's case) and `t218.3` (the accomplice): recorded, with no
+    Holmes paragraph, so they cannot score.
+- **Checker** (`engine/thoughts.js`): the target is an inference, the exception a named one of a rule it applies.
+  The report's new "Exceptions raised" table: where each exception shows, Holmes's paragraph, whether it can score.
+- **Engine** (`Game.raiseScores`, `raiseScore`): Q5 as agreed, in the shape of the notice scores. A raise (a
+  reservation or a defeat) scores when made before the thought's first Holmes paragraph; nothing counts in Trivial;
+  nothing gates.
+- **Test** (`defeasibility.test.js`): two checker errors; the gypsies raised at ¶62 score against ¶114, and are saved;
+  the accomplice is recorded and never scores.
+- **The kickoff's "ws 3" thoughts, each held or given a reason:**
+  - held: `t34.3` (a reservation, scored), `t36.2` (an inference and a defeat, scored), `t62.3` (the same),
+    `t37.16` (the accomplice, a reservation, never scored), `t35.6` (the parts of Round 88; inference-as-fact stays
+    recorded), `t40.6` (mapped; no police step rests on the storm), `t64.3` (the case holds the corrected default
+    already);
+  - partial: `t56.1`, two of its four items (the stick against one blow is a strain, workstream 6; the cravat's
+    history is the clutch exception, counted);
+  - given a reason: `t29.3` (Gregory's asserted conditional, no rule), `t32.4` (a gloss with no content);
+  - deferred by Robert (Q6): `t4.2`, `t68.3`, still `no_inference: workstream-3`.
+- **Moved:** thoughts report: the "Exceptions raised" table (six rows, three can score). Logs, case report, gates:
+  nothing.

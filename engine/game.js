@@ -1007,6 +1007,26 @@ export class Game {
         return { noticed: rows.filter((r) => r.noticed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.holmes !== null && r.holmes > r.para).length, of: rows.length };
     }
 
+    /**
+     * The exceptions the annotation counts (thoughts with `raises`, workstream 3): each thought with Holmes's
+     * paragraph (null if he never takes it up), where the player first raised one of its exceptions against its
+     * inference (a reservation or a defeat; null if not), and whether that was before Holmes's (it scores). Nothing
+     * counts in Trivial.
+     */
+    raiseScores() {
+        return (this.model.data.thoughts ?? []).filter((t) => t.raises?.length).map((t) => {
+            const at = [...this.raised.values()].filter((r) => t.raises.some((x) => x.target === r.id && x.exception === r.exception)).map((r) => r.para);
+            const raised = this.autoSolves() || !at.length ? null : Math.min(...at);
+            const holmes = t.holmes && !t.holmes.never && t.holmes.paras?.length ? t.holmes.paras[0] : null;
+            return { thought: t.id, raises: t.raises, para: t.para, holmes, raised, scores: raised !== null && holmes !== null && raised < holmes };
+        });
+    }
+    /** In aggregate: steps seen through, and those before Holmes, out of those he takes apart. */
+    raiseScore() {
+        const rows = this.raiseScores();
+        return { raised: rows.filter((r) => r.raised !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.holmes !== null).length, of: rows.length };
+    }
+
     // ---------- inferences ----------
     /** The inferences the player holds (built, stated to them, or in Trivial worked out for them). */
     heldInferences() { return [...this.inferences.filter((k) => this.knows(k.id)).map((k) => k.id), ...this.concluded.map((c) => c.id).filter((id) => this.knows(id))]; }

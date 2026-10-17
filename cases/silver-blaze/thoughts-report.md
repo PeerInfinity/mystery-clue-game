@@ -56,6 +56,19 @@ NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice
 | `t84.7` | `c.milliner_bill` | ¶84 | ¶225 | yes |
 | `t189.1` | `c.odds_shortened` | ¶189 | ¶189 | no |
 
+## Exceptions raised
+
+Thoughts whose raising of an exception against an inference counts (`raises`). A raise, a reservation or a defeat, scores when made before Holmes's paragraph; one with no Holmes paragraph is recorded and cannot score.
+
+| Thought | Against | Exception | Shows from | Holmes | Can score |
+|---|---|---|---|---|---|
+| `t34.3` | `k.dog_knew_the_visitor` | barked_unheard | ¶34 | ¶219 | yes |
+| `t36.2` | `k.police_simpson_drugged` | could_not_see | ¶36 | ¶218 | yes |
+| `t56.1` | `k.police_simpson_drugged` | could_not_see | ¶36 | never | no |
+| `t56.1` | `k.police_stick_killed` | his_before | ¶60 | never | no |
+| `t62.3` | `k.gregory_gypsies` | gone_anyway | ¶62 | ¶114 | yes |
+| `t218.3` | `k.drugger_took_the_horse` | accomplice | ¶218 | never | no |
+
 ## Short chains
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.

@@ -128,6 +128,14 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         if (t.notices && t.tag !== 'NOTICE') err(`${t.id}: only a NOTICE thought lists the cards it notices`);
         // An event card too (Round 98): the odd thing may be that something happened at all (the horse taken, not lamed in his stall).
         for (const x of t.notices ?? []) if (!['claims', 'entities', 'events'].includes(model?.cards.get(x)?.section ?? (caseIds.has(x) ? 'claims' : null))) err(`${t.id}: notices ${x}, which is not a clue, entity or event card`);
+        // The exceptions whose raising counts for a thought (workstream 3, Round 105): a named exception of a rule
+        // that one of the target inference's applications applies.
+        for (const x of t.raises ?? []) {
+            const k = inferenceById.get(x.target);
+            if (!k) { err(`${t.id}: raises an exception against ${x.target}, which is not in constraints.json`); continue; }
+            const rules = new Map((model?.data.rules ?? []).map((r) => [r.id, r]));
+            if (!(k.rules ?? []).some((u) => (rules.get(u.rule)?.unless ?? []).some((e) => e?.id === x.exception))) err(`${t.id}: ${x.exception} is not a named exception of a rule ${x.target} applies`);
+        }
         if (t.inference !== undefined) {
             if (!CAN_NAME.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${CAN_NAME.join(', ')} do)`);
             else if (!inferenceById.has(t.inference)) err(`${t.id}: inference ${t.inference} is not in constraints.json`);

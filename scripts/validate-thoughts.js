@@ -52,6 +52,26 @@ if (r.dateGaps.length) {
         }
     } else out.push('None.');
 }
+{
+    // Exceptions raised (workstream 3, Round 105): the plays that count for a thought, from where the exception shows.
+    const rows = data.thoughts.filter((t) => t.raises);
+    const game = new (await import('../engine/game.js')).Game(model);
+    const fromPara = (x) => {
+        const use = (model.data.constraints.find((k) => k.id === x.target)?.rules ?? []).find((u) => (model.cards.get(u.rule)?.unless ?? []).some((e) => e?.id === x.exception));
+        if (!use) return null;
+        const e = model.cards.get(use.rule).unless.find((y) => y?.id === x.exception);
+        return Math.max(game.ruleAt.get(use.rule) ?? -1, e.source?.length ? model.story.find(e.source[0])?.para ?? Infinity : -1);
+    };
+    out.push('', '## Exceptions raised', '', 'Thoughts whose raising of an exception against an inference counts (`raises`). A raise, a reservation or a defeat, scores when made before Holmes\'s paragraph; one with no Holmes paragraph is recorded and cannot score.', '');
+    if (rows.length) {
+        out.push('| Thought | Against | Exception | Shows from | Holmes | Can score |', '|---|---|---|---|---|---|');
+        for (const t of rows) for (const x of t.raises) {
+            const h = t.holmes && !t.holmes.never ? t.holmes.paras?.[0] : undefined;
+            const from = fromPara(x);
+            out.push(`| \`${t.id}\` | \`${x.target}\` | ${x.exception} | ${from === null ? '—' : `¶${from}`} | ${h === undefined ? 'never' : `¶${h}`} | ${h !== undefined && from !== null && h > from ? 'yes' : 'no'} |`);
+        }
+    } else out.push('None.');
+}
 const c = r.chains;
 const fmt = (p) => (p === Infinity ? 'never' : p === null ? '—' : `¶${p}`);
 out.push('', '## Short chains', '', 'Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought\'s own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.', '');

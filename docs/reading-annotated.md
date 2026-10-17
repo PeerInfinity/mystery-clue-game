@@ -306,7 +306,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   **Nobody mentions the dog.** Someone came in the night and took out a horse, and the dog did nothing anyone
   heard. Most first-time readers miss this. It is the hardest move in the story, because nothing in the text
   points at the gap.
-- `t34.3` **WEIGH** · *fair* · careful · undercuts `t34.2`
+- `t34.3` **WEIGH** · *fair* · careful · undercuts `t34.2` · Holmes ¶219
   reads "for they are both sound sleepers"
   This is the text's own defeater: the dog might have barked unheard. But the lads sleep in the loft over the
   harness-room, close enough that loud barking would be hard to sleep through. It weakens `t34.2` without

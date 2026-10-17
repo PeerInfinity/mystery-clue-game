@@ -174,3 +174,29 @@ test('a clash sets aside an inference whole, its rule applications with it (step
     const working = new Set(game.workingConstraints());
     assert.ok(!working.has('k.gregory_gypsies#rule1') && !working.has('k.police_stick_killed#rule1'), 'the applications went with them');
 });
+
+test('raising an exception scores before Holmes takes the step apart; the checker knows the plays (step 4)', async () => {
+    const { checkThoughts } = await import('./thoughts.js');
+    const data = JSON.parse(fs.readFileSync(`${base}/thoughts.json`, 'utf8'));
+    const bad = { ...data, thoughts: data.thoughts.map((t) => (t.id === 't62.3' ? { ...t, raises: [{ target: 'k.gregory_gypsies', exception: 'accomplice' }, { target: 'k.nothing', exception: 'x' }] } : t)) };
+    const errors = checkThoughts(bad, model).errors;
+    assert.ok(errors.includes('t62.3: accomplice is not a named exception of a rule k.gregory_gypsies applies'), errors.join('\n'));
+    assert.ok(errors.includes('t62.3: raises an exception against k.nothing, which is not in constraints.json'));
+
+    const game = readTo(paraOf('On Tuesday they were gone'));
+    assert.deepEqual(game.raiseScore(), { raised: 0, scored: 0, possible: 3, of: 5 });
+    game.raise('k.gregory_gypsies', 1, 'gone_anyway');
+    const row = game.raiseScores().find((r) => r.thought === 't62.3');
+    assert.equal(row.holmes, paraOf('These people always clear out'));
+    assert.ok(row.scores, 'a reservation made before Holmes\'s ¶114 scores');
+    assert.deepEqual(game.raiseScore(), { raised: 1, scored: 1, possible: 3, of: 5 });
+    const again = new Game(model);
+    again.load(game.save());
+    assert.equal(again.raiseScore().scored, 1, 'the paragraph it was raised at is saved');
+    // The accomplice is recorded, and can never score: Holmes never takes it up.
+    const late = readTo(ACCESS);
+    late.suspect('k.police_simpson_took_horse');
+    late.raise(DRUGGER, 1, 'accomplice');
+    const acc = late.raiseScores().find((r) => r.thought === 't218.3');
+    assert.ok(acc.raised === ACCESS && acc.holmes === null && !acc.scores);
+});

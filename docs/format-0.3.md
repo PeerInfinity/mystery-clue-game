@@ -497,6 +497,18 @@ specific thing stay ground facts with a formula and no schema.
     (`p.gypsies_leave_on_trouble`, given by the period belief `r.gypsies_clear_out`, ¶62, in
     `k.gypsies_would_leave_anyway`, `t62.3`).
 
+## As built (2026-10-17): exceptions raised, scored (workstream 3, step 4; Round 105)
+
+- **`raises: [{target, exception}]`** on a thought: the plays (an exception raised against an inference) that count
+  for it. The thoughts checker requires the target to be an inference and the exception a named one of a rule it
+  applies; the report lists each with where the exception shows, Holmes's paragraph and whether it can score.
+- **`Game.raiseScores()` / `raiseScore()`:** a raise, a reservation or a defeat, scores when made before the thought's
+  first Holmes paragraph; nothing counts in Trivial; nothing gates. In aggregate: raised, scored, possible (those with
+  a Holmes paragraph), of.
+- **Silver Blaze:** `t34.3` (the sleepers, against the dog step; Holmes ¶219, from `t219.1`), `t36.2` (could not have
+  seen it, against the police's first step; ¶218), `t62.3` (gone anyway, against Gregory's; ¶114) can score;
+  `t56.1` (Gregory's case, two of its items) and `t218.3` (the accomplice) are recorded and cannot.
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's
