@@ -1979,3 +1979,47 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   the chain (the question, Hunter going for the dog, her flight), citing those two clues. His leaning in, told as
   happening while she ran, stays open on both sides of her flight.
 - **Timing:** `npm test` 61 tests, 128 s.
+
+## Round 76 (2026-10-16): step C, 1a — intention: aims, tied to the purposes of acts; the man who found the horse
+
+- **Format** (`states.json` `state_aims`; aspect `intention`, track `st.<thing>.aims`; schema and validator):
+  - the aims are one vocabulary with the purposes of acts: information, injure, steal, exercise, find the way,
+    lead the horse home, hide it, keep it safe, rob;
+  - an intention track ranges over them, with an aim checked against the list.
+- **Engine** (`caseModel.js` `aimTies`, in `trackTies` and `windowTies`): built in, whoever does an act with a
+  `purpose` slot has that purpose as their aim at its time, for the purpose values that are aims. On the board
+  and the cards an aim is pencilled ("was trying …") and committed like a condition. Card text: "John Straker was
+  trying to injure the horse (…)".
+- **Data:**
+  - **Straker:** `st.straker.aims` at the stable hour = injure, derived through the tie from why the horse was taken
+    out.
+  - **The split:** `state_splits` gains dawn at `e.brown_turns_back`.
+  - **The man who found the horse:** `st.track_man.aims`, before his turning = lead home, after it open.
+  - **The inference:** `k.track_man_changed_his_mind` (Holmes; asserted: which way a track went is not a facet,
+    so the engine cannot derive the aim from it), from `c.double_track_loops` and the new default rule
+    `r.leads_where_he_means`.
+  - **The thought:** `t123.2` maps to it, with a date note: the tracks' claim ends at ¶124, one paragraph on.
+  - **The annotation's background:** `bk.leading_intent` maps to the rule.
+- **Changed from the plan** (`docs/knowledge-intention.md`, data plan):
+  - **The aims are the track man's, not Brown's.** At ¶123 the reader does not yet know it was Brown (the boots
+    tell it at ¶146).
+  - **The aim after the turning is left open.** "To hide" is learned a paragraph later.
+  - **Step 1 is split.** The money and watch, and "not a robbery" (`t78.2`), become 1b: they need possession to
+    carry over windows (`r.stays_put` is for places only).
+- **Moved:**
+  - **Report:**
+    - slots 621 → 656, constraints 330 → 428, rules 96 → 97, quotes 1012 → 1013;
+    - states 22 → 25 (1 open), asserted inferences 10 → 11;
+    - 33 order questions at dawn, all open: the new split asks one for every event no clue puts elsewhere;
+    - their order ties.
+  - **Reveal log:**
+    - the rule as background at ¶122;
+    - the inference at ¶146, where Holmes tells it;
+    - the man's two aim questions there too.
+  - **Foreshadow log:** the rule at ¶122 (untold words: means, changed).
+  - **Gates:** a new gate at ¶146, `t123.2` needing `k.track_man_changed_his_mind`: Holmes's own deduction, stated
+    there.
+  - **Thoughts report:** `t123.2` gains an inference (41 of 49); one premise disagreement remains. `t124.2` cites
+    `t123.2`, whose inference is not among its premises. Left for Robert: the annotation's chain, not the data, is
+    the question.
+- **Cost:** `npm run validate` 34 s → 47 s and `npm test` 128 s → 149 s (62 tests), from the dawn split's order questions and ties.

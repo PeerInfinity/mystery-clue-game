@@ -227,3 +227,18 @@ test("order questions: an event's part proven on the case's split; the player's 
     assert.ok(!model.subwindows.has('w.mon_2110.before.edith_flees') && !model.slots.has('ord.stranger_at_window.edith_flees'));
     assert.ok(model.slots.has('ord.edith_runs_to_window.edith_flees'), 'a stated order stays');
 });
+
+test("aims (intention): an act's purpose is its agent's aim then; the man who found the horse meant to lead it home, then turned back", () => {
+    const solved = new Game(model, { difficulty: 'trivial', autoPace: 'logic' });
+    while (!solved.finished()) solved.advance();
+    assert.equal(solved.settled('st.straker.aims.tue_stable'), 'injure', 'from why the horse was taken out');
+    assert.equal(solved.settled('st.track_man.aims.tue_dawn.before.brown_turns_back'), 'lead_home');
+    assert.equal(solved.settled('st.track_man.aims.tue_dawn.after.brown_turns_back'), null, 'what he meant afterwards is not told here');
+    // Pencilled and worded like any state; an aim is one of the case's aims.
+    const game = new Game(model, { difficulty: MEDIUM });
+    while (game.read < 80) game.advance();
+    assert.ok(game.pencilPlace('straker', 'w.tue_stable', 'injure', { aspect: 'aims' }));
+    assert.ok(!game.pencilPlace('straker', 'w.tue_stable', 'stable', { aspect: 'aims' }));
+    assert.deepEqual(game.cardTimeline('straker').lines.find((l) => l.time === 'w.tue_stable').aimsPencil.map((m) => m.value), ['injure']);
+    assert.equal(game.stateText('straker', 'w.tue_stable', 'aims', 'injure'), 'John Straker was trying to injure the horse (Tuesday, after 1 a.m. — at the stable)');
+});

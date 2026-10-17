@@ -355,6 +355,28 @@
       },
       "description": "Conditions a condition track may name (true/false in each window)."
     },
+    "state_aims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "label": {
+            "type": "string",
+            "description": "What the person is trying to do, as an answer: 'To lead the horse home'."
+          }
+        }
+      },
+      "description": "Aims an intention track ranges over (what a person is trying to do), one vocabulary with the purposes of acts: an act's purpose is its agent's aim at its time."
+    },
     "states": {
       "type": "array",
       "items": {
@@ -1789,7 +1811,8 @@
           "enum": [
             "location",
             "possession",
-            "condition"
+            "condition",
+            "intention"
           ]
         },
         "condition": {

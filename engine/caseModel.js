@@ -270,6 +270,10 @@ export function buildModel(data) {
         const within = new Map(entities.filter((e) => e.within).map((e) => [e.id, e.within]));
         const up = (p) => { const out = []; for (let q = within.get(p); q && !out.includes(q); q = within.get(q)) out.push(q); return out; };
         const conditions = new Map((data.state_conditions ?? []).map((x) => [x.id, x]));
+        // Aims (step 5, intention): what a person is trying to do. One vocabulary with the purposes of acts, so that an
+        // act's purpose is its agent's aim at its time (trackTies).
+        const aims = (data.state_aims ?? []).map((x) => x.id);
+        const aimLabels = Object.fromEntries((data.state_aims ?? []).map((x) => [x.id, x.label]));
         const windowLabel = new Map(windows.map((w) => [w.id, w.label]));
         const timeLabel = (id) => {
             if (timeOrder.has(id)) return windowLabel.get(id);
@@ -278,18 +282,18 @@ export function buildModel(data) {
         };
         // A track, and its windows (each a slot); `addWindow` serves the player's opened states too (openState).
         makeTrack = (t) => {
-            const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.condition;
+            const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.condition;
             if (t.aspect === 'condition' && !conditions.has(t.condition)) errors.push(`${t.id}: unknown condition ${t.condition}`);
             const places = typeof t.places === 'string' ? sets.get(t.places) : t.places ?? [];
             if (!places) errors.push(`${t.id}: unknown place set ${t.places}`);
-            const domain = t.aspect === 'condition' ? ['true', 'false']
+            const domain = t.aspect === 'condition' ? ['true', 'false'] : t.aspect === 'intention' ? aims
                 : [...new Set([...(t.aspect === 'possession' ? domainFor({ kinds: t.holders ?? ['person', 'animal', 'group'] }) : []), ...(places ?? []), 'elsewhere'])];
             // A listed place stands for itself apart from the listed places inside it (the stable apart from its
             // loft): a thing at a place is at the nearest listed place containing it, or 'elsewhere'. `overlaps(v)`:
             // the value a thing at v takes; `inside(v)`: the values a thing NOT at v cannot take.
             const fold = (v) => {
                 if (domain.includes(v)) return v;
-                if (t.aspect === 'condition') return null;
+                if (t.aspect === 'condition' || t.aspect === 'intention') return null;
                 for (const p of up(v)) if (domain.includes(p)) return p;
                 return 'elsewhere';
             };
@@ -299,7 +303,7 @@ export function buildModel(data) {
             if (stateTracks.has(key)) errors.push(`${t.id}: a second ${name} track for ${t.of}`);
             const slotOfTime = new Map();
             const ask = t.aspect === 'location' ? `Where was {${t.of}}?` : t.aspect === 'possession' ? `Who had {${t.of}}?`
-                : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
+                : t.aspect === 'intention' ? `What was {${t.of}} trying to do?` : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
             const times = [];
             const addWindow = (w, answer, extra = {}) => {
                 const id = `${t.id}.${w.replace(/^w\./, '')}`;
@@ -310,7 +314,7 @@ export function buildModel(data) {
                     splitBy: subwindows.get(w)?.path.map(([, e]) => e) ?? [],
                     prompt: `${ask} (${timeLabel(w)})`, domain,
                     answer, undetermined: answer === null ? true : undefined,
-                    labels: t.aspect === 'condition' ? undefined : { elsewhere: 'Somewhere else' },
+                    labels: t.aspect === 'condition' ? undefined : t.aspect === 'intention' ? aimLabels : { elsewhere: 'Somewhere else' },
                     ...extra,
                 });
                 return id;
@@ -819,6 +823,7 @@ function trackTies(ctx, t) {
             }
         }
     }
+    if (t.name === 'aims') for (const k of aimTies(ctx, t.of, t.times)) world(k.id, k.label, k.formula);
     if (t.name === 'held') {
         const place = stateTracks.get(`at|${t.of}`);
         for (const w of t.times) {
@@ -868,6 +873,7 @@ function windowTies(ctx, thing, name, w) {
             }
         }
     }
+    if (name === 'aims') for (const k of aimTies(ctx, thing, [w])) tie(k.id, k.label, k.formula);
     // Holders and the held, in this window: the opened thing as either.
     for (const t of stateTracks.values()) {
         if (t.name !== 'held' || !t.slotFor(w)) continue;
@@ -902,9 +908,10 @@ export function openState(model, thing, name, w) {
     }
     if (!ctx.isTime(w)) throw new Error(`unknown window ${w}`);
     const conditions = (model.data.state_conditions ?? []).map((c) => c.id);
-    if (!['at', 'held', ...conditions].includes(name)) throw new Error(`unknown aspect ${name}`);
+    const aims = (model.data.state_aims ?? []).length ? ['aims'] : [];
+    if (!['at', 'held', ...aims, ...conditions].includes(name)) throw new Error(`unknown aspect ${name}`);
     if (!model.cards.has(thing)) throw new Error(`unknown card ${thing}`);
-    const aspect = name === 'at' ? 'location' : name === 'held' ? 'possession' : 'condition';
+    const aspect = name === 'at' ? 'location' : name === 'held' ? 'possession' : name === 'aims' ? 'intention' : 'condition';
     const set = model.data.state_places?.[0]?.id;
     const track = existing ?? ctx.makeTrack({ id: `st.${thing}.${name}`, of: thing, aspect, ...(aspect === 'condition' ? { condition: name } : { places: set }), windows: {} });
     const slot = track.addWindow(w, null, { opened: true });
@@ -1028,4 +1035,34 @@ export function closeSplit(model, w, by) {
     for (const id of o.slots) model.slots.delete(id);
     for (const id of o.ties) model.constraints.delete(id);
     rebuildProblem(model);
+}
+
+/**
+ * Whoever does an act with a purpose has that purpose as their aim at its time (intention, step 5): for each event
+ * with a `purpose` slot that `thing` may be the agent of, and each of these windows (or parts) it may fall in, its
+ * purpose values that are aims fix the aim there. [{id, label, formula}]
+ */
+function aimTies(ctx, thing, windows) {
+    const { data, slots, timeOrder, subwindows, stated, stateTracks } = ctx;
+    const track = stateTracks.get(`aims|${thing}`);
+    const out = [];
+    for (const e of data.events ?? []) {
+        const purpose = slots.get(`${e.id}.purpose`);
+        if (!purpose || !slots.get(`${e.id}.agent`)?.domain.includes(thing) || !slots.has(`${e.id}.time`)) continue;
+        const who = stated.get(`${e.id}.agent`);
+        if (who !== undefined && who !== thing) continue;
+        const when = stated.get(`${e.id}.time`);
+        const values = purpose.domain.filter((v) => track.domain.includes(v));
+        if (!values.length) continue;
+        const parts = [];
+        for (const w of windows) {
+            const root = timeOrder.has(w) ? w : subwindows.get(w).root;
+            if (when !== undefined && when !== root) continue;
+            const conds = inTimeConds(ctx, e.id, w);
+            if (!conds) continue;
+            for (const v of values) parts.push({ implies: [{ and: [{ eq: [`${e.id}.agent`, thing] }, ...conds, { eq: [purpose.id, v] }] }, { eq: [track.slotFor(w), v] }] });
+        }
+        if (parts.length) out.push({ id: `k.world.${thing}.${e.id.slice(2)}.aim`, label: `Whoever does a thing for a purpose is trying to do that, when he does it (${thing}, ${e.id}).`, formula: parts.length === 1 ? parts[0] : { and: parts } });
+    }
+    return out;
 }

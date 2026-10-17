@@ -573,6 +573,7 @@ const thingChip = (x, time) => {
     return markChip(x.thing, time, x.value, name, x);
 };
 const placeName = (v) => esc(v === 'elsewhere' ? 'somewhere else' : shortName(v, 24));
+const aimName = (v) => esc((model.data.state_aims ?? []).find((a) => a.id === v)?.label.replace(/^To /, 'to ') ?? v);
 /** A mark's status, as a class and a title (proven, ruled out with a proof, or excluded by the clues when greying). */
 const STATUS = {
     proven: ['mark-proven', 'You proved it'],
@@ -638,6 +639,9 @@ function cardTimelineHtml(id) {
                 if (k.value !== null) bits.push(markChip(id, l.time, k.value, yes(k.value), { given: true }));
                 for (const m of k.pencil) bits.push(markChip(id, l.time, m.value, yes(m.value), m, { aspect: k.id, commit }));
             }
+            if (l.aims || l.aimsPencil.length) bits.push('<span class="small muted">trying</span>');
+            if (l.aims) bits.push(markChip(id, l.time, l.aims, aimName(l.aims), { given: true }));
+            for (const m of l.aimsPencil.filter((x) => x.value !== l.aims || x.struck)) bits.push(markChip(id, l.time, m.value, aimName(m.value), m, { aspect: 'aims', commit }));
             for (const e of l.events) bits.push(`<div class="ev">• ${evLink(e.event)}</div>`);
         } else {
             for (const x of l.things) bits.push(markChip(x.thing, l.time, x.value, `${esc(shortName(x.thing, 24))}${x.value !== id ? ` <span class="small">(${placeName(x.value)})</span>` : ''}`, x, { commit: layer === 'mine' }));
@@ -654,9 +658,12 @@ function cardTimelineHtml(id) {
         // What to pencil: where it was, who had it, or one of the case's conditions.
         const held = (k) => !game.isHidden(k) && (model.cards.get(k)?.kind === 'place' || ['person', 'animal', 'group'].includes(model.cards.get(k)?.kind));
         const conds = model.data.state_conditions ?? [];
-        const aspects = `<select id="cpen-aspect">${layerOpt('at', 'was at', cp.aspect)}${layerOpt('held', 'was held by', cp.aspect)}${conds.map((c) => layerOpt(c.id, `was ${c.id}?`, cp.aspect)).join('')}</select>`;
+        const aims = model.data.state_aims ?? [];
+        const person = ['person', 'group'].includes(model.cards.get(id)?.kind);
+        const aspects = `<select id="cpen-aspect">${layerOpt('at', 'was at', cp.aspect)}${layerOpt('held', 'was held by', cp.aspect)}${person && aims.length ? layerOpt('aims', 'was trying', cp.aspect) : ''}${conds.map((c) => layerOpt(c.id, `was ${c.id}?`, cp.aspect)).join('')}</select>`;
         const values = cp.aspect === 'at' ? [['', 'where…'], ...[...game.unlocked.keys()].filter((x) => model.cards.get(x)?.kind === 'place' && !game.isHidden(x)).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'somewhere else']]
             : cp.aspect === 'held' ? [['', 'who, or where it lay…'], ...[...game.unlocked.keys()].filter(held).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'someone or somewhere else']]
+                : cp.aspect === 'aims' ? [['', 'to do what…'], ...aims.map((a) => [a.id, a.label.replace(/^To /, 'to ')])]
                 : [['', 'yes or no…'], ['true', 'yes'], ['false', 'no']];
         h += `<div class="pen row small">Pencil in: at ${whens} it ${aspects} <select id="cpen-other">${values.map(([v, label]) => layerOpt(v, label, cp.other)).join('')}</select> <button data-cpen-add="${esc(id)}">Pencil it in</button></div>`;
     } else {
@@ -734,6 +741,9 @@ function boardHtml(layout) {
                     if (k.value !== null) bits.push(markChip(r.thing, c.time, k.value, yes(k.value), { given: true }));
                     for (const m of k.pencil) bits.push(markChip(r.thing, c.time, m.value, yes(m.value), m, { aspect: k.id }));
                 }
+                if (c.aims || c.aimsPencil.length) bits.push('<span class="small muted">trying</span>');
+                if (c.aims) bits.push(markChip(r.thing, c.time, c.aims, aimName(c.aims), { given: true }));
+                for (const m of c.aimsPencil.filter((x) => x.value !== c.aims || x.struck)) bits.push(markChip(r.thing, c.time, m.value, aimName(m.value), m, { aspect: 'aims' }));
                 h += `<td data-pen-cell="${esc(`thing=${r.thing}|time=${c.time}`)}"${pen.thing === r.thing && pen.time === c.time ? ' class="picked"' : ''}>${bits.join(' ')}</td>`;
             }
             h += '</tr>';

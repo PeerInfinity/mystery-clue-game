@@ -259,8 +259,10 @@ const stateRows = [];
         if (trackIds.has(t.id)) err(`${t.id}: declared twice`);
         trackIds.add(t.id);
         if (!has(t.of)) err(`${t.id}: of → unknown ${t.of}`);
-        const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.condition;
-        if (t.id !== `st.${t.of}.${name}`) err(`${t.id}: a track's id is st.<thing>.<at|held|condition>, here st.${t.of}.${name}`);
+        const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.condition;
+        if (t.id !== `st.${t.of}.${name}`) err(`${t.id}: a track's id is st.<thing>.<at|held|aims|condition>, here st.${t.of}.${name}`);
+        if (t.aspect === 'intention' && !(data.state_aims ?? []).length) err(`${t.id}: an intention track needs the case's state_aims`);
+        for (const a of t.aspect === 'intention' ? Object.values(t.windows ?? {}) : []) if (a !== null && !(data.state_aims ?? []).some((x) => x.id === a)) err(`${t.id}: ${a} is not one of the state_aims`);
         if (t.aspect === 'location' && !t.places) err(`${t.id}: a location track needs its places`);
     }
     // JSON keeps the last of two equal keys: look for a window declared twice in the file's own lines.

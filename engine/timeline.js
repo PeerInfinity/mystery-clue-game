@@ -156,6 +156,8 @@ export function byThing(game, layer = MINE) {
             conditions: conditionsAt(game, thing, t.id, layer),
             pencil: pencilAt(game, thing, t.id, layer),
             heldPencil: pencilAt(game, thing, t.id, layer, 'held'),
+            aims: given(game, thing, 'aims', t.id),
+            aimsPencil: pencilAt(game, thing, t.id, layer, 'aims'),
         })),
     }));
     return { times: ts, rows };
@@ -261,9 +263,11 @@ export function cardTimeline(game, id, layer = MINE) {
                 conditions: conditionsAt(game, id, t.id, layer),
                 pencil: pencilAt(game, id, t.id, layer),
                 heldPencil: pencilAt(game, id, t.id, layer, 'held'),
+                aims: given(game, id, 'aims', t.id),
+                aimsPencil: pencilAt(game, id, t.id, layer, 'aims'),
                 events: mine.filter((e) => eventTime(game, e) === t.id && !game.board.splits.some((s) => s.by === e && s.time === t.id)).map((e) => ({ event: e, roles: roles(e) })),
             };
-            if (line.at !== null || line.held !== null || line.conditions.length || line.pencil.length || line.heldPencil.length || line.events.length) lines.push(line);
+            if (line.at !== null || line.held !== null || line.aims !== null || line.conditions.length || line.pencil.length || line.heldPencil.length || line.aimsPencil.length || line.events.length) lines.push(line);
         }
         for (const e of mine) if (!eventTime(game, e)) undated.push(e);
         return { kind, lines, undated };

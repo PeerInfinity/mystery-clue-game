@@ -410,7 +410,8 @@ export class Game {
         const kind = this.model.cards.get(value)?.kind;
         if (aspect === 'at' && value !== TL.ELSEWHERE && !(this.knows(value) && kind === 'place')) return false;
         if (aspect === 'held' && value !== TL.ELSEWHERE && !(this.knows(value) && [...TL.BOARD_KINDS.filter((k) => k !== 'object'), 'place'].includes(kind))) return false;
-        if (aspect !== 'at' && aspect !== 'held' && !((this.model.data.state_conditions ?? []).some((c) => c.id === aspect) && ['true', 'false'].includes(value))) return false;
+        if (aspect === 'aims' && !(this.model.data.state_aims ?? []).some((a) => a.id === value)) return false;
+        if (aspect !== 'at' && aspect !== 'held' && aspect !== 'aims' && !((this.model.data.state_conditions ?? []).some((c) => c.id === aspect) && ['true', 'false'].includes(value))) return false;
         if (layer !== TL.MINE && !this.visibleTheories().some((t) => t.id === layer)) return false;
         const same = (p) => p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer && TL.aspectOf(p) === aspect;
         this.board.pencil = this.board.pencil.filter((p) => !same(p));
@@ -544,6 +545,7 @@ export class Game {
         const what = value === TL.ELSEWHERE ? 'somewhere else' : this.nameOf(value).replace(/^(The|A|An) /, (a) => a.toLowerCase());
         if (aspect === 'at') return `${who} was ${value === TL.ELSEWHERE ? 'somewhere else' : `at ${what}`} (${label})`;
         if (aspect === 'held') return this.model.cards.get(value)?.kind === 'place' ? `${who} lay at ${what} (${label})` : `${what} had ${who} (${label})`;
+        if (aspect === 'aims') return `${who} was trying ${((this.model.data.state_aims ?? []).find((a) => a.id === value)?.label ?? value).replace(/^To /, 'to ')} (${label})`;
         const cond = (this.model.data.state_conditions ?? []).find((c) => c.id === aspect);
         return `${who} was ${value === 'true' ? '' : 'not '}${cond?.id ?? aspect} (${label})`;
     }

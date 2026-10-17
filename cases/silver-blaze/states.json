@@ -4,10 +4,22 @@
   {"id": "night", "text": "The places of Monday night on Dartmoor.", "places": ["straker_villa", "stable", "loft", "kings_pyland", "fatal_hollow", "moor", "mapleton", "invalid_villas", "gypsy_camp", "tavistock"]}
  ],
  "state_splits": [
-  {"window": "w.tue_0700", "by": "e.wife_wakes", "why": "Mrs. Straker woke at the villa at seven and then went down to the stables."}
+  {"window": "w.tue_0700", "by": "e.wife_wakes", "why": "Mrs. Straker woke at the villa at seven and then went down to the stables."},
+  {"window": "w.tue_dawn", "by": "e.brown_turns_back", "why": "The man who found the horse first led it towards King's Pyland, then turned back and led it to Mapleton: what he meant to do changed there."}
  ],
  "state_conditions": [
   {"id": "stupefied", "prompt": "Was {0} stupefied?"}
+ ],
+ "state_aims": [
+  {"id": "information", "label": "To get information to bet on"},
+  {"id": "injure", "label": "To injure the horse"},
+  {"id": "steal", "label": "To steal the horse"},
+  {"id": "exercise", "label": "To give the horse early exercise"},
+  {"id": "find_way", "label": "To find the way"},
+  {"id": "lead_home", "label": "To lead the horse home"},
+  {"id": "hide", "label": "To hide the horse"},
+  {"id": "keep_safe", "label": "To keep the horse safe"},
+  {"id": "rob", "label": "To rob"}
  ],
  "states": [
   {"id": "st.straker.at", "of": "straker", "aspect": "location", "places": "night", "windows": {"w.tue_0100": "straker_villa", "w.tue_morning": "fatal_hollow"}},
@@ -16,6 +28,8 @@
   {"id": "st.ned_hunter.at", "of": "ned_hunter", "aspect": "location", "places": "night", "windows": {"w.mon_2100": "stable", "w.tue_0700": "stable"}},
   {"id": "st.ned_hunter.stupefied", "of": "ned_hunter", "aspect": "condition", "condition": "stupefied", "windows": {"w.tue_0700": "true"}},
   {"id": "st.overcoat.held", "of": "overcoat", "aspect": "possession", "places": "night", "windows": {"w.tue_0100": "straker", "w.tue_morning": "fatal_hollow"}},
-  {"id": "st.cravat.held", "of": "cravat", "aspect": "possession", "places": "night", "windows": {"w.tue_morning": "straker"}}
+  {"id": "st.cravat.held", "of": "cravat", "aspect": "possession", "places": "night", "windows": {"w.tue_morning": "straker"}},
+  {"id": "st.straker.aims", "of": "straker", "aspect": "intention", "windows": {"w.tue_stable": "injure"}},
+  {"id": "st.track_man.aims", "of": "track_man", "aspect": "intention", "windows": {"w.tue_dawn.before.brown_turns_back": "lead_home", "w.tue_dawn.after.brown_turns_back": null}}
  ]
 }
