@@ -1,6 +1,6 @@
 # Noticing and absence (workstream 5)
 
-Status: **AGREED** (Robert, 2026-10-16, Round 82: the five recommendations, as written). **Built:** step 1, absence filing (Round 83; the alarm rule changed from the plan, see there). Builds on the world model and on knowledge (Rounds 60–78)
+Status: **AGREED** (Robert, 2026-10-16, Round 82: the five recommendations, as written). **Built:** step 1, absence filing (Round 83; the alarm rule changed from the plan, see there); step 2, notices (Round 84). Builds on the world model and on knowledge (Rounds 60–78)
 and on the default knowledge rules (Round 81, starter batch).
 
 ## The reader's process

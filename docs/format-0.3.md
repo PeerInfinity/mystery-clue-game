@@ -419,6 +419,9 @@ specific thing stay ground facts with a formula and no schema.
   version 7 unchanged: an older save has none).
 - **Silver Blaze:** the dog (`c.dog_did_nothing`, otherwise ¶181) and no alarm (`c.no_alarm`, filed only), both
   witnessed by the lads' "They had heard nothing during the night".
+- **Notices** (Round 84): a NOTICE thought's `notices` lists the cards whose marking counts. `Game.notice(card,
+  because?)` marks a held card odd (saved as `noticed`); `noticeScore()` counts details noticed before Holmes's
+  first paragraph on them.
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 

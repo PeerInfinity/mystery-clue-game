@@ -2240,3 +2240,28 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     the paragraph that tells its evidence.
   - **Thoughts report:** 46 of 49 deductions with an inference. Premise disagreements 2 → 3: `t34.5` cites
     `t32.2` (Straker went out at one), which the inference does not need. Left as the annotation's framing.
+
+## Round 84 (2026-10-16): workstream 5, step 2 — notices and their scoring
+
+- **Data** (`thoughts.json`): eight NOTICE thoughts gain `notices`, the cards whose marking as odd counts:
+  - the dish (`t20.4`) and the rule against drink (`t20.5`);
+  - the coat on the bush (`t35.8`) and the pocket inventory, for the candle (`t78.3`);
+  - the cataract knife (`t81.2`);
+  - the milliner's bill, for whose bill (`t84.3`) and for the sum (`t84.7`);
+  - the odds (`t189.1`).
+- **Can score:** five of them, those Holmes draws attention to in a later paragraph (`t20.4`, `t35.8`, `t78.3`,
+  `t84.3`, `t84.7`). The knife (¶81) and the odds (¶189) are Holmes's in their own paragraph, and he never
+  remarks on the rule against drink.
+- **Engine** (`Game.notice(card, because?)`, `unnotice`, `noticeScores()`, `noticeScore()`; saved as `noticed`):
+  - **Notice:** a card the player holds, with an optional reason (a background fact they hold). Nothing is checked
+    or told when a card is marked: a notice gives nothing away about what matters.
+  - **Scoring:** a detail is noticed at the first paragraph any of its cards was marked, and scores if that is
+    before Holmes's paragraph. In aggregate: `{noticed, scored, possible, of}` (possible 5, of 8). Nothing counts
+    in Trivial.
+  - Kept apart from `score()` (Holmes's deductions), as the gap analysis ruled (§6.2).
+- **Checks** (`thoughts.js`): only a NOTICE thought lists `notices`; each is a clue or entity card; the game deals
+  it by the thought's paragraph. The thoughts report gains "Notable details".
+- **Test** (`absence.test.js`): not before the card is held; a reason must be a background fact; one card serves
+  two details; the aggregate; saved, restored and withdrawn; nothing in Trivial.
+- **Moved:** the thoughts report's new table. Nothing in the logs, the case report or the gates.
+- **Next:** step 3, the UI ("That's odd" on a card; filing an absence; the "Odd things" list).

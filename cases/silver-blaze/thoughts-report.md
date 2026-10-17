@@ -43,6 +43,21 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 | `t123.1` | `c.double_track_loops` | ¶123 | ¶124 |
 | `t161.1` | `c.photograph_available` | ¶161 | ¶162 |
 
+## Notable details
+
+NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice scores when made before Holmes's paragraph; one he speaks of in its own paragraph, or never, is noticed but cannot score.
+
+| Thought | Cards | Reader | Holmes | Can score |
+|---|---|---|---|---|
+| `t20.4` | `c.curry_for_supper` | ¶20 | ¶216 | yes |
+| `t20.5` | `c.no_liquid` | ¶20 | never | no |
+| `t35.8` | `c.coat_on_bush_seen` | ¶35 | ¶226 | yes |
+| `t78.3` | `c.pocket_inventory` | ¶78 | ¶224 | yes |
+| `t81.2` | `c.knife_is_cataract_knife`, `c.knife_delicate` | ¶81 | ¶81 | no |
+| `t84.3` | `c.milliner_bill` | ¶84 | ¶225 | yes |
+| `t84.7` | `c.milliner_bill` | ¶84 | ¶225 | yes |
+| `t189.1` | `c.odds_shortened` | ¶189 | ¶189 | no |
+
 ## Short chains
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.

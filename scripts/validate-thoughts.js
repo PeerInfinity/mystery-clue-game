@@ -40,6 +40,18 @@ if (r.dateGaps.length) {
     out.push('| Thought | Card | Reader | Game |', '|---|---|---|---|');
     for (const g of r.dateGaps) out.push(`| \`${g.thought}\` | \`${g.card}\` | ¶${g.reader} | ¶${g.game} |`);
 } else out.push('None.');
+{
+    // Notable details (workstream 5, Round 84): the cards whose marking as odd counts, and Holmes's paragraph.
+    const rows = data.thoughts.filter((t) => t.notices);
+    out.push('', '## Notable details', '', 'NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice scores when made before Holmes\'s paragraph; one he speaks of in its own paragraph, or never, is noticed but cannot score.', '');
+    if (rows.length) {
+        out.push('| Thought | Cards | Reader | Holmes | Can score |', '|---|---|---|---|---|');
+        for (const t of rows) {
+            const h = t.holmes?.paras?.[0];
+            out.push(`| \`${t.id}\` | ${t.notices.map((x) => `\`${x}\``).join(', ')} | ¶${t.para} | ${h === undefined ? 'never' : `¶${h}`} | ${h !== undefined && h > t.para ? 'yes' : 'no'} |`);
+        }
+    } else out.push('None.');
+}
 const c = r.chains;
 const fmt = (p) => (p === Infinity ? 'never' : p === null ? '—' : `¶${p}`);
 out.push('', '## Short chains', '', 'Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought\'s own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.', '');

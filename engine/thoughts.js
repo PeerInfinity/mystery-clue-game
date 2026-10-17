@@ -124,6 +124,9 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         }
         if (t.holmes && !t.holmes.never) for (const p of t.holmes.paras ?? []) if (p < 0 || p > last) err(`${t.id}: Holmes paragraph ${p} is outside the story`);
         for (const x of t.maps ?? []) if (!caseIds.has(x)) err(`${t.id}: maps to unknown ${x}`);
+        // The cards whose marking as odd counts for a notable detail (workstream 5, Round 84).
+        if (t.notices && t.tag !== 'NOTICE') err(`${t.id}: only a NOTICE thought lists the cards it notices`);
+        for (const x of t.notices ?? []) if (!['claims', 'entities'].includes(model?.cards.get(x)?.section ?? (caseIds.has(x) ? 'claims' : null))) err(`${t.id}: notices ${x}, which is not a clue or entity card`);
         if (t.inference !== undefined) {
             if (!CAN_NAME.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${CAN_NAME.join(', ')} do)`);
             else if (!inferenceById.has(t.inference)) err(`${t.id}: inference ${t.inference} is not in constraints.json`);
@@ -162,6 +165,11 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
                 if (at === undefined) continue; // rules arrive by the background setting; actions are the story's
                 if (at > t.para) dateGaps.push({ thought: t.id, card: id, reader: t.para, game: at });
             }
+        }
+        // A notable detail must be in the player's hand by the thought's paragraph, or it could not be noticed there.
+        for (const t of thoughts.filter((x) => x.notices)) for (const id of t.notices) {
+            const at = reader.unlocked.get(id)?.para;
+            if (at === undefined || at > t.para) err(`${t.id}: notices ${id}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
         }
     }
     const chains = checkChains(thoughts, background, inferenceById, byId, dates ? model : null);

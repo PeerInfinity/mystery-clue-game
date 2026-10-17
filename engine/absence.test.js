@@ -61,3 +61,29 @@ test('no alarm was raised: either Straker never got to the stable, or he was not
     while (!game.knows('k.entrant_took_the_horse')) game.advance();
     assert.deepEqual(game.propose(game.connectSet('k.straker_raised_no_alarm')).built, ['k.straker_raised_no_alarm']);
 });
+
+test('notices: a card the player holds marked odd, scored when made before Holmes draws attention to it', () => {
+    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
+    assert.equal(game.notice('c.milliner_bill').ok, false, 'not before the card is held');
+    while (!game.knows('c.milliner_bill')) game.advance();
+    assert.ok(game.notice('c.milliner_bill').ok);
+    assert.equal(game.notice('c.curry_for_supper', 'c.stall_empty').ok, false, 'a reason is a background fact');
+    assert.ok(game.notice('c.curry_for_supper').ok, 'a notice made late still counts for its card');
+    assert.ok(game.notice('c.pocket_inventory', 'r.stays_held').ok);
+    const bill = game.noticeScores().find((r) => r.thought === 't84.3');
+    assert.deepEqual([bill.noticed < bill.holmes, bill.scores], [true, true]);
+    assert.equal(game.noticeScores().find((r) => r.thought === 't84.7').scores, true, 'one card can serve two details');
+    assert.deepEqual(game.noticeScore(), { noticed: 4, scored: 4, possible: 5, of: 8 });
+    // Saved and restored; withdrawn.
+    const again = new Game(model);
+    again.load(game.save());
+    assert.deepEqual(again.noticeScore(), game.noticeScore());
+    assert.equal(again.noticed.get('c.pocket_inventory').because, 'r.stays_held');
+    assert.ok(again.unnotice('c.curry_for_supper'));
+    assert.equal(again.noticeScore().noticed, 3);
+    // Trivial scores nothing.
+    const trivial = new Game(model, { difficulty: TRIVIAL });
+    while (!trivial.knows('c.milliner_bill')) trivial.advance();
+    trivial.notice('c.milliner_bill');
+    assert.equal(trivial.noticeScore().scored, 0);
+});

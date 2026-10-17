@@ -263,6 +263,7 @@ export class Game {
         this.applied = [];              // [{id, rule, bind, para}]
         this.concluded = [];            // [{id, cited, formula, label, para}]
         this.filed = [];                // [{id, para}] absences the player filed (Round 83), or Trivial filed for them
+        this.noticed = new Map();       // card id → {para, because}: details the player marked as odd (Round 84)
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -291,6 +292,7 @@ export class Game {
             applied: this.applied.map((a) => [a.id, a.rule, a.bind, a.para]),
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             filed: this.filed.map((f) => [f.id, f.para]),
+            noticed: [...this.noticed].map(([id, n]) => [id, n.para, n.because]),
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
@@ -360,6 +362,7 @@ export class Game {
             this.madeAt = new Map(state.made.filter(([id]) => this.routeById.has(id)));
             this.moved = false;
         }
+        for (const [id, para, because] of state.noticed ?? []) if (this.knows(id)) this.noticed.set(id, { para, because: because && this.knows(because) ? because : null });
         if (board) this.board = { ...TL.emptyBoard(), ...board };
     }
 
@@ -787,6 +790,38 @@ export class Game {
         this.filed.push({ id: a.id, para });
         if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
         return { ok: true, id: a.id };
+    }
+
+    // ---------- notices (workstream 5, Round 84) ----------
+    /**
+     * Mark a card the player holds as odd, optionally because of a background fact they hold (the expectation it
+     * goes against). Nothing is checked or told: a notice is the player's own. Marking it again changes the reason.
+     */
+    notice(card, because = null) {
+        if (!this.knows(card)) return { ok: false, reason: 'you do not hold that card' };
+        if (because !== null && (!this.knows(because) || this.model.cards.get(because)?.section !== 'rules')) return { ok: false, reason: 'the reason must be a background fact you hold' };
+        const was = this.noticed.get(card);
+        this.noticed.set(card, { para: was?.para ?? this.read - 1, because });
+        return { ok: true };
+    }
+    unnotice(card) { return this.noticed.delete(card); }
+    /**
+     * The notable details the annotation lists (NOTICE thoughts with `notices`): each with Holmes's paragraph (the
+     * first where he draws attention to it; null if he never does), the paragraph the player first marked one of its
+     * cards (null if not), and whether that was before Holmes's (it scores). Nothing counts in Trivial.
+     */
+    noticeScores() {
+        return (this.model.data.thoughts ?? []).filter((t) => t.tag === 'NOTICE' && t.notices?.length).map((t) => {
+            const at = t.notices.map((c) => this.noticed.get(c)?.para).filter((x) => x !== undefined);
+            const noticed = this.autoSolves() || !at.length ? null : Math.min(...at);
+            const holmes = t.holmes?.paras?.length ? t.holmes.paras[0] : null;
+            return { thought: t.id, cards: t.notices, para: t.para, holmes, noticed, scores: noticed !== null && holmes !== null && noticed < holmes };
+        });
+    }
+    /** In aggregate: details noticed, and those noticed before Holmes, out of those he draws attention to later. */
+    noticeScore() {
+        const rows = this.noticeScores();
+        return { noticed: rows.filter((r) => r.noticed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.holmes !== null && r.holmes > r.para).length, of: rows.length };
     }
 
     // ---------- inferences ----------
