@@ -35,6 +35,8 @@ export const MEDIUM = 'medium';
 export const HARD = 'hard';
 export const CUSTOM = 'custom';
 export const DIFFICULTIES = [TRIVIAL, EASY, MEDIUM, HARD];
+/** Why a clue may be doubted, beyond mistaken and lying (workstream 4: recorded; their logic is workstream 3's). */
+export const DOUBT_REASONS = ['could-not-see', 'inference-as-fact', 'hearsay', 'neutral'];
 // Trivial's pace: settle each answer when Holmes reaches it in the story, or as soon as the held clues allow.
 export const AUTO_HOLMES = 'holmes';
 export const AUTO_LOGIC = 'logic';
@@ -250,6 +252,7 @@ export class Game {
         this.suspected = new Set();     // claim ids the player doubts
         this.doubtKind = new Map();     // claim id → 'mistaken' | 'lying', for a doubt that says how (workstream 4)
         this.splitClaims = new Set();   // statements the player split into their parts (workstream 4)
+        this.doubtReason = new Map();   // claim id → why the player doubts it (recorded, not checked: workstream 3 gives it logic)
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
         this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
         this.clashCache = null;
@@ -288,6 +291,7 @@ export class Game {
             lastSeen: [...this.lastSeen],
             suspected: [...this.suspected],
             doubtKind: [...this.doubtKind],
+            doubtReason: [...this.doubtReason],
             split: [...this.splitClaims].map((id) => [id, Math.min(...this.partsOf(id).map((x) => this.unlocked.get(x)?.para ?? Infinity))]),
             autoPace: this.autoPace,
             asked: this.asked,
@@ -360,6 +364,7 @@ export class Game {
         this.lastSeen = new Map(state.lastSeen ?? []);
         this.suspected = new Set((state.suspected ?? []).filter((id) => this.model.claimForms.has(id)));
         this.doubtKind = new Map((state.doubtKind ?? []).filter(([id, k]) => this.suspected.has(id) && this.doubtKinds(id).includes(k)));
+        this.doubtReason = new Map((state.doubtReason ?? []).filter(([id, r]) => this.suspected.has(id) && DOUBT_REASONS.includes(r)));
         this.clashLog = (state.clashLog ?? []).filter((ids) => ids.every((id) => this.model.constraints.has(id)));
         this.clashCache = null;
         // Where the player made each step, as saved (an older save is scored from here on).
@@ -636,7 +641,16 @@ export class Game {
         if (kind) this.doubtKind.set(id, kind); else this.doubtKind.delete(id);
         return true;
     }
-    unsuspect(id) { this.suspected.delete(id); this.doubtKind.delete(id); }
+    unsuspect(id) { this.suspected.delete(id); this.doubtKind.delete(id); this.doubtReason.delete(id); }
+    /**
+     * Why the player doubts a clue (workstream 4, recorded only until workstream 3 gives undercuts their logic):
+     * one of DOUBT_REASONS, or null to clear it. Only for a clue they doubt.
+     */
+    setDoubtReason(id, reason) {
+        if (!this.suspected.has(id) || (reason !== null && !DOUBT_REASONS.includes(reason))) return false;
+        if (reason) this.doubtReason.set(id, reason); else this.doubtReason.delete(id);
+        return true;
+    }
     /**
      * The readings a doubt of this clue may take beyond the plain one: ['mistaken', 'lying'] for a statement; along a
      * reporting chain, one pair per speaker ('lying:straker', 'mistaken:mrs_straker').

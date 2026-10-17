@@ -5,7 +5,7 @@
   and testimony and belief (workstream 4). The world model (steps 1–5, Rounds 60–78), solver speed (Round 66) and
   event order (Rounds 73–75) are done.
 - `docs/noticing-absence.md` — noticing and absence (workstream 5): agreed (Round 82), built (Rounds 83–85).
-- `docs/testimony-belief.md` — testimony, sources and belief (workstream 4): agreed (Round 86).
+- `docs/testimony-belief.md` — testimony, sources and belief (workstream 4): agreed (Round 86), built (Rounds 87–90).
 - `docs/knowledge-intention.md` — knowledge, intention and belief: agreed (Round 72), built but belief (Rounds 76–78).
 - `docs/format-0.3.md` — the case format as built, and the decisions taken on it.
 - `docs/redesign.md` — the design discussion the format serves: the reader's process, what the logic and the

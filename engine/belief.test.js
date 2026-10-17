@@ -95,3 +95,18 @@ test('a reporting chain: Straker lied to his wife, and she passed it on in good 
     assert.equal(solved.settled(mrs_straker), 'true');
     assert.equal(solved.settled('st.straker.believes_derbyshire_friend_said.weeks_before'), 'false');
 });
+
+test('a doubt may say why: recorded, saved, and cleared with the doubt', () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    const id = 'c.hunter_blames_stranger';
+    while (!game.knows(id)) game.advance();
+    assert.equal(game.setDoubtReason(id, 'could-not-see'), false, 'only for a clue the player doubts');
+    game.suspect(id, 'mistaken');
+    assert.ok(game.setDoubtReason(id, 'could-not-see'));
+    assert.equal(game.setDoubtReason(id, 'because'), false);
+    const again = new Game(model);
+    again.load(game.save());
+    assert.equal(again.doubtReason.get(id), 'could-not-see');
+    again.unsuspect(id);
+    assert.equal(again.doubtReason.has(id), false);
+});

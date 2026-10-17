@@ -265,11 +265,7 @@ function toolCard() {
     }
     if (c.section === 'claims' || c.section === 'inferences') {
         if (c.section === 'inferences') h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(c.formula))}</p>`;
-        if (game.canSuspect(id)) {
-            h += game.isSuspected(id)
-                ? `<p class="doubt on">You suspect this may be false: it counts as fact nowhere, and “Is it true?” is open below. <button data-unsuspect="${id}" class="quiet">Trust it again</button></p>`
-                : `<p class="doubt">Until you doubt it, the game takes this at its word. <button data-suspect="${id}">I suspect this may be false</button></p>`;
-        }
+        if (game.canSuspect(id)) h += weighHtml(id);
         const form = model.claimForms.get(id);
         const f = c.section === 'claims' && form && model.constraints.get(form.trusted)?.formula;
         if (f) h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(f))}</p>`;
@@ -446,6 +442,42 @@ function cardTally(ids) {
     return { fresh, updated };
 }
 const tallyText = ({ fresh, updated }) => [fresh && `${fresh} new`, updated && `${updated} updated`].filter(Boolean).join(', ');
+
+/**
+ * Weighing a clue (workstream 4): trust it or doubt it; for a statement, say how (mistaken: believed and false;
+ * lying: not believed), and along a reporting chain whose; why (recorded); split it into what was seen and what
+ * concluded; trace who passed it on.
+ */
+const DOUBT_REASONS = { 'could-not-see': 'could not have seen it', 'inference-as-fact': 'an inference written as fact', hearsay: 'hearsay', neutral: 'it cuts both ways' };
+function weighHtml(id) {
+    let h = '';
+    const chain = game.chainOf(id);
+    if (chain.length) h += `<p class="small chain">Passed on: ${chain.map((l) => (game.knows(l.by) ? link(l.by, shortName(l.by, 24)) : esc(cardName(l.by)))).join(' → ')}${chain[chain.length - 1].to ? '' : ' → the story'}</p>`;
+    const kindName = (k) => {
+        const [kind, who] = k.split(':');
+        const name = who ? (game.knows(who) ? shortName(who, 24) : cardName(who)) : 'the speaker';
+        return kind === 'lying' ? `${name} lied` : `${name} was mistaken`;
+    };
+    if (game.isSuspected(id)) {
+        const kind = game.doubtKind.get(id);
+        h += `<p class="doubt on">You suspect this may be false${kind ? `: ${esc(kindName(kind))}` : ''}. It counts as fact nowhere${kind ? ', and what the speaker believed counts as you say' : ', and “Is it true?” is open below'}. <button data-unsuspect="${id}" class="quiet">Trust it again</button></p>`;
+        const kinds = game.doubtKinds(id).filter((k) => k !== kind);
+        if (kinds.length) h += `<p class="small doubt">Say how: ${kinds.map((k) => `<span class="link" data-suspect="${esc(id)}" data-kind="${esc(k)}">${esc(kindName(k))}</span>`).join(' · ')}</p>`;
+        if (game.doubtReason) {
+            const r = game.doubtReason.get(id) ?? '';
+            h += `<p class="small doubt">Why: <select id="doubt-reason" data-reason-for="${esc(id)}"><option value="">(say why, if you like)</option>${Object.entries(DOUBT_REASONS).map(([v, l]) => `<option value="${v}"${v === r ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></p>`;
+        }
+    } else {
+        const kinds = game.doubtKinds(id);
+        h += `<p class="doubt">Until you doubt it, the game takes this at its word. <button data-suspect="${id}">I suspect this may be false</button>${kinds.length ? ` <span class="small">or: ${kinds.map((k) => `<span class="link" data-suspect="${esc(id)}" data-kind="${esc(k)}">${esc(kindName(k))}</span>`).join(' · ')}</span>` : ''}</p>`;
+    }
+    if (game.partsOf(id).length) {
+        h += game.splitClaims.has(id)
+            ? `<p class="small muted">You split this statement: ${game.partsOf(id).filter((x) => game.knows(x)).map((x) => link(x, shortName(x, 50))).join(' · ')}. It counts nowhere itself.</p>`
+            : `<p class="small">Does this mix what was seen with what was concluded? <button data-split-claim="${esc(id)}" class="quiet">Split this statement</button></p>`;
+    }
+    return h;
+}
 
 function toolCards() {
     const known = [...game.unlocked.keys()].filter((id) => !['glosses', 'rules'].includes(model.cards.get(id)?.section));
@@ -1071,7 +1103,7 @@ function onClick(e) {
     }
     const d = e.target.closest('[data-suspect],[data-unsuspect],[data-clash]');
     if (d) {
-        if (d.dataset.suspect) { game.suspect(d.dataset.suspect); toast(`You now doubt: ${esc(shortName(d.dataset.suspect, 60))}`); }
+        if (d.dataset.suspect) { game.suspect(d.dataset.suspect, d.dataset.kind || null); toast(`You now doubt: ${esc(shortName(d.dataset.suspect, 60))}`); }
         else if (d.dataset.unsuspect) game.unsuspect(d.dataset.unsuspect);
         else {
             ui.clash = { slot: d.dataset.clash, html: '<span class="muted">Checking everything you trust… (a few seconds)</span>' };
@@ -1089,7 +1121,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-absence-file],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-absence-file],[data-split-claim],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1128,6 +1160,12 @@ function onClick(e) {
         return;
     }
     if (t.dataset.unnotice) { game.unnotice(t.dataset.unnotice); changed(); return; }
+    if (t.dataset.splitClaim) {
+        const res = game.splitClaim(t.dataset.splitClaim);
+        if (res.ok) toast(`Split into: ${res.parts.map((x) => link(x, shortName(x, 50))).join(' · ')}`); else toast(esc(res.reason));
+        changed();
+        return;
+    }
     if (t.dataset.absenceFile) {
         Object.assign(ui.absence, { expectation: $('#ab-exp').value || null, time: $('#ab-time').value || null, witness: $('#ab-witness').value || null });
         const { expectation, time, witness } = ui.absence;
@@ -1271,6 +1309,7 @@ document.addEventListener('change', (e) => game && run(() => onChange(e)));
 function onChange(e) {
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
+    if (e.target.id === 'doubt-reason') { game.setDoubtReason(e.target.dataset.reasonFor, e.target.value || null); changed(); return; }
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }
     if (e.target.dataset.add) {
         const slot = e.target.dataset.add;

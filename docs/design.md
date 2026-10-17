@@ -2444,3 +2444,27 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Thoughts report:** both SOURCE thoughts are held. Premise disagreements 6 → 7: `t32.3` cites `t32.2`, her own
     observation, which its inference does not need.
   - **Gates:** nothing.
+
+## Round 90 (2026-10-16): workstream 4, step 4 — reasons recorded, and the UI for weighing testimony
+
+- **Engine** (`Game.setDoubtReason(id, reason)`, `DOUBT_REASONS`; saved as `doubtReason`): a doubt may say why.
+  - **The reasons:** could not have seen it, an inference written as fact, hearsay, it cuts both ways.
+  - **Recorded only:** their logic (undercuts) is workstream 3's. Mistaken and lying are the readings with logic
+    (Round 87).
+  - Only for a clue the player doubts; trusting it again clears the reason.
+- **UI** (the card):
+  - **Doubting a statement:** "I suspect this may be false", or at once how ("the speaker was mistaken", "the
+    speaker lied"). Along a chain the choices name each speaker ("John Straker lied", "Mrs. Straker was
+    mistaken").
+  - **Once doubted:** the reading in force, "Say how" to change it, and "Why" (the recorded reasons).
+  - **"Passed on: John Straker → Mrs. Straker"** for a statement with a chain.
+  - **"Split this statement"** where the statement has parts. Afterwards the card lists the parts and says it
+    counts nowhere itself.
+- **Checked in headless Chrome** at ¶84, Medium: the Derbyshire statement split; its "friend" part showing the
+  chain and four doubts; "John Straker lied" taken; "hearsay" kept as the reason.
+- **Test** (`belief.test.js`): a reason only on a doubted clue, from the list; saved; cleared with the doubt.
+- **Moved:** nothing in the logs, reports or gates.
+- **Workstream 4 is done** as agreed (Round 86), with two items left:
+  - **Not built:** Mrs. Straker's honest denial at the Plymouth ruse (`t92.3`). Her denial is not a clue in the case;
+    it would need one.
+  - **Not done:** scoring WEIGH thoughts. It was deferred by the agreement (Q6), to workstream 6.
