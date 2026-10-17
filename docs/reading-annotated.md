@@ -913,16 +913,16 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 **¶122–¶123**
 - `t122.1` **RECORD** · typical
   reads "The double track turned sharp off and took the direction of King's Pyland"
-- `t123.1` **RECORD** · typical
+- `t122.2` **RECORD** · typical
   reads "saw to my surprise the same tracks coming back again in the opposite direction"
-- `t123.2` **AGENT** · *fair* · careful · from `t122.1`, `t123.1` · Holmes ¶146
+- `t122.3` **AGENT** · *fair* · careful · from `t122.1`, `t122.2` · Holmes ¶146
   The man set out to lead the horse home to King's Pyland, then changed his mind and turned back. He found
   the horse first and made his decision afterwards.
 
 **¶124**
 - `t124.1` **RECORD** · *strong* · typical
   reads "It ended at the paving of asphalt which led up to the gates of the Mapleton stables"
-- `t124.2` **INFER** · *strong* · typical · from `t124.1`, `t123.1`, `t117.1` · supports `t40.4`, `t64.3` · Holmes ¶146
+- `t124.2` **INFER** · *strong* · typical · from `t124.1`, `t122.2`, `t117.1` · supports `t40.4`, `t64.3` · Holmes ¶146
   The horse was taken into Mapleton. Since Mapleton was searched (`t64.1`), the searchers missed him, and the
   disguise (`t64.3`) or some trick explains how.
 
@@ -975,9 +975,9 @@ Straker, and confirmation of the motive.
   reads "Of course you observed the peculiarly square toes in the impressions, and that his own boots exactly corresponded to them"
   ⚠ fair play: **disclosed late**. Watson didn't report the square toes when they followed the tracks, so the
   reader couldn't have observed them.
-- `t146.2` **TEST** · *strong* · typical · from `t146.1` · supports `t127.4`, `t127.3`, `t123.2`
+- `t146.2` **TEST** · *strong* · typical · from `t146.1` · supports `t127.4`, `t127.3`, `t122.3`
   reads "no subordinate would have dared to do such a thing"; "according to his custom he was the first down"; "his first impulse had been to lead him back to King's Pyland"
-  Holmes's account of Brown's morning matches `t123.2`, `t127.3` and `t127.4` point for point.
+  Holmes's account of Brown's morning matches `t122.3`, `t127.3` and `t127.4` point for point.
 - `t146.3` **RECORD** · typical
   reads "from the white forehead which has given the favourite its name"
   The text confirms the meaning of the name (`bk.blaze`). For a modern reader, this is the first time it is given.

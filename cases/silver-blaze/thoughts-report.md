@@ -36,10 +36,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 
 A RECORD whose card the game deals after the paragraph where the reader already has the fact.
 
-| Thought | Card | Reader | Game |
-|---|---|---|---|
-| `t122.1` | `c.double_track_loops` | ¶122 | ¶124 |
-| `t123.1` | `c.double_track_loops` | ¶123 | ¶124 |
+None.
 
 ## Notable details
 
@@ -60,7 +57,7 @@ NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 53; with an inference: 50; with a reason for none: 3; earliest-date misses: 0 (and 5 explained); premise disagreements: 3
+- deduction-type thoughts: 53; with an inference: 50; with a reason for none: 3; earliest-date misses: 0 (and 4 explained); premise disagreements: 3
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -107,7 +104,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t102.4` | INFER | `k.horse_kicked` | ¶102 | ¶102 |  |  |  |  |  |
 | `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶37 |  |  |  |  |  |
 | `t120.1` | INFER | `k.horse_left_alone` | ¶120 | ¶119 |  |  |  |  |  |
-| `t123.2` | AGENT | `k.track_man_changed_his_mind` | ¶123 | ¶124 (explained) |  |  |  |  |  |
+| `t122.3` | AGENT | `k.track_man_changed_his_mind` | ¶122 | ¶122 |  |  |  |  |  |
 | `t124.2` | INFER | `k.tracks_end_at_mapleton` | ¶124 | ¶124 |  |  | `r.tracks_lead_in` |  |  |
 | `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶127 |  |  | `r.first_up_takes_it_in` |  |  |
 | `t135.1` | WEIGH | `k.brown_lied` | ¶135 | ¶140 (explained) | `t133.1` | `k.brown_broke` | `r.denies_own_deed` |  | `bk.guilty_denial` |
@@ -123,7 +120,6 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 - `t20.6` (¶20, dealt ¶37): The reader anticipates the drugging at ¶20; the game can pose the question only once the drugging is told (Hunter's charge, ¶36) and the opium found (¶37), where this rule becomes relevant. Holmes never states it, so nothing gates or scores on it.
 - `t29.3` (¶29, dealt ¶36): The reader holds the conditional at ¶29, ahead of the drugging; the game can pose it only once the drugging is told (Hunter's charge, ¶36). It is Gregory's asserted conditional: nothing gates or scores on it.
 - `t31.3` (¶31, dealt ¶33): The reader's conditional at ¶31 is about an entry the story has not yet told: the entry's card (and its "with what?") comes with the open door at ¶33.
-- `t123.2` (¶123, dealt ¶124): The reader sees the track turn back at ¶123; the claim that carries the tracks ends where they end (¶124), so the game deals the inference one paragraph on.
 - `t135.1` (¶135, dealt ¶140): The denial is weighed at ¶135, once Brown has invited Holmes in; that it was a lie is certain only once Brown gives in (¶140), which the inference rests on.
 
 ### Deductions with no inference

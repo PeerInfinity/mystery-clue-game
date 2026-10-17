@@ -2548,3 +2548,35 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     `t135.1`: batch 4).
   - **Case report:** the inference table's row for Brown's lie names `t135.1`.
   - **Reveal and foreshadow logs, gates:** nothing.
+
+## Round 95 (2026-10-17): review batch 2 — the double track in three lines; two rules moved to where they are used
+
+- **The double track** (B3): `c.double_track_loops`, quoted only from its last line (¶124) but telling the turn and
+  the return as well, is three claims, each quoted from its own line:
+  - `c.double_track_turns`: "The double track turned sharp off and took the direction of King's Pyland" (no slot
+    content);
+  - `c.double_track_returns`: "the same tracks coming back again in the opposite direction", carrying
+    `e.brown_turns_back` (agent the track's man, patient the horse, near Mapleton);
+  - `c.double_track_ends`: "It ended at the paving of asphalt ...", carrying `e.horse_hidden`'s agent and patient.
+
+  `k.track_man_changed_his_mind` rests on the turn and the return, `k.tracks_end_at_mapleton` on the return and the
+  end; Holmes's route step `t117.2` and `a.follow_tracks` are re-pointed.
+- **Found while building:** the turn and the return are both in story paragraph 122 (¶123 is "One for you,
+  Watson"). `t123.1` and `t123.2` are now **`t122.2`** and **`t122.3`**, dated ¶122; `t124.2` and `t146.2` follow.
+  The review had them at ¶123.
+- **Two rules** (B6, B7; Round 79's borderline texts):
+  - `r.horse_gregarious` in Holmes's words, "left to himself, he makes for his own stable or the nearest other
+    one" (no more "taken out and loose ... that is where it is"), relevant from the horse in the hollow (¶37), not
+    ¶18;
+  - `r.tendon_nick` relevant from the lame sheep (¶173), not ¶18. Holmes's route step for the knife (`t81.5`)
+    listed it among its flat premises, which moved the step's gates (¶104, ¶170) to ¶174 on the first try. It
+    does not need it (the annotation's own point: the general form carries the chain) and no longer lists it.
+- **Moved:**
+  - **Reveal and foreshadow logs:** the two rules leave ¶18 (gregarious at ¶37, the tendon nick and its gloss at
+    ¶173); the turn, the return and `e.brown_turns_back` with its four questions at ¶122 (were ¶124); the end at
+    ¶124.
+  - **Case report:** claims 152 → 154, constraints 461 → 462, quotes 1034 → 1036; `e.brown_turns_back` first told
+    at ¶122; the route rows re-pointed.
+  - **Thoughts report:** "Dealt later than the reader has it": none (was 2). Explained date misses 5 → 4
+    (`t122.3`'s note is gone: dealt ¶122, as the reader has it).
+  - **Gates:** `t123.2` at ¶146 is `t122.3`; nothing moves.
