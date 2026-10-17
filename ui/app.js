@@ -274,6 +274,7 @@ function toolCard() {
     if (c.section === 'claims' || c.section === 'inferences') {
         if (c.section === 'inferences') h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(c.formula))}</p>`;
         if (game.canSuspect(id)) h += weighHtml(id);
+        if (c.section === 'inferences') h += unlessHtml(id);
         const form = model.claimForms.get(id);
         const f = c.section === 'claims' && form && model.constraints.get(form.trusted)?.formula;
         if (f) h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(f))}</p>`;
@@ -466,7 +467,11 @@ function weighHtml(id) {
         const name = who ? (game.knows(who) ? shortName(who, 24) : cardName(who)) : 'the speaker';
         return kind === 'lying' ? `${name} lied` : `${name} was mistaken`;
     };
-    if (game.isSuspected(id)) {
+    const defeat = game.raisedOn(id).find((r) => r.status === 'established');
+    if (defeat) {
+        // A defeat (workstream 3): the step no longer counts, for the reason shown; its conclusion is not shown false.
+        h += `<p class="doubt on">This step no longer counts: you have shown that ${esc(defeat.text)}. That does not make its conclusion false; “Does it hold?” is open below. <button data-withdraw="${esc(`${id}|${defeat.n}|${defeat.exception}`)}" class="quiet">Count it again</button></p>`;
+    } else if (game.isSuspected(id)) {
         const kind = game.doubtKind.get(id);
         h += `<p class="doubt on">You suspect this may be false${kind ? `: ${esc(kindName(kind))}` : ''}. It counts as fact nowhere${kind ? ', and what the speaker believed counts as you say' : ', and “Is it true?” is open below'}. <button data-unsuspect="${id}" class="quiet">Trust it again</button></p>`;
         const kinds = game.doubtKinds(id).filter((k) => k !== kind);
@@ -485,6 +490,20 @@ function weighHtml(id) {
             : `<p class="small">Does this mix what was seen with what was concluded? <button data-split-claim="${esc(id)}" class="quiet">Split this statement</button></p>`;
     }
     return h;
+}
+
+// The exceptions of the defaults a step applies (workstream 3): raise one against it; what was raised, where it stands.
+function unlessHtml(id) {
+    const open = game.exceptionsOf(id);
+    const raised = game.raisedOn(id);
+    if (!open.length && !raised.length) return '';
+    const word = { open: 'a reservation: the step still counts', established: 'shown: the step no longer counts', 'ruled-out': 'since ruled out by what you hold' };
+    let h = '';
+    for (const r of raised.filter((x) => x.status !== 'established')) h += `<p class="small">Unless ${esc(r.text)} — ${esc(word[r.now] ?? r.now)}${r.now !== r.status && r.status !== 'established' ? ` (raised as ${esc(r.status === 'open' ? 'a reservation' : r.status)})` : ''}. <span class="link" data-withdraw="${esc(`${id}|${r.n}|${r.exception}`)}">take it back</span></p>`;
+    const left = open.filter((x) => !raised.some((r) => r.n === x.n && r.exception === x.id));
+    if (left.length) h += `<p class="small">This step leans on a general rule. Could it fail here? ${left.map((x) => `<span class="link" data-raise="${esc(`${id}|${x.n}|${x.id}`)}">unless ${esc(x.text)}</span>`).join(' · ')}</p>`;
+    if (game.restingOnDefeated(id)) h += '<p class="small bad">It rests on a step you have shown does not hold.</p>';
+    return h ? `<div class="unless"><div class="small muted">Unless…</div>${h}</div>` : '';
 }
 
 function toolCards() {
@@ -1129,7 +1148,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-absence-file],[data-split-claim],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1168,6 +1187,17 @@ function onClick(e) {
         return;
     }
     if (t.dataset.unnotice) { game.unnotice(t.dataset.unnotice); changed(); return; }
+    if (t.dataset.raise) {
+        const [id, n, x] = t.dataset.raise.split('|');
+        const res = game.raise(id, Number(n), x);
+        if (res.status === 'ruled-out') toast(`What you hold rules that out: ${chainHtml(res.used)}`);
+        else if (res.status === 'established') toast('What you hold shows it: the step no longer counts, and this is why.');
+        else if (res.ok) toast('Noted as a reservation: nothing you hold settles it, so the step still counts.');
+        else toast(esc(res.reason));
+        changed();
+        return;
+    }
+    if (t.dataset.withdraw) { const [id, n, x] = t.dataset.withdraw.split('|'); game.withdraw(id, Number(n), x); changed(); return; }
     if (t.dataset.splitClaim) {
         const res = game.splitClaim(t.dataset.splitClaim);
         if (res.ok) toast(`Split into: ${res.parts.map((x) => link(x, shortName(x, 50))).join(' · ')}`); else toast(esc(res.reason));

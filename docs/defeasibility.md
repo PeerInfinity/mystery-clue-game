@@ -1,6 +1,6 @@
 # Defeasibility (workstream 3)
 
-Status: **AGREED** (Robert, 2026-10-17, Round 101: the recommendations of Q1–Q5 and Q7, and the order of work; Q6 deferred as a whole). Mission: `docs/kickoff-workstream-3.md`. Builds on the
+Status: **AGREED** (Robert, 2026-10-17, Round 101: the recommendations of Q1–Q5 and Q7, and the order of work; Q6 deferred as a whole). **Built:** step 1, exceptions and the raise action (Round 102); step 2, exceptions shown (Round 103); step 3, the police's four and slice 4 (Round 104); step 4, thoughts and scoring (Round 105); step 5, the UI (Round 106). Mission: `docs/kickoff-workstream-3.md`. Builds on the
 rule library (default rules with `strength` and `unless`), belief and the doubt readings (workstream 4, Rounds
 86–91), expectations as default rules (workstream 5, Round 82), and the review's "ws 3" rows
 (`docs/annotation-review.md`, Round 93).
@@ -283,3 +283,26 @@ exception text goes through the leak checker.
 The recommendations of Q1–Q5 and Q7 as written, and the order of work. **Q6 is deferred** as a whole: `t4.2` and
 `t68.3` keep `no_inference: workstream-3` for now, and no `r.one_culprit` is authored; the larger question behind
 it (whether an applied default yields in a clash before a story clue) waits with it.
+
+## Left open (Round 106)
+
+- **Q6** (one culprit, `t4.2` and `t68.3`): deferred by Robert; both keep `no_inference: workstream-3`.
+- **How clashes weigh what they set aside** (Robert, Round 104: leave it for now; rethink it after this workstream,
+  as the first design question of workstream 6 or a short paper before it). What has been seen:
+  - the order is by source only: story clues give way first, then inferences someone else stated, then the
+    player's and Holmes's. A player who keeps the police's account loses true clues to it
+    (`k.police_simpson_took_horse` against `c.simpson_came_for_information`, Round 102);
+  - Q6's question is the same one: an applied default that is false (one culprit) would clash late and cost story
+    clues before the player's own card;
+  - workstream 3 now marks what a better order could use: which steps rest on a default, which default has an
+    exception open (a reservation), which step is defeated;
+  - workstream 6's graded support and strain are the other half of "what should give way".
+  - Fixed meanwhile, as a bug (Round 104): an inference set aside in a clash now goes whole, its rule applications
+    with it.
+- **Reading-layer calls made by precedent** (Rounds 89, 95: a rule that would give a step away goes where Holmes says
+  it), for Robert to revisit if he wishes: `r.saw_drug_would_not_eat` and Hunter's perception at ¶218 (so `t36.2`'s
+  defeat comes no earlier, though a reservation can be raised from ¶36); "he could not have seen it" shown with
+  `r.witness_saw_it` at ¶36; "they would have gone anyway" and the period belief `r.gypsies_clear_out` at ¶62, where
+  the gypsies' going is told (a period belief, like `r.gypsies_avoid_trouble` at ¶19).
+- **`r.markings_identify_horse`'s** own text says "unless the markings have been hidden" twice, and its exception
+  repeats it.

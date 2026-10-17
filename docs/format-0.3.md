@@ -509,6 +509,16 @@ specific thing stay ground facts with a formula and no schema.
   seen it, against the police's first step; ¶218), `t62.3` (gone anyway, against Gregory's; ¶114) can score;
   `t56.1` (Gregory's case, two of its items) and `t218.3` (the accomplice) are recorded and cannot.
 
+## As built (2026-10-17): the UI for exceptions (workstream 3, step 5; Round 106)
+
+- **On an inference's card, "Unless…":** the exceptions of the defaults it applies, each a link to raise it ("This
+  step leans on a general rule. Could it fail here?"); a raised one with where it stands now (a reservation, or since
+  ruled out) and "take it back"; a warning when the step rests on one the player has defeated.
+- **The answer:** a toast. Ruled out lists what rules it out; a reservation says the step still counts; a defeat says
+  it no longer does. A defeated step's card says so in place of the doubt line ("That does not make its conclusion
+  false"), with "Count it again".
+- **On a background fact's card:** its exceptions, as "Unless …" (Round 103).
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's

@@ -2864,3 +2864,23 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - deferred by Robert (Q6): `t4.2`, `t68.3`, still `no_inference: workstream-3`.
 - **Moved:** thoughts report: the "Exceptions raised" table (six rows, three can score). Logs, case report, gates:
   nothing.
+
+## Round 106 (2026-10-17): workstream 3, step 5 — the UI for exceptions; workstream 3 done
+
+- **UI** (`ui/app.js`, `ui/style.css`): on an inference's card, "Unless…" lists the exceptions of the defaults it
+  applies, each a link to raise it. The answer comes as a toast: ruled out (with what rules it out), a reservation
+  (the step still counts) or a defeat (it no longer does). A raised exception shows where it stands now, with "take
+  it back". A defeated step's card says "This step no longer counts: you have shown that …. That does not make its
+  conclusion false", with "Count it again", in place of the plain doubt's line and its "Why" list. A step resting on
+  a defeated one is flagged.
+- **Checked in headless Chrome** at ¶62, Medium, on Gregory's gypsies card: the exception offered; clicking it
+  raises a reservation (toast, then "Unless they would have gone anyway — a reservation: the step still counts");
+  with `k.gypsies_would_leave_anyway` built, the defeat shown in place of the doubt line.
+- **Workstream 3 is done** as agreed (Round 101): `docs/defeasibility.md` marked built, with a "Left open" section:
+  - Q6 (deferred);
+  - the clash rethink (Robert, Round 104: after this workstream, before or as the start of workstream 6), with what
+    was seen;
+  - the reading-layer calls made by precedent;
+  - the doubled markings text.
+- **`CLAUDE.md`** points at the paper as built, and at workstream 6 next.
+- **Moved:** nothing in the logs, reports or gates (the UI only).

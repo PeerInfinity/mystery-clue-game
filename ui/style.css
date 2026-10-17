@@ -204,6 +204,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .doubt { font-size: 13px; color: var(--muted); margin: 8px 0; }
 .doubt.on { color: var(--bad); }
 .doubt button { margin-left: 6px; }
+.unless { margin: 8px 0; padding: 4px 0 4px 10px; border-left: 2px solid var(--line); }
 .flag.doubted { color: var(--bad); }
 .notice { font-size: 13px; color: var(--muted); margin: 8px 0; }
 .notice select { max-width: 14em; }
