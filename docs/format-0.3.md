@@ -370,10 +370,12 @@ specific thing stay ground facts with a formula and no schema.
   lists each stated order with its claim, and the case's split questions it settles.
 - **Opened states' ties fold places** (`windowTies` now goes through the state term): "Edith at the stable window"
   reads as the stable. Before, the unfolded place made a tie that could never hold once an order was known.
-- **Silver Blaze** (Round 74): ten orders, in the evening (the lads' return, the message, Straker's unease), the
-  window scene (the tip and the dog, Edith's run and flight, the leaning and the search, the locked door), one
-  o'clock (dressing and leaving), and seven o'clock and the morning (waking, the open door, the lads roused, the
-  body and the cravat).
+- **Silver Blaze** (Rounds 74–75): fifteen orders, at nine (the stables locked, the lads to supper), on the path
+  (the stop, the bribe), in the window scene (the tip and the dog, Edith's run and flight, the dog before her
+  flight, the leaning, the stranger's flight and the search, the locked door), in the evening (the lads' return,
+  the message, Straker's unease), at one o'clock (dressing, the knife, leaving), and at seven o'clock and in the
+  morning (waking, the open door, the lads roused, the body and the cravat). Left open: Edith reaching the window
+  before the tip (the only line is three paragraphs before the tip is told) and Brown's morning (a derived claim).
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 

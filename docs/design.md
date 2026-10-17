@@ -1952,3 +1952,30 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
     earlier in the same paragraph). Nothing appears in another paragraph.
   - **Thoughts report and gates:** nothing.
 - **Timing:** `npm test` 61 tests, 160 s.
+
+## Round 75 (2026-10-16): the order of events within a window, step 3 — Robert's rulings on what was held back
+
+- **Robert:** make all the updates held back in Round 74.
+- **The answer key corrected:** `e.simpson_flees` moves from 370 to 355, after Hunter locks the door (350) and
+  before his search (360). "When Hunter rushed out with the hound he was gone": the stranger fled first.
+  - `c.stranger_gone` now states the chain: stranger leaning in → stranger flees → Hunter's search. "A minute
+    later" is from the leaning.
+- **Pairs told by consecutive sentences, now stated:**
+
+  | Order | Claim |
+  |---|---|
+  | the stables locked → the lads go up to supper | `c.lads_supped_at_house` |
+  | the stranger stops Edith → the bribe | `c.bribe_to_edith` |
+  | Hunter goes for the dog → Edith flees | `c.stranger_leaning_in` |
+  | the knife taken "as he left the room" → he leaves the house | `c.knife_from_dressing_table` |
+
+- **Moved:**
+  - **Report:** slots 616 → 621, constraints unchanged (330), fifteen stated orders. The fabula table and the
+    slot list put the stranger's flight before Hunter's search. The theories, clashes and minimal breaks are
+    unchanged.
+  - **Reveal log:** the questions on Hunter's search come after the flight's within ¶29.
+  - **Foreshadow log, thoughts report and gates:** nothing.
+- **Test** (`timeline.test.js`, order questions): the stranger's question now comes before Edith's flight through
+  the chain (the question, Hunter going for the dog, her flight), citing those two clues. His leaning in, told as
+  happening while she ran, stays open on both sides of her flight.
+- **Timing:** `npm test` 61 tests, 128 s.

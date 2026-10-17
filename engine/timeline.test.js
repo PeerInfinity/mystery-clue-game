@@ -206,8 +206,13 @@ test("order questions: an event's part proven on the case's split; the player's 
     const ran = game.proveOrder('e.edith_runs_to_window', 'w.mon_2110.before.edith_flees');
     assert.ok(ran.ok && ran.card, JSON.stringify(ran));
     assert.deepEqual(ran.used, ['k.c.stranger_leaning_in']);
-    // No clue orders the stranger's question against her flight: open.
-    assert.equal(game.proveOrder('e.stranger_at_window', 'w.mon_2110.before.edith_flees').ok, false);
+    // The stranger's question came before her flight through the chain the clues give (the question, then Hunter
+    // going for the dog, then her flight); his leaning in, told as happening while she ran, stays open.
+    const tip = game.proveOrder('e.stranger_at_window', 'w.mon_2110.before.edith_flees');
+    assert.ok(tip.ok, JSON.stringify(tip));
+    assert.deepEqual([...tip.used].sort(), ['k.c.hunter_went_for_dog', 'k.c.stranger_leaning_in']);
+    assert.equal(game.proveOrder('e.stranger_leans_in', 'w.mon_2110.before.edith_flees').ok, false);
+    assert.equal(game.proveOrder('e.stranger_leans_in', 'w.mon_2110.after.edith_flees').ok, false);
     // The stated order reaches a split at a third event (order runs through): if she fled before Hunter locked the
     // door, she ran to the window before it too.
     assert.ok(game.splitTime('w.mon_2110.after.edith_flees', 'e.hunter_locks_door'));
