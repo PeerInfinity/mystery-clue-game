@@ -198,3 +198,11 @@ test('states: declared windows are slots; the world model ties them to events; w
     assert.equal(model.problem.consistent(active, { [ord.id]: 'before' }).ok, false);
     assert.equal(model.problem.consistent(active, { [ord.id]: 'after' }).ok, true);
 });
+
+test('the default knowledge rules range over propositions: a bound proposition names its knowledge track', () => {
+    const acts = instantiateRule(model, 'r.told_knows', { telling: 'e.message_to_straker', who: 'silas_brown', fact: 'p.mercy_in_safe_return', when: 'w.thu_night' });
+    assert.ok(acts.ok, acts.error);
+    assert.match(JSON.stringify(acts.formula), /st\.silas_brown\.knows_mercy_in_safe_return\.thu_night/);
+    assert.match(instantiateRule(model, 'r.told_knows', { telling: 'e.message_to_straker', who: 'straker', fact: 'stable', when: 'w.mon_late' }).error, /must be a proposition/);
+    for (const r of ['r.told_knows', 'r.present_sees', 'r.acts_on_knows']) assert.equal(model.cards.get(r).strength, 'default');
+});

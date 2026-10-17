@@ -99,6 +99,7 @@ export function buildModel(data) {
         else if (spec.kind || spec.kinds) out = domainFor({ kinds: spec.kinds ?? [spec.kind] });
         else if (spec.window) out = [...windows.map((w) => w.id), ...subwindows.keys()];
         else if (spec.condition) out = (data.state_conditions ?? []).map((c) => c.id);
+        else if (spec.proposition) out = (data.propositions ?? []).map((x) => x.id);
         else if (spec.trait) out = entities.filter((e) => !(e.flags ?? []).some((f) => EXCLUDED_FROM_DOMAINS.includes(f))).map((e) => e.id);
         else out = [];
         if (spec.trait) out = out.filter((id) => hasTrait(id, spec.trait));
@@ -354,7 +355,8 @@ export function buildModel(data) {
         hasSlot: (id) => slots.has(id),
         domainOf: (id) => slots.get(id)?.domain ?? [],
         relation: (name) => relations.get(name) ?? null,
-        state: (name, thing) => stateTracks.get(`${name}|${thing}`) ?? null,
+        // A proposition names its knowledge track (a rule's ?fact bound to p.x reads knows_x).
+        state: (name, thing) => stateTracks.get(`${String(name).startsWith('p.') ? knowsName(name) : name}|${thing}`) ?? null,
         isWindow: isTime,
         cards: cardsOf,
     };
@@ -551,7 +553,7 @@ export function instantiateRule(model, ruleId, bind = {}) {
 }
 
 function describeSpec(spec) {
-    const what = spec.window ? 'a time window' : spec.condition ? 'a condition' : spec.only ? `one of ${spec.only.join(', ')}` : spec.placeholder ? `a ${(spec.kinds ?? [spec.kind] ?? ['card']).join(' or ')} not yet identified` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
+    const what = spec.window ? 'a time window' : spec.condition ? 'a condition' : spec.proposition ? 'a proposition' : spec.only ? `one of ${spec.only.join(', ')}` : spec.placeholder ? `a ${(spec.kinds ?? [spec.kind] ?? ['card']).join(' or ')} not yet identified` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
     return spec.trait ? `${what} that is ${spec.trait}` : what;
 }
 

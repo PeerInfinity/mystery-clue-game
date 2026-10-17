@@ -1675,6 +1675,10 @@
         "condition": {
           "type": "boolean",
           "description": "range over the declared state conditions"
+        },
+        "proposition": {
+          "type": "boolean",
+          "description": "range over the propositions; in a state term the bound proposition names its knowledge track"
         }
       }
     },

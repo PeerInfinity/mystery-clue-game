@@ -406,6 +406,9 @@ specific thing stay ground facts with a formula and no schema.
 - **Conditions offered** (Round 80): the card's pencil form offers a condition (`state_conditions`) only once a
   card the player holds speaks of it, or a question they can see asks it (`Game.knowableConditions()`), as for
   propositions. Silver Blaze's second condition is `sheathed` (the cataract knife, `k.knife_bared`).
+- **A variable over propositions** (Round 81): `{"proposition": true}` in a schema's `vars`. Bound to `p.<name>`, it
+  may stand as a state term's name, and reads the knowledge track `knows_<name>`. The three default knowledge rules
+  use it: `r.told_knows`, `r.present_sees`, `r.acts_on_knows`.
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 

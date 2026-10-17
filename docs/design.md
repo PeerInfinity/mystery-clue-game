@@ -2134,3 +2134,29 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Foreshadow log:** the rule at ¶82 (untold: "longer").
   - **Thoughts report:** 45 of 49 deductions with an inference; `world-model` reasons left: `t34.5` only.
   - **Gates:** nothing.
+
+## Round 81 (2026-10-16): starter batch, 2 — the three default knowledge rules (told, seen, acts on it)
+
+- **Format and engine:** a schema variable may range over the propositions (`{"proposition": true}`). Bound to
+  `p.<name>`, it stands as a state term's name and reads that proposition's knowledge track (`env.state`). So one
+  rule speaks of knowing any fact, where Round 78's rules named their track literally.
+- **Data** (`knowledge.json`, default, each with `unless`):
+  - `r.told_knows`: who is told something knows it from then on, unless he did not believe it. Background from
+    Hunter's message to Straker (¶32), "told him what had occurred".
+  - `r.present_sees`: who is there, awake, when something happens sees it, unless asleep or stupefied, or it was
+    dark or hidden. From Edith looking back and seeing the stranger at the window (¶29). The place is a variable,
+    so the rule compares the state with a named value, not with the event's place slot (Round 77's trap).
+  - `r.acts_on_knows`: who acts on a fact knows it when he acts, unless by chance. From the stranger's "I
+    understand that a stable-boy sleeps there alone" (¶24), beside `r.lost_does_not_know`.
+- **Unapplied, as the kickoff allows:** no thought needs them. `t24.2` and `t150.1` take their knowledge from the
+  speaker's own words, which is better evidence than the defaults. `r.present_sees` has its first use waiting in
+  workstream 5 (`t34.5`: had Straker been at the stable when the horse was led out, he would know the stall was
+  empty; `docs/noticing-absence.md`, Q5).
+- **Limit found:** `who` ranges over people and groups, which excludes placeholders (the stranger). A rule applied
+  to him would need `also`, as `r.lost_does_not_know` has. Left until a rule is applied to him.
+- **Test** (`reasoning.test.js`): `r.told_knows` bound to Brown and `p.mercy_in_safe_return` grounds to his
+  knowledge track; a place is refused as the fact.
+- **Moved:**
+  - **Report:** rules 102 → 105, quotes 1020 → 1023.
+  - **Reveal and foreshadow logs:** the three rules as background on the reasoning topic, at ¶24, ¶29 and ¶32.
+  - **Thoughts report and gates:** nothing.
