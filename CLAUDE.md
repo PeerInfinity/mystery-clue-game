@@ -4,6 +4,8 @@
 - `docs/kickoff-world-model-2.md` — the current work: solver speed, checked placements on the board, then
   knowledge and intention. World-model steps 1–4 (`docs/kickoff-world-model.md`) are done (Rounds 60–64);
   workstream 2 (short chains) is done (Rounds 41–58).
+- `docs/kickoff-event-order.md` — a parallel piece of work (Round 70): the order of events within a time window, as
+  format and case data. Steps A and B of the world-model kickoff are done (Rounds 66–70); C is being designed.
 - `docs/format-0.3.md` — the case format as built, and the decisions taken on it.
 - `docs/redesign.md` — the design discussion the format serves: the reader's process, what the logic and the
   gameplay are missing, the alternatives, and the order of work.

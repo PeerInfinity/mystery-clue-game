@@ -1806,3 +1806,40 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
 - **Not yet:** the parts of a window the player splits ("a part of a window you split yourself cannot be checked
   yet"). That comes with part 3, the order questions.
 - **Moved:** nothing in the logs, reports or gates.
+
+## Round 70 (2026-10-16): checked placements (B, part 3) — the order questions of the player's own splits
+
+- **Opened on commit** (`caseModel.js` `openSplit`/`closeSplit`; Game `#ensurePart`): when the player commits
+  something about a part of a window they split themselves (a placement, or an event's part), the split is built.
+  - **What is built:** its two parts, an order question `ord.<event>.<splitter>` with no answer for each event
+    that may share the window, and the order ties these add (`orderTies`, extracted from `buildModel` unchanged).
+    The parents of a nested part are built first.
+  - **Held by count, saved and closed** as opened states are (`openedSplits` in the save, before `opened`).
+- **Commit an event's part** (Game `proveOrder(event, part)`; "prove" beside an event placed in a part, on the
+  board and on the event's card):
+  - **What is proven:** it happened before or after each event that splits the windows above that part.
+  - **The card:** a proven order becomes a card, "“…” happened after “…”".
+  - **The guard:** what the player trusts must be consistent first, as for states.
+  - **Example:** on the case's own split, the finding of the open door is proven to come after Mrs. Straker woke
+    (her waking at seven, the door found open).
+- **Problem met, and Robert's ruling (Option A):**
+  - **The problem:** Round 61's convention put the event that splits a window on the boundary of both parts, so
+    whoever does it was tied to its place in both. That fits a split at Mrs. Straker's waking. It breaks a split
+    at a move: at "Edith flees" it put her on the moor path throughout the part before her flight, against her
+    running to the window.
+  - **The ruling:** the splitting event lies in neither part (`inTimeConds`). For the case this drops one tie (her
+    waking), and her state before waking stays unique, given by her own clue. The other alternative, keep the
+    boundary and refuse splits at moves, was declined.
+- **Problem met, open (Robert: the case will get the data, in a session of its own):**
+  - No clue in the case states the order of two events within a window. No claim asserts an order question.
+  - So an order on the player's own splits is provable only where the world's states force it. "Edith ran to the
+    window before she fled" stays "does not settle it yet", though the story tells it ("As Edith fled she looked
+    back…").
+  - `docs/kickoff-event-order.md` hands the format and the data to a new session.
+- **Test** (`timeline.test.js`, order questions):
+  - the finding after the waking, proven and placed;
+  - the player's split of the window scene opened on commit, with its order questions;
+  - Edith's part well-posed (the flight in neither part) and still unproven;
+  - save, restore and reset.
+- **Moved:** `report.md`: constraints 327 → 326; the waking tie no longer among what gives Mrs. Straker's state
+  before waking. Nothing in the logs, the thoughts report or the gates.

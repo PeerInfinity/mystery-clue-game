@@ -17,7 +17,7 @@
 // Scoring: Holmes's steps are the annotated reading's thoughts (engine/steps.js); one the player makes by their own
 //   reasoning before the paragraph where Holmes states it scores (thoughtScores, score).
 
-import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState } from './caseModel.js';
+import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState, openSplit, closeSplit } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
 
@@ -257,6 +257,8 @@ export class Game {
         // The states the player opened go with their cards.
         for (const slot of this.openedStates ?? []) closeState(this.model, slot);
         this.openedStates = [];
+        for (const [w, by] of [...(this.openedSplits ?? [])].reverse()) closeSplit(this.model, w, by);
+        this.openedSplits = [];
         this.applied = [];              // [{id, rule, bind, para}]
         this.concluded = [];            // [{id, cited, formula, label, para}]
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
@@ -288,6 +290,7 @@ export class Game {
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             made: [...this.#noteMade()],
             board: this.board,
+            openedSplits: this.openedSplits,
             opened: this.openedStates.map((slot) => { const o = this.model.opened.find((x) => x.slot === slot); return [o.thing, o.name, o.window]; }),
             version: 7,
         };
@@ -314,7 +317,10 @@ export class Game {
             this.#unlock(id, para);
             this.inferenceHow.set(id, { how: 'built' });
         }
-        // The states the player opened, before the cards and marks that speak of them.
+        // The splits and states the player opened, before the cards and marks that speak of them.
+        for (const [w, by] of state.openedSplits ?? []) {
+            try { openSplit(this.model, w, by); this.openedSplits.push([w, by]); } catch (e) { console.warn(`could not reopen the split of ${w} at ${by}: ${e.message}`); }
+        }
         for (const [thing, name, w] of state.opened ?? []) {
             try { this.openedStates.push(openState(this.model, thing, name, w)); } catch (e) { console.warn(`could not reopen ${thing} ${name} ${w}: ${e.message}`); }
         }
@@ -458,7 +464,7 @@ export class Game {
         let opened = null;
         if (!st) {
             if (!this.knows(thing) || !this.#shownTime(time)) return { reason: 'that is not on your board' };
-            if (!this.model.windows.some((w) => w.id === time) && !this.model.subwindows.has(time)) return { reason: 'a part of a window you split yourself cannot be checked yet' };
+            if (!this.#ensurePart(time)) return { reason: 'that time cannot be checked' };
             try { opened = openState(this.model, thing, aspect, time); } catch (e) { return { reason: e.message }; }
             this.openedStates.push(opened);
             // The case's ties are unchanged (the opened window has its own), so the clashes found still stand: the
@@ -481,6 +487,54 @@ export class Game {
             return { reason: `${who} has no single ${aspect === 'at' ? 'place' : aspect === 'held' ? 'holder' : 'answer'} throughout this time: what you trust ${aspect === 'at' ? `puts ${who} in more than one place then` : 'gives more than one'}. Split the time at an event to place ${who} before or after it.`, clash };
         }
         return st ?? { reason: 'that is not one of the answers here' };
+    }
+
+    /**
+     * Make sure the model has this time: a window, a part the case splits, or a part of the player's own split
+     * (opened, with its parents, with openSplit). False if it is none of these.
+     */
+    #ensurePart(time) {
+        if (this.model.windows.some((w) => w.id === time) || this.model.subwindows.has(time)) {
+            const sw = this.model.subwindows.get(time);
+            // Opened by another game on the same model: hold it too.
+            if (sw?.opened && !this.openedSplits.some(([w, by]) => w === sw.parent && by === sw.by)) { openSplit(this.model, sw.parent, sw.by); this.openedSplits.push([sw.parent, sw.by]); }
+            return true;
+        }
+        const sp = this.board.splits.find((x) => time === TL.partId(x.time, 'before', x.by) || time === TL.partId(x.time, 'after', x.by));
+        if (!sp || !this.#ensurePart(sp.time)) return false;
+        try { openSplit(this.model, sp.time, sp.by); } catch { return false; }
+        this.openedSplits.push([sp.time, sp.by]);
+        if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
+        return true;
+    }
+
+    /**
+     * Commit an event's place in a split window: prove it happened before (or after) the event that splits it, and
+     * so on up the parts (`part` is where it is placed). The order questions are the case's or, for the player's
+     * own split, opened for it. A proven order becomes a card, as a proven state does.
+     */
+    proveOrder(event, part) {
+        if (!this.knows(event) || !this.#shownTime(part)) return { ok: false, reason: 'that is not on your board' };
+        if (!this.#ensurePart(part)) return { ok: false, reason: 'that time cannot be checked' };
+        const sw = this.model.subwindows.get(part);
+        if (!sw) return { ok: false, reason: 'that is a whole window, not a part of one' };
+        const conds = sw.path.filter(([, by]) => by !== event).map(([dir, by]) => [`ord.${event.slice(2)}.${by.slice(2)}`, dir, by]);
+        if (conds.some(([slot]) => !this.model.slots.has(slot))) return { ok: false, reason: 'a clue you hold puts it in another window' };
+        // As for a state: what is trusted must be consistent, or nothing can be proven of it.
+        const working = this.workingConstraints();
+        if (!this.model.problem.consistent(working).ok) return { ok: false, reason: 'some of the clues you trust clash: one of them must be false', clash: this.model.problem.explainConflict(working) ?? [] };
+        const formula = conds.length === 1 ? { eq: [conds[0][0], conds[0][1]] } : { and: conds.map(([slot, dir]) => ({ eq: [slot, dir] })) };
+        const res = this.checkConclusion(formula);
+        if (!res.ok) return res.reason ? { ...res, reason: 'what you hold and trust does not settle it yet' } : res;
+        for (const [slot, dir] of conds) this.#mark(slot).proven = { value: dir, cited: true, used: res.used };
+        this.placeEvent(event, part);
+        const had = this.concluded.find((c) => JSON.stringify(c.formula) === JSON.stringify(formula) && this.knows(c.id));
+        if (had) return { ok: true, card: had.id, used: res.used };
+        const name = (e) => `“${this.nameOf(e)}”`;
+        const label = `${name(event)} happened ${conds.map(([, dir, by]) => `${dir} ${name(by)}`).join(', and ')}`;
+        const cited = [...new Set(res.used.map((k) => this.model.constraints.get(k)).filter((k) => k && !k.definition && !k.world).flatMap((k) => (k.inference ? [k.inference] : k.premises)))].filter((x) => this.knows(x));
+        const made = this.conclude(cited, formula, { label });
+        return made.ok ? { ok: true, card: made.id, used: res.used } : { ok: true, card: null, used: res.used, cardRefused: made.reason ?? made.error ?? 'refused' };
     }
 
     /** A state in words: "John Straker was at Straker's villa (Tuesday, 1 a.m.)". */

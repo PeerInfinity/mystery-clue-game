@@ -332,6 +332,23 @@ specific thing stay ground facts with a formula and no schema.
   Only times reached and lines with something on them; undated events are listed apart. The Card tab draws it,
   with the board's layer selector and pencil marks.
 
+## As built (2026-10-16): checked placements (B; Rounds 68–70)
+
+- **Board marks:** a pencil mark may carry `aspect` (`held`, or a condition's id; default `at`).
+- **Committing a mark** (Game `proveMark`, `ruleOutMark`, `proveOrder`):
+  - proving a state is checked in every setting; ruling one out follows `crossOut`;
+  - a proven state or order becomes a player card (as `conclude` makes, saved with them);
+  - nothing is checked where what the player trusts plus the ties is inconsistent: the thing has no single
+    answer throughout that time.
+- **Opened states** (`openState`/`closeState`): a slot the case never declared, made when a mark there is
+  committed. It carries `opened: true`, has no answer and plays no part in uniqueness. Its ties (`windowTies`)
+  are its own (`…@<window>`); the case's ties do not change.
+- **Opened splits** (`openSplit`/`closeSplit`): a split the player made, built when a part of it is committed:
+  its parts (`opened: true`), its order questions (no answer) and their order ties.
+- **Both** are held by count, saved (`opened`, `openedSplits`), and closed on reset.
+- **The splitting event lies in neither part** (Round 70; before, on the boundary of both).
+- **Event order within a window:** no claim states it yet (open; `docs/kickoff-event-order.md`).
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's

@@ -618,7 +618,7 @@ function cardTimelineHtml(id) {
             h += `<p class="small">${esc(line.label ?? cardName(line.time))}${tl.place ? ` · ${link(tl.place, shortName(tl.place, 30))}` : ''}</p>`;
             const sp = game.board.splits.find((x) => x.time === line.time);
             if (sp && sp.by !== id) h += `<p class="small">Split at ${evLink(sp.by)}: this happened <span class="link" data-move="${esc(`${id}|${line.time}.before.${sp.by.slice(2)}`)}">before</span> / <span class="link" data-move="${esc(`${id}|${line.time}.after.${sp.by.slice(2)}`)}">after</span> it?</p>`;
-            if (line.placed) h += `<p class="small"><span class="link" data-move="${esc(`${id}|`)}">Back to the whole window</span></p>`;
+            if (line.placed) h += `<p class="small"><span class="link" data-order-prove="${esc(`${id}|${line.time}`)}">Prove it</span> · <span class="link" data-move="${esc(`${id}|`)}">Back to the whole window</span></p>`;
         }
         return h;
     }
@@ -707,7 +707,8 @@ function boardHtml(layout) {
                 const evs = cell.events.map((e) => {
                     const sp = game.board.splits.find((x) => x.time === t.id);
                     const mv = sp && t.kind !== 'boundary' ? ` <span class="small muted">→ <span class="link" data-move="${esc(`${e}|${t.id}.before.${sp.by.slice(2)}`)}">before</span> / <span class="link" data-move="${esc(`${e}|${t.id}.after.${sp.by.slice(2)}`)}">after</span></span>` : '';
-                    const back = game.board.placed.some((p) => p.event === e) && t.kind === 'part' ? ` <span class="link small" data-move="${esc(`${e}|`)}" title="Back to the whole window">↑</span>` : '';
+                    const placedHere = game.board.placed.some((p) => p.event === e) && t.kind === 'part';
+                    const back = placedHere ? ` <span class="link small" data-move="${esc(`${e}|`)}" title="Back to the whole window">↑</span> <span class="link small" data-order-prove="${esc(`${e}|${t.id}`)}" title="Prove it happened in this part, from what you hold and trust">prove</span>` : '';
                     return `<div class="ev" title="${esc(cardName(e))}">• ${link(e, shortName(e, 26))}${mv}${back}</div>`;
                 }).join('');
                 const pick = t.kind === 'boundary' || c === 'unknown' ? '' : ` data-pen-cell="${esc(`time=${t.id}|place=${c}`)}"${pen.time === t.id && pen.place === c ? ' class="picked"' : ''}`;
@@ -1037,7 +1038,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1084,6 +1085,14 @@ function onClick(e) {
     }
     if (t.dataset.penToggle) { const [thing, time, value, struck, aspect = 'at'] = t.dataset.penToggle.split('|'); game.pencilPlace(thing, time, value, { struck: struck === '1', layer: ui.layer ?? 'mine', aspect }); ui.layerFit = null; changed(); return; }
     if (t.dataset.penErase) { const [thing, time, value, aspect = 'at'] = t.dataset.penErase.split('|'); game.erasePlace(thing, time, value, ui.layer ?? 'mine', aspect); ui.layerFit = null; changed(); return; }
+    if (t.dataset.orderProve) {
+        const [ev, part] = t.dataset.orderProve.split('|');
+        const res = game.proveOrder(ev, part);
+        if (res.ok) toast(res.card ? `Proven. A new card: ${link(res.card, shortName(res.card, 60))}` : 'Proven.');
+        else toast(esc(res.reason ?? res.error ?? 'Not proven.'));
+        changed();
+        return;
+    }
     if (t.dataset.markProve || t.dataset.markRule) {
         const [thing, time, value, aspect] = (t.dataset.markProve ?? t.dataset.markRule).split('|');
         const res = t.dataset.markProve ? game.proveMark(thing, time, value, aspect) : game.ruleOutMark(thing, time, value, aspect);

@@ -195,6 +195,7 @@ export function buildModel(data) {
     // part an event falls in is an ORDER question, `ord.<event>.<splitter>` (before/after), one per event that may
     // share the window; its answer is the events' fabula order, open unless a claim states it.
     const subwindows = new Map();   // id -> {id, parent, root, path: [[dir, event]...], label}
+    let makeSplit = null;
     const orderSlot = (a, e) => `ord.${a.replace(/^e\./, '')}.${e.replace(/^e\./, '')}`;
     {
         const events = data.events ?? [];
@@ -206,15 +207,19 @@ export function buildModel(data) {
         }
         const claimed = new Set();
         for (const c of data.claims ?? []) for (const m of JSON.stringify(c.asserts ?? {}).matchAll(/"(ord\.[a-z0-9_.]+)"/g)) claimed.add(m[1]);
-        for (const sp of data.state_splits ?? []) {
+        // One split: its two parts and an order question for each event that may share the window. `opened`: a
+        // split the player made (openSplit), whose order questions have no answer of their own.
+        makeSplit = (sp, opened = false) => {
+            const made = { parts: [], slots: [] };
             const parent = timeOrder.has(sp.window) ? { id: sp.window, root: sp.window, path: [] } : subwindows.get(sp.window);
-            if (!parent) { errors.push(`split: unknown window ${sp.window}`); continue; }
+            if (!parent) { errors.push(`split: unknown window ${sp.window}`); return made; }
             const by = eventById.get(sp.by);
-            if (!by) { errors.push(`split of ${sp.window}: unknown event ${sp.by}`); continue; }
+            if (!by) { errors.push(`split of ${sp.window}: unknown event ${sp.by}`); return made; }
             for (const dir of ['before', 'after']) {
                 const id = `${parent.id}.${dir}.${sp.by.replace(/^e\./, '')}`;
                 if (subwindows.has(id)) { errors.push(`split ${id} declared twice`); continue; }
-                subwindows.set(id, { id, parent: parent.id, root: parent.root, by: sp.by, dir, path: [...parent.path, [dir, sp.by]] });
+                subwindows.set(id, { id, parent: parent.id, root: parent.root, by: sp.by, dir, path: [...parent.path, [dir, sp.by]], ...(opened ? { opened: true } : {}) });
+                made.parts.push(id);
             }
             for (const e of events) {
                 // An event may fall in the split part unless a clue the case trusts puts it in another window.
@@ -222,14 +227,18 @@ export function buildModel(data) {
                 if (e.id === sp.by || !e.facets?.time || (when !== undefined && when !== parent.root)) continue;
                 const id = orderSlot(e.id, sp.by);
                 if (slots.has(id)) continue;
+                made.slots.push(id);
                 addSlot({
                     id, on: e.id, facet: 'order', prompt: `Did it happen before or after {${sp.by}}?`, domain: ['before', 'after'],
-                    answer: (e.fabula_order ?? 0) < (by.fabula_order ?? 0) ? 'before' : 'after',
-                    undetermined: claimed.has(id) ? undefined : true,
+                    answer: opened ? null : (e.fabula_order ?? 0) < (by.fabula_order ?? 0) ? 'before' : 'after',
+                    undetermined: !opened && claimed.has(id) ? undefined : true,
                     labels: { before: 'Before', after: 'After' },
+                    ...(opened ? { opened: true } : {}),
                 });
             }
-        }
+            return made;
+        };
+        for (const sp of data.state_splits ?? []) makeSplit(sp);
     }
     const isTime = (id) => timeOrder.has(id) || subwindows.has(id);
     const rootOf = (id) => (timeOrder.has(id) ? id : subwindows.get(id)?.root);
@@ -398,35 +407,11 @@ export function buildModel(data) {
             if (formula.true) return;
             addConstraint({ id, label, premises: [], world: true, thing, ...(thing ? {} : { definition: true }), formula });
         };
-        const ctx = { data, slots, subwindows, timeOrder, env, stateTracks, orderSlot, isPlace: model_isPlace, stated: statedOutright(data), makeTrack, isTime };
+        const ctx = { data, slots, subwindows, timeOrder, env, stateTracks, orderSlot, isPlace: model_isPlace, stated: statedOutright(data), makeTrack, makeSplit, isTime };
         const inTime = (a, w) => inTimeConds(ctx, a, w);
         for (const t of stateTracks.values()) for (const k of trackTies(ctx, t)) world(k.id, k.label, k.formula, k.thing);
         worldContext = ctx;
-        // A part split off inside another part: its splitting event lies in that part. Two splitters order each other
-        // one way only, and order runs through: before F, and F before E, is before E.
-        for (const sw of subwindows.values()) {
-            if (sw.dir !== 'before' || !subwindows.has(sw.parent)) continue;
-            const conds = inTime(sw.by, sw.parent);
-            if (conds && conds.length > 1) world(`k.world.split.${sw.parent.slice(2)}.${sw.by.slice(2)}`, `${sw.by} lies within ${sw.parent}.`, { implies: [conds[0], { and: conds.slice(1) }] });
-        }
-        const splitters = [...new Set([...subwindows.values()].map((sw) => sw.by))];
-        for (const e of splitters) for (const f of splitters) {
-            if (e >= f || !slots.has(orderSlot(e, f)) || !slots.has(orderSlot(f, e))) continue;
-            world(`k.world.order.${e.slice(2)}.${f.slice(2)}`, `${e} and ${f}: one is before the other.`, { and: [
-                { implies: [{ eq: [orderSlot(e, f), 'before'] }, { eq: [orderSlot(f, e), 'after'] }] },
-                { implies: [{ eq: [orderSlot(e, f), 'after'] }, { eq: [orderSlot(f, e), 'before'] }] },
-            ] });
-        }
-        for (const a of data.events ?? []) for (const e of splitters) for (const f of splitters) {
-            if (a.id === e || a.id === f || e === f) continue;
-            const [ae, af, fe] = [orderSlot(a.id, e), orderSlot(a.id, f), orderSlot(f, e)];
-            if (!slots.has(ae) || !slots.has(af) || !slots.has(fe)) continue;
-            const same = { and: [{ same: [`${a.id}.time`, `${e}.time`] }, { same: [`${f}.time`, `${e}.time`] }] };
-            world(`k.world.order.${a.id.slice(2)}.${f.slice(2)}.${e.slice(2)}`, `Order runs through (${a.id}, ${f}, ${e}).`, { and: [
-                { implies: [{ and: [same, { eq: [af, 'before'] }, { eq: [fe, 'before'] }] }, { eq: [ae, 'before'] }] },
-                { implies: [{ and: [same, { eq: [af, 'after'] }, { eq: [fe, 'after'] }] }, { eq: [ae, 'after'] }] },
-            ] });
-        }
+        for (const k of orderTies(ctx)) world(k.id, k.label, k.formula);
     }
     for (const k of data.constraints ?? []) {
         if (!isGround(k.formula)) {
@@ -467,7 +452,7 @@ export function buildModel(data) {
         }
     }
 
-    const model = { data, cards, slots, constraints, claimForms, relations, stateTracks, subwindows, env, timeOrder, sceneOrder, windows, scenes, errors, problem: null, dynamic: new Map(), worldContext, opened: [] };
+    const model = { data, cards, slots, constraints, claimForms, relations, stateTracks, subwindows, env, timeOrder, sceneOrder, windows, scenes, errors, problem: null, dynamic: new Map(), worldContext, opened: [], openedSplits: [] };
     if (!errors.length) rebuildProblem(model);
     model.relevant = relevantCards(model);
     // Verify every authored inference once (the report shows which are checked, which merely asserted).
@@ -758,7 +743,9 @@ function inTimeConds({ timeOrder, subwindows, slots, orderSlot }, a, w) {
     const root = timeOrder.has(w) ? w : subwindows.get(w).root;
     const conds = [{ eq: [`${a}.time`, root] }];
     for (const [dir, e] of subwindows.get(w)?.path ?? []) {
-        if (e === a) continue; // the splitting event itself lies on the boundary of both parts
+        // The event that splits a window lies in neither part (Robert, Round 70): whoever does it is not tied to its
+        // place in the part before or after it (a flight from one place to another would put them in both).
+        if (e === a) return null;
         const o = orderSlot(a, e);
         if (!slots.has(o)) return null;
         conds.push({ eq: [o, dir] });
@@ -911,6 +898,77 @@ export function closeState(model, slot) {
     const track = model.stateTracks.get(key);
     track.removeWindow(o.window);
     if (o.newTrack && !track.times.length) model.stateTracks.delete(key);
+    for (const id of o.ties) model.constraints.delete(id);
+    rebuildProblem(model);
+}
+
+/**
+ * The order of the events that split windows (definitions, always active): a part split off inside another part
+ * has its splitting event in that part; two splitters order each other one way only; and order runs through
+ * (before F, and F before E, is before E). [{id, label, formula}]
+ */
+function orderTies(ctx) {
+    const { data, slots, subwindows, orderSlot } = ctx;
+    const out = [];
+    const world = (id, label, formula) => out.push({ id, label, formula });
+    for (const sw of subwindows.values()) {
+        if (sw.dir !== 'before' || !subwindows.has(sw.parent)) continue;
+        const conds = inTimeConds(ctx, sw.by, sw.parent);
+        if (conds && conds.length > 1) world(`k.world.split.${sw.parent.slice(2)}.${sw.by.slice(2)}`, `${sw.by} lies within ${sw.parent}.`, { implies: [conds[0], { and: conds.slice(1) }] });
+    }
+    const splitters = [...new Set([...subwindows.values()].map((sw) => sw.by))];
+    for (const e of splitters) for (const f of splitters) {
+        if (e >= f || !slots.has(orderSlot(e, f)) || !slots.has(orderSlot(f, e))) continue;
+        world(`k.world.order.${e.slice(2)}.${f.slice(2)}`, `${e} and ${f}: one is before the other.`, { and: [
+            { implies: [{ eq: [orderSlot(e, f), 'before'] }, { eq: [orderSlot(f, e), 'after'] }] },
+            { implies: [{ eq: [orderSlot(e, f), 'after'] }, { eq: [orderSlot(f, e), 'before'] }] },
+        ] });
+    }
+    for (const a of data.events ?? []) for (const e of splitters) for (const f of splitters) {
+        if (a.id === e || a.id === f || e === f) continue;
+        const [ae, af, fe] = [orderSlot(a.id, e), orderSlot(a.id, f), orderSlot(f, e)];
+        if (!slots.has(ae) || !slots.has(af) || !slots.has(fe)) continue;
+        const same = { and: [{ same: [`${a.id}.time`, `${e}.time`] }, { same: [`${f}.time`, `${e}.time`] }] };
+        world(`k.world.order.${a.id.slice(2)}.${f.slice(2)}.${e.slice(2)}`, `Order runs through (${a.id}, ${f}, ${e}).`, { and: [
+            { implies: [{ and: [same, { eq: [af, 'before'] }, { eq: [fe, 'before'] }] }, { eq: [ae, 'before'] }] },
+            { implies: [{ and: [same, { eq: [af, 'after'] }, { eq: [fe, 'after'] }] }, { eq: [ae, 'after'] }] },
+        ] });
+    }
+    return out;
+}
+
+/**
+ * Open a split the player made (they commit something about one of its parts): window `w` (a window or a part)
+ * split at event `by` into the part before and the part after, with an order question (no answer) for each event
+ * that may share the window, and the order ties these add. Held by count, like opened states. Returns the parts.
+ */
+export function openSplit(model, w, by) {
+    const ctx = model.worldContext;
+    const ids = ['before', 'after'].map((dir) => `${w}.${dir}.${by.replace(/^e\./, '')}`);
+    if (model.subwindows.has(ids[0])) {
+        const o = model.openedSplits.find((x) => x.window === w && x.by === by);
+        if (o) o.holders++;
+        return ids;
+    }
+    if (!ctx.isTime(w)) throw new Error(`unknown window ${w}`);
+    if (model.cards.get(by)?.section !== 'events') throw new Error(`${by} is not an event`);
+    const made = ctx.makeSplit({ window: w, by }, true);
+    const ties = orderTies(ctx).filter((k) => !model.constraints.has(k.id));
+    for (const k of ties) model.constraints.set(k.id, { id: k.id, label: k.label, premises: [], world: true, definition: true, formula: k.formula });
+    model.openedSplits.push({ window: w, by, ...made, ties: ties.map((k) => k.id), holders: 1 });
+    rebuildProblem(model);
+    return ids;
+}
+
+/** Let go of a split opened with openSplit; the last to let go closes it (its parts, order questions and ties). */
+export function closeSplit(model, w, by) {
+    const i = model.openedSplits.findIndex((x) => x.window === w && x.by === by);
+    if (i < 0) return;
+    const o = model.openedSplits[i];
+    if (--o.holders > 0) return;
+    model.openedSplits.splice(i, 1);
+    for (const id of o.parts) model.subwindows.delete(id);
+    for (const id of o.slots) model.slots.delete(id);
     for (const id of o.ties) model.constraints.delete(id);
     rebuildProblem(model);
 }

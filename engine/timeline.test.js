@@ -179,3 +179,30 @@ test('a cell the case never declared opens when a mark there is committed; one w
     assert.ok(!model.slots.has('st.ned_hunter.at.mon_2110'));
     assert.ok(!model.stateTracks.has('at|edith_baxter'));
 });
+
+test("order questions: an event's part proven on the case's split; the player's own split opened on commit; the splitter lies in neither part", () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    while (game.read <= paraOf('Mrs. Straker awoke at seven') + 3) game.advance();
+    game.splitTime('w.tue_0700', 'e.wife_wakes');
+    const res = game.proveOrder('e.stable_found_open', 'w.tue_0700.after.wife_wakes');
+    assert.ok(res.ok && res.card, JSON.stringify(res));
+    assert.match(model.cards.get(res.card).text, /happened after/);
+    assert.equal(game.cardTimeline('e.stable_found_open').lines[0].time, 'w.tue_0700.after.wife_wakes', 'placed in its part');
+    // The player's own split of the window scene at Edith's flight: opened when something about a part is committed.
+    assert.ok(game.splitTime('w.mon_2110', 'e.edith_flees'));
+    assert.ok(!model.subwindows.has('w.mon_2110.before.edith_flees'));
+    game.pencilPlace('edith_baxter', 'w.mon_2110.before.edith_flees', 'stable');
+    const edith = game.proveMark('edith_baxter', 'w.mon_2110.before.edith_flees', 'stable');
+    assert.ok(model.subwindows.get('w.mon_2110.before.edith_flees')?.opened, 'the split is opened');
+    assert.ok(model.slots.get('ord.edith_runs_to_window.edith_flees')?.opened, 'with its order questions');
+    // Her flight lies in neither part, so the part before it has an answer; no clue tells the order yet, so it stays open.
+    assert.doesNotMatch(edith.reason ?? '', /no single place/);
+    assert.equal(edith.ok, false);
+    assert.equal(game.proveOrder('e.edith_runs_to_window', 'w.mon_2110.before.edith_flees').ok, false);
+    // Saved and restored; a reset closes the split.
+    const copy = new Game(model, { difficulty: MEDIUM, state: JSON.parse(JSON.stringify(game.save())) });
+    assert.deepEqual(copy.openedSplits, [['w.mon_2110', 'e.edith_flees']]);
+    copy.reset();
+    game.reset();
+    assert.ok(!model.subwindows.has('w.mon_2110.before.edith_flees') && !model.slots.has('ord.edith_runs_to_window.edith_flees'));
+});
