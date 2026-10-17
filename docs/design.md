@@ -2641,3 +2641,31 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Case report:** claims 154 → 155, quotes 1037 → 1038.
   - **Thoughts report:** "Notable details" 8 → 11 rows.
   - **Gates:** nothing.
+
+## Round 99 (2026-10-17): review batch 6 — the stranger's "Can you tell me where I am?" as a lie
+
+- **The thought** (`t24.2`): "the 'lost' story is a cover". The case concluded his aim was not to find his way
+  (`k.stranger_came_on_purpose`, Round 78) but had no statement of his to doubt.
+- **Data:**
+  - `c.stranger_says_lost` (¶22, "Can you tell me where I am? ... I had almost made up my mind to sleep on the
+    moor"): Edith's testimony, passed on from the stranger (chain: the stranger → Edith, at 21:05), asserting his
+    aim then was `find_way`; truth false, with a truth slot. Its doubts: mistaken or lying, by him or by Edith.
+  - `r.lost_is_a_pretence` (default, from ¶24, beside `r.lost_does_not_know`): a man who says he has lost his way,
+    when he came where he is on purpose, does not believe what he says.
+  - `k.stranger_lied_about_lost` (implicit, **verified**): from `k.stranger_came_on_purpose` and the rule, the
+    stranger did not believe his own words; a declared belief track (false at 21:05).
+  - `t24.1` and `t24.2` map the statement.
+- **The clash trap checked** (Rounds 78, 91): trusted, the statement contradicts the inference's conclusion, not a
+  clue. Once the player builds `k.stranger_came_on_purpose`, the clash is {the inference, the statement}, and only
+  the statement (a story clue, the lowest weight) is set aside; `c.stranger_knew_lad_alone` stays trusted. Doubted
+  as his lie, nothing clashes.
+- **Test** (`belief.test.js`): the four doubts; the inference built, the lie granted, the one clash and what it
+  sets aside; the answer key.
+- **Moved:**
+  - **Reveal and foreshadow logs:** the statement at ¶22; the rule as background at ¶24 (it names the reader's own
+    step there, as `r.lost_does_not_know` does, and hints at nothing later).
+  - **Case report:** claims 155 → 156, rules 110 → 111, constraints 462 → 465, quotes 1038 → 1040, a 25th track,
+    verified inferences 73 → 74, two more unique slots (the statement's truth, his belief).
+  - **Thoughts report:** one more implicit inference. **Gates:** nothing.
+- **The review's batches are all built** (Rounds 94–99). Left, as recommended: C2, C5, C7, C8, C10 (leave), C4
+  (optional), C11 and C13 (with workstream 6). `CLAUDE.md` now points at the review and at workstream 3 next.

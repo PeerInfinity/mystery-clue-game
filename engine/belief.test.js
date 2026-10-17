@@ -120,3 +120,20 @@ test("Mrs. Straker's denial at the ruse is honest (t92.3): built from the sincer
     while (!solved.finished()) solved.advance();
     assert.equal(solved.settled('st.mrs_straker.believes_wife_never_had_dress.thu_evening'), 'true');
 });
+
+test("The stranger's 'Can you tell me where I am?' was a pretence (t24.2, Round 99): his lie is granted, and the clash sets aside only his statement", () => {
+    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
+    while (!game.knows('c.stranger_knew_lad_alone')) game.advance();
+    assert.ok(game.knows('c.stranger_says_lost'));
+    assert.deepEqual(game.doubtKinds('c.stranger_says_lost'), ['mistaken:the_stranger', 'lying:the_stranger', 'mistaken:edith_baxter', 'lying:edith_baxter']);
+    assert.deepEqual(game.propose(game.connectSet('k.stranger_came_on_purpose')).built, ['k.stranger_came_on_purpose']);
+    assert.ok(game.knows('k.stranger_lied_about_lost'), 'the lie is bookkeeping, granted with its premises');
+    const clash = game.clashes();
+    assert.equal(clash.length, 1);
+    assert.ok(game.workingConstraints().some((k) => model.constraints.get(k).from_claim === 'c.stranger_knew_lad_alone'), 'the true clue the inference rests on is not set aside');
+    game.suspect('c.stranger_says_lost', 'lying:the_stranger');
+    assert.equal(game.clashes().length, 0);
+    const solved = new Game(model, { difficulty: TRIVIAL, autoPace: 'logic' });
+    while (!solved.finished()) solved.advance();
+    assert.equal(solved.settled('st.the_stranger.believes_stranger_says_lost.mon_2105'), 'false');
+});
