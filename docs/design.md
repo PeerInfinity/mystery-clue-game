@@ -2105,3 +2105,32 @@ The kickoff of Round 65 is done: A in Round 66, B in Rounds 67–70, C designed 
 Rounds 76–78; event order came from a parallel session in Rounds 73–75. `docs/kickoff-workstreams-4-5.md` hands
 the next session a starter batch, then noticing and absence (workstream 5, which unlocks `t34.5`), then testimony
 and belief (workstream 4). It carries the open items and this session's traps. `CLAUDE.md` points at it.
+
+## Round 80 (2026-10-16): starter batch, 1 — the knife unsheathed in the hollow (`t82.3`); conditions offered once the story speaks of them
+
+- **Robert:** agreed to the proposed start. The board's three-dropdown form stays as it is (option a): aims and
+  knowledge are pencilled on the cards only.
+- **Data:**
+  - **A condition** `sheathed` ("Was the blade of {0} sheathed?") and a track `st.cataract_knife.sheathed`: at
+    one o'clock true, given by `c.cork_by_body` ("The tip was guarded by a disk of cork"), and in the morning
+    false, derived.
+  - **A default rule,** `r.guard_off_bares`: a knife whose guard is found beside it, off the tip, is no longer
+    guarded (unless it was put back on before). Background from the cork line (¶82), where the reader's thought
+    is.
+  - **The inference** `k.knife_bared` (editorial, **verified**), from the cork clue and the rule. `t82.3` maps to
+    it. It settles no case question and does not gate: an editorial step, like `k.not_a_robbery`. (The kickoff
+    said "implicit", but a thought names it, and an implicit inference is one no thought names.)
+- **Engine, the reading layer:** the card's pencil form offered every condition on every card from ¶1, so
+  "was sheathed?" would have shown before the story has a sheath. `Game.knowableConditions()` now offers a
+  condition only once a card the player holds speaks of it, or a question they can see asks it, as Round 78 did
+  for propositions. `pencilPlace` and the card form use it. "Stupefied" now first appears with Hunter's stupor
+  (¶33 in Easy and Medium; in Hard, once the player collects that clue).
+- **Test** (`thoughts.test.js` takes `t68.3` as its thought with no inference; `timeline.test.js`): no sheath offered at ¶32 (the knife in his hand); at ¶82 it is, the inference is
+  built, and the unsheathed knife in the morning is proven as a mark; sheathed at one o'clock cannot be ruled out.
+- **Moved:**
+  - **Report:** rules 101 → 102, slots 666 → 668, constraints 440 → 442, quotes 1019 → 1020, states 15 → 16 tracks
+    (32 → 34 declared), verified inferences 64 → 65.
+  - **Reveal log:** the rule as background on the cork at ¶82.
+  - **Foreshadow log:** the rule at ¶82 (untold: "longer").
+  - **Thoughts report:** 45 of 49 deductions with an inference; `world-model` reasons left: `t34.5` only.
+  - **Gates:** nothing.

@@ -403,6 +403,9 @@ specific thing stay ground facts with a formula and no schema.
   - **Rule schemas** name a knowledge track by its literal name (`{"state": ["knows_lad_alone_at_night", "?who",
     "?when"]}`).
 - **Belief** is not built (workstream 4; `docs/knowledge-intention.md`, Q4).
+- **Conditions offered** (Round 80): the card's pencil form offers a condition (`state_conditions`) only once a
+  card the player holds speaks of it, or a question they can see asks it (`Game.knowableConditions()`), as for
+  propositions. Silver Blaze's second condition is `sheathed` (the cataract knife, `k.knife_bared`).
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 

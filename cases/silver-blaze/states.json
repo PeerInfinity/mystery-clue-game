@@ -8,7 +8,8 @@
   {"window": "w.tue_dawn", "by": "e.brown_turns_back", "why": "The man who found the horse first led it towards King's Pyland, then turned back and led it to Mapleton: what he meant to do changed there."}
  ],
  "state_conditions": [
-  {"id": "stupefied", "prompt": "Was {0} stupefied?"}
+  {"id": "stupefied", "prompt": "Was {0} stupefied?"},
+  {"id": "sheathed", "prompt": "Was the blade of {0} sheathed?"}
  ],
  "state_aims": [
   {"id": "information", "label": "To get information to bet on"},
@@ -27,6 +28,7 @@
   {"id": "st.other_lads.at", "of": "other_lads", "aspect": "location", "places": "night", "windows": {"w.tue_0100": "loft", "w.tue_stable": "loft", "w.tue_hollow": "loft", "w.tue_blow": "loft", "w.tue_after": "loft", "w.tue_dawn": "loft", "w.tue_0700": "loft"}},
   {"id": "st.ned_hunter.at", "of": "ned_hunter", "aspect": "location", "places": "night", "windows": {"w.mon_2100": "stable", "w.tue_0700": "stable"}},
   {"id": "st.ned_hunter.stupefied", "of": "ned_hunter", "aspect": "condition", "condition": "stupefied", "windows": {"w.tue_0700": "true"}},
+  {"id": "st.cataract_knife.sheathed", "of": "cataract_knife", "aspect": "condition", "condition": "sheathed", "windows": {"w.tue_0100": "true", "w.tue_morning": "false"}},
   {"id": "st.overcoat.held", "of": "overcoat", "aspect": "possession", "places": "night", "windows": {"w.tue_0100": "straker", "w.tue_morning": "fatal_hollow"}},
   {"id": "st.cravat.held", "of": "cravat", "aspect": "possession", "places": "night", "windows": {"w.tue_morning": "straker"}},
   {"id": "st.sovereigns.held", "of": "sovereigns", "aspect": "possession", "places": "night", "windows": {"w.tue_after": "straker", "w.tue_morning": "straker"}},

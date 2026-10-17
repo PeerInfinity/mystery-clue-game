@@ -657,7 +657,7 @@ function cardTimelineHtml(id) {
     if (tl.kind === 'thing') {
         // What to pencil: where it was, who had it, or one of the case's conditions.
         const held = (k) => !game.isHidden(k) && (model.cards.get(k)?.kind === 'place' || ['person', 'animal', 'group'].includes(model.cards.get(k)?.kind));
-        const conds = model.data.state_conditions ?? [];
+        const conds = game.knowableConditions().map((id) => ({ id }));
         const aims = model.data.state_aims ?? [];
         const person = ['person', 'group'].includes(model.cards.get(id)?.kind);
         const aspects = `<select id="cpen-aspect">${layerOpt('at', 'was at', cp.aspect)}${layerOpt('held', 'was held by', cp.aspect)}${person && aims.length ? layerOpt('aims', 'was trying', cp.aspect) : ''}${conds.map((c) => layerOpt(c.id, `was ${c.id}?`, cp.aspect)).join('')}${game.knowablePropositions().map((p) => layerOpt(`knows_${p.slice(2)}`, `knew: “${shortName(p, 50)}”?`, cp.aspect)).join('')}</select>`;

@@ -373,6 +373,20 @@ export class Game {
         return (this.model.data.propositions ?? []).map((p) => p.id).filter((p) => this.knows(p)
             || [...this.model.slots.values()].some((s) => s.track && s.state === knowsName(p) && this.slotVisible(s.id)));
     }
+    /**
+     * The conditions the player may pencil: those a card they hold speaks of, or a question they can see asks
+     * about (so "was it sheathed?" is not offered before the story gives a sheath).
+     */
+    knowableConditions() {
+        const spoken = new Set();
+        for (const id of this.unlocked.keys()) {
+            const c = this.model.cards.get(id);
+            const f = c?.asserts ?? c?.formula;
+            if (f) for (const x of slotsIn(f)) { const s = this.model.slots.get(x); if (s?.track) spoken.add(s.state); }
+        }
+        return (this.model.data.state_conditions ?? []).map((c) => c.id).filter((c) => spoken.has(c)
+            || [...this.model.slots.values()].some((s) => s.track && s.state === c && this.slotVisible(s.id)));
+    }
 
     /** One card's own timeline (engine/timeline.js, cardTimeline). */
     cardTimeline(id, layer = TL.MINE) { return TL.cardTimeline(this, id, layer); }
@@ -420,7 +434,7 @@ export class Game {
         if (aspect === 'at' && value !== TL.ELSEWHERE && !(this.knows(value) && kind === 'place')) return false;
         if (aspect === 'held' && value !== TL.ELSEWHERE && !(this.knows(value) && [...TL.BOARD_KINDS.filter((k) => k !== 'object'), 'place'].includes(kind))) return false;
         if (aspect === 'aims' && !(this.model.data.state_aims ?? []).some((a) => a.id === value)) return false;
-        const yesNo = [...(this.model.data.state_conditions ?? []).map((c) => c.id), ...this.knowablePropositions().map(knowsName)];
+        const yesNo = [...this.knowableConditions(), ...this.knowablePropositions().map(knowsName)];
         if (aspect !== 'at' && aspect !== 'held' && aspect !== 'aims' && !(yesNo.includes(aspect) && ['true', 'false'].includes(value))) return false;
         if (layer !== TL.MINE && !this.visibleTheories().some((t) => t.id === layer)) return false;
         const same = (p) => p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer && TL.aspectOf(p) === aspect;

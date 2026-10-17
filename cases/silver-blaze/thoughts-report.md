@@ -16,7 +16,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | ABSENCE | 5 | 2 |
 | QUESTION | 10 | 4 |
 | HYPOTHESIS | 27 | 21 |
-| INFER | 24 | 23 |
+| INFER | 24 | 24 |
 | DEFAULT | 8 | 7 |
 | AGENT | 8 | 7 |
 | PHYSICAL | 1 | 1 |
@@ -47,7 +47,7 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 49; with an inference: 44; with a reason for none: 5; earliest-date misses: 0 (and 4 explained); premise disagreements: 2
+- deduction-type thoughts: 49; with an inference: 45; with a reason for none: 4; earliest-date misses: 0 (and 4 explained); premise disagreements: 2
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -78,7 +78,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t78.2` | INFER | `k.not_a_robbery` | ¶78 | ¶78 |  |  | `r.stays_held`, `r.robber_takes_valuables` |  |  |
 | `t81.4` | AGENT | `k.knife_not_a_weapon` | ¶81 | ¶81 |  |  |  |  |  |
 | `t81.5` | INFER | `k.knife_for_an_operation` | ¶81 | ¶81 |  |  |  |  |  |
-| `t82.3` | INFER | none: world-model | ¶82 | — |  |  |  |  |  |
+| `t82.3` | INFER | `k.knife_bared` | ¶82 | ¶82 |  |  | `r.guard_off_bares` |  |  |
 | `t84.6` | IDENTIFY | `k.derbyshire_is_straker` | ¶84 | ¶84 |  |  |  | `k.bill_names_its_debtor` | `t84.5` |
 | `t84.9` | DEFAULT | `k.bill_is_his_own` | ¶84 | ¶84 |  |  |  |  |  |
 | `t92.2` | INFER | `k.dove_silk_on_the_bill` | ¶92 | ¶91 |  |  |  |  | `t85.2` |
@@ -113,7 +113,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet.
 
 - workstream-3: `t4.2`, `t68.3`
-- world-model: `t34.5`, `t82.3`
+- world-model: `t34.5`
 - action: `t92.14`
 
 ### Inferences named by more than one thought

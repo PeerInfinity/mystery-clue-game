@@ -271,3 +271,20 @@ test('knowledge: a clue of what someone knew deals its proposition; what is know
     assert.equal(solved.settled('st.silas_brown.aims.thu_night'), 'keep_safe');
     assert.equal(solved.settled('p.mercy_in_safe_return'), 'true');
 });
+
+test('a condition is offered once the story speaks of it; the cork by the body leaves the knife unsheathed', () => {
+    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'start' } });
+    while (game.read <= paraOf('in his right hand he held a small knife')) game.advance();
+    assert.ok(game.knows('cataract_knife'));
+    assert.ok(!game.knowableConditions().includes('sheathed'), 'no sheath before the cork is told');
+    assert.ok(!game.pencilPlace('cataract_knife', 'w.tue_morning', 'false', { aspect: 'sheathed' }));
+    while (game.read <= paraOf('a disk of cork which we found beside his\n      body')) game.advance();
+    assert.ok(game.knowableConditions().includes('sheathed'));
+    const res = game.propose(game.connectSet('k.knife_bared'));
+    assert.deepEqual(res.built, ['k.knife_bared'], JSON.stringify(res));
+    assert.ok(game.pencilPlace('cataract_knife', 'w.tue_morning', 'false', { aspect: 'sheathed' }));
+    const proof = game.proveMark('cataract_knife', 'w.tue_morning', 'false', 'sheathed');
+    assert.ok(proof.ok, JSON.stringify(proof));
+    assert.equal(game.cardTimeline('cataract_knife').lines.find((l) => l.time === 'w.tue_morning')?.conditions?.find((c) => c.id === 'sheathed')?.value, 'false');
+    assert.ok(!game.proveMark('cataract_knife', 'w.tue_0100', 'false', 'sheathed').ok, 'it was sheathed when he set out');
+});
