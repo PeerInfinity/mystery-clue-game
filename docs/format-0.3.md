@@ -347,7 +347,28 @@ specific thing stay ground facts with a formula and no schema.
   its parts (`opened: true`), its order questions (no answer) and their order ties.
 - **Both** are held by count, saved (`opened`, `openedSplits`), and closed on reset.
 - **The splitting event lies in neither part** (Round 70; before, on the boundary of both).
-- **Event order within a window:** no claim states it yet (open; `docs/kickoff-event-order.md`).
+- **Event order within a window:** stated by claims with `seq` (next section).
+
+## As built (2026-10-16): the order of events within a window (Round 73)
+
+- **`{seq: [a, b, ...]}`** in a claim's `asserts`: the events happen in one window, in this order. Each consecutive
+  pair grounds to `same(a.time, b.time)` and `ord.<a>.<b> = before`. Claims only (an order the story tells, quoted
+  through the claim's own line); never from `fabula_order`, which only gives the answer key.
+- **The order question is the pair's own:** the case builds `ord.<a>.<b>` for every pair a claim states, whether or
+  not a split asks it (answer from `fabula_order`; settled by the claim). A split at `b` (the case's or the
+  player's) asks exactly that question; it is reused, not opened, and stays when the split closes.
+- **Order runs through over every order question** (`orderTies`, generalised from the splitters' to all `ord.*`
+  slots): two questions over one pair agree, and for three events in one window `x` before `m` and `m` before `z`
+  gives `x` before `z`. So a stated pair reaches the questions of any split of its window: on the player's split at
+  Hunter locking the door, "she fled before it" carries "she ran to the window before it". Ties keep their ids
+  (`k.world.order.<x>.<m>.<z>`, the middle event in the middle); the case's earlier ones are unchanged.
+- **Simultaneous events** ("as she ran she looked back and saw…"): the model orders a window's events totally, so a
+  pair the story tells as happening together gets no `seq`; its order stays open.
+- **Validator:** a `seq` names two different events, both timed; on a claim with a quoted line; in fabula order
+  unless the claim is false; not in rules, inferences or propositions. The report's "Orders within a window"
+  lists each stated order with its claim, and the case's split questions it settles.
+- **Opened states' ties fold places** (`windowTies` now goes through the state term): "Edith at the stable window"
+  reads as the stable. Before, the unfolded place made a tie that could never hold once an order was known.
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 

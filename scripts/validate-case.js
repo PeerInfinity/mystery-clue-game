@@ -11,7 +11,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { mergeCase, buildModel, activeConstraints, checkStep, verifyInference } from '../engine/caseModel.js';
+import { mergeCase, buildModel, activeConstraints, checkStep, verifyInference, seqPairs } from '../engine/caseModel.js';
 import { evaluate, literalsOf, render, slotsOf } from '../engine/logic.js';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { Story } from '../engine/story.js';
@@ -278,6 +278,24 @@ const stateRows = [];
         const by = [...new Set(filledBy.get(s.id) ?? [])];
         if (s.answer !== null && !by.length) err(`state ${s.id}: answered ${s.answer} but no claim states it and no inference derives it`);
         stateRows.push({ slot: s, by });
+    }
+}
+// Orders within a window (`seq`, Round 73): only a claim states one, quoted through its own line; two different timed
+// events, in their true order where the claim is true.
+const seqRows = [];
+{
+    const eventById = new Map((data.events ?? []).map((e) => [e.id, e]));
+    for (const c of data.claims ?? []) for (const [a, b] of seqPairs(c.asserts)) {
+        const [ea, eb] = [eventById.get(a), eventById.get(b)];
+        if (!ea || !eb) { err(`${c.id}: seq names ${ea ? b : a}, which is not an event`); continue; }
+        if (a === b) err(`${c.id}: seq puts ${a} before itself`);
+        if (!ea.facets?.time || !eb.facets?.time) err(`${c.id}: seq of ${a} and ${b}: both need a time`);
+        if (!(c.attested ?? []).some((x) => x.source?.length)) err(`${c.id}: states an order (${a}, ${b}) with no quoted line`);
+        if (c.truth !== false && !(ea.fabula_order < eb.fabula_order)) err(`${c.id}: seq puts ${a} before ${b}, against the fabula order`);
+        seqRows.push({ slot: `ord.${a.slice(2)}.${b.slice(2)}`, a, b, by: c.id });
+    }
+    for (const sec of ['rules', 'constraints', 'propositions']) for (const x of data[sec] ?? []) {
+        if (seqPairs([x.formula, x.schema, x.means]).length) err(`${x.id}: seq is for claims (an order the story tells), not ${sec}`);
     }
 }
 // Traits: every trait a rule or relation ranges over is carried by some card; a card names each trait once.
@@ -611,6 +629,21 @@ function writeReport() {
             out(`| \`${r.slot.track}\` | ${r.slot.window} | ${r.slot.answer ?? '—'} | ${r.by.join(', ') || '—'} | ${status} |`);
         }
         out();
+    }
+    {
+        // The orders within a window: those a claim states (seq), and the order questions of the case's splits that
+        // these or the states settle.
+        const rows = slotRows.filter((r) => r.slot.facet === 'order' && (seqRows.some((x) => x.slot === r.slot.id) || r.status.startsWith('settled')));
+        if (rows.length) {
+            out('## Orders within a window');
+            out();
+            out('Stated by a claim (`seq`), or a split\'s order question the case settles.');
+            out();
+            out('| Order | Answer | Stated by | Status |');
+            out('|---|---|---|---|');
+            for (const r of rows) out(`| \`${r.slot.id}\` | ${r.slot.answer} | ${seqRows.filter((x) => x.slot === r.slot.id).map((x) => x.by).join(', ') || '—'} | ${r.status} |`);
+            out();
+        }
     }
     out('## Slots');
     out();

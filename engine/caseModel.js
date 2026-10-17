@@ -207,6 +207,13 @@ export function buildModel(data) {
         }
         const claimed = new Set();
         for (const c of data.claims ?? []) for (const m of JSON.stringify(c.asserts ?? {}).matchAll(/"(ord\.[a-z0-9_.]+)"/g)) claimed.add(m[1]);
+        // Two events a claim puts in order within one window (`seq`, Round 73): an order question of their own,
+        // `ord.<a>.<b>`, whether or not a split asks it. The world's order ties carry it into the splits' questions.
+        const sequenced = [];
+        for (const c of data.claims ?? []) for (const [a, b] of seqPairs(c.asserts)) {
+            claimed.add(orderSlot(a, b));
+            sequenced.push([a, b]);
+        }
         // One split: its two parts and an order question for each event that may share the window. `opened`: a
         // split the player made (openSplit), whose order questions have no answer of their own.
         makeSplit = (sp, opened = false) => {
@@ -239,6 +246,17 @@ export function buildModel(data) {
             return made;
         };
         for (const sp of data.state_splits ?? []) makeSplit(sp);
+        for (const [a, b] of sequenced) {
+            const id = orderSlot(a, b);
+            const [ea, eb] = [eventById.get(a), eventById.get(b)];
+            if (!ea || !eb) { errors.push(`seq: unknown event ${ea ? b : a}`); continue; }
+            if (slots.has(id)) continue;
+            addSlot({
+                id, on: a, facet: 'order', prompt: `Did it happen before or after {${b}}?`, domain: ['before', 'after'],
+                answer: (ea.fabula_order ?? 0) < (eb.fabula_order ?? 0) ? 'before' : 'after',
+                labels: { before: 'Before', after: 'After' },
+            });
+        }
     }
     const isTime = (id) => timeOrder.has(id) || subwindows.has(id);
     const rootOf = (id) => (timeOrder.has(id) ? id : subwindows.get(id)?.root);
@@ -728,6 +746,15 @@ export function checkStep(model, cited, claim, doubted = null) {
  * pays for each; the pruning holds in the case's reading, and loses only those ties for a player who doubts that
  * very clue).
  */
+/** The pairs of events a formula puts in order with `seq` ([[a, b]...], consecutive pairs of each list). */
+export function seqPairs(f, out = []) {
+    if (!f || typeof f !== 'object') return out;
+    if (Array.isArray(f)) { for (const x of f) seqPairs(x, out); return out; }
+    if (Array.isArray(f.seq)) for (let i = 1; i < f.seq.length; i++) out.push([f.seq[i - 1], f.seq[i]]);
+    else for (const x of Object.values(f)) seqPairs(x, out);
+    return out;
+}
+
 function statedOutright(data) {
     const stated = new Map();
     for (const c of data.claims ?? []) {
@@ -823,7 +850,6 @@ function windowTies(ctx, thing, name, w) {
     const tie = (id, label, formula) => { if (!formula.true) out.push({ id: `${id}@${w.slice(2)}`, label, formula, thing }); };
     const root = timeOrder.has(w) ? w : subwindows.get(w).root;
     if (name === 'at') {
-        const here = at(thing);
         for (const e of data.events ?? []) {
             if (!slots.has(`${e.id}.place`) || !slots.has(`${e.id}.time`)) continue;
             const when = stated.get(`${e.id}.time`);
@@ -835,7 +861,9 @@ function windowTies(ctx, thing, name, w) {
                 if (who !== undefined && who !== thing) continue;
                 const conds = inTimeConds(ctx, e.id, w);
                 if (!conds) continue;
-                const then = g(where !== undefined ? { eq: [here, where] } : { same: [here, `${e.id}.place`] });
+                // Through the state term, so a place folds to the track's (the stable window reads as the stable).
+                const st = { state: ['at', thing, w] };
+                const then = g(where !== undefined ? { eq: [st, where] } : { same: [st, `${e.id}.place`] });
                 tie(`k.world.${thing}.${e.id.slice(2)}.${role}`, `Whoever ${role === 'agent' ? 'does a thing' : 'has a thing done to them'} is where it is done, when it is done (${thing}, ${e.id}).`, { implies: [{ and: [{ eq: [`${e.id}.${role}`, thing] }, ...conds] }, then] });
             }
         }
@@ -849,7 +877,7 @@ function windowTies(ctx, thing, name, w) {
             if (name === 'at' && !(t.of === thing ? at(thing) : at(t.of))) continue;
             let then = { true: true };
             if (at(h) && at(t.of)) then = g({ same: [at(h), at(t.of)] });
-            else if (!stateTracks.has(`at|${h}`) && at(t.of) && isPlace(h)) then = g({ eq: [at(t.of), h] });
+            else if (!stateTracks.has(`at|${h}`) && at(t.of) && isPlace(h)) then = g({ eq: [{ state: ['at', t.of, w] }, h] });
             if (!then.true) parts.push({ implies: [{ eq: [t.slotFor(w), h] }, then] });
         }
         if (parts.length) tie(`k.world.${t.of}.held.${thing}`, `Whoever has a thing in hand is where the thing is; a thing left lying is where it lies (${t.of}).`, { and: parts });
@@ -932,6 +960,35 @@ function orderTies(ctx) {
         world(`k.world.order.${a.id.slice(2)}.${f.slice(2)}.${e.slice(2)}`, `Order runs through (${a.id}, ${f}, ${e}).`, { and: [
             { implies: [{ and: [same, { eq: [af, 'before'] }, { eq: [fe, 'before'] }] }, { eq: [ae, 'before'] }] },
             { implies: [{ and: [same, { eq: [af, 'after'] }, { eq: [fe, 'after'] }] }, { eq: [ae, 'after'] }] },
+        ] });
+    }
+    // The same over every order question, not only the splitters' (Round 73): a pair a claim puts in order (`seq`)
+    // reaches the questions of any split of its window, the case's or the player's. `lt(x, y)`: x is before y, read
+    // off whichever of the two questions exists.
+    const lt = (x, y) => (slots.has(orderSlot(x, y)) ? { eq: [orderSlot(x, y), 'before'] } : slots.has(orderSlot(y, x)) ? { eq: [orderSlot(y, x), 'after'] } : null);
+    const made = new Set(out.map((k) => k.id));
+    const next = new Map();
+    for (const s of slots.values()) {
+        if (s.facet !== 'order') continue;
+        const [x, y] = [s.on, `e.${s.id.split('.')[2]}`];
+        for (const [u, v] of [[x, y], [y, x]]) { if (!next.has(u)) next.set(u, new Set()); next.get(u).add(v); }
+        if (x < y && slots.has(orderSlot(y, x)) && !made.has(`k.world.order.${x.slice(2)}.${y.slice(2)}`)) {
+            made.add(`k.world.order.${x.slice(2)}.${y.slice(2)}`);
+            world(`k.world.order.${x.slice(2)}.${y.slice(2)}`, `${x} and ${y}: one is before the other.`, { and: [
+                { implies: [{ eq: [orderSlot(x, y), 'before'] }, { eq: [orderSlot(y, x), 'after'] }] },
+                { implies: [{ eq: [orderSlot(x, y), 'after'] }, { eq: [orderSlot(y, x), 'before'] }] },
+            ] });
+        }
+    }
+    for (const [m, ends] of next) for (const x of ends) for (const z of ends) {
+        if (x >= z || !next.get(x)?.has(z)) continue;
+        const [ida, idb] = [`k.world.order.${x.slice(2)}.${m.slice(2)}.${z.slice(2)}`, `k.world.order.${z.slice(2)}.${m.slice(2)}.${x.slice(2)}`];
+        if (made.has(ida) || made.has(idb)) continue;
+        made.add(ida);
+        const same = { and: [{ same: [`${x}.time`, `${m}.time`] }, { same: [`${z}.time`, `${m}.time`] }] };
+        world(ida, `Order runs through (${x}, ${m}, ${z}).`, { and: [
+            { implies: [{ and: [same, lt(x, m), lt(m, z)] }, lt(x, z)] },
+            { implies: [{ and: [same, lt(z, m), lt(m, x)] }, lt(z, x)] },
         ] });
     }
     return out;

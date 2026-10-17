@@ -1870,3 +1870,45 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   data and the format while it runs. The two sessions share one working tree, so each commits its own files by
   path.
 - **Moved:** nothing (documents only).
+
+## Round 73 (2026-10-16): the order of events within a window, step 1 — `seq` in the format, Edith's order
+
+- **Robert's ruling** (of the alternatives in `docs/kickoff-event-order.md`, and the recommendation taken):
+  - **The sequence fact is an order question of its own.** `{seq: [a, b]}` in a claim's `asserts` grounds to the
+    same window and `ord.<a>.<b> = before`. The case builds that question for every pair a claim states, split or
+    not.
+  - **The bridge to every split is the order ties, generalised:** two questions over one pair agree, and order runs
+    through any three events in one window. A player's split asks `ord.*.<splitter>`, which the ties tie to the
+    stated pairs. So no constraint is built per claim and per split, and doubting, clashes and saves are unchanged.
+  - **Declined:**
+    - per-split grounding of each claim's fact: bookkeeping in doubt, clashes and saves;
+    - a position slot per event: wide slots, hidden questions, solver risk;
+    - `ord.*` asserted only for the case's splits: never reaches the player's.
+  - **Simultaneous events** ("as she ran she looked back and saw…") get no `seq`; their order stays open.
+  - **Two steps:** this one (format, engine, validator, Edith's line, the test), then the data window by window.
+- **Engine:** `logic.js` grounds `seq` (chains as consecutive pairs). `caseModel.js` adds `seqPairs`, builds the
+  stated pairs' order slots (answer from `fabula_order`, settled), and extends `orderTies` over every order slot.
+  The case's earlier ties keep their ids and formulas.
+- **Problem met and fixed:** an opened state's ties (`windowTies`, Round 69) compared the state with the event's
+  place unfolded. "Edith at the stable window" was then a value outside the state's domain, a tie that could never
+  hold once the order was known, so her place before the flight was refused as "no single place". They now go
+  through the state term, as the case's ties do.
+- **Data:** `c.stranger_leaning_in` (Edith's testimony) gains `{seq: [e.edith_runs_to_window, e.edith_flees]}`;
+  its quote now starts at "The girl fled away to the house" (same paragraph, ¶29).
+- **Validator and report:**
+  - a `seq` names two different timed events, on a claim with a quoted line, in fabula order unless the claim is
+    false, and only on claims;
+  - the report's new "Orders within a window" lists the stated orders and the split questions the case settles.
+- **Test** (`timeline.test.js`, order questions), on the player's split of the window scene at Edith's flight:
+  - her order is not provable while her testimony is doubted, and is proven once it is trusted, citing it alone;
+  - she is proven at the stable before her flight;
+  - the stranger's question stays open;
+  - on a nested split at Hunter locking the door, "she fled before it" gives "she ran to the window before it";
+  - the stated question is the case's own and stays after reset.
+- **Timing:** `npm test` 61 tests, 137 s.
+- **Moved:**
+  - **Report:** one more slot (`ord.edith_runs_to_window.edith_flees`, settled: before) and the new table;
+    constraints unchanged (326).
+  - **Reveal and foreshadow logs:** `e.edith_flees` moves a few lines within ¶29, its quote now starting earlier
+    in the paragraph.
+  - **Thoughts report and gates:** nothing.

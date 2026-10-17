@@ -1040,7 +1040,7 @@
       }
     },
     "formula": {
-      "description": "A formula over slots (ground), or a schema with variables (rules). eq/ne/in/nin compare a term with values; same/diff compare two terms; before/not_after compare time slots (or {lit: window}); forall/exists range a variable over cards; only sets a relation's last argument.",
+      "description": "A formula over slots (ground), or a schema with variables (rules). eq/ne/in/nin compare a term with values; same/diff compare two terms; before/not_after compare time slots (or {lit: window}); seq puts events in order within one window; forall/exists range a variable over cards; only sets a relation's last argument.",
       "type": "object",
       "minProperties": 1,
       "maxProperties": 1,
@@ -1074,6 +1074,14 @@
         },
         "not_after": {
           "$ref": "#/$defs/twoTimes"
+        },
+        "seq": {
+          "description": "Events in one window, in this order (claims only): the same window, and each pair's order question ord.<a>.<b> before.",
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string"
+          }
         },
         "and": {
           "type": "array",

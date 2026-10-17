@@ -496,6 +496,19 @@ export function ground(f, env) {
                 const t = (x) => (x && typeof x === 'object' && x.lit ? { lit: card(x.lit) } : isVar(x) && !x.slice(1).includes('.') ? { lit: card(x) } : slotOf(x));
                 return { [op]: [t(a[0]), t(a[1])] };
             }
+            case 'seq': {
+                // Events in one window, in this order (Round 73): each pair, the same window and the order question
+                // `ord.<a>.<b>` before. The case model builds those questions for every pair a claim states.
+                if (!Array.isArray(a) || a.length < 2) throw new Error('seq takes two or more events');
+                const evs = a.map(card);
+                const parts = [];
+                for (let i = 1; i < evs.length; i++) {
+                    const [x, y] = [evs[i - 1], evs[i]];
+                    const o = `ord.${x.replace(/^e\./, '')}.${y.replace(/^e\./, '')}`;
+                    parts.push({ same: [slotOf(`${x}.time`), slotOf(`${y}.time`)] }, { eq: [slotOf(o), 'before'] });
+                }
+                return { and: parts };
+            }
             case 'and': case 'or': return { [op]: a.map(g) };
             case 'not': return { not: g(a) };
             case 'implies': return { implies: [g(a[0]), g(a[1])] };

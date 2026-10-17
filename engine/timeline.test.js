@@ -180,7 +180,7 @@ test('a cell the case never declared opens when a mark there is committed; one w
     assert.ok(!model.stateTracks.has('at|edith_baxter'));
 });
 
-test("order questions: an event's part proven on the case's split; the player's own split opened on commit; the splitter lies in neither part", () => {
+test("order questions: an event's part proven on the case's split; the player's own split opened on commit; the splitter lies in neither part; an order a clue states", () => {
     const game = new Game(model, { difficulty: MEDIUM });
     while (game.read <= paraOf('Mrs. Straker awoke at seven') + 3) game.advance();
     game.splitTime('w.tue_0700', 'e.wife_wakes');
@@ -194,15 +194,31 @@ test("order questions: an event's part proven on the case's split; the player's 
     game.pencilPlace('edith_baxter', 'w.mon_2110.before.edith_flees', 'stable');
     const edith = game.proveMark('edith_baxter', 'w.mon_2110.before.edith_flees', 'stable');
     assert.ok(model.subwindows.get('w.mon_2110.before.edith_flees')?.opened, 'the split is opened');
-    assert.ok(model.slots.get('ord.edith_runs_to_window.edith_flees')?.opened, 'with its order questions');
-    // Her flight lies in neither part, so the part before it has an answer; no clue tells the order yet, so it stays open.
-    assert.doesNotMatch(edith.reason ?? '', /no single place/);
-    assert.equal(edith.ok, false);
+    assert.ok(model.slots.get('ord.stranger_at_window.edith_flees')?.opened, 'with its order questions');
+    // Her flight lies in neither part, so the part before it has an answer: her testimony says she ran to the window
+    // before she fled (seq), so she was at the stable then.
+    assert.ok(edith.ok, JSON.stringify(edith));
+    assert.ok(!model.slots.get('ord.edith_runs_to_window.edith_flees').opened, 'the order a clue states is the case\'s own question');
+    // The order: not while her testimony is doubted; proven once it is trusted, citing it.
+    game.suspect('c.stranger_leaning_in');
     assert.equal(game.proveOrder('e.edith_runs_to_window', 'w.mon_2110.before.edith_flees').ok, false);
+    game.unsuspect('c.stranger_leaning_in');
+    const ran = game.proveOrder('e.edith_runs_to_window', 'w.mon_2110.before.edith_flees');
+    assert.ok(ran.ok && ran.card, JSON.stringify(ran));
+    assert.deepEqual(ran.used, ['k.c.stranger_leaning_in']);
+    // No clue orders the stranger's question against her flight: open.
+    assert.equal(game.proveOrder('e.stranger_at_window', 'w.mon_2110.before.edith_flees').ok, false);
+    // The stated order reaches a split at a third event (order runs through): if she fled before Hunter locked the
+    // door, she ran to the window before it too.
+    assert.ok(game.splitTime('w.mon_2110.after.edith_flees', 'e.hunter_locks_door'));
+    game.proveOrder('e.hunter_searches', 'w.mon_2110.after.edith_flees.after.hunter_locks_door');
+    assert.ok(model.slots.has('ord.edith_runs_to_window.hunter_locks_door'));
+    assert.ok(game.checkConclusion({ implies: [{ eq: ['ord.edith_flees.hunter_locks_door', 'before'] }, { eq: ['ord.edith_runs_to_window.hunter_locks_door', 'before'] }] }).ok);
     // Saved and restored; a reset closes the split.
     const copy = new Game(model, { difficulty: MEDIUM, state: JSON.parse(JSON.stringify(game.save())) });
-    assert.deepEqual(copy.openedSplits, [['w.mon_2110', 'e.edith_flees']]);
+    assert.deepEqual(copy.openedSplits, [['w.mon_2110', 'e.edith_flees'], ['w.mon_2110.after.edith_flees', 'e.hunter_locks_door']]);
     copy.reset();
     game.reset();
-    assert.ok(!model.subwindows.has('w.mon_2110.before.edith_flees') && !model.slots.has('ord.edith_runs_to_window.edith_flees'));
+    assert.ok(!model.subwindows.has('w.mon_2110.before.edith_flees') && !model.slots.has('ord.stranger_at_window.edith_flees'));
+    assert.ok(model.slots.has('ord.edith_runs_to_window.edith_flees'), 'a stated order stays');
 });
