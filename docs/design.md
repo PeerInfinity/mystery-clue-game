@@ -1856,3 +1856,17 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   - **The six:** `t34.5` also needs absence (workstream 5); `t82.3` needs only a condition track; `t123.2` waits
     for the event-order session.
 - **Moved:** nothing (documents only).
+
+## Round 72 (2026-10-16): step C agreed
+
+- **Robert:** agreed to all five recommendations of `docs/knowledge-intention.md`, as written:
+  - knowledge over propositions;
+  - two laws built in (knowledge persists; what is known is true) and three default rule cards (told, seen, acts
+    on it);
+  - an aim track per person, tied to the purposes of acts;
+  - belief deferred to workstream 4, with its shape fixed;
+  - the order of work, starting with intention.
+- **Building waits for the event-order session** (`docs/kickoff-event-order.md`), which owns the engine, the case
+  data and the format while it runs. The two sessions share one working tree, so each commits its own files by
+  path.
+- **Moved:** nothing (documents only).

@@ -1,6 +1,6 @@
 # Knowledge, intention and belief (world model, step 5)
 
-Status: **PROPOSED** (2026-10-16, Round 71). For Robert to decide; nothing is built. Builds on the world model as
+Status: **AGREED** (Robert, 2026-10-16, Round 72: the five recommendations below, as written). Nothing is built yet. Builds on the world model as
 built (Rounds 60–70: location, possession, condition, splits and order). Belief goes with workstream 4
 (testimony) of `docs/gap-analysis.md`.
 
@@ -160,7 +160,9 @@ A motive (`straker.motive`) stays a facet: it is why, not what for, and it has n
 Each step keeps the reading layer sacred: every proposition, aim and track answer is quoted through a claim's
 own line, and the fair-play test, the reveal and foreshadow logs and the gate listing are diffed.
 
-## For Robert
+## Agreed (Robert, Round 72)
+
+All five as recommended:
 
 1. Q1: knowledge about propositions?
 2. Q2: two laws built in, three as default rule cards?
