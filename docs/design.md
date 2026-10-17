@@ -2098,3 +2098,10 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   - done: `t24.2`, `t78.2`, `t123.2`, `t150.1`;
   - left: `t34.5` (absence, workstream 5; its reason becomes `absence` when that is built) and `t82.3` (a
     condition track only).
+
+## Round 79 (2026-10-16): hand-off — workstreams 5 and 4
+
+The kickoff of Round 65 is done: A in Round 66, B in Rounds 67–70, C designed in Rounds 71–72 and built in
+Rounds 76–78; event order came from a parallel session in Rounds 73–75. `docs/kickoff-workstreams-4-5.md` hands
+the next session a starter batch, then noticing and absence (workstream 5, which unlocks `t34.5`), then testimony
+and belief (workstream 4). It carries the open items and this session's traps. `CLAUDE.md` points at it.

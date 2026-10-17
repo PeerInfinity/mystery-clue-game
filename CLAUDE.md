@@ -1,11 +1,10 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-world-model-2.md` — the current work: solver speed, checked placements on the board, then
-  knowledge and intention. World-model steps 1–4 (`docs/kickoff-world-model.md`) are done (Rounds 60–64);
-  workstream 2 (short chains) is done (Rounds 41–58).
-- `docs/kickoff-event-order.md` — a parallel piece of work (Round 70): the order of events within a time window, as
-  format and case data. Steps A and B of the world-model kickoff are done (Rounds 66–70); C is being designed.
+- `docs/kickoff-workstreams-4-5.md` — the current work: a starter batch, then noticing and absence (workstream 5)
+  and testimony and belief (workstream 4). The world model (steps 1–5, Rounds 60–78), solver speed (Round 66) and
+  event order (Rounds 73–75) are done.
+- `docs/knowledge-intention.md` — knowledge, intention and belief: agreed (Round 72), built but belief (Rounds 76–78).
 - `docs/format-0.3.md` — the case format as built, and the decisions taken on it.
 - `docs/redesign.md` — the design discussion the format serves: the reader's process, what the logic and the
   gameplay are missing, the alternatives, and the order of work.
@@ -19,7 +18,7 @@
 ## Commands
 | Task | Command |
 |---|---|
-| All tests (engine + full case validation, 11–15 min since Round 61; run it in the background) | `npm test` |
+| All tests (engine + full case validation, about 3 min since Round 66; run it in the background) | `npm test` |
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Validate the case and rewrite `cases/silver-blaze/report.md` | `npm run validate` |
 | Serve the game | `node scripts/serve.js` → http://localhost:8321/ (`logic.html` lays the case's logic open; the Timeline tab has the board) |
