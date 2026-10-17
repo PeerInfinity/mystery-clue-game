@@ -2884,3 +2884,13 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - the doubled markings text.
 - **`CLAUDE.md`** points at the paper as built, and at workstream 6 next.
 - **Moved:** nothing in the logs, reports or gates (the UI only).
+
+## Round 107 (2026-10-17): hand-off — how clashes weigh what they set aside
+
+- **Robert:** next, the clash rethink as a short design question of its own, in a new session, before workstream 6;
+  Q6 (one culprit) goes with it.
+- **`docs/kickoff-clashes.md`** hands it over: the question (Round 17's clashes, Round 19's provenance order), the
+  cases gathered (a stated inference outweighing true clues; a false applied default; what works today and must keep
+  working), what workstream 3 gives a better rule, the questions the paper must answer, and the traps of Rounds
+  60–106. It supersedes `docs/kickoff-workstream-3.md`. `CLAUDE.md` points at it.
+- **Moved:** nothing (documents only).
