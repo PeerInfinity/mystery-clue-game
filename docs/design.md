@@ -2053,3 +2053,48 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   solution does not need"); it was not gated on the suite's exit code. `r.robber_takes_valuables` compared the
   holder with the blow's patient slot, which the engine expands over every person, so every person became a
   card the solution needs. The rule now names the victim (`victim`, bound to Straker); still verified.
+
+## Round 78 (2026-10-16): step C, 2 — knowledge over propositions; the stranger came on purpose (`t24.2`), Brown keeps the horse safe (`t150.1`)
+
+- **Format** (aspect `knowledge`, `knows: <proposition>`, track `st.<thing>.knows_<proposition>`; schema and
+  validator): did the thing know the proposition then, yes or no.
+- **The two laws, built in** (`knowledgeTies`): known means the proposition holds, and known in one window means
+  known in every later one of the track. The three default rules of Q2 (told, seen, acts on it) are not authored
+  yet: no thought among the six needs them.
+- **Dealing:** a clue that states what someone knew deals the proposition with it (`#spokenOf`), so its words come
+  from that clue's own line. The card's pencil form offers only propositions the player holds or a visible
+  question asks about (`knowablePropositions`).
+- **Data:**
+  - **Propositions** (`propositions.json`, the first): `p.lad_alone_at_night` ("A stable-boy sleeps alone in the
+    stable every night") and `p.mercy_in_safe_return` ("Brown's only hope of mercy is to produce the horse safe").
+  - **`t24.2`:**
+    - `c.stranger_knew_lad_alone` gains the stranger's knowledge at a few minutes past nine, from his own "I
+      understand that a stable-boy sleeps there alone every night".
+    - The default rule `r.lost_does_not_know` (background from ¶24): a stranger lost on the moor does not know
+      how the stable is kept.
+    - `k.stranger_came_on_purpose` (editorial, **verified**): his aim then was not to find his way.
+  - **`t150.1`:**
+    - A new claim, `c.brown_hope_of_mercy`, from Holmes's "He knows that his only hope of mercy is to produce it
+      safe" (¶150).
+    - The default rule `r.mercy_keeps_safe`, stated there.
+    - `k.brown_keeps_horse_safe` (Holmes, **verified**): Brown's aim on Thursday night is to keep it safe. No gate:
+      the thought has no Holmes paragraph of its own.
+- **Changed from the plan:** no "lost" claim for the stranger ("Can you tell me where I am?" as his aim to find
+  the way). It would clash with his "I understand…", and a clash sets aside every story clue in it, this one too.
+  The inference concludes from the knowledge alone. The rule moved from ¶22 (his question) to ¶24 (his
+  knowledge), so it does not surface two paragraphs before the clue it bears on.
+- **Test** (`timeline.test.js`, knowledge):
+  - the proposition is dealt at the stranger's line and not before;
+  - the inference is built at ¶24, and the mark and its wording follow;
+  - at the end of the story, Brown's aim and the proposition are settled.
+- **Moved:**
+  - **Reveal log:** the proposition at ¶24; the rule at ¶24; at ¶150, the new claim, the rule and the
+    proposition.
+  - **Foreshadow log:** the two rules and the claim.
+  - **Report:** two propositions, four tracks, two verified inferences.
+  - **Thoughts report:** 44 of 49 deductions with an inference.
+  - **Gates:** nothing.
+- **The six `world-model` thoughts:**
+  - done: `t24.2`, `t78.2`, `t123.2`, `t150.1`;
+  - left: `t34.5` (absence, workstream 5; its reason becomes `absence` when that is built) and `t82.3` (a
+    condition track only).

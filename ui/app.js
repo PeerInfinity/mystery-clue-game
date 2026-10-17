@@ -635,7 +635,7 @@ function cardTimelineHtml(id) {
             if (l.held) bits.push(markChip(id, l.time, l.held, placeName(l.held), { given: true }));
             for (const m of l.heldPencil) bits.push(markChip(id, l.time, m.value, placeName(m.value), m, { aspect: 'held', commit }));
             for (const k of l.conditions) {
-                const yes = (v) => (v === 'true' ? esc(k.id) : `not ${esc(k.id)}`);
+                const yes = (v) => (k.kind === 'knowledge' ? `${v === 'true' ? 'knew' : 'did not know'}: “${esc(k.label)}”` : v === 'true' ? esc(k.id) : `not ${esc(k.id)}`);
                 if (k.value !== null) bits.push(markChip(id, l.time, k.value, yes(k.value), { given: true }));
                 for (const m of k.pencil) bits.push(markChip(id, l.time, m.value, yes(m.value), m, { aspect: k.id, commit }));
             }
@@ -660,7 +660,7 @@ function cardTimelineHtml(id) {
         const conds = model.data.state_conditions ?? [];
         const aims = model.data.state_aims ?? [];
         const person = ['person', 'group'].includes(model.cards.get(id)?.kind);
-        const aspects = `<select id="cpen-aspect">${layerOpt('at', 'was at', cp.aspect)}${layerOpt('held', 'was held by', cp.aspect)}${person && aims.length ? layerOpt('aims', 'was trying', cp.aspect) : ''}${conds.map((c) => layerOpt(c.id, `was ${c.id}?`, cp.aspect)).join('')}</select>`;
+        const aspects = `<select id="cpen-aspect">${layerOpt('at', 'was at', cp.aspect)}${layerOpt('held', 'was held by', cp.aspect)}${person && aims.length ? layerOpt('aims', 'was trying', cp.aspect) : ''}${conds.map((c) => layerOpt(c.id, `was ${c.id}?`, cp.aspect)).join('')}${game.knowablePropositions().map((p) => layerOpt(`knows_${p.slice(2)}`, `knew: “${shortName(p, 50)}”?`, cp.aspect)).join('')}</select>`;
         const values = cp.aspect === 'at' ? [['', 'where…'], ...[...game.unlocked.keys()].filter((x) => model.cards.get(x)?.kind === 'place' && !game.isHidden(x)).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'somewhere else']]
             : cp.aspect === 'held' ? [['', 'who, or where it lay…'], ...[...game.unlocked.keys()].filter(held).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'someone or somewhere else']]
                 : cp.aspect === 'aims' ? [['', 'to do what…'], ...aims.map((a) => [a.id, a.label.replace(/^To /, 'to ')])]
@@ -737,7 +737,7 @@ function boardHtml(layout) {
                 if (c.held) bits.push(markChip(r.thing, c.time, c.held, placeName(c.held), { given: true }));
                 for (const m of c.heldPencil) bits.push(markChip(r.thing, c.time, m.value, placeName(m.value), m, { aspect: 'held' }));
                 for (const k of c.conditions) {
-                    const yes = (v) => (v === 'true' ? esc(k.id) : `not ${esc(k.id)}`);
+                    const yes = (v) => (k.kind === 'knowledge' ? `${v === 'true' ? 'knew' : 'did not know'}: “${esc(k.label)}”` : v === 'true' ? esc(k.id) : `not ${esc(k.id)}`);
                     if (k.value !== null) bits.push(markChip(r.thing, c.time, k.value, yes(k.value), { given: true }));
                     for (const m of k.pencil) bits.push(markChip(r.thing, c.time, m.value, yes(m.value), m, { aspect: k.id }));
                 }

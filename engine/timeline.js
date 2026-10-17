@@ -18,6 +18,8 @@
 // The parts carry the same ids as the case's own (`<window>.before.<event>`), so a state the case declares there
 // (and a held clue gives) shows once the player has made that split.
 
+import { knowsName } from './caseModel.js';
+
 export const UNKNOWN = 'unknown';
 export const ELSEWHERE = 'elsewhere';
 
@@ -295,7 +297,10 @@ export const BOARD_KINDS = ['person', 'animal', 'group', 'object'];
 
 /** A thing's conditions at a time: what the clues give, and the player's pencil marks, per condition. */
 function conditionsAt(game, thing, time, layer) {
-    return (game.model.data.state_conditions ?? []).map((c) => ({ id: c.id, value: given(game, thing, c.id, time), pencil: pencilAt(game, thing, time, layer, c.id) }))
+    const conds = (game.model.data.state_conditions ?? []).map((c) => ({ id: c.id, kind: 'condition', label: c.id }));
+    // Knowledge, per proposition (step 5): did the thing know it then?
+    const known = (game.model.data.propositions ?? []).map((p) => ({ id: knowsName(p.id), kind: 'knowledge', label: p.text, proposition: p.id }));
+    return [...conds, ...known].map((c) => ({ ...c, value: given(game, thing, c.id, time), pencil: pencilAt(game, thing, time, layer, c.id) }))
         .filter((c) => c.value !== null || c.pencil.length);
 }
 

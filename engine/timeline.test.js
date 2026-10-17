@@ -253,3 +253,21 @@ test("possession carries over time: the money still on him rules out a robbery (
     assert.ok(game.knows('k.not_a_robbery'));
     assert.equal(game.cardTimeline('sovereigns').lines.find((l) => l.time === 'w.tue_morning')?.held, 'straker');
 });
+
+test('knowledge: a clue of what someone knew deals its proposition; what is known is true and kept; a lost stranger would not know it', () => {
+    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'start' } });
+    while (game.read < paraOf('I understand\n      that a stable-boy sleeps there alone every night')) game.advance();
+    assert.ok(!game.knows('p.lad_alone_at_night') && !game.knowablePropositions().length, 'not before the line');
+    game.advance();
+    assert.ok(game.knows('p.lad_alone_at_night'), "dealt with the stranger's words");
+    assert.deepEqual(game.knowablePropositions(), ['p.lad_alone_at_night']);
+    const res = game.propose(game.connectSet('k.stranger_came_on_purpose'));
+    assert.deepEqual(res.built, ['k.stranger_came_on_purpose'], JSON.stringify(res));
+    assert.ok(game.pencilPlace('the_stranger', 'w.mon_2105', 'true', { aspect: 'knows_lad_alone_at_night' }));
+    assert.equal(game.stateText('the_stranger', 'w.mon_2105', 'knows_lad_alone_at_night', 'true'), 'The stranger at the stable knew this: “A stable-boy sleeps alone in the stable every night.” (Monday, a few minutes after 9)');
+    // The two built-in laws, at the end of the story: Brown's knowledge holds, so its proposition does.
+    const solved = new Game(model, { difficulty: 'trivial', autoPace: 'logic' });
+    while (!solved.finished()) solved.advance();
+    assert.equal(solved.settled('st.silas_brown.aims.thu_night'), 'keep_safe');
+    assert.equal(solved.settled('p.mercy_in_safe_return'), 'true');
+});

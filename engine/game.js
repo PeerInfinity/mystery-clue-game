@@ -17,7 +17,7 @@
 // Scoring: Holmes's steps are the annotated reading's thoughts (engine/steps.js); one the player makes by their own
 //   reasoning before the paragraph where Holmes states it scores (thoughtScores, score).
 
-import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState, openSplit, closeSplit } from './caseModel.js';
+import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState, openSplit, closeSplit, knowsName } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
 
@@ -365,6 +365,15 @@ export class Game {
     /** The timeline in one layout ('place' or 'thing'): see engine/timeline.js. */
     timeline(layout = 'place', layer = TL.MINE) { return layout === 'thing' ? TL.byThing(this, layer) : TL.byPlace(this, layer); }
     timelineTimes() { return TL.times(this); }
+    /**
+     * The propositions the player may pencil knowledge of: those whose card they hold, or that a knowledge
+     * question they can see asks about (so no proposition's words show before the story gives them).
+     */
+    knowablePropositions() {
+        return (this.model.data.propositions ?? []).map((p) => p.id).filter((p) => this.knows(p)
+            || [...this.model.slots.values()].some((s) => s.track && s.state === knowsName(p) && this.slotVisible(s.id)));
+    }
+
     /** One card's own timeline (engine/timeline.js, cardTimeline). */
     cardTimeline(id, layer = TL.MINE) { return TL.cardTimeline(this, id, layer); }
     followedThings(layer = TL.MINE) { return TL.followed(this, layer); }
@@ -411,7 +420,8 @@ export class Game {
         if (aspect === 'at' && value !== TL.ELSEWHERE && !(this.knows(value) && kind === 'place')) return false;
         if (aspect === 'held' && value !== TL.ELSEWHERE && !(this.knows(value) && [...TL.BOARD_KINDS.filter((k) => k !== 'object'), 'place'].includes(kind))) return false;
         if (aspect === 'aims' && !(this.model.data.state_aims ?? []).some((a) => a.id === value)) return false;
-        if (aspect !== 'at' && aspect !== 'held' && aspect !== 'aims' && !((this.model.data.state_conditions ?? []).some((c) => c.id === aspect) && ['true', 'false'].includes(value))) return false;
+        const yesNo = [...(this.model.data.state_conditions ?? []).map((c) => c.id), ...this.knowablePropositions().map(knowsName)];
+        if (aspect !== 'at' && aspect !== 'held' && aspect !== 'aims' && !(yesNo.includes(aspect) && ['true', 'false'].includes(value))) return false;
         if (layer !== TL.MINE && !this.visibleTheories().some((t) => t.id === layer)) return false;
         const same = (p) => p.thing === thing && p.time === time && p.value === value && (p.layer ?? TL.MINE) === layer && TL.aspectOf(p) === aspect;
         this.board.pencil = this.board.pencil.filter((p) => !same(p));
@@ -545,6 +555,8 @@ export class Game {
         const what = value === TL.ELSEWHERE ? 'somewhere else' : this.nameOf(value).replace(/^(The|A|An) /, (a) => a.toLowerCase());
         if (aspect === 'at') return `${who} was ${value === TL.ELSEWHERE ? 'somewhere else' : `at ${what}`} (${label})`;
         if (aspect === 'held') return this.model.cards.get(value)?.kind === 'place' ? `${who} lay at ${what} (${label})` : `${what} had ${who} (${label})`;
+        const prop = (this.model.data.propositions ?? []).find((p) => knowsName(p.id) === aspect);
+        if (prop) return `${who} ${value === 'true' ? 'knew' : 'did not know'} this: “${prop.text}” (${label})`;
         if (aspect === 'aims') return `${who} was trying ${((this.model.data.state_aims ?? []).find((a) => a.id === value)?.label ?? value).replace(/^To /, 'to ')} (${label})`;
         const cond = (this.model.data.state_conditions ?? []).find((c) => c.id === aspect);
         return `${who} was ${value === 'true' ? '' : 'not '}${cond?.id ?? aspect} (${label})`;
@@ -812,7 +824,9 @@ export class Game {
      *  `entities`, the entities whose questions it speaks of as well. */
     #spokenOf(formula, entities = false) {
         const sections = entities ? ['events', 'propositions', 'entities'] : ['events', 'propositions'];
-        return [...new Set([...slotsOf(formula)].map((s) => this.model.slots.get(s)?.on))].filter((o) => sections.includes(this.model.cards.get(o)?.section));
+        // A state of knowledge speaks of its proposition too: the clue that tells what someone knew deals it.
+        const of = (s) => { const sl = this.model.slots.get(s); const t = sl?.track && this.model.stateTracks.get(`${sl.state}|${sl.on}`); return t?.aspect === 'knowledge' ? [sl.on, t.knows] : [sl?.on]; };
+        return [...new Set([...slotsOf(formula)].flatMap(of))].filter((o) => sections.includes(this.model.cards.get(o)?.section));
     }
 
     /** Background facts the player holds that can be applied (they carry a schema or a formula). */

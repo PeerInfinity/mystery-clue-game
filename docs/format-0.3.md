@@ -391,6 +391,19 @@ specific thing stay ground facts with a formula and no schema.
   - the man who found the horse, before and after his turning back (dawn split at `e.brown_turns_back`), from
     `k.track_man_changed_his_mind`.
 
+## As built (2026-10-16): possession over time and knowledge (world model, step 5; Rounds 77–78)
+
+- **Possession over time:** `r.stays_held`, the default counterpart of `r.stays_put` for what a man has about
+  him.
+- **A knowledge track** (`aspect: "knowledge"`, `knows: "p.<name>"`, id `st.<thing>.knows_<name>`): did the
+  thing know the proposition, in each window.
+  - **Built in** (`knowledgeTies`): known means the proposition holds; known in a window means known in every
+    later window of the track.
+  - **Dealing:** a clue that states a knowledge state deals its proposition.
+  - **Rule schemas** name a knowledge track by its literal name (`{"state": ["knows_lad_alone_at_night", "?who",
+    "?when"]}`).
+- **Belief** is not built (workstream 4; `docs/knowledge-intention.md`, Q4).
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's

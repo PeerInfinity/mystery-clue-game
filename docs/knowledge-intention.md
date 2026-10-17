@@ -1,6 +1,6 @@
 # Knowledge, intention and belief (world model, step 5)
 
-Status: **AGREED** (Robert, 2026-10-16, Round 72: the five recommendations below, as written). Nothing is built yet. Builds on the world model as
+Status: **AGREED** (Robert, 2026-10-16, Round 72: the five recommendations below, as written). **Built:** intention (Round 76), possession over time (Round 77), knowledge with its two laws (Round 78). Not yet: the three default knowledge rules (told, seen, acts on it), knowledge and aims in the board's three-dropdown form (they are on the cards), belief (workstream 4). Builds on the world model as
 built (Rounds 60–70: location, possession, condition, splits and order). Belief goes with workstream 4
 (testimony) of `docs/gap-analysis.md`.
 

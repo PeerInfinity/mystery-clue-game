@@ -274,6 +274,9 @@ export function buildModel(data) {
         // act's purpose is its agent's aim at its time (trackTies).
         const aims = (data.state_aims ?? []).map((x) => x.id);
         const aimLabels = Object.fromEntries((data.state_aims ?? []).map((x) => [x.id, x.label]));
+        // Knowledge (step 5): does the thing know a proposition? One track per thing and proposition, named
+        // knows_<proposition>, true or false in each window.
+        const propositions = new Map((data.propositions ?? []).map((x) => [x.id, x]));
         const windowLabel = new Map(windows.map((w) => [w.id, w.label]));
         const timeLabel = (id) => {
             if (timeOrder.has(id)) return windowLabel.get(id);
@@ -282,18 +285,19 @@ export function buildModel(data) {
         };
         // A track, and its windows (each a slot); `addWindow` serves the player's opened states too (openState).
         makeTrack = (t) => {
-            const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.condition;
+            const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.aspect === 'knowledge' ? knowsName(t.knows) : t.condition;
+            if (t.aspect === 'knowledge' && !propositions.has(t.knows)) errors.push(`${t.id}: knows ${t.knows}, which is not a proposition`);
             if (t.aspect === 'condition' && !conditions.has(t.condition)) errors.push(`${t.id}: unknown condition ${t.condition}`);
             const places = typeof t.places === 'string' ? sets.get(t.places) : t.places ?? [];
             if (!places) errors.push(`${t.id}: unknown place set ${t.places}`);
-            const domain = t.aspect === 'condition' ? ['true', 'false'] : t.aspect === 'intention' ? aims
+            const domain = t.aspect === 'condition' || t.aspect === 'knowledge' ? ['true', 'false'] : t.aspect === 'intention' ? aims
                 : [...new Set([...(t.aspect === 'possession' ? domainFor({ kinds: t.holders ?? ['person', 'animal', 'group'] }) : []), ...(places ?? []), 'elsewhere'])];
             // A listed place stands for itself apart from the listed places inside it (the stable apart from its
             // loft): a thing at a place is at the nearest listed place containing it, or 'elsewhere'. `overlaps(v)`:
             // the value a thing at v takes; `inside(v)`: the values a thing NOT at v cannot take.
             const fold = (v) => {
                 if (domain.includes(v)) return v;
-                if (t.aspect === 'condition' || t.aspect === 'intention') return null;
+                if (t.aspect === 'condition' || t.aspect === 'intention' || t.aspect === 'knowledge') return null;
                 for (const p of up(v)) if (domain.includes(p)) return p;
                 return 'elsewhere';
             };
@@ -303,7 +307,8 @@ export function buildModel(data) {
             if (stateTracks.has(key)) errors.push(`${t.id}: a second ${name} track for ${t.of}`);
             const slotOfTime = new Map();
             const ask = t.aspect === 'location' ? `Where was {${t.of}}?` : t.aspect === 'possession' ? `Who had {${t.of}}?`
-                : t.aspect === 'intention' ? `What was {${t.of}} trying to do?` : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
+                : t.aspect === 'intention' ? `What was {${t.of}} trying to do?`
+                    : t.aspect === 'knowledge' ? `Did {${t.of}} know this: “${propositions.get(t.knows)?.text ?? t.knows}”?` : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
             const times = [];
             const addWindow = (w, answer, extra = {}) => {
                 const id = `${t.id}.${w.replace(/^w\./, '')}`;
@@ -314,7 +319,7 @@ export function buildModel(data) {
                     splitBy: subwindows.get(w)?.path.map(([, e]) => e) ?? [],
                     prompt: `${ask} (${timeLabel(w)})`, domain,
                     answer, undetermined: answer === null ? true : undefined,
-                    labels: t.aspect === 'condition' ? undefined : t.aspect === 'intention' ? aimLabels : { elsewhere: 'Somewhere else' },
+                    labels: t.aspect === 'condition' ? undefined : t.aspect === 'intention' ? aimLabels : t.aspect === 'knowledge' ? { true: 'Knew it', false: 'Did not know it' } : { elsewhere: 'Somewhere else' },
                     ...extra,
                 });
                 return id;
@@ -824,6 +829,7 @@ function trackTies(ctx, t) {
         }
     }
     if (t.name === 'aims') for (const k of aimTies(ctx, t.of, t.times)) world(k.id, k.label, k.formula);
+    if (t.aspect === 'knowledge') for (const k of knowledgeTies(ctx, t, t.times)) world(k.id, k.label, k.formula);
     if (t.name === 'held') {
         const place = stateTracks.get(`at|${t.of}`);
         for (const w of t.times) {
@@ -874,6 +880,8 @@ function windowTies(ctx, thing, name, w) {
         }
     }
     if (name === 'aims') for (const k of aimTies(ctx, thing, [w])) tie(k.id, k.label, k.formula);
+    const kt = stateTracks.get(`${name}|${thing}`);
+    if (kt?.aspect === 'knowledge') for (const k of knowledgeTies(ctx, kt, [w])) tie(k.id, k.label, k.formula);
     // Holders and the held, in this window: the opened thing as either.
     for (const t of stateTracks.values()) {
         if (t.name !== 'held' || !t.slotFor(w)) continue;
@@ -909,11 +917,12 @@ export function openState(model, thing, name, w) {
     if (!ctx.isTime(w)) throw new Error(`unknown window ${w}`);
     const conditions = (model.data.state_conditions ?? []).map((c) => c.id);
     const aims = (model.data.state_aims ?? []).length ? ['aims'] : [];
-    if (!['at', 'held', ...aims, ...conditions].includes(name)) throw new Error(`unknown aspect ${name}`);
+    const known = (model.data.propositions ?? []).map((p) => knowsName(p.id));
+    if (!['at', 'held', ...aims, ...known, ...conditions].includes(name)) throw new Error(`unknown aspect ${name}`);
     if (!model.cards.has(thing)) throw new Error(`unknown card ${thing}`);
-    const aspect = name === 'at' ? 'location' : name === 'held' ? 'possession' : name === 'aims' ? 'intention' : 'condition';
+    const aspect = name === 'at' ? 'location' : name === 'held' ? 'possession' : name === 'aims' ? 'intention' : known.includes(name) ? 'knowledge' : 'condition';
     const set = model.data.state_places?.[0]?.id;
-    const track = existing ?? ctx.makeTrack({ id: `st.${thing}.${name}`, of: thing, aspect, ...(aspect === 'condition' ? { condition: name } : { places: set }), windows: {} });
+    const track = existing ?? ctx.makeTrack({ id: `st.${thing}.${name}`, of: thing, aspect, ...(aspect === 'condition' ? { condition: name } : aspect === 'knowledge' ? { knows: (model.data.propositions ?? []).find((p) => knowsName(p.id) === name).id } : aspect === 'intention' ? {} : { places: set }), windows: {} });
     const slot = track.addWindow(w, null, { opened: true });
     const ties = windowTies(ctx, thing, name, w);
     for (const k of ties) model.constraints.set(k.id, { id: k.id, label: k.label, premises: [], world: true, thing: k.thing, formula: k.formula });
@@ -1063,6 +1072,31 @@ function aimTies(ctx, thing, windows) {
             for (const v of values) parts.push({ implies: [{ and: [{ eq: [`${e.id}.agent`, thing] }, ...conds, { eq: [purpose.id, v] }] }, { eq: [track.slotFor(w), v] }] });
         }
         if (parts.length) out.push({ id: `k.world.${thing}.${e.id.slice(2)}.aim`, label: `Whoever does a thing for a purpose is trying to do that, when he does it (${thing}, ${e.id}).`, formula: parts.length === 1 ? parts[0] : { and: parts } });
+    }
+    return out;
+}
+
+/** The name of the knowledge track of a proposition: p.lad_alone_at_night → knows_lad_alone_at_night. */
+export const knowsName = (p) => `knows_${String(p).replace(/^p\./, '')}`;
+
+/**
+ * The two laws of knowledge (built in, Round 72): what one knows one goes on knowing (in every later window of the
+ * track), and what one knows is true (the proposition holds). For these windows of track `t`. [{id, label, formula}]
+ */
+function knowledgeTies(ctx, t, windows) {
+    const { timeOrder, subwindows } = ctx;
+    const rank = (w) => timeOrder.get(timeOrder.has(w) ? w : subwindows.get(w).root);
+    const out = [];
+    for (const w of windows) {
+        const here = t.slotFor(w);
+        out.push({ id: `k.world.${t.of}.${t.name}.true.${w.slice(2)}`, label: `What one knows is true (${t.of}, ${t.knows}).`, formula: { implies: [{ eq: [here, 'true'] }, { eq: [t.knows, 'true'] }] } });
+        for (const v of t.times) {
+            if (v === w || rank(v) === rank(w)) continue;
+            const [a, b] = rank(v) < rank(w) ? [v, w] : [w, v];
+            const id = `k.world.${t.of}.${t.name}.kept.${a.slice(2)}.${b.slice(2)}`;
+            if (out.some((k) => k.id === id)) continue;
+            out.push({ id, label: `What one knows one goes on knowing (${t.of}, ${t.knows}).`, formula: { implies: [{ eq: [t.slotFor(a), 'true'] }, { eq: [t.slotFor(b), 'true'] }] } });
+        }
     }
     return out;
 }

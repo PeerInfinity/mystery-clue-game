@@ -18,7 +18,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | HYPOTHESIS | 27 | 21 |
 | INFER | 24 | 23 |
 | DEFAULT | 8 | 7 |
-| AGENT | 8 | 5 |
+| AGENT | 8 | 7 |
 | PHYSICAL | 1 | 1 |
 | IDENTIFY | 3 | 2 |
 | WEIGH | 19 | 4 |
@@ -47,14 +47,14 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 49; with an inference: 42; with a reason for none: 7; earliest-date misses: 0 (and 4 explained); premise disagreements: 1
+- deduction-type thoughts: 49; with an inference: 44; with a reason for none: 5; earliest-date misses: 0 (and 4 explained); premise disagreements: 2
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
 | `t4.2` | DEFAULT | none: workstream-3 | ¶4 | — |  |  |  |  |  |
 | `t19.5` | INFER | `k.at_a_stable_in_reach` | ¶19 | ¶19 |  |  |  |  |  |
 | `t20.6` | INFER | `k.drugged_in_food` | ¶20 | ¶37 (explained) |  |  | `r.tap_water_not_dosed` |  | `t20.5` |
-| `t24.2` | AGENT | none: world-model | ¶24 | — |  |  |  |  |  |
+| `t24.2` | AGENT | `k.stranger_came_on_purpose` | ¶24 | ¶24 |  |  | `r.lost_does_not_know` |  |  |
 | `t29.3` | INFER | `k.window_drugging_time` | ¶29 | ¶36 (explained) |  |  |  |  | `t25.1` |
 | `t31.3` | INFER | `k.later_entry_needs_key` | ¶31 | ¶33 (explained) |  |  |  |  |  |
 | `t33.2` | INFER | `k.door_opened_with_key` | ¶33 | ¶33 |  |  |  |  |  |
@@ -97,7 +97,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 |  |  | `r.undertaking_means_possession` |  |  |
 | `t146.2` | TEST | `k.boots_identify` | ¶146 | ¶146 |  |  | `r.prints_identify_boots` |  |  |
 | `t148.2` | INFER | `k.disguised_to_survive_search` | ¶148 | ¶66 |  |  |  |  |  |
-| `t150.1` | AGENT | none: world-model | ¶150 | — |  |  |  |  |  |
+| `t150.1` | AGENT | `k.brown_keeps_horse_safe` | ¶150 | ¶150 | `t140.1` |  | `r.mercy_keeps_safe` |  |  |
 | `t175.1` | INFER | `k.sheep_lamed_by_hand` | ¶175 | ¶173 |  |  |  |  |  |
 | `t198.2` | IDENTIFY | `k.bay_is_ross_entry` | ¶198 | ¶198 |  |  | `r.colours_identify_owner`, `r.scratched_horse_does_not_run` | `k.markings_identify` |  |
 
@@ -113,7 +113,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet.
 
 - workstream-3: `t4.2`, `t68.3`
-- world-model: `t24.2`, `t34.5`, `t82.3`, `t150.1`
+- world-model: `t34.5`, `t82.3`
 - action: `t92.14`
 
 ### Inferences named by more than one thought

@@ -32,6 +32,10 @@
   {"id": "st.sovereigns.held", "of": "sovereigns", "aspect": "possession", "places": "night", "windows": {"w.tue_after": "straker", "w.tue_morning": "straker"}},
   {"id": "st.silver_watch.held", "of": "silver_watch", "aspect": "possession", "places": "night", "windows": {"w.tue_morning": "straker"}},
   {"id": "st.straker.aims", "of": "straker", "aspect": "intention", "windows": {"w.tue_stable": "injure"}},
-  {"id": "st.track_man.aims", "of": "track_man", "aspect": "intention", "windows": {"w.tue_dawn.before.brown_turns_back": "lead_home", "w.tue_dawn.after.brown_turns_back": null}}
+  {"id": "st.track_man.aims", "of": "track_man", "aspect": "intention", "windows": {"w.tue_dawn.before.brown_turns_back": "lead_home", "w.tue_dawn.after.brown_turns_back": null}},
+  {"id": "st.the_stranger.aims", "of": "the_stranger", "aspect": "intention", "windows": {"w.mon_2105": null}},
+  {"id": "st.the_stranger.knows_lad_alone_at_night", "of": "the_stranger", "aspect": "knowledge", "knows": "p.lad_alone_at_night", "windows": {"w.mon_2105": "true"}},
+  {"id": "st.silas_brown.aims", "of": "silas_brown", "aspect": "intention", "windows": {"w.thu_night": "keep_safe"}},
+  {"id": "st.silas_brown.knows_mercy_in_safe_return", "of": "silas_brown", "aspect": "knowledge", "knows": "p.mercy_in_safe_return", "windows": {"w.thu_night": "true"}}
  ]
 }

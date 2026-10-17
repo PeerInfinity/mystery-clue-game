@@ -1812,11 +1812,17 @@
             "location",
             "possession",
             "condition",
-            "intention"
+            "intention",
+            "knowledge"
           ]
         },
         "condition": {
           "type": "string"
+        },
+        "knows": {
+          "type": "string",
+          "pattern": "^p\\.[a-z0-9_]+$",
+          "description": "Knowledge: the proposition the thing knows (or not); the track is st.<thing>.knows_<proposition>."
         },
         "places": {
           "oneOf": [
