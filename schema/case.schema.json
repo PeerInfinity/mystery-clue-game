@@ -1024,9 +1024,41 @@
         "unless": {
           "type": "array",
           "items": {
-            "type": "string"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Unique within the rule; the player raises it by this id against one application."
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The story line that speaks of the exception; it cannot be raised before it is read."
+                  },
+                  "formula": {
+                    "$ref": "#/$defs/formula",
+                    "description": "Over the rule's schema variables, grounded with each application's bind: what holds when the exception does. Checked against what the player holds: ruled out, open (a reservation) or established (a defeat)."
+                  }
+                }
+              }
+            ]
           },
-          "description": "Named defeaters: what would make the fact not apply (shown to the player; not checked)."
+          "description": "Exceptions (workstream 3): what would make the fact not apply. A plain string is text only; a named exception (id, text, source, formula) can be raised against one application of the rule."
         }
       },
       "description": "A background fact that serves as a premise. It is shown on the card(s) it attaches to, mixed with the period notes, so that it does not stand out as a clue."

@@ -2701,3 +2701,38 @@ and belief (workstream 4). It carries the open items and this session's traps. `
 - **Deferred:** Q6 as a whole (one culprit, `t4.2` and `t68.3`, and whether an applied default yields in a clash
   before a story clue).
 - **Moved:** nothing (documents only).
+
+## Round 102 (2026-10-17): workstream 3, step 1 — named exceptions, and raising one against an application
+
+- **Format** (schema, model, validator): an `unless` entry may be `{id, text, source?, formula?}`. The formula is
+  over the rule's variables, grounded per application (`exceptions` on each `#rule<n>`); ids unique in the rule;
+  the source quoted within one paragraph.
+- **Engine** (`Game.applicationsOf`, `exceptionsOf`, `exceptionStatus`, `raise`, `withdraw`, `raisedOn`,
+  `restingOnDefeated`; saved as `raised`): Q2's three outcomes. Ruled out: refused, with the constraints that rule
+  it out. Open: a reservation, the card still counts. Established: a defeat, the card doubted with the exception
+  as its reason. Raisable once the rule is held and the exception's line read.
+  - **Found while building:** the check must leave out every use of the default with the same grounded exception,
+    not only the card's own. `k.hunter_was_drugged`, `k.found_before_seven` and `k.drugging_is_dishonest` apply
+    `r.drugged_guard` to the same events, and each ruled the accomplice out by assuming it away.
+  - **Cost:** the check itself takes about 0.1 s at ¶218. The first clash computation there (about 11 s, done
+    anyway by the game) is the slow part.
+- **Data:** `r.dog_barks_at_strangers`'s "the dog did bark and nobody heard" (`barked_unheard`, from "for they are
+  both sound sleepers", ¶34, no formula); `r.drugged_guard`'s "the drugger had an accomplice" (`accomplice`, from
+  "Which of them, then, had access to that dish without the maid seeing them?", ¶218, formula `diff` of the
+  dosing's and the taking's agents).
+- **Test** (`defeasibility.test.js`, new):
+  - the grounded exceptions, and two format errors;
+  - the accomplice: not before ¶218; ruled out for a player who doubts Holmes's curry step and trusts the police
+    (Simpson drugged and took), by the police's inference; with that doubted, a reservation that leaves the card
+    counting and blocks nothing, saved, and still open at the end of the story;
+  - the sleepers, a reservation;
+  - on a copy of the case, a made-up pair on the dog rule: one the clues entail (a defeat: doubted, saved, withdrawn
+    by trusting again) and one they contradict (refused).
+- **Seen for step 3:** a police inference that clashes with a true story clue sets the clue aside (story clues
+  weigh least, then inferences someone else stated): `k.police_simpson_took_horse` against
+  `c.simpson_came_for_information`. The police's chain then rules the accomplice out for a player who keeps it.
+- **Moved:**
+  - **Report:** quotes 1040 → 1042; a new "Exceptions" section, five rows (the accomplice on the four applications
+    of `r.drugged_guard`, each "left open by the story; in the answer key: does not hold (the default's answer)";
+    the sleepers, no formula).
+  - **Reveal and foreshadow logs, thoughts report, gates:** nothing. Exceptions are not shown yet (step 2).

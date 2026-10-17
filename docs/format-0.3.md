@@ -440,6 +440,26 @@ specific thing stay ground facts with a formula and no schema.
 - **Chains** (Round 89): `chain: [{by, to, at?}]` on an attestation. Each speaker along it has a belief of his own;
   a doubt names whose failed (`lying:<who>`, `mistaken:<who>`). `Game.chainOf(id)`.
 
+## As built (2026-10-17): exceptions and the raise action (workstream 3, step 1; Round 102)
+
+- **Named exceptions:** an `unless` entry may be `{id, text, source?, formula?}` (a plain string stays text only).
+  The id is unique in its rule; the formula is over the rule's own variables and is grounded with each authored
+  application's bind (`exceptions` on the `#rule<n>` constraint). The source must be found within one paragraph.
+- **`Game.raise(card, n, exception)`** against application `n` of a held card (an authored inference's `#rule<n>`,
+  or a rule the player applied). Raisable once the rule is held and the exception's source line read
+  (`exceptionsOf`). Checked against what the player holds and trusts, leaving out the card, what rests on it and
+  every use of a default with the same grounded exception (`exceptionStatus`):
+  - **ruled out:** refused, with what rules it out;
+  - **open** (or no formula): a **reservation**, recorded; the card still counts and holds back no paragraph;
+  - **established:** a **defeat**: the card is doubted (counts nowhere), with the exception as its reason.
+  Saved as `raised` (save version 7 unchanged). Trusting the card again withdraws a defeat; `withdraw` takes back
+  either. `raisedOn(card)` gives where each now stands; `restingOnDefeated(card)` marks what rests on a defeat.
+- **Report:** "Exceptions", per application: ruled out, established or left open by the whole story, and whether
+  the answer key bears it out.
+- **Silver Blaze:** the sound sleepers (`r.dog_barks_at_strangers`, ¶34, no formula) and the accomplice
+  (`r.drugged_guard`, ¶218, `?dosing.agent` differs from `?taking.agent`: left open by the story, on all four of
+  the rule's applications).
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's

@@ -96,6 +96,7 @@ for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'rou
     for (const item of data[sec] ?? []) checkQuotes(item.id, item.source);
 }
 for (const e of data.entities ?? []) for (const n of e.notes ?? []) checkQuotes(e.id, n.source);
+for (const r of data.rules ?? []) for (const u of r.unless ?? []) if (u?.source) checkQuotes(`${r.id} exception ${u.id}`, u.source);
 for (const e of data.entities ?? []) for (const t of e.traits ?? []) checkQuotes(`${e.id} trait ${t.id}`, t.source);
 for (const g of data.glosses ?? []) if (g.after) checkQuotes(g.id, [g.after]);
 for (const r of data.rules ?? []) if (r.relevant_from) checkQuotes(r.id, [r.relevant_from]);
@@ -488,6 +489,38 @@ for (const k of data.constraints ?? []) {
     inferenceRows.push({ k, ...v });
 }
 
+// ---------- named exceptions (workstream 3): where each application's exception stands in the whole story ----------
+// Left out of each check: the inference, what rests on it, and every use of a default with the same grounded exception.
+const exceptionRows = [];
+{
+    const restingOn = (id) => {
+        const out = new Set([id]);
+        for (let grew = true; grew;) {
+            grew = false;
+            for (const k of data.constraints ?? []) if (!out.has(k.id) && k.premises.some((p) => out.has(p))) { out.add(k.id); grew = true; }
+        }
+        return out;
+    };
+    for (const k of model.constraints.values()) {
+        for (const x of k.exceptions ?? []) {
+            const rule = model.cards.get(k.rule);
+            const u = (rule.unless ?? []).find((y) => y?.id === x.id);
+            if (u.source && !storyIndex.find(u.source[0])) err(`${k.rule}: exception ${x.id}: quote not within one paragraph`);
+            let status = 'no formula';
+            if (x.formula) {
+                const same = JSON.stringify(x.formula);
+                const skip = restingOn(k.inference);
+                for (const j of model.constraints.values()) if (j.exceptions?.some((y) => JSON.stringify(y.formula) === same)) for (const z of restingOn(j.inference)) skip.add(z);
+                const active = allIds.filter((id) => !skip.has(model.constraints.get(id).inference));
+                status = !model.problem.consistent(active, {}, { extra: [x.formula] }).ok ? 'ruled out'
+                    : !model.problem.consistent(active, {}, { extra: [{ not: x.formula }] }).ok ? 'established' : 'left open by the story';
+                status += `; in the answer key: ${evaluate(x.formula, truth, model.timeOrder) === false ? 'does not hold (the default\'s answer)' : 'holds'}`;
+            }
+            exceptionRows.push({ k, x, u, at: u.source ? storyIndex.find(u.source[0])?.para : null, status });
+        }
+    }
+}
+
 // ---------- theories ----------
 const theoryRows = [];
 for (const t of data.theories ?? []) {
@@ -636,6 +669,18 @@ function writeReport() {
         out(`| \`${r.k.id}\` | ${(r.k.rules ?? []).map((u) => `${u.rule}(${Object.entries(u.bind ?? {}).map(([v, c]) => `${v}=${c}`).join(', ')})`).join('; ') || '—'} | ${r.status}${r.status === 'asserted' && r.k.asserted ? `: ${r.k.asserted}` : ''} |`);
     }
     out();
+    if (exceptionRows.length) {
+        out('## Exceptions');
+        out();
+        out('Named exceptions of default rules (workstream 3), per application: where each stands in the whole story, leaving');
+        out('out the inference, what rests on it and every use of the default with the same exception. Raised by a player, an');
+        out('open one is a reservation and an established one a defeat.');
+        out();
+        out('| Application | Exception | From ¶ | Status |');
+        out('|---|---|---|---|');
+        for (const r of exceptionRows) out(`| \`${r.k.id}\` | ${r.x.id}: ${r.u.text} | ${r.at ?? '—'} | ${r.status} |`);
+        out();
+    }
     if (lateQuotes.length) {
         out('## Quoted later than they appear');
         out('');

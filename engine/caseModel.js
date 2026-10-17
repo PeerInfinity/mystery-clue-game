@@ -401,6 +401,18 @@ export function buildModel(data) {
             const g = groundOrError(r.id, r.formula);
             if (g) cards.get(r.id).formula = g;
         }
+        // Named exceptions (workstream 3): an id unique within the rule, a text, and a formula over the rule's own
+        // variables, grounded with each application's bind.
+        const named = new Set();
+        for (const u of r.unless ?? []) {
+            if (typeof u === 'string') continue;
+            if (!u.id || !u.text) { errors.push(`${r.id}: an exception needs an id and a text`); continue; }
+            if (named.has(u.id)) errors.push(`${r.id}: exception ${u.id} named twice`);
+            named.add(u.id);
+            if (!u.formula) continue;
+            if (!r.schema) { errors.push(`${r.id}: exception ${u.id} has a formula, but the rule has no variables`); continue; }
+            for (const v of varsOf(u.formula)) if (!(v in (r.schema.vars ?? {}))) errors.push(`${r.id}: exception ${u.id} uses ?${v}, which the rule's vars do not declare`);
+        }
     }
 
     // ---- constraints ----
@@ -497,7 +509,8 @@ export function buildModel(data) {
             if (!rule || rule.section !== 'rules' || !(rule.schema || rule.formula)) { errors.push(`${k.id}: applies ${use.rule}, which is not a background fact with a formula`); return; }
             let g;
             try { g = rule.schema ? ground(rule.schema.formula, { ...env, bind: use.bind ?? {} }) : rule.formula; } catch (e) { errors.push(`${k.id}: ${use.rule}: ${e.message}`); return; }
-            addConstraint({ id: `${k.id}#rule${i + 1}`, label: `${rule.text} (as applied in: ${k.label})`, by: k.by, premises: [...new Set([...k.premises, ...Object.values(use.bind ?? {}).filter((c) => cards.has(c))])], inference: k.id, doubt_with: k.id, rule: use.rule, bind: use.bind ?? {}, formula: g });
+            const exceptions = namedExceptions(rule).map((u) => ({ id: u.id, formula: u.formula ? groundOrError(`${k.id}#rule${i + 1}: exception ${u.id}`, u.formula, use.bind ?? {}) : null }));
+            addConstraint({ id: `${k.id}#rule${i + 1}`, label: `${rule.text} (as applied in: ${k.label})`, by: k.by, premises: [...new Set([...k.premises, ...Object.values(use.bind ?? {}).filter((c) => cards.has(c))])], inference: k.id, doubt_with: k.id, rule: use.rule, bind: use.bind ?? {}, exceptions, formula: g });
         });
     }
 
@@ -569,6 +582,17 @@ export function rebuildProblem(model) {
  * Returns {ok, formula, premises} (premises: the rule and the bound cards) or {ok: false, error}.
  * A rule with a ground `formula` and no schema takes no bindings.
  */
+/** A rule's named exceptions (workstream 3): the `unless` entries with an id. */
+export function namedExceptions(rule) {
+    return (rule?.unless ?? []).filter((u) => typeof u === 'object' && u?.id);
+}
+
+/** A named exception's formula, grounded with an application's bind (null if it has none). */
+export function exceptionFormula(model, ruleId, exceptionId, bind = {}) {
+    const u = namedExceptions(model.cards.get(ruleId)).find((x) => x.id === exceptionId);
+    return u?.formula ? ground(u.formula, { ...model.env, bind }) : null;
+}
+
 export function instantiateRule(model, ruleId, bind = {}) {
     const rule = model.cards.get(ruleId);
     if (!rule || rule.section !== 'rules') return { ok: false, error: `${ruleId} is not a background fact` };

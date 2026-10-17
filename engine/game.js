@@ -17,7 +17,7 @@
 // Scoring: Holmes's steps are the annotated reading's thoughts (engine/steps.js); one the player makes by their own
 //   reasoning before the paragraph where Holmes states it scores (thoughtScores, score).
 
-import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState, openSplit, closeSplit, knowsName } from './caseModel.js';
+import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState, openSplit, closeSplit, knowsName, namedExceptions, exceptionFormula } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
 
@@ -269,6 +269,7 @@ export class Game {
         this.concluded = [];            // [{id, cited, formula, label, para}]
         this.filed = [];                // [{id, para}] absences the player filed (Round 83), or Trivial filed for them
         this.noticed = new Map();       // card id → {para, because}: details the player marked as odd (Round 84)
+        this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised (workstream 3)
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -301,6 +302,7 @@ export class Game {
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             filed: this.filed.map((f) => [f.id, f.para]),
             noticed: [...this.noticed].map(([id, n]) => [id, n.para, n.because]),
+            raised: [...this.raised.values()].map((r) => [r.id, r.n, r.exception, r.para, r.status]),
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
@@ -374,6 +376,11 @@ export class Game {
         }
         for (const [id, para] of state.split ?? []) if (this.knows(id) && this.partsOf(id).length) { this.splitClaims.add(id); for (const x of this.partsOf(id)) this.#unlock(x, para); }
         for (const [id, para, because] of state.noticed ?? []) if (this.knows(id)) this.noticed.set(id, { para, because: because && this.knows(because) ? because : null });
+        for (const [id, n, exception, para, status] of state.raised ?? []) {
+            const e = this.knows(id) && this.applicationsOf(id).find((a) => a.n === n)?.exceptions.find((x) => x.id === exception);
+            if (!e || (status === 'established' && !this.suspected.has(id))) continue;
+            this.raised.set(`${id}#${n}:${exception}`, { id, n, rule: e.rule, exception, status, para });
+        }
         if (board) this.board = { ...TL.emptyBoard(), ...board };
     }
 
@@ -641,7 +648,11 @@ export class Game {
         if (kind) this.doubtKind.set(id, kind); else this.doubtKind.delete(id);
         return true;
     }
-    unsuspect(id) { this.suspected.delete(id); this.doubtKind.delete(id); this.doubtReason.delete(id); }
+    unsuspect(id) {
+        this.suspected.delete(id); this.doubtKind.delete(id); this.doubtReason.delete(id);
+        // A defeat is a doubt with the exception as its reason: trusting the card again withdraws it.
+        for (const [key, r] of this.raised) if (r.id === id && r.status === 'established') this.raised.delete(key);
+    }
     /**
      * Why the player doubts a clue (workstream 4, recorded only until workstream 3 gives undercuts their logic):
      * one of DOUBT_REASONS, or null to clear it. Only for a clue they doubt.
@@ -682,6 +693,114 @@ export class Game {
         this.moved = true;
         return { ok: true, parts };
     }
+    // ---------- exceptions (workstream 3, docs/defeasibility.md) ----------
+
+    /**
+     * The rule applications a card rests on, each with the named exceptions of its rule: [{n, rule, bind,
+     * exceptions: [{id, rule, text, formula, source, para}]}]. An authored inference lists its own (`#rule<n>`); a
+     * rule the player applied is one application. `para` is where the exception's source line is (null: none).
+     */
+    applicationsOf(id) {
+        const card = this.model.cards.get(id);
+        if (!card) return [];
+        const uses = [];
+        if (card.section === 'applied') uses.push({ n: 1, rule: card.rule, bind: card.bind ?? {} });
+        else for (let n = 1; this.model.constraints.has(`${id}#rule${n}`); n++) {
+            const k = this.model.constraints.get(`${id}#rule${n}`);
+            uses.push({ n, rule: k.rule, bind: k.bind ?? {} });
+        }
+        return uses.map((u) => ({
+            ...u,
+            exceptions: namedExceptions(this.model.cards.get(u.rule)).map((x) => ({
+                id: x.id, rule: u.rule, text: x.text, source: x.source ?? null,
+                para: x.source?.length ? this.#paraOf(x.source[0]) : null,
+                formula: exceptionFormula(this.model, u.rule, x.id, u.bind),
+            })),
+        }));
+    }
+
+    /**
+     * The exceptions the player may raise against a card they hold: those of the rules it applies, once the rule is
+     * held and the exception's own line (if it has one) has been read. Each with its application `n`.
+     */
+    exceptionsOf(id) {
+        if (!this.knows(id)) return [];
+        return this.applicationsOf(id).flatMap((a) => a.exceptions.filter((x) => this.knows(a.rule) && (x.para === null || x.para < this.read)).map((x) => ({ ...x, n: a.n })));
+    }
+
+    /** The card and what the player holds that rests on it (a check of an exception raised against it leaves them out). */
+    #restingOn(id) {
+        const out = new Set([id]);
+        const held = [...this.heldInferences(), ...this.heldApplied()];
+        for (let grew = true; grew;) {
+            grew = false;
+            for (const x of held) if (!out.has(x) && (this.model.cards.get(x)?.premises ?? []).some((p) => out.has(p))) { out.add(x); grew = true; }
+        }
+        return out;
+    }
+
+    /**
+     * Where an exception stands against what the player holds and trusts, leaving out the card it is raised against
+     * and what rests on it: 'ruled-out' (what they hold contradicts it), 'established' (what they hold entails it)
+     * or 'open'. An exception with no formula is always open. Returns {status, used?}.
+     */
+    exceptionStatus(id, formula) {
+        if (!formula) return { status: 'open' };
+        // Left out as well: every use of a default whose exception, so grounded, is this one (the same default over
+        // the same events, in another inference, answers it only by assuming it does not hold).
+        const same = JSON.stringify(formula);
+        const skip = this.#restingOn(id);
+        for (const k of this.model.constraints.values()) if (k.exceptions?.some((x) => JSON.stringify(x.formula) === same)) for (const x of this.#restingOn(k.inference)) skip.add(x);
+        for (const a of this.applied) if (JSON.stringify(namedExceptions(this.model.cards.get(a.rule)).map((u) => exceptionFormula(this.model, a.rule, u.id, a.bind))).includes(same)) for (const x of this.#restingOn(a.id)) skip.add(x);
+        const active = this.#withTies(this.workingConstraints().filter((kid) => !skip.has(this.model.constraints.get(kid).inference)), slotsOf(formula));
+        for (const [status, extra] of [['ruled-out', formula], ['established', { not: formula }]]) {
+            if (!this.model.problem.consistent(active, {}, { extra: [extra], focus: true }).ok) return { status, used: this.model.problem.explainConflict(active, {}, { extra: [extra] }) ?? [] };
+        }
+        return { status: 'open' };
+    }
+
+    /**
+     * Raise a named exception against application `n` of a card the player holds. Ruled out by what they hold:
+     * refused, with what rules it out. Open: a reservation (the card still counts, marked). Established: a defeat
+     * (the card counts nowhere, as a plain doubt does, with the exception as its reason).
+     * Returns {ok, status, used} or {ok: false, status?, used?, reason}.
+     */
+    raise(id, n, exception) {
+        if (!this.knows(id)) return { ok: false, reason: 'you do not hold that card' };
+        const e = this.exceptionsOf(id).find((x) => x.n === n && x.id === exception);
+        if (!e) return { ok: false, reason: 'that exception cannot be raised there' };
+        const st = this.exceptionStatus(id, e.formula);
+        if (st.status === 'ruled-out') return { ok: false, ...st, reason: 'what you hold rules it out' };
+        this.moved = true;
+        const key = `${id}#${n}:${exception}`;
+        this.raised.set(key, { id, n, rule: e.rule, exception, status: st.status, para: this.raised.get(key)?.para ?? this.read - 1 });
+        if (st.status === 'established') { this.suspected.add(id); this.doubtKind.delete(id); this.doubtReason.delete(id); }
+        return { ok: true, status: st.status, used: st.used ?? [] };
+    }
+
+    /** Take back a raised exception (a defeated card counts again once no defeat stands against it). */
+    withdraw(id, n, exception) {
+        const key = `${id}#${n}:${exception}`;
+        const r = this.raised.get(key);
+        if (!r) return false;
+        this.raised.delete(key);
+        if (r.status === 'established' && ![...this.raised.values()].some((x) => x.id === id && x.status === 'established')) this.unsuspect(id);
+        return true;
+    }
+
+    /** The exceptions raised against a card, each with where it stands now (a reservation may since be ruled out). */
+    raisedOn(id) {
+        return [...this.raised.values()].filter((r) => r.id === id).map((r) => {
+            const e = this.applicationsOf(id).find((a) => a.n === r.n)?.exceptions.find((x) => x.id === r.exception);
+            return { ...r, text: e?.text, now: r.status === 'established' ? 'established' : this.exceptionStatus(id, e?.formula).status };
+        });
+    }
+
+    /** Does a held card rest on a card the player has defeated? (It is marked, not removed.) */
+    restingOnDefeated(id) {
+        return [...this.raised.values()].some((r) => r.status === 'established' && r.id !== id && this.#restingOn(r.id).has(id));
+    }
+
     /** What the player doubts or no longer counts: doubted clues, and the statements they split. */
     #discounted() { return this.splitClaims.size ? new Set([...this.suspected, ...this.splitClaims]) : this.suspected; }
     isSuspected(id) { return this.suspected.has(id); }
