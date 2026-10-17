@@ -637,8 +637,16 @@ export class Game {
         return true;
     }
     unsuspect(id) { this.suspected.delete(id); this.doubtKind.delete(id); }
-    /** The readings a doubt of this clue may take beyond the plain one: ['mistaken', 'lying'] for a statement. */
-    doubtKinds(id) { return this.model.claimForms.get(id)?.belief ? ['mistaken', 'lying'] : []; }
+    /**
+     * The readings a doubt of this clue may take beyond the plain one: ['mistaken', 'lying'] for a statement; along a
+     * reporting chain, one pair per speaker ('lying:straker', 'mistaken:mrs_straker').
+     */
+    doubtKinds(id) { return Object.keys(this.model.claimForms.get(id) ?? {}).filter((k) => /^(mistaken|lying)(:|$)/.test(k)); }
+    /** Who passed a statement on, in order (its reporting chain, then the one the story quotes): [{by, to}]. */
+    chainOf(id) {
+        const a = (this.model.cards.get(id)?.attested ?? []).find((x) => x.chain?.length);
+        return a ? [...a.chain.map((l) => ({ by: l.by, to: l.to })), { by: a.by, to: a.to ?? null }] : [];
+    }
     /** The parts a statement can be split into (claims with `part_of`, workstream 4): what was seen, what concluded. */
     partsOf(id) {
         if (!this.partsByClaim) {

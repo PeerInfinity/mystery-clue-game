@@ -2399,3 +2399,48 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     which now holds cards that are not among its premises (before, "not held").
   - **Reveal and foreshadow logs, gates:** nothing.
 - **Not yet:** the UI (step 4).
+
+## Round 89 (2026-10-16): workstream 4, step 3 — reporting chains, with a belief per link
+
+- **Format:** `chain: [{by, to, at?}]` on an attestation: who passed it on before the one quoted, first speaker first
+  (schema). `at` is when that speaker said it.
+- **Engine:**
+  - **A belief per speaker:** each person or group along a statement's chain gets a belief of his own in its content,
+    at his link's time. These are latent unless declared, as in Round 87.
+  - **The doubt names whose belief failed:** `lying:straker`, `mistaken:mrs_straker` (`doubtKinds`). A statement
+    with one speaker keeps the bare `mistaken` and `lying`.
+  - **`Game.chainOf(id)`** gives the chain for "trace this": `[{by, to}]`, ending with the speaker the story quotes.
+- **Data:**
+  - **Straker's "anxiety about the horses"** (`c.straker_said_anxious`): Straker → Mrs. Straker at one o'clock, then
+    she to the police. The answer key:
+    - Straker did not believe it: `k.straker_lied_to_wife` (implicit, **verified**), with the new default
+      `r.knows_own_errand` (a man knows his own errand: if it is not honest, he does not believe it is). Background
+      from Holmes's "For a dishonest one, obviously" (¶220), not beside Straker's words, where it would hint.
+    - Mrs. Straker believed it: `k.mrs_straker_passes_in_good_faith` (**verified**, by the sincerity default).
+      `t32.3` names it.
+  - **"A friend of her husband's"** (`c.derbyshire_friend_said`, the part from Round 88): Straker → Mrs. Straker, in
+    the weeks before. Straker did not believe it: `k.straker_lied_about_derbyshire` (implicit, **verified**), from
+    `k.derbyshire_is_straker` and the new default `r.knows_himself` (a man who speaks of another who is himself under
+    another name does not believe what he says of him). Background from "dispose of the mythical Derbyshire" (¶225).
+  - **The papers' struggle:** police → newspapers → Holmes. It is shown in the chain; it asserts nothing, so no
+    belief.
+  - **The sincerity default** (`r.witness_believes`) now surfaces at ¶32, beside Mrs. Straker's report, where
+    `t32.3` weighs it (it was ¶36). It says a witness means what he says, so it hints at nothing.
+- **Test** (`belief.test.js`):
+  - the chain and its four doubts;
+  - "lying:straker" puts the lie on his link only, and a bare "lying" is refused along a chain;
+  - the papers' chain;
+  - the answer key at the end;
+  - Round 88's split test now doubts the "friend" part as `mistaken:mrs_straker`, since that part has a chain.
+- **Moved:**
+  - **Report:**
+    - rules 108 → 110, constraints 453 → 459, verified inferences 69 → 72;
+    - three declared belief tracks, all unique.
+  - **Reveal log:**
+    - the sincerity rule from ¶36 to ¶32;
+    - at ¶220, the errand rule, Straker's lie and its question;
+    - at ¶225, the alias rule, the Derbyshire lie and its question.
+  - **Foreshadow log:** the same three rules.
+  - **Thoughts report:** both SOURCE thoughts are held. Premise disagreements 6 → 7: `t32.3` cites `t32.2`, her own
+    observation, which its inference does not need.
+  - **Gates:** nothing.

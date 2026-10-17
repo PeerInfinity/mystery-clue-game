@@ -347,12 +347,12 @@ export function buildModel(data) {
         // Belief over statements (workstream 4, Round 87): whoever testifies or admits something has a belief about
         // what he said, at the time he said it (`said_at`, else his scene's time). Unless the case declares that
         // track, it is latent, like a clue's truth: open, and no part of the uniqueness check.
+        // A reporting chain (Round 89) gives each speaker along it a belief of his own, at the time he passed it on.
         for (const c of data.claims ?? []) {
-            const st = statementOf(c, entities);
-            if (!st || stateTracks.has(`${believesName(c.id)}|${st.by}`)) continue;
-            const w = c.said_at ?? (data.scenes ?? []).find((s) => s.id === st.scene)?.time;
-            if (!w || !isTime(w)) continue;
-            makeTrack({ id: `st.${st.by}.${believesName(c.id)}`, of: st.by, aspect: 'belief', believes: c.id, windows: { [w]: null }, latent: true });
+            for (const sp of statementOf(c, entities, data.scenes)?.speakers ?? []) {
+                if (stateTracks.has(`${believesName(c.id)}|${sp.by}`) || !sp.at || !isTime(sp.at)) continue;
+                makeTrack({ id: `st.${sp.by}.${believesName(c.id)}`, of: sp.by, aspect: 'belief', believes: c.id, windows: { [sp.at]: null }, latent: true });
+            }
         }
     }
     // Propositions: boolean slots, each on its own card.
@@ -433,16 +433,21 @@ export function buildModel(data) {
         }
         // A statement doubted in one of two readings (workstream 4): mistaken (the speaker believed it, and it is
         // false) or lying (he did not believe it). Both read his belief at the time he spoke.
-        const st = statementOf(c, entities);
-        const track = st && stateTracks.get(`${believesName(c.id)}|${st.by}`);
-        const b = track?.times.length ? track.slotFor(track.times[0]) : null;
-        if (b) {
-            const forms = claimForms.get(c.id);
+        // Along a reporting chain each speaker's belief can be the one that failed: the kinds then name him
+        // ('lying:straker', 'mistaken:mrs_straker').
+        const speakers = statementOf(c, entities, data.scenes)?.speakers ?? [];
+        const forms = claimForms.get(c.id);
+        for (const sp of speakers) {
+            const track = stateTracks.get(`${believesName(c.id)}|${sp.by}`);
+            const b = track?.times.length ? track.slotFor(sp.at && track.slotFor(sp.at) ? sp.at : track.times[0]) : null;
+            if (!b) continue;
+            const tag = speakers.length > 1 ? `:${sp.by}` : '';
             for (const [kind, v] of [['mistaken', 'true'], ['lying', 'false']]) {
-                addConstraint({ ...base, id: `k.${c.id}#${kind}`, formula: { and: [{ eq: [`${c.id}.truth`, 'false'] }, { not: asserts }, { eq: [b, v] }] }, variant: true });
-                forms[kind] = `k.${c.id}#${kind}`;
+                addConstraint({ ...base, id: `k.${c.id}#${kind}${tag}`, formula: { and: [{ eq: [`${c.id}.truth`, 'false'] }, { not: asserts }, { eq: [b, v] }] }, variant: true });
+                forms[`${kind}${tag}`] = `k.${c.id}#${kind}${tag}`;
             }
-            forms.belief = b;
+            (forms.beliefs ??= {})[sp.by] = b;
+            if (speakers.length === 1) forms.belief = b;
         }
     }
     // What a clue tells for certain, whatever the player makes of its content (`said`: e.g. that the speaker was
@@ -1126,13 +1131,19 @@ export const knowsName = (p) => `knows_${String(p).replace(/^p\./, '')}`;
 export const believesName = (x) => `believes_${String(x).replace(/^[pc]\./, '')}`;
 /** VIAS whose speaker is a person who may believe or not what he says. */
 const STATEMENT_VIAS = ['testimony', 'admission'];
-/** A statement: a clue someone said (testimony, admission), with its speaker and scene; null otherwise. */
-export function statementOf(c, entities) {
+/**
+ * A statement: a clue someone said (testimony, admission), with its speaker and scene; null otherwise. `speakers`:
+ * who said it, in order along its reporting chain (`chain` on the attestation, Round 89), each with when.
+ */
+export function statementOf(c, entities, scenes = []) {
     if (c.derived || !c.asserts) return null;
     const a = (c.attested ?? []).find((x) => STATEMENT_VIAS.includes(x.via) && x.by);
     if (!a) return null;
-    const who = entities.find((e) => e.id === a.by);
-    return who && ['person', 'group'].includes(who.kind) ? { by: a.by, scene: a.scene } : null;
+    const person = (id) => ['person', 'group'].includes(entities.find((e) => e.id === id)?.kind);
+    if (!person(a.by)) return null;
+    const at = c.said_at ?? scenes.find((s) => s.id === a.scene)?.time;
+    const speakers = [...(a.chain ?? []).filter((l) => person(l.by)).map((l) => ({ by: l.by, at: l.at })), { by: a.by, at }];
+    return { by: a.by, scene: a.scene, speakers };
 }
 
 /**

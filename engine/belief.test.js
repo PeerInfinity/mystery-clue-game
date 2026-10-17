@@ -65,12 +65,33 @@ test('splitting a statement: what she saw and what she was told, trusted or doub
     assert.ok(game.checkConclusion(whole).ok, 'held whole, it says Derbyshire is not Straker');
     assert.deepEqual(game.splitClaim(id).parts, ['c.derbyshire_letters_came', 'c.derbyshire_friend_said']);
     assert.ok(game.checkConclusion(whole).ok, 'its "friend" part still says so, while trusted');
-    assert.ok(game.suspect('c.derbyshire_friend_said', 'mistaken'));
+    assert.ok(game.suspect('c.derbyshire_friend_said', 'mistaken:mrs_straker'));
     assert.equal(game.checkConclusion(whole).ok, false, 'doubted, the part no longer counts, and the whole counts nowhere');
     assert.ok(game.knows(id) && !game.suspected.has(id), 'the statement stays in the hand, not doubted');
     const again = new Game(model);
     again.load(game.save());
     assert.ok(again.splitClaims.has(id) && again.knows('c.derbyshire_letters_came'));
-    assert.equal(again.doubtKind.get('c.derbyshire_friend_said'), 'mistaken');
+    assert.equal(again.doubtKind.get('c.derbyshire_friend_said'), 'mistaken:mrs_straker');
     assert.equal(again.checkConclusion(whole).ok, false);
+});
+
+test('a reporting chain: Straker lied to his wife, and she passed it on in good faith', () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    const id = 'c.straker_said_anxious';
+    while (!game.knows(id)) game.advance();
+    assert.deepEqual(game.chainOf(id), [{ by: 'straker', to: 'mrs_straker' }, { by: 'mrs_straker', to: null }]);
+    assert.deepEqual(game.doubtKinds(id).sort(), ['lying:mrs_straker', 'lying:straker', 'mistaken:mrs_straker', 'mistaken:straker']);
+    const { straker, mrs_straker } = model.claimForms.get(id).beliefs;
+    assert.equal(straker, 'st.straker.believes_straker_said_anxious.tue_0100');
+    assert.ok(game.suspect(id, 'lying:straker'));
+    assert.ok(game.checkConclusion({ eq: [straker, 'false'] }).ok, 'the lie sits on his link');
+    assert.equal(game.checkConclusion({ eq: [mrs_straker, 'false'] }).ok, false, 'hers is not touched');
+    assert.equal(game.suspect(id, 'lying'), false, 'along a chain a doubt names whose belief failed');
+    assert.equal(game.chainOf('c.straker_defended_himself').map((l) => l.by).join(' → '), 'police → newspapers → holmes');
+    // The answer key: he lied about his errand and about Derbyshire; she believed him.
+    const solved = new Game(model, { difficulty: TRIVIAL, autoPace: 'logic' });
+    while (!solved.finished()) solved.advance();
+    assert.equal(solved.settled(straker), 'false');
+    assert.equal(solved.settled(mrs_straker), 'true');
+    assert.equal(solved.settled('st.straker.believes_derbyshire_friend_said.weeks_before'), 'false');
 });

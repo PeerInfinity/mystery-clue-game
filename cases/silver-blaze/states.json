@@ -42,6 +42,9 @@
   {"id": "st.ned_hunter.believes_hunter_blames_stranger", "of": "ned_hunter", "aspect": "belief", "believes": "c.hunter_blames_stranger", "windows": {"w.thu_journey": "true"}},
   {"id": "st.mrs_straker.believes_derbyshire_a_friend", "of": "mrs_straker", "aspect": "belief", "believes": "c.derbyshire_a_friend", "windows": {"w.thu_evening": "true"}},
   {"id": "st.colonel_ross.believes_ross_not_my_horse", "of": "colonel_ross", "aspect": "belief", "believes": "c.ross_not_my_horse", "windows": {"w.race_day": "true"}},
-  {"id": "st.silas_brown.believes_brown_denies", "of": "silas_brown", "aspect": "belief", "believes": "c.brown_denies", "windows": {"w.thu_dusk": "false"}}
+  {"id": "st.silas_brown.believes_brown_denies", "of": "silas_brown", "aspect": "belief", "believes": "c.brown_denies", "windows": {"w.thu_dusk": "false"}},
+  {"id": "st.straker.believes_straker_said_anxious", "of": "straker", "aspect": "belief", "believes": "c.straker_said_anxious", "windows": {"w.tue_0100": "false"}},
+  {"id": "st.mrs_straker.believes_straker_said_anxious", "of": "mrs_straker", "aspect": "belief", "believes": "c.straker_said_anxious", "windows": {"w.thu_journey": "true"}},
+  {"id": "st.straker.believes_derbyshire_friend_said", "of": "straker", "aspect": "belief", "believes": "c.derbyshire_friend_said", "windows": {"w.weeks_before": "false"}}
  ]
 }

@@ -843,6 +843,21 @@
         "source": {
           "$ref": "#/$defs/source"
         },
+        "chain": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Who passed it on before the one quoted (workstream 4, Round 89), first speaker first: each link's speaker, hearer and when.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["by", "to"],
+            "properties": {
+              "by": { "$ref": "#/$defs/id" },
+              "to": { "$ref": "#/$defs/id" },
+              "at": { "type": "string", "pattern": "^w\\.[a-z0-9_.]+$" }
+            }
+          }
+        },
         "files": {
           "type": "object",
           "additionalProperties": false,

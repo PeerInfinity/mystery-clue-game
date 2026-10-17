@@ -437,6 +437,8 @@ specific thing stay ground facts with a formula and no schema.
 - **WEIGH and SOURCE thoughts may name inferences.**
 - **Parts** (Round 88): a claim `part_of` a statement is dealt only when the player splits it (`Game.splitClaim`);
   the statement then counts nowhere. Its parts' lines lie within its own, and together they assert what it asserts.
+- **Chains** (Round 89): `chain: [{by, to, at?}]` on an attestation. Each speaker along it has a belief of his own;
+  a doubt names whose failed (`lying:<who>`, `mistaken:<who>`). `Game.chainOf(id)`.
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
