@@ -21,7 +21,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | AGENT | 8 | 8 |
 | PHYSICAL | 1 | 1 |
 | IDENTIFY | 3 | 2 |
-| WEIGH | 19 | 4 |
+| WEIGH | 19 | 5 |
 | SOURCE | 2 | 1 |
 | TEST | 30 | 17 |
 | RESIDUE | 1 | 0 |
@@ -62,7 +62,7 @@ NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 51; with an inference: 48; with a reason for none: 3; earliest-date misses: 0 (and 5 explained); premise disagreements: 5
+- deduction-type thoughts: 51; with an inference: 48; with a reason for none: 3; earliest-date misses: 0 (and 5 explained); premise disagreements: 6
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -102,7 +102,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t92.14` | AGENT | none: action | ¶92 | — |  |  |  |  |  |
 | `t92.15` | INFER | `k.second_household` | ¶92 | ¶92 |  |  | `r.second_establishment` |  |  |
 | `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  |  |  |  |  |
-| `t97.2` | AGENT | `k.coat_off_to_work` | ¶97 | ¶97 |  |  | `r.dead_men_do_nothing` |  | `t35.6` |
+| `t97.2` | AGENT | `k.coat_off_to_work` | ¶97 | ¶97 | `t35.6` |  | `r.dead_men_do_nothing` |  |  |
 | `t102.2` | TEST | `k.vesta_from_strakers_box` | ¶102 | ¶102 |  |  | `r.vesta_from_box`, `r.dead_men_do_nothing` |  |  |
 | `t102.4` | INFER | `k.horse_kicked` | ¶102 | ¶102 |  |  |  |  |  |
 | `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶37 |  |  |  |  |  |

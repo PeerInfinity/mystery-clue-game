@@ -2362,3 +2362,40 @@ and belief (workstream 4). It carries the open items and this session's traps. `
       `t133.1`, the denial left out above.
     - One more date explained (`t133.2`).
   - **Gates:** nothing.
+
+## Round 88 (2026-10-16): workstream 4, step 2 — splitting a statement into what was seen and what concluded
+
+- **Format:** a claim may be `part_of` another (schema, validator). The validator checks:
+  - a part's line lies within its statement's own line;
+  - the parts together assert what the statement asserts (the same formula, or its conjuncts);
+  - a statement splits into two parts or more; neither is derived.
+- **Engine** (`Game.splitClaim(id)`, `partsOf(id)`; saved as `split`):
+  - **Never dealt by mention:** a part has no span in the story. It comes only when the player splits its statement.
+  - **Splitting** deals the parts, each to trust or doubt apart, in any reading (a statement part is a statement,
+    with its own latent belief).
+  - **The statement stays in the hand** but counts nowhere from then on, as a plain doubt does, without being marked
+    doubted.
+  - **Kept:** the parts are never left out by the "irrelevant cards" option.
+- **Data:**
+  - **`c.derbyshire_a_friend`** splits into:
+    - `c.derbyshire_letters_came`: "occasionally his letters were addressed here", what she saw herself, true;
+    - `c.derbyshire_friend_said`: "Derbyshire was a friend of her husband's", what she was told, false, with a
+      truth slot. It carries the statement's whole assertion (Derbyshire is not Straker).
+  - **`c.straker_defended_himself`** (the papers' reading, which asserts nothing in slot terms) splits into:
+    - `c.papers_struggle_inferred`: "defended himself vigorously", the police reading;
+    - `c.papers_assailants_inferred`: the plural "assailants".
+
+    Both are re-filed as inference by the police (`t35.6`: "Re-file it as the police reading"), and both are false.
+    The knife in his hand, the part that was seen, is its own clue already (`c.knife_in_right_hand`).
+  - **`t35.6`** maps the two parts.
+- **Test** (`belief.test.js`; `game.test.js`: reading the whole story deals every clue but the parts, and each
+  statement with parts can be split): not dealt by reading; a clue without parts refuses; held whole, the statement says
+  Derbyshire is not Straker; after the split the "friend" part says it while trusted, and nothing says it once that
+  part is doubted as mistaken; the statement stays held and undoubted; saved and restored.
+- **Moved:**
+  - **Report:** claims 148 → 152, quotes 1028 → 1032, one more unique slot (the "friend" part's truth), one more
+    latent belief.
+  - **Thoughts report:** WEIGH thoughts held by a card 4 → 5. Premise disagreements 5 → 6: `t97.2` cites `t35.6`,
+    which now holds cards that are not among its premises (before, "not held").
+  - **Reveal and foreshadow logs, gates:** nothing.
+- **Not yet:** the UI (step 4).

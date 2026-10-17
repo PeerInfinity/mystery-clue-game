@@ -283,6 +283,32 @@ const stateRows = [];
         stateRows.push({ slot: s, by });
     }
 }
+// Parts of a statement (`part_of`, workstream 4): each quoted within its statement's own line; together they assert
+// what the statement asserts (the same formula, or its conjuncts).
+{
+    const byId = new Map((data.claims ?? []).map((c) => [c.id, c]));
+    const norm = (q) => q.replace(/\s+/g, ' ');
+    const parts = new Map();
+    for (const c of data.claims ?? []) {
+        if (!c.part_of) continue;
+        const parent = byId.get(c.part_of);
+        if (!parent) { err(`${c.id}: part of ${c.part_of}, which is not a claim`); continue; }
+        if (parent.part_of) err(`${c.id}: part of ${c.part_of}, itself a part`);
+        if (c.derived || parent.derived) err(`${c.id}: a derived claim is proven, not split`);
+        const lines = (parent.attested ?? []).flatMap((a) => a.source ?? []).map(norm);
+        for (const q of (c.attested ?? []).flatMap((a) => a.source ?? [])) if (!lines.some((l) => l.includes(norm(q)))) err(`${c.id}: its line is not within ${c.part_of}'s own`);
+        parts.set(c.part_of, [...(parts.get(c.part_of) ?? []), c]);
+    }
+    for (const [pid, list] of parts) {
+        const pa = byId.get(pid).asserts;
+        const got = list.filter((x) => x.asserts).map((x) => x.asserts);
+        const whole = got.length === 1 ? got[0] : got.length ? { and: got } : undefined;
+        const conj = (f) => (f?.and ? f.and : f ? [f] : []).map((x) => JSON.stringify(x)).sort().join('|');
+        if (conj(pa) !== conj(whole)) err(`${pid}: its parts together do not assert what it asserts`);
+        if (list.length < 2) err(`${pid}: a statement splits into two parts or more`);
+    }
+}
+
 // Absences the player files (`files` on a `via: absence` attestation, Round 83): what was expected (a default rule),
 // when it did not happen (windows), and who or what would have registered it (a clue that is no absence itself).
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) {

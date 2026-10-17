@@ -120,7 +120,8 @@ export class Story {
         // (`via: absence` with `files`, Round 83) is no span: its line is where it can first be filed (`absenceAt`).
         this.absenceAt = new Map();
         for (const c of data.claims ?? []) {
-            if (c.derived) continue;
+            // A part of a statement (`part_of`, workstream 4) comes only when the player splits the statement.
+            if (c.derived || c.part_of) continue;
             for (const a of c.attested ?? []) {
                 if (a.via === 'absence' && a.files) {
                     const at = Math.max(...(a.source ?? []).map((q) => this.find(q)?.para ?? Infinity));

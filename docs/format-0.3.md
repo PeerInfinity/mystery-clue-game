@@ -435,6 +435,8 @@ specific thing stay ground facts with a formula and no schema.
 - **Rule variables:** `{"statement": true}` (a state term's name reads the speaker's belief).
 - **Built in:** knowing implies believing.
 - **WEIGH and SOURCE thoughts may name inferences.**
+- **Parts** (Round 88): a claim `part_of` a statement is dealt only when the player splits it (`Game.splitClaim`);
+  the statement then counts nowhere. Its parts' lines lie within its own, and together they assert what it asserts.
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 

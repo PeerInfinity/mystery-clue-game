@@ -880,6 +880,11 @@
             "$ref": "#/$defs/id"
           }
         },
+        "part_of": {
+          "type": "string",
+          "pattern": "^c\\.[a-z0-9_]+$",
+          "description": "A part of a statement (workstream 4): dealt only when the player splits that statement, to trust or doubt apart (what was seen, what concluded)."
+        },
         "said": {
           "$ref": "#/$defs/formula",
           "description": "What the clue tells for certain, whatever the player makes of its content (e.g. that the speaker was certain of it): true whenever the clue is held, doubted or not (workstream 4)."

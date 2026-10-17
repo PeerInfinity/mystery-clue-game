@@ -228,7 +228,7 @@ export class Game {
         if (share >= 1 || !this.model.relevant) return;
         for (const id of this.model.cards.keys()) {
             // An absence comes only when the player files it, so it is never left out (a true filing is never refused).
-            if (this.model.relevant.has(id) || this.model.cards.get(id).section === 'inferences' || (this.model.cards.get(id).attested ?? []).some((a) => a.files)) continue;
+            if (this.model.relevant.has(id) || this.model.cards.get(id).section === 'inferences' || (this.model.cards.get(id).attested ?? []).some((a) => a.files) || this.model.cards.get(id).part_of) continue;
             // The same cards every time (a hash of the id), and a larger share keeps every card a smaller one did.
             let h = 2166136261;
             for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
@@ -249,6 +249,7 @@ export class Game {
         this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
         this.suspected = new Set();     // claim ids the player doubts
         this.doubtKind = new Map();     // claim id → 'mistaken' | 'lying', for a doubt that says how (workstream 4)
+        this.splitClaims = new Set();   // statements the player split into their parts (workstream 4)
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
         this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
         this.clashCache = null;
@@ -287,6 +288,7 @@ export class Game {
             lastSeen: [...this.lastSeen],
             suspected: [...this.suspected],
             doubtKind: [...this.doubtKind],
+            split: [...this.splitClaims].map((id) => [id, Math.min(...this.partsOf(id).map((x) => this.unlocked.get(x)?.para ?? Infinity))]),
             autoPace: this.autoPace,
             asked: this.asked,
             clashLog: this.clashLog,
@@ -365,6 +367,7 @@ export class Game {
             this.madeAt = new Map(state.made.filter(([id]) => this.routeById.has(id)));
             this.moved = false;
         }
+        for (const [id, para] of state.split ?? []) if (this.knows(id) && this.partsOf(id).length) { this.splitClaims.add(id); for (const x of this.partsOf(id)) this.#unlock(x, para); }
         for (const [id, para, because] of state.noticed ?? []) if (this.knows(id)) this.noticed.set(id, { para, because: because && this.knows(because) ? because : null });
         if (board) this.board = { ...TL.emptyBoard(), ...board };
     }
@@ -636,6 +639,29 @@ export class Game {
     unsuspect(id) { this.suspected.delete(id); this.doubtKind.delete(id); }
     /** The readings a doubt of this clue may take beyond the plain one: ['mistaken', 'lying'] for a statement. */
     doubtKinds(id) { return this.model.claimForms.get(id)?.belief ? ['mistaken', 'lying'] : []; }
+    /** The parts a statement can be split into (claims with `part_of`, workstream 4): what was seen, what concluded. */
+    partsOf(id) {
+        if (!this.partsByClaim) {
+            this.partsByClaim = new Map();
+            for (const c of this.model.data.claims ?? []) if (c.part_of) this.partsByClaim.set(c.part_of, [...(this.partsByClaim.get(c.part_of) ?? []), c.id]);
+        }
+        return this.partsByClaim.get(id) ?? [];
+    }
+    /**
+     * Split a statement the player holds into its parts: the parts are dealt, each to trust or doubt apart, and the
+     * statement itself counts nowhere from then on (as a plain doubt does). Returns {ok, parts} or {ok: false, reason}.
+     */
+    splitClaim(id) {
+        if (!this.knows(id)) return { ok: false, reason: 'you do not hold that clue' };
+        const parts = this.partsOf(id).filter((x) => !this.hidden.has(x));
+        if (!parts.length) return { ok: false, reason: 'this statement does not come apart' };
+        this.splitClaims.add(id);
+        for (const x of parts) this.#unlock(x, this.read - 1);
+        this.moved = true;
+        return { ok: true, parts };
+    }
+    /** What the player doubts or no longer counts: doubted clues, and the statements they split. */
+    #discounted() { return this.splitClaims.size ? new Set([...this.suspected, ...this.splitClaims]) : this.suspected; }
     isSuspected(id) { return this.suspected.has(id); }
 
     /** The doubted claims a proof's constraints trusted: the proof no longer stands. */
@@ -1025,7 +1051,7 @@ export class Game {
         for (const [slot, v] of literalsIn(formula)) if (slot && !this.model.slots.get(slot).domain.includes(v)) return { ok: false, error: `${v} is no answer to ${slot}` };
         const known = new Set(S);
         // Everything the cited cards switch on, in the player's reading; the player's own cards count when cited.
-        const active = this.#withTies(activeConstraints(this.model, known, this.suspected, { heldInferences: true, kinds: this.doubtKind }).filter((kid) => {
+        const active = this.#withTies(activeConstraints(this.model, known, this.#discounted(), { heldInferences: true, kinds: this.doubtKind }).filter((kid) => {
             const k = this.model.constraints.get(kid);
             return k.definition || !k.inference || known.has(k.inference);
         }), slotsOf(formula));
@@ -1682,7 +1708,7 @@ export class Game {
     }
 
     activeConstraints() {
-        return activeConstraints(this.model, this.known(), this.suspected, { heldInferences: !this.autoSolves(), kinds: this.doubtKind }).filter((id) => !this.model.constraints.get(id).derived);
+        return activeConstraints(this.model, this.known(), this.#discounted(), { heldInferences: !this.autoSolves(), kinds: this.doubtKind }).filter((id) => !this.model.constraints.get(id).derived);
     }
 
     /** Clues the player trusts that cannot all be true (a minimal set), or null. Trivial shows it. */

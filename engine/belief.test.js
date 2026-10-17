@@ -54,3 +54,23 @@ test('Brown lied, Mrs. Straker and the Colonel believed what they said: the answ
     if (!game.knows('k.brown_broke')) assert.deepEqual(game.propose(game.connectSet('k.brown_broke')).built, ['k.brown_broke']);
     assert.deepEqual(game.propose(game.connectSet('k.brown_lied')).built, ['k.brown_lied']);
 });
+
+test('splitting a statement: what she saw and what she was told, trusted or doubted apart', () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    const id = 'c.derbyshire_a_friend';
+    while (!game.knows(id)) game.advance();
+    assert.ok(!game.knows('c.derbyshire_friend_said'), 'the parts are not dealt by reading');
+    assert.equal(game.splitClaim('c.stall_empty').ok, false, 'a clue with no parts does not come apart');
+    const whole = { ne: ['william_derbyshire.identity', 'straker'] };
+    assert.ok(game.checkConclusion(whole).ok, 'held whole, it says Derbyshire is not Straker');
+    assert.deepEqual(game.splitClaim(id).parts, ['c.derbyshire_letters_came', 'c.derbyshire_friend_said']);
+    assert.ok(game.checkConclusion(whole).ok, 'its "friend" part still says so, while trusted');
+    assert.ok(game.suspect('c.derbyshire_friend_said', 'mistaken'));
+    assert.equal(game.checkConclusion(whole).ok, false, 'doubted, the part no longer counts, and the whole counts nowhere');
+    assert.ok(game.knows(id) && !game.suspected.has(id), 'the statement stays in the hand, not doubted');
+    const again = new Game(model);
+    again.load(game.save());
+    assert.ok(again.splitClaims.has(id) && again.knows('c.derbyshire_letters_came'));
+    assert.equal(again.doubtKind.get('c.derbyshire_friend_said'), 'mistaken');
+    assert.equal(again.checkConclusion(whole).ok, false);
+});

@@ -48,8 +48,12 @@ test('reading the whole story (free pace, Easy, background when relevant) collec
         .filter((c) => !game.knows(c.id)).map((c) => c.id);
     // An absence no later line states comes only when the player files it (workstream 5); it can be filed.
     const filedOnly = [...game.absenceById().keys()].filter((id) => !game.story.firstAt.has(id));
-    assert.deepEqual(missing, filedOnly);
+    // A part of a statement comes when the player splits the statement (workstream 4); each can be.
+    const parts = model.data.claims.filter((c) => c.part_of).map((c) => c.id);
+    assert.deepEqual(missing.filter((id) => !parts.includes(id)), filedOnly);
     assert.deepEqual(game.fileableAbsences().map((a) => a.id), filedOnly);
+    for (const parent of new Set(model.data.claims.filter((c) => c.part_of).map((c) => c.part_of))) assert.ok(game.splitClaim(parent).ok, parent);
+    assert.deepEqual(parts.filter((id) => !game.knows(id)), []);
     assert.equal(game.done.length, game.actions.length, 'every action is reached');
 });
 
