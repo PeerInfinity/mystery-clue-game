@@ -2949,3 +2949,18 @@ and belief (workstream 4). It carries the open items and this session's traps. `
 - **`docs/format-0.3.md`:** rule strength is authored as the rule's general reliability (a heuristic now gives way
   in a clash).
 - **Moved:** nothing in the reveal and foreshadow logs, the case report, the thoughts report or the gates.
+
+## Round 110 (2026-10-17): clashes, step 2 — Easy says what the game set aside, and why
+
+- **UI** (`ui/app.js`, Easy's Clashes list): in each clash the member the game set aside is marked "set aside"
+  (with "doubt it"), and every other member offers "doubt this instead". A line under the chain gives the reason,
+  by the class of what weighed least: someone else's reasoning goes first; a rule of thumb before what the story
+  tells; someone's word before reasoning (a witness's word first, a confession last); your own reasoning, and
+  Holmes's, last. A tie says the game cannot choose between the members marked. The list's heading now says the
+  game sets aside "what weighs least in each clash". Clashes met while checking an answer are shown as before.
+- **Checked in headless Chrome** (Easy, saves made in node):
+  - at ¶104, five clashes, each marked as the engine sets them aside, with its reason;
+  - a "doubt this instead" on Holmes's dish step resolves the four clashes it is in;
+  - at ¶41, the tie (the police's "Simpson drugged him", built by the player, against the dish step): both marked,
+    with the tie line.
+- **Moved:** nothing in the logs, reports or gates (the UI only).

@@ -600,8 +600,8 @@ function clashesHtml() {
     if (!list.length && !resolved.length) return '';
     let h = `<h3 class="section" id="clashes">Clashes${list.length ? ` (${list.length})` : ''}</h3>`;
     if (list.length) {
-        h += '<p class="small muted">Clues you trust that cannot all be true. Until you doubt one, the game sets aside the claims caught in a clash when it checks answers, so a clash here does not rule out answers elsewhere.</p>';
-        list.forEach((cl, i) => { h += `<div class="clash"><b>Clash ${i + 1}</b>${clashHtml(cl.ids)}</div>`; });
+        h += '<p class="small muted">Clues you trust that cannot all be true. Until you doubt one, the game sets aside what weighs least in each clash when it checks answers, so a clash here does not rule out answers elsewhere.</p>';
+        list.forEach((cl, i) => { h += `<div class="clash"><b>Clash ${i + 1}</b>${clashHtml(cl.ids, cl)}</div>`; });
     }
     if (resolved.length) {
         h += `<details class="resolved"><summary class="small">${resolved.length} resolved by a doubt</summary><ul class="list">`;
@@ -917,27 +917,30 @@ let R = null;
 const readingOf = (f) => R.readingOf(f);
 
 /** A clue in a chain: a claim links to its card, with a way to doubt it. */
-function clueHtml(id) {
+function clueHtml(id, aside = null) {
     const k = model.constraints.get(id);
     const c = k.from_claim;
     if (!c) return esc(k.label);
-    return `${link(c, shortName(c, 90))} ${game.suspected.has(c) ? '<span class="small muted">doubted</span>' : `<span class="link small" data-suspect="${c}">doubt it</span>`}`;
+    if (game.suspected.has(c)) return `${link(c, shortName(c, 90))} <span class="small muted">doubted</span>`;
+    // In a listed clash: the card the game set aside, and the others, which the player may doubt instead.
+    if (aside?.includes(c)) return `${link(c, shortName(c, 90))} <span class="small bad">set aside</span> <span class="link small" data-suspect="${c}">doubt it</span>`;
+    return `${link(c, shortName(c, 90))} <span class="link small" data-suspect="${c}">${aside ? 'doubt this instead' : 'doubt it'}</span>`;
 }
 
 /**
  * Clues that cannot all hold, replayed as numbered steps: what each one narrows ("so the owner of the bill is
  * John Straker"), ending where some question is left with nothing. `fixed` is an assumed answer to start from.
  */
-function chainHtml(ids, fixed = {}) {
+function chainHtml(ids, fixed = {}, aside = null) {
     const replay = game.chain(ids, fixed);
     if (!replay.steps.length) return doubtableHtml(ids);
     const { suppose, lines, unused, contradiction } = R.chainLines(ids, replay, fixed);
     const say = (x) => `${esc(x.text)}${x.bad ? ' <span class="bad">✗</span>' : ''}`;
     let h = '<ol class="chain">';
     for (const t of suppose) h += `<li class="suppose">${esc(t)}</li>`;
-    for (const l of lines) h += `<li>${clueHtml(l.id)}${l.says.length ? `<div class="so">so ${l.says.map(say).join('; and ')}</div>` : ''}</li>`;
+    for (const l of lines) h += `<li>${clueHtml(l.id, aside)}${l.says.length ? `<div class="so">so ${l.says.map(say).join('; and ')}</div>` : ''}</li>`;
     h += '</ol>';
-    if (!contradiction || unused.length) h += `<div class="small muted">${contradiction ? 'Also involved' : 'Together with'}: ${unused.map(clueHtml).join(' · ')}</div>`;
+    if (!contradiction || unused.length) h += `<div class="small muted">${contradiction ? 'Also involved' : 'Together with'}: ${unused.map((x) => clueHtml(x, aside)).join(' · ')}</div>`;
     return h;
 }
 
@@ -1027,9 +1030,22 @@ function doubtableHtml(ids) {
     const doubt = (c) => (game.suspected.has(c) ? '<span class="small muted">doubted</span>' : `<span class="link small" data-suspect="${c}">doubt it</span>`);
     return `${claims.map((c) => `${link(c, shortName(c, 70))} ${doubt(c)}`).join(' · ')}${rest.length ? (claims.length ? ` <span class="muted">(with: ${rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')})</span>` : rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')) : ''}`;
 }
-/** A set of clues that cannot all hold, with a way to doubt each claim in it. */
-function clashHtml(ids) {
-    return `${chainHtml(ids)}<div class="small">One of the claims must be false.</div>`;
+// Why the game set aside what it did (Game.clashes, docs/clashes.md): by the class of what weighed least.
+const CLASH_WHY = {
+    'others-inference': 'Someone else\'s reasoning gives way first.',
+    heuristic: 'A rule of thumb gives way before what the story tells.',
+    statement: 'Someone\'s word gives way before reasoning (a witness\'s word first, a confession last).',
+    inference: 'Your own reasoning (and Holmes\'s) gives way last.',
+};
+
+/**
+ * A set of clues that cannot all hold, with a way to doubt each claim in it. Given the clash as the game found it
+ * (Easy's list), it says what the game set aside and why, and offers the others to doubt instead.
+ */
+function clashHtml(ids, clash = null) {
+    if (!clash?.aside?.length) return `${chainHtml(ids)}<div class="small">One of the claims must be false.</div>`;
+    const which = clash.tie ? 'the ones marked “set aside”: they weigh the same, so it cannot choose between them' : 'the one marked “set aside”';
+    return `${chainHtml(ids, {}, clash.aside)}<div class="small">One of the claims must be false. Until you doubt one, the game sets aside ${which}. ${esc(clash.tie ? '' : CLASH_WHY[clash.why] ?? '')}</div>`;
 }
 
 // ---------- events ----------

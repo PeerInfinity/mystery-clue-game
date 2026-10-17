@@ -1,7 +1,7 @@
 # How clashes weigh what they set aside (with Q6, one culprit)
 
 Status: **AGREED** (Robert, 2026-10-17, Round 108: every recommendation, and the order of work). **Built:** step 1,
-the weighing (Round 109). Mission: `docs/kickoff-clashes.md`. Builds on Round 17
+the weighing (Round 109); step 2, showing the choice (Round 110). Mission: `docs/kickoff-clashes.md`. Builds on Round 17
 (clashes, `Game.clashes`), Round 19 (the provenance order), workstream 3 (`docs/defeasibility.md`: rule strength,
 named exceptions, reservations and defeats) and Round 104 (an inference set aside goes whole).
 
