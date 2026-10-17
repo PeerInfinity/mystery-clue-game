@@ -204,6 +204,10 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .doubt.on { color: var(--bad); }
 .doubt button { margin-left: 6px; }
 .flag.doubted { color: var(--bad); }
+.notice { font-size: 13px; color: var(--muted); margin: 8px 0; }
+.notice select { max-width: 14em; }
+.notice.on, .flag.odd { color: var(--accent, #8a5a00); }
+.absence { margin-top: 6px; }
 .small.bad, div.bad { color: var(--bad); }
 
 /* New / updated counts on the card filters */

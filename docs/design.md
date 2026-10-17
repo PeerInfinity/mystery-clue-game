@@ -2265,3 +2265,23 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   two details; the aggregate; saved, restored and withdrawn; nothing in Trivial.
 - **Moved:** the thoughts report's new table. Nothing in the logs, the case report or the gates.
 - **Next:** step 3, the UI ("That's odd" on a card; filing an absence; the "Odd things" list).
+
+## Round 85 (2026-10-16): workstream 5, step 3 — the UI for noticing and absence
+
+- **"That's odd"** on a clue or thing card (not in Trivial), with an optional "because…" (a background fact
+  held). A marked card shows "marked odd" in its head and "You marked this as odd at paragraph N", with "Not odd
+  after all". Nothing is told back.
+- **"Something that should have happened did not"** on the board (both layouts), under the pencil form: what you
+  would expect (a background fact held), when (a time on the board), and who or what would have noticed (a clue
+  held). "File it" deals the clue, or says "the story does not bear that out". Easy suggests the expectation of the
+  first absence that can be filed (the agreed help). In Medium and Hard the background comes by asking, so the dog's
+  expectation is held only once the player asks about the dog.
+- **"Odd things"** in the Questions tab: the cards marked odd (with "not odd") and the absences filed.
+- **Scores** are not shown: the score display for deductions and notices together is workstream 9's.
+- **Checked in headless Chrome** at ¶40:
+  - Easy: the knife clue marked odd; the dog filed from the board, with the expectation suggested; both listed under
+    "Odd things".
+  - Medium: no suggestion, and a filing without the expectation is refused with the prompt.
+- **Moved:** nothing in the logs, reports or gates (the UI only).
+- **Workstream 5 is done** as agreed (Round 82), apart from the lantern and the cravat in Edith's description, left
+  for later.

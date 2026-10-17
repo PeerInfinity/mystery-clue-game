@@ -210,6 +210,7 @@ function toolCard() {
     const hideFlags = ['placeholder', 'fiction_within_story', 'implied'];
     let h = `<div class="card-head"><span class="kind">${kindOf(id)}</span>${(c.flags ?? []).filter((f) => !hideFlags.includes(f)).map((f) => `<span class="flag">${esc(f.replace(/_/g, ' '))}</span>`).join('')}`;
     if (game.isSuspected(id)) h += '<span class="flag doubted">suspected</span>';
+    if (game.noticed.has(id)) h += '<span class="flag odd">marked odd</span>';
     if (c.section === 'entities' || c.section === 'events') h += `<h2>${esc(game.nameOf(id))}</h2>`;
     else h += `<p class="desc">${esc(c.text)}</p>`;
     const names = [...new Set(story.spans.slice(0, game.read).flatMap((list, p) => list.filter((sp) => sp.kind === 'entity' && sp.ids.includes(id)).map((sp) => story.paragraphs[p].display.slice(sp.start, sp.end))))]
@@ -276,6 +277,15 @@ function toolCard() {
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
 
+    // Noticing (workstream 5): mark a clue or a thing as odd, against what one would expect. Nothing is told back.
+    if (['claims', 'entities'].includes(c.section) && !game.autoSolves()) {
+        const n = game.noticed.get(id);
+        if (n) h += `<p class="small notice on">You marked this as odd at ${paraLabel(n.para)}${n.because ? `, against: ${link(n.because, shortName(n.because, 70))}` : ''}. <span class="link" data-unnotice="${esc(id)}">Not odd after all</span></p>`;
+        else {
+            const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && !game.isHidden(x));
+            h += `<p class="small notice">Does something here go against what you would expect? <select id="notice-because"><option value="">because… (optional)</option>${rules.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 60))}</option>`).join('')}</select> <button data-notice="${esc(id)}" class="quiet">That's odd</button></p>`;
+        }
+    }
     if (game.canAsk(id)) {
         h += game.hasAsked(id)
             ? `<p class="small muted">${(game.rulesOn.get(id) ?? []).some((r) => game.knows(r)) ? 'You have recalled what you know about this (under Background above); more will come to mind as the story goes on.' : 'You asked: nothing in particular comes to mind yet.'}</p>`
@@ -498,6 +508,7 @@ function toolQuestions() {
         }
         d += '</ul>';
     }
+    d += oddThingsHtml();
     const c = game.helps('clashes') ? clashesHtml() : '';
     if (!raised.length) return `${c}<p class="empty">The story has not raised any questions yet.</p>${d}`;
     let h = `${c}<p class="small muted">The questions the case turns on, as the story raises them.</p><ul class="list">`;
@@ -510,6 +521,17 @@ function toolQuestions() {
         h += `<li class="q"><span>${visible ? `<span class="link" data-slot-open="${q.slot}">${esc(game.questionText(q))}</span>` : esc(game.questionText(q))}</span><span class="state ${settled !== null ? 'done' : ''}">${state}${picks.length ? ` · circled: ${picks.map((v) => esc(valueName(q.slot, v))).join(', ')}` : ''}</span></li>`;
     }
     return `${h}</ul>${d}`;
+}
+
+/** The details the player marked as odd, and the absences they filed (workstream 5). */
+function oddThingsHtml() {
+    const noticed = [...game.noticed].filter(([id]) => game.knows(id));
+    const filed = game.filed.filter((f) => game.knows(f.id));
+    if (!noticed.length && !filed.length) return '';
+    let h = '<h3 class="section">Odd things</h3><ul class="list">';
+    for (const [id, n] of noticed) h += `<li>${link(id, shortName(id, 80))} <span class="small muted">· ${paraLabel(n.para)}${n.because ? ` · against ${esc(shortName(n.because, 50))}` : ''}</span> <span class="link small" data-unnotice="${esc(id)}">not odd</span></li>`;
+    for (const f of filed) h += `<li>${link(f.id, shortName(f.id, 80))} <span class="small muted">· what did not happen, filed at ${paraLabel(f.para)}</span></li>`;
+    return `${h}</ul>`;
 }
 
 /** Easy: the clashes among the clues the player trusts, each as a chain, and the ones a doubt has resolved. */
@@ -692,6 +714,7 @@ function boardHtml(layout) {
         at <select id="pen-time">${opt('', 'when…', pen.time)}${shown.map((t) => opt(t.id, `${'· '.repeat(t.depth)}${t.label}`, pen.time)).join('')}</select>
         in <select id="pen-place">${opt('', 'where…', pen.place)}${places.map((id) => opt(id, shortName(id, 30), pen.place)).join('')}${opt('elsewhere', 'somewhere else', pen.place)}</select>
         <button data-pen-add="1">Pencil it in</button></div>`;
+    h += absenceFormHtml(shown);
     const unfollowed = people.filter((id) => !followed.includes(id));
     h += `<div class="small follow">Following ${followed.map((id) => `${link(id, shortName(id, 24))} <span class="link x" data-unfollow="${esc(id)}" title="Stop following">×</span>`).join(', ') || 'no one yet'}.
         ${unfollowed.length ? `Follow <select id="follow-pick">${unfollowed.map((id) => opt(id, shortName(id, 30), null)).join('')}</select> <button data-follow-go="1" class="quiet">Follow</button>` : ''}</div>`;
@@ -751,6 +774,24 @@ function boardHtml(layout) {
         h += '</tbody></table></div>';
     }
     return h;
+}
+
+/**
+ * Filing an absence (workstream 5): something that should have happened did not. The player names what they
+ * expected (a background fact), when, and the clue that would have registered it. Easy suggests the expectation.
+ */
+function absenceFormHtml(shown) {
+    if (game.autoSolves()) return '';
+    const ab = ui.absence ?? (ui.absence = { expectation: null, time: null, witness: null });
+    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
+    const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && !game.isHidden(x));
+    const clues = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'claims' && !game.isHidden(x));
+    const suggested = game.helps('hints') ? game.fileableAbsences()[0]?.expectation ?? null : null;
+    const exp = ab.expectation ?? suggested;
+    return `<div class="pen row small absence">Something that should have happened did not: <select id="ab-exp">${opt('', 'what you would expect…', exp)}${rules.map((x) => opt(x, shortName(x, 50), exp)).join('')}</select>
+        at <select id="ab-time">${opt('', 'when…', ab.time)}${shown.map((t) => opt(t.id, `${'· '.repeat(t.depth)}${t.label}`, ab.time)).join('')}</select>
+        and <select id="ab-witness">${opt('', 'who or what would have noticed…', ab.witness)}${clues.map((x) => opt(x, shortName(x, 50), ab.witness)).join('')}</select>
+        <button data-absence-file="1">File it</button></div>`;
 }
 
 function toolTimeline() {
@@ -1048,7 +1089,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-absence-file],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1077,6 +1118,23 @@ function onClick(e) {
         if (!ui.pen.thing || !ui.pen.time || !ui.pen.place) { toast('Choose who or what, when and where.'); renderTool(); return; }
         if (!game.pencilPlace(ui.pen.thing, ui.pen.time, ui.pen.place, { layer: ui.layer ?? 'mine' })) toast('That cannot be pencilled in here.');
         ui.layerFit = null;
+        changed();
+        return;
+    }
+    if (t.dataset.notice) {
+        const res = game.notice(t.dataset.notice, $('#notice-because')?.value || null);
+        if (!res.ok) toast(esc(res.reason));
+        changed();
+        return;
+    }
+    if (t.dataset.unnotice) { game.unnotice(t.dataset.unnotice); changed(); return; }
+    if (t.dataset.absenceFile) {
+        Object.assign(ui.absence, { expectation: $('#ab-exp').value || null, time: $('#ab-time').value || null, witness: $('#ab-witness').value || null });
+        const { expectation, time, witness } = ui.absence;
+        if (!expectation || !time || !witness) { toast('Choose what you would expect, when, and who or what would have noticed.'); renderTool(); return; }
+        const res = game.fileAbsence(expectation, time, witness);
+        if (res.ok) { toast(`Filed. ${res.existing ? 'You hold it already' : 'A new clue'}: ${link(res.id, shortName(res.id, 70))}`); ui.absence = null; }
+        else toast(esc(res.reason));
         changed();
         return;
     }
