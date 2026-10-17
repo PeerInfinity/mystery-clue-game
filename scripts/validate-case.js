@@ -291,6 +291,7 @@ const seqRows = [];
         if (a === b) err(`${c.id}: seq puts ${a} before itself`);
         if (!ea.facets?.time || !eb.facets?.time) err(`${c.id}: seq of ${a} and ${b}: both need a time`);
         if (!(c.attested ?? []).some((x) => x.source?.length)) err(`${c.id}: states an order (${a}, ${b}) with no quoted line`);
+        if (c.derived) err(`${c.id}: a derived claim (a conclusion to prove) states no order; seq is for what a clue tells`);
         if (c.truth !== false && !(ea.fabula_order < eb.fabula_order)) err(`${c.id}: seq puts ${a} before ${b}, against the fabula order`);
         seqRows.push({ slot: `ord.${a.slice(2)}.${b.slice(2)}`, a, b, by: c.id });
     }

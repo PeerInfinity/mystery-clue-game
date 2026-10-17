@@ -364,11 +364,16 @@ specific thing stay ground facts with a formula and no schema.
   (`k.world.order.<x>.<m>.<z>`, the middle event in the middle); the case's earlier ones are unchanged.
 - **Simultaneous events** ("as she ran she looked back and saw…"): the model orders a window's events totally, so a
   pair the story tells as happening together gets no `seq`; its order stays open.
-- **Validator:** a `seq` names two different events, both timed; on a claim with a quoted line; in fabula order
-  unless the claim is false; not in rules, inferences or propositions. The report's "Orders within a window"
+- **Validator:** a `seq` names two different events, both timed; on a claim with a quoted line, never a derived
+  one (a conclusion to prove); in fabula order unless the claim is false; not in rules, inferences or
+  propositions. As with any conjunct, the claim's card must not deal an event before its own label is told. The report's "Orders within a window"
   lists each stated order with its claim, and the case's split questions it settles.
 - **Opened states' ties fold places** (`windowTies` now goes through the state term): "Edith at the stable window"
   reads as the stable. Before, the unfolded place made a tie that could never hold once an order was known.
+- **Silver Blaze** (Round 74): ten orders, in the evening (the lads' return, the message, Straker's unease), the
+  window scene (the tip and the dog, Edith's run and flight, the leaning and the search, the locked door), one
+  o'clock (dressing and leaving), and seven o'clock and the morning (waking, the open door, the lads roused, the
+  body and the cravat).
 
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 

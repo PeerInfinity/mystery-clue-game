@@ -1912,3 +1912,43 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   - **Reveal and foreshadow logs:** `e.edith_flees` moves a few lines within ¶29, its quote now starting earlier
     in the paragraph.
   - **Thoughts report and gates:** nothing.
+
+## Round 74 (2026-10-16): the order of events within a window, step 2 — the data
+
+- **Ten orders stated**, each on a true claim whose own quoted line tells it. Five quotes were widened within their
+  paragraph, and two claims gained a second quote from their paragraph:
+
+  | Order | Claim | The line |
+  |---|---|---|
+  | lads return → Hunter's message | `c.lads_returned_message` | "waited until his fellow-grooms had returned, when he sent" |
+  | message → Straker uneasy | `c.straker_uneasy` | "Straker was excited at hearing the account" (added) |
+  | Straker dressing → leaves | `c.straker_left_in_mackintosh` | "in spite of her entreaties he pulled on…" (widened) |
+  | stranger's question → Hunter goes for the dog | `c.hunter_went_for_dog` | "So, you're one of those damned touts!" (added) |
+  | Edith runs to the window → flees | `c.stranger_leaning_in` | Round 73 |
+  | stranger leaning in → Hunter's search | `c.stranger_gone` | "A minute later, however, when Hunter rushed out…" (widened) |
+  | Hunter locks the door → his search | `c.door_locked_behind` | "locked the door before he left it" |
+  | Mrs. Straker wakes → door found open | `c.stable_door_open` | "set off for the stables. The door was open" (widened) |
+  | door found open → lads roused | `c.lads_heard_nothing` | "…were quickly aroused" (added) |
+  | body found → maid knows the cravat | `c.edith_knows_cravat` | the cravat in the dead man's hand, recognised |
+
+- **Problems met:**
+  - **The leak guard held twice.** "She had begun to tell him… when the stranger came up again" (¶25) tells that
+    Edith reached the window before the stranger asked for the tip. On her claim it dealt the tip event at ¶25,
+    ahead of its label (¶28); as a second quote on the tip's claim it dated that card at ¶25. Left out.
+  - **A derived claim** (`c.brown_story_told`, Holmes's account of Brown's morning, which the player proves) would
+    have made its order a thing to prove that no clue gives. Left out. The validator now refuses `seq` on a derived
+    claim (before, the validator's derived-claim check read the claim's raw formula and failed on the `seq`).
+- **Held back for Robert:**
+  - **The stranger's flight against Hunter's search.** "When Hunter rushed out with the hound he was gone" puts the
+    flight first, but `fabula_order` has it after (370 against 360). Stating it means correcting the answer key.
+  - **Pairs told only by consecutive sentences, with no connective:** the stables locked → the lads go up to
+    supper; Hunter goes for the dog → Edith flees; the stranger stops Edith → the bribe; the knife taken "as he
+    left the room" → he leaves the house.
+- **Moved:**
+  - **Report:** slots 607 → 616, constraints 326 → 330 (four order ties over Mrs. Straker's waking, the door and the
+    lads), quotes 1009 → 1012. The new table has twelve rows. `ord.lads_roused.wife_wakes`, the case's own split
+    question, is now settled (after), by order running on. The theories, clashes and minimal breaks are unchanged.
+  - **Reveal and foreshadow logs:** four cards reorder within ¶28, ¶32, ¶33 and ¶34 (their quotes now start
+    earlier in the same paragraph). Nothing appears in another paragraph.
+  - **Thoughts report and gates:** nothing.
+- **Timing:** `npm test` 61 tests, 160 s.
