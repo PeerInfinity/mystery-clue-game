@@ -1,6 +1,7 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/defeasibility.md` — workstream 3: agreed (Round 101, Q6 deferred); its order of work is being built.
 - `docs/kickoff-workstream-3.md` — the current work: workstream 3 (defeasibility), design first, then build what
   Robert agrees. Then workstream 6, then a second review.
 - `docs/annotation-review.md` — the focused review of the annotated reading: a verdict per thought in scope; its six

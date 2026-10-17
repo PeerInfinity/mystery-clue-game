@@ -2682,3 +2682,22 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   the accomplice exception Round 93 left open, the police's four, the recorded doubt reasons) and the traps of
   Rounds 60–99. `CLAUDE.md` points at it; it supersedes `docs/kickoff-annotation-review.md`.
 - **Moved:** nothing (documents only).
+
+## Round 101 (2026-10-17): workstream 3 agreed — defeasibility (`docs/defeasibility.md`)
+
+- **Proposed** (the paper): the reader's three moves with an exception (a reservation, a defeat, a refutation),
+  what the case holds (`unless` never read or shown; one application cannot be set aside; the police's four
+  asserted without a reason; `k.drugger_took_the_horse` in seven gates), seven questions, the data per thought.
+- **Robert:** agreed to the recommendations of Q1–Q5 and Q7, and to the order of work:
+  - an exception is a named entry of a rule's `unless` (id, text, source, formula), shown with its rule after a
+    leak check;
+  - a played exception is ruled out, a reservation (open: the step still counts) or a defeat (established by
+    what the player holds: the step counts nowhere, the exception its reason);
+  - the police's four get police defaults with `defeated_by`, are verified as their reasoning, and slice 4's gate
+    then makes an unexplained `asserted` an error;
+  - "could not have seen it" gets logic; inference-as-fact, hearsay and neutral stay recorded;
+  - undercuts score before Holmes's paragraph, in aggregate, and never gate;
+  - the accomplice is an exception sourced at ¶218, always a reservation.
+- **Deferred:** Q6 as a whole (one culprit, `t4.2` and `t68.3`, and whether an applied default yields in a clash
+  before a story clue).
+- **Moved:** nothing (documents only).
