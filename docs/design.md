@@ -1843,3 +1843,16 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   - save, restore and reset.
 - **Moved:** `report.md`: constraints 327 → 326; the waking tie no longer among what gives Mrs. Straker's state
   before waking. Nothing in the logs, the thoughts report or the gates.
+
+## Round 71 (2026-10-16): step C proposed — knowledge, intention and belief (`docs/knowledge-intention.md`)
+
+- **Design only; for Robert to decide.** The document goes through the six `world-model` thoughts (`t24.2`,
+  `t34.5`, `t78.2`, `t82.3`, `t123.2`, `t150.1`) and what each needs, and recommends:
+  - **Knowledge:** boolean tracks per thing and proposition. Built in: knowledge persists, and what is known is
+    true. Default rule cards: being told, seeing, acting on a fact.
+  - **Intention:** an aim track per person, tied to the purposes of acts, and split like places.
+  - **Belief:** deferred to workstream 4 (testimony), with its shape fixed (knowing implies believing; a sincere
+    speaker believes what he says).
+  - **The six:** `t34.5` also needs absence (workstream 5); `t82.3` needs only a condition track; `t123.2` waits
+    for the event-order session.
+- **Moved:** nothing (documents only).
