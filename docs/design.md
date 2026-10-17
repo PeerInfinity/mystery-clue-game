@@ -2285,3 +2285,18 @@ and belief (workstream 4). It carries the open items and this session's traps. `
 - **Moved:** nothing in the logs, reports or gates (the UI only).
 - **Workstream 5 is done** as agreed (Round 82), apart from the lantern and the cravat in Edith's description, left
   for later.
+
+## Round 86 (2026-10-16): workstream 4 agreed — testimony, sources and belief (`docs/testimony-belief.md`)
+
+- **Proposed** (the paper, written in Round 85's session): how a reader weighs what people say, against what the
+  case holds, with seven questions.
+- **Robert:** agreed to all seven recommendations, as written:
+  - a statement's content becomes a derived proposition; the speaker's belief is a track over it;
+  - doubt in two readings, mistaken (believed, false) and lying (not believed), beside the plain doubt; a
+    sincerity default rule; knowing implies believing;
+  - `parts` on the two mixed claims (Derbyshire the friend; the papers' struggle), split by the player;
+  - reporting chains on the attestation, with belief per link;
+  - mistaken and lying with logic, the other reasons recorded until workstream 3; no scoring yet;
+  - the belief answers, parts and chains listed in Q7.
+- **Order of work:** belief and the two doubts; parts; chains; recorded reasons and the UI.
+- **Moved:** nothing (documents only).
