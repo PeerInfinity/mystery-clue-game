@@ -423,6 +423,19 @@ specific thing stay ground facts with a formula and no schema.
   because?)` marks a held card odd (saved as `noticed`); `noticeScore()` counts details noticed before Holmes's
   first paragraph on them.
 
+## As built (2026-10-16): belief over statements (workstream 4, step 1; Round 87)
+
+- **A belief track** (`aspect: "belief"`, `believes: p.<name>` or `c.<name>`, id `st.<thing>.believes_<name>`): did
+  the thing believe the proposition, or the statement's content, then.
+- **Automatic belief:** each testimony or admission by a person or group has one, at `said_at` or its scene's time.
+  It is latent unless declared.
+- **Readings of a doubted statement:** `mistaken` (truth false, believed) and `lying` (truth false, not believed),
+  beside the plain doubt (`Game.suspect(id, kind)`).
+- **`said`** on a claim: true whenever the clue is held (`k.<claim>#said`).
+- **Rule variables:** `{"statement": true}` (a state term's name reads the speaker's belief).
+- **Built in:** knowing implies believing.
+- **WEIGH and SOURCE thoughts may name inferences.**
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's

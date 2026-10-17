@@ -1,6 +1,6 @@
 # Testimony, sources and belief (workstream 4)
 
-Status: **AGREED** (Robert, 2026-10-16, Round 86: the seven recommendations, as written). Builds on knowledge over propositions (Round 78) and the
+Status: **AGREED** (Robert, 2026-10-16, Round 86: the seven recommendations, as written). **Built:** step 1, belief and the two doubts (Round 87). Builds on knowledge over propositions (Round 78) and the
 shape of belief fixed in `docs/knowledge-intention.md` Q4 (Round 72).
 
 ## The reader's process

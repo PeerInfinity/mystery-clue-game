@@ -38,6 +38,10 @@
   {"id": "st.the_stranger.aims", "of": "the_stranger", "aspect": "intention", "windows": {"w.mon_2105": null}},
   {"id": "st.the_stranger.knows_lad_alone_at_night", "of": "the_stranger", "aspect": "knowledge", "knows": "p.lad_alone_at_night", "windows": {"w.mon_2105": "true"}},
   {"id": "st.silas_brown.aims", "of": "silas_brown", "aspect": "intention", "windows": {"w.thu_night": "keep_safe"}},
-  {"id": "st.silas_brown.knows_mercy_in_safe_return", "of": "silas_brown", "aspect": "knowledge", "knows": "p.mercy_in_safe_return", "windows": {"w.thu_night": "true"}}
+  {"id": "st.silas_brown.knows_mercy_in_safe_return", "of": "silas_brown", "aspect": "knowledge", "knows": "p.mercy_in_safe_return", "windows": {"w.thu_night": "true"}},
+  {"id": "st.ned_hunter.believes_hunter_blames_stranger", "of": "ned_hunter", "aspect": "belief", "believes": "c.hunter_blames_stranger", "windows": {"w.thu_journey": "true"}},
+  {"id": "st.mrs_straker.believes_derbyshire_a_friend", "of": "mrs_straker", "aspect": "belief", "believes": "c.derbyshire_a_friend", "windows": {"w.thu_evening": "true"}},
+  {"id": "st.colonel_ross.believes_ross_not_my_horse", "of": "colonel_ross", "aspect": "belief", "believes": "c.ross_not_my_horse", "windows": {"w.race_day": "true"}},
+  {"id": "st.silas_brown.believes_brown_denies", "of": "silas_brown", "aspect": "belief", "believes": "c.brown_denies", "windows": {"w.thu_dusk": "false"}}
  ]
 }

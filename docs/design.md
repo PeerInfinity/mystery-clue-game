@@ -2300,3 +2300,65 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - the belief answers, parts and chains listed in Q7.
 - **Order of work:** belief and the two doubts; parts; chains; recorded reasons and the UI.
 - **Moved:** nothing (documents only).
+
+## Round 87 (2026-10-16): workstream 4, step 1 — belief over statements; mistaken or lying
+
+- **Format** (schema, validator):
+  - **A belief track:** `aspect: "belief"`, `believes: <proposition or claim>`, id `st.<thing>.believes_<name>`. A
+    claim as the object is the statement's own content, "what he said". This is Q1's derived proposition, with no
+    second card.
+  - **`said` on a claim:** what the clue tells for certain whatever the player makes of its content (Hunter "was
+    equally certain"). It holds whenever the clue is held, doubted or not (`k.<claim>#said`).
+  - **`said_at`:** when the speaker said it. By default it is the time of the scene that tells the statement.
+  - **A schema variable over statements:** `{"statement": true}`. Bound to `c.<name>`, it names the speaker's
+    belief in a state term.
+  - **WEIGH and SOURCE thoughts may name an inference** (a belief weighed).
+- **Engine:**
+  - **Automatic belief:** every testimony or admission whose speaker is a person or group gets a belief track at the
+    time he spoke. It is latent (like a clue's truth: open, no part of uniqueness) unless the case declares it. That
+    makes 55 latent belief slots. Reports by Holmes from the papers wait for the chains (step 3), which name the
+    first speaker.
+  - **Doubt in two readings** (`Game.suspect(id, kind)`, `doubtKinds(id)`; saved as `doubtKind`):
+    - mistaken: false, and believed;
+    - lying: false, and not believed.
+
+    The plain doubt is unchanged. The readings are variant forms of the claim (`claimForms.mistaken`, `.lying`,
+    `.belief`), chosen in `activeConstraints` (`kinds`). A clash's set-aside still falls back to the plain doubt.
+  - **Built in:** knowing implies believing, where one person has both tracks over one proposition (no instance in
+    the case yet). A belief brings no ties of its own: what someone believed places him nowhere.
+- **Data:**
+  - **Rules** (default):
+    - `r.witness_believes`: a witness says what he believes, unless he has a reason to lie (from Hunter's "equally
+      certain", ¶36);
+    - `r.denies_own_deed`: a man who denies a thing he did himself does not believe his denial, unless he has
+      forgotten it (from Brown's "It's a lie!", ¶133).
+  - **Belief answers** (declared tracks, each given or derived):
+    - Hunter believes his charge: `said` on `c.hunter_blames_stranger`, from "He was equally certain";
+    - Mrs. Straker believes Derbyshire a friend: `k.mrs_straker_believes_friend` (editorial, **verified**, by the
+      sincerity default); `t84.5` names it;
+    - the Colonel believes "That's not my horse": `k.ross_believes_not_his` (implicit, **verified**);
+    - Brown did not believe his denial: `k.brown_lied` (editorial, **verified**, from `k.brown_broke` and the new
+      rule); `t133.2` names it, with a date note (the lie is certain at ¶140, when Brown gives in).
+  - **So "lying" about Hunter clashes** with what the story tells: that he was certain.
+- **Changed from the plan:**
+  - The denial is not among `k.brown_lied`'s premises: trusted, it contradicts what Brown did. The inference rests on
+    his deed and binds the denial in the rule.
+  - **Not yet:** Mrs. Straker's honest denial at the Plymouth ruse (her denial is not a clue in the case) and
+    Straker's "anxiety" (a lie passed on by his wife, with the chains of step 3).
+- **Test** (`belief.test.js`, new):
+  - Hunter: mistaken fits, lying clashes with "certain";
+  - a statement with a latent belief: proven a lie only once doubted as one; the kind is saved;
+  - the answer key at the end; `k.brown_lied` built by a player.
+- **Moved:**
+  - **Report:**
+    - rules 106 → 108, slots 669 → 673, constraints 445 → 452, verified inferences 66 → 69;
+    - four declared belief tracks, all unique;
+    - 55 latent belief slots, counted apart.
+  - **Reveal log:** the two rules as background at ¶36 and ¶133. At the race, the Colonel's implicit inference and
+    his belief question.
+  - **Foreshadow log:** the two rules.
+  - **Thoughts report:** `t84.5` (SOURCE) and `t133.2` (WEIGH) have inferences, 48 of 51.
+    - Premise disagreements 3 → 5: `t84.6` cites `t84.5`, whose inference it does not need, and `t133.2` cites
+      `t133.1`, the denial left out above.
+    - One more date explained (`t133.2`).
+  - **Gates:** nothing.

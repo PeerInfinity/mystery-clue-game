@@ -248,6 +248,7 @@ export class Game {
         this.theories = [];
         this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
         this.suspected = new Set();     // claim ids the player doubts
+        this.doubtKind = new Map();     // claim id → 'mistaken' | 'lying', for a doubt that says how (workstream 4)
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
         this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
         this.clashCache = null;
@@ -285,6 +286,7 @@ export class Game {
             theories: this.theories,
             lastSeen: [...this.lastSeen],
             suspected: [...this.suspected],
+            doubtKind: [...this.doubtKind],
             autoPace: this.autoPace,
             asked: this.asked,
             clashLog: this.clashLog,
@@ -355,6 +357,7 @@ export class Game {
         this.theories = state.theories ?? [];
         this.lastSeen = new Map(state.lastSeen ?? []);
         this.suspected = new Set((state.suspected ?? []).filter((id) => this.model.claimForms.has(id)));
+        this.doubtKind = new Map((state.doubtKind ?? []).filter(([id, k]) => this.suspected.has(id) && this.doubtKinds(id).includes(k)));
         this.clashLog = (state.clashLog ?? []).filter((ids) => ids.every((id) => this.model.constraints.has(id)));
         this.clashCache = null;
         // Where the player made each step, as saved (an older save is scored from here on).
@@ -618,8 +621,21 @@ export class Game {
     // ---------- doubt ----------
     /** Any claim the player holds can be doubted. Its question "Is it true?" opens, and it stops counting as fact. */
     canSuspect(id) { return this.knows(id) && this.model.claimForms.has(id); }
-    suspect(id) { if (this.canSuspect(id)) this.suspected.add(id); }
-    unsuspect(id) { this.suspected.delete(id); }
+    /**
+     * Doubt a clue. `kind` (workstream 4) says how, for a statement whose speaker's belief the case can read:
+     * 'mistaken' (he believed it, and it is false) or 'lying' (he did not believe it); none is the plain doubt (it
+     * counts nowhere, and "Is it true?" opens). Doubting again with another kind changes it.
+     */
+    suspect(id, kind = null) {
+        if (!this.canSuspect(id)) return false;
+        if (kind && !this.doubtKinds(id).includes(kind)) return false;
+        this.suspected.add(id);
+        if (kind) this.doubtKind.set(id, kind); else this.doubtKind.delete(id);
+        return true;
+    }
+    unsuspect(id) { this.suspected.delete(id); this.doubtKind.delete(id); }
+    /** The readings a doubt of this clue may take beyond the plain one: ['mistaken', 'lying'] for a statement. */
+    doubtKinds(id) { return this.model.claimForms.get(id)?.belief ? ['mistaken', 'lying'] : []; }
     isSuspected(id) { return this.suspected.has(id); }
 
     /** The doubted claims a proof's constraints trusted: the proof no longer stands. */
@@ -1009,7 +1025,7 @@ export class Game {
         for (const [slot, v] of literalsIn(formula)) if (slot && !this.model.slots.get(slot).domain.includes(v)) return { ok: false, error: `${v} is no answer to ${slot}` };
         const known = new Set(S);
         // Everything the cited cards switch on, in the player's reading; the player's own cards count when cited.
-        const active = this.#withTies(activeConstraints(this.model, known, this.suspected, { heldInferences: true }).filter((kid) => {
+        const active = this.#withTies(activeConstraints(this.model, known, this.suspected, { heldInferences: true, kinds: this.doubtKind }).filter((kid) => {
             const k = this.model.constraints.get(kid);
             return k.definition || !k.inference || known.has(k.inference);
         }), slotsOf(formula));
@@ -1666,7 +1682,7 @@ export class Game {
     }
 
     activeConstraints() {
-        return activeConstraints(this.model, this.known(), this.suspected, { heldInferences: !this.autoSolves() }).filter((id) => !this.model.constraints.get(id).derived);
+        return activeConstraints(this.model, this.known(), this.suspected, { heldInferences: !this.autoSolves(), kinds: this.doubtKind }).filter((id) => !this.model.constraints.get(id).derived);
     }
 
     /** Clues the player trusts that cannot all be true (a minimal set), or null. Trivial shows it. */

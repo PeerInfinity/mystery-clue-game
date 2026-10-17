@@ -880,6 +880,15 @@
             "$ref": "#/$defs/id"
           }
         },
+        "said": {
+          "$ref": "#/$defs/formula",
+          "description": "What the clue tells for certain, whatever the player makes of its content (e.g. that the speaker was certain of it): true whenever the clue is held, doubted or not (workstream 4)."
+        },
+        "said_at": {
+          "type": "string",
+          "pattern": "^w\\.[a-z0-9_.]+$",
+          "description": "When the speaker said it, for his belief in it (default: the time of the scene that tells it)."
+        },
         "asserts": {
           "$ref": "#/$defs/formula",
           "description": "What the claim says in slot terms. Becomes the constraint 'k.<claim id>' resting on the claim."
@@ -1690,6 +1699,10 @@
         "proposition": {
           "type": "boolean",
           "description": "range over the propositions; in a state term the bound proposition names its knowledge track"
+        },
+        "statement": {
+          "type": "boolean",
+          "description": "range over the statements (testimony, admission); in a state term the bound statement names its speaker's belief in it"
         }
       }
     },
@@ -1828,8 +1841,14 @@
             "possession",
             "condition",
             "intention",
-            "knowledge"
+            "knowledge",
+            "belief"
           ]
+        },
+        "believes": {
+          "type": "string",
+          "pattern": "^[pc]\\.[a-z0-9_]+$",
+          "description": "Belief (workstream 4): the proposition, or the statement (a claim: what the speaker said), believed or not; the track is st.<thing>.believes_<name>."
         },
         "condition": {
           "type": "string"

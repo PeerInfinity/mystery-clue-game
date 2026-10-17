@@ -259,8 +259,8 @@ const stateRows = [];
         if (trackIds.has(t.id)) err(`${t.id}: declared twice`);
         trackIds.add(t.id);
         if (!has(t.of)) err(`${t.id}: of → unknown ${t.of}`);
-        const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.aspect === 'knowledge' ? `knows_${String(t.knows).replace(/^p\./, '')}` : t.condition;
-        if (t.id !== `st.${t.of}.${name}`) err(`${t.id}: a track's id is st.<thing>.<at|held|aims|knows_<proposition>|condition>, here st.${t.of}.${name}`);
+        const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.aspect === 'knowledge' ? `knows_${String(t.knows).replace(/^p\./, '')}` : t.aspect === 'belief' ? `believes_${String(t.believes).replace(/^[pc]\./, '')}` : t.condition;
+        if (t.id !== `st.${t.of}.${name}`) err(`${t.id}: a track's id is st.<thing>.<at|held|aims|knows_<proposition>|believes_<proposition or claim>|condition>, here st.${t.of}.${name}`);
         if (t.aspect === 'knowledge' && !(data.propositions ?? []).some((x) => x.id === t.knows)) err(`${t.id}: knows ${t.knows}, which is not a proposition`);
         if (t.aspect === 'intention' && !(data.state_aims ?? []).length) err(`${t.id}: an intention track needs the case's state_aims`);
         for (const a of t.aspect === 'intention' ? Object.values(t.windows ?? {}) : []) if (a !== null && !(data.state_aims ?? []).some((x) => x.id === a)) err(`${t.id}: ${a} is not one of the state_aims`);
@@ -277,7 +277,7 @@ const stateRows = [];
     for (const c of data.claims ?? []) { const f = model.cards.get(c.id)?.asserts; if (f) for (const x of slotsOf(f)) note(x, c.id); }
     for (const k of model.constraints.values()) if (!k.from_claim || k.inference) for (const x of slotsOf(k.formula)) note(x, k.inference ?? k.id);
     for (const s of model.slots.values()) {
-        if (!s.track) continue;
+        if (!s.track || s.latent) continue; // a statement's belief, unless the case declares it, is latent (workstream 4)
         const by = [...new Set(filledBy.get(s.id) ?? [])];
         if (s.answer !== null && !by.length) err(`state ${s.id}: answered ${s.answer} but no claim states it and no inference derives it`);
         stateRows.push({ slot: s, by });
@@ -560,7 +560,7 @@ function writeReport() {
     const byKind = {};
     for (const e of data.entities) byKind[e.kind] = (byKind[e.kind] ?? 0) + 1;
     out(`- cards: ${model.cards.size} — entities ${count('entities')} (${Object.entries(byKind).map(([k, v]) => `${v} ${k}`).join(', ')}), events ${count('events')}, claims ${count('claims')} (${data.claims.filter((c) => c.derived).length} derived), rules ${count('rules')}, glosses ${count('glosses')}`);
-    out(`- slots: ${[...model.slots.values()].filter((s) => !s.latent).length}; constraints: ${allIds.length} (${count('constraints')} reasoning, the rest from claims); plus the player's other reading of each claim (${[...model.slots.values()].filter((s) => s.latent).length} latent truth slots)`);
+    out(`- slots: ${[...model.slots.values()].filter((s) => !s.latent).length}; constraints: ${allIds.length} (${count('constraints')} reasoning, the rest from claims); plus the player's other reading of each claim (${[...model.slots.values()].filter((s) => s.latent && !s.track).length} latent truth slots, ${[...model.slots.values()].filter((s) => s.latent && s.track).length} latent belief slots)`);
     out(`- quotes: ${nQuotes}, all found in the story`);
     out(`- relations: ${count('relations')} (${[...model.slots.values()].filter((s) => s.facet === 'relation').length} slots); propositions: ${count('propositions')}`);
     out(`- states: ${count('states')} tracks, ${stateRows.length} declared states (${stateRows.filter((r) => r.slot.answer === null).length} left open)`);

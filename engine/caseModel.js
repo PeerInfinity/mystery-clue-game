@@ -100,6 +100,7 @@ export function buildModel(data) {
         else if (spec.window) out = [...windows.map((w) => w.id), ...subwindows.keys()];
         else if (spec.condition) out = (data.state_conditions ?? []).map((c) => c.id);
         else if (spec.proposition) out = (data.propositions ?? []).map((x) => x.id);
+        else if (spec.statement) out = (data.claims ?? []).filter((c) => statementOf(c, entities)).map((c) => c.id);
         else if (spec.trait) out = entities.filter((e) => !(e.flags ?? []).some((f) => EXCLUDED_FROM_DOMAINS.includes(f))).map((e) => e.id);
         else out = [];
         if (spec.trait) out = out.filter((id) => hasTrait(id, spec.trait));
@@ -286,19 +287,21 @@ export function buildModel(data) {
         };
         // A track, and its windows (each a slot); `addWindow` serves the player's opened states too (openState).
         makeTrack = (t) => {
-            const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.aspect === 'knowledge' ? knowsName(t.knows) : t.condition;
+            const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.aspect === 'knowledge' ? knowsName(t.knows) : t.aspect === 'belief' ? believesName(t.believes) : t.condition;
             if (t.aspect === 'knowledge' && !propositions.has(t.knows)) errors.push(`${t.id}: knows ${t.knows}, which is not a proposition`);
+            // Belief (workstream 4): of a proposition, or of a statement's own content (a claim: what the speaker said).
+            if (t.aspect === 'belief' && !propositions.has(t.believes) && !(data.claims ?? []).some((c) => c.id === t.believes)) errors.push(`${t.id}: believes ${t.believes}, which is neither a proposition nor a claim`);
             if (t.aspect === 'condition' && !conditions.has(t.condition)) errors.push(`${t.id}: unknown condition ${t.condition}`);
             const places = typeof t.places === 'string' ? sets.get(t.places) : t.places ?? [];
             if (!places) errors.push(`${t.id}: unknown place set ${t.places}`);
-            const domain = t.aspect === 'condition' || t.aspect === 'knowledge' ? ['true', 'false'] : t.aspect === 'intention' ? aims
+            const domain = t.aspect === 'condition' || t.aspect === 'knowledge' || t.aspect === 'belief' ? ['true', 'false'] : t.aspect === 'intention' ? aims
                 : [...new Set([...(t.aspect === 'possession' ? domainFor({ kinds: t.holders ?? ['person', 'animal', 'group'] }) : []), ...(places ?? []), 'elsewhere'])];
             // A listed place stands for itself apart from the listed places inside it (the stable apart from its
             // loft): a thing at a place is at the nearest listed place containing it, or 'elsewhere'. `overlaps(v)`:
             // the value a thing at v takes; `inside(v)`: the values a thing NOT at v cannot take.
             const fold = (v) => {
                 if (domain.includes(v)) return v;
-                if (t.aspect === 'condition' || t.aspect === 'intention' || t.aspect === 'knowledge') return null;
+                if (t.aspect === 'condition' || t.aspect === 'intention' || t.aspect === 'knowledge' || t.aspect === 'belief') return null;
                 for (const p of up(v)) if (domain.includes(p)) return p;
                 return 'elsewhere';
             };
@@ -309,7 +312,8 @@ export function buildModel(data) {
             const slotOfTime = new Map();
             const ask = t.aspect === 'location' ? `Where was {${t.of}}?` : t.aspect === 'possession' ? `Who had {${t.of}}?`
                 : t.aspect === 'intention' ? `What was {${t.of}} trying to do?`
-                    : t.aspect === 'knowledge' ? `Did {${t.of}} know this: “${propositions.get(t.knows)?.text ?? t.knows}”?` : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
+                    : t.aspect === 'knowledge' ? `Did {${t.of}} know this: “${propositions.get(t.knows)?.text ?? t.knows}”?`
+                        : t.aspect === 'belief' ? `Did {${t.of}} believe this: “${propositions.get(t.believes)?.text ?? cards.get(t.believes)?.text ?? t.believes}”?` : (conditions.get(t.condition)?.prompt ?? `${t.condition}({0})?`).replace('{0}', `{${t.of}}`);
             const times = [];
             const addWindow = (w, answer, extra = {}) => {
                 const id = `${t.id}.${w.replace(/^w\./, '')}`;
@@ -320,7 +324,8 @@ export function buildModel(data) {
                     splitBy: subwindows.get(w)?.path.map(([, e]) => e) ?? [],
                     prompt: `${ask} (${timeLabel(w)})`, domain,
                     answer, undetermined: answer === null ? true : undefined,
-                    labels: t.aspect === 'condition' ? undefined : t.aspect === 'intention' ? aimLabels : t.aspect === 'knowledge' ? { true: 'Knew it', false: 'Did not know it' } : { elsewhere: 'Somewhere else' },
+                    labels: t.aspect === 'condition' ? undefined : t.aspect === 'intention' ? aimLabels : t.aspect === 'knowledge' ? { true: 'Knew it', false: 'Did not know it' } : t.aspect === 'belief' ? { true: 'Believed it', false: 'Did not believe it' } : { elsewhere: 'Somewhere else' },
+                    ...(t.latent ? { latent: true } : {}),
                     ...extra,
                 });
                 return id;
@@ -339,6 +344,16 @@ export function buildModel(data) {
             return track;
         };
         for (const t of data.states ?? []) makeTrack(t);
+        // Belief over statements (workstream 4, Round 87): whoever testifies or admits something has a belief about
+        // what he said, at the time he said it (`said_at`, else his scene's time). Unless the case declares that
+        // track, it is latent, like a clue's truth: open, and no part of the uniqueness check.
+        for (const c of data.claims ?? []) {
+            const st = statementOf(c, entities);
+            if (!st || stateTracks.has(`${believesName(c.id)}|${st.by}`)) continue;
+            const w = c.said_at ?? (data.scenes ?? []).find((s) => s.id === st.scene)?.time;
+            if (!w || !isTime(w)) continue;
+            makeTrack({ id: `st.${st.by}.${believesName(c.id)}`, of: st.by, aspect: 'belief', believes: c.id, windows: { [w]: null }, latent: true });
+        }
     }
     // Propositions: boolean slots, each on its own card.
     for (const p of data.propositions ?? []) {
@@ -355,8 +370,9 @@ export function buildModel(data) {
         hasSlot: (id) => slots.has(id),
         domainOf: (id) => slots.get(id)?.domain ?? [],
         relation: (name) => relations.get(name) ?? null,
-        // A proposition names its knowledge track (a rule's ?fact bound to p.x reads knows_x).
-        state: (name, thing) => stateTracks.get(`${String(name).startsWith('p.') ? knowsName(name) : name}|${thing}`) ?? null,
+        // A proposition names its knowledge track (a rule's ?fact bound to p.x reads knows_x); a statement names the
+        // speaker's belief in it (?stmt bound to c.x reads believes_x).
+        state: (name, thing) => stateTracks.get(`${String(name).startsWith('p.') ? knowsName(name) : String(name).startsWith('c.') ? believesName(name) : name}|${thing}`) ?? null,
         isWindow: isTime,
         cards: cardsOf,
     };
@@ -415,6 +431,26 @@ export function buildModel(data) {
             addConstraint({ ...base, id: `k.${c.id}#doubted`, formula: doubted, variant: true });
             claimForms.set(c.id, { trusted: `k.${c.id}`, doubted: `k.${c.id}#doubted` });
         }
+        // A statement doubted in one of two readings (workstream 4): mistaken (the speaker believed it, and it is
+        // false) or lying (he did not believe it). Both read his belief at the time he spoke.
+        const st = statementOf(c, entities);
+        const track = st && stateTracks.get(`${believesName(c.id)}|${st.by}`);
+        const b = track?.times.length ? track.slotFor(track.times[0]) : null;
+        if (b) {
+            const forms = claimForms.get(c.id);
+            for (const [kind, v] of [['mistaken', 'true'], ['lying', 'false']]) {
+                addConstraint({ ...base, id: `k.${c.id}#${kind}`, formula: { and: [{ eq: [`${c.id}.truth`, 'false'] }, { not: asserts }, { eq: [b, v] }] }, variant: true });
+                forms[kind] = `k.${c.id}#${kind}`;
+            }
+            forms.belief = b;
+        }
+    }
+    // What a clue tells for certain, whatever the player makes of its content (`said`: e.g. that the speaker was
+    // certain of it): true whenever the clue is held, doubted or not.
+    for (const c of data.claims ?? []) {
+        if (!c.said || c.derived) continue;
+        const g = isGround(c.said) ? c.said : groundOrError(c.id, c.said);
+        if (g) addConstraint({ id: `k.${c.id}#said`, label: c.text, premises: [c.id], said_of: c.id, formula: g });
     }
     // A proposition's meaning: p.x = true exactly when its `means` formula holds. Always active (no premises).
     for (const p of data.propositions ?? []) {
@@ -553,7 +589,7 @@ export function instantiateRule(model, ruleId, bind = {}) {
 }
 
 function describeSpec(spec) {
-    const what = spec.window ? 'a time window' : spec.condition ? 'a condition' : spec.proposition ? 'a proposition' : spec.only ? `one of ${spec.only.join(', ')}` : spec.placeholder ? `a ${(spec.kinds ?? [spec.kind] ?? ['card']).join(' or ')} not yet identified` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
+    const what = spec.window ? 'a time window' : spec.condition ? 'a condition' : spec.proposition ? 'a proposition' : spec.statement ? 'a statement someone made' : spec.only ? `one of ${spec.only.join(', ')}` : spec.placeholder ? `a ${(spec.kinds ?? [spec.kind] ?? ['card']).join(' or ')} not yet identified` : spec.section ? 'an event' : spec.kind || spec.kinds ? `a ${(spec.kinds ?? [spec.kind]).join(' or ')}` : 'a card';
     return spec.trait ? `${what} that is ${spec.trait}` : what;
 }
 
@@ -669,7 +705,7 @@ export function relevantCards(model) {
  * `heldInferences`: an inference (or applied rule) counts while its own card is in `known` (a player who
  * builds inferences), instead of once its premises are (the case's reading, and Trivial).
  */
-export function activeConstraints(model, known, doubted = null, { heldInferences = false } = {}) {
+export function activeConstraints(model, known, doubted = null, { heldInferences = false, kinds = null } = {}) {
     const out = [];
     // Premises known cover an inference whose premises they cover, and so on up a chain (short chains: an
     // inference may cite another inference, and counts wherever its flat ancestry would).
@@ -682,7 +718,7 @@ export function activeConstraints(model, known, doubted = null, { heldInferences
         if (heldInferences && k.inference ? !known.has(k.inference) : !k.premises.every((p) => known.has(p))) continue;
         if (k.doubt_with && doubted?.has(k.doubt_with)) continue;
         const forms = doubted && k.from_claim ? model.claimForms.get(k.from_claim) : null;
-        out.push(forms ? (doubted.has(k.from_claim) ? forms.doubted : forms.trusted) : k.id);
+        out.push(forms ? (doubted.has(k.from_claim) ? forms[kinds?.get(k.from_claim)] ?? forms.doubted : forms.trusted) : k.id);
     }
     // The world model's ties, for the things whose states the active cards speak of.
     const things = new Set();
@@ -697,7 +733,8 @@ export function stateThings(model, id) {
     if (!k) return [];
     if (!k.stateThings) {
         const out = new Set();
-        for (const s of slotsOf(k.formula)) { const sl = model.slots.get(s); if (sl?.track) out.add(sl.on); }
+        // A belief brings no ties of its own: what someone believed puts him nowhere.
+        for (const s of slotsOf(k.formula)) { const sl = model.slots.get(s); if (sl?.track && sl.aspect !== 'belief') out.add(sl.on); }
         k.stateThings = [...out];
     }
     return k.stateThings;
@@ -832,6 +869,11 @@ function trackTies(ctx, t) {
     }
     if (t.name === 'aims') for (const k of aimTies(ctx, t.of, t.times)) world(k.id, k.label, k.formula);
     if (t.aspect === 'knowledge') for (const k of knowledgeTies(ctx, t, t.times)) world(k.id, k.label, k.formula);
+    // Knowing implies believing (workstream 4): where the same person has both tracks over one proposition.
+    if (t.aspect === 'belief') {
+        const kt = stateTracks.get(`${knowsName(t.believes)}|${t.of}`);
+        for (const w of t.times) if (kt?.slotFor(w)) world(`k.world.${t.of}.${t.name}.known.${w.slice(2)}`, `What one knows one believes (${t.of}, ${t.believes}).`, { implies: [{ eq: [kt.slotFor(w), 'true'] }, { eq: [t.slotFor(w), 'true'] }] });
+    }
     if (t.name === 'held') {
         const place = stateTracks.get(`at|${t.of}`);
         for (const w of t.times) {
@@ -1080,6 +1122,18 @@ function aimTies(ctx, thing, windows) {
 
 /** The name of the knowledge track of a proposition: p.lad_alone_at_night → knows_lad_alone_at_night. */
 export const knowsName = (p) => `knows_${String(p).replace(/^p\./, '')}`;
+/** A belief track's name: believes_<proposition or claim, without its prefix>. */
+export const believesName = (x) => `believes_${String(x).replace(/^[pc]\./, '')}`;
+/** VIAS whose speaker is a person who may believe or not what he says. */
+const STATEMENT_VIAS = ['testimony', 'admission'];
+/** A statement: a clue someone said (testimony, admission), with its speaker and scene; null otherwise. */
+export function statementOf(c, entities) {
+    if (c.derived || !c.asserts) return null;
+    const a = (c.attested ?? []).find((x) => STATEMENT_VIAS.includes(x.via) && x.by);
+    if (!a) return null;
+    const who = entities.find((e) => e.id === a.by);
+    return who && ['person', 'group'].includes(who.kind) ? { by: a.by, scene: a.scene } : null;
+}
 
 /**
  * The two laws of knowledge (built in, Round 72): what one knows one goes on knowing (in every later window of the
