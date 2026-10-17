@@ -74,3 +74,14 @@ test('short chains: a rule the inference applies is its warrant; a miss can be e
     bad.thoughts.find((x) => x.id === 't20.3').date_note = 'a RECORD has no inference';
     assert.ok(checkThoughts(bad, model).errors.includes("t20.3: date_note explains the date of a thought's inference"));
 });
+
+test('short chains: a weighed statement counts as cited, used or set aside; so does one a rule application binds (Round 97)', () => {
+    const row = (id) => checkThoughts(data, model).chains.rows.find((x) => x.thought === id);
+    assert.deepEqual(row('t84.6').uncited, [], "Mrs. Straker's 'friend', weighed (t84.5), is what the merge sets aside");
+    assert.deepEqual(row('t92.4').uncited, [], 'her honest denial, weighed (t92.3), is what the dress test uses');
+    assert.ok(!row('t92.4').unmatched.includes('c.wife_never_had_dress'));
+    assert.deepEqual(row('t135.1').uncited, [], "Brown's denial is bound in the lie's rule application");
+    const bad = structuredClone(data);
+    bad.thoughts.find((x) => x.id === 't84.6').from.push('t36.2'); // Hunter's charge, weighed: nothing to do with Derbyshire
+    assert.deepEqual(checkThoughts(bad, model).chains.rows.find((x) => x.thought === 't84.6').uncited, ['t36.2']);
+});

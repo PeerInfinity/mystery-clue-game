@@ -2601,3 +2601,23 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Case report:** quotes 1036 → 1037; the inference's rule binding; the route row is `t62.4`'s.
   - **Thoughts report:** deduction-type thoughts 53 → 54 (a DROP that names one), reasons `workstream-3` 2 → 3.
   - **Gates:** ¶114 `t62.3` → `t62.4`, same inference.
+
+## Round 97 (2026-10-17): review batch 4 — a weighed statement counts as cited; the boot comparison's untold result
+
+- **The thoughts checker** (`engine/thoughts.js`, `checkChains`): two kinds of citation now count, where before
+  they were "cited, not a premise":
+  - **a weighed statement:** a cited WEIGH or SOURCE thought whose inference is a belief about a statement (the
+    statements its rule applications bind) stands for that statement. It counts when the step uses the statement
+    (a premise: trusted, as weighed) or must set it aside (the statement speaks of the conclusion's questions);
+  - **a statement the inference binds in a rule application:** the step weighs it without resting on it (Round 87's
+    denial, which trusted would contradict the deed).
+- **Resolved:** `t84.6` (Mrs. Straker's "friend", weighed by `t84.5`, is what the merge sets aside), `t92.4` (her
+  honest denial, weighed by `t92.3`, is what the dress test uses), and `t135.1`'s citation of the denial. `t135.1`
+  keeps one disagreement, `k.brown_broke` (¶140) not cited: the review's option (a), with its date note. The
+  manner reading at ¶135 (C11) waits for workstream 6.
+- **Data:** `a.compare_boots` gains `yields.unknown`, "The text never says what the comparison showed", the marker
+  `a.question_maid` has; `t107.2` maps it.
+- **Test** (`thoughts.test.js`): the three rows; a weighed statement about something else (Hunter's charge cited
+  by `t84.6`) still counts as uncited.
+- **Moved:** thoughts report: premise disagreements 3 → 1 (`t135.1`); ABSENCE held 3 → 4 of 6. Logs, case report,
+  gates: nothing.

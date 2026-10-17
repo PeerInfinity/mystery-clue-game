@@ -13,7 +13,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 |---|---|---|
 | RECORD | 93 | 91 |
 | NOTICE | 16 | 3 |
-| ABSENCE | 6 | 3 |
+| ABSENCE | 6 | 4 |
 | QUESTION | 10 | 4 |
 | HYPOTHESIS | 27 | 21 |
 | INFER | 24 | 24 |
@@ -57,7 +57,7 @@ NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 54; with an inference: 50; with a reason for none: 4; earliest-date misses: 0 (and 4 explained); premise disagreements: 3
+- deduction-type thoughts: 54; with an inference: 50; with a reason for none: 4; earliest-date misses: 0 (and 4 explained); premise disagreements: 1
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -92,11 +92,11 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t81.5` | INFER | `k.knife_for_an_operation` | ¶81 | ¶81 |  |  |  |  |  |
 | `t82.3` | INFER | `k.knife_bared` | ¶82 | ¶82 |  |  | `r.guard_off_bares` |  |  |
 | `t84.5` | SOURCE | `k.mrs_straker_believes_friend` | ¶84 | ¶84 |  |  | `r.witness_believes` |  | `bk.alias_post` |
-| `t84.6` | IDENTIFY | `k.derbyshire_is_straker` | ¶84 | ¶84 | `t84.5` |  |  | `k.bill_names_its_debtor` |  |
+| `t84.6` | IDENTIFY | `k.derbyshire_is_straker` | ¶84 | ¶84 |  |  |  | `k.bill_names_its_debtor` |  |
 | `t84.9` | DEFAULT | `k.bill_is_his_own` | ¶84 | ¶84 |  |  |  |  |  |
 | `t92.2` | INFER | `k.dove_silk_on_the_bill` | ¶92 | ¶91 |  |  |  |  | `t85.2` |
 | `t92.3` | WEIGH | `k.wife_denies_in_good_faith` | ¶92 | ¶92 |  |  | `r.witness_believes` |  |  |
-| `t92.4` | TEST | `k.dresses_for_the_other_woman` | ¶92 | ¶92 | `t92.3` |  | `r.no_finery_for_servants` |  |  |
+| `t92.4` | TEST | `k.dresses_for_the_other_woman` | ¶92 | ¶92 |  |  | `r.no_finery_for_servants` |  |  |
 | `t92.14` | AGENT | none: action | ¶92 | — |  |  |  |  |  |
 | `t92.15` | INFER | `k.second_household` | ¶92 | ¶92 |  |  | `r.second_establishment` |  |  |
 | `t96.1` | PHYSICAL | `k.coat_placed` | ¶96 | ¶95 |  |  |  |  |  |
@@ -108,7 +108,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t122.3` | AGENT | `k.track_man_changed_his_mind` | ¶122 | ¶122 |  |  |  |  |  |
 | `t124.2` | INFER | `k.tracks_end_at_mapleton` | ¶124 | ¶124 |  |  | `r.tracks_lead_in` |  |  |
 | `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶127 |  |  | `r.first_up_takes_it_in` |  |  |
-| `t135.1` | WEIGH | `k.brown_lied` | ¶135 | ¶140 (explained) | `t133.1` | `k.brown_broke` | `r.denies_own_deed` |  | `bk.guilty_denial` |
+| `t135.1` | WEIGH | `k.brown_lied` | ¶135 | ¶140 (explained) |  | `k.brown_broke` | `r.denies_own_deed` |  | `bk.guilty_denial` |
 | `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 |  |  | `r.undertaking_means_possession` |  |  |
 | `t146.2` | TEST | `k.boots_identify` | ¶146 | ¶146 |  |  | `r.prints_identify_boots` |  |  |
 | `t148.2` | INFER | `k.disguised_to_survive_search` | ¶148 | ¶66 |  |  |  |  |  |

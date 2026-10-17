@@ -172,17 +172,25 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             if (at === undefined || at > t.para) err(`${t.id}: notices ${id}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
         }
     }
-    const chains = checkChains(thoughts, background, inferenceById, byId, dates ? model : null);
+    const claimById = new Map((d.claims ?? []).map((c) => [c.id, c]));
+    const chains = checkChains(thoughts, background, inferenceById, byId, dates ? model : null, claimById);
     for (const k of chains.unnamed) if (implicitRequired) err(`${k}: no thought names this inference, and it is not marked implicit`);
     for (const x of chains.implicitNamed) err(`${x.inference}: marked implicit, but ${x.thought} names it`);
     return { errors, coverage, dateGaps, chains, unmappedBackground: background.filter((b) => !(b.maps ?? []).length).map((b) => b.id) };
 }
 
 // The short chains: each deduction-type thought against its inference.
-function checkChains(thoughts, background, inferenceById, byId, model) {
+function checkChains(thoughts, background, inferenceById, byId, model, claimById = new Map()) {
     const deductions = thoughts.filter((t) => DEDUCTION.includes(t.tag) || (CAN_NAME.includes(t.tag) && t.inference));
     const bkById = new Map(background.map((b) => [b.id, b]));
     // The case cards a cited item stands for: a thought's inference and the cards it maps to; a background card's rules.
+    // A cited WEIGH or SOURCE thought whose inference is a belief about a statement stands for that statement
+    // (the statements its rule applications bind): the step weighed it before using it or setting it aside (Round 97).
+    const weighed = (id) => {
+        const o = byId.get(id);
+        if (!o || !['WEIGH', 'SOURCE'].includes(o.tag)) return [];
+        return (inferenceById.get(o.inference)?.rules ?? []).flatMap((u) => Object.values(u.bind ?? {})).filter((x) => claimById.has(x));
+    };
     const cardsOf = (id) => {
         if (id.startsWith('bk.')) return new Set(bkById.get(id)?.maps ?? []);
         const o = byId.get(id);
@@ -229,10 +237,20 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
         // The questions the step answers: its formula's, and its premise inferences' (a cited HYPOTHESIS or
         // QUESTION stands for the question it poses).
         const asked = new Set([k, ...k.premises.map((p) => inferenceById.get(p)).filter(Boolean)].flatMap((x) => [...slotsOf(x.formula)]));
+        // Statements the inference binds in its rule applications: it weighs them without resting on them (a denial
+        // that, trusted, would contradict the deed; Round 87).
+        const bound = new Set((k.rules ?? []).flatMap((u) => Object.values(u.bind ?? {})));
+        const conclusionSlots = new Set(slotsOf(k.formula));
         for (const p of t.from ?? []) {
             const cards = cardsOf(p);
             const hit = [...cards].filter((c) => premises.has(c));
-            if (!hit.length && [...cards].some((c) => asked.has(c))) continue;
+            if (!hit.length && [...cards].some((c) => asked.has(c) || bound.has(c))) continue;
+            if (!hit.length) {
+                // A weighed statement the step uses (trusted, as weighed) or must set aside (it speaks of the conclusion).
+                const used = weighed(p).filter((x) => premises.has(x));
+                if (used.length) { used.forEach((c) => covered.add(c)); continue; }
+                if (weighed(p).some((x) => [...slotsOf(claimById.get(x).asserts ?? { and: [] })].some((sl) => conclusionSlots.has(sl)))) continue;
+            }
             if (hit.length) hit.forEach((c) => covered.add(c));
             else if (cards.size) row.uncited.push(p);
             else row.unheld.push(p); // a thought no card holds yet (a NOTICE, a WEIGH): later workstreams
