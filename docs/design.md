@@ -2175,3 +2175,68 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - the alarm for `t34.5`; notices on eight thoughts; the lantern and the cravat later.
 - **Now:** `t34.5`'s `no_inference` is `absence` (a new reason), no longer `world-model`.
 - **Moved:** the thoughts report's reasons (`world-model` none left; `absence`: `t34.5`).
+
+## Round 83 (2026-10-16): workstream 5, step 1 — absences the player files; the dog; no alarm (`t34.5`)
+
+- **Format** (`files` on a `via: absence` attestation; schema and validator):
+  - `{expectation, windows, witness}`: the default rule that expected what did not happen, the windows it did not
+    happen in, and the clue that would have registered it;
+  - the validator checks each (a rule, known windows, a witness that is a claim and no absence itself, only on
+    absences, never on a derived claim);
+  - the report's new table, "Absences the player files", lists each absence with its line and where it is
+    otherwise dealt.
+- **Engine:**
+  - **Dealing** (`story.js`): an absence line is no span, so it deals nothing by mention or by click.
+    `story.absenceAt` keeps its paragraph. The claim's own later attestations deal it as before.
+  - **Filing** (`Game.fileAbsence(expectation, time, witness)`, `fileableAbsences()`):
+    - the rule and the witness must be held, and the time reached (a part of a window counts as its window);
+    - a match deals the claim, and its events with it;
+    - a mismatch answers "the story does not bear that out" and costs nothing.
+  - **Trivial** files by itself as soon as it can.
+  - **Kept:** filed absences are saved (`filed`) and never left out by the "irrelevant cards" option, so a true
+    filing is never refused.
+  - **The thoughts checker's readers file** each absence as soon as they can, so a filed absence is not "dealt
+    late".
+- **Data:**
+  - **The dog:** `c.dog_did_nothing` is filed against `r.dog_barks_at_strangers`, at the stable hour, witness
+    `c.lads_heard_nothing`. Unfiled, it comes at Gregory's "The dog did nothing in the night-time" (¶181).
+  - **No alarm:**
+    - a proposition `p.alarm_raised_in_night` (false);
+    - an absence claim `c.no_alarm`, quoted from the lads' two lines (¶34). It is filed against the new default
+      rule `r.honest_trainer_alarms` ("An honest trainer who comes into his stable in the night and finds his horse
+      gone raises the alarm", background from ¶34), at any time from one o'clock to dawn, witness the lads. No later
+      line states it, so it comes only by filing.
+  - **The inference:** `k.straker_raised_no_alarm` (editorial, **verified**): if Straker came into the stable, he
+    was not honest. `t34.5` maps to it; `bk.alarm` maps to the rule; `t34.1` also maps `c.no_alarm`.
+- **Changed from the plan** (Q5): the alarm rule speaks of coming into the stable and finding the horse gone, not
+  of knowledge through `r.present_sees`. The knowledge route needs Straker's place and knowledge at the time the
+  horse was taken. That time is an open case question at ¶34 (any of 27 windows), so the tracks would need a state
+  in every one of them, or the rule would hold vacuously. `r.present_sees` stays unapplied.
+- **Not yet:** the UI (step 3). Until then a player in Easy, Medium or Hard meets the dog's silence at ¶181, and the
+  alarm not at all.
+- **Test** (`absence.test.js`, new):
+  - at ¶34 the lads' line deals no absence;
+  - wrong witnesses, times and expectations are refused at no cost;
+  - the right filing deals the clue and its event, and Holmes's dog deduction can be built then;
+  - saved and restored;
+  - unfiled, the clue comes at ¶181 and the step gates ¶182;
+  - Hard's click collects only the lads' clue, and Trivial files both by itself;
+  - the alarm is filed for the night (not at nine) and `k.straker_raised_no_alarm` built.
+
+  `reasoning.test.js`: the two dog tests file the absence first. `game.test.js`: reading the whole story collects
+  every clue but the filed-only absences, which can then be filed.
+- **Moved:**
+  - **Report:**
+    - cards 647 → 651, claims 147 → 148, rules 105 → 106, propositions 2 → 3, verified inferences 65 → 66;
+    - the new absences table;
+    - `e.dog_silent` leaves "cards quoted later than they appear".
+    - The honest-servant theory's minimal break set changed: the alarm's inference and `k.visitor_is_taker` in,
+      `k.drugging_is_dishonest` out. The absence of an alarm is a shorter refutation of "the honest servant who
+      went down to the stables".
+  - **Reveal log:** the dog's clue, its event and their three questions move from ¶34 to ¶181. Holmes's dog
+    inference moves from ¶180 to ¶182. The alarm rule appears at ¶34.
+  - **Foreshadow log:** the rule at ¶34; the dog's clue and label at ¶181.
+  - **Gates:** `t34.7` (the dog) moves from ¶180 to ¶182: its clue is told at ¶181, and a gate never falls on
+    the paragraph that tells its evidence.
+  - **Thoughts report:** 46 of 49 deductions with an inference. Premise disagreements 2 → 3: `t34.5` cites
+    `t32.2` (Straker went out at one), which the inference does not need. Left as the annotation's framing.

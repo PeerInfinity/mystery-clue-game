@@ -842,6 +842,17 @@
         },
         "source": {
           "$ref": "#/$defs/source"
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["expectation", "windows", "witness"],
+          "description": "An absence (via absence) the player files rather than is dealt (Round 83): the default rule that expected what did not happen, the windows it did not happen in, and the clue that would have registered it.",
+          "properties": {
+            "expectation": { "$ref": "#/$defs/id" },
+            "windows": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 1 },
+            "witness": { "$ref": "#/$defs/id" }
+          }
         }
       }
     },

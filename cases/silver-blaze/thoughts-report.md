@@ -18,7 +18,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | HYPOTHESIS | 27 | 21 |
 | INFER | 24 | 24 |
 | DEFAULT | 8 | 7 |
-| AGENT | 8 | 7 |
+| AGENT | 8 | 8 |
 | PHYSICAL | 1 | 1 |
 | IDENTIFY | 3 | 2 |
 | WEIGH | 19 | 4 |
@@ -47,7 +47,7 @@ A RECORD whose card the game deals after the paragraph where the reader already 
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 49; with an inference: 45; with a reason for none: 4; earliest-date misses: 0 (and 4 explained); premise disagreements: 2
+- deduction-type thoughts: 49; with an inference: 46; with a reason for none: 3; earliest-date misses: 0 (and 4 explained); premise disagreements: 3
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -58,7 +58,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t29.3` | INFER | `k.window_drugging_time` | ¶29 | ¶36 (explained) |  |  |  |  | `t25.1` |
 | `t31.3` | INFER | `k.later_entry_needs_key` | ¶31 | ¶33 (explained) |  |  |  |  |  |
 | `t33.2` | INFER | `k.door_opened_with_key` | ¶33 | ¶33 |  |  |  |  |  |
-| `t34.5` | AGENT | none: absence | ¶34 | — |  |  |  |  |  |
+| `t34.5` | AGENT | `k.straker_raised_no_alarm` | ¶34 | ¶34 | `t32.2` |  |  | `k.entrant_took_the_horse` |  |
 | `t34.7` | DEFAULT | `k.dog_knew_the_visitor` | ¶34 | ¶34 |  |  |  |  |  |
 | `t37.4` | INFER | `k.drugged_after_set_aside` | ¶37 | ¶37 |  |  | `r.same_dish_safe` | `k.portion_dished_at_supper` |  |
 | `t37.5` | INFER | `k.taker_had_a_key` | ¶37 | ¶37 |  |  |  | `k.entrant_took_the_horse`, `k.led_by_taker` |  |
@@ -113,7 +113,6 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
 
 - workstream-3: `t4.2`, `t68.3`
-- absence: `t34.5`
 - action: `t92.14`
 
 ### Inferences named by more than one thought
@@ -140,4 +139,4 @@ None.
 
 ## Background cards with no rule
 
-`bk.one_culprit`, `bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alarm`, `bk.alias_post`, `bk.guilty_denial`
+`bk.one_culprit`, `bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alias_post`, `bk.guilty_denial`

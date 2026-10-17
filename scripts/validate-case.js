@@ -283,6 +283,20 @@ const stateRows = [];
         stateRows.push({ slot: s, by });
     }
 }
+// Absences the player files (`files` on a `via: absence` attestation, Round 83): what was expected (a default rule),
+// when it did not happen (windows), and who or what would have registered it (a clue that is no absence itself).
+for (const c of data.claims ?? []) for (const a of c.attested ?? []) {
+    if (!a.files) continue;
+    const f = a.files;
+    if (a.via !== 'absence') err(`${c.id}: only an absence is filed (files on a ${a.via} attestation)`);
+    if (model.cards.get(f.expectation)?.section !== 'rules') err(`${c.id}: files against ${f.expectation}, which is not a rule`);
+    for (const w of f.windows ?? []) if (!windowIds.has(w)) err(`${c.id}: files in unknown window ${w}`);
+    const witness = (data.claims ?? []).find((x) => x.id === f.witness);
+    if (!witness) err(`${c.id}: its witness ${f.witness} is not a claim`);
+    else if ((witness.attested ?? []).every((x) => x.via === 'absence')) err(`${c.id}: its witness ${f.witness} is itself an absence`);
+    if (c.derived) err(`${c.id}: a derived claim is proven, not filed`);
+}
+
 // Orders within a window (`seq`, Round 73): only a claim states one, quoted through its own line; two different timed
 // events, in their true order where the claim is true.
 const seqRows = [];
@@ -646,6 +660,23 @@ function writeReport() {
             out('| Order | Answer | Stated by | Status |');
             out('|---|---|---|---|');
             for (const r of rows) out(`| \`${r.slot.id}\` | ${r.slot.answer} | ${seqRows.filter((x) => x.slot === r.slot.id).map((x) => x.by).join(', ') || '—'} | ${r.status} |`);
+            out();
+        }
+    }
+    {
+        // Absences the player files (Round 83): never dealt by mention.
+        const rows = (data.claims ?? []).flatMap((c) => (c.attested ?? []).filter((a) => a.files).map((a) => ({ c, a })));
+        if (rows.length) {
+            out('## Absences the player files');
+            out();
+            out('Never dealt by mention: filed from the expectation, a time and the witness, or dealt at a later attestation of the claim\'s own.');
+            out();
+            out('| Claim | Line | Expectation | Times | Witness | Otherwise dealt at |');
+            out('|---|---|---|---|---|---|');
+            for (const { c, a } of rows) {
+                const later = storyIndex.firstAt.get(c.id);
+                out(`| \`${c.id}\` | ¶${storyIndex.absenceAt.get(c.id)} | ${a.files.expectation} | ${a.files.windows.join(', ')} | ${a.files.witness} | ${later === undefined ? 'never (filed only)' : `¶${later}`} |`);
+            }
             out();
         }
     }

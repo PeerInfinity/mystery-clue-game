@@ -155,8 +155,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
     // Dates: where the game (reading through, cards dealt as mentioned) deals a RECORD's cards.
     const dateGaps = [];
     if (dates) {
-        const reader = new Game(model);
-        while (!reader.finished()) reader.advance();
+        const reader = readThrough(new Game(model, { background: BG_RELEVANT })); // background facts where relevant, so absences can be filed
         for (const t of thoughts.filter((x) => x.tag === 'RECORD')) {
             for (const id of t.maps ?? []) {
                 const at = reader.unlocked.get(id)?.para;
@@ -190,8 +189,7 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
     let avail = null;
     let askable = null;
     if (model) {
-        const reader = new Game(model, { background: BG_RELEVANT });
-        while (!reader.finished()) reader.advance();
+        const reader = readThrough(new Game(model, { background: BG_RELEVANT }));
         const memo = new Map();
         avail = (id, seen = new Set()) => {
             if (memo.has(id)) return memo.get(id);
@@ -249,4 +247,12 @@ function checkChains(thoughts, background, inferenceById, byId, model) {
     const wrong = [...inferenceById.values()].filter((k) => k.truth === false && !namedBy.has(k.id)).map((k) => k.id);
     const unnamed = [...inferenceById.values()].filter((k) => !k.implicit && k.truth !== false && !namedBy.has(k.id)).map((k) => k.id);
     return { rows, shared, implicit, implicitNamed, unnamed, wrong };
+}
+
+/** Read a game through to the end, filing each absence as soon as it can be filed (a careful reader; workstream 5). */
+function readThrough(game) {
+    const fileAll = () => { for (const a of game.fileableAbsences()) game.fileAbsence(a.expectation, a.windows[0], a.witness); };
+    fileAll();
+    while (!game.finished()) { game.advance(); fileAll(); }
+    return game;
 }

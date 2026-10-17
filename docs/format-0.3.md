@@ -410,6 +410,16 @@ specific thing stay ground facts with a formula and no schema.
   may stand as a state term's name, and reads the knowledge track `knows_<name>`. The three default knowledge rules
   use it: `r.told_knows`, `r.present_sees`, `r.acts_on_knows`.
 
+## As built (2026-10-16): absences the player files (workstream 5, step 1; Round 83)
+
+- **`files: {expectation, windows, witness}`** on a `via: absence` attestation: the claim is never dealt by that
+  line, by mention or click. The player files it (`Game.fileAbsence(rule, time, witness)`): the rule and the
+  witness held, the time reached and among `windows` (a part counts as its window). It is otherwise dealt at a later
+  attestation of its own, if it has one. Trivial files it by itself. Filed absences are saved (`filed`, save
+  version 7 unchanged: an older save has none).
+- **Silver Blaze:** the dog (`c.dog_did_nothing`, otherwise ¶181) and no alarm (`c.no_alarm`, filed only), both
+  witnessed by the lads' "They had heard nothing during the night".
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's

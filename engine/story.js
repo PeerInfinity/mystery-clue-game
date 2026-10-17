@@ -116,10 +116,20 @@ export class Story {
         for (const e of data.entities ?? []) {
             if (!this.firstAt.has(e.id)) for (const q of e.source ?? []) this.#quoteSpan(e.id, q, 'entity');
         }
-        // Claims: every attestation quote is a span; the claim appears at the earliest.
+        // Claims: every attestation quote is a span; the claim appears at the earliest. An absence the player files
+        // (`via: absence` with `files`, Round 83) is no span: its line is where it can first be filed (`absenceAt`).
+        this.absenceAt = new Map();
         for (const c of data.claims ?? []) {
             if (c.derived) continue;
-            for (const a of c.attested ?? []) for (const q of a.source ?? []) this.#quoteSpan(c.id, q, 'claim');
+            for (const a of c.attested ?? []) {
+                if (a.via === 'absence' && a.files) {
+                    const at = Math.max(...(a.source ?? []).map((q) => this.find(q)?.para ?? Infinity));
+                    if (Number.isFinite(at)) this.absenceAt.set(c.id, Math.min(at, this.absenceAt.get(c.id) ?? Infinity));
+                    else this.problems.push(`${c.id}: an absence line is not found`);
+                    continue;
+                }
+                for (const q of a.source ?? []) this.#quoteSpan(c.id, q, 'claim');
+            }
         }
         // Events told directly have their quote; implied ones also appear through claims (see Game).
         for (const e of data.events ?? []) for (const q of e.source ?? []) this.#quoteSpan(e.id, q, 'event');

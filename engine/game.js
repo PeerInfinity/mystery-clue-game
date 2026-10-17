@@ -227,7 +227,8 @@ export class Game {
         this.hidden = new Set();
         if (share >= 1 || !this.model.relevant) return;
         for (const id of this.model.cards.keys()) {
-            if (this.model.relevant.has(id) || this.model.cards.get(id).section === 'inferences') continue;
+            // An absence comes only when the player files it, so it is never left out (a true filing is never refused).
+            if (this.model.relevant.has(id) || this.model.cards.get(id).section === 'inferences' || (this.model.cards.get(id).attested ?? []).some((a) => a.files)) continue;
             // The same cards every time (a hash of the id), and a larger share keeps every card a smaller one did.
             let h = 2166136261;
             for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
@@ -261,6 +262,7 @@ export class Game {
         this.openedSplits = [];
         this.applied = [];              // [{id, rule, bind, para}]
         this.concluded = [];            // [{id, cited, formula, label, para}]
+        this.filed = [];                // [{id, para}] absences the player filed (Round 83), or Trivial filed for them
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -288,6 +290,7 @@ export class Game {
             built: [...this.inferenceHow].filter(([, h]) => h.how === 'built').map(([id]) => [id, this.unlocked.get(id).para]),
             applied: this.applied.map((a) => [a.id, a.rule, a.bind, a.para]),
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
+            filed: this.filed.map((f) => [f.id, f.para]),
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
@@ -312,6 +315,11 @@ export class Game {
             while (asked.length && asked[0][1] < this.read) this.ask(asked.shift()[0]);
         }
         if (this.collecting()) for (const [id, para] of state.collected ?? []) this.#unlock(id, para);
+        for (const [id, para] of state.filed ?? []) {
+            if (!this.absenceById().has(id)) continue;
+            this.#unlock(id, para);
+            if (!this.filed.some((f) => f.id === id)) this.filed.push({ id, para });
+        }
         for (const [id, para] of state.built ?? []) {
             if (!this.inferenceById.has(id) || this.knows(id)) continue;
             this.#unlock(id, para);
@@ -702,6 +710,8 @@ export class Game {
             this.#unlock(id, p);
             this.inferenceHow.set(id, { how: 'stated', by });
         }
+        // Trivial files an absence for the player as soon as it can be filed (Round 83).
+        if (this.autoSolves()) for (const a of this.fileableAbsences()) this.fileAbsence(a.expectation, a.windows[0], a.witness);
         // The story is about to wait on a deduction: the card that holds its question is dealt now.
         for (const id of this.story.gates?.get(p + 1) ?? []) {
             const c = this.routeById.get(id).concludes;
@@ -733,6 +743,50 @@ export class Game {
             this.#unlock(k, para);
             this.inferenceHow.set(k, { how: inf.implicit ? 'implicit' : 'auto' });
         }
+    }
+
+    // ---------- absences (workstream 5, Round 83) ----------
+    /**
+     * The absences the case lets the player file: claim id → {id, para, expectation, windows, witness}. An absence
+     * is a clue no line states: something expected (a default rule) did not happen in a time, and a witness would
+     * have registered it. It is never dealt by mention; it comes when filed, or at a later attestation of its own.
+     */
+    absenceById() {
+        if (!this.absences) {
+            this.absences = new Map();
+            for (const c of this.model.data.claims ?? []) {
+                const a = (c.attested ?? []).find((x) => x.via === 'absence' && x.files);
+                const para = this.story.absenceAt?.get(c.id);
+                if (a && para !== undefined) this.absences.set(c.id, { id: c.id, para, ...a.files });
+            }
+        }
+        return this.absences;
+    }
+    /** The absences the player could file now (held expectation and witness, the time reached), not yet held. */
+    fileableAbsences() {
+        return [...this.absenceById().values()].filter((a) => !this.knows(a.id) && !this.hidden.has(a.id) && a.para < this.read
+            && this.knows(a.expectation) && this.knows(a.witness) && a.windows.some((w) => this.reached(w)));
+    }
+    /**
+     * File an absence: `expectation` (a rule the player holds) expected something that did not happen at `time`
+     * (a window or a part of one on the board), and `witness` (a clue the player holds) would have registered it.
+     * If the case has that absence, its clue is dealt: {ok: true, id}. Otherwise {ok: false, reason}; nothing is lost.
+     */
+    fileAbsence(expectation, time, witness) {
+        this.moved = true;
+        if (!this.knows(expectation) || this.model.cards.get(expectation)?.section !== 'rules') return { ok: false, reason: 'choose a background fact you hold: what should have happened' };
+        if (!this.knows(witness) || this.model.cards.get(witness)?.section !== 'claims') return { ok: false, reason: 'choose a clue you hold: who or what would have noticed it' };
+        const root = String(time).split('.').slice(0, 2).join('.');
+        if (!this.reached(root)) return { ok: false, reason: 'choose a time the story has reached' };
+        const a = [...this.absenceById().values()].find((x) => x.expectation === expectation && x.witness === witness && x.windows.includes(root) && x.para < this.read);
+        if (!a) return { ok: false, reason: 'the story does not bear that out' };
+        if (this.knows(a.id)) return { ok: true, id: a.id, existing: true };
+        if (this.hidden.has(a.id)) return { ok: false, reason: 'the story does not bear that out' };
+        const para = this.read - 1;
+        this.#unlock(a.id, para);
+        this.filed.push({ id: a.id, para });
+        if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
+        return { ok: true, id: a.id };
     }
 
     // ---------- inferences ----------

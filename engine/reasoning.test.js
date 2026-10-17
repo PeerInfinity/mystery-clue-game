@@ -63,7 +63,10 @@ test('verified inferences: the engine derives the conclusion; an asserted one on
 
 test('applyRule: the player grounds a background fact against cards and holds it', () => {
     const game = new Game(model, { background: BG_START });
-    while (!game.knows('e.stable_entered') || !game.knows('e.dog_silent')) game.advance();
+    // The dog's silence is an absence the player files (workstream 5): the dog should have barked, the lads heard nothing.
+    while (!game.knows('c.lads_heard_nothing')) game.advance();
+    assert.ok(game.fileAbsence('r.dog_barks_at_strangers', 'w.tue_stable', 'c.lads_heard_nothing').ok);
+    assert.ok(game.knows('e.stable_entered') && game.knows('e.dog_silent'));
     assert.ok(game.applicableRules().includes('r.dog_barks_at_strangers'));
     assert.ok(game.ruleBindings('r.dog_barks_at_strangers').dog.includes('stable_dog'));
     assert.match(game.applyRule('r.dog_barks_at_strangers', { dog: 'stable_dog', visit: 'e.stable_entered', silence: 'e.straker_jockey' }).error, /no such slot/, 'an event without the facets the rule speaks of cannot be bound');
@@ -87,6 +90,7 @@ test('applyRule: the player grounds a background fact against cards and holds it
 test('conclude: a stated conclusion the cited cards entail becomes an inference card; one they do not is refused', () => {
     const game = new Game(model, { background: BG_START });
     while (game.read < 60) game.advance();
+    assert.ok(game.fileAbsence('r.dog_barks_at_strangers', 'w.tue_stable', 'c.lads_heard_nothing').ok);
     const cited = ['c.dog_kept_in_stable', 'c.dog_did_nothing', 'c.stall_empty', 'c.stable_door_open', 'c.simpson_lives_at_villas'];
     const nope = game.conclude(cited, { ne: ['e.stable_entered.agent', 'simpson'] });
     assert.equal(nope.ok, false, 'the clues alone do not say who the dog knew');

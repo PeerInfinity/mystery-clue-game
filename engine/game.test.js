@@ -46,7 +46,10 @@ test('reading the whole story (free pace, Easy, background when relevant) collec
     const missing = [...model.cards.values()]
         .filter((c) => ['entities', 'events', 'rules'].includes(c.section) || (c.section === 'claims' && !c.derived))
         .filter((c) => !game.knows(c.id)).map((c) => c.id);
-    assert.deepEqual(missing, []);
+    // An absence no later line states comes only when the player files it (workstream 5); it can be filed.
+    const filedOnly = [...game.absenceById().keys()].filter((id) => !game.story.firstAt.has(id));
+    assert.deepEqual(missing, filedOnly);
+    assert.deepEqual(game.fileableAbsences().map((a) => a.id), filedOnly);
     assert.equal(game.done.length, game.actions.length, 'every action is reached');
 });
 

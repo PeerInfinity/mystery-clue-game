@@ -2,6 +2,7 @@
  "description": "Intermediate conclusions as boolean slots p.<name> (format 0.3): each is a card the player can conclude and then cite. Some are what a character knows (knowledge tracks in states.json).",
  "propositions": [
   {"id": "p.lad_alone_at_night", "text": "A stable-boy sleeps alone in the stable every night.", "answer": "true"},
-  {"id": "p.mercy_in_safe_return", "text": "Brown's only hope of mercy is to produce the horse safe.", "answer": "true"}
+  {"id": "p.mercy_in_safe_return", "text": "Brown's only hope of mercy is to produce the horse safe.", "answer": "true"},
+  {"id": "p.alarm_raised_in_night", "text": "Someone raised the alarm at the stable in the night.", "answer": "false"}
  ]
 }
