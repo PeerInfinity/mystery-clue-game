@@ -2486,3 +2486,19 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Thoughts report:** WEIGH thoughts held 5 → 6, deductions with an inference 50 of 53. Premise disagreements
     7 → 8: `t92.4` cites `t92.3`, now an inference of its own that `k.dresses_for_the_other_woman` does not need.
   - **Logs and gates:** nothing.
+
+## Round 92 (2026-10-17): hand-off — a focused review of the annotation
+
+- **Robert:** agreed to the plan. First a focused review of the annotated reading against what the case can now
+  hold (the tags whose features exist, about 190 of 294 thoughts); then workstream 3 (defeasibility); then
+  workstream 6 (hypotheses, scenarios, residue); then a second review of the tags those make modelable.
+- **`docs/kickoff-annotation-review.md`** hands the review to a new session:
+  - the scope;
+  - a per-thought method with five verdicts;
+  - the review table to write (`docs/annotation-review.md`);
+  - the known items to start from (the eight premise disagreements, the four late RECORDs, NOTICE and WEIGH gaps,
+    the unapplied knowledge rules, Round 79's open list);
+  - the traps of Rounds 60–91.
+
+  Fixes are proposed in batches for Robert, and nothing is changed without him. `CLAUDE.md` points at it.
+- **Moved:** nothing (documents only).

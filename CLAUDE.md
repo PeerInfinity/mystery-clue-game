@@ -1,9 +1,9 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-workstreams-4-5.md` — the current work: a starter batch, then noticing and absence (workstream 5)
-  and testimony and belief (workstream 4). The world model (steps 1–5, Rounds 60–78), solver speed (Round 66) and
-  event order (Rounds 73–75) are done.
+- `docs/kickoff-annotation-review.md` — the current work: a focused review of the annotated reading against what the
+  case can now hold, thought by thought, with fixes proposed in batches for Robert. Then workstream 3, workstream 6,
+  and a second review. Workstreams 4 and 5 are done (Rounds 80–91).
 - `docs/noticing-absence.md` — noticing and absence (workstream 5): agreed (Round 82), built (Rounds 83–85).
 - `docs/testimony-belief.md` — testimony, sources and belief (workstream 4): agreed (Round 86), built (Rounds 87–90).
 - `docs/knowledge-intention.md` — knowledge, intention and belief: agreed (Round 72), built but belief (Rounds 76–78).
