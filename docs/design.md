@@ -2049,3 +2049,7 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
   - **Gates:** nothing (the step is editorial, so it does not gate).
 - **The six `world-model` thoughts:** `t123.2` and `t78.2` done; `t24.2` and `t150.1` with step 2 (knowledge);
   `t34.5` waits for absence (workstream 5); `t82.3` needs only a condition track.
+- **Fix after the commit** (Round 77, second commit): the first commit went in with one test failing ("cards the
+  solution does not need"); it was not gated on the suite's exit code. `r.robber_takes_valuables` compared the
+  holder with the blow's patient slot, which the engine expands over every person, so every person became a
+  card the solution needs. The rule now names the victim (`victim`, bound to Straker); still verified.

@@ -108,7 +108,7 @@ premise propositions or inferences. Asserted: it stands on the author's word unt
 | `k.drugged_after_set_aside` | r.same_dish_safe(dosing=e.opium_added, portion=hunter_portion, dish=curried_mutton, setting=e.portion_set_aside, meal=e.household_sups) | verified |
 | `k.portion_dished_at_supper` | r.set_aside_at_the_meal(setting=e.portion_set_aside, meal=e.household_sups, portion=hunter_portion, dish=curried_mutton) | verified |
 | `k.drugged_in_food` | r.tap_water_not_dosed(dosing=e.opium_added, tap=water_tap) | verified |
-| `k.not_a_robbery` | r.stays_held(thing=sovereigns, from=w.tue_after, to=w.tue_morning); r.robber_takes_valuables(blow=e.fatal_blow, item=sovereigns, after=w.tue_after) | verified |
+| `k.not_a_robbery` | r.stays_held(thing=sovereigns, from=w.tue_after, to=w.tue_morning); r.robber_takes_valuables(blow=e.fatal_blow, victim=straker, item=sovereigns, after=w.tue_after) | verified |
 | `k.portion_set_aside_before_edith` | r.set_aside_at_the_meal(setting=e.portion_set_aside, meal=e.household_sups, portion=hunter_portion, dish=curried_mutton) | verified |
 | `k.straker_home_all_evening` | — | asserted: The story never places Straker between nine and the message that reached him at the house later in the evening; that he was at home all evening is the editorial reading of it. |
 | `k.drugged_in_house_means_before_nine_five` | r.set_aside_at_the_meal(setting=e.portion_set_aside, meal=e.household_sups, portion=hunter_portion, dish=curried_mutton); r.dosed_before_carried_off(dosing=e.opium_added, keeping=e.portion_set_aside, carrying=e.edith_carries_supper) | verified |
