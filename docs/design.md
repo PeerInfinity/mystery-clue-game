@@ -2669,3 +2669,16 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Thoughts report:** one more implicit inference. **Gates:** nothing.
 - **The review's batches are all built** (Rounds 94–99). Left, as recommended: C2, C5, C7, C8, C10 (leave), C4
   (optional), C11 and C13 (with workstream 6). `CLAUDE.md` now points at the review and at workstream 3 next.
+
+## Round 100 (2026-10-17): hand-off — workstream 3, defeasibility
+
+- **Leak check** (Robert asked for it; cheap on his plan): `node checker/check.js cases/silver-blaze --all --runs 2`
+  passed all six card texts added in Rounds 95–99 (the three track claims, the stranger's "where am I", the
+  foreleg); `--background` passed the four rules moved or reworded (gregarious, gypsies, the pretence, the tendon
+  nick). 549 of 569 pieces "ok"; the 20 flags are on cards untouched since Round 92 (18 as on 2026-10-13, and two
+  traits never checked before), listed in the kickoff.
+- **`docs/kickoff-workstream-3.md`** hands workstream 3 to a new session: design first (`docs/defeasibility.md`),
+  with the inputs the review gathered (the annotation's undercuts, the defaults with named exceptions including
+  the accomplice exception Round 93 left open, the police's four, the recorded doubt reasons) and the traps of
+  Rounds 60–99. `CLAUDE.md` points at it; it supersedes `docs/kickoff-annotation-review.md`.
+- **Moved:** nothing (documents only).

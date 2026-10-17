@@ -1,10 +1,11 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/annotation-review.md` — the focused review of the annotated reading (kickoff:
-  `docs/kickoff-annotation-review.md`): a verdict per thought in scope; its six fix batches built (Rounds 93–99).
-  Next: workstream 3 (defeasibility), workstream 6, then a second review. Its "leave"/"with ws 6" items are listed
-  there. Workstreams 4 and 5 are done (Rounds 80–91).
+- `docs/kickoff-workstream-3.md` — the current work: workstream 3 (defeasibility), design first, then build what
+  Robert agrees. Then workstream 6, then a second review.
+- `docs/annotation-review.md` — the focused review of the annotated reading: a verdict per thought in scope; its six
+  fix batches built (Rounds 93–99); its "ws 3" rows are workstream 3's inputs. Workstreams 4 and 5 are done (Rounds
+  80–91).
 - `docs/noticing-absence.md` — noticing and absence (workstream 5): agreed (Round 82), built (Rounds 83–85).
 - `docs/testimony-belief.md` — testimony, sources and belief (workstream 4): agreed (Round 86), built (Rounds 87–90).
 - `docs/knowledge-intention.md` — knowledge, intention and belief: agreed (Round 72), built but belief (Rounds 76–78).
