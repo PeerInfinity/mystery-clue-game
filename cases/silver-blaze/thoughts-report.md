@@ -58,7 +58,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t29.3` | INFER | `k.window_drugging_time` | ¶29 | ¶36 (explained) |  |  |  |  | `t25.1` |
 | `t31.3` | INFER | `k.later_entry_needs_key` | ¶31 | ¶33 (explained) |  |  |  |  |  |
 | `t33.2` | INFER | `k.door_opened_with_key` | ¶33 | ¶33 |  |  |  |  |  |
-| `t34.5` | AGENT | none: world-model | ¶34 | — |  |  |  |  |  |
+| `t34.5` | AGENT | none: absence | ¶34 | — |  |  |  |  |  |
 | `t34.7` | DEFAULT | `k.dog_knew_the_visitor` | ¶34 | ¶34 |  |  |  |  |  |
 | `t37.4` | INFER | `k.drugged_after_set_aside` | ¶37 | ¶37 |  |  | `r.same_dish_safe` | `k.portion_dished_at_supper` |  |
 | `t37.5` | INFER | `k.taker_had_a_key` | ¶37 | ¶37 |  |  |  | `k.entrant_took_the_horse`, `k.led_by_taker` |  |
@@ -110,10 +110,10 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 
 ### Deductions with no inference
 
-Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet.
+Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
 
 - workstream-3: `t4.2`, `t68.3`
-- world-model: `t34.5`
+- absence: `t34.5`
 - action: `t92.14`
 
 ### Inferences named by more than one thought

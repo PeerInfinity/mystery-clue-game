@@ -206,7 +206,7 @@ specific thing stay ground facts with a formula and no schema.
 - (Round 46) A TEST that concludes something may name its inference too.
 - (Round 53) An inference the game grants by itself also waits for the entities whose questions it speaks of.
 - (Round 56) A deduction with no possible inference says why: `no_inference` is `workstream-3`, `action` or
-  `world-model`. `implicitRequired` is on: an inference neither named nor implicit is an error, and so is a
+  `world-model` (Round 82: or `absence`). `implicitRequired` is on: an inference neither named nor implicit is an error, and so is a
   deduction with neither an inference nor a reason.
 
 ## As built (2026-10-15): Holmes's steps from the thoughts (Round 57)

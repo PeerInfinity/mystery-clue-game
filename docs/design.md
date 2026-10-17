@@ -2160,3 +2160,18 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Report:** rules 102 → 105, quotes 1020 → 1023.
   - **Reveal and foreshadow logs:** the three rules as background on the reasoning topic, at ¶24, ¶29 and ¶32.
   - **Thoughts report and gates:** nothing.
+
+## Round 82 (2026-10-16): workstream 5 agreed — noticing and absence (`docs/noticing-absence.md`)
+
+- **Proposed** (the paper, written in Round 81's session): the reader's two moves, a detail odd against an
+  expectation (notice) and an expected thing missing (absence), with five questions.
+- **Robert:** agreed to all five recommendations, as written:
+  - expectations are default rules the player holds;
+  - a notice is a mark on a card, with an optional "because", recorded, flagged and scored in aggregate before
+    Holmes's paragraph; player questions are deferred;
+  - an absence is filed from an expectation, a time and a witness; until filed it comes at the story's next
+    attestation (the dog at ¶181, its gate moving from ¶180);
+  - new absences are false propositions; the dog stays a silence event;
+  - the alarm for `t34.5`; notices on eight thoughts; the lantern and the cravat later.
+- **Now:** `t34.5`'s `no_inference` is `absence` (a new reason), no longer `world-model`.
+- **Moved:** the thoughts report's reasons (`world-model` none left; `absence`: `t34.5`).
