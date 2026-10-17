@@ -17,7 +17,7 @@
 // Scoring: Holmes's steps are the annotated reading's thoughts (engine/steps.js); one the player makes by their own
 //   reasoning before the paragraph where Holmes states it scores (thoughtScores, score).
 
-import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic } from './caseModel.js';
+import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
 
@@ -254,6 +254,9 @@ export class Game {
         // The player's own cards: applied rules and concluded inferences (format 0.3). Each is a card in the model.
         for (const id of this.dynamicIds ?? []) removeDynamic(this.model, id);
         this.dynamicIds = [];
+        // The states the player opened go with their cards.
+        for (const slot of this.openedStates ?? []) closeState(this.model, slot);
+        this.openedStates = [];
         this.applied = [];              // [{id, rule, bind, para}]
         this.concluded = [];            // [{id, cited, formula, label, para}]
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
@@ -285,6 +288,7 @@ export class Game {
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             made: [...this.#noteMade()],
             board: this.board,
+            opened: this.openedStates.map((slot) => { const o = this.model.opened.find((x) => x.slot === slot); return [o.thing, o.name, o.window]; }),
             version: 7,
         };
     }
@@ -309,6 +313,10 @@ export class Game {
             if (!this.inferenceById.has(id) || this.knows(id)) continue;
             this.#unlock(id, para);
             this.inferenceHow.set(id, { how: 'built' });
+        }
+        // The states the player opened, before the cards and marks that speak of them.
+        for (const [thing, name, w] of state.opened ?? []) {
+            try { this.openedStates.push(openState(this.model, thing, name, w)); } catch (e) { console.warn(`could not reopen ${thing} ${name} ${w}: ${e.message}`); }
         }
         // The player's own cards, in the order they were made (applied rules may be cited by conclusions).
         const made = [
@@ -417,8 +425,8 @@ export class Game {
      * card of the player's, citable like an inference. Returns {ok, card} or the check's refusal.
      */
     proveMark(thing, time, value, aspect = 'at') {
-        const st = TL.stateOf(this, thing, time, aspect, value);
-        if (!st) return { ok: false, reason: 'the case has no question here yet' };
+        const st = this.#stateFor(thing, time, aspect, value);
+        if (st.reason) return { ok: false, reason: st.reason, ...(st.clash ? { clash: st.clash } : {}) };
         const res = this.prove(st.slot, st.value);
         if (!res.ok) return res.reason ? { ...res, reason: 'what you hold and trust does not settle it yet' } : res;
         this.pencilPlace(thing, time, value, { aspect });
@@ -432,18 +440,54 @@ export class Game {
 
     /** Rule a mark out: as a cross-out of that answer (checked or in pencil, as the options say); the mark is struck. */
     ruleOutMark(thing, time, value, aspect = 'at') {
-        const st = TL.stateOf(this, thing, time, aspect, value);
-        if (!st) return { ok: false, reason: 'the case has no question here yet' };
+        const st = this.#stateFor(thing, time, aspect, value);
+        if (st.reason) return { ok: false, reason: st.reason, ...(st.clash ? { clash: st.clash } : {}) };
         const res = this.strike(st.slot, st.value);
         if (res.ok) this.pencilPlace(thing, time, value, { aspect, struck: true });
         return res;
+    }
+
+    /**
+     * The state a mark speaks of ({slot, value}), opening it if the case never declared it (openState: checked
+     * against the rules only, with no answer of its own). {reason} where it cannot be opened.
+     */
+    #stateFor(thing, time, aspect, value) {
+        let st = TL.stateOf(this, thing, time, aspect, value);
+        // Another game on the same model opened it: hold it too, so it stays while this game's cards speak of it.
+        if (st && this.model.opened.some((o) => o.slot === st.slot) && !this.openedStates.includes(st.slot)) this.openedStates.push(openState(this.model, thing, aspect, time));
+        let opened = null;
+        if (!st) {
+            if (!this.knows(thing) || !this.#shownTime(time)) return { reason: 'that is not on your board' };
+            if (!this.model.windows.some((w) => w.id === time) && !this.model.subwindows.has(time)) return { reason: 'a part of a window you split yourself cannot be checked yet' };
+            try { opened = openState(this.model, thing, aspect, time); } catch (e) { return { reason: e.message }; }
+            this.openedStates.push(opened);
+            // The case's ties are unchanged (the opened window has its own), so the clashes found still stand: the
+            // cache is checked again, not thrown away.
+            if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
+            st = TL.stateOf(this, thing, time, aspect, value);
+        }
+        // A cell means its whole time: if what the player trusts, with the world's ties, cannot give the thing one
+        // answer there (it moves within that time, say), nothing about the cell can be proven. Say why, and close a
+        // state opened for it.
+        const slot = st?.slot ?? opened;
+        const active = this.#withTies(this.workingConstraints(), [slot]);
+        if (!this.model.problem.consistent(active).ok) {
+            const clash = this.model.problem.explainConflict(active) ?? [];
+            if (opened) {
+                closeState(this.model, opened);
+                this.openedStates = this.openedStates.filter((x) => x !== opened);
+            }
+            const who = this.nameOf(thing);
+            return { reason: `${who} has no single ${aspect === 'at' ? 'place' : aspect === 'held' ? 'holder' : 'answer'} throughout this time: what you trust ${aspect === 'at' ? `puts ${who} in more than one place then` : 'gives more than one'}. Split the time at an event to place ${who} before or after it.`, clash };
+        }
+        return st ?? { reason: 'that is not one of the answers here' };
     }
 
     /** A state in words: "John Straker was at Straker's villa (Tuesday, 1 a.m.)". */
     stateText(thing, time, aspect, value) {
         const label = this.timelineTimes().find((t) => t.id === time)?.label ?? this.model.windows.find((w) => w.id === time)?.label ?? time;
         const who = this.nameOf(thing);
-        const what = value === TL.ELSEWHERE ? 'somewhere else' : this.nameOf(value);
+        const what = value === TL.ELSEWHERE ? 'somewhere else' : this.nameOf(value).replace(/^(The|A|An) /, (a) => a.toLowerCase());
         if (aspect === 'at') return `${who} was ${value === TL.ELSEWHERE ? 'somewhere else' : `at ${what}`} (${label})`;
         if (aspect === 'held') return this.model.cards.get(value)?.kind === 'place' ? `${who} lay at ${what} (${label})` : `${what} had ${who} (${label})`;
         const cond = (this.model.data.state_conditions ?? []).find((c) => c.id === aspect);
@@ -756,7 +800,8 @@ export class Game {
         this.applied.push({ id: cardId, key, rule: ruleId, bind, para: at });
         this.#unlock(cardId, at);
         this.inferenceHow.set(cardId, { how: 'applied' });
-        this.clashCache = null;
+        // A new card only adds to what is trusted: the clashes found still clash, and are checked again first.
+        if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
         return { ok: true, id: cardId, formula: res.formula };
     }
 
@@ -791,10 +836,10 @@ export class Game {
         for (const [slot, v] of literalsIn(formula)) if (slot && !this.model.slots.get(slot).domain.includes(v)) return { ok: false, error: `${v} is no answer to ${slot}` };
         const known = new Set(S);
         // Everything the cited cards switch on, in the player's reading; the player's own cards count when cited.
-        const active = activeConstraints(this.model, known, this.suspected, { heldInferences: true }).filter((kid) => {
+        const active = this.#withTies(activeConstraints(this.model, known, this.suspected, { heldInferences: true }).filter((kid) => {
             const k = this.model.constraints.get(kid);
             return k.definition || !k.inference || known.has(k.inference);
-        });
+        }), slotsOf(formula));
         const clash = this.model.problem.explainConflict(active);
         if (clash) return { ok: false, contradiction: clash };
         if (this.model.problem.consistent(active, {}, { extra: [{ not: formula }] }).ok) return { ok: false, reason: 'the cards you cite do not settle that' };
@@ -811,7 +856,8 @@ export class Game {
         this.concluded.push({ id: cardId, cited: S, formula, label: text, para: at });
         this.#unlock(cardId, at);
         this.inferenceHow.set(cardId, { how: 'concluded' });
-        this.clashCache = null;
+        // A new card only adds to what is trusted: the clashes found still clash, and are checked again first.
+        if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
         return { ok: true, id: cardId, used, premises, matches: this.conclusionMatches(formula) };
     }
 
@@ -1267,8 +1313,19 @@ export class Game {
         return this.#checkAgainstAll({}, [{ not: formula }]);
     }
 
+    /**
+     * The world's ties for the things whose states these slots are (a check about a state needs them, though no card
+     * the player holds speaks of that thing's states), added to `active`.
+     */
+    #withTies(active, slots) {
+        const things = new Set([...slots].map((s) => this.model.slots.get(s)).filter((sl) => sl?.track).map((sl) => sl.on));
+        if (!things.size) return active;
+        const have = new Set(active);
+        return [...active, ...[...this.model.constraints.values()].filter((k) => k.world && things.has(k.thing) && !have.has(k.id)).map((k) => k.id)];
+    }
+
     #checkAgainstAll(fixed, extra) {
-        const active = this.workingConstraints();
+        const active = this.#withTies(this.workingConstraints(), [...Object.keys(fixed), ...extra.flatMap((f) => [...slotsOf(f)])]);
         // Only the questions tied to the answer or the formula need searching: what is held is consistent already.
         if (this.model.problem.consistent(active, fixed, { extra, focus: true }).ok) return { ok: false, reason: 'nothing you hold and trust rules it out yet' };
         return { ok: true, used: this.model.problem.explainConflict(active, fixed, { extra }) };
@@ -1282,7 +1339,7 @@ export class Game {
         if (!this.assisted()) return { plausible: true, why: 'shape only' };
         // Judged against what the player trusts, setting aside the claims caught in a clash: a clash elsewhere
         // says nothing about this answer.
-        const active = this.workingConstraints();
+        const active = this.#withTies(this.workingConstraints(), [slot]);
         const aside = this.clashes().length;
         if (this.model.problem.consistent(active, { [slot]: value }, { focus: true }).ok) return { plausible: true, aside };
         return { plausible: false, why: 'clues', aside, conflict: this.model.problem.explainConflict(active, { [slot]: value }) };

@@ -150,3 +150,32 @@ test('checked placements: a mark proven becomes a card; ruling one out is checke
     easy.pencilPlace('other_lads', 'w.tue_stable', 'loft');
     assert.deepEqual(easy.ruleOutMark('other_lads', 'w.tue_stable', 'loft'), { ok: true, proof: false });
 });
+
+test('a cell the case never declared opens when a mark there is committed; one with no single answer is refused; reset closes it', () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    while (game.read < 46) game.advance();
+    assert.ok(!model.slots.has('st.ned_hunter.at.mon_2110'));
+    // Hunter at the stable while the stranger was at the window: he locked the door behind him.
+    game.pencilPlace('ned_hunter', 'w.mon_2110', 'stable');
+    const res = game.proveMark('ned_hunter', 'w.mon_2110', 'stable');
+    assert.ok(res.ok && res.card, JSON.stringify(res));
+    assert.ok(model.slots.get('st.ned_hunter.at.mon_2110')?.opened, 'opened, with no answer of its own');
+    assert.equal(game.cardTimeline('ned_hunter').lines.find((l) => l.time === 'w.mon_2110').at, 'stable', 'shown as given once proven');
+    game.pencilPlace('ned_hunter', 'w.mon_2110', 'straker_villa');
+    assert.ok(game.ruleOutMark('ned_hunter', 'w.mon_2110', 'straker_villa').proof, 'the proven card rules the villa out');
+    // Edith runs to the window and flees to the house within that time: no single place throughout it.
+    game.pencilPlace('edith_baxter', 'w.mon_2110', 'stable');
+    const edith = game.proveMark('edith_baxter', 'w.mon_2110', 'stable');
+    assert.equal(edith.ok, false);
+    assert.match(edith.reason, /no single place throughout this time/);
+    assert.ok(!model.slots.has('st.edith_baxter.at.mon_2110'), 'the state opened for it is closed again');
+    // Saved and restored with the card that speaks of it; a reset closes it.
+    const copy = new Game(model, { difficulty: MEDIUM, state: JSON.parse(JSON.stringify(game.save())) });
+    assert.deepEqual(copy.openedStates, ['st.ned_hunter.at.mon_2110']);
+    assert.ok(copy.concluded.length === 1 && copy.knows(copy.concluded[0].id));
+    copy.reset();
+    assert.ok(model.slots.has('st.ned_hunter.at.mon_2110'), 'still held by the first game');
+    game.reset();
+    assert.ok(!model.slots.has('st.ned_hunter.at.mon_2110'));
+    assert.ok(!model.stateTracks.has('at|edith_baxter'));
+});

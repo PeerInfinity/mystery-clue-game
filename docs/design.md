@@ -1765,3 +1765,44 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
 - **Checked in headless Chrome** at ¶46: the lads ruled out of the stable at the stable hour (struck, green); a
   failed proof explained; a stupefied mark for Hunter on his card and on the board.
 - **Moved:** nothing in the logs, reports or gates.
+
+## Round 69 (2026-10-16): checked placements (B, part 2) — cells the case never declared
+
+- **Opened on commit:** a mark the player proves or rules out where the case declares no state opens one
+  (`caseModel.js` `openState`). It is a slot on the thing's track (a new track if it has none), with no answer
+  and no part in uniqueness. Its domain is the case's place set, the holders, or yes/no.
+  - **Its own ties** (`windowTies`): whoever does or undergoes an event in that window is there, and a holder is
+    with the thing held. These are direct implications for that window.
+  - **The case's ties are untouched:** built over the declared windows, they read an opened window as
+    unconstrained, so the new ties only add to them.
+  - **Closing:** opened states are held by count (several games may share a model) and closed when the last
+    holder lets go (`closeState`; Game `reset`). They are saved (`opened`) and reopened before the cards that
+    speak of them.
+- **Refactor, no change in what is built:** the per-track ties (`trackTies`, `inTimeConds`, `statedOutright`) and
+  the making of a track (`makeTrack`, with `addWindow`/`removeWindow`) are functions of their own. The case's
+  slots and 65 ties come out identical: the same ids, formulas, labels and order.
+- **A check about a state takes that thing's ties** (`#withTies` in proving, ruling out, greying and `conclude`),
+  even where no card the player holds speaks of its states.
+- **Problem met, and Robert's ruling (option 1 of three):**
+  - **The problem:** a cell means its whole time. Edith runs to the stable window and flees to the house, both in
+    "Monday, at the stable window", so one place for her there contradicts her own clue. The proof check,
+    which assumes what is held is consistent, called "Edith was at the stable" proven: vacuous.
+  - **The ruling:** before any placement is proven or ruled out, what the player trusts plus the ties must be
+    consistent. If not, nothing is checked. The player is told the thing has no single place throughout that
+    time and can split the time at an event; a state opened for it is closed again. The alternatives, read an
+    opened cell as "at some point in the window" or split automatically, were declined.
+- **Speed:** opening a state, adding a proven card (and any conclusion or applied rule) no longer throws the clash
+  cache away. A new card only adds to what is trusted, so the clashes found are checked again first. At the end
+  of the story in Easy a placement proof takes about 4 s (23 s before the change, most of it a full clash
+  search).
+- **Display:** a pencil mark that repeats what is given (or proven) is not shown twice.
+- **Checked:**
+  - Test (`timeline.test.js`): Hunter at the stable during the window scene, proven from "he locked the door
+    behind him", and the villa then ruled out by that card. Edith refused, her state closed. Save, reload,
+    reset and the shared count.
+  - At the end of the story in Easy (scratch run): Silver Blaze at the stable during the stable hour and in the
+    hollow, and Straker at both, proven and made cards.
+  - In headless Chrome at ¶46: Hunter's card proves the cell; Edith's is refused with the explanation.
+- **Not yet:** the parts of a window the player splits ("a part of a window you split yourself cannot be checked
+  yet"). That comes with part 3, the order questions.
+- **Moved:** nothing in the logs, reports or gates.

@@ -629,7 +629,7 @@ function cardTimelineHtml(id) {
         if (tl.kind === 'thing') {
             const commit = layer === 'mine';
             if (l.at !== null) bits.push(markChip(id, l.time, l.at, placeName(l.at), { given: true }));
-            for (const m of l.pencil) bits.push(markChip(id, l.time, m.value, placeName(m.value), m, { commit }));
+            for (const m of l.pencil.filter((x) => x.value !== l.at || x.struck)) bits.push(markChip(id, l.time, m.value, placeName(m.value), m, { commit }));
             if (l.held || l.heldPencil.length) bits.push('<span class="small muted">held by</span>');
             if (l.held) bits.push(markChip(id, l.time, l.held, placeName(l.held), { given: true }));
             for (const m of l.heldPencil) bits.push(markChip(id, l.time, m.value, placeName(m.value), m, { aspect: 'held', commit }));
@@ -724,7 +724,7 @@ function boardHtml(layout) {
             for (const c of r.cells) {
                 const bits = [];
                 if (c.at) bits.push(markChip(r.thing, c.time, c.at, placeName(c.at), { given: true }));
-                for (const m of c.pencil) bits.push(markChip(r.thing, c.time, m.value, placeName(m.value), m));
+                for (const m of c.pencil.filter((x) => x.value !== c.at || x.struck)) bits.push(markChip(r.thing, c.time, m.value, placeName(m.value), m));
                 if (c.held || c.heldPencil.length) bits.push('<span class="small muted">held by</span>');
                 if (c.held) bits.push(markChip(r.thing, c.time, c.held, placeName(c.held), { given: true }));
                 for (const m of c.heldPencil) bits.push(markChip(r.thing, c.time, m.value, placeName(m.value), m, { aspect: 'held' }));
