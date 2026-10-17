@@ -2023,3 +2023,29 @@ It carries the rulings of this session and the traps met. `CLAUDE.md` points at 
     `t123.2`, whose inference is not among its premises. Left for Robert: the annotation's chain, not the data, is
     the question.
 - **Cost:** `npm run validate` 34 s → 47 s and `npm test` 128 s → 149 s (62 tests), from the dawn split's order questions and ties.
+
+## Round 77 (2026-10-16): step C, 1b — possession over time; "not a robbery" (`t78.2`)
+
+- **Data:**
+  - **Possession tracks:** `st.sovereigns.held` (after the blow, and in the morning) and `st.silver_watch.held`
+    (in the morning). `c.pocket_inventory` gains the morning holder, Straker, for both, quoted through its own line.
+  - **A slot:** `e.fatal_blow.purpose` ("Was Straker struck down to rob him?", rob / not), answer not.
+  - **Two default rules** (`knowledge.json`, background from ¶78):
+    - `r.stays_held`: what a man has about him stays with him until something takes it. It is the possession
+      counterpart of `r.stays_put`.
+    - `r.robber_takes_valuables`: a man who strikes another down to rob him takes the money and the watch he
+      carries.
+  - **The inference:** `k.not_a_robbery` (editorial: nobody in the story states it), **verified** by the engine
+    from the inventory, the blow on Straker and the two rule applications. "Rob" is an aim too, so whoever struck
+    to rob would have that aim then (the tie of 1a).
+  - **The thought:** `t78.2` maps to it. Its `from` gains `t35.2` (the blow shattered Straker's head): "still on
+    the body" presumes he was struck down, and without that clue the engine cannot verify the step.
+- **Test:** `timeline.test.js`, possession over time: verified, built by a player at ¶78, shown on the
+  sovereigns' card. `thoughts.test.js` takes `t82.3` as its thought with no inference, since `t78.2` now has one.
+- **Moved:**
+  - **Report:** rules 97 → 99, slots 656 → 660, constraints 428 → 431, verified inferences 61 → 62, states 25 → 28.
+  - **Reveal and foreshadow logs:** the two rules as background at ¶78.
+  - **Thoughts report:** 42 of 49 deductions with an inference; one premise disagreement (`t124.2`, left as it is).
+  - **Gates:** nothing (the step is editorial, so it does not gate).
+- **The six `world-model` thoughts:** `t123.2` and `t78.2` done; `t24.2` and `t150.1` with step 2 (knowledge);
+  `t34.5` waits for absence (workstream 5); `t82.3` needs only a condition track.

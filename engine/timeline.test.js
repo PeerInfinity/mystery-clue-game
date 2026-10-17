@@ -242,3 +242,14 @@ test("aims (intention): an act's purpose is its agent's aim then; the man who fo
     assert.deepEqual(game.cardTimeline('straker').lines.find((l) => l.time === 'w.tue_stable').aimsPencil.map((m) => m.value), ['injure']);
     assert.equal(game.stateText('straker', 'w.tue_stable', 'aims', 'injure'), 'John Straker was trying to injure the horse (Tuesday, after 1 a.m. — at the stable)');
 });
+
+test("possession carries over time: the money still on him rules out a robbery (verified, and a player can build it at ¶78)", async () => {
+    const { verifyInference } = await import('./caseModel.js');
+    assert.equal(verifyInference(model, model.data.constraints.find((k) => k.id === 'k.not_a_robbery')).status, 'verified');
+    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'start' } });
+    while (game.read <= paraOf('five sovereigns in gold')) game.advance();
+    const res = game.propose(game.connectSet('k.not_a_robbery'));
+    assert.deepEqual(res.built, ['k.not_a_robbery'], JSON.stringify(res));
+    assert.ok(game.knows('k.not_a_robbery'));
+    assert.equal(game.cardTimeline('sovereigns').lines.find((l) => l.time === 'w.tue_morning')?.held, 'straker');
+});

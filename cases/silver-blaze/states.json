@@ -29,6 +29,8 @@
   {"id": "st.ned_hunter.stupefied", "of": "ned_hunter", "aspect": "condition", "condition": "stupefied", "windows": {"w.tue_0700": "true"}},
   {"id": "st.overcoat.held", "of": "overcoat", "aspect": "possession", "places": "night", "windows": {"w.tue_0100": "straker", "w.tue_morning": "fatal_hollow"}},
   {"id": "st.cravat.held", "of": "cravat", "aspect": "possession", "places": "night", "windows": {"w.tue_morning": "straker"}},
+  {"id": "st.sovereigns.held", "of": "sovereigns", "aspect": "possession", "places": "night", "windows": {"w.tue_after": "straker", "w.tue_morning": "straker"}},
+  {"id": "st.silver_watch.held", "of": "silver_watch", "aspect": "possession", "places": "night", "windows": {"w.tue_morning": "straker"}},
   {"id": "st.straker.aims", "of": "straker", "aspect": "intention", "windows": {"w.tue_stable": "injure"}},
   {"id": "st.track_man.aims", "of": "track_man", "aspect": "intention", "windows": {"w.tue_dawn.before.brown_turns_back": "lead_home", "w.tue_dawn.after.brown_turns_back": null}}
  ]
