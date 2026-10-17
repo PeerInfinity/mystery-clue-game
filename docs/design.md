@@ -2621,3 +2621,23 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   by `t84.6`) still counts as uncited.
 - **Moved:** thoughts report: premise disagreements 3 → 1 (`t135.1`); ABSENCE held 3 → 4 of 6. Logs, case report,
   gates: nothing.
+
+## Round 98 (2026-10-17): review batch 5 — three notable details, one on an event card; the second marking
+
+- **Notices on an event card:** the odd thing may be that something happened at all. `t18.3`: the horse was taken,
+  when laming or hiding him in his stall would serve (Holmes asks it at ¶57, so it can score). The thoughts checker
+  lets `notices` name an event card; the card view offers "That's odd" on events (checked in headless Chrome at
+  ¶19: the button, the mark, the flag).
+- **Two more notices** (no Holmes paragraph, so they cannot score):
+  - `t40.5`: "by repeated blows" against "a savage blow" (`c.simpson_stick`, `c.head_shattered`);
+  - `t82.4`: a cataract knife kept on a trainer's dressing-table (`c.knife_from_dressing_table`).
+- **The second marking** (`t186.1`, "two markings, not one"): `c.silver_blaze_foreleg`, "Silver Blaze also has a
+  mottled off-foreleg", Ross's testimony quoted from ¶186. `c.silver_blaze_markings` is dealt at ¶146, where only
+  the forehead is told, so its text could not carry the leg.
+- **Test** (`absence.test.js`): the aggregate is now possible 6, of 11; an event card marked odd, scored against
+  Holmes's ¶57.
+- **Moved:**
+  - **Reveal and foreshadow logs:** the foreleg clue at ¶186.
+  - **Case report:** claims 154 → 155, quotes 1037 → 1038.
+  - **Thoughts report:** "Notable details" 8 → 11 rows.
+  - **Gates:** nothing.

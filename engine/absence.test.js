@@ -73,7 +73,12 @@ test('notices: a card the player holds marked odd, scored when made before Holme
     const bill = game.noticeScores().find((r) => r.thought === 't84.3');
     assert.deepEqual([bill.noticed < bill.holmes, bill.scores], [true, true]);
     assert.equal(game.noticeScores().find((r) => r.thought === 't84.7').scores, true, 'one card can serve two details');
-    assert.deepEqual(game.noticeScore(), { noticed: 4, scored: 4, possible: 5, of: 8 });
+    assert.deepEqual(game.noticeScore(), { noticed: 4, scored: 4, possible: 6, of: 11 });
+    // An event card can be noticed too (Round 98): the horse taken out at all, when laming him in his stall would do.
+    assert.ok(game.notice('e.horse_led_out').ok);
+    const taken = game.noticeScores().find((r) => r.thought === 't18.3');
+    assert.deepEqual([taken.holmes, taken.scores], [57, false], 'marked at ¶84, after Holmes asked it at ¶57');
+    game.unnotice('e.horse_led_out');
     // Saved and restored; withdrawn.
     const again = new Game(model);
     again.load(game.save());

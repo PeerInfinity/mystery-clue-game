@@ -126,7 +126,8 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         for (const x of t.maps ?? []) if (!caseIds.has(x)) err(`${t.id}: maps to unknown ${x}`);
         // The cards whose marking as odd counts for a notable detail (workstream 5, Round 84).
         if (t.notices && t.tag !== 'NOTICE') err(`${t.id}: only a NOTICE thought lists the cards it notices`);
-        for (const x of t.notices ?? []) if (!['claims', 'entities'].includes(model?.cards.get(x)?.section ?? (caseIds.has(x) ? 'claims' : null))) err(`${t.id}: notices ${x}, which is not a clue or entity card`);
+        // An event card too (Round 98): the odd thing may be that something happened at all (the horse taken, not lamed in his stall).
+        for (const x of t.notices ?? []) if (!['claims', 'entities', 'events'].includes(model?.cards.get(x)?.section ?? (caseIds.has(x) ? 'claims' : null))) err(`${t.id}: notices ${x}, which is not a clue, entity or event card`);
         if (t.inference !== undefined) {
             if (!CAN_NAME.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${CAN_NAME.join(', ')} do)`);
             else if (!inferenceById.has(t.inference)) err(`${t.id}: inference ${t.inference} is not in constraints.json`);

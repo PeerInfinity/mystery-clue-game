@@ -44,11 +44,14 @@ NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice
 
 | Thought | Cards | Reader | Holmes | Can score |
 |---|---|---|---|---|
+| `t18.3` | `e.horse_led_out` | ¶18 | ¶57 | yes |
 | `t20.4` | `c.curry_for_supper` | ¶20 | ¶216 | yes |
 | `t20.5` | `c.no_liquid` | ¶20 | never | no |
 | `t35.8` | `c.coat_on_bush_seen` | ¶35 | ¶226 | yes |
+| `t40.5` | `c.simpson_stick`, `c.head_shattered` | ¶40 | never | no |
 | `t78.3` | `c.pocket_inventory` | ¶78 | ¶224 | yes |
 | `t81.2` | `c.knife_is_cataract_knife`, `c.knife_delicate` | ¶81 | ¶81 | no |
+| `t82.4` | `c.knife_from_dressing_table` | ¶82 | never | no |
 | `t84.3` | `c.milliner_bill` | ¶84 | ¶225 | yes |
 | `t84.7` | `c.milliner_bill` | ¶84 | ¶225 | yes |
 | `t189.1` | `c.odds_shortened` | ¶189 | ¶189 | no |

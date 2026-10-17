@@ -273,8 +273,8 @@ function toolCard() {
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
 
-    // Noticing (workstream 5): mark a clue or a thing as odd, against what one would expect. Nothing is told back.
-    if (['claims', 'entities'].includes(c.section) && !game.autoSolves()) {
+    // Noticing (workstream 5): mark a clue, a thing or an event as odd, against what one would expect (events: Round 98). Nothing is told back.
+    if (['claims', 'entities', 'events'].includes(c.section) && !game.autoSolves()) {
         const n = game.noticed.get(id);
         if (n) h += `<p class="small notice on">You marked this as odd at ${paraLabel(n.para)}${n.because ? `, against: ${link(n.because, shortName(n.because, 70))}` : ''}. <span class="link" data-unnotice="${esc(id)}">Not odd after all</span></p>`;
         else {
