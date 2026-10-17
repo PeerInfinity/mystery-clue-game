@@ -45,6 +45,7 @@
   {"id": "st.silas_brown.believes_brown_denies", "of": "silas_brown", "aspect": "belief", "believes": "c.brown_denies", "windows": {"w.thu_dusk": "false"}},
   {"id": "st.straker.believes_straker_said_anxious", "of": "straker", "aspect": "belief", "believes": "c.straker_said_anxious", "windows": {"w.tue_0100": "false"}},
   {"id": "st.mrs_straker.believes_straker_said_anxious", "of": "mrs_straker", "aspect": "belief", "believes": "c.straker_said_anxious", "windows": {"w.thu_journey": "true"}},
-  {"id": "st.straker.believes_derbyshire_friend_said", "of": "straker", "aspect": "belief", "believes": "c.derbyshire_friend_said", "windows": {"w.weeks_before": "false"}}
+  {"id": "st.straker.believes_derbyshire_friend_said", "of": "straker", "aspect": "belief", "believes": "c.derbyshire_friend_said", "windows": {"w.weeks_before": "false"}},
+  {"id": "st.mrs_straker.believes_wife_never_had_dress", "of": "mrs_straker", "aspect": "belief", "believes": "c.wife_never_had_dress", "windows": {"w.thu_evening": "true"}}
  ]
 }

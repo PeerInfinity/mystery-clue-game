@@ -2468,3 +2468,21 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Not built:** Mrs. Straker's honest denial at the Plymouth ruse (`t92.3`). Her denial is not a clue in the case;
     it would need one.
   - **Not done:** scoring WEIGH thoughts. It was deferred by the agreement (Q6), to workstream 6.
+
+## Round 91 (2026-10-17): Mrs. Straker's honest denial at the ruse (`t92.3`); a correction to Round 90
+
+- **Correction:** Round 90 said her denial at Holmes's Plymouth ruse "is not a clue in the case". It is:
+  `c.wife_never_had_dress` ("I never had such a dress, sir", ¶92), a true testimony that `k.dresses_for_the_other_woman`
+  rests on. Only Holmes's own line (`c.holmes_plymouth_ruse`) had been looked at. Robert asked.
+- **Data:**
+  - a declared belief track, `st.mrs_straker.believes_wife_never_had_dress` (Thursday evening, true);
+  - `k.wife_denies_in_good_faith` (editorial, **verified**, by the sincerity default), named by `t92.3`. Doubting her
+    denial as a lie now clashes with the case.
+- **Left as it is:** Holmes's ruse line keeps no slot content. "The dress was hers" (false) would clash with her
+  true denial, and a clash sets aside both story clues, her denial among them, which the dress inferences need.
+- **Test** (`belief.test.js`): her denial has the two readings; the inference is built at ¶92; the answer key.
+- **Moved:**
+  - **Report:** one more declared belief (unique) and verified inference (72 → 73).
+  - **Thoughts report:** WEIGH thoughts held 5 → 6, deductions with an inference 50 of 53. Premise disagreements
+    7 → 8: `t92.4` cites `t92.3`, now an inference of its own that `k.dresses_for_the_other_woman` does not need.
+  - **Logs and gates:** nothing.

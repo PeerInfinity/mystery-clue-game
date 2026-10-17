@@ -110,3 +110,13 @@ test('a doubt may say why: recorded, saved, and cleared with the doubt', () => {
     again.unsuspect(id);
     assert.equal(again.doubtReason.has(id), false);
 });
+
+test("Mrs. Straker's denial at the ruse is honest (t92.3): built from the sincerity default; the answer key", () => {
+    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
+    while (!game.knows('c.wife_never_had_dress')) game.advance();
+    assert.deepEqual(game.doubtKinds('c.wife_never_had_dress'), ['mistaken', 'lying']);
+    assert.deepEqual(game.propose(game.connectSet('k.wife_denies_in_good_faith')).built, ['k.wife_denies_in_good_faith']);
+    const solved = new Game(model, { difficulty: TRIVIAL, autoPace: 'logic' });
+    while (!solved.finished()) solved.advance();
+    assert.equal(solved.settled('st.mrs_straker.believes_wife_never_had_dress.thu_evening'), 'true');
+});
