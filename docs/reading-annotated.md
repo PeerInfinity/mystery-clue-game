@@ -314,7 +314,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t34.4` **HYPOTHESIS** · *fair* · careful · from `t34.2` · Holmes ¶219
   Why was the dog quiet: {drugged too; barked unheard; **the visitor was someone the dog knew**}. Nothing says
   the dog was drugged (only the lad's supper was analysed, `t37.3`).
-- `t34.5` **AGENT** · *fair* · careful · from `t32.2`, `t33.1`, `t34.1`, `bk.alarm` · Holmes —
+- `t34.5` **AGENT** · *fair* · careful · from `t33.1`, `t34.8`, `bk.alarm` · Holmes —
   Straker went out at one, by his own account to the stables. Either he never got there, or he got there and
   **raised no alarm**: he didn't wake the lads in the loft about a drugged guard and an empty stall.
 - `t34.6` **GENRE** · *weak* · expert · Holmes ¶220
@@ -325,6 +325,10 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   Someone came in and took a horse while the dog was there, and nobody heard it: a guard dog barks at strangers,
   so the visitor was someone the dog knew, one of King's Pyland. Exceptions: the dog was drugged too, or barked
   unheard (`t34.3`). (Added in Round 44: Holmes's step, which a careful reader can take here.)
+- `t34.8` **ABSENCE** · *fair* · careful · from `t34.1`, `t32.2`, `t33.1`, `bk.alarm` · Holmes —
+  Nobody raised the alarm in the night: the lads in the loft slept until Mrs. Straker came at seven, though the
+  stall was empty and the guard drugged. (Added in the annotation review, Round 93: the absence `t34.5` rests on,
+  which the annotation had not tagged.)
 
 **¶35**
 - `t35.1` **RECORD** · typical
@@ -381,7 +385,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   but the step needs `bk.opium_taste`, which modern readers may lack.
 - `t37.7` **DEFAULT** · *fair* · careful · from `t37.6`, `t37.3`, `t20.2`, `bk.coincidence` · Holmes ¶218 ("too monstrous a coincidence")
   The drugger knew or chose the menu. Exception: the drugger had a method that didn't depend on the dish.
-- `t37.8` **INFER** · *fair* · careful · from `t37.7`, `t24.1`, `t26.1`, `t19.1` · refutes `t29.3`; strains `t24.3 (drug)` · Holmes ¶218
+- `t37.8` **INFER** · *fair* · careful · from `t37.7`, `t24.1`, `t19.1` · refutes `t29.3`; strains `t24.3 (drug)` · Holmes ¶218
   The stranger came with his paper already made up and couldn't have known what was for supper. **The drugger
   is of the household.**
 - `t37.9` **HYPOTHESIS·opportunity** · *fair* · careful · from `t37.8`, `t20.2`, `t20.7` · Holmes ¶218 (names Straker and his wife)
@@ -745,7 +749,8 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
   maid version needs two, and she has no motive beyond a bribe she ran away from.
 - `t92.8` **QUESTION** · careful · from `t92.6`
   Who drugged the dish: Straker or his wife? The curry argument names the household; the dog and key arguments
-  name the person who came at one. Holmes leaves the access question open (¶218).
+  name the person who came at one. The default of `t37.16` (whoever drugged the guard took the horse) answers
+  Straker; its exception, an accomplice, leaves his wife. Holmes leaves the access question open (¶218).
 - `t92.15` **INFER** · *fair* · careful · from `t92.4`, `t84.1`, `t85.1`, `bk.milliner_prices`, `bk.lay_against` · Holmes ¶225
   The costume went to another woman, and a trainer's household does not run to twenty-guinea dresses: if
   Derbyshire is Straker, Straker is keeping a second household, and its debts are his motive. (Added in Round 55.)
@@ -793,7 +798,7 @@ ahead by predicting what each action will find.
   With no wind, the coat wasn't blown onto the bush: it was put there. A reader who made `t92.10` scores it here.
 - `t97.1` **RECORD** · typical
   reads "Yes, it was laid across the bush."
-- `t97.2` **AGENT** · *fair* · careful · from `t96.1`, `t97.1`, `t35.2`, `t35.6`, `bk.coat_work` · strains `t46.1`; supports `t92.6` · Holmes ¶226
+- `t97.2` **AGENT** · *fair* · careful · from `t96.1`, `t97.1`, `t35.2`, `bk.coat_work` · strains `t35.6`, `t46.1`; supports `t92.6` · Holmes ¶226
   A man in a desperate fight doesn't lay his coat across a bush. Straker took it off himself, before whatever
   happened, to do something that needed his arms free.
 
@@ -917,7 +922,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 **¶124**
 - `t124.1` **RECORD** · *strong* · typical
   reads "It ended at the paving of asphalt which led up to the gates of the Mapleton stables"
-- `t124.2` **INFER** · *strong* · typical · from `t124.1`, `t123.2`, `t117.1` · supports `t40.4`, `t64.3` · Holmes ¶146
+- `t124.2` **INFER** · *strong* · typical · from `t124.1`, `t123.1`, `t117.1` · supports `t40.4`, `t64.3` · Holmes ¶146
   The horse was taken into Mapleton. Since Mapleton was searched (`t64.1`), the searchers missed him, and the
   disguise (`t64.3`) or some trick explains how.
 
@@ -938,7 +943,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 **¶129–¶136**
 - `t133.1` **RECORD** · typical
   reads "Holmes leaned forward and whispered something in the trainer's ear. He started violently and flushed to the temples"; "It's a lie!"; "an infernal lie!"
-- `t133.2` **WEIGH** · *fair* · careful · from `t133.1`, `bk.guilty_denial` · supports `t127.4`
+- `t135.1` **WEIGH** · *fair* · careful · from `t133.1`, `bk.guilty_denial` · supports `t127.4`
   A violent denial, followed at once by an invitation into the parlour. Whatever Holmes said hit something true.
 
 **¶137–¶143**
@@ -984,7 +989,7 @@ Straker, and confirmation of the motive.
   A "faker" is one who disguises horses: that is how the search missed him.
 
 **¶149–¶150**
-- `t150.1` **AGENT** · *fair* · typical · from `t140.1`
+- `t150.1` **AGENT** · *fair* · typical
   reads "he will guard it as the apple of his eye. He knows that his only hope of mercy is to produce it safe"
   Brown now has every reason to keep the horse safe.
 
@@ -1128,8 +1133,8 @@ of Holmes's facts the reader had, and which appear here for the first time.
   reads "it is surely too monstrous a coincidence"; "The opium was added after the dish was set aside for the stable-boy"
 - `t218.3` **NOTICE** · *weak* · careful · from `t218.1`, `t37.9`
   reads "Straker and his wife, the only two people who could have chosen curried mutton for supper that night"; "Which of them, then, had access to that dish without the maid seeing them?"
-  Holmes excludes the maid without argument, and then leaves his own access question unanswered. `t92.8` is still
-  open.
+  Holmes excludes the maid without argument, and then leaves his own access question unanswered. `t92.8` is
+  answered only by the default of `t37.16`, whose exception (an accomplice) he never rules out.
 
 **¶219**
 - `t219.1` **TEST** · *strong* · careful · supports `t34.2`, `t34.3`, `t34.4 (knew)`
@@ -1143,8 +1148,9 @@ of Holmes's facts the reader had, and which appear here for the first time.
   ⚠ fair play: `bk.lay_against` is first stated **here**.
 - `t220.2` **TEST** · *strong* · careful · from `t220.1` · supports `t46.4`, `t84.8`, `t28.3`
 - `t220.3` **NOTICE** · *fair* · careful · from `t220.1`, `t92.8` · answers `t92.8`
-  "His own stable-boy": Holmes attributes the drugging to Straker by assertion. The access question he raised at
-  ¶218 is answered by the scenario, not by evidence.
+  "His own stable-boy": Holmes attributes the drugging to Straker without answering the access question he raised
+  at ¶218. The attribution rests on the default of `t37.16` (whoever drugged the guard took the horse), not on
+  evidence of who had the dish; its exception, an accomplice, is the open part.
 
 **¶221–¶223**
 - `t221.1` **RECORD** · *strong* · typical
@@ -1236,7 +1242,8 @@ refuted at `t212.3`). Bayard (`t192.2`) and the field-glass (`t6.2`) end as SET 
 
 ### Still open when the story ends
 
-Who put the opium in the dish (Holmes asserts Straker, `t220.3`), why Straker carried the cravat (`t226.3`), what
+Who put the opium in the dish (Holmes asserts Straker, `t220.3`, by the default of `t37.16`; an accomplice is its
+exception), why Straker carried the cravat (`t226.3`), what
 Holmes asked the maid (`t163.2`), and what the boot comparison showed (`t107.2`). The game shouldn't ask the
 player to prove anything the story itself leaves open.
 

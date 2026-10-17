@@ -2502,3 +2502,49 @@ and belief (workstream 4). It carries the open items and this session's traps. `
 
   Fixes are proposed in batches for Robert, and nothing is changed without him. `CLAUDE.md` points at it.
 - **Moved:** nothing (documents only).
+
+## Round 93 (2026-10-17): the annotation review — verdicts, one question of direction, fix batches
+
+- **`docs/annotation-review.md`**: every one of the 191 thoughts in scope, checked against a dump of what holds it
+  (maps, inference premises, formula and rules, notices, the claims' asserts, `said`, truth, chains, parts and
+  filings, the paragraph each card is dealt). 138 accurate, 25 partial, 8 wrong, 11 missing but modelable now
+  (or with no plain card), 8 waiting for workstreams 3 or 6.
+- **Found:** the eight premise disagreements sort into data short (`t32.3`), annotation long (`t34.5`, `t97.2`,
+  `t124.2`, `t150.1`) and annotation right where the format cannot say it (`t84.6`, `t92.4`, `t133.2`: a step
+  that needs a statement weighed first). The four "dealt late" RECORDs were wrong mappings or a claim quoted only
+  from its last line. The gypsies' inference uses their departure as evidence, which the reader and Holmes do
+  not. A RECORD (`t34.1`) held the player's two absences. Two rules (`r.horse_gregarious`, `r.tendon_nick`) surface
+  at ¶18 and lean towards the solution.
+- **Robert:** agreed to every recommendation, and to building all six batches. On the question of direction (who
+  drugged the dish: the annotation says open, its own `t37.16` and the case say Straker by default) he took (a):
+  the case keeps Straker; the three thoughts that called it open are corrected, its exception (an accomplice, the
+  wife) left for workstream 3.
+- **Moved:** nothing (documents only).
+
+## Round 94 (2026-10-17): review batch 1 — mappings, citations, one label; who drugged the dish
+
+- **Annotation** (`thoughts.json` and `reading-annotated.md`), the review's A1–A27 but A14 (with batch 3):
+  - **maps added** where a held card was unmapped: `t4.1` (the two ¶4 events), `t19.1`, `t19.4` (the reputation),
+    `t26.1` (the sworn paper), `t29.4` (the dog rule), `t32.2` (Straker's stated reason), `t36.3`, `t40.6`,
+    `t40.7`, `t60.2`, `t78.5`, `t93.1`, `t133.1` (Brown's denial), `t141.2`, `t226.1` (the three steps Holmes
+    states there);
+  - **maps corrected:** `t14.1` (the ¶14 card, not the ¶37 one), `t34.1` (the lads' line only, not the two
+    absences), `t82.2` (the two statements it weighs, not `t81.5`'s inference), `t84.7` (not `t92.15`'s
+    inference), `t161.1` (not the ¶162 photograph), `t224.1` (the vesta only);
+  - **a new thought, `t34.8` ABSENCE** (careful): nobody raised the alarm in the night, mapping `c.no_alarm`.
+    `t34.5` cites it in place of `t34.1` and `t32.2`;
+  - **citations:** `t37.8` drops `t26.1`; `t97.2` moves `t35.6` from its premises to `strains`; `t124.2` cites the
+    return track (`t123.1`), not the man's change of mind; `t150.1` drops `t140.1`;
+  - **a date:** `t133.2` is now `t135.1` (the invitation into the parlour is ¶134–¶135). Older Rounds keep the old
+    id;
+  - **who drugged the dish** (Round 93, (a)): `t92.8`, `t218.3`, `t220.3` and "Still open when the story ends"
+    now say the default of `t37.16` answers it and its exception, an accomplice, is the open part.
+- **Data:** `k.horse_at_mapleton_by_reach` loses "which also has every reason to keep him from running" from its
+  label (not among its premises).
+- **Moved:**
+  - **Thoughts report:** 295 thoughts. Held by a card: RECORD 89 → 91, ABSENCE 2 → 3 of 6, WEIGH 6 → 12, PREDICT
+    5 → 8; NOTICE 4 → 3 (`t84.7` keeps its `notices`, which the coverage table does not count). "Dealt later than
+    the reader has it" 4 → 2 (`t122.1`, `t123.1`: batch 2). Premise disagreements 8 → 3 (`t84.6`, `t92.4`,
+    `t135.1`: batch 4).
+  - **Case report:** the inference table's row for Brown's lie names `t135.1`.
+  - **Reveal and foreshadow logs, gates:** nothing.

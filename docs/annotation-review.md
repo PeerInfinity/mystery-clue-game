@@ -1,8 +1,8 @@
 # Annotation review: what the case holds of each thought
 
-Status: **REVIEW COMPLETE** (2026-10-17): every thought in scope has a verdict. The fix batches await Robert. The mission is in
-`docs/kickoff-annotation-review.md`. Nothing here has been changed in the case or the annotation yet: the fixes are
-proposals, gathered by kind at the end, for Robert to decide batch by batch.
+Status: **REVIEW COMPLETE** (2026-10-17, Round 93): every thought in scope has a verdict. Robert agreed to all six batches and to (a) on who drugged the dish. Built: batch 1 (Round 94). The mission is in
+`docs/kickoff-annotation-review.md`. The fixes were
+proposed by kind at the end, decided by Robert batch by batch, and built as Rounds of `docs/design.md`.
 
 ## How to read this
 

@@ -270,7 +270,7 @@ An earlier quote, where the story has one, would let the card carry its words fr
 | `t124.2` | c.horse_track_in_wet_hollow, c.double_track_loops, r.tracks_lead_in | (silver_blaze.hidden_at = mapleton) ∧ (e.horse_hidden.place = mapleton) | ✓ |
 | `t127.3` | c.horse_track_in_wet_hollow, c.double_track_loops, r.tracks_lead_in, c.brown_first_up, c.mapleton_brown, r.first_up_takes_it_in | e.horse_hidden.agent = silas_brown | ✓ |
 | `t127.4` | c.square_toes, r.prints_identify_boots | track_man.identity = silas_brown | ✓ |
-| `t133.2` | c.brown_capitulates, r.undertaking_means_possession, r.denies_own_deed | st.silas_brown.believes_brown_denies.thu_dusk = false | ✓ |
+| `t135.1` | c.brown_capitulates, r.undertaking_means_possession, r.denies_own_deed | st.silas_brown.believes_brown_denies.thu_dusk = false | ✓ |
 | `t140.2` | c.brown_capitulates, r.undertaking_means_possession | e.horse_hidden.agent = silas_brown | ✓ |
 | `t141.1` | r.horse_gregarious, r.gypsies_avoid_trouble, r.famous_horse_unsellable, c.gypsies_gone, c.no_news_of_horse, c.mapleton_searched_nothing, c.silver_blaze_markings, r.disguise_washes_off, c.stall_empty, r.searched_and_not_found, c.horse_was_in_hollow | silver_blaze.disguised = true | ✓ |
 | `t146.2` | c.square_toes, r.prints_identify_boots | track_man.identity = brown_boots.owner | ✓ |
