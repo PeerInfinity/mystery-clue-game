@@ -160,6 +160,75 @@ A motive (`straker.motive`) stays a facet: it is why, not what for, and it has n
 Each step keeps the reading layer sacred: every proposition, aim and track answer is quoted through a claim's
 own line, and the fair-play test, the reveal and foreshadow logs and the gate listing are diffed.
 
+## Data plan (Round 73+; prepared while the event-order session runs, to build after it)
+
+Ids and quotes below are from `cases/silver-blaze` as of Round 72. Every answer is given by a claim's own line or
+derived by an inference, as the validator already requires for states.
+
+### Step 1: intention
+
+**The aims share one vocabulary with the purposes of acts.**
+- **Why:** the built-in tie then needs no mapping: whoever does an act with a `purpose` facet has that purpose
+  as their aim at the act's time.
+- **Where:** a new part entry `state_aims` (beside `state_conditions`), each aim with an id, a label and its line.
+- **The aims:** the existing purpose values (`injure`, `steal`, `exercise`, `information`), plus `find_way`,
+  `lead_home`, `hide`, `keep_safe` and `rob`.
+
+**Tracks (`states.json`, aspect `intention`, name `aims`):**
+
+| Track | Window(s) | Answer | Given by |
+|---|---|---|---|
+| `st.the_stranger.aims` | `w.mon_2105` | `information` (not `find_way`) | derived (`t24.2`, step 2's knowledge); the pretence is a new claim, below |
+| `st.straker.aims` | `w.tue_stable`, `w.tue_hollow` | `injure` | derived: the tie from `e.horse_led_out.purpose` = `injure` (`k.knife_for_an_operation`) |
+| `st.silas_brown.aims` | `w.tue_dawn.before.brown_turns_back` | `lead_home` | `c.brown_story_told` ("his first impulse had been to lead him back to King's Pyland"); for the reader, derived from `c.double_track_loops` (`t123.2`) |
+| `st.silas_brown.aims` | `w.tue_dawn.after.brown_turns_back` | `hide` | `c.brown_story_told` ("how he could hide the horse until the race was over"); the return track (`c.double_track_loops`) |
+| `st.silas_brown.aims` | `w.thu_night` | `keep_safe` | derived (`t150.1`, step 2); Holmes states it ("he will guard it as the apple of his eye", ¶150) |
+
+**Other data:**
+- **A case split:** `state_splits` gains `w.tue_dawn` at `e.brown_turns_back` (Brown's aims change there). Its
+  order questions (`e.brown_finds_horse` before, `e.horse_hidden` after) come from the event-order session's
+  facts.
+- **A new claim:** `c.stranger_says_lost`: "Can you tell me where I am? I had almost made up my mind to sleep on
+  the moor". It asserts the stranger's aim at `w.mon_2105` is `find_way`, with truth false: a pretence the player
+  can doubt.
+- **Possession, for `t78.2`:** tracks `st.sovereigns.held` and `st.silver_watch.held`, at `w.tue_day` = `straker`,
+  as a conjunct on `c.pocket_inventory` ("a silver watch with a gold chain, five sovereigns in gold").
+  `r.stays_put` carries them back to after the blow.
+- **A purpose slot, for `t78.2`:** `e.fatal_blow.purpose`, over `rob` and `other`. The horse's kick has no aim;
+  "other" covers it.
+
+**Rules** (`knowledge.json`, default, with `unless`):
+- `r.leads_where_he_means`: one who leads a horse towards a place means to take it there (`t123.2`), unless he
+  is lost.
+- `r.robber_takes_valuables`: one who strikes a man to rob him takes the money and watch on him (`t78.2`), unless
+  disturbed.
+
+**Engine:**
+- the aspect `intention` (like a condition, over `state_aims`);
+- the tie from purposes to aims (in `trackTies` and `windowTies`);
+- the board and card form's "was trying to" choice;
+- the validator and schema for `state_aims`.
+
+**Thoughts gaining an inference:** `t123.2`, `t78.2`. `t24.2` and `t150.1` complete in step 2.
+
+### Step 2: knowledge (preview)
+
+**Propositions to author** (`propositions.json`, empty today), each with its `means` and its line:
+- **`p.lad_alone_at_night`:** "a stable-boy sleeps there alone every night". `c.stranger_knew_lad_alone` gains
+  `knows(the_stranger, p.lad_alone_at_night)` at `w.mon_2105`.
+- **`p.stall_empty`:** the stall was empty after the horse was taken (`t34.5`'s knowledge half).
+- **`p.holmes_knows_brown_hid`:** what Holmes told Brown.
+
+**A new event:** `e.holmes_tells_brown` (`w.thu_dusk`, recipient `silas_brown`, content
+`p.holmes_knows_brown_hid`), from "When I told him every detail he gave it up".
+
+**Rules:**
+- `r.lost_does_not_know`: a stranger lost on the moor does not know a stable's night arrangements (`t24.2`,
+  against `c.stranger_says_lost`);
+- `r.mercy_keeps_safe`: one whose only hope of mercy is to produce a thing safe keeps it safe (`t150.1`).
+
+**The three default rules of Q2:** `r.told_knows`, `r.present_sees`, `r.acts_on_knows`.
+
 ## Agreed (Robert, Round 72)
 
 All five as recommended:
