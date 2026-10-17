@@ -393,7 +393,8 @@ export function buildModel(data) {
     for (const r of data.rules ?? []) {
         if (r.strength && !RULE_STRENGTHS.includes(r.strength)) errors.push(`${r.id}: unknown strength ${r.strength}`);
         if (r.schema) {
-            const used = varsOf(r.schema.formula);
+            // A variable may serve only a named exception (what the witness saw, the band's habit).
+            const used = varsOf({ and: [r.schema.formula, ...(r.unless ?? []).filter((u) => u?.formula).map((u) => u.formula)] });
             for (const v of used) if (!(v in (r.schema.vars ?? {}))) errors.push(`${r.id}: schema uses ?${v}, which its vars do not declare`);
             for (const v of Object.keys(r.schema.vars ?? {})) if (!used.has(v)) errors.push(`${r.id}: schema declares ?${v} but never uses it`);
         }
@@ -510,7 +511,11 @@ export function buildModel(data) {
             let g;
             try { g = rule.schema ? ground(rule.schema.formula, { ...env, bind: use.bind ?? {} }) : rule.formula; } catch (e) { errors.push(`${k.id}: ${use.rule}: ${e.message}`); return; }
             const exceptions = namedExceptions(rule).map((u) => ({ id: u.id, formula: u.formula ? groundOrError(`${k.id}#rule${i + 1}: exception ${u.id}`, u.formula, use.bind ?? {}) : null }));
-            addConstraint({ id: `${k.id}#rule${i + 1}`, label: `${rule.text} (as applied in: ${k.label})`, by: k.by, premises: [...new Set([...k.premises, ...Object.values(use.bind ?? {}).filter((c) => cards.has(c))])], inference: k.id, doubt_with: k.id, rule: use.rule, bind: use.bind ?? {}, exceptions, formula: g });
+            // An application the true story defeats (a character's wrong step, workstream 3): the exception that holds
+            // says so. It is the character's reasoning, held while a player trusts the inference, never the case's.
+            if (use.defeated_by && !exceptions.some((x) => x.id === use.defeated_by && x.formula)) errors.push(`${k.id}: defeated by ${use.defeated_by}, which is not an exception of ${use.rule} with a formula`);
+            if (use.defeated_by && k.truth !== false) errors.push(`${k.id}: only a false inference has an application defeated in the true story`);
+            addConstraint({ id: `${k.id}#rule${i + 1}`, label: `${rule.text} (as applied in: ${k.label})`, by: k.by, premises: [...new Set([...k.premises, ...Object.values(use.bind ?? {}).filter((c) => cards.has(c))])], inference: k.id, doubt_with: k.id, rule: use.rule, bind: use.bind ?? {}, exceptions, ...(use.defeated_by ? { defeated: use.defeated_by } : {}), formula: g });
         });
     }
 
@@ -746,6 +751,8 @@ export function activeConstraints(model, known, doubted = null, { heldInferences
         if (k.world) { ties.push(k); continue; }
         if (heldInferences && k.inference ? !known.has(k.inference) : !k.premises.every((p) => known.has(p))) continue;
         if (k.doubt_with && doubted?.has(k.doubt_with)) continue;
+        // A defeated application is a character's step: in a player's reading (while they trust it), never the case's.
+        if (k.defeated && !doubted) continue;
         const forms = doubted && k.from_claim ? model.claimForms.get(k.from_claim) : null;
         out.push(forms ? (doubted.has(k.from_claim) ? forms[kinds?.get(k.from_claim)] ?? forms.doubted : forms.trusted) : k.id);
     }

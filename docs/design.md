@@ -2769,3 +2769,68 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Report:** quotes 1042 → 1049; the Exceptions table gains eight rows (the seven held back, on their
     applications; no formulas).
   - **Thoughts report, gates:** nothing.
+
+## Round 104 (2026-10-17): workstream 3, step 3 — the police's four as reasoning; slice 4's report gate
+
+- **Format** (schema, model, validator):
+  - `defeated_by` on a false inference's rule application: the named exception (with a formula) that holds in the
+    true story. Verification keeps the application, so the inference is verified as the character's reasoning. The
+    case's reading leaves it out (`defeated`): it is active only for a player who trusts the inference. The validator
+    checks the exception in the answer key.
+  - A schema variable may serve only a named exception; a variable bound to a proposition stands for its slot.
+  - A proposition may carry `source` lines, and is dealt at the first.
+  - **The report gate (slice 4):** an inference the engine does not derive and that gives no `asserted: "<why>"` is
+    an error. Silver Blaze: 80 verified, 7 asserted, each with its reason.
+- **Data** (seven rules, two propositions, two inferences; the four rewritten):
+  - `k.police_simpson_drugged` takes Hunter's charge as fact by `r.witness_saw_it` (¶36: "a witness who is sure of
+    what he says he saw is commonly taken to have it right"), defeated by "he could not have seen it"
+    (`p.hunter_saw_the_dosing` false). The reader's `k.hunter_could_not_see` (`t36.2`, editorial, verified) gives it
+    from Hunter's eating and `r.saw_drug_would_not_eat`. The rule and the proposition come at Holmes's line on the
+    eater (¶218), not beside Hunter's charge, where they would give the step away; `t36.2` gets a date note.
+  - `k.police_simpson_took_horse` rests on the first and applies `r.drugged_guard`, as Holmes does (sound; the false
+    part is its premise), and `r.night_taker_steals` (¶46), defeated by "he meant to injure it" (from "If he wished to
+    injure it", ¶57). Its formula drops `simpson.purpose`, which `t.police`'s assignment keeps.
+  - `k.police_stick_killed`: `r.clutched_from_assailant` (¶35), defeated by "it was in his own hands before he was
+    struck" (from Simpson's "he had lost it", ¶60); `r.weapon_fits_the_wounds` (¶40), sound in the true story.
+  - `k.gregory_gypsies`: `r.flight_shows_guilt` (¶62), defeated by "they would have gone anyway"
+    (`p.gypsies_leave_on_trouble`, raised at ¶62, given by the period belief `r.gypsies_clear_out`, flagged a
+    stereotype, from Holmes's "These people always clear out", ¶114). `k.gypsies_would_leave_anyway` (editorial,
+    verified) is `t62.3`'s, which loses `no_inference`; `bk.gypsies` maps the new rule.
+- **Found while building:**
+  - With the police's second step applying `r.drugged_guard` to the same events, it cannot answer the accomplice
+    either: trusting the police no longer rules the accomplice out (Round 102's test said it did). The test now says
+    so; the made-up pair still covers "ruled out".
+  - A proposition reaches the player only through a clue that speaks of it; the two new ones had none, so the
+    thoughts report dated their inferences "never". Hence `source` on propositions.
+  - The States table counted the defeated application as giving Hunter's belief; it no longer does.
+  - **A clash set an inference aside but left its rule applications active** (`Game.clashes`). Harmless while every
+    application was true; with the police's defeated ones it was not. At the end of the story the gypsies' step,
+    set aside by the horse's instinct, kept "people who leave … have what was taken" active, which then set aside
+    `c.gypsies_gone`, and the stick's and Hunter's applications set aside the shattered head, the cravat and the whole
+    curry chain (`game.test.js`'s clash test caught it: the honest-record clue was no longer the one set aside). Now an
+    application counts as part of its inference: caught in a clash it is weighed as the inference, and a card set
+    aside goes whole, its applications with it. This is how a doubt already treats them (`doubt_with`), not a change
+    of the clash order (which stays open, with Q6).
+- **Leak check:** the seven rules under `--background`. Four were flagged as untrue rules (a witness's certainty, the
+  clutched thing, the fitting weapon, flight), so they are now written as presumptions ("commonly taken to …",
+  "commonly suspected of …"); then 4/4 ok. `--exceptions` 80/80 ok ($0.16 in all).
+- **Played** (test, Medium): at ¶62 every police exception can be raised, as a reservation; the gypsies' becomes a
+  defeat once the player builds `k.gypsies_would_leave_anyway`; at ¶219, with `k.hunter_could_not_see` built, "he
+  could not have seen it" defeats the police's first step, and their second is marked as resting on it. "He meant to
+  injure it" is ruled out for a player who still trusts Gregory's "poor weapon".
+- **Test** (`defeasibility.test.js`): the four verified and their defeated applications out of the case's reading;
+  the gypsies' defeat at ¶62; Hunter's at ¶219, with the police's second step resting on it; at the end of the story no
+  true clue lost to a police step, and the applications gone with their inferences.
+- **Seen, for Robert:** a stated inference outweighs a story clue in a clash (Round 102), so a player who keeps the
+  police's account loses true clues to it. Robert: leave it; the clash order is to be rethought after this workstream,
+  with Q6 and workstream 6's graded support.
+- **Moved:**
+  - **Reveal and foreshadow logs:** 24 reveal lines, all additions: the seven rules and their exceptions where
+    planned (¶35, ¶36, ¶40, ¶46, ¶57, ¶60, ¶62, ¶218), and the two propositions (¶62, ¶218); 46 foreshadow lines.
+  - **Report:** rules 111 → 118, propositions 3 → 5, constraints 465 → 470, quotes 1049 → 1062, verified 74 → 80,
+    asserted 11 → 7 (each with its reason), forced slots 453 → 455; the four police rows verified with their rules;
+    five Exceptions rows (four "established; holds, and defeats this application", the accomplice left open).
+  - **Thoughts report:** with an inference 50 → 52 (`t36.2`, `t62.3`); `workstream-3` left on `t4.2`, `t68.3`
+    (Q6, deferred); premise disagreements 1 → 2 (`t36.2` cites Hunter's charge, where the reader takes his eating;
+    the inference rests on the analysed remains, ¶37); date misses explained 4 → 5.
+  - **Gates:** nothing.

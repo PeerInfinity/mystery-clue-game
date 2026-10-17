@@ -1379,6 +1379,10 @@
                 "additionalProperties": {
                   "type": "string"
                 }
+              },
+              "defeated_by": {
+                "type": "string",
+                "description": "A false inference's application that the true story defeats (workstream 3): the id of the rule's named exception that holds. Verification keeps the application; the case's reading does not, and the validator checks the exception in the answer key."
               }
             }
           }
@@ -1863,6 +1867,13 @@
         "means": {
           "$ref": "#/$defs/formula",
           "description": "Its meaning in slot terms: the model adds a definition tying the two."
+        },
+        "source": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Lines that raise the question (workstream 3): the card is dealt at the first, as an event told directly is. Without it, a proposition comes with a clue or inference that speaks of it."
         },
         "note": {
           "type": "string"

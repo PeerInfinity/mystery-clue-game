@@ -41,15 +41,10 @@ test('the accomplice: raised from ¶218, a reservation that holds back nothing, 
     assert.equal(before.raise(DRUGGER, 1, 'accomplice').ok, false);
     const game = readTo(ACCESS);
     assert.deepEqual(game.exceptionsOf(DRUGGER).map((e) => [e.n, e.id, e.para]), [[1, 'accomplice', ACCESS]]);
-    // Doubting Holmes's curry step and trusting the police, Simpson drugged the guard and took the horse: that rules
-    // the accomplice out.
+    // Doubting Holmes's curry step and trusting the police (Simpson drugged the guard and took the horse) does not rule
+    // it out: the police's "and so he took the horse" applies the same default to the same events (step 3), so it
+    // cannot answer the exception. Nothing the player holds settles it: the default stands, with a reservation.
     game.suspect('k.drugger_chose_the_dish');
-    const ruled = game.raise(DRUGGER, 1, 'accomplice');
-    assert.equal(ruled.status, 'ruled-out');
-    assert.ok(ruled.used.includes('k.police_simpson_took_horse#trusted'), ruled.used.join(', '));
-    assert.equal(game.raisedOn(DRUGGER).length, 0, 'a ruled-out exception is not recorded');
-    // Doubting the police's account, nothing the player holds settles it: the default stands, with a reservation.
-    game.suspect('k.police_simpson_took_horse');
     assert.deepEqual(game.raise(DRUGGER, 1, 'accomplice'), { ok: true, status: 'open', used: [] });
     assert.ok(!game.isSuspected(DRUGGER), 'a reservation leaves the card counting');
     assert.deepEqual(game.blockers(), [], 'and holds back no paragraph');
@@ -125,4 +120,57 @@ test('a background fact shows its exceptions, each from its own line where it ha
     assert.deepEqual(unless(game, 'topic_reasoning', 'r.asks_about_what_he_read'), [['he asked about it for some other reason', fact.para]]);
     assert.deepEqual(unless(game, 'topic_reasoning', 'r.planned_the_dish'), [['he learned the menu from someone in the house', paraOf('his supper, which consisted of a dish of curried')]]);
     assert.deepEqual(unless(game, 'topic_reasoning', 'r.practise_first'), [], 'the sheep wait for the sheep');
+});
+
+test("the police's four: verified as their reasoning; a defeated application is never the case's (step 3)", async () => {
+    const { activeConstraints, verifyInference } = await import('./caseModel.js');
+    for (const k of ['k.police_simpson_drugged', 'k.police_simpson_took_horse', 'k.police_stick_killed', 'k.gregory_gypsies']) {
+        assert.equal(model.verified.get(k).status, 'verified', k);
+    }
+    const defeated = [...model.constraints.values()].filter((k) => k.defeated).map((k) => `${k.id}:${k.defeated}`);
+    assert.deepEqual(defeated, ['k.police_simpson_drugged#rule1:could_not_see', 'k.police_simpson_took_horse#rule2:to_injure', 'k.police_stick_killed#rule1:his_before', 'k.gregory_gypsies#rule1:gone_anyway']);
+    const everything = new Set(model.cards.keys());
+    assert.ok(!activeConstraints(model, everything).some((id) => model.constraints.get(id).defeated), 'the case\'s reading leaves them out');
+    assert.ok(activeConstraints(model, everything, new Set()).includes('k.gregory_gypsies#rule1'), 'a player who trusts Gregory holds his step');
+    assert.equal(verifyInference(model, model.data.constraints.find((k) => k.id === 'k.hunter_could_not_see')).status, 'verified');
+});
+
+test('the gypsies: their going points at nothing, which defeats Gregory\'s step (t62.3)', () => {
+    const game = readTo(paraOf('On Tuesday they were gone'));
+    const K = 'k.gregory_gypsies';
+    assert.ok(game.knows(K) && game.knows('r.gypsies_clear_out') && game.knows('p.gypsies_leave_on_trouble'));
+    assert.deepEqual(game.exceptionsOf(K).map((e) => e.id), ['gone_anyway']);
+    assert.equal(game.raise(K, 1, 'gone_anyway').status, 'open', 'holding the period belief is not yet using it');
+    game.withdraw(K, 1, 'gone_anyway');
+    assert.deepEqual(game.propose(game.connectSet('k.gypsies_would_leave_anyway')).built, ['k.gypsies_would_leave_anyway']);
+    const res = game.raise(K, 1, 'gone_anyway');
+    assert.equal(res.status, 'established');
+    assert.ok(res.used.includes('k.gypsies_would_leave_anyway'), res.used.join(', '));
+    assert.ok(game.isSuspected(K), 'Gregory\'s step counts nowhere');
+    assert.deepEqual(game.blockers(), []);
+});
+
+test('Hunter could not have seen it: from Holmes\'s line on the eater, a defeat of the police\'s first step (t36.2)', () => {
+    const before = readTo(paraOf('would undoubtedly detect it, and would probably eat no more') - 1);
+    assert.ok(!before.knows('p.hunter_saw_the_dosing') && !before.knows('r.saw_drug_would_not_eat'), 'not beside Hunter\'s charge');
+    assert.equal(before.raise('k.police_simpson_drugged', 1, 'could_not_see').status, 'open', 'raised early, it is a reservation');
+    const game = readTo(paraOf('not barked enough'));
+    assert.deepEqual(game.propose(game.connectSet('k.hunter_could_not_see')).built, ['k.hunter_could_not_see']);
+    const res = game.raise('k.police_simpson_drugged', 1, 'could_not_see');
+    assert.equal(res.status, 'established');
+    assert.ok(game.isSuspected('k.police_simpson_drugged'));
+    assert.ok(game.restingOnDefeated('k.police_simpson_took_horse'), 'the police\'s next step rests on it');
+    assert.ok(!game.isSuspected('c.hunter_blames_stranger'), 'Hunter\'s charge itself is weighed apart (mistaken, as before)');
+});
+
+test('a clash sets aside an inference whole, its rule applications with it (step 3)', () => {
+    // The police's applications are false in the true story: once their inference is set aside in a clash, they must
+    // go with it, and never cost the player a true clue (the gypsies' going, the shattered head, the curry).
+    const game = new Game(model, { options: { background: 'start' } });
+    while (!game.finished()) game.advance();
+    const lost = game.clashes().flatMap((c) => c.claims);
+    for (const c of ['c.gypsies_gone', 'c.head_shattered', 'c.cravat_in_left_hand', 'c.curry_for_supper', 'c.stall_empty']) assert.ok(!lost.includes(c), c);
+    assert.ok(lost.includes('k.gregory_gypsies') && lost.includes('k.police_stick_killed'));
+    const working = new Set(game.workingConstraints());
+    assert.ok(!working.has('k.gregory_gypsies#rule1') && !working.has('k.police_stick_killed#rule1'), 'the applications went with them');
 });

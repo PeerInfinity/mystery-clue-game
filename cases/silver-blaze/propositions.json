@@ -3,6 +3,8 @@
  "propositions": [
   {"id": "p.lad_alone_at_night", "text": "A stable-boy sleeps alone in the stable every night.", "answer": "true"},
   {"id": "p.mercy_in_safe_return", "text": "Brown's only hope of mercy is to produce the horse safe.", "answer": "true"},
-  {"id": "p.alarm_raised_in_night", "text": "Someone raised the alarm at the stable in the night.", "answer": "false"}
+  {"id": "p.alarm_raised_in_night", "text": "Someone raised the alarm at the stable in the night.", "answer": "false"},
+  {"id": "p.hunter_saw_the_dosing", "text": "Hunter saw his supper being drugged.", "answer": "false", "source": ["would undoubtedly detect it, and would probably eat no more"]},
+  {"id": "p.gypsies_leave_on_trouble", "text": "The gypsies would have left at news of trouble, whoever did the crime.", "answer": "true", "source": ["On Tuesday they were gone"]}
  ]
 }

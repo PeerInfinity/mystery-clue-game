@@ -473,6 +473,30 @@ specific thing stay ground facts with a formula and no schema.
 - **Leak checker:** `--exceptions` checks each exception once, against the story so far where it first shows, as
   "Unless … (an exception to the general rule: …)"; `--all` includes them.
 
+## As built (2026-10-17): the police's four as reasoning, and the report gate (workstream 3, step 3; Round 104)
+
+- **`defeated_by`** on a false inference's rule application: the id of the rule's named exception (with a formula)
+  that holds in the true story. Verification keeps the application (the character's reasoning, verified). The
+  case's reading leaves it out (`defeated` on the `#rule<n>` constraint): it is active only in a player's reading,
+  while they trust the inference. The validator checks the exception's formula in the answer key instead.
+- **A schema variable may serve only a named exception** (what the witness saw, the band's habit), and a variable
+  bound to a proposition stands for its slot.
+- **A proposition may have `source` lines:** it is dealt at the first, as an event told directly is.
+- **The report gate (slice 4):** an inference the engine does not derive must say why (`asserted: "<why>"`), or the
+  validator errs. Silver Blaze: 80 verified, 7 asserted, each with its reason.
+- **Silver Blaze:**
+  - `k.police_simpson_drugged`: Hunter's charge taken as fact (`r.witness_saw_it`, ¶36), defeated by "he could not
+    have seen it" (`p.hunter_saw_the_dosing` false). The reader's `k.hunter_could_not_see` (`t36.2`) gives it from
+    his eating and `r.saw_drug_would_not_eat`, both from Holmes's line on the eater (¶218);
+  - `k.police_simpson_took_horse`: from the first, by `r.drugged_guard` (sound; its premise is the false part) and
+    `r.night_taker_steals` (¶46), defeated by "he meant to injure it" (¶57). Its formula no longer repeats
+    `simpson.purpose` (the theory's assignment keeps it);
+  - `k.police_stick_killed`: `r.clutched_from_assailant` (¶35), defeated by "it was in his own hands before he was
+    struck" (¶60, Simpson's "he had lost it"); `r.weapon_fits_the_wounds` (¶40), sound in the true story;
+  - `k.gregory_gypsies`: `r.flight_shows_guilt` (¶62), defeated by "they would have gone anyway"
+    (`p.gypsies_leave_on_trouble`, given by the period belief `r.gypsies_clear_out`, ¶62, in
+    `k.gypsies_would_leave_anyway`, `t62.3`).
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's
@@ -501,7 +525,9 @@ specific thing stay ground facts with a formula and no schema.
   *Ruled (Round 33):* neither as asked. Model them as the annotation does: each police conclusion is a member of
   a candidate set (`t39.4`, `t46.1`, `t62.2`), the police's rules are defeasible defaults, and the reader defeats
   them by undercut, strain and drop (`t36.2`, `t40.5`, `t46.3`, `t62.4`). Built as part of the infrastructure the
-  gap analysis lays out, not separately; slice 4 waits on that.
+  gap analysis lays out, not separately; slice 4 waits on that. *Done (Rounds 102–104):* each is verified as the
+  character's reasoning, its wrong step defeated by a named exception the true story bears out; slice 4's gate is
+  strict.
 - **Cards quoted later than they appear** (19, listed in the report): an earlier quote where the story has one.
   *Ruled (Round 33):* handle with the annotation's fair-play table and late-disclosure typing, in the gap analysis.
 - **The sheep event at ¶173** now shows its four questions, "Who did it?" among them, when the lad reports the

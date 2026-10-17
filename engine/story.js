@@ -134,6 +134,8 @@ export class Story {
         }
         // Events told directly have their quote; implied ones also appear through claims (see Game).
         for (const e of data.events ?? []) for (const q of e.source ?? []) this.#quoteSpan(e.id, q, 'event');
+        // A proposition with lines of its own is raised there (workstream 3: what Hunter saw, the gypsies' habit).
+        for (const p of data.propositions ?? []) for (const q of p.source ?? []) this.#quoteSpan(p.id, q, 'proposition');
         for (const q of data.questions ?? []) {
             const hit = this.#quoteSpan(q.id, q.raised, 'question');
             if (hit) this.anchors.questions.set(q.id, hit.para);

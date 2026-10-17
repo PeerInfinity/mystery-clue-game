@@ -1792,7 +1792,10 @@ export class Game {
         // Doubtable: a trusted clue or inference. A clash sets aside what weighs least, by where it came from (never
         // by whether it is true): a story's clue first, then an inference someone else stated, and last one the
         // player built or Holmes drew.
-        const isClaim = (id) => !!trustedClaim(this.model, id);
+        // A rule application counts as part of its inference (workstream 3: a character's step the true story
+        // defeats is false): caught in a clash, it is set aside with the inference, at the inference's weight.
+        const ownerOf = (id) => trustedClaim(this.model, id) ?? this.model.constraints.get(id).doubt_with ?? null;
+        const isClaim = (id) => !!ownerOf(id);
         const weight = (id) => {
             const inf = this.model.constraints.get(id).inference;
             if (!inf) return 0;
@@ -1805,9 +1808,10 @@ export class Game {
             const doubtable = c.ids.filter(isClaim);
             const least = Math.min(...doubtable.map(weight));
             const drop = new Set(doubtable.length ? doubtable.filter((id) => weight(id) === least) : c.ids);
-            set = set.filter((id) => !drop.has(id));
-            for (const claim of c.claims) {
-                if (!drop.has(this.model.claimForms.get(claim)?.trusted)) continue;
+            // A card set aside goes whole: its trusted reading and its rule applications.
+            const gone = new Set([...drop].map(ownerOf).filter(Boolean));
+            set = set.filter((id) => !drop.has(id) && !gone.has(ownerOf(id)));
+            for (const claim of gone) {
                 const doubted = this.model.claimForms.get(claim)?.doubted;
                 if (doubted && !set.includes(doubted)) set.push(doubted);
             }
@@ -1818,7 +1822,7 @@ export class Game {
         while (!this.model.problem.consistent(set).ok) {
             const byWeight = (w) => set.filter((id) => isClaim(id) && weight(id) === w);
             const ids = this.model.problem.explainConflict([...set.filter((id) => !isClaim(id)), ...byWeight(2), ...byWeight(1), ...byWeight(0)]);
-            const c = { ids, claims: [...new Set(ids.map((id) => trustedClaim(this.model, id)).filter(Boolean))] };
+            const c = { ids, claims: [...new Set(ids.map(ownerOf).filter(Boolean))] };
             list.push(c);
             setAside(c);
             const k = ids.join('|');

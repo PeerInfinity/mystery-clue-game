@@ -60,7 +60,7 @@ NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 54; with an inference: 50; with a reason for none: 4; earliest-date misses: 0 (and 4 explained); premise disagreements: 1
+- deduction-type thoughts: 55; with an inference: 52; with a reason for none: 3; earliest-date misses: 0 (and 5 explained); premise disagreements: 2
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -74,6 +74,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t33.2` | INFER | `k.door_opened_with_key` | ¶33 | ¶33 |  |  |  |  |  |
 | `t34.5` | AGENT | `k.straker_raised_no_alarm` | ¶34 | ¶34 |  |  |  | `k.entrant_took_the_horse` |  |
 | `t34.7` | DEFAULT | `k.dog_knew_the_visitor` | ¶34 | ¶34 |  |  |  |  |  |
+| `t36.2` | WEIGH | `k.hunter_could_not_see` | ¶36 | ¶218 (explained) | `t36.1` | `c.hunter_ate_drugged`, `c.opium_in_portion_only` | `r.saw_drug_would_not_eat` |  |  |
 | `t37.4` | INFER | `k.drugged_after_set_aside` | ¶37 | ¶37 |  |  | `r.same_dish_safe` | `k.portion_dished_at_supper` |  |
 | `t37.5` | INFER | `k.taker_had_a_key` | ¶37 | ¶37 |  |  |  | `k.entrant_took_the_horse`, `k.led_by_taker` |  |
 | `t37.7` | DEFAULT | `k.drugger_knew_the_menu` | ¶37 | ¶37 |  |  |  |  |  |
@@ -87,7 +88,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t46.2` | INFER | `k.bridled_by_taker` | ¶46 | ¶46 |  |  | `r.bridle_needs_a_hand` |  |  |
 | `t46.7` | INFER | `k.drugging_is_dishonest` | ¶46 | ¶37 |  |  | `r.honest_men_dont_drug` |  |  |
 | `t60.4` | INFER | `k.cravat_order` | ¶60 | ¶60 |  |  | `r.dropped_before_found`, `r.not_his_so_found_out`, `r.dead_men_do_nothing` |  |  |
-| `t62.3` | DEFAULT | none: workstream-3 | ¶62 | — |  |  |  |  |  |
+| `t62.3` | DEFAULT | `k.gypsies_would_leave_anyway` | ¶62 | ¶62 |  |  |  |  |  |
 | `t62.4` | DROP | `k.gypsies_did_not_take_him` | ¶62 | ¶62 |  |  |  |  | `t46.3` |
 | `t68.3` | IDENTIFY | none: workstream-3 | ¶68 | — |  |  |  |  |  |
 | `t78.2` | INFER | `k.not_a_robbery` | ¶78 | ¶78 |  |  | `r.stays_held`, `r.robber_takes_valuables` |  |  |
@@ -124,13 +125,14 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 - `t20.6` (¶20, dealt ¶37): The reader anticipates the drugging at ¶20; the game can pose the question only once the drugging is told (Hunter's charge, ¶36) and the opium found (¶37), where this rule becomes relevant. Holmes never states it, so nothing gates or scores on it.
 - `t29.3` (¶29, dealt ¶36): The reader holds the conditional at ¶29, ahead of the drugging; the game can pose it only once the drugging is told (Hunter's charge, ¶36). It is Gregory's asserted conditional: nothing gates or scores on it.
 - `t31.3` (¶31, dealt ¶33): The reader's conditional at ¶31 is about an entry the story has not yet told: the entry's card (and its "with what?") comes with the open door at ¶33.
+- `t36.2` (¶36, dealt ¶218): The reader has it at ¶36. The rule it applies (a man who sees his food tampered with does not eat it) and the question of what Hunter saw come at Holmes's line on the eater (¶218), not beside Hunter's charge, where they would give the step away (Rounds 89, 104).
 - `t135.1` (¶135, dealt ¶140): The denial is weighed at ¶135, once Brown has invited Holmes in; that it was a lie is certain only once Brown gives in (¶140), which the inference rests on.
 
 ### Deductions with no inference
 
 Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
 
-- workstream-3: `t4.2`, `t62.3`, `t68.3`
+- workstream-3: `t4.2`, `t68.3`
 - action: `t92.14`
 
 ### Inferences named by more than one thought

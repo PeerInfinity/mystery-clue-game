@@ -301,6 +301,8 @@ export function ground(f, env) {
         let id = x;
         if (isVar(x)) {
             const [v, ...rest] = x.slice(1).split('.');
+            // A variable bound to a proposition (a card that is its own slot) stands for that slot.
+            if (!rest.length && v in bind && env.hasSlot(bind[v])) return bind[v];
             if (!rest.length) throw new Error(`${x} names a card where a slot was expected`);
             if (!(v in bind)) throw new Error(`variable ?${v} is not bound`);
             id = `${bind[v]}.${rest.join('.')}`;

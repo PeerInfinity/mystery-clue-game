@@ -92,7 +92,7 @@ const checkQuotes = (owner, quotes) => {
 for (const s of data.scenes) checkQuotes(s.id, s.source);
 for (const q of data.questions ?? []) checkQuotes(q.id, [q.raised]);
 for (const x of data.inconsistencies ?? []) checkQuotes(x.id, x.source);
-for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'route']) {
+for (const sec of ['entities', 'events', 'rules', 'constraints', 'actions', 'route', 'propositions']) {
     for (const item of data[sec] ?? []) checkQuotes(item.id, item.source);
 }
 for (const e of data.entities ?? []) for (const n of e.notes ?? []) checkQuotes(e.id, n.source);
@@ -276,7 +276,7 @@ const stateRows = [];
     const filledBy = new Map();
     const note = (slot, by) => { if (!filledBy.has(slot)) filledBy.set(slot, []); filledBy.get(slot).push(by); };
     for (const c of data.claims ?? []) { const f = model.cards.get(c.id)?.asserts; if (f) for (const x of slotsOf(f)) note(x, c.id); }
-    for (const k of model.constraints.values()) if (!k.from_claim || k.inference) for (const x of slotsOf(k.formula)) note(x, k.inference ?? k.id);
+    for (const k of model.constraints.values()) if ((!k.from_claim || k.inference) && !k.defeated) for (const x of slotsOf(k.formula)) note(x, k.inference ?? k.id);
     for (const s of model.slots.values()) {
         if (!s.track || s.latent) continue; // a statement's belief, unless the case declares it, is latent (workstream 4)
         const by = [...new Set(filledBy.get(s.id) ?? [])];
@@ -392,9 +392,15 @@ for (const s of model.slots.values()) if (!s.latent && s.answer !== null && s.an
 // Variant constraints and latent slots are the player's other reading of a claim (see caseModel): not the case's.
 for (const k of model.constraints.values()) {
     if (k.variant) continue;
+    // A defeated application (workstream 3): the true story need not keep it, but must bear out what defeats it.
+    if (k.defeated) {
+        const x = k.exceptions.find((e) => e.id === k.defeated);
+        if (evaluate(x.formula, truth, model.timeOrder) === false) err(`${k.id}: defeated by ${k.defeated}, which does not hold in the true solution`);
+        continue;
+    }
     if (evaluate(k.formula, truth, model.timeOrder) === false) err(`the true solution violates ${k.id}: ${k.label}`);
 }
-const allIds = [...model.constraints.keys()].filter((id) => !model.constraints.get(id).variant);
+const allIds = [...model.constraints.keys()].filter((id) => !model.constraints.get(id).variant && !model.constraints.get(id).defeated);
 const evidenceIds = allIds.filter((id) => !model.constraints.get(id).derived);
 // Undetermined slots: the solution must still extend to them.
 const fullCheck = model.problem.consistent(allIds, Object.fromEntries(truth));
@@ -486,6 +492,8 @@ for (const k of data.constraints ?? []) {
     if (v.status === 'error') err(`inference ${k.id}: ${v.error}`);
     if (v.status === 'vacuous') err(`inference ${k.id}: its premises cannot all hold`);
     if (v.status === 'verified' && k.asserted) warn(`inference ${k.id} is marked asserted but the engine verifies it`);
+    // The report gate (slice 4, Round 104): an inference the engine does not derive says why.
+    if (v.status === 'asserted' && !k.asserted) err(`inference ${k.id} is asserted with no reason (asserted: "<why>")`);
     inferenceRows.push({ k, ...v });
 }
 
@@ -514,7 +522,7 @@ const exceptionRows = [];
                 const active = allIds.filter((id) => !skip.has(model.constraints.get(id).inference));
                 status = !model.problem.consistent(active, {}, { extra: [x.formula] }).ok ? 'ruled out'
                     : !model.problem.consistent(active, {}, { extra: [{ not: x.formula }] }).ok ? 'established' : 'left open by the story';
-                status += `; in the answer key: ${evaluate(x.formula, truth, model.timeOrder) === false ? 'does not hold (the default\'s answer)' : 'holds'}`;
+                status += `; in the answer key: ${evaluate(x.formula, truth, model.timeOrder) === false ? 'does not hold (the default\'s answer)' : k.defeated === x.id ? 'holds, and defeats this application' : 'holds'}`;
             }
             exceptionRows.push({ k, x, u, at: u.source ? storyIndex.find(u.source[0])?.para : null, status });
         }
@@ -623,7 +631,7 @@ function writeReport() {
     out(`- quotes: ${nQuotes}, all found in the story`);
     out(`- relations: ${count('relations')} (${[...model.slots.values()].filter((s) => s.facet === 'relation').length} slots); propositions: ${count('propositions')}`);
     out(`- states: ${count('states')} tracks, ${stateRows.length} declared states (${stateRows.filter((r) => r.slot.answer === null).length} left open)`);
-    out(`- inferences: ${inferenceRows.filter((r) => r.status === 'verified').length} verified by the engine from their premises, ${inferenceRows.filter((r) => r.status === 'asserted').length} asserted (format 0.3 migration in progress)`);
+    out(`- inferences: ${inferenceRows.filter((r) => r.status === 'verified').length} verified by the engine from their premises, ${inferenceRows.filter((r) => r.status === 'asserted').length} asserted, each with its reason`);
     const unique = slotRows.filter((r) => r.status === 'unique').length;
     const open = slotRows.filter((r) => r.slot.undetermined).length;
     out(`- uniqueness: ${unique} slots forced by the evidence, ${open} recorded as left open by the story`);
