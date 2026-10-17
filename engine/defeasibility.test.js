@@ -24,7 +24,7 @@ const readTo = (para, opts = {}) => {
 test('named exceptions are grounded on each application of their rule', () => {
     const k = model.constraints.get(`${DRUGGER}#rule1`);
     assert.deepEqual(k.exceptions, [{ id: 'accomplice', formula: { diff: ['e.opium_added.agent', 'e.horse_led_out.agent'] } }]);
-    assert.deepEqual(model.constraints.get('k.dog_knew_the_visitor#rule1').exceptions, [{ id: 'barked_unheard', formula: null }]);
+    assert.deepEqual(model.constraints.get('k.dog_knew_the_visitor#rule1').exceptions, [{ id: 'dog_put_out', formula: null }, { id: 'barked_unheard', formula: null }]);
     // A plain string stays text with no id; a named one needs an id and a text, unique in its rule, over its variables.
     const data = mergeCase(JSON.parse(fs.readFileSync(`${base}/case.json`, 'utf8')), Object.fromEntries(JSON.parse(fs.readFileSync(`${base}/case.json`, 'utf8')).parts.map((p) => [p, JSON.parse(fs.readFileSync(`${base}/${p}`, 'utf8'))])));
     const rule = data.rules.find((r) => r.id === 'r.drugged_guard');
@@ -68,7 +68,7 @@ test('the sound sleepers: an exception with no formula is always a reservation',
     const game = readTo(SLEEPERS);
     assert.ok(game.fileAbsence('r.dog_barks_at_strangers', 'w.tue_stable', 'c.lads_heard_nothing').ok);
     assert.deepEqual(game.propose(game.connectSet('k.dog_knew_the_visitor'), 'who').built, ['k.dog_knew_the_visitor']);
-    assert.deepEqual(game.exceptionsOf('k.dog_knew_the_visitor').map((e) => e.id), ['barked_unheard']);
+    assert.deepEqual(game.exceptionsOf('k.dog_knew_the_visitor').map((e) => e.id), ['dog_put_out', 'barked_unheard']);
     assert.deepEqual(game.raise('k.dog_knew_the_visitor', 1, 'barked_unheard'), { ok: true, status: 'open', used: [] });
     assert.ok(!game.isSuspected('k.dog_knew_the_visitor'));
 });
@@ -106,4 +106,23 @@ test('an established exception defeats the card; a contradicted one is refused (
     game.raise(K, 1, 'same_place');
     assert.ok(game.withdraw(K, 1, 'same_place'));
     assert.ok(!game.isSuspected(K));
+});
+
+test('a background fact shows its exceptions, each from its own line where it has one (step 2)', () => {
+    const DRUG = paraOf('under the influence of some powerful drug');
+    const unless = (game, card, rule) => game.info(card).filter((it) => it.kind === 'exception' && it.card === rule).map((it) => [it.text, it.para]);
+    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
+    while (game.read <= DRUG - 1) game.advance();
+    const rule = game.info('topic_horses').find((it) => it.card === 'r.horse_would_wake_sleepers');
+    assert.ok(rule && rule.para < DRUG, 'the fact itself shows early');
+    assert.deepEqual(unless(game, 'topic_horses', 'r.horse_would_wake_sleepers'), [], 'its drugged sleepers wait for the drugged lad');
+    assert.deepEqual(unless(game, 'stable_dog', 'r.dog_barks_at_strangers'), [], 'and so do the dog\'s');
+    game.advance();
+    assert.deepEqual(unless(game, 'topic_horses', 'r.horse_would_wake_sleepers'), [['the sleepers were drugged too', DRUG]]);
+    assert.deepEqual(unless(game, 'stable_dog', 'r.dog_barks_at_strangers').map(([t]) => t), ['the dog was asleep, drugged, muzzled or shut away', 'the dog did bark and nobody heard']);
+    // An exception with no line of its own comes with its fact; the menu waits for the supper (¶20).
+    const fact = game.info('topic_reasoning').find((it) => it.card === 'r.asks_about_what_he_read');
+    assert.deepEqual(unless(game, 'topic_reasoning', 'r.asks_about_what_he_read'), [['he asked about it for some other reason', fact.para]]);
+    assert.deepEqual(unless(game, 'topic_reasoning', 'r.planned_the_dish'), [['he learned the menu from someone in the house', paraOf('his supper, which consisted of a dish of curried')]]);
+    assert.deepEqual(unless(game, 'topic_reasoning', 'r.practise_first'), [], 'the sheep wait for the sheep');
 });

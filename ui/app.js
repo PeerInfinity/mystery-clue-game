@@ -250,9 +250,17 @@ function toolCard() {
             for (const n of words) h += `<div class="bg-note"><b>${esc(n.term)}.</b> ${esc(n.text)}</div>`;
             h += '</div>';
         }
-        if (facts.length) {
+        // A background fact's exceptions (workstream 3) follow it; one whose own line comes later shows there, with
+        // the fact it belongs to.
+        const unless = g.items.filter((it) => it.kind === 'exception');
+        const later = unless.filter((x) => !facts.some((n) => n.card === x.card));
+        if (facts.length || later.length) {
             h += '<div class="bg"><div class="small muted">Background</div>';
-            for (const n of facts) h += `<div class="bg-note">${esc(n.text)}</div>`;
+            for (const n of facts) {
+                h += `<div class="bg-note">${esc(n.text)}</div>`;
+                for (const x of unless.filter((u) => u.card === n.card)) h += `<div class="bg-note unless">Unless ${esc(x.text)}.</div>`;
+            }
+            for (const x of later) h += `<div class="bg-note unless">${esc(shortName(x.card, 60))}: unless ${esc(x.text)}.</div>`;
             h += '</div>';
         }
         h += '</div>';

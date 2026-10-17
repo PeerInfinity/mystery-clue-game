@@ -2736,3 +2736,36 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     of `r.drugged_guard`, each "left open by the story; in the answer key: does not hold (the default's answer)";
     the sleepers, no formula).
   - **Reveal and foreshadow logs, thoughts report, gates:** nothing. Exceptions are not shown yet (step 2).
+
+## Round 103 (2026-10-17): workstream 3, step 2 — exceptions shown with their background facts
+
+- **Engine** (`Game.info`): each `unless` entry is a piece of the cards its rule attaches to (`kind: 'exception'`),
+  from the fact's paragraph or the exception's own source line, whichever is later.
+- **UI:** "Unless …" under the fact in the card's Background; one whose line comes later shows there, with its fact
+  named. Checked in headless Chrome at ¶35 (Easy, the Horses topic): the exceptions under their facts, the drugged
+  sleepers arriving at ¶34.
+- **Held back** (Q1 (i)), each made a named exception with a source. Reviewed by eye at the paragraph each would
+  show:
+  - three that speak of drugging before anyone is drugged, to ¶34 ("under the influence of some powerful drug"):
+    `r.horse_would_wake_sleepers` (¶18), `r.dog_barks_at_strangers`'s "asleep, drugged, muzzled or shut away" (¶29),
+    `r.present_sees`'s "asleep or stupefied" (¶29);
+  - `r.no_coincidence`'s drug brought on the chance of a dish (¶12), to the opium (¶37);
+  - `r.practise_first`'s sheep (¶12), to the lame sheep (¶173);
+  - `r.laying_against`'s "he meant to lame it for someone else" (¶18, the solution's method), to "laying against
+    their own horses" (¶220);
+  - found by the checker: `r.planned_the_dish`'s "he learned the menu from someone in the house" (¶12), to the supper
+    (¶20).
+- **Leak checker** (`--exceptions`, and in `--all`): each exception once, where it first shows, with a system prompt
+  of its own. The first run used the story prompt and flagged 53 of 71: it read the rule as a claim the story had not
+  made and the exception as an event. With its own prompt (the fact is background, the exception a possibility; a
+  leak is a particular of this story not yet told, or a pointer at an unhinted turn), 70 of 71 ok; the one flag is
+  the menu above, now ok at ¶20 ($0.18).
+- **Left as it is:** `r.markings_identify_horse`'s own text already says "unless the markings have been hidden"
+  (twice), so its exception line repeats it.
+- **Test** (`defeasibility.test.js`): the drugged sleepers and the dog's wait for ¶34 while their facts show earlier;
+  an exception with no line comes with its fact; the menu at the supper; the sheep not yet.
+- **Moved:**
+  - **Reveal and foreshadow logs:** 104 exception lines (71 exceptions, some on more than one card); nothing else.
+  - **Report:** quotes 1042 → 1049; the Exceptions table gains eight rows (the seven held back, on their
+    applications; no formulas).
+  - **Thoughts report, gates:** nothing.

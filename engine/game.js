@@ -1394,7 +1394,14 @@ export class Game {
                 if (para < this.read) out.push({ key: `trait.${t.id}`, para, kind: 'background', term: t.term, text: t.text, trait: t.id, quote: t.source[0] });
             }
             for (const r of this.rulesOn.get(id) ?? []) {
-                if (this.knows(r)) out.push({ key: r, para: Math.max(first, this.unlocked.get(r).para), kind: 'background', text: this.model.cards.get(r).text, card: r });
+                if (!this.knows(r)) continue;
+                const at = Math.max(first, this.unlocked.get(r).para);
+                out.push({ key: r, para: at, kind: 'background', text: this.model.cards.get(r).text, card: r });
+                // Its exceptions (workstream 3): with it, or from their own line, whichever is later.
+                (this.model.cards.get(r).unless ?? []).forEach((u, i) => {
+                    const para = Math.max(at, u.source?.length ? this.#paraOf(u.source[0]) : -1);
+                    if (para < this.read) out.push({ key: `${r}|unless${i}`, para, kind: 'exception', text: u.text ?? u, card: r, ...(u.id ? { exception: u.id } : {}), ...(u.source ? { quote: u.source[0] } : {}) });
+                });
             }
             (c.notes ?? []).forEach((n, i) => {
                 const para = Math.max(first, this.#paraOf(n.source[0]));

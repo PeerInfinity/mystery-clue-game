@@ -460,6 +460,19 @@ specific thing stay ground facts with a formula and no schema.
   (`r.drugged_guard`, ¶218, `?dosing.agent` differs from `?taking.agent`: left open by the story, on all four of
   the rule's applications).
 
+## As built (2026-10-17): exceptions shown (workstream 3, step 2; Round 103)
+
+- **On the card:** each `unless` entry is a piece of the cards its rule attaches to (`kind: 'exception'`, key
+  `<rule>|unless<i>`), shown under the fact as "Unless …", from the fact's paragraph or the exception's own source
+  line, whichever is later. One whose line comes later shows there, with its fact named.
+- **Held back to a line of their own** (a named exception with a `source`), where shown with the fact they would
+  run ahead of the story: the three that speak of drugging (`r.horse_would_wake_sleepers`,
+  `r.dog_barks_at_strangers`'s first, `r.present_sees`'s first) to ¶34; `r.no_coincidence`'s to the opium (¶37);
+  `r.practise_first`'s sheep to ¶173; `r.laying_against`'s laming to ¶220; `r.planned_the_dish`'s menu to the
+  supper (¶20).
+- **Leak checker:** `--exceptions` checks each exception once, against the story so far where it first shows, as
+  "Unless … (an exception to the general rule: …)"; `--all` includes them.
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's

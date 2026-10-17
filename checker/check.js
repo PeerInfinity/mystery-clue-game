@@ -72,6 +72,31 @@ or object from the plot).
 
 Judge every fact in the text. Also say whether each fact is TRUE as general knowledge.`;
 
+// An exception to a background fact (workstream 3): the fact is the player's general knowledge, the exception a
+// possibility it allows for. Checked for one thing: does it speak of anything in this story the story has not told?
+const SYSTEM_EXCEPTION = `You check the cards of a mystery game for spoilers.
+
+The player reads a story one paragraph at a time. Beside the story they hold BACKGROUND FACTS: general rules of
+common knowledge (how horses, dogs, households, people behave), written for the game and not part of the story.
+Each background fact may list EXCEPTIONS: possibilities that would make the rule not apply ("unless the dog was
+asleep"). An exception is NOT a claim that anything happened. It only names a possibility.
+
+You are given THE STORY SO FAR, ONE BACKGROUND FACT and ONE OF ITS EXCEPTIONS. Decide whether the exception runs
+ahead of the story.
+
+The exception is a LEAK when it speaks of a particular person, thing, event or detail of this story that the
+story so far has not mentioned (for example "the sheep" when no sheep have appeared, or "the drugged guard" when
+nobody has been drugged yet), or when it points the reader towards a specific turn of the plot the story has given
+no hint of.
+
+The exception is OK when it is a general possibility that anyone would think of for that rule, worded in general
+terms ("he", "it", "someone", "the searchers", "the door"), even if the story has not raised it. That the story has
+not stated the rule, or the possibility, is NOT a leak: background facts and their exceptions are never in the
+story. Do not use any memory of this story: judge only from the text you are given.
+
+List each fact or possibility in the exception, say whether it is supported (general, or already in the story) or
+not (a particular of this story the story has not told), and give the verdict.`;
+
 const SCHEMA = {
     type: 'object',
     properties: {
@@ -102,13 +127,20 @@ function prompt(item) {
     return `THE STORY SO FAR (paragraphs 1 to ${item.para}):\n\n${so}\n\n---\n\n${subject}\n\nTHE CARD TEXT (a ${item.kind}):\n"${item.text}"\n\nJudge every fact in the card text.`;
 }
 
+function promptException(item) {
+    const so = story.paragraphs.slice(1, item.para + 1).map((p, i) => `[${i + 1}] ${p.display}`).join('\n\n');
+    return `THE STORY SO FAR (paragraphs 1 to ${item.para}):\n\n${so}\n\n---\n\nTHE BACKGROUND FACT:\n"${item.rule}"\n\nTHE EXCEPTION:\n"unless ${item.text}"\n\nDoes the exception run ahead of the story?`;
+}
+const systemOf = (item) => item.background ? SYSTEM_BACKGROUND : item.exception ? SYSTEM_EXCEPTION : SYSTEM;
+const promptOf = (item) => item.background ? promptBackground(item) : item.exception ? promptException(item) : prompt(item);
+
 function promptBackground(item) {
     return `THE BACKGROUND FACT (${item.kind}):\n"${item.text}"\n\nJudge every fact in it: is it general knowledge (and true), or a fact about this particular story?`;
 }
 
 function ask(item) {
     return new Promise((resolve) => {
-        const child = spawn('claude', ['-p', '--model', modelName, '--system-prompt', item.background ? SYSTEM_BACKGROUND : SYSTEM, '--tools', '', '--strict-mcp-config',
+        const child = spawn('claude', ['-p', '--model', modelName, '--system-prompt', systemOf(item), '--tools', '', '--strict-mcp-config',
             '--setting-sources', '', '--no-session-persistence', '--output-format', 'json', '--json-schema', JSON.stringify(SCHEMA)],
         { cwd: here, stdio: ['pipe', 'pipe', 'pipe'] });
         let out = '';
@@ -123,7 +155,7 @@ function ask(item) {
                 resolve({ item, answer: null, cost: 0, error: `${e.message}: ${(out || errText).slice(0, 300)}` });
             }
         });
-        child.stdin.end(item.background ? promptBackground(item) : prompt(item));
+        child.stdin.end(promptOf(item));
     });
 }
 
@@ -134,7 +166,9 @@ else if (args.includes('--background')) {
     // story-so-far check covers them.) Expected 'ok' is the hope, not a known answer: misses are the findings.
     items = (model.data.rules ?? []).map((r) => ({ id: r.id, kind: 'background fact', text: r.text, expect: 'ok', background: true }));
 } else if (args.includes('--all')) items = allPieces();
-else throw new Error('use --tests, --background or --all');
+// A background fact's exceptions (workstream 3), each checked against the story so far where it first shows.
+else if (args.includes('--exceptions')) items = allPieces().filter((x) => x.kind === 'exception').filter((x, i, all) => all.findIndex((y) => y.id.split('|').slice(1).join('|') === x.id.split('|').slice(1).join('|')) === i);
+else throw new Error('use --tests, --background, --all or --exceptions');
 
 /**
  * Every piece of card text the player reads, at the paragraph where it first shows (reading the story through,
@@ -145,11 +179,11 @@ function allPieces() {
     const game = new Game(model, { background: 'relevant' });
     const out = [];
     const seen = new Set();
-    const add = (card, para, kind, key, text) => {
+    const add = (card, para, kind, key, text, extra = {}) => {
         const id = `${card}|${key}`;
         if (seen.has(id) || !text) return;
         seen.add(id);
-        out.push({ id, card, para, kind, text, expect: 'ok' });
+        out.push({ id, card, para, kind, text, expect: 'ok', ...extra });
     };
     const scan = () => {
         for (const [id, u] of game.unlocked) {
@@ -160,6 +194,7 @@ function allPieces() {
             if (c.section === 'rules') continue;
             for (const it of game.info(id)) {
                 if (['mention', 'attestation', 'clue'].includes(it.kind) || (it.kind === 'background' && !it.term)) continue;
+                if (it.kind === 'exception') { add(id, it.para, 'exception', it.key, it.text, { exception: true, rule: model.cards.get(it.card).text }); continue; }
                 add(id, it.para, it.kind === 'background' ? 'gloss' : it.kind === 'name' ? (it.event ? 'event label' : 'name') : it.kind, it.key, it.term ? `${it.term}: ${it.text}` : it.text);
             }
         }
@@ -181,7 +216,7 @@ if (args.includes('--dry')) {
 const runs = Number(opt('runs', 1));
 const cacheFile = `.cache/checker-answers-${modelName}.json`;
 const answers = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : {};
-const keyOf = (item, run) => crypto.createHash('sha1').update(`${run}|${item.background ? SYSTEM_BACKGROUND : SYSTEM}|${item.background ? promptBackground(item) : prompt(item)}`).digest('hex');
+const keyOf = (item, run) => crypto.createHash('sha1').update(`${run}|${systemOf(item)}|${promptOf(item)}`).digest('hex');
 const useCache = args.includes('--all');
 const jobs = [];
 for (const item of items) for (let run = 0; run < runs; run++) jobs.push({ item, run });

@@ -189,6 +189,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .bg-note { padding: 4px 0; border-bottom: 1px dotted var(--line); }
 .bg-note:last-child { border-bottom: 0; }
 .bg-note b { font-family: var(--serif); }
+.bg-note.unless { padding-left: 1.2em; font-style: italic; color: var(--muted); border-bottom: 0; }
 .chip .x { cursor: pointer; }
 
 .info { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; margin: 10px 0; }
