@@ -377,6 +377,20 @@ specific thing stay ground facts with a formula and no schema.
   morning (waking, the open door, the lads roused, the body and the cravat). Left open: Edith reaching the window
   before the tip (the only line is three paragraphs before the tip is told) and Brown's morning (a derived claim).
 
+## As built (2026-10-16): intention (world model, step 5, 1a; Round 76)
+
+- **`state_aims`** (`[{id, label}]`) lists what a person may be trying to do. It is one vocabulary with the
+  purpose values of acts.
+- **An intention track** (`aspect: "intention"`, id `st.<thing>.aims`) ranges over those aims, one slot per
+  declared window or part, like a condition.
+- **Built-in tie** (`aimTies`): whoever does an act with a `purpose` slot has that purpose as their aim at the
+  act's time (for the purpose values that are aims).
+- **On the board:** pencil marks with `aspect: "aims"`, committed and opened like any state.
+- **Silver Blaze:**
+  - Straker's aim at the stable hour, derived through the tie;
+  - the man who found the horse, before and after his turning back (dawn split at `e.brown_turns_back`), from
+    `k.track_man_changed_his_mind`.
+
 ## As built (2026-10-16): layers (world model, step 4; Round 64)
 
 - A pencil mark may carry `layer` (a theory id; none = the player's own). `theoryMarks` derives where a theory's
