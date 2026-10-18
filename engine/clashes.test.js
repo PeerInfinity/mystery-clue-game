@@ -67,3 +67,17 @@ test('a tie sets aside every tied member: the police\'s step built by the player
     assert.deepEqual(game.clashes().map((x) => x.aside), [['c.hunter_blames_stranger']]);
     assert.ok(game.workingConstraints().includes('k.drugger_chose_the_dish'));
 });
+
+test('one culprit (t4.2), built as soon as it can be, gives way as a heuristic to the horse\'s kick, and costs no clue', () => {
+    const buildCulprit = (game) => {
+        if (!game.knows('k.one_culprit') && game.buildable().includes('k.one_culprit')) assert.deepEqual(game.propose(game.connectSet('k.one_culprit')).built, ['k.one_culprit']);
+    };
+    const { game, met } = replay(buildCulprit);
+    assert.equal(game.unlocked.get('k.one_culprit').para, model.story.find('His head\n      had been shattered').para, 'buildable once the blow is told');
+    const broken = met.find((c) => c.aside.includes('k.one_culprit'));
+    assert.deepEqual(broken.aside, ['k.one_culprit']);
+    assert.equal(broken.why, 'heuristic');
+    assert.ok(broken.claims.includes('k.horse_kicked'));
+    for (const c of met) assert.ok(c.aside.every(isFalse), `¶${c.para}: ${c.aside.join(', ')} set aside`);
+    for (const c of ['c.stall_empty', 'c.stable_door_open', 'c.head_shattered']) assert.ok(!met.some((x) => x.aside.includes(c)), c);
+});

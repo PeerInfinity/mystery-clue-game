@@ -2964,3 +2964,47 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - at ¶41, the tie (the police's "Simpson drugged him", built by the player, against the dish step): both marked,
     with the tie line.
 - **Moved:** nothing in the logs, reports or gates (the UI only).
+
+## Round 111 (2026-10-17): clashes, step 3 — one culprit (Q6); the clash work done
+
+- **Robert** (at build time): one culprit is an inference the reader builds, not only a rule the player applies,
+  so that `t4.2` names it as every DEFAULT thought does. The thoughts checker wants each deduction to name an
+  inference or give a reason for none.
+- **Data:**
+  - `r.one_culprit`, a `heuristic`: "Two crimes of one night, close together, are commonly taken to be the work of
+    one hand". Its formula says the two events have the same agent. It has two named exceptions: "one of them led
+    to the other" (no formula) and "two hands acted apart" (the agents differ). Dealt at ¶4 ("the tragic murder of
+    its trainer"); its text shows under Holmes's methods from ¶12.
+  - `k.one_culprit` (editorial, false, verified): "One hand did both: whoever took the horse out struck the blow that
+    killed the trainer". It is built from the taking, the blow and the rule. Its application is `defeated_by`
+    `two_hands`, which holds in the answer key, so the case's reading never uses it.
+  - `t4.2` names it, with a `date_note`: the murder at ¶4 has no agent slot, so the inference is about the blow,
+    told at ¶35. `bk.one_culprit` maps the rule. `t68.3` is `no_inference: workstream-6`, a new value: the break
+    is by strain at ¶68, not by a clash.
+- **Played** (`clashes.test.js`): a passive player who builds it at ¶35 loses it at ¶202, as a heuristic, to Holmes's
+  "the horse kicked him". No clue is lost; the stall, the door and the shattered head stay. Under Round 108's
+  trial of the old rule, the same card cost the stall and the door at ¶102.
+- **Leak check:** the rule text under `--background` (ok); `--exceptions` 82/82 ok, the two new ones included
+  ($0.15).
+- **Found while building** (the suite's validation test): a thought that names an inference becomes a route step,
+  and the case's reading cannot prove a false conclusion ("route t4.2: premises do not yield its conclusion"). No
+  thought had named a false inference before. `stepsFromThoughts` now leaves a false inference off the route: it is
+  verified as its reasoner's reasoning, not as a step of the case's.
+- **An expectation that changed:** `defeasibility.test.js` lists the defeated applications; `k.one_culprit#rule1`
+  (two hands) joins the police's four.
+- **Moved:**
+  - **Reveal log:** three lines at ¶12 under Holmes's methods (the rule and its two exceptions).
+  - **Foreshadow log:** the rule at ¶4, and the three lines at ¶12.
+  - **Report:** rules 118 → 119, constraints 470 → 471, quotes 1062 → 1063, verified 80 → 81, forced slots
+    455 → 456. New rows: the verified inference, its two exceptions ("two hands" established in the answer key,
+    defeating the application) and its truth slot (false, unique).
+  - **Thoughts report:**
+    - with an inference 52 → 53;
+    - explained date misses 5 → 6 (`t4.2`, dealt ¶35);
+    - premise disagreements 2 → 3: `t4.2`'s inference rests on the blow, where `t4.1` maps the death;
+    - `bk.one_culprit` is no longer listed as mapping nothing;
+    - `workstream-3` → `workstream-6` for `t68.3`.
+  - **Gates:** nothing.
+- **The clash work is done** as agreed (Round 108). `docs/clashes.md` is marked built, with a "Left open" section:
+  the authored inference, the tie, reservations, `t68.3`. Q6 of `docs/defeasibility.md` is closed with a pointer.
+  `CLAUDE.md` points at the paper as built, and at workstream 6 next.

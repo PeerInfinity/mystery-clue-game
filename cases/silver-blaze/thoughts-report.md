@@ -73,11 +73,11 @@ Thoughts whose raising of an exception against an inference counts (`raises`). A
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 55; with an inference: 52; with a reason for none: 3; earliest-date misses: 0 (and 5 explained); premise disagreements: 2
+- deduction-type thoughts: 55; with an inference: 53; with a reason for none: 2; earliest-date misses: 0 (and 6 explained); premise disagreements: 3
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
-| `t4.2` | DEFAULT | none: workstream-3 | ¶4 | — |  |  |  |  |  |
+| `t4.2` | DEFAULT | `k.one_culprit` | ¶4 | ¶35 (explained) |  | `e.fatal_blow` |  |  |  |
 | `t19.5` | INFER | `k.at_a_stable_in_reach` | ¶19 | ¶19 |  |  |  |  |  |
 | `t20.6` | INFER | `k.drugged_in_food` | ¶20 | ¶37 (explained) |  |  | `r.tap_water_not_dosed` |  | `t20.5` |
 | `t24.2` | AGENT | `k.stranger_came_on_purpose` | ¶24 | ¶24 |  |  | `r.lost_does_not_know` |  |  |
@@ -103,7 +103,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t60.4` | INFER | `k.cravat_order` | ¶60 | ¶60 |  |  | `r.dropped_before_found`, `r.not_his_so_found_out`, `r.dead_men_do_nothing` |  |  |
 | `t62.3` | DEFAULT | `k.gypsies_would_leave_anyway` | ¶62 | ¶62 |  |  |  |  |  |
 | `t62.4` | DROP | `k.gypsies_did_not_take_him` | ¶62 | ¶62 |  |  |  |  | `t46.3` |
-| `t68.3` | IDENTIFY | none: workstream-3 | ¶68 | — |  |  |  |  |  |
+| `t68.3` | IDENTIFY | none: workstream-6 | ¶68 | — |  |  |  |  |  |
 | `t78.2` | INFER | `k.not_a_robbery` | ¶78 | ¶78 |  |  | `r.stays_held`, `r.robber_takes_valuables` |  |  |
 | `t81.4` | AGENT | `k.knife_not_a_weapon` | ¶81 | ¶81 |  |  |  |  |  |
 | `t81.5` | INFER | `k.knife_for_an_operation` | ¶81 | ¶81 |  |  |  |  |  |
@@ -135,6 +135,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 
 ### Earliest-date misses explained
 
+- `t4.2` (¶4, dealt ¶35): the murder at ¶4 names no hand; the blow, whose hand the inference is about, is told at ¶35 (Round 111)
 - `t20.6` (¶20, dealt ¶37): The reader anticipates the drugging at ¶20; the game can pose the question only once the drugging is told (Hunter's charge, ¶36) and the opium found (¶37), where this rule becomes relevant. Holmes never states it, so nothing gates or scores on it.
 - `t29.3` (¶29, dealt ¶36): The reader holds the conditional at ¶29, ahead of the drugging; the game can pose it only once the drugging is told (Hunter's charge, ¶36). It is Gregory's asserted conditional: nothing gates or scores on it.
 - `t31.3` (¶31, dealt ¶33): The reader's conditional at ¶31 is about an entry the story has not yet told: the entry's card (and its "with what?") comes with the open door at ¶33.
@@ -145,7 +146,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 
 Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
 
-- workstream-3: `t4.2`, `t68.3`
+- workstream-6: `t68.3`
 - action: `t92.14`
 
 ### Inferences named by more than one thought
@@ -172,4 +173,4 @@ None.
 
 ## Background cards with no rule
 
-`bk.one_culprit`, `bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alias_post`, `bk.guilty_denial`
+`bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alias_post`, `bk.guilty_denial`

@@ -286,7 +286,8 @@ it (whether an applied default yields in a clash before a story clue) waits with
 
 ## Left open (Round 106)
 
-- **Q6** (one culprit, `t4.2` and `t68.3`): deferred by Robert; both keep `no_inference: workstream-3`.
+- **Q6** (one culprit, `t4.2` and `t68.3`): deferred by Robert, then settled by `docs/clashes.md` (Rounds 108, 111):
+  `k.one_culprit` applies `r.one_culprit` (a heuristic) and is named by `t4.2`; `t68.3` waits for workstream 6.
 - **How clashes weigh what they set aside** (Robert, Round 104: leave it for now; rethink it after this workstream,
   as the first design question of workstream 6 or a short paper before it). What has been seen:
   - the order is by source only: story clues give way first, then inferences someone else stated, then the

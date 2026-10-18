@@ -128,7 +128,8 @@ test("the police's four: verified as their reasoning; a defeated application is 
         assert.equal(model.verified.get(k).status, 'verified', k);
     }
     const defeated = [...model.constraints.values()].filter((k) => k.defeated).map((k) => `${k.id}:${k.defeated}`);
-    assert.deepEqual(defeated, ['k.police_simpson_drugged#rule1:could_not_see', 'k.police_simpson_took_horse#rule2:to_injure', 'k.police_stick_killed#rule1:his_before', 'k.gregory_gypsies#rule1:gone_anyway']);
+    // And the reader's own one culprit (t4.2, Round 111): two hands acted apart.
+    assert.deepEqual(defeated, ['k.police_simpson_drugged#rule1:could_not_see', 'k.police_simpson_took_horse#rule2:to_injure', 'k.police_stick_killed#rule1:his_before', 'k.gregory_gypsies#rule1:gone_anyway', 'k.one_culprit#rule1:two_hands']);
     const everything = new Set(model.cards.keys());
     assert.ok(!activeConstraints(model, everything).some((id) => model.constraints.get(id).defeated), 'the case\'s reading leaves them out');
     assert.ok(activeConstraints(model, everything, new Set()).includes('k.gregory_gypsies#rule1'), 'a player who trusts Gregory holds his step');

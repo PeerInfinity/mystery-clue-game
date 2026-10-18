@@ -23,7 +23,9 @@ export function stepsFromThoughts(data) {
             continue;
         }
         const k = byId.get(t.inference);
-        if (!k) continue;
+        // A false inference (the reader's one culprit, Round 111) is verified as its reasoner's reasoning, not as a
+        // step of the case's route.
+        if (!k || k.truth === false) continue;
         const paras = t.holmes && !t.holmes.never ? t.holmes.paras ?? [] : [];
         const gates = k.by === 'holmes' && !k.implicit && paras.length > 0;
         steps.push({ id: t.id, reasoner: gates ? 'holmes' : k.by, premises: [...new Set(leaves(k.id))], concludes: { formula: k.formula }, inference: k.id, ...(paras.length && { at: Math.min(...paras) }) });

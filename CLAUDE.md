@@ -1,10 +1,11 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-clashes.md` — the current work: how clashes weigh what they set aside, with Q6 (one culprit); design
-  first (`docs/clashes.md`), then build what Robert agrees. Then workstream 6, then a second review.
-- `docs/defeasibility.md` — workstream 3 (defeasibility): agreed (Round 101, Q6 deferred), built (Rounds 102–106);
-  its "Left open" feeds the clash work.
+- `docs/clashes.md` — how clashes weigh what they set aside, with Q6 (one culprit): agreed (Round 108), built
+  (Rounds 109–111); its "Left open" feeds workstream 6. Next: workstream 6 (hypotheses, scenarios, residue;
+  `docs/gap-analysis.md`), then a second review of the tags workstreams 3 and 6 make modelable.
+- `docs/defeasibility.md` — workstream 3 (defeasibility): agreed (Round 101), built (Rounds 102–106); its Q6 was
+  settled by the clash paper.
 - `docs/annotation-review.md` — the focused review of the annotated reading: a verdict per thought in scope; its six
   fix batches built (Rounds 93–99); its "ws 3" rows are workstream 3's inputs. Workstreams 4 and 5 are done (Rounds
   80–91).

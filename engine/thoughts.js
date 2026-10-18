@@ -13,7 +13,7 @@
 // the step's warrant and need not be cited (Round 42); a premise that is an implicit inference is bookkeeping and
 // need not be either. A thought may explain an accepted earliest-date miss in `date_note`. A deduction that can
 // have no inference says why in `no_inference` (Round 56): `workstream-3` (a default to be defeated, or its
-// revision), `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82).
+// revision), `workstream-6` (a revision by strain, not by a clash: the break of one culprit, Round 111), `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82).
 
 import { Game, BG_RELEVANT } from './game.js';
 import { slotsOf } from './logic.js';
@@ -34,7 +34,7 @@ const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag)
 export const DEDUCTION = ['INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY'];
 // A TEST that concludes something (the costume went to another woman) may name its inference too (Round 46).
 const CAN_NAME = [...DEDUCTION, 'TEST', 'WEIGH', 'SOURCE', 'DROP']; // WEIGH and SOURCE: a belief weighed (workstream 4, Round 87); DROP: a candidate dropped, "not X" (Round 96)
-export const NO_INFERENCE = ['workstream-3', 'action', 'world-model', 'absence'];
+export const NO_INFERENCE = ['workstream-3', 'workstream-6', 'action', 'world-model', 'absence'];
 
 /**
  * @param data   the parsed thoughts.json
