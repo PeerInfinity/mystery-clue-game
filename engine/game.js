@@ -1986,8 +1986,49 @@ export class Game {
             set = rest;
         }
         const res = { items, refuted, atOdds: refuted || items.some((i) => i.why === 'inference' || i.told === 'seen') };
+        // What is left once the cost is paid: what the scenario's residue is read against.
+        Object.defineProperty(res, 'rest', { value: set });
         this.costCache.map.set(key, res);
         return res;
+    }
+
+    /**
+     * The puzzles the player has met (docs/hypotheses.md, Q3): on Easy (and Trivial), once its cards are held and its
+     * thought's paragraph is read; otherwise once the player has noticed one of its cards, or filed one that is an
+     * absence (filing it is the noticing).
+     */
+    metPuzzles() {
+        const paraOf = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t.para]));
+        return (this.model.data.puzzles ?? []).filter((pz) => (this.assisted()
+            ? pz.cards.every((c) => this.knows(c)) && this.read > (paraOf.get(pz.thought) ?? 0)
+            : pz.cards.some((c) => this.noticed.has(c) || (this.knows(c) && (this.model.cards.get(c)?.attested ?? []).some((a) => a.via === 'absence')))));
+    }
+
+    /**
+     * What a scenario explains and leaves over among the puzzles met: it explains one when its answers, with the facts
+     * left once its cost is paid, entail one of the puzzle's explanations. The facts are the clues the player trusts
+     * and the world's ties, not inferences: a story explains an oddity by what it says happened, not by the player's
+     * (or Holmes's) reasoning about which story is true, which would lend every story the same explanations.
+     * {explained: [{puzzle, by (the explanation's index)}], residue: [puzzle ids]}. Cached with the cost.
+     */
+    residue(theory, { extra = [] } = {}) {
+        const cost = this.scenarioCost(theory, { extra });
+        const facts = cost.rest.filter((id) => !this.model.constraints.get(id)?.inference);
+        const fixed = theory.assignment ?? {};
+        const out = { explained: [], residue: [] };
+        for (const pz of this.metPuzzles()) {
+            const key = `residue#${pz.id}#${JSON.stringify([fixed, extra])}`;
+            let by = this.costCache.map.get(key);
+            if (by === undefined) {
+                by = cost.refuted ? -1 : pz.explanations.findIndex((e) => {
+                    const f = e.formula ?? this.model.cards.get(e.inference)?.formula;
+                    return !!f && !this.model.problem.consistent(facts, fixed, { extra: [...extra, { not: f }] }).ok;
+                });
+                this.costCache.map.set(key, by);
+            }
+            if (by >= 0) out.explained.push({ puzzle: pz.id, by }); else out.residue.push(pz.id);
+        }
+        return out;
     }
 
     /**

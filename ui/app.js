@@ -628,7 +628,7 @@ function toolTheories() {
         if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
         if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
         if (cost) {
-            h += costHtml(cost);
+            h += costHtml(cost) + residueHtml(game.residue(t));
         } else {
             h += res.fits ? '<div class="small good">Nothing you hold rules it out yet.</div>' : '<div class="small bad">Something you hold and trust rules it out. Find it: try ruling out its answers.</div>';
         }
@@ -657,6 +657,18 @@ function costHtml(cost) {
     if (own.length) h += `<div class="small bad">It goes against your own reasoning (or Holmes's): ${own.map(names).join(' · ')}</div>`;
     if (seen.length) h += `<div class="small bad">It goes against what was seen, found or written: ${seen.map(names).join(' · ')}</div>`;
     return h;
+}
+
+/**
+ * A scenario's residue (Game.residue, docs/hypotheses.md Q3): the odd things met that it leaves unexplained, each
+ * shown by its cards, and how many it explains.
+ */
+function residueHtml(res) {
+    const all = res.explained.length + res.residue.length;
+    if (!all) return '';
+    const cardsOf = (id) => (model.data.puzzles ?? []).find((z) => z.id === id).cards.map((x) => link(x, shortName(x, 50))).join(' with ');
+    if (!res.residue.length) return `<div class="small good">It explains every odd thing you have met (${all}).</div>`;
+    return `<div class="small">It leaves ${res.residue.length} of ${all} odd things unexplained: ${res.residue.map(cardsOf).join(' · ')}</div>`;
 }
 
 // ---------- the board: where things were, when (world model; engine/timeline.js) ----------
@@ -1283,7 +1295,7 @@ function onClick(e) {
         const r = game.checkLayer(layer);
         const skip = r.unchecked ? ` <span class="small muted">(${r.unchecked} of your marks are at times or for things none of your clues speaks of: not checked.)</span>` : '';
         // A theory's night, on Easy, is weighed for what it must disbelieve (docs/hypotheses.md, Q2).
-        const html = r.cost && game.assisted() ? `${costHtml(r.cost)}${skip}`
+        const html = r.cost && game.assisted() ? `${costHtml(r.cost)}${residueHtml(r.residue)}${skip}`
             : r.fits ? `<span class="good">This night fits everything you trust so far.</span>${skip}` : `<span class="bad">This night does not fit what you trust:</span>${chainHtml(r.conflict, r.fixed)}${skip}`;
         ui.layerFit = { layer, html };
         renderTool();

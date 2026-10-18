@@ -528,6 +528,24 @@ specific thing stay ground facts with a formula and no schema.
   declared state to take one of its marked places, against the working constraints (clashes set aside).
   `Game.visibleTheories()` decides which theories the player has met.
 
+## As built (2026-10-17): a scenario's cost and residue (workstream 6, steps 1–2; Rounds 114–115)
+
+- **Cost** (`Game.scenarioCost(theory, {extra})`, no data): a theory's answers held fast, the clashes they make with
+  the working set broken as clashes are (`#weigher`), until what is left fits. Each item set aside, with its class,
+  and for a clue how it was told. `atOdds` when it gives up the player's or Holmes's own reasoning or something seen;
+  `refuted` when nothing doubtable is left to give up. `checkLayer` returns it for a theory's layer.
+- **Puzzles** (`knowledge.json`, section `puzzles`, one per line; schema `puzzle`): `{id: "pz.<name>", cards, thought,
+  explanations: [{formula} | {inference}]}`. `cards`: the clues (or an event) that show the oddity; noticing one
+  meets the puzzle off Easy, and on Easy it is met once all are held and the thought's paragraph is read (an absence
+  is met once filed). `thought`: the annotated thought that reads it. An explanation is a formula over slots, or an
+  inference whose formula is borrowed. No text of their own: the tray shows the puzzle's cards.
+- **Residue** (`Game.residue(theory, {extra})`): a met puzzle is explained when the theory's answers, with the facts
+  left once its cost is paid (trusted clues and world ties, **not inferences**), entail one of its explanations. Read
+  against inferences too, every consistent story borrowed Holmes's explanations by the end (measured, Round 115).
+- **Checks** (`validate-case.js`): cards, thought, inference and slots resolve; at least one explanation holds in
+  the answer key. The report's "Puzzles" table lists which explanations hold and which story theories explain each
+  puzzle by their answers alone. Thoughts may map to puzzle ids (`t46.3`).
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

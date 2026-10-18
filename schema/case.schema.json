@@ -224,6 +224,12 @@
         "$ref": "#/$defs/gloss"
       }
     },
+    "puzzles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/puzzle"
+      }
+    },
     "slots": {
       "type": "array",
       "items": {
@@ -1062,6 +1068,30 @@
         }
       },
       "description": "A background fact that serves as a premise. It is shown on the card(s) it attaches to, mixed with the period notes, so that it does not stand out as a clue."
+    },
+    "puzzle": {
+      "description": "An oddity a story of the night must explain (docs/hypotheses.md, Q3): the cards that show it, the annotated thought that reads it, and its explanations. No text of its own.",
+      "type": "object",
+      "required": ["id", "cards", "thought", "explanations"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^pz\\." },
+        "cards": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "thought": { "type": "string" },
+        "explanations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "formula": { "type": "object" },
+              "inference": { "type": "string" }
+            },
+            "oneOf": [{ "required": ["formula"] }, { "required": ["inference"] }]
+          }
+        }
+      }
     },
     "gloss": {
       "type": "object",

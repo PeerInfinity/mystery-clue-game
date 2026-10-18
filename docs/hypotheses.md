@@ -1,7 +1,7 @@
 # Hypotheses, scenarios and residue (workstream 6)
 
 Status: **AGREED** (Robert, 2026-10-17, Round 113: every recommendation, and the order of work; where one proves
-hard to build, fall back to a simpler alternative). **Built:** step 1, the cost (Round 114). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
+hard to build, fall back to a simpler alternative). **Built:** step 1, the cost (Round 114); step 2, puzzles and residue (Round 115). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
 (§2 HYPOTHESIS, WEIGH, TEST, RESIDUE, DROP, REVISE; §6: supports and strains authored first, computed later; wrong
 turns cost nothing), Round 19 (theories), workstream 5 (notices), workstream 3 (exceptions) and the clash paper
 (`docs/clashes.md`: the four classes, "never by truth").
@@ -410,3 +410,15 @@ Each step is one commit with a Round entry, gated on `npm test`, with the logs, 
 The recommendations of Q1–Q8 as written, and the order of work. Robert: "If we encounter problems with
 implementation, then we can fall back to simpler options." A fallback taken at build time is recorded in its Round
 entry and here.
+
+**At build time (Round 115):**
+- **Residue is read against the facts, not everything trusted.** Q3 said "its answers, with what the player trusts".
+  Built that way, every consistent story borrowed the explanations Holmes states, and by ¶231 the police theory
+  "explained" the curry, the dog and the key (nothing stops Simpson having known the menu). A story now explains an
+  oddity by its answers and the facts left once its cost is paid: trusted clues and world ties, not inferences.
+- **Ids are `pz.*`,** since propositions use `p.*`.
+- **Listed, not chased:**
+  - why the horse was taken out at all: the police and the gypsies explain it by theft, where `t46.3` counts the
+    theft itself improbable;
+  - partial theories (the honest trainer, the self-wound) leave nearly every puzzle over, which is right but noisy;
+  - the candle (`t78.3`) has no puzzle: no slot says what the light was for.

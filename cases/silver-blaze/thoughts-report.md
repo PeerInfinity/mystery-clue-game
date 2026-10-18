@@ -24,7 +24,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | WEIGH | 19 | 12 |
 | SOURCE | 2 | 2 |
 | TEST | 30 | 17 |
-| RESIDUE | 1 | 0 |
+| RESIDUE | 1 | 1 |
 | PREDICT | 8 | 8 |
 | TEST PLAN | 4 | 4 |
 | GENRE | 20 | 3 |
@@ -73,7 +73,7 @@ Thoughts whose raising of an exception against an inference counts (`raises`). A
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 55; with an inference: 53; with a reason for none: 2; earliest-date misses: 0 (and 6 explained); premise disagreements: 3
+- deduction-type thoughts: 55; with an inference: 53; with a reason for none: 2; earliest-date misses: 0 (and 6 explained); premise disagreements: 4
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -102,7 +102,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t46.7` | INFER | `k.drugging_is_dishonest` | ¶46 | ¶37 |  |  | `r.honest_men_dont_drug` |  |  |
 | `t60.4` | INFER | `k.cravat_order` | ¶60 | ¶60 |  |  | `r.dropped_before_found`, `r.not_his_so_found_out`, `r.dead_men_do_nothing` |  |  |
 | `t62.3` | DEFAULT | `k.gypsies_would_leave_anyway` | ¶62 | ¶62 |  |  |  |  |  |
-| `t62.4` | DROP | `k.gypsies_did_not_take_him` | ¶62 | ¶62 |  |  |  |  | `t46.3` |
+| `t62.4` | DROP | `k.gypsies_did_not_take_him` | ¶62 | ¶62 | `t46.3` |  |  |  |  |
 | `t68.3` | IDENTIFY | none: workstream-6 | ¶68 | — |  |  |  |  |  |
 | `t78.2` | INFER | `k.not_a_robbery` | ¶78 | ¶78 |  |  | `r.stays_held`, `r.robber_takes_valuables` |  |  |
 | `t81.4` | AGENT | `k.knife_not_a_weapon` | ¶81 | ¶81 |  |  |  |  |  |

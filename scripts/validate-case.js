@@ -548,6 +548,30 @@ for (const t of data.theories ?? []) {
     theoryRows.push({ t, fitsTheirs, conflict });
 }
 
+// ---------- puzzles (docs/hypotheses.md, Q3) ----------
+// Each puzzle's cards, thought and explanations resolve; the true story explains it; and, for the report, which of
+// the story's theories explain it by their answers alone.
+const puzzleRows = [];
+{
+    const thoughtIds = new Set((data.thoughts ?? []).map((t) => t.id));
+    const formulaOf = (e) => e.formula ?? model.cards.get(e.inference)?.formula;
+    for (const pz of data.puzzles ?? []) {
+        for (const c of pz.cards) if (!has(c)) err(`puzzle ${pz.id}: unknown card ${c}`);
+        if (data.thoughts && !thoughtIds.has(pz.thought)) err(`puzzle ${pz.id}: unknown thought ${pz.thought}`);
+        const formulas = pz.explanations.map(formulaOf);
+        pz.explanations.forEach((e, i) => {
+            if (e.inference && !model.constraints.has(e.inference) && !has(e.inference)) err(`puzzle ${pz.id}: unknown inference ${e.inference}`);
+            if (!formulas[i]) { err(`puzzle ${pz.id}: explanation ${i + 1} has no formula`); return; }
+            for (const x of slotsOf(formulas[i])) if (!model.slots.has(x)) err(`puzzle ${pz.id}: explanation ${i + 1} speaks of unknown slot ${x}`);
+        });
+        if (errors.length) continue;
+        const holds = formulas.map((f) => evaluate(f, truth, model.timeOrder));
+        if (!holds.includes(true)) err(`puzzle ${pz.id}: no explanation holds in the true solution (${holds.join(', ')})`);
+        const by = (data.theories ?? []).filter((t) => formulas.some((f) => !model.problem.consistent([], t.assignment, { extra: [{ not: f }] }).ok)).map((t) => t.id);
+        puzzleRows.push({ pz, holds, by });
+    }
+}
+
 // ---------- route (Holmes's steps) ----------
 const routeRows = [];
 for (const step of data.route ?? []) {
@@ -666,6 +690,16 @@ function writeReport() {
         }
         out();
     }
+    out('## Puzzles');
+    out();
+    out('Oddities a story of the night must explain (docs/hypotheses.md, Q3). A scenario explains one when its answers,');
+    out('with the facts the player trusts (clues and the world\'s ties, not inferences), entail one of its explanations.');
+    out('"Story theories" lists those that do by their answers alone.');
+    out();
+    out('| Puzzle | Cards | Thought | Explanations true in the answer key | Story theories explaining it |');
+    out('|---|---|---|---|---|');
+    for (const r of puzzleRows) out(`| \`${r.pz.id}\` | ${r.pz.cards.join(', ')} | \`${r.pz.thought}\` | ${r.holds.map((h, i) => (h === true ? i + 1 : null)).filter(Boolean).join(', ')} of ${r.holds.length} | ${r.by.join(', ') || '—'} |`);
+    out();
     out('## Inferences');
     out();
     out('Verified: the engine derives the formula from the claim premises (trusted), the rule applications listed and any');

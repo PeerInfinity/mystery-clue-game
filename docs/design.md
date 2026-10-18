@@ -3096,3 +3096,49 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - no vacuous agreement;
   - a player who builds `k.gypsies_did_not_take_him` at ¶62 holds the gypsies at odds.
 - **Moved:** nothing. The reveal, foreshadow and clash logs, the case report, the thoughts report and the gate listing are unchanged (the clash weighing's refactor keeps every outcome).
+
+## Round 115 (2026-10-17): workstream 6, step 2 — puzzles and residue
+
+- **Puzzles** (`knowledge.json`, `docs/hypotheses.md` Q3): ten oddities, each a list of the cards that show it, the
+  thought that reads it, and its explanations as formulas over slots, or an inference's formula. They carry no text.
+  - the curry (the drugger knew the menu, or was of the household);
+  - the dog (the visitor, or the one who led the horse out, was of the stable);
+  - no alarm, and the locked door (the entrant had a key, or Straker led the horse out);
+  - the coat (taken off to work);
+  - one blow (not the stick);
+  - the knife (for an operation);
+  - the bill (Straker's own; Derbyshire is Straker; or a friend's);
+  - the horse not found (disguised);
+  - why the horse was led out (to steal him, or to harm him away from the stable).
+- **`Game.metPuzzles()`:** on Easy, once a puzzle's cards are held and its thought's paragraph is read; off Easy, once
+  the player notices one of its cards (an absence: once filed).
+- **`Game.residue(theory)`:** a puzzle is explained when the theory's answers, with the facts left once its cost is
+  paid, entail an explanation.
+  - **A fallback taken:** against facts (trusted clues and world ties), not inferences. Read against everything
+    trusted, the police theory "explained" the curry, the dog and the key by ¶231, borrowing Holmes's explanations
+    (Simpson might have known the menu).
+  - `checkLayer` returns it for a theory's layer.
+- **UI (Easy):** each theory says "It leaves N of M odd things unexplained: …" (by their cards), or that it explains
+  every odd thing met. "Check this night" says the same. Checked in headless Chrome at ¶92: the police and the gypsies
+  leave 7 of 8; the honest trainer 8 of 8.
+- **Validator:** puzzles' references and slots resolve, and an explanation holds in the answer key. The report gains a
+  "Puzzles" table.
+- **Thoughts:** `t46.3` (RESIDUE) maps to the eight puzzles of its list; puzzle ids are valid `maps` targets.
+- **Tests** (`engine/hypotheses.test.js`, the passive reading now files absences as Easy offers them):
+  - at ¶46 the police leave the curry, the dog, the key, no alarm, the coat, one blow and the horse not found;
+  - the inside story (the fixture now also names the steel shoe and the disguise) leaves nothing, at ¶46, ¶92, ¶104
+    and ¶231;
+  - the gypsies leave the curry and the dog (`t62.4`);
+  - Brown as organiser leaves strictly more than the inside story (`t68.2`);
+  - the police with a duplicate key explain the locked door (a patch, `t58.4`);
+  - on Medium the curry is met only once noticed.
+- **Listed, not chased** (`docs/hypotheses.md`): theft explains why the horse was taken out (`t46.3`'s item 4 is not
+  reproduced); partial theories show long trays; the candle has no puzzle.
+- **Moved:**
+  - **Case report:** a new "Puzzles" section, ten rows. The answer key bears out at least one explanation of each
+    puzzle. The friend's theory explains the bill by its answers alone; the police's and the gypsies' explain why the
+    horse was led out.
+  - **Thoughts report:** RESIDUE mapped 0 → 1 (`t46.3`). Premise disagreements 3 → 4: `t62.4` cites `t46.3`, now
+    held, which `k.gypsies_did_not_take_him` does not rest on. Its "explains nothing about the curry or the dog" is a
+    residue reason, for step 3's drop.
+  - **Unchanged:** the reveal, foreshadow and clash logs, and the gates.

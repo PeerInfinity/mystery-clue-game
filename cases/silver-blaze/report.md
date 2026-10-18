@@ -95,6 +95,25 @@ Held by Dr. Watson, Inspector Gregory. Fits what they knew: yes.
 Not broken by the evidence.
 
 
+## Puzzles
+
+Oddities a story of the night must explain (docs/hypotheses.md, Q3). A scenario explains one when its answers,
+with the facts the player trusts (clues and the world's ties, not inferences), entail one of its explanations.
+"Story theories" lists those that do by their answers alone.
+
+| Puzzle | Cards | Thought | Explanations true in the answer key | Story theories explaining it |
+|---|---|---|---|---|
+| `pz.curry` | c.curry_for_supper | `t37.6` | 1, 2 of 2 | — |
+| `pz.dog` | c.dog_did_nothing | `t34.2` | 1, 2 of 2 | — |
+| `pz.no_alarm` | c.no_alarm | `t34.8` | 1 of 1 | — |
+| `pz.key` | c.door_locked_behind | `t31.3` | 2 of 2 | — |
+| `pz.coat` | c.coat_on_bush_seen | `t35.8` | 1 of 1 | — |
+| `pz.one_blow` | c.head_shattered, c.simpson_stick | `t40.5` | 1 of 1 | — |
+| `pz.knife` | c.knife_is_cataract_knife | `t81.2` | 1 of 1 | — |
+| `pz.bill` | c.milliner_bill | `t84.3` | 1, 2 of 3 | t.derbyshire_a_friend |
+| `pz.not_found` | c.no_news_of_horse | `t37.12` | 1 of 1 | — |
+| `pz.led_out` | e.horse_led_out | `t18.3` | 2 of 2 | t.police, t.gypsies |
+
 ## Inferences
 
 Verified: the engine derives the formula from the claim premises (trusted), the rule applications listed and any

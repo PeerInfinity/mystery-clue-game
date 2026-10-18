@@ -5,7 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
-import { Game, EASY } from './game.js';
+import { Game, EASY, MEDIUM } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 const isFalse = (id) => model.cards.get(id)?.truth === false;
@@ -16,6 +16,7 @@ const INSIDE = {
         'e.opium_added.agent': 'straker', 'e.opium_added.place': 'straker_villa', 'e.horse_led_out.agent': 'straker',
         'e.horse_led_out.purpose': 'injure', 'e.fatal_blow.agent': 'silver_blaze', 'e.knife_taken.purpose': 'operation',
         'e.coat_off.purpose': 'work', 'william_derbyshire.identity': 'straker', 'straker.honest': 'false', 'silver_blaze.hidden_at': 'mapleton',
+        'silver_blaze.disguised': 'true', 'e.fatal_blow.instrument': 'steel_shoe',
     },
 };
 const cards = (cost) => cost.items.flatMap((i) => i.cards);
@@ -25,17 +26,25 @@ function build(game, id) {
     return game.propose(game.connectSet(id));
 }
 
-// One passive reading (Easy, background when relevant, nothing built), weighed at a few paragraphs.
-const AT = [92, 104, 231];
+// The annotation's Silas Brown as organiser (t66.3), as a player would write it.
+const BROWN = { assignment: { 'e.horse_hidden.agent': 'silas_brown', 'e.horse_led_out.purpose': 'steal' } };
+
+// One passive reading (Easy, background when relevant, nothing built), weighed at a few paragraphs; the absences
+// filed as Easy offers them.
+const AT = [46, 92, 104, 231];
 const seen = new Map();
 {
     const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     while (!game.finished()) {
         game.advance();
+        for (const a of game.fileableAbsences()) game.fileAbsence(a.expectation, a.windows[0], a.witness);
         const p = game.read - 1;
         if (!AT.includes(p)) continue;
         const clashes = JSON.stringify(game.clashes());
         seen.set(p, {
+            met: game.metPuzzles().map((z) => z.id),
+            residue: Object.fromEntries([['police', theory('t.police')], ['gypsies', theory('t.gypsies')], ['inside', INSIDE], ['brown', BROWN],
+                ['patched', { assignment: { ...theory('t.police').assignment, 'e.stable_entered.instrument': 'duplicate_key' } }]].map(([n, t]) => [n, game.residue(t).residue])),
             inside: game.scenarioCost(INSIDE),
             police: game.scenarioCost(theory('t.police')),
             support: game.theorySupport(theory('t.police')),
@@ -90,4 +99,38 @@ test('a player who sees through the gypsies by ¶62 holds them at odds with thei
     const after = game.scenarioCost(theory('t.gypsies'));
     assert.equal(after.atOdds, true);
     assert.ok(after.items.some((i) => i.why === 'inference' && i.cards.includes('k.gypsies_did_not_take_him')), JSON.stringify(after.items));
+});
+
+test('the police leave the annotation\'s residue (t46.3) over; the inside story explains it', () => {
+    const at46 = seen.get(46);
+    // The dog and the alarm are absences, filed here as Easy offers them; why take the horse out, the police explain
+    // by theft (a listed difference from t46.3, which finds the theft itself improbable).
+    for (const z of ['pz.curry', 'pz.dog', 'pz.key', 'pz.no_alarm', 'pz.coat', 'pz.one_blow', 'pz.not_found']) {
+        assert.ok(at46.met.includes(z), `${z} met by ¶46`);
+        assert.ok(at46.residue.police.includes(z), `${z} in the police's residue`);
+    }
+    assert.ok(!at46.residue.police.includes('pz.led_out'));
+    for (const p of AT) assert.deepEqual(seen.get(p).residue.inside, [], `¶${p}`);
+});
+
+test('the gypsies explain neither the curry nor the dog (t62.4); Brown as organiser leaves more over than the inside story (t68.2)', () => {
+    const at92 = seen.get(92).residue;
+    for (const z of ['pz.curry', 'pz.dog']) assert.ok(at92.gypsies.includes(z), z);
+    assert.ok(at92.brown.length > at92.inside.length && at92.inside.every((z) => at92.brown.includes(z)));
+    for (const z of ['pz.curry', 'pz.dog']) assert.ok(at92.brown.includes(z), z);
+});
+
+test('a patch takes an item out of the tray: the police with a duplicate key explain the locked door (t58.4)', () => {
+    const at92 = seen.get(92).residue;
+    assert.ok(at92.police.includes('pz.key'));
+    assert.ok(!at92.patched.includes('pz.key'));
+});
+
+test('off Easy, a puzzle is met only once the player notices one of its cards', () => {
+    const game = new Game(model, { difficulty: MEDIUM });
+    while (game.read <= 40) game.advance();
+    assert.ok(!game.metPuzzles().some((z) => z.id === 'pz.curry'));
+    assert.ok(game.notice('c.curry_for_supper').ok);
+    assert.ok(game.metPuzzles().some((z) => z.id === 'pz.curry'));
+    assert.ok(game.residue(theory('t.police')).residue.includes('pz.curry'));
 });
