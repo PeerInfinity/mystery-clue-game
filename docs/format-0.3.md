@@ -588,6 +588,27 @@ specific thing stay ground facts with a formula and no schema.
 - **The report:** a **Held back by the story** section (the two facts, the three checks with late or never results,
   and the 36 rules offered before the story states them).
 
+## As built (2026-10-18): the reader setting (workstream 8, step 3; Round 136)
+
+- **Options:** `reader` (`modern`, `1892`, `racing`; default `modern`) and `supplied` (`offered`, `withheld`; every
+  preset `offered`). `reader` is in `READER_OPTIONS`: `presetOf` ignores it, `optionsFrom` defaults it, and the UI
+  keeps it when the difficulty changes.
+- **The loader** puts the background cards on `data.background` (from `thoughts.json`); the validator too, and leaves
+  them out of the schema check.
+- **`Game.lacking`:** the rules this reader lacks (`lackingRules`), set in `reset()` (`#readerSetup`). `ruleAt` is
+  this reader's: with `supplied: withheld` a lacking rule arrives where the story states it (its `source`), or never
+  (`Infinity`); with `background: start` it still waits. The game then has its own gates (`Story.gatesFor`, the
+  story's gate logic with this game's `ruleAt`; a step with a premise never told gates nothing). Offered, `gates` is
+  the story's. `blockers`, `nextDeductionAt` and the slot dealt before a gate read `game.gates`; Holmes's own
+  statements (where his steps' inferences arrive) still follow the story's gates.
+- **`Game.disclosure(rule)`** is `{at, told, early, supplied, lacks?}`: `early`, offered before the story states it;
+  `supplied`, this reader lacks it, `lacks` naming the background card. `heldBack()` lists the supplied rules (not
+  the merely early: an 1892 reader's own knowledge is not held back), once the story states them or, if it never
+  does, at the end. The report's held-back table keeps every early rule.
+- **The UI:** a supplied fact, on its card and in the Background tab, reads "· Supplied: a reader of 1892 would know
+  this" (or "a racing man of 1892", "a specialist"), and once read past, "; the story says so at paragraph N". The
+  two options are in Options ("You read as", "Background you would not know").
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

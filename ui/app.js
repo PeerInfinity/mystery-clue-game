@@ -6,7 +6,7 @@ import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, workerClient, settle } from '../engine/remoteProblem.js';
-import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS, DROP_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
+import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -256,7 +256,7 @@ function toolCard() {
         if (facts.length || later.length) {
             h += '<div class="bg"><div class="small muted">Background</div>';
             for (const n of facts) {
-                h += `<div class="bg-note">${esc(n.text)}</div>`;
+                h += `<div class="bg-note">${esc(n.text)}${suppliedNote(n.card)}</div>`;
                 for (const x of unless.filter((u) => u.card === n.card)) h += `<div class="bg-note unless">Unless ${esc(x.text)}.</div>`;
             }
             for (const x of later) h += `<div class="bg-note unless">${esc(shortName(x.card, 60))}: unless ${esc(x.text)}.</div>`;
@@ -602,6 +602,17 @@ function toolCards() {
     return h;
 }
 
+// A background fact this reader lacks is supplied by the game (docs/reader-layer.md, Q1): who would have known it,
+// and, once the story has said so, where it does.
+function suppliedNote(ruleId) {
+    const d = game.disclosure(ruleId);
+    if (!d?.supplied) return '';
+    const mark = (model.data.background ?? []).find((b) => b.id === d.lacks)?.reader_1892 ?? '';
+    const who = /^racing/.test(mark) ? 'a racing man of 1892 would know this' : /^specialist/.test(mark) ? 'a specialist would know this' : 'a reader of 1892 would know this';
+    const told = d.told !== null && d.told < game.read ? `; the story says so at ${paraLabel(d.told)}` : '';
+    return ` <span class="small muted supplied">· Supplied: ${who}${told}.</span>`;
+}
+
 function toolBackground() {
     const facts = [...game.unlocked.keys()].filter((k) => model.cards.get(k).section === 'rules');
     const how = game.background === BG_ASK ? 'You recall a fact when you ask about a card it concerns.' : game.background === BG_START ? 'Everything a reader of the time knew, from the start.' : 'Each fact appears where the story first touches its subject.';
@@ -619,7 +630,7 @@ function toolBackground() {
         const heading = game.knows(on) ? link(on) : model.cards.get(on)?.kind === 'topic' ? esc(game.nameOf(on)) : 'Other';
         h += `<h3 class="section">${heading}</h3><ul class="list">`;
         // By text, not id: ids would sort the filler apart from the facts that matter.
-        for (const r of list.sort((a, b) => model.cards.get(a).text.localeCompare(model.cards.get(b).text))) h += `<li>${esc(model.cards.get(r).text)}</li>`;
+        for (const r of list.sort((a, b) => model.cards.get(a).text.localeCompare(model.cards.get(b).text))) h += `<li>${esc(model.cards.get(r).text)}${suppliedNote(r)}</li>`;
         h += '</ul>';
     }
     return h;
@@ -1614,7 +1625,7 @@ function onChange(e) {
     if (['difficulty', 'pace', 'autopace'].includes(e.target.id) || e.target.id.startsWith('opt-')) {
         const state = game.save();
         const opts = e.target.id === 'difficulty'
-            ? { ...(PRESETS[e.target.value] ?? game.opts) }
+            ? { ...(PRESETS[e.target.value] ?? game.opts), ...Object.fromEntries(READER_OPTIONS.map((k) => [k, game.opts[k]])) }
             : { ...game.opts, ...(e.target.id.startsWith('opt-') && { [e.target.id.slice(4)]: e.target.value }) };
         // Answers are kept differently by who works them out, how they are listed and how they are crossed out.
         if (['solver', 'answers', 'crossOut'].some((k) => opts[k] !== game.opts[k]) && game.marks.size) {
@@ -1652,6 +1663,8 @@ const OPTION_UI = {
     kind: ['Building an inference', { off: 'Connect the cards', on: 'Also name what it is about' }, 'Also name it: you say whether the conclusion is about who, when, where, what, why, or whether something is so.'],
     connect: ['Background in inferences', { implicit: 'Needed in hand', connect: 'Connected too' }, 'Needed in hand: connect an inference\'s clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.'],
     background: ['Background facts', { start: 'All at once', relevant: 'When relevant', ask: 'When asked' }, 'General knowledge a reader of the time had. All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.'],
+    supplied: ['Background you would not know', { offered: 'Supplied by the game', withheld: 'Only where the story says it' }, 'The background facts a reader like you would not bring to the story. Supplied: they arrive like any other, marked as supplied. Only where the story says it: each comes when the story states it, often late, and some never.'],
+    reader: ['You read as', { modern: 'A reader of today', 1892: 'A reader of 1892', racing: 'A racing man of 1892' }, 'What you bring to the story. The background facts such a reader would not know are marked as supplied by the game.'],
     irrelevant: ['Cards the solution does not need', { none: 'None', few: 'One in four', half: 'Half', most: 'Three in four', all: 'All' }, 'How many of the cards with no part in the solution you get at all (the people, places, things and facts that are only colour). The rest are left out of the game: no card, and nothing to click in the text.'],
 };
 function buildOptions() {

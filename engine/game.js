@@ -20,6 +20,7 @@
 import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState, openSplit, closeSplit, knowsName, namedExceptions, exceptionFormula } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
+import { READER_KINDS, lackingRules } from './readers.js';
 
 /** Holmes's steps' needs (Game.stepNeeds), per problem. */
 const STEP_NEEDS = new WeakMap();
@@ -72,6 +73,9 @@ export const INF_CONNECT = 'connect';
 //   connect     building an inference: background facts needed in hand, or connected like clues
 //   background  when background facts arrive (BG_*)
 //   irrelevant  how many of the cards the solution has no use for are shown at all
+//   supplied    the background facts the reader lacks: offered like the rest (marked), or withheld until the story
+//               states them (docs/reader-layer.md, Q1)
+//   reader      who the player is as a reader (engine/readers.js): not part of the difficulty
 export const OPTIONS = {
     solver: ['game', 'player'],
     cards: ['dealt', 'collect'],
@@ -85,7 +89,11 @@ export const OPTIONS = {
     connect: [INF_IMPLICIT, INF_CONNECT],
     background: [BG_START, BG_RELEVANT, BG_ASK],
     irrelevant: ['none', 'few', 'half', 'most', 'all'],
+    supplied: ['offered', 'withheld'],
+    reader: READER_KINDS,
 };
+// The options that say who the player is, not how hard the game is: kept when the difficulty changes.
+export const READER_OPTIONS = ['reader'];
 // The options that only mean something while the player works out the answers.
 // What a clash sets aside first (Game.#clashWeight, docs/clashes.md): the classes, lightest first, and within the
 // clues, how a clue was told (anything else, seen, found or written, weighs most).
@@ -96,19 +104,19 @@ const COST_TOLD = ['testimony', 'report', 'admission', 'seen'];
 export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'weigh', 'hints', 'kind', 'connect'];
 const IRRELEVANT_SHARE = { none: 0, few: 0.25, half: 0.5, most: 0.75, all: 1 };
 export const PRESETS = {
-    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
-    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
-    medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'counts', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all' },
-    hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'asked', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all' },
+    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
+    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
+    medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'counts', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all', supplied: 'offered' },
+    hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'asked', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all', supplied: 'offered' },
 };
 /** The preset these options match, or CUSTOM. With the game solving, the player's options do not count. */
 export function presetOf(opts) {
     const applies = (k) => opts.solver === 'player' || !PLAYER_OPTIONS.includes(k);
-    return DIFFICULTIES.find((d) => Object.keys(OPTIONS).every((k) => !applies(k) || PRESETS[d][k] === opts[k])) ?? CUSTOM;
+    return DIFFICULTIES.find((d) => Object.keys(OPTIONS).every((k) => READER_OPTIONS.includes(k) || !applies(k) || PRESETS[d][k] === opts[k])) ?? CUSTOM;
 }
 /** Options from a preset, with any given ones laid over it (unknown keys and values dropped). */
 export function optionsFrom(difficulty, over = {}) {
-    const out = { ...PRESETS[DIFFICULTIES.includes(difficulty) ? difficulty : MEDIUM] };
+    const out = { ...PRESETS[DIFFICULTIES.includes(difficulty) ? difficulty : MEDIUM], reader: READER_KINDS[0] };
     for (const [k, v] of Object.entries(over ?? {})) if (OPTIONS[k]?.includes(v)) out[k] = v;
     return out;
 }
@@ -176,6 +184,7 @@ export class Game {
         // Scenes start where their first quote is.
         this.sceneStarts = (model.data.scenes ?? []).map((sc) => this.story.find(sc.source?.[0] ?? '')?.para).filter((p) => p !== undefined).sort((a, b) => a - b);
         // Where each background fact becomes relevant: its `relevant_from` line, never before one of its cards.
+        // (For this reader, `ruleAt`: see #readerSetup.)
         this.ruleAt = new Map();
         for (const r of model.data.rules ?? []) {
             const held = Math.min(...(r.attaches_to ?? []).map((e) => this.story.firstAt.get(e) ?? Infinity));
@@ -257,7 +266,28 @@ export class Game {
         }
     }
 
+    /**
+     * Who the reader is (docs/reader-layer.md, Q1): the rules they lack (`lacking`). Offered, they arrive like any
+     * other and are marked as supplied; withheld, they arrive where the story states them, or never, and the 'wait'
+     * pace counts them told there (its gates are this game's own).
+     */
+    #readerSetup() {
+        if (!this.baseRuleAt) this.baseRuleAt = this.ruleAt;
+        this.lacking = lackingRules(this.model.data.background, this.opts.reader);
+        this.ruleAt = new Map(this.baseRuleAt);
+        this.withheld = new Set(this.opts.supplied === 'withheld' ? this.lacking.keys() : []);
+        for (const r of this.withheld) this.ruleAt.set(r, Math.max(this.baseRuleAt.get(r), this.#toldAt(r) ?? Infinity));
+        this.gates = this.withheld.size ? this.story.gatesFor(this.model.data, (r) => this.ruleAt.get(r.id) ?? -1) : this.story.gates;
+    }
+
+    /** Where the story itself states a background fact (its `source`), or null. */
+    #toldAt(ruleId) {
+        const told = Math.min(...(this.model.cards.get(ruleId)?.source ?? []).map((q) => this.#paraOf(q)));
+        return Number.isFinite(told) ? told : null;
+    }
+
     reset() {
+        this.#readerSetup();
         this.#hideIrrelevant();
         this.read = 1;                  // paragraphs [0, read) have been read; paragraph 0 is the title
         this.seq = 0;                   // discovery counter (the investigation axis)
@@ -298,7 +328,7 @@ export class Game {
         this.madeAt = new Map();
         this.moved = false;
         this.board = TL.emptyBoard(); // the timeline: followed things, pencil marks, splits, events placed (timeline.js)
-        if (this.background === BG_START) for (const r of this.model.data.rules ?? []) this.#unlock(r.id, 0);
+        if (this.background === BG_START) for (const r of this.model.data.rules ?? []) if (!this.withheld.has(r.id)) this.#unlock(r.id, 0);
         this.#process(0);
     }
 
@@ -850,7 +880,7 @@ export class Game {
     /** Reasoning steps the next paragraph waits for, not yet made. */
     blockers() {
         if (this.finished()) return [];
-        return this.story.stepsBefore(this.read, this.model.data).filter((s) => !this.stepMade(s));
+        return [...(this.gates.get(this.read) ?? [])].filter((s) => !this.stepMade(s));
     }
 
     /** The action the next paragraph shows Holmes doing, if any (labels the read-on button). */
@@ -891,7 +921,7 @@ export class Game {
 
     /** The paragraph just before Holmes's next deduction (where the story would wait for it), or the end. */
     nextDeductionAt() {
-        const ahead = [...(this.story.gates?.keys() ?? [])].filter((p) => p > this.read).sort((a, b) => a - b);
+        const ahead = [...(this.gates?.keys() ?? [])].filter((p) => p > this.read).sort((a, b) => a - b);
         return ahead[0] ?? this.story.paragraphs.length;
     }
 
@@ -909,6 +939,8 @@ export class Game {
 
     #process(p) {
         if (this.background === BG_RELEVANT) for (const [r, at] of this.ruleAt) if (at === p) this.#unlock(r, p);
+        // All at once, but a withheld fact still waits for the story to state it.
+        if (this.background === BG_START) for (const r of this.withheld) if (this.ruleAt.get(r) === p) this.#unlock(r, p);
         // Asked about already: the card recalls each further fact as the story reaches its subject.
         if (this.background === BG_ASK) {
             for (const [card] of this.asked) for (const r of this.rulesOn.get(card) ?? []) if (this.ruleAt.get(r) === p) this.#unlock(r, p);
@@ -928,7 +960,7 @@ export class Game {
         // Trivial files an absence for the player as soon as it can be filed (Round 83).
         if (this.autoSolves()) for (const a of this.fileableAbsences()) this.fileAbsence(a.expectation, a.windows[0], a.witness);
         // The story is about to wait on a deduction: the card that holds its question is dealt now.
-        for (const id of this.story.gates?.get(p + 1) ?? []) {
+        for (const id of this.gates?.get(p + 1) ?? []) {
             const c = this.routeById.get(id).concludes;
             const slot = c.slot ?? c.formula.eq?.[0];
             if (slot) this.#unlock(this.model.slots.get(slot)?.on, p);
@@ -2357,8 +2389,8 @@ export class Game {
 
     /**
      * Disclosure (docs/reader-layer.md, Q2): where the story tells a card, and what it holds back.
-     *   a rule:   {at: where the game offers it, told: where the story states it (null: never), supplied: offered
-     *             before the story states it}
+     *   a rule:   {at: where the game offers it, told: where the story states it (null: never), early: offered
+     *             before the story states it, supplied: this reader lacks it (lacks: the background card that says so)}
      *   a check:  {at: where Holmes makes it, result: shown / late / never}
      *   a fact:   {at: first mention, ...its `disclosure` (late: where it should have been shown, or never; policy)}
      *   other:    {at: first mention}
@@ -2369,9 +2401,11 @@ export class Game {
         const c = this.model.cards.get(id);
         if (!c) return null;
         if (c.section === 'rules') {
-            const told = Math.min(...(c.source ?? []).map((q) => this.#paraOf(q)));
+            const told = this.#toldAt(id);
             const at = this.ruleAt.get(id);
-            return { at, told: Number.isFinite(told) ? told : null, supplied: Number.isFinite(told) && at < told };
+            const out = { at, told, early: told !== null && at < told, supplied: this.lacking.has(id) };
+            if (out.supplied) out.lacks = this.lacking.get(id); // the background card this reader lacks
+            return out;
         }
         const at = this.story.firstAt.get(id) ?? null;
         return c.disclosure ? { at, ...c.disclosure } : { at };
@@ -2379,8 +2413,8 @@ export class Game {
 
     /**
      * What the story held back, as far as it has been read: facts told late (once told), the background facts the
-     * game offered before the story states them (once stated, if held), checks whose result came late (once it
-     * has), and at the end what was never told. Nothing names a paragraph not yet read. Never scored.
+     * game supplied because this reader lacks them (once the story states them, or at the end; if held), checks
+     * whose result came late (once it has), and at the end what was never told. Nothing names a paragraph not yet read. Never scored.
      * Each: {id, kind: 'late' | 'supplied' | 'never', at, told?, due?, policy?}, in story order.
      */
     heldBack() {
@@ -2396,7 +2430,7 @@ export class Game {
         for (const r of this.model.data.rules ?? []) {
             if (!this.knows(r.id)) continue;
             const d = this.disclosure(r.id);
-            if (d.supplied && d.told < this.read) out.push({ id: r.id, kind: 'supplied', at: this.unlocked.get(r.id).para, told: d.told });
+            if (d.supplied && (d.told === null ? end : d.told < this.read)) out.push({ id: r.id, kind: 'supplied', at: this.unlocked.get(r.id).para, told: d.told, ...(d.lacks && { lacks: d.lacks }) });
         }
         for (const ck of this.model.data.checks ?? []) {
             if (ck.result.late !== undefined && ck.result.late < this.read) out.push({ id: ck.id, kind: 'late', due: ck.at, told: ck.result.late, at: ck.at });

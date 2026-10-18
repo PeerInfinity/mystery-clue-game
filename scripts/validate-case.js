@@ -34,8 +34,10 @@ if (main.mentions_file) {
     data.mentions = { entities: m.entities, windows: m.windows };
 }
 if (main.thoughts_file) data.thoughts = readJson(main.thoughts_file).thoughts; // Holmes's steps (Round 57); checked by validate-thoughts
+if (main.thoughts_file) data.background = readJson(main.thoughts_file).background; // the reader marks (engine/readers.js)
 const raw = structuredClone(data); // the model grounds some formulas in place (route conclusions): check the schema on the file's own
 delete raw.thoughts;
+delete raw.background;
 const model = buildModel(data);
 const errors = [...model.errors];
 {
@@ -469,7 +471,7 @@ const knownBy = (sceneIdx) => {
     return known;
 };
 // Per reader (docs/reader-layer.md, Q1): a rule the reader lacks counts only once the story has stated it.
-const background = main.thoughts_file ? readJson(main.thoughts_file).background ?? [] : [];
+const background = data.background ?? [];
 const FAIR_READERS = ['1892', 'modern'];
 const fairRows = [];
 {
@@ -500,7 +502,7 @@ const heldBackRows = [];
     }
     for (const c of [...data.claims, ...(data.constraints ?? [])]) if (c.disclosure) heldBackRows.push({ id: c.id, ...g.disclosure(c.id) });
     for (const ck of data.checks ?? []) if (!ck.result.shown) heldBackRows.push({ id: ck.id, ...g.disclosure(ck.id) });
-    for (const r of data.rules ?? []) { const d = g.disclosure(r.id); if (d.supplied) heldBackRows.push({ id: r.id, ...d }); }
+    for (const r of data.rules ?? []) { const d = g.disclosure(r.id); if (d.early) heldBackRows.push({ id: r.id, at: d.at, told: d.told }); }
 }
 // The background cards some reader lacks: their rules, where the game offers each, and where the story states it.
 const backgroundRows = [];

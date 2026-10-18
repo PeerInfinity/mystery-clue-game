@@ -11,7 +11,11 @@ export async function loadCase(base, read = defaultRead) {
         const m = await read(`${base}/${main.mentions_file}`);
         data.mentions = { entities: m.entities, windows: m.windows };
     }
-    if (main.thoughts_file) data.thoughts = (await read(`${base}/${main.thoughts_file}`)).thoughts;
+    if (main.thoughts_file) {
+        const t = await read(`${base}/${main.thoughts_file}`);
+        data.thoughts = t.thoughts;
+        data.background = t.background; // the background cards and their reader marks (engine/readers.js)
+    }
     const model = buildModel(data);
     const text = await read(`${base}/${main.case.source.text_file}`, 'text');
     model.story = new Story(text, data);

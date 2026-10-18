@@ -3589,3 +3589,21 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   `engine/reader.test.js`.
 - **The report:** a "Held back by the story" section: the two facts, `ck.boots`, `ck.photograph`, `ck.maid`, and 36
   rules the game offers before the story states them (opium's taste ¶37 → ¶218, the dog ¶29 → ¶219, …).
+
+## Round 136 (2026-10-18): ws 8 step 3 — the reader setting
+
+- **Options:** `reader` (modern, 1892, racing; default modern; not part of the difficulty, kept across a change of
+  it) and `supplied` (offered in every preset; `withheld` for purists).
+- **Engine:** `Game.lacking` from `lackingRules`, set on every reset; with `withheld`, a lacking rule's `ruleAt` is
+  where the story states it (or never), and the game computes its own gates (`Story.gatesFor`, factored out of
+  `#gates`): `t102.4`, `t37.13` and `t148.2` stop gating for a modern purist, since a premise is never told. The
+  loader carries the background cards (`data.background`).
+- **A refinement of Q2, found in the tests:** "supplied" means *this reader lacks it*. A rule offered before the
+  story states it is `early`; for an 1892 reader opium's taste is early but their own, so it is not listed as held
+  back (the paper's case "Opium's taste held"). `heldBack()` lists supplied rules; the report keeps the 36 early ones.
+- **UI:** "· Supplied: a reader of 1892 would know this" (a racing man, a specialist) on supplied facts, with the
+  paragraph where the story says so once read past it; checked in headless Chrome on an Easy save at ¶120 (the
+  loose horse "the story says so at paragraph 114"; the kick and the faker supplied).
+- **Tests:** three more in `engine/reader.test.js` (the readers, the reader outside the difficulty, withheld).
+- **Diffs:** none: the reveal, foreshadow and clash logs, both reports and the gate listing are unchanged (the default
+  reader is offered everything, as before).
