@@ -3142,3 +3142,50 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     held, which `k.gypsies_did_not_take_him` does not rest on. Its "explains nothing about the curry or the dog" is a
     residue reason, for step 3's drop.
   - **Unchanged:** the reveal, foreshadow and clash logs, and the gates.
+
+## Round 116 (2026-10-17): workstream 6, step 3 — drop with a reason
+
+- **`Game.drop(target, reason, {rival, cites})`** (`docs/hypotheses.md`, Q5): a story or player theory, or a candidate
+  (slot = value), dropped for one of `DROP_REASONS`:
+  - out-explained (a rival theory);
+  - more hands (a rival);
+  - cost;
+  - a card (cites held cards).
+
+  It is a stance: never refused, taken back with `undrop`, and saved.
+- **`Game.dropCheck(target)`:**
+  - out-explained: the rival's residue is a strict part of the dropped one's;
+  - more hands: more people among its agents (`Game.hands`) than the rival's;
+  - cost: something it needs wrong;
+  - a card: the cited card is in its cost, or contradicts its answers outright.
+
+  A candidate weighed against a rival is the rival's story with the candidate in its place.
+- **Scoring:** `dropScores` / `dropScore`, in the shape of the raise and notice scores. A thought with `dropped` scores
+  when its target is dropped before its deadline: Holmes's paragraph, or `dropped.deadline` where he never makes it.
+  - `t58.3`: the paper, by the ten-pound note; deadline ¶104.
+  - `t62.4`: the gypsies, by the player's step; Holmes ¶114.
+  - `t92.7`: the maid, more hands; deadline ¶104.
+  - `t68.3` is the "two stories" doubt of `k.one_culprit`, a new doubt reason. Its `no_inference` is `doubt`, and it
+    is unscored.
+  - `t68.2` names no game target (Brown's story is the player's).
+- **Validation** (`engine/thoughts.js`): a drop's target, reason, citations and deadline resolve.
+- **UI:**
+  - "drop it…" on each theory, and "Drop it…" in each candidate's menu: a reason, a rival theory, and for a card the
+    one open in the Card tab;
+  - a dropped theory is dimmed and a dropped candidate struck with dots, with "take it back";
+  - on Easy, the game's check of the reason in a line ("The other leaves 2 odd things unexplained; this one 9, those
+    among them.").
+
+  Checked in headless Chrome at ¶92 with three drops.
+- **A bug fixed:** `addTheory` gave two theories made in the same millisecond one id.
+- **Tests** (`engine/hypotheses.test.js`):
+  - the paper, the gypsies, the maid (2 hands to 1) and Brown (out-explained) dropped with checks that hold;
+  - a reason that does not hold is recorded and checked false;
+  - the scores, 3 of 3;
+  - save and load;
+  - the passive player's cost dates the maid's and the paper's deadline at ¶104;
+  - one culprit doubted for "two stories".
+- **Tidy-up:** `workstream-6` is retired as a `no_inference` value, as `workstream-3` was in Round 112. The thoughts
+  report's legend names `doubt` in its place.
+- **Moved:** the thoughts report only: `t68.3`'s reason `workstream-6` → `doubt`, and the legend. Unchanged: the
+  reveal, foreshadow and clash logs, the case report and the gates.

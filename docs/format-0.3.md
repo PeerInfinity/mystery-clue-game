@@ -528,7 +528,7 @@ specific thing stay ground facts with a formula and no schema.
   declared state to take one of its marked places, against the working constraints (clashes set aside).
   `Game.visibleTheories()` decides which theories the player has met.
 
-## As built (2026-10-17): a scenario's cost and residue (workstream 6, steps 1–2; Rounds 114–115)
+## As built (2026-10-17): a scenario's cost, residue and drops (workstream 6, steps 1–3; Rounds 114–116)
 
 - **Cost** (`Game.scenarioCost(theory, {extra})`, no data): a theory's answers held fast, the clashes they make with
   the working set broken as clashes are (`#weigher`), until what is left fits. Each item set aside, with its class,
@@ -545,6 +545,11 @@ specific thing stay ground facts with a formula and no schema.
 - **Checks** (`validate-case.js`): cards, thought, inference and slots resolve; at least one explanation holds in
   the answer key. The report's "Puzzles" table lists which explanations hold and which story theories explain each
   puzzle by their answers alone. Thoughts may map to puzzle ids (`t46.3`).
+- **Drops** (Round 116; no case data but the thoughts'): the player drops a theory or a candidate with one of
+  `DROP_REASONS` (out-explained, more hands, cost, a card), saved as `drops`. A DROP thought (and `t68.3`) carries
+  `dropped: {theory | slot, value | inference, reason, cites?, deadline?}`: the game target it drops, why, and where
+  Holmes never makes it the paragraph by which the story makes it untenable. `dropScores` counts them before the
+  deadline.
 
 ## Open
 

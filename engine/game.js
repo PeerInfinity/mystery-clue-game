@@ -36,7 +36,9 @@ export const HARD = 'hard';
 export const CUSTOM = 'custom';
 export const DIFFICULTIES = [TRIVIAL, EASY, MEDIUM, HARD];
 /** Why a clue may be doubted, beyond mistaken and lying (workstream 4: recorded; their logic is workstream 3's). */
-export const DOUBT_REASONS = ['could-not-see', 'inference-as-fact', 'hearsay', 'neutral'];
+export const DOUBT_REASONS = ['could-not-see', 'inference-as-fact', 'hearsay', 'neutral', 'two-stories'];
+// Why a hypothesis is dropped (docs/hypotheses.md, Q5): the game checks each where it can, and never refuses one.
+export const DROP_REASONS = ['out-explained', 'more-hands', 'cost', 'card'];
 // Trivial's pace: settle each answer when Holmes reaches it in the story, or as soon as the held clues allow.
 export const AUTO_HOLMES = 'holmes';
 export const AUTO_LOGIC = 'logic';
@@ -277,6 +279,7 @@ export class Game {
         this.concluded = [];            // [{id, cited, formula, label, para}]
         this.filed = [];                // [{id, para}] absences the player filed (Round 83), or Trivial filed for them
         this.noticed = new Map();       // card id → {para, because}: details the player marked as odd (Round 84)
+        this.drops = new Map();         // drop key → {target, reason, rival, cites, para}: hypotheses dropped (workstream 6)
         this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised (workstream 3)
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
@@ -310,6 +313,7 @@ export class Game {
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             filed: this.filed.map((f) => [f.id, f.para]),
             noticed: [...this.noticed].map(([id, n]) => [id, n.para, n.because]),
+            drops: [...this.drops.values()],
             raised: [...this.raised.values()].map((r) => [r.id, r.n, r.exception, r.para, r.status]),
             made: [...this.#noteMade()],
             board: this.board,
@@ -386,6 +390,7 @@ export class Game {
         }
         for (const [id, para] of state.split ?? []) if (this.knows(id) && this.partsOf(id).length) { this.splitClaims.add(id); for (const x of this.partsOf(id)) this.#unlock(x, para); }
         for (const [id, para, because] of state.noticed ?? []) if (this.knows(id)) this.noticed.set(id, { para, because: because && this.knows(because) ? because : null });
+        for (const d of state.drops ?? []) if (d?.target && DROP_REASONS.includes(d.reason)) this.drops.set(dropKey(d.target), d);
         for (const [id, n, exception, para, status] of state.raised ?? []) {
             const e = this.knows(id) && this.applicationsOf(id).find((a) => a.n === n)?.exceptions.find((x) => x.id === exception);
             if (!e || (status === 'established' && !this.suspected.has(id))) continue;
@@ -1949,7 +1954,9 @@ export class Game {
 
     // ---------- theories ----------
     addTheory(label, assignment = {}) {
-        const id = `t.player_${Date.now().toString(36)}`;
+        // Unique even for two theories made in the same millisecond.
+        let id = `t.player_${Date.now().toString(36)}`;
+        for (let n = 2; this.theories.some((t) => t.id === id); n++) id = `t.player_${Date.now().toString(36)}_${n}`;
         this.theories.push({ id, label, assignment });
         return id;
     }
@@ -2062,6 +2069,93 @@ export class Game {
         return v;
     }
 
+    // ---------- dropping a hypothesis (docs/hypotheses.md, Q5) ----------
+    /**
+     * The scenario a drop speaks of: a theory, or a candidate (slot = value). A candidate weighed against a rival is
+     * the rival's story with the candidate in its place ("the maid version": the inside story, the maid drugging).
+     */
+    scenarioOf(target, rival = null) {
+        if (target.theory) return this.visibleTheories().find((t) => t.id === target.theory) ?? null;
+        if (target.slot) return { assignment: { ...(rival?.assignment ?? {}), [target.slot]: target.value } };
+        return null;
+    }
+
+    /**
+     * Drop a theory or a candidate for a reason (DROP_REASONS): a stance, never refused, taken back with undrop. `rival`
+     * is a theory id (out-explained, more hands), `cites` card ids (a card). Checked by dropCheck, not here.
+     */
+    drop(target, reason, { rival = null, cites = [] } = {}) {
+        if (!DROP_REASONS.includes(reason) || !this.scenarioOf(target)) return { ok: false, reason: 'nothing to drop' };
+        if (['out-explained', 'more-hands'].includes(reason) && !this.visibleTheories().some((t) => t.id === rival)) return { ok: false, reason: 'choose a theory that does better' };
+        if (reason === 'card' && !(cites.length && cites.every((c) => this.knows(c)))) return { ok: false, reason: 'cite a card you hold' };
+        const key = dropKey(target);
+        const was = this.drops.get(key);
+        this.drops.set(key, { target, reason, rival, cites, para: was?.para ?? this.read - 1 });
+        return { ok: true, key };
+    }
+    undrop(target) { return this.drops.delete(dropKey(target)); }
+    dropOf(target) { return this.drops.get(dropKey(target)) ?? null; }
+
+    /**
+     * Does the reason hold, from what the player holds? {ok, ...}: out-explained, the rival's residue a strict part of
+     * the dropped one's; more hands, more people in its acts than the rival's; cost, something it needs wrong; a card,
+     * the cited card in its cost or against its answers outright. Never by truth.
+     */
+    dropCheck(target) {
+        const d = this.dropOf(target);
+        if (!d) return null;
+        const rival = d.rival ? this.visibleTheories().find((t) => t.id === d.rival) ?? null : null;
+        const mine = this.scenarioOf(target, rival);
+        if (!mine) return { ok: false, gone: true };
+        if (d.reason === 'out-explained') {
+            if (!rival) return { ok: false, gone: true };
+            const a = this.residue(mine).residue;
+            const b = this.residue(rival).residue;
+            return { ok: b.length < a.length && b.every((z) => a.includes(z)), residue: a, rivalResidue: b };
+        }
+        if (d.reason === 'more-hands') {
+            if (!rival) return { ok: false, gone: true };
+            const a = this.hands(mine);
+            const b = this.hands(rival);
+            return { ok: a.length > b.length, hands: a, rivalHands: b };
+        }
+        const cost = this.scenarioCost(mine);
+        if (d.reason === 'cost') return { ok: cost.items.length > 0 || cost.refuted, cost };
+        const inCost = cost.items.some((i) => i.cards.some((c) => d.cites.includes(c)));
+        const owner = (id) => trustedClaim(this.model, id) ?? this.model.constraints.get(id)?.inference ?? null;
+        const cited = this.workingConstraints().filter((id) => d.cites.includes(owner(id)));
+        return { ok: inCost || (cited.length > 0 && !this.model.problem.consistent(cited, mine.assignment).ok), cost };
+    }
+
+    /** The people a scenario's answers make act: the agents it names that are people. */
+    hands(theory) {
+        const out = new Set();
+        for (const [s, v] of Object.entries(theory.assignment ?? {})) {
+            if (this.model.slots.get(s)?.facet === 'agent' && this.model.cards.get(v)?.kind === 'person') out.add(v);
+        }
+        return [...out];
+    }
+
+    /**
+     * The drops the annotation counts (thoughts with `dropped` naming a theory or a candidate): each with its deadline (Holmes's paragraph, or where
+     * the story itself makes the hypothesis untenable, `dropped.deadline`), the paragraph the player dropped it (a
+     * doubt, for an inference; null if not), and whether that was before the deadline (it scores). Wrong turns cost
+     * nothing; nothing counts in Trivial.
+     */
+    dropScores() {
+        // A doubt of an inference (t68.3's "two stories") is the doubt's, unscored: Holmes never says it.
+        return (this.model.data.thoughts ?? []).filter((t) => t.dropped && !t.dropped.inference).map((t) => {
+            const d = t.dropped;
+            const at = this.autoSolves() ? null : this.dropOf(d)?.para ?? null;
+            const holmes = t.holmes && !t.holmes.never && t.holmes.paras?.length ? t.holmes.paras[0] : d.deadline ?? null;
+            return { thought: t.id, para: t.para, deadline: holmes, dropped: at, scores: at !== null && holmes !== null && at < holmes };
+        });
+    }
+    dropScore() {
+        const rows = this.dropScores();
+        return { dropped: rows.filter((r) => r.dropped !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.deadline !== null).length, of: rows.length };
+    }
+
     // ---------- the three time axes ----------
     /** Fabula: events the player holds, with their time if settled. */
     fabula() {
@@ -2083,6 +2177,11 @@ export class Game {
         if (c?.section === 'rules') return this.ruleAt.get(cardId);
         return this.story.firstAt.get(cardId) ?? null;
     }
+}
+
+/** A drop's key: a theory's id, a candidate's slot=value, or an inference's id. */
+export function dropKey(target) {
+    return target.theory ?? (target.slot ? `${target.slot}=${target.value}` : target.inference);
 }
 
 function literalsIn(f, out = []) {

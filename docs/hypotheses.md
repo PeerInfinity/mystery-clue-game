@@ -1,7 +1,7 @@
 # Hypotheses, scenarios and residue (workstream 6)
 
 Status: **AGREED** (Robert, 2026-10-17, Round 113: every recommendation, and the order of work; where one proves
-hard to build, fall back to a simpler alternative). **Built:** step 1, the cost (Round 114); step 2, puzzles and residue (Round 115). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
+hard to build, fall back to a simpler alternative). **Built:** step 1, the cost (Round 114); step 2, puzzles and residue (Round 115); step 3, drop with a reason (Round 116). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
 (§2 HYPOTHESIS, WEIGH, TEST, RESIDUE, DROP, REVISE; §6: supports and strains authored first, computed later; wrong
 turns cost nothing), Round 19 (theories), workstream 5 (notices), workstream 3 (exceptions) and the clash paper
 (`docs/clashes.md`: the four classes, "never by truth").
@@ -422,3 +422,13 @@ entry and here.
     theft itself improbable;
   - partial theories (the honest trainer, the self-wound) leave nearly every puzzle over, which is right but noisy;
   - the candle (`t78.3`) has no puzzle: no slot says what the light was for.
+
+**At build time (Round 116):**
+- **A candidate is dropped against a rival as the rival's story with the candidate in its place** ("the maid version"
+  is the player's inside story with the maid drugging). Without a rival a candidate stands alone (its slot = value).
+- **`t68.3`** names the doubt (`dropped: {inference: "k.one_culprit", reason: "two-stories"}`, `no_inference: doubt`).
+  It is not scored: Holmes never says it.
+- **Deadlines:** the three drops Holmes never makes carry `dropped.deadline`. A test checks the two that a passive
+  player's cost can date (the maid and the paper, ¶104). `t68.2` (Brown as organiser) names no game target: Brown's
+  story is the player's own.
+- **A bug found and fixed:** two theories added in the same millisecond got the same id.

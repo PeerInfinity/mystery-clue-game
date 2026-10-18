@@ -146,6 +146,8 @@ a:hover, .link:hover { text-decoration: underline; }
 .chip { display: inline-flex; align-items: center; gap: 4px; background: var(--chip); color: var(--ink); border-radius: 12px; padding: 2px 9px; font-size: 13px; border: 1px solid transparent; cursor: pointer; }
 .chip.ruled { opacity: .55; border-style: dashed; border-color: var(--line); }
 .chip.struck { text-decoration: line-through; opacity: .55; }
+.chip.dropped { text-decoration: line-through dotted; opacity: .7; }
+.theory.dropped { opacity: .75; }
 .chip.circled { border: 2px solid var(--accent); padding: 1px 8px; font-weight: 600; }
 .chip.proved { text-decoration: line-through; background: var(--good-soft); opacity: .8; }
 .chip.proven { background: var(--good); color: #fff; font-weight: 600; }

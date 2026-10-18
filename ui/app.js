@@ -6,7 +6,7 @@ import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, workerClient, settle } from '../engine/remoteProblem.js';
-import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS } from '../engine/game.js';
+import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS, DROP_REASONS } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -405,7 +405,8 @@ function countLeft(slot) {
 function chip(slot, v, cls) {
     const picked = ui.menu?.slot === slot && ui.menu?.value === v ? ' picked' : '';
     const circled = !game.autoSolves() && game.isCircled(slot, v) ? ' circled' : '';
-    return `<span class="chip ${cls}${circled}${picked}" data-slot="${slot}" data-val="${esc(v)}">${esc(valueName(slot, v))}${cls === 'proved' ? ' <span class="x">✓</span>' : ''}</span>`;
+    const dropped = !game.autoSolves() && game.dropOf({ slot, value: v }) ? ' dropped' : '';
+    return `<span class="chip ${cls}${circled}${dropped}${picked}" data-slot="${slot}" data-val="${esc(v)}">${esc(valueName(slot, v))}${cls === 'proved' ? ' <span class="x">✓</span>' : ''}</span>`;
 }
 
 function slotMenu(s, v) {
@@ -436,8 +437,53 @@ function slotMenu(s, v) {
     const mine = game.theories.find((t) => t.id === ui.theory);
     if (mine && !isGiven) b.push(`<button data-op="theory" class="quiet">Add to “${esc(mine.label)}”</button>`);
     if (model.cards.has(v) && game.knows(v)) b.push(`<button data-op="open" class="quiet">Open ${esc(shortName(v, 30))}</button>`);
-    return `<div class="menu" data-menu-slot="${s.id}" data-menu-val="${esc(v)}"><b>${esc(valueName(s.id, v))}</b>${b.join('')}${ui.menuNote ? `<div class="why">${ui.menuNote}</div>` : ''}</div>`;
+    // Dropping a candidate for a reason that is not a proof (docs/hypotheses.md, Q5).
+    const key = `c|${s.id}|${v}`;
+    if (!isGiven && !isProven && !game.dropOf({ slot: s.id, value: v })) b.push(`<button class="quiet" data-drop-open="${esc(key)}">Drop it…</button>`);
+    const drop = game.dropOf({ slot: s.id, value: v }) ? dropHtml(key) : ui.dropping === key ? dropForm(key) : '';
+    return `<div class="menu" data-menu-slot="${s.id}" data-menu-val="${esc(v)}"><b>${esc(valueName(s.id, v))}</b>${b.join('')}${drop}${ui.menuNote ? `<div class="why">${ui.menuNote}</div>` : ''}</div>`;
 }
+
+// ---------- dropping a hypothesis (docs/hypotheses.md, Q5) ----------
+const DROP_LABELS = {
+    'out-explained': 'another theory explains more',
+    'more-hands': 'it needs more people than another theory',
+    cost: 'it needs too much of what I trust to be wrong',
+    card: 'the card I have open tells against it',
+};
+/** A drop target from its key: t|theory or c|slot|value. */
+function dropTarget(key) {
+    const [kind, a, b] = key.split('|');
+    return kind === 't' ? { theory: a } : { slot: a, value: b };
+}
+function dropForm(key) {
+    const target = dropTarget(key);
+    const rivals = game.visibleTheories().filter((t) => t.id !== target.theory);
+    const card = ui.selected && game.knows(ui.selected) ? ui.selected : null;
+    return `<div class="small drop-form">Why drop it? <select id="drop-reason">${DROP_REASONS.map((r) => `<option value="${r}">${esc(DROP_LABELS[r])}</option>`).join('')}</select>`
+        + (rivals.length ? ` Than: <select id="drop-rival">${rivals.map((t) => `<option value="${esc(t.id)}">${esc(shortName(t.label, 50))}</option>`).join('')}</select>` : '')
+        + `${card ? ` <span class="muted">(the card open: ${esc(shortName(card, 40))})</span>` : ''} <button data-drop-go="${esc(key)}">Drop</button> <span class="link" data-drop-cancel="1">cancel</span></div>`;
+}
+/** A dropped hypothesis: the reason, on Easy the game's check of it, and a way back. */
+function dropHtml(key) {
+    const target = dropTarget(key);
+    const d = game.dropOf(target);
+    const rival = d.rival ? game.visibleTheories().find((t) => t.id === d.rival) : null;
+    let h = `<div class="small dropped-note">Dropped: ${esc(DROP_LABELS[d.reason])}${rival ? ` (${esc(shortName(rival.label, 50))})` : ''}${d.cites?.length ? ` (${d.cites.map((c) => link(c, shortName(c, 40))).join(', ')})` : ''}.`;
+    if (game.assisted()) {
+        const c = game.dropCheck(target);
+        const names = (ids) => ids.map((x) => esc(cardName(x))).join(', ') || 'nobody';
+        const says = c.gone ? 'The theory it was weighed against is gone.'
+            : d.reason === 'out-explained' ? (c.ok ? `The other leaves ${c.rivalResidue.length} odd things unexplained; this one ${c.residue.length}, those among them.` : `The other does not explain everything this one does (it leaves ${c.rivalResidue.length}, this one ${c.residue.length}).`)
+                : d.reason === 'more-hands' ? (c.ok ? `It needs ${names(c.hands)}; the other only ${names(c.rivalHands)}.` : `It needs ${names(c.hands)}, no more than the other (${names(c.rivalHands)}).`)
+                    : d.reason === 'cost' ? (c.ok ? `It needs ${c.cost.items.length} thing${c.cost.items.length === 1 ? '' : 's'} you trust to be wrong.` : 'It needs nothing you trust to be wrong.')
+                        : c.ok ? 'The card tells against it.' : 'The card does not tell against it on its own.';
+        h += ` <span class="${c.ok ? 'good' : 'muted'}">${says}</span>`;
+    }
+    return `${h} <span class="link" data-undrop="${esc(key)}">take it back</span></div>`;
+}
+
+
 
 /** New = never opened; updated = opened, and something has been added since. */
 function cardTally(ids) {
@@ -618,7 +664,7 @@ function toolTheories() {
         // Easy weighs the theory (what it must disbelieve); otherwise only whether something rules it out.
         const cost = game.assisted() ? game.scenarioCost(t) : null;
         const res = cost ? null : game.checkTheory(t);
-        h += `<div class="theory ${(cost ? !cost.atOdds : res.fits) ? 'fits' : 'broken'}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
+        h += `<div class="theory ${(cost ? !cost.atOdds : res.fits) ? 'fits' : 'broken'}${game.dropOf({ theory: t.id }) ? ' dropped' : ''}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
         h += `<ul class="small">${Object.entries(t.assignment).map(([s, v]) => `<li><span class="link" data-slot-open="${s}">${esc(game.promptOf(s))}</span> → ${esc(valueName(s, v))}${t.story ? '' : ` <span class="link" data-untheory="${t.id}|${s}">remove</span>`}</li>`).join('') || '<li class="empty">no answers yet</li>'}</ul>`;
         // The inferences the theory rests on (the ones its holders drew) and, among those the player holds, the
         // ones its answers agree with and the ones they go against.
@@ -632,6 +678,8 @@ function toolTheories() {
         } else {
             h += res.fits ? '<div class="small good">Nothing you hold rules it out yet.</div>' : '<div class="small bad">Something you hold and trust rules it out. Find it: try ruling out its answers.</div>';
         }
+        const tkey = `t|${t.id}`;
+        h += game.dropOf({ theory: t.id }) ? dropHtml(tkey) : ui.dropping === tkey ? dropForm(tkey) : `<div class="small"><span class="link" data-drop-open="${esc(tkey)}">drop it…</span></div>`;
         if (!t.story) h += `<div class="small"><span class="link" data-theory-current="${t.id}">${ui.theory === t.id ? '★ new answers go here' : 'add answers here'}</span> · <span class="link" data-del-theory="${t.id}">delete</span></div>`;
         h += '</div>';
     }
@@ -1191,7 +1239,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1312,6 +1360,17 @@ function onClick(e) {
         if (label) { ui.theory = game.addTheory(label); changed(); }
         return;
     }
+    if (t.dataset.dropOpen) { ui.dropping = t.dataset.dropOpen; renderTool(); return; }
+    if (t.dataset.dropCancel) { ui.dropping = null; renderTool(); return; }
+    if (t.dataset.dropGo) {
+        const reason = $('#drop-reason').value;
+        const res = game.drop(dropTarget(t.dataset.dropGo), reason, { rival: $('#drop-rival')?.value ?? null, cites: reason === 'card' && ui.selected ? [ui.selected] : [] });
+        if (!res.ok) { toast(esc(res.reason)); return; }
+        ui.dropping = null;
+        changed();
+        return;
+    }
+    if (t.dataset.undrop) { game.undrop(dropTarget(t.dataset.undrop)); changed(); return; }
     if (t.dataset.theoryCurrent) { ui.theory = t.dataset.theoryCurrent; renderTool(); return; }
     if (t.dataset.delTheory) { game.theories = game.theories.filter((x) => x.id !== t.dataset.delTheory); changed(); return; }
     if (t.dataset.untheory) {

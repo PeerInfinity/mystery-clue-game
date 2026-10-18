@@ -134,3 +134,64 @@ test('off Easy, a puzzle is met only once the player notices one of its cards', 
     assert.ok(game.metPuzzles().some((z) => z.id === 'pz.curry'));
     assert.ok(game.residue(theory('t.police')).residue.includes('pz.curry'));
 });
+
+test('drops for reasons that are not proofs: checked where they can be, never refused, scored before the story settles them', () => {
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    const readTo = (p) => { while (game.read <= p) { game.advance(); for (const a of game.fileableAbsences()) game.fileAbsence(a.expectation, a.windows[0], a.witness); } };
+    // ¶58: the paper was money (t58.3), by the card that says so.
+    readTo(58);
+    const paper = { slot: 'paper_packet.contents', value: 'opium' };
+    assert.ok(game.drop(paper, 'card', { cites: ['c.simpson_ten_pound_note'] }).ok);
+    assert.equal(game.dropCheck(paper).ok, true);
+    // ¶62: the gypsies (t62.4), by the player's own step.
+    readTo(62);
+    assert.ok(build(game, 'k.gypsies_did_not_take_him').built?.includes('k.gypsies_did_not_take_him'));
+    assert.ok(game.drop({ theory: 't.gypsies' }, 'card', { cites: ['k.gypsies_did_not_take_him'] }).ok);
+    assert.equal(game.dropCheck({ theory: 't.gypsies' }).ok, true);
+    // ¶92: the player's inside story; the maid needs two hands where it needs one (t92.7); Brown as organiser is
+    // out-explained (t68.2).
+    readTo(92);
+    const inside = game.addTheory('Inside', { ...INSIDE.assignment });
+    const brown = game.addTheory('Brown', { ...BROWN.assignment });
+    const maid = { slot: 'e.opium_added.agent', value: 'edith_baxter' };
+    assert.ok(game.drop(maid, 'more-hands', { rival: inside }).ok);
+    const hands = game.dropCheck(maid);
+    assert.deepEqual([hands.ok, hands.hands.length, hands.rivalHands.length], [true, 2, 1]);
+    assert.ok(game.drop({ theory: brown }, 'out-explained', { rival: inside }).ok);
+    assert.equal(game.dropCheck({ theory: brown }).ok, true);
+    // Never refused: a reason that does not hold is recorded, and the check says so.
+    assert.ok(game.drop({ theory: inside }, 'out-explained', { rival: 't.police' }).ok);
+    assert.equal(game.dropCheck({ theory: inside }).ok, false);
+    assert.ok(game.undrop({ theory: inside }));
+    // Scored before the deadline: Holmes's paragraph (the gypsies, ¶114), or where the story makes it untenable (¶104).
+    const rows = Object.fromEntries(game.dropScores().map((r) => [r.thought, r]));
+    for (const t of ['t58.3', 't62.4', 't92.7']) assert.equal(rows[t].scores, true, t);
+    assert.deepEqual([rows['t62.4'].deadline, rows['t92.7'].deadline], [114, 104]);
+    assert.deepEqual(game.dropScore(), { dropped: 3, scored: 3, possible: 3, of: 3 });
+    // Saved and loaded.
+    const again = new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state: JSON.parse(JSON.stringify(game.save())) });
+    assert.equal(again.dropOf(maid).reason, 'more-hands');
+    assert.equal(again.dropOf({ theory: 't.gypsies' }).cites[0], 'k.gypsies_did_not_take_him');
+});
+
+test('the deadlines the annotation gives for the drops Holmes never makes are where the story makes them untenable', () => {
+    // The passive reading's cost: the maid and the paper are at odds with the player's own reasoning first at ¶104.
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    const maid = { assignment: { 'e.opium_added.agent': 'edith_baxter' } };
+    const paper = { assignment: { 'paper_packet.contents': 'opium' } };
+    while (game.read <= 103) game.advance();
+    assert.deepEqual([game.scenarioCost(maid).atOdds, game.scenarioCost(paper).atOdds], [false, false]);
+    game.advance();
+    assert.deepEqual([game.scenarioCost(maid).atOdds, game.scenarioCost(paper).atOdds], [true, true]);
+    const deadline = (id) => model.data.thoughts.find((t) => t.id === id).dropped.deadline;
+    assert.deepEqual([deadline('t92.7'), deadline('t58.3')], [104, 104]);
+});
+
+test('one culprit is doubted for "two stories" (t68.3)', () => {
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    while (game.read <= 68) game.advance();
+    assert.ok(build(game, 'k.one_culprit').built?.includes('k.one_culprit'));
+    assert.ok(game.suspect('k.one_culprit'));
+    assert.ok(game.setDoubtReason('k.one_culprit', 'two-stories'));
+    assert.equal(model.data.thoughts.find((t) => t.id === 't68.3').dropped.inference, 'k.one_culprit');
+});

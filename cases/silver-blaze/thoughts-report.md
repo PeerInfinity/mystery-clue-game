@@ -103,7 +103,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t60.4` | INFER | `k.cravat_order` | ¶60 | ¶60 |  |  | `r.dropped_before_found`, `r.not_his_so_found_out`, `r.dead_men_do_nothing` |  |  |
 | `t62.3` | DEFAULT | `k.gypsies_would_leave_anyway` | ¶62 | ¶62 |  |  |  |  |  |
 | `t62.4` | DROP | `k.gypsies_did_not_take_him` | ¶62 | ¶62 | `t46.3` |  |  |  |  |
-| `t68.3` | IDENTIFY | none: workstream-6 | ¶68 | — |  |  |  |  |  |
+| `t68.3` | IDENTIFY | none: doubt | ¶68 | — |  |  |  |  |  |
 | `t78.2` | INFER | `k.not_a_robbery` | ¶78 | ¶78 |  |  | `r.stays_held`, `r.robber_takes_valuables` |  |  |
 | `t81.4` | AGENT | `k.knife_not_a_weapon` | ¶81 | ¶81 |  |  |  |  |  |
 | `t81.5` | INFER | `k.knife_for_an_operation` | ¶81 | ¶81 |  |  |  |  |  |
@@ -144,9 +144,9 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 
 ### Deductions with no inference
 
-Each says why (`no_inference`): `workstream-6`, a revision by strain, not by a clash; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
+Each says why (`no_inference`): `doubt`, the move doubts an inference rather than drawing one; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
 
-- workstream-6: `t68.3`
+- doubt: `t68.3`
 - action: `t92.14`
 
 ### Inferences named by more than one thought

@@ -12,10 +12,12 @@
 // the game cannot have dealt by the thought's own paragraph (the earliest date). A rule the inference applies is
 // the step's warrant and need not be cited (Round 42); a premise that is an implicit inference is bookkeeping and
 // need not be either. A thought may explain an accepted earliest-date miss in `date_note`. A deduction that can
-// have no inference says why in `no_inference` (Round 56): `workstream-6` (a revision by strain, not by a clash:
-// the break of one culprit, Round 111; `workstream-3` was retired in Round 112, its thoughts all held), `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82).
+// have no inference says why in `no_inference` (Round 56) (`workstream-3` and `workstream-6` were retired in Rounds 112
+// and 116, their thoughts all held): `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82), `doubt` (the move doubts an inference rather than drawing one: `t68.3`, Round 116).
 
-import { Game, BG_RELEVANT } from './game.js';
+import { Game, BG_RELEVANT, DROP_REASONS, DOUBT_REASONS } from './game.js';
+
+const theoryIds = (model) => new Set((model?.data.theories ?? []).map((x) => x.id));
 import { slotsOf } from './logic.js';
 
 export const TAGS = ['RECORD', 'NOTICE', 'ABSENCE', 'QUESTION', 'HYPOTHESIS', 'INFER', 'DEFAULT', 'AGENT', 'PHYSICAL',
@@ -34,7 +36,7 @@ const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag)
 export const DEDUCTION = ['INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY'];
 // A TEST that concludes something (the costume went to another woman) may name its inference too (Round 46).
 const CAN_NAME = [...DEDUCTION, 'TEST', 'WEIGH', 'SOURCE', 'DROP']; // WEIGH and SOURCE: a belief weighed (workstream 4, Round 87); DROP: a candidate dropped, "not X" (Round 96)
-export const NO_INFERENCE = ['workstream-6', 'action', 'world-model', 'absence'];
+export const NO_INFERENCE = ['action', 'world-model', 'absence', 'doubt'];
 
 /**
  * @param data   the parsed thoughts.json
@@ -135,6 +137,19 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             if (!k) { err(`${t.id}: raises an exception against ${x.target}, which is not in constraints.json`); continue; }
             const rules = new Map((model?.data.rules ?? []).map((r) => [r.id, r]));
             if (!(k.rules ?? []).some((u) => (rules.get(u.rule)?.unless ?? []).some((e) => e?.id === x.exception))) err(`${t.id}: ${x.exception} is not a named exception of a rule ${x.target} applies`);
+        }
+        // What a drop drops in the game (workstream 6, Round 116): a story theory, a candidate (slot = value), or, by a
+        // doubt, an inference; with its reason, the cards it cites, and, where Holmes never takes it up, the paragraph by
+        // which the story makes it untenable (the deadline it scores against).
+        if (t.dropped) {
+            const d = t.dropped;
+            if (d.theory && !theoryIds(model).has(d.theory)) err(`${t.id}: drops unknown theory ${d.theory}`);
+            if (d.slot && !model?.slots.get(d.slot)?.domain.includes(d.value)) err(`${t.id}: drops ${d.slot} = ${d.value}, not a candidate there`);
+            if (d.inference && !inferenceById.has(d.inference)) err(`${t.id}: drops inference ${d.inference}, which is not in constraints.json`);
+            if (!d.theory && !d.slot && !d.inference) err(`${t.id}: dropped names no theory, candidate or inference`);
+            if (!(d.inference ? DOUBT_REASONS : DROP_REASONS).includes(d.reason)) err(`${t.id}: drop reason ${d.reason} unknown`);
+            for (const c of d.cites ?? []) if (!caseIds.has(c)) err(`${t.id}: drop cites unknown ${c}`);
+            if (d.deadline !== undefined && !(d.deadline > t.para)) err(`${t.id}: drop deadline ¶${d.deadline} is not after the thought`);
         }
         if (t.inference !== undefined) {
             if (!CAN_NAME.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${CAN_NAME.join(', ')} do)`);
