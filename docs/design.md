@@ -3515,3 +3515,20 @@ trailer. The next session is told to gate documentation-only commits too.
   - entity names keep their capitals mid-sentence ("Look for A box of vestas at The hollow").
 - **No engine or case change:** the logs, the reports and the gate listing cannot move. They were rerun before the
   commit and did not.
+
+## Round 131 (2026-10-18): workstream 7's review
+
+- **`docs/review-ws7.md`:** each PREDICT and TEST PLAN thought, the second review's three ws 7 rows and the four
+  watch-holmes thoughts behind the kickoff's "17", against what Rounds 126–130 built.
+  - **Held (12):** `t29.4`, `t78.5`, `t85.3`, `t92.5`, `t92.9`, `t92.10`, `t92.11`, `t92.12`, `t101.2`, `t141.2`
+    and `t182.2`, plus `t116.3`, which has no window of its own and scores through `t92.11`'s earlier plan.
+  - **Held, unscored:** `t163.3`.
+  - **Not held, with reasons:**
+    - `t92.13`: "the horse will run" is an answer, already scored as `t40.4`, and "keep him entered" is advice no
+      template fits;
+    - `t92.14`: the sheep have no name before Holmes asks about them;
+    - `t161.2`: it settles `t92.13`.
+  - **Unscored by rule (decision 2):** the four watch-holmes thoughts.
+- **Left open:** an "advise" template; watch-holmes as a confirmation in the Checks tab (workstream 8); theories
+  proposing their own predictions; the Medium page that stays busy (workstream 9).
+- **`CLAUDE.md`'s reading list** now points at `docs/predictions.md` and this review. **Workstream 7 is done.**
