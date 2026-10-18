@@ -234,3 +234,16 @@ test('the candle (t78.3, t102.3): a puzzle the police leave over, a reading, and
     assert.deepEqual(game.openValues('e.light_struck.purpose'), ['work']);
     assert.ok(game.revisedBy('e.light_struck.purpose').includes('c.pocket_inventory'));
 });
+
+test('a violent denial, then the parlour (t135.1): the denial is false by a rule of thumb, which gives nothing away on its own', () => {
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    while (game.read <= 134) game.advance();
+    assert.ok(!game.buildable().includes('k.denial_struck_home'), 'not before the invitation');
+    game.advance();
+    assert.ok(build(game, 'k.denial_struck_home').built?.includes('k.denial_struck_home'));
+    // Trusting the denial, the rule of thumb only says it is false: who hid the horse stays open.
+    assert.ok(game.openValues('e.horse_hidden.agent').length > 1);
+    // Doubting it, the denial's falsehood names the man.
+    assert.ok(game.suspect('c.brown_denies'));
+    assert.deepEqual(game.openValues('e.horse_hidden.agent'), ['silas_brown']);
+});

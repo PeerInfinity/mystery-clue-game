@@ -52,7 +52,9 @@ test('Brown lied, Mrs. Straker and the Colonel believed what they said: the answ
     const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
     while (!game.knows('k.brown_broke')) { game.advance(); if (game.finished()) break; }
     if (!game.knows('k.brown_broke')) assert.deepEqual(game.propose(game.connectSet('k.brown_broke')).built, ['k.brown_broke']);
-    assert.deepEqual(game.propose(game.connectSet('k.brown_lied')).built, ['k.brown_lied']);
+    // The lie follows by itself once Brown is known to have the horse (implicit since Round 123: the reader's step is
+    // the guilty denial at ¶135, k.denial_struck_home).
+    assert.deepEqual([game.knows('k.brown_lied'), game.howHeld('k.brown_lied')?.how], [true, 'implicit']);
 });
 
 test('splitting a statement: what she saw and what she was told, trusted or doubted apart', () => {

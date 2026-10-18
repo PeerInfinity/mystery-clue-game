@@ -3312,3 +3312,34 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - **Thoughts report:** NOTICE mapped 3 → 4; deductions 55 → 56, with an inference 53 → 54; premise
     disagreements unchanged at 5.
   - **Unchanged:** the clash log and the gates.
+
+## Round 123 (2026-10-17): the second review's batch 4 — a guilty denial (C3, the first review's C11)
+
+- **New claim** `c.brown_invites` (¶135, observed by Watson): "Asked whether to argue it out in public or in his
+  parlour, Brown lets Holmes in: 'Oh, come in if you wish to.'" Plain description, with no "gives way".
+- **New rule** `r.guilty_denial`, a **heuristic**: "A man who flares up to deny a charge and then at once agrees to
+  talk it over in private is commonly taken to have been touched by the truth of it." Its exception is "he wants a
+  false charge settled quietly". It is shown from ¶133, the denial.
+- **New inference** `k.denial_struck_home` (verified): from the denial, the invitation and the rule, the denial is
+  false (its truth slot). It gives nothing away on its own. Trusting the denial, who hid the horse stays open;
+  doubting it, the falsehood names Brown, five paragraphs before he gives in.
+  - As a heuristic step it weighs class 1 in a clash.
+  - It is named by `t135.1`, which reads ¶135's line. `t135.1`'s date note is gone, since its step is now dealt on
+    its own paragraph.
+  - `k.brown_lied` (¶140, the belief) becomes implicit, as C11 proposed. `bk.guilty_denial` maps the rule.
+- **Leak checker** (haiku, two runs): the rule (`--background`), its exception (`--exceptions`) and the claim
+  (`--all`) all pass. The full `--all` pass came almost wholly from the cache ($0.09); its 20 flags are on unchanged
+  pieces.
+- **Test:** the step is not buildable before ¶135. Built at ¶135, it leaves the hider open while the denial is
+  trusted, and names Brown once it is doubted.
+- **Moved:**
+  - **Reveal and foreshadow logs:** the rule and its exception at ¶133, the claim at ¶135.
+  - **Case report:** cards 687 → 690, claims 156 → 157, rules 120 → 121, constraints 473 → 475, quotes 1063 → 1067,
+    verified 82 → 83. `t135.1`'s route row now concludes the denial's falsehood at ¶135.
+  - **Thoughts report:** premise disagreements 5 → 4 (`t135.1`'s, from the first review, is resolved); explained
+    date misses 6 → 5; `k.brown_lied` is listed among the implicit inferences.
+  - **Unchanged:** the clash log and the gates.
+- **An expectation that changed:** `belief.test.js` built `k.brown_lied` by hand. Now implicit, it follows by itself
+  once `k.brown_broke` is held, and the test checks that instead. (The first suite run caught it; nothing was
+  committed until it passed.)
+- **The second review's four batches are all built.**

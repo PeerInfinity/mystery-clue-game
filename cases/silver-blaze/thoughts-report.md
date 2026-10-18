@@ -73,7 +73,7 @@ Thoughts whose raising of an exception against an inference counts (`raises`). A
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 56; with an inference: 54; with a reason for none: 2; earliest-date misses: 0 (and 6 explained); premise disagreements: 5
+- deduction-type thoughts: 56; with an inference: 54; with a reason for none: 2; earliest-date misses: 0 (and 5 explained); premise disagreements: 4
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -125,7 +125,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t122.3` | AGENT | `k.track_man_changed_his_mind` | ¶122 | ¶122 |  |  |  |  |  |
 | `t124.2` | INFER | `k.tracks_end_at_mapleton` | ¶124 | ¶124 |  |  | `r.tracks_lead_in` |  |  |
 | `t127.3` | AGENT | `k.first_up_and_no_subordinate` | ¶127 | ¶127 |  |  | `r.first_up_takes_it_in` |  |  |
-| `t135.1` | WEIGH | `k.brown_lied` | ¶135 | ¶140 (explained) |  | `k.brown_broke` | `r.denies_own_deed` |  | `bk.guilty_denial` |
+| `t135.1` | WEIGH | `k.denial_struck_home` | ¶135 | ¶135 |  |  |  |  |  |
 | `t140.2` | INFER | `k.brown_broke` | ¶140 | ¶140 |  |  | `r.undertaking_means_possession` |  |  |
 | `t146.2` | TEST | `k.boots_identify` | ¶146 | ¶146 |  |  | `r.prints_identify_boots` |  |  |
 | `t148.2` | INFER | `k.disguised_to_survive_search` | ¶148 | ¶66 |  |  |  |  |  |
@@ -141,7 +141,6 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 - `t29.3` (¶29, dealt ¶36): The reader holds the conditional at ¶29, ahead of the drugging; the game can pose it only once the drugging is told (Hunter's charge, ¶36). It is Gregory's asserted conditional: nothing gates or scores on it.
 - `t31.3` (¶31, dealt ¶33): The reader's conditional at ¶31 is about an entry the story has not yet told: the entry's card (and its "with what?") comes with the open door at ¶33.
 - `t36.2` (¶36, dealt ¶218): The reader has it at ¶36. The rule it applies (a man who sees his food tampered with does not eat it) and the question of what Hunter saw come at Holmes's line on the eater (¶218), not beside Hunter's charge, where they would give the step away (Rounds 89, 104).
-- `t135.1` (¶135, dealt ¶140): The denial is weighed at ¶135, once Brown has invited Holmes in; that it was a lie is certain only once Brown gives in (¶140), which the inference rests on.
 
 ### Deductions with no inference
 
@@ -158,7 +157,7 @@ None.
 
 Granted as soon as their premises are held; never gate, never score (Q4). Provisional: the world model will re-derive much of it (Q5).
 
-`k.portion_dished_at_supper`, `k.ross_believes_not_his`, `k.straker_lied_to_wife`, `k.straker_lied_about_derbyshire`, `k.stranger_lied_about_lost`, `k.portion_set_aside_before_edith`, `k.straker_home_all_evening`, `k.drugged_in_house_means_before_nine_five`, `k.visitor_is_taker`, `k.entrant_took_the_horse`, `k.hunter_was_drugged`, `k.wife_stayed_home`, `k.night_sequence`, `k.found_before_seven`, `k.met_after_bolting`, `k.hollow_order`, `k.led_by_taker`, `k.operation_in_the_open`, `k.blow_needs_a_wielder`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.bill_names_its_debtor`, `k.second_household_kept`, `k.practice_first`, `k.lame_plan`, `k.found_at_dawn`, `k.disguised_by_hider`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
+`k.portion_dished_at_supper`, `k.ross_believes_not_his`, `k.brown_lied`, `k.straker_lied_to_wife`, `k.straker_lied_about_derbyshire`, `k.stranger_lied_about_lost`, `k.portion_set_aside_before_edith`, `k.straker_home_all_evening`, `k.drugged_in_house_means_before_nine_five`, `k.visitor_is_taker`, `k.entrant_took_the_horse`, `k.hunter_was_drugged`, `k.wife_stayed_home`, `k.night_sequence`, `k.found_before_seven`, `k.met_after_bolting`, `k.hollow_order`, `k.led_by_taker`, `k.operation_in_the_open`, `k.blow_needs_a_wielder`, `k.cravat_worn_at_window`, `k.simpson_purpose`, `k.paper_held_opium_means_nobbling`, `k.bill_names_its_debtor`, `k.second_household_kept`, `k.practice_first`, `k.lame_plan`, `k.found_at_dawn`, `k.disguised_by_hider`, `k.markings_identify`, `k.sent_over_by_hider`, `k.went_out_to_the_stables`
 
 ### Inferences no thought names, not marked implicit
 
@@ -174,4 +173,4 @@ None.
 
 ## Background cards with no rule
 
-`bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alias_post`, `bk.guilty_denial`
+`bk.genre_obvious`, `bk.genre_named_detail`, `bk.drug_paper`, `bk.alias_post`
