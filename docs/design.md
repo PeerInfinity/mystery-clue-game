@@ -3356,3 +3356,24 @@ Robert asked for workstream 7 in a new session. `docs/kickoff-workstream-7.md` h
 
 The kickoff also records that Round 120's documentation follow-up was committed without the suite and without the
 trailer. The next session is told to gate documentation-only commits too.
+
+## Round 125 (2026-10-18): workstream 7 — measured, and the paper agreed
+
+- **Measured** (a scratch replay, passive and builder players on Easy): for each PREDICT and TEST PLAN thought, when
+  its premises are held, where Holmes performs the check, and when the result is shown. The windows run from 0
+  (`t116.3`, `t163.3`) to 151 paragraphs (`t29.4`). Findings:
+  - most predictions are finds about events the player has not met (the match's `e.light_struck` is first mentioned
+    at ¶226), so a prediction cannot be a sealed answer over slots; the three that can are already deductions;
+  - Holmes's actions cannot be offered as a menu: the list names the sheep, the milliner and the race ahead of time;
+  - `a.dress_trick` is anchored at ¶225 (the explanation), not ¶89, and `a.search_mud` at ¶104, not ¶102;
+  - filed absences are recorded but never scored, the dog (`t34.2`) among them;
+  - the kickoff's "17" thoughts are 13 in the data, plus the four watch-holmes GENRE thoughts.
+- **`docs/predictions.md` written and agreed** (Robert): a sealed check composed from four templates over held
+  things, matched quietly against authored checks (`ck.*`), with an optional expected result; settled at the check's
+  own paragraph; `result: shown / late / never`; `checkScores` (a plan scores when Holmes performs it, whatever the
+  story shows) and `absenceScores`; a sealed check may cite a theory; the same action on every preset but Trivial.
+- **Corrected in discussion:** the draft assumed the read-on button names Holmes's next action. Robert pointed out it
+  has said "Next paragraph" since Round 10. The deadline is the check's paragraph.
+- **The maid's question** (`t163.3`): recorded and matched, never scored (Robert: the simpler option).
+- **Next:** step 1, the anchors.
+
