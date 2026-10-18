@@ -441,3 +441,8 @@ player's own story there.
 **At build time (Round 118):** the presets are an option, `weigh` (names, counts, asked), set by each preset as
 `clashes` is, so a custom game can choose. Off Easy the Theories panel no longer says whether a theory "fits": the
 fit was the misleading signal (Measured, §1). On Hard a theory shows nothing until weighed.
+
+**After the second review (Round 121):** Q3's promise is built: a theory's **assumed answers** (`Game.assumedAnswers`),
+those nothing the player holds and trusts gives, nor goes against, are shown beside its cost ("It rests on nothing
+you hold for: …"), and counted on Medium. `t.police` gains its duplicate key, so the police explain the locked door
+by a patch (`t58.4`).

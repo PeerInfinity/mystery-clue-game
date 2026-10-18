@@ -44,7 +44,8 @@ const seen = new Map();
         seen.set(p, {
             met: game.metPuzzles().map((z) => z.id),
             residue: Object.fromEntries([['police', theory('t.police')], ['gypsies', theory('t.gypsies')], ['inside', INSIDE], ['brown', BROWN],
-                ['patched', { assignment: { ...theory('t.police').assignment, 'e.stable_entered.instrument': 'duplicate_key' } }]].map(([n, t]) => [n, game.residue(t).residue])),
+                ['unpatched', { assignment: Object.fromEntries(Object.entries(theory('t.police').assignment).filter(([s]) => s !== 'e.stable_entered.instrument')) }]].map(([n, t]) => [n, game.residue(t).residue])),
+            assumed: game.assumedAnswers(theory('t.police')),
             inside: game.scenarioCost(INSIDE),
             police: game.scenarioCost(theory('t.police')),
             support: game.theorySupport(theory('t.police')),
@@ -104,12 +105,14 @@ test('a player who sees through the gypsies by ¶62 holds them at odds with thei
 test('the police leave the annotation\'s residue (t46.3) over; the inside story explains it', () => {
     const at46 = seen.get(46);
     // The dog and the alarm are absences, filed here as Easy offers them; why take the horse out, the police explain
-    // by theft (a listed difference from t46.3, which finds the theft itself improbable).
-    for (const z of ['pz.curry', 'pz.dog', 'pz.key', 'pz.no_alarm', 'pz.coat', 'pz.one_blow', 'pz.not_found']) {
+    // by theft (a listed difference from t46.3, which finds the theft itself improbable); the locked door, by their
+    // duplicate key, an answer nothing held gives (the next test).
+    for (const z of ['pz.curry', 'pz.dog', 'pz.no_alarm', 'pz.coat', 'pz.one_blow', 'pz.not_found']) {
         assert.ok(at46.met.includes(z), `${z} met by ¶46`);
         assert.ok(at46.residue.police.includes(z), `${z} in the police's residue`);
     }
-    assert.ok(!at46.residue.police.includes('pz.led_out'));
+    assert.ok(at46.met.includes('pz.key'));
+    for (const z of ['pz.led_out', 'pz.key']) assert.ok(!at46.residue.police.includes(z), z);
     for (const p of AT) assert.deepEqual(seen.get(p).residue.inside, [], `¶${p}`);
 });
 
@@ -120,10 +123,13 @@ test('the gypsies explain neither the curry nor the dog (t62.4); Brown as organi
     for (const z of ['pz.curry', 'pz.dog']) assert.ok(at92.brown.includes(z), z);
 });
 
-test('a patch takes an item out of the tray: the police with a duplicate key explain the locked door (t58.4)', () => {
-    const at92 = seen.get(92).residue;
-    assert.ok(at92.police.includes('pz.key'));
-    assert.ok(!at92.patched.includes('pz.key'));
+test('a patch takes an item out of the tray, and shows as resting on nothing held: the police\'s duplicate key (t58.4)', () => {
+    const at92 = seen.get(92);
+    assert.ok(!at92.residue.police.includes('pz.key'));
+    assert.ok(at92.residue.unpatched.includes('pz.key'), 'without the key, the locked door is left over');
+    assert.ok(at92.assumed.some((a) => a.slot === 'e.stable_entered.instrument' && a.value === 'duplicate_key'), JSON.stringify(at92.assumed));
+    // An answer the police's own (trusted) steps give is not assumed.
+    assert.ok(!at92.assumed.some((a) => a.slot === 'e.opium_added.agent'), JSON.stringify(at92.assumed));
 });
 
 test('off Easy, a puzzle is met only once the player notices one of its cards', () => {

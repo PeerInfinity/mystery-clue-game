@@ -555,6 +555,9 @@ specific thing stay ground facts with a formula and no schema.
   visible, the player's settled answer and each met theory's; `Game.revisedBy(slot)` the held cards an answer
   re-reads. The card view shows "How it reads under each story"; proving a value, or adding it to a theory, names
   the cards it re-reads.
+- **Assumed answers** (Round 121, `Game.assumedAnswers(theory)`): a theory's answers that the working set leaves
+  open (neither entailed nor contradicted; a trusted statement gives its own truth). Shown with the cost; returned
+  by `checkLayer` as `assumed`.
 - **The `weigh` option** (Round 118): `names` (Trivial, Easy: what a theory needs wrong, goes against and leaves over,
   by name; a drop's check in a line), `counts` (Medium: the counts; a drop's check as yes or no), `asked` (Hard:
   nothing until the player weighs a theory, then the counts; no drop check).

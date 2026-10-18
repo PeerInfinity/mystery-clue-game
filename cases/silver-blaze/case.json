@@ -542,7 +542,8 @@
         "simpson.purpose": "steal_horse",
         "e.fatal_blow.agent": "simpson",
         "e.fatal_blow.instrument": "penang_lawyer",
-        "e.thigh_cut.agent": "straker"
+        "e.thigh_cut.agent": "straker",
+        "e.stable_entered.instrument": "duplicate_key"
       },
       "source": [
         "The police imagine, I\n      take it, that this Fitzroy Simpson, having drugged the lad"

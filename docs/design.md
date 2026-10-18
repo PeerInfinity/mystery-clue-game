@@ -3266,3 +3266,22 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     on. This is the first review's point on `t40.4`: the inference is reach only, the thought motive and reach.
     Listed, not changed.
   - **Unchanged:** the reveal, foreshadow and clash logs, the case report and the gates.
+
+## Round 121 (2026-10-17): the second review's batch 2 — the duplicate key, and assumed answers (B1, C2)
+
+- **B1:** `t.police` gains `e.stable_entered.instrument` = `duplicate_key`; its label already said it. It becomes
+  visible at ¶46 as before (`e.stable_entered` is dealt at ¶33).
+- **C2, `Game.assumedAnswers(theory)`:** the answers the working set leaves open, neither entailed nor contradicted.
+  A trusted statement gives its own truth, so "Straker's 'anxious' is true" is not assumed while it is trusted.
+  - Easy: "It rests on nothing you hold for: The stable door is opened: With what? → A duplicate key".
+  - Medium and Hard: counted with the cost.
+  - `checkLayer` returns them.
+  - Questions in the panel now name their event (`slotQuestion`), as the readings do.
+- **This is Q3's promise, unbuilt until now:** a patch takes a puzzle out of the tray and shows that it rests on
+  nothing held (`t58.4`).
+- **Tests that changed:**
+  - the police's residue at ¶46 no longer holds the locked door (their key explains it);
+  - the patch test now checks the key both ways (without it, the door is left over), that it is assumed, and that
+    the opium answer, which the police's own trusted step gives, is not.
+- **Moved:** the case report's Puzzles table (`pz.key` is now explained by `t.police` by its answers alone). Unchanged:
+  the reveal, foreshadow and clash logs, the thoughts report and the gates.

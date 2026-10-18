@@ -106,7 +106,7 @@ with the facts the player trusts (clues and the world's ties, not inferences), e
 | `pz.curry` | c.curry_for_supper | `t37.6` | 1, 2 of 2 | — |
 | `pz.dog` | c.dog_did_nothing | `t34.2` | 1, 2 of 2 | — |
 | `pz.no_alarm` | c.no_alarm | `t34.8` | 1 of 1 | — |
-| `pz.key` | c.door_locked_behind | `t31.3` | 2 of 2 | — |
+| `pz.key` | c.door_locked_behind | `t31.3` | 2 of 2 | t.police |
 | `pz.coat` | c.coat_on_bush_seen | `t35.8` | 1 of 1 | — |
 | `pz.one_blow` | c.head_shattered, c.simpson_stick | `t40.5` | 1 of 1 | — |
 | `pz.knife` | c.knife_is_cataract_knife | `t81.2` | 1 of 1 | — |

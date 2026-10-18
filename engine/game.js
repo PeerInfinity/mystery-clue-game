@@ -2001,6 +2001,32 @@ export class Game {
     }
 
     /**
+     * A theory's assumed answers (docs/review-ws3-ws6.md, C2; the patches of `t58.4`): those nothing the player holds
+     * and trusts gives, since the working set leaves them open (one it contradicts is in the cost instead). An answer that explains a puzzle this way takes it
+     * out of the tray on the theory's word alone. Cached while the working set stands.
+     */
+    assumedAnswers(theory) {
+        const working = this.workingConstraints();
+        const wkey = working.join('|');
+        if (this.costCache?.key !== wkey) this.costCache = { key: wkey, map: new Map() };
+        const out = [];
+        for (const [s, v] of Object.entries(theory.assignment ?? {})) {
+            // A statement the player holds and trusts gives its own truth.
+            const slot = this.model.slots.get(s);
+            if (slot?.facet === 'truth' && v === 'true' && this.knows(slot.on) && !this.isSuspected(slot.on)) continue;
+            const key = `assumed#${s}=${v}`;
+            let assumed = this.costCache.map.get(key);
+            if (assumed === undefined) {
+                // Not given (what is held leaves it open), and not against what is held (that is the cost's).
+                assumed = this.model.problem.consistent(working, {}, { extra: [{ ne: [s, v] }] }).ok && this.model.problem.consistent(working, { [s]: v }).ok;
+                this.costCache.map.set(key, assumed);
+            }
+            if (assumed) out.push({ slot: s, value: v });
+        }
+        return out;
+    }
+
+    /**
      * The puzzles the player has met (docs/hypotheses.md, Q3): on Easy (and Trivial), once its cards are held and its
      * thought's paragraph is read; otherwise once the player has noticed one of its cards, or filed one that is an
      * absence (filing it is the noticing).

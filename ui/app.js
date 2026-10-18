@@ -286,8 +286,7 @@ function toolCard() {
     if (readings.length) {
         h += '<div class="readings small"><div class="muted">How it reads under each story</div>';
         for (const r of readings) {
-            const slot = model.slots.get(r.slot);
-            const q = slot.prompt.includes('{') ? esc(game.promptOf(r.slot)) : `${esc(cardName(slot.on))}: ${esc(game.promptOf(r.slot))}`;
+            const q = slotQuestion(r.slot);
             const rows = [...(r.mine !== null ? [['your answer', r.mine]] : []), ...r.layers.map((l) => [layerName(l.layer), l.value])];
             h += `<div>${q} ${rows.map(([who, v]) => `<span class="reading">${esc(who)}: <b>${esc(valueName(r.slot, v))}</b></span>`).join(' · ')}</div>`;
         }
@@ -701,8 +700,8 @@ function toolTheories() {
         if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
         if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
         if (!cost) h += `<div class="small"><span class="link" data-weigh="${esc(t.id)}">Weigh it</span></div>`;
-        else if (mode === 'names') h += costHtml(cost) + residueHtml(game.residue(t));
-        else h += countsHtml(cost, game.residue(t));
+        else if (mode === 'names') h += costHtml(cost) + residueHtml(game.residue(t)) + assumedHtml(game.assumedAnswers(t));
+        else h += countsHtml(cost, game.residue(t), game.assumedAnswers(t).length);
         const tkey = `t|${t.id}`;
         h += game.dropOf({ theory: t.id }) ? dropHtml(tkey) : ui.dropping === tkey ? dropForm(tkey) : `<div class="small"><span class="link" data-drop-open="${esc(tkey)}">drop it…</span></div>`;
         if (!t.story) h += `<div class="small"><span class="link" data-theory-current="${t.id}">${ui.theory === t.id ? '★ new answers go here' : 'add answers here'}</span> · <span class="link" data-del-theory="${t.id}">delete</span></div>`;
@@ -736,8 +735,18 @@ function costHtml(cost) {
 function weighMode() {
     return game.autoSolves() ? 'names' : game.opts.weigh;
 }
-/** A scenario weighed as counts (Medium, and Hard on request): how much it needs wrong, and leaves over. */
-function countsHtml(cost, res) {
+/** A question as it stands alone: an event's facet ("Who did it?") is prefixed with the event. */
+function slotQuestion(id) {
+    const slot = model.slots.get(id);
+    return slot.prompt.includes('{') ? esc(game.promptOf(id)) : `${esc(shortName(slot.on, 50))}: ${esc(game.promptOf(id))}`;
+}
+/** A theory's assumed answers (Game.assumedAnswers): what it says that nothing you hold gives. */
+function assumedHtml(assumed) {
+    if (!assumed.length) return '';
+    return `<div class="small">It rests on nothing you hold for: ${assumed.map((a) => `${slotQuestion(a.slot)} → ${esc(valueName(a.slot, a.value))}`).join(' · ')}</div>`;
+}
+/** A scenario weighed as counts (Medium, and Hard on request): how much it needs wrong, leaves over, and assumes. */
+function countsHtml(cost, res, assumed = 0) {
     if (cost.refuted) return '<div class="small bad">It cannot hold, whatever you set aside.</div>';
     const own = cost.items.filter((i) => i.why === 'inference' || i.told === 'seen').length;
     const words = cost.items.length - own;
@@ -745,6 +754,7 @@ function countsHtml(cost, res) {
     const parts = [`it needs ${words} thing${words === 1 ? '' : 's'} you trust to be wrong`];
     if (own) parts.push(`goes against ${own} of your own steps or of what was seen`);
     if (all) parts.push(`leaves ${res.residue.length} of ${all} odd things unexplained`);
+    if (assumed) parts.push(`rests on nothing you hold for ${assumed} of its answers`);
     return `<div class="small ${own ? 'bad' : ''}">Weighed: ${parts.join(', ')}.</div>`;
 }
 
@@ -1384,7 +1394,7 @@ function onClick(e) {
         const r = game.checkLayer(layer);
         const skip = r.unchecked ? ` <span class="small muted">(${r.unchecked} of your marks are at times or for things none of your clues speaks of: not checked.)</span>` : '';
         // A theory's night, on Easy, is weighed for what it must disbelieve (docs/hypotheses.md, Q2).
-        const html = r.cost ? `${weighMode() === 'names' ? costHtml(r.cost) + residueHtml(r.residue) : countsHtml(r.cost, r.residue)}${skip}`
+        const html = r.cost ? `${weighMode() === 'names' ? costHtml(r.cost) + residueHtml(r.residue) + assumedHtml(r.assumed) : countsHtml(r.cost, r.residue, r.assumed.length)}${skip}`
             : r.fits ? `<span class="good">This night fits everything you trust so far.</span>${skip}` : `<span class="bad">This night does not fit what you trust:</span>${chainHtml(r.conflict, r.fixed)}${skip}`;
         ui.layerFit = { layer, html };
         renderTool();
