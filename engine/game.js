@@ -292,6 +292,7 @@ export class Game {
         this.noticed = new Map();       // card id → {para, because}: details the player marked as odd (Round 84)
         this.drops = new Map();         // drop key → {target, reason, rival, cites, para}: hypotheses dropped (workstream 6)
         this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised (workstream 3)
+        this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed (workstream 7)
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -326,11 +327,12 @@ export class Game {
             noticed: [...this.noticed].map(([id, n]) => [id, n.para, n.because]),
             drops: [...this.drops.values()],
             raised: [...this.raised.values()].map((r) => [r.id, r.n, r.exception, r.para, r.status]),
+            seals: this.seals,
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
             opened: this.openedStates.map((slot) => { const o = this.model.opened.find((x) => x.slot === slot); return [o.thing, o.name, o.window]; }),
-            version: 7,
+            version: 8,
         };
     }
 
@@ -407,6 +409,7 @@ export class Game {
             if (!e || (status === 'established' && !this.suspected.has(id))) continue;
             this.raised.set(`${id}#${n}:${exception}`, { id, n, rule: e.rule, exception, status, para });
         }
+        for (const x of state.seals ?? []) if (CHECK_TEMPLATES[x?.verb] && Object.values(x.fields ?? {}).every((id) => this.knows(id))) this.seals.push({ ...x });
         if (board) this.board = { ...TL.emptyBoard(), ...board };
     }
 
@@ -2210,6 +2213,105 @@ export class Game {
     dropScore() {
         const rows = this.dropScores();
         return { dropped: rows.filter((r) => r.dropped !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.deadline !== null).length, of: rows.length };
+    }
+
+    // ---------- sealed checks (workstream 7, docs/predictions.md) ----------
+    /**
+     * Seal a check the player plans before Holmes makes it: a template verb with each of its fields filled by a card
+     * the player holds, and optionally the result they expect (one of the template's outcomes), an answer over a
+     * question they hold that the result would give, and a theory it comes from. It is recorded with the paragraph
+     * and never edited; nothing says whether Holmes will make it.
+     */
+    seal(verb, fields, { expect = null, answer = null, theory = null } = {}) {
+        const tpl = CHECK_TEMPLATES[verb];
+        if (!tpl) return { ok: false, reason: `a check is one of: ${Object.keys(CHECK_TEMPLATES).join(', ')}` };
+        for (const f of tpl.fields) if (!fields?.[f] || !this.knows(fields[f])) return { ok: false, reason: `choose a card you hold for ${f}` };
+        if (Object.keys(fields).some((f) => !tpl.fields.includes(f))) return { ok: false, reason: `${verb} has the fields ${tpl.fields.join(', ')}` };
+        if (expect !== null && !tpl.outcomes.includes(expect)) return { ok: false, reason: `expect one of: ${tpl.outcomes.join(', ')}` };
+        if (answer !== null && (expect === null || [...slotsIn(answer)].some((x) => !this.model.slots.has(x) || !this.knows(this.model.slots.get(x).on)))) return { ok: false, reason: 'an expected answer goes with an expected result, over a question you hold' };
+        const id = `seal-${this.seals.length + 1}`;
+        this.seals.push({ id, verb, fields: { ...fields }, expect, answer, theory, para: this.read - 1, withdrawn: null });
+        return { ok: true, id };
+    }
+    /** Withdraw a sealed check: it stays on record and no longer scores. */
+    unseal(id) {
+        const x = this.seals.find((s) => s.id === id);
+        if (!x || x.withdrawn !== null) return false;
+        x.withdrawn = this.read - 1;
+        return true;
+    }
+    /** The case's check a sealed one matches: same verb, and every field the check names accepts the seal's card. */
+    #checkOf(x) {
+        return (this.model.data.checks ?? []).find((ck) => ck.plans.some((p) => p.verb === x.verb
+            && Object.entries(p).every(([f, ok]) => f === 'verb' || ok.includes(x.fields[f])))) ?? null;
+    }
+    /** Does the result's answer give the expected one? */
+    #answerGiven(given, expected) {
+        if (!expected) return true;
+        if (!given) return false;
+        const eqs = (given.and ?? [given]).filter((f) => f.eq).map((f) => f.eq);
+        return evaluate(expected, new Map(eqs), this.model.timeOrder) === true;
+    }
+    /**
+     * What the story has shown of a sealed check so far. Before Holmes's paragraph is read: nothing (not even whether
+     * he will make it). Then: performed at ¶N, and the result where the story tells it (borne out or not, for an
+     * expectation), "not told here" until then, and at the story's end "never told" or, for a check Holmes never
+     * made, "not made".
+     */
+    sealStatus(id) {
+        const x = this.seals.find((s) => s.id === id);
+        if (!x) return null;
+        const ck = this.#checkOf(x);
+        const base = { id, sealed: x.para, withdrawn: x.withdrawn };
+        if (!ck || this.read <= ck.at) return { ...base, performed: null, made: this.finished() && !ck ? false : null };
+        const at = ck.result.shown ?? ck.result.late ?? null;
+        const told = at !== null && this.read > at;
+        const borne = !told || x.expect === null ? null : x.expect === ck.outcome && this.#answerGiven(ck.answer, x.answer);
+        return { ...base, performed: ck.at, check: ck.id, result: told ? at : null, outcome: told ? ck.outcome : null, borne, never: !!ck.result.never && this.finished() };
+    }
+    /**
+     * The checks the annotation counts (thoughts with `checks`): each with its deadline (the paragraph where Holmes
+     * makes it), the paragraph the player sealed a matching check that expects what the thought expects (null if
+     * not; a withdrawn seal does not count), whether the expected result was borne out (null while pending, never
+     * told, or nothing expected), and whether it scores: sealed before the deadline and not contradicted. A thought
+     * with no Holmes paragraph (the maid's question) is recorded and cannot score. Nothing counts in Trivial.
+     */
+    checkScores() {
+        const checks = new Map((this.model.data.checks ?? []).map((c) => [c.id, c]));
+        return (this.model.data.thoughts ?? []).filter((t) => t.checks?.length).flatMap((t) => t.checks.map((want) => {
+            const ck = checks.get(want.check);
+            const dated = !!(t.holmes && !t.holmes.never && t.holmes.paras?.length);
+            const ok = this.autoSolves() ? [] : this.seals.filter((x) => x.withdrawn === null && this.#checkOf(x) === ck
+                && (want.expect === undefined || (x.expect === want.expect && this.#answerGiven(x.answer, want.answer))));
+            const sealed = ok.length ? Math.min(...ok.map((x) => x.para)) : null;
+            const at = ck.result.shown ?? ck.result.late ?? null;
+            const borne = want.expect === undefined || at === null || this.read <= at ? null : want.expect === ck.outcome && this.#answerGiven(ck.answer, want.answer);
+            return { thought: t.id, check: ck.id, para: t.para, deadline: ck.at, sealed, borne, scores: dated && sealed !== null && sealed < ck.at && borne !== false };
+        }));
+    }
+    /** In aggregate: the thoughts' checks sealed, and those before Holmes, out of those he makes after the thought. */
+    checkScore() {
+        const rows = this.checkScores();
+        const dated = new Set((this.model.data.thoughts ?? []).filter((t) => t.holmes && !t.holmes.never && t.holmes.paras?.length).map((t) => t.id));
+        return { sealed: rows.filter((r) => r.sealed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => dated.has(r.thought) && r.deadline > r.para).length, of: rows.length };
+    }
+    /**
+     * The absences the annotation dates (ABSENCE thoughts with a Holmes paragraph and a clue the player files): the
+     * paragraph the player filed it (null if not, or if the game filed it in Trivial), and whether that was before
+     * Holmes's (it scores). The dog, filed at ¶34, scores against ¶180.
+     */
+    absenceScores() {
+        const filed = new Map(this.filed.map((f) => [f.id, f.para]));
+        return (this.model.data.thoughts ?? []).filter((t) => t.tag === 'ABSENCE' && t.holmes && !t.holmes.never && t.holmes.paras?.length && (t.maps ?? []).some((m) => this.absenceById().has(m))).map((t) => {
+            const at = (t.maps ?? []).map((m) => filed.get(m)).filter((x) => x !== undefined);
+            const para = this.autoSolves() || !at.length ? null : Math.min(...at);
+            const holmes = t.holmes.paras[0];
+            return { thought: t.id, para: t.para, holmes, filed: para, scores: para !== null && para < holmes };
+        });
+    }
+    absenceScore() {
+        const rows = this.absenceScores();
+        return { filed: rows.filter((r) => r.filed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.length };
     }
 
     // ---------- the three time axes ----------

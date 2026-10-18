@@ -3440,3 +3440,30 @@ trailer. The next session is told to gate documentation-only commits too.
   (Robert's standard for conveniences):
   - **the coat:** ¶32 (ask Gregory about the overcoat);
   - **the boots:** ¶35 (compare Simpson with the hollow), which is the point of `t101.2`.
+
+## Round 128 (2026-10-18): workstream 7 step 3 — sealing and scoring
+
+- **`Game.seal(verb, fields, {expect, answer, theory})`** (`docs/predictions.md` Q1–Q3):
+  - every field of the template must be filled with a card the player holds;
+  - `expect` is one of the template's outcomes;
+  - `answer` goes with `expect`, over a question the player holds.
+
+  It is recorded with the paragraph (`seals`, saved; save version 8). **`unseal(id)`** keeps the record and stops it
+  scoring (not `withdraw`, which withdraws a raised exception: the first suite run caught the clash).
+- **`sealStatus(id)`** tells nothing until Holmes's paragraph has been read, not even whether he will make the
+  check. Then it gives where he made it, the result where the story tells it (borne out or not, for an
+  expectation), and at the end of the story "never told" (the boots, the maid) or, for a check he never made,
+  `made: false`.
+- **`checkScores()` / `checkScore()`**, in the family's shape. One row per thought's check: the deadline (the check's
+  paragraph), the earliest unwithdrawn matching seal that expects what the thought expects, `borne`, and `scores`
+  (sealed before the deadline and not contradicted; a thought with no Holmes paragraph never scores). Of 11 rows, 9
+  can score.
+- **`absenceScores()` / `absenceScore()`:** ABSENCE thoughts with a Holmes paragraph and a fileable clue (today only
+  `t34.2`, the dog: filed at ¶34, against ¶180). This is how `t29.4` is sealed, and `t182.2` settles it.
+- **Nothing counts in Trivial.** Wrong expectations cost nothing.
+- **Tests:** `engine/predictions.test.js` (11) from the paper's cases: the match early and too late; not borne out;
+  withdrawn; the dress and the coat; the tracks early and the wet hollow at ¶116 (no window, though the earlier
+  Mapleton plan counts for `t116.3` too, being the same check); the photograph (plan at ¶161, answer at ¶229); the
+  boots (scored, never told); the maid (matched, unscored); the race; a check Holmes never makes; the dog; Trivial;
+  save and load.
+- **Not yet:** the theory test (step 4) and any UI (step 5). `theory` is recorded and checks nothing.
