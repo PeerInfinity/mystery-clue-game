@@ -281,6 +281,18 @@ function toolCard() {
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
 
+    // Readings (workstream 6, docs/hypotheses.md Q6): what this card means under each story, by the answers that carry it.
+    const readings = game.autoSolves() ? [] : game.readingsOf(id).filter((r) => r.mine !== null || r.layers.length);
+    if (readings.length) {
+        h += '<div class="readings small"><div class="muted">How it reads under each story</div>';
+        for (const r of readings) {
+            const slot = model.slots.get(r.slot);
+            const q = slot.prompt.includes('{') ? esc(game.promptOf(r.slot)) : `${esc(cardName(slot.on))}: ${esc(game.promptOf(r.slot))}`;
+            const rows = [...(r.mine !== null ? [['your answer', r.mine]] : []), ...r.layers.map((l) => [layerName(l.layer), l.value])];
+            h += `<div>${q} ${rows.map(([who, v]) => `<span class="reading">${esc(who)}: <b>${esc(valueName(r.slot, v))}</b></span>`).join(' · ')}</div>`;
+        }
+        h += '</div>';
+    }
     // Noticing (workstream 5): mark a clue, a thing or an event as odd, against what one would expect (events: Round 98). Nothing is told back.
     if (['claims', 'entities', 'events'].includes(c.section) && !game.autoSolves()) {
         const n = game.noticed.get(id);
@@ -451,6 +463,17 @@ const DROP_LABELS = {
     cost: 'it needs too much of what I trust to be wrong',
     card: 'the card I have open tells against it',
 };
+/** A theory's short name, as a story to read cards under. */
+function layerName(id) {
+    const t = game.visibleTheories().find((x) => x.id === id);
+    if (!t) return id;
+    return t.story ? t.label.split(':')[0] : `your “${shortName(t.label, 30)}”`;
+}
+/** The REVISE moment: the old cards that an answer re-reads (Game.revisedBy). */
+function revisedNote(slot) {
+    const cards = game.revisedBy(slot);
+    return cards.length ? ` It changes how you read: ${cards.map((x) => link(x, shortName(x, 40))).join(' · ')}.` : '';
+}
 /** A drop target from its key: t|theory or c|slot|value. */
 function dropTarget(key) {
     const [kind, a, b] = key.split('|');
@@ -1405,7 +1428,7 @@ function onClick(e) {
                 const res = op === 'prove' ? game.prove(slot, value) : game.strike(slot, value);
                 if (res.ok) {
                     ui.menu = null;
-                    toast(`${op === 'prove' ? 'Proved' : 'Ruled out'}. It rests on ${res.used.length} of your clues and inferences.`);
+                    toast(`${op === 'prove' ? 'Proved' : 'Ruled out'}. It rests on ${res.used.length} of your clues and inferences.${op === 'prove' ? revisedNote(slot) : ''}`);
                     changed();
                 } else {
                     ui.menuNote = `<span class="bad">Not yet: nothing you hold and trust ${op === 'prove' ? 'leaves only this answer' : 'rules it out'}.</span> <span class="small muted">Build the inference that would${game.clashes().length ? ', or resolve a clash' : ''}.</span>`;
@@ -1432,7 +1455,7 @@ function onClick(e) {
         }
         else if (op === 'theory') {
             game.theories.find((x) => x.id === ui.theory).assignment[slot] = value;
-            ui.menuNote = '<span class="good">Added to the theory.</span>';
+            ui.menuNote = `<span class="good">Added to the theory.</span>${revisedNote(slot)}`;
             save();
             renderTool();
         } else if (op === 'fit') runFit(slot, value);

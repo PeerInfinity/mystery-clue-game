@@ -528,7 +528,7 @@ specific thing stay ground facts with a formula and no schema.
   declared state to take one of its marked places, against the working constraints (clashes set aside).
   `Game.visibleTheories()` decides which theories the player has met.
 
-## As built (2026-10-17): a scenario's cost, residue and drops (workstream 6, steps 1–3; Rounds 114–116)
+## As built (2026-10-17): a scenario's cost, residue, drops and readings (workstream 6, steps 1–4; Rounds 114–117)
 
 - **Cost** (`Game.scenarioCost(theory, {extra})`, no data): a theory's answers held fast, the clashes they make with
   the working set broken as clashes are (`#weigher`), until what is left fits. Each item set aside, with its class,
@@ -550,6 +550,11 @@ specific thing stay ground facts with a formula and no schema.
   `dropped: {theory | slot, value | inference, reason, cites?, deadline?}`: the game target it drops, why, and where
   Holmes never makes it the paragraph by which the story makes it untenable. `dropScores` counts them before the
   deadline.
+- **Readings** (Round 117; `knowledge.json`, section `readings`; schema `reading`): `{id: "rd.<name>", slot,
+  cards}`, a slot that carries what old cards mean. `Game.readingsOf(card)` gives, for each reading whose question is
+  visible, the player's settled answer and each met theory's; `Game.revisedBy(slot)` the held cards an answer
+  re-reads. The card view shows "How it reads under each story"; proving a value, or adding it to a theory, names
+  the cards it re-reads.
 
 ## Open
 

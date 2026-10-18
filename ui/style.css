@@ -148,6 +148,8 @@ a:hover, .link:hover { text-decoration: underline; }
 .chip.struck { text-decoration: line-through; opacity: .55; }
 .chip.dropped { text-decoration: line-through dotted; opacity: .7; }
 .theory.dropped { opacity: .75; }
+.readings { margin: .4em 0; }
+.readings .reading { white-space: nowrap; }
 .chip.circled { border: 2px solid var(--accent); padding: 1px 8px; font-weight: 600; }
 .chip.proved { text-decoration: line-through; background: var(--good-soft); opacity: .8; }
 .chip.proven { background: var(--good); color: #fff; font-weight: 600; }

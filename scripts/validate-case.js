@@ -572,6 +572,12 @@ const puzzleRows = [];
     }
 }
 
+// ---------- readings (docs/hypotheses.md, Q6) ----------
+for (const r of data.readings ?? []) {
+    if (!model.slots.has(r.slot)) err(`reading ${r.id}: unknown slot ${r.slot}`);
+    for (const c of r.cards) if (!has(c)) err(`reading ${r.id}: unknown card ${c}`);
+}
+
 // ---------- route (Holmes's steps) ----------
 const routeRows = [];
 for (const step of data.route ?? []) {

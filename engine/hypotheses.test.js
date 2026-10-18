@@ -195,3 +195,18 @@ test('one culprit is doubted for "two stories" (t68.3)', () => {
     assert.ok(game.setDoubtReason('k.one_culprit', 'two-stories'));
     assert.equal(model.data.thoughts.find((t) => t.id === 't68.3').dropped.inference, 'k.one_culprit');
 });
+
+test('an old card reads differently under each story (t226.2): the blow under the police and under the inside story', () => {
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    while (game.read <= 104) game.advance();
+    const inside = game.addTheory('Inside', { ...INSIDE.assignment });
+    const byLayer = (r) => Object.fromEntries(r.layers.map((l) => [l.layer, l.value]));
+    const reads = game.readingsOf('c.head_shattered');
+    const who = reads.find((r) => r.slot === 'e.fatal_blow.agent');
+    const what = reads.find((r) => r.slot === 'e.fatal_blow.instrument');
+    assert.deepEqual([byLayer(who)['t.police'], byLayer(who)[inside]], ['simpson', 'silver_blaze']);
+    assert.deepEqual([byLayer(what)['t.police'], byLayer(what)[inside]], ['penang_lawyer', 'steel_shoe']);
+    // Settling who struck the blow re-reads the old cards it carries.
+    for (const c of ['c.head_shattered', 'c.straker_defended_himself']) assert.ok(game.revisedBy('e.fatal_blow.agent').includes(c), c);
+    assert.deepEqual(game.readingsOf('c.horse_alone'), []);
+});

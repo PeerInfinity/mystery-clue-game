@@ -69,7 +69,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
     // Case cards a thought may map to.
     const d = model.data;
     const inferenceById = new Map((d.constraints ?? []).map((k) => [k.id, k]));
-    const caseIds = new Set([...model.cards.keys(), ...(d.actions ?? []).map((a) => a.id), ...(d.route ?? []).map((s) => s.id), ...model.slots.keys(), ...(d.theories ?? []).map((x) => x.id), ...(d.puzzles ?? []).map((x) => x.id)]);
+    const caseIds = new Set([...model.cards.keys(), ...(d.actions ?? []).map((a) => a.id), ...(d.route ?? []).map((s) => s.id), ...model.slots.keys(), ...(d.theories ?? []).map((x) => x.id), ...(d.puzzles ?? []).map((x) => x.id), ...(d.readings ?? []).map((x) => x.id)]);
     for (const b of background) for (const m of b.maps ?? []) if (!caseIds.has(m)) err(`${b.id}: maps to unknown ${m}`);
 
     // Scenes: each starts at its first quote's paragraph.

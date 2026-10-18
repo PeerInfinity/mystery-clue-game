@@ -30,7 +30,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | GENRE | 20 | 3 |
 | SET ASIDE | 7 | 0 |
 | DROP | 4 | 3 |
-| REVISE | 4 | 3 |
+| REVISE | 4 | 4 |
 
 ## Dealt later than the reader has it
 

@@ -1,7 +1,7 @@
 # Hypotheses, scenarios and residue (workstream 6)
 
 Status: **AGREED** (Robert, 2026-10-17, Round 113: every recommendation, and the order of work; where one proves
-hard to build, fall back to a simpler alternative). **Built:** step 1, the cost (Round 114); step 2, puzzles and residue (Round 115); step 3, drop with a reason (Round 116). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
+hard to build, fall back to a simpler alternative). **Built:** step 1, the cost (Round 114); step 2, puzzles and residue (Round 115); step 3, drop with a reason (Round 116); step 4, readings by layer (Round 117). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
 (§2 HYPOTHESIS, WEIGH, TEST, RESIDUE, DROP, REVISE; §6: supports and strains authored first, computed later; wrong
 turns cost nothing), Round 19 (theories), workstream 5 (notices), workstream 3 (exceptions) and the clash paper
 (`docs/clashes.md`: the four classes, "never by truth").
@@ -432,3 +432,8 @@ entry and here.
   player's cost can date (the maid and the paper, ¶104). `t68.2` (Brown as organiser) names no game target: Brown's
   story is the player's own.
 - **A bug found and fixed:** two theories added in the same millisecond got the same id.
+
+**At build time (Round 117):** readings are authored as `readings` in `knowledge.json` (`rd.*`: a slot and the cards it
+re-reads), not as `reinterprets` on the slots, so that `t226.2` and `t212.3` can map to them. The cravat's reading
+is who picked it up (`e.cravat_picked_up.agent`); the police theory does not answer it, so the card shows only the
+player's own story there.

@@ -2069,6 +2069,25 @@ export class Game {
         return v;
     }
 
+    // ---------- readings (docs/hypotheses.md, Q6) ----------
+    /**
+     * How a card reads under each story: for each reading (a slot that carries what the card means) whose question
+     * the player has met, the player's own settled answer (null if open) and each theory met that answers it.
+     * Switching stories is switching readings.
+     */
+    readingsOf(card) {
+        return (this.model.data.readings ?? []).filter((r) => r.cards.includes(card) && this.slotVisible(r.slot)).map((r) => ({
+            reading: r.id,
+            slot: r.slot,
+            mine: this.settled(r.slot),
+            layers: this.visibleTheories().filter((t) => t.assignment[r.slot] !== undefined).map((t) => ({ layer: t.id, value: t.assignment[r.slot] })),
+        }));
+    }
+    /** The held cards a slot re-reads: what settling it, or answering it in a theory, changes the meaning of. */
+    revisedBy(slot) {
+        return [...new Set((this.model.data.readings ?? []).filter((r) => r.slot === slot).flatMap((r) => r.cards))].filter((c) => this.knows(c));
+    }
+
     // ---------- dropping a hypothesis (docs/hypotheses.md, Q5) ----------
     /**
      * The scenario a drop speaks of: a theory, or a candidate (slot = value). A candidate weighed against a rival is

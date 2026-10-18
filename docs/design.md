@@ -3189,3 +3189,27 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   report's legend names `doubt` in its place.
 - **Moved:** the thoughts report only: `t68.3`'s reason `workstream-6` → `doubt`, and the legend. Unchanged: the
   reveal, foreshadow and clash logs, the case report and the gates.
+
+## Round 117 (2026-10-17): workstream 6, step 4 — readings by layer
+
+- **Readings** (`knowledge.json`, `docs/hypotheses.md` Q6): seven slots that carry what old cards mean, each with the
+  cards it re-reads:
+  - why the knife was taken (the knife cards, "poor weapon");
+  - why the coat came off (the coat on the bush, laid across);
+  - who struck the blow ("assailants", "defended himself", the shattered head);
+  - with what (the head, Simpson's stick);
+  - what cut the thigh;
+  - who picked up the cravat;
+  - who Derbyshire is (the bill, "a friend", the letters).
+
+  They carry no text. The schema and the validator check them.
+- **`Game.readingsOf(card)`** gives, per reading whose question is visible, the player's settled answer and each met
+  theory's. **`Game.revisedBy(slot)`** gives the held cards an answer re-reads.
+- **UI:** a card shows "How it reads under each story", for example "Straker's head is shattered by a savage blow:
+  Who did it? The police theory: Fitzroy Simpson · your “Inside story”: Silver Blaze". Proving an answer, or adding
+  it to a theory, adds "It changes how you read: …". Checked in headless Chrome at ¶104.
+- **Thoughts:** `t226.2` maps also to the five readings it names, and `t212.3` to the blow's two.
+- **Test:** the shattered head reads Simpson and the stick under the police, the horse and the shoe under the
+  player's inside story; settling who struck re-reads the head and "defended himself".
+- **Moved:** the thoughts report, REVISE mapped 3 → 4. Unchanged: the reveal, foreshadow and clash logs, the case
+  report and the gates.
