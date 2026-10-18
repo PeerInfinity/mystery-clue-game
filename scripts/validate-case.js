@@ -15,7 +15,7 @@ import { mergeCase, buildModel, activeConstraints, checkStep, verifyInference, s
 import { evaluate, literalsOf, render, slotsOf } from '../engine/logic.js';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { Story } from '../engine/story.js';
-import { Game } from '../engine/game.js';
+import { Game, CHECK_TEMPLATES } from '../engine/game.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -578,6 +578,48 @@ for (const r of data.readings ?? []) {
     for (const c of r.cards) if (!has(c)) err(`reading ${r.id}: unknown card ${c}`);
 }
 
+// ---------- checks (docs/predictions.md, Q2–Q4) ----------
+// Each check's action, fields and answer resolve; its paragraphs are in the story and in order; and, for the report,
+// the paragraph from which a player could plan it: every field the plan names has an accepted id the story has
+// mentioned by then (the window opens there and closes at the check's own paragraph).
+const checkRows = [];
+{
+    const actionIdsHere = new Set((data.actions ?? []).map((a) => a.id));
+    const lastPara = storyIndex.paragraphs.length - 1;
+    const metAt = (id) => (model.cards.get(id)?.section === 'rules' ? null : storyIndex.firstAt.get(id) ?? null);
+    for (const ck of data.checks ?? []) {
+        if (!actionIdsHere.has(ck.action)) err(`check ${ck.id}: unknown action ${ck.action}`);
+        if (ck.at > lastPara) err(`check ${ck.id}: paragraph ${ck.at} is outside the story`);
+        const r = ck.result;
+        const resultAt = r.shown ?? r.late ?? null;
+        if (resultAt !== null && (resultAt < ck.at || resultAt > lastPara)) err(`check ${ck.id}: result at ¶${resultAt}, before the check or outside the story`);
+        if (r.late !== undefined && r.late === ck.at) err(`check ${ck.id}: a late result comes after the check's own paragraph`);
+        if (r.never && ck.outcome !== undefined) err(`check ${ck.id}: a result never told has no outcome`);
+        if (!r.never && ck.outcome === undefined) err(`check ${ck.id}: a result the story tells needs its outcome`);
+        const opens = [];
+        for (const plan of ck.plans) {
+            const tpl = CHECK_TEMPLATES[plan.verb];
+            if (ck.outcome !== undefined && !tpl.outcomes.includes(ck.outcome)) err(`check ${ck.id}: outcome ${ck.outcome} is not one of ${plan.verb}'s (${tpl.outcomes.join(', ')})`);
+            const fields = Object.keys(plan).filter((k) => k !== 'verb');
+            for (const f of fields) if (!tpl.fields.includes(f)) err(`check ${ck.id}: ${plan.verb} has no field ${f}`);
+            let at = -1;
+            for (const f of fields) {
+                for (const x of plan[f]) if (!has(x)) err(`check ${ck.id}: ${f} accepts unknown ${x}`);
+                const met = plan[f].map(metAt).filter((p) => p !== null);
+                at = Math.max(at, met.length ? Math.min(...met) : Infinity);
+            }
+            opens.push(at);
+        }
+        const opensAt = Math.min(...opens);
+        if (!(opensAt < ck.at)) err(`check ${ck.id}: no plan for it can be made before Holmes makes it (¶${ck.at})`);
+        if (ck.answer) {
+            for (const x of slotsOf(ck.answer)) if (!model.slots.has(x)) err(`check ${ck.id}: answer speaks of unknown slot ${x}`);
+            if (!errors.length && evaluate(ck.answer, truth, model.timeOrder) !== true) err(`check ${ck.id}: its answer does not hold in the true solution`);
+        }
+        checkRows.push({ ck, opensAt });
+    }
+}
+
 // ---------- route (Holmes's steps) ----------
 const routeRows = [];
 for (const step of data.route ?? []) {
@@ -705,6 +747,20 @@ function writeReport() {
     out('| Puzzle | Cards | Thought | Explanations true in the answer key | Story theories explaining it |');
     out('|---|---|---|---|---|');
     for (const r of puzzleRows) out(`| \`${r.pz.id}\` | ${r.pz.cards.join(', ')} | \`${r.pz.thought}\` | ${r.holds.map((h, i) => (h === true ? i + 1 : null)).filter(Boolean).join(', ')} of ${r.holds.length} | ${r.by.join(', ') || '—'} |`);
+    out();
+    out('## Checks');
+    out();
+    out('Checks Holmes makes that a reader can plan first (docs/predictions.md). "Plannable from" is the first paragraph');
+    out('by which the story has mentioned an accepted id for every field a plan names; a seal before Holmes\'s paragraph');
+    out('scores.');
+    out();
+    out('| Check | Action | Plans | Plannable from | Holmes | Result | Outcome |');
+    out('|---|---|---|---|---|---|---|');
+    for (const { ck, opensAt } of checkRows) {
+        const plans = ck.plans.map((p) => `${p.verb} ${Object.entries(p).filter(([k]) => k !== 'verb').map(([k, v]) => `${k}: ${v.join(' / ')}`).join('; ') || '(anything)'}`).join('<br>');
+        const res = ck.result.never ? 'never' : ck.result.late !== undefined ? `late, ¶${ck.result.late}` : `¶${ck.result.shown}`;
+        out(`| \`${ck.id}\` | ${ck.action} | ${plans} | ¶${opensAt} | ¶${ck.at} | ${res} | ${ck.outcome ?? '—'}${ck.answer ? `; ${render(ck.answer)}` : ''} |`);
+    }
     out();
     out('## Inferences');
     out();

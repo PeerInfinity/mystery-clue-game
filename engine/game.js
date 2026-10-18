@@ -39,6 +39,14 @@ export const DIFFICULTIES = [TRIVIAL, EASY, MEDIUM, HARD];
 export const DOUBT_REASONS = ['could-not-see', 'inference-as-fact', 'hearsay', 'neutral', 'two-stories'];
 // Why a hypothesis is dropped (docs/hypotheses.md, Q5): the game checks each where it can, and never refuses one.
 export const DROP_REASONS = ['out-explained', 'more-hands', 'cost', 'card'];
+// A check the player plans before Holmes makes it (docs/predictions.md, Q1–Q2): a template whose fields are filled
+// with things the player holds, and the results it can have (what a sealed check may expect).
+export const CHECK_TEMPLATES = {
+    look: { fields: ['thing', 'place'], outcomes: ['found', 'not-found'] },
+    ask: { fields: ['person', 'about'], outcomes: ['yes', 'no'] },
+    show: { fields: ['thing', 'to'], outcomes: ['yes', 'no'] },
+    compare: { fields: ['thing', 'with'], outcomes: ['matches', 'differs'] },
+};
 // Trivial's pace: settle each answer when Holmes reaches it in the story, or as soon as the held clues allow.
 export const AUTO_HOLMES = 'holmes';
 export const AUTO_LOGIC = 'logic';

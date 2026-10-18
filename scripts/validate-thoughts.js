@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { loadCase } from '../engine/loadCase.js';
 import { checkThoughts } from '../engine/thoughts.js';
+import { render } from '../engine/logic.js';
 
 const dir = process.argv[2];
 if (!dir) {
@@ -69,6 +70,21 @@ if (r.dateGaps.length) {
             const h = t.holmes && !t.holmes.never ? t.holmes.paras?.[0] : undefined;
             const from = fromPara(x);
             out.push(`| \`${t.id}\` | \`${x.target}\` | ${x.exception} | ${from === null ? '—' : `¶${from}`} | ${h === undefined ? 'never' : `¶${h}`} | ${h !== undefined && from !== null && h > from ? 'yes' : 'no'} |`);
+        }
+    } else out.push('None.');
+}
+{
+    // Workstream 7 (Round 127): the checks PREDICT and TEST PLAN thoughts plan (docs/predictions.md).
+    const rows = model.data.thoughts.filter((t) => t.checks?.length);
+    const checks = new Map((model.data.checks ?? []).map((x) => [x.id, x]));
+    out.push('', '## Checks planned', '', 'PREDICT and TEST PLAN thoughts with the checks they plan (`checks`), and what they expect of the result. A sealed check scores when made before Holmes makes it, whether or not the story tells the result; an expected result must not be contradicted. A thought with no Holmes paragraph is recorded and cannot score.', '');
+    if (rows.length) {
+        out.push('| Thought | Check | Expects | Thought ¶ | Holmes | Result | Can score |', '|---|---|---|---|---|---|---|');
+        for (const t of rows) for (const x of t.checks) {
+            const ck = checks.get(x.check);
+            const res = ck.result.never ? 'never' : ck.result.late !== undefined ? `late, ¶${ck.result.late}` : `¶${ck.result.shown}`;
+            const dated = !!(t.holmes && !t.holmes.never && t.holmes.paras?.length);
+            out.push(`| \`${t.id}\` | \`${x.check}\` | ${x.expect ?? '—'}${x.answer ? ` (${render(x.answer)})` : ''} | ¶${t.para} | ¶${ck.at} | ${res} | ${dated && t.para < ck.at ? 'yes' : 'no'} |`);
         }
     } else out.push('None.');
 }

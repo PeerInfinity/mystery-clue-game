@@ -236,6 +236,12 @@
         "$ref": "#/$defs/reading"
       }
     },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
     "slots": {
       "type": "array",
       "items": {
@@ -1086,6 +1092,41 @@
         "cards": { "type": "array", "minItems": 1, "items": { "type": "string" } }
       }
     },
+    "check": {
+      "description": "A check Holmes makes that a reader can plan first (docs/predictions.md, Q2): the action, the templates a player's plan may take (each field lists the ids it accepts; a field left out accepts anything), the paragraph where Holmes makes it, its result (shown at, late at, or never told), the outcome, and optionally the answer the result asserts. No text of its own.",
+      "type": "object",
+      "required": ["id", "action", "plans", "at", "result"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^ck\\." },
+        "action": { "type": "string" },
+        "plans": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["verb"],
+            "properties": {
+              "verb": { "enum": ["look", "ask", "show", "compare"] }
+            },
+            "additionalProperties": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+          }
+        },
+        "at": { "type": "integer", "minimum": 0 },
+        "result": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "shown": { "type": "integer", "minimum": 0 },
+            "late": { "type": "integer", "minimum": 0 },
+            "never": { "const": true }
+          },
+          "oneOf": [{ "required": ["shown"] }, { "required": ["late"] }, { "required": ["never"] }]
+        },
+        "outcome": { "type": "string" },
+        "answer": { "type": "object" }
+      }
+    },
     "puzzle": {
       "description": "An oddity a story of the night must explain (docs/hypotheses.md, Q3): the cards that show it, the annotated thought that reads it, and its explanations. No text of its own.",
       "type": "object",
@@ -1623,9 +1664,6 @@
               "items": {
                 "$ref": "#/$defs/id"
               }
-            },
-            "unknown": {
-              "type": "string"
             }
           }
         },

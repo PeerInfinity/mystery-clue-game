@@ -115,6 +115,23 @@ with the facts the player trusts (clues and the world's ties, not inferences), e
 | `pz.led_out` | e.horse_led_out | `t18.3` | 2 of 2 | t.police, t.gypsies |
 | `pz.candle` | c.pocket_inventory | `t78.3` | 1 of 1 | — |
 
+## Checks
+
+Checks Holmes makes that a reader can plan first (docs/predictions.md). "Plannable from" is the first paragraph
+by which the story has mentioned an accepted id for every field a plan names; a seal before Holmes's paragraph
+scores.
+
+| Check | Action | Plans | Plannable from | Holmes | Result | Outcome |
+|---|---|---|---|---|---|---|
+| `ck.mud` | a.search_mud | look thing: vesta_box / tallow_candle; place: fatal_hollow | ¶78 | ¶102 | ¶102 | found |
+| `ck.dress` | a.dress_trick | ask person: mrs_straker; about: c.milliner_bill / c.bill_22_guineas / madame_lesurier / william_derbyshire | ¶84 | ¶89 | ¶92 | no |
+| `ck.coat` | a.examine_coat | ask person: gregory / colonel_ross; about: c.coat_on_bush_seen / overcoat / furze_bush | ¶32 | ¶94 | ¶95 | yes |
+| `ck.boots` | a.compare_boots | compare thing: straker_boot / simpson_shoe / straker / simpson; with: fatal_hollow / c.horse_was_in_hollow | ¶35 | ¶107 | never | — |
+| `ck.tracks` | a.search_wet_hollow | look thing: silver_blaze / horseshoe; place: wet_hollow / mapleton | ¶19 | ¶116 | ¶117 | found |
+| `ck.photograph` | a.request_photograph | show thing: straker / photograph; to: madame_lesurier | ¶84 | ¶161 | late, ¶229 | yes; william_derbyshire.identity = straker |
+| `ck.maid` | a.question_maid | ask person: edith_baxter | ¶20 | ¶163 | never | — |
+| `ck.race` | a.at_the_race | look thing: silver_blaze; place: c.two_horses_for_cup / c.favourite_odds / racecourse / winchester | ¶18 | ¶197 | ¶198 | found |
+
 ## Inferences
 
 Verified: the engine derives the formula from the claim premises (trusted), the rule applications listed and any

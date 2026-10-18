@@ -3409,3 +3409,34 @@ trailer. The next session is told to gate documentation-only commits too.
 - **Expectations that changed:** the passive player's cost for the maid and the paper first reaches their own
   reasoning at ¶102, not ¶104, so `t92.7`'s and `t58.3`'s `dropped.deadline` are 102 and `hypotheses.test.js` says
   so (two tests).
+
+## Round 127 (2026-10-18): workstream 7 step 2 — checks as data
+
+- **`checks`** in `knowledge.json` (`ck.*`, one per line; `docs/predictions.md` Q2–Q4), eight of them: the mud, the
+  dress, the coat, the boots, the wet hollow's tracks, the photograph, the maid and the race. Each has:
+  - its action;
+  - its plans: a template verb (`look`, `ask`, `show`, `compare`; `CHECK_TEMPLATES` in `engine/game.js`) with the
+    ids each field accepts. A field left out accepts anything (the maid: "ask Edith Baxter", about anything);
+  - `at`: the paragraph where Holmes makes it, which is also the deadline;
+  - `result`: `{shown}`, `{late}` (the photograph: asked for at ¶161, the milliner's word at ¶229) or `{never}`
+    (the boots, the maid);
+  - the outcome, and for the photograph the answer its result asserts (Derbyshire is Straker).
+
+  No text of its own: a plan is shown in names the player already holds, so there is nothing new for the leak
+  checker.
+- **`yields.unknown`** goes from `a.compare_boots` and `a.question_maid` (and from the schema): the checks' `never`
+  replaces it.
+- **Thoughts** name their checks (`checks: [{check, expect?, answer?}]`): `t78.5`, `t92.9`, `t85.3`, `t92.5`,
+  `t92.10`, `t92.11`, `t92.12`, `t101.2`, `t116.3`, `t141.2` and `t163.3`.
+- **Validation:**
+  - the case validator checks the action, the fields against the template, the paragraphs, outcome against result,
+    and that the answer holds in the answer key. It also checks that some plan can be made before Holmes's
+    paragraph (every field has an accepted id already mentioned). The report gains a **Checks** table with the
+    paragraph each becomes plannable;
+  - the thoughts validator checks each thought's links. The thoughts report gains **Checks planned**: nine can
+    score; `t116.3` (window 0) and `t163.3` (no Holmes date) cannot.
+- **Plannable from:** the mud ¶78, the dress ¶84, the photograph ¶84, the race ¶18 (the Wessex Cup cards; the
+  racecourse is first named at ¶183). Two open early because the accepted words are broad, and are left so
+  (Robert's standard for conveniences):
+  - **the coat:** ¶32 (ask Gregory about the overcoat);
+  - **the boots:** ¶35 (compare Simpson with the hollow), which is the point of `t101.2`.

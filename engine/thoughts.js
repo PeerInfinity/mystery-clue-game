@@ -15,7 +15,7 @@
 // have no inference says why in `no_inference` (Round 56) (`workstream-3` and `workstream-6` were retired in Rounds 112
 // and 116, their thoughts all held): `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82), `doubt` (the move doubts an inference rather than drawing one: `t68.3`, Round 116).
 
-import { Game, BG_RELEVANT, DROP_REASONS, DOUBT_REASONS } from './game.js';
+import { Game, BG_RELEVANT, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from './game.js';
 
 const theoryIds = (model) => new Set((model?.data.theories ?? []).map((x) => x.id));
 import { slotsOf } from './logic.js';
@@ -69,7 +69,8 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
     // Case cards a thought may map to.
     const d = model.data;
     const inferenceById = new Map((d.constraints ?? []).map((k) => [k.id, k]));
-    const caseIds = new Set([...model.cards.keys(), ...(d.actions ?? []).map((a) => a.id), ...(d.route ?? []).map((s) => s.id), ...model.slots.keys(), ...(d.theories ?? []).map((x) => x.id), ...(d.puzzles ?? []).map((x) => x.id), ...(d.readings ?? []).map((x) => x.id)]);
+    const caseIds = new Set([...model.cards.keys(), ...(d.actions ?? []).map((a) => a.id), ...(d.route ?? []).map((s) => s.id), ...model.slots.keys(), ...(d.theories ?? []).map((x) => x.id), ...(d.puzzles ?? []).map((x) => x.id), ...(d.readings ?? []).map((x) => x.id), ...(d.checks ?? []).map((x) => x.id)]);
+    const checkById = new Map((d.checks ?? []).map((c) => [c.id, c]));
     for (const b of background) for (const m of b.maps ?? []) if (!caseIds.has(m)) err(`${b.id}: maps to unknown ${m}`);
 
     // Scenes: each starts at its first quote's paragraph.
@@ -150,6 +151,17 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             if (!(d.inference ? DOUBT_REASONS : DROP_REASONS).includes(d.reason)) err(`${t.id}: drop reason ${d.reason} unknown`);
             for (const c of d.cites ?? []) if (!caseIds.has(c)) err(`${t.id}: drop cites unknown ${c}`);
             if (d.deadline !== undefined && !(d.deadline > t.para)) err(`${t.id}: drop deadline ¶${d.deadline} is not after the thought`);
+        }
+        // The checks a PREDICT or TEST PLAN thought plans (workstream 7, Round 127): the check, and what it expects of
+        // the result (one of the template's outcomes) and, with that, the answer the result would assert.
+        if (t.checks && ![t.tag, t.then_tag].some((x) => ['PREDICT', 'TEST PLAN', 'HYPOTHESIS'].includes(x))) err(`${t.id}: only a PREDICT, TEST PLAN or HYPOTHESIS thought plans a check`);
+        for (const x of t.checks ?? []) {
+            const ck = checkById.get(x.check);
+            if (!ck) { err(`${t.id}: plans unknown check ${x.check}`); continue; }
+            if (t.para > ck.at) err(`${t.id}: plans ${x.check} after Holmes makes it (¶${ck.at})`);
+            if (x.expect !== undefined && !ck.plans.some((p) => CHECK_TEMPLATES[p.verb].outcomes.includes(x.expect))) err(`${t.id}: expects ${x.expect}, not an outcome of ${x.check}`);
+            if (x.answer && x.expect === undefined) err(`${t.id}: an expected answer goes with an expected outcome`);
+            for (const sl of x.answer ? slotsOf(x.answer) : []) if (!model?.slots.has(sl)) err(`${t.id}: expects an answer over unknown slot ${sl}`);
         }
         if (t.inference !== undefined) {
             if (!CAN_NAME.includes(t.tag)) err(`${t.id}: a ${t.tag} thought names no inference (only ${CAN_NAME.join(', ')} do)`);

@@ -196,5 +196,15 @@
     {"id":"rd.cravat","slot":"e.cravat_picked_up.agent","cards":["c.cravat_in_left_hand"]},
     {"id":"rd.derbyshire","slot":"william_derbyshire.identity","cards":["c.milliner_bill","c.derbyshire_a_friend","c.derbyshire_letters_came"]},
     {"id":"rd.light","slot":"e.light_struck.purpose","cards":["c.pocket_inventory","c.vesta_in_mud"]}
+  ],
+  "checks": [
+    {"id":"ck.mud","action":"a.search_mud","plans":[{"verb":"look","thing":["vesta_box","tallow_candle"],"place":["fatal_hollow"]}],"at":102,"result":{"shown":102},"outcome":"found"},
+    {"id":"ck.dress","action":"a.dress_trick","plans":[{"verb":"ask","person":["mrs_straker"],"about":["c.milliner_bill","c.bill_22_guineas","madame_lesurier","william_derbyshire"]}],"at":89,"result":{"shown":92},"outcome":"no"},
+    {"id":"ck.coat","action":"a.examine_coat","plans":[{"verb":"ask","person":["gregory","colonel_ross"],"about":["c.coat_on_bush_seen","overcoat","furze_bush"]}],"at":94,"result":{"shown":95},"outcome":"yes"},
+    {"id":"ck.boots","action":"a.compare_boots","plans":[{"verb":"compare","thing":["straker_boot","simpson_shoe","straker","simpson"],"with":["fatal_hollow","c.horse_was_in_hollow"]}],"at":107,"result":{"never":true}},
+    {"id":"ck.tracks","action":"a.search_wet_hollow","plans":[{"verb":"look","thing":["silver_blaze","horseshoe"],"place":["wet_hollow","mapleton"]}],"at":116,"result":{"shown":117},"outcome":"found"},
+    {"id":"ck.photograph","action":"a.request_photograph","plans":[{"verb":"show","thing":["straker","photograph"],"to":["madame_lesurier"]}],"at":161,"result":{"late":229},"outcome":"yes","answer":{"eq":["william_derbyshire.identity","straker"]}},
+    {"id":"ck.maid","action":"a.question_maid","plans":[{"verb":"ask","person":["edith_baxter"]}],"at":163,"result":{"never":true}},
+    {"id":"ck.race","action":"a.at_the_race","plans":[{"verb":"look","thing":["silver_blaze"],"place":["c.two_horses_for_cup","c.favourite_odds","racecourse","winchester"]}],"at":197,"result":{"shown":198},"outcome":"found"}
   ]
 }

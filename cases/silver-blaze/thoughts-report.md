@@ -69,6 +69,24 @@ Thoughts whose raising of an exception against an inference counts (`raises`). A
 | `t62.3` | `k.gregory_gypsies` | gone_anyway | ¶62 | ¶114 | yes |
 | `t218.3` | `k.drugger_took_the_horse` | accomplice | ¶218 | never | no |
 
+## Checks planned
+
+PREDICT and TEST PLAN thoughts with the checks they plan (`checks`), and what they expect of the result. A sealed check scores when made before Holmes makes it, whether or not the story tells the result; an expected result must not be contradicted. A thought with no Holmes paragraph is recorded and cannot score.
+
+| Thought | Check | Expects | Thought ¶ | Holmes | Result | Can score |
+|---|---|---|---|---|---|---|
+| `t78.5` | `ck.mud` | found | ¶78 | ¶102 | ¶102 | yes |
+| `t85.3` | `ck.dress` | — | ¶85 | ¶89 | ¶92 | yes |
+| `t92.5` | `ck.photograph` | — | ¶92 | ¶161 | late, ¶229 | yes |
+| `t92.9` | `ck.mud` | found | ¶92 | ¶102 | ¶102 | yes |
+| `t92.10` | `ck.coat` | yes | ¶92 | ¶94 | ¶95 | yes |
+| `t92.11` | `ck.tracks` | found | ¶92 | ¶116 | ¶117 | yes |
+| `t92.12` | `ck.photograph` | yes (william_derbyshire.identity = straker) | ¶92 | ¶161 | late, ¶229 | yes |
+| `t101.2` | `ck.boots` | — | ¶101 | ¶107 | never | yes |
+| `t116.3` | `ck.tracks` | — | ¶116 | ¶116 | ¶117 | no |
+| `t141.2` | `ck.race` | found | ¶141 | ¶197 | ¶198 | yes |
+| `t163.3` | `ck.maid` | — | ¶163 | ¶163 | never | no |
+
 ## Short chains
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
