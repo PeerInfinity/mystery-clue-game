@@ -3213,3 +3213,21 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   player's inside story; settling who struck re-reads the head and "defended himself".
 - **Moved:** the thoughts report, REVISE mapped 3 → 4. Unchanged: the reveal, foreshadow and clash logs, the case
   report and the gates.
+
+## Round 118 (2026-10-17): workstream 6, step 5 — what each preset shows
+
+- **A new option, `weigh`** (`docs/hypotheses.md` Q8), in `PLAYER_OPTIONS` and each preset:
+  - **names** (Trivial, Easy): as built in steps 1–3, with each drop's check in a line;
+  - **counts** (Medium): "Weighed: it needs 2 things you trust to be wrong, leaves 2 of 2 odd things unexplained",
+    and a drop's check as "The game finds it so" or "does not";
+  - **asked** (Hard): nothing until the player clicks "Weigh it" on a theory, then the counts; no drop check.
+
+  "Check this night" on a theory's layer follows the same option. The settings panel offers it ("Weighing
+  theories").
+- **Off Easy, the Theories panel no longer says whether a theory "fits".** The fit was the misleading signal (the
+  measurement of Round 113); the weighing replaces it at every level. `checkTheory` stays in the engine (tests).
+- **Checked in headless Chrome:**
+  - Medium at ¶92: counts, with only the two filed absences met, since the player had noticed nothing;
+  - Hard: "Weigh it", then the counts.
+- **Test:** the presets' `weigh` values, and `presetOf` still recognises each preset.
+- **Moved:** nothing (UI and options only). The logs, both reports and the gates are unchanged.

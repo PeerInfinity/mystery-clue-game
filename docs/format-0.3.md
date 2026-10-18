@@ -528,7 +528,7 @@ specific thing stay ground facts with a formula and no schema.
   declared state to take one of its marked places, against the working constraints (clashes set aside).
   `Game.visibleTheories()` decides which theories the player has met.
 
-## As built (2026-10-17): a scenario's cost, residue, drops and readings (workstream 6, steps 1–4; Rounds 114–117)
+## As built (2026-10-17): a scenario's cost, residue, drops and readings (workstream 6, steps 1–5; Rounds 114–118)
 
 - **Cost** (`Game.scenarioCost(theory, {extra})`, no data): a theory's answers held fast, the clashes they make with
   the working set broken as clashes are (`#weigher`), until what is left fits. Each item set aside, with its class,
@@ -555,6 +555,9 @@ specific thing stay ground facts with a formula and no schema.
   visible, the player's settled answer and each met theory's; `Game.revisedBy(slot)` the held cards an answer
   re-reads. The card view shows "How it reads under each story"; proving a value, or adding it to a theory, names
   the cards it re-reads.
+- **The `weigh` option** (Round 118): `names` (Trivial, Easy: what a theory needs wrong, goes against and leaves over,
+  by name; a drop's check in a line), `counts` (Medium: the counts; a drop's check as yes or no), `asked` (Hard:
+  nothing until the player weighs a theory, then the counts; no drop check).
 
 ## Open
 

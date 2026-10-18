@@ -210,3 +210,9 @@ test('an old card reads differently under each story (t226.2): the blow under th
     for (const c of ['c.head_shattered', 'c.straker_defended_himself']) assert.ok(game.revisedBy('e.fatal_blow.agent').includes(c), c);
     assert.deepEqual(game.readingsOf('c.horse_alone'), []);
 });
+
+test('the presets weigh theories by name on Easy, as counts on Medium, on request on Hard (Q8)', async () => {
+    const { PRESETS, presetOf } = await import('./game.js');
+    assert.deepEqual(['trivial', 'easy', 'medium', 'hard'].map((d) => PRESETS[d].weigh), ['names', 'names', 'counts', 'asked']);
+    for (const d of ['easy', 'medium', 'hard']) assert.equal(presetOf(PRESETS[d]), d);
+});

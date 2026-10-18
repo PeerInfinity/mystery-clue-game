@@ -71,6 +71,7 @@ export const OPTIONS = {
     crossOut: ['pencil', 'checked'],
     greying: ['on', 'off'],
     clashes: ['on', 'off'],
+    weigh: ['names', 'counts', 'asked'],
     hints: ['on', 'off'],
     kind: ['off', 'on'],
     connect: [INF_IMPLICIT, INF_CONNECT],
@@ -84,13 +85,13 @@ export const CLASH_CLASSES = ['others-inference', 'heuristic', 'statement', 'inf
 const CLASH_TOLD = { testimony: 0, inference: 0, report: 1, admission: 2 };
 // A clue in a scenario's cost, by how it was told (the second key of a statement's weight).
 const COST_TOLD = ['testimony', 'report', 'admission', 'seen'];
-export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'hints', 'kind', 'connect'];
+export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'weigh', 'hints', 'kind', 'connect'];
 const IRRELEVANT_SHARE = { none: 0, few: 0.25, half: 0.5, most: 0.75, all: 1 };
 export const PRESETS = {
-    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
-    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
-    medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all' },
-    hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all' },
+    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
+    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all' },
+    medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'counts', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all' },
+    hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'asked', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all' },
 };
 /** The preset these options match, or CUSTOM. With the game solving, the player's options do not count. */
 export function presetOf(opts) {

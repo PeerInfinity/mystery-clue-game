@@ -493,7 +493,10 @@ function dropHtml(key) {
     const d = game.dropOf(target);
     const rival = d.rival ? game.visibleTheories().find((t) => t.id === d.rival) : null;
     let h = `<div class="small dropped-note">Dropped: ${esc(DROP_LABELS[d.reason])}${rival ? ` (${esc(shortName(rival.label, 50))})` : ''}${d.cites?.length ? ` (${d.cites.map((c) => link(c, shortName(c, 40))).join(', ')})` : ''}.`;
-    if (game.assisted()) {
+    if (weighMode() === 'counts') {
+        const c = game.dropCheck(target);
+        h += ` <span class="${c.ok ? 'good' : 'muted'}">${c.ok ? 'The game finds it so.' : 'The game does not find it so.'}</span>`;
+    } else if (weighMode() === 'names') {
         const c = game.dropCheck(target);
         const names = (ids) => ids.map((x) => esc(cardName(x))).join(', ') || 'nobody';
         const says = c.gone ? 'The theory it was weighed against is gone.'
@@ -680,14 +683,15 @@ function clashesHtml() {
 }
 
 function toolTheories() {
-    const weigh = game.assisted() ? 'The game weighs each one against what you trust: what it needs to be wrong, and what it goes against.' : 'It fits until a clue or inference you hold breaks it.';
+    const mode = weighMode();
+    const weigh = { names: 'The game weighs each one against what you trust: what it needs to be wrong, what it goes against, and the odd things it leaves unexplained.', counts: 'The game weighs each one against what you trust, and says how much it needs wrong and leaves unexplained.', asked: 'Weigh one to see how much it needs wrong and leaves unexplained.' }[mode];
     let h = `<p class="small muted">A theory is a set of answers held together. ${weigh} To add answers, pick an answer on any question and choose “Add to theory”.</p>`;
     const all = game.visibleTheories();
     for (const t of all) {
-        // Easy weighs the theory (what it must disbelieve); otherwise only whether something rules it out.
-        const cost = game.assisted() ? game.scenarioCost(t) : null;
-        const res = cost ? null : game.checkTheory(t);
-        h += `<div class="theory ${(cost ? !cost.atOdds : res.fits) ? 'fits' : 'broken'}${game.dropOf({ theory: t.id }) ? ' dropped' : ''}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
+        // Weighed (docs/hypotheses.md, Q8): by name on Easy, as counts on Medium, on request on Hard.
+        const weighed = mode !== 'asked' || ui.weighed?.has(t.id);
+        const cost = weighed ? game.scenarioCost(t) : null;
+        h += `<div class="theory${cost ? (cost.atOdds ? ' broken' : ' fits') : ''}${game.dropOf({ theory: t.id }) ? ' dropped' : ''}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
         h += `<ul class="small">${Object.entries(t.assignment).map(([s, v]) => `<li><span class="link" data-slot-open="${s}">${esc(game.promptOf(s))}</span> → ${esc(valueName(s, v))}${t.story ? '' : ` <span class="link" data-untheory="${t.id}|${s}">remove</span>`}</li>`).join('') || '<li class="empty">no answers yet</li>'}</ul>`;
         // The inferences the theory rests on (the ones its holders drew) and, among those the player holds, the
         // ones its answers agree with and the ones they go against.
@@ -696,11 +700,9 @@ function toolTheories() {
         const { agree, against } = game.theorySupport(t);
         if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
         if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
-        if (cost) {
-            h += costHtml(cost) + residueHtml(game.residue(t));
-        } else {
-            h += res.fits ? '<div class="small good">Nothing you hold rules it out yet.</div>' : '<div class="small bad">Something you hold and trust rules it out. Find it: try ruling out its answers.</div>';
-        }
+        if (!cost) h += `<div class="small"><span class="link" data-weigh="${esc(t.id)}">Weigh it</span></div>`;
+        else if (mode === 'names') h += costHtml(cost) + residueHtml(game.residue(t));
+        else h += countsHtml(cost, game.residue(t));
         const tkey = `t|${t.id}`;
         h += game.dropOf({ theory: t.id }) ? dropHtml(tkey) : ui.dropping === tkey ? dropForm(tkey) : `<div class="small"><span class="link" data-drop-open="${esc(tkey)}">drop it…</span></div>`;
         if (!t.story) h += `<div class="small"><span class="link" data-theory-current="${t.id}">${ui.theory === t.id ? '★ new answers go here' : 'add answers here'}</span> · <span class="link" data-del-theory="${t.id}">delete</span></div>`;
@@ -728,6 +730,22 @@ function costHtml(cost) {
     if (own.length) h += `<div class="small bad">It goes against your own reasoning (or Holmes's): ${own.map(names).join(' · ')}</div>`;
     if (seen.length) h += `<div class="small bad">It goes against what was seen, found or written: ${seen.map(names).join(' · ')}</div>`;
     return h;
+}
+
+/** How much the game shows when it weighs a theory: names (Easy), counts (Medium), asked (Hard). */
+function weighMode() {
+    return game.autoSolves() ? 'names' : game.opts.weigh;
+}
+/** A scenario weighed as counts (Medium, and Hard on request): how much it needs wrong, and leaves over. */
+function countsHtml(cost, res) {
+    if (cost.refuted) return '<div class="small bad">It cannot hold, whatever you set aside.</div>';
+    const own = cost.items.filter((i) => i.why === 'inference' || i.told === 'seen').length;
+    const words = cost.items.length - own;
+    const all = res.explained.length + res.residue.length;
+    const parts = [`it needs ${words} thing${words === 1 ? '' : 's'} you trust to be wrong`];
+    if (own) parts.push(`goes against ${own} of your own steps or of what was seen`);
+    if (all) parts.push(`leaves ${res.residue.length} of ${all} odd things unexplained`);
+    return `<div class="small ${own ? 'bad' : ''}">Weighed: ${parts.join(', ')}.</div>`;
 }
 
 /**
@@ -1262,7 +1280,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1366,7 +1384,7 @@ function onClick(e) {
         const r = game.checkLayer(layer);
         const skip = r.unchecked ? ` <span class="small muted">(${r.unchecked} of your marks are at times or for things none of your clues speaks of: not checked.)</span>` : '';
         // A theory's night, on Easy, is weighed for what it must disbelieve (docs/hypotheses.md, Q2).
-        const html = r.cost && game.assisted() ? `${costHtml(r.cost)}${residueHtml(r.residue)}${skip}`
+        const html = r.cost ? `${weighMode() === 'names' ? costHtml(r.cost) + residueHtml(r.residue) : countsHtml(r.cost, r.residue)}${skip}`
             : r.fits ? `<span class="good">This night fits everything you trust so far.</span>${skip}` : `<span class="bad">This night does not fit what you trust:</span>${chainHtml(r.conflict, r.fixed)}${skip}`;
         ui.layerFit = { layer, html };
         renderTool();
@@ -1383,6 +1401,7 @@ function onClick(e) {
         if (label) { ui.theory = game.addTheory(label); changed(); }
         return;
     }
+    if (t.dataset.weigh) { (ui.weighed ??= new Set()).add(t.dataset.weigh); renderTool(); return; }
     if (t.dataset.dropOpen) { ui.dropping = t.dataset.dropOpen; renderTool(); return; }
     if (t.dataset.dropCancel) { ui.dropping = null; renderTool(); return; }
     if (t.dataset.dropGo) {
@@ -1523,6 +1542,7 @@ const OPTION_UI = {
     crossOut: ['Crossing out', { pencil: 'Freely, in pencil', checked: 'Checked by the game' }, 'In pencil: cross out what you like. Checked: an answer is ruled out only if what you hold and trust rules it out (the game checks).'],
     greying: ['Answers your clues rule out', { on: 'Greyed out', off: 'Not shown' }, 'Greyed out: the game greys the answers your clues already rule out, and offers “Could it fit?” on each answer and a check on each theory.'],
     clashes: ['Clashes among your clues', { on: 'Listed', off: 'Not listed' }, 'Listed: the Questions tab lists the clues you trust that cannot all be true.'],
+    weigh: ['Weighing theories', { names: 'What and which', counts: 'How much', asked: 'When you ask' }, 'What and which: each theory shows what it needs you to disbelieve, what it goes against, and which odd things it leaves unexplained. How much: only the counts. When you ask: nothing until you weigh a theory, then the counts.'],
     hints: ['Inference hints', { on: 'How many, and where to start', off: 'None' }, 'How many: the Inferences tab counts how many more you could build; when the story waits on a deduction, it names the cards to start from.'],
     kind: ['Building an inference', { off: 'Connect the cards', on: 'Also name what it is about' }, 'Also name it: you say whether the conclusion is about who, when, where, what, why, or whether something is so.'],
     connect: ['Background in inferences', { implicit: 'Needed in hand', connect: 'Connected too' }, 'Needed in hand: connect an inference\'s clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.'],
