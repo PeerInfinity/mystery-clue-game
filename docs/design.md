@@ -3064,3 +3064,35 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   4. readings by layer;
   5. presets;
   6. the second review.
+
+## Round 114 (2026-10-17): workstream 6, step 1 — a scenario's cost
+
+- **`Game.scenarioCost(theory, {extra})`** (`docs/hypotheses.md`, Q2): the theory's answers held fast, the clashes
+  they make with the working set broken as `clashes()` breaks them (lightest class first, one member, ties all), until
+  what is left fits. It returns each item set aside, with its class and, for a clue, how it was told (testimony,
+  report, admission, seen). `atOdds` means it gives up the player's or Holmes's own reasoning, or something seen;
+  `refuted` means the answers cannot hold at all. It is cached while the working set stands, and reset with the
+  clash cache.
+- **The clash weighing is shared:** `#weigher()` (order, weight, break one) is used by `clashes()` and the cost alike.
+  Clash outcomes are unchanged.
+- **`Game.theorySupport(theory)`:** the held inferences a theory's answers agree with (one alone entails an answer)
+  and go against (one contradicts them), read off the solver and cached per pair. This fixes the Theories panel's
+  vacuous "agrees with": the police theory no longer agrees with the steps the inside story rests on.
+- **`checkLayer`** also returns a theory layer's `cost`.
+- **UI (Easy):**
+  - the Theories panel weighs each theory: "It needs these to be wrong: … (someone's word)", "It goes against your
+    own reasoning (or Holmes's): …", "… what was seen, found or written: …". A theory is marked broken only when it
+    is at odds;
+  - "Check this night" on a theory's layer says the same;
+  - Medium and Hard are unchanged until step 5.
+
+  Checked in headless Chrome at ¶104 (the police: Simpson's word, and Holmes's dish step).
+- **`engine/hypotheses.test.js`:**
+  - the inside story (the annotation's `t92.6` as a fixture) costs only false cards, fewer from ¶92 to ¶104, and
+    nothing at ¶231;
+  - the police cost statements to ¶92 and are at odds from ¶104 (Holmes's dish step);
+  - the layer's check gives the same cost;
+  - weighing changes no clash;
+  - no vacuous agreement;
+  - a player who builds `k.gypsies_did_not_take_him` at ¶62 holds the gypsies at odds.
+- **Moved:** nothing. The reveal, foreshadow and clash logs, the case report, the thoughts report and the gate listing are unchanged (the clash weighing's refactor keeps every outcome).

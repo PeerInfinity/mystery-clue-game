@@ -1,7 +1,7 @@
 # Hypotheses, scenarios and residue (workstream 6)
 
 Status: **AGREED** (Robert, 2026-10-17, Round 113: every recommendation, and the order of work; where one proves
-hard to build, fall back to a simpler alternative). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
+hard to build, fall back to a simpler alternative). **Built:** step 1, the cost (Round 114). Mission: `docs/kickoff-workstream-6.md`. Builds on `docs/gap-analysis.md`
 (§2 HYPOTHESIS, WEIGH, TEST, RESIDUE, DROP, REVISE; §6: supports and strains authored first, computed later; wrong
 turns cost nothing), Round 19 (theories), workstream 5 (notices), workstream 3 (exceptions) and the clash paper
 (`docs/clashes.md`: the four classes, "never by truth").

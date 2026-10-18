@@ -4,7 +4,6 @@
 
 import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
-import { evaluate } from '../engine/logic.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, workerClient, settle } from '../engine/remoteProblem.js';
 import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS } from '../engine/game.js';
@@ -612,29 +611,24 @@ function clashesHtml() {
 }
 
 function toolTheories() {
-    let h = '<p class="small muted">A theory is a set of answers held together. It fits until a clue or inference you hold breaks it. To add answers, pick an answer on any question and choose “Add to theory”.</p>';
+    const weigh = game.assisted() ? 'The game weighs each one against what you trust: what it needs to be wrong, and what it goes against.' : 'It fits until a clue or inference you hold breaks it.';
+    let h = `<p class="small muted">A theory is a set of answers held together. ${weigh} To add answers, pick an answer on any question and choose “Add to theory”.</p>`;
     const all = game.visibleTheories();
     for (const t of all) {
-        const res = game.checkTheory(t);
-        h += `<div class="theory ${res.fits ? 'fits' : 'broken'}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
+        // Easy weighs the theory (what it must disbelieve); otherwise only whether something rules it out.
+        const cost = game.assisted() ? game.scenarioCost(t) : null;
+        const res = cost ? null : game.checkTheory(t);
+        h += `<div class="theory ${(cost ? !cost.atOdds : res.fits) ? 'fits' : 'broken'}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
         h += `<ul class="small">${Object.entries(t.assignment).map(([s, v]) => `<li><span class="link" data-slot-open="${s}">${esc(game.promptOf(s))}</span> → ${esc(valueName(s, v))}${t.story ? '' : ` <span class="link" data-untheory="${t.id}|${s}">remove</span>`}</li>`).join('') || '<li class="empty">no answers yet</li>'}</ul>`;
         // The inferences the theory rests on (the ones its holders drew) and, among those the player holds, the
         // ones its answers agree with and the ones they go against.
         const restsOn = (t.rests_on ?? []).filter((x) => game.knows(x));
         if (restsOn.length) h += `<div class="small">Rests on: ${restsOn.map((x) => link(x, shortName(x, 70))).join(' · ')}</div>`;
-        const assign = new Map(Object.entries(t.assignment));
-        const agree = [];
-        const against = [];
-        for (const k of game.heldInferences()) {
-            if (game.isSuspected(k) || restsOn.includes(k)) continue;
-            const v = evaluate(model.cards.get(k).formula, assign, model.timeOrder);
-            if (v === true) agree.push(k); else if (v === false) against.push(k);
-        }
+        const { agree, against } = game.theorySupport(t);
         if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
         if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
-        if (game.assisted()) {
-            h += res.fits ? '<div class="small good">Fits everything you hold so far.</div>'
-                : `<div class="small bad">Broken by what you hold:</div><div class="small">${chainHtml(res.conflict, t.assignment)}</div>`;
+        if (cost) {
+            h += costHtml(cost);
         } else {
             h += res.fits ? '<div class="small good">Nothing you hold rules it out yet.</div>' : '<div class="small bad">Something you hold and trust rules it out. Find it: try ruling out its answers.</div>';
         }
@@ -642,6 +636,27 @@ function toolTheories() {
         h += '</div>';
     }
     return `${h}<div class="row"><button data-new-theory="1">New theory</button></div>`;
+}
+
+const COST_TOLD = { testimony: 'someone\'s word', report: 'a report', admission: 'an admission' };
+const COST_WHY = { 'others-inference': 'someone else\'s reasoning', heuristic: 'a rule of thumb you applied' };
+/**
+ * A scenario's cost (Game.scenarioCost, docs/hypotheses.md Q2): what it needs to be wrong among what you trust, and
+ * what it goes against of your own reasoning or of what was seen. A story that says a witness is wrong is not
+ * refuted; it pays for it.
+ */
+function costHtml(cost) {
+    if (cost.refuted) return '<div class="small bad">It cannot hold, whatever you set aside.</div>';
+    if (!cost.items.length) return '<div class="small good">It needs nothing you trust to be wrong.</div>';
+    const names = (i) => i.cards.map((x) => link(x, shortName(x, 60))).join(' and ');
+    const words = cost.items.filter((i) => i.why !== 'inference' && i.told !== 'seen');
+    const own = cost.items.filter((i) => i.why === 'inference');
+    const seen = cost.items.filter((i) => i.told === 'seen');
+    let h = '';
+    if (words.length) h += `<div class="small">It needs ${words.length === 1 ? 'this' : `these ${words.length}`} to be wrong: ${words.map((i) => `${names(i)} <span class="muted">(${esc(COST_TOLD[i.told] ?? COST_WHY[i.why])})</span>`).join(' · ')}</div>`;
+    if (own.length) h += `<div class="small bad">It goes against your own reasoning (or Holmes's): ${own.map(names).join(' · ')}</div>`;
+    if (seen.length) h += `<div class="small bad">It goes against what was seen, found or written: ${seen.map(names).join(' · ')}</div>`;
+    return h;
 }
 
 // ---------- the board: where things were, when (world model; engine/timeline.js) ----------
@@ -1267,7 +1282,10 @@ function onClick(e) {
         const layer = ui.layer ?? 'mine';
         const r = game.checkLayer(layer);
         const skip = r.unchecked ? ` <span class="small muted">(${r.unchecked} of your marks are at times or for things none of your clues speaks of: not checked.)</span>` : '';
-        ui.layerFit = { layer, html: r.fits ? `<span class="good">This night fits everything you trust so far.</span>${skip}` : `<span class="bad">This night does not fit what you trust:</span>${chainHtml(r.conflict, r.fixed)}${skip}` };
+        // A theory's night, on Easy, is weighed for what it must disbelieve (docs/hypotheses.md, Q2).
+        const html = r.cost && game.assisted() ? `${costHtml(r.cost)}${skip}`
+            : r.fits ? `<span class="good">This night fits everything you trust so far.</span>${skip}` : `<span class="bad">This night does not fit what you trust:</span>${chainHtml(r.conflict, r.fixed)}${skip}`;
+        ui.layerFit = { layer, html };
         renderTool();
         return;
     }

@@ -80,6 +80,8 @@ export const OPTIONS = {
 // clues, how a clue was told (anything else, seen, found or written, weighs most).
 export const CLASH_CLASSES = ['others-inference', 'heuristic', 'statement', 'inference'];
 const CLASH_TOLD = { testimony: 0, inference: 0, report: 1, admission: 2 };
+// A clue in a scenario's cost, by how it was told (the second key of a statement's weight).
+const COST_TOLD = ['testimony', 'report', 'admission', 'seen'];
 export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'hints', 'kind', 'connect'];
 const IRRELEVANT_SHARE = { none: 0, few: 0.25, half: 0.5, most: 0.75, all: 1 };
 export const PRESETS = {
@@ -260,6 +262,8 @@ export class Game {
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
         this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
         this.clashCache = null;
+        this.costCache = null;
+        this.bearingCache = null;
         this.inferenceHow = new Map();  // inference id → {how: 'built'|'stated'|'auto'|'implicit'|'applied'|'concluded', by?}
         // The player's own cards: applied rules and concluded inferences (format 0.3). Each is a card in the model.
         for (const id of this.dynamicIds ?? []) removeDynamic(this.model, id);
@@ -373,6 +377,8 @@ export class Game {
         this.doubtReason = new Map((state.doubtReason ?? []).filter(([id, r]) => this.suspected.has(id) && DOUBT_REASONS.includes(r)));
         this.clashLog = (state.clashLog ?? []).filter((ids) => ids.every((id) => this.model.constraints.has(id)));
         this.clashCache = null;
+        this.costCache = null;
+        this.bearingCache = null;
         // Where the player made each step, as saved (an older save is scored from here on).
         if (state.made) {
             this.madeAt = new Map(state.made.filter(([id]) => this.routeById.has(id)));
@@ -1102,6 +1108,7 @@ export class Game {
         }
         if (more < Infinity) { out.onto = true; out.more = more; }
         this.clashCache = null;
+        this.costCache = null;
         return out;
     }
 
@@ -1196,6 +1203,8 @@ export class Game {
         this.inferenceHow.delete(id);
         this.suspected.delete(id);
         this.clashCache = null;
+        this.costCache = null;
+        this.bearingCache = null;
         return true;
     }
 
@@ -1814,43 +1823,22 @@ export class Game {
         const active = this.activeConstraints();
         const key = active.join('|');
         if (this.clashCache?.key === key) return this.clashCache.list;
-        // Doubtable: a trusted clue or inference. A rule application counts as part of its inference (workstream 3:
-        // a character's step the true story defeats is false): caught in a clash, it is set aside with the inference,
-        // at the inference's weight.
-        const ownerOf = (id) => trustedClaim(this.model, id) ?? this.model.constraints.get(id).doubt_with ?? null;
-        const isClaim = (id) => !!ownerOf(id);
-        const weights = new Map();
-        const weight = (id) => {
-            if (!weights.has(id)) weights.set(id, this.#clashWeight(ownerOf(id), this.model.constraints.get(id).inference));
-            return weights.get(id);
-        };
-        const lighter = (a, b) => weight(a)[0] - weight(b)[0] || weight(a)[1] - weight(b)[1];
+        const w = this.#weigher();
         const list = [];
         let set = [...active];
         const setAside = (c) => {
-            const doubtable = c.ids.filter(isClaim);
-            // One member is enough to break a minimal clash: the lightest goes, and on a tie every tied member (the
-            // game has no ground to choose between them).
-            const least = doubtable.reduce((m, id) => (m === null || lighter(id, m) < 0 ? id : m), null);
-            const drop = new Set(doubtable.length ? doubtable.filter((id) => lighter(id, least) === 0) : c.ids);
-            // A card set aside goes whole: its trusted reading and its rule applications.
-            const gone = new Set([...drop].map(ownerOf).filter(Boolean));
-            c.aside = [...gone];
-            c.why = least ? CLASH_CLASSES[weight(least)[0]] : null;
-            c.tie = gone.size > 1;
-            set = set.filter((id) => !drop.has(id) && !gone.has(ownerOf(id)));
-            for (const claim of gone) {
-                const doubted = this.model.claimForms.get(claim)?.doubted;
-                if (doubted && !set.includes(doubted)) set.push(doubted);
-            }
+            const { least, gone, rest } = w.breakOne(c.ids, set);
+            c.aside = gone;
+            c.why = least ? CLASH_CLASSES[w.weight(least)[0]] : null;
+            c.tie = gone.length > 1;
+            set = rest;
         };
         for (const c of this.clashCache?.list ?? []) {
             if (c.ids.every((id) => set.includes(id))) { list.push(c); setAside(c); }
         }
         while (!this.model.problem.consistent(set).ok) {
-            // The heaviest are tried first and the lightest last, so a clash rests on as light a member as it can.
-            const ids = this.model.problem.explainConflict([...set.filter((id) => !isClaim(id)), ...set.filter(isClaim).sort((a, b) => lighter(b, a))]);
-            const c = { ids, claims: [...new Set(ids.map(ownerOf).filter(Boolean))] };
+            const ids = this.model.problem.explainConflict(w.order(set));
+            const c = { ids, claims: [...new Set(ids.map(w.ownerOf).filter(Boolean))] };
             list.push(c);
             setAside(c);
             const k = ids.join('|');
@@ -1858,6 +1846,40 @@ export class Game {
         }
         this.clashCache = { key, list, working: set };
         return list;
+    }
+
+    /**
+     * The clash weighing (docs/clashes.md), shared by clashes() and scenarioCost(). Doubtable: a trusted clue or
+     * inference. A rule application counts as part of its inference (workstream 3: a character's step the true story
+     * defeats is false): caught in a clash, it is set aside with the inference, at the inference's weight.
+     *   order(set): the members to search, the heaviest tried first and the lightest last, so a clash rests on as light
+     *     a member as it can;
+     *   breakOne(ids, set): one member is enough to break a minimal clash: the lightest goes, and on a tie every tied
+     *     member (the game has no ground to choose between them). A card set aside goes whole: its trusted reading
+     *     and its rule applications; a claim is read as doubted instead. Returns {least, gone, rest}.
+     */
+    #weigher() {
+        const ownerOf = (id) => trustedClaim(this.model, id) ?? this.model.constraints.get(id).doubt_with ?? null;
+        const weights = new Map();
+        const weight = (id) => {
+            if (!weights.has(id)) weights.set(id, this.#clashWeight(ownerOf(id), this.model.constraints.get(id).inference));
+            return weights.get(id);
+        };
+        const lighter = (a, b) => weight(a)[0] - weight(b)[0] || weight(a)[1] - weight(b)[1];
+        const order = (set) => [...set.filter((id) => !ownerOf(id)), ...set.filter(ownerOf).sort((a, b) => lighter(b, a))];
+        const breakOne = (ids, set) => {
+            const doubtable = ids.filter(ownerOf);
+            const least = doubtable.reduce((m, id) => (m === null || lighter(id, m) < 0 ? id : m), null);
+            const drop = new Set(doubtable.length ? doubtable.filter((id) => lighter(id, least) === 0) : ids);
+            const gone = new Set([...drop].map(ownerOf).filter(Boolean));
+            const rest = set.filter((id) => !drop.has(id) && !gone.has(ownerOf(id)));
+            for (const claim of gone) {
+                const doubted = this.model.claimForms.get(claim)?.doubted;
+                if (doubted && !rest.includes(doubted)) rest.push(doubted);
+            }
+            return { least, gone: [...gone], rest };
+        };
+        return { ownerOf, weight, order, breakOne };
     }
 
     /**
@@ -1935,6 +1957,68 @@ export class Game {
     checkTheory(theory) {
         const conflict = this.model.problem.explainConflict(this.activeConstraints(), theory.assignment);
         return { fits: !conflict, conflict };
+    }
+
+    /**
+     * What a scenario must disbelieve (docs/hypotheses.md, Q2): its answers held fast, the clashes they make with what
+     * the player trusts (the clashes among it set aside first) broken as clashes() breaks them, until what is left
+     * fits. Each item: {cards, why (CLASH_CLASSES), told (a clue's: testimony, report, admission or seen)}. `atOdds`
+     * when it must give up the player's own (or Holmes's) reasoning, or something seen, found or written; `refuted`
+     * when the answers cannot hold whatever is set aside. Never by truth. Cached while the working set stands.
+     */
+    scenarioCost(theory, { extra = [] } = {}) {
+        const working = this.workingConstraints();
+        const fixed = theory.assignment ?? {};
+        const wkey = working.join('|');
+        if (this.costCache?.key !== wkey) this.costCache = { key: wkey, map: new Map() };
+        const key = JSON.stringify([fixed, extra]);
+        if (this.costCache.map.has(key)) return this.costCache.map.get(key);
+        const w = this.#weigher();
+        let set = [...working];
+        const items = [];
+        let refuted = false;
+        while (!this.model.problem.consistent(set, fixed, { extra }).ok) {
+            const ids = this.model.problem.explainConflict(w.order(set), fixed, { extra });
+            if (!ids?.some(w.ownerOf)) { refuted = true; break; }
+            const { least, gone, rest } = w.breakOne(ids, set);
+            const [cls, within] = w.weight(least);
+            items.push({ cards: gone, why: CLASH_CLASSES[cls], ...(CLASH_CLASSES[cls] === 'statement' ? { told: COST_TOLD[within] } : {}) });
+            set = rest;
+        }
+        const res = { items, refuted, atOdds: refuted || items.some((i) => i.why === 'inference' || i.told === 'seen') };
+        this.costCache.map.set(key, res);
+        return res;
+    }
+
+    /**
+     * The held inferences a theory's answers agree with (one alone entails one of its answers) and go against (one
+     * contradicts them), leaving out those it rests on and those the player doubts. Read off the solver, not off a
+     * partial evaluation: an implication whose condition the answers leave open neither agrees nor goes against.
+     */
+    theorySupport(theory) {
+        const fixed = theory.assignment ?? {};
+        const restsOn = theory.rests_on ?? [];
+        const agree = [];
+        const against = [];
+        for (const k of this.heldInferences()) {
+            if (this.isSuspected(k) || restsOn.includes(k)) continue;
+            const v = this.#bearing(k, fixed);
+            if (v > 0) agree.push(k); else if (v < 0) against.push(k);
+        }
+        return { agree, against };
+    }
+
+    /** How one inference bears on a set of answers: -1 against, 1 for (entails one of them), 0 neither. Cached. */
+    #bearing(k, fixed) {
+        const key = `${k}#${JSON.stringify(fixed)}`;
+        this.bearingCache ??= new Map();
+        if (this.bearingCache.has(key)) return this.bearingCache.get(key);
+        const f = this.model.cards.get(k)?.formula;
+        let v = 0;
+        if (f && !this.model.problem.consistent([], fixed, { extra: [f] }).ok) v = -1;
+        else if (f && Object.entries(fixed).some(([s, x]) => !this.model.problem.consistent([], {}, { extra: [f, { ne: [s, x] }] }).ok)) v = 1;
+        this.bearingCache.set(key, v);
+        return v;
     }
 
     // ---------- the three time axes ----------

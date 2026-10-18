@@ -202,7 +202,8 @@ export function byPlace(game, layer = MINE) {
  * Does a layer fit what the player holds and trusts? Its theory's answers are fixed, and each of its declared
  * states the player has pencilled must take one of the places pencilled there (not struck). Pencil marks at times
  * or for things the case has no state for cannot be checked: they are counted, not judged.
- * Returns {fits, conflict (constraint ids, when it does not fit), fixed, checked, unchecked}.
+ * Returns {fits, conflict (constraint ids, when it does not fit), fixed, checked, unchecked}, and for a theory's layer its
+ * `cost` (Game.scenarioCost: what that night must disbelieve).
  */
 export function checkLayer(game, layer = MINE) {
     const theory = layer === MINE ? null : game.visibleTheories().find((t) => t.id === layer);
@@ -228,8 +229,10 @@ export function checkLayer(game, layer = MINE) {
     }
     // As "Could it fit?" does: against what the player trusts, the claims caught in a clash set aside.
     const active = game.workingConstraints();
-    if (game.model.problem.consistent(active, fixed, { extra }).ok) return { fits: true, conflict: null, fixed, checked, unchecked };
-    return { fits: false, conflict: game.model.problem.explainConflict(active, fixed, { extra }) ?? [], fixed, checked, unchecked };
+    // A theory's night is weighed as a scenario (docs/hypotheses.md, Q2): what it must disbelieve, not only whether.
+    const cost = theory ? { cost: game.scenarioCost(theory, { extra }) } : {};
+    if (game.model.problem.consistent(active, fixed, { extra }).ok) return { fits: true, conflict: null, fixed, checked, unchecked, ...cost };
+    return { fits: false, conflict: game.model.problem.explainConflict(active, fixed, { extra }) ?? [], fixed, checked, unchecked, ...cost };
 }
 
 /**
