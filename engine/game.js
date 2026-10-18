@@ -323,6 +323,8 @@ export class Game {
         this.drops = new Map();         // drop key → {target, reason, rival, cites, para}: hypotheses dropped (workstream 6)
         this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised (workstream 3)
         this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed (workstream 7)
+        this.setAsideAt = new Map();    // card id → the paragraph the player set it aside at (workstream 8)
+        this.rereads = [];              // [{from, to, question, para}]: passages the player went back over (workstream 8)
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -358,6 +360,8 @@ export class Game {
             drops: [...this.drops.values()],
             raised: [...this.raised.values()].map((r) => [r.id, r.n, r.exception, r.para, r.status]),
             seals: this.seals,
+            setAside: [...this.setAsideAt],
+            rereads: this.rereads,
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
@@ -440,7 +444,37 @@ export class Game {
             this.raised.set(`${id}#${n}:${exception}`, { id, n, rule: e.rule, exception, status, para });
         }
         for (const x of state.seals ?? []) if (CHECK_TEMPLATES[x?.verb] && Object.values(x.fields ?? {}).every((id) => this.knows(id))) this.seals.push({ ...x });
+        for (const [id, para] of state.setAside ?? []) this.setAside(id, para);
+        for (const r of state.rereads ?? []) if (r && r.to < this.read) this.rereads.push({ ...r });
         if (board) this.board = { ...TL.emptyBoard(), ...board };
+    }
+
+    // ---------- the reader's housekeeping (docs/reader-layer.md, Q4–Q5): never checked, never scored ----------
+    /**
+     * Set a card aside as scenery: it leaves the player's lists, stays held (it still counts as a premise), and the
+     * game never says whether it was right to (the answer key is not consulted). Clues, people, things and events.
+     */
+    setAside(id, para = this.read - 1) {
+        if (!this.knows(id) || !['entities', 'events', 'claims'].includes(this.model.cards.get(id)?.section)) return false;
+        if (!this.setAsideAt.has(id)) this.setAsideAt.set(id, para);
+        return true;
+    }
+    /** Put a card set aside back among the rest. */
+    putBack(id) { return this.setAsideAt.delete(id); }
+    isSetAside(id) { return this.setAsideAt.has(id); }
+    /** Cards set aside, in the order they were. */
+    setAsideCards() { return [...this.setAsideAt].sort((a, b) => a[1] - b[1]).map(([id]) => id); }
+
+    /**
+     * Go back over paragraphs `from`–`to` (already read), optionally with a question: a raised case question's id or
+     * a held card. Recorded with the paragraph it was made at; nothing else.
+     */
+    reread(from, to, question = null) {
+        if (!(Number.isInteger(from) && Number.isInteger(to) && from >= 1 && from <= to && to < this.read)) return null;
+        if (question && !this.knows(question) && !(this.model.data.questions ?? []).some((q) => q.id === question && this.questionRaised(q.id))) return null;
+        const r = { from, to, question, para: this.read - 1 };
+        this.rereads.push(r);
+        return r;
     }
 
     // ---------- the timeline (world model; engine/timeline.js) ----------

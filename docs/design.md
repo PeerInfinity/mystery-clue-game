@@ -3618,3 +3618,15 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   with `t81.5`. Unchanged: the foreshadow log, both reports.
 - **Tests:** `reader.test.js` (an expert step is a bonus; the withheld case now pins `t148.2`, which still gates the
   story at ¶204).
+
+## Round 138 (2026-10-18): ws 8 step 5 — set aside and re-read
+
+- **Engine:** `setAside`, `putBack`, `isSetAside`, `setAsideCards` (Q5: held, silent, saved) and `reread(from, to,
+  question)` (Q4: recorded, saved); none reaches a score function (a test sets aside every clue and entity at ¶40 and
+  compares all six score families and `buildable()`).
+- **UI:** a card's "Set aside" / "Put back"; the hand filter `inHand` (not left out, not set aside) in the lists and
+  dropdowns that offer held cards; a folded "Set aside (N)" list on the Cards tab; "Re-read…" on the reading bar.
+  Checked in headless Chrome on an Easy save at ¶70: two cards set aside (the list shows "Set aside (2)", the tab's
+  tally drops by two); re-reading ¶8–¶46 with "Who drugged Ned Hunter's supper?" outlines 39 paragraphs and saves
+  `{from: 8, to: 46, question: q.who_drugged, para: 70}`.
+- **Diffs:** none: the reveal, foreshadow and clash logs, both reports and the gate listing are unchanged.

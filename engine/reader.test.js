@@ -95,3 +95,33 @@ test('an expert step is a bonus: it never gates the wait pace, arrives as Holmes
     w.load({ ...state, read: 202 });
     assert.deepEqual(w.blockers(), ['t198.2'], 'the bay is still waited for; the kick is not');
 });
+
+test('set aside: a card leaves the lists, stays held, is saved, and changes no score', () => {
+    const g = readTo(new Game(model, { difficulty: EASY }), 7);
+    assert.ok(g.knows('field_glass'));
+    assert.ok(g.setAside('field_glass'));
+    assert.ok(g.isSetAside('field_glass') && g.knows('field_glass'));
+    assert.ok(!g.setAside('r.dog_barks_at_strangers'), 'a background fact is not set aside');
+    assert.ok(!g.setAside('bayard') || g.knows('bayard'), 'only a held card');
+    const h = new Game(model, { difficulty: EASY, state: g.save() });
+    assert.deepEqual(h.setAsideCards(), ['field_glass']);
+    assert.ok(h.putBack('field_glass') && !h.isSetAside('field_glass'));
+    // A card the solution uses may be set aside too; nothing is said, and its inferences still build.
+    const a = readTo(new Game(model, { difficulty: EASY }), 40);
+    const b = readTo(new Game(model, { difficulty: EASY }), 40);
+    for (const id of [...b.unlocked.keys()].filter((x) => ['claims', 'entities'].includes(model.cards.get(x).section))) b.setAside(id);
+    assert.deepEqual(b.buildable(), a.buildable());
+    const scores = (x) => [x.thoughtScores(), x.noticeScores(), x.raiseScores(), x.dropScores(), x.checkScores(), x.absenceScores()];
+    assert.deepEqual(scores(b), scores(a));
+});
+
+test('re-read: a passage gone back over is recorded with its question, saved, and only within what was read', () => {
+    const g = readTo(new Game(model, { difficulty: EASY }), 70);
+    assert.equal(g.reread(8, 46), g.rereads[0]);
+    assert.deepEqual(g.rereads[0], { from: 8, to: 46, question: null, para: 70 });
+    assert.equal(g.reread(60, 90), null, 'not past what was read');
+    assert.equal(g.reread(20, 10), null);
+    assert.ok(g.reread(20, 37, 'curried_mutton'));
+    assert.equal(g.reread(20, 37, 'the_bay'), null, 'a card not held');
+    assert.equal(new Game(model, { difficulty: EASY, state: g.save() }).rereads.length, 2);
+});

@@ -80,6 +80,9 @@ a:hover, .link:hover { text-decoration: underline; }
 .story { position: relative; flex: 1; overflow: auto; padding: 16px 26px; font-family: var(--serif); font-size: 17px; line-height: 1.6; }
 .story p { margin: 0 0 .8em; }
 .story p.latest { border-left: 3px solid var(--accent); padding-left: 10px; margin-left: -13px; }
+.story p.reread { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.story p.reread .m { outline: 1px dotted var(--accent); }
+.reread-form input[type=number] { width: 4.5em; }
 .story p.title { font-size: 22px; font-weight: 600; text-align: center; }
 .reader { border-top: 1px solid var(--line); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .reader .note { font-size: 13px; color: var(--muted); flex-basis: 100%; }

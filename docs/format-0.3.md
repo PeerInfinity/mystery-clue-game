@@ -618,6 +618,18 @@ specific thing stay ground facts with a formula and no schema.
   `k.horse_kicked` now comes at ¶226, Holmes's explanation of the kick, instead of ¶202 (the reveal). `t46.4`'s
   needs still arrive at ¶102 with `t81.5`, and ¶220 still waits for them through `t220.3`.
 
+## As built (2026-10-18): set aside and re-read (workstream 8, step 5; Round 138)
+
+- **`Game.setAside(id)`, `putBack(id)`, `isSetAside(id)`, `setAsideCards()`:** a held entity, event or claim set
+  aside as scenery (`setAsideAt`: id → paragraph). It stays held and counts as a premise; nothing checks it against
+  the key, and no score reads it. Saved (`setAside`).
+- **`Game.reread(from, to, question)`:** going back over paragraphs already read, with an optional question (a raised
+  case question or a held card); recorded in `rereads` with the paragraph it was made at, saved, never scored.
+- **The UI:** "Set aside" / "Put back" on a card; set-aside cards leave the Cards list and its tally, the
+  inference builder's background list, the check templates, the absence form and the timeline's people and places
+  (`inHand`), and wait in a folded "Set aside (N)" list. The text keeps them clickable. "Re-read…" on the reading
+  bar opens a form (from, to, a raised question); re-reading outlines the passage and scrolls to it.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

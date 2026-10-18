@@ -23,7 +23,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { tab: 'card', selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
+const ui = { tab: 'card', selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -50,6 +50,8 @@ function kindOf(id) {
     return { events: 'event', claims: 'clue', rules: 'background', glosses: 'background', inferences: 'inference', propositions: 'proposition', applied: 'applied fact' }[c.section] ?? c.section;
 }
 const paraLabel = (p) => `paragraph ${p}`;
+// A card in the player's hand: neither left out of the game nor set aside by the player (docs/reader-layer.md, Q5).
+const inHand = (id) => !game.isHidden(id) && !game.isSetAside(id);
 
 // ---------- state ----------
 function save() {
@@ -109,7 +111,8 @@ function renderStory() {
             const kind = s.kinds.includes('entity') ? 'entity' : s.kinds.includes('question') ? 'question' : s.kinds.includes('event') ? 'event' : s.kinds.includes('window') ? 'window' : 'claim';
             return `<span class="m ${kind}${got ? ' got' : ''}" data-para="${i}" data-ids="${esc(ids.join(' '))}">${esc(s.text)}</span>`;
         }).join('');
-        h += `<p class="${i === 0 ? 'title' : ''}${i === game.read - 1 && i > 0 ? ' latest' : ''}" data-p="${i}">${body}</p>`;
+        const again = ui.rereadShown && i >= ui.rereadShown.from && i <= ui.rereadShown.to;
+        h += `<p class="${i === 0 ? 'title' : ''}${i === game.read - 1 && i > 0 ? ' latest' : ''}${again ? ' reread' : ''}" data-p="${i}">${body}</p>`;
     }
     const top = el.scrollTop;
     el.innerHTML = h;
@@ -149,7 +152,20 @@ function renderReader() {
     const sceneJump = aheadScene > 1 && game.nextSceneAt() < story.paragraphs.length
         ? `<button id="read-scene" class="quiet" ${blocked ? 'disabled' : ''} title="Read on to the start of the next scene">Next scene <span class="small">(${aheadScene} ¶)</span></button>`
         : '';
-    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}`;
+    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}${rereadForm()}`;
+}
+
+// Re-read (docs/reader-layer.md, Q4): go back over paragraphs already read, with a question in mind. Recorded; the
+// passage is outlined in the story until the next re-read is closed.
+function rereadForm() {
+    const r = ui.reread;
+    if (!r) return '';
+    const raised = model.data.questions.filter((q) => game.questionRaised(q.id));
+    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
+    return `<div class="note reread-form small">Re-read from paragraph <input id="rr-from" type="number" min="1" max="${game.read - 1}" value="${r.from}">
+        to <input id="rr-to" type="number" min="1" max="${game.read - 1}" value="${r.to}">
+        with the question <select id="rr-q">${opt('', 'none in particular', r.question)}${raised.map((q) => opt(q.id, game.questionText(q), r.question)).join('')}</select>
+        <button id="rr-go">Re-read</button> <button id="rr-close" class="quiet">Close</button>${r.error ? ` <span class="muted">${esc(r.error)}</span>` : ''}</div>`;
 }
 
 function scrollStory() {
@@ -167,7 +183,7 @@ function renderToolNow() {
     infTab.hidden = game.autoSolves() && !game.heldInferences().length;
     const left = game.helps('hints') ? game.buildable().length : 0;
     infTab.textContent = `Inferences${left ? ` (${left} to build)` : ''}`;
-    const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)));
+    const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section) && !game.isSetAside(k)));
     document.querySelector('.tab[data-tab="cards"]').textContent = `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`;
     const clashes = game.helps('clashes') ? game.clashes().length : 0;
     document.querySelector('.tab[data-tab="questions"]').textContent = `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`;
@@ -210,6 +226,7 @@ function toolCard() {
     let h = `<div class="card-head"><span class="kind">${kindOf(id)}</span>${(c.flags ?? []).filter((f) => !hideFlags.includes(f)).map((f) => `<span class="flag">${esc(f.replace(/_/g, ' '))}</span>`).join('')}`;
     if (game.isSuspected(id)) h += '<span class="flag doubted">suspected</span>';
     if (game.noticed.has(id)) h += '<span class="flag odd">marked odd</span>';
+    if (game.isSetAside(id)) h += '<span class="flag">set aside</span>';
     if (c.section === 'entities' || c.section === 'events') h += `<h2>${esc(game.nameOf(id))}</h2>`;
     else h += `<p class="desc">${esc(c.text)}</p>`;
     const names = [...new Set(story.spans.slice(0, game.read).flatMap((list, p) => list.filter((sp) => sp.kind === 'entity' && sp.ids.includes(id)).map((sp) => story.paragraphs[p].display.slice(sp.start, sp.end))))]
@@ -265,6 +282,8 @@ function toolCard() {
         h += '</div>';
     });
     if (['claims', 'rules'].includes(c.section) && !game.autoSolves()) h += inferButton(id);
+    // Scenery: set it aside (it leaves your lists and costs nothing), or put it back.
+    if (['entities', 'events', 'claims'].includes(c.section)) h += `<p class="small"><button class="quiet" data-${game.isSetAside(id) ? 'putback' : 'setaside'}="${id}" title="${game.isSetAside(id) ? 'Back among your cards' : 'Out of your lists as scenery; you still hold it, and you can put it back'}">${game.isSetAside(id) ? 'Put back' : 'Set aside'}</button></p>`;
     if (c.section === 'inferences') {
         const how = game.howHeld(id);
         h += `<p class="small muted">${how?.how === 'built' ? 'You built this inference' : how?.how === 'stated' ? `${esc(cardName(how.by))} drew this inference` : how?.how === 'implicit' ? 'Follows from what you hold' : 'Worked out for you'} · ${paraLabel(game.unlocked.get(id).para)}</p>`;
@@ -297,7 +316,7 @@ function toolCard() {
         const n = game.noticed.get(id);
         if (n) h += `<p class="small notice on">You marked this as odd at ${paraLabel(n.para)}${n.because ? `, against: ${link(n.because, shortName(n.because, 70))}` : ''}. <span class="link" data-unnotice="${esc(id)}">Not odd after all</span></p>`;
         else {
-            const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && !game.isHidden(x));
+            const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && inHand(x));
             h += `<p class="small notice">Does something here go against what you would expect? <select id="notice-because"><option value="">because… (optional)</option>${rules.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 60))}</option>`).join('')}</select> <button data-notice="${esc(id)}" class="quiet">That's odd</button></p>`;
         }
     }
@@ -577,7 +596,7 @@ function unlessHtml(id) {
 }
 
 function toolCards() {
-    const known = [...game.unlocked.keys()].filter((id) => !['glosses', 'rules'].includes(model.cards.get(id)?.section));
+    const known = [...game.unlocked.keys()].filter((id) => !['glosses', 'rules'].includes(model.cards.get(id)?.section) && !game.isSetAside(id));
     const counts = {};
     const members = {};
     for (const id of known) {
@@ -599,6 +618,8 @@ function toolCards() {
         const open = game.slotsOn(id).filter((s) => game.settled(s.id) === null).length;
         return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id, shortName(id, 90))}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${open ? ` <span class="small muted">· ${open} open</span>` : ''}</li>`;
     }).join('')}</ul>` : `<p class="empty">${game.collecting() ? 'No cards yet. Click the words in the story that mention someone or something.' : 'No cards yet. Start reading.'}</p>`;
+    const aside = game.setAsideCards();
+    if (aside.length) h += `<details class="set-aside"><summary class="small muted">Set aside (${aside.length})</summary><ul class="list">${aside.map((id) => `<li><span class="kind">${kindOf(id)}</span>${link(id, shortName(id, 90))} <button class="quiet small" data-putback="${id}">Put back</button></li>`).join('')}</ul></details>`;
     return h;
 }
 
@@ -742,7 +763,7 @@ function toolChecks() {
     if (game.autoSolves()) return '<p class="small muted">In Trivial the game works the case out; there are no checks to plan.</p>';
     const f = ui.plan ?? (ui.plan = { verb: 'look', fields: {}, expect: '', slot: '', value: '', theory: '' });
     const tpl = CHECK_TEMPLATES[f.verb];
-    const held = [...game.unlocked.keys()].filter((x) => !game.isHidden(x) && ['entities', 'claims'].includes(model.cards.get(x)?.section));
+    const held = [...game.unlocked.keys()].filter((x) => inHand(x) && ['entities', 'claims'].includes(model.cards.get(x)?.section));
     const people = held.filter((x) => model.cards.get(x).kind === 'person');
     const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
     const pick = (field, i) => {
@@ -940,18 +961,18 @@ function cardTimelineHtml(id) {
     const whens = `<select id="cpen-time">${layerOpt('', 'when…', cp.time)}${shown.map((t) => layerOpt(t.id, `${'· '.repeat(t.depth)}${t.label}`, cp.time)).join('')}</select>`;
     if (tl.kind === 'thing') {
         // What to pencil: where it was, who had it, or one of the case's conditions.
-        const held = (k) => !game.isHidden(k) && (model.cards.get(k)?.kind === 'place' || ['person', 'animal', 'group'].includes(model.cards.get(k)?.kind));
+        const held = (k) => inHand(k) && (model.cards.get(k)?.kind === 'place' || ['person', 'animal', 'group'].includes(model.cards.get(k)?.kind));
         const conds = game.knowableConditions().map((id) => ({ id }));
         const aims = model.data.state_aims ?? [];
         const person = ['person', 'group'].includes(model.cards.get(id)?.kind);
         const aspects = `<select id="cpen-aspect">${layerOpt('at', 'was at', cp.aspect)}${layerOpt('held', 'was held by', cp.aspect)}${person && aims.length ? layerOpt('aims', 'was trying', cp.aspect) : ''}${conds.map((c) => layerOpt(c.id, `was ${c.id}?`, cp.aspect)).join('')}${game.knowablePropositions().map((p) => layerOpt(`knows_${p.slice(2)}`, `knew: “${shortName(p, 50)}”?`, cp.aspect)).join('')}</select>`;
-        const values = cp.aspect === 'at' ? [['', 'where…'], ...[...game.unlocked.keys()].filter((x) => model.cards.get(x)?.kind === 'place' && !game.isHidden(x)).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'somewhere else']]
+        const values = cp.aspect === 'at' ? [['', 'where…'], ...[...game.unlocked.keys()].filter((x) => model.cards.get(x)?.kind === 'place' && inHand(x)).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'somewhere else']]
             : cp.aspect === 'held' ? [['', 'who, or where it lay…'], ...[...game.unlocked.keys()].filter(held).map((x) => [x, shortName(x, 30)]), ['elsewhere', 'someone or somewhere else']]
                 : cp.aspect === 'aims' ? [['', 'to do what…'], ...aims.map((a) => [a.id, a.label.replace(/^To /, 'to ')])]
                 : [['', 'yes or no…'], ['true', 'yes'], ['false', 'no']];
         h += `<div class="pen row small">Pencil in: at ${whens} it ${aspects} <select id="cpen-other">${values.map(([v, label]) => layerOpt(v, label, cp.other)).join('')}</select> <button data-cpen-add="${esc(id)}">Pencil it in</button></div>`;
     } else {
-        const people = [...game.unlocked.keys()].filter((x) => BOARD_KINDS.includes(model.cards.get(x)?.kind) && !game.isHidden(x));
+        const people = [...game.unlocked.keys()].filter((x) => BOARD_KINDS.includes(model.cards.get(x)?.kind) && inHand(x));
         h += `<div class="pen row small">Pencil in <select id="cpen-other">${layerOpt('', 'who or what…', cp.other)}${people.map((x) => layerOpt(x, shortName(x, 30), cp.other)).join('')}</select> here at ${whens} <button data-cpen-add="${esc(id)}">Pencil it in</button></div>`;
     }
     return h;
@@ -966,8 +987,8 @@ function boardHtml(layout) {
     const times = game.timelineTimes();
     const shown = times.filter((t) => t.kind !== 'boundary');
     const followed = game.followedThings(ui.layer ?? 'mine');
-    const people = [...game.unlocked.keys()].filter((id) => BOARD_KINDS.includes(model.cards.get(id)?.kind) && !game.isHidden(id));
-    const places = [...game.unlocked.keys()].filter((id) => model.cards.get(id)?.kind === 'place' && !game.isHidden(id));
+    const people = [...game.unlocked.keys()].filter((id) => BOARD_KINDS.includes(model.cards.get(id)?.kind) && inHand(id));
+    const places = [...game.unlocked.keys()].filter((id) => model.cards.get(id)?.kind === 'place' && inHand(id));
     let h = '<p class="small muted">Where everyone and everything was, when. Your clues place some of it (solid); the rest is yours to pencil in (dashed: several marks are several guesses; click a mark to strike it). Click a cell to start a mark there. Each theory you have met is a night of its own: choose it as the layer to see where its answers put people (dotted), and pencil its night.</p>';
     h += `<div class="row small">${layerPicker()} <button data-layer-check="1" class="quiet">Does this night fit?</button></div>`;
     if (ui.layerFit?.layer === layer) h += `<div class="note block">${ui.layerFit.html}</div>`;
@@ -1046,8 +1067,8 @@ function absenceFormHtml(shown) {
     if (game.autoSolves()) return '';
     const ab = ui.absence ?? (ui.absence = { expectation: null, time: null, witness: null });
     const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
-    const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && !game.isHidden(x));
-    const clues = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'claims' && !game.isHidden(x));
+    const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && inHand(x));
+    const clues = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'claims' && inHand(x));
     const suggested = game.helps('hints') ? game.fileableAbsences()[0]?.expectation ?? null : null;
     const exp = ab.expectation ?? suggested;
     return `<div class="pen row small absence">Something that should have happened did not: <select id="ab-exp">${opt('', 'what you would expect…', exp)}${rules.map((x) => opt(x, shortName(x, 50), exp)).join('')}</select>
@@ -1306,6 +1327,18 @@ function onClick(e) {
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
+    if (e.target.closest('#reread-open')) { ui.reread = ui.reread ? null : { from: 1, to: game.read - 1, question: '' }; renderReader(); return; }
+    if (e.target.closest('#rr-close')) { ui.reread = null; ui.rereadShown = null; renderStory(); return; }
+    if (e.target.closest('#rr-go')) {
+        const [from, to, question] = [+$('#rr-from').value, +$('#rr-to').value, $('#rr-q').value || null];
+        if (!game.reread(from, to, question)) { ui.reread = { from, to, question, error: 'Choose paragraphs you have read, the first no later than the last.' }; renderReader(); return; }
+        ui.reread = { from, to, question };
+        ui.rereadShown = { from, to };
+        renderStory();
+        save();
+        document.querySelector(`#story p[data-p="${from}"]`)?.scrollIntoView({ block: 'start' });
+        return;
+    }
     const readBtn = e.target.closest('#read, #read-scene, #read-deduction');
     if (readBtn) {
         const res = readBtn.id === 'read' ? game.advance() : readBtn.id === 'read-scene' ? game.readToNextScene() : game.readToNextDeduction();
@@ -1324,6 +1357,10 @@ function onClick(e) {
         changed();
         return;
     }
+    const aside = e.target.closest('[data-setaside]');
+    if (aside) { game.setAside(aside.dataset.setaside); changed(); return; }
+    const back = e.target.closest('[data-putback]');
+    if (back) { game.putBack(back.dataset.putback); changed(); return; }
     const inf = e.target.closest('[data-infer]');
     if (inf) {
         ui.building ??= { cards: [], kind: null, note: '' };
