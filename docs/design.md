@@ -3670,3 +3670,15 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   presented, not endorsed." on its card and in the Background tab (`suppliedNote`). `docs/review-ws8.md` corrected:
   25 background cards held.
 - **Diffs:** UI only; the logs, the reports and the gate listing are untouched (no engine or data change).
+
+## Round 142 (2026-10-18): hand-off — workstream 9 (the UI)
+
+Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over workstream 9 (`docs/gap-analysis.md`
+§5 item 9):
+- what has no UI: the whole score family, `applyRule` and `conclude`; the busy page (Rounds 130, 139); the reviews'
+  left-open items;
+- the reading list;
+- the mission: an inventory per tag and a profile of the busy page, then `docs/ui.md` agreed with Robert, steps,
+  and a closing review tag by tag;
+- the traps of Rounds 60–141, with this session's added: profiles that could not time hints; a flag's meaning
+  checked before a gap is claimed; the 'wait'-pace test loop; the save waits in headless Chrome; the shell `&`.
