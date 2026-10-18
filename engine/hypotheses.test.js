@@ -16,7 +16,7 @@ const INSIDE = {
         'e.opium_added.agent': 'straker', 'e.opium_added.place': 'straker_villa', 'e.horse_led_out.agent': 'straker',
         'e.horse_led_out.purpose': 'injure', 'e.fatal_blow.agent': 'silver_blaze', 'e.knife_taken.purpose': 'operation',
         'e.coat_off.purpose': 'work', 'william_derbyshire.identity': 'straker', 'straker.honest': 'false', 'silver_blaze.hidden_at': 'mapleton',
-        'silver_blaze.disguised': 'true', 'e.fatal_blow.instrument': 'steel_shoe',
+        'silver_blaze.disguised': 'true', 'e.fatal_blow.instrument': 'steel_shoe', 'e.light_struck.purpose': 'work',
     },
 };
 const cards = (cost) => cost.items.flatMap((i) => i.cards);
@@ -221,4 +221,16 @@ test('the presets weigh theories by name on Easy, as counts on Medium, on reques
     const { PRESETS, presetOf } = await import('./game.js');
     assert.deepEqual(['trivial', 'easy', 'medium', 'hard'].map((d) => PRESETS[d].weigh), ['names', 'names', 'counts', 'asked']);
     for (const d of ['easy', 'medium', 'hard']) assert.equal(presetOf(PRESETS[d]), d);
+});
+
+test('the candle (t78.3, t102.3): a puzzle the police leave over, a reading, and the Colonel\'s step at ¶224', () => {
+    const at92 = seen.get(92);
+    assert.ok(at92.met.includes('pz.candle'));
+    assert.ok(at92.residue.police.includes('pz.candle'));
+    assert.ok(!at92.residue.inside.includes('pz.candle'));
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    while (game.read <= 224) game.advance();
+    assert.deepEqual(game.howHeld('k.light_to_work'), { how: 'stated', by: 'colonel_ross' });
+    assert.deepEqual(game.openValues('e.light_struck.purpose'), ['work']);
+    assert.ok(game.revisedBy('e.light_struck.purpose').includes('c.pocket_inventory'));
 });

@@ -3285,3 +3285,30 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     the opium answer, which the police's own trusted step gives, is not.
 - **Moved:** the case report's Puzzles table (`pz.key` is now explained by `t.police` by its answers alone). Unchanged:
   the reveal, foreshadow and clash logs, the thoughts report and the gates.
+
+## Round 122 (2026-10-17): the second review's batch 3 — the light's purpose (C1)
+
+- **New slot** `e.light_struck.purpose` {pipe, work}, answer work. Its prompt does not name who struck the light,
+  since that is told only at ¶224: "Why was a light struck in the hollow?" ("To light a pipe", "To see to some close
+  work").
+- **New rule** `r.candle_for_work` (default; "commonly taken to …"; exception "he struck the match only for his
+  pipe"). It is shown from ¶78, where the pocket inventory names the candle; the reader's `t78.3` has the same thought
+  there.
+- **New inference** `k.light_to_work` (verified): the candle, with Holmes's `k.vesta_from_strakers_box`, gives the
+  purpose. The Colonel states it at ¶224 ("Of course that was why he needed the candle, and struck the match"). It is
+  named by `t224.1`, which now cites `t78.1` and `t102.2`, and so becomes a route step at ¶224.
+- **Puzzle** `pz.candle` (the pocket inventory, `t78.3`) and **reading** `rd.light` (the inventory, the vesta in the
+  mud). The inside-story fixture names the purpose. The police leave the candle over.
+- **Thoughts:** `t102.3` maps the slot and the reading; `t78.3` the puzzle; `t224.1` the inference and the reading.
+- **Leak checker** (haiku, two runs, cached): the rule (`--background`) and its exception (`--exceptions`, 83 of 83)
+  both pass.
+- **Test:** the candle met by ¶92 and left over by the police, not by the inside story. At ¶224 the Colonel's step is
+  held as stated and leaves only "work" open, and settling it re-reads the inventory.
+- **Moved:**
+  - **Reveal and foreshadow logs:** the rule and its exception at ¶78; the inference, the slot and its two options
+    where they are dealt.
+  - **Case report:** rules 119 → 120, constraints 471 → 473, quotes 1063 → 1065, verified 81 → 82, forced slots
+    456 → 457. New rows for the puzzle, the inference, the route step `t224.1` and the slot (unique).
+  - **Thoughts report:** NOTICE mapped 3 → 4; deductions 55 → 56, with an inference 53 → 54; premise
+    disagreements unchanged at 5.
+  - **Unchanged:** the clash log and the gates.

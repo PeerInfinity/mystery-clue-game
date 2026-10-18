@@ -12,7 +12,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | Tag | Thoughts | Held by a card |
 |---|---|---|
 | RECORD | 93 | 91 |
-| NOTICE | 16 | 3 |
+| NOTICE | 16 | 4 |
 | ABSENCE | 6 | 4 |
 | QUESTION | 10 | 4 |
 | HYPOTHESIS | 27 | 24 |
@@ -73,7 +73,7 @@ Thoughts whose raising of an exception against an inference counts (`raises`). A
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 55; with an inference: 53; with a reason for none: 2; earliest-date misses: 0 (and 6 explained); premise disagreements: 5
+- deduction-type thoughts: 56; with an inference: 54; with a reason for none: 2; earliest-date misses: 0 (and 6 explained); premise disagreements: 5
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -132,6 +132,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t150.1` | AGENT | `k.brown_keeps_horse_safe` | ¶150 | ¶150 |  |  | `r.mercy_keeps_safe` |  |  |
 | `t175.1` | INFER | `k.sheep_lamed_by_hand` | ¶175 | ¶173 |  |  |  |  |  |
 | `t198.2` | IDENTIFY | `k.bay_is_ross_entry` | ¶198 | ¶198 |  |  | `r.colours_identify_owner`, `r.scratched_horse_does_not_run` | `k.markings_identify` |  |
+| `t224.1` | TEST | `k.light_to_work` | ¶224 | ¶102 |  |  | `r.candle_for_work` |  |  |
 
 ### Earliest-date misses explained
 
