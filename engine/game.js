@@ -2228,6 +2228,7 @@ export class Game {
         for (const f of tpl.fields) if (!fields?.[f] || !this.knows(fields[f])) return { ok: false, reason: `choose a card you hold for ${f}` };
         if (Object.keys(fields).some((f) => !tpl.fields.includes(f))) return { ok: false, reason: `${verb} has the fields ${tpl.fields.join(', ')}` };
         if (expect !== null && !tpl.outcomes.includes(expect)) return { ok: false, reason: `expect one of: ${tpl.outcomes.join(', ')}` };
+        if (theory !== null && !this.visibleTheories().some((t) => t.id === theory)) return { ok: false, reason: 'cite a theory you can see' };
         if (answer !== null && (expect === null || [...slotsIn(answer)].some((x) => !this.model.slots.has(x) || !this.knows(this.model.slots.get(x).on)))) return { ok: false, reason: 'an expected answer goes with an expected result, over a question you hold' };
         const id = `seal-${this.seals.length + 1}`;
         this.seals.push({ id, verb, fields: { ...fields }, expect, answer, theory, para: this.read - 1, withdrawn: null });
@@ -2239,6 +2240,31 @@ export class Game {
         if (!x || x.withdrawn !== null) return false;
         x.withdrawn = this.read - 1;
         return true;
+    }
+    /**
+     * What the theory a sealed check cites says of its expected answer (docs/predictions.md, Q6), tested as residue
+     * is (Round 115): the theory's answers held fast, with the facts left once its cost is paid (trusted clues and the
+     * world's ties, not inferences). 'says-so' (they entail the answer), 'says-otherwise' (they contradict it),
+     * 'says-nothing', or 'refuted' (the theory breaks with what the player holds). Null for a seal with no answer or
+     * no theory still visible. Never refuses anything.
+     */
+    sealTheoryTest(id) {
+        const x = this.seals.find((s) => s.id === id);
+        if (!x?.answer || !x.theory) return null;
+        const theory = this.visibleTheories().find((t) => t.id === x.theory);
+        if (!theory) return null;
+        const cost = this.scenarioCost(theory);
+        if (cost.refuted) return { says: 'refuted', cost };
+        const facts = cost.rest.filter((k) => !this.model.constraints.get(k)?.inference);
+        const fixed = theory.assignment ?? {};
+        const key = `seal#${JSON.stringify([fixed, x.answer])}`;
+        let says = this.costCache.map.get(key);
+        if (says === undefined) {
+            says = !this.model.problem.consistent(facts, fixed, { extra: [{ not: x.answer }] }).ok ? 'says-so'
+                : !this.model.problem.consistent(facts, fixed, { extra: [x.answer] }).ok ? 'says-otherwise' : 'says-nothing';
+            this.costCache.map.set(key, says);
+        }
+        return { says, cost };
     }
     /** The case's check a sealed one matches: same verb, and every field the check names accepts the seal's card. */
     #checkOf(x) {

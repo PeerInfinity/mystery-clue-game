@@ -3467,3 +3467,19 @@ trailer. The next session is told to gate documentation-only commits too.
   boots (scored, never told); the maid (matched, unscored); the race; a check Holmes never makes; the dog; Trivial;
   save and load.
 - **Not yet:** the theory test (step 4) and any UI (step 5). `theory` is recorded and checks nothing.
+
+## Round 129 (2026-10-18): workstream 7 step 4 — the theory test
+
+- **`Game.sealTheoryTest(id)`** (`docs/predictions.md` Q6): a sealed check with an expected answer and a cited
+  theory is tested as residue is (Round 115). The theory's answers are held fast with the facts left once its cost
+  is paid (trusted clues and the world's ties, not inferences). Possible results: `says-so`, `says-otherwise`,
+  `says-nothing`, or `refuted`. It is cached with the cost and never refuses. `seal` now refuses a theory the
+  player cannot see.
+- **Found when testing:** the paper expected the police to say nothing of "Derbyshire is Straker". They say
+  otherwise: their story keeps Mrs. Straker's word that Derbyshire is a friend, which costs it nothing. Once the
+  player doubts her, they say nothing. That is the method working: a story is read with the testimony it does not
+  pay to reject. The test now checks both.
+- **Test:** `predictions.test.js` gains the case (12 tests): the player's inside story says so; the police say
+  otherwise, then nothing once her word is doubted; her own belief says otherwise; a seal with no answer tests
+  nothing.
+- **Presets** (Q7) are the UI's: Easy names the result, Medium says yes or no, Hard on request (the `weigh` option).

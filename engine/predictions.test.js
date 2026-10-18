@@ -134,3 +134,18 @@ test('sealed checks are saved and loaded', () => {
     assert.deepEqual(again.seals, game.seals);
     assert.equal(row(again, 't78.5').scores, true);
 });
+
+test('a sealed check may cite a theory: the game says whether the theory gives its expected answer (Q6)', () => {
+    const game = readTo(fresh(), 92);
+    const mine = game.addTheory('Straker is Derbyshire', { 'william_derbyshire.identity': 'straker', 'e.horse_led_out.agent': 'straker' });
+    assert.match(game.seal('show', { thing: 'straker', to: 'madame_lesurier' }, { expect: 'yes', answer: DERBY, theory: 't.nobody' }).reason, /theory you can see/);
+    const seal = (theory) => game.seal('show', { thing: 'straker', to: 'madame_lesurier' }, { expect: 'yes', answer: DERBY, theory }).id;
+    assert.equal(game.sealTheoryTest(seal(mine)).says, 'says-so');
+    // The police keep Mrs. Straker's word that Derbyshire is a friend (it costs their story nothing), so they say
+    // otherwise; once the player doubts her, they say nothing. Her own belief says otherwise either way.
+    assert.equal(game.sealTheoryTest(seal('t.police')).says, 'says-otherwise');
+    assert.equal(game.sealTheoryTest(seal('t.derbyshire_a_friend')).says, 'says-otherwise');
+    assert.ok(game.suspect('c.derbyshire_a_friend'));
+    assert.equal(game.sealTheoryTest(seal('t.police')).says, 'says-nothing');
+    assert.equal(game.sealTheoryTest(game.seal('show', { thing: 'straker', to: 'madame_lesurier' }).id), null, 'no answer, nothing to test');
+});
