@@ -628,8 +628,10 @@ function toolCards() {
 // A background fact this reader lacks is supplied by the game (docs/reader-layer.md, Q1): who would have known it,
 // and, once the story has said so, where it does.
 function suppliedNote(ruleId) {
+    // A period prejudice the story voices (flag `stereotype`): shown as the period's, not the game's (Q1, bk.gypsies).
+    const period = (model.cards.get(ruleId)?.flags ?? []).includes('stereotype') ? ' <span class="small muted period">· A belief of the period: presented, not endorsed.</span>' : '';
     const d = game.disclosure(ruleId);
-    if (!d?.supplied) return '';
+    if (!d?.supplied) return period;
     const mark = (model.data.background ?? []).find((b) => b.id === d.lacks)?.reader_1892 ?? '';
     const who = /^racing/.test(mark) ? 'a racing man of 1892 would know this' : /^specialist/.test(mark) ? 'a specialist would know this' : 'a reader of 1892 would know this';
     const told = d.told !== null && d.told < game.read ? `; the story says so at ${paraLabel(d.told)}` : '';

@@ -64,19 +64,18 @@ For each it says whether the item is now held as agreed and how, or why not. It 
 | `bk.blaze`, `bk.horse_faker` | racing public | rare | **held** | Lacked by 1892 and modern, held by the racing reader ("a racing man of 1892 would know this"). |
 | `bk.lay_against` | racing-literate | rare | **held** | As `bk.blaze`; told at ¶220. |
 | `bk.tendon_nick` | specialist | rare | **held** | Lacked by every reader: always supplied ("a specialist would know this"), told at ¶221. Only implicit inferences use it, as the fair-play table accepts. |
-| `bk.gypsies` | period | period (presented, not endorsed) | **not held for display** | Both readers hold it, so the reader setting is right. But nothing shows "presented, not endorsed". Its rules carry `period: true` (8 rules), and the UI never reads the flag. A one-line mark on the card would hold it. Listed, not built. |
+| `bk.gypsies` | period | period (presented, not endorsed) | **held** (Round 141) | Both readers hold it. Its two rules are flagged `stereotype` and their text opens "(A prejudice of the period.)", so the card head already showed the flag. *Corrected in Round 141:* this row first said nothing showed it, misreading `period: true`, which marks 1890s knowledge. Round 141 adds the explicit "· A belief of the period: presented, not endorsed." on the card and in the Background tab. |
 
 ## In numbers
 
 - **GENRE:** 12 held, unscored (all watch-holmes and re-read); 3 held by existing moves; 5 not held (the plain
   narrator's-contract thoughts, as agreed).
 - **SET ASIDE:** 5 held; 2 not held (passages).
-- **Background cards:** 24 held; 1 not held for display (the period mark).
+- **Background cards:** 25 held (the period mark made explicit in Round 141).
 
 ## Left open
 
-- **The period mark** ("presented, not endorsed") on `period: true` rules: a UI line. It was not part of the
-  agreed steps.
+- ~~**The period mark**~~: done in Round 141, on the `stereotype` rules.
 - **The purist (`supplied: withheld`) still hears Holmes.** The inferences of Holmes's steps arrive at the
   *story's* earliest gates (Round 126). For example, `t81.5`'s needs arrive at ¶102 for a modern purist too, though
   that player's own gate for `t81.5` moves to ¶219. This is Holmes speaking, not the player knowing, so it is left so.

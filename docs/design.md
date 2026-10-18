@@ -3661,3 +3661,12 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   recorded, unused; profiles and confidence drive nothing beyond the expert gates; the busy page on long saves
   (workstream 9). A correction to Round 139: the end-of-story list showed twelve supplied facts, not eleven.
 - **`CLAUDE.md`'s reading list** now points at `docs/reader-layer.md` and this review. **Workstream 8 is done.**
+
+## Round 141 (2026-10-18): the period mark
+
+- **Robert asked for it** after the review. The review had read `period: true` (1890s knowledge, eight rules) as the
+  period-belief flag. The gypsies' two rules carry `flags: ["stereotype"]` and open "(A prejudice of the period.)",
+  so the card head already showed "stereotype". Now a `stereotype` rule also reads "· A belief of the period:
+  presented, not endorsed." on its card and in the Background tab (`suppliedNote`). `docs/review-ws8.md` corrected:
+  25 background cards held.
+- **Diffs:** UI only; the logs, the reports and the gate listing are untouched (no engine or data change).
