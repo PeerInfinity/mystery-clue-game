@@ -3343,3 +3343,16 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   once `k.brown_broke` is held, and the test checks that instead. (The first suite run caught it; nothing was
   committed until it passed.)
 - **The second review's four batches are all built.**
+
+## Round 124 (2026-10-18): hand-off — workstream 7 (predictions and test plans)
+
+Robert asked for workstream 7 in a new session. `docs/kickoff-workstream-7.md` hands it over:
+- the question: sealed predictions, the player's checks, scoring against the story, and withheld results;
+- the reading list: the PREDICT and TEST PLAN thoughts, the audit's beat-Holmes windows and fair-play gaps, the ws 7
+  rows of both reviews, `actions.json`, and the score family;
+- the mission: measure first, write `docs/predictions.md` and agree it with Robert, build in steps, then a short
+  review;
+- the traps of Rounds 60–123.
+
+The kickoff also records that Round 120's documentation follow-up was committed without the suite and without the
+trailer. The next session is told to gate documentation-only commits too.

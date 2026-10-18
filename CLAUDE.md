@@ -1,6 +1,8 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-workstream-7.md` — workstream 7 (predictions and test plans): the next session's mission (Round 124);
+  its paper will be `docs/predictions.md`.
 - `docs/hypotheses.md` — workstream 6 (hypotheses, scenarios, residue): agreed (Round 113), built (Rounds 114–118).
   Kickoff: `docs/kickoff-workstream-6.md`.
 - `docs/review-ws3-ws6.md` — the second review (Round 119): what workstreams 3 and 6 make modelable, a verdict per
