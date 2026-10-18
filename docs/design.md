@@ -3231,3 +3231,23 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   - Hard: "Weigh it", then the counts.
 - **Test:** the presets' `weigh` values, and `presetOf` still recognises each preset.
 - **Moved:** nothing (UI and options only). The logs, both reports and the gates are unchanged.
+
+## Round 119 (2026-10-17): the second review — what workstreams 3 and 6 make modelable
+
+- **`docs/review-ws3-ws6.md`:** a verdict for each of the 85 thoughts in scope:
+  - every HYPOTHESIS, TEST, DROP, REVISE and RESIDUE thought;
+  - the first review's "ws 3" and "ws 6" rows.
+
+  Read from a dump of each thought's maps, drops and relations, with deal paragraphs.
+- **Verdicts:** 53 accurate, 23 partial, 1 wrong, 2 missing now, 6 missing later.
+  - **wrong:** `t35.9` maps the coat's agent where its set is the purpose;
+  - **missing now:** `t58.4` (patches: Q3's "rests on nothing held" was not built) and `t102.3` (no slot for what the
+    light was for);
+  - most partials are TESTs and HYPOTHESES that map nothing where a card, puzzle or reading now holds them.
+- **Not given a mechanism by workstream 6:** strains by improbability (`t24.4`, `t37.11`, `t64.2`, `t120.2`).
+  Recommended: leave them authored.
+- **Fixes proposed, for Robert, in batches:**
+  1. A1–A16, maps only;
+  2. B1 with C2: the police's duplicate key as an answer, and a theory's assumed answers marked;
+  3. C1: the light's purpose, a candle puzzle and a reading;
+  4. C3: `r.guilty_denial`, C11 of the first review.

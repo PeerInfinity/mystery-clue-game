@@ -1,8 +1,10 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/hypotheses.md` — workstream 6 (hypotheses, scenarios, residue): agreed (Round 113), being built in its order
-  of work; then a second review of the tags workstreams 3 and 6 make modelable. Kickoff: `docs/kickoff-workstream-6.md`.
+- `docs/hypotheses.md` — workstream 6 (hypotheses, scenarios, residue): agreed (Round 113), built (Rounds 114–118).
+  Kickoff: `docs/kickoff-workstream-6.md`.
+- `docs/review-ws3-ws6.md` — the second review (Round 119): what workstreams 3 and 6 make modelable, a verdict per
+  thought and fix batches for Robert.
 - `docs/clashes.md` — how clashes weigh what they set aside, with Q6 (one culprit): agreed (Round 108), built
   (Rounds 109–111); its "Left open" feeds workstream 6.
 - `docs/defeasibility.md` — workstream 3 (defeasibility): agreed (Round 101), built (Rounds 102–106); its Q6 was
