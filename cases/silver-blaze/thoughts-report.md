@@ -144,7 +144,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 
 ### Deductions with no inference
 
-Each says why (`no_inference`): `workstream-3`, a default to be defeated or its revision; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
+Each says why (`no_inference`): `workstream-6`, a revision by strain, not by a clash; `action`, a prediction played as an action; `world-model`, it needs a slot the case lacks yet; `absence`, it rests on an absence the player files (workstream 5).
 
 - workstream-6: `t68.3`
 - action: `t92.14`

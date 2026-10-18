@@ -1,9 +1,11 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-workstream-6.md` — the current work: workstream 6 (hypotheses, scenarios, residue); design first
+  (`docs/hypotheses.md`), then build what Robert agrees. Then a second review of the tags workstreams 3 and 6 make
+  modelable.
 - `docs/clashes.md` — how clashes weigh what they set aside, with Q6 (one culprit): agreed (Round 108), built
-  (Rounds 109–111); its "Left open" feeds workstream 6. Next: workstream 6 (hypotheses, scenarios, residue;
-  `docs/gap-analysis.md`), then a second review of the tags workstreams 3 and 6 make modelable.
+  (Rounds 109–111); its "Left open" feeds workstream 6.
 - `docs/defeasibility.md` — workstream 3 (defeasibility): agreed (Round 101), built (Rounds 102–106); its Q6 was
   settled by the clash paper.
 - `docs/annotation-review.md` — the focused review of the annotated reading: a verdict per thought in scope; its six
@@ -31,6 +33,7 @@
 | Serve the game | `node scripts/serve.js` → http://localhost:8321/ (`logic.html` lays the case's logic open; the Timeline tab has the board) |
 | Check the annotated reading (`thoughts.json`) and rewrite `cases/silver-blaze/thoughts-report.md` | `npm run validate-thoughts` |
 | What appears at each paragraph (leak checks) | `npm run reveal-log`, `npm run foreshadow-log` (→ `.cache/`) |
+| Every clash met and what it sets aside, for three kinds of player (about a minute; `--build` adds a fourth, 5 min) | `npm run clash-log` (→ `.cache/clash-log.txt`) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 
 ## Conventions

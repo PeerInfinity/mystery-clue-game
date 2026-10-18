@@ -8,6 +8,7 @@
     "validate": "node scripts/validate-case.js cases/silver-blaze",
     "reveal-log": "node scripts/reveal-log.js cases/silver-blaze > .cache/reveal-log.txt",
     "foreshadow-log": "node scripts/foreshadow-log.js cases/silver-blaze > .cache/foreshadow-log.txt",
+    "clash-log": "node scripts/clash-log.js cases/silver-blaze > .cache/clash-log.txt",
     "validate-thoughts": "node scripts/validate-thoughts.js cases/silver-blaze"
   },
   "devDependencies": {

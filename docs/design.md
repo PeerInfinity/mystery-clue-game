@@ -3008,3 +3008,24 @@ and belief (workstream 4). It carries the open items and this session's traps. `
 - **The clash work is done** as agreed (Round 108). `docs/clashes.md` is marked built, with a "Left open" section:
   the authored inference, the tie, reservations, `t68.3`. Q6 of `docs/defeasibility.md` is closed with a pointer.
   `CLAUDE.md` points at the paper as built, and at workstream 6 next.
+
+## Round 112 (2026-10-17): hand-off — workstream 6 (hypotheses, scenarios, residue)
+
+- **Robert:** before the next session, make the clash replay a standing log and write the kickoff.
+- **`scripts/clash-log.js`** (`npm run clash-log` → `.cache/clash-log.txt`, about a minute): every clash met through
+  the story, and what it sets aside and why, for three kinds of player (passive; doubting Holmes's curry step;
+  building one culprit). `--build` adds one who builds everything (about 5 minutes). Cards are marked ✓/✗ by the
+  answer key, which the engine never reads. Today it reports no true card set aside for any of them. The kickoff
+  makes it one of the logs diffed at each step.
+- **Tidy-up:** `workstream-3` is retired as a `no_inference` value; no thought uses it since Round 111. The thoughts
+  report's legend now names `workstream-6` in its place.
+- **`docs/kickoff-workstream-6.md`** hands the workstream over:
+  - the question (rival stories weighed, not refuted);
+  - what to read;
+  - what the earlier work leaves it (the thoughts' authored relations, the strains and drops deferred by name,
+    `t68.3`, the clash paper's two open questions, the clash log);
+  - the questions its paper must answer;
+  - the traps of Rounds 60–111, with this session's added.
+
+  It supersedes `docs/kickoff-clashes.md`. `CLAUDE.md` points at it and lists the clash log.
+- **Moved:** the thoughts report's legend line only; nothing in the logs, the case report or the gates.
