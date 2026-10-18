@@ -3251,3 +3251,17 @@ and belief (workstream 4). It carries the open items and this session's traps. `
   2. B1 with C2: the police's duplicate key as an answer, and a theory's assumed answers marked;
   3. C1: the light's purpose, a candle puzzle and a reading;
   4. C3: `r.guilty_denial`, C11 of the first review.
+
+## Round 120 (2026-10-17): the second review's batch 1 — maps (A1–A16)
+
+- **Robert:** build all four batches, if possible (B1 as (a), with C2).
+- **Built:** sixteen `maps` changes in `thoughts.json`, as listed in `docs/review-ws3-ws6.md`.
+  - `t35.9` now maps the coat's purpose and reading instead of its agent (the one wrong verdict).
+  - The others map the card, puzzle or reading that now holds them.
+
+  Ids and tags are unchanged, so `reading-annotated.md` is too.
+- **Moved:**
+  - **Thoughts report:** HYPOTHESIS mapped 21 → 24, TEST 17 → 26. Premise disagreements 4 → 5: `t40.4` cites
+    `t40.3` (Mapleton's motive, now held by `c.mapleton_interest`), which `k.horse_at_mapleton_by_reach` does not rest
+    on. This is the first review's point on `t40.4`: the inference is reach only, the thought motive and reach.
+    Listed, not changed.

@@ -1,6 +1,7 @@
 # Second review: what workstreams 3 and 6 make modelable
 
-Status: **REVIEW COMPLETE, fixes for Robert** (2026-10-17, Round 119). The kickoff's third task
+Status: **REVIEW COMPLETE; all four batches agreed** (Robert, 2026-10-17: "I want to build all of these, if possible";
+B1 as (a), with C2). Built: batch 1 (Round 120). The kickoff's third task
 (`docs/kickoff-workstream-6.md`): after workstream 6, review again the thoughts whose tags workstreams 3
 (defeasibility) and 6 (hypotheses, scenarios, residue) give features to hold, in the manner of
 `docs/annotation-review.md` (Round 93). Fixes are proposed by kind at the end, for Robert to decide batch by batch.
