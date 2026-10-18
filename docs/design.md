@@ -3265,3 +3265,4 @@ and belief (workstream 4). It carries the open items and this session's traps. `
     `t40.3` (Mapleton's motive, now held by `c.mapleton_interest`), which `k.horse_at_mapleton_by_reach` does not rest
     on. This is the first review's point on `t40.4`: the inference is reach only, the thought motive and reach.
     Listed, not changed.
+  - **Unchanged:** the reveal, foreshadow and clash logs, the case report and the gates.
