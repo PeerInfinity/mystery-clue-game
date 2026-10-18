@@ -889,6 +889,18 @@
         }
       }
     },
+    "disclosure": {
+      "type": "object",
+      "description": "A fact the story discloses late or never (docs/reader-layer.md, Q2): late = the paragraph where it should have been shown (the card is told at its own first mention); never = the story never tells it. The policy is what the case does about it: withhold (as the story does), background (offered early), inferred (the player supplies it).",
+      "additionalProperties": false,
+      "required": ["policy"],
+      "properties": {
+        "late": { "type": "integer", "minimum": 0 },
+        "never": { "const": true },
+        "policy": { "enum": ["withhold", "background", "inferred"] }
+      },
+      "oneOf": [{ "required": ["late"] }, { "required": ["never"] }]
+    },
     "claim": {
       "type": "object",
       "required": [
@@ -904,6 +916,7 @@
           "type": "string",
           "pattern": "^c\\.[a-z0-9_]+$"
         },
+        "disclosure": { "$ref": "#/$defs/disclosure" },
         "text": {
           "type": "string"
         },
@@ -1404,6 +1417,7 @@
           "type": "string",
           "pattern": "^k\\.[a-z0-9_.]+$"
         },
+        "disclosure": { "$ref": "#/$defs/disclosure" },
         "label": {
           "type": "string",
           "description": "The reasoning in words, as a player would read it."

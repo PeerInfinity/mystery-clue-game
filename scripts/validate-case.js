@@ -488,6 +488,20 @@ const fairRows = [];
         });
     }
 }
+// What the story holds back (docs/reader-layer.md, Q2): a fact told late was due before its first mention.
+const heldBackRows = [];
+{
+    const g = new Game(model);
+    for (const c of [...data.claims, ...(data.constraints ?? [])]) {
+        if (c.disclosure?.late === undefined) continue;
+        const at = storyIndex.firstAt.get(c.id);
+        if (at === undefined) err(`${c.id}: disclosure late, but the card is never mentioned`);
+        else if (c.disclosure.late >= at) err(`${c.id}: disclosure late from ¶${c.disclosure.late}, not before its first mention (¶${at})`);
+    }
+    for (const c of [...data.claims, ...(data.constraints ?? [])]) if (c.disclosure) heldBackRows.push({ id: c.id, ...g.disclosure(c.id) });
+    for (const ck of data.checks ?? []) if (!ck.result.shown) heldBackRows.push({ id: ck.id, ...g.disclosure(ck.id) });
+    for (const r of data.rules ?? []) { const d = g.disclosure(r.id); if (d.supplied) heldBackRows.push({ id: r.id, ...d }); }
+}
 // The background cards some reader lacks: their rules, where the game offers each, and where the story states it.
 const backgroundRows = [];
 {
@@ -742,6 +756,18 @@ function writeReport() {
         out(`| ${r.q.text} | ${s.answer ?? `one of ${s.undetermined}`} | ${fmt(all)} | ${fmt(r.withRules)} | ${FAIR_READERS.map((x) => fmt(r.byReader[x])).join(' | ')} |`);
     }
     out();
+    if (heldBackRows.length) {
+        out('## Held back by the story');
+        out();
+        out('Facts the story tells late or never (their `disclosure`), checks whose result comes late or never, and the');
+        out('background facts the game offers before the story states them. The game lists them as the story passes.');
+        out();
+        out('| Card | Offered or first mentioned ¶ | Due ¶ | Told ¶ | Policy |');
+        out('|---|---|---|---|---|');
+        const told = (r) => (r.never || r.result?.never || (r.told === null) ? 'never' : r.told ?? r.result?.late ?? r.at);
+        for (const r of heldBackRows) out(`| \`${r.id}\` | ${r.at ?? '—'} | ${r.late ?? (r.result ? r.at : '—')} | ${told(r)} | ${r.policy ?? (r.result ? 'check' : 'background')} |`);
+        out();
+    }
     if (backgroundRows.length) {
         out('## Background by reader');
         out();

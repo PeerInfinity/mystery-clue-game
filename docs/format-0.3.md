@@ -572,6 +572,22 @@ specific thing stay ground facts with a formula and no schema.
   section, **Background by reader**, lists each background card some reader lacks: its marks, who lacks it, and for
   each rule where the game offers it (`ruleAt`) and where the story states it (its `source`, or never).
 
+## As built (2026-10-18): disclosure (workstream 8, step 2; Round 135)
+
+- **`disclosure`** on a claim or an inference (`$defs/disclosure`): `{late: N, policy}` (it should have been shown at
+  ¶N; it is told at the card's own first mention) or `{never: true, policy}`; the policy is `withhold`,
+  `background` or `inferred`. Two so far: `c.square_toes` `{late: 119, policy: withhold}` (Holmes saw the prints at
+  ¶119; the toes are told at ¶146) and `k.dove_silk_on_the_bill` `{never: true, policy: inferred}` (the bill's items).
+  The validator refuses a `late` that is not before the card's first mention.
+- **`Game.disclosure(id)`** now returns an object: for a rule `{at, told, supplied}` (`supplied`: offered before
+  the story states it; a rule the story never states is not supplied); for a check `{at, result}`; for a fact
+  `{at, ...disclosure}`; otherwise `{at}`. Its one UI caller (the timeline's scenes view) reads `.at`.
+- **`Game.heldBack()`**: what the story held back, as far as it has been read: late facts once told (and held),
+  rules supplied early once the story states them (if held), late check results once told, and at the end the
+  never-told. Nothing names a paragraph not yet read. Never scored; the UI list is step 6.
+- **The report:** a **Held back by the story** section (the two facts, the three checks with late or never results,
+  and the 36 rules offered before the story states them).
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

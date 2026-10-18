@@ -35,6 +35,55 @@ lacks (see "Background by reader") unless the story has stated them by then.
 | Who was {the_stranger}? | simpson | simpson | simpson | simpson | simpson |
 | Which horse is {the_bay}? | silver_blaze | silver_blaze | 13 left | 13 left | 13 left |
 
+## Held back by the story
+
+Facts the story tells late or never (their `disclosure`), checks whose result comes late or never, and the
+background facts the game offers before the story states them. The game lists them as the story passes.
+
+| Card | Offered or first mentioned ¶ | Due ¶ | Told ¶ | Policy |
+|---|---|---|---|---|
+| `c.square_toes` | 146 | 119 | 146 | withhold |
+| `k.dove_silk_on_the_bill` | — | — | never | inferred |
+| `ck.boots` | 107 | 107 | never | check |
+| `ck.photograph` | 161 | 161 | 229 | check |
+| `ck.maid` | 163 | 163 | never | check |
+| `r.opium_taste` | 37 | — | 218 | background |
+| `r.curry_masks` | 20 | — | 218 | background |
+| `r.no_coincidence` | 12 | — | 218 | background |
+| `r.menu_chosen_by_household` | 19 | — | 218 | background |
+| `r.menu_known_at_home` | 20 | — | 218 | background |
+| `r.planned_the_dish` | 12 | — | 218 | background |
+| `r.same_dish_safe` | 37 | — | 218 | background |
+| `r.dog_barks_at_strangers` | 29 | — | 219 | background |
+| `r.dog_knows_its_own` | 29 | — | 219 | background |
+| `r.honest_men_dont_drug` | 37 | — | 220 | background |
+| `r.cataract_knife_use` | 80 | — | 221 | background |
+| `r.operation_on_the_horse` | 80 | — | 221 | background |
+| `r.tendon_nick` | 173 | — | 221 | background |
+| `r.laying_against` | 18 | — | 220 | background |
+| `r.horse_would_wake_sleepers` | 18 | — | 223 | background |
+| `r.light_hidden_in_hollow` | 35 | — | 226 | background |
+| `r.startled_horse_kicks` | 18 | — | 226 | background |
+| `r.wind_and_coats` | 35 | — | 96 | background |
+| `r.candle_for_work` | 78 | — | 224 | background |
+| `r.knife_marks_assailant` | 35 | — | 41 | background |
+| `r.convulsions_after_brain_injury` | 35 | — | 43 | background |
+| `r.others_bills` | 84 | — | 225 | background |
+| `r.servant_wages` | 85 | — | 225 | background |
+| `r.practise_first` | 12 | — | 228 | background |
+| `r.horse_gregarious` | 37 | — | 114 | background |
+| `r.gypsies_avoid_trouble` | 19 | — | 114 | background |
+| `r.famous_horse_unsellable` | 14 | — | 114 | background |
+| `r.wet_ground_holds_tracks` | 37 | — | 116 | background |
+| `r.prints_identify_boots` | 101 | — | 146 | background |
+| `r.disguise_washes_off` | 18 | — | 148 | background |
+| `r.markings_identify_horse` | 18 | — | 186 | background |
+| `r.money_talks` | 18 | — | 189 | background |
+| `r.colours_identify_owner` | 19 | — | 195 | background |
+| `r.bridle_needs_a_hand` | 19 | — | 46 | background |
+| `r.storm_wets_clothes` | 32 | — | 40 | background |
+| `r.gypsies_clear_out` | 62 | — | 114 | background |
+
 ## Background by reader
 
 The background cards (thoughts.json) some kind of reader lacks: the game supplies their rules, offering each

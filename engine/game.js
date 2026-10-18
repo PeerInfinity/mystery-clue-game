@@ -2355,11 +2355,54 @@ export class Game {
         return [...this.unlocked].sort((a, b) => a[1].at - b[1].at).map(([id, u]) => ({ id, ...u }));
     }
 
-    /** Disclosure: the paragraph where the story first mentions a card. */
-    disclosure(cardId) {
-        const c = this.model.cards.get(cardId);
-        if (c?.section === 'rules') return this.ruleAt.get(cardId);
-        return this.story.firstAt.get(cardId) ?? null;
+    /**
+     * Disclosure (docs/reader-layer.md, Q2): where the story tells a card, and what it holds back.
+     *   a rule:   {at: where the game offers it, told: where the story states it (null: never), supplied: offered
+     *             before the story states it}
+     *   a check:  {at: where Holmes makes it, result: shown / late / never}
+     *   a fact:   {at: first mention, ...its `disclosure` (late: where it should have been shown, or never; policy)}
+     *   other:    {at: first mention}
+     */
+    disclosure(id) {
+        const ck = (this.model.data.checks ?? []).find((x) => x.id === id);
+        if (ck) return { at: ck.at, result: ck.result };
+        const c = this.model.cards.get(id);
+        if (!c) return null;
+        if (c.section === 'rules') {
+            const told = Math.min(...(c.source ?? []).map((q) => this.#paraOf(q)));
+            const at = this.ruleAt.get(id);
+            return { at, told: Number.isFinite(told) ? told : null, supplied: Number.isFinite(told) && at < told };
+        }
+        const at = this.story.firstAt.get(id) ?? null;
+        return c.disclosure ? { at, ...c.disclosure } : { at };
+    }
+
+    /**
+     * What the story held back, as far as it has been read: facts told late (once told), the background facts the
+     * game offered before the story states them (once stated, if held), checks whose result came late (once it
+     * has), and at the end what was never told. Nothing names a paragraph not yet read. Never scored.
+     * Each: {id, kind: 'late' | 'supplied' | 'never', at, told?, due?, policy?}, in story order.
+     */
+    heldBack() {
+        const out = [];
+        const end = this.finished();
+        for (const c of [...(this.model.data.claims ?? []), ...(this.model.data.constraints ?? [])]) {
+            const d = c.disclosure;
+            if (!d) continue;
+            const at = this.story.firstAt.get(c.id) ?? null;
+            if (d.late !== undefined && at !== null && at < this.read && this.knows(c.id)) out.push({ id: c.id, kind: 'late', due: d.late, told: at, at: d.late, policy: d.policy });
+            if (d.never && end) out.push({ id: c.id, kind: 'never', at: Infinity, policy: d.policy });
+        }
+        for (const r of this.model.data.rules ?? []) {
+            if (!this.knows(r.id)) continue;
+            const d = this.disclosure(r.id);
+            if (d.supplied && d.told < this.read) out.push({ id: r.id, kind: 'supplied', at: this.unlocked.get(r.id).para, told: d.told });
+        }
+        for (const ck of this.model.data.checks ?? []) {
+            if (ck.result.late !== undefined && ck.result.late < this.read) out.push({ id: ck.id, kind: 'late', due: ck.at, told: ck.result.late, at: ck.at });
+            if (ck.result.never && end) out.push({ id: ck.id, kind: 'never', at: ck.at });
+        }
+        return out.sort((a, b) => a.at - b.at);
     }
 }
 

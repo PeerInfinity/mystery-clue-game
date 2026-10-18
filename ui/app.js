@@ -1069,7 +1069,7 @@ function toolTimeline() {
             const at = story.find(s.source[0])?.para ?? 0;
             if (at >= game.read) break;
             const here = [...game.unlocked.keys()].filter((c) => model.cards.get(c).section === 'claims').filter((c) => {
-                const p = game.disclosure(c);
+                const p = game.disclosure(c).at;
                 const next = model.scenes[model.scenes.indexOf(s) + 1];
                 const end = next ? story.find(next.source[0])?.para ?? Infinity : Infinity;
                 return p >= at && p < end;

@@ -3577,3 +3577,15 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   open only because their common sense is never stated, are settled for both.
 - **Diffs:** `report.md` only in the Questions table and the new section; reveal, foreshadow and clash logs,
   `thoughts-report.md` and the gate listing unchanged.
+
+## Round 135 (2026-10-18): ws 8 step 2 — disclosure as data
+
+- **Data:** `disclosure` on `c.square_toes` (`{late: 119, policy: withhold}`) and `k.dove_silk_on_the_bill`
+  (`{never: true, policy: inferred}`); `$defs/disclosure` in the schema; the validator refuses a `late` not before the
+  card's first mention.
+- **Engine:** `Game.disclosure(id)` returns `{at, told, supplied}` for a rule, `{at, result}` for a check, `{at,
+  ...disclosure}` for a fact (it returned a bare paragraph; its one UI caller reads `.at`). `Game.heldBack()` lists
+  what the story held back as far as it has been read, the never-told only at the end. Tests in the new
+  `engine/reader.test.js`.
+- **The report:** a "Held back by the story" section: the two facts, `ck.boots`, `ck.photograph`, `ck.maid`, and 36
+  rules the game offers before the story states them (opium's taste ¶37 → ¶218, the dog ¶29 → ¶219, …).
