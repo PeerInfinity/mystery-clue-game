@@ -214,8 +214,11 @@ export class Story {
         const rules = new Map((data.rules ?? []).map((r) => [r.id, r]));
         const premiseAt = (step) => Math.max(-1, ...step.premises.map((p) => (rules.has(p) ? ruleAt(rules.get(p)) : this.firstAt.get(p) ?? Infinity)));
         const route = new Map((data.route ?? []).map((r) => [r.id, r]));
+        // An expert's move (a leap almost nobody makes) is a bonus, never a gate (docs/reader-layer.md, Q3).
+        const expert = new Set((data.thoughts ?? []).filter((t) => t.profile === 'expert').map((t) => t.id));
         const gates = new Map();
         const add = (para, stepId) => {
+            if (expert.has(stepId)) return;
             const at = Math.max(para, premiseAt(route.get(stepId)) + 1);
             if (!Number.isFinite(at)) { problems?.push(`${stepId}: a premise is never told`); return; }
             if (!gates.has(at)) gates.set(at, new Set());

@@ -609,6 +609,15 @@ specific thing stay ground facts with a formula and no schema.
   this" (or "a racing man of 1892", "a specialist"), and once read past, "; the story says so at paragraph N". The
   two options are in Options ("You read as", "Background you would not know").
 
+## As built (2026-10-18): expert steps are bonuses (workstream 8, step 4; Round 137)
+
+- **`Story.gatesFor`** skips a step whose thought is `expert`, both as one of Holmes's own steps and as an action's
+  `requires.thoughts`: `t46.4` (¶111, ¶220), `t37.13` (¶202, ¶226) and `t102.4` (¶226) no longer gate 'wait'. They
+  stay route steps and score rows (`thoughtScores`) if made before Holmes.
+- **Where Holmes's inferences arrive** follows (Round 126's earliest gate, else the step's anchor):
+  `k.horse_kicked` now comes at ¶226, Holmes's explanation of the kick, instead of ¶202 (the reveal). `t46.4`'s
+  needs still arrive at ¶102 with `t81.5`, and ¶220 still waits for them through `t220.3`.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

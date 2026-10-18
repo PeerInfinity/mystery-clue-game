@@ -66,8 +66,8 @@ test('withheld: a fact the reader lacks comes only where the story states it, an
     assert.ok(!g.knows('r.opium_taste'));
     assert.ok(!g.buildable().includes('k.drugger_knew_the_menu'));
     const gated = new Set([...g.gates.values()].flatMap((s) => [...s]));
-    for (const s of ['t102.4', 't37.13', 't148.2']) assert.ok(!gated.has(s), `${s}: a premise is never told`);
-    assert.ok(model.story.gates.get(226).has('t102.4'), 'the story\'s own gates are untouched');
+    for (const s of ['t148.2', 't92.4', 't92.15']) assert.ok(!gated.has(s), `${s}: a premise is never told`);
+    assert.ok(model.story.gates.get(204).has('t148.2'), 'the story\'s own gates are untouched');
     readTo(g, 218);
     assert.ok(g.knows('r.opium_taste'));
     // All at once, the withheld still wait.
@@ -77,4 +77,21 @@ test('withheld: a fact the reader lacks comes only where the story states it, an
     const o = new Game(model, { difficulty: EASY });
     assert.equal(o.ruleAt.get('r.opium_taste'), 37);
     assert.equal(o.gates, model.story.gates);
+});
+
+test('an expert step is a bonus: it never gates the wait pace, arrives as Holmes explains it, and still scores', async () => {
+    const { WAIT } = await import('./game.js');
+    const gated = new Set([...model.story.gates.values()].flatMap((x) => [...x]));
+    for (const s of ['t46.4', 't37.13', 't102.4']) assert.ok(!gated.has(s), s);
+    const free = readTo(new Game(model, { difficulty: EASY }), 225);
+    assert.ok(!free.knows('k.horse_kicked'), 'not before Holmes explains the kick');
+    readTo(free, 226);
+    assert.ok(free.knows('k.horse_kicked'));
+    const rows = new Game(model, { difficulty: EASY }).thoughtScores().map((r) => r.thought);
+    assert.ok(rows.includes('t102.4') && rows.includes('t37.13'), 'still scored rows');
+    // The wait pace reads ¶202 without the kick (it held there before, Round 137).
+    const w = new Game(model, { difficulty: EASY, pace: WAIT });
+    const state = w.save();
+    w.load({ ...state, read: 202 });
+    assert.deepEqual(w.blockers(), ['t198.2'], 'the bay is still waited for; the kick is not');
 });

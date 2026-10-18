@@ -3607,3 +3607,14 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
 - **Tests:** three more in `engine/reader.test.js` (the readers, the reader outside the difficulty, withheld).
 - **Diffs:** none: the reveal, foreshadow and clash logs, both reports and the gate listing are unchanged (the default
   reader is offered everything, as before).
+
+## Round 137 (2026-10-18): ws 8 step 4 — expert steps stop gating
+
+- **`Story.gatesFor`** skips expert thoughts (Q3, part 1). Gates gone: `t46.4` at ¶111 and ¶220, `t37.13` at ¶202
+  and ¶226, `t102.4` at ¶226. The 'wait' pace now reads ¶202 waiting only for the bay (`t198.2`).
+- **Moved, as expected:** `k.horse_kicked` reaches a free-pace player at ¶226 (Holmes's explanation of the kick)
+  instead of ¶202, so the reveal log moves its line, and the clash log's three clashes it wins
+  (`k.police_stick_killed` twice, `k.one_culprit` once) from ¶202 to ¶226. `t46.4`'s needs still arrive at ¶102
+  with `t81.5`. Unchanged: the foreshadow log, both reports.
+- **Tests:** `reader.test.js` (an expert step is a bonus; the withheld case now pins `t148.2`, which still gates the
+  story at ¶204).
