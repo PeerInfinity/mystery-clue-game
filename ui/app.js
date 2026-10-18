@@ -152,6 +152,8 @@ function renderReader() {
     const sceneJump = aheadScene > 1 && game.nextSceneAt() < story.paragraphs.length
         ? `<button id="read-scene" class="quiet" ${blocked ? 'disabled' : ''} title="Read on to the start of the next scene">Next scene <span class="small">(${aheadScene} ¶)</span></button>`
         : '';
+    const points = game.showsSignals() ? game.storySignals().filter((x) => x.kind === 'reread' && x.para === game.read - 1) : [];
+    for (const x of points) note += `<div class="note">The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</div>`;
     el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}${rereadForm()}`;
 }
 
@@ -670,6 +672,8 @@ function toolQuestions() {
         d += '</ul>';
     }
     d += oddThingsHtml();
+    d += signalsHtml();
+    d += heldBackHtml();
     const c = game.helps('clashes') ? clashesHtml() : '';
     if (!raised.length) return `${c}<p class="empty">The story has not raised any questions yet.</p>${d}`;
     let h = `${c}<p class="small muted">The questions the case turns on, as the story raises them.</p><ul class="list">`;
@@ -692,6 +696,38 @@ function oddThingsHtml() {
     let h = '<h3 class="section">Odd things</h3><ul class="list">';
     for (const [id, n] of noticed) h += `<li>${link(id, shortName(id, 80))} <span class="small muted">· ${paraLabel(n.para)}${n.because ? ` · against ${esc(shortName(n.because, 50))}` : ''}</span> <span class="link small" data-unnotice="${esc(id)}">not odd</span></li>`;
     for (const f of filed) h += `<li>${link(f.id, shortName(f.id, 80))} <span class="small muted">· what did not happen, filed at ${paraLabel(f.para)}</span></li>`;
+    return `${h}</ul>`;
+}
+
+// The story's own signals (hints 'story'; docs/reader-layer.md, Q3–Q4): what Holmes visibly attends to, quoted with
+// the cards it mentions and never interpreted, and the passages the story points back to.
+function signalsHtml() {
+    if (!game.showsSignals()) return '';
+    const list = game.storySignals().reverse();
+    if (!list.length) return '';
+    let h = '<h3 class="section">Holmes\'s interest</h3><p class="small muted">Where the story shows what Holmes attends to. It points; it proves nothing.</p><ul class="list">';
+    for (const x of list) {
+        h += x.kind === 'reread'
+            ? `<li><span class="small muted">${paraLabel(x.para)} ·</span> The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</li>`
+            : `<li><span class="small muted">${paraLabel(x.para)} ·</span> <span class="quote-inline">“${esc(x.quote)}”</span>${x.cards.length ? ` <span class="small">· ${x.cards.map((c) => link(c, shortName(c, 40))).join(', ')}</span>` : ''}</li>`;
+    }
+    return `${h}</ul>`;
+}
+
+// What the story held back (docs/reader-layer.md, Q2), as far as read: facts told late, background the game supplied,
+// results told late, and at the end what was never told.
+function heldBackHtml() {
+    const list = game.heldBack();
+    if (!list.length) return '';
+    const label = (id) => (id.startsWith('ck.') ? model.data.actions.find((a) => a.id === model.data.checks.find((c) => c.id === id)?.action)?.label ?? id : null);
+    let h = '<h3 class="section">What the story held back</h3><ul class="list small">';
+    for (const x of list) {
+        const name = label(x.id);
+        if (name) h += `<li>${esc(name)} — ${x.kind === 'late' ? `the result is told only at ${paraLabel(x.told)}` : 'the story never says what came of it'}.</li>`;
+        else if (x.kind === 'supplied') h += `<li>${esc(model.cards.get(x.id).text)} — supplied by the game; ${x.told === null ? 'the story never says so' : `the story says so at ${paraLabel(x.told)}`}.</li>`;
+        else if (x.kind === 'late') h += `<li>${link(x.id, shortName(x.id, 80))} — due at ${paraLabel(x.due)}; the story tells it only at ${paraLabel(x.told)}.</li>`;
+        else h += `<li>${link(x.id, shortName(x.id, 80))} — the story never tells it${x.policy === 'inferred' ? '; it can only be inferred' : ''}.</li>`;
+    }
     return `${h}</ul>`;
 }
 
@@ -1327,6 +1363,8 @@ function onClick(e) {
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
+    const prompt = e.target.closest('[data-reread-prompt]');
+    if (prompt) { const [from, to] = prompt.dataset.rereadPrompt.split('-').map(Number); ui.reread = { from, to, question: '' }; renderReader(); return; }
     if (e.target.closest('#reread-open')) { ui.reread = ui.reread ? null : { from: 1, to: game.read - 1, question: '' }; renderReader(); return; }
     if (e.target.closest('#rr-close')) { ui.reread = null; ui.rereadShown = null; renderStory(); return; }
     if (e.target.closest('#rr-go')) {
@@ -1696,7 +1734,7 @@ const OPTION_UI = {
     greying: ['Answers your clues rule out', { on: 'Greyed out', off: 'Not shown' }, 'Greyed out: the game greys the answers your clues already rule out, and offers “Could it fit?” on each answer and a check on each theory.'],
     clashes: ['Clashes among your clues', { on: 'Listed', off: 'Not listed' }, 'Listed: the Questions tab lists the clues you trust that cannot all be true.'],
     weigh: ['Weighing theories', { names: 'What and which', counts: 'How much', asked: 'When you ask' }, 'What and which: each theory shows what it needs you to disbelieve, what it goes against, and which odd things it leaves unexplained. How much: only the counts. When you ask: nothing until you weigh a theory, then the counts.'],
-    hints: ['Inference hints', { on: 'How many, and where to start', off: 'None' }, 'How many: the Inferences tab counts how many more you could build; when the story waits on a deduction, it names the cards to start from.'],
+    hints: ['Hints', { story: 'Also the story\'s own signals', on: 'How many, and where to start', off: 'None' }, 'How many: the Inferences tab counts how many more you could build; when the story waits on a deduction, it names the cards to start from. The story\'s own signals: the Questions tab also lists what Holmes visibly attends to, and the story points you back to a passage to re-read where it does so itself.'],
     kind: ['Building an inference', { off: 'Connect the cards', on: 'Also name what it is about' }, 'Also name it: you say whether the conclusion is about who, when, where, what, why, or whether something is so.'],
     connect: ['Background in inferences', { implicit: 'Needed in hand', connect: 'Connected too' }, 'Needed in hand: connect an inference\'s clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.'],
     background: ['Background facts', { start: 'All at once', relevant: 'When relevant', ask: 'When asked' }, 'General knowledge a reader of the time had. All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.'],

@@ -103,6 +103,9 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         if (t.subtype && !(SUBTYPES[t.tag] ?? []).includes(t.subtype)) err(`${t.id}: ${t.tag} has no subtype ${t.subtype}`);
         if (t.confidence ? !CONFIDENCE.includes(t.confidence) : !NO_CONFIDENCE(t)) err(`${t.id}: confidence ${t.confidence ?? 'missing'}`);
         if (!PROFILES.includes(t.profile)) err(`${t.id}: profile ${t.profile ?? 'missing'}`);
+        // The passage a re-read points back to (docs/reader-layer.md, Q4): read already, within the story.
+        if (t.passage && !(t.tag === 'GENRE' && t.subtype === 're-read')) err(`${t.id}: only a GENRE·re-read thought names a passage`);
+        if (t.passage && !(Array.isArray(t.passage) && t.passage.length === 2 && t.passage[0] >= 1 && t.passage[0] <= t.passage[1] && t.passage[1] < t.para)) err(`${t.id}: passage ${JSON.stringify(t.passage)} is not paragraphs already read`);
         // Premises and relation targets exist and are no later than the thought.
         const earlier = (id, what) => {
             if (id.startsWith('bk.')) { if (!bkIds.has(id)) err(`${t.id}: ${what} unknown ${id}`); return; }

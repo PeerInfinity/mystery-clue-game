@@ -68,7 +68,8 @@ export const INF_CONNECT = 'connect';
 //   crossOut    pencil: anything can be crossed out; checked: only what the player's clues rule out
 //   greying     grey the answers the player's clues rule out, and offer "Could it fit?" (and theory checks)
 //   clashes     list the clashes among the player's clues on the Questions tab
-//   hints       count the inferences left to build, and name where a waiting deduction starts
+//   hints       count the inferences left to build, and name where a waiting deduction starts; `story` also
+//               shows the story's own signals (Holmes's interest, passages to re-read; docs/reader-layer.md, Q3)
 //   kind        building an inference: the player names what its conclusion is about
 //   connect     building an inference: background facts needed in hand, or connected like clues
 //   background  when background facts arrive (BG_*)
@@ -84,7 +85,7 @@ export const OPTIONS = {
     greying: ['on', 'off'],
     clashes: ['on', 'off'],
     weigh: ['names', 'counts', 'asked'],
-    hints: ['on', 'off'],
+    hints: ['story', 'on', 'off'],
     kind: ['off', 'on'],
     connect: [INF_IMPLICIT, INF_CONNECT],
     background: [BG_START, BG_RELEVANT, BG_ASK],
@@ -104,8 +105,8 @@ const COST_TOLD = ['testimony', 'report', 'admission', 'seen'];
 export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'weigh', 'hints', 'kind', 'connect'];
 const IRRELEVANT_SHARE = { none: 0, few: 0.25, half: 0.5, most: 0.75, all: 1 };
 export const PRESETS = {
-    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
-    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'on', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
+    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'story', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
+    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'story', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
     medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'counts', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all', supplied: 'offered' },
     hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'asked', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all', supplied: 'offered' },
 };
@@ -247,8 +248,10 @@ export class Game {
     autoSolves() { return this.opts.solver === 'game'; }
     collecting() { return this.opts.cards === 'collect'; }
     proposing() { return this.opts.answers === 'propose' && !this.autoSolves(); }
-    /** Player's option `k` is 'on' (always off while the game solves). */
-    helps(k) { return !this.autoSolves() && this.opts[k] === 'on'; }
+    /** Player's option `k` is 'on' (always off while the game solves). Hints 'story' are 'on' and more. */
+    helps(k) { return !this.autoSolves() && (this.opts[k] === 'on' || (k === 'hints' && this.opts[k] === 'story')); }
+    /** The story's own signals are shown (hints 'story'; in Trivial too, which only watches). */
+    showsSignals() { return this.opts.hints === 'story'; }
 
     /** Left out of this game: a card the solution has no use for, beyond the share the player asked to see. */
     isHidden(id) { return this.hidden.has(id); }
@@ -447,6 +450,34 @@ export class Game {
         for (const [id, para] of state.setAside ?? []) this.setAside(id, para);
         for (const r of state.rereads ?? []) if (r && r.to < this.read) this.rereads.push({ ...r });
         if (board) this.board = { ...TL.emptyBoard(), ...board };
+    }
+
+    /**
+     * The story's own signals, as far as read (docs/reader-layer.md, Q3–Q4): Holmes's visible interest (each
+     * GENRE·watch-holmes thought: the clause that shows it, and the held cards that clause mentions, never what it
+     * implies) and the passages the story points back to (GENRE·re-read: its `passage`, with the clause that
+     * prompts it). Hints only: never scored. Each: {thought, kind: 'watch' | 'reread', para, quote, cards, passage?}.
+     */
+    storySignals() {
+        const byId = this.thoughtById ?? (this.thoughtById = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t])));
+        const out = [];
+        for (const t of this.model.data.thoughts ?? []) {
+            if (t.tag !== 'GENRE' || t.para >= this.read || !['watch-holmes', 're-read'].includes(t.subtype)) continue;
+            // The clause: the thought's own, else its first premise's that reads the text.
+            const quotes = t.reads?.length ? t.reads : (t.from ?? []).map((f) => byId.get(f)).find((x) => x?.reads?.length)?.reads ?? [];
+            const cards = [];
+            for (const q of quotes) {
+                const hit = this.story.find(q);
+                if (!hit || hit.para >= this.read) continue;
+                for (const sp of this.story.spans[hit.para]) if (sp.start < hit.end && sp.end > hit.start) for (const id of sp.ids) {
+                    if (this.knows(id) && !this.hidden.has(id) && ['entities', 'claims', 'events'].includes(this.model.cards.get(id)?.section) && !cards.includes(id)) cards.push(id);
+                }
+            }
+            const s = { thought: t.id, kind: t.subtype === 're-read' ? 'reread' : 'watch', para: t.para, quote: quotes.join(' … '), cards };
+            if (t.passage) s.passage = [...t.passage];
+            out.push(s);
+        }
+        return out;
     }
 
     // ---------- the reader's housekeeping (docs/reader-layer.md, Q4–Q5): never checked, never scored ----------

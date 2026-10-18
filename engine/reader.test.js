@@ -125,3 +125,24 @@ test('re-read: a passage gone back over is recorded with its question, saved, an
     assert.equal(g.reread(20, 37, 'the_bay'), null, 'a card not held');
     assert.equal(new Game(model, { difficulty: EASY, state: g.save() }).rereads.length, 2);
 });
+
+test('the story\'s own signals: Holmes\'s interest quoted with the cards it mentions, and the passages it points back to', async () => {
+    const { PRESETS, MEDIUM } = await import('./game.js');
+    assert.equal(PRESETS.easy.hints, 'story');
+    assert.equal(PRESETS.medium.hints, 'off');
+    const g = readTo(new Game(model, { difficulty: EASY }), 109);
+    assert.ok(g.helps('hints') && g.showsSignals());
+    const s = g.storySignals();
+    for (const x of s) assert.ok(x.para < g.read, x.thought);
+    assert.ok(!s.some((x) => x.thought === 't111.2'), 'not before its paragraph');
+    const shoe = s.find((x) => x.thought === 't109.2');
+    assert.ok(shoe.cards.includes('horseshoe') && shoe.quote.includes('horseshoe into my pocket'));
+    assert.deepEqual(s.find((x) => x.thought === 't70.2').passage, [8, 46]);
+    // A signal names only cards held, and says nothing of what it implies: no check, no slot, no inference.
+    for (const x of s) for (const c of x.cards) assert.ok(g.knows(c) && !c.startsWith('k.') && !c.startsWith('ck.'), c);
+    assert.ok(!new Game(model, { difficulty: MEDIUM }).showsSignals());
+    // Hints feed no score.
+    const h = readTo(new Game(model, { difficulty: EASY, options: { hints: 'off' } }), 109);
+    const scores = (x) => [x.thoughtScores(), x.noticeScores(), x.checkScores(), x.absenceScores()];
+    assert.deepEqual(scores(g), scores(h));
+});

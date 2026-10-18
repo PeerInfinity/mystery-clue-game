@@ -3630,3 +3630,18 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   tally drops by two); re-reading ¶8–¶46 with "Who drugged Ned Hunter's supper?" outlines 39 paragraphs and saves
   `{from: 8, to: 46, question: q.who_drugged, para: 70}`.
 - **Diffs:** none: the reveal, foreshadow and clash logs, both reports and the gate listing are unchanged.
+
+## Round 139 (2026-10-18): ws 8 step 6 — hints from the story
+
+- **Option:** `hints` gains `story` (Trivial and Easy). **Data:** `passage` on `t70.2` (¶8–¶46) and `t182.3`
+  (¶29–¶34), checked. **Engine:** `storySignals()`, the twelve watch-holmes and re-read thoughts as clauses and the
+  held cards they mention (¶109: "put this horseshoe into my pocket", the horseshoe and the moor), never
+  interpreted; `showsSignals()`. A test: signals only up to the paragraph read, cards only held ones, no score moves.
+- **UI:** the Questions tab's **Holmes's interest** and **What the story held back**; the reading bar's "The story
+  points back: re-read paragraphs 8–46" at ¶70 (and ¶29–¶34 at ¶182), which opens the re-read form. Checked in
+  headless Chrome on Easy saves at ¶70, ¶110 and the end (the end's list: eleven supplied facts, the square toes
+  "due at paragraph 119; … only at paragraph 146", the boots and the maid never, the photograph's result at ¶229,
+  the bill's items never, inferred). A long save needs about 90 s before the tab responds (the busy page of Round 130).
+- **Leak check:** no card text changed; the new text is fixed templates around card names and story quotes shown at
+  their own paragraph, so the LLM checker (which reads card text) was not run.
+- **Diffs:** none in the logs, the reports or the gate listing.

@@ -630,6 +630,20 @@ specific thing stay ground facts with a formula and no schema.
   (`inHand`), and wait in a folded "Set aside (N)" list. The text keeps them clickable. "Re-read…" on the reading
   bar opens a form (from, to, a raised question); re-reading outlines the passage and scrolls to it.
 
+## As built (2026-10-18): hints from the story (workstream 8, step 6; Round 139)
+
+- **`hints: story`** (Trivial and Easy; Medium and Hard keep `off`): today's hints and the story's own signals.
+  `helps('hints')` is true for it; `showsSignals()` says whether the signals show (Trivial too).
+- **`passage`** on a GENRE·re-read thought (`[from, to]`, already read; checked by `engine/thoughts.js`): `t70.2`
+  points back to ¶8–¶46, `t182.3` to ¶29–¶34.
+- **`Game.storySignals()`**, as far as read: each GENRE·watch-holmes thought as its clause (its own `reads`, else its
+  first premise's) and the held cards that clause mentions; each GENRE·re-read as its passage. Never what a signal
+  implies; never scored.
+- **The UI:** on the Questions tab, **Holmes's interest** (newest first: the paragraph, the quoted clause, the cards;
+  a re-read as "The story points back: re-read paragraphs 8–46", which opens the re-read form) and **What the story
+  held back** (`heldBack()`, as read, on every preset). At a re-read's own paragraph the reading bar says so too.
+  New text is fixed templates around card names and story quotes; no case fact is written anew.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
