@@ -446,3 +446,8 @@ fit was the misleading signal (Measured, §1). On Hard a theory shows nothing un
 those nothing the player holds and trusts gives, nor goes against, are shown beside its cost ("It rests on nothing
 you hold for: …"), and counted on Medium. `t.police` gains its duplicate key, so the police explain the locked door
 by a patch (`t58.4`).
+
+**Round 126 (workstream 7):** the knife step's gate moved from ¶104 to ¶102 (the mud search's anchor), so the
+passive player's cost for the maid and the paper first reaches their own reasoning at ¶102. Both drop deadlines are
+now ¶102.
+

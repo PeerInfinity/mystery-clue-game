@@ -203,7 +203,9 @@ export class Game {
             const needs = this.stepNeeds.get(step.id);
             // Only Holmes's own steps are his to state (a thought's inference by Watson or Gregory is not).
             if (step.reasoner !== 'holmes') continue;
-            const at = [...(this.story.gates ?? [])].find(([, ids]) => ids.has(step.id))?.[0] ?? this.story.anchors.steps.get(step.id);
+            // At the earliest paragraph where the story waits for it (Round 126: not the first gate found), else where told.
+            const gated = [...(this.story.gates ?? [])].filter(([, ids]) => ids.has(step.id)).map(([p]) => p);
+            const at = gated.length ? Math.min(...gated) : this.story.anchors.steps.get(step.id);
             for (const id of needs ?? []) stateAt(at, id, 'holmes');
         }
         for (const k of this.inferences) this.claimEvents.set(k.id, this.#spokenOf(model.cards.get(k.id).formula));

@@ -169,10 +169,10 @@ test('drops for reasons that are not proofs: checked where they can be, never re
     assert.ok(game.drop({ theory: inside }, 'out-explained', { rival: 't.police' }).ok);
     assert.equal(game.dropCheck({ theory: inside }).ok, false);
     assert.ok(game.undrop({ theory: inside }));
-    // Scored before the deadline: Holmes's paragraph (the gypsies, ¶114), or where the story makes it untenable (¶104).
+    // Scored before the deadline: Holmes's paragraph (the gypsies, ¶114), or where the story makes it untenable (¶102).
     const rows = Object.fromEntries(game.dropScores().map((r) => [r.thought, r]));
     for (const t of ['t58.3', 't62.4', 't92.7']) assert.equal(rows[t].scores, true, t);
-    assert.deepEqual([rows['t62.4'].deadline, rows['t92.7'].deadline], [114, 104]);
+    assert.deepEqual([rows['t62.4'].deadline, rows['t92.7'].deadline], [114, 102]);
     assert.deepEqual(game.dropScore(), { dropped: 3, scored: 3, possible: 3, of: 3 });
     // Saved and loaded.
     const again = new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state: JSON.parse(JSON.stringify(game.save())) });
@@ -181,16 +181,17 @@ test('drops for reasons that are not proofs: checked where they can be, never re
 });
 
 test('the deadlines the annotation gives for the drops Holmes never makes are where the story makes them untenable', () => {
-    // The passive reading's cost: the maid and the paper are at odds with the player's own reasoning first at ¶104.
+    // The passive reading's cost: the maid and the paper are at odds with the player's own reasoning first at ¶102, where Holmes searches the mud
+    // for the match the knife's purpose predicts (the 'wait' pace asks for that step there, Round 126).
     const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     const maid = { assignment: { 'e.opium_added.agent': 'edith_baxter' } };
     const paper = { assignment: { 'paper_packet.contents': 'opium' } };
-    while (game.read <= 103) game.advance();
+    while (game.read <= 101) game.advance();
     assert.deepEqual([game.scenarioCost(maid).atOdds, game.scenarioCost(paper).atOdds], [false, false]);
     game.advance();
     assert.deepEqual([game.scenarioCost(maid).atOdds, game.scenarioCost(paper).atOdds], [true, true]);
     const deadline = (id) => model.data.thoughts.find((t) => t.id === id).dropped.deadline;
-    assert.deepEqual([deadline('t92.7'), deadline('t58.3')], [104, 104]);
+    assert.deepEqual([deadline('t92.7'), deadline('t58.3')], [102, 102]);
 });
 
 test('one culprit is doubted for "two stories" (t68.3)', () => {

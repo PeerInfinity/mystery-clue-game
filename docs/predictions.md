@@ -405,3 +405,9 @@ The recommendations of Q1–Q7 as written, and the order of work. Two points set
   exception: the story never says what was asked, so "ask Edith Baxter about anything" would be a free point. It is
   recorded, shown as matched at ¶163, and never scored (the simpler of the two options).
 
+**At build time (Round 126):** step 1, the anchors. `a.search_mud` is anchored at ¶102, and `a.dress_trick` at ¶89
+without its thought requirement. Moving the dress trick exposed an ordering accident: a Holmes step's inferences
+were handed to a free-pace player at the first gate *registered*, not the earliest. Robert chose (A): the earliest
+gate, explicitly. "Derbyshire is Straker" now arrives at ¶161 (the photograph request, where 'wait' already waits
+for it), `t114.2` at ¶116 and `t141.1` at ¶148, both Holmes's own paragraphs.
+

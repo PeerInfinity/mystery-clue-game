@@ -3377,3 +3377,35 @@ trailer. The next session is told to gate documentation-only commits too.
 - **The maid's question** (`t163.3`): recorded and matched, never scored (Robert: the simpler option).
 - **Next:** step 1, the anchors.
 
+
+## Round 126 (2026-10-18): workstream 7 step 1 — the anchors, and the earliest gate
+
+- **Anchors** (`docs/predictions.md` Q3):
+  - `a.search_mud` is anchored at ¶102 ("he made a careful study of the trampled mud"), where Holmes searches and
+    finds the vesta, not ¶104;
+  - `a.dress_trick` at ¶89 ("Surely I met you in Plymouth…"), not ¶225 (the explanation), and without
+    `requires.thoughts` (option (b)): at ¶89 the story does not show Holmes acting on the identity.
+
+  The old quotes stay as second sources.
+- **The earliest gate (Robert: option A).** A Holmes step's inferences reach a free-pace player at the gate where the
+  story waits for them. The code took the first gate *registered* (actions before route steps), not the earliest.
+  `a.dress_trick`'s gate at ¶225 had been holding "Derbyshire is Straker" back to ¶225 by accident. `Game` now
+  takes the earliest gate:
+  - `t84.6` at ¶161 (the photograph request, where 'wait' already waits);
+  - `t114.2` at ¶116;
+  - `t141.1` at ¶148, both Holmes's own paragraphs.
+
+  The alternatives were to keep the dress trick at ¶225 (B), or to hand steps out only at Holmes's paragraph (C, a
+  large ripple).
+- **Moved:**
+  - **Gates:** `t81.5` ¶104 → ¶102.
+  - **Reveal log:** the dish, horse-taking and knife inferences ¶104 → ¶102; `k.horse_goes_home` ¶117 → ¶116;
+    `k.disguised_to_survive_search` ¶202 → ¶148; `k.derbyshire_is_straker` and `k.straker_lied_about_derbyshire`
+    ¶225 → ¶161.
+  - **Clash log:** the ¶104 clashes now at ¶102; Mrs. Straker's "a friend" is set aside at ¶161 against
+    `k.derbyshire_is_straker`, not at ¶225 against the bill steps.
+  - **Case report:** quotes 1067 → 1069.
+  - **Unchanged:** the foreshadow log, the thoughts report.
+- **Expectations that changed:** the passive player's cost for the maid and the paper first reaches their own
+  reasoning at ¶102, not ¶104, so `t92.7`'s and `t58.3`'s `dropped.deadline` are 102 and `hypotheses.test.js` says
+  so (two tests).
