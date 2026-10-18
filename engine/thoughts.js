@@ -16,6 +16,7 @@
 // and 116, their thoughts all held): `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82), `doubt` (the move doubts an inference rather than drawing one: `t68.3`, Round 116).
 
 import { Game, BG_RELEVANT, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from './game.js';
+import { READER_MARKS } from './readers.js';
 
 const theoryIds = (model) => new Set((model?.data.theories ?? []).map((x) => x.id));
 import { slotsOf } from './logic.js';
@@ -29,7 +30,6 @@ export const SUBTYPES = {
 export const RELATIONS = ['supports', 'strains', 'refutes', 'undercuts', 'revises', 'drops', 'answers', 'strained_by'];
 const CONFIDENCE = ['weak', 'weak to fair', 'fair', 'fair to strong', 'strong'];
 const PROFILES = ['typical', 'careful', 'expert'];
-const READERS = /^(yes|likely|partial|rare|period|specialist|racing public|racing-literate|needs the text's gloss)/;
 // Moves that need no confidence: a fact read, a question asked, a detail set aside, a passage re-read.
 const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag) || t.subtype === 're-read';
 // The deduction-type tags: each such thought becomes one authored inference (short chains, Q1).
@@ -63,7 +63,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         if (!/^bk\.\w+$/.test(b.id)) err(`${b.id}: a background card's id is bk.<name>`);
         if (bkIds.has(b.id)) err(`${b.id}: duplicate id`);
         bkIds.add(b.id);
-        for (const r of ['reader_1892', 'reader_modern']) if (!READERS.test(b[r] ?? '')) err(`${b.id}: ${r} "${b[r]}" is not a known availability`);
+        for (const r of ['reader_1892', 'reader_modern']) if (!READER_MARKS.test(b[r] ?? '')) err(`${b.id}: ${r} "${b[r]}" is not a known availability`);
     }
 
     // Case cards a thought may map to.

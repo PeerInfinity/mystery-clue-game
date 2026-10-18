@@ -3565,3 +3565,15 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   `supplied: withheld` for purists), 1892 and modern columns replacing Strict; `Game.disclosure` over rules, facts
   and checks with a "held back" list at the end; expert steps stop gating 'wait'; `hints: story` on Easy (the
   Holmes's interest log, re-read prompts); a re-read action; per-card set aside; no Checks-tab mark before Holmes acts.
+
+## Round 134 (2026-10-18): ws 8 step 1 — readers in the report
+
+- **`engine/readers.js`:** the reader rule (`READERS`: modern, 1892, racing; "partial" lacking for the modern
+  reader) and `lackingRules`; `READER_MARKS` moved here from `engine/thoughts.js`. A test in `thoughts.test.js`.
+- **The report:** Strict replaced by **1892 reader** and **Modern reader** columns, and a **Background by reader**
+  section (eight cards some reader lacks; each rule's offered and told paragraph). The columns are the measurement's
+  §3: the 1892 reader loses only the motive; the modern reader the drugger (20 left), the place (48), the taker (20),
+  the purpose (3), the killer (43) and the motive. Derbyshire, the coat, the knife and the cut, which Strict left
+  open only because their common sense is never stated, are settled for both.
+- **Diffs:** `report.md` only in the Questions table and the new section; reveal, foreshadow and clash logs,
+  `thoughts-report.md` and the gate listing unchanged.

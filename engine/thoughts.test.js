@@ -85,3 +85,14 @@ test('short chains: a weighed statement counts as cited, used or set aside; so d
     bad.thoughts.find((x) => x.id === 't84.6').from.push('t36.2'); // Hunter's charge, weighed: nothing to do with Derbyshire
     assert.deepEqual(checkThoughts(bad, model).chains.rows.find((x) => x.thought === 't84.6').uncited, ['t36.2']);
 });
+
+test('readers lack the rules of the background cards they do not hold (docs/reader-layer.md, Q1)', async () => {
+    const { lackingRules } = await import('./readers.js');
+    const lacks = (reader) => [...lackingRules(data.background, reader).keys()].sort();
+    assert.deepEqual(lacks('racing'), ['r.tendon_nick']);
+    assert.deepEqual(lacks('1892'), ['r.disguise_washes_off', 'r.laying_against', 'r.markings_identify_horse', 'r.searched_and_not_found', 'r.tendon_nick']);
+    // "Partial" is lacking for a modern reader: opium's taste, the kick, the loose horse; and the milliner's prices.
+    for (const r of ['r.opium_taste', 'r.curry_masks', 'r.startled_horse_kicks', 'r.horse_gregarious', 'r.servant_wages']) assert.ok(lacks('modern').includes(r), r);
+    assert.ok(!lacks('modern').includes('r.gypsies_avoid_trouble'), 'period, presented not endorsed: held');
+    assert.equal(lackingRules(data.background, 'nobody').size, 0);
+});

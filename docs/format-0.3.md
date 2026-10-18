@@ -562,13 +562,24 @@ specific thing stay ground facts with a formula and no schema.
   by name; a drop's check in a line), `counts` (Medium: the counts; a drop's check as yes or no), `asked` (Hard:
   nothing until the player weighs a theory, then the counts; no drop check).
 
+## As built (2026-10-18): readers in the report (workstream 8, step 1; Round 134)
+
+- **`engine/readers.js`:** `READER_MARKS` (the availability marks, moved from `thoughts.js`), `READERS` (modern,
+  1892, racing: which of a background card's two marks speaks for each, and which marks it holds; "partial" is
+  lacking) and `lackingRules(background, reader)`: rule id → the `bk.*` card that marks it.
+- **The report:** the Strict column is gone. Two columns, **1892 reader** and **Modern reader**, take the clues by the
+  challenge with every rule but those the reader lacks and the story has not stated by then (`stated_in`). A new
+  section, **Background by reader**, lists each background card some reader lacks: its marks, who lacks it, and for
+  each rule where the game offers it (`ruleAt`) and where the story states it (its `source`, or never).
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
   rules are common sense the story never states, so two questions show more candidates under Strict than before
   (the editorial inferences used to carry the same common sense with no rule). Whether unstated general rules
   should count as known from the start under Strict is open. *Ruled (Round 33):* superseded by the annotation's
-  background cards (`bk.*`, each marked for an 1892 and a modern reader); settle it in the gap analysis.
+  background cards (`bk.*`, each marked for an 1892 and a modern reader); settle it in the gap analysis. *Done (Round 134):*
+  replaced by an 1892 and a modern column (`docs/reader-layer.md`).
 - **The kitchen as a place of its own.** The drugging's place is recorded as "one of straker_villa, villa_kitchen";
   the kitchen is a place card used only by the lads' supper, so a rule over the portion's keeping place reaches
   the villa half only and `k.drugged_in_house_means_before_nine_five` stays asserted. Fold the kitchen into the

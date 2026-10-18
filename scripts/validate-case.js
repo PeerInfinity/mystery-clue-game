@@ -16,6 +16,7 @@ import { evaluate, literalsOf, render, slotsOf } from '../engine/logic.js';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { Story } from '../engine/story.js';
 import { Game, CHECK_TEMPLATES } from '../engine/game.js';
+import { READER_KINDS, lackingRules } from '../engine/readers.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -467,21 +468,39 @@ const knownBy = (sceneIdx) => {
     for (const r of data.rules ?? []) known.add(r.id);
     return known;
 };
+// Per reader (docs/reader-layer.md, Q1): a rule the reader lacks counts only once the story has stated it.
+const background = main.thoughts_file ? readJson(main.thoughts_file).background ?? [] : [];
+const FAIR_READERS = ['1892', 'modern'];
 const fairRows = [];
 {
     const known = knownBy(challenge);
-    const knownNoLateRules = new Set([...known].filter((id) => {
-        const r = model.cards.get(id);
-        return r.section !== 'rules' || model.sceneOrder.get(r.stated_in) <= challenge;
-    }));
     const act = activeConstraints(model, known);
-    const actStrict = activeConstraints(model, knownNoLateRules);
+    const actFor = Object.fromEntries(FAIR_READERS.map((reader) => {
+        const lacks = lackingRules(background, reader);
+        const theirs = new Set([...known].filter((id) => !lacks.has(id) || model.sceneOrder.get(model.cards.get(id).stated_in) <= challenge));
+        return [reader, activeConstraints(model, theirs)];
+    }));
     for (const q of data.questions) {
         fairRows.push({
             q,
             withRules: model.problem.candidates(act, q.slot),
-            strict: model.problem.candidates(actStrict, q.slot),
+            byReader: Object.fromEntries(FAIR_READERS.map((reader) => [reader, model.problem.candidates(actFor[reader], q.slot)])),
         });
+    }
+}
+// The background cards some reader lacks: their rules, where the game offers each, and where the story states it.
+const backgroundRows = [];
+{
+    const g = new Game(model);
+    const lacking = Object.fromEntries(READER_KINDS.map((reader) => [reader, lackingRules(background, reader)]));
+    for (const b of background) {
+        const by = READER_KINDS.filter((reader) => [...lacking[reader].values()].includes(b.id));
+        if (!by.length) continue;
+        const rules = (b.maps ?? []).map((id) => {
+            const told = (model.cards.get(id)?.source ?? []).map((q) => storyIndex.find(q)?.para).filter((p) => p !== undefined);
+            return { id, at: g.ruleAt.get(id), told: told.length ? Math.min(...told) : null };
+        });
+        backgroundRows.push({ b, by, rules });
     }
 }
 
@@ -711,18 +730,29 @@ function writeReport() {
     out('## Questions');
     out();
     out('Candidates left for each case question. "By the challenge" uses every clue the reader has by the');
-    out(`challenge scene (${data.case.challenge_scene}) plus every rule; "strict" also drops rules the story only`);
-    out('states after it.');
+    out(`challenge scene (${data.case.challenge_scene}) plus every rule. The reader columns drop the rules that reader`);
+    out('lacks (see "Background by reader") unless the story has stated them by then.');
     out();
-    out('| Question | Answer | All evidence | By the challenge | Strict |');
-    out('|---|---|---|---|---|');
+    out(`| Question | Answer | All evidence | By the challenge | ${FAIR_READERS.map((r) => `${r === 'modern' ? 'Modern' : r} reader`).join(' | ')} |`);
+    out(`|---|---|---|---|${FAIR_READERS.map(() => '---|').join('')}`);
     for (const r of fairRows) {
         const s = model.slots.get(r.q.slot);
         const all = slotRows.find((x) => x.slot.id === r.q.slot).cands;
         const fmt = (c) => (c.length <= 4 ? c.join(', ') : `${c.length} left`);
-        out(`| ${r.q.text} | ${s.answer ?? `one of ${s.undetermined}`} | ${fmt(all)} | ${fmt(r.withRules)} | ${fmt(r.strict)} |`);
+        out(`| ${r.q.text} | ${s.answer ?? `one of ${s.undetermined}`} | ${fmt(all)} | ${fmt(r.withRules)} | ${FAIR_READERS.map((x) => fmt(r.byReader[x])).join(' | ')} |`);
     }
     out();
+    if (backgroundRows.length) {
+        out('## Background by reader');
+        out();
+        out('The background cards (thoughts.json) some kind of reader lacks: the game supplies their rules, offering each');
+        out('where it becomes relevant; "told" is where the story itself states it.');
+        out();
+        out('| Card | 1892 | Modern | Lacked by | Rules: offered ¶, told ¶ |');
+        out('|---|---|---|---|---|');
+        for (const r of backgroundRows) out(`| \`${r.b.id}\` | ${r.b.reader_1892} | ${r.b.reader_modern} | ${r.by.join(', ')} | ${r.rules.map((x) => `\`${x.id}\` ${x.at}, ${x.told ?? 'never'}`).join('; ')} |`);
+        out();
+    }
     out('## Theories');
     out();
     for (const r of theoryRows) {
