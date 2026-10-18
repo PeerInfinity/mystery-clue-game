@@ -1,6 +1,8 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-workstream-8.md` — workstream 8 (the reader layer): the next session's mission (Round 132); its paper
+  will be `docs/reader-layer.md`.
 - `docs/predictions.md` — workstream 7 (predictions and test plans): agreed (Round 125), built (Rounds 126–130):
   sealed checks (`ck.*` in `knowledge.json`, a Checks tab), `checkScores` and `absenceScores`. Kickoff:
   `docs/kickoff-workstream-7.md`. Its review: `docs/review-ws7.md` (Round 131), a verdict per thought.

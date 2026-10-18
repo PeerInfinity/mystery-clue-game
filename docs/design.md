@@ -3532,3 +3532,15 @@ trailer. The next session is told to gate documentation-only commits too.
 - **Left open:** an "advise" template; watch-holmes as a confirmation in the Checks tab (workstream 8); theories
   proposing their own predictions; the Medium page that stays busy (workstream 9).
 - **`CLAUDE.md`'s reading list** now points at `docs/predictions.md` and this review. **Workstream 7 is done.**
+
+## Round 132 (2026-10-18): hand-off — workstream 8 (the reader layer)
+
+Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over workstream 8 (`docs/gap-analysis.md`
+§5 item 8):
+- the four strands: background availability replacing Strict, disclosure typing on facts, profiles and hint tiers,
+  and GENRE and SET ASIDE;
+- the reading list;
+- the mission: measure first, write `docs/reader-layer.md` and agree it with Robert, build in steps, then a short
+  review;
+- the traps of Rounds 60–131, with this session's added: check what the UI shows before reasoning from it; method
+  names that shadow; anchors that move gates; the headless Chrome notes.
