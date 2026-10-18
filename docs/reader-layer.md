@@ -1,6 +1,7 @@
 # The reader layer (workstream 8)
 
-Status: **AGREED** (Robert, 2026-10-18, Round 133: every recommendation of Q1–Q6 and the order of work). Mission: `docs/kickoff-workstream-8.md`. Builds on
+Status: **AGREED** (Robert, 2026-10-18, Round 133: every recommendation of Q1–Q6 and the order of work), **built**
+(Rounds 134–139). Its review: `docs/review-ws8.md` (Round 140). Mission: `docs/kickoff-workstream-8.md`. Builds on
 `docs/gap-analysis.md` (§2 GENRE and SET ASIDE; §3 background cards, profile, confidence, "late or never
 disclosed"; §5 item 8; §6 decisions 2 and 4), `docs/reading-annotated.md` (the background cards, the GENRE and SET
 ASIDE thoughts, the fair-play table, "Notes for the next pass"), Round 33 (availability per reader supersedes
@@ -400,3 +401,11 @@ diffed before and after.
 ## Agreed (Robert, Round 133)
 
 The recommendations of Q1–Q6 as written, and the order of work.
+
+**At build time (Rounds 134–139):**
+- **"Supplied" means this reader lacks it** (Round 136). A rule offered before the story states it is `early`; an 1892
+  reader's opium's taste is early but their own, so "held back" lists only the supplied (the paper's case "Opium's
+  taste held"). The report keeps the 36 early rules.
+- **Expert steps** took their follow-on gates with them: `t46.4` at ¶220 and `t37.13` at ¶226 as well as the three
+  named. `k.horse_kicked` now reaches a free-pace player at ¶226, Holmes's explanation (Round 137).
+- **The re-read prompts** needed their passages as data: `passage` on `t70.2` and `t182.3` (Round 139).

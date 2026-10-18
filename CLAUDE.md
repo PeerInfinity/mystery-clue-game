@@ -1,8 +1,10 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-workstream-8.md` — workstream 8 (the reader layer): the next session's mission (Round 132); its paper
-  will be `docs/reader-layer.md`.
+- `docs/reader-layer.md` — workstream 8 (the reader layer): agreed (Round 133), built (Rounds 134–139): the `reader`
+  and `supplied` options (`engine/readers.js`), `Game.disclosure` and `heldBack`, expert steps that never gate, set
+  aside and re-read, `hints: story` (Holmes's interest). Kickoff: `docs/kickoff-workstream-8.md`. Its review:
+  `docs/review-ws8.md` (Round 140). Next in `docs/gap-analysis.md` §5: workstream 9, the UI.
 - `docs/predictions.md` — workstream 7 (predictions and test plans): agreed (Round 125), built (Rounds 126–130):
   sealed checks (`ck.*` in `knowledge.json`, a Checks tab), `checkScores` and `absenceScores`. Kickoff:
   `docs/kickoff-workstream-7.md`. Its review: `docs/review-ws7.md` (Round 131), a verdict per thought.

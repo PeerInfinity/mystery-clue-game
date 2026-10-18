@@ -3645,3 +3645,19 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
 - **Leak check:** no card text changed; the new text is fixed templates around card names and story quotes shown at
   their own paragraph, so the LLM checker (which reads card text) was not run.
 - **Diffs:** none in the logs, the reports or the gate listing.
+
+## Round 140 (2026-10-18): workstream 8's review
+
+- **`docs/review-ws8.md`:** the 20 GENRE thoughts, the 7 SET ASIDE thoughts and the 25 background cards' marks,
+  against what Rounds 134–139 built.
+  - **GENRE:** the 10 watch-holmes and 2 re-read thoughts held, unscored (Holmes's interest, the two passages);
+    `t12.2`, `t14.4`, `t38.1` held by existing moves (the doubt reasons, the one-culprit heuristic); 5 plain ones not
+    held, as agreed (no mechanic for the narrator's contract).
+  - **SET ASIDE:** 5 held (the field-glass, the telegraph posts, the new dress, the half-crown, Bayard); the two
+    passages (`t118.1`, `t152.1`) have no card.
+  - **Background cards:** 24 held; `bk.gypsies`'s "presented, not endorsed" is not shown (the `period` flag is never
+    read by the UI).
+- **Left open:** the period mark; the purist still hears Holmes at the story's gates; a re-read's question is
+  recorded, unused; profiles and confidence drive nothing beyond the expert gates; the busy page on long saves
+  (workstream 9). A correction to Round 139: the end-of-story list showed twelve supplied facts, not eleven.
+- **`CLAUDE.md`'s reading list** now points at `docs/reader-layer.md` and this review. **Workstream 8 is done.**
