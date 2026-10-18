@@ -3544,3 +3544,24 @@ Robert asked for the next session. `docs/kickoff-workstream-8.md` hands over wor
   review;
 - the traps of Rounds 60–131, with this session's added: check what the UI shows before reasoning from it; method
   names that shadow; anchors that move gates; the headless Chrome notes.
+
+## Round 133 (2026-10-18): the reader layer, measured and agreed
+
+- **Measured** (scratch replays, Easy, background when relevant; `docs/reader-layer.md` "Measured"):
+  - a **modern** reader without the background cards they lack (opium's taste, the kick, the blaze, laying, the
+    milliner's prices, the faker, the tendon) cannot reach the curry before ¶218, nor the kick or the disguise at
+    all; by the challenge six case questions go open. An **1892** reader loses only the motive; an 1892 racing
+    reader nothing that matters. Today every player is the last.
+  - **Strict** also drops the 81 common-sense rules the story never states, hence its "45 left".
+  - every fair-play gap already has a policy (supplied, inferred, withheld, marked on checks); facts and rules
+    carry no mark.
+  - **profiles cannot time hints:** 38 of the 47 scored deduction rows are careful, and a hint at the next scene
+    after the earliest date lands before Holmes in 34 of them (median 132 ¶). Three expert, high-hindsight thoughts
+    gate 'wait' (`t46.4`, `t37.13`, `t102.4`).
+  - the **story's own signals** (watch-holmes, re-read) are the honest hint layer; a Checks-tab mark at ¶109 would
+    confirm `ck.tracks` before Holmes performs it, against `docs/predictions.md` Q1.
+  - **SET ASIDE** is the reader's choice without the key (Bayard is used); `irrelevant` is the key's.
+- **Agreed (Robert):** every recommendation and the order of work: a `reader` option marking supplied rules (and
+  `supplied: withheld` for purists), 1892 and modern columns replacing Strict; `Game.disclosure` over rules, facts
+  and checks with a "held back" list at the end; expert steps stop gating 'wait'; `hints: story` on Easy (the
+  Holmes's interest log, re-read prompts); a re-read action; per-card set aside; no Checks-tab mark before Holmes acts.
