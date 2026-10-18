@@ -6,7 +6,7 @@ import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, workerClient, settle } from '../engine/remoteProblem.js';
-import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS, DROP_REASONS } from '../engine/game.js';
+import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, PRESETS, DROP_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -162,7 +162,7 @@ function scrollStory() {
 function renderTool() { run(renderToolNow); }
 function renderToolNow() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
-    $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, timeline: toolTimeline, background: toolBackground }[ui.tab]();
+    $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground }[ui.tab]();
     const infTab = document.querySelector('.tab[data-tab="inferences"]');
     infTab.hidden = game.autoSolves() && !game.heldInferences().length;
     const left = game.helps('hints') ? game.buildable().length : 0;
@@ -708,6 +708,72 @@ function toolTheories() {
         h += '</div>';
     }
     return `${h}<div class="row"><button data-new-theory="1">New theory</button></div>`;
+}
+
+// ---------- checks (workstream 7, docs/predictions.md) ----------
+const CHECK_WORDS = { look: ['Look for', 'at'], ask: ['Ask', 'about'], show: ['Show', 'to'], compare: ['Compare', 'with'] };
+const OUTCOME_WORDS = { found: 'found', 'not-found': 'not found', yes: 'yes', no: 'no', matches: 'they match', differs: 'they differ' };
+const SAYS_WORDS = { 'says-so': 'says so', 'says-otherwise': 'says otherwise', 'says-nothing': 'says nothing either way', refuted: 'cannot hold, whatever you set aside' };
+/** A sealed check in words: the template with the player's cards. */
+function checkText(x) {
+    const [a, b] = CHECK_WORDS[x.verb];
+    const [f, g] = CHECK_TEMPLATES[x.verb].fields;
+    // A clue is a sentence: it reads in quotation marks.
+    const name = (id) => (model.cards.get(id)?.section === 'claims' ? `“${link(id, shortName(id, 60).replace(/\.$/, ''))}”` : link(id, shortName(id, 50)));
+    return `${a} ${name(x.fields[f])} ${b} ${name(x.fields[g])}`;
+}
+/**
+ * Plan a check before Holmes makes it (docs/predictions.md): a template filled with cards the player holds, the result
+ * they expect, the answer it would give, and the theory it comes from. Sealed, it says nothing until the story
+ * reaches it; then where Holmes made it and what the story shows of the result.
+ */
+function toolChecks() {
+    if (game.autoSolves()) return '<p class="small muted">In Trivial the game works the case out; there are no checks to plan.</p>';
+    const f = ui.plan ?? (ui.plan = { verb: 'look', fields: {}, expect: '', slot: '', value: '', theory: '' });
+    const tpl = CHECK_TEMPLATES[f.verb];
+    const held = [...game.unlocked.keys()].filter((x) => !game.isHidden(x) && ['entities', 'claims'].includes(model.cards.get(x)?.section));
+    const people = held.filter((x) => model.cards.get(x).kind === 'person');
+    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
+    const pick = (field, i) => {
+        const list = field === 'person' || field === 'to' ? people : held;
+        return `<select id="plan-${i}">${opt('', `${field}…`, f.fields[field] ?? '')}${list.map((x) => opt(x, shortName(x, 50), f.fields[field])).join('')}</select>`;
+    };
+    const slots = game.visibleSlots();
+    const slot = slots.find((x) => x.id === f.slot);
+    let h = `<p class="small muted">Plan a check before Holmes makes it: what you would do, with cards you hold, and what you expect it to show. It is sealed when you plan it; nothing tells you whether Holmes will do the same until the story gets there. A check made before he makes it counts, whatever the story shows of the result; a wrong guess costs nothing.</p>`;
+    h += `<div class="pen small"><div class="row"><select id="plan-verb">${Object.keys(CHECK_TEMPLATES).map((v) => opt(v, CHECK_WORDS[v][0], f.verb)).join('')}</select> ${pick(tpl.fields[0], 0)} ${esc(CHECK_WORDS[f.verb][1])} ${pick(tpl.fields[1], 1)}</div>`;
+    h += `<div class="row">Expecting: <select id="plan-expect">${opt('', 'nothing in particular', f.expect)}${tpl.outcomes.map((o) => opt(o, OUTCOME_WORDS[o], f.expect)).join('')}</select>`;
+    if (f.expect) {
+        h += ` which would answer <select id="plan-slot">${opt('', 'no question', f.slot)}${slots.map((x) => opt(x.id, shortName(x.on, 30) + ': ' + game.promptOf(x.id), f.slot)).join('')}</select>`;
+        if (slot) h += ` <select id="plan-value">${opt('', 'with…', f.value)}${slot.domain.filter((v) => !game.isHidden(v)).map((v) => opt(v, valueName(slot.id, v), f.value)).join('')}</select>`;
+    }
+    h += '</div>';
+    const theories = game.visibleTheories();
+    if (f.expect && f.slot && theories.length) h += `<div class="row">From the theory: <select id="plan-theory">${opt('', 'none', f.theory)}${theories.map((t) => opt(t.id, t.label, f.theory)).join('')}</select></div>`;
+    h += '<div class="row"><button data-plan-seal="1">Seal it</button></div></div>';
+    const mode = weighMode();
+    for (const x of [...game.seals].reverse()) {
+        const st = game.sealStatus(x.id);
+        h += `<div class="theory${x.withdrawn !== null ? ' dropped' : ''}">${checkText(x)}${x.expect ? `, expecting ${esc(OUTCOME_WORDS[x.expect])}` : ''}${x.answer ? ` (${esc(game.promptOf(x.answer.eq[0]))} → ${esc(valueName(x.answer.eq[0], x.answer.eq[1]))})` : ''}`;
+        h += `<div class="small muted">Sealed at ${paraLabel(x.para)}${x.withdrawn !== null ? `; withdrawn at ${paraLabel(x.withdrawn)}` : ''}.</div>`;
+        if (st.performed !== null) {
+            h += `<div class="small">Holmes does this (${paraLabel(st.performed)}).</div>`;
+            if (st.result !== null) h += `<div class="small${st.borne === false ? ' bad' : st.borne ? ' good' : ''}">The result (${paraLabel(st.result)}): ${esc(OUTCOME_WORDS[st.outcome] ?? st.outcome)}${st.borne === null ? '' : st.borne ? ', as you expected.' : ', not as you expected.'}</div>`;
+            else if (st.never) h += '<div class="small">The story never says what he found. It is left open.</div>';
+            else h += '<div class="small">The story does not say here what he found.</div>';
+        } else if (st.made === false) h += '<div class="small muted">Holmes never did this.</div>';
+        if (x.theory && x.answer) {
+            const name = theories.find((t) => t.id === x.theory)?.label ?? 'the theory';
+            if (mode === 'asked' && !ui.tested?.has(x.id)) h += `<div class="small"><span class="link" data-plan-test="${esc(x.id)}">What does ${esc(name)} say?</span></div>`;
+            else {
+                const tt = game.sealTheoryTest(x.id);
+                if (tt) h += `<div class="small">${esc(name)}: ${mode === 'counts' ? (tt.says === 'says-so' ? 'yes, it gives this answer' : 'no, it does not give this answer') : esc(SAYS_WORDS[tt.says])}.</div>`;
+            }
+        }
+        if (x.withdrawn === null && st.performed === null) h += `<div class="small"><span class="link" data-unseal="${esc(x.id)}">withdraw</span></div>`;
+        h += '</div>';
+    }
+    return h;
 }
 
 const COST_TOLD = { testimony: 'someone\'s word', report: 'a report', admission: 'an admission' };
@@ -1290,7 +1356,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1346,6 +1412,19 @@ function onClick(e) {
         changed();
         return;
     }
+    if (t.dataset.planSeal) {
+        const f = ui.plan;
+        readPlan();
+        const tpl = CHECK_TEMPLATES[f.verb];
+        const fields = Object.fromEntries(tpl.fields.map((x) => [x, f.fields[x]]));
+        const answer = f.expect && f.slot && f.value ? { eq: [f.slot, f.value] } : null;
+        const res = game.seal(f.verb, fields, { expect: f.expect || null, answer, theory: answer && f.theory ? f.theory : null });
+        if (res.ok) { toast('Sealed. The story will tell.'); ui.plan = null; } else toast(esc(res.reason));
+        changed();
+        return;
+    }
+    if (t.dataset.planTest) { (ui.tested ??= new Set()).add(t.dataset.planTest); renderTool(); return; }
+    if (t.dataset.unseal) { game.unseal(t.dataset.unseal); changed(); return; }
     if (t.dataset.absenceFile) {
         Object.assign(ui.absence, { expectation: $('#ab-exp').value || null, time: $('#ab-time').value || null, witness: $('#ab-witness').value || null });
         const { expectation, time, witness } = ui.absence;
@@ -1501,7 +1580,23 @@ document.addEventListener('input', (e) => {
     }
 });
 document.addEventListener('change', (e) => game && run(() => onChange(e)));
+/** The plan form's choices, read back into ui.plan before a re-render or a seal. */
+function readPlan() {
+    const f = ui.plan;
+    const tpl = CHECK_TEMPLATES[f.verb];
+    tpl.fields.forEach((x, i) => { const v = $(`#plan-${i}`)?.value; if (v !== undefined) f.fields[x] = v || undefined; });
+    f.expect = $('#plan-expect')?.value ?? f.expect;
+    f.slot = $('#plan-slot')?.value ?? (f.expect ? f.slot : '');
+    f.value = $('#plan-value')?.value ?? '';
+    f.theory = $('#plan-theory')?.value ?? '';
+}
 function onChange(e) {
+    if (e.target.id?.startsWith('plan-')) {
+        if (e.target.id === 'plan-verb') ui.plan = { verb: e.target.value, fields: {}, expect: '', slot: '', value: '', theory: '' };
+        else readPlan();
+        if (['plan-verb', 'plan-expect', 'plan-slot'].includes(e.target.id)) renderTool();
+        return;
+    }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
     if (e.target.id === 'doubt-reason') { game.setDoubtReason(e.target.dataset.reasonFor, e.target.value || null); changed(); return; }

@@ -3483,3 +3483,35 @@ trailer. The next session is told to gate documentation-only commits too.
   otherwise, then nothing once her word is doubted; her own belief says otherwise; a seal with no answer tests
   nothing.
 - **Presets** (Q7) are the UI's: Easy names the result, Medium says yes or no, Hard on request (the `weigh` option).
+
+## Round 130 (2026-10-18): workstream 7 step 5 — the Checks tab
+
+- **A Checks tab** (`toolChecks` in `ui/app.js`, `docs/predictions.md` Q7). The form is "Look for / Ask / Show /
+  Compare" {a card} "at / about / to / with" {a card}:
+  - the dropdowns hold only cards the player has (people only for "ask" and "show … to");
+  - "Expecting" offers the template's outcomes;
+  - with an expectation, the player may name the answer it would give (a question on the table and a value), and
+    the theory it comes from;
+  - "Seal it" records the check. A clue is quoted in the sealed text.
+- **The sealed list.** Each shows the paragraph it was sealed at and, once read, what the story showed: "Holmes does
+  this (¶N)"; the result, "as you expected" or "not as you expected"; "The story does not say here what he found";
+  at the end, "never says … It is left open", or "Holmes never did this". A seal can be withdrawn until Holmes acts.
+- **The theory test by `weigh`:**
+  - Easy names it ("says so / says otherwise / says nothing either way");
+  - Medium says yes or no;
+  - Hard has a "What does … say?" link.
+
+  Trivial shows no form: the game works the case out.
+- **Checked in headless Chrome** (saves made in node, loaded through `localStorage`):
+  - Easy at ¶170: four seals; borne out, not borne out, a late result pending, the theory named;
+  - Easy at the end: the boots "left open", the photograph's result at ¶229, "as you expected";
+  - the counts and on-request branches;
+  - sealing through the form itself.
+- **Listed, not chased:**
+  - a Medium game at ¶170 with background "when relevant" (the save's options) never left the Card tab within two
+    minutes, the Theories tab included. The committed UI does the same, so it is not this step's. Its page shows no
+    busy overlay and logs no error;
+  - on Hard a player can seal only with cards they have collected, as everywhere on Hard;
+  - entity names keep their capitals mid-sentence ("Look for A box of vestas at The hollow").
+- **No engine or case change:** the logs, the reports and the gate listing cannot move. They were rerun before the
+  commit and did not.

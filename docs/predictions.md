@@ -411,3 +411,12 @@ were handed to a free-pace player at the first gate *registered*, not the earlie
 gate, explicitly. "Derbyshire is Straker" now arrives at ¶161 (the photograph request, where 'wait' already waits
 for it), `t114.2` at ¶116 and `t141.1` at ¶148, both Holmes's own paragraphs.
 
+**At build time (Rounds 127–130):**
+- **Checks** carry no text, so nothing new goes through the leak checker. `yields.unknown` is gone, replaced by
+  `result: {never}` (Round 127).
+- **The withdraw action is `unseal`.** `Game.withdraw` already withdraws a raised exception; the first suite run caught
+  the clash (Round 128).
+- **The police "say otherwise"** of Derbyshire being Straker, not "nothing" as the case table expected: their story
+  keeps Mrs. Straker's word, which costs it nothing. Once she is doubted they say nothing (Round 129).
+- **The UI** is a Checks tab (Round 130).
+
