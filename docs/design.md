@@ -3029,3 +3029,38 @@ and belief (workstream 4). It carries the open items and this session's traps. `
 
   It supersedes `docs/kickoff-clashes.md`. `CLAUDE.md` points at it and lists the clash log.
 - **Moved:** the thoughts report's legend line only; nothing in the logs, the case report or the gates.
+
+## Round 113 (2026-10-17): workstream 6 — hypotheses, scenarios and residue, agreed (docs/hypotheses.md)
+
+- **Measured first:** a replay of the whole story (Easy, background when relevant) for four players (passive; doubting
+  Holmes's curry step; building one culprit; building everything), following twelve hypotheses: the story's theories,
+  the annotation's thought-only scenarios as provisional assignments, four candidates, and one culprit.
+  - **Fit is the wrong instrument:** every rival story reads "broken" almost at once, by a trusted statement. The true
+    inside story is broken from ¶84 by Straker's false honest record, until ¶225 or never.
+  - **A scenario's cost** (the clash weighing with its answers held fast) falls for the true story (passive: 9 at ¶92,
+    0 at ¶231, every item false) and grows for the false ones (the gypsies 9, and 13 for a builder). From ¶104 the
+    police's cost includes the player's own reasoning.
+  - **The authored relations are mostly unplayable:** 10 of 18 strains, and two of the four drops, come from thoughts
+    with no card. The case has no explains or causal data.
+  - **The Theories panel's "agrees with"** counts implications whose condition is unmet (a bug).
+  - **One culprit** costs nothing at ¶68 for any player: `t68.3` is a stance, not a computable loss.
+- **Agreed (Robert): every recommendation.** Where one proves hard to build, fall back to a simpler alternative.
+  - **Q1:** two sizes, candidate sets on slots and scenarios as theories. The annotation's three scenarios stay the
+    player's to make (test fixtures, not story theories; C13 answered no). The player sets the stance, the game
+    shows the standing, nothing is ever called confirmed.
+  - **Q2:** a scenario's check is its cost, by class, in place of fit.
+  - **Q3:** residue from authored puzzles (oddities with explanations as formulas), met by noticing on Medium and
+    Hard.
+  - **Q4:** strain shown, scores nothing, gates nothing; the clash tuple unchanged.
+  - **Q5:** drop with a reason the game checks where it can (out-explained, more hands, cost, a card), never refused;
+    `t68.3` a "two stories" doubt of `k.one_culprit`.
+  - **Q6:** readings by layer through the meaning slots.
+  - **Q7:** drops score before the story makes them untenable.
+  - **Q8:** Easy names, Medium counts, Hard on request.
+- **Order of work:**
+  1. the cost, with the panel fix;
+  2. puzzles and residue;
+  3. drop with a reason;
+  4. readings by layer;
+  5. presets;
+  6. the second review.
