@@ -3740,3 +3740,25 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
 - **Tests:** `engine/record.test.js`: at ¶40 nothing whose deadline is ahead (not the curry), only held cards named;
   at ¶219 the curry with its lead; at the end every family within its possible; Trivial scores nothing.
 - **Moved:** nothing in the logs, the reports or the gate listing.
+
+## Round 146 (2026-10-18): ws 9 step 3 — the record in the UI
+
+- **UI** (`docs/ui.md` Q1): "Ahead of Holmes: N" in the header, opening **Your record against Holmes**; a note on the
+  reading bar for each scored row whose deadline the read just passed; at the end the totals per family, the five
+  longest leads and what the story held back; Trivial's one line. Fixed templates around held cards (quoted when a
+  card is a sentence), paragraph numbers and a sealed check's own words; the annotation's text is never shown.
+- **Checked in headless Chrome** on Easy builder saves (everything buildable built, the curry noticed at ¶20, the
+  vesta box sealed at ¶80):
+  - ¶217: "Ahead of Holmes: 20"; reading to ¶219, the bar: "paragraph 218 · Holmes reasons: “The others ate the same
+    dish unharmed, …” You had it at paragraph 37: 181 paragraphs before him"; the record: "Deductions: 24 of the 26
+    steps Holmes has made so far";
+  - ¶102: "Holmes does this: Look for A box of vestas at The hollow. You planned it at paragraph 80: 22 paragraphs
+    before him";
+  - the end: deductions 41 of 47, odd details 1 of 8, checks 2 of 10; the curry noticed 196 paragraphs before Holmes
+    first among the longest leads; Trivial: "nothing is scored".
+- **Leak check:** no card text changed; the new text is fixed templates around held card names, quotes of held cards
+  and paragraph numbers, shown only once the story has read each deadline, so the LLM checker (which reads card text)
+  was not run.
+- **Listed, not chased:** a check's text keeps entity capitals mid-sentence ("Look for A box of vestas"), as Round 130
+  listed; a step resting on several inferences is quoted in full, which can make a long line.
+- **Moved:** nothing in the logs, the reports or the gate listing (UI only).

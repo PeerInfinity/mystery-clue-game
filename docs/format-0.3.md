@@ -668,6 +668,19 @@ specific thing stay ground facts with a formula and no schema.
   `families`: scored and passed so far, and `possible` once the story has ended; `ahead`: the rows scored. Rows that
   can never score are left out. Read by the UI (step 3); never by a hint.
 
+## As built (2026-10-18): the record in the UI (workstream 9, step 3; Round 146)
+
+- **The header:** "Ahead of Holmes: N" beside the cards and questions (not in Trivial), N the scored rows of
+  `Game.record()`, drawn as a piece. It opens **Your record against Holmes** (`toolRecord`, a view of the tool pane
+  with no tab of its own): per family, scored "of the N … so far" during play, "of" the possible at the end; at the
+  end the five longest leads and "What the story held back"; the scored rows, newest first.
+- **The reading bar:** after a read (a paragraph, a scene, a deduction), each scored row whose deadline fell in the
+  paragraphs just read: "paragraph 218 · Holmes reasons: “…” You had it at paragraph 37: 181 paragraphs before him."
+  The read only notes where it started (`ui.readFrom`); the rows are a piece, so the move itself never waits on them.
+- **Wording:** fixed templates per family around held cards (a sentence card quoted, a thing named), the slot and
+  value of a step with no inference, a sealed check's own words; never a thought's text. A drop's deadline reads
+  "before the story did". Each line once. At the end in Trivial: "the game worked the case out: nothing is scored".
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

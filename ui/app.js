@@ -116,7 +116,7 @@ async function fillPieces() {
             const [key, fn] = pending.entries().next().value;
             pending.delete(key);
             await settle(fn, () => model.problem).catch((e) => console.error(e));
-            await run(renderToolNow);
+            await run(() => { renderToolNow(); renderReader(); });
         }
     } finally { filling = false; }
 }
@@ -147,7 +147,11 @@ function renderStory() {
 
 function renderReader() {
     const el = $('#reader');
-    if (game.finished()) { el.innerHTML = '<span class="muted">The end.</span>'; return; }
+    const news = recordNews();
+    if (game.finished()) {
+        el.innerHTML = `${news}<span class="muted">The end.</span> ${game.autoSolves() ? '<span class="small muted">In Trivial the game worked the case out: nothing is scored. On Easy you can race Holmes.</span>' : '<span class="link small" data-record-open="1">Your record against Holmes</span>'}`;
+        return;
+    }
     const blockers = game.blockers();
     const ahead = game.nextDeductionAt() - game.read;
     const aheadScene = game.nextSceneAt() - game.read;
@@ -179,6 +183,7 @@ function renderReader() {
         : '';
     const points = game.showsSignals() ? game.storySignals().filter((x) => x.kind === 'reread' && x.para === game.read - 1) : [];
     for (const x of points) note += `<div class="note">The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</div>`;
+    note = news + note;
     el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}${rereadForm()}`;
 }
 
@@ -205,7 +210,7 @@ function scrollStory() {
 function renderTool() { run(renderToolNow); }
 function renderToolNow() {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
-    $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground }[ui.tab]();
+    $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord }[ui.tab]();
     const infTab = document.querySelector('.tab[data-tab="inferences"]');
     infTab.hidden = game.autoSolves() && !game.heldInferences().length;
     const left = game.helps('hints') ? game.buildable().length : 0;
@@ -813,6 +818,65 @@ function toolTheories() {
     return `${h}<div class="row"><button data-new-theory="1">New theory</button></div>`;
 }
 
+// ---------- the record against Holmes (workstream 9, docs/ui.md Q1) ----------
+// Told only as the story reaches each deadline (Game.record never gives a row whose deadline is ahead), in fixed
+// templates around held cards and paragraph numbers: never the annotation's own words.
+const FAMILY_WORDS = {
+    deduction: ['Deductions', 'steps Holmes has made'],
+    notice: ['Odd details', 'details Holmes has drawn attention to'],
+    raise: ['Steps seen through', 'steps Holmes has taken apart'],
+    drop: ['Wrong turns dropped', 'wrong turns the story has left behind'],
+    check: ['Checks planned', 'checks Holmes has made'],
+    absence: ['What did not happen', 'absences Holmes has pointed to'],
+};
+// A card that is a sentence (a clue, an inference) is quoted; a thing or a person is named.
+const names = (ids) => ids.map((x) => (['claims', 'inferences', 'applied'].includes(model.cards.get(x)?.section) ? `“${link(x, shortName(x, 110).replace(/\.$/, ''))}”` : link(x, shortName(x, 60)))).join('; ');
+/** Each line once: two thoughts can rest on the same inference. */
+const once = (lines) => [...new Set(lines)];
+/** What a row says Holmes (or the story) did at its deadline, and what the player had done. */
+function recordLine(r) {
+    const seal = r.seal ? game.seals.find((x) => x.id === r.seal) : null;
+    const what = {
+        deduction: () => (r.names.length ? `Holmes reasons: ${names(r.names)}` : r.concludes?.slot ? `Holmes settles ${slotQuestion(r.concludes.slot)} → ${esc(valueName(r.concludes.slot, r.concludes.value))}` : 'Holmes reasons it out'),
+        notice: () => `Holmes draws attention to ${names(r.names)}`,
+        raise: () => `Holmes shows that a step does not hold, ${names(r.names)}${r.exceptions?.[0]?.text ? `, unless ${esc(r.exceptions[0].text)}` : ''}`,
+        drop: () => `The story leaves behind ${r.target.theory ? esc(layerName(r.target.theory)) : `${slotQuestion(r.target.slot)} → ${esc(valueName(r.target.slot, r.target.value))}`}`,
+        check: () => (seal ? `Holmes does this: ${checkText(seal)}` : 'Holmes makes a check'),
+        absence: () => `Holmes points to ${names(r.names)}`,
+    }[r.family]();
+    const done = { deduction: 'You had it', notice: 'You marked it odd', raise: 'You raised it', drop: 'You dropped it', check: 'You planned it', absence: 'You filed it' }[r.family];
+    const before = r.family === 'drop' ? 'before the story did' : 'before him';
+    return `${what}. ${done} at ${paraLabel(r.at)}: ${r.lead} paragraph${r.lead === 1 ? '' : 's'} ${before}.`;
+}
+/** On the reading bar: the rows whose deadline fell in the paragraphs just read, scored. */
+function recordNews() {
+    if (game.autoSolves() || ui.readFrom == null) return '';
+    const from = ui.readFrom - 1;
+    const rows = piece(`news:${from}:${game.read}`, () => game.record().rows.filter((r) => r.scores && r.deadline >= from && r.deadline < game.read), []);
+    return once(rows.map((r) => `<div class="note record-news">${paraLabel(r.deadline)} · ${recordLine(r)}</div>`)).join('');
+}
+function toolRecord() {
+    if (game.autoSolves()) return '<h3 class="section">Your record against Holmes</h3><p class="small muted">In Trivial the game works the case out: nothing is scored. On Easy you can race Holmes.</p>';
+    const rec = piece('record', () => game.record(), null);
+    let h = '<h3 class="section">Your record against Holmes</h3>';
+    if (!rec) return `${h}<p class="small muted weighing">Weighing…</p>`;
+    h += `<p class="small muted">${game.finished() ? 'The story is over: what you reached before Holmes, out of everything he does.' : 'As far as the story has gone: what you reached before Holmes, out of what he has done so far. The rest is told as the story reaches it.'}</p><ul class="list">`;
+    for (const [f, [label, of]] of Object.entries(FAMILY_WORDS)) {
+        const a = rec.families[f];
+        if (!a.passed && !a.possible) continue;
+        h += `<li><b>${label}:</b> ${a.scored} ${game.finished() ? `of ${a.possible}` : `of the ${a.passed} ${of} so far`}</li>`;
+    }
+    h += '</ul>';
+    const scored = rec.rows.filter((r) => r.scores);
+    if (game.finished() && scored.length) {
+        const best = [...scored].sort((a, b) => b.lead - a.lead).slice(0, 5);
+        h += `<h3 class="section">Furthest ahead</h3><ul class="list small">${once(best.map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>`;
+    }
+    h += scored.length ? `<h3 class="section">Before Holmes (${scored.length})</h3><ul class="list small">${once([...scored].reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>` : '<p class="empty">Nothing yet.</p>';
+    if (game.finished()) h += heldBackHtml();
+    return h;
+}
+
 // ---------- checks (workstream 7, docs/predictions.md) ----------
 const CHECK_WORDS = { look: ['Look for', 'at'], ask: ['Ask', 'about'], show: ['Show', 'to'], compare: ['Compare', 'with'] };
 const OUTCOME_WORDS = { found: 'found', 'not-found': 'not found', yes: 'yes', no: 'no', matches: 'they match', differs: 'they differ' };
@@ -1188,7 +1252,9 @@ function renderNow() {
     const settledQ = model.data.questions.filter((q) => game.settled(q.slot) !== null).length;
     const raised = model.data.questions.filter((q) => game.questionRaised(q.id)).length;
     const found = [...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)).length;
-    $('#progress').textContent = `${found} cards · ${settledQ} of ${raised} questions settled`;
+    // The record against Holmes (docs/ui.md Q1): only what the story has already reached; nothing in Trivial.
+    const ahead = game.autoSolves() ? null : piece('count:record', () => (ui.ahead = game.record().ahead), ui.ahead ?? 0);
+    $('#progress').innerHTML = `${found} cards · ${settledQ} of ${raised} questions settled${ahead === null ? '' : ` · <span class="link" data-record-open="1" title="Your record against Holmes, as far as the story has gone">Ahead of Holmes: ${ahead}</span>`}`;
     $('#difficulty').value = game.difficulty;
     $('#pace').value = game.pace;
     $('#autopace').value = game.autoPace;
@@ -1414,6 +1480,8 @@ function onClick(e) {
     }
     const readBtn = e.target.closest('#read, #read-scene, #read-deduction');
     if (readBtn) {
+        // The paragraphs this read covers: the record's rows whose deadline falls in them are told (recordNews).
+        ui.readFrom = game.read;
         const res = readBtn.id === 'read' ? game.advance() : readBtn.id === 'read-scene' ? game.readToNextScene() : game.readToNextDeduction();
         if (!game.collecting() && res.newCards?.length) {
             const shown = res.newCards.filter((c) => !['rules'].includes(model.cards.get(c).section));
@@ -1449,6 +1517,7 @@ function onClick(e) {
         return;
     }
     if (e.target.closest('[data-build-clear]')) { ui.building = null; renderTool(); return; }
+    if (e.target.closest('[data-record-open]')) { ui.tab = 'record'; renderTool(); $('#tool').scrollTop = 0; return; }
     const tabOpen = e.target.closest('[data-tab-open]');
     if (tabOpen) { ui.tab = tabOpen.dataset.tabOpen; renderTool(); return; }
     if (e.target.closest('[data-show-clashes]')) {
