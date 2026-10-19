@@ -1,12 +1,15 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/ui.md` — workstream 9 (the UI): measured and agreed (Round 143), being built. Kickoff:
-  `docs/kickoff-workstream-9.md` (Round 142).
+- `docs/ui.md` — workstream 9 (the UI): measured and agreed (Round 143), built (Rounds 144–148): the busy page
+  (seeded clashes, pieces drawn after the page), the record against Holmes (`Game.record`, shown only as the story
+  reaches each deadline), "state it yourself" (`concludeFrom`), the small items. Its review: `docs/review-ws9.md`
+  (Round 149): 15 of the 20 tags playable, QUESTION (the player's own questions) not. Kickoff:
+  `docs/kickoff-workstream-9.md`. All nine workstreams of `docs/gap-analysis.md` §5 are done.
 - `docs/reader-layer.md` — workstream 8 (the reader layer): agreed (Round 133), built (Rounds 134–139): the `reader`
   and `supplied` options (`engine/readers.js`), `Game.disclosure` and `heldBack`, expert steps that never gate, set
   aside and re-read, `hints: story` (Holmes's interest). Kickoff: `docs/kickoff-workstream-8.md`. Its review:
-  `docs/review-ws8.md` (Round 140). Next in `docs/gap-analysis.md` §5: workstream 9, the UI.
+  `docs/review-ws8.md` (Round 140).
 - `docs/predictions.md` — workstream 7 (predictions and test plans): agreed (Round 125), built (Rounds 126–130):
   sealed checks (`ck.*` in `knowledge.json`, a Checks tab), `checkScores` and `absenceScores`. Kickoff:
   `docs/kickoff-workstream-7.md`. Its review: `docs/review-ws7.md` (Round 131), a verdict per thought.
@@ -37,7 +40,7 @@
 ## Commands
 | Task | Command |
 |---|---|
-| All tests (engine + full case validation, about 3 min since Round 66; run it in the background) | `npm test` |
+| All tests (engine + full case validation, about 7–8 min; run it in the background) | `npm test` |
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Validate the case and rewrite `cases/silver-blaze/report.md` | `npm run validate` |
 | Serve the game | `node scripts/serve.js` → http://localhost:8321/ (`logic.html` lays the case's logic open; the Timeline tab has the board) |

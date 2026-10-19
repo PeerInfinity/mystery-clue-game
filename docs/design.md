@@ -3799,3 +3799,16 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
   - the settings panel: You, The cards, Your reasoning, What the game shows, every option there.
 - **Leak check:** no card text; the new labels are fixed words.
 - **Moved:** nothing in the logs, the reports or the gate listing.
+
+## Round 149 (2026-10-18): workstream 9's review; workstream 9 done
+
+- **`docs/review-ws9.md`:** each of the 20 tags of `docs/gap-analysis.md` §2 against the UI as built (Rounds 144–148).
+  Playable: 15 (RECORD, NOTICE, ABSENCE, HYPOTHESIS, INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY, WEIGH, SOURCE, TEST,
+  RESIDUE, DROP, REVISE), each scored family now shown as the story reaches its deadline; playable, unscored: GENRE and
+  SET ASIDE (12 of 20 and 5 of 7 thoughts, as agreed); partly playable: PREDICT and TEST PLAN (`t92.13`, `t92.14`, as
+  workstream 7 left them); not playable: QUESTION, the player's own questions (`docs/ui.md` Q7, kept for later).
+- **Left open:** the player's own questions; no UI for `applyRule` (agreed) or `retract`; the rule `category`; the
+  board without checks or signals (agreed); the earlier reviews' items; a check's capitals; the case loading on the
+  main thread.
+- **`docs/ui.md`** marked built, with what changed at build time; **`CLAUDE.md`** points at it and the review, and the
+  suite's time is 7–8 minutes. **Workstream 9 is done**, and with it the nine workstreams of the gap analysis's §5.

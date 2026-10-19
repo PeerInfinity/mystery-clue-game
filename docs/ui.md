@@ -1,6 +1,7 @@
 # The UI (workstream 9)
 
-Status: **AGREED** (Robert, 2026-10-18, Round 143: every recommendation of Q1–Q7 and the order of work). Mission: `docs/kickoff-workstream-9.md`. Builds on
+Status: **AGREED** (Robert, 2026-10-18, Round 143: every recommendation of Q1–Q7 and the order of work), **built**
+(Rounds 144–148). Its review: `docs/review-ws9.md` (Round 149). Mission: `docs/kickoff-workstream-9.md`. Builds on
 `docs/gap-analysis.md` (§2, every tag's "What is needed", for its UI half; §5 item 9; §6 decision 2, what scores),
 Round 32 (the game should let the player perform every step of the annotation), the "UI" steps and "Left open"
 lists of `docs/hypotheses.md`, `docs/predictions.md` and `docs/reader-layer.md`, their reviews, and Rounds 62
@@ -360,3 +361,13 @@ The recommendations of Q1–Q7 as written, and the order of work:
 - **Q2:** `applyRule` leaves the UI plan (`propose` is the player's inference); the small "State it yourself"
   (`conclude`, cited rules grounded for the player, with a time budget) is built as step 4.
 - **Q7:** the player's own questions are a design question of their own, kept listed for a later workstream.
+
+**At build time (Rounds 144–148):**
+- **The busy page** (Round 144): a reload seeds the clash cache from the saved log; the worker shares a request
+  already in flight (two waiting pieces had made the same search twice). Measured on a shared machine, so the
+  targets of 10 s and 3 s were for an idle one: a reload at the end about 12 s (HEAD before: 43–97 s), the first theory
+  at about 6 s.
+- **`possible`** (Round 145): notices 6 → 8, checks 9 → 10; two tests' expectations changed.
+- **State it yourself** (Round 147): the rules are applied as the case's inferences apply them (their
+  `<inference>#ruleN` constraints), which needs no binding form; 41 of the route's 54 inferences follow from the clues
+  alone. A lone card that completes nothing stays connected.
