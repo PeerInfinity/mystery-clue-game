@@ -4038,3 +4038,26 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Leak check:** no card text; the annotation reads a clause of ¶33.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; `c.wife_woke_at_seven` was
   already dealt at ¶33).
+
+## Round 163 (2026-10-19): three UI defects found by playing the action table through the UI
+
+- **Measured:** the closing review's action table (one row per thought: its moves as the UI makes them) played through
+  the real UI in headless Chrome on Hard, from the first paragraph, each move checked in the saved game (the session's
+  `ui-run.mjs`). Three defects, on every difficulty (Robert agreed the fixes):
+  - (g) **An inference that rests on another inference (or on an event) could not be built:** "Infer from this /
+    Connect to this" was on clue and background cards only. 18 of the 58 inferences were out of reach in the UI, 13
+    of them behind Holmes's dated steps (the curry after its first step, the key, the knife, Derbyshire, the second
+    household, the sheep; the one-culprit default rests on two events). The checks of Rounds 145–147 used saves built
+    in node, which never met it.
+  - (h) **The papers' "defended himself against his assailants" could not be split** (`t35.6`): a statement made only
+    of parts cannot be doubted whole, and the card drew its weighing (with the split) only for one that can.
+  - (j) **"New theory" failed in every browser since Round 139:** the re-read prompt's local `const prompt` in the click
+    handler shadowed the browser's `prompt()`, so naming a theory called `null` ("prompt is not a function").
+- **UI:** "Connect to this" on inference and event cards too; a statement of parts shows its split without the doubt;
+  the local renamed.
+- **Checked in headless Chrome** on Hard saves: at ¶37, from the curry's first step (`k.drugger_knew_the_menu`, its
+  card on the Inferences tab) and three cards, "You inferred: The drugger knew what the house would have for supper,
+  …"; at ¶36, "Split into: That Straker had defended himself vigorously … · That there was more than one assailant
+  …", with no doubt buttons; "New theory" asks "Name your theory" and saves it.
+- **Leak check:** no text changed.
+- **Moved:** nothing in the logs, the reports or the gate listing (UI only).

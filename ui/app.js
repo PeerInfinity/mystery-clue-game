@@ -318,7 +318,8 @@ function toolCard() {
         }
         h += '</div>';
     });
-    if (['claims', 'rules'].includes(c.section) && !game.autoSolves()) h += inferButton(id);
+    // Any card an inference can rest on can be connected: a clue, a background fact, an inference, an event.
+    if (['claims', 'rules', 'inferences', 'events'].includes(c.section) && !game.autoSolves()) h += inferButton(id);
     // Scenery: set it aside (it leaves your lists and costs nothing), or put it back.
     if (['entities', 'events', 'claims'].includes(c.section)) h += `<p class="small"><button class="quiet" data-${game.isSetAside(id) ? 'putback' : 'setaside'}="${id}" title="${game.isSetAside(id) ? 'Back among your cards' : 'Out of your lists as scenery; you still hold it, and you can put it back'}">${game.isSetAside(id) ? 'Put back' : 'Set aside'}</button></p>`;
     if (c.section === 'inferences') {
@@ -328,7 +329,8 @@ function toolCard() {
     }
     if (c.section === 'claims' || c.section === 'inferences') {
         if (c.section === 'inferences') h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(c.formula))}</p>`;
-        if (game.canSuspect(id)) h += weighHtml(id);
+        // A statement made only of parts (the papers' "assailants") cannot be doubted whole, but can be split.
+        if (game.canSuspect(id) || game.partsOf(id).length) h += weighHtml(id);
         if (c.section === 'inferences') h += unlessHtml(id);
         const form = model.claimForms.get(id);
         const f = c.section === 'claims' && form && model.constraints.get(form.trusted)?.formula;
@@ -599,7 +601,9 @@ function weighHtml(id) {
         return kind === 'lying' ? `${name} lied` : `${name} was mistaken`;
     };
     const defeat = game.raisedOn(id).find((r) => r.status === 'established');
-    if (defeat) {
+    if (!game.canSuspect(id)) {
+        // Nothing to doubt whole: only the split below.
+    } else if (defeat) {
         // A defeat (workstream 3): the step no longer counts, for the reason shown; its conclusion is not shown false.
         h += `<p class="doubt on">This step no longer counts: you have shown that ${esc(defeat.text)}. That does not make its conclusion false; “Does it hold?” is open below. <button data-withdraw="${esc(`${id}|${defeat.n}|${defeat.exception}`)}" class="quiet">Count it again</button></p>`;
     } else if (game.isSuspected(id)) {
@@ -1576,8 +1580,8 @@ function onClick(e) {
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
-    const prompt = e.target.closest('[data-reread-prompt]');
-    if (prompt) { const [from, to] = prompt.dataset.rereadPrompt.split('-').map(Number); ui.reread = { from, to, question: '' }; renderReader(); return; }
+    const pointBack = e.target.closest('[data-reread-prompt]');
+    if (pointBack) { const [from, to] = pointBack.dataset.rereadPrompt.split('-').map(Number); ui.reread = { from, to, question: '' }; renderReader(); return; }
     if (e.target.closest('#reread-open')) { ui.reread = ui.reread ? null : { from: 1, to: game.read - 1, question: '' }; renderReader(); return; }
     if (e.target.closest('#rr-close')) { ui.reread = null; ui.rereadShown = null; renderStory(); return; }
     if (e.target.closest('#rr-go')) {
