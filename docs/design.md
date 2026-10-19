@@ -4145,3 +4145,14 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Checked in headless Chrome:** the checked-in file played through the UI on Hard from the first paragraph: 396 moves,
   none failed, no console error; the record: 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1.
 - **Moved:** nothing in the logs, the reports or the gate listing.
+
+## Round 169 (2026-10-19): the layout paper
+
+- **`docs/layout.md`** (piece 2 of `docs/kickoff-closing-review.md`): today's page screenshotted in headless Chrome
+  (desktop: story left with the reading bar under it, eight tabs wrapping onto two rows right; phone: one page 5,584 px
+  tall, the story above the tools). Recommended: any tab (Story and Record among them) in either panel, swapping rather
+  than showing one twice; the reading bar at page level, always shown; a card opening in the other panel (in place with
+  "back" in one column); a one-or-two-columns toggle, phones always one column with the bar at the bottom; one
+  scrolling row of tabs per panel; the layout remembered per viewer apart from the save; today's page the default. For
+  Robert to agree before anything is built.
+- **Moved:** nothing (documentation).
