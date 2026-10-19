@@ -23,7 +23,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
+const ui = { columns: 2, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -224,9 +224,13 @@ function scrollStory() {
 // the one clicked in (Q3).
 const TABS = [['story', 'Story'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
 const TOOLS = { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
-const panelOf = (tab) => ui.panels.findIndex((p) => p.tab === tab);
-const panelBody = (tab) => $(`#panel-${panelOf(tab)}`);
-/** The panel a click came from (null: the header, the pop-up). */
+// One column (the header's toggle) or two; a phone always one (docs/layout.md, Q4). In one column the second panel is
+// hidden, and keeps its tab for when there are two again.
+const NARROW = window.matchMedia('(max-width: 699px)');
+const columns = () => (NARROW.matches ? 1 : ui.columns);
+const shown = (i) => i < columns();
+const panelOf = (tab) => ui.panels.findIndex((p, i) => p.tab === tab && shown(i));
+/** The panel a click came from (null: the header, the reading bar, the pop-up). */
 function fromPanel(e) {
     const p = e.target.closest('.panel');
     return p ? Number(p.dataset.panel) : e.target.closest('#pop') ? ui.popFrom ?? null : null;
@@ -237,20 +241,52 @@ function choose(i, tab) {
     if (other.tab === tab) other.tab = ui.panels[i].tab;
     ui.panels[i].tab = tab;
 }
-/** Show a tab where a link opens it: where it is shown already, else in the other panel than the one clicked in. */
+/** A view a link replaces, kept for "back" (Q3): the panel, its tab, the card shown, and where it was scrolled. */
+function leave(i) {
+    const tab = ui.panels[i].tab;
+    const el = tab === 'story' ? $('#story') : $(`#panel-${i}`);
+    ui.back = [...ui.back, { panel: i, tab, card: tab === 'card' ? ui.selected : null, scroll: el?.scrollTop ?? 0 }].slice(-30);
+}
+/** Show a tab where a link opens it: where it is shown already, else in the other panel than the one clicked in (in one
+ *  column, the one panel). */
 function show(tab, from = null) {
     let i = panelOf(tab);
-    if (i < 0) {
-        i = from === null ? (tab === 'story' || ui.panels[1].tab === 'story' ? 0 : 1) : 1 - from;
-        ui.panels[i].tab = tab;
-    }
+    if (i >= 0) return i;
+    i = columns() === 1 ? 0 : from === null ? (tab === 'story' || ui.panels[1].tab === 'story' ? 0 : 1) : 1 - from;
+    leave(i);
+    choose(i, tab);
     return i;
 }
-/** Each panel's body made for its tab: the story and its reading bar, or a tool. True if the story was just put up. */
+/** The view "back" returns a panel to: the last one left there that it does not show now. */
+function backFor(i) {
+    const now = ui.panels[i].tab;
+    for (let k = ui.back.length - 1; k >= 0; k--) {
+        const b = ui.back[k];
+        if (columns() > 1 && b.panel !== i) continue;
+        if (b.tab === 'card' && !(b.card && game.knows(b.card))) continue;
+        // A list the other panel shows now is in view already.
+        if (b.tab !== 'card' && panelOf(b.tab) >= 0 && panelOf(b.tab) !== i) continue;
+        if (b.tab !== now || (now === 'card' && b.card !== ui.selected)) return k;
+    }
+    return -1;
+}
+function goBack(i) {
+    const k = backFor(i);
+    if (k < 0) return;
+    const b = ui.back[k];
+    ui.back.splice(k, 1);
+    if (b.tab === 'card') { ui.selected = b.card; ui.menu = null; ui.menuNote = ''; }
+    choose(i, b.tab);
+    ui.restore = { panel: i, scroll: b.scroll };
+}
+/** Each shown panel's body made for its tab: the story, or a tool. True if the story was just put up. */
 function layoutPanels() {
     let storyShown = false;
+    $('.layout').classList.toggle('one', columns() === 1);
+    document.querySelectorAll('[data-cols]').forEach((b) => b.classList.toggle('on', Number(b.dataset.cols) === ui.columns));
     ui.panels.forEach(({ tab }, i) => {
         const body = $(`#panel-${i}`);
+        if (!shown(i)) { if (body.dataset.tab) { body.dataset.tab = ''; body.innerHTML = ''; } return; }
         if (body.dataset.tab === tab) return;
         body.dataset.tab = tab;
         if (tab === 'story') {
@@ -275,23 +311,46 @@ function renderTabs() {
         cards: `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`,
         questions: `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`,
     };
-    const hidden = { inferences: game.autoSolves() && !game.heldInferences().length };
+    label.story = `Story ¶${game.read - 1}`;
+    if (!game.autoSolves()) label.record = `Record (${ui.ahead ?? 0} ahead)`;
+    const hidden = { inferences: game.autoSolves() && !game.heldInferences().length, record: game.autoSolves() };
     document.querySelectorAll('.panel').forEach((el, i) => {
-        el.querySelector('.tabs').innerHTML = TABS.filter(([t]) => !hidden[t] || ui.panels[i].tab === t)
+        if (!shown(i)) return;
+        // One row that scrolls sideways (Q5), the tab shown kept in view.
+        const row = el.querySelector('.tabs');
+        row.innerHTML = TABS.filter(([t]) => !hidden[t] || ui.panels[i].tab === t)
             .map(([t, name]) => `<button data-tab="${t}" class="tab${ui.panels[i].tab === t ? ' on' : ''}">${esc(label[t] ?? name)}</button>`).join('');
+        const on = row.querySelector('.tab.on')?.getBoundingClientRect();
+        const box = row.getBoundingClientRect();
+        if (on && (on.left < box.left || on.right > box.right)) row.scrollLeft += on.left - box.left - 8;
+        const k = backFor(i);
+        const back = el.querySelector('.back-row');
+        back.hidden = k < 0;
+        back.innerHTML = k < 0 ? '' : `<span class="link" data-back="${i}">← back to ${esc(backName(ui.back[k]))}</span>`;
     });
+}
+function backName(b) {
+    if (b.tab === 'card') return shortName(b.card, 50);
+    if (b.tab === 'story') return 'the story';
+    return TABS.find(([t]) => t === b.tab)[1];
 }
 function renderTool() { run(renderToolNow); }
 function renderToolNow() {
     if (layoutPanels()) { renderStory(); scrollStory(); }
     // The connection in progress shows above the card, or above the first tool shown.
-    const bar = panelOf('card') >= 0 ? panelOf('card') : ui.panels.findIndex((p) => p.tab !== 'story');
+    const bar = panelOf('card') >= 0 ? panelOf('card') : ui.panels.findIndex((p, i) => p.tab !== 'story' && shown(i));
     ui.panels.forEach(({ tab }, i) => {
-        if (tab === 'story') return;
+        if (tab === 'story' || !shown(i)) return;
         const body = $(`#panel-${i}`);
-        body.innerHTML = (i === bar ? buildingBar() : '') + (tab === 'card' ? backHtml() : '') + TOOLS[tab]();
+        body.innerHTML = (i === bar ? buildingBar() : '') + TOOLS[tab]();
         if (body.dataset.fresh) { body.scrollTop = 0; delete body.dataset.fresh; }
     });
+    // Back to a view: where it was scrolled.
+    if (ui.restore) {
+        const el = ui.panels[ui.restore.panel].tab === 'story' ? $('#story') : $(`#panel-${ui.restore.panel}`);
+        if (el) el.scrollTop = ui.restore.scroll;
+        ui.restore = null;
+    }
     renderTabs();
     // The reading bar says whether the story is in view (on Hard, "open the story to collect").
     renderReader();
@@ -311,7 +370,7 @@ function intro() {
 <p class="desc">${esc(model.data.case.teaser)}</p>
 <h3 class="section">How to play</h3>
 <ul>
-<li>Read the story on the left, one paragraph at a time.</li>
+<li>Read the story one paragraph at a time: press “Next paragraph” in the reading bar.</li>
 <li>Everything the story mentions — people, places, things, events, statements — becomes a card. ${game.collecting() ? 'You collect a card by clicking the words in the story that mention it.' : 'Click the marked words in the story to open a card.'}</li>
 <li>Cards have <b>open questions</b>: who did it, where, when, whose is it, is it true. Each question lists its possible answers, like pencil marks in sudoku${game.proposing() ? ' — you list them yourself' : ''}.</li>
 <li>${game.autoSolves() ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : `${game.opts.crossOut === 'pencil' ? 'Cross answers out as you see fit' : 'Rule answers out: the game checks each against every clue and inference you hold and trust'}${game.helps('greying') ? '; the game greys the ones your clues already rule out' : ''}. Circle the answers you favour.`}</li>
@@ -1477,12 +1536,6 @@ function inferButton(id) {
     return `<p class="infer"><button data-infer="${id}" class="quiet" title="Propose an inference that starts from this card">${b?.cards.length ? 'Connect to this' : 'Infer from this'}</button></p>`;
 }
 
-/** "Back" on the Card tab: to the card shown before (docs/layout.md, Q3). */
-function backHtml() {
-    const prev = ui.back.at(-1);
-    return prev && game.knows(prev) && ui.selected && game.knows(ui.selected) ? `<div class="back small"><span class="link" data-back="1">← back to ${esc(shortName(prev, 50))}</span></div>` : '';
-}
-
 /** The connection in progress, above the card or the first tool shown. */
 function buildingBar() {
     const b = ui.building;
@@ -1613,9 +1666,10 @@ function clashHtml(ids, clash = null) {
 }
 
 // ---------- events ----------
-function openCard(id, from = null, { back = false } = {}) {
-    // The card before is kept for "back" (docs/layout.md, Q3), unless this is a step back.
-    if (!back && ui.selected && ui.selected !== id && game.knows(ui.selected)) ui.back = [...ui.back.filter((x) => x !== ui.selected), ui.selected].slice(-30);
+function openCard(id, from = null) {
+    // Moving from card to card in place: the card before is kept for "back" (docs/layout.md, Q3).
+    const at = panelOf('card');
+    if (at >= 0 && ui.selected && ui.selected !== id && game.knows(ui.selected)) leave(at);
     ui.selected = id;
     const i = show('card', from);
     ui.menu = null;
@@ -1664,6 +1718,7 @@ function onStoryClick(e) {
 }
 
 document.addEventListener('click', (e) => game && run(() => onClick(e)));
+NARROW.addEventListener('change', () => game && render());
 function onClick(e) {
     // A click anywhere outside the settings panel closes it.
     const settings = document.querySelector('.settings');
@@ -1730,7 +1785,10 @@ function onClick(e) {
     if (e.target.closest('[data-record-open]')) { $(`#panel-${show('record', fromPanel(e))}`).dataset.fresh = '1'; renderTool(); return; }
     const tabOpen = e.target.closest('[data-tab-open]');
     if (tabOpen) { show(tabOpen.dataset.tabOpen, fromPanel(e)); renderTool(); return; }
-    if (e.target.closest('[data-back]')) { if (ui.back.length) openCard(ui.back.pop(), fromPanel(e), { back: true }); return; }
+    const backTo = e.target.closest('[data-back]');
+    if (backTo) { goBack(Number(backTo.dataset.back)); renderTool(); return; }
+    const cols = e.target.closest('[data-cols]');
+    if (cols) { ui.columns = Number(cols.dataset.cols); renderTool(); return; }
     if (e.target.closest('[data-show-clashes]')) {
         show('questions', fromPanel(e));
         renderToolNow();

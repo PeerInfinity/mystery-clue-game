@@ -4,7 +4,7 @@
 //   node scripts/ui-run.mjs [table.json] [out.json]   (default: cases/silver-blaze/action-table.json → .cache/ui-run.json)
 // Needs the game served (node scripts/serve.js → URL, default http://localhost:8321/) and the headless Chrome on port
 // 9333. Only one script may drive that Chrome at a time: two clients on its one page spoil each other's runs.
-// STOP=<para> stops after that paragraph's moves. About 12–13 minutes for the whole game on a loaded machine.
+// STOP=<para> stops after that paragraph's moves; COLS=1 plays it in one column (the header's toggle). About 12–13 minutes for the whole game on a loaded machine.
 import fs from 'node:fs';
 import path from 'node:path';
 import { open } from './cdp.mjs';
@@ -23,6 +23,7 @@ await p.ev(`localStorage.clear(); 1`); await p.send('Page.reload'); await p.slee
 await p.ev(`document.querySelector('.settings').open = true; 1`);
 await p.choose('#difficulty', 'hard');
 await p.ev(`document.querySelector('.settings').open = false; 1`);
+if (process.env.COLS === '1') await p.click('[data-cols="1"]');
 // The theory's name: answer the page's prompt().
 let promptText = null;
 p.ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.method === 'Page.javascriptDialogOpening') p.send('Page.handleJavaScriptDialog', { accept: true, promptText: promptText ?? '' }); });
@@ -39,7 +40,7 @@ const label = async (slot, v) => {
 };
 // The default layout (docs/layout.md): the story in the left panel, the card in the right. As a player would, the
 // lists are chosen in the left panel, so a card clicked there opens on the right, and the left goes back to the story
-// to click its words. The reading bar is above both panels.
+// to click its words. The reading bar is above both panels. In one column the card opens in place of the list.
 const LEFT = '.panel[data-panel="0"]';
 const choose = async (t) => (await p.ev(`document.querySelector('${LEFT} .tab.on')?.dataset.tab === ${JSON.stringify(t)}`)) || p.click(`${LEFT} .tab[data-tab="${t}"]`);
 const showStory = async () => (await p.ev(`!!document.querySelector('#story')`)) || choose('story');

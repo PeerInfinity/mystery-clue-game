@@ -11,6 +11,7 @@
   <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">a casebook</span></h1>
   <div class="controls">
     <span id="progress" class="progress"></span>
+    <span class="columns" title="Show one panel the full width, or two side by side"><button data-cols="2" class="quiet">Two columns</button><button data-cols="1" class="quiet">One column</button></span>
     <details class="settings">
       <summary title="Game settings"><span class="gear" aria-hidden="true">⚙</span> <span id="settings-summary" class="long">Settings</span><span id="settings-short" class="short">Settings</span></summary>
       <div class="settings-panel">
@@ -39,10 +40,12 @@
 <main class="layout">
   <section class="panel" data-panel="0">
     <div class="tabs" role="tablist"></div>
+    <div class="back-row small" hidden></div>
     <div id="panel-0" class="panel-body"><p class="muted">Loading the case…</p></div>
   </section>
   <section class="panel" data-panel="1">
     <div class="tabs" role="tablist"></div>
+    <div class="back-row small" hidden></div>
     <div id="panel-1" class="panel-body"></div>
   </section>
 </main>

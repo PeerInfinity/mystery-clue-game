@@ -4209,3 +4209,31 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   none failed, no console error, 13 minutes; the record 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1: 70.
 - **Leak check:** the new words are fixed labels and counts ("¶N read", "N new cards", "open the story to collect").
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
+
+## Round 173 (2026-10-19): the layout, step 3: one column, the phone, one row of tabs
+
+- **Built** (`docs/layout.md` Q3–Q5; `index.html`, `ui/app.js`, `ui/style.css`):
+  - **One column or two:** a toggle in the header beside Settings ("Two columns" / "One column"). One column is one
+    panel the full width, its selector at the top; the second panel is hidden and keeps its tab for when there are
+    two again (choosing in the one panel a tab the hidden one holds swaps them, so no tab is ever in both).
+  - **"Back"** (Q3): a link that replaces a panel's view keeps it, with the panel, the tab, the card and where it was
+    scrolled; a strip under the panel's tabs reads "← back to the story" (or the list, or the card before) and
+    returns there at the same place. In one column every link opens in the one panel, so a card opened from the story
+    replaces it and "back" returns to the story where it was; with two, a card opened in place of another (or of the
+    view in the other panel) does the same. A list the other panel already shows is not offered.
+  - **The phone** (below 700 px): always one column, the toggle hidden, the reading bar at the bottom of the screen;
+    the page is the screen's height (844 px on a 390 × 844 phone, from 5,584 px), each panel scrolling on its own.
+  - **The selector** (Q5): one row per panel that scrolls sideways, the tab shown kept in view; the counts as before,
+    and "Story ¶N" and "Record (N ahead)" (no Record tab in Trivial, which scores nothing).
+  - "How to play" says "press “Next paragraph” in the reading bar" (it said "the story on the left").
+- **The runner:** `COLS=1 node scripts/ui-run.mjs` plays the table in one column (the toggle pressed after Hard is
+  chosen); a card clicked in a list opens in its place.
+- **Checked in headless Chrome** (desktop 1400 × 900 and phone 390 × 844, screenshots sent to Robert): one row of tabs
+  in each panel; one column, a card from the story, "back" to the story at its place; the record from the header and
+  back; two columns again with the tabs as they were; the phone's story and a card from Cards with "← back to Cards",
+  the bar at the bottom; no console error. **The action table through the UI** on Hard, in two columns and in one:
+  396 moves each, none failed, no console error, 12½ minutes each; the record both times 45 of 47, 8 of 8, 3 of 3,
+  3 of 3, 10 of 10, 1 of 1: 70.
+- **Leak check:** the new words are fixed labels ("Two columns", "One column", "← back to" the story, a tab or a held
+  card's name, "¶N", "N ahead").
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
