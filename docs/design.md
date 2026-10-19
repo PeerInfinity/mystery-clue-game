@@ -4095,3 +4095,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **For Robert:** the maximum as the autoplay's target; where the action table lives; the script's own rules (into
   `thoughts.json`?); the seven slips.
 - **Moved:** nothing (documentation).
+
+## Round 166 (2026-10-19): four annotation maps that named later cards
+
+- **The closing review's slips** (`docs/review-closing.md`, "Thoughts whose move comes after their paragraph"; Robert
+  agreed to fix them): four thoughts mapped a card or inference the story or a later thought holds, so the game could
+  make their move only later than their paragraph:
+  - `t35.7` (whose blood) no longer maps `k.only_one_blade` (`t44.2`'s, ¶41); its question stays;
+  - `t35.10` (the cravat in his hand) no longer maps `k.cravat_order` (`t60.4`'s, ¶60); its reading stays;
+  - `c.mapleton_interest` (quoted from ¶66) moves from `t40.3` (¶40) to `t66.2` ("Brown adds motive", ¶66);
+  - `t64.2` (the search found nothing, ¶64) maps the ¶64 search, `c.stables_within_ten_miles`, not Mapleton's (¶66).
+- **Not slips, on a closer look:** `t34.5` was the table script's order within a paragraph (it now passes over a
+  paragraph until nothing more moves); `t56.1`'s second raise and `t64.3`'s disguise need cards the story tells at ¶60
+  and ¶66, which the review says.
+- **Moved:** `thoughts-report.md`: HYPOTHESIS thoughts holding a card 24 → 23; premise disagreements 4 → 3; `t40.4`'s
+  cited `t40.3` is now "not held" at ¶40 (Mapleton's interest is told at ¶66). The logs, `report.md` and the gate
+  listing are unchanged.

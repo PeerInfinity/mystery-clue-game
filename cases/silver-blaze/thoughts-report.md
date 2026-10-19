@@ -15,7 +15,7 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | NOTICE | 16 | 4 |
 | ABSENCE | 6 | 4 |
 | QUESTION | 10 | 4 |
-| HYPOTHESIS | 27 | 24 |
+| HYPOTHESIS | 27 | 23 |
 | INFER | 24 | 24 |
 | DEFAULT | 8 | 7 |
 | AGENT | 8 | 8 |
@@ -108,7 +108,7 @@ PREDICT and TEST PLAN thoughts with the checks they plan (`checks`), and what th
 
 Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names one inference in `constraints.json` (`docs/short-chains.md`, Q1). *Dealt*: the paragraph by which the game, read through with background facts arriving where relevant, has dealt every premise of the inference (an inference premise counts once its own premises are dealt). It is also never earlier than the story deals the event cards the conclusion speaks of. A miss is a dealt paragraph later than the thought's own: a late card to fix, an annotation date to correct, or a miss explained (`date_note`, listed below). A deduction that can have no inference says why (`no_inference`, listed below). *Warrant*: the rules the inference applies that no cited item stands for (they need no citation); *bookkeeping*: implicit inferences among its premises; *not held*: cited thoughts no card holds yet.
 
-- deduction-type thoughts: 56; with an inference: 54; with a reason for none: 2; earliest-date misses: 0 (and 5 explained); premise disagreements: 4
+- deduction-type thoughts: 56; with an inference: 54; with a reason for none: 2; earliest-date misses: 0 (and 5 explained); premise disagreements: 3
 
 | Thought | Tag | Inference | Thought ¶ | Dealt | Cited, not a premise | Premise, not cited | Warrant | Bookkeeping | Not held |
 |---|---|---|---|---|---|---|---|---|---|
@@ -130,7 +130,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t37.14` | DEFAULT | `k.menu_choosers` | ¶37 | ¶37 |  |  |  |  |  |
 | `t37.15` | DEFAULT | `k.drugger_chose_the_dish` | ¶37 | ¶37 |  |  |  |  |  |
 | `t37.16` | INFER | `k.drugger_took_the_horse` | ¶37 | ¶37 |  |  |  |  |  |
-| `t40.4` | INFER | `k.horse_at_mapleton_by_reach` | ¶40 | ¶37 | `t40.3` |  |  |  |  |
+| `t40.4` | INFER | `k.horse_at_mapleton_by_reach` | ¶40 | ¶37 |  |  |  |  | `t40.3` |
 | `t41.2` | TEST | `k.knife_marks_assailant` | ¶41 | ¶41 |  |  | `r.wounds_in_a_struggle` |  |  |
 | `t44.2` | TEST | `k.only_one_blade` | ¶44 | ¶41 |  |  |  |  |  |
 | `t46.2` | INFER | `k.bridled_by_taker` | ¶46 | ¶46 |  |  | `r.bridle_needs_a_hand` |  |  |
