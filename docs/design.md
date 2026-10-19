@@ -4081,3 +4081,17 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   (more hands than the player's inside story) are made through the forms.
 - **Leak check:** the new words are fixed labels; the answers shown are the player's own, already on offer.
 - **Moved:** nothing in the logs, the reports or the gate listing (UI only).
+
+## Round 165 (2026-10-19): the closing review written
+
+- **`docs/review-closing.md`:** every one of the 296 thoughts against the game as played on Hard through the UI, from
+  the action table (the session's `table.mjs`, played by `ui-run.mjs` in headless Chrome: 395 moves, none failed, about
+  13 minutes): 68 score, 131 played, 12 played by an earlier thought's move, 1 played but never ahead (`t127.4`), 35
+  held otherwise, 17 confirmations, 10 Easy and Trivial only (watch-holmes), 2 playable but not scripted, 20 not held
+  (each with its agreed reason).
+- **The Hard maximum:** 70 ahead of Holmes (deductions 45 of 47, every other family full), the same for the engine,
+  the annotation's player and the UI. Unscorable: `t127.4` (late disclosure) and `t36.2` (its fact stated at ¶218).
+- **The defects** found on the way, all fixed (Rounds 157–164), and **seven annotation slips** of map or date listed.
+- **For Robert:** the maximum as the autoplay's target; where the action table lives; the script's own rules (into
+  `thoughts.json`?); the seven slips.
+- **Moved:** nothing (documentation).

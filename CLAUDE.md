@@ -1,6 +1,10 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/review-closing.md` — the closing review (Rounds 157–165): every thought's move made in the UI on Hard, in one
+  game played through the page by the action table (the autoplay's script); the Hard maximum, 70 ahead of Holmes (45
+  of 47 deductions, every other family full), the same for the engine, the annotation and the UI; eleven defects found
+  and fixed on the way (Rounds 157–164). Its questions for Robert open the next pieces.
 - `docs/kickoff-closing-review.md` — the next sessions' work (Round 156), in Robert's order: a closing review of the
   whole game against the annotation, thought by thought (its paper: `docs/review-closing.md`); then the layout (tabs at
   the top of both panels, the story as a tab, one or two columns); the player's notes on the story text; an autoplay
