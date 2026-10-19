@@ -3824,3 +3824,23 @@ not playable (`docs/review-ws9.md`). `docs/kickoff-questions.md` hands it over:
   template would offer), then `docs/questions.md` discussed with Robert before anything is built;
 - the traps of Rounds 60–150, with this session's added: the gate that commits a file edited during its run, the
   shared machine's timings, and the browser-check details.
+
+## Round 151 (2026-10-18): the player's own questions measured; docs/questions.md agreed
+
+- **Measured** (scratch scripts in the session's scratchpad; Easy, a passive reader and a builder; the UI in headless
+  Chrome at ¶46):
+  - **When the reader asks against when the game opens the question:** of the ten QUESTION thoughts, 3 are already
+    open when asked (`t46.6`, `t92.8`, `t120.3`); 2 match a slot the story raises later (`t14.2`: ¶37 passive, ¶19
+    builder; `t46.5`: ¶214 passive, ¶92 builder); 5 match no slot (`t20.7`, `t25.1`, `t31.4`, `t57.3`, `t108.2`), two
+    of them near the drugging's slots, whose event is not yet held.
+  - **Templates over held cards** cannot leak by their dropdowns (held cards, fixed words), but **a different
+    response** to a matched question would: five events carry a declared "why", 11 objects an owner, one person a
+    motive.
+  - **Slots opened as soon as their card is held** would show `straker.motive` at ¶4 ("What drove the trainer to it?",
+    with "Debts run up by the woman of his second household"), Holmes's answers for the coat and the light, and the
+    state and order slots' window labels: their labels were safe only because the slots wait to be raised.
+  - The re-read form offers only the raised case questions (seven at ¶46).
+- **Agreed (Robert):** every recommendation of `docs/questions.md`: the "?" card matched quietly and joining at the
+  raise; templates in the engine, never state, order, truth or relation slots; q.where_horse anchored at ¶14; the
+  re-read form and candidates, nothing early; ·turn-around one template; the record only; the order of work.
+- **`CLAUDE.md`** points at the paper.
