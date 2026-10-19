@@ -4061,3 +4061,23 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   …", with no doubt buttons; "New theory" asks "Name your theory" and saves it.
 - **Leak check:** no text changed.
 - **Moved:** nothing in the logs, the reports or the gate listing (UI only).
+
+## Round 164 (2026-10-19): a settled question keeps the player's answers to drop; a drop names the card it cites
+
+- **Found** by playing the action table through the UI (Robert agreed the recommendations):
+  - (i) **A question settled by a clue hid the player's other answers.** Once Simpson's ten-pound note is held, "What
+    was in the folded paper?" is settled by it and showed only the note: "opium", which a Hard player can propose from
+    ¶40 (where the police's reading raises the question), vanished with its "Drop it…". The paper's wrong turn
+    (`t58.3`, scored) could not be dropped in the UI on any difficulty.
+  - (k) **A drop "because of a card" could cite only the question's own card:** the form cited the card open, and a
+    question's answers show only on its own card, so the ten-pound note could never be cited against "opium".
+- **UI:** a settled question keeps the answers the player proposed or circled beside the settled one, each with a menu
+  that says the question is settled and offers "Drop it…"; the drop form's reason reads "a card tells against it" and
+  has "Because of:", a list of held clues and inferences with the card open first.
+- **Checked in headless Chrome:** the whole game on Hard played through the UI from the first paragraph by the action
+  table, on this tree: 380 moves, none failed, no console error; the record at the end: deductions 45 of 47, odd
+  details 8 of 8, steps seen through 3 of 3, wrong turns dropped 3 of 3, checks 10 of 10, what did not happen 1 of 1:
+  70, the engine's maximum. The paper's drop at ¶58 ("opium", because of the ten-pound note) and the maid's at ¶92
+  (more hands than the player's inside story) are made through the forms.
+- **Leak check:** the new words are fixed labels; the answers shown are the player's own, already on offer.
+- **Moved:** nothing in the logs, the reports or the gate listing (UI only).

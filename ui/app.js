@@ -406,6 +406,8 @@ function renderSlot(s) {
         chips.push(`<span class="chip proven" data-slot="${s.id}" data-val="${esc(settled)}">${esc(valueName(s.id, settled))}</span>`);
         if (game.autoSolves()) chips.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'settled by the story' : 'worked out from your clues'}</span>`);
         else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
+        // The answers the player put forward (proposed or circled) stay in view beside the settled one, to be dropped (Round 164).
+        if (!game.autoSolves()) chips.push(...[...new Set([...(m?.listed ?? []), ...(m?.circled ?? [])])].filter((v) => v !== settled && game.offered(s.id, v)).map((v) => chip(s.id, v, 'ruled')));
         for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k, shortName(k, 60))}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
     } else {
         const pencil = game.pencil(s.id);
@@ -496,7 +498,9 @@ function slotMenu(s, v) {
         if (model.cards.has(v) && game.knows(v)) b.push(`<button data-op="open" class="quiet">Open ${esc(shortName(v, 30))}</button>`);
         return `<div class="menu" data-menu-slot="${s.id}" data-menu-val="${esc(v)}"><b>${esc(valueName(s.id, v))}</b>${b.join('')}${ui.menuNote ? `<div class="why">${ui.menuNote}</div>` : ''}</div>`;
     }
-    if (isGiven && !isProven) b.push(`<span class="small muted">Given by a clue you trust.</span> <button data-suspect="${game.given(s.id).claim}" class="quiet">Doubt that clue</button>`);
+    const settledOther = game.settled(s.id) !== null && game.settled(s.id) !== v;
+    if (settledOther) b.push(`<span class="small muted">The question is settled: ${esc(valueName(s.id, game.settled(s.id)))}.</span>`);
+    else if (isGiven && !isProven) b.push(`<span class="small muted">Given by a clue you trust.</span> <button data-suspect="${game.given(s.id).claim}" class="quiet">Doubt that clue</button>`);
     else if (isProven) b.push('<button data-op="unprove">Undo the proof</button>');
     else if (st && !game.strikeLapsed(s.id, v)) b.push('<button data-op="unstrike">Restore</button>');
     else {
@@ -512,7 +516,7 @@ function slotMenu(s, v) {
     if (model.cards.has(v) && game.knows(v)) b.push(`<button data-op="open" class="quiet">Open ${esc(shortName(v, 30))}</button>`);
     // Dropping a candidate for a reason that is not a proof (docs/hypotheses.md, Q5).
     const key = `c|${s.id}|${v}`;
-    if (!isGiven && !isProven && !game.dropOf({ slot: s.id, value: v })) b.push(`<button class="quiet" data-drop-open="${esc(key)}">Drop it…</button>`);
+    if ((settledOther || (!isGiven && !isProven)) && !game.dropOf({ slot: s.id, value: v })) b.push(`<button class="quiet" data-drop-open="${esc(key)}">Drop it…</button>`);
     const drop = game.dropOf({ slot: s.id, value: v }) ? dropHtml(key) : ui.dropping === key ? dropForm(key) : '';
     return `<div class="menu" data-menu-slot="${s.id}" data-menu-val="${esc(v)}"><b>${esc(valueName(s.id, v))}</b>${b.join('')}${drop}${ui.menuNote ? `<div class="why">${ui.menuNote}</div>` : ''}</div>`;
 }
@@ -522,7 +526,7 @@ const DROP_LABELS = {
     'out-explained': 'another theory explains more',
     'more-hands': 'it needs more people than another theory',
     cost: 'it needs too much of what I trust to be wrong',
-    card: 'the card I have open tells against it',
+    card: 'a card tells against it',
 };
 /** A theory's short name, as a story to read cards under. */
 function layerName(id) {
@@ -543,10 +547,13 @@ function dropTarget(key) {
 function dropForm(key) {
     const target = dropTarget(key);
     const rivals = game.visibleTheories().filter((t) => t.id !== target.theory);
-    const card = ui.selected && game.knows(ui.selected) ? ui.selected : null;
+    // The card that tells against it: any clue or inference held, the card open first (Round 164).
+    const open = ui.selected && game.knows(ui.selected) && ['claims', 'inferences'].includes(model.cards.get(ui.selected)?.section) ? ui.selected : null;
+    const cards = [...(open ? [open] : []), ...[...game.unlocked.keys()].filter((x) => x !== open && inHand(x) && ['claims', 'inferences'].includes(model.cards.get(x)?.section))];
     return `<div class="small drop-form">Why drop it? <select id="drop-reason">${DROP_REASONS.map((r) => `<option value="${r}">${esc(DROP_LABELS[r])}</option>`).join('')}</select>`
         + (rivals.length ? ` Than: <select id="drop-rival">${rivals.map((t) => `<option value="${esc(t.id)}">${esc(shortName(t.label, 50))}</option>`).join('')}</select>` : '')
-        + `${card ? ` <span class="muted">(the card open: ${esc(shortName(card, 40))})</span>` : ''} <button data-drop-go="${esc(key)}">Drop</button> <span class="link" data-drop-cancel="1">cancel</span></div>`;
+        + ` Because of: <select id="drop-cite"><option value="">the card…</option>${cards.map((x) => `<option value="${esc(x)}"${x === open ? ' selected' : ''}>${esc(shortName(x, 60))}</option>`).join('')}</select>`
+        + ` <button data-drop-go="${esc(key)}">Drop</button> <span class="link" data-drop-cancel="1">cancel</span></div>`;
 }
 /** A dropped hypothesis: the reason, on Easy the game's check of it, and a way back. */
 function dropHtml(key) {
@@ -1819,7 +1826,7 @@ function onClick(e) {
     if (t.dataset.dropCancel) { ui.dropping = null; renderTool(); return; }
     if (t.dataset.dropGo) {
         const reason = $('#drop-reason').value;
-        const res = game.drop(dropTarget(t.dataset.dropGo), reason, { rival: $('#drop-rival')?.value ?? null, cites: reason === 'card' && ui.selected ? [ui.selected] : [] });
+        const res = game.drop(dropTarget(t.dataset.dropGo), reason, { rival: $('#drop-rival')?.value ?? null, cites: reason === 'card' && $('#drop-cite')?.value ? [$('#drop-cite').value] : [] });
         if (!res.ok) { toast(esc(res.reason)); return; }
         ui.dropping = null;
         changed();
