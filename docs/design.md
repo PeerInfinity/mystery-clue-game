@@ -3983,3 +3983,25 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Test:** `record.test.js`: an Easy builder makes all four before Holmes (`t46.4` by ¶46); a passive reader none.
 - **Leak check:** no text changed; the record names held cards only, at Holmes's paragraph, as before.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full); only the scores, which none of them shows.
+
+## Round 160 (2026-10-18): three thoughts dated where their move is possible
+
+- **Annotation** (Round 157's defect d; `thoughts.json` and `docs/reading-annotated.md` together): three thoughts were
+  dated a paragraph after their move is possible, by the annotation's own rule (a thought's id carries the first
+  paragraph at which every premise is available), so a player following the annotation reached each at Holmes's own
+  paragraph and could not score it:
+  - `t96.1` → **`t95.2`**: the coat was placed, from Gregory's "None; but very heavy rain" (¶95); Holmes ¶96.
+  - `t189.1` → **`t188.2`**: the shortened odds, told at ¶188; Holmes ¶189.
+  - `t81.2` → **`t80.2`**: the cataract knife is named at ¶80 (Watson), a paragraph before Holmes calls it strange.
+    Its record `t81.1` is split: **`t80.1`** (¶80, "It is what we call a cataract knife") and `t81.1` (¶81, the
+    delicate blade that would not shut). `t80.2` notices the ¶80 card only (the validator refuses a notice of a card
+    the game deals later; noticing the ¶81 card could never score, ¶81 being Holmes's).
+  References follow: `t81.3` and `t97.2`'s premises, `pz.knife`'s thought, `a.examine_coat`'s yield, a test's
+  message. Older review documents keep the ids they had (they are records).
+- **Leak check:** no card text changed.
+  `t81.4` (no one arms himself with a cataract knife) now cites `t80.1` beside `t81.1`.
+- **Moved:**
+  - `thoughts-report.md`: 296 thoughts (RECORD 94); the knife's and the odds' notices now possible before Holmes
+    ("yes" where both were "no"); `t95.2` dated ¶95, its engine date; the premise disagreements stay at 4.
+  - `report.md`: `pz.knife`'s thought and `k.coat_placed`'s step renamed; the gate listing: ¶96's step renamed.
+  - The reveal, foreshadow and clash logs are unchanged.

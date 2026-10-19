@@ -548,7 +548,7 @@ the horse is (`t14.3`).
   Holmes puts injuring the horse on the table as a natural aim.
 - `t57.3` **QUESTION·turn-around** · *weak* · expert · from `t18.3`, `t57.2` · Holmes ¶223
   Turned round: what needed doing **away from** the stable? Something that couldn't be done within earshot of the
-  loft, or that needed light that would be seen. It waits for the knife (`t81.2`) and the candle (`t78.3`).
+  loft, or that needed light that would be seen. It waits for the knife (`t80.2`) and the candle (`t78.3`).
 
 **¶58**
 - `t58.1` **RECORD** · typical
@@ -650,15 +650,18 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
   If he lit a match in the hollow, a spent one may be in the mud there.
 
 **¶79–¶81**
-- `t81.1` **RECORD** · *strong* · typical
-  reads "It is what we call a cataract knife"; "A very delicate blade devised for very delicate work"; "it would not shut in his pocket"
-- `t81.2` **NOTICE** · *strong* · typical · from `t81.1`, `t32.1` · Holmes ¶81, ¶221
+- `t80.1` **RECORD** · *strong* · typical
+  reads "It is what we call a cataract knife"
+- `t80.2` **NOTICE** · *strong* · typical · from `t80.1`, `t32.1` · Holmes ¶81, ¶221
   A horse-trainer carrying **a surgeon's eye-knife** on a night when he expected trouble. This is the loudest
   clue in the story, and the story says so through Holmes.
-- `t81.3` **HYPOTHESIS** · *fair* · careful · from `t81.2`, `t57.2`, `t78.3`
+  (Dated ¶80 in Round 160: the cataract knife is named there, a paragraph before Holmes calls it strange.)
+- `t81.1` **RECORD** · *strong* · typical
+  reads "A very delicate blade devised for very delicate work"; "it would not shut in his pocket"
+- `t81.3` **HYPOTHESIS** · *fair* · careful · from `t80.2`, `t57.2`, `t78.3`
   Why carry it: {the nearest weapon; **to operate on something that night**}? The only possible patient within
   a quarter mile is the horse.
-- `t81.4` **AGENT** · *fair* · careful · from `t81.1`, `t35.4`, `bk.weapon_choice` · strains `t81.3 (weapon)` · Holmes ¶221 ("no sane man would choose for a weapon")
+- `t81.4` **AGENT** · *fair* · careful · from `t80.1`, `t81.1`, `t35.4`, `bk.weapon_choice` · strains `t81.3 (weapon)` · Holmes ¶221 ("no sane man would choose for a weapon")
   A man arming himself takes a stick or a poker.
 - `t81.5` **INFER** · *fair* · careful · from `t81.3`, `t81.4`, `t57.3` · Holmes ¶221, ¶223
   He meant to **injure the horse, delicately, away from the stable**: away from the loft's hearing, by candle.
@@ -771,7 +774,7 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 **What remains uncertain:** what killed Straker (`t46.6`); why he carried the cravat (`t60.3`); who has the horse
 (`t40.4`); who drugged the dish (`t92.8`).
 
-**Difficulty, by profile.** A *typical* reader reaches the motive for Simpson, the knife as odd (`t81.2`) and
+**Difficulty, by profile.** A *typical* reader reaches the motive for Simpson, the knife as odd (`t80.2`) and
 perhaps Derbyshire, and holds the police theory with doubts. A *careful* reader reaches the inside story through
 step 7. Step 8 (the horse as killer, `t37.13`), the disguise (`t64.3`) and the practice (`t92.14`) are *expert*
 moves: the game should treat them as bonuses, not as gates.
@@ -794,11 +797,11 @@ ahead by predicting what each action will find.
 **¶94–¶97**
 - `t95.1` **RECORD** · *strong* · typical
   reads "There was no wind that night, I understand," "None; but very heavy rain."
-- `t96.1` **PHYSICAL** · *strong* · typical · from `t95.1`, `t35.1`, `t32.2` · refutes `t35.9 (blown)`; supports `t92.10` · Holmes ¶96
-  With no wind, the coat wasn't blown onto the bush: it was put there. A reader who made `t92.10` scores it here.
+- `t95.2` **PHYSICAL** · *strong* · typical · from `t95.1`, `t35.1`, `t32.2` · refutes `t35.9 (blown)`; supports `t92.10` · Holmes ¶96
+  With no wind, the coat wasn't blown onto the bush: it was put there. A reader who made `t92.10` scores it here. (Dated ¶95 in Round 160: Gregory's answer, its last premise, is there.)
 - `t97.1` **RECORD** · typical
   reads "Yes, it was laid across the bush."
-- `t97.2` **AGENT** · *fair* · careful · from `t96.1`, `t97.1`, `t35.2`, `bk.coat_work` · strains `t35.6`, `t46.1`; supports `t92.6` · Holmes ¶226
+- `t97.2` **AGENT** · *fair* · careful · from `t95.2`, `t97.1`, `t35.2`, `bk.coat_work` · strains `t35.6`, `t46.1`; supports `t92.6` · Holmes ¶226
   A man in a desperate fight doesn't lay his coat across a bush. Straker took it off himself, before whatever
   happened, to do something that needed his arms free.
 
@@ -861,7 +864,7 @@ ahead by predicting what each action will find.
 
 ### State of mind after s05
 
-The hollow has confirmed two predictions (`t96.1`, `t102.2`) and Holmes's behaviour matches the inside story
+The hollow has confirmed two predictions (`t95.2`, `t102.2`) and Holmes's behaviour matches the inside story
 (`t106.1`, `t109.2`, `t111.2`). The police theory has nothing new in its favour, and the result that would
 test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), what killed Straker (`t46.6`).
 
@@ -1066,9 +1069,10 @@ are what killed Straker (`t46.6`) and what Holmes asked the maid (`t163.2`).
 **¶188–¶189**
 - `t188.1` **RECORD** · typical
   reads "You could have got fifteen to one yesterday, but the price has become shorter and shorter, until you can hardly get three to one now"
-- `t189.1` **NOTICE·calculate** · *fair* · careful · from `t188.1`, `bk.odds` · supports `t141.2` · Holmes ¶189
+- `t188.2` **NOTICE·calculate** · *fair* · careful · from `t188.1`, `bk.odds` · supports `t141.2` · Holmes ¶189
   Odds shortening from 15 to 1 to 3 to 1 means informed money: someone knows the horse will run. (Holmes, ¶214,
   "stand[s] to win a little".)
+  (Dated ¶188 in Round 160: the odds are told there; Holmes remarks on them at ¶189.)
 
 **¶191**
 - `t191.1` **RECORD** · typical
@@ -1255,7 +1259,7 @@ Observations from writing the pilot that bear on the format and the game. To be 
 analysis once the whole story is annotated.
 
 - **Most of the work is weighing and noticing, not deducing.** The INFER steps are short and few. The decisive
-  moves are NOTICE and ABSENCE (`t37.6`, `t81.2`, `t84.3`, `t34.2`), WEIGH and SOURCE (`t35.6`, `t36.2`,
+  moves are NOTICE and ABSENCE (`t37.6`, `t80.2`, `t84.3`, `t34.2`), WEIGH and SOURCE (`t35.6`, `t36.2`,
   `t84.5`), and RESIDUE (`t46.3`).
 - **Testimony needs a grain finer than the claim.** `t35.6` is one clause of a paragraph whose other clauses are
   observations; `t36.1` holds an observation and a conclusion from the same witness. Clause-level spans are
@@ -1280,7 +1284,7 @@ analysis once the whole story is annotated.
   `bk.horse_kick` are where modern readers fall short. Offering them as optional cards would be a natural hint
   system.
 - **The second half is scoring, not solving.** From ¶93 on, most thoughts are TEST: a prediction made earlier is
-  confirmed (`t96.1`, `t102.2`, `t117.2`, `t173.2`, `t198.2`, `t212.2`). The game's payoff loop is a prediction
+  confirmed (`t95.2`, `t102.2`, `t117.2`, `t173.2`, `t198.2`, `t212.2`). The game's payoff loop is a prediction
   sealed early and opened when the story reaches it, and the windows table shows how large the windows are.
 - **Holmes's actions are tests the player can anticipate.** The horseshoe in his pocket (`t109.2`), "let the name
   stand" (`t111.2`), the photograph (`t161.3`), leaving for London (`t156.2`): each is a TEST PLAN the player could

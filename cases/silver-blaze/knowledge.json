@@ -181,7 +181,7 @@
     {"id":"pz.key","cards":["c.door_locked_behind"],"thought":"t31.3","explanations":[{"formula":{"in":["e.stable_entered.instrument",["stable_key","duplicate_key"]]}},{"formula":{"eq":["e.horse_led_out.agent","straker"]}}]},
     {"id":"pz.coat","cards":["c.coat_on_bush_seen"],"thought":"t35.8","explanations":[{"formula":{"eq":["e.coat_off.purpose","work"]}}]},
     {"id":"pz.one_blow","cards":["c.head_shattered","c.simpson_stick"],"thought":"t40.5","explanations":[{"formula":{"ne":["e.fatal_blow.instrument","penang_lawyer"]}}]},
-    {"id":"pz.knife","cards":["c.knife_is_cataract_knife"],"thought":"t81.2","explanations":[{"formula":{"eq":["e.knife_taken.purpose","operation"]}}]},
+    {"id":"pz.knife","cards":["c.knife_is_cataract_knife"],"thought":"t80.2","explanations":[{"formula":{"eq":["e.knife_taken.purpose","operation"]}}]},
     {"id":"pz.bill","cards":["c.milliner_bill"],"thought":"t84.3","explanations":[{"formula":{"eq":["milliner_bill.owner","straker"]}},{"formula":{"eq":["william_derbyshire.identity","straker"]}},{"formula":{"eq":["c.derbyshire_a_friend.truth","true"]}}]},
     {"id":"pz.not_found","cards":["c.no_news_of_horse"],"thought":"t37.12","explanations":[{"formula":{"eq":["silver_blaze.disguised","true"]}}]},
     {"id":"pz.led_out","cards":["e.horse_led_out"],"thought":"t18.3","explanations":[{"formula":{"eq":["e.horse_led_out.purpose","steal"]}},{"formula":{"and":[{"eq":["e.horse_led_out.purpose","injure"]},{"ne":["e.led_to_hollow.place","stable"]}]}}]},

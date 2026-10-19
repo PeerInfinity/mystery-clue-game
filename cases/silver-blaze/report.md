@@ -174,7 +174,7 @@ with the facts the player trusts (clues and the world's ties, not inferences), e
 | `pz.key` | c.door_locked_behind | `t31.3` | 2 of 2 | t.police |
 | `pz.coat` | c.coat_on_bush_seen | `t35.8` | 1 of 1 | — |
 | `pz.one_blow` | c.head_shattered, c.simpson_stick | `t40.5` | 1 of 1 | — |
-| `pz.knife` | c.knife_is_cataract_knife | `t81.2` | 1 of 1 | — |
+| `pz.knife` | c.knife_is_cataract_knife | `t80.2` | 1 of 1 | — |
 | `pz.bill` | c.milliner_bill | `t84.3` | 1, 2 of 3 | t.derbyshire_a_friend |
 | `pz.not_found` | c.no_news_of_horse | `t37.12` | 1 of 1 | — |
 | `pz.led_out` | e.horse_led_out | `t18.3` | 2 of 2 | t.police, t.gypsies |
@@ -398,7 +398,7 @@ An earlier quote, where the story has one, would let the card carry its words fr
 | `t92.3` | c.wife_never_had_dress, r.witness_believes | st.mrs_straker.believes_wife_never_had_dress.thu_evening = true | ✓ |
 | `t92.4` | c.milliner_bill, c.bill_22_guineas, c.holmes_plymouth_ruse, r.asks_about_what_he_read, c.wife_never_had_dress, r.no_finery_for_servants | e.dresses_bought.recipient ∉ {mrs_straker, edith_baxter} | ✓ |
 | `t92.15` | c.milliner_bill, c.bill_22_guineas, c.holmes_plymouth_ruse, r.asks_about_what_he_read, c.wife_never_had_dress, r.no_finery_for_servants, r.servant_wages, r.second_establishment, r.laying_against | (william_derbyshire.identity = straker) → (straker.motive = debts_of_second_household) | ✓ |
-| `t96.1` | c.coat_on_bush_seen, c.no_wind, c.straker_left_in_mackintosh, r.wind_and_coats | (e.coat_off.agent = straker) ∧ (e.coat_off.object = overcoat) ∧ (e.straker_leaves.time < e.coat_off.time) | ✓ |
+| `t95.2` | c.coat_on_bush_seen, c.no_wind, c.straker_left_in_mackintosh, r.wind_and_coats | (e.coat_off.agent = straker) ∧ (e.coat_off.object = overcoat) ∧ (e.straker_leaves.time < e.coat_off.time) | ✓ |
 | `t97.2` | c.coat_on_bush_seen, c.no_wind, c.straker_left_in_mackintosh, r.wind_and_coats, c.coat_laid_across, c.head_shattered, r.dead_men_do_nothing, r.coat_off_to_work | (e.coat_off.time < e.fatal_blow.time) ∧ (e.coat_off.purpose = work) | ✓ |
 | `t102.2` | c.vesta_in_mud, c.pocket_inventory, c.head_shattered, r.vesta_from_box, r.dead_men_do_nothing | (wax_vesta.owner = straker) ∧ (e.light_struck.agent = wax_vesta.owner) ∧ (e.light_struck.time < e.fatal_blow.time) | ✓ |
 | `t102.4` | c.head_shattered, c.horse_was_in_hollow, c.vesta_in_mud, r.startled_horse_kicks, r.hoof_strikes_as_horse_kicks | (e.fatal_blow.agent = silver_blaze) ∧ (e.fatal_blow.instrument = steel_shoe) | ✓ |
