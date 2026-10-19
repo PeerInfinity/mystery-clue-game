@@ -1,6 +1,11 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-closing-review.md` — the next sessions' work (Round 156), in Robert's order: a closing review of the
+  whole game against the annotation, thought by thought (its paper: `docs/review-closing.md`); then the layout (tabs at
+  the top of both panels, the story as a tab, one or two columns); the player's notes on the story text; an autoplay
+  that plays Hard to the maximum score through the UI, typing the annotation's thoughts as notes. Each piece a paper
+  agreed with Robert before it is built.
 - `docs/questions.md` — the player's own questions (QUESTION): measured and agreed (Round 151), built (Rounds
   152–155): `Game.pose` over `QUESTION_TEMPLATES`, matched quietly to a slot and joining it only when the story (or the
   player's inference) raises it; a card's "Ask your own question", Your questions, the re-read form, the bar's note,

@@ -3914,3 +3914,14 @@ not playable (`docs/review-ws9.md`). `docs/kickoff-questions.md` hands it over:
 - **`docs/questions.md`** marked built, with what changed at build time; **`CLAUDE.md`** points at it. Of the ten
   QUESTION thoughts, four now join at once (`t14.2`, `t46.6`, `t92.8`, `t120.3`), one later (`t46.5`, ¶214 for a reader who only reads on; ¶92 for a
   builder), and the five with no question of the case stay the player's notes. QUESTION is playable, unscored.
+
+## Round 156 (2026-10-18): hand-off — the closing review, the layout, the player's notes, the autoplay
+
+Robert asked for four pieces of work, in order, possibly over several sessions: a closing review of the whole game
+against the annotation; the layout (both panels' tab selectors at the top, the story as a tab, a one-or-two-columns
+toggle); the player's own notes on the story text, visually distinct (the look undecided: alternatives to show him); and
+an autoplay that plays the whole game on Hard to the maximum score by reading `thoughts.json`, typing each thought as a
+note and clicking the UI, with an animated cursor and human-speed keys. `docs/kickoff-closing-review.md` hands them over:
+the review thought by thought, with a per-thought action table (the autoplay's script) and the Hard maximum measured;
+then a paper for each later piece, agreed before it is built; the traps of Rounds 60–156, with this session's added
+(drafting in a worktree while a gate runs; waiting on page state on a loaded machine).
