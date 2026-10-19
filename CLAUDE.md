@@ -61,6 +61,7 @@
 | Check the annotated reading (`thoughts.json`) and rewrite `cases/silver-blaze/thoughts-report.md` | `npm run validate-thoughts` |
 | What appears at each paragraph (leak checks) | `npm run reveal-log`, `npm run foreshadow-log` (→ `.cache/`) |
 | Every clash met and what it sets aside, for three kinds of player (about a minute; `--build` adds a fourth, 5 min) | `npm run clash-log` (→ `.cache/clash-log.txt`) |
+| The action table (the annotation's moves in the UI on Hard, the autoplay's script) → `cases/silver-blaze/action-table.json`; rerun when the case or the thoughts change (a test checks it is up to date and reaches the Hard maximum) | `npm run action-table` (about 3–5 min) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 
 ## Conventions

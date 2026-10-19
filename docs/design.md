@@ -4127,3 +4127,21 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   by its paragraph; only a hypothesis proposes candidates, answers of a question of the case. Test: `thoughts.test.js`.
   `docs/reading-annotated.md` is unchanged (the fields are data about moves, like `asks` and `checks`).
 - **Moved:** nothing in the logs, the reports or the gate listing.
+
+## Round 168 (2026-10-19): the action table in the repository
+
+- **Agreed** (Robert, on `docs/review-closing.md`'s second question): the action table becomes `engine/actionTable.js`
+  (`actionTable(model)`, usable in node and in the page), written by `npm run action-table` (`scripts/action-table.js`)
+  to `cases/silver-blaze/action-table.json`, one thought per line, checked in.
+- **What changed from the review's scratch script:** the set-asides and candidates come from `thoughts.json` (Round
+  167); the script passes over each paragraph until nothing more moves (so `t34.5` is made at ¶34, after `t34.8`'s
+  filing in the same paragraph); the player's theory is named by its label, not the game's random id, so the file is
+  reproducible. Its own rules stay marked in the code: asking about each card collected, the split and the two-stories
+  doubt, the inside story's answers that the UI allows at ¶92, Edith asked about the curried mutton, the police theory
+  weighed.
+- **Test** (`engine/actionTable.test.js`): the table's game reaches the Hard maximum (deductions 45 of 47, missing only
+  `t127.4` and `t36.2`; every other family full); only `t212.1` and `t214.1` never hold (Holmes naming the horse is
+  proved, not dealt); the checked-in file is what the script writes. It adds about 3–4 minutes to the suite.
+- **Checked in headless Chrome:** the checked-in file played through the UI on Hard from the first paragraph: 396 moves,
+  none failed, no console error; the record: 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1.
+- **Moved:** nothing in the logs, the reports or the gate listing.
