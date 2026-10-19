@@ -434,3 +434,11 @@ test('scoring: a thought the player makes before Holmes states it scores; one Ho
     trivial.propose(trivial.connectSet('k.drugger_knew_the_menu'));
     assert.equal(trivial.score().scored, 0);
 });
+
+test('Hard: an inference whose conclusion speaks through a relation (the curry, the dog) names its kind, and the curry builds (Round 158)', () => {
+    const game = new Game(model, { difficulty: HARD, background: BG_START });
+    for (const id of ['k.drugger_knew_the_menu', 'k.drugger_knew_the_dish', 'k.dog_knew_the_visitor']) assert.deepEqual(game.conclusionKinds(id), ['who'], id);
+    while (game.read < 38) game.advance();
+    for (let p = 0; p < game.read; p++) game.collect(p, [...new Set(model.story.segments(p).flatMap((s) => s.ids).filter((x) => model.cards.has(x)))]);
+    assert.ok(build(game, 'k.drugger_knew_the_menu').built.includes('k.drugger_knew_the_menu'));
+});

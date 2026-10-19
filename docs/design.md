@@ -3955,3 +3955,15 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   builds `k.drugger_took_the_horse` ("You inferred: The guard was drugged so that …").
 - **Leak check:** no new text; the facts' own text, already shown, becomes a link.
 - **Moved:** nothing in the logs, the reports or the gate listing (UI only).
+
+## Round 158 (2026-10-18): conclusionKinds reads a relation term
+
+- **Engine** (Round 157's defect b): `conclusionKinds` takes a relation term (`{rel: [name, ...args]}`) as speaking of
+  the questions among its arguments, so the curry's two steps and the dog's are "Who". Every inference of the case
+  now names its kind without throwing.
+- **Checked in headless Chrome** on Round 157's Hard save at ¶37: connecting the curry's four clues and three
+  background facts, "about: Who", builds `k.drugger_knew_the_menu` ("You inferred: Opium can be tasted and a curry
+  hides it; …"), with no console error.
+- **Test:** `game.test.js`: the three kinds; on Hard at ¶37, the curry built from clicked cards.
+- **Leak check:** no text changed.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full against the session's baseline).

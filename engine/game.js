@@ -1292,7 +1292,8 @@ export class Game {
         const walk = (f) => {
             if (f.implies) return walk(f.implies[1]);
             if (f.and) return f.and.forEach(walk);
-            for (const x of slotsIn(f)) {
+            // A relation term ({rel: [name, ...args]}) speaks of the questions among its arguments (Round 158).
+            for (const x of [...slotsIn(f)].flatMap((y) => (y?.rel ? y.rel.slice(1).filter((a) => this.model.slots.has(a)) : [y]))) {
                 const sl = this.model.slots.get(x);
                 out.add(KIND_OF_FACET[sl.facet] ?? (sl.domain.length === 2 && sl.domain.includes('true') ? 'whether' : 'what'));
             }
