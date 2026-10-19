@@ -3883,3 +3883,17 @@ not playable (`docs/review-ws9.md`). `docs/kickoff-questions.md` hands it over:
 - **Test:** `questions.test.js`: a re-read carries a `pq.N`; an unknown one is refused.
 - **Leak check:** no card text; the templates and labels are fixed words around held card names.
 - **Moved:** nothing in the logs, the reports or the gate listing.
+
+## Round 154 (2026-10-18): the player's own questions, step 3 — the record
+
+- **UI** (`docs/questions.md` Q5): *Your record against Holmes* lists "Questions you asked before the story", each with
+  the story's question, where the player asked it and the lead, under "Not counted: a question can be asked of
+  anything". Never in a family or in "Ahead of Holmes".
+- **Checked in headless Chrome** on a passive Easy save read to ¶37 (the worktree on port 8322, before step 4 moved the
+  anchor): "Deductions: 0 of the 1 steps Holmes has made so far", then "Questions you asked before the story (1) …
+  paragraph 37 · Where has Silver Blaze been since Tuesday morning? You asked it at paragraph 14: 23 paragraphs
+  before."
+- **`docs/review-ws9.md`:** QUESTION is now *playable, unscored*; the five thoughts that match no question of the case
+  stay the player's notes, as agreed.
+- **Leak check:** no card text; fixed words around the story's question, already raised.
+- **Moved:** nothing in the logs, the reports or the gate listing (UI only).

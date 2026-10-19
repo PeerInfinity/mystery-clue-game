@@ -744,6 +744,12 @@ specific thing stay ground facts with a formula and no schema.
 - **The reading bar at the join:** "paragraph 37 · The story asks here: ⟨the story's question⟩ You asked it at
   paragraph 14", from `record().questions`, beside the record's notes.
 
+## As built (2026-10-18): the player's own questions in the record (docs/questions.md, step 3; Round 154)
+
+- **Your record against Holmes** gains "Questions you asked before the story (N)", from `record().questions`: each with
+  the paragraph the story asked it, the story's question as a link, where the player asked it and the lead; "Not
+  counted: a question can be asked of anything." No family and no "Ahead of Holmes" count changes.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

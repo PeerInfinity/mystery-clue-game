@@ -944,6 +944,8 @@ function toolRecord() {
         h += `<h3 class="section">Furthest ahead</h3><ul class="list small">${once(best.map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>`;
     }
     h += scored.length ? `<h3 class="section">Before Holmes (${scored.length})</h3><ul class="list small">${once([...scored].reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>` : '<p class="empty">Nothing yet.</p>';
+    // The player's own questions the story asked after them (docs/questions.md, Q5): shown, never counted.
+    if (rec.questions.length) h += `<h3 class="section">Questions you asked before the story (${rec.questions.length})</h3><p class="small muted">Not counted: a question can be asked of anything.</p><ul class="list small">${[...rec.questions].reverse().map((q) => `<li>${paraLabel(q.deadline)} · <span class="link" data-slot-open="${q.slot}">${esc(game.promptOf(q.slot))}</span> You asked it at ${paraLabel(q.at)}: ${q.lead} ${q.lead === 1 ? 'paragraph' : 'paragraphs'} before.</li>`).join('')}</ul>`;
     if (game.finished()) h += heldBackHtml();
     return h;
 }

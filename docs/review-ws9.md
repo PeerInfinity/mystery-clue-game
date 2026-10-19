@@ -21,7 +21,7 @@ Each "Where" was checked in headless Chrome in Rounds 143–148, or in the round
 | RECORD (93) | the story pane, "Next paragraph / scene / deduction"; the Card and Cards tabs; Hard collects by clicking; Timeline › What happened, What you found | — | **playable** | — |
 | NOTICE (16, ·calculate 2) | a card's "That's odd", with an optional expectation; Questions › Odd things | `noticeScores`: "Holmes draws attention to …" at his paragraph; the record (Round 146) | **playable** | ·calculate is a notice whose expectation names the figures, as the gap analysis asked; nothing computes |
 | ABSENCE (6) | the board's form, and a clue's own card (Round 148) | `absenceScores` (the dog): "Holmes points to …" | **playable** | the four absences without a Holmes date are filed, unscored, as agreed (ws 7) |
-| QUESTION (10) | none: the story raises the questions; a re-read can carry one | — | **not playable** | the player's own questions were never designed (`docs/ui.md` Q7): kept for a later workstream (Round 143) |
+| QUESTION (10) | *Since Rounds 152–154 (`docs/questions.md`):* a card's "Ask your own question" (13 templates over held cards); Your questions on the card and the Questions tab, with the player's candidates; the re-read form; the bar's note when the story asks the same | the record's "Questions you asked before the story", never counted (Q5) | **playable, unscored** | five of the ten match no question of the case and stay the player's notes (`t20.7`, `t25.1`, `t31.4`, `t57.3`, `t108.2`), as agreed; ·turn-around is one ordinary template (Q4) |
 | HYPOTHESIS (27) | the open questions' chips (pencil, circle, cross out, prove); Theories (new theory, add answers, weigh); the board's layers | through the deductions they become | **playable** | — |
 | INFER (24) | "Infer from this" / "Connect to this"; "Or state it yourself" (Round 147) | `thoughtScores`: "Holmes reasons: …" at his paragraph, "Ahead of Holmes" | **playable** | `applyRule` has no UI by agreement (`docs/ui.md` Q2); `concludeFrom` reaches 41 of the route's 54 inferences from the clues alone (Round 147) |
 | DEFAULT (8, ·period 2) | "Unless…" on an inference's card; a background fact's exceptions; "presented, not endorsed" (Round 141) | `raiseScores`: "Holmes shows that a step does not hold …" | **playable** | — |
@@ -53,16 +53,16 @@ Nothing is shown before its deadline; Trivial shows one line at the end. No hint
 ## In numbers
 
 - **Of the 20 tags of §2: playable,** 15. **Playable, unscored:** 2 (GENRE, SET ASIDE), with the thoughts the agreed
-  papers leave out.
+  papers leave out; 3 since Round 154 (QUESTION, `docs/questions.md`).
 - **Partly playable:** 2 (PREDICT and TEST PLAN, as workstream 7's review left them).
-- **Not playable:** 1 (QUESTION: the player's own questions, kept for a later workstream).
+- **Not playable:** 1 (QUESTION: the player's own questions, kept for a later workstream); none since Round 154.
 - **The busy page:** a reload at the end ready in about 12 s on a loaded machine (HEAD before: 43–97 s); Theories
   usable at once, each theory filled in as weighed (Round 144).
 
 ## Left open
 
 - **The player's own questions** (QUESTION, `docs/ui.md` Q7): a design question of its own, which touches the
-  reading layer.
+  reading layer. *Designed and built since:* `docs/questions.md` (Rounds 151–154).
 - **`applyRule`** keeps no UI (agreed); **`retract`** has none either: a player's own conclusion is doubted, not
   taken back.
 - **The rule `category`** (AGENT, PHYSICAL) to sort the hand: never built, nothing asks for it.
