@@ -4005,3 +4005,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
     ("yes" where both were "no"); `t95.2` dated ¶95, its engine date; the premise disagreements stay at 4.
   - `report.md`: `pz.knife`'s thought and `k.coat_placed`'s step renamed; the gate listing: ¶96's step renamed.
   - The reveal, foreshadow and clash logs are unchanged.
+
+## Round 161 (2026-10-19): a reload keeps what the player built
+
+- **Found** in the closing review (Robert agreed to the fix): `Game.load` read the whole story again and only then
+  restored the inferences the player had built, so one a character states later in the story (Holmes's at ¶102) was
+  already held as stated and stayed so: "Holmes drew this inference, paragraph 102" for `k.drugger_took_the_horse`,
+  built at ¶37. Scores made before the reload survived (they are saved), but a step made after it that needs such an
+  inference could no longer count: reloaded at ¶110, the sheep (`t173.2`, ¶173) never scored.
+- **Engine:** a built inference comes back during the reread, at the paragraph it was built, as background asked for
+  already did.
+- **Checked in headless Chrome** on an Easy builder save at ¶219: the card says "You built this inference ·
+  paragraph 37" (before: Holmes, ¶102).
+- **Test:** `record.test.js`: reloaded at ¶110, the inference is the player's at its paragraph, and the sheep are made
+  before Holmes; it fails without the fix.
+- **Leak check:** no text changed.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full).

@@ -406,9 +406,14 @@ export class Game {
         this.reset();
         const target = Math.min(state.read ?? 1, this.story.paragraphs.length);
         const asked = [...(state.asked ?? [])].sort((a, b) => a[1] - b[1]);
+        // An inference the player built comes back at the paragraph they built it, before a character can state it
+        // further on (a later statement would otherwise take its place: "Holmes drew this inference", Round 161).
+        const built = [...(state.built ?? [])].filter(([id]) => this.inferenceById.has(id)).sort((a, b) => a[1] - b[1]);
+        const rebuild = ([id, para]) => { if (this.knows(id)) return; this.#unlock(id, para); this.inferenceHow.set(id, { how: 'built' }); };
         while (this.read < target) {
             this.#readNext();
             while (asked.length && asked[0][1] < this.read) this.ask(asked.shift()[0]);
+            while (built.length && built[0][1] < this.read) rebuild(built.shift());
         }
         if (this.collecting()) for (const [id, para] of state.collected ?? []) this.#unlock(id, para);
         for (const [id, para] of state.filed ?? []) {
@@ -416,11 +421,7 @@ export class Game {
             this.#unlock(id, para);
             if (!this.filed.some((f) => f.id === id)) this.filed.push({ id, para });
         }
-        for (const [id, para] of state.built ?? []) {
-            if (!this.inferenceById.has(id) || this.knows(id)) continue;
-            this.#unlock(id, para);
-            this.inferenceHow.set(id, { how: 'built' });
-        }
+        for (const b of built) rebuild(b);
         // The splits and states the player opened, before the cards and marks that speak of them.
         for (const [w, by] of state.openedSplits ?? []) {
             try { openSplit(this.model, w, by); this.openedSplits.push([w, by]); } catch (e) { console.warn(`could not reopen the split of ${w} at ${by}: ${e.message}`); }

@@ -64,3 +64,14 @@ test('an implicit inference neither makes a step nor blocks it: Straker took the
     for (const s of steps) assert.ok(b[s] !== null && b[s] < builder.holmesAt(s), `${s} made before Holmes`);
     assert.deepEqual(Object.values(made(passive)), [null, null, null, null], 'the implicit inferences alone make nothing');
 });
+
+test('a reload keeps what the player built, though a character states it later: the sheep still count after it (Round 161)', () => {
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    while (game.read <= 110) { game.advance(); buildAll(game); }
+    assert.equal(game.howHeld('k.drugger_took_the_horse')?.how, 'built');
+    const again = new Game(model, { state: JSON.parse(JSON.stringify(game.save())) });
+    assert.deepEqual([again.howHeld('k.drugger_took_the_horse'), again.unlocked.get('k.drugger_took_the_horse').para], [{ how: 'built' }, game.unlocked.get('k.drugger_took_the_horse').para], 'not "stated by Holmes" at ¶102');
+    while (again.read <= 176) { again.advance(); buildAll(again); }
+    const sheep = again.thoughtScores().find((r) => r.thought === 't173.2');
+    assert.ok(sheep.made !== null && sheep.made < sheep.holmes, `the sheep made at ${sheep.made}`);
+});
