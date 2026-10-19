@@ -3925,3 +3925,33 @@ note and clicking the UI, with an animated cursor and human-speed keys. `docs/ki
 the review thought by thought, with a per-thought action table (the autoplay's script) and the Hard maximum measured;
 then a paper for each later piece, agreed before it is built; the traps of Rounds 60–156, with this session's added
 (drafting in a worktree while a gate runs; waiting on page state on a loaded machine).
+
+## Round 157 (2026-10-18): the closing review measured on Hard; four defects; background facts as links
+
+- **Measured** (scratch scripts in the session's scratchpad: `hard.mjs`, a Hard replay in node of two players; the UI
+  in headless Chrome): the **engine's maximum** (clicks every marked span, asks about every card, builds everything,
+  every scored move at its earliest) and **the annotation's player** (each thought's own move at its paragraph,
+  retried until it holds). Robert's standard (Round 157): if everything works as intended the two are the same, so
+  every difference is a defect of the engine, the case or the annotation.
+  - Engine maximum: deductions 41 of 47, notices 8 of 8, raises 3, drops 3, checks 10, the dog 1: 66 ahead of Holmes.
+    The annotation's player: 40, 6, 3, 3, 10, 1: 63.
+  - **Four defects** (Robert agreed to fix all four before the review goes on):
+    (a) **On Hard no inference with a background premise can be built in the UI.** Hard connects background
+    (`connect: connect`), but no control opened a background fact's card, the only place with "Connect to this": the
+    Background tab and a card's Background notes were plain text (since `24e08fa`). 34 of the 39 inferences behind
+    Holmes's dated steps have a background premise; "State it yourself" needs it cited too. Checked at ¶37: the five
+    clues of `k.drugger_took_the_horse` end at "connect one more card", the held `r.drugged_guard` out of reach.
+    (b) `conclusionKinds` throws on a relation term (the curry's two steps and the dog's): on Hard, connecting the
+    curry's last card says "Something went wrong: … reading 'facet'".
+    (c) Four of Holmes's main steps never score on any preset (`t46.4`, `t81.5`, `t173.2`, `t220.3`): each needs an
+    implicit inference (`k.wife_stayed_home`, `k.found_before_seven`), and an implicit inference never counts as the
+    player's.
+    (d) Three thoughts are dated a paragraph after their move is possible (`t81.2`, `t96.1`, `t189.1`).
+  - With (b) and (c) mended in a scratch worktree, the engine's maximum is 45 of 47 deductions, 70 in all. The two
+    left: `t127.4` (Brown's square toes disclosed at Holmes's own paragraph) and `t36.2` (its background fact offered
+    only at ¶218).
+- **Fix (a), UI:** each background fact is a link to its card, in the Background tab and in a card's Background notes.
+  Checked in headless Chrome on a Hard save at ¶37: from the Background tab, "Connect to this" on `r.drugged_guard`
+  builds `k.drugger_took_the_horse` ("You inferred: The guard was drugged so that …").
+- **Leak check:** no new text; the facts' own text, already shown, becomes a link.
+- **Moved:** nothing in the logs, the reports or the gate listing (UI only).

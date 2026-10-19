@@ -309,7 +309,8 @@ function toolCard() {
         if (facts.length || later.length) {
             h += '<div class="bg"><div class="small muted">Background</div>';
             for (const n of facts) {
-                h += `<div class="bg-note">${esc(n.text)}${suppliedNote(n.card)}</div>`;
+                // A link: the fact's own card is where it is connected into an inference (Hard connects background).
+                h += `<div class="bg-note">${link(n.card, n.text)}${suppliedNote(n.card)}</div>`;
                 for (const x of unless.filter((u) => u.card === n.card)) h += `<div class="bg-note unless">Unless ${esc(x.text)}.</div>`;
             }
             for (const x of later) h += `<div class="bg-note unless">${esc(shortName(x.card, 60))}: unless ${esc(x.text)}.</div>`;
@@ -694,7 +695,8 @@ function toolBackground() {
         const heading = game.knows(on) ? link(on) : model.cards.get(on)?.kind === 'topic' ? esc(game.nameOf(on)) : 'Other';
         h += `<h3 class="section">${heading}</h3><ul class="list">`;
         // By text, not id: ids would sort the filler apart from the facts that matter.
-        for (const r of list.sort((a, b) => model.cards.get(a).text.localeCompare(model.cards.get(b).text))) h += `<li>${esc(model.cards.get(r).text)}${suppliedNote(r)}</li>`;
+        // Each fact opens its card, where it is connected into an inference (Hard connects background, Round 157).
+        for (const r of list.sort((a, b) => model.cards.get(a).text.localeCompare(model.cards.get(b).text))) h += `<li>${link(r, model.cards.get(r).text)}${suppliedNote(r)}</li>`;
         h += '</ul>';
     }
     return h;
