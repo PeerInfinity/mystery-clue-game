@@ -134,6 +134,17 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         if (t.notices && t.tag !== 'NOTICE') err(`${t.id}: only a NOTICE thought lists the cards it notices`);
         // An event card too (Round 98): the odd thing may be that something happened at all (the horse taken, not lamed in his stall).
         for (const x of t.notices ?? []) if (!['claims', 'entities', 'events'].includes(model?.cards.get(x)?.section ?? (caseIds.has(x) ? 'claims' : null))) err(`${t.id}: notices ${x}, which is not a clue, entity or event card`);
+        // The card a SET ASIDE thought puts aside, and the answers a hypothesis proposes on a question (Round 167): the
+        // reader's moves the action table makes (docs/review-closing.md).
+        if (t.aside !== undefined && t.tag !== 'SET ASIDE') err(`${t.id}: only a SET ASIDE thought names a card to set aside`);
+        if (t.aside !== undefined && model && !['entities', 'events', 'claims'].includes(model.cards.get(t.aside)?.section)) err(`${t.id}: sets aside ${t.aside}, which is not an entity, event or clue card`);
+        if (t.candidates !== undefined && t.tag !== 'HYPOTHESIS') err(`${t.id}: only a HYPOTHESIS thought proposes candidates`);
+        if (t.candidates !== undefined && model) {
+            const s = model.slots.get(t.candidates.slot);
+            if (!s) err(`${t.id}: candidates on ${t.candidates.slot}, which is no question of the case`);
+            else for (const v of t.candidates.values ?? []) if (!s.domain.includes(v)) err(`${t.id}: ${v} is no answer to ${t.candidates.slot}`);
+            if (!(t.candidates.values ?? []).length) err(`${t.id}: candidates name no answer`);
+        }
         // The question a QUESTION thought poses, as a template over cards (docs/questions.md, Q2).
         if (t.asks && t.tag !== 'QUESTION') err(`${t.id}: only a QUESTION thought poses a question`);
         if (t.asks) {
@@ -220,6 +231,11 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         for (const t of thoughts.filter((x) => x.notices)) for (const id of t.notices) {
             const at = reader.unlocked.get(id)?.para;
             if (at === undefined || at > t.para) err(`${t.id}: notices ${id}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
+        }
+        // A card can be set aside only once the player holds it.
+        for (const t of thoughts.filter((x) => x.aside)) {
+            const at = reader.unlocked.get(t.aside)?.para;
+            if (at === undefined || at > t.para) err(`${t.id}: sets aside ${t.aside}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
         }
         // A question can be posed only about cards the player holds by the thought's paragraph (docs/questions.md).
         for (const t of thoughts.filter((x) => x.asks)) for (const id of t.asks.cards ?? []) {

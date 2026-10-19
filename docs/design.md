@@ -4111,3 +4111,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Moved:** `thoughts-report.md`: HYPOTHESIS thoughts holding a card 24 → 23; premise disagreements 4 → 3; `t40.4`'s
   cited `t40.3` is now "not held" at ¶40 (Mapleton's interest is told at ¶66). The logs, `report.md` and the gate
   listing are unchanged.
+
+## Round 167 (2026-10-19): the reader's set-asides and candidates as data
+
+- **Agreed** (Robert, on `docs/review-closing.md`'s third question): the moves the action table had to decide for itself
+  become the annotation's data, since they are the reader's:
+  - `aside` on the five SET ASIDE thoughts that name a card (`t6.2` the field-glass, `t10.1` the telegraph posts,
+    `t24.5` the new dress, `t128.1` the half-crown, `t192.2` Bayard);
+  - `candidates: {slot, values}` on eleven hypotheses: the answers the reader puts on the case's question (`t14.3`
+    Mapleton and King's Pyland; `t24.3` opium and the note; `t35.9` fight or work; `t37.9` and `t37.10` the household and
+    the maid; `t37.13` Simpson or the horse; `t81.3` weapon or operation; `t84.4` Straker; `t102.3` pipe or work;
+    `t127.4` Brown; `t141.1` disguised).
+  Asking "What do I know about this?" of each card collected stays a rule of the script.
+- **Checked** (`engine/thoughts.js`): only a SET ASIDE thought sets aside, an entity, event or clue card the game deals
+  by its paragraph; only a hypothesis proposes candidates, answers of a question of the case. Test: `thoughts.test.js`.
+  `docs/reading-annotated.md` is unchanged (the fields are data about moves, like `asks` and `checks`).
+- **Moved:** nothing in the logs, the reports or the gate listing.

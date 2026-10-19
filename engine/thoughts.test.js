@@ -96,3 +96,17 @@ test('readers lack the rules of the background cards they do not hold (docs/read
     assert.ok(!lacks('modern').includes('r.gypsies_avoid_trouble'), 'period, presented not endorsed: held');
     assert.equal(lackingRules(data.background, 'nobody').size, 0);
 });
+
+test('a set-aside names a card the reader holds, and a hypothesis\'s candidates are answers to its question (Round 167)', async () => {
+    const { checkThoughts } = await import('./thoughts.js');
+    const data = JSON.parse(fs.readFileSync(new URL('../cases/silver-blaze/thoughts.json', import.meta.url)));
+    assert.equal(data.thoughts.filter((t) => t.aside).length, 5);
+    assert.ok(data.thoughts.filter((t) => t.candidates).length >= 10);
+    const bad = structuredClone(data);
+    const at = (id) => bad.thoughts.find((t) => t.id === id);
+    at('t6.2').aside = 'r.opium_taste';
+    at('t24.3').candidates = { slot: 'paper_packet.contents', values: ['arsenic'] };
+    at('t4.1').aside = 'field_glass';
+    const { errors } = checkThoughts(bad, model);
+    for (const e of ['t6.2: sets aside r.opium_taste', 't24.3: arsenic is no answer', 't4.1: only a SET ASIDE thought']) assert.ok(errors.some((x) => x.startsWith(e)), e);
+});
