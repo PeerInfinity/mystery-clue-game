@@ -3784,3 +3784,18 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
   (135 pass) before it was pushed. Files a running gate will commit are now left alone until it finishes.
 - **Leak check:** no card text; the form offers only questions on held cards and answers on offer.
 - **Moved:** nothing in the logs, the reports or the gate listing.
+
+## Round 148 (2026-10-18): ws 9 step 5 — the small items
+
+- **UI only** (`docs/ui.md` Q4, Q5): the doubt's reasons taken from the engine, so "two stories" (`t68.3`) is offered;
+  the re-read's question on the reading bar and a "Your re-reads" list on the Questions tab; the absence form on a
+  clue's own card, the clue as the witness; the 14 options under four headings.
+- **Checked in headless Chrome:**
+  - ¶101 (a builder's save): `k.one_culprit` doubted, its Why list ends "the night is several stories, not one", and it
+    is kept; re-reading ¶20–¶30 with "Who drugged Ned Hunter's supper?", the bar names the question and the Questions
+    tab lists the re-read (saved);
+  - ¶38: on the lads' clue, the folded form files the dog's absence (`r.dog_barks_at_strangers`, Tuesday at the stable):
+    "Filed. A new clue: The two lads in the loft heard nothing …", listed under Odd things;
+  - the settings panel: You, The cards, Your reasoning, What the game shows, every option there.
+- **Leak check:** no card text; the new labels are fixed words.
+- **Moved:** nothing in the logs, the reports or the gate listing.

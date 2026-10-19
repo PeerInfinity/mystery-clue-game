@@ -6,7 +6,7 @@ import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
-import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
+import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -181,6 +181,8 @@ function renderReader() {
     const sceneJump = aheadScene > 1 && game.nextSceneAt() < story.paragraphs.length
         ? `<button id="read-scene" class="quiet" ${blocked ? 'disabled' : ''} title="Read on to the start of the next scene">Next scene <span class="small">(${aheadScene} ¶)</span></button>`
         : '';
+    // A re-read in progress names the question it was made with (docs/ui.md Q4).
+    if (ui.rereadShown) note += `<div class="note">Re-reading paragraphs ${ui.rereadShown.from}–${ui.rereadShown.to}${ui.rereadShown.question ? ` with the question: ${esc(questionName(ui.rereadShown.question))}` : ''}${ui.rereadShown.question && /[?.!]$/.test(questionName(ui.rereadShown.question)) ? '' : '.'}</div>`;
     const points = game.showsSignals() ? game.storySignals().filter((x) => x.kind === 'reread' && x.para === game.read - 1) : [];
     for (const x of points) note += `<div class="note">The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</div>`;
     note = news + note;
@@ -354,6 +356,8 @@ function toolCard() {
             h += `<p class="small notice">Does something here go against what you would expect? <select id="notice-because"><option value="">because… (optional)</option>${rules.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 60))}</option>`).join('')}</select> <button data-notice="${esc(id)}" class="quiet">That's odd</button></p>`;
         }
     }
+    // Filing an absence from the clue that would have registered it (docs/ui.md Q4); the board offers the same form.
+    if (c.section === 'claims' && !game.autoSolves()) h += `<details class="small absence-on-card"${ui.absence?.witness === id && (ui.absence.expectation || ui.absence.time) ? ' open' : ''}><summary>Should this have shown something that did not happen?</summary>${absenceFormHtml(game.timelineTimes().filter((t) => t.kind !== 'boundary'), id)}</details>`;
     if (game.canAsk(id)) {
         h += game.hasAsked(id)
             ? `<p class="small muted">${(game.rulesOn.get(id) ?? []).some((r) => game.knows(r)) ? 'You have recalled what you know about this (under Background above); more will come to mind as the story goes on.' : 'You asked: nothing in particular comes to mind yet.'}</p>`
@@ -580,7 +584,8 @@ const tallyText = ({ fresh, updated }) => [fresh && `${fresh} new`, updated && `
  * lying: not believed), and along a reporting chain whose; why (recorded); split it into what was seen and what
  * concluded; trace who passed it on.
  */
-const DOUBT_REASONS = { 'could-not-see': 'could not have seen it', 'inference-as-fact': 'an inference written as fact', hearsay: 'hearsay', neutral: 'it cuts both ways' };
+// The engine's reasons (DOUBT_REASONS), each with its words; "two stories" is t68.3's (docs/hypotheses.md Q5).
+const DOUBT_WORDS = { 'could-not-see': 'could not have seen it', 'inference-as-fact': 'an inference written as fact', hearsay: 'hearsay', neutral: 'it cuts both ways', 'two-stories': 'the night is several stories, not one' };
 function weighHtml(id) {
     let h = '';
     const chain = game.chainOf(id);
@@ -601,7 +606,7 @@ function weighHtml(id) {
         if (kinds.length) h += `<p class="small doubt">Say how: ${kinds.map((k) => `<span class="link" data-suspect="${esc(id)}" data-kind="${esc(k)}">${esc(kindName(k))}</span>`).join(' · ')}</p>`;
         if (game.doubtReason) {
             const r = game.doubtReason.get(id) ?? '';
-            h += `<p class="small doubt">Why: <select id="doubt-reason" data-reason-for="${esc(id)}"><option value="">(say why, if you like)</option>${Object.entries(DOUBT_REASONS).map(([v, l]) => `<option value="${v}"${v === r ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></p>`;
+            h += `<p class="small doubt">Why: <select id="doubt-reason" data-reason-for="${esc(id)}"><option value="">(say why, if you like)</option>${DOUBT_REASONS.map((v) => `<option value="${v}"${v === r ? ' selected' : ''}>${esc(DOUBT_WORDS[v] ?? v)}</option>`).join('')}</select></p>`;
         }
     } else {
         const kinds = game.doubtKinds(id);
@@ -707,6 +712,7 @@ function toolQuestions() {
     }
     d += oddThingsHtml();
     d += signalsHtml();
+    d += rereadsHtml();
     d += heldBackHtml();
     const c = game.helps('clashes') ? clashesHtml() : '';
     if (!raised.length) return `${c}<p class="empty">The story has not raised any questions yet.</p>${d}`;
@@ -735,6 +741,16 @@ function oddThingsHtml() {
 
 // The story's own signals (hints 'story'; docs/reader-layer.md, Q3–Q4): what Holmes visibly attends to, quoted with
 // the cards it mentions and never interpreted, and the passages the story points back to.
+/** A re-read's question: a raised case question, or a held card. */
+function questionName(id) {
+    const q = model.data.questions.find((x) => x.id === id);
+    return q ? game.questionText(q) : shortName(id, 60);
+}
+/** The player's own re-reads, with their questions (recorded, never scored). */
+function rereadsHtml() {
+    if (!game.rereads.length) return '';
+    return `<h3 class="section">Your re-reads</h3><ul class="list small">${[...game.rereads].reverse().map((r) => `<li><span class="muted">${paraLabel(r.para)} ·</span> <span class="link" data-reread-prompt="${r.from}-${r.to}">paragraphs ${r.from}–${r.to}</span>${r.question ? ` · ${esc(questionName(r.question))}` : ''}</li>`).join('')}</ul>`;
+}
 function signalsHtml() {
     if (!game.showsSignals()) return '';
     const list = game.storySignals().reverse();
@@ -1198,12 +1214,13 @@ function boardHtml(layout) {
  * Filing an absence (workstream 5): something that should have happened did not. The player names what they
  * expected (a background fact), when, and the clue that would have registered it. Easy suggests the expectation.
  */
-function absenceFormHtml(shown) {
+function absenceFormHtml(shown, witnessCard = null) {
     if (game.autoSolves()) return '';
     const ab = ui.absence ?? (ui.absence = { expectation: null, time: null, witness: null });
+    if (witnessCard && ab.witness !== witnessCard) Object.assign(ab, { expectation: null, time: null, witness: witnessCard });
     const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
     const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && inHand(x));
-    const clues = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'claims' && inHand(x));
+    const clues = witnessCard ? [witnessCard] : [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'claims' && inHand(x));
     const suggested = game.helps('hints') ? game.fileableAbsences()[0]?.expectation ?? null : null;
     const exp = ab.expectation ?? suggested;
     return `<div class="pen row small absence">Something that should have happened did not: <select id="ab-exp">${opt('', 'what you would expect…', exp)}${rules.map((x) => opt(x, shortName(x, 50), exp)).join('')}</select>
@@ -1508,7 +1525,7 @@ function onClick(e) {
         const [from, to, question] = [+$('#rr-from').value, +$('#rr-to').value, $('#rr-q').value || null];
         if (!game.reread(from, to, question)) { ui.reread = { from, to, question, error: 'Choose paragraphs you have read, the first no later than the last.' }; renderReader(); return; }
         ui.reread = { from, to, question };
-        ui.rereadShown = { from, to };
+        ui.rereadShown = { from, to, question };
         renderStory();
         save();
         document.querySelector(`#story p[data-p="${from}"]`)?.scrollIntoView({ block: 'start' });
@@ -1884,11 +1901,20 @@ const OPTION_UI = {
     reader: ['You read as', { modern: 'A reader of today', 1892: 'A reader of 1892', racing: 'A racing man of 1892' }, 'What you bring to the story. The background facts such a reader would not know are marked as supplied by the game.'],
     irrelevant: ['Cards the solution does not need', { none: 'None', few: 'One in four', half: 'Half', most: 'Three in four', all: 'All' }, 'How many of the cards with no part in the solution you get at all (the people, places, things and facts that are only colour). The rest are left out of the game: no card, and nothing to click in the text.'],
 };
+// The options under four headings (docs/ui.md Q5); every option of OPTIONS appears once.
+const OPTION_GROUPS = [
+    ['You', ['reader', 'supplied']],
+    ['The cards', ['cards', 'irrelevant', 'background']],
+    ['Your reasoning', ['solver', 'answers', 'crossOut', 'kind', 'connect']],
+    ['What the game shows', ['greying', 'clashes', 'weigh', 'hints']],
+];
 function buildOptions() {
-    $('#options').innerHTML = Object.entries(OPTIONS).map(([k, values]) => {
+    const grouped = OPTION_GROUPS.flatMap(([, ks]) => ks);
+    const groups = [...OPTION_GROUPS, ['Other', Object.keys(OPTIONS).filter((k) => !grouped.includes(k))]];
+    $('#options').innerHTML = groups.filter(([, ks]) => ks.length).map(([title, ks]) => `<div class="opt-group"><div class="small muted opt-group-title">${esc(title)}</div>${ks.map((k) => {
         const [label, names, help] = OPTION_UI[k];
-        return `<label title="${esc(help)}">${esc(label)}<select id="opt-${k}">${values.map((v) => `<option value="${v}">${esc(names[v])}</option>`).join('')}</select></label>`;
-    }).join('');
+        return `<label title="${esc(help)}">${esc(label)}<select id="opt-${k}">${OPTIONS[k].map((v) => `<option value="${v}">${esc(names[v])}</option>`).join('')}</select></label>`;
+    }).join('')}</div>`).join('');
 }
 
 // ---------- start ----------

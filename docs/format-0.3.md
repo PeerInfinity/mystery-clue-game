@@ -696,6 +696,17 @@ specific thing stay ground facts with a formula and no schema.
   on a held card), "is" or "is not", an answer on offer, "Does it follow?". A lone card that completes nothing now
   stays connected.
 
+## As built (2026-10-18): the small items (workstream 9, step 5; Round 148)
+
+- **The doubt's reasons are the engine's** (`DOUBT_REASONS`, with words in `DOUBT_WORDS`): "the night is several
+  stories, not one" (`two-stories`, `t68.3`) is now offered.
+- **A re-read's question is used:** while its passage is outlined, the reading bar says "Re-reading paragraphs 20–30
+  with the question: …"; the Questions tab lists **Your re-reads** (paragraph, passage, question; a passage link
+  opens the re-read form). Never scored.
+- **Absence from a clue's card:** a clue's card offers, folded, the board's absence form with the clue itself as the
+  witness ("Should this have shown something that did not happen?").
+- **The options under four headings** (You; The cards; Your reasoning; What the game shows), every option as before.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
