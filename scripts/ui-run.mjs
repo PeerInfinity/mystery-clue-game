@@ -39,7 +39,7 @@ const label = async (slot, v) => {
 };
 // The default layout (docs/layout.md): the story in the left panel, the card in the right. As a player would, the
 // lists are chosen in the left panel, so a card clicked there opens on the right, and the left goes back to the story
-// to read on or click its words.
+// to click its words. The reading bar is above both panels.
 const LEFT = '.panel[data-panel="0"]';
 const choose = async (t) => (await p.ev(`document.querySelector('${LEFT} .tab.on')?.dataset.tab === ${JSON.stringify(t)}`)) || p.click(`${LEFT} .tab[data-tab="${t}"]`);
 const showStory = async () => (await p.ev(`!!document.querySelector('#story')`)) || choose('story');
@@ -113,7 +113,6 @@ const t0 = Date.now();
 for (const m of moves) {
     if (m.at > STOP) break;
     // Read on until the move's paragraph has been read (the move was made with read = at + 1).
-    if (((await st()).read ?? 1) <= m.at) await showStory();
     while (((await st()).read ?? 1) <= m.at) { if (!(await p.click('#read'))) { results.push({ ...m, ok: false, why: 'cannot read on' }); break; } }
     let why = null;
     if (await took(m) && m.op !== 'theory') { results.push({ seq: m.seq, thought: m.thought, op: m.op, at: m.at, ok: true, already: true }); continue; }
@@ -130,7 +129,6 @@ for (const m of moves) {
     if (results.length % 50 === 0) { console.log(`${results.length} moves, ¶${m.at}, ${Math.round((Date.now() - t0) / 1000)} s, failed ${results.filter((r) => !r.ok).length}`); fs.writeFileSync(OUT, JSON.stringify({ results }, null, 1)); }
 }
 // Read to the end and take the record.
-await showStory();
 while (await p.click('#read-deduction') || await p.click('#read')) { if (await p.ev(`!document.querySelector('#read')`)) break; }
 await p.click('[data-record-open]');
 const record = await p.text('.panel-body[data-tab="record"]');

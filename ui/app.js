@@ -116,7 +116,7 @@ async function fillPieces() {
             const [key, fn] = pending.entries().next().value;
             pending.delete(key);
             await settle(fn, () => model.problem).catch((e) => console.error(e));
-            await run(() => { renderToolNow(); renderReader(); });
+            await run(renderToolNow);
         }
     } finally { filling = false; }
 }
@@ -143,12 +143,20 @@ function renderStory() {
     const top = el.scrollTop;
     el.innerHTML = h;
     el.scrollTop = top;
-    renderReader();
+}
+
+/** What the last read brought (docs/layout.md, Q2): said in the bar, so reading on with the story hidden still tells. */
+function broughtHtml() {
+    const b = ui.brought;
+    if (!b || b.to !== game.read - 1) return '';
+    const paras = b.from === b.to ? `¶${b.to}` : `¶${b.from}–¶${b.to}`;
+    // On Hard the words of the story are the cards: they are collected in the story.
+    if (game.collecting()) return panelOf('story') < 0 ? `${paras} read: <span class="link" data-tab-open="story">open the story</span> to collect` : `${paras} read`;
+    return `${paras} read${b.cards ? ` · <span class="link" data-tab-open="cards">${b.cards} new card${b.cards > 1 ? 's' : ''}</span>` : ''}`;
 }
 
 function renderReader() {
     const el = $('#reader');
-    if (!el) return;
     const news = recordNews();
     if (game.finished()) {
         el.innerHTML = `${news}<span class="muted">The end.</span> ${game.autoSolves() ? '<span class="small muted">In Trivial the game worked the case out: nothing is scored. On Easy you can race Holmes.</span>' : '<span class="link small" data-record-open="1">Your record against Holmes</span>'}`;
@@ -188,7 +196,7 @@ function renderReader() {
     const points = game.showsSignals() ? game.storySignals().filter((x) => x.kind === 'reread' && x.para === game.read - 1) : [];
     for (const x of points) note += `<div class="note">The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</div>`;
     note = news + note;
-    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${note}${rereadForm()}`;
+    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}${note}${rereadForm()}`;
 }
 
 // Re-read (docs/reader-layer.md, Q4): go back over paragraphs already read, with a question in mind. Recorded; the
@@ -233,7 +241,7 @@ function choose(i, tab) {
 function show(tab, from = null) {
     let i = panelOf(tab);
     if (i < 0) {
-        i = from === null ? (ui.panels[1].tab === 'story' ? 0 : 1) : 1 - from;
+        i = from === null ? (tab === 'story' || ui.panels[1].tab === 'story' ? 0 : 1) : 1 - from;
         ui.panels[i].tab = tab;
     }
     return i;
@@ -247,7 +255,7 @@ function layoutPanels() {
         body.dataset.tab = tab;
         if (tab === 'story') {
             body.className = 'panel-body story-pane';
-            body.innerHTML = '<div id="story" class="story"></div><div id="reader" class="reader"></div>';
+            body.innerHTML = '<div id="story" class="story"></div>';
             storyShown = true;
         } else {
             body.className = 'panel-body tool-body';
@@ -285,6 +293,8 @@ function renderToolNow() {
         if (body.dataset.fresh) { body.scrollTop = 0; delete body.dataset.fresh; }
     });
     renderTabs();
+    // The reading bar says whether the story is in view (on Hard, "open the story to collect").
+    renderReader();
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
         ui.focusSlot = null;
@@ -1663,12 +1673,14 @@ function onClick(e) {
     const pointBack = e.target.closest('[data-reread-prompt]');
     if (pointBack) { const [from, to] = pointBack.dataset.rereadPrompt.split('-').map(Number); ui.reread = { from, to, question: '' }; renderReader(); return; }
     if (e.target.closest('#reread-open')) { ui.reread = ui.reread ? null : { from: 1, to: game.read - 1, question: '' }; renderReader(); return; }
-    if (e.target.closest('#rr-close')) { ui.reread = null; ui.rereadShown = null; renderStory(); return; }
+    if (e.target.closest('#rr-close')) { ui.reread = null; ui.rereadShown = null; renderStory(); renderReader(); return; }
     if (e.target.closest('#rr-go')) {
         const [from, to, question] = [+$('#rr-from').value, +$('#rr-to').value, $('#rr-q').value || null];
         if (!game.reread(from, to, question)) { ui.reread = { from, to, question, error: 'Choose paragraphs you have read, the first no later than the last.' }; renderReader(); return; }
         ui.reread = { from, to, question };
         ui.rereadShown = { from, to, question };
+        show('story');
+        renderToolNow();
         renderStory();
         save();
         document.querySelector(`#story p[data-p="${from}"]`)?.scrollIntoView({ block: 'start' });
@@ -1679,8 +1691,9 @@ function onClick(e) {
         // The paragraphs this read covers: the record's rows whose deadline falls in them are told (recordNews).
         ui.readFrom = game.read;
         const res = readBtn.id === 'read' ? game.advance() : readBtn.id === 'read-scene' ? game.readToNextScene() : game.readToNextDeduction();
+        const shown = (res.newCards ?? []).filter((c) => !['rules'].includes(model.cards.get(c).section));
+        ui.brought = { from: ui.readFrom, to: game.read - 1, cards: game.collecting() ? 0 : shown.length };
         if (!game.collecting() && res.newCards?.length) {
-            const shown = res.newCards.filter((c) => !['rules'].includes(model.cards.get(c).section));
             if (shown.length) toast(`New: ${shown.slice(0, 5).map((c) => esc(shortName(c, 30))).join(', ')}${shown.length > 5 ? ` and ${shown.length - 5} more` : ''}`);
         }
         changed();

@@ -4192,3 +4192,20 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   error, 13 minutes; the record: deductions 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1: 70.
 - **Leak check:** new words are fixed labels ("Story", "Record", "← back to" a held card's name); no card text.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
+
+## Round 172 (2026-10-19): the layout, step 2: the reading bar at page level
+
+- **Built** (`docs/layout.md` Q2 a; `index.html`, `ui/app.js`, `ui/style.css`): the reading bar ("Next paragraph",
+  "Next scene", "Next deduction", "Re-read…", the count, the notes) is a strip under the header, the full width, always
+  shown whatever the panels hold; the Story tab holds the text alone. A short line says what the last read brought:
+  "¶41 read · 2 new cards" (the count a link to the Cards tab), or for a scene "¶35–¶40 read · …"; on Hard (cards
+  collected from the words), "¶42 read" with the story in view, "¶42 read: open the story to collect" without it (the
+  link puts the story in the left panel). A re-read brings the story into view to outline its passage. The record's
+  news, "Holmes is a step ahead" and the story's prompts stay in the bar, as before.
+- **The runner** (`scripts/ui-run.mjs`) reads on from the bar without going back to the story.
+- **Checked in headless Chrome** (desktop 1400 × 900 and phone 390, screenshots sent to Robert): reading on with Cards
+  and Card shown ("¶41 read · 2 new cards"); on Hard with the Timeline and Card shown, "open the story to collect", the
+  link bringing the story back on the left; no console error. **The action table through the UI** on Hard: 396 moves,
+  none failed, no console error, 13 minutes; the record 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1: 70.
+- **Leak check:** the new words are fixed labels and counts ("¶N read", "N new cards", "open the story to collect").
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
