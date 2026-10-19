@@ -20,6 +20,7 @@
 import { activeConstraints, trustedClaim, instantiateRule, addDynamic, removeDynamic, openState, closeState, openSplit, closeSplit, knowsName, namedExceptions, exceptionFormula } from './caseModel.js';
 import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
+import { OverBudget } from './solver.js';
 import { READER_KINDS, lackingRules } from './readers.js';
 
 /** Holmes's steps' needs (Game.stepNeeds), per problem. */
@@ -1337,7 +1338,7 @@ export class Game {
      * Returns {ok, id, used, premises, matches: authored inferences this conclusion covers} or
      *   {ok: false, reason} / {ok: false, contradiction: [constraint ids]} / {ok: false, error}.
      */
-    conclude(cited, formula, { id = null, label = null, para = null } = {}) {
+    conclude(cited, formula, { id = null, label = null, para = null, apply = false } = {}) {
         this.moved = true;
         if (this.autoSolves()) return { ok: false, error: 'the game is working the answers out itself' };
         const S = [...new Set(cited)].filter((x) => this.knows(x));
@@ -1346,15 +1347,19 @@ export class Game {
         for (const [slot, v] of literalsIn(formula)) if (slot && !this.model.slots.get(slot).domain.includes(v)) return { ok: false, error: `${v} is no answer to ${slot}` };
         const known = new Set(S);
         // Everything the cited cards switch on, in the player's reading; the player's own cards count when cited.
-        const active = this.#withTies(activeConstraints(this.model, known, this.#discounted(), { heldInferences: true, kinds: this.doubtKind }).filter((kid) => {
+        // With `apply`, the background facts the cited cards call on, applied as the case applies them (#applications).
+        const apps = apply ? this.#applications(S) : [];
+        const active = this.#withTies([...activeConstraints(this.model, known, this.#discounted(), { heldInferences: true, kinds: this.doubtKind }).filter((kid) => {
             const k = this.model.constraints.get(kid);
             return k.definition || !k.inference || known.has(k.inference);
-        }), slotsOf(formula));
+        }), ...apps], slotsOf(formula));
+        const isApp = new Set(apps);
         const clash = this.model.problem.explainConflict(active);
         if (clash) return { ok: false, contradiction: clash };
         if (this.model.problem.consistent(active, {}, { extra: [{ not: formula }] }).ok) return { ok: false, reason: 'the cards you cite do not settle that' };
         const used = this.model.problem.explainConflict(active, {}, { extra: [{ not: formula }] }) ?? [];
-        const premises = [...new Set(used.map((kid) => this.model.constraints.get(kid)).filter((k) => !k.definition).flatMap((k) => k.inference ? [k.inference] : k.premises))];
+        // An application stands for its rule and the held cards it binds, never for the inference it was authored in.
+        const premises = [...new Set(used.map((kid) => this.model.constraints.get(kid)).filter((k) => !k.definition).flatMap((k) => (isApp.has(k.id) ? [k.rule, ...Object.values(k.bind ?? {}).filter((c) => this.knows(c))] : k.inference ? [k.inference] : k.premises)))];
         const cardId = id ?? `k.player_${(this.model.dynamicSeq = (this.model.dynamicSeq ?? 0) + 1)}`;
         const text = label ?? this.readingOf(formula);
         try {
@@ -1369,6 +1374,38 @@ export class Game {
         // A new card only adds to what is trusted: the clashes found still clash, and are checked again first.
         if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
         return { ok: true, id: cardId, used, premises, matches: this.conclusionMatches(formula) };
+    }
+
+    /**
+     * State it yourself (docs/ui.md Q2): conclude from the connected cards, with the background facts they call on
+     * applied for the player. A rule is applied as the case's own inferences apply it (their `rules`), wherever the
+     * cards it binds are held and one of them is cited or spoken of by a cited card; the rule must be cited when
+     * background is connected, and only held otherwise. Within `budget` ms of solving; past it {ok: false, tooHard}.
+     */
+    concludeFrom(cards, formula, { budget = 20000 } = {}) {
+        if (!this.autoSolves() && !cards.some((x) => this.knows(x))) return { ok: false, error: 'cite at least one card you hold' };
+        try {
+            return this.#withBudget(budget, () => this.conclude(cards, formula, { apply: true }));
+        } catch (e) {
+            if (e instanceof OverBudget) return { ok: false, tooHard: true };
+            throw e;
+        }
+    }
+    /** The case's rule applications the cited cards call on (constraint ids). */
+    #applications(cited) {
+        const S = new Set(cited);
+        const near = new Set([...S, ...[...S].flatMap((c) => [...(this.claimEvents.get(c) ?? []), ...(this.model.cards.get(c)?.about ?? [])])]);
+        const ruleOk = (r) => (this.connect === INF_CONNECT ? S.has(r) : this.knows(r));
+        return [...this.model.constraints.values()].filter((k) => k.rule && k.inference && !k.defeated && ruleOk(k.rule)
+            && Object.values(k.bind ?? {}).every((c) => !this.model.cards.has(c) || this.knows(c))
+            && Object.values(k.bind ?? {}).some((c) => near.has(c))).map((k) => k.id);
+    }
+    /** Run `fn` with a time budget on the solver: the page's worker or this problem (OverBudget past it). */
+    #withBudget(ms, fn) {
+        const p = this.model.problem;
+        if (p.withBudget) return p.withBudget(ms, fn);
+        p.deadline = Date.now() + ms;
+        try { return fn(); } finally { p.deadline = null; }
     }
 
     /** Authored inferences, not yet held, whose formula this conclusion alone entails. */

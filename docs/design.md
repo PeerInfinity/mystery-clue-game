@@ -3762,3 +3762,25 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
 - **Listed, not chased:** a check's text keeps entity capitals mid-sentence ("Look for A box of vestas"), as Round 130
   listed; a step resting on several inferences is quoted in full, which can make a long line.
 - **Moved:** nothing in the logs, the reports or the gate listing (UI only).
+
+## Round 147 (2026-10-18): ws 9 step 4 — state it yourself
+
+- **Engine:** `Game.concludeFrom` (`docs/ui.md` Q2): the player's own conclusion from the connected cards, the
+  background they call on applied as the case's inferences apply it, so there is no binding form. A time budget
+  (20 s a call) crosses to the worker (`RemoteProblem.withBudget`, the worker's `OVER` answer); past it, "too hard to
+  check here". `applyRule` keeps no UI.
+- **Measured** (the route's 54 inferences, each at the paragraph its premises are held, citing only what "Infer from
+  this" would connect, background implicit): 41 follow, 2 run past the budget, 11 do not (they need more than the
+  cards cite: world ties, or an earlier step of the player's). Calls take 50–500 ms in node.
+- **UI:** "Or state it yourself" on the building bar: a question, "is" / "is not", an answer, "Does it follow?". A lone
+  card that completes nothing stays connected ("connect another, or state a conclusion yourself"). Checked in headless
+  Chrome at ¶38: the curry clue alone, "who drugged the supper is not Fitzroy Simpson": "It does not follow from these
+  cards". The positive case is the test's (a clue that completes an inference alone is built by "Infer from this").
+- **Test:** `reasoning.test.js`: from the tap clue alone, plain `conclude` refuses and `concludeFrom` makes the card,
+  with the rule as a premise and no unheld inference; a false conclusion refused; a 1 ms budget too hard, nothing made;
+  Trivial refused.
+- **A slip in Round 146, mended before pushing:** its gate had committed `ui/app.js` with this step's form, written
+  while that suite ran, calling a method that did not yet exist. The commit was amended to step 3 alone and re-gated
+  (135 pass) before it was pushed. Files a running gate will commit are now left alone until it finishes.
+- **Leak check:** no card text; the form offers only questions on held cards and answers on offer.
+- **Moved:** nothing in the logs, the reports or the gate listing.

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
 import { ground, isGround, varsOf } from './logic.js';
 import { instantiateRule, verifyInference, checkStep, activeConstraints } from './caseModel.js';
-import { Game, WAIT, BG_START, TRIVIAL } from './game.js';
+import { Game, WAIT, BG_START, TRIVIAL, EASY } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 
@@ -209,4 +209,24 @@ test('the default knowledge rules range over propositions: a bound proposition n
     assert.match(JSON.stringify(acts.formula), /st\.silas_brown\.knows_mercy_in_safe_return\.thu_night/);
     assert.match(instantiateRule(model, 'r.told_knows', { telling: 'e.message_to_straker', who: 'straker', fact: 'stable', when: 'w.mon_late' }).error, /must be a proposition/);
     for (const r of ['r.told_knows', 'r.present_sees', 'r.acts_on_knows']) assert.equal(model.cards.get(r).strength, 'default');
+});
+
+test('concludeFrom: a conclusion of the player\'s own, the cited cards\' background applied as the case applies it (docs/ui.md Q2)', () => {
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    game.readTo(38);
+    const k = model.cards.get('k.drugged_in_food');
+    const cited = game.connectSet('k.drugged_in_food');
+    assert.ok(cited.every((x) => model.cards.get(x).section !== 'rules'), 'only clues cited: background is implicit');
+    assert.equal(game.conclude(cited, k.formula).ok, false, 'plain conclude does not apply the background');
+    assert.equal(game.concludeFrom(cited, k.formula, { budget: 1 }).tooHard, true, 'past its budget: too hard to check here');
+    assert.ok(!game.concluded.length, 'and nothing was made');
+    const res = game.concludeFrom(cited, k.formula);
+    assert.ok(res.ok, 'it follows');
+    const card = model.cards.get(res.id);
+    assert.ok(card.premises.includes('r.tap_water_not_dosed'), 'the rule applied is a premise');
+    assert.ok(!card.premises.some((p) => model.cards.get(p)?.section === 'inferences' && !game.knows(p)), 'never an inference the player does not hold');
+    assert.equal(game.howHeld(res.id).how, 'concluded');
+    game.retract(res.id);
+    assert.equal(game.concludeFrom(cited, { eq: ['e.opium_added.agent', 'simpson'] }).ok, false, 'what does not follow is refused');
+    assert.equal(new Game(model, { difficulty: TRIVIAL }).concludeFrom(['c.stall_empty'], { true: true }).ok, false);
 });

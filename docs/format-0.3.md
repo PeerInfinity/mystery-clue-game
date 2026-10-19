@@ -681,6 +681,21 @@ specific thing stay ground facts with a formula and no schema.
   value of a step with no inference, a sealed check's own words; never a thought's text. A drop's deadline reads
   "before the story did". Each line once. At the end in Trivial: "the game worked the case out: nothing is scored".
 
+## As built (2026-10-18): state it yourself (workstream 9, step 4; Round 147)
+
+- **`Game.concludeFrom(cards, formula, {budget})`:** `conclude` with the background the cited cards call on applied
+  for the player: the case's own rule applications (the `<inference>#ruleN` constraints) whose rule is held (cited,
+  when background is connected), whose bound cards are all held, and one of whose bound cards is cited or spoken of
+  by a cited card. A defeated application never counts. The new card's premises are the cited cards that were needed
+  and, for an application, its rule and bound cards, never the authored inference it came from. Each solver call is
+  held to `budget` ms (20 s); past it `{ok: false, tooHard: true}` and nothing is made.
+- **Budgets across the worker:** `RemoteProblem.withBudget(ms, fn)` sends the budget with each request; the worker
+  sets the problem's deadline and answers `{[OVER]: true}` past it, which the page throws as `OverBudget`.
+- **`applyRule` keeps no UI** (`docs/ui.md` Q2): `propose` is the player's inference, and `concludeFrom` their own.
+- **The UI:** "Or state it yourself" on the building bar while cards are connected: a question on the table (unsettled,
+  on a held card), "is" or "is not", an answer on offer, "Does it follow?". A lone card that completes nothing now
+  stays connected.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
@@ -721,7 +736,8 @@ specific thing stay ground facts with a formula and no schema.
   claim the story makes, never an editorial list.
 - **`conclude` on the big component late in the story** can take a few seconds when the conclusion is not
   entailed (the solver must find a witness). A time budget or a weaker first check may be wanted for the UI.
-- The UI does not yet offer `applyRule` or `conclude`; it still builds inferences by connecting premises.
+- The UI does not yet offer `applyRule` or `conclude`; it still builds inferences by connecting premises. *Answered
+  (Round 147):* `applyRule` keeps no UI; `conclude` is offered as "state it yourself" (`concludeFrom`).
 
 ## Decisions and next steps (user, 2026-10-14)
 

@@ -1327,7 +1327,42 @@ function buildingBar() {
     }
     h += ` <button class="quiet small" data-build-clear>Done</button>`;
     if (b.note) h += `<div class="small build-note">${b.note}</div>`;
+    if (b.cards.length) h += stateForm();
     return `${h}</div>`;
+}
+
+/**
+ * State it yourself (docs/ui.md Q2): a conclusion of the player's own from the cards connected, as an answer to a
+ * question on the table (or not that answer). The game says whether it follows, with the background facts the cards
+ * call on applied as the case applies them; it never says what does follow.
+ */
+function stateForm() {
+    const st = ui.state ?? (ui.state = { slot: '', neg: '', value: '' });
+    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
+    const slots = game.visibleSlots().filter((x) => game.knows(x.on) && game.settled(x.id) === null);
+    const slot = slots.find((x) => x.id === st.slot);
+    let h = `<div class="small state-form">Or state it yourself: <select id="st-slot">${opt('', 'a question…', st.slot)}${slots.map((x) => opt(x.id, `${shortName(x.on, 30)}: ${game.promptOf(x.id)}`, st.slot)).join('')}</select>`;
+    if (slot) h += ` <select id="st-neg">${opt('', 'is', st.neg)}${opt('not', 'is not', st.neg)}</select> <select id="st-value">${opt('', 'which…', st.value)}${slot.domain.filter((v) => game.offered(slot.id, v)).map((v) => opt(v, valueName(slot.id, v), st.value)).join('')}</select> <button data-state-go="1" class="quiet">Does it follow?</button>`;
+    return `${h}</div>`;
+}
+function runState() {
+    const st = ui.state;
+    const b = ui.building;
+    if (!st?.slot || !st.value || !b?.cards.length) { b.note = 'Choose a question and an answer.'; renderTool(); return; }
+    const formula = st.neg ? { ne: [st.slot, st.value] } : { eq: [st.slot, st.value] };
+    const res = game.concludeFrom(b.cards, formula);
+    if (res.ok) {
+        b.note = `<span class="good">It follows:</span> ${link(res.id, shortName(res.id, 90))}`;
+        toast(`New inference: ${esc(shortName(res.id, 70))}`);
+        ui.state = null;
+        b.cards = [];
+        changed();
+        return;
+    }
+    b.note = res.tooHard ? 'Too hard to check from here: try connecting fewer cards, or build the steps one at a time.'
+        : res.contradiction ? 'These cards clash among themselves: one of them must be false.'
+            : res.error ? esc(res.error) : 'It does not follow from these cards.';
+    renderTool();
 }
 
 /** Try the connection as it stands, and say what came of it. */
@@ -1347,7 +1382,8 @@ function runPropose() {
     if (res.lacking) b.note = `You're onto something, but it needs knowledge you do not have yet.${game.background === BG_ASK ? ' Try asking what you know about the things involved.' : ''}`;
     else if (res.wrongKind) b.note = 'You\'re onto something, but the conclusion would not be about that.';
     else if (res.onto) b.note = res.more === 1 ? 'You\'re onto something: connect one more card.' : `You're onto something, but it needs ${res.more} more connections.`;
-    else if (b.cards.length === 1) { b.note = 'Nothing follows from that card.'; b.cards = []; }
+    // A lone card stays connected: the player may still state a conclusion of their own from it.
+    else if (b.cards.length === 1) b.note = 'Nothing follows from that card on its own: connect another, or state a conclusion yourself.';
     else { const last = b.cards.pop(); b.note = `${esc(shortName(last, 50))} does not connect with the others.`; }
     renderTool();
 }
@@ -1516,7 +1552,8 @@ function onClick(e) {
         renderTool();
         return;
     }
-    if (e.target.closest('[data-build-clear]')) { ui.building = null; renderTool(); return; }
+    if (e.target.closest('[data-build-clear]')) { ui.building = null; ui.state = null; renderTool(); return; }
+    if (e.target.closest('[data-state-go]')) { Object.assign(ui.state, { neg: $('#st-neg').value, value: $('#st-value').value }); runState(); return; }
     if (e.target.closest('[data-record-open]')) { ui.tab = 'record'; renderTool(); $('#tool').scrollTop = 0; return; }
     const tabOpen = e.target.closest('[data-tab-open]');
     if (tabOpen) { ui.tab = tabOpen.dataset.tabOpen; renderTool(); return; }
@@ -1791,6 +1828,7 @@ function onChange(e) {
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
     if (e.target.id === 'doubt-reason') { game.setDoubtReason(e.target.dataset.reasonFor, e.target.value || null); changed(); return; }
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }
+    if (e.target.id === 'st-slot') { ui.state = { slot: e.target.value, neg: '', value: '' }; renderTool(); return; }
     if (e.target.dataset.add) {
         const slot = e.target.dataset.add;
         const s = model.slots.get(slot);

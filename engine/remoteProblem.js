@@ -21,6 +21,8 @@ export class NeedSolve extends Error {
 }
 
 const SLOW = ['consistent', 'candidates', 'allCandidates', 'countSolutions', 'explainConflict'];
+/** The worker's answer to a request that ran past its budget. */
+export const OVER = '__overBudget';
 
 export class RemoteProblem {
     /**
@@ -41,17 +43,28 @@ export class RemoteProblem {
         this.timeOrder = local.timeOrder;
     }
 
+    /** Run `fn` with the worker's calls held to `ms` each (the answer past it: OverBudget, thrown here). */
+    withBudget(ms, fn) {
+        this.remoteBudget = ms;
+        try { return fn(); } finally { this.remoteBudget = null; }
+    }
+
     #call(method, args) {
-        const key = `${method}|${JSON.stringify(args, (k, v) => (v instanceof Set ? [...v] : v))}`;
-        if (this.answers.has(key)) return this.answers.get(key);
-        this.local.deadline = Date.now() + this.budget;
+        const budget = this.remoteBudget ?? null;
+        const key = `${method}|${JSON.stringify(args, (k, v) => (v instanceof Set ? [...v] : v))}${budget ? `|budget ${budget}` : ''}`;
+        if (this.answers.has(key)) {
+            const res = this.answers.get(key);
+            if (res?.[OVER]) throw new OverBudget();
+            return res;
+        }
+        this.local.deadline = Date.now() + Math.min(this.budget, budget ?? Infinity);
         try {
             const res = this.local[method](...args);
             this.answers.set(key, res);
             return res;
         } catch (e) {
             if (!(e instanceof OverBudget)) throw e;
-            throw new NeedSolve({ key, method, args, version: this.client.version });
+            throw new NeedSolve({ key, method, args, budget, version: this.client.version });
         } finally {
             this.local.deadline = null;
         }
@@ -118,7 +131,7 @@ export function workerClient(worker) {
             return new Promise((resolve, reject) => {
                 const id = ++next;
                 pending.set(id, { resolve, reject, onProgress });
-                worker.postMessage({ type: 'solve', id, method: request.method, args: request.args });
+                worker.postMessage({ type: 'solve', id, method: request.method, args: request.args, budget: request.budget ?? null });
             });
         },
     };

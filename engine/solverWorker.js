@@ -4,7 +4,8 @@
 //   {type: 'solve', id, method, args}  →  {type: 'progress', id, done, total, what}…, then {type: 'result', id, result}
 //                                         or {type: 'error', id, error}
 
-import { Problem } from './solver.js';
+import { Problem, OverBudget } from './solver.js';
+import { OVER } from './remoteProblem.js';
 
 /** The message handler, apart from the worker global so that it can be tested in node. */
 export function createHandler(post, { every = 100 } = {}) {
@@ -19,12 +20,16 @@ export function createHandler(post, { every = 100 } = {}) {
             last = now;
             post({ type: 'progress', id: m.id, done, total, what });
         };
+        // A request with a budget (Game.concludeFrom) gives up past it, and says so.
+        problem.deadline = m.budget ? Date.now() + m.budget : null;
         try {
             post({ type: 'result', id: m.id, result: problem[m.method](...m.args) });
         } catch (err) {
-            post({ type: 'error', id: m.id, error: String(err?.stack ?? err) });
+            if (err instanceof OverBudget) post({ type: 'result', id: m.id, result: { [OVER]: true } });
+            else post({ type: 'error', id: m.id, error: String(err?.stack ?? err) });
         } finally {
             problem.onProgress = null;
+            problem.deadline = null;
         }
     };
 }
