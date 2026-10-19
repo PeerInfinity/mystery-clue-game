@@ -81,3 +81,21 @@ test('one culprit (t4.2), built as soon as it can be, gives way as a heuristic t
     for (const c of met) assert.ok(c.aside.every(isFalse), `¶${c.para}: ${c.aside.join(', ')} set aside`);
     for (const c of ['c.stall_empty', 'c.stable_door_open', 'c.head_shattered']) assert.ok(!met.some((x) => x.aside.includes(c)), c);
 });
+
+test('a reloaded game checks the clashes it met instead of searching for them again (docs/ui.md Q3)', () => {
+    const played = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    while (played.read <= 110) { played.advance(); played.clashes(); }
+    const show = (g) => g.clashes().map((c) => `${c.ids.join('|')}>${c.aside.join('|')}:${c.why}:${c.claims.join('|')}`);
+    const before = show(played);
+    assert.ok(before.length >= 3, 'clashes met by ¶110');
+    const reloaded = new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state: played.save() });
+    const p = model.problem;
+    let searches = 0;
+    const explain = p.explainConflict;
+    p.explainConflict = (...a) => { searches++; return explain.apply(p, a); };
+    try {
+        assert.deepEqual(show(reloaded), before, 'the same clashes, in the same order, setting aside the same cards');
+    } finally { delete p.explainConflict; }
+    assert.equal(searches, 0, 'no clash searched for again');
+    assert.deepEqual(reloaded.workingConstraints(), played.workingConstraints());
+});

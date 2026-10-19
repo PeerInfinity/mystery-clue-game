@@ -644,6 +644,19 @@ specific thing stay ground facts with a formula and no schema.
   held back** (`heldBack()`, as read, on every preset). At a re-read's own paragraph the reading bar says so too.
   New text is fixed templates around card names and story quotes; no case fact is written anew.
 
+## As built (2026-10-18): the busy page (workstream 9, step 1; Round 144)
+
+- **A reload weighs no clash again.** `Game.load` seeds the clash cache from the saved `clashLog` (the clashes met, in
+  the order met); `clashes()` checks a seeded clash before it searches, and fills in its `claims`. A clash that no
+  longer stands (a doubted claim) is skipped as before.
+- **`RemoteProblem.fetch` shares a request already on its way** to the worker, so two waiting pieces of the page never
+  have the same search made twice.
+- **`ui/app.js`: pieces.** `piece(key, fn, placeholder)` draws a part of the page that may wait on the solver: at once
+  if its answer is at hand, else a placeholder, worked out after the page is drawn, one at a time and without the busy
+  veil (`fillPieces`), the tool redrawn as each arrives. The Questions tab's clash count is one (the last count stands
+  meanwhile), and each theory's weighing on the Theories tab is one ("Weighing…"). A click's own work still shows the
+  busy panel. `index.html` says "Loading the case…" until the page is drawn.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

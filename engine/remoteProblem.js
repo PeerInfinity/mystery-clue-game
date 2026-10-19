@@ -57,11 +57,16 @@ export class RemoteProblem {
         }
     }
 
-    /** Fetch an answer from the worker and keep it. */
+    /** Fetch an answer from the worker and keep it. A request already on its way is shared, not sent again. */
     async fetch(request, onProgress = null) {
-        const res = await this.client.solve(request, onProgress);
-        this.answers.set(request.key, res);
-        return res;
+        this.inflight ??= new Map();
+        if (!this.inflight.has(request.key)) {
+            this.inflight.set(request.key, this.client.solve(request, onProgress).then((res) => {
+                this.answers.set(request.key, res);
+                return res;
+            }).finally(() => this.inflight.delete(request.key)));
+        }
+        return this.inflight.get(request.key);
     }
 }
 

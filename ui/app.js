@@ -5,7 +5,7 @@
 import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { rebuildProblem } from '../engine/caseModel.js';
-import { RemoteProblem, workerClient, settle } from '../engine/remoteProblem.js';
+import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
 import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
@@ -95,6 +95,31 @@ function run(fn) {
     }).catch((e) => { console.error(e); toast(`Something went wrong: ${esc(e.message)}`); });
 }
 const later = (fn, ms) => setTimeout(() => run(fn), ms);
+
+// A piece of the page that may wait on the solver (a tab's count, a theory's weighing; docs/ui.md Q3): drawn now if
+// its answer is at hand, else a placeholder; after the page is drawn the pieces are worked out one at a time, without
+// the busy veil, and the tool redrawn as each arrives. A piece only reads the game, so working it out again is harmless.
+const pending = new Map();
+let filling = false;
+function piece(key, fn, placeholder) {
+    try { return fn(); } catch (e) {
+        if (!(e instanceof NeedSolve)) throw e;
+        pending.set(key, fn);
+        return placeholder;
+    }
+}
+async function fillPieces() {
+    if (filling) return;
+    filling = true;
+    try {
+        while (pending.size) {
+            const [key, fn] = pending.entries().next().value;
+            pending.delete(key);
+            await settle(fn, () => model.problem).catch((e) => console.error(e));
+            await run(renderToolNow);
+        }
+    } finally { filling = false; }
+}
 
 // ---------- the story ----------
 function renderStory() {
@@ -187,7 +212,8 @@ function renderToolNow() {
     infTab.textContent = `Inferences${left ? ` (${left} to build)` : ''}`;
     const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section) && !game.isSetAside(k)));
     document.querySelector('.tab[data-tab="cards"]').textContent = `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`;
-    const clashes = game.helps('clashes') ? game.clashes().length : 0;
+    // The count waits for nothing: until the clashes are weighed, the last count stands.
+    const clashes = game.helps('clashes') ? piece('count:clashes', () => (ui.clashCount = game.clashes().length), ui.clashCount ?? 0) : 0;
     document.querySelector('.tab[data-tab="questions"]').textContent = `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`;
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
@@ -197,6 +223,7 @@ function renderToolNow() {
         document.getElementById(`win-${ui.focusWindow.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
         ui.focusWindow = null;
     }
+    if (pending.size) setTimeout(fillPieces, 0);
 }
 
 function intro() {
@@ -759,19 +786,25 @@ function toolTheories() {
     for (const t of all) {
         // Weighed (docs/hypotheses.md, Q8): by name on Easy, as counts on Medium, on request on Hard.
         const weighed = mode !== 'asked' || ui.weighed?.has(t.id);
-        const cost = weighed ? game.scenarioCost(t) : null;
+        // Weighed one theory at a time, after the panel is drawn (docs/ui.md Q3): until then, "weighing…".
+        const w = piece(`theory:${t.id}:${weighed}`, () => {
+            const cost = weighed ? game.scenarioCost(t) : null;
+            return { cost, support: game.theorySupport(t), html: !cost ? '' : mode === 'names' ? costHtml(cost) + residueHtml(game.residue(t)) + assumedHtml(game.assumedAnswers(t)) : countsHtml(cost, game.residue(t), game.assumedAnswers(t).length) };
+        }, null);
+        const cost = w?.cost ?? null;
         h += `<div class="theory${cost ? (cost.atOdds ? ' broken' : ' fits') : ''}${game.dropOf({ theory: t.id }) ? ' dropped' : ''}"><b>${esc(t.story ? `${t.held_by.filter((x) => game.knows(x)).map(cardName).join(', ')}: ` : '')}</b>${esc(t.label)}`;
         h += `<ul class="small">${Object.entries(t.assignment).map(([s, v]) => `<li><span class="link" data-slot-open="${s}">${esc(game.promptOf(s))}</span> → ${esc(valueName(s, v))}${t.story ? '' : ` <span class="link" data-untheory="${t.id}|${s}">remove</span>`}</li>`).join('') || '<li class="empty">no answers yet</li>'}</ul>`;
         // The inferences the theory rests on (the ones its holders drew) and, among those the player holds, the
         // ones its answers agree with and the ones they go against.
         const restsOn = (t.rests_on ?? []).filter((x) => game.knows(x));
         if (restsOn.length) h += `<div class="small">Rests on: ${restsOn.map((x) => link(x, shortName(x, 70))).join(' · ')}</div>`;
-        const { agree, against } = game.theorySupport(t);
-        if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
-        if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
-        if (!cost) h += `<div class="small"><span class="link" data-weigh="${esc(t.id)}">Weigh it</span></div>`;
-        else if (mode === 'names') h += costHtml(cost) + residueHtml(game.residue(t)) + assumedHtml(game.assumedAnswers(t));
-        else h += countsHtml(cost, game.residue(t), game.assumedAnswers(t).length);
+        if (!w) h += '<div class="small muted weighing">Weighing…</div>';
+        else {
+            const { agree, against } = w.support;
+            if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
+            if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
+            h += cost ? w.html : `<div class="small"><span class="link" data-weigh="${esc(t.id)}">Weigh it</span></div>`;
+        }
         const tkey = `t|${t.id}`;
         h += game.dropOf({ theory: t.id }) ? dropHtml(tkey) : ui.dropping === tkey ? dropForm(tkey) : `<div class="small"><span class="link" data-drop-open="${esc(tkey)}">drop it…</span></div>`;
         if (!t.story) h += `<div class="small"><span class="link" data-theory-current="${t.id}">${ui.theory === t.id ? '★ new answers go here' : 'add answers here'}</span> · <span class="link" data-del-theory="${t.id}">delete</span></div>`;

@@ -3704,3 +3704,27 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
   `applyRule` out of the UI plan, a small "State it yourself" over `conclude`; the busy page's three fixes and a
   loading line; the re-read question, "two stories" and absence from a card built, the rest listed; the options
   grouped; the board left as it is; the player's own questions kept for a later workstream.
+
+## Round 144 (2026-10-18): ws 9 step 1 — the busy page
+
+- **Engine:** `Game.load` seeds the clash cache from the saved `clashLog`, so a reload checks the clashes it met instead
+  of searching for them again; `RemoteProblem.fetch` shares a request already in flight (the first Chrome check found
+  the deferred count and the Questions tab making the same search twice).
+- **UI:** `piece` / `fillPieces`: the Questions tab's clash count and each theory's weighing are drawn after the page,
+  one at a time, without the busy veil; Theories shows each theory at once with "Weighing…". "Loading the case…" while
+  the case loads.
+- **Checked in headless Chrome,** HEAD (a worktree served on port 8322) against this step, alternating, on an Easy save
+  at the end with a played game's clash log. The machine was shared (load average 5–16 from other jobs; it may have
+  slowed Round 143's measurements too, and perhaps Rounds 130 and 139's):
+  - ready after a reload: HEAD 97 s and 43 s; now 12.5 s and 11.2 s, nearly all of it the case loading; the Questions
+    tab then opens in under 1 s, its count arriving after;
+  - Theories: HEAD 56 s and 29 s before anything shows; now the first theory at 6 s, all six at about 31 s, the panel
+    usable throughout;
+  - reading on with Theories open: 0.8 s a paragraph, the weighing finishing behind.
+
+  The paper's targets (10 s, 3 s) were for an idle machine; under this load they are missed by the case's own loading
+  time (11 s here, 5 s idle).
+- **Test:** `clashes.test.js`: a game reloaded at ¶110 has the same clashes in the same order, setting aside the same
+  cards, with no clash searched for again, and the same working set.
+- **Moved:** nothing. The reveal, foreshadow and clash logs, both reports and the gate listing are unchanged (none
+  of them reloads a save).

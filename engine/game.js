@@ -430,7 +430,9 @@ export class Game {
         this.doubtKind = new Map((state.doubtKind ?? []).filter(([id, k]) => this.suspected.has(id) && this.doubtKinds(id).includes(k)));
         this.doubtReason = new Map((state.doubtReason ?? []).filter(([id, r]) => this.suspected.has(id) && DOUBT_REASONS.includes(r)));
         this.clashLog = (state.clashLog ?? []).filter((ids) => ids.every((id) => this.model.constraints.has(id)));
-        this.clashCache = null;
+        // The clashes met, in the order met, seed the weighing: clashes() checks them before it searches, so a reload
+        // does not search again for what the game already found (docs/ui.md Q3). Those no longer standing are skipped.
+        this.clashCache = this.clashLog.length ? { key: null, list: this.clashLog.map((ids) => ({ ids })) } : null;
         this.costCache = null;
         this.bearingCache = null;
         // Where the player made each step, as saved (an older save is scored from here on).
@@ -1950,7 +1952,7 @@ export class Game {
             set = rest;
         };
         for (const c of this.clashCache?.list ?? []) {
-            if (c.ids.every((id) => set.includes(id))) { list.push(c); setAside(c); }
+            if (c.ids.every((id) => set.includes(id))) { c.claims ??= [...new Set(c.ids.map(w.ownerOf).filter(Boolean))]; list.push(c); setAside(c); }
         }
         while (!this.model.problem.consistent(set).ok) {
             const ids = this.model.problem.explainConflict(w.order(set));
