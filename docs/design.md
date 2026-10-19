@@ -4021,3 +4021,20 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   before Holmes; it fails without the fix.
 - **Leak check:** no text changed.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full).
+
+## Round 162 (2026-10-19): the annotation records Mrs. Straker waking at seven; the annotation's player meets the maximum
+
+- **Found** in the closing review (Robert agreed): four of Holmes's main steps (`t46.4`, `t81.5`, `t173.2`, `t220.3`)
+  rest on two implicit inferences, `k.wife_stayed_home` and `k.found_before_seven`, whose premises include a clue no
+  thought recorded ("Mrs. Straker awoke at seven …", ¶33) and two background facts under Holmes's methods
+  (`r.stays_put`, `r.gone_before_found`) that no thought names, being steps "no reader notices making".
+- **Annotation:** `t33.1` reads the clause and maps `c.wife_woke_at_seven` (`thoughts.json` and
+  `docs/reading-annotated.md`). The background facts are the autoplay script's business, not the annotation's: a
+  careful Hard player asks "What do I know about this?" on each card they collect (the action table's rule).
+- **Measured** (the session's `table.mjs`, the annotation's player on Hard, each move as the UI makes it: a click on
+  the words collects every card they carry): deductions 45 of 47, notices 8 of 8, raises 3, drops 3, checks 10, the
+  dog 1: 70 ahead of Holmes, **the same as the engine's maximum**. The two rows no player can score: `t127.4` (Brown's
+  square toes disclosed at Holmes's own paragraph) and `t36.2` (its background fact offered only at ¶218).
+- **Leak check:** no card text; the annotation reads a clause of ¶33.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; `c.wife_woke_at_seven` was
+  already dealt at ¶33).

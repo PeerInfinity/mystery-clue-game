@@ -295,7 +295,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 
 **¶33**
 - `t33.1` **RECORD** · *strong* · typical
-  reads "The door was open"; "Hunter was sunk in a state of absolute stupor, the favourite's stall was empty, and there were no signs of his trainer"
+  reads "Mrs. Straker awoke at seven in the morning, to find that her husband had not yet returned"; "The door was open"; "Hunter was sunk in a state of absolute stupor, the favourite's stall was empty, and there were no signs of his trainer"
 - `t33.2` **INFER** · *strong* · careful · from `t33.1`, `t31.1`, `t31.3`
   The door was opened with a key, from outside or from inside before Hunter went under.
 
