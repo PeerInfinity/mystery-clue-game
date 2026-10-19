@@ -707,6 +707,29 @@ specific thing stay ground facts with a formula and no schema.
   witness ("Should this have shown something that did not happen?").
 - **The options under four headings** (You; The cards; Your reasoning; What the game shows), every option as before.
 
+## As built (2026-10-18): the player's own questions, in the engine (docs/questions.md, step 1; Round 152)
+
+- **`QUESTION_TEMPLATES`** (`engine/game.js`): thirteen templates, fixed words around one or two held cards of named
+  kinds (an entity's `kind`, or `events`): who, where, when and why of an event; where is, whose is, who really is,
+  why would {person} do it; who had, who could get at, where was {thing} during {event}, how did {thing} leave
+  {place}, what could not be done at {place}. `facets` lists the slot facets a template may match on its first card;
+  the last five match nothing.
+- **`Game.pose(template, cards)`** makes a question card of the player's own (`pq.N`, saved as `posed`; save version 8
+  unchanged: an older save has none); `unpose`; `poseCandidate(id, card, on)` puts a held card on it, checked by
+  nothing; `posedQuestions()` lists them with `text` (`posedText`) and `joined`. Refused in Trivial, for a card not
+  held or of the wrong kind.
+- **The quiet match and the join:** a question matches the slot on its first card of a listed facet (never a state,
+  order, truth or relation slot: track slots are skipped and those facets are listed by no template). Nothing about a
+  question shows the match: `joined` is null and the save carries no slot until the slot is visible
+  (`slotVisible`), checked before and after each paragraph and on every listing, so a slot raised by the player's own
+  inference joins where they made it. At the join the candidates become circles (and proposals, when the player
+  proposes answers). A question whose slot is already open joins at once.
+- **`record().questions`:** the questions joined after they were asked, `{id, slot, at, deadline, lead}`; never in a
+  family, never in `ahead`; empty in Trivial.
+- **`asks: {template, cards}`** on a QUESTION thought: the question the player can pose; validated (template known,
+  cards of its kinds, dealt by the thought's paragraph). `thoughts-report.md` gains "Questions posed": each posed at
+  its paragraph by a reader who only reads on, and where it joins.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

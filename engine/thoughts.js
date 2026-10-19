@@ -15,7 +15,7 @@
 // have no inference says why in `no_inference` (Round 56) (`workstream-3` and `workstream-6` were retired in Rounds 112
 // and 116, their thoughts all held): `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82), `doubt` (the move doubts an inference rather than drawing one: `t68.3`, Round 116).
 
-import { Game, BG_RELEVANT, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from './game.js';
+import { Game, BG_RELEVANT, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from './game.js';
 import { READER_MARKS } from './readers.js';
 
 const theoryIds = (model) => new Set((model?.data.theories ?? []).map((x) => x.id));
@@ -134,6 +134,17 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         if (t.notices && t.tag !== 'NOTICE') err(`${t.id}: only a NOTICE thought lists the cards it notices`);
         // An event card too (Round 98): the odd thing may be that something happened at all (the horse taken, not lamed in his stall).
         for (const x of t.notices ?? []) if (!['claims', 'entities', 'events'].includes(model?.cards.get(x)?.section ?? (caseIds.has(x) ? 'claims' : null))) err(`${t.id}: notices ${x}, which is not a clue, entity or event card`);
+        // The question a QUESTION thought poses, as a template over cards (docs/questions.md, Q2).
+        if (t.asks && t.tag !== 'QUESTION') err(`${t.id}: only a QUESTION thought poses a question`);
+        if (t.asks) {
+            const tpl = QUESTION_TEMPLATES[t.asks.template];
+            if (!tpl) err(`${t.id}: asks with unknown template ${t.asks.template}`);
+            else if ((t.asks.cards ?? []).length !== tpl.cards.length) err(`${t.id}: ${t.asks.template} takes ${tpl.cards.length} card(s)`);
+            else if (model) t.asks.cards.forEach((x, i) => {
+                const c = model.cards.get(x);
+                if (!c || !(tpl.cards[i].includes('events') ? c.section === 'events' : c.section === 'entities' && tpl.cards[i].includes(c.kind))) err(`${t.id}: asks about ${x}, which is not of the kinds ${t.asks.template} takes`);
+            });
+        }
         // The exceptions whose raising counts for a thought (workstream 3, Round 105): a named exception of a rule
         // that one of the target inference's applications applies.
         for (const x of t.raises ?? []) {
@@ -209,6 +220,11 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         for (const t of thoughts.filter((x) => x.notices)) for (const id of t.notices) {
             const at = reader.unlocked.get(id)?.para;
             if (at === undefined || at > t.para) err(`${t.id}: notices ${id}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
+        }
+        // A question can be posed only about cards the player holds by the thought's paragraph (docs/questions.md).
+        for (const t of thoughts.filter((x) => x.asks)) for (const id of t.asks.cards ?? []) {
+            const at = reader.unlocked.get(id)?.para;
+            if (at === undefined || at > t.para) err(`${t.id}: asks about ${id}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
         }
     }
     const claimById = new Map((d.claims ?? []).map((c) => [c.id, c]));

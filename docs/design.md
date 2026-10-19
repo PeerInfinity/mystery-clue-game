@@ -3844,3 +3844,23 @@ not playable (`docs/review-ws9.md`). `docs/kickoff-questions.md` hands it over:
   raise; templates in the engine, never state, order, truth or relation slots; q.where_horse anchored at ¶14; the
   re-read form and candidates, nothing early; ·turn-around one template; the record only; the order of work.
 - **`CLAUDE.md`** points at the paper.
+
+## Round 152 (2026-10-18): the player's own questions, step 1 — the engine
+
+- **Engine** (`docs/questions.md` Q1–Q2, Q5): `QUESTION_TEMPLATES`, thirteen templates over one or two held cards;
+  `Game.pose`, `unpose`, `poseCandidate`, `posedQuestions`, `posedText` (`Game.ask` is background asking, so the move is
+  `pose`). A question is matched quietly to a slot on its first card of the template's facets (never a state, order,
+  truth or relation slot); before the join nothing shows the match, not even the save. It joins when the slot becomes
+  visible, checked before and after each paragraph and on every listing, so a question raised by the player's own
+  inference joins where they made it; the candidates become circles (proposals when the player proposes answers).
+  `record().questions` lists the questions joined after they were asked, never counted.
+- **Thoughts:** `asks: {template, cards}` on the ten QUESTION thoughts, validated (template, kinds, cards dealt by the
+  thought's paragraph); `thoughts-report.md`'s new "Questions posed": `t14.2` joins at ¶37 and `t46.5` at ¶214 for a
+  reader who only reads on, `t46.6`, `t92.8` and `t120.3` at once, the other five never (the player's notes).
+- **Tests:** `engine/questions.test.js` (9): matched and unmatched alike; the join at ¶37 with the candidate circled and
+  recorded (lead 23), never counted; joined at ¶19 by the builder's `k.at_a_stable_in_reach`; Straker's motive unseen
+  until ¶214; already open; refusals (the drugging at ¶20, kinds, Trivial); proposing answers; save and load before and
+  after the join, and withdrawal; asking everything (over 100 questions at ¶46) moves no family.
+- **Leak check:** no card text; the templates are fixed words around card names (articles lowered as `phrase` does).
+- **Moved:** `thoughts-report.md` gains "Questions posed"; the reveal, foreshadow and clash logs, `report.md` and the
+  gate listing are unchanged.

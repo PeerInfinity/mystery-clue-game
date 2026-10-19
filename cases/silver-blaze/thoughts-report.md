@@ -56,6 +56,23 @@ NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice
 | `t84.7` | `c.milliner_bill` | ¶84 | ¶225 | yes |
 | `t189.1` | `c.odds_shortened` | ¶189 | ¶189 | no |
 
+## Questions posed
+
+QUESTION thoughts with the question the player can pose (`asks`), posed at the thought's paragraph by a reader who only reads on (Easy), and where it joins the story's question. One that matches no slot stays the player's note; joining later than it was asked is recorded, never scored.
+
+| Thought | Question | Reader | Joins |
+|---|---|---|---|
+| `t14.2` | Where is Silver Blaze? | ¶14 | `silver_blaze.hidden_at` at ¶37 |
+| `t20.7` | Who could get at the curried mutton? | ¶20 | — |
+| `t25.1` | Where was the curried mutton during “Frightened, Edith runs past him to the stable window”? | ¶25 | — |
+| `t31.4` | Who had the stable door's lock? | ¶31 | — |
+| `t46.5` | Why would John Straker do it? | ¶46 | `straker.motive` at ¶214 |
+| `t46.6` | Who was behind “Straker's head is shattered by a savage blow”? | ¶46 | `e.fatal_blow.agent` at ¶46 |
+| `t57.3` | What could not be done at the King's Pyland stable? | ¶57 | — |
+| `t92.8` | Who was behind “Hunter's supper is drugged”? | ¶92 | `e.opium_added.agent` at ¶92 |
+| `t108.2` | How did Silver Blaze leave the hollow? | ¶108 | — |
+| `t120.3` | Who really is the man whose track appears beside the horse's? | ¶120 | `track_man.identity` at ¶120 |
+
 ## Exceptions raised
 
 Thoughts whose raising of an exception against an inference counts (`raises`). A raise, a reservation or a defeat, scores when made before Holmes's paragraph; one with no Holmes paragraph is recorded and cannot score.

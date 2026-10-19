@@ -49,6 +49,25 @@ export const CHECK_TEMPLATES = {
     show: { fields: ['thing', 'to'], outcomes: ['yes', 'no'] },
     compare: { fields: ['thing', 'with'], outcomes: ['matches', 'differs'] },
 };
+// A question the player poses (docs/questions.md, Q2): fixed words around one or two cards they hold, each of the
+// kinds listed (an entity's kind, or 'events'). `facets`: the facets of a slot on the first card it may match, quietly;
+// never a state, order, truth or relation slot. A question that matches nothing is the player's own note.
+const THINGS = ['person', 'animal', 'object', 'document'];
+export const QUESTION_TEMPLATES = {
+    'event-who': { text: 'Who was behind “{0}”?', cards: [['events']], facets: ['agent'] },
+    'event-where': { text: 'Where did “{0}” happen?', cards: [['events']], facets: ['place'] },
+    'event-when': { text: 'When did “{0}” happen?', cards: [['events']], facets: ['time'] },
+    'event-why': { text: 'Why did “{0}” happen?', cards: [['events']], facets: ['purpose', 'cause'] },
+    'where-is': { text: 'Where is {0}?', cards: [THINGS], facets: ['whereabouts'] },
+    whose: { text: 'Whose is {0}?', cards: [['object', 'document', 'animal']], facets: ['owner'] },
+    'who-is': { text: 'Who really is {0}?', cards: [['person', 'animal']], facets: ['identity'] },
+    'why-person': { text: 'Why would {0} do it?', cards: [['person']], facets: ['motive', 'purpose'] },
+    'who-had': { text: 'Who had {0}?', cards: [['object', 'document']], facets: [] },
+    reach: { text: 'Who could get at {0}?', cards: [['object', 'document', 'animal']], facets: [] },
+    'where-during': { text: 'Where was {0} during “{1}”?', cards: [THINGS, ['events']], facets: [] },
+    'how-left': { text: 'How did {0} leave {1}?', cards: [THINGS, ['place']], facets: [] },
+    'not-here': { text: 'What could not be done at {0}?', cards: [['place']], facets: [] },
+};
 // Trivial's pace: settle each answer when Holmes reaches it in the story, or as soon as the held clues allow.
 export const AUTO_HOLMES = 'holmes';
 export const AUTO_LOGIC = 'logic';
@@ -329,6 +348,7 @@ export class Game {
         this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed (workstream 7)
         this.setAsideAt = new Map();    // card id → the paragraph the player set it aside at (workstream 8)
         this.rereads = [];              // [{from, to, question, para}]: passages the player went back over (workstream 8)
+        this.posed = [];                // [{id, template, cards, para, candidates, joined}]: the player's own questions (docs/questions.md)
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -366,6 +386,7 @@ export class Game {
             seals: this.seals,
             setAside: [...this.setAsideAt],
             rereads: this.rereads,
+            posed: this.posed.map((q) => [q.id, q.template, q.cards, q.para, q.candidates, q.joined]),
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
@@ -452,6 +473,12 @@ export class Game {
         for (const x of state.seals ?? []) if (CHECK_TEMPLATES[x?.verb] && Object.values(x.fields ?? {}).every((id) => this.knows(id))) this.seals.push({ ...x });
         for (const [id, para] of state.setAside ?? []) this.setAside(id, para);
         for (const r of state.rereads ?? []) if (r && r.to < this.read) this.rereads.push({ ...r });
+        // The player's questions, after the marks: a joined question's candidates are in them already.
+        for (const [id, template, cards, para, candidates, joined] of state.posed ?? []) {
+            if (!this.#poseFits(template, cards) || this.posed.some((q) => q.id === id)) continue;
+            this.posed.push({ id, template, cards: [...cards], para, candidates: (candidates ?? []).filter((c) => this.knows(c)), joined: joined ?? null });
+        }
+        this.#noteJoins();
         if (board) this.board = { ...TL.emptyBoard(), ...board };
     }
 
@@ -509,6 +536,88 @@ export class Game {
         const r = { from, to, question, para: this.read - 1 };
         this.rereads.push(r);
         return r;
+    }
+
+    // ---------- the player's own questions (docs/questions.md) ----------
+    /**
+     * Pose a question: a template (QUESTION_TEMPLATES) over held cards of its kinds. It is the player's own card, and
+     * nothing about it says whether the case asks it too: it is matched quietly to a slot (#poseMatch), and joins
+     * that slot only once the story, or an inference the player holds, raises it. Not in Trivial.
+     */
+    pose(template, cards) {
+        if (this.autoSolves()) return { ok: false, reason: 'in Trivial the game works the case out' };
+        if (!this.#poseFits(template, cards)) return { ok: false, reason: 'choose cards you hold, of the kinds the question takes' };
+        const same = this.posed.find((q) => q.template === template && q.cards.join() === cards.join());
+        if (same) return { ok: true, id: same.id, again: true };
+        const n = Math.max(0, ...this.posed.map((q) => +q.id.slice(3))) + 1;
+        const q = { id: `pq.${n}`, template, cards: [...cards], para: this.read - 1, candidates: [], joined: null };
+        this.posed.push(q);
+        this.#noteJoins();
+        return { ok: true, id: q.id };
+    }
+    /** Withdraw a question. A joined one leaves its marks on the story's question. */
+    unpose(id) {
+        const i = this.posed.findIndex((q) => q.id === id);
+        if (i < 0) return false;
+        this.posed.splice(i, 1);
+        return true;
+    }
+    #poseFits(template, cards) {
+        const t = QUESTION_TEMPLATES[template];
+        if (!t || !Array.isArray(cards) || cards.length !== t.cards.length) return false;
+        return cards.every((id, i) => {
+            const c = this.model.cards.get(id);
+            return c && this.knows(id) && (t.cards[i].includes('events') ? c.section === 'events' : c.section === 'entities' && t.cards[i].includes(c.kind));
+        });
+    }
+    /** The slot a question matches, if any: on its first card, of one of its template's facets. Never shown before the join. */
+    #poseMatch(q) {
+        if (!this.slotsByCard) {
+            this.slotsByCard = new Map();
+            for (const s of this.model.slots.values()) if (!s.track) this.slotsByCard.set(s.on, [...(this.slotsByCard.get(s.on) ?? []), s]);
+        }
+        const on = this.slotsByCard.get(q.cards[0]) ?? [];
+        for (const f of QUESTION_TEMPLATES[q.template].facets) for (const s of on) if (s.facet === f) return s.id;
+        return null;
+    }
+    /** Join each matched question whose slot the story (or a held inference) now raises; its candidates become marks. */
+    #noteJoins() {
+        for (const q of this.posed) {
+            if (q.joined) continue;
+            const slot = this.#poseMatch(q);
+            if (!slot || !this.slotVisible(slot)) continue;
+            q.joined = { slot, para: this.read - 1 };
+            for (const v of q.candidates) {
+                if (!this.model.slots.get(slot).domain.includes(v) || !this.offered(slot, v)) continue;
+                if (this.proposing()) this.addCandidate(slot, v);
+                this.circle(slot, v);
+            }
+        }
+    }
+    /** A question's words, the cards named as the story names them so far (an entity's article in lower case, as `phrase`). */
+    posedText(q) {
+        return QUESTION_TEMPLATES[q.template].text.replace(/\{(\d)\}/g, (_, i) => {
+            const id = q.cards[+i];
+            const name = this.nameOf(id);
+            return this.model.cards.get(id).section === 'entities' ? name.replace(/^(The|A|An) /, (a) => a.toLowerCase()) : name;
+        });
+    }
+    /**
+     * The player's questions, oldest first: {id, template, cards, text, para, candidates, joined}. `joined` ({slot,
+     * para}) is null until the story raises the question it matches: before that, a matched question and one that
+     * matches nothing are alike.
+     */
+    posedQuestions() {
+        this.#noteJoins();
+        return this.posed.map((q) => ({ ...q, cards: [...q.cards], candidates: [...q.candidates], text: this.posedText(q), joined: q.joined ? { ...q.joined } : null }));
+    }
+    /** Put a held card on a question as a candidate, or take it off: the player's own, checked by nothing. */
+    poseCandidate(id, card, on = true) {
+        const q = this.posed.find((x) => x.id === id);
+        if (!q || q.joined || !this.knows(card)) return false;
+        if (on && !q.candidates.includes(card)) q.candidates.push(card);
+        if (!on) q.candidates = q.candidates.filter((c) => c !== card);
+        return true;
     }
 
     // ---------- the timeline (world model; engine/timeline.js) ----------
@@ -1000,9 +1109,12 @@ export class Game {
     readToNextDeduction() { return this.readTo(this.nextDeductionAt()); }
 
     #readNext() {
+        // A question raised by the player's own move since the last paragraph joins where they made it.
+        if (this.posed.length) this.#noteJoins();
         const p = this.read;
         this.read++;
         this.#process(p);
+        if (this.posed.length) this.#noteJoins();
     }
 
     #process(p) {
@@ -2527,7 +2639,9 @@ export class Game {
             const mine = rows.filter((r) => r.family === f);
             return [f, { scored: mine.filter((r) => r.scores).length, passed: mine.length, possible: this.finished() ? a.possible : null }];
         }));
-        return { rows: rows.sort((a, b) => a.deadline - b.deadline), families, ahead: rows.filter((r) => r.scores).length };
+        // The player's questions the story raised after they asked them (docs/questions.md, Q5): recorded, never counted.
+        const questions = this.autoSolves() ? [] : this.posedQuestions().filter((q) => q.joined && q.joined.para > q.para).map((q) => ({ id: q.id, slot: q.joined.slot, at: q.para, deadline: q.joined.para, lead: q.joined.para - q.para })).sort((a, b) => a.deadline - b.deadline);
+        return { rows: rows.sort((a, b) => a.deadline - b.deadline), families, ahead: rows.filter((r) => r.scores).length, questions };
     }
 
     // ---------- the three time axes ----------
