@@ -730,6 +730,20 @@ specific thing stay ground facts with a formula and no schema.
   cards of its kinds, dealt by the thought's paragraph). `thoughts-report.md` gains "Questions posed": each posed at
   its paragraph by a reader who only reads on, and where it joins.
 
+## As built (2026-10-18): the player's own questions, in the UI (docs/questions.md, step 2; Round 153)
+
+- **A card** (an entity or event, not in Trivial): "Ask your own question:" a list of the templates whose first place
+  takes the card, each written with the card in it ("Why would John Straker do it?"), a second list of held cards for
+  the two-card templates, and "Ask". **Your questions (N)** lists the player's questions naming the card: before the
+  join, "yours, asked at paragraph N", the player's candidates as chips (×), "Candidates: [a card you hold…] Add" and
+  "withdraw the question", identical for a question the case asks too and one it does not; after the join, "the story
+  asks it too" with the story's question as a link.
+- **The Questions tab:** "Your questions", newest first.
+- **The re-read form** lists the player's questions ("… (yours)") after the raised case questions, a joined one only
+  once; `Game.reread` takes a `pq.N`.
+- **The reading bar at the join:** "paragraph 37 · The story asks here: ⟨the story's question⟩ You asked it at
+  paragraph 14", from `record().questions`, beside the record's notes.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

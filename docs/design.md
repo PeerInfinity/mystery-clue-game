@@ -3864,3 +3864,22 @@ not playable (`docs/review-ws9.md`). `docs/kickoff-questions.md` hands it over:
 - **Leak check:** no card text; the templates are fixed words around card names (articles lowered as `phrase` does).
 - **Moved:** `thoughts-report.md` gains "Questions posed"; the reveal, foreshadow and clash logs, `report.md` and the
   gate listing are unchanged.
+
+## Round 153 (2026-10-18): the player's own questions, step 2 — the UI
+
+- **UI** (`docs/questions.md` Q1–Q3): on an entity or event card, "Ask your own question:" (the templates that take the
+  card, written with it; a second list for the two-card ones) and **Your questions**, with the player's candidates
+  (add, ×) and "withdraw" before the join, the story's question as a link after; the Questions tab's "Your questions";
+  the re-read form lists them ("(yours)"; `Game.reread` takes a `pq.N`); the reading bar's note at the join.
+- **Checked in headless Chrome** (the worktree served on port 8322; the machine loaded to 14–15, so pages took up to a
+  minute to load) on passive Easy saves:
+  - ¶31, Silver Blaze's card: "Where is Silver Blaze?" asked at ¶14 with King's Pyland and Dartmoor, shown "yours,
+    asked at paragraph 14" exactly as the unmatched "Who had the stable door's lock?";
+  - ¶36 → ¶37: the bar, "paragraph 37 · The story asks here: Where has Silver Blaze been since Tuesday morning? You
+    asked it at paragraph 14"; the Questions tab, "the story asks it too" against the lock question's "paragraph 31 ·
+    Ned Hunter, John Straker"; the re-read form ends "Who had the stable door's lock? (yours)", the joined one not
+    listed twice;
+  - ¶46, Straker's card: "Why would John Straker do it?" chosen and asked; listed with "no candidates of your own yet".
+- **Test:** `questions.test.js`: a re-read carries a `pq.N`; an unknown one is refused.
+- **Leak check:** no card text; the templates and labels are fixed words around held card names.
+- **Moved:** nothing in the logs, the reports or the gate listing.

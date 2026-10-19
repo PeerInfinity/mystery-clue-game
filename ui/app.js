@@ -6,7 +6,7 @@ import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
-import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
+import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
@@ -198,7 +198,7 @@ function rereadForm() {
     const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
     return `<div class="note reread-form small">Re-read from paragraph <input id="rr-from" type="number" min="1" max="${game.read - 1}" value="${r.from}">
         to <input id="rr-to" type="number" min="1" max="${game.read - 1}" value="${r.to}">
-        with the question <select id="rr-q">${opt('', 'none in particular', r.question)}${raised.map((q) => opt(q.id, game.questionText(q), r.question)).join('')}</select>
+        with the question <select id="rr-q">${opt('', 'none in particular', r.question)}${raised.map((q) => opt(q.id, game.questionText(q), r.question)).join('')}${game.autoSolves() ? '' : game.posedQuestions().filter((q) => !q.joined || !raised.some((x) => x.slot === q.joined.slot)).map((q) => opt(q.id, `${q.text} (yours)`, r.question)).join('')}</select>
         <button id="rr-go">Re-read</button> <button id="rr-close" class="quiet">Close</button>${r.error ? ` <span class="muted">${esc(r.error)}</span>` : ''}</div>`;
 }
 
@@ -356,6 +356,8 @@ function toolCard() {
             h += `<p class="small notice">Does something here go against what you would expect? <select id="notice-because"><option value="">because… (optional)</option>${rules.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 60))}</option>`).join('')}</select> <button data-notice="${esc(id)}" class="quiet">That's odd</button></p>`;
         }
     }
+    // The player's own questions on this card (docs/questions.md): alike whether the case asks them too, until it does.
+    if (['entities', 'events'].includes(c.section) && !game.autoSolves()) h += posedOnCardHtml(id);
     // Filing an absence from the clue that would have registered it (docs/ui.md Q4); the board offers the same form.
     if (c.section === 'claims' && !game.autoSolves()) h += `<details class="small absence-on-card"${ui.absence?.witness === id && (ui.absence.expectation || ui.absence.time) ? ' open' : ''}><summary>Should this have shown something that did not happen?</summary>${absenceFormHtml(game.timelineTimes().filter((t) => t.kind !== 'boundary'), id)}</details>`;
     if (game.canAsk(id)) {
@@ -710,6 +712,7 @@ function toolQuestions() {
         }
         d += '</ul>';
     }
+    d += posedListHtml();
     d += oddThingsHtml();
     d += signalsHtml();
     d += rereadsHtml();
@@ -728,6 +731,52 @@ function toolQuestions() {
     return `${h}</ul>${d}`;
 }
 
+// ---------- the player's own questions (docs/questions.md) ----------
+const poseKind = (id) => (model.cards.get(id).section === 'events' ? 'events' : model.cards.get(id).kind);
+/** Held cards of the kinds a template's place takes, by name. */
+function heldOfKinds(kinds) {
+    return [...game.unlocked.keys()].filter((x) => ['entities', 'events'].includes(model.cards.get(x)?.section) && kinds.includes(poseKind(x)) && inHand(x)).sort((a, b) => cardName(a).localeCompare(cardName(b)));
+}
+/** A template's words with this card in its first place and "…" in its second. */
+function templateLabel(t, id) {
+    const name = cardName(id);
+    return t.text.replace('{0}', model.cards.get(id).section === 'entities' ? name.replace(/^(The|A|An) /, (a) => a.toLowerCase()) : name).replace('{1}', '…');
+}
+/** One of the player's questions: its words, then its candidates (before the join) or the story's question (after). */
+function posedHtml(q) {
+    let h = `<div class="slot posed"><div class="slot-head"><b>${esc(q.text)}</b><span class="state">${q.joined ? 'the story asks it too' : `yours, asked at ${paraLabel(q.para)}`}</span></div>`;
+    if (q.joined) {
+        h += `<div class="small"><span class="link" data-slot-open="${q.joined.slot}">${esc(game.promptOf(q.joined.slot))}</span>${q.joined.para > q.para ? ` <span class="muted">· raised at ${paraLabel(q.joined.para)}; you asked it at ${paraLabel(q.para)}</span>` : ''}</div>`;
+    } else {
+        const chips = q.candidates.map((c) => `<span class="chip">${esc(cardName(c))} <span class="link" data-pose-uncand="${q.id}|${esc(c)}" title="Take it off">×</span></span>`);
+        const opts = heldOfKinds(['person', 'animal', 'object', 'document', 'place', 'group']).filter((x) => !q.candidates.includes(x) && !q.cards.includes(x));
+        h += `<div class="chips">${chips.join('') || '<span class="empty">no candidates of your own yet</span>'}</div>`;
+        h += `<div class="small">Candidates: <select id="pose-cand-${q.id.replace('.', '-')}"><option value="">a card you hold…</option>${opts.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 50))}</option>`).join('')}</select> <button class="quiet" data-pose-cand="${q.id}">Add</button> · <span class="link" data-unpose="${q.id}">withdraw the question</span></div>`;
+    }
+    return `${h}</div>`;
+}
+/** On a card: the player's questions that name it, and the form to ask one about it. */
+function posedOnCardHtml(id) {
+    const mine = game.posedQuestions().filter((q) => q.cards.includes(id));
+    let h = mine.length ? `<h3 class="section">Your questions (${mine.length})</h3>${mine.map(posedHtml).join('')}` : '';
+    const fits = Object.entries(QUESTION_TEMPLATES).filter(([, t]) => t.cards[0].includes(poseKind(id)));
+    if (!fits.length) return h;
+    const sel = fits.some(([k]) => k === ui.poseTemplate) ? ui.poseTemplate : fits[0][0];
+    const t = QUESTION_TEMPLATES[sel];
+    const second = t.cards.length > 1 ? ` <select id="pose-second"><option value="">${t.cards[1].includes('events') ? 'what happened…' : t.cards[1].includes('place') ? 'where…' : 'what…'}</option>${heldOfKinds(t.cards[1]).filter((x) => x !== id).map((x) => `<option value="${esc(x)}">${esc(shortName(x, 50))}</option>`).join('')}</select>` : '';
+    h += `<p class="small pose">Ask your own question: <select id="pose-template">${fits.map(([k, x]) => `<option value="${k}"${k === sel ? ' selected' : ''}>${esc(templateLabel(x, id))}</option>`).join('')}</select>${second} <button class="quiet" data-pose="${esc(id)}">Ask</button></p>`;
+    return h;
+}
+/** The Questions tab: every question the player asked, newest first. */
+function posedListHtml() {
+    if (game.autoSolves()) return '';
+    const list = game.posedQuestions().reverse();
+    if (!list.length) return '';
+    let h = '<h3 class="section">Your questions</h3><p class="small muted">Questions you asked yourself. The game checks nothing on them; when the story asks the same question, yours joins it.</p><ul class="list">';
+    for (const q of list) h += `<li class="q"><span>${q.joined ? `<span class="link" data-slot-open="${q.joined.slot}">${esc(q.text)}</span>` : `<span class="link" data-card="${esc(q.cards[0])}">${esc(q.text)}</span>`}</span><span class="state ${q.joined ? 'done' : ''}">${q.joined ? 'the story asks it too' : `${paraLabel(q.para)}${q.candidates.length ? ` · ${q.candidates.map((c) => esc(cardName(c))).join(', ')}` : ''}`}</span></li>`;
+    return `${h}</ul>`;
+}
+
 /** The details the player marked as odd, and the absences they filed (workstream 5). */
 function oddThingsHtml() {
     const noticed = [...game.noticed].filter(([id]) => game.knows(id));
@@ -744,7 +793,9 @@ function oddThingsHtml() {
 /** A re-read's question: a raised case question, or a held card. */
 function questionName(id) {
     const q = model.data.questions.find((x) => x.id === id);
-    return q ? game.questionText(q) : shortName(id, 60);
+    if (q) return game.questionText(q);
+    const mine = game.posedQuestions().find((x) => x.id === id);
+    return mine ? mine.text : shortName(id, 60);
 }
 /** The player's own re-reads, with their questions (recorded, never scored). */
 function rereadsHtml() {
@@ -869,7 +920,11 @@ function recordNews() {
     if (game.autoSolves() || ui.readFrom == null) return '';
     const from = ui.readFrom - 1;
     const rows = piece(`news:${from}:${game.read}`, () => game.record().rows.filter((r) => r.scores && r.deadline >= from && r.deadline < game.read), []);
-    return once(rows.map((r) => `<div class="note record-news">${paraLabel(r.deadline)} · ${recordLine(r)}</div>`)).join('');
+    const asked = piece(`news-q:${from}:${game.read}`, () => game.record().questions.filter((q) => q.deadline >= from && q.deadline < game.read), []);
+    return once([
+        ...rows.map((r) => `<div class="note record-news">${paraLabel(r.deadline)} · ${recordLine(r)}</div>`),
+        ...asked.map((q) => `<div class="note record-news">${paraLabel(q.deadline)} · The story asks here: <span class="link" data-slot-open="${q.slot}">${esc(game.promptOf(q.slot))}</span> You asked it at ${paraLabel(q.at)}.</div>`),
+    ]).join('');
 }
 function toolRecord() {
     if (game.autoSolves()) return '<h3 class="section">Your record against Holmes</h3><p class="small muted">In Trivial the game works the case out: nothing is scored. On Easy you can race Holmes.</p>';
@@ -1600,7 +1655,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],[data-pose],[data-pose-cand],[data-pose-uncand],[data-unpose],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
@@ -1639,6 +1694,23 @@ function onClick(e) {
         return;
     }
     if (t.dataset.unnotice) { game.unnotice(t.dataset.unnotice); changed(); return; }
+    if (t.dataset.pose) {
+        const tpl = $('#pose-template')?.value;
+        const cards = [t.dataset.pose, ...(QUESTION_TEMPLATES[tpl]?.cards.length > 1 ? [$('#pose-second')?.value] : [])];
+        if (cards.some((x) => !x)) { toast('Choose what the question is about.'); return; }
+        const res = game.pose(tpl, cards);
+        if (!res.ok) toast(esc(res.reason));
+        else if (res.again) toast('You have asked that already.');
+        changed();
+        return;
+    }
+    if (t.dataset.poseCand) {
+        const card = $(`#pose-cand-${t.dataset.poseCand.replace('.', '-')}`)?.value;
+        if (card) { game.poseCandidate(t.dataset.poseCand, card); changed(); }
+        return;
+    }
+    if (t.dataset.poseUncand) { const [q, card] = t.dataset.poseUncand.split('|'); game.poseCandidate(q, card, false); changed(); return; }
+    if (t.dataset.unpose) { game.unpose(t.dataset.unpose); changed(); return; }
     if (t.dataset.raise) {
         const [id, n, x] = t.dataset.raise.split('|');
         const res = game.raise(id, Number(n), x);
@@ -1842,6 +1914,7 @@ function onChange(e) {
         return;
     }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
+    if (e.target.id === 'pose-template') { ui.poseTemplate = e.target.value; renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
     if (e.target.id === 'doubt-reason') { game.setDoubtReason(e.target.dataset.reasonFor, e.target.value || null); changed(); return; }
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }

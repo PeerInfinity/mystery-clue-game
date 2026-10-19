@@ -527,12 +527,12 @@ export class Game {
     setAsideCards() { return [...this.setAsideAt].sort((a, b) => a[1] - b[1]).map(([id]) => id); }
 
     /**
-     * Go back over paragraphs `from`–`to` (already read), optionally with a question: a raised case question's id or
-     * a held card. Recorded with the paragraph it was made at; nothing else.
+     * Go back over paragraphs `from`–`to` (already read), optionally with a question: a raised case question's id, one
+     * of the player's own questions (`pq.N`), or a held card. Recorded with the paragraph it was made at; nothing else.
      */
     reread(from, to, question = null) {
         if (!(Number.isInteger(from) && Number.isInteger(to) && from >= 1 && from <= to && to < this.read)) return null;
-        if (question && !this.knows(question) && !(this.model.data.questions ?? []).some((q) => q.id === question && this.questionRaised(q.id))) return null;
+        if (question && !this.knows(question) && !this.posed.some((q) => q.id === question) && !(this.model.data.questions ?? []).some((q) => q.id === question && this.questionRaised(q.id))) return null;
         const r = { from, to, question, para: this.read - 1 };
         this.rereads.push(r);
         return r;
