@@ -37,25 +37,32 @@ const label = async (slot, v) => {
     const c = model.cards.get(v);
     return c && (c.section === 'entities' || c.section === 'events') ? mirror.nameOf(v) : c?.text ?? v;
 };
+// The default layout (docs/layout.md): the story in the left panel, the card in the right. As a player would, the
+// lists are chosen in the left panel, so a card clicked there opens on the right, and the left goes back to the story
+// to read on or click its words.
+const LEFT = '.panel[data-panel="0"]';
+const choose = async (t) => (await p.ev(`document.querySelector('${LEFT} .tab.on')?.dataset.tab === ${JSON.stringify(t)}`)) || p.click(`${LEFT} .tab[data-tab="${t}"]`);
+const showStory = async () => (await p.ev(`!!document.querySelector('#story')`)) || choose('story');
 async function openCard(id, tab) {
     for (const t of [...new Set([tab, 'cards', 'inferences', 'background', 'questions'])]) {
-        await p.click(`.tab[data-tab="${t}"]`);
-        if (await p.click(`#tool [data-card="${id}"]`)) return true;
+        await choose(t);
+        if (await p.click(`#panel-0 [data-card="${id}"]`)) return true;
     }
     // A set-aside card is listed under the fold of the Cards tab.
-    await p.click('.tab[data-tab="cards"]');
-    await p.ev(`document.querySelectorAll('details.set-aside').forEach((d) => d.open = true); 1`);
-    return p.click(`#tool [data-card="${id}"]`);
+    await choose('cards');
+    await p.ev(`document.querySelectorAll('#panel-0 details.set-aside').forEach((d) => d.open = true); 1`);
+    return p.click(`#panel-0 [data-card="${id}"]`);
 }
 async function step(u) {
     if (u.story !== undefined) {
+        await showStory();
         const sel = `#story p[data-p="${u.story}"] .m`;
         const ok = await p.ev(`(() => { const el = [...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.dataset.ids.split(' ').includes(${JSON.stringify(u.span)}) && e.textContent === ${JSON.stringify(u.words)}) ?? [...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.dataset.ids.split(' ').includes(${JSON.stringify(u.span)})); if (!el) return false; el.scrollIntoView(); el.click(); return true; })()`);
         if (ok) await p.idle();
         return ok || `no words for ${u.span} in ¶${u.story}`;
     }
     if (u.open) return (await openCard(u.open, u.tab)) || `cannot open ${u.open}`;
-    if (u.tab) return (await p.click(`.tab[data-tab="${u.tab}"]`)) || `no tab ${u.tab}`;
+    if (u.tab) return (await choose(u.tab)) || `no tab ${u.tab}`;
     if (u.open_details) { await p.ev(`document.querySelectorAll(${JSON.stringify(u.open_details)}).forEach((d) => d.open = true); 1`); return true; }
     if (u.select_text) {
         const v = await p.ev(`[...(document.querySelector(${JSON.stringify(u.select_text)})?.options ?? [])].find((o) => o.text === ${JSON.stringify(u.text)})?.value ?? null`);
@@ -65,7 +72,7 @@ async function step(u) {
     if (u.fill) return (await p.ev(`(() => { const e = document.querySelector(${JSON.stringify(u.fill)}); if (!e) return false; e.value = ${JSON.stringify(String(u.value))}; return true; })()`)) || `no field ${u.fill}`;
     if (u.propose) {
         const text = await label(u.propose, u.value);
-        const ok = await p.ev(`(() => { const e = document.querySelector('#tool input[data-add="${u.propose}"]'); if (!e) return false; e.value = ${JSON.stringify(text)}; e.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`);
+        const ok = await p.ev(`(() => { const e = document.querySelector('.tool-body input[data-add="${u.propose}"]'); if (!e) return false; e.value = ${JSON.stringify(text)}; e.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`);
         if (ok) await p.idle();
         return ok || `no answer box for ${u.propose}`;
     }
@@ -106,6 +113,7 @@ const t0 = Date.now();
 for (const m of moves) {
     if (m.at > STOP) break;
     // Read on until the move's paragraph has been read (the move was made with read = at + 1).
+    if (((await st()).read ?? 1) <= m.at) await showStory();
     while (((await st()).read ?? 1) <= m.at) { if (!(await p.click('#read'))) { results.push({ ...m, ok: false, why: 'cannot read on' }); break; } }
     let why = null;
     if (await took(m) && m.op !== 'theory') { results.push({ seq: m.seq, thought: m.thought, op: m.op, at: m.at, ok: true, already: true }); continue; }
@@ -122,9 +130,10 @@ for (const m of moves) {
     if (results.length % 50 === 0) { console.log(`${results.length} moves, ¶${m.at}, ${Math.round((Date.now() - t0) / 1000)} s, failed ${results.filter((r) => !r.ok).length}`); fs.writeFileSync(OUT, JSON.stringify({ results }, null, 1)); }
 }
 // Read to the end and take the record.
+await showStory();
 while (await p.click('#read-deduction') || await p.click('#read')) { if (await p.ev(`!document.querySelector('#read')`)) break; }
 await p.click('[data-record-open]');
-const record = await p.text('#tool');
+const record = await p.text('.panel-body[data-tab="record"]');
 fs.writeFileSync(OUT.replace(/\.json$/, '-save.json'), JSON.stringify(await p.state()));
 fs.writeFileSync(OUT, JSON.stringify({ secs: Math.round((Date.now() - t0) / 1000), failed: results.filter((r) => !r.ok).length, results, record, errors: p.errors }, null, 1));
 console.log(`done in ${Math.round((Date.now() - t0) / 1000)} s; ${results.length} moves, failed ${results.filter((r) => !r.ok).length}; console errors ${p.errors.length}`);

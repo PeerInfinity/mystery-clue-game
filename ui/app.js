@@ -23,7 +23,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { tab: 'card', selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
+const ui = { panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -124,6 +124,7 @@ async function fillPieces() {
 // ---------- the story ----------
 function renderStory() {
     const el = $('#story');
+    if (!el) return;
     const hard = game.collecting();
     el.classList.toggle('hard', hard);
     let h = '';
@@ -147,6 +148,7 @@ function renderStory() {
 
 function renderReader() {
     const el = $('#reader');
+    if (!el) return;
     const news = recordNews();
     if (game.finished()) {
         el.innerHTML = `${news}<span class="muted">The end.</span> ${game.autoSolves() ? '<span class="small muted">In Trivial the game worked the case out: nothing is scored. On Easy you can race Holmes.</span>' : '<span class="link small" data-record-open="1">Your record against Holmes</span>'}`;
@@ -204,24 +206,85 @@ function rereadForm() {
 
 function scrollStory() {
     const el = $('#story');
-    const last = el.querySelector('p.latest');
+    const last = el?.querySelector('p.latest');
     if (last) el.scrollTop = last.offsetTop + last.offsetHeight - el.clientHeight + 24;
 }
 
-// ---------- tools ----------
-function renderTool() { run(renderToolNow); }
-function renderToolNow() {
-    document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
-    $('#tool').innerHTML = buildingBar() + { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord }[ui.tab]();
-    const infTab = document.querySelector('.tab[data-tab="inferences"]');
-    infTab.hidden = game.autoSolves() && !game.heldInferences().length;
+// ---------- the panels (docs/layout.md) ----------
+// Two panels, each drawing any tab; a tab is shown in one panel at a time. Choosing in one panel a tab the other shows
+// swaps the two (Q1); a link opens its tab in the other panel than the one clicked in, or in place if its own panel is
+// the one clicked in (Q3).
+const TABS = [['story', 'Story'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
+const TOOLS = { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
+const panelOf = (tab) => ui.panels.findIndex((p) => p.tab === tab);
+const panelBody = (tab) => $(`#panel-${panelOf(tab)}`);
+/** The panel a click came from (null: the header, the pop-up). */
+function fromPanel(e) {
+    const p = e.target.closest('.panel');
+    return p ? Number(p.dataset.panel) : e.target.closest('#pop') ? ui.popFrom ?? null : null;
+}
+/** Choose a tab in a panel; if the other panel shows it, the two swap. */
+function choose(i, tab) {
+    const other = ui.panels[1 - i];
+    if (other.tab === tab) other.tab = ui.panels[i].tab;
+    ui.panels[i].tab = tab;
+}
+/** Show a tab where a link opens it: where it is shown already, else in the other panel than the one clicked in. */
+function show(tab, from = null) {
+    let i = panelOf(tab);
+    if (i < 0) {
+        i = from === null ? (ui.panels[1].tab === 'story' ? 0 : 1) : 1 - from;
+        ui.panels[i].tab = tab;
+    }
+    return i;
+}
+/** Each panel's body made for its tab: the story and its reading bar, or a tool. True if the story was just put up. */
+function layoutPanels() {
+    let storyShown = false;
+    ui.panels.forEach(({ tab }, i) => {
+        const body = $(`#panel-${i}`);
+        if (body.dataset.tab === tab) return;
+        body.dataset.tab = tab;
+        if (tab === 'story') {
+            body.className = 'panel-body story-pane';
+            body.innerHTML = '<div id="story" class="story"></div><div id="reader" class="reader"></div>';
+            storyShown = true;
+        } else {
+            body.className = 'panel-body tool-body';
+            body.innerHTML = '';
+            body.dataset.fresh = '1';
+        }
+    });
+    return storyShown;
+}
+function renderTabs() {
     const left = game.helps('hints') ? game.buildable().length : 0;
-    infTab.textContent = `Inferences${left ? ` (${left} to build)` : ''}`;
     const tally = cardTally([...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section) && !game.isSetAside(k)));
-    document.querySelector('.tab[data-tab="cards"]').textContent = `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`;
     // The count waits for nothing: until the clashes are weighed, the last count stands.
     const clashes = game.helps('clashes') ? piece('count:clashes', () => (ui.clashCount = game.clashes().length), ui.clashCount ?? 0) : 0;
-    document.querySelector('.tab[data-tab="questions"]').textContent = `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`;
+    const label = {
+        inferences: `Inferences${left ? ` (${left} to build)` : ''}`,
+        cards: `Cards${tallyText(tally) ? ` (${tallyText(tally)})` : ''}`,
+        questions: `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`,
+    };
+    const hidden = { inferences: game.autoSolves() && !game.heldInferences().length };
+    document.querySelectorAll('.panel').forEach((el, i) => {
+        el.querySelector('.tabs').innerHTML = TABS.filter(([t]) => !hidden[t] || ui.panels[i].tab === t)
+            .map(([t, name]) => `<button data-tab="${t}" class="tab${ui.panels[i].tab === t ? ' on' : ''}">${esc(label[t] ?? name)}</button>`).join('');
+    });
+}
+function renderTool() { run(renderToolNow); }
+function renderToolNow() {
+    if (layoutPanels()) { renderStory(); scrollStory(); }
+    // The connection in progress shows above the card, or above the first tool shown.
+    const bar = panelOf('card') >= 0 ? panelOf('card') : ui.panels.findIndex((p) => p.tab !== 'story');
+    ui.panels.forEach(({ tab }, i) => {
+        if (tab === 'story') return;
+        const body = $(`#panel-${i}`);
+        body.innerHTML = (i === bar ? buildingBar() : '') + (tab === 'card' ? backHtml() : '') + TOOLS[tab]();
+        if (body.dataset.fresh) { body.scrollTop = 0; delete body.dataset.fresh; }
+    });
+    renderTabs();
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
         ui.focusSlot = null;
@@ -1355,6 +1418,7 @@ function renderNow() {
     const pick = (id) => $(`#${id}`).selectedOptions[0]?.textContent ?? '';
     $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('opt-background').toLowerCase()}`;
     $('#settings-short').textContent = pick('difficulty');
+    layoutPanels();
     renderStory();
     renderToolNow();
 }
@@ -1403,7 +1467,13 @@ function inferButton(id) {
     return `<p class="infer"><button data-infer="${id}" class="quiet" title="Propose an inference that starts from this card">${b?.cards.length ? 'Connect to this' : 'Infer from this'}</button></p>`;
 }
 
-/** The connection in progress, above whatever tab is open. */
+/** "Back" on the Card tab: to the card shown before (docs/layout.md, Q3). */
+function backHtml() {
+    const prev = ui.back.at(-1);
+    return prev && game.knows(prev) && ui.selected && game.knows(ui.selected) ? `<div class="back small"><span class="link" data-back="1">← back to ${esc(shortName(prev, 50))}</span></div>` : '';
+}
+
+/** The connection in progress, above the card or the first tool shown. */
 function buildingBar() {
     const b = ui.building;
     if (!b) return '';
@@ -1533,13 +1603,15 @@ function clashHtml(ids, clash = null) {
 }
 
 // ---------- events ----------
-function openCard(id) {
+function openCard(id, from = null, { back = false } = {}) {
+    // The card before is kept for "back" (docs/layout.md, Q3), unless this is a step back.
+    if (!back && ui.selected && ui.selected !== id && game.knows(ui.selected)) ui.back = [...ui.back.filter((x) => x !== ui.selected), ui.selected].slice(-30);
     ui.selected = id;
-    ui.tab = 'card';
+    const i = show('card', from);
     ui.menu = null;
     ui.menuNote = '';
+    $(`#panel-${i}`).dataset.fresh = '1';
     renderTool();
-    $('#tool').scrollTop = 0;
     // Shown with its new pieces highlighted; from now on they count as seen.
     if (game.knows(id)) game.markSeen(id);
     save();
@@ -1564,6 +1636,7 @@ function onStoryClick(e) {
     }
     if (!m) return;
     const ids = m.dataset.ids.split(' ');
+    ui.popFrom = panelOf('story');
     const items = ids.map((id) => {
         if (model.cards.has(id)) return game.knows(id) ? `<span class="item link" data-card="${id}"><span class="kind">${kindOf(id)}</span>${esc(shortName(id, 60))}</span>` : '';
         if (id.startsWith('w.')) return `<span class="item link" data-window="${id}"><span class="kind">time</span>${esc(cardName(id))}</span>`;
@@ -1641,12 +1714,13 @@ function onClick(e) {
     }
     if (e.target.closest('[data-build-clear]')) { ui.building = null; ui.state = null; renderTool(); return; }
     if (e.target.closest('[data-state-go]')) { Object.assign(ui.state, { neg: $('#st-neg').value, value: $('#st-value').value }); runState(); return; }
-    if (e.target.closest('[data-record-open]')) { ui.tab = 'record'; renderTool(); $('#tool').scrollTop = 0; return; }
+    if (e.target.closest('[data-record-open]')) { $(`#panel-${show('record', fromPanel(e))}`).dataset.fresh = '1'; renderTool(); return; }
     const tabOpen = e.target.closest('[data-tab-open]');
-    if (tabOpen) { ui.tab = tabOpen.dataset.tabOpen; renderTool(); return; }
+    if (tabOpen) { show(tabOpen.dataset.tabOpen, fromPanel(e)); renderTool(); return; }
+    if (e.target.closest('[data-back]')) { if (ui.back.length) openCard(ui.back.pop(), fromPanel(e), { back: true }); return; }
     if (e.target.closest('[data-show-clashes]')) {
-        ui.tab = 'questions';
-        renderTool();
+        show('questions', fromPanel(e));
+        renderToolNow();
         document.getElementById('clashes')?.scrollIntoView({ block: 'start' });
         return;
     }
@@ -1672,19 +1746,19 @@ function onClick(e) {
     }
     const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],[data-pose],[data-pose-cand],[data-pose-uncand],[data-unpose],.tab');
     if (!t) return;
-    if (t.classList.contains('tab')) { ui.tab = t.dataset.tab; renderTool(); return; }
-    if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card); return; }
+    if (t.classList.contains('tab')) { choose(fromPanel(e), t.dataset.tab); renderTool(); return; }
+    if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card, fromPanel(e)); return; }
     if (t.dataset.slotOpen) {
         $('#pop').hidden = true;
         const s = model.slots.get(t.dataset.slotOpen);
         if (!game.knows(s.on)) { toast('You have not collected that card yet.'); return; }
         ui.focusSlot = s.id;
-        openCard(s.on);
+        openCard(s.on, fromPanel(e));
         renderTool();
         return;
     }
-    if (t.dataset.window) { $('#pop').hidden = true; ui.tab = 'timeline'; ui.timeline = 'fabula'; ui.focusWindow = t.dataset.window; renderTool(); return; }
-    if (t.dataset.goto) { document.querySelector(`#story p[data-p="${t.dataset.goto}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    if (t.dataset.window) { $('#pop').hidden = true; show('timeline', fromPanel(e)); ui.timeline = 'fabula'; ui.focusWindow = t.dataset.window; renderTool(); return; }
+    if (t.dataset.goto) { show('story', fromPanel(e)); renderToolNow(); document.querySelector(`#story p[data-p="${t.dataset.goto}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
     if (t.dataset.kind !== undefined && t.closest('.filters')) { ui.kind = t.dataset.kind || null; renderTool(); return; }
     if (t.dataset.expand) { ui.expanded.add(t.dataset.expand); renderTool(); return; }
     if (t.dataset.timeline) { ui.timeline = t.dataset.timeline; renderTool(); return; }

@@ -36,22 +36,13 @@
   </div>
 </header>
 <main class="layout">
-  <section class="story-pane">
-    <div id="story" class="story"></div>
-    <div id="reader" class="reader"></div>
+  <section class="panel" data-panel="0">
+    <div class="tabs" role="tablist"></div>
+    <div id="panel-0" class="panel-body"><p class="muted">Loading the case…</p></div>
   </section>
-  <section class="tools">
-    <div class="tabs" role="tablist">
-      <button data-tab="card" class="tab on">Card</button>
-      <button data-tab="cards" class="tab">Cards</button>
-      <button data-tab="questions" class="tab">Questions</button>
-      <button data-tab="inferences" class="tab">Inferences</button>
-      <button data-tab="theories" class="tab">Theories</button>
-      <button data-tab="checks" class="tab">Checks</button>
-      <button data-tab="timeline" class="tab">Timeline</button>
-      <button data-tab="background" class="tab">Background</button>
-    </div>
-    <div id="tool" class="tool-body"><p class="muted">Loading the case…</p></div>
+  <section class="panel" data-panel="1">
+    <div class="tabs" role="tablist"></div>
+    <div id="panel-1" class="panel-body"></div>
   </section>
 </main>
 <div id="pop" class="pop" hidden></div>

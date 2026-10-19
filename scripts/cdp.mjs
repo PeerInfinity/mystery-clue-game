@@ -17,8 +17,8 @@ export async function open({ save = null, url = process.env.URL ?? 'http://local
     const send = (method, params = {}) => new Promise((r) => { const id = ++n; pending.set(id, r); ws.send(JSON.stringify({ id, method, params })); });
     const ev = async (expr) => { const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true }); if (r.result?.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description ?? 'eval failed'); return r.result?.result?.value; };
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-    // Ready: the case is loaded (the reading bar has its button) and the busy veil is down, twice in a row.
-    const idle = async (max = 180000) => { const t0 = Date.now(); let ok = 0; while (Date.now() - t0 < max) { const s = await ev(`!!document.querySelector('#read, #reader .muted') && document.querySelector('#busy').hidden && !document.querySelector('#tool .pending')`).catch(() => false); ok = s ? ok + 1 : 0; if (ok >= 2) return Date.now() - t0; await sleep(300); } throw new Error('page not idle'); };
+    // Ready: the case is loaded (the panels have their tabs) and the busy veil is down, twice in a row.
+    const idle = async (max = 180000) => { const t0 = Date.now(); let ok = 0; while (Date.now() - t0 < max) { const s = await ev(`!!document.querySelector('.tabs .tab') && document.querySelector('#busy').hidden && !document.querySelector('.tool-body .pending')`).catch(() => false); ok = s ? ok + 1 : 0; if (ok >= 2) return Date.now() - t0; await sleep(300); } throw new Error('page not idle'); };
     await send('Page.enable');
     // Always the files as they are now: the served tree changes between runs.
     await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });

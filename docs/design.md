@@ -4169,3 +4169,26 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   this session's (one script on the headless Chrome at a time, its cache, script slips that look like defects, a test
   file written during a gate).
 - **Moved:** nothing (documentation and scripts).
+
+## Round 171 (2026-10-19): the layout, step 1: two panels drawing any tab
+
+- **Built** (`docs/layout.md`, order of work step 1; `ui/app.js`, `index.html`, `ui/style.css`): two panels
+  (`ui.panels`, each `{tab}`), each with the selector at its top over the ten tabs: Story, Card, Cards, Questions,
+  Inferences, Theories, Checks, Timeline, Background, and Record (the record against Holmes, a tab like the others).
+  A tab is shown in one panel at a time: choosing in one panel the tab the other shows swaps them (Q1 a). Links are
+  routed by Q3 (a): a card (or the record, a question's card, the timeline's window, a tab named in the reading bar)
+  opens where its tab is shown already, else in the other panel than the one clicked in; a link inside the Card tab
+  opens in place, with "← back to …" to the card before. The connection in progress shows above the Card tab, or above
+  the first tool shown. The reading bar stays with the story for this step (step 2 moves it). Default: Story left, Card
+  right, as before.
+- **The runner** (`scripts/ui-run.mjs`, `scripts/cdp.mjs`): the page is ready when its tabs are drawn (the reading bar
+  may be hidden); the lists are chosen in the left panel, so a card clicked there opens on the right, and the left
+  goes back to the story to read on or click its words. The action table's steps are unchanged: `{open, tab}` and
+  `{tab}` still say what a player does (open a card from a list, go to a tab).
+- **Checked in headless Chrome** (desktop 1400 × 900 and phone 390, screenshots sent to Robert): the default (Story
+  left, Card right); Story chosen on the right swaps it with Card; Cards on the left, a card clicked opens on the right;
+  "back" from a card opened inside the Card tab; the record from the header opens beside the story; no console error.
+  **The action table played through the UI** on Hard from the first paragraph: 396 moves, none failed, no console
+  error, 13 minutes; the record: deductions 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1: 70.
+- **Leak check:** new words are fixed labels ("Story", "Record", "← back to" a held card's name); no card text.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
