@@ -1,10 +1,10 @@
 # The layout: tabs at the top of both panels, the story as a tab, one or two columns
 
-Status: **a paper for Robert** (2026-10-19), piece 2 of `docs/kickoff-closing-review.md`. Nothing is built until it is
-agreed. Builds on `docs/ui.md` (the UI as built, Rounds 144–148), `docs/questions.md` (Rounds 152–155), the closing
-review (`docs/review-closing.md`, Rounds 157–168, which played the whole game through the page) and Robert's wishes:
-both panels get their tab selector at the top; the story becomes one of the selectable tabs; a toggle between one
-column and two.
+Status: **AGREED** (Robert, 2026-10-19, Round 170: every recommendation of Q1–Q7 and the order of work), piece 2 of
+`docs/kickoff-closing-review.md`. To be built from `docs/kickoff-layout.md`. Builds on `docs/ui.md` (the UI as built,
+Rounds 144–148), `docs/questions.md` (Rounds 152–155), the closing review (`docs/review-closing.md`, Rounds 157–168,
+which played the whole game through the page) and Robert's wishes: both panels get their tab selector at the top; the
+story becomes one of the selectable tabs; a toggle between one column and two.
 
 ## The player's process
 
@@ -144,3 +144,13 @@ diffed (nothing should move: UI only).
 5. **Q5–Q7:** one scrolling row of tabs per panel; the layout remembered per viewer apart from the save; today's page as
    the default?
 6. **The order of work** above?
+
+## Agreed (Robert, Round 170)
+
+Every recommendation as written: any tab (Story and Record among them) in either panel, choosing a tab the other panel
+shows swaps them (Q1 a; a "pin this card" second Card tab listed); the reading bar at page level, under the header,
+always shown, with the line saying what a paragraph brought and, on Hard, "open the story to collect" (Q2 a); a card
+opens in the other panel with two columns, in place with "back" in one column (Q3 a); the toggle in the header, phones
+always one column with the bar at the bottom (Q4); one sideways-scrolling row of tabs per panel with their counts (Q5);
+the layout remembered per viewer under `mystery-clue-game:layout:v1`, apart from the save, "Start over" keeping it (Q6);
+today's page as the default (Q7); the order of work.

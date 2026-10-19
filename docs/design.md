@@ -4156,3 +4156,16 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   scrolling row of tabs per panel; the layout remembered per viewer apart from the save; today's page the default. For
   Robert to agree before anything is built.
 - **Moved:** nothing (documentation).
+
+## Round 170 (2026-10-19): the layout agreed; hand-off
+
+- **Agreed (Robert):** every recommendation of `docs/layout.md` (Q1–Q7) and its order of work; the paper marked so.
+- **`scripts/ui-run.mjs` and `scripts/cdp.mjs`:** the closing review's runner and DevTools client, moved from the
+  session's scratchpad: the action table played through the UI, each move checked in the save (Rounds 163–168). Checked
+  from its new place on the first 20 paragraphs: 60 moves, none failed. `CLAUDE.md` lists it.
+- **Hand-off:** `docs/kickoff-layout.md` (supersedes `docs/kickoff-closing-review.md`): build the layout in its four
+  steps, each checked by the action table through the UI with screenshots for Robert; then the notes paper (mock-ups by
+  sight), then the autoplay paper (the action table as its script, 70 as its target); the traps of Rounds 60–170, with
+  this session's (one script on the headless Chrome at a time, its cache, script slips that look like defects, a test
+  file written during a gate).
+- **Moved:** nothing (documentation and scripts).

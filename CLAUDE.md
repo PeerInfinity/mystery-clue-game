@@ -1,11 +1,14 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-layout.md` — the next sessions' work (Round 170): build the agreed layout (`docs/layout.md`) in four
+  steps, each checked by playing the action table through the UI (`scripts/ui-run.mjs`); then the player's notes (a
+  paper with mock-ups by sight), then the autoplay (its script is the action table, its target 70).
 - `docs/review-closing.md` — the closing review (Rounds 157–165): every thought's move made in the UI on Hard, in one
   game played through the page by the action table (the autoplay's script); the Hard maximum, 70 ahead of Holmes (45
   of 47 deductions, every other family full), the same for the engine, the annotation and the UI; eleven defects found
-  and fixed on the way (Rounds 157–164). Its questions for Robert open the next pieces.
-- `docs/kickoff-closing-review.md` — the next sessions' work (Round 156), in Robert's order: a closing review of the
+  and fixed on the way (Rounds 157–164); its questions settled in Rounds 166–168 (the action table in the repository).
+- `docs/kickoff-closing-review.md` — superseded by `docs/kickoff-layout.md`; the four pieces (Round 156), in Robert's order: a closing review of the
   whole game against the annotation, thought by thought (its paper: `docs/review-closing.md`); then the layout (tabs at
   the top of both panels, the story as a tab, one or two columns); the player's notes on the story text; an autoplay
   that plays Hard to the maximum score through the UI, typing the annotation's thoughts as notes. Each piece a paper
@@ -62,6 +65,7 @@
 | What appears at each paragraph (leak checks) | `npm run reveal-log`, `npm run foreshadow-log` (→ `.cache/`) |
 | Every clash met and what it sets aside, for three kinds of player (about a minute; `--build` adds a fourth, 5 min) | `npm run clash-log` (→ `.cache/clash-log.txt`) |
 | The action table (the annotation's moves in the UI on Hard, the autoplay's script) → `cases/silver-blaze/action-table.json`; rerun when the case or the thoughts change (a test checks it is up to date and reaches the Hard maximum) | `npm run action-table` (about 3–5 min) |
+| Play the action table through the real UI in headless Chrome (port 9333; one script at a time), each move checked in the save; the record at the end (about 12–13 min) | `node scripts/ui-run.mjs` (→ `.cache/ui-run.json`; `STOP=<para>` for a part) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 
 ## Conventions
