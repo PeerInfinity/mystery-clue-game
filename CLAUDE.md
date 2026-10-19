@@ -1,6 +1,8 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-questions.md` — the player's own questions (QUESTION, the one tag not playable): the next session's
+  planning discussion (Round 150); its paper will be `docs/questions.md`.
 - `docs/ui.md` — workstream 9 (the UI): measured and agreed (Round 143), built (Rounds 144–148): the busy page
   (seeded clashes, pieces drawn after the page), the record against Holmes (`Game.record`, shown only as the story
   reaches each deadline), "state it yourself" (`concludeFrom`), the small items. Its review: `docs/review-ws9.md`

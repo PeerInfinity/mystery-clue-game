@@ -3812,3 +3812,15 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
   main thread.
 - **`docs/ui.md`** marked built, with what changed at build time; **`CLAUDE.md`** points at it and the review, and the
   suite's time is 7–8 minutes. **Workstream 9 is done**, and with it the nine workstreams of the gap analysis's §5.
+
+## Round 150 (2026-10-18): hand-off — the player's own questions
+
+Robert asked for the next session, a planning discussion of QUESTION, the one tag of `docs/gap-analysis.md` §2 that is
+not playable (`docs/review-ws9.md`). `docs/kickoff-questions.md` hands it over:
+- what the annotation and the gap analysis ask (pin a "?" on a blank; templates over facets; a question that matches
+  an authored slot opens it early, if the story has made it askable), the ten QUESTION thoughts and what holds
+  questions today (`slotVisible`, the case's questions, the re-read form);
+- the reading list; the mission: measure (when each thought is asked against when the game opens its slot; what a
+  template would offer), then `docs/questions.md` discussed with Robert before anything is built;
+- the traps of Rounds 60–150, with this session's added: the gate that commits a file edited during its run, the
+  shared machine's timings, and the browser-check details.
