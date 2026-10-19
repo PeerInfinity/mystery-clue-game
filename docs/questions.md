@@ -1,7 +1,7 @@
 # The player's own questions (QUESTION)
 
 Status: **AGREED** (Robert, 2026-10-18, Round 151: every recommendation of Q1–Q6, (d) of Q2, and the order of
-work); to be built in Rounds 152 on. Mission:
+work), **built** (Rounds 152–155; see "At build time" at the end). Mission:
 `docs/kickoff-questions.md`. Builds on `docs/gap-analysis.md` (§2, QUESTION and HYPOTHESIS; §6 decision 2, what
 scores), Rounds 4–11 (the reading layer; questions shown only once raised), 32 (every step of the annotation playable),
 33–34 (the sheep's cause before its culprit), `docs/noticing-absence.md` (the notice, whose shape this paper borrows),
@@ -314,3 +314,14 @@ question when it is raised (Q1 b); templates over held cards, matched in the eng
 relation slots, and the case question "Where is Silver Blaze?" anchored at ¶14 (Q2 a, d); the re-read form and the
 player's candidates, nothing before the join (Q3); ·turn-around as one ordinary template (Q4 b); the record only, never
 counted (Q5 b); every difficulty but Trivial (Q6); the order of work.
+
+**At build time (Rounds 152–155):**
+- **The move is `Game.pose`** (`Game.ask` is background asking). Thirteen templates; the article of an entity's name is
+  lowered as `phrase` does ("Who could get at the curried mutton?").
+- **The join is checked before and after each paragraph and on every listing,** so a question raised by the player's
+  own inference joins at the paragraph they made it (the builder's "Why did “The favourite disappears” happen?" at
+  ¶37, the passive reader's at ¶46).
+- **The re-read form** lists a joined question once (the story's own wording).
+- **With "Where is Silver Blaze?" anchored at ¶14 (step 4),** `t14.2` is asked with the story and no longer recorded;
+  of the ten thoughts only `t46.5` joins later than asked (¶214 for a reader who only reads on). The tests' late join
+  became "Whose is the heavy stick?" (asked at ¶21, raised at ¶40).

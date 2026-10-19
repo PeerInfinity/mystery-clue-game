@@ -1,9 +1,11 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/questions.md` — the player's own questions (QUESTION, the one tag not playable): measured and agreed
-  (Round 151): a "?" card the player holds, from templates over held cards, matched quietly to a slot and joining it
-  only when the story raises it; recorded, never scored. Kickoff: `docs/kickoff-questions.md`.
+- `docs/questions.md` — the player's own questions (QUESTION): measured and agreed (Round 151), built (Rounds
+  152–155): `Game.pose` over `QUESTION_TEMPLATES`, matched quietly to a slot and joining it only when the story (or the
+  player's inference) raises it; a card's "Ask your own question", Your questions, the re-read form, the bar's note,
+  the record (never counted); "Where is Silver Blaze?" raised at ¶14. QUESTION is now playable, unscored
+  (`docs/review-ws9.md`). Kickoff: `docs/kickoff-questions.md`.
 - `docs/ui.md` — workstream 9 (the UI): measured and agreed (Round 143), built (Rounds 144–148): the busy page
   (seeded clashes, pieces drawn after the page), the record against Holmes (`Game.record`, shown only as the story
   reaches each deadline), "state it yourself" (`concludeFrom`), the small items. Its review: `docs/review-ws9.md`

@@ -750,6 +750,11 @@ specific thing stay ground facts with a formula and no schema.
   the paragraph the story asked it, the story's question as a link, where the player asked it and the lead; "Not
   counted: a question can be asked of anything." No family and no "Ahead of Holmes" count changes.
 
+## As built (2026-10-18): "Where is Silver Blaze?" raised at ¶14 (docs/questions.md, step 4; Round 155)
+
+- **`q.where_horse`** is raised by "the most remarkable horse in England could long remain concealed" (¶14), where the
+  story itself asks it and the annotation's typical reader does (`t14.2`), instead of "no news has come of him" (¶37).
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's

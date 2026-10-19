@@ -62,7 +62,7 @@ QUESTION thoughts with the question the player can pose (`asks`), posed at the t
 
 | Thought | Question | Reader | Joins |
 |---|---|---|---|
-| `t14.2` | Where is Silver Blaze? | ¶14 | `silver_blaze.hidden_at` at ¶37 |
+| `t14.2` | Where is Silver Blaze? | ¶14 | `silver_blaze.hidden_at` at ¶14 |
 | `t20.7` | Who could get at the curried mutton? | ¶20 | — |
 | `t25.1` | Where was the curried mutton during “Frightened, Edith runs past him to the stable window”? | ¶25 | — |
 | `t31.4` | Who had the stable door's lock? | ¶31 | — |

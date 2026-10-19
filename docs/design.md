@@ -3897,3 +3897,20 @@ not playable (`docs/review-ws9.md`). `docs/kickoff-questions.md` hands it over:
   stay the player's notes, as agreed.
 - **Leak check:** no card text; fixed words around the story's question, already raised.
 - **Moved:** nothing in the logs, the reports or the gate listing (UI only).
+
+## Round 155 (2026-10-18): the player's own questions, step 4 — "Where is Silver Blaze?" at ¶14
+
+- **Case** (`docs/questions.md` Q2 d): `q.where_horse` is raised at ¶14 by "the most remarkable horse in England could
+  long remain concealed", where the story asks it (`t14.2`, typical), instead of ¶37.
+- **Tests:** `questions.test.js`: the question raised at ¶14 and not at ¶13; "Where is Silver Blaze?" posed there joins
+  at once and is not recorded. The tests' late join is now "Whose is the heavy stick?" (asked at ¶21, raised at ¶40,
+  lead 19), and the inference join "Why did “The favourite disappears” happen?" (the builder's at ¶37, the passive
+  reader's at ¶46).
+- **Leak check:** no new text; the question's own words ("Where is {silver_blaze}?", and the slot's "Where has Silver
+  Blaze been since Tuesday morning?") were already shown and checked, now from ¶14, where Silver Blaze (¶10) and
+  Tuesday are told. The LLM checker was not run.
+- **Moved:** the reveal log (the question at ¶14 instead of ¶37, nothing else); `thoughts-report.md` (`t14.2` joins at
+  ¶14). The foreshadow and clash logs, `report.md` and the gate listing are unchanged.
+- **`docs/questions.md`** marked built, with what changed at build time; **`CLAUDE.md`** points at it. Of the ten
+  QUESTION thoughts, four now join at once (`t14.2`, `t46.6`, `t92.8`, `t120.3`), one later (`t46.5`, ¶214 for a reader who only reads on; ¶92 for a
+  builder), and the five with no question of the case stay the player's notes. QUESTION is playable, unscored.

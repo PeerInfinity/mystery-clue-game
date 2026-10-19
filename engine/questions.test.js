@@ -18,41 +18,57 @@ const readTo = (g, p) => { while (g.read <= p) g.advance(); }; // ¶p read
 test('a matched and an unmatched question look alike until the story raises the matched one', () => {
     const g = easy();
     readTo(g, 31);
-    const where = g.pose('where-is', ['silver_blaze']);
+    const stick = g.pose('whose', ['penang_lawyer']);
     const key = g.pose('who-had', ['stable_key']);
-    assert.ok(where.ok && key.ok);
+    assert.ok(stick.ok && key.ok);
     const [a, b] = g.posedQuestions();
-    assert.equal(a.text, 'Where is Silver Blaze?');
+    assert.equal(a.text, 'Whose is the heavy stick?');
     assert.equal(b.text, "Who had the stable door's lock?");
     assert.deepEqual(Object.keys(a).sort(), Object.keys(b).sort());
     assert.equal(a.joined, null);
     assert.equal(b.joined, null);
-    assert.ok(!JSON.stringify(g.save().posed).includes('hidden_at'), 'the save carries no match either');
-    assert.equal(g.slotVisible('silver_blaze.hidden_at'), false, 'posing opens nothing');
+    assert.ok(!JSON.stringify(g.save().posed).includes('owner'), 'the save carries no match either');
+    assert.equal(g.slotVisible('penang_lawyer.owner'), false, 'posing opens nothing');
 });
 
 test('the join: at the paragraph the story raises the question, with the player\'s candidates as circles', () => {
     const g = easy();
-    readTo(g, 14);
-    const { id } = g.pose('where-is', ['silver_blaze']);
-    assert.ok(g.poseCandidate(id, 'kings_pyland'));
+    readTo(g, 21);
+    const { id } = g.pose('whose', ['penang_lawyer']);
+    assert.ok(g.poseCandidate(id, 'simpson'));
     assert.equal(g.poseCandidate(id, 'e.opium_added'), false, 'only a held card');
-    readTo(g, 36);
+    readTo(g, 39);
     assert.equal(g.posedQuestions()[0].joined, null);
     assert.equal(g.record().questions.length, 0, 'nothing recorded before the raise');
-    readTo(g, 37);
-    assert.deepEqual(g.posedQuestions()[0].joined, { slot: 'silver_blaze.hidden_at', para: 37 });
-    assert.ok(g.isCircled('silver_blaze.hidden_at', 'kings_pyland'), 'the candidate carried over');
-    assert.deepEqual(g.record().questions, [{ id, slot: 'silver_blaze.hidden_at', at: 14, deadline: 37, lead: 23 }]);
+    readTo(g, 40);
+    assert.deepEqual(g.posedQuestions()[0].joined, { slot: 'penang_lawyer.owner', para: 40 });
+    assert.ok(g.isCircled('penang_lawyer.owner', 'simpson'), 'the candidate carried over');
+    assert.deepEqual(g.record().questions, [{ id, slot: 'penang_lawyer.owner', at: 21, deadline: 40, lead: 19 }]);
     assert.equal(g.record().ahead, easy().record().ahead, 'never counted');
 });
 
 test('a question raised by the player\'s own inference joins where they made it', () => {
+    const passive = easy();
+    const builder = easy();
+    readTo(passive, 20);
+    readTo(builder, 20);
+    passive.pose('event-why', ['e.horse_led_out']);
+    builder.pose('event-why', ['e.horse_led_out']);
+    readTo(passive, 46);
+    while (builder.read <= 46) { builder.advance(); buildAll(builder); }
+    assert.equal(passive.posedQuestions()[0].joined?.para, 46);
+    assert.equal(builder.posedQuestions()[0].joined?.para, 37, 'raised by an inference the builder holds at ¶37');
+});
+
+test('where the story itself asks: "Where is Silver Blaze?" is raised at ¶14 (docs/questions.md Q2 d)', () => {
     const g = easy();
+    readTo(g, 13);
+    assert.equal(g.questionRaised('q.where_horse'), false);
     readTo(g, 14);
+    assert.equal(g.questionRaised('q.where_horse'), true);
     g.pose('where-is', ['silver_blaze']);
-    while (g.read <= 19) { g.advance(); buildAll(g); }
-    assert.equal(g.posedQuestions()[0].joined?.para, 19, 'k.at_a_stable_in_reach built at ¶19');
+    assert.deepEqual(g.posedQuestions()[0].joined, { slot: 'silver_blaze.hidden_at', para: 14 });
+    assert.equal(g.record().questions.length, 0, 'the reader asked it with the story: nothing to record');
 });
 
 test('the long lead: Straker\'s motive stays the player\'s note until the story raises it, its answers unseen', () => {
@@ -91,34 +107,34 @@ test('refused: a card not held, the wrong kind, an unknown template, Trivial', (
 
 test('proposing answers (Hard\'s way): the join proposes the player\'s candidates', () => {
     const g = new Game(model, { difficulty: EASY, options: { background: 'relevant', answers: 'propose' } });
-    readTo(g, 14);
-    const { id } = g.pose('where-is', ['silver_blaze']);
-    g.poseCandidate(id, 'kings_pyland');
-    readTo(g, 37);
-    assert.deepEqual(g.pencil('silver_blaze.hidden_at'), ['kings_pyland']);
+    readTo(g, 21);
+    const { id } = g.pose('whose', ['penang_lawyer']);
+    g.poseCandidate(id, 'simpson');
+    readTo(g, 40);
+    assert.deepEqual(g.pencil('penang_lawyer.owner'), ['simpson']);
     const h = new Game(model, { difficulty: EASY });
     h.load(g.save());
     assert.deepEqual(h.posedQuestions(), g.posedQuestions());
-    assert.deepEqual(h.pencil('silver_blaze.hidden_at'), ['kings_pyland']);
+    assert.deepEqual(h.pencil('penang_lawyer.owner'), ['simpson']);
 });
 
 test('saved and loaded on Easy, before and after the join', () => {
     const g = easy();
-    readTo(g, 20);
-    const a = g.pose('where-is', ['silver_blaze']).id;
-    g.poseCandidate(a, 'kings_pyland');
+    readTo(g, 21);
+    const a = g.pose('whose', ['penang_lawyer']).id;
+    g.poseCandidate(a, 'simpson');
     g.pose('reach', ['curried_mutton']);
     const h = easy();
     h.load(g.save());
     assert.deepEqual(h.posedQuestions(), g.posedQuestions());
-    readTo(h, 37);
+    readTo(h, 40);
     const k = easy();
     k.load(h.save());
     assert.deepEqual(k.posedQuestions(), h.posedQuestions());
-    assert.equal(k.record().questions[0].lead, 17);
+    assert.equal(k.record().questions[0].lead, 19);
     assert.ok(k.unpose(a));
     assert.equal(k.posedQuestions().length, 1);
-    assert.ok(k.isCircled('silver_blaze.hidden_at', 'kings_pyland'), 'the marks stay');
+    assert.ok(k.isCircled('penang_lawyer.owner', 'simpson'), 'the marks stay');
 });
 
 test('asking everything moves no score family', () => {
