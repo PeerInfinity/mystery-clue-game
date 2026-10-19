@@ -1,8 +1,8 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-workstream-9.md` — workstream 9 (the UI): the next session's mission (Round 142); its paper will be
-  `docs/ui.md`.
+- `docs/ui.md` — workstream 9 (the UI): measured and agreed (Round 143), being built. Kickoff:
+  `docs/kickoff-workstream-9.md` (Round 142).
 - `docs/reader-layer.md` — workstream 8 (the reader layer): agreed (Round 133), built (Rounds 134–139): the `reader`
   and `supplied` options (`engine/readers.js`), `Game.disclosure` and `heldBack`, expert steps that never gate, set
   aside and re-read, `hints: story` (Holmes's interest). Kickoff: `docs/kickoff-workstream-8.md`. Its review:

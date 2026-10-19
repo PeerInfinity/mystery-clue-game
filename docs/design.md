@@ -3682,3 +3682,25 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
   and a closing review tag by tag;
 - the traps of Rounds 60–141, with this session's added: profiles that could not time hints; a flag's meaning
   checked before a gap is claimed; the 'wait'-pace test loop; the save waits in headless Chrome; the shell `&`.
+
+## Round 143 (2026-10-18): workstream 9 measured; docs/ui.md agreed
+
+- **Measured** (scratch scripts in the session's scratchpad; headless Chrome over the DevTools protocol):
+  - **The inventory:** every tag's move, its engine method and where the UI offers it. Missing: QUESTION (the
+    player's own questions; no workstream took it), the UI of `applyRule`, `conclude`, `retract` and all twelve score
+    functions. A defect: the UI's doubt reasons lack "two stories" (`t68.3`). Filing an absence is offered only on the
+    board.
+  - **The busy page:** Rounds 130 and 139 do not reproduce at HEAD with their own saves. The waits are real but shown:
+    an Easy reload at the end 36–41 s (the twelve clashes searched for again: 21 worker requests, 31 s), Theories 15–27 s
+    late in the story (every theory weighed before any is shown), reading on 0.36 s with spikes of 7–20 s where a
+    clash arrives, the first 5 s blank (the model built on the main thread).
+  - **Scores replayed:** an ideal player beats Holmes on 41 of 47 deductions (median lead 124 ¶). `noticeScore` and
+    `checkScore` can report more scored than possible (8 of 6, 10 of 9). A row shown before its deadline confirms a
+    deduction.
+  - **`conclude`:** alone it reaches 3 of 54 route inferences, 43 with their rules applied first; `applyRule` binds up
+    to five variables over 13–88 cards; one call ran past 20 s.
+- **Agreed (Robert):** every recommendation of `docs/ui.md`: scores shown as the story reaches each deadline (a note
+  at Holmes's paragraph, "Ahead of Holmes", the record, the end's totals), `possible` as rows with a deadline;
+  `applyRule` out of the UI plan, a small "State it yourself" over `conclude`; the busy page's three fixes and a
+  loading line; the re-read question, "two stories" and absence from a card built, the rest listed; the options
+  grouped; the board left as it is; the player's own questions kept for a later workstream.
