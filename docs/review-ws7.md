@@ -48,7 +48,7 @@ For each it says whether the thought is now held as agreed and how, or why not. 
   and `t161.2` (it settles `t92.13`).
 - **Unscored by rule:** the 4 watch-holmes thoughts.
 
-`checkScore().possible` is 9 of 11 rows, and `absenceScore().possible` is 1.
+`checkScore().possible` is 9 of 11 rows, and `absenceScore().possible` is 1. *(Round 145: `possible` now counts every row with a deadline, so 10 of 11; `t116.3` is among them.)*
 
 ## Left open
 

@@ -1129,10 +1129,13 @@ export class Game {
             return { thought: t.id, cards: t.notices, para: t.para, holmes, noticed, scores: noticed !== null && holmes !== null && noticed < holmes };
         });
     }
-    /** In aggregate: details noticed, and those noticed before Holmes, out of those he draws attention to later. */
+    /**
+     * In aggregate: details noticed, and those noticed before Holmes, out of those he draws attention to at all (a
+     * card can be noticed before the thought's own paragraph, so a row is possible once it has Holmes's; docs/ui.md Q1).
+     */
     noticeScore() {
         const rows = this.noticeScores();
-        return { noticed: rows.filter((r) => r.noticed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.holmes !== null && r.holmes > r.para).length, of: rows.length };
+        return { noticed: rows.filter((r) => r.noticed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.holmes !== null).length, of: rows.length };
     }
 
     /**
@@ -2414,11 +2417,14 @@ export class Game {
             return { thought: t.id, check: ck.id, para: t.para, deadline: ck.at, sealed, borne, scores: dated && sealed !== null && sealed < ck.at && borne !== false };
         }));
     }
-    /** In aggregate: the thoughts' checks sealed, and those before Holmes, out of those he makes after the thought. */
+    /** In aggregate: the thoughts' checks sealed, and those before Holmes, out of those he makes (docs/ui.md Q1). */
     checkScore() {
         const rows = this.checkScores();
-        const dated = new Set((this.model.data.thoughts ?? []).filter((t) => t.holmes && !t.holmes.never && t.holmes.paras?.length).map((t) => t.id));
-        return { sealed: rows.filter((r) => r.sealed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => dated.has(r.thought) && r.deadline > r.para).length, of: rows.length };
+        const dated = this.#datedThoughts();
+        return { sealed: rows.filter((r) => r.sealed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => dated.has(r.thought)).length, of: rows.length };
+    }
+    #datedThoughts() {
+        return new Set((this.model.data.thoughts ?? []).filter((t) => t.holmes && !t.holmes.never && t.holmes.paras?.length).map((t) => t.id));
     }
     /**
      * The absences the annotation dates (ABSENCE thoughts with a Holmes paragraph and a clue the player files): the
@@ -2437,6 +2443,54 @@ export class Game {
     absenceScore() {
         const rows = this.absenceScores();
         return { filed: rows.filter((r) => r.filed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.length };
+    }
+
+    // ---------- the record against Holmes (workstream 9, docs/ui.md Q1) ----------
+    /**
+     * The player's record against Holmes, as far as the story has been read: the rows of the six score families whose
+     * deadline (Holmes's paragraph, or where the story makes a hypothesis untenable) has been read. A row whose
+     * deadline is still ahead is left out: shown early, it would tell the player that the move is right. Each row:
+     * {family, thought, deadline, at (where the player made the move, or null), scores, lead (paragraphs ahead of the
+     * deadline), names (held cards it can be told by)} and, by family, what it needs to be told: `concludes` (a step
+     * with no inference of its own), `exceptions` ({target, exception, text}), `target` (a drop), `seal` (the earliest
+     * matching seal's id). `families`: per family the rows scored and passed, and once the story has ended, possible.
+     * Rows that can never score (no deadline) are left out. Nothing scores in Trivial.
+     */
+    record() {
+        const passed = (d) => d !== null && d !== undefined && d < this.read;
+        const held = (ids) => [...new Set(ids)].filter((x) => x && this.knows(x));
+        const thought = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t]));
+        const dated = this.#datedThoughts();
+        const rows = [];
+        const add = (family, r, deadline, at, names, more = {}) => {
+            if (!passed(deadline)) return;
+            rows.push({ family, thought: r.thought, deadline, at: at ?? null, scores: !!r.scores, lead: r.scores ? deadline - at : null, names: held(names), ...more });
+        };
+        for (const r of this.thoughtScores()) {
+            const needs = this.stepInferences(r.thought);
+            add('deduction', r, r.holmes, r.made, needs ?? [], needs ? {} : { concludes: this.routeById.get(r.thought)?.concludes ?? null });
+        }
+        for (const r of this.noticeScores()) add('notice', r, r.holmes, r.noticed, r.cards);
+        for (const r of this.raiseScores()) {
+            const exceptions = r.raises.map((x) => ({ ...x, text: this.applicationsOf(x.target).flatMap((a) => a.exceptions).find((e) => e.id === x.exception)?.text ?? null }));
+            add('raise', r, r.holmes, r.raised, r.raises.map((x) => x.target), { exceptions });
+        }
+        for (const r of this.dropScores()) {
+            const d = thought.get(r.thought).dropped;
+            add('drop', r, r.deadline, r.dropped, [d.theory, d.value, ...(d.cites ?? [])], { target: d.theory ? { theory: d.theory } : { slot: d.slot, value: d.value } });
+        }
+        for (const r of this.checkScores()) {
+            if (!dated.has(r.thought)) continue;
+            const seal = r.sealed === null ? null : this.seals.find((x) => x.withdrawn === null && x.para === r.sealed && this.#checkOf(x)?.id === r.check)?.id ?? null;
+            add('check', r, r.deadline, r.sealed, [], { check: r.check, seal });
+        }
+        for (const r of this.absenceScores()) add('absence', r, r.holmes, r.filed, (thought.get(r.thought).maps ?? []).filter((m) => this.absenceById().has(m)));
+        const agg = { deduction: this.score(), notice: this.noticeScore(), raise: this.raiseScore(), drop: this.dropScore(), check: this.checkScore(), absence: this.absenceScore() };
+        const families = Object.fromEntries(Object.entries(agg).map(([f, a]) => {
+            const mine = rows.filter((r) => r.family === f);
+            return [f, { scored: mine.filter((r) => r.scores).length, passed: mine.length, possible: this.finished() ? a.possible : null }];
+        }));
+        return { rows: rows.sort((a, b) => a.deadline - b.deadline), families, ahead: rows.filter((r) => r.scores).length };
     }
 
     // ---------- the three time axes ----------

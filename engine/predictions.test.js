@@ -108,7 +108,7 @@ test('the race (t141.2), a check Holmes never makes, and the aggregate', () => {
     while (!game.finished()) game.advance();
     assert.deepEqual([row(game, 't141.2').scores, row(game, 't141.2').borne], [true, true]);
     assert.equal(game.sealStatus(never).made, false);
-    assert.deepEqual(game.checkScore(), { sealed: 1, scored: 1, possible: 9, of: 11 });
+    assert.deepEqual(game.checkScore(), { sealed: 1, scored: 1, possible: 10, of: 11 });
 });
 
 test('the dog (t29.4, t34.2): filing the absence before Holmes scores', () => {

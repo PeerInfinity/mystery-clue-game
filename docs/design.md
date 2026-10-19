@@ -3728,3 +3728,15 @@ Robert asked for the next session. `docs/kickoff-workstream-9.md` hands over wor
   cards, with no clash searched for again, and the same working set.
 - **Moved:** nothing. The reveal, foreshadow and clash logs, both reports and the gate listing are unchanged (none
   of them reloads a save).
+
+## Round 145 (2026-10-18): ws 9 step 2 — the record against Holmes, in the engine
+
+- **`possible` made consistent** (`docs/ui.md` Q1): every row with a deadline. `noticeScore().possible` 6 → 8 and
+  `checkScore().possible` 9 → 10, so the ideal player's "8 of 6" and "10 of 9" (Round 143) cannot happen. Two tests'
+  expectations change with it (`absence.test.js`, `predictions.test.js`); `docs/review-ws7.md`'s count annotated.
+- **`Game.record()`:** the six families' rows whose deadline has been read, with the player's paragraph, the lead and
+  the held cards that tell each; per family scored and passed, and possible only at the end. A builder replay to the
+  end: deductions 41 of 47, the first rows `t29.3` (¶36, made ¶29, lead 7) and `t31.3` (¶57, lead 26).
+- **Tests:** `engine/record.test.js`: at ¶40 nothing whose deadline is ahead (not the curry), only held cards named;
+  at ¶219 the curry with its lead; at the end every family within its possible; Trivial scores nothing.
+- **Moved:** nothing in the logs, the reports or the gate listing.

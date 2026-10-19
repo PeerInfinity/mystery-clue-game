@@ -657,6 +657,17 @@ specific thing stay ground facts with a formula and no schema.
   meanwhile), and each theory's weighing on the Theories tab is one ("Weighing…"). A click's own work still shows the
   busy panel. `index.html` says "Loading the case…" until the page is drawn.
 
+## As built (2026-10-18): the record against Holmes (workstream 9, step 2; Round 145)
+
+- **`possible` is every row with a deadline,** so that no family scores more than it could: `noticeScore().possible`
+  6 → 8 (a card can be noticed before its thought's paragraph: `t81.2`, `t189.1`), `checkScore().possible` 9 → 10
+  (`t116.3`). The other aggregates are unchanged.
+- **`Game.record()`:** the rows of the six families whose deadline has been read (never one still ahead), each with
+  `family`, `thought`, `deadline`, `at`, `scores`, `lead` and `names` (held cards to tell it by), plus what its family
+  needs: `concludes` (a step with no inference), `exceptions` (with their text), `target` (a drop), `check` and `seal`.
+  `families`: scored and passed so far, and `possible` once the story has ended; `ahead`: the rows scored. Rows that
+  can never score are left out. Read by the UI (step 3); never by a hint.
+
 ## Open
 
 - **The Strict column counts unstated rules as late.** It drops every rule without `stated_in`; the night chain's
