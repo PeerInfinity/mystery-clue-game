@@ -1602,7 +1602,10 @@ export class Game {
         const step = this.routeById.get(stepId);
         const own = (id) => this.knows(id) && !this.suspected.has(id) && ['built', 'concluded', 'applied'].includes(this.inferenceHow.get(id)?.how);
         const needs = this.stepInferences(stepId);
-        if (needs && needs.every(own)) return true;
+        // An implicit inference (a step no reader notices making) is nobody's: it neither makes a step nor blocks one
+        // (Round 159). At least one of the inferences the step needs must be the player's own.
+        const implicit = (id) => this.knows(id) && !this.suspected.has(id) && this.inferenceHow.get(id)?.how === 'implicit';
+        if (needs && needs.some(own) && needs.every((id) => own(id) || implicit(id))) return true;
         const c = step.concludes;
         if (c.slot && this.isStruckWithProof(c.slot, c.value)) return true;
         const f = c.slot ? { ne: [c.slot, c.value] } : c.formula;

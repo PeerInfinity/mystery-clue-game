@@ -3967,3 +3967,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Test:** `game.test.js`: the three kinds; on Hard at ¶37, the curry built from clicked cards.
 - **Leak check:** no text changed.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full against the session's baseline).
+
+## Round 159 (2026-10-18): an implicit inference neither makes nor blocks a step
+
+- **Engine** (Round 157's defect c): a step of Holmes counts as the player's when every inference it needs is held
+  and trusted, at least one is the player's own (built, concluded or applied), and the rest are implicit (steps no
+  reader notices making). Before, an implicit need blocked the step for good, so `t46.4` (Straker took the horse),
+  `t81.5` (the knife for an operation), `t173.2` (the sheep) and `t220.3` (Straker drugged the dish) never scored,
+  on any preset: each needs `k.wife_stayed_home` and `k.found_before_seven`. The implicit inferences alone still make
+  nothing (a reader who only reads on scores none of the four).
+- **Checked in headless Chrome** on an Easy builder save at ¶219, reading on: at ¶220 the bar says "Holmes reasons:
+  “A drug that had to be hidden, …”; “The guard was drugged …”; “Mrs. Straker was at home all night …”; “The horse
+  was taken out in the night …”. You had it at paragraph 37: 183 paragraphs before him", and at ¶221 the knife's
+  step; no console error.
+- **Test:** `record.test.js`: an Easy builder makes all four before Holmes (`t46.4` by ¶46); a passive reader none.
+- **Leak check:** no text changed; the record names held cards only, at Holmes's paragraph, as before.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full); only the scores, which none of them shows.

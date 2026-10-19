@@ -51,3 +51,16 @@ test('Trivial: the record scores nothing', () => {
     assert.equal(r.ahead, 0);
     assert.ok(r.rows.every((x) => !x.scores));
 });
+
+test('an implicit inference neither makes a step nor blocks it: Straker took the horse, made by ¶46 (Round 159)', () => {
+    const steps = ['t46.4', 't81.5', 't173.2', 't220.3'];
+    const builder = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    const passive = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    while (builder.read <= 175) { builder.advance(); passive.advance(); buildAll(builder); }
+    const made = (g) => Object.fromEntries(g.thoughtScores().filter((r) => steps.includes(r.thought)).map((r) => [r.thought, r.made]));
+    assert.ok(steps.every((s) => builder.stepInferences(s).some((x) => builder.howHeld(x)?.how === 'implicit')), 'each needs an implicit inference');
+    const b = made(builder);
+    assert.ok(b['t46.4'] !== null && b['t46.4'] <= 46, `Straker took the horse: made at ${b['t46.4']}`);
+    for (const s of steps) assert.ok(b[s] !== null && b[s] < builder.holmesAt(s), `${s} made before Holmes`);
+    assert.deepEqual(Object.values(made(passive)), [null, null, null, null], 'the implicit inferences alone make nothing');
+});
