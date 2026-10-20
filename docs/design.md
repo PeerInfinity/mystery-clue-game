@@ -4255,3 +4255,16 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   the player's notes, with mock-ups inside the new layout for Robert to choose by sight.
 - **Leak check:** no text changed.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
+
+## Round 175 (2026-10-19): the notes paper
+
+- **`docs/notes.md`** (piece 2 of `docs/kickoff-layout.md`): the player's notes on the story. Measured: the
+  annotation as notes (206 of 296 thoughts carry prose, 28,000 characters; 142 quote their span; ¶37 and ¶92 hold 16
+  and 15 thoughts); a span is a character range of a paragraph's fixed text. Five looks mocked up in headless Chrome
+  inside the built layout (Hard at ¶37, desktop and phone; notes injected by a scratch script, nothing in the
+  repository changed), screenshots sent to Robert: A in the margin, B a card between paragraphs, C a highlighted span
+  with the note on click, D pencilled into the line, E a Notes tab beside the story with numbered markers.
+  Recommended: B with E's list; a note on a span or a paragraph (a drag selects, a click still collects on Hard);
+  saved with the game; edit, delete with undo; notes never feed the game; on every difficulty. For Robert to choose by
+  sight and agree before anything is built.
+- **Moved:** nothing (documentation).
