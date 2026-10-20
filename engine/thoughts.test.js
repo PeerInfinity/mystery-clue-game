@@ -149,3 +149,17 @@ test('the prose is the reader\'s note: a later thought or paragraph goes in the 
     ]) assert.ok(r.errors.includes(e), e);
     assert.ok(data.thoughts.some((x) => /¶\d+/.test(x.remark ?? '') && +x.remark.match(/¶(\d+)/)[1] > x.para), 'a remark may look ahead');
 });
+
+test('a ⚠ is the annotator\'s: in the remark, at the level the data records (Round 185)', () => {
+    const bad = structuredClone(data);
+    const t = (id) => bad.thoughts.find((x) => x.id === id);
+    t('t4.1').text += ' ⚠ low: easy.';
+    t('t37.13').hindsight = 'medium';
+    delete t('t146.1').hindsight;
+    const r = checkThoughts(bad, model);
+    for (const e of [
+        't4.1: a ⚠ belongs in the remark, not the reader\'s note',
+        't37.13: hindsight medium, but its remark has no "⚠ medium"',
+        't146.1: hindsight none, but its remark carries a ⚠',
+    ]) assert.ok(r.errors.includes(e), e);
+});

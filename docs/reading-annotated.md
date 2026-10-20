@@ -136,7 +136,7 @@ quotes the clause it reads (`reads "..."`). That quote, not the whole paragraph,
   Holmes calls the case unique, so the obvious explanation is likely to be wrong.
 - `t6.2` **SET ASIDE** · typical
   reads "You would oblige me by bringing with you your very excellent field-glass."
-  An object asked for by name, so a reader might expect it to matter.
+  A field-glass, asked for by name. For watching something far off, presumably; nothing to make of it yet.
   *Note:* It is used only to watch the race (¶199) and carries no inference. A player who instead files it as a
   prediction shouldn't be penalised, and nothing should follow from it.
 
@@ -164,7 +164,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 **¶14**
 - `t14.1` **RECORD** · *strong* · typical
   reads "I could not believe it possible that the most remarkable horse in England could long remain concealed"; "beyond the arrest of young Fitzroy Simpson nothing had been done"
-  The horse has been missing since Tuesday morning in thinly populated country.
+  The horse has been missing for days, in thinly populated country.
 - `t14.2` **QUESTION** · typical · from `t14.1`
   Where can a famous horse be hidden for days?
 - `t14.3` **HYPOTHESIS** · *fair* · careful · from `t14.2`, `bk.famous_horse`
@@ -224,7 +224,8 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   reads "a person of gentlemanly bearing, dressed in a grey suit of tweeds, with a cloth cap"; "carried a heavy stick with a knob to it"; "the extreme pallor of his face and ... the nervousness of his manner"
 - `t21.2` **ABSENCE** · *weak* · expert · Holmes —
   The description has no cravat.
-  *Note:* The maid later recognises one (`t35.5`) that she didn't describe here. That is small and leads nowhere
+  *Note:* ⚠ high: only the cravat of ¶35 makes its absence here worth logging; a first-time reader has no reason to
+  expect one. The maid later recognises one (`t35.5`) that she didn't describe here. That is small and leads nowhere
   certain, but it is the kind of gap a careful reader logs.
 
 **¶22–¶24**
@@ -245,8 +246,8 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 **¶25–¶26**
 - `t25.1` **QUESTION·opportunity** · careful · from `t20.7`
   reads "ran past him to the window through which she was accustomed to hand the meals"; "Hunter was seated at the small table inside"
-  Where was the dish during this scene: in her hands, on the sill, or on Hunter's table? The text doesn't
-  say. The police theory depends on the answer.
+  Where was the dish during this scene: in her hands, on the sill, or on Hunter's table? The text doesn't say.
+  Whether he could have reached it depends on the answer.
 - `t26.1` **WEIGH** · *fair* · careful
   reads "The girl has sworn that as he spoke she noticed the corner of the little paper packet protruding from his closed hand"
   Sworn and specific: good evidence that he hadn't yet given the paper to anyone.
@@ -311,8 +312,8 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   reads "They had heard nothing during the night, for they are both sound sleepers"
 - `t34.2` **ABSENCE** · *fair* · careful · from `t29.1`, `t29.4`, `t33.2`, `t34.1` · Holmes ¶180–¶182, ¶219
   **Nobody mentions the dog.** Someone came in the night and took out a horse, and the dog did nothing anyone heard.
-  *Note:* Most first-time readers miss this. It is the hardest move in the story, because nothing in the text points
-  at the gap.
+  *Note:* ⚠ medium: the story's most famous line makes this easy for anyone who knows it. Most first-time readers
+  miss this. It is the hardest move in the story, because nothing in the text points at the gap.
 - `t34.3` **WEIGH** · *fair* · careful · undercuts `t34.2` · Holmes ¶219
   reads "for they are both sound sleepers"
   This is the text's own defeater: the dog might have barked unheard. But the lads sleep in the loft over the
@@ -586,6 +587,7 @@ the horse is (`t14.3`).
 - `t60.3` **HYPOTHESIS** · *weak* · careful · from `t60.2`, `t32.2`, `t35.10` · Holmes ¶226 (the second)
   Someone passing the stables later picked it up, for instance a man going down at one in the morning. If it was
   Straker, why keep it: {to lay it on the stranger later, as a strap or tie}?
+  *Note:* ⚠ low: "a strap or tie" is close to Holmes's own guess (¶226).
 - `t60.4` **INFER** · *strong* · careful · from `t60.1`, `t35.5`, `t32.2`, `t35.2` · Holmes ¶226
   The cravat is Simpson's, and it was in Straker's dead hand. Simpson parted with it before it came into Straker's
   hand, and Straker had it only after he left home at one and before he died.
@@ -765,7 +767,7 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
   7. He leads the horse to the hollow, out of sight of the house, takes his coat off to work (`t35.8`), and strikes
      a light (`t78.3`).
   8. One blow kills him; falling, he cuts his own thigh (`t35.2`, `t44.2`). The best candidate for the blow is the
-     horse (`t37.13` ⚠): no robbery (`t78.2`), no human killer needed, and the horse was there.
+     horse (`t37.13`): no robbery (`t78.2`), no human killer needed, and the horse was there.
   9. The horse bolts. The nearest stable he could reach without being seen is Mapleton, where a searcher could
      miss him if the blaze were hidden (`t40.4`, `t64.3`).
 - `t92.7` **DROP** · *fair* · careful · from `t92.6`, `t37.11` · drops `t37.10` · Holmes —
@@ -856,7 +858,7 @@ ahead by predicting what each action will find.
   Why strike a match in the hollow at one in the morning: {to light his pipe; to light the candle and see to
   work}? The pipe is in his pockets, but so is the candle. Taken with the knife, the candle reading is the
   stronger.
-- `t102.4` **INFER** · *weak* · expert · from `t102.1`, `t37.1`, `t35.2`, `bk.horse_kick` · supports `t37.13` · Holmes ¶226
+- `t102.4` **PHYSICAL** · *weak* · expert · from `t102.1`, `t37.1`, `t35.2`, `bk.horse_kick` · supports `t37.13` · Holmes ¶226
   A match was struck in the dark beside the horse, and the man there died of one blow to the head. A horse startled
   by a sudden light kicks, and a shod hoof kills: the blow was the horse's.
   *Note:* ⚠ high: as with `t37.13`, the reader is primed for a human killer.
@@ -1035,7 +1037,7 @@ Straker, and confirmation of the motive.
 **¶152**
 - `t152.1` **SET ASIDE** · typical
   reads "the Colonel's manner has been just a trifle cavalier to me. I am inclined now to have a little amusement at his expense"
-  Character, not case: the explanation for the race-day surprise.
+  Character, not case: he means to have some fun with the Colonel.
 
 **¶154–¶156**
 - `t156.1` **RECORD** · typical

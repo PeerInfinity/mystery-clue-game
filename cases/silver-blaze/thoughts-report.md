@@ -16,10 +16,10 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | ABSENCE | 6 | 4 |
 | QUESTION | 10 | 4 |
 | HYPOTHESIS | 27 | 23 |
-| INFER | 24 | 24 |
+| INFER | 23 | 23 |
 | DEFAULT | 8 | 7 |
 | AGENT | 8 | 8 |
-| PHYSICAL | 1 | 1 |
+| PHYSICAL | 2 | 2 |
 | IDENTIFY | 3 | 2 |
 | WEIGH | 19 | 12 |
 | SOURCE | 2 | 2 |
@@ -154,7 +154,7 @@ Each deduction-type thought (INFER, DEFAULT, AGENT, PHYSICAL, IDENTIFY) names on
 | `t95.2` | PHYSICAL | `k.coat_placed` | ¶95 | ¶95 |  |  |  |  |  |
 | `t97.2` | AGENT | `k.coat_off_to_work` | ¶97 | ¶97 |  |  | `r.dead_men_do_nothing` |  |  |
 | `t102.2` | TEST | `k.vesta_from_strakers_box` | ¶102 | ¶102 |  |  | `r.vesta_from_box`, `r.dead_men_do_nothing` |  |  |
-| `t102.4` | INFER | `k.horse_kicked` | ¶102 | ¶102 |  |  |  |  |  |
+| `t102.4` | PHYSICAL | `k.horse_kicked` | ¶102 | ¶102 |  |  |  |  |  |
 | `t114.2` | DEFAULT | `k.horse_goes_home` | ¶114 | ¶37 |  |  |  |  |  |
 | `t120.1` | INFER | `k.horse_left_alone` | ¶120 | ¶119 |  |  |  |  |  |
 | `t122.3` | AGENT | `k.track_man_changed_his_mind` | ¶122 | ¶122 |  |  |  |  |  |

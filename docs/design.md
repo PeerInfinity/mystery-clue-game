@@ -4432,3 +4432,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   cites exist; **the reader's note cites no later thought or paragraph** (a remark may). Test: `thoughts.test.js`.
 - **Leak check:** no card text; the notes only lose words.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full); the action table rerun, unchanged.
+
+## Round 185 (2026-10-19): B3, honesty
+
+- **Annotation** (`docs/review-annotations.md` B3; both files): five notes said what the reader cannot have yet and
+  are reworded: `t6.2` (the field-glass set aside as a reader's guess, "For watching something far off, presumably;
+  nothing to make of it yet"), `t14.1` ("missing for days", not "since Tuesday morning"), `t25.1` ("Whether he could
+  have reached it", not "the police theory", told at ¶36), `t152.1` ("he means to have some fun with the Colonel", not
+  "the race-day surprise"); `t34.4`'s was moved in Round 184. A ⚠ on three moves that lean on the end (Robert, Q5):
+  `t21.2` high (only the cravat of ¶35 makes its absence worth logging), `t34.2` medium (the story's most famous
+  line), `t60.3` low ("a strap or tie", close to Holmes's guess). `t92.6`'s "(`t37.13` ⚠)" loses its mark. `t102.4`
+  re-tagged PHYSICAL (Q7: a weak step through a world rule, not an INFER).
+- **Validator** (`engine/thoughts.js`): a ⚠ is the annotator's: never in the reader's note, and in the remark exactly
+  when the data records a `hindsight` level, at that level ("⚠ fair play" for `noted`). Test: `thoughts.test.js`.
+- **Leak check:** no card text.
+- **Moved:** `thoughts-report.md`: INFER 24 → 23, PHYSICAL 1 → 2 (`t102.4`). The action table rerun: `t102.4`'s row
+  tag only, no move. The logs, `report.md` and the gate listing unchanged (diffed in full).

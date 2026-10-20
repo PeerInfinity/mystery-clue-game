@@ -208,6 +208,10 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         for (const id of citedIds(t.text)) if (byId.get(id)?.para > t.para) err(`${t.id}: its prose cites ${id}, which comes later (¶${byId.get(id).para}); a remark may`);
         for (const x of (t.text ?? '').matchAll(/¶(\d+)/g)) if (+x[1] > t.para) err(`${t.id}: its prose cites ¶${x[1]}, after its own paragraph; a remark may`);
         if (t.remark !== undefined && !(typeof t.remark === 'string' && t.remark.trim())) err(`${t.id}: a remark is some text`);
+        // A hindsight mark (⚠) is the annotator's: in the remark, with the level the data records (Round 185).
+        if ((t.text ?? '').includes('⚠')) err(`${t.id}: a ⚠ belongs in the remark, not the reader's note`);
+        const mark = t.hindsight === undefined ? null : t.hindsight === 'noted' ? '⚠ fair play' : `⚠ ${t.hindsight}`;
+        if (mark ? !(t.remark ?? '').includes(mark) : (t.remark ?? '').includes('⚠')) err(`${t.id}: hindsight ${t.hindsight ?? 'none'}, but its remark ${mark ? `has no "${mark}"` : 'carries a ⚠'}`);
     }
 
     // The Markdown mirror (Round 183): the same thoughts, field by field (bold and line breaks aside).
