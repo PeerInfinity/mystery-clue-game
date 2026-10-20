@@ -4586,3 +4586,17 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   the typing (about 12 characters a second at 1×) and the pauses are unchanged.
 - **Checked:** `scripts/autoplay-check.mjs` plays with no cursor (its fastest), so it is unaffected; nothing else moves.
 - **Moved:** nothing (the autoplay's cursor only).
+
+## Round 195 (2026-10-20): the autoplay waits to be started, and steps
+
+- **Robert's ask:** the autoplay paused when the page loads, starting only on Resume; and a button to play one step at
+  a time.
+- **Built** (`ui/autoplay.js`): after setting up the fresh game on Hard it pauses ("Ready: Resume to play, or Step for
+  one move at a time."). A **Step** button beside Pause / Resume makes the next step and pauses again, naming it
+  ("Collecting: “the tragic murder of” · paused"). A step is what the caption names: one move of the table (collecting,
+  asking, building, …), one note or highlight written, or one paragraph read. Pressed while playing, Step pauses after
+  the step under way. `?autoplay=fast` (the check) does not wait.
+- **Checked** in headless Chrome: nothing moved in 5 s after the page loaded; eight Steps each made exactly one step
+  (four paragraphs read, then collect, ask, collect, ask) and paused; Resume played on; no console error.
+  `scripts/autoplay-check.mjs` 12 of 12 (70).
+- **Moved:** nothing (the autoplay only).

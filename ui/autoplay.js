@@ -39,7 +39,7 @@ export async function start({ store, fast, story, valueName, toast }) {
         fetch(`${CASE}/action-table.json`).then((r) => r.json()),
         fetch(`${CASE}/thoughts.json`).then((r) => r.json()),
     ]);
-    const s = { speed: fast ? 'at_once' : 1, paused: false, skipTo: null, stopped: false, para: 0, failed: null, done: false, notes: 0, moves: 0 };
+    const s = { speed: fast ? 'at_once' : 1, paused: false, stepping: false, skipTo: null, stopped: false, para: 0, failed: null, done: false, notes: 0, moves: 0 };
     const factor = () => (fast ? 0 : s.skipTo !== null ? 0 : s.speed === 'at_once' ? 4 : s.speed);
     const wait = async (ms) => { const f = factor(); if (f) await sleep(ms / f); await gate(); };
     const gate = async () => { while (s.paused && !s.stopped) await sleep(150); if (s.stopped) throw new Stopped(); };
@@ -49,6 +49,7 @@ export async function start({ store, fast, story, valueName, toast }) {
     strip.className = 'autoplay-strip';
     strip.innerHTML = `<span class="ap-title">Autoplay</span> <span id="ap-para" class="small"></span> <span id="ap-caption" class="ap-caption"></span>
         <span class="ap-tools"><button id="ap-pause" class="quiet">Pause</button>
+        <button id="ap-step" class="quiet" title="Make the next move, then pause">Step</button>
         <select id="ap-speed" aria-label="Speed">${SPEEDS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
         <button id="ap-skip" class="quiet" title="Make this paragraph's moves without pausing"><span class="long">Skip to the next paragraph</span><span class="short">Skip ¶</span></button>
         <button id="ap-stop" class="quiet">Stop</button></span>`;
@@ -60,7 +61,17 @@ export async function start({ store, fast, story, valueName, toast }) {
     if (!fast) document.body.append(cursor);
     $('#ap-speed').value = String(s.speed);
     $('#ap-speed').addEventListener('change', (e) => { s.speed = e.target.value === 'at_once' ? 'at_once' : Number(e.target.value); });
-    $('#ap-pause').addEventListener('click', () => { s.paused = !s.paused; $('#ap-pause').textContent = s.paused ? 'Resume' : 'Pause'; caption(s.paused ? 'Paused: the page is yours to look round; resume to go on.' : s.lastCaption); });
+    const setPaused = (on, why = 'Paused: the page is yours to look round; resume to go on.') => {
+        s.paused = on;
+        $('#ap-pause').textContent = on ? 'Resume' : 'Pause';
+        if (on) $('#ap-caption').textContent = why;
+        else caption(s.lastCaption ?? '');
+    };
+    $('#ap-pause').addEventListener('click', () => { s.stepping = false; setPaused(!s.paused); });
+    // One step (Round 195): the next move, note or paragraph read, then paused again (pressed while playing: pause
+    // after the one under way).
+    $('#ap-step').addEventListener('click', () => { s.stepping = true; if (s.paused) setPaused(false); });
+    const stepped = () => { if (s.stepping) { s.stepping = false; setPaused(true, `${s.lastCaption} · paused`); } };
     $('#ap-skip').addEventListener('click', () => { s.skipTo = s.para + 1; });
     $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; ending('Stopped.'); });
     const caption = (text) => { if (!s.paused) s.lastCaption = text; $('#ap-caption').textContent = text; };
@@ -226,6 +237,7 @@ export async function start({ store, fast, story, valueName, toast }) {
         }
         if (!took(m)) throw new Failed(`The autoplay stopped at paragraph ${m.at}: ${$('#ap-caption').textContent.toLowerCase()} did not take (${why ?? 'the save does not show it'}). This is a defect to fix.`);
         s.moves++;
+        stepped();
         await wait(250);
     }
 
@@ -298,6 +310,7 @@ export async function start({ store, fast, story, valueName, toast }) {
         box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
         await idle();
         s.notes++;
+        stepped();
         return true;
     }
     // A thought's notes: each clause it reads highlighted, its note after the last (or at its paragraph's end).
@@ -339,6 +352,8 @@ export async function start({ store, fast, story, valueName, toast }) {
         await choose('#difficulty', 'hard');
         document.querySelector('.settings').open = false;
         await showStory();
+        // Paused at the start (Round 195): nothing moves until Resume (or Step) is pressed.
+        if (!fast) { setPaused(true, 'Ready: Resume to play, or Step for one move at a time.'); await gate(); }
         for (let p = 1; p <= last; p++) {
             s.para = p;
             if (s.skipTo !== null && p >= s.skipTo) s.skipTo = null;
@@ -346,6 +361,7 @@ export async function start({ store, fast, story, valueName, toast }) {
             while ((saved().read ?? 1) <= p) {
                 caption('Reading on');
                 if (!(await click('#read'))) throw new Failed(`The autoplay could not read on at paragraph ${p}.`);
+                stepped();
             }
             await wait(1000);
             const ms = movesAt.get(p) ?? [];
