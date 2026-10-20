@@ -1,6 +1,8 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/review-annotations.md` — the annotation reviewed as a reader's paper (Round 182): a verdict per thought, batches
+  B1–B5 for Robert to agree.
 - `docs/kickoff-annotations.md` — the next session's work (Round 181): a general review of the annotation's content
   (`docs/reading-annotated.md`, `thoughts.json`; a paper first, `docs/review-annotations.md`), the typed notes the
   autoplay will write (72 thoughts whose prose carries hindsight), then the autoplay (`docs/autoplay.md`, agreed).

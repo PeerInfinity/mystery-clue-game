@@ -4383,3 +4383,18 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   moves, none failed, 70 each time) and, for the notes, `scripts/notes-check.mjs`; the logs, reports and gate listing
   unchanged throughout.
 - **Moved:** nothing (documentation).
+
+## Round 182 (2026-10-19): the annotation reviewed as a reader's paper
+
+- **`docs/review-annotations.md`** (piece 1 of `docs/kickoff-annotations.md`): `docs/reading-annotated.md` and
+  `thoughts.json` read thought by thought at each thought's paragraph (a dump per thought from the session's scratch
+  scripts, mechanical flags first, then every thought read by hand). Of 296 thoughts: 108 clean (the reader's note,
+  honest, typable as it stands), 85 a highlight alone, 5 empty, 98 needing something: 58 carry the annotator's remarks
+  in the prose (the 15 ⚠ notes, the 20 forward references, scoring, game design, remarks about readers, round
+  history), 28 cite earlier thoughts by id, 23 differ between the two files (three in substance: `t92.6`'s prose cut
+  short in the data, `t57.3` citing the renamed `t81.2`, `t146.2` citing a `t123.2` that does not exist), 5 say what
+  the reader cannot have yet without a reference (`t6.2`, `t14.1`, `t25.1`, `t34.4`, `t152.1`), 5 are written for a
+  reader who did not make an earlier move, 3 lean on the end unmarked (`t21.2`, `t34.2`, `t60.3`). The earlier reviews'
+  open items closed as annotation questions. Proposed: B1 the files agree, B2 a `remark` field, B3 honesty, B4 the
+  typed notes, B5 the validator's new checks; eight questions for Robert.
+- **Moved:** nothing (documentation).
