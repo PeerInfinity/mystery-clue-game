@@ -1,6 +1,9 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/minimal-playthrough.md` — the paper of Round 197 (written, for Robert to agree): the fewest of the annotated
+  reader's moves that reach 70 (141; 143 in the page), batched or not, the clicks they take, the choice of playthroughs
+  in the autoplay, the statistics. Nothing built until agreed.
 - `docs/kickoff-minimal-playthrough.md` — the next session's work (Round 196): a minimal playthrough to the Hard
   maximum (no notes, no dead ends, fewest clicks), a choice of playthroughs in the autoplay, the game's statistics; a
   paper first (`docs/minimal-playthrough.md`).

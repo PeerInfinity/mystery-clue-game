@@ -4613,3 +4613,20 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   autoplay at ½× and ¼×, its cursor at half speed, paused at the start with a Step button; a note written in the
   story's line (Robert's choice A, by sight).
 - **Moved:** nothing (documentation).
+
+## Round 197 (2026-10-20): the paper on a minimal playthrough, a choice of playthroughs, statistics
+
+- **The work of `docs/kickoff-minimal-playthrough.md`,** paper first: `docs/minimal-playthrough.md`, for Robert to
+  agree. Nothing built.
+- **Measured** by replaying moves through the engine on Hard (scratch scripts): the 70 rows belong to 68 thoughts; the
+  scoring moves and, backwards, the moves that first gave what they need make 154 moves (70); each removed in turn
+  and the rest replayed, 13 more go: **141 moves reach 70** (143 in the page: a candidate is dropped from its chip, so
+  the two answers dropped must be proposed), none of them removable alone. Collects 151 → 72, asks 123 → 10 (Hard
+  recalls a card's further facts by itself once it was asked), builds 52 → 37, seals 11 → 7 (one seal scores every
+  thought that plans the check); no notes, questions, re-reads, set-asides, split, doubt or weighing.
+- **Batched** as late as the deadlines allow: 12 stops, 142 moves, 70. **Clicks** (a model of the page): the annotated
+  moves about 1,616 with reading ¶ by ¶; the minimal moves with the shortcuts 785 at the reader's paragraphs, 726
+  batched.
+- **Found:** on Hard a click on collected words does not open the card (the kickoff assumed it did); a drop scores
+  whatever its reason, held or not (`dropScores` does not consult `dropCheck`): both put to Robert, not changed.
+- **Moved:** nothing (documentation).
