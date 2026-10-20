@@ -66,6 +66,7 @@
 | Every clash met and what it sets aside, for three kinds of player (about a minute; `--build` adds a fourth, 5 min) | `npm run clash-log` (→ `.cache/clash-log.txt`) |
 | The action table (the annotation's moves in the UI on Hard, the autoplay's script) → `cases/silver-blaze/action-table.json`; rerun when the case or the thoughts change (a test checks it is up to date and reaches the Hard maximum) | `npm run action-table` (about 3–5 min) |
 | Play the action table through the real UI in headless Chrome (port 9333; one script at a time), each move checked in the save; the record at the end (about 12–13 min) | `node scripts/ui-run.mjs` (→ `.cache/ui-run.json`; `STOP=<para>` for a part) |
+| The player's notes played through the page in headless Chrome (real mouse and keys: a note at a point, on marked words, a highlight, edit, delete and undo, the settings, reload, Start over), each step checked in the save (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 
 ## Conventions

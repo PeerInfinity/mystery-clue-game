@@ -4317,3 +4317,40 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   its notes are the same twenty paragraphs on.
 - **Leak check:** no text.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full).
+
+## Round 179 (2026-10-19): notes in the page; the notes built
+
+- **Built** (`docs/notes.md` N1–N9, order of work step 3; `index.html`, `ui/app.js`, `ui/style.css`, `ui/fonts/`):
+  - **The notes mode** (N8 a): "✎ Notes" in the header where Start over was ("✎ Notes: on" in the note's ink, a text
+    cursor over the story). On, a click on the story opens a note at that point; a drag over words marks them
+    (snapped to whole words, one paragraph at a time) and opens a note after them; a note left empty on marked words
+    is a highlight alone. The story's words neither collect nor open cards while it is on. Turning it on with the
+    story hidden brings the story into view.
+  - **In the story** (N1, D): each note written in where it was put, in the hand between ‹ ›; the words it marks
+    highlighted. A point inside the words a card is collected or opened by shows just after them, so those words stay
+    whole. The note being written is a box at its place: Enter keeps it (Shift+Enter a new line), Esc cancels, leaving
+    the box keeps it; a click on a note edits it, with Keep, Cancel and Delete; a note left open is kept before the next.
+  - **The Notes tab** (N1, E): "Notes (N)", after Story: every note by paragraph with its place ("on “…”", "after
+    “…”"), its words or "a highlight", and show (the note brought into view in the story, flashed), edit and delete;
+    a delete says "Note deleted · undo".
+  - **The settings** (N9, The page): **Notes in the story** (shown, or only in the Notes tab: a ✎ at each note, the
+    highlights kept), **Notes written in** (handwriting, or the page's own face), **Highlights** (a yellow marker, a
+    blue underline drawn solid and thick below the story's own marks, a pale blue wash), each kept with the layout.
+    Light and dark colours for the ink and the highlights.
+  - **The hand:** Caveat (weight 500, its Latin subset, 50 KB), served with the page from `ui/fonts/` with its SIL Open
+    Font License (`ui/fonts/OFL.txt`); `scripts/serve.js` serves `.woff2` as `font/woff2`.
+  - "How to play" says how to write notes and that the game never reads them.
+- **`scripts/notes-check.mjs`** (`CLAUDE.md` lists it): the notes played through the page in headless Chrome with real
+  mouse and keys (DevTools `Input` events), on Hard at ¶37: notes mode on; a click after "Finally," writes a note at
+  that offset and collects nothing; a drag over "powdered opium" marks those words (snapped whole) with a note after;
+  a drag over "the same dish" kept empty is a highlight; a note edited in place; Esc cancels; mode off, a click collects
+  again; the Notes tab lists three, deletes one, undo puts it back, show flashes it in the story; the three settings
+  and the dark theme; a reload keeps the notes; Start over clears them; no console error. 18 checks, all passed.
+- **Checked:** the action table through the UI on Hard (notes mode off): 396 moves, none failed, no console error, 15
+  minutes; the record 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1: 70 (run on the draft, the same files but the
+  "How to play" line). Screenshots for Robert: the notes in the story, the Notes tab, the underline, the wash with notes
+  only in the tab, dark, and a phone.
+- **Leak check:** a note is the player's own text, never checked; the new words are fixed labels.
+- **The notes are built** (Rounds 177–179); `docs/notes.md` marked so. Next (`docs/kickoff-layout.md`): the autoplay
+  paper.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).

@@ -40,9 +40,22 @@
         Theme
         <select id="theme"><option value="system">As the system</option><option value="light">Light</option><option value="dark">Dark</option></select>
       </label>
+      <label title="Your notes written into the story, or only listed in the Notes tab (the words they mark stay highlighted)">
+        Notes in the story
+        <select id="notes-shown"><option value="story">Shown</option><option value="tab">Only in the Notes tab</option></select>
+      </label>
+      <label title="The face your notes are written in">
+        Notes written in
+        <select id="notes-hand"><option value="hand">Handwriting</option><option value="page">The page's own face</option></select>
+      </label>
+      <label title="How the words a note speaks of are marked">
+        Highlights
+        <select id="highlight"><option value="marker">A yellow marker</option><option value="underline">A blue underline</option><option value="wash">A pale blue wash</option></select>
+      </label>
       <button id="reset" class="quiet settings-rule">Start over…</button>
       </div>
     </details>
+    <button id="notes-mode" class="quiet notes-toggle">✎ Notes</button>
   </div>
 </header>
 <div id="reader" class="reader"></div>

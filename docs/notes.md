@@ -1,6 +1,6 @@
 # The player's notes on the story
 
-Status: **AGREED** (Robert, 2026-10-19, Rounds 175–176), to be built in the order of work at the end. Piece 2 of
+Status: **BUILT** (Rounds 177–179); **AGREED** (Robert, 2026-10-19, Rounds 175–176). Piece 2 of
 `docs/kickoff-layout.md` (first set out as piece 3 of `docs/kickoff-closing-review.md`): the player writes their own
 notes against the story text, visually distinct from it. First paper Round 175 (five looks, A–E); Robert chose **D and
 E** (notes written into the story's line, anywhere in the text, the words a note speaks of highlighted; and a Notes

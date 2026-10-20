@@ -25,7 +25,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { columns: 2, theme: 'system', panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
+const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -63,7 +63,20 @@ function restore() {
     try { return JSON.parse(localStorage.getItem(STORE) ?? 'null'); } catch { return null; }
 }
 function saveLayout() {
-    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme })); } catch { /* private mode */ }
+    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight })); } catch { /* private mode */ }
+}
+// The viewer's settings for notes (docs/notes.md, N9): each a select in Settings, a value kept with the layout, a class on the page.
+const VIEWER = { notesShown: ['notes-shown', ['story', 'tab']], notesHand: ['notes-hand', ['hand', 'page']], highlight: ['highlight', ['marker', 'underline', 'wash']] };
+function applyViewer() {
+    for (const [k, [id, values]] of Object.entries(VIEWER)) {
+        for (const v of values) document.body.classList.toggle(`${id}-${v}`, ui[k] === v);
+        if ($(`#${id}`)) $(`#${id}`).value = ui[k];
+    }
+    document.body.classList.toggle('notes-mode', ui.notesMode);
+    const b = $('#notes-mode');
+    b.classList.toggle('on', ui.notesMode);
+    b.textContent = ui.notesMode ? '✎ Notes: on' : '✎ Notes';
+    b.title = ui.notesMode ? 'Notes mode is on: a click in the story writes a note there, a drag marks words. Click to turn it off.' : 'Write notes in the story: click where a note goes, or drag over words to mark them';
 }
 /** Light, dark, or as the system (the stylesheet's own dark colours, by `prefers-color-scheme`). */
 function applyTheme() {
@@ -76,6 +89,7 @@ function restoreLayout() {
     try { l = JSON.parse(localStorage.getItem(LAYOUT) ?? 'null'); } catch { /* none */ }
     const ok = (t) => TABS.some(([x]) => x === t);
     if (['system', 'light', 'dark'].includes(l?.theme)) ui.theme = l.theme;
+    for (const [k, [, values]] of Object.entries(VIEWER)) if (values.includes(l?.[k])) ui[k] = l[k];
     applyTheme();
     if (!l || ![1, 2].includes(l.columns) || l.panels?.length !== 2 || !l.panels.every(ok) || l.panels[0] === l.panels[1]) return;
     ui.columns = l.columns;
@@ -149,21 +163,162 @@ function renderStory() {
     const hard = game.collecting();
     el.classList.toggle('hard', hard);
     let h = '';
+    const notes = game.allNotes();
     for (let i = 0; i < game.read; i++) {
-        const segs = story.segments(i);
-        const body = segs.map((s) => {
-            const ids = s.ids.filter((id) => (model.cards.has(id) && !game.isHidden(id)) || s.kinds.includes('window') || s.kinds.includes('question'));
-            if (!ids.length) return esc(s.text);
-            const got = ids.some((id) => game.knows(id));
-            const kind = s.kinds.includes('entity') ? 'entity' : s.kinds.includes('question') ? 'question' : s.kinds.includes('event') ? 'event' : s.kinds.includes('window') ? 'window' : 'claim';
-            return `<span class="m ${kind}${got ? ' got' : ''}" data-para="${i}" data-ids="${esc(ids.join(' '))}">${esc(s.text)}</span>`;
-        }).join('');
+        const body = paragraphHtml(i, notes.filter((n) => n.para === i));
         const again = ui.rereadShown && i >= ui.rereadShown.from && i <= ui.rereadShown.to;
         h += `<p class="${i === 0 ? 'title' : ''}${i === game.read - 1 && i > 0 ? ' latest' : ''}${again ? ' reread' : ''}" data-p="${i}">${body}</p>`;
     }
     const top = el.scrollTop;
     el.innerHTML = h;
     el.scrollTop = top;
+    const box = $('#note-text');
+    if (box && ui.noteEdit?.focus) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); ui.noteEdit.focus = false; }
+}
+
+// ---------- the player's notes (docs/notes.md) ----------
+// A paragraph's text with the player's notes written in where they were put, and the words they speak of
+// highlighted. A note's point inside a marked segment (the words a card is collected or opened by) shows just after
+// it, so those words stay whole. The note being written or edited is drawn as a text box at its place.
+function paragraphHtml(i, notes) {
+    const segs = story.segments(i);
+    const edit = ui.noteEdit?.para === i ? ui.noteEdit : null;
+    const marks = notes.filter((n) => n.from !== null && n.id !== edit?.id);
+    if (edit && edit.from !== null) marks.push(edit);
+    let o = 0;
+    const parts = segs.map((s) => {
+        const ids = s.ids.filter((id) => (model.cards.has(id) && !game.isHidden(id)) || s.kinds.includes('window') || s.kinds.includes('question'));
+        const b = [o, o + s.text.length];
+        o = b[1];
+        return { s, ids, b };
+    });
+    const inMarked = (q) => parts.find((x) => x.ids.length && x.b[0] < q && q < x.b[1]);
+    const at = new Map();
+    const put = (q, html) => { const x = inMarked(q); const k = x ? x.b[1] : q; at.set(k, (at.get(k) ?? '') + html); };
+    for (const n of notes) {
+        if (n.id === edit?.id) continue;
+        if (n.text) put(n.at, ui.notesShown === 'tab' ? `<span class="n-mark" data-note="${n.id}" title="Your note: ${esc(n.text)}">✎</span>` : `<span class="n-note" data-note="${n.id}">${esc(n.text)}</span>`);
+    }
+    if (edit) put(edit.at, noteEditorHtml(edit));
+    const cuts = [...new Set(marks.flatMap((n) => [n.from, n.to]))];
+    const piece = (from, to, text) => {
+        const on = marks.filter((n) => n.from <= from && to <= n.to);
+        return on.length ? `<span class="n-hl" data-note="${on.map((n) => n.id ?? 'new').join(' ')}">${esc(text)}</span>` : esc(text);
+    };
+    let h = at.get(0) ?? '';
+    for (const { s, ids, b } of parts) {
+        const stops = [b[0], ...cuts.filter((q) => b[0] < q && q < b[1]), ...(ids.length ? [] : [...at.keys()].filter((q) => b[0] < q && q < b[1])), b[1]].sort((x, y) => x - y);
+        let inner = '';
+        for (let k = 0; k + 1 < stops.length; k++) {
+            if (stops[k] === stops[k + 1]) continue;
+            inner += piece(stops[k], stops[k + 1], s.text.slice(stops[k] - b[0], stops[k + 1] - b[0]));
+            if (!ids.length && stops[k + 1] < b[1]) inner += at.get(stops[k + 1]) ?? '';
+        }
+        if (ids.length) {
+            const got = ids.some((id) => game.knows(id));
+            const kind = s.kinds.includes('entity') ? 'entity' : s.kinds.includes('question') ? 'question' : s.kinds.includes('event') ? 'event' : s.kinds.includes('window') ? 'window' : 'claim';
+            inner = `<span class="m ${kind}${got ? ' got' : ''}" data-para="${i}" data-ids="${esc(ids.join(' '))}">${inner}</span>`;
+        }
+        h += inner + (at.get(b[1]) ?? '');
+    }
+    return h;
+}
+function noteEditorHtml(e) {
+    return `<span class="n-edit"><textarea id="note-text" rows="2" placeholder="${e.from !== null ? 'Your note on the marked words, or leave it empty for a highlight' : 'Your note'}">${esc(e.text ?? '')}</textarea><span class="n-edit-tools small"><button data-note-keep="1">Keep</button> <button class="quiet" data-note-cancel="1">Cancel</button>${e.id ? ` <button class="quiet" data-note-delete="${e.id}">Delete</button>` : ''} <span class="muted">Enter keeps · Esc cancels</span></span></span>`;
+}
+/** The offset in a paragraph's own text of a point in the page (the notes' words are not the story's). */
+function storyOffset(p, node, off) {
+    const r = document.createRange();
+    r.setStart(p, 0);
+    r.setEnd(node, off);
+    const f = r.cloneContents();
+    f.querySelectorAll('.n-note, .n-mark, .n-edit').forEach((x) => x.remove());
+    return f.textContent.length;
+}
+/** Notes mode (docs/notes.md, N8 a): a click opens a note at that point; a drag marks the words, the note after them. */
+function onNotesPointer(e) {
+    if (!ui.notesMode || e.target.closest('.n-note, .n-mark, .n-edit')) return;
+    const sel = getSelection();
+    let range = null;
+    if (sel.rangeCount && !sel.isCollapsed) range = sel.getRangeAt(0);
+    else {
+        const c = document.caretRangeFromPoint?.(e.clientX, e.clientY) ?? (() => { const q = document.caretPositionFromPoint?.(e.clientX, e.clientY); if (!q) return null; const r = document.createRange(); r.setStart(q.offsetNode, q.offset); return r; })();
+        range = c;
+    }
+    if (!range) return;
+    const p = (range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer).closest('#story p[data-p]');
+    if (!p || p.classList.contains('title')) return;
+    const para = Number(p.dataset.p);
+    let from = storyOffset(p, range.startContainer, range.startOffset);
+    let to = from;
+    if (!range.collapsed) {
+        const end = (range.endContainer.nodeType === Node.TEXT_NODE ? range.endContainer.parentElement : range.endContainer).closest('#story p[data-p]');
+        // One paragraph at a time: a drag into the next is cut at the first's end.
+        to = end === p ? storyOffset(p, range.endContainer, range.endOffset) : story.paragraphs[para].display.length;
+        if (end !== p) toast('A note speaks of one paragraph at a time: the marking stops at its end.');
+    }
+    sel.removeAllRanges();
+    if (to > from) [from, to] = wholeWords(story.paragraphs[para].display, from, to);
+    // A note left open is kept before the next is begun.
+    if (ui.noteEdit) keepNote();
+    ui.noteEdit = to > from ? { para, from, to, at: to, text: '', focus: true } : { para, from: null, to: null, at: from, text: '', focus: true };
+    run(renderStory);
+}
+/** A marking snapped to whole words, without the spaces at its ends: a drag need not be exact. */
+function wholeWords(t, from, to) {
+    const w = /[\p{L}\p{N}’'-]/u;
+    while (from < to && /\s/.test(t[from])) from++;
+    while (to > from && /\s/.test(t[to - 1])) to--;
+    while (from > 0 && w.test(t[from - 1]) && w.test(t[from])) from--;
+    while (to < t.length && w.test(t[to]) && w.test(t[to - 1])) to++;
+    return [from, to];
+}
+function keepNote() {
+    const e = ui.noteEdit;
+    if (!e) return;
+    const text = $('#note-text')?.value ?? e.text ?? '';
+    ui.noteEdit = null;
+    if (e.id) game.editNote(e.id, text);
+    else if (text.trim() || e.from !== null) game.addNote({ para: e.para, at: e.at, from: e.from, to: e.to, text });
+    changed();
+}
+function deleteNote(id) {
+    const gone = game.deleteNote(id);
+    ui.noteEdit = null;
+    if (!gone) return;
+    ui.lastDeleted = gone;
+    changed();
+    toast(`${gone.text ? 'Note' : 'Highlight'} deleted · <span class="link" data-note-undo="1">undo</span>`);
+}
+/** Where a note is, in words: on the words it marks, or after the words before its point. */
+function notePlace(n) {
+    const t = story.paragraphs[n.para].display;
+    if (n.from !== null) return `on “${shortText(t.slice(n.from, n.to), 60)}”`;
+    if (n.at === 0) return 'at its start';
+    if (n.at >= t.length) return 'at its end';
+    return `after “…${t.slice(Math.max(0, n.at - 40), n.at).replace(/^\S*\s/, '').trim()}”`;
+}
+const shortText = (s, k) => (s.length > k ? `${s.slice(0, k - 1)}…` : s);
+function toolNotes() {
+    const ns = game.allNotes();
+    let h = `<h3 class="section">Your notes${ns.length ? ` (${ns.length})` : ''}</h3>`;
+    if (!ns.length) return `${h}<p class="empty">No notes yet. Turn on “✎ Notes” in the header, then click in the story where a note goes, or drag over words to mark them.</p><p class="small muted">Notes are yours: the game never reads them.</p>`;
+    h += '<ul class="list n-list">';
+    for (const n of ns) {
+        h += `<li><div class="small muted">¶${n.para} · ${esc(notePlace(n))} <span class="n-tools"><span class="link" data-note-show="${n.id}">show</span> · <span class="link" data-note-edit="${n.id}">edit</span> · <span class="link" data-note-delete="${n.id}">delete</span></span></div>${n.text ? `<div class="n-text">${esc(n.text)}</div>` : '<div class="small muted">a highlight</div>'}</li>`;
+    }
+    return `${h}</ul><p class="small muted">Notes are yours: the game never reads them.</p>`;
+}
+/** Bring a note into view in the story (the story shown where a link opens it), flashed for a moment. */
+function showNote(id, from) {
+    show('story', from);
+    renderToolNow();
+    renderStory();
+    const el = document.querySelector(`#story [data-note~="${id}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center' });
+    el.classList.add('n-flash');
+    setTimeout(() => el.classList.remove('n-flash'), 1200);
 }
 
 /** What the last read brought (docs/layout.md, Q2): said in the bar, so reading on with the story hidden still tells. */
@@ -243,8 +398,8 @@ function scrollStory() {
 // Two panels, each drawing any tab; a tab is shown in one panel at a time. Choosing in one panel a tab the other shows
 // swaps the two (Q1); a link opens its tab in the other panel than the one clicked in, or in place if its own panel is
 // the one clicked in (Q3).
-const TABS = [['story', 'Story'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
-const TOOLS = { card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
+const TABS = [['story', 'Story'], ['notes', 'Notes'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
+const TOOLS = { notes: toolNotes, card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
 // One column (the header's toggle) or two; a phone always one (docs/layout.md, Q4). In one column the second panel is
 // hidden, and keeps its tab for when there are two again.
 const NARROW = window.matchMedia('(max-width: 699px)');
@@ -306,6 +461,7 @@ function layoutPanels() {
     $('.layout').classList.toggle('one', columns() === 1);
     $('#layout-cols').value = String(ui.columns);
     $('#theme').value = ui.theme;
+    applyViewer();
     ui.panels.forEach(({ tab }, i) => {
         const body = $(`#panel-${i}`);
         if (!shown(i)) { if (body.dataset.tab) { body.dataset.tab = ''; body.innerHTML = ''; } return; }
@@ -335,6 +491,7 @@ function renderTabs() {
         questions: `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`,
     };
     label.story = `Story ¶${game.read - 1}`;
+    if (game.notes.length) label.notes = `Notes (${game.notes.length})`;
     if (!game.autoSolves()) label.record = `Record (${ui.ahead ?? 0} ahead)`;
     const hidden = { inferences: game.autoSolves() && !game.heldInferences().length, record: game.autoSolves() };
     document.querySelectorAll('.panel').forEach((el, i) => {
@@ -399,6 +556,7 @@ function intro() {
 <li>${game.autoSolves() ? 'The game works out what your clues allow: each question shows only the answers still possible, and settles itself when one is left. Click a ruled-out answer to see why.' : `${game.opts.crossOut === 'pencil' ? 'Cross answers out as you see fit' : 'Rule answers out: the game checks each against every clue and inference you hold and trust'}${game.helps('greying') ? '; the game greys the ones your clues already rule out' : ''}. Circle the answers you favour.`}</li>
 <li>${game.autoSolves() ? 'The game draws the inferences for you; they are listed under Inferences.' : `<b>Inferences</b> are the reasoning that connects clues. Open a clue or background card and press “Infer from this”, then connect further cards; the game tells you when you are onto something${game.opts.kind === 'on' ? ', and you name what the conclusion is about' : ''}. Holmes and the others state some inferences themselves.`}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
+<li>Your own notes: turn on <b>✎ Notes</b> in the header, then click in the story where a note goes, or drag over words to mark them. The Notes tab lists them; the game never reads them.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
 }
@@ -1746,6 +1904,32 @@ function onClick(e) {
     // A click anywhere outside the settings panel closes it.
     const settings = document.querySelector('.settings');
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
+    // The player's notes (docs/notes.md): their buttons, a note clicked to edit, the mode.
+    if (e.target.closest('#notes-mode')) {
+        ui.notesMode = !ui.notesMode;
+        ui.noteEdit = null;
+        if (ui.notesMode) show('story');
+        applyViewer();
+        renderTool();
+        renderStory();
+        return;
+    }
+    if (e.target.closest('[data-note-keep]')) { keepNote(); return; }
+    if (e.target.closest('[data-note-cancel]')) { ui.noteEdit = null; renderStory(); return; }
+    const noteDel = e.target.closest('[data-note-delete]');
+    if (noteDel) { deleteNote(noteDel.dataset.noteDelete); return; }
+    if (e.target.closest('[data-note-undo]')) { if (ui.lastDeleted && game.addNote(ui.lastDeleted, ui.lastDeleted.id).ok) { ui.lastDeleted = null; $('#toast').hidden = true; changed(); } return; }
+    const noteShow = e.target.closest('[data-note-show]');
+    if (noteShow) { showNote(noteShow.dataset.noteShow, fromPanel(e)); return; }
+    const noteOpen = e.target.closest('[data-note-edit], #story .n-note, #story .n-mark');
+    if (noteOpen) {
+        const n = game.allNotes().find((x) => x.id === (noteOpen.dataset.noteEdit ?? noteOpen.dataset.note));
+        if (n) { if (ui.noteEdit && ui.noteEdit.id !== n.id) keepNote(); ui.noteEdit = { ...n, focus: true }; showNote(n.id, fromPanel(e)); }
+        return;
+    }
+    if (e.target.closest('.n-edit')) return;
+    // In notes mode the story's words neither collect nor open cards: a click there writes a note (onNotesPointer).
+    if (ui.notesMode && e.target.closest('#story')) return;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
     const pointBack = e.target.closest('[data-reread-prompt]');
@@ -2077,6 +2261,21 @@ document.addEventListener('input', (e) => {
     }
 });
 document.addEventListener('change', (e) => game && run(() => onChange(e)));
+document.addEventListener('pointerup', (e) => game && e.target.closest?.('#story') && onNotesPointer(e));
+// The note being written: Enter keeps it (Shift+Enter a new line), Esc cancels, leaving the box keeps it.
+document.addEventListener('keydown', (e) => {
+    if (e.target.id !== 'note-text') return;
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); run(keepNote); }
+    if (e.key === 'Escape') { e.preventDefault(); ui.noteEdit = null; run(renderStory); }
+});
+document.addEventListener('input', (e) => { if (e.target.id === 'note-text' && ui.noteEdit) ui.noteEdit.text = e.target.value; });
+document.addEventListener('focusout', (e) => {
+    if (e.target.id !== 'note-text') return;
+    const was = ui.noteEdit;
+    setTimeout(() => { if (was && ui.noteEdit === was && !document.activeElement?.closest('.n-edit')) run(keepNote); }, 150);
+});
+// The note's buttons keep the focus in its box, so pressing one is not leaving it.
+document.addEventListener('mousedown', (e) => { if (e.target.closest('.n-edit button')) e.preventDefault(); });
 /** The plan form's choices, read back into ui.plan before a re-render or a seal. */
 function readPlan() {
     const f = ui.plan;
@@ -2097,6 +2296,8 @@ function onChange(e) {
     // The page's settings: the viewer's, kept with the layout (docs/notes.md, N9).
     if (e.target.id === 'layout-cols') { ui.columns = Number(e.target.value); renderTool(); return; }
     if (e.target.id === 'theme') { ui.theme = e.target.value; applyTheme(); saveLayout(); return; }
+    const viewer = Object.entries(VIEWER).find(([, [id]]) => id === e.target.id);
+    if (viewer) { ui[viewer[0]] = e.target.value; applyViewer(); saveLayout(); renderStory(); return; }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
     if (e.target.id === 'pose-template') { ui.poseTemplate = e.target.value; renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
@@ -2136,6 +2337,7 @@ function onChange(e) {
 $('#reset').addEventListener('click', () => run(() => {
     if (!confirm('Start the case over? Your place, marks and theories will be lost.')) return;
     document.querySelector('.settings').open = false;
+    ui.noteEdit = null;
     game.reset();
     ui.selected = null;
     changed();
