@@ -1208,7 +1208,8 @@ function toolTheories() {
         if (!t.story) h += `<div class="small"><span class="link" data-theory-current="${t.id}">${ui.theory === t.id ? '★ new answers go here' : 'add answers here'}</span> · <span class="link" data-del-theory="${t.id}">delete</span></div>`;
         h += '</div>';
     }
-    return `${h}<div class="row"><button data-new-theory="1">New theory</button></div>`;
+    // A new theory is named in place (docs/autoplay.md A4, Round 187), not by the browser's dialog.
+    return `${h}<div class="row"><label class="small" for="theory-name">New theory:</label> <input id="theory-name" type="text" placeholder="Theory ${game.theories.length + 1}" aria-label="The new theory's name"> <button data-new-theory="1">Create</button></div>`;
 }
 
 // ---------- the record against Holmes (workstream 9, docs/ui.md Q1) ----------
@@ -2167,8 +2168,9 @@ function onClick(e) {
     if (t.dataset.unsplit) { game.unsplitTime(t.dataset.unsplit); changed(); return; }
     if (t.dataset.move) { const [ev, time] = t.dataset.move.split('|'); game.placeEvent(ev, time || null); changed(); return; }
     if (t.dataset.newTheory) {
-        const label = prompt('Name your theory', `Theory ${game.theories.length + 1}`);
-        if (label) { ui.theory = game.addTheory(label); changed(); }
+        const label = document.querySelector('#theory-name')?.value.trim() || `Theory ${game.theories.length + 1}`;
+        ui.theory = game.addTheory(label);
+        changed();
         return;
     }
     if (t.dataset.weigh) { (ui.weighed ??= new Set()).add(t.dataset.weigh); renderTool(); return; }
@@ -2264,6 +2266,8 @@ document.addEventListener('change', (e) => game && run(() => onChange(e)));
 document.addEventListener('pointerup', (e) => game && e.target.closest?.('#story') && onNotesPointer(e));
 // The note being written: Enter keeps it (Shift+Enter a new line), Esc cancels, leaving the box keeps it.
 document.addEventListener('keydown', (e) => {
+    // The new theory's name: Enter creates it, as the button does.
+    if (e.target.id === 'theory-name' && e.key === 'Enter') { e.preventDefault(); document.querySelector('[data-new-theory]')?.click(); return; }
     if (e.target.id !== 'note-text') return;
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); run(keepNote); }
     if (e.key === 'Escape') { e.preventDefault(); ui.noteEdit = null; run(renderStory); }

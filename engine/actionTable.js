@@ -163,7 +163,7 @@ export function actionTable(model) {
             th.assignment = can;
             const id = g.addTheory(th.label, { ...can });
             THEORIES[t.id].id = id;
-            return log('theory', { label: th.label, assignment: th.assignment }, [{ tab: 'theories' }, { click: '[data-new-theory]', prompt: th.label }, ...Object.entries(th.assignment).flatMap(([s, v]) => [openUi(model.slots.get(s).on), { propose: s, value: v }, { click: `.chip[data-slot="${s}"][data-val="${v}"]` }, { click: '[data-op="theory"]' }])], !!id);
+            return log('theory', { label: th.label, assignment: th.assignment }, [{ tab: 'theories' }, { fill: '#theory-name', value: th.label }, { click: '[data-new-theory]' }, ...Object.entries(th.assignment).flatMap(([s, v]) => [openUi(model.slots.get(s).on), { propose: s, value: v }, { click: `.chip[data-slot="${s}"][data-val="${v}"]` }, { click: '[data-op="theory"]' }])], !!id);
         });
         if (t.dropped && !t.dropped.inference) step(`d:${t.id}`, () => {
             const d = t.dropped;

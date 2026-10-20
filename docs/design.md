@@ -4474,3 +4474,16 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Moved:** `thoughts-report.md` gains "Notes the autoplay types": 147 notes as they stand, 59 typed forms, 85
   highlights alone, 5 nothing; 69 thoughts with a remark. The action table rerun, unchanged; the logs, `report.md` and
   the gate listing unchanged (diffed in full).
+
+## Round 187 (2026-10-19): the autoplay, step 1: a theory named in place
+
+- **UI** (`docs/autoplay.md` A4; `ui/app.js`): the Theories tab ends with "New theory: [Theory N] Create", a field
+  and a button in place of the browser's `prompt()` (the only dialog that stopped the page, Round 163); Enter in the
+  field creates the theory, as the button does; an empty field takes the placeholder's name.
+- **The action table's step** (`engine/actionTable.js`): the name typed into `#theory-name`, then Create; the table
+  rerun (the one theory move's steps). **The runner** (`scripts/ui-run.mjs`) no longer answers a dialog.
+- **Checked:** the action table played through the UI on Hard (`node scripts/ui-run.mjs`): 396 moves, none failed, no
+  console error, 12 minutes; the record: deductions 45 of 47, odd details 8 of 8, steps seen through 3 of 3, wrong turns
+  dropped 3 of 3, checks 10 of 10, what did not happen 1 of 1: 70 ahead. A screenshot of the field for Robert.
+- **Leak check:** fixed labels only.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full).

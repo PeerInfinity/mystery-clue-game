@@ -24,9 +24,6 @@ await p.ev(`document.querySelector('.settings').open = true; 1`);
 await p.choose('#difficulty', 'hard');
 await p.ev(`document.querySelector('.settings').open = false; 1`);
 if (process.env.COLS === '1') { await p.ev(`document.querySelector('.settings').open = true; 1`); await p.choose('#layout-cols', '1'); await p.ev(`document.querySelector('.settings').open = false; 1`); }
-// The theory's name: answer the page's prompt().
-let promptText = null;
-p.ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.method === 'Page.javascriptDialogOpening') p.send('Page.handleJavaScriptDialog', { accept: true, promptText: promptText ?? '' }); });
 const st = async () => (await p.state())?.game ?? {};
 const has = (list, id) => (list ?? []).some((x) => (Array.isArray(x) ? x[0] : x) === id);
 const results = [];
@@ -79,8 +76,6 @@ async function step(u) {
     }
     if (u.click_if_absent) { if (await p.ev(`!!document.querySelector(${JSON.stringify(u.click_if_absent)})`)) return true; }
     if (u.click) {
-        // This headless Chrome has no window.prompt: answer it in the page (the dialog handler covers a real one).
-        if (u.prompt) { promptText = u.prompt; await p.ev(`window.prompt = () => ${JSON.stringify(u.prompt)}; 1`); }
         return (await p.click(u.click)) || `nothing to click: ${u.click}`;
     }
     if (u.expect) return true;
