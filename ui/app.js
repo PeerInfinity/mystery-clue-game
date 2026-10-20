@@ -25,7 +25,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { columns: 2, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
+const ui = { columns: 2, theme: 'system', panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -63,13 +63,20 @@ function restore() {
     try { return JSON.parse(localStorage.getItem(STORE) ?? 'null'); } catch { return null; }
 }
 function saveLayout() {
-    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab) })); } catch { /* private mode */ }
+    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme })); } catch { /* private mode */ }
+}
+/** Light, dark, or as the system (the stylesheet's own dark colours, by `prefers-color-scheme`). */
+function applyTheme() {
+    if (ui.theme === 'system') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = ui.theme;
 }
 /** The layout last used here, if it is one this page can show; else the default (Q7). */
 function restoreLayout() {
     let l = null;
     try { l = JSON.parse(localStorage.getItem(LAYOUT) ?? 'null'); } catch { /* none */ }
     const ok = (t) => TABS.some(([x]) => x === t);
+    if (['system', 'light', 'dark'].includes(l?.theme)) ui.theme = l.theme;
+    applyTheme();
     if (!l || ![1, 2].includes(l.columns) || l.panels?.length !== 2 || !l.panels.every(ok) || l.panels[0] === l.panels[1]) return;
     ui.columns = l.columns;
     ui.panels = l.panels.map((tab) => ({ tab }));
@@ -297,7 +304,8 @@ function goBack(i) {
 function layoutPanels() {
     let storyShown = false;
     $('.layout').classList.toggle('one', columns() === 1);
-    document.querySelectorAll('[data-cols]').forEach((b) => b.classList.toggle('on', Number(b.dataset.cols) === ui.columns));
+    $('#layout-cols').value = String(ui.columns);
+    $('#theme').value = ui.theme;
     ui.panels.forEach(({ tab }, i) => {
         const body = $(`#panel-${i}`);
         if (!shown(i)) { if (body.dataset.tab) { body.dataset.tab = ''; body.innerHTML = ''; } return; }
@@ -1500,8 +1508,8 @@ function renderNow() {
     }
     if (game.difficulty === CUSTOM) $('#difficulty-options').open = true;
     const pick = (id) => $(`#${id}`).selectedOptions[0]?.textContent ?? '';
-    $('#settings-summary').textContent = `${pick('difficulty')} · ${pick('pace') === 'Free' ? 'Free pace' : 'Waits'} · Background ${pick('opt-background').toLowerCase()}`;
-    $('#settings-short').textContent = pick('difficulty');
+    $('#settings-summary').textContent = `Settings · ${pick('difficulty')}`;
+    $('#settings-short').textContent = 'Settings';
     layoutPanels();
     renderStory();
     renderToolNow();
@@ -1802,8 +1810,6 @@ function onClick(e) {
     if (tabOpen) { show(tabOpen.dataset.tabOpen, fromPanel(e)); renderTool(); return; }
     const backTo = e.target.closest('[data-back]');
     if (backTo) { goBack(Number(backTo.dataset.back)); renderTool(); return; }
-    const cols = e.target.closest('[data-cols]');
-    if (cols) { ui.columns = Number(cols.dataset.cols); renderTool(); return; }
     if (e.target.closest('[data-show-clashes]')) {
         show('questions', fromPanel(e));
         renderToolNow();
@@ -2088,6 +2094,9 @@ function onChange(e) {
         if (['plan-verb', 'plan-expect', 'plan-slot'].includes(e.target.id)) renderTool();
         return;
     }
+    // The page's settings: the viewer's, kept with the layout (docs/notes.md, N9).
+    if (e.target.id === 'layout-cols') { ui.columns = Number(e.target.value); renderTool(); return; }
+    if (e.target.id === 'theme') { ui.theme = e.target.value; applyTheme(); saveLayout(); return; }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
     if (e.target.id === 'pose-template') { ui.poseTemplate = e.target.value; renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
@@ -2126,6 +2135,7 @@ function onChange(e) {
 }
 $('#reset').addEventListener('click', () => run(() => {
     if (!confirm('Start the case over? Your place, marks and theories will be lost.')) return;
+    document.querySelector('.settings').open = false;
     game.reset();
     ui.selected = null;
     changed();

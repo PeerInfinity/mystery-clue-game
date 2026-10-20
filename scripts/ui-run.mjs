@@ -4,7 +4,7 @@
 //   node scripts/ui-run.mjs [table.json] [out.json]   (default: cases/silver-blaze/action-table.json → .cache/ui-run.json)
 // Needs the game served (node scripts/serve.js → URL, default http://localhost:8321/) and the headless Chrome on port
 // 9333. Only one script may drive that Chrome at a time: two clients on its one page spoil each other's runs.
-// STOP=<para> stops after that paragraph's moves; COLS=1 plays it in one column (the header's toggle). About 12–13 minutes for the whole game on a loaded machine.
+// STOP=<para> stops after that paragraph's moves; COLS=1 plays it in one column (Layout, in the settings). About 12–13 minutes for the whole game on a loaded machine.
 import fs from 'node:fs';
 import path from 'node:path';
 import { open } from './cdp.mjs';
@@ -23,7 +23,7 @@ await p.ev(`localStorage.clear(); 1`); await p.send('Page.reload'); await p.slee
 await p.ev(`document.querySelector('.settings').open = true; 1`);
 await p.choose('#difficulty', 'hard');
 await p.ev(`document.querySelector('.settings').open = false; 1`);
-if (process.env.COLS === '1') await p.click('[data-cols="1"]');
+if (process.env.COLS === '1') { await p.ev(`document.querySelector('.settings').open = true; 1`); await p.choose('#layout-cols', '1'); await p.ev(`document.querySelector('.settings').open = false; 1`); }
 // The theory's name: answer the page's prompt().
 let promptText = null;
 p.ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.method === 'Page.javascriptDialogOpening') p.send('Page.handleJavaScriptDialog', { accept: true, promptText: promptText ?? '' }); });

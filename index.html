@@ -11,10 +11,10 @@
   <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">a casebook</span></h1>
   <div class="controls">
     <span id="progress" class="progress"></span>
-    <span class="columns" title="Show one panel the full width, or two side by side"><button data-cols="2" class="quiet">Two columns</button><button data-cols="1" class="quiet">One column</button></span>
     <details class="settings">
-      <summary title="Game settings"><span class="gear" aria-hidden="true">⚙</span> <span id="settings-summary" class="long">Settings</span><span id="settings-short" class="short">Settings</span></summary>
+      <summary title="Settings: the game's, and the page's"><span class="gear" aria-hidden="true">⚙</span> <span id="settings-summary" class="long">Settings</span><span id="settings-short" class="short">Settings</span></summary>
       <div class="settings-panel">
+      <div class="small muted opt-group-title">The game</div>
       <label title="Each difficulty is a preset of the options below. Change any option and the difficulty reads Custom.">
         Difficulty
         <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option><option value="custom" disabled>Custom</option></select>
@@ -31,9 +31,18 @@
         <summary>Difficulty options</summary>
         <div id="options" class="options-grid"></div>
       </details>
+      <div class="small muted opt-group-title settings-rule" title="Yours, kept on this device apart from the game">The page</div>
+      <label id="layout-label" title="One panel the full width, or two side by side (a phone always shows one)">
+        Layout
+        <select id="layout-cols"><option value="2">Two columns</option><option value="1">One column</option></select>
+      </label>
+      <label title="Light or dark, or as this device is set">
+        Theme
+        <select id="theme"><option value="system">As the system</option><option value="light">Light</option><option value="dark">Dark</option></select>
+      </label>
+      <button id="reset" class="quiet settings-rule">Start over…</button>
       </div>
     </details>
-    <button id="reset" class="quiet">Start over</button>
   </div>
 </header>
 <div id="reader" class="reader"></div>

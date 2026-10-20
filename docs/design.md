@@ -4281,3 +4281,22 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   layout, apart from the save.
 - **Order of work:** the Settings menu; notes in the game (node tests); notes in the page.
 - **Moved:** nothing (documentation).
+
+## Round 177 (2026-10-19): the Settings menu
+
+- **Built** (`docs/notes.md` N9, order of work step 1; `index.html`, `ui/app.js`, `ui/style.css`): the drop-down is
+  **Settings** ("⚙ Settings · Hard" on a desktop, "⚙ Settings" on a phone; it read "Hard · Free pace · Background when
+  asked"), in two parts: **The game** (difficulty, pace, the options, as before) and **The page**, the viewer's own:
+  **Layout** (two columns or one: the header's toggle moved in; hidden on a phone, always one column) and **Theme** (as
+  the system, light, dark: the stylesheet's own dark colours, set by `data-theme`). **Start over…** moved inside, at its
+  foot, still asking first; it closes the menu. The page's settings are kept with the layout under
+  `mystery-clue-game:layout:v1`, apart from the save, and kept by Start over. The header's place for the notes toggle
+  is free (step 3).
+- **The runner:** `COLS=1` chooses one column in the settings.
+- **Checked in headless Chrome** (screenshots sent to Robert): the menu in light and dark; one column and dark kept
+  across a reload; Start over restarts the game, closes the menu and keeps both; "as the system" clears the theme; no
+  console error. **The action table through the UI** on Hard: 396 moves, none failed, no console error, 14 minutes;
+  the record 45 of 47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1: 70 (and its first 20 paragraphs in one column, 60
+  moves, none failed).
+- **Leak check:** fixed labels only.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
