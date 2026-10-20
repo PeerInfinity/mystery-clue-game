@@ -4531,3 +4531,13 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   autoplay built and checked to 70 (12 of 12), the action table through the UI unchanged (396 moves, none failed, 70)
   after each UI step. `CLAUDE.md` says the kickoff is done; nothing is handed off.
 - **Moved:** nothing (documentation).
+
+## Round 190 (2026-10-20): the site publishes the autoplay and the notes' font
+
+- **Robert's report:** on GitHub Pages, `?autoplay` failed: `ui/autoplay.js` 404, "Failed to fetch dynamically imported
+  module". `scripts/build-site.js` followed only `import … from` lines, and the page loads the autoplay by `import()`;
+  it did not follow a stylesheet's `url()` either, so the notes' hand (`ui/fonts/Caveat-500-latin.woff2`, Round 178)
+  was also missing from the site (404; the notes fell back to the default face).
+- **Fixed:** the build follows `import('./x.js')` (and stamps it with the build's version, as the static imports are)
+  and `url(...)` in the stylesheets. The site gains exactly those two files (the old and new builds' lists diffed).
+- **Moved:** nothing in the logs, the reports or the gate listing (the build script only).

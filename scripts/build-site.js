@@ -21,15 +21,19 @@ for (const page of PAGES) {
     for (const [, ref] of html.matchAll(/(?:href|src)="([^"#?:]+)"/g)) if (ref !== './') files.add(path.normalize(ref));
 }
 
-// ES modules, followed through their relative imports.
-const todo = [...files].filter((f) => f.endsWith('.js'));
+// ES modules, followed through their relative imports, and stylesheets through their url()s (the notes' font).
+const todo = [...files].filter((f) => f.endsWith('.js') || f.endsWith('.css'));
 while (todo.length) {
     const f = todo.pop();
     const src = fs.readFileSync(path.join(root, f), 'utf8');
-    // `import … from './x.js'`, and a worker's module: `new URL('./x.js', import.meta.url)`.
-    for (const [, ref] of src.matchAll(/(?:(?:import|export)\b[^'"]*?from\s*|new URL\(\s*)['"](\.{1,2}\/[^'"]+)['"]/g)) {
+    // `import … from './x.js'`, a module loaded when needed: `import('./x.js')`, and a worker's module:
+    // `new URL('./x.js', import.meta.url)`; in a stylesheet, `url(fonts/x.woff2)`.
+    const refs = f.endsWith('.css')
+        ? [...src.matchAll(/url\(\s*['"]?([^'"()#?:]+)['"]?\s*\)/g)]
+        : [...src.matchAll(/(?:(?:import|export)\b[^'"]*?from\s*|import\(\s*|new URL\(\s*)['"](\.{1,2}\/[^'"]+)['"]/g)];
+    for (const [, ref] of refs) {
         const dep = path.normalize(path.join(path.dirname(f), ref));
-        if (!files.has(dep)) { files.add(dep); todo.push(dep); }
+        if (!files.has(dep)) { files.add(dep); if (/\.(js|css)$/.test(dep)) todo.push(dep); }
     }
 }
 
@@ -47,7 +51,7 @@ for (const f of [...files].sort()) {
         const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:href|src)=")([^"#?:]+\.(?:css|js))"/g, (m, a, ref) => `${a}${stamp(ref)}"`);
         fs.writeFileSync(path.join(out, f), text);
     } else if (f.endsWith('.js')) {
-        const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:(?:import|export)\b[^'"]*?from\s*|new URL\(\s*)['"])(\.{1,2}\/[^'"?]+)(['"])/g, (m, a, ref, b) => `${a}${stamp(ref)}${b}`);
+        const text = fs.readFileSync(path.join(root, f), 'utf8').replace(/((?:(?:import|export)\b[^'"]*?from\s*|import\(\s*|new URL\(\s*)['"])(\.{1,2}\/[^'"?]+)(['"])/g, (m, a, ref, b) => `${a}${stamp(ref)}${b}`);
         fs.writeFileSync(path.join(out, f), text);
     } else fs.copyFileSync(path.join(root, f), path.join(out, f));
 }
