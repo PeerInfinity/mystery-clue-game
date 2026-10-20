@@ -4300,3 +4300,20 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   moves, none failed).
 - **Leak check:** fixed labels only.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
+
+## Round 178 (2026-10-19): notes in the game
+
+- **Built** (`docs/notes.md` N2–N5, order of work step 2; `engine/game.js`): `Game` keeps the player's notes,
+  `{id, para, at, from, to, text}`: written at a point `at` of a paragraph read (an offset in its fixed text,
+  `story.paragraphs[i].display`, which is exactly the text the page draws), with the words it speaks of marked
+  (`from`–`to`) or not, and a highlight with nothing written allowed. `addNote` (refuses a paragraph not read, the
+  title, offsets outside the paragraph, and a note with nothing written or marked; a note on marked words is written
+  after them, a note with no point at the paragraph's end), `editNote` (emptied: a highlight stays one, a bare note
+  goes), `deleteNote` (returns the note, to put back with its id: the undo), `allNotes` (in the story's order). Saved
+  with the game (`notes` in the save, the same version, an older save reading as none), reloaded, cleared by a reset.
+  Nothing in the game reads them.
+- **Test** (`engine/notes.test.js`, 5 tests): the three kinds; the refusals; edit, delete and undo; save, reload and
+  reset; and that notes feed nothing: with or without two notes, the record, the buildable inferences and the save but
+  its notes are the same twenty paragraphs on.
+- **Leak check:** no text.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full).

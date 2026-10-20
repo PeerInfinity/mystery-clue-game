@@ -349,6 +349,7 @@ export class Game {
         this.setAsideAt = new Map();    // card id → the paragraph the player set it aside at (workstream 8)
         this.rereads = [];              // [{from, to, question, para}]: passages the player went back over (workstream 8)
         this.posed = [];                // [{id, template, cards, para, candidates, joined}]: the player's own questions (docs/questions.md)
+        this.notes = [];                // [{id, para, at, from, to, text}]: the player's notes on the story (docs/notes.md); never read by the game
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -387,6 +388,7 @@ export class Game {
             setAside: [...this.setAsideAt],
             rereads: this.rereads,
             posed: this.posed.map((q) => [q.id, q.template, q.cards, q.para, q.candidates, q.joined]),
+            notes: this.notes.map((n) => [n.id, n.para, n.at, n.from, n.to, n.text]),
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
@@ -480,6 +482,7 @@ export class Game {
             this.posed.push({ id, template, cards: [...cards], para, candidates: (candidates ?? []).filter((c) => this.knows(c)), joined: joined ?? null });
         }
         this.#noteJoins();
+        for (const [id, para, at, from, to, text] of state.notes ?? []) this.addNote({ para, at, from, to, text }, id);
         if (board) this.board = { ...TL.emptyBoard(), ...board };
     }
 
@@ -537,6 +540,45 @@ export class Game {
         const r = { from, to, question, para: this.read - 1 };
         this.rereads.push(r);
         return r;
+    }
+
+    // ---------- the player's notes on the story (docs/notes.md) ----------
+    // The player's paper: a note written at a point of a paragraph read (`at`, an offset in its text), with the words it
+    // speaks of highlighted if the player marked them (`from`–`to`), or a highlight with no words written. Saved with
+    // the game and cleared by a reset; nothing in the game reads them (N5).
+    /** Add a note; `id` only when restoring one (a reload, an undo). {ok, id} or {ok: false, reason}. */
+    addNote({ para, at = null, from = null, to = null, text = '' }, id = null) {
+        const len = this.story.paragraphs[para]?.display.length;
+        if (!Number.isInteger(para) || para < 1 || para >= this.read || len === undefined) return { ok: false, reason: 'a paragraph you have read' };
+        const marked = from !== null || to !== null;
+        if (marked && !(Number.isInteger(from) && Number.isInteger(to) && from >= 0 && from < to && to <= len)) return { ok: false, reason: 'words within the paragraph' };
+        at ??= marked ? to : len;
+        if (!Number.isInteger(at) || at < 0 || at > len) return { ok: false, reason: 'a point within the paragraph' };
+        text = String(text ?? '').trim();
+        if (!text && !marked) return { ok: false, reason: 'write something, or mark the words' };
+        if (id && this.notes.some((n) => n.id === id)) return { ok: false, reason: 'that note is there already' };
+        id ??= `n.${Math.max(0, ...this.notes.map((n) => +n.id.slice(2))) + 1}`;
+        const n = { id, para, at, from: marked ? from : null, to: marked ? to : null, text };
+        this.notes.push(n);
+        return { ok: true, id };
+    }
+    /** Rewrite a note's words; with none left, a highlight stays as one, a bare note goes. */
+    editNote(id, text) {
+        const n = this.notes.find((x) => x.id === id);
+        if (!n) return { ok: false, reason: 'no such note' };
+        text = String(text ?? '').trim();
+        if (!text && n.from === null) { this.deleteNote(id); return { ok: true, deleted: true }; }
+        n.text = text;
+        return { ok: true };
+    }
+    /** Delete a note; returns it, to put back with `addNote(note, note.id)` (undo). */
+    deleteNote(id) {
+        const i = this.notes.findIndex((x) => x.id === id);
+        return i < 0 ? null : this.notes.splice(i, 1)[0];
+    }
+    /** The notes in the story's order: by paragraph, then where each is written. Copies. */
+    allNotes() {
+        return [...this.notes].sort((a, b) => a.para - b.para || a.at - b.at || +a.id.slice(2) - +b.id.slice(2)).map((n) => ({ ...n }));
     }
 
     // ---------- the player's own questions (docs/questions.md) ----------
