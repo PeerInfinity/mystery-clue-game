@@ -4268,3 +4268,16 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   saved with the game; edit, delete with undo; notes never feed the game; on every difficulty. For Robert to choose by
   sight and agree before anything is built.
 - **Moved:** nothing (documentation).
+
+## Round 176 (2026-10-19): the notes paper agreed
+
+- **Robert chose** (`docs/notes.md`, its second round of mock-ups: the look D + E with the controls (a)–(e) and the
+  settings menu, screenshotted in headless Chrome inside the built layout): **D and E**, notes written into the
+  story's line anywhere in the text with the words they speak of highlighted, and a Notes tab; a highlight without a
+  note allowed; saved with the game; never feeding the game; **(a) a notes mode** toggled in the header where Start over
+  was; the drop-down renamed **Settings**, with Start over inside it and the viewer's settings: the layout (the columns
+  toggle moved in), the theme (system, light, dark), notes in the story or only in their tab, the notes' hand, and the
+  highlight's style (a yellow marker, a blue underline, a pale blue wash). The viewer's settings are kept with the
+  layout, apart from the save.
+- **Order of work:** the Settings menu; notes in the game (node tests); notes in the page.
+- **Moved:** nothing (documentation).
