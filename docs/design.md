@@ -4600,3 +4600,16 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   (four paragraphs read, then collect, ask, collect, ask) and paused; Resume played on; no console error.
   `scripts/autoplay-check.mjs` 12 of 12 (70).
 - **Moved:** nothing (the autoplay only).
+
+## Round 196 (2026-10-20): handed off: a minimal playthrough, a choice of playthroughs, statistics
+
+- **Robert's ask:** a second playthrough with just the moves the Hard maximum needs (no notes, no dead ends, the
+  fewest clicks: a card opened from the story or the card in view rather than from a list), a way to choose which one
+  the autoplay plays, and statistics: how much content the game has and how many actions of each kind the minimal
+  playthrough needs. In a new session.
+- **Handed off:** `docs/kickoff-minimal-playthrough.md` (the ask, the measures of the annotated table: 396 moves, 1,140
+  UI steps by kind; the questions for its paper; the traps of Rounds 190–195). `CLAUDE.md` names it first.
+- **This session** (Rounds 190–195): the site publishes the autoplay, the notes' font and the action table; the
+  autoplay at ½× and ¼×, its cursor at half speed, paused at the start with a Step button; a note written in the
+  story's line (Robert's choice A, by sight).
+- **Moved:** nothing (documentation).

@@ -1,11 +1,14 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-minimal-playthrough.md` — the next session's work (Round 196): a minimal playthrough to the Hard
+  maximum (no notes, no dead ends, fewest clicks), a choice of playthroughs in the autoplay, the game's statistics; a
+  paper first (`docs/minimal-playthrough.md`).
 - `docs/review-annotations.md` — the annotation reviewed as a reader's paper (Round 182): a verdict per thought, batches
   B1–B5 for Robert to agree.
 - `docs/kickoff-annotations.md` — done (Rounds 182–188): the annotation reviewed (`docs/review-annotations.md`, B1–B5
   built: `remark` and `typed` in `thoughts.json`, the markdown mirrored field by field), the notes leak-checked, then
-  the autoplay built. No session is handed off; the next work is Robert's to choose.
+  the autoplay built. Superseded by `docs/kickoff-minimal-playthrough.md`.
 - `docs/autoplay.md` — the autoplay (agreed Round 181, built Rounds 187–188): Settings → "Watch the autoplay…" or
   `?autoplay`; in the page, its own cursor and save, the action table as its script, the reader's thoughts typed as
   notes (`typed`, Round 186), 70 at the end; `scripts/autoplay-check.mjs`.
