@@ -132,3 +132,20 @@ test('the annotation mirrors the data field by field, and the prose cites only t
         't46.5: its prose cites t28.9, which does not exist',
     ]) assert.ok(r.errors.includes(e), e);
 });
+
+test('the prose is the reader\'s note: a later thought or paragraph goes in the remark, which the annotation marks (Round 184)', () => {
+    const bad = structuredClone(data);
+    const t = (id) => bad.thoughts.find((x) => x.id === id);
+    t('t4.2').text += ' It breaks at `t68.3`.';
+    t('t6.2').text += ' Used at ¶199.';
+    t('t12.2').remark = 'Something else.';
+    t('t14.2').remark = '';
+    const r = checkThoughts(bad, model, { markdown });
+    for (const e of [
+        't4.2: its prose cites t68.3, which comes later (¶68); a remark may',
+        't6.2: its prose cites ¶199, after its own paragraph; a remark may',
+        "t12.2: its remark differs from the annotation's note",
+        't14.2: a remark is some text',
+    ]) assert.ok(r.errors.includes(e), e);
+    assert.ok(data.thoughts.some((x) => /¶\d+/.test(x.remark ?? '') && +x.remark.match(/¶(\d+)/)[1] > x.para), 'a remark may look ahead');
+});

@@ -200,8 +200,15 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         } else if (implicitRequired && DEDUCTION.includes(t.tag) && t.inference === undefined) err(`${t.id}: a ${t.tag} thought names no inference and gives no no_inference reason`);
     }
 
-    // The ids a thought's prose cites (Round 183): each one a thought or a background card that exists.
-    for (const t of thoughts) for (const id of citedIds(t.text)) if (!byId.has(id) && !bkIds.has(id)) err(`${t.id}: its prose cites ${id}, which does not exist`);
+    // The ids a thought's prose and remark cite (Round 183): each one a thought or a background card that exists. The
+    // prose is the reader's note at its paragraph, so a thought or paragraph it cites lies no later; looking ahead is
+    // the annotator's, in the remark (Round 184).
+    for (const t of thoughts) {
+        for (const id of [...citedIds(t.text), ...citedIds(t.remark)]) if (!byId.has(id) && !bkIds.has(id)) err(`${t.id}: its prose cites ${id}, which does not exist`);
+        for (const id of citedIds(t.text)) if (byId.get(id)?.para > t.para) err(`${t.id}: its prose cites ${id}, which comes later (¶${byId.get(id).para}); a remark may`);
+        for (const x of (t.text ?? '').matchAll(/¶(\d+)/g)) if (+x[1] > t.para) err(`${t.id}: its prose cites ¶${x[1]}, after its own paragraph; a remark may`);
+        if (t.remark !== undefined && !(typeof t.remark === 'string' && t.remark.trim())) err(`${t.id}: a remark is some text`);
+    }
 
     // The Markdown mirror (Round 183): the same thoughts, field by field (bold and line breaks aside).
     if (markdown !== null) {
@@ -271,16 +278,20 @@ export function parseAnnotation(markdown) {
     for (const line of markdown.split('\n')) {
         const m = line.match(/^- `(t\d+\.\d+)` \*\*([A-Z ]+?)(?:·([a-z-]+))?\*\*(.*)$/);
         if (m) {
-            cur = { id: m[1], tag: m[2], subtype: m[3] ?? null, ...parseHeader(m[4]), reads: null, prose: [] };
+            cur = { id: m[1], tag: m[2], subtype: m[3] ?? null, ...parseHeader(m[4]), reads: null, prose: [], note: null };
             out.set(cur.id, cur);
             continue;
         }
         if (!cur || !/^ {2,}\S/.test(line)) { cur = null; continue; }
         const s = line.trim();
-        if (cur.reads === null && !cur.prose.length && s.startsWith('reads "')) cur.reads = [...s.matchAll(/"([^"]*)"/g)].map((x) => x[1]);
-        else cur.prose.push(s);
+        if (cur.reads === null && !cur.prose.length && cur.note === null && s.startsWith('reads "')) cur.reads = [...s.matchAll(/"([^"]*)"/g)].map((x) => x[1]);
+        else if (s.startsWith('*Note:* ')) cur.note = [s.slice(8)];
+        else (cur.note ?? cur.prose).push(s);
     }
-    for (const e of out.values()) e.text = e.prose.join(' ');
+    for (const e of out.values()) {
+        e.text = e.prose.join(' ');
+        e.remark = e.note?.join(' ') ?? null;
+    }
     return out;
 }
 
@@ -321,6 +332,7 @@ function mirrorDiffs(t, e) {
     if (!same(holmes(e.holmes), holmes(t.holmes))) out.push(`Holmes ${JSON.stringify(holmes(e.holmes))} in the annotation, ${JSON.stringify(holmes(t.holmes))} in thoughts.json`);
     if (!same(e.reads, t.reads ?? null)) out.push('reads other words in the annotation');
     if (prose(e.text) !== prose(t.text)) out.push('its prose differs from the annotation\'s');
+    if (prose(e.remark) !== prose(t.remark)) out.push('its remark differs from the annotation\'s note');
     return out;
 }
 

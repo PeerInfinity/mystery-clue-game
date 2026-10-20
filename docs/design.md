@@ -4417,3 +4417,18 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   prose on its own line); `INFER·opportunity` in the tag table; `t124.2` cites `t66.1`, Mapleton's own search.
 - **Leak check:** no card text; the prose changed is the annotation's.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full); the action table rerun, unchanged.
+
+## Round 184 (2026-10-19): B2, the annotator's remarks in their own field
+
+- **Annotation** (`docs/review-annotations.md` B2; both files): 68 thoughts' prose split into the reader's note
+  (`text`) and the annotator's **`remark`**: the ⚠ notes, the forward references, scoring ("A reader who made …
+  scores it here"), what the game should do, remarks about readers, when a thought was added or redated. In
+  `docs/reading-annotated.md` the remark is a line of its own under the note, marked "*Note:*" (the notation says so).
+  Where the remark was the whole prose, the note is a short one of the reader's (`t146.1` the square toes, `t182.2`
+  the dog, `t212.2` the horse, `t218.1`, `t220.1`, `t221.1` the background stated at last); the alt-reader thoughts
+  (`t70.2`, `t173.2`, `t175.1`, `t182.3`, `t212.3`) keep the note of the reader who made every move, the other reader
+  in the remark. `t34.4`'s "only the lad's supper was analysed" (¶37) moves to its remark.
+- **Validator** (`engine/thoughts.js`): the mirror compares the remark with the markdown's note; the ids a remark
+  cites exist; **the reader's note cites no later thought or paragraph** (a remark may). Test: `thoughts.test.js`.
+- **Leak check:** no card text; the notes only lose words.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full); the action table rerun, unchanged.
