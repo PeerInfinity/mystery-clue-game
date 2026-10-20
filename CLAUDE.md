@@ -6,8 +6,9 @@
 - `docs/kickoff-annotations.md` — the next session's work (Round 181): a general review of the annotation's content
   (`docs/reading-annotated.md`, `thoughts.json`; a paper first, `docs/review-annotations.md`), the typed notes the
   autoplay will write (72 thoughts whose prose carries hindsight), then the autoplay (`docs/autoplay.md`, agreed).
-- `docs/autoplay.md` — the autoplay (agreed, Round 181): in the page, its own cursor and save, the action table as its
-  script, the reader's thoughts typed as notes, 70 at the end.
+- `docs/autoplay.md` — the autoplay (agreed Round 181, built Rounds 187–188): Settings → "Watch the autoplay…" or
+  `?autoplay`; in the page, its own cursor and save, the action table as its script, the reader's thoughts typed as
+  notes (`typed`, Round 186), 70 at the end; `scripts/autoplay-check.mjs`.
 - `docs/notes.md` — the player's notes (built, Rounds 175–179): a notes mode, notes written into the story's line, the
   Notes tab, the Settings menu's page settings. `docs/layout.md` — the layout (built, Rounds 171–174).
 - `docs/kickoff-layout.md` — superseded by `docs/kickoff-annotations.md` (its layout and notes built, Rounds 171–179); the work of Round 170: build the agreed layout (`docs/layout.md`) in four
@@ -76,6 +77,7 @@
 | The action table (the annotation's moves in the UI on Hard, the autoplay's script) → `cases/silver-blaze/action-table.json`; rerun when the case or the thoughts change (a test checks it is up to date and reaches the Hard maximum) | `npm run action-table` (about 3–5 min) |
 | Play the action table through the real UI in headless Chrome (port 9333; one script at a time), each move checked in the save; the record at the end (about 12–13 min) | `node scripts/ui-run.mjs` (→ `.cache/ui-run.json`; `STOP=<para>` for a part) |
 | The player's notes played through the page in headless Chrome (real mouse and keys: a note at a point, on marked words, a highlight, edit, delete and undo, the settings, reload, Start over), each step checked in the save (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
+| The autoplay checked (`docs/autoplay.md` A7): the page opened on `?autoplay=fast` in headless Chrome, played to the end by `ui/autoplay.js`; the record must read 70 ahead, every family as the action table says, the notes all written, no console error, the player's game kept aside (about 6–8 minutes; one script at a time on port 9333) | `node scripts/autoplay-check.mjs [shots dir]` (→ `.cache/autoplay-check.json`) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 | LLM leak checker over the reader's notes the autoplay types (each `typed`, or the prose as it stands, against the story up to its paragraph; about $1 a fresh run) | `node checker/check.js cases/silver-blaze --notes --runs 2` (→ `.cache/checker-notes-haiku.json`) |
 

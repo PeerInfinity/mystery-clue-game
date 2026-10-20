@@ -331,3 +331,25 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .notes-toggle.on { background: var(--note-ink); color: var(--panel); border-color: var(--note-ink); }
 .n-list li { padding: 6px 0; border-bottom: 1px dotted var(--line); }
 .n-list .n-tools { float: right; }
+
+/* The autoplay (docs/autoplay.md, A2, A5): its strip over the foot of the page, its own cursor, a ring on a click. */
+.autoplay-strip { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 60; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; max-width: calc(100vw - 32px); padding: 6px 12px; background: var(--panel); color: var(--ink); border: 1.5px solid var(--accent); border-radius: 10px; box-shadow: 0 4px 16px rgb(0 0 0 / .18); font-size: 14px; }
+.autoplay-strip .ap-title { font-weight: 600; color: var(--accent); }
+.autoplay-strip .ap-caption { flex: 1 1 18em; min-width: 0; }
+.autoplay-strip .ap-tools { display: flex; gap: 6px; align-items: center; }
+.autoplay-strip .button { background: var(--accent); color: #fff; border-radius: 6px; padding: 4px 10px; }
+.autoplay-cursor { position: fixed; left: 0; top: 0; z-index: 70; pointer-events: none; transform: translate(50vw, 50vh); }
+.autoplay-cursor svg path { fill: var(--ink); stroke: var(--panel); stroke-width: 1.2; }
+.autoplay-cursor::after { content: ''; position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; }
+.autoplay-cursor.click::after { animation: ap-ring .45s ease-out; }
+@keyframes ap-ring { from { opacity: .9; transform: scale(.4); } to { opacity: 0; transform: scale(1.6); } }
+.autoplay-strip .short { display: none; }
+@media (max-width: 699px) {
+  .autoplay-strip { top: 6px; bottom: auto; width: calc(100vw - 32px); gap: 4px 8px; padding: 4px 8px; font-size: 12px; }
+  .autoplay-strip .ap-caption { flex-basis: 100%; order: 3; }
+  .autoplay-strip .ap-tools button, .autoplay-strip .ap-tools select { padding: 2px 6px; font-size: 12px; }
+  .autoplay-strip .long { display: none; }
+  .autoplay-strip .short { display: inline; }
+}
+/* Room under the story while the autoplay plays, so the paragraph just read can come to the middle of the panel. */
+.autoplaying #story { padding-bottom: 50vh; }

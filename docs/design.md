@@ -4487,3 +4487,37 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   dropped 3 of 3, checks 10 of 10, what did not happen 1 of 1: 70 ahead. A screenshot of the field for Robert.
 - **Leak check:** fixed labels only.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full).
+
+## Round 188 (2026-10-19): the autoplay built
+
+- **`ui/autoplay.js`** (`docs/autoplay.md` A1 a, A2, A3, A5, A6), loaded by `ui/app.js` only on `?autoplay`:
+  - **Its own save** (`mystery-clue-game:silver-blaze:autoplay`, fresh each time): the player's game is kept aside
+    under its own key and comes back with "Back to your game"; the viewer's layout is neither read nor written (the
+    default two panels; one column on a phone); theme and notes settings are the viewer's.
+  - **Started** from Settings, The page: "Watch the autoplay…", which asks first; or by the address `?autoplay`.
+  - **The script** is the action table: a fresh game on Hard chosen in the settings, then each paragraph read with
+    "Next paragraph", its moves made with the page's own events (the runner's steps, `scripts/ui-run.mjs`), each
+    checked in the save; a move that does not take stops the autoplay with a message naming the paragraph (A5).
+  - **The notes:** for each thought, once its moves are made, each clause it reads is marked (the words selected,
+    the pointer let go, in notes mode) and its note, the `typed` form or the prose as it stands (Round 186), typed
+    a character at a time after the last clause, or at its paragraph's end when it reads none; Enter keeps it. The
+    remark is never typed.
+  - **Its own cursor** glides to each target (half a second at 1×) with a ring on a click; **a strip** at the foot of
+    the page (at the top on a phone): the paragraph, a caption of the move in plain words ("Collecting: “…”",
+    "Asking what I know about it", "Writing a note", …), Pause/Resume (the page usable meanwhile), speed 1×, 2×, 4× or
+    notes at once, "Skip to the next paragraph", Stop. At the end the record opens: "The story is over. 393 moves,
+    376 notes." (A6). While it plays, room under the story lets the paragraph just read come to the middle.
+  - `?autoplay=fast`: no cursor, no pauses, notes at once (the check).
+- **`scripts/autoplay-check.mjs`** (A7): the page opened on `?autoplay=fast` in headless Chrome and played to the end
+  by the autoplay itself; 12 checks: played to the end; 70 ahead of Holmes; each family as the action table says; the
+  save holds every note and highlight (376: one per clause read, one per note with no clause) and every typed form; no
+  console error; the player's save untouched. 12 of 12, about 6–8 minutes. `CLAUDE.md` lists it.
+- **Found on the way:** a note with no marked words is placed where the pointer is let go, and the newest paragraph,
+  at the foot of the story, sat under the strip: 72 such notes were lost in the first full run (304 of 376). Fixed by
+  the room under the story, scrolling the place to the middle of its panel, and the strip out of the way for that
+  instant; the second run wrote all 376.
+- **Checked:** `scripts/autoplay-check.mjs` on this tree, 12 of 12 (393 moves, 376 notes, 70 ahead, no console error);
+  the action table through the UI (`scripts/ui-run.mjs`): 396 moves, none failed, no console error, 70; frames at 1×
+  (desktop) and 4× (phone) for Robert. "How to play" names the autoplay.
+- **Leak check:** the notes typed are the ones leak-checked in Round 186; the strip's words are fixed labels.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).

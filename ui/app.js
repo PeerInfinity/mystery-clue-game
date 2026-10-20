@@ -9,7 +9,10 @@ import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remote
 import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
-const STORE = 'mystery-clue-game:silver-blaze:v2';
+// The autoplay (docs/autoplay.md, A2) plays in a save of its own, so the player's game is kept aside: `?autoplay` (or
+// `?autoplay=fast`, no pauses and notes at once, for the check) opens the page on it, fresh each time.
+const AUTOPLAY = new URLSearchParams(location.search).get('autoplay');
+const STORE = AUTOPLAY === null ? 'mystery-clue-game:silver-blaze:v2' : 'mystery-clue-game:silver-blaze:autoplay';
 // The layout is the viewer's, the game is the case's: kept apart, and "Start over" keeps it (docs/layout.md, Q6).
 const LAYOUT = 'mystery-clue-game:layout:v1';
 const KIND_GROUPS = [
@@ -63,6 +66,7 @@ function restore() {
     try { return JSON.parse(localStorage.getItem(STORE) ?? 'null'); } catch { return null; }
 }
 function saveLayout() {
+    if (AUTOPLAY !== null) return; // the autoplay lays out its own page and leaves the viewer's alone
     try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight })); } catch { /* private mode */ }
 }
 // The viewer's settings for notes (docs/notes.md, N9): each a select in Settings, a value kept with the layout, a class on the page.
@@ -91,6 +95,7 @@ function restoreLayout() {
     if (['system', 'light', 'dark'].includes(l?.theme)) ui.theme = l.theme;
     for (const [k, [, values]] of Object.entries(VIEWER)) if (values.includes(l?.[k])) ui[k] = l[k];
     applyTheme();
+    if (AUTOPLAY !== null) return; // the default layout, as the autoplay plays it
     if (!l || ![1, 2].includes(l.columns) || l.panels?.length !== 2 || !l.panels.every(ok) || l.panels[0] === l.panels[1]) return;
     ui.columns = l.columns;
     ui.panels = l.panels.map((tab) => ({ tab }));
@@ -557,6 +562,7 @@ function intro() {
 <li>${game.autoSolves() ? 'The game draws the inferences for you; they are listed under Inferences.' : `<b>Inferences</b> are the reasoning that connects clues. Open a clue or background card and press “Infer from this”, then connect further cards; the game tells you when you are onto something${game.opts.kind === 'on' ? ', and you name what the conclusion is about' : ''}. Holmes and the others state some inferences themselves.`}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>Your own notes: turn on <b>✎ Notes</b> in the header, then click in the story where a note goes, or drag over words to mark them. The Notes tab lists them; the game never reads them.</li>
+<li>To watch the game played to the end by a careful reader, its thoughts written in as notes: <b>Settings → Watch the autoplay…</b> Your game is kept aside meanwhile.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
 }
@@ -2395,6 +2401,7 @@ R = makeReadings({
 });
 buildOptions();
 restoreLayout();
+if (AUTOPLAY !== null) try { localStorage.removeItem(STORE); } catch { /* private mode */ }
 const saved = restore();
 const defaults = model.data.settings_defaults ?? {};
 // The solver's worker: the page answers quick checks itself and hands the slow ones over.
@@ -2406,4 +2413,10 @@ run(() => {
     ui.selected = saved?.selected ?? null;
     renderNow();
     scrollStory();
+    if (AUTOPLAY !== null) import('./autoplay.js').then((m) => m.start({ store: STORE, fast: AUTOPLAY === 'fast', story, valueName, toast }));
+});
+// "Watch the autoplay…" (docs/autoplay.md, A2): asks first, then opens the page on the autoplay's own save.
+$('#autoplay-open').addEventListener('click', () => {
+    if (!confirm('Watch the game played on Hard from the first paragraph to the last, as a careful reader plays it, with the reader\'s thoughts written in as notes? It takes about an hour at its own pace (faster at 4×). Your game is kept aside and comes back when you stop.')) return;
+    location.search = '?autoplay';
 });

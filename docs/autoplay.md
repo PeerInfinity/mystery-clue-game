@@ -1,6 +1,6 @@
 # The autoplay: the game played to its maximum through the page, the reader's thoughts written as notes
 
-Status: **AGREED** (Robert, 2026-10-19, Round 181: every recommendation and the order of work; the annotation's
+Status: **BUILT** (Rounds 187–188: the inline theory name; `ui/autoplay.js` and `scripts/autoplay-check.mjs`, the record 70 at the end; the typed notes in Rounds 182–186). **AGREED** (Robert, 2026-10-19, Round 181: every recommendation and the order of work; the annotation's
 cleanup, the typed notes of A3, and a general review of the annotation go first, in their own session:
 `docs/kickoff-annotations.md`). Written Round 180. Piece 3 of `docs/kickoff-layout.md` (first set out as piece 4 of
 `docs/kickoff-closing-review.md`). Builds on the action table (`engine/actionTable.js`, Round 168: its script), the
