@@ -180,6 +180,35 @@ test('drops for reasons that are not proofs: checked where they can be, never re
     assert.equal(again.dropOf({ theory: 't.gypsies' }).cites[0], 'k.gypsies_did_not_take_him');
 });
 
+test('a drop scores only from where a reason that holds is given (Round 199)', () => {
+    const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
+    const readTo = (p) => { while (game.read <= p) game.advance(); };
+    const paper = { slot: 'paper_packet.contents', value: 'opium' };
+    const maid = { slot: 'e.opium_added.agent', value: 'edith_baxter' };
+    // ¶58: the paper dropped citing a card that says nothing about it: recorded, not held.
+    readTo(58);
+    assert.ok(game.drop(paper, 'card', { cites: ['watson'] }).ok);
+    assert.deepEqual([game.dropOf(paper).para, game.dropOf(paper).held, game.dropCheck(paper).ok], [58, null, false]);
+    // ¶60: dropped again for the ten-pound note: held from here, still dropped at ¶58.
+    readTo(60);
+    assert.ok(game.drop(paper, 'card', { cites: ['c.simpson_ten_pound_note'] }).ok);
+    assert.deepEqual([game.dropOf(paper).para, game.dropOf(paper).held], [58, 60]);
+    // ¶92: the maid dropped for the same irrelevant card, and never for a reason that holds.
+    readTo(92);
+    assert.ok(game.drop(maid, 'card', { cites: ['watson'] }).ok);
+    readTo(103);
+    const rows = Object.fromEntries(game.record().rows.filter((r) => r.family === 'drop').map((r) => [r.thought, r]));
+    assert.deepEqual([rows['t58.3'].scores, rows['t58.3'].at, rows['t58.3'].why], [true, 60, undefined]);
+    assert.deepEqual([rows['t92.7'].scores, rows['t92.7'].why], [false, 'reason']);
+    // Saved and loaded, with what held; a save from before Round 199 has its reason checked as it stands.
+    const state = JSON.parse(JSON.stringify(game.save()));
+    assert.equal(new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state }).dropOf(paper).held, 60);
+    for (const d of state.drops) delete d.held;
+    const old = new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state });
+    const oldRows = Object.fromEntries(old.dropScores().map((r) => [r.thought, r]));
+    assert.deepEqual([oldRows['t58.3'].held, oldRows['t92.7'].held], [58, null]);
+});
+
 test('the deadlines the annotation gives for the drops Holmes never makes are where the story makes them untenable', () => {
     // The passive reading's cost: the maid and the paper are at odds with the player's own reasoning first at ¶102, where Holmes searches the mud
     // for the match the knife's purpose predicts (the 'wait' pace asks for that step there, Round 126).

@@ -1262,6 +1262,9 @@ function recordLine(r) {
         check: () => (seal ? `Holmes does this: ${checkText(seal)}` : 'Holmes makes a check'),
         absence: () => `Holmes points to ${names(r.names)}`,
     }[r.family]();
+    // Made but not counted (Round 199): a drop whose reason did not hold, a check expected both ways.
+    if (r.why === 'reason') return `${what}. You dropped it at ${paraLabel(r.at)}, but the reason you gave did not hold, so it does not count.`;
+    if (r.why === 'hedged') return `${what}. You planned it at ${paraLabel(seal.para)}, but expecting more than one result, so it does not count.`;
     const done = { deduction: 'You had it', notice: 'You marked it odd', raise: 'You raised it', drop: 'You dropped it', check: 'You planned it', absence: 'You filed it' }[r.family];
     const before = r.family === 'drop' ? 'before the story did' : 'before him';
     return `${what}. ${done} at ${paraLabel(r.at)}: ${r.lead} paragraph${r.lead === 1 ? '' : 's'} ${before}.`;
@@ -1270,7 +1273,7 @@ function recordLine(r) {
 function recordNews() {
     if (game.autoSolves() || ui.readFrom == null) return '';
     const from = ui.readFrom - 1;
-    const rows = piece(`news:${from}:${game.read}`, () => game.record().rows.filter((r) => r.scores && r.deadline >= from && r.deadline < game.read), []);
+    const rows = piece(`news:${from}:${game.read}`, () => game.record().rows.filter((r) => (r.scores || r.why) && r.deadline >= from && r.deadline < game.read), []);
     const asked = piece(`news-q:${from}:${game.read}`, () => game.record().questions.filter((q) => q.deadline >= from && q.deadline < game.read), []);
     return once([
         ...rows.map((r) => `<div class="note record-news">${paraLabel(r.deadline)} · ${recordLine(r)}</div>`),
@@ -1295,6 +1298,8 @@ function toolRecord() {
         h += `<h3 class="section">Furthest ahead</h3><ul class="list small">${once(best.map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>`;
     }
     h += scored.length ? `<h3 class="section">Before Holmes (${scored.length})</h3><ul class="list small">${once([...scored].reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>` : '<p class="empty">Nothing yet.</p>';
+    const uncounted = once(rec.rows.filter((r) => r.why).reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`));
+    if (uncounted.length) h += `<h3 class="section">Not counted (${uncounted.length})</h3><ul class="list small">${uncounted.join('')}</ul>`;
     // The player's own questions the story asked after them (docs/questions.md, Q5): shown, never counted.
     if (rec.questions.length) h += `<h3 class="section">Questions you asked before the story (${rec.questions.length})</h3><p class="small muted">Not counted: a question can be asked of anything.</p><ul class="list small">${[...rec.questions].reverse().map((q) => `<li>${paraLabel(q.deadline)} · <span class="link" data-slot-open="${q.slot}">${esc(game.promptOf(q.slot))}</span> You asked it at ${paraLabel(q.at)}: ${q.lead} ${q.lead === 1 ? 'paragraph' : 'paragraphs'} before.</li>`).join('')}</ul>`;
     if (game.finished()) h += heldBackHtml();

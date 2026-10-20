@@ -549,7 +549,7 @@ specific thing stay ground facts with a formula and no schema.
   `DROP_REASONS` (out-explained, more hands, cost, a card), saved as `drops`. A DROP thought (and `t68.3`) carries
   `dropped: {theory | slot, value | inference, reason, cites?, deadline?}`: the game target it drops, why, and where
   Holmes never makes it the paragraph by which the story makes it untenable. `dropScores` counts them before the
-  deadline.
+  deadline, from where a reason that holds was first given (`held` on the saved drop, Round 199).
 - **Readings** (Round 117; `knowledge.json`, section `readings`; schema `reading`): `{id: "rd.<name>", slot,
   cards}`, a slot that carries what old cards mean. `Game.readingsOf(card)` gives, for each reading whose question is
   visible, the player's settled answer and each met theory's; `Game.revisedBy(slot)` the held cards an answer
@@ -819,3 +819,19 @@ specific thing stay ground facts with a formula and no schema.
 - **Order of work:** the migration above; then step 2 of `redesign.md` (propositions as citable intermediate
   conclusions, short chains, route steps re-expressed as chains); then the UI for applying rules and
   concluding, with the busy indicator; then step 3 (coverage and the scenario board).
+
+## As built (2026-10-20): what does not count (Round 199)
+
+- **A drop scores only from where its reason holds.** `Game.drop` still never refuses; it saves `held`, the paragraph
+  at which a reason that `dropCheck` finds holding was first given (null until then; dropping again with a better
+  reason sets it, a worse one never clears it). `dropScores` gives `held` and scores `held < deadline`. A save from
+  before Round 199 has its reason checked as it stands, dated by the drop.
+- **A hedged check scores nothing.** A seal expecting a result is hedged when another seal of the same check, live
+  when Holmes makes it (sealed before, not withdrawn before), expects a different result, or the same result with a
+  different answer. `checkScores` leaves hedged seals out of an expectation's row (`hedged: true` when that is why it
+  has none); a plan with no expectation is never hedged.
+- **`Game.record()`** gives `why` on a passed row the player made that does not count: `reason` or `hedged` (with
+  `seal`). The record shows them under **Not counted**, and the reading bar as the story passes their deadline: "…
+  You dropped it at paragraph 80, but the reason you gave did not hold, so it does not count." / "… You planned it at
+  paragraph 80, but expecting more than one result, so it does not count."
+

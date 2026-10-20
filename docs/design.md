@@ -4643,3 +4643,25 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   `scripts/autoplay-check.mjs` 12 of 12 (70, no console error).
 - **The paper** (`docs/minimal-playthrough.md` M4 b) notes the fix; its click counts are to be measured again.
 - **Moved:** nothing in the logs, the reports or the gate listing (the page only).
+
+## Round 199 (2026-10-20): a drop scores only for a reason that holds; a hedged check not at all
+
+- **Robert's ruling** on the paper of Round 197: a drop that scored whatever its reason is to be fixed; of the ideas
+  put to him, option 1 (the reason checked when the drop is made), and the same looseness in sealed checks (a check
+  sealed expecting each result scored whichever was right).
+- **Built** (`engine/game.js`): `drop` saves `held`, the paragraph a reason `dropCheck` finds holding was first given
+  (never refused, as before); `dropScores` scores `held < deadline`; an old save's drops are checked as they stand.
+  A seal's expectation is **hedged** when another seal of the same check live when Holmes acts expects a different
+  result, or the same with a different answer: it scores nothing (`checkScores` `hedged`). `record()` gives `why`
+  (`reason`, `hedged`) on a row made but not counted; the Record tab lists them under **Not counted**, and the reading
+  bar tells them as the story passes their deadline (`ui/app.js`).
+- **Measured:** the annotated reader's three drops hold where they are made (at ¶92 only "more hands" against the
+  inside story holds for Edith Baxter); no thought plans one check two ways: the action table still reaches 70.
+- **Tests:** a drop for an irrelevant card is not held, dropped again for the right card it is held from there and
+  scores; one never held shows `why: 'reason'`; saved, loaded, and an old save rechecked (`hypotheses.test.js`). A
+  check sealed both ways is hedged; withdrawn after Holmes still hedged, before not; two answers hedge; a plan with
+  no expectation is not (`predictions.test.js`).
+- **Checked** in the page: a Hard save with both made, read past ¶102: the reading bar and the Record tab's "Not
+  counted (2)" say each; the merged mud rows counted once.
+- **Docs:** `docs/format-0.3.md` (as built), `docs/hypotheses.md` and `docs/predictions.md` (Changed),
+  `docs/minimal-playthrough.md` (the finding settled).

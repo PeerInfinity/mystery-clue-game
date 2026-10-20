@@ -54,6 +54,32 @@ test('an expectation the story does not bear out costs nothing and scores nothin
     assert.equal(game.checkScore().scored, 0);
 });
 
+test('a check expected both ways is hedged and scores nothing; withdrawing one before Holmes acts lifts it (Round 199)', () => {
+    const game = readTo(fresh(), 80);
+    const found = game.seal('look', { thing: 'tallow_candle', place: 'fatal_hollow' }, { expect: 'found' });
+    const not = game.seal('look', { thing: 'tallow_candle', place: 'fatal_hollow' }, { expect: 'not-found' });
+    readTo(game, 103);
+    assert.deepEqual([row(game, 't78.5').scores, row(game, 't78.5').hedged], [false, true]);
+    const rec = game.record().rows.find((r) => r.thought === 't78.5');
+    assert.deepEqual([rec.why, rec.seal], ['hedged', found.id]);
+    // Withdrawn after Holmes acts: still hedged. Withdrawn before: the expectation stands.
+    game.unseal(not.id);
+    assert.equal(row(game, 't78.5').scores, false);
+    const early = readTo(fresh(), 80);
+    early.seal('look', { thing: 'tallow_candle', place: 'fatal_hollow' }, { expect: 'found' });
+    const wrong = early.seal('look', { thing: 'tallow_candle', place: 'fatal_hollow' }, { expect: 'not-found' });
+    readTo(early, 90);
+    early.unseal(wrong.id);
+    readTo(early, 103);
+    assert.deepEqual([row(early, 't78.5').scores, row(early, 't78.5').hedged], [true, undefined]);
+    // The same result with two different answers is hedged too; a plan with no expectation never is.
+    const two = readTo(fresh(), 92);
+    two.seal('show', { thing: 'straker', to: 'madame_lesurier' }, { expect: 'yes', answer: DERBY });
+    two.seal('show', { thing: 'straker', to: 'madame_lesurier' }, { expect: 'yes', answer: { eq: ['william_derbyshire.identity', 'simpson'] } });
+    readTo(two, 162);
+    assert.deepEqual([row(two, 't92.12').hedged, row(two, 't92.5').scores], [true, true]);
+});
+
 test('the dress (t85.3) and the coat (t92.10)', () => {
     const game = readTo(fresh(), 86);
     game.seal('ask', { person: 'mrs_straker', about: 'c.milliner_bill' });

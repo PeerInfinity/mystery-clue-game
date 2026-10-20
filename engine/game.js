@@ -343,7 +343,7 @@ export class Game {
         this.concluded = [];            // [{id, cited, formula, label, para}]
         this.filed = [];                // [{id, para}] absences the player filed (Round 83), or Trivial filed for them
         this.noticed = new Map();       // card id → {para, because}: details the player marked as odd (Round 84)
-        this.drops = new Map();         // drop key → {target, reason, rival, cites, para}: hypotheses dropped (workstream 6)
+        this.drops = new Map();         // drop key → {target, reason, rival, cites, para, held}: hypotheses dropped (workstream 6)
         this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised (workstream 3)
         this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed (workstream 7)
         this.setAsideAt = new Map();    // card id → the paragraph the player set it aside at (workstream 8)
@@ -2439,7 +2439,8 @@ export class Game {
 
     /**
      * Drop a theory or a candidate for a reason (DROP_REASONS): a stance, never refused, taken back with undrop. `rival`
-     * is a theory id (out-explained, more hands), `cites` card ids (a card). Checked by dropCheck, not here.
+     * is a theory id (out-explained, more hands), `cites` card ids (a card). Checked by dropCheck, never refused for it;
+     * `held` is the paragraph a reason that holds was first given (null if none yet): what the score counts (Round 199).
      */
     drop(target, reason, { rival = null, cites = [] } = {}) {
         if (!DROP_REASONS.includes(reason) || !this.scenarioOf(target)) return { ok: false, reason: 'nothing to drop' };
@@ -2447,7 +2448,8 @@ export class Game {
         if (reason === 'card' && !(cites.length && cites.every((c) => this.knows(c)))) return { ok: false, reason: 'cite a card you hold' };
         const key = dropKey(target);
         const was = this.drops.get(key);
-        this.drops.set(key, { target, reason, rival, cites, para: was?.para ?? this.read - 1 });
+        this.drops.set(key, { target, reason, rival, cites, para: was?.para ?? this.read - 1, held: was?.held ?? null });
+        if (this.drops.get(key).held === null && this.dropCheck(target)?.ok) this.drops.get(key).held = this.read - 1;
         return { ok: true, key };
     }
     undrop(target) { return this.drops.delete(dropKey(target)); }
@@ -2495,17 +2497,22 @@ export class Game {
 
     /**
      * The drops the annotation counts (thoughts with `dropped` naming a theory or a candidate): each with its deadline (Holmes's paragraph, or where
-     * the story itself makes the hypothesis untenable, `dropped.deadline`), the paragraph the player dropped it (a
-     * doubt, for an inference; null if not), and whether that was before the deadline (it scores). Wrong turns cost
-     * nothing; nothing counts in Trivial.
+     * the story itself makes the hypothesis untenable, `dropped.deadline`), the paragraph the player dropped it (null
+     * if not), the paragraph they first gave a reason for it that holds (`held`, Round 199: a reason that does not hold
+     * scores nothing), and whether that was before the deadline (it scores). Wrong turns cost nothing; nothing counts in
+     * Trivial.
      */
     dropScores() {
         // A doubt of an inference (t68.3's "two stories") is the doubt's, unscored: Holmes never says it.
         return (this.model.data.thoughts ?? []).filter((t) => t.dropped && !t.dropped.inference).map((t) => {
             const d = t.dropped;
-            const at = this.autoSolves() ? null : this.dropOf(d)?.para ?? null;
+            const mine = this.autoSolves() ? null : this.dropOf(d);
+            // A save from before Round 199 has no `held`: its reason is checked as it stands, dated by the drop.
+            if (mine && mine.held === undefined) mine.held = this.dropCheck(d)?.ok ? mine.para : null;
+            const at = mine?.para ?? null;
+            const held = mine?.held ?? null;
             const holmes = t.holmes && !t.holmes.never && t.holmes.paras?.length ? t.holmes.paras[0] : d.deadline ?? null;
-            return { thought: t.id, para: t.para, deadline: holmes, dropped: at, scores: at !== null && holmes !== null && at < holmes };
+            return { thought: t.id, para: t.para, deadline: holmes, dropped: at, held, scores: held !== null && holmes !== null && held < holmes };
         });
     }
     dropScore() {
@@ -2564,6 +2571,16 @@ export class Game {
         }
         return { says, cost };
     }
+    /**
+     * Hedged (Round 199): another seal of the same check, live when Holmes makes it (sealed before, not withdrawn
+     * before), expects a different result, or the same result with a different answer. Expecting every result of a
+     * check is no expectation: none of them scores. Withdrawing all but one before Holmes acts lifts it.
+     */
+    #hedged(x, ck) {
+        if (x.expect === null) return false;
+        return this.seals.some((y) => y !== x && y.expect !== null && y.para < ck.at && (y.withdrawn === null || y.withdrawn >= ck.at) && this.#checkOf(y) === ck
+            && (y.expect !== x.expect || (x.answer && y.answer && JSON.stringify(x.answer) !== JSON.stringify(y.answer))));
+    }
     /** The case's check a sealed one matches: same verb, and every field the check names accepts the seal's card. */
     #checkOf(x) {
         return (this.model.data.checks ?? []).find((ck) => ck.plans.some((p) => p.verb === x.verb
@@ -2605,12 +2622,14 @@ export class Game {
         return (this.model.data.thoughts ?? []).filter((t) => t.checks?.length).flatMap((t) => t.checks.map((want) => {
             const ck = checks.get(want.check);
             const dated = !!(t.holmes && !t.holmes.never && t.holmes.paras?.length);
-            const ok = this.autoSolves() ? [] : this.seals.filter((x) => x.withdrawn === null && this.#checkOf(x) === ck
+            const matching = this.autoSolves() ? [] : this.seals.filter((x) => x.withdrawn === null && this.#checkOf(x) === ck
                 && (want.expect === undefined || (x.expect === want.expect && this.#answerGiven(x.answer, want.answer))));
+            // An expectation hedged by another (Round 199) scores nothing; a plan with no expectation is not hedged.
+            const ok = want.expect === undefined ? matching : matching.filter((x) => !this.#hedged(x, ck));
             const sealed = ok.length ? Math.min(...ok.map((x) => x.para)) : null;
             const at = ck.result.shown ?? ck.result.late ?? null;
             const borne = want.expect === undefined || at === null || this.read <= at ? null : want.expect === ck.outcome && this.#answerGiven(ck.answer, want.answer);
-            return { thought: t.id, check: ck.id, para: t.para, deadline: ck.at, sealed, borne, scores: dated && sealed !== null && sealed < ck.at && borne !== false };
+            return { thought: t.id, check: ck.id, para: t.para, deadline: ck.at, sealed, borne, scores: dated && sealed !== null && sealed < ck.at && borne !== false, ...(ok.length < matching.length && !ok.some((x) => x.para < ck.at) && { hedged: true }) };
         }));
     }
     /** In aggregate: the thoughts' checks sealed, and those before Holmes, out of those he makes (docs/ui.md Q1). */
@@ -2649,7 +2668,9 @@ export class Game {
      * {family, thought, deadline, at (where the player made the move, or null), scores, lead (paragraphs ahead of the
      * deadline), names (held cards it can be told by)} and, by family, what it needs to be told: `concludes` (a step
      * with no inference of its own), `exceptions` ({target, exception, text}), `target` (a drop), `seal` (the earliest
-     * matching seal's id). `families`: per family the rows scored and passed, and once the story has ended, possible.
+     * matching seal's id). `why` on a row the player made that does not count (Round 199): 'reason' (a drop whose reason
+     * did not hold), 'hedged' (a check expected both ways). `families`: per family the rows scored and passed, and once
+     * the story has ended, possible.
      * Rows that can never score (no deadline) are left out. Nothing scores in Trivial.
      */
     record() {
@@ -2673,12 +2694,13 @@ export class Game {
         }
         for (const r of this.dropScores()) {
             const d = thought.get(r.thought).dropped;
-            add('drop', r, r.deadline, r.dropped, [d.theory, d.value, ...(d.cites ?? [])], { target: d.theory ? { theory: d.theory } : { slot: d.slot, value: d.value } });
+            add('drop', r, r.deadline, r.held ?? r.dropped, [d.theory, d.value, ...(d.cites ?? [])], { target: d.theory ? { theory: d.theory } : { slot: d.slot, value: d.value }, ...(r.dropped !== null && r.held === null && { why: 'reason' }) });
         }
         for (const r of this.checkScores()) {
             if (!dated.has(r.thought)) continue;
-            const seal = r.sealed === null ? null : this.seals.find((x) => x.withdrawn === null && x.para === r.sealed && this.#checkOf(x)?.id === r.check)?.id ?? null;
-            add('check', r, r.deadline, r.sealed, [], { check: r.check, seal });
+            const seal = (r.hedged ? this.seals.find((x) => x.withdrawn === null && x.para < r.deadline && this.#checkOf(x)?.id === r.check)
+                : r.sealed === null ? null : this.seals.find((x) => x.withdrawn === null && x.para === r.sealed && this.#checkOf(x)?.id === r.check))?.id ?? null;
+            add('check', r, r.deadline, r.sealed, [], { check: r.check, seal, ...(r.hedged && { why: 'hedged' }) });
         }
         for (const r of this.absenceScores()) add('absence', r, r.holmes, r.filed, (thought.get(r.thought).maps ?? []).filter((m) => this.absenceById().has(m)));
         const agg = { deduction: this.score(), notice: this.noticeScore(), raise: this.raiseScore(), drop: this.dropScore(), check: this.checkScore(), absence: this.absenceScore() };

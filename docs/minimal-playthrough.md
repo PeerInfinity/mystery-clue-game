@@ -1,6 +1,6 @@
 # A minimal playthrough to the Hard maximum, a choice of playthroughs, and the game's statistics
 
-Status: **WRITTEN** (Round 197), for Robert to agree. Nothing is built until he does. The work of
+Status: **WRITTEN** (Round 197), for Robert to agree. Two findings settled first: collected words open their card on Hard (Round 198); drops score only for a reason that holds, hedged checks not at all (Round 199). Nothing is built until he does. The work of
 `docs/kickoff-minimal-playthrough.md` (Robert's ask, Round 196). Builds on the action table
 (`cases/silver-blaze/action-table.json`, `engine/actionTable.js`: the annotated reader's moves on Hard) and the autoplay
 (`docs/autoplay.md`, `ui/autoplay.js`).
@@ -68,13 +68,14 @@ The minimal moves touch 106 of the 296 thoughts. The 37 builds connect 148 cards
 search over every move the game allows. A different inference (fewer cards, another route to Holmes's step) could be
 cheaper; finding it would need a search over the case's inferences, a larger piece of work (listed, not proposed).
 
-### A finding: a drop scores whatever its reason
+### A finding: a drop scored whatever its reason (fixed, Round 199)
 
-`dropScores()` counts a drop made before the deadline **whatever the reason given, and whether or not it holds**
-(`dropCheck` is not consulted). So the minimal playthrough could drop Edith Baxter "for its cost" and skip the inside
-story theory: one move and its eight answers (about 30 clicks) fewer. That would be a playthrough exploiting the
-score, not a reader's. **Recommended:** keep the annotation's reasons (each drop's reason holds), and list the scoring
-gap for Robert (should a drop score only when its reason holds?), outside this work.
+`dropScores()` counted a drop made before the deadline **whatever the reason given, and whether or not it held**
+(`dropCheck` was not consulted). So the minimal playthrough could have dropped Edith Baxter "for its cost" and skipped
+the inside story theory. **Robert: fix it.** Since Round 199 a drop scores from where a reason that holds was first
+given, and a check expected both ways (the same looseness for sealed checks) scores nothing. The annotated reader's
+three drops hold where they are made; at ¶92 only "more hands" against the inside story holds for Edith Baxter, so the
+theory stays in the minimal playthrough.
 
 ### Where the clicks go
 
@@ -203,8 +204,7 @@ Each step one commit with a Round entry, gated on `npm test`; the logs, reports 
 
 1. **M1–M2:** minimal = the fewest of the annotated reader's moves that still reach 70 (141, 143 in the page), then the
    fewest clicks for them; the wrong turns kept because they score?
-2. **The drop finding:** keep the annotation's reasons for the drops (recommended), rather than exploit that a drop
-   scores whatever its reason? Should the scoring change (a separate question)?
+2. **The drop finding:** settled, the scoring fixed (Round 199).
 3. **M3:** the moves batched just before their deadlines (12 stops, about 726 clicks), or made at the reader's
    paragraphs (45, about 785)?
 4. **M4:** the autoplay takes the shortest way to each card in the minimal playthrough only? And do you want the game

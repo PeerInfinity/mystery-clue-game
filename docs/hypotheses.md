@@ -451,3 +451,11 @@ by a patch (`t58.4`).
 passive player's cost for the maid and the paper first reaches their own reasoning at ¶102. Both drop deadlines are
 now ¶102.
 
+
+## Changed (Round 199): a drop scores only for a reason that holds
+
+Robert (2026-10-20), on `docs/minimal-playthrough.md`: a drop scored whatever its reason, held or not. A drop is still
+a stance, never refused (Q5); the score now counts it from the paragraph at which a reason the game finds holding was
+first given (`held`). A drop for a reason that does not hold shows in the record under "Not counted", once its
+deadline has passed. The annotated reader's three drops all hold where they are made (measured). `docs/format-0.3.md`,
+"As built (2026-10-20)".

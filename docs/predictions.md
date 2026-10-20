@@ -420,3 +420,11 @@ for it), `t114.2` at ¶116 and `t141.1` at ¶148, both Holmes's own paragraphs.
   keeps Mrs. Straker's word, which costs it nothing. Once she is doubted they say nothing (Round 129).
 - **The UI** is a Checks tab (Round 130).
 
+
+## Changed (Round 199): a check expected both ways scores nothing
+
+Robert (2026-10-20), on `docs/minimal-playthrough.md`: sealing one check twice, expecting each result, scored whichever
+was right. Now an expectation is hedged when another seal of the same check, live when Holmes makes it, expects a
+different result (or the same with a different answer); a hedged expectation scores nothing, and the record says so
+under "Not counted". Withdrawing all but one before Holmes acts lifts it; a plan with no expectation is never hedged.
+No thought of the annotation plans one check two ways. `docs/format-0.3.md`, "As built (2026-10-20)".
