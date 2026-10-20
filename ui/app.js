@@ -10,6 +10,8 @@ import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'mystery-clue-game:silver-blaze:v2';
+// The layout is the viewer's, the game is the case's: kept apart, and "Start over" keeps it (docs/layout.md, Q6).
+const LAYOUT = 'mystery-clue-game:layout:v1';
 const KIND_GROUPS = [
     ['person', 'People'], ['animal', 'Animals'], ['group', 'Groups'], ['place', 'Places'],
     ['object', 'Things'], ['document', 'Documents'], ['events', 'Events'], ['claims', 'Clues'],
@@ -59,6 +61,18 @@ function save() {
 }
 function restore() {
     try { return JSON.parse(localStorage.getItem(STORE) ?? 'null'); } catch { return null; }
+}
+function saveLayout() {
+    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab) })); } catch { /* private mode */ }
+}
+/** The layout last used here, if it is one this page can show; else the default (Q7). */
+function restoreLayout() {
+    let l = null;
+    try { l = JSON.parse(localStorage.getItem(LAYOUT) ?? 'null'); } catch { /* none */ }
+    const ok = (t) => TABS.some(([x]) => x === t);
+    if (!l || ![1, 2].includes(l.columns) || l.panels?.length !== 2 || !l.panels.every(ok) || l.panels[0] === l.panels[1]) return;
+    ui.columns = l.columns;
+    ui.panels = l.panels.map((tab) => ({ tab }));
 }
 function changed() {
     cache.clear();
@@ -299,6 +313,7 @@ function layoutPanels() {
             body.dataset.fresh = '1';
         }
     });
+    saveLayout();
     return storyShown;
 }
 function renderTabs() {
@@ -2163,6 +2178,7 @@ R = makeReadings({
     valueName: (slot, v) => valueName(slot, v),
 });
 buildOptions();
+restoreLayout();
 const saved = restore();
 const defaults = model.data.settings_defaults ?? {};
 // The solver's worker: the page answers quick checks itself and hands the slow ones over.

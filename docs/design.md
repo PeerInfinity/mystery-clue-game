@@ -4237,3 +4237,21 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Leak check:** the new words are fixed labels ("Two columns", "One column", "← back to" the story, a tab or a held
   card's name, "¶N", "N ahead").
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
+
+## Round 174 (2026-10-19): the layout, step 4: remembered per viewer; the layout built
+
+- **Built** (`docs/layout.md` Q6–Q7; `ui/app.js`): the columns and each panel's tab are kept in `localStorage` under
+  `mystery-clue-game:layout:v1`, apart from the game's save (the layout is the viewer's, the game is the case's),
+  written whenever the panels are laid out and read at load. "Start over" keeps it; a key this page cannot show (an
+  unknown tab, the same tab twice, a column count other than one or two) is ignored, and with no key the page opens
+  in the default (Story left, Card right, two columns), so a save made before the layout opens as before.
+- **Checked in headless Chrome** (the cases of `docs/layout.md`): a new viewer gets the default; Timeline left and
+  Cards right come back after a reload, the game's paragraph kept; one column comes back after a reload; "Start over"
+  restarts the game and keeps the layout, before and after a reload; a bad key and a missing key open the default; no
+  console error. Screenshots (desktop 1400 × 900, phone 390) of a remembered Timeline and Story sent to Robert.
+  **The action table through the UI** on Hard: 396 moves, none failed, no console error, 12 minutes; the record 45 of
+  47, 8 of 8, 3 of 3, 3 of 3, 10 of 10, 1 of 1: 70.
+- **The layout is built** (Rounds 171–174); `docs/layout.md` marked so. Next (`docs/kickoff-layout.md`): the paper on
+  the player's notes, with mock-ups inside the new layout for Robert to choose by sight.
+- **Leak check:** no text changed.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).

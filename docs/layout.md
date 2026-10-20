@@ -1,6 +1,7 @@
 # The layout: tabs at the top of both panels, the story as a tab, one or two columns
 
-Status: **AGREED** (Robert, 2026-10-19, Round 170: every recommendation of Q1–Q7 and the order of work), piece 2 of
+Status: **BUILT** (Rounds 171–174, its four steps); **AGREED** (Robert, 2026-10-19, Round 170: every recommendation of
+Q1–Q7 and the order of work), piece 2 of
 `docs/kickoff-closing-review.md`. To be built from `docs/kickoff-layout.md`. Builds on `docs/ui.md` (the UI as built,
 Rounds 144–148), `docs/questions.md` (Rounds 152–155), the closing review (`docs/review-closing.md`, Rounds 157–168,
 which played the whole game through the page) and Robert's wishes: both panels get their tab selector at the top; the
