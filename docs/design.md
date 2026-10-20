@@ -4560,3 +4560,21 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Checked** in headless Chrome: the menu's six options; at ¼× the autoplay reads on and collects at the slower pace;
   at 1× it types as before (24 characters in 2 s); no console error.
 - **Moved:** nothing (the autoplay's strip only).
+
+## Round 193 (2026-10-20): a note written in the story's line
+
+- **Robert's ask:** notes written straight into the story panel, as they look when kept, not in a box that pops up.
+  Three mock-ups shown by sight (the note half-written at ¶37, desktop and phone): A plain, B ✓ ✕ after the note, C a
+  faint wash behind it. **Robert chose A, for the player and the autoplay alike.**
+- **Built** (`docs/notes.md` N4, "Changed"): the editor is the note itself, an editable span (`contenteditable=
+  "plaintext-only"`) in the hand between ‹ ›, the caret in the note's ink; no box, no buttons in the text. The reading
+  bar says "✎ Writing a note · Enter keeps · Esc cancels" (on marked words "nothing written: a highlight"; for a note
+  written before, "Editing a note" and its Delete). Enter, Esc and leaving the note work as before. The autoplay types
+  into the same place.
+- **A slip caught by the autoplay check:** the autoplay's `type()` also fills the answer box (an `<input>`); written
+  first for the note alone, it broke "proposing an answer" at ¶14. Fixed: a field gets its value, a note its text.
+- **Checked:** `scripts/notes-check.mjs` 21 of 21 (three new: written in the line in the note's look with the caret in
+  it; the bar says what the keys do; Delete in the bar for an old note; Keep now by Enter); Delete pressed in the bar
+  with the real mouse (deleted, the toast's undo); `scripts/autoplay-check.mjs` 12 of 12 (393 moves, 376 notes, 70, no
+  console error); screenshots desktop and phone, and the autoplay typing at 1×.
+- **Moved:** nothing in the logs, the reports or the gate listing (the page only).

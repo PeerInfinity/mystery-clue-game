@@ -92,6 +92,11 @@ A re-read keeps them.
 A click on a note in the story (or "edit" in the Notes tab) opens it in place, in a plain text box in the hand; kept on
 Enter or on leaving the box, Esc cancels. "delete" removes it, with "Note deleted · undo" in a toast. No formatting.
 
+**Changed (Robert, Round 193):** no box. A note is written straight into the story's line, as it looks once kept (in the
+hand, between ‹ ›, the caret in the note's ink); the reading bar says what the keys do ("✎ Writing a note · Enter keeps ·
+Esc cancels") and, for a note written before, holds its Delete. Chosen by sight from three mock-ups (A, plain; B, ✓ ✕
+after the note; C, a faint wash behind it): A. The autoplay types into the same place.
+
 ### N5. Do notes ever feed the game — agreed: never
 
 They are the player's paper: not read, matched, scored or counted; nothing in the record, the hints or the questions

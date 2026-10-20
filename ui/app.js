@@ -178,13 +178,16 @@ function renderStory() {
     el.innerHTML = h;
     el.scrollTop = top;
     const box = $('#note-text');
-    if (box && ui.noteEdit?.focus) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); ui.noteEdit.focus = false; }
+    if (box && ui.noteEdit?.focus) { box.focus(); caretToEnd(box); ui.noteEdit.focus = false; }
+    const hint = $('#note-hint');
+    if (hint) hint.innerHTML = noteHint();
 }
 
 // ---------- the player's notes (docs/notes.md) ----------
 // A paragraph's text with the player's notes written in where they were put, and the words they speak of
 // highlighted. A note's point inside a marked segment (the words a card is collected or opened by) shows just after
-// it, so those words stay whole. The note being written or edited is drawn as a text box at its place.
+// it, so those words stay whole. The note being written or edited is written in the line at its place, in its finished
+// look (Round 193); what the keys do is said in the reading bar (noteHint).
 function paragraphHtml(i, notes) {
     const segs = story.segments(i);
     const edit = ui.noteEdit?.para === i ? ui.noteEdit : null;
@@ -229,7 +232,22 @@ function paragraphHtml(i, notes) {
     return h;
 }
 function noteEditorHtml(e) {
-    return `<span class="n-edit"><textarea id="note-text" rows="2" placeholder="${e.from !== null ? 'Your note on the marked words, or leave it empty for a highlight' : 'Your note'}">${esc(e.text ?? '')}</textarea><span class="n-edit-tools small"><button data-note-keep="1">Keep</button> <button class="quiet" data-note-cancel="1">Cancel</button>${e.id ? ` <button class="quiet" data-note-delete="${e.id}">Delete</button>` : ''} <span class="muted">Enter keeps · Esc cancels</span></span></span>`;
+    return `<span class="n-edit" id="note-text" contenteditable="plaintext-only" spellcheck="false" role="textbox" aria-label="Your note">${esc(e.text ?? '')}</span>`;
+}
+/** The note being written, in the reading bar: what the keys do, and Delete for a note written before. */
+function noteHint() {
+    const e = ui.noteEdit;
+    if (!e) return '';
+    return `✎ ${e.id ? 'Editing a note' : 'Writing a note'} · Enter keeps${e.from !== null && !e.id ? ' (nothing written: a highlight)' : ''} · Esc cancels${e.id ? ` · <button class="quiet" data-note-delete="${e.id}">Delete</button>` : ''}`;
+}
+const noteText = () => $('#note-text')?.innerText.replace(/\n$/, '');
+function caretToEnd(box) {
+    const r = document.createRange();
+    r.selectNodeContents(box);
+    r.collapse(false);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
 }
 /** The offset in a paragraph's own text of a point in the page (the notes' words are not the story's). */
 function storyOffset(p, node, off) {
@@ -281,7 +299,7 @@ function wholeWords(t, from, to) {
 function keepNote() {
     const e = ui.noteEdit;
     if (!e) return;
-    const text = $('#note-text')?.value ?? e.text ?? '';
+    const text = noteText() ?? e.text ?? '';
     ui.noteEdit = null;
     if (e.id) game.editNote(e.id, text);
     else if (text.trim() || e.from !== null) game.addNote({ para: e.para, at: e.at, from: e.from, to: e.to, text });
@@ -377,7 +395,7 @@ function renderReader() {
     const points = game.showsSignals() ? game.storySignals().filter((x) => x.kind === 'reread' && x.para === game.read - 1) : [];
     for (const x of points) note += `<div class="note">The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</div>`;
     note = news + note;
-    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}${note}${rereadForm()}`;
+    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}<span id="note-hint" class="note-hint small">${noteHint()}</span>${note}${rereadForm()}`;
 }
 
 // Re-read (docs/reader-layer.md, Q4): go back over paragraphs already read, with a question in mind. Recorded; the
@@ -1921,8 +1939,6 @@ function onClick(e) {
         renderStory();
         return;
     }
-    if (e.target.closest('[data-note-keep]')) { keepNote(); return; }
-    if (e.target.closest('[data-note-cancel]')) { ui.noteEdit = null; renderStory(); return; }
     const noteDel = e.target.closest('[data-note-delete]');
     if (noteDel) { deleteNote(noteDel.dataset.noteDelete); return; }
     if (e.target.closest('[data-note-undo]')) { if (ui.lastDeleted && game.addNote(ui.lastDeleted, ui.lastDeleted.id).ok) { ui.lastDeleted = null; $('#toast').hidden = true; changed(); } return; }
@@ -2270,7 +2286,7 @@ document.addEventListener('input', (e) => {
 });
 document.addEventListener('change', (e) => game && run(() => onChange(e)));
 document.addEventListener('pointerup', (e) => game && e.target.closest?.('#story') && onNotesPointer(e));
-// The note being written: Enter keeps it (Shift+Enter a new line), Esc cancels, leaving the box keeps it.
+// The note being written: Enter keeps it (Shift+Enter a new line), Esc cancels, leaving it keeps it.
 document.addEventListener('keydown', (e) => {
     // The new theory's name: Enter creates it, as the button does.
     if (e.target.id === 'theory-name' && e.key === 'Enter') { e.preventDefault(); document.querySelector('[data-new-theory]')?.click(); return; }
@@ -2278,14 +2294,14 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); run(keepNote); }
     if (e.key === 'Escape') { e.preventDefault(); ui.noteEdit = null; run(renderStory); }
 });
-document.addEventListener('input', (e) => { if (e.target.id === 'note-text' && ui.noteEdit) ui.noteEdit.text = e.target.value; });
+document.addEventListener('input', (e) => { if (e.target.id === 'note-text' && ui.noteEdit) ui.noteEdit.text = noteText(); });
 document.addEventListener('focusout', (e) => {
     if (e.target.id !== 'note-text') return;
     const was = ui.noteEdit;
     setTimeout(() => { if (was && ui.noteEdit === was && !document.activeElement?.closest('.n-edit')) run(keepNote); }, 150);
 });
-// The note's buttons keep the focus in its box, so pressing one is not leaving it.
-document.addEventListener('mousedown', (e) => { if (e.target.closest('.n-edit button')) e.preventDefault(); });
+// The note's Delete (in the reading bar) keeps the focus in the note, so pressing it is not leaving it.
+document.addEventListener('mousedown', (e) => { if (e.target.closest('#note-hint button')) e.preventDefault(); });
 /** The plan form's choices, read back into ui.plan before a re-render or a seal. */
 function readPlan() {
     const f = ui.plan;

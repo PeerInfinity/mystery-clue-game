@@ -134,17 +134,24 @@ export async function start({ store, fast, story, valueName, toast }) {
         document.querySelectorAll('#panel-0 details.set-aside').forEach((d) => { d.open = true; });
         return click(`#panel-0 [data-card="${id}"]`);
     }
+    // A field's value, or a note written in the line (Round 193), the caret kept after the last letter typed.
+    const put = (box, text) => {
+        if (!box.isContentEditable) { box.value = text; return; }
+        box.textContent = text;
+        const r = document.createRange(); r.selectNodeContents(box); r.collapse(false); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    };
     async function type(box, text) {
         await pointAt(box);
         box.focus();
+        let sofar = '';
         for (const ch of text) {
             if (factor() && s.speed !== 'at_once') {
-                box.value += ch;
+                put(box, (sofar += ch));
                 box.dispatchEvent(new Event('input', { bubbles: true }));
                 await sleep((1000 / 12 / factor()) * (0.6 + Math.random() * 0.8));
             }
         }
-        box.value = text;
+        put(box, text);
         box.dispatchEvent(new Event('input', { bubbles: true }));
     }
 

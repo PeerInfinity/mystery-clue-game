@@ -46,6 +46,8 @@ check(await p.ev(`document.body.classList.contains('notes-mode') && document.que
 const afterFinally = t37.indexOf('Finally,') + 'Finally,'.length;
 await clickAt(await point(37, afterFinally));
 check(await p.ev(`!!document.querySelector('#note-text')`), 'a click opens a note there');
+check(await p.ev(`(() => { const b = document.querySelector('#note-text'); return b.isContentEditable && !document.querySelector('#story textarea') && document.activeElement === b && getComputedStyle(b).fontFamily === getComputedStyle(document.querySelector('#story .n-note') ?? b).fontFamily; })()`), 'it is written in the line, in the note\'s look, the caret in it');
+check(await p.ev(`document.querySelector('#note-hint').textContent.includes('Enter keeps')`), 'the reading bar says what the keys do');
 await type('So the horse was there; the drug is the next thing.');
 await key('Enter');
 let ns = await notes();
@@ -62,7 +64,7 @@ check(onOpium && t37.slice(onOpium[3], onOpium[4]) === 'powdered opium' && onOpi
 // 3. A highlight alone: a drag over "the same dish", kept empty.
 const dish = t37.indexOf('the same dish');
 await drag(await point(37, dish), await point(37, dish + 'the same dish'.length - 1));
-await p.click('[data-note-keep]');
+await key('Enter');
 ns = await notes();
 const hl = ns.find((n) => n[5] === '');
 check(hl && t37.slice(hl[3], hl[4]) === 'the same dish', 'a highlight with nothing written');
@@ -70,7 +72,8 @@ check(((await game()).collected ?? []).length === collected0, 'the drags collect
 await shot('notes-desktop');
 // 4. Edit: click the first note in the story, rewrite it.
 await p.click('#story .n-note');
-await p.ev(`(() => { const t = document.querySelector('#note-text'); t.select(); return 1; })()`);
+check(await p.ev(`!!document.querySelector('#note-hint [data-note-delete]')`), 'an old note opened: Delete in the reading bar');
+await p.ev(`(() => { const t = document.querySelector('#note-text'); getSelection().selectAllChildren(t); return 1; })()`);
 await type('So the horse was in the hollow.');
 await key('Enter');
 ns = await notes();
