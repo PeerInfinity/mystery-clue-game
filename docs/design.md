@@ -4551,3 +4551,12 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   Chrome: playing at ¶6 after 40 s at 1×, notes in the hand, no console error; no 404 but the favicon (none ever).
   Round 190 checked only that the two files were served, which let this one through.
 - **Moved:** nothing (the build script only).
+
+## Round 192 (2026-10-20): the autoplay at ½× and ¼×
+
+- **Robert's ask:** a ½× and a ¼× speed. The strip's menu now reads ¼×, ½×, 1×, 2×, 4×, notes at once (1× still the
+  start); every pause, glide and keystroke is divided by the speed, so ¼× is four times slower than 1× throughout
+  (about a paragraph every 6 s where nothing is done, 3 characters a second typed).
+- **Checked** in headless Chrome: the menu's six options; at ¼× the autoplay reads on and collects at the slower pace;
+  at 1× it types as before (24 characters in 2 s); no console error.
+- **Moved:** nothing (the autoplay's strip only).

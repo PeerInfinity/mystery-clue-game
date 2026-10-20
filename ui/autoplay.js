@@ -9,7 +9,7 @@
 // with no pauses and the notes at once.
 
 const CASE = 'cases/silver-blaze';
-const SPEEDS = { 1: '1×', 2: '2×', 4: '4×', at_once: 'notes at once' };
+const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], ['4', '4×'], ['at_once', 'notes at once']];
 // What a move is, in plain words (A2): never the thought's id or tag.
 const CAPTIONS = {
     collect: (m) => `Collecting: “${(m.words ?? '').trim()}”`,
@@ -49,7 +49,7 @@ export async function start({ store, fast, story, valueName, toast }) {
     strip.className = 'autoplay-strip';
     strip.innerHTML = `<span class="ap-title">Autoplay</span> <span id="ap-para" class="small"></span> <span id="ap-caption" class="ap-caption"></span>
         <span class="ap-tools"><button id="ap-pause" class="quiet">Pause</button>
-        <select id="ap-speed" aria-label="Speed">${Object.entries(SPEEDS).map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
+        <select id="ap-speed" aria-label="Speed">${SPEEDS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
         <button id="ap-skip" class="quiet" title="Make this paragraph's moves without pausing"><span class="long">Skip to the next paragraph</span><span class="short">Skip ¶</span></button>
         <button id="ap-stop" class="quiet">Stop</button></span>`;
     document.body.append(strip);
