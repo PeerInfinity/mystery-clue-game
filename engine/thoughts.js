@@ -208,6 +208,12 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         for (const id of citedIds(t.text)) if (byId.get(id)?.para > t.para) err(`${t.id}: its prose cites ${id}, which comes later (¶${byId.get(id).para}); a remark may`);
         for (const x of (t.text ?? '').matchAll(/¶(\d+)/g)) if (+x[1] > t.para) err(`${t.id}: its prose cites ¶${x[1]}, after its own paragraph; a remark may`);
         if (t.remark !== undefined && !(typeof t.remark === 'string' && t.remark.trim())) err(`${t.id}: a remark is some text`);
+        // What the autoplay types as the reader's note (docs/autoplay.md A3, Round 186): the typed form, or else the
+        // prose as it stands; either way no ⚠, backtick, ¶, thought or card id, or set in braces, which are the
+        // annotation's notation and would run ahead of the story or mean nothing on the page.
+        if (t.typed !== undefined && !(typeof t.typed === 'string' && t.typed.trim() && t.text)) err(`${t.id}: a typed note is some text, for a thought with prose`);
+        const typed = t.typed ?? t.text;
+        if (typed) for (const [what, re] of TYPED_REFUSES) if (re.test(typed)) err(`${t.id}: ${t.typed !== undefined ? 'its typed note' : 'its prose, typed as it stands,'} has ${what}${t.typed !== undefined ? '' : '; give it a typed form'}`);
         // A hindsight mark (⚠) is the annotator's: in the remark, with the level the data records (Round 185).
         if ((t.text ?? '').includes('⚠')) err(`${t.id}: a ⚠ belongs in the remark, not the reader's note`);
         const mark = t.hindsight === undefined ? null : t.hindsight === 'noted' ? '⚠ fair play' : `⚠ ${t.hindsight}`;
@@ -264,6 +270,9 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
     for (const x of chains.implicitNamed) err(`${x.inference}: marked implicit, but ${x.thought} names it`);
     return { errors, coverage, dateGaps, chains, unmappedBackground: background.filter((b) => !(b.maps ?? []).length).map((b) => b.id) };
 }
+
+// What a note the autoplay types may not hold (docs/autoplay.md A3).
+export const TYPED_REFUSES = [['a ⚠', /⚠/], ['a backtick', /`/], ['a ¶', /¶/], ['a thought or card id', /\b(t\d+\.\d+|(bk|[ckreqa]|pz|rd|ck)\.[a-z_]{2,})\b/], ['a set in braces', /[{}]/]];
 
 // The ids a piece of prose cites: thoughts (t<¶>.<n>) and background cards (bk.<name>).
 export const citedIds = (text) => [...(text ?? '').matchAll(/\b(t\d+\.\d+|bk\.[a-z_]+)\b/g)].map((x) => x[1]);

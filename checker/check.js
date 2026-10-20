@@ -3,6 +3,7 @@
 // It sees only the story up to the paragraph where the text appears, and the sentence that first mentions the
 // card's subject — never the card's id or the case's own name for it.
 //   node checker/check.js cases/silver-blaze --tests [--model haiku] [--only id,id] [--concurrency 4]
+//   node checker/check.js cases/silver-blaze --notes [--runs 2]   the reader's notes the autoplay types (Round 186)
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -97,6 +98,27 @@ story. Do not use any memory of this story: judge only from the text you are giv
 List each fact or possibility in the exception, say whether it is supported (general, or already in the story) or
 not (a particular of this story the story has not told), and give the verdict.`;
 
+// A note the autoplay types (docs/autoplay.md A3): the annotated reader's own thought at a paragraph, written into the
+// story. It may guess, ask and reason; it may not use what the story has not told (Round 186).
+const SYSTEM_NOTE = `You check the notes of a careful first-time reader of a mystery story for spoilers.
+
+The reader reads the story one paragraph at a time and writes notes in the margin as they go: what they notice,
+what they guess, what they ask, how they reason. You are given THE STORY SO FAR (everything the reader has read)
+and ONE NOTE written at that point. Decide whether the note uses anything the reader could not know yet.
+
+A note is OK when everything it relies on is in the story so far, follows from it, or is general knowledge (how
+horses, dogs, households, people behave; what words mean; what detective stories usually do). Guesses,
+hypotheses, questions and predictions are fine, however bold or however wrong, as long as they are reasoned from
+what has been read: "perhaps the horse killed him" is a guess, not a leak. The note may refer back to the reader's
+own earlier notes ("as I planned", "as I expected") and to what earlier paragraphs said.
+
+A note is a LEAK when it relies on something the story so far has not told: it states as known a fact about this
+story's people, places, things or events that has not been given; names something by a name the story has not
+yet used for it; or speaks of what the story will do later ("this matters later", "he is wrong, as we shall see").
+Do not use any memory of this story: judge only from the text you are given.
+
+List each fact the note relies on (not its guesses), say whether it is supported, and give the verdict.`;
+
 const SCHEMA = {
     type: 'object',
     properties: {
@@ -131,8 +153,13 @@ function promptException(item) {
     const so = story.paragraphs.slice(1, item.para + 1).map((p, i) => `[${i + 1}] ${p.display}`).join('\n\n');
     return `THE STORY SO FAR (paragraphs 1 to ${item.para}):\n\n${so}\n\n---\n\nTHE BACKGROUND FACT:\n"${item.rule}"\n\nTHE EXCEPTION:\n"unless ${item.text}"\n\nDoes the exception run ahead of the story?`;
 }
-const systemOf = (item) => item.background ? SYSTEM_BACKGROUND : item.exception ? SYSTEM_EXCEPTION : SYSTEM;
-const promptOf = (item) => item.background ? promptBackground(item) : item.exception ? promptException(item) : prompt(item);
+const systemOf = (item) => item.background ? SYSTEM_BACKGROUND : item.exception ? SYSTEM_EXCEPTION : item.note ? SYSTEM_NOTE : SYSTEM;
+const promptOf = (item) => item.background ? promptBackground(item) : item.exception ? promptException(item) : item.note ? promptNote(item) : prompt(item);
+
+function promptNote(item) {
+    const so = story.paragraphs.slice(1, item.para + 1).map((p, i) => `[${i + 1}] ${p.display}`).join('\n\n');
+    return `THE STORY SO FAR (paragraphs 1 to ${item.para}):\n\n${so}\n\n---\n\nTHE READER'S NOTE, written after paragraph ${item.para}:\n"${item.text}"\n\nDoes the note use anything the story so far has not told?`;
+}
 
 function promptBackground(item) {
     return `THE BACKGROUND FACT (${item.kind}):\n"${item.text}"\n\nJudge every fact in it: is it general knowledge (and true), or a fact about this particular story?`;
@@ -166,9 +193,13 @@ else if (args.includes('--background')) {
     // story-so-far check covers them.) Expected 'ok' is the hope, not a known answer: misses are the findings.
     items = (model.data.rules ?? []).map((r) => ({ id: r.id, kind: 'background fact', text: r.text, expect: 'ok', background: true }));
 } else if (args.includes('--all')) items = allPieces();
+// The reader's notes the autoplay types (Round 186): each thought's typed form, or its prose as it stands, at its
+// paragraph (the autoplay writes it there or later).
+else if (args.includes('--notes')) items = JSON.parse(fs.readFileSync(path.join(caseDir, 'thoughts.json'), 'utf8')).thoughts
+    .filter((t) => t.typed ?? t.text).map((t) => ({ id: t.id, para: t.para, kind: 'note', text: t.typed ?? t.text, expect: 'ok', note: true }));
 // A background fact's exceptions (workstream 3), each checked against the story so far where it first shows.
 else if (args.includes('--exceptions')) items = allPieces().filter((x) => x.kind === 'exception').filter((x, i, all) => all.findIndex((y) => y.id.split('|').slice(1).join('|') === x.id.split('|').slice(1).join('|')) === i);
-else throw new Error('use --tests, --background, --all or --exceptions');
+else throw new Error('use --tests, --background, --all, --notes or --exceptions');
 
 /**
  * Every piece of card text the player reads, at the paragraph where it first shows (reading the story through,
@@ -217,7 +248,7 @@ const runs = Number(opt('runs', 1));
 const cacheFile = `.cache/checker-answers-${modelName}.json`;
 const answers = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : {};
 const keyOf = (item, run) => crypto.createHash('sha1').update(`${run}|${systemOf(item)}|${promptOf(item)}`).digest('hex');
-const useCache = args.includes('--all');
+const useCache = args.includes('--all') || args.includes('--notes');
 const jobs = [];
 for (const item of items) for (let run = 0; run < runs; run++) jobs.push({ item, run });
 let done = 0;
@@ -263,4 +294,4 @@ for (const r of results) {
 }
 console.log(`\n${right}/${results.filter((r) => r.item.expect !== 'unsettled').length} right · model ${modelName} · $${cost.toFixed(4)}`);
 fs.mkdirSync('.cache', { recursive: true });
-fs.writeFileSync(`.cache/checker-${args.includes('--all') ? 'all-' : ''}${modelName}.json`, JSON.stringify(results, null, 1));
+fs.writeFileSync(`.cache/checker-${args.includes('--all') ? 'all-' : args.includes('--notes') ? 'notes-' : ''}${modelName}.json`, JSON.stringify(results, null, 1));

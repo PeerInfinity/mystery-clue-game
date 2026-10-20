@@ -163,3 +163,23 @@ test('a ⚠ is the annotator\'s: in the remark, at the level the data records (R
         't146.1: hindsight none, but its remark carries a ⚠',
     ]) assert.ok(r.errors.includes(e), e);
 });
+
+test('what the autoplay types holds none of the annotation\'s notation: a typed form where the prose cannot be typed (Round 186)', () => {
+    const bad = structuredClone(data);
+    const t = (id) => bad.thoughts.find((x) => x.id === id);
+    delete t('t46.5').typed;
+    t('t24.3').typed = 'What is in the folded paper: {a drug, money}?';
+    t('t4.2').typed = 'As at ¶14.';
+    t('t40.6').typed = 'It says nothing about one a.m., as `c.simpson_clothes_wet` has it.';
+    t('t18.1').typed = 'A favourite.';
+    const r = checkThoughts(bad, model);
+    for (const e of [
+        't46.5: its prose, typed as it stands, has a backtick; give it a typed form',
+        't46.5: its prose, typed as it stands, has a thought or card id; give it a typed form',
+        't24.3: its typed note has a set in braces',
+        't4.2: its typed note has a ¶',
+        't40.6: its typed note has a thought or card id',
+        't18.1: a typed note is some text, for a thought with prose',
+    ]) assert.ok(r.errors.includes(e), e);
+    assert.ok(!r.errors.some((e) => e.startsWith('t40.6: its prose')), '"a.m." is no card id');
+});

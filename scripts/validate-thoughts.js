@@ -36,6 +36,16 @@ out.push(`- errors: ${r.errors.length}`, '');
 out.push('## Coverage', '', 'Thoughts of each tag whose content some case card holds (`maps`): a claim, rule, inference, question, action, route step or theory. A thought with no card is a gap in the data. Held content is not yet a move the player can make: the moves are the workstreams of `docs/gap-analysis.md`.', '');
 out.push('| Tag | Thoughts | Held by a card |', '|---|---|---|');
 for (const c of r.coverage) out.push(`| ${c.tag} | ${c.count} | ${c.mapped} |`);
+{
+    // What the autoplay writes for each thought (docs/autoplay.md A3, Round 186): its prose as it stands, its typed
+    // form, a highlight of the words it reads alone, or nothing.
+    const T = data.thoughts;
+    const n = (f) => T.filter(f).length;
+    out.push('', '## Notes the autoplay types', '', 'For each thought, what the autoplay writes into the story: the reader\'s note as it stands (`text`), its typed form (`typed`, where the note cites thoughts, cards or paragraphs, or uses the annotation\'s notation), a highlight of the words it reads with nothing written, or nothing. The annotator\'s `remark` is never typed.', '');
+    out.push('| Written | Thoughts |', '|---|---|');
+    out.push(`| the note as it stands | ${n((t) => t.text && t.typed === undefined)} |`, `| its typed form | ${n((t) => t.typed !== undefined)} |`, `| a highlight alone | ${n((t) => !t.text && t.reads)} |`, `| nothing | ${n((t) => !t.text && !t.reads)} |`);
+    out.push('', `Thoughts with a remark: ${n((t) => t.remark !== undefined)}.`);
+}
 out.push('', '## Dealt later than the reader has it', '', 'A RECORD whose card the game deals after the paragraph where the reader already has the fact.', '');
 if (r.dateGaps.length) {
     out.push('| Thought | Card | Reader | Game |', '|---|---|---|---|');

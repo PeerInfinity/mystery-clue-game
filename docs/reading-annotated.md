@@ -361,7 +361,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   Whose blood is on the knife: {an assailant's, **Straker's own**}? The thigh cut is "clean" from "a very sharp
   instrument", and he is holding one.
 - `t35.8` **NOTICE** · *weak* · careful · from `t32.2`, `t35.1`, `bk.coat_work` · Holmes ¶226
-  **The coat is off.** He set out in a mackintosh in heavy rain; a quarter mile on, the coat is on a bush. It stays
+  **The coat is off.** He set out in a mackintosh in the rain; a quarter mile on, the coat is on a bush. It stays
   weak until the wind is known.
   *Note:* The wind is asked about at ¶94–¶96.
 - `t35.9` **HYPOTHESIS** · *weak* · careful · from `t35.8`
@@ -375,7 +375,7 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   reads "Hunter ... was also quite positive as to the ownership of the cravat"; "He was equally certain that the same stranger had, while standing at the window, drugged his curried mutton"
 - `t36.2` **WEIGH** · *strong* · careful · from `t36.1` · undercuts `t36.1 (drugged)`, `t29.3` · Holmes ¶218
   Hunter couldn't have **seen** the drugging: had he seen it, he wouldn't have eaten the food. His certainty is a
-  conclusion (the stranger was at the window, and later I was drugged) from a man just out of an opium stupor.
+  conclusion (the stranger was at the window, and later I was drugged) from a man just out of a drugged stupor.
   Downgrade it to "Hunter believes".
 - `t36.3` **WEIGH** · *strong* · careful · from `t36.1`, `t35.5` · supports `t35.5`
   The cravat identification is observation, and two witnesses agree. Keep it as fact: it is the stranger's.
@@ -611,7 +611,7 @@ the horse is (`t14.3`).
 - `t64.2` **TEST** · *fair* · typical · from `t64.1` · strains `t14.3 (stable)`, `t40.4`
 - `t64.3` **HYPOTHESIS** (PHYSICAL) · *weak* · expert · from `bk.blaze`, `bk.famous_horse`, `t64.1` · undercuts `t64.2` · Holmes ¶198, ¶202
   A search finds a horse only if the searchers recognise him, and his name says how they would: a blaze. A horse
-  with the blaze dyed out is one more bay among bays.
+  with the blaze dyed out is one more horse among horses.
   *Note:* ⚠ medium: the reader needs `bk.blaze`, and the disguise isn't confirmed until ¶198.
 
 **¶66**
@@ -662,7 +662,8 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t78.1` **RECORD** · *strong* · typical
   reads "a box of vestas, two inches of tallow candle, an A.D.P. briar-root pipe, a pouch of seal-skin ... a silver watch with a gold chain, five sovereigns in gold, an aluminium pencil-case, a few papers, and an ivory-handled knife with a very delicate, inflexible blade"
 - `t78.2` **INFER** · *strong* · typical · from `t78.1`, `t35.2`
-  Five sovereigns and a gold-chained watch are still on the body. Not a robbery, and nobody searched him.
+  Five sovereigns and a gold-chained watch were still in his pockets. Not a robbery: whoever was there didn't search
+  him.
 - `t78.3` **NOTICE** · *fair* · careful · from `t78.1` · Holmes ¶224 (the Colonel)
   **A candle** as well as matches. Matches go with the pipe; a candle is for close work in the dark.
 - `t78.4` **ABSENCE** · *weak* · expert · from `t78.1`, `t32.2`
@@ -731,7 +732,7 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t85.1` **RECORD** · typical
   reads "Madam Derbyshire had somewhat expensive tastes"; "Twenty-two guineas is rather heavy for a single costume"
 - `t85.2` **GENRE·watch-holmes** · *weak* · careful · from `t85.1`
-  Holmes reads the bill line by line. The reader isn't shown the items, only that one is a costume of 22 guineas.
+  Holmes glances down the bill. The reader isn't shown the items, only that one is a costume of 22 guineas.
 - `t85.3` **TEST PLAN** · *fair* · expert · from `t84.6`, `t85.1` · Holmes ¶89–¶92
   If Derbyshire is Straker, there are two versions: (a) Straker dresses **his wife** extravagantly under another
   name, and (b) there is **another woman**. Ask whether Mrs. Straker ever received that costume. "Friend"
@@ -870,7 +871,7 @@ ahead by predicting what each action will find.
 - `t107.1` **RECORD** · typical
   reads "He took the boots from the bag, and compared the impressions of each of them with marks upon the ground. Then he clambered up to the rim of the hollow, and crawled about among the ferns and bushes."
 - `t107.2` **ABSENCE** · *fair* · careful · from `t107.1`, `t101.2` · Holmes —
-  **The result of the comparison is never reported.**
+  The result of the comparison isn't reported.
   *Note:* The reader is shown the test (`t101.2`) but not its outcome. This is a fair-play gap, and the game has to
   choose: withhold it as the story does, or reveal it here.
 
@@ -971,7 +972,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
   No groom would dare to hide a stolen favourite on his own account. Whoever did it at Mapleton had the authority
   to.
 - `t127.4` **HYPOTHESIS** · *fair* · careful · from `t127.1`, `t127.3`, `t124.2`, `t66.1` · answers `t120.3` · Holmes ¶146
-  The man was **Silas Brown**: first up, master of the yard, with money on Desborough.
+  The man was **Silas Brown**: first up, master of the yard, with large bets on the race.
 - `t128.1` **SET ASIDE** · typical
   reads "As Sherlock Holmes replaced the half-crown which he had drawn from his pocket"
   A tip offered and refused.
@@ -1012,7 +1013,7 @@ Straker, and confirmation of the motive.
 **¶146**
 - `t146.1` **RECORD** · *strong* · typical
   reads "Of course you observed the peculiarly square toes in the impressions, and that his own boots exactly corresponded to them"
-  Square toes: nothing was said of them when we followed the tracks.
+  Square toes: nothing was said of them when the tracks were followed.
   *Note:* ⚠ fair play: disclosed late. Watson didn't report the square toes when they followed the tracks, so the
   reader couldn't have observed them.
 - `t146.2` **TEST** · *strong* · typical · from `t146.1` · supports `t127.4`, `t127.3`, `t122.3`
@@ -1065,7 +1066,7 @@ Straker, and confirmation of the motive.
 - `t163.1` **RECORD** · typical
   reads "I have a question which I should like to put to the maid"
 - `t163.2` **ABSENCE** · *fair* · careful · from `t163.1` · Holmes —
-  The question and its answer are never reported.
+  The question and its answer aren't reported.
 - `t163.3` **HYPOTHESIS** · *weak* · careful · from `t163.2`, `t92.8`, `t20.7`
   What did he ask: {who chose the curry that night; who was in the kitchen when the lad's dish was set aside;
   whether Straker came to the kitchen; about the dress}? Each fits a question left open (`t92.8`).
@@ -1079,7 +1080,8 @@ Straker, and confirmation of the motive.
   *Note:* For an expert who made `t92.14`, the prediction is scored. For everyone else it confirms `t81.5`.
 - `t175.1` **INFER** · *fair* · careful · from `t173.1`, `t81.5`, `bk.practice` · Holmes ¶228
   reads "A long shot, Watson; a very long shot"; "this singular epidemic among the sheep"
-  Holmes expected lame sheep. Sheep don't go lame three at a time without a cause; Straker practised on them.
+  Holmes went looking for lame sheep. Sheep don't go lame three at a time without a cause; Straker practised on
+  them.
   *Note:* For a reader who didn't predict it (`t92.14`), the step is made here.
 
 **¶177–¶182**

@@ -4448,3 +4448,29 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Leak check:** no card text.
 - **Moved:** `thoughts-report.md`: INFER 24 → 23, PHYSICAL 1 → 2 (`t102.4`). The action table rerun: `t102.4`'s row
   tag only, no move. The logs, `report.md` and the gate listing unchanged (diffed in full).
+
+## Round 186 (2026-10-19): B4, the typed notes; the notes leak-checked
+
+- **Annotation** (`docs/review-annotations.md` B4, `docs/autoplay.md` A3 a; `thoughts.json` only, the markdown being
+  the annotator's record): a field **`typed`** on 59 thoughts, the note the autoplay writes where the reader's note
+  cannot be typed as it stands: earlier thoughts, cards and paragraphs cited in words ("as I planned", "the tracks I
+  predicted"), sets in braces as plain questions, the inside story's nine steps and the residue's eight items in
+  prose, the predictions as "A prediction: …", the alt-reader thoughts as the reader who made every move. First person
+  where the reader speaks of an earlier move (Robert, Q2).
+- **The LLM checker over every note the autoplay types** (`checker/check.js --notes`, a prompt of its own: a note may
+  guess and reason, but may not rest on what the story has not told; Haiku, two runs, $0.89 in all): 206 notes, 37
+  flagged on the first pass. Nine were real and are fixed in both files: `t36.2` "an opium stupor" (opium is named at
+  ¶37), `t64.3` "one more bay among bays" (the colour is given at ¶197), `t127.4` "money on Desborough" (¶66 says
+  large bets on the race), `t35.8` "heavy rain" (¶32 has it pattering), `t107.2` and `t163.2` "never reported" (a
+  claim on the story's future), `t85.2` "line by line" (he glances down it), `t78.2` "still on the body", `t175.1`
+  "Holmes expected lame sheep" (a long shot); and four typed notes reworded (the predictions `t92.9`–`t92.12` read as
+  facts; `t19.3`, `t182.3`, `t225.1`). The 22 still flagged (`t14.4`, `t19.4`, `t24.4`, `t32.3`, `t33.2`, `t35.10`,
+  `t37.6`, `t37.11`, `t46.3`, `t46.4`, `t60.4`, `t84.5`, `t92.6`, `t92.8`, `t116.2`, `t120.2`, `t124.2`, `t140.2`,
+  `t141.1`, `t163.3`, `t173.2`, `t175.1`) were each read: the checker takes the reader's own inference, stated as the
+  reader concludes it, for a fact the story has not told. Accepted.
+- **Validator** (`engine/thoughts.js`, `TYPED_REFUSES`): a typed note, and a note typed as it stands, holds no ⚠,
+  backtick, ¶, thought or card id, or set in braces; a typed note belongs to a thought with prose. The thoughts report
+  counts what the autoplay writes. Test: `thoughts.test.js`. `CLAUDE.md` lists the notes check.
+- **Moved:** `thoughts-report.md` gains "Notes the autoplay types": 147 notes as they stand, 59 typed forms, 85
+  highlights alone, 5 nothing; 69 thoughts with a remark. The action table rerun, unchanged; the logs, `report.md` and
+  the gate listing unchanged (diffed in full).

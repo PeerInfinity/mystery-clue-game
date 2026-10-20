@@ -32,6 +32,19 @@ Thoughts of each tag whose content some case card holds (`maps`): a claim, rule,
 | DROP | 4 | 3 |
 | REVISE | 4 | 4 |
 
+## Notes the autoplay types
+
+For each thought, what the autoplay writes into the story: the reader's note as it stands (`text`), its typed form (`typed`, where the note cites thoughts, cards or paragraphs, or uses the annotation's notation), a highlight of the words it reads with nothing written, or nothing. The annotator's `remark` is never typed.
+
+| Written | Thoughts |
+|---|---|
+| the note as it stands | 147 |
+| its typed form | 59 |
+| a highlight alone | 85 |
+| nothing | 5 |
+
+Thoughts with a remark: 69.
+
 ## Dealt later than the reader has it
 
 A RECORD whose card the game deals after the paragraph where the reader already has the fact.

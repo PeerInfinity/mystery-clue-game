@@ -1,6 +1,6 @@
 # The annotation reviewed as a reader's paper
 
-Status: **AGREED** (Robert, 2026-10-19, Round 183: every recommendation, Q1–Q8, and the batches in their order). B1 with B5's mirror and id checks built (Round 183). Written Round 182. Piece 1 of `docs/kickoff-annotations.md`: a general review of the annotation's
+Status: **AGREED** (Robert, 2026-10-19, Round 183: every recommendation, Q1–Q8, and the batches in their order). Built: B1 with B5's mirror and id checks (Round 183), B2 (Round 184), B3 (Round 185), B4 with the rest of B5 (Round 186): all five. Written Round 182. Piece 1 of `docs/kickoff-annotations.md`: a general review of the annotation's
 content (`docs/reading-annotated.md`, the annotator's record, and `cases/silver-blaze/thoughts.json`, the same as
 data), a verdict per thought, the fixes by kind in batches for Robert to agree. Earlier reviews looked at what the case
 holds of each thought (`docs/annotation-review.md`) and what the game lets the player do with it
