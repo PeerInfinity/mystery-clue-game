@@ -1,6 +1,8 @@
 # The autoplay: the game played to its maximum through the page, the reader's thoughts written as notes
 
-Status: **for Robert** (2026-10-19, Round 180). Piece 3 of `docs/kickoff-layout.md` (first set out as piece 4 of
+Status: **AGREED** (Robert, 2026-10-19, Round 181: every recommendation and the order of work; the annotation's
+cleanup, the typed notes of A3, and a general review of the annotation go first, in their own session:
+`docs/kickoff-annotations.md`). Written Round 180. Piece 3 of `docs/kickoff-layout.md` (first set out as piece 4 of
 `docs/kickoff-closing-review.md`). Builds on the action table (`engine/actionTable.js`, Round 168: its script), the
 UI runner that plays it (`scripts/ui-run.mjs`, Round 170), the layout (`docs/layout.md`, Rounds 171–174) and the
 player's notes (`docs/notes.md`, Rounds 175–179: what it writes). Nothing is built until Robert agrees.
@@ -135,3 +137,11 @@ Each step one commit with a Round entry, gated on `npm test`; the logs, reports 
    (recommended), or stripped at run time, or only the 134 clean ones typed? The LLM leak checker over the typed notes?
 4. **A4:** an inline field for a theory's name, in place of the browser's dialog?
 5. **The order of work** above?
+
+## Agreed (Robert, Round 181)
+
+Every recommendation as written: in the page with its own cursor (A1 a); started from Settings or `?autoplay`, in a
+save of its own with the player's game kept aside, the control strip and the caption (A2); the typed form for the
+thoughts that cannot be typed as they stand, written into `thoughts.json` and checked by the validator (A3 a); an
+inline field for a theory's name (A4); the order of work. Robert: the annotation needs cleaning up for this, so a new
+session reviews the annotation's content and writes the typed notes first (`docs/kickoff-annotations.md`).

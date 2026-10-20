@@ -1,7 +1,14 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-layout.md` — the next sessions' work (Round 170): build the agreed layout (`docs/layout.md`) in four
+- `docs/kickoff-annotations.md` — the next session's work (Round 181): a general review of the annotation's content
+  (`docs/reading-annotated.md`, `thoughts.json`; a paper first, `docs/review-annotations.md`), the typed notes the
+  autoplay will write (72 thoughts whose prose carries hindsight), then the autoplay (`docs/autoplay.md`, agreed).
+- `docs/autoplay.md` — the autoplay (agreed, Round 181): in the page, its own cursor and save, the action table as its
+  script, the reader's thoughts typed as notes, 70 at the end.
+- `docs/notes.md` — the player's notes (built, Rounds 175–179): a notes mode, notes written into the story's line, the
+  Notes tab, the Settings menu's page settings. `docs/layout.md` — the layout (built, Rounds 171–174).
+- `docs/kickoff-layout.md` — superseded by `docs/kickoff-annotations.md` (its layout and notes built, Rounds 171–179); the work of Round 170: build the agreed layout (`docs/layout.md`) in four
   steps, each checked by playing the action table through the UI (`scripts/ui-run.mjs`); then the player's notes (a
   paper with mock-ups by sight), then the autoplay (its script is the action table, its target 70).
 - `docs/review-closing.md` — the closing review (Rounds 157–165): every thought's move made in the UI on Hard, in one

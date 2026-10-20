@@ -4367,3 +4367,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   (the LLM checker if Robert wants it); an inline field for a theory's name in place of `prompt()`; the record at the
   end, 70; `scripts/autoplay-check.mjs`. For Robert to agree before anything is built.
 - **Moved:** nothing (documentation).
+
+## Round 181 (2026-10-19): the autoplay paper agreed; hand-off
+
+- **Agreed (Robert):** every recommendation of `docs/autoplay.md` and its order of work; the paper marked so. Robert:
+  the annotation needs cleaning up before it can be typed, so **a new session** reviews the annotation's content
+  (a paper first) and writes the typed notes, then builds the autoplay.
+- **Hand-off:** `docs/kickoff-annotations.md` (supersedes `docs/kickoff-layout.md`): a general review of
+  `docs/reading-annotated.md` and `thoughts.json` as a reader's paper (honesty, the prose as a note, dates and premises,
+  the two files agreeing, what the validator should check, the questions left open), then the `typed` field and its
+  validator rule, then the autoplay (the inline theory name, `ui/autoplay.js`, `scripts/autoplay-check.mjs`); the
+  traps of Rounds 60–181. `CLAUDE.md`'s "Read first" points to it.
+- **This session** (Rounds 171–181): the layout in four steps, the Settings menu, the player's notes in two rounds of
+  mock-ups and three steps, the autoplay paper; every step checked by the action table played through the page (396
+  moves, none failed, 70 each time) and, for the notes, `scripts/notes-check.mjs`; the logs, reports and gate listing
+  unchanged throughout.
+- **Moved:** nothing (documentation).
