@@ -4521,3 +4521,13 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   (desktop) and 4× (phone) for Robert. "How to play" names the autoplay.
 - **Leak check:** the notes typed are the ones leak-checked in Round 186; the strip's words are fixed labels.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
+
+## Round 189 (2026-10-19): the session's record
+
+- **This session** (Rounds 182–188, `docs/kickoff-annotations.md`, all of it): the annotation reviewed as a reader's
+  paper and its five batches built (the files agree, the annotator's remarks in `remark`, five honesty fixes and three
+  ⚠, 59 typed notes, the validator's mirror and typed rules); the 206 notes the autoplay types leak-checked by the LLM
+  checker (nine real slips fixed, 22 flags accepted as the reader's own inferences); a theory named in place; the
+  autoplay built and checked to 70 (12 of 12), the action table through the UI unchanged (396 moves, none failed, 70)
+  after each UI step. `CLAUDE.md` says the kickoff is done; nothing is handed off.
+- **Moved:** nothing (documentation).

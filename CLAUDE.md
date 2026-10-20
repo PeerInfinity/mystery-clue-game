@@ -3,9 +3,9 @@
 ## Read first
 - `docs/review-annotations.md` — the annotation reviewed as a reader's paper (Round 182): a verdict per thought, batches
   B1–B5 for Robert to agree.
-- `docs/kickoff-annotations.md` — the next session's work (Round 181): a general review of the annotation's content
-  (`docs/reading-annotated.md`, `thoughts.json`; a paper first, `docs/review-annotations.md`), the typed notes the
-  autoplay will write (72 thoughts whose prose carries hindsight), then the autoplay (`docs/autoplay.md`, agreed).
+- `docs/kickoff-annotations.md` — done (Rounds 182–188): the annotation reviewed (`docs/review-annotations.md`, B1–B5
+  built: `remark` and `typed` in `thoughts.json`, the markdown mirrored field by field), the notes leak-checked, then
+  the autoplay built. No session is handed off; the next work is Robert's to choose.
 - `docs/autoplay.md` — the autoplay (agreed Round 181, built Rounds 187–188): Settings → "Watch the autoplay…" or
   `?autoplay`; in the page, its own cursor and save, the action table as its script, the reader's thoughts typed as
   notes (`typed`, Round 186), 70 at the end; `scripts/autoplay-check.mjs`.
