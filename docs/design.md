@@ -4354,3 +4354,16 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **The notes are built** (Rounds 177–179); `docs/notes.md` marked so. Next (`docs/kickoff-layout.md`): the autoplay
   paper.
 - **Moved:** nothing in the logs, the reports or the gate listing (diffed in full; UI only).
+
+## Round 180 (2026-10-19): the autoplay paper
+
+- **`docs/autoplay.md`** (piece 3 of `docs/kickoff-layout.md`): the game played to its maximum through the page, the
+  reader's thoughts written as notes. Measured: the table's 396 moves at 78 paragraphs are 1,139 UI steps; of the 296
+  thoughts, 142 quote the words they read (81 with no prose: a highlight alone), 206 have prose, of which 134 can be
+  typed as they stand and 72 cannot (⚠ notes, ids, paragraph references; 20 point ahead in the story); about an hour
+  to watch at 1×. Recommended: in the page with its own cursor (`ui/autoplay.js`), started from Settings or
+  `?autoplay`, in a save of its own with the player's game kept aside, a control strip (pause, speeds, stop) and a
+  caption of the move in plain words; a typed form for the 72 written into `thoughts.json` and checked by the validator
+  (the LLM checker if Robert wants it); an inline field for a theory's name in place of `prompt()`; the record at the
+  end, 70; `scripts/autoplay-check.mjs`. For Robert to agree before anything is built.
+- **Moved:** nothing (documentation).
