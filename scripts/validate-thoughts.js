@@ -5,8 +5,8 @@
 //
 // Checks (engine/thoughts.js): ids carry their paragraph and scene; tags, subtypes, confidence and profile are
 // known; premises and relation targets exist and come no later; every quote is found and none lies ahead; a
-// relation to one member of a set names a candidate the target lists; `maps` resolve to case cards; the data
-// mirrors docs/reading-annotated.md. Reports, without failing: how many thoughts of each tag a case card holds,
+// relation to one member of a set names a candidate the target lists; `maps` resolve to case cards; the ids the
+// prose cites exist; the data mirrors docs/reading-annotated.md field by field (Round 183). Reports, without failing: how many thoughts of each tag a case card holds,
 // where the game deals a RECORD's card later than the reader could have it, and background cards with no rule;
 // and the short chains: each deduction-type thought's inference, premises that disagree with what it cites, the
 // earliest-date misses, inferences named twice, and inferences no thought names (implicit or not yet marked).

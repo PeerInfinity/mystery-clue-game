@@ -4398,3 +4398,22 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   open items closed as annotation questions. Proposed: B1 the files agree, B2 a `remark` field, B3 honesty, B4 the
   typed notes, B5 the validator's new checks; eight questions for Robert.
 - **Moved:** nothing (documentation).
+
+## Round 183 (2026-10-19): the review agreed; B1, the two files agree, and the validator's mirror
+
+- **Agreed (Robert):** every recommendation of `docs/review-annotations.md` (Q1–Q8: a `remark` field marked "*Note:*"
+  in the markdown; typed notes in the first person where the reader speaks of an earlier move; sets in braces typed as
+  questions; the alt-reader thoughts typed as the reader who made every move; a ⚠ on `t21.2`, `t34.2`, `t60.3`; the
+  empty TESTs left; `t102.4` re-tagged PHYSICAL; the batches in order) and the LLM checker over every note the autoplay
+  types (its cost has been trivial).
+- **Validator** (`engine/thoughts.js`, B5's first part): `parseAnnotation` reads each entry of
+  `docs/reading-annotated.md` (tag, subtype, confidence, profile, `from`, relations, Holmes's paragraphs, `reads`,
+  prose), and the data must mirror it field by field (bold and line breaks aside), where before only ids and tags were
+  compared; every id a thought's prose cites must exist. Test: `thoughts.test.js`.
+- **B1** (both files): `t92.6`'s prose restored in the data (five of its nine steps had lost their last line);
+  `t57.3`'s `t81.2` → `t80.2`, `t146.2`'s `t123.2` → `t122.3`; the markdown takes the data's `from` (`t78.2`, `t122.3`,
+  `t224.1`) and `reads` (`t135.1`); the data takes the markdown's later Holmes paragraph (`t34.2` ¶219, `t92.14` ¶228)
+  and its history notes (which B2 moves into `remark`); `t92.9`–`t92.14` written in the markdown's own format (the
+  prose on its own line); `INFER·opportunity` in the tag table; `t124.2` cites `t66.1`, Mapleton's own search.
+- **Leak check:** no card text; the prose changed is the annotation's.
+- **Moved:** nothing in the logs, the reports or the gate listing (diffed in full); the action table rerun, unchanged.

@@ -110,3 +110,25 @@ test('a set-aside names a card the reader holds, and a hypothesis\'s candidates 
     const { errors } = checkThoughts(bad, model);
     for (const e of ['t6.2: sets aside r.opium_taste', 't24.3: arsenic is no answer', 't4.1: only a SET ASIDE thought']) assert.ok(errors.some((x) => x.startsWith(e)), e);
 });
+
+test('the annotation mirrors the data field by field, and the prose cites only thoughts that exist (Round 183)', () => {
+    const bad = structuredClone(data);
+    const t = (id) => bad.thoughts.find((x) => x.id === id);
+    t('t37.4').text += ' And more.';
+    t('t78.2').from = ['t78.1'];
+    t('t34.2').holmes = { ...t('t34.2').holmes, paras: [180, 182] };
+    t('t24.4').relations = [{ type: 'supports', target: 't24.3', member: 'money' }];
+    t('t135.1').reads = ['Oh, come in'];
+    t('t20.5').confidence = 'strong';
+    t('t46.5').text = t('t46.5').text.replace('t28.3', 't28.9');
+    const r = checkThoughts(bad, model, { markdown });
+    for (const e of [
+        "t37.4: its prose differs from the annotation's",
+        't78.2: cites t78.1, t35.2 in the annotation, t78.1 in thoughts.json',
+        't34.2: Holmes {"paras":[180,182,219],"range":true} in the annotation, {"paras":[180,182],"range":true} in thoughts.json',
+        't24.4: relations strains t24.3 (drug); supports t24.3 (money) in the annotation, supports t24.3 (money) in thoughts.json',
+        't135.1: reads other words in the annotation',
+        't20.5: confidence fair in the annotation, strong in thoughts.json',
+        't46.5: its prose cites t28.9, which does not exist',
+    ]) assert.ok(r.errors.includes(e), e);
+});

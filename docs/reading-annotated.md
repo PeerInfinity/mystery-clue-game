@@ -71,7 +71,7 @@ quotes the clause it reads (`reads "..."`). That quote, not the whole paragraph,
 | ABSENCE | | Expecting something the text doesn't report. | File an expectation (set up earlier in the text) as "expected, not reported". |
 | QUESTION | ·opportunity ·motive ·turn-around | Naming a blank. `·turn-around`: inverting a question to make it productive. | Pin a "?" card on a blank or a card. |
 | HYPOTHESIS | ·opportunity ·motive ·scenario | Proposing a set of candidate explanations, held open. `·scenario`: a whole story of the night. | Put candidates on a blank; sets stay open until pruned. |
-| INFER | | A step as good as certain given its premises. | Combine cards; the engine checks the step. |
+| INFER | ·opportunity | A step as good as certain given its premises. | Combine cards; the engine checks the step. |
 | DEFAULT | ·period | A step through background knowledge that usually holds, with named exceptions. `·period`: a belief of 1892 that the game presents in period terms without endorsing it. | Combine cards under a rule card whose exceptions can later be played against it. |
 | AGENT | | Reasoning about what a person in that position would do or would have done. | As DEFAULT, with a rule about people. |
 | PHYSICAL | | Reasoning about what could physically happen. | As DEFAULT, with a rule about the world. |
@@ -640,7 +640,7 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 **¶78**
 - `t78.1` **RECORD** · *strong* · typical
   reads "a box of vestas, two inches of tallow candle, an A.D.P. briar-root pipe, a pouch of seal-skin ... a silver watch with a gold chain, five sovereigns in gold, an aluminium pencil-case, a few papers, and an ivory-handled knife with a very delicate, inflexible blade"
-- `t78.2` **INFER** · *strong* · typical · from `t78.1`
+- `t78.2` **INFER** · *strong* · typical · from `t78.1`, `t35.2`
   Five sovereigns and a gold-chained watch are still on the body. Not a robbery, and nobody searched him.
 - `t78.3` **NOTICE** · *fair* · careful · from `t78.1` · Holmes ¶224 (the Colonel)
   **A candle** as well as matches. Matches go with the pipe; a candle is for close work in the dark.
@@ -759,17 +759,19 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
   Derbyshire is Straker, Straker is keeping a second household, and its debts are his motive. (Added in Round 55.)
 
 **Predictions a reader can make here, before Holmes checks them:**
-- `t92.9` **PREDICT** · *weak* · careful · from `t78.5` · Holmes ¶102–¶106: a spent match in the hollow.
-- `t92.10` **PREDICT** · *fair* · careful · from `t35.8`, `t35.9`, `t92.6` · Holmes ¶94–¶96: the coat was laid on
-  the bush, which will show if the night was still.
-- `t92.11` **PREDICT** · *fair* · careful · from `t40.4` · Holmes ¶116–¶119: the horse's tracks lead towards
-  Mapleton.
-- `t92.12` **PREDICT** · *fair* · careful · from `t92.5` · Holmes ¶229: the milliner recognises Straker's photograph.
-- `t92.13` **PREDICT** · *weak* · expert · from `t40.4`, `t92.6` · Holmes ¶111, ¶161: the horse will be found in
-  time to run, so Holmes will want him kept entered.
-- `t92.14` **AGENT** → **PREDICT** · *weak* · expert · from `t81.5`, `bk.practice` · Holmes ¶170–¶175, ¶228: a careful man doesn't
-  attempt a delicate operation cold, so Straker practised on something first. ⚠ high: reachable only by asking
-  "would he do this cold?", and almost no first-time reader asks it.
+- `t92.9` **PREDICT** · *weak* · careful · from `t78.5` · Holmes ¶102–¶106
+  A spent match in the hollow.
+- `t92.10` **PREDICT** · *fair* · careful · from `t35.8`, `t35.9`, `t92.6` · Holmes ¶94–¶96
+  The coat was laid on the bush, which will show if the night was still.
+- `t92.11` **PREDICT** · *fair* · careful · from `t40.4` · Holmes ¶116–¶119
+  The horse's tracks lead towards Mapleton.
+- `t92.12` **PREDICT** · *fair* · careful · from `t92.5` · Holmes ¶229
+  The milliner recognises Straker's photograph.
+- `t92.13` **PREDICT** · *weak* · expert · from `t40.4`, `t92.6` · Holmes ¶111, ¶161
+  The horse will be found in time to run, so Holmes will want him kept entered.
+- `t92.14` **AGENT** → **PREDICT** · *weak* · expert · from `t81.5`, `bk.practice` · Holmes ¶170–¶175, ¶228
+  A careful man doesn't attempt a delicate operation cold, so Straker practised on something first. ⚠ high:
+  reachable only by asking "would he do this cold?", and almost no first-time reader asks it.
 
 **What remains uncertain:** what killed Straker (`t46.6`); why he carried the cravat (`t60.3`); who has the horse
 (`t40.4`); who drugged the dish (`t92.8`).
@@ -918,7 +920,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
   reads "The double track turned sharp off and took the direction of King's Pyland"
 - `t122.2` **RECORD** · typical
   reads "saw to my surprise the same tracks coming back again in the opposite direction"
-- `t122.3` **AGENT** · *fair* · careful · from `t122.1`, `t122.2` · Holmes ¶146
+- `t122.3` **AGENT** · *fair* · careful · from `t122.1`, `t122.2`, `bk.leading_intent` · Holmes ¶146
   The man set out to lead the horse home to King's Pyland, then changed his mind and turned back. He found
   the horse first and made his decision afterwards.
 
@@ -926,7 +928,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 - `t124.1` **RECORD** · *strong* · typical
   reads "It ended at the paving of asphalt which led up to the gates of the Mapleton stables"
 - `t124.2` **INFER** · *strong* · typical · from `t124.1`, `t122.2`, `t117.1` · supports `t40.4`, `t64.3` · Holmes ¶146
-  The horse was taken into Mapleton. Since Mapleton was searched (`t64.1`), the searchers missed him, and the
+  The horse was taken into Mapleton. Since Mapleton was searched (`t66.1`), the searchers missed him, and the
   disguise (`t64.3`) or some trick explains how.
 
 **¶126–¶127**
@@ -947,6 +949,7 @@ test it directly (`t107.2`) is withheld. Open: where the horse went (`t108.2`), 
 - `t133.1` **RECORD** · typical
   reads "Holmes leaned forward and whispered something in the trainer's ear. He started violently and flushed to the temples"; "It's a lie!"; "an infernal lie!"
 - `t135.1` **WEIGH** · *fair* · careful · from `t133.1`, `bk.guilty_denial` · supports `t127.4`
+  reads "Oh, come in if you wish to."
   A violent denial, followed at once by an invitation into the parlour. Whatever Holmes said hit something true.
 
 **¶137–¶143**
@@ -1167,7 +1170,7 @@ of Holmes's facts the reader had, and which appear here for the first time.
   The turn-around (`t57.3`) had two answers, noise and light. Holmes gives noise.
 
 **¶224**
-- `t224.1` **TEST** · *strong* · careful · supports `t78.3`, `t102.2`, `t102.3 (candle)`
+- `t224.1` **TEST** · *strong* · careful · from `t78.1`, `t102.2` · supports `t78.3`, `t102.2`, `t102.3 (candle)`
   reads "Of course that was why he needed the candle, and struck the match."
   The Colonel, not Holmes, makes this step: a character in the story performs a reader's move.
 

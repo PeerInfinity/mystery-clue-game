@@ -200,12 +200,16 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         } else if (implicitRequired && DEDUCTION.includes(t.tag) && t.inference === undefined) err(`${t.id}: a ${t.tag} thought names no inference and gives no no_inference reason`);
     }
 
-    // The Markdown mirror: the same ids with the same tags.
+    // The ids a thought's prose cites (Round 183): each one a thought or a background card that exists.
+    for (const t of thoughts) for (const id of citedIds(t.text)) if (!byId.has(id) && !bkIds.has(id)) err(`${t.id}: its prose cites ${id}, which does not exist`);
+
+    // The Markdown mirror (Round 183): the same thoughts, field by field (bold and line breaks aside).
     if (markdown !== null) {
-        const md = new Map([...markdown.matchAll(/^- `(t\d+\.\d+)` \*\*([A-Z ]+)/gm)].map((x) => [x[1], x[2]]));
-        for (const [id, tag] of md) {
-            if (!byId.has(id)) err(`${id}: in the annotation but not in thoughts.json`);
-            else if (byId.get(id).tag !== tag) err(`${id}: tagged ${tag} in the annotation, ${byId.get(id).tag} in thoughts.json`);
+        const md = parseAnnotation(markdown);
+        for (const [id, e] of md) {
+            const t = byId.get(id);
+            if (!t) { err(`${id}: in the annotation but not in thoughts.json`); continue; }
+            for (const x of mirrorDiffs(t, e)) err(`${id}: ${x}`);
         }
         for (const id of byId.keys()) if (!md.has(id)) err(`${id}: in thoughts.json but not in the annotation`);
     }
@@ -248,6 +252,76 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
     for (const k of chains.unnamed) if (implicitRequired) err(`${k}: no thought names this inference, and it is not marked implicit`);
     for (const x of chains.implicitNamed) err(`${x.inference}: marked implicit, but ${x.thought} names it`);
     return { errors, coverage, dateGaps, chains, unmappedBackground: background.filter((b) => !(b.maps ?? []).length).map((b) => b.id) };
+}
+
+// The ids a piece of prose cites: thoughts (t<¶>.<n>) and background cards (bk.<name>).
+export const citedIds = (text) => [...(text ?? '').matchAll(/\b(t\d+\.\d+|bk\.[a-z_]+)\b/g)].map((x) => x[1]);
+
+/**
+ * docs/reading-annotated.md's thoughts, by id: each entry's header (tag, subtype, confidence, profile, premises,
+ * relations, Holmes's paragraphs), its `reads` and its prose, as the data would hold them.
+ *
+ *   - `t35.6` **WEIGH** · *strong* · careful · from `t12.2` · Holmes ¶226 (contradicts)
+ *     reads "It was clear, …"; "…"
+ *     The prose, over as many lines as it takes.
+ */
+export function parseAnnotation(markdown) {
+    const out = new Map();
+    let cur = null;
+    for (const line of markdown.split('\n')) {
+        const m = line.match(/^- `(t\d+\.\d+)` \*\*([A-Z ]+?)(?:·([a-z-]+))?\*\*(.*)$/);
+        if (m) {
+            cur = { id: m[1], tag: m[2], subtype: m[3] ?? null, ...parseHeader(m[4]), reads: null, prose: [] };
+            out.set(cur.id, cur);
+            continue;
+        }
+        if (!cur || !/^ {2,}\S/.test(line)) { cur = null; continue; }
+        const s = line.trim();
+        if (cur.reads === null && !cur.prose.length && s.startsWith('reads "')) cur.reads = [...s.matchAll(/"([^"]*)"/g)].map((x) => x[1]);
+        else cur.prose.push(s);
+    }
+    for (const e of out.values()) e.text = e.prose.join(' ');
+    return out;
+}
+
+function parseHeader(h) {
+    const parts = h.split(' · ').map((x) => x.trim());
+    const ids = (s) => [...s.matchAll(/`([^`]+)`/g)].map((x) => x[1]);
+    const e = { confidence: null, profile: null, from: [], relations: [], holmes: undefined };
+    for (const p of parts) {
+        let m;
+        if ((m = p.match(/^\*([a-z ]+)\*$/))) e.confidence = m[1];
+        else if (PROFILES.includes(p)) e.profile = p;
+        else if (p.startsWith('from ')) e.from = ids(p);
+        else if ((m = p.match(/^Holmes (.*)$/))) e.holmes = m[1].trim() === '—' ? 'never' : { paras: [...m[1].replace(/\([^)]*\)/g, '').matchAll(/¶(\d+)/g)].map((x) => +x[1]), range: /¶\d+–¶\d+/.test(m[1]) };
+        else for (const r of p.split(/; |, (?=(?:supports|strains|refutes|undercuts|revises|drops|answers|strained by) )/)) {
+            const rm = r.match(/^(supports|strains|refutes|undercuts|revises|drops|answers|strained by) (.*)$/);
+            if (rm) for (const x of ids(rm[2])) {
+                const [, target, member] = x.match(/^(\S+)(?: \((.*)\))?$/);
+                e.relations.push({ type: rm[1].replace(' ', '_'), target, ...(member && { member }) });
+            }
+        }
+    }
+    return e;
+}
+
+// How a thought's data differs from its entry in the annotation.
+function mirrorDiffs(t, e) {
+    const out = [];
+    const prose = (s) => (s ?? '').replace(/\*\*/g, '').replace(/\s+/g, ' ').trim();
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    if (e.tag !== t.tag) out.push(`tagged ${e.tag} in the annotation, ${t.tag} in thoughts.json`);
+    if (e.subtype !== (t.subtype ?? null)) out.push(`subtype ${e.subtype} in the annotation, ${t.subtype ?? null} in thoughts.json`);
+    if (e.confidence !== (t.confidence ?? null)) out.push(`confidence ${e.confidence} in the annotation, ${t.confidence ?? null} in thoughts.json`);
+    if (e.profile !== t.profile) out.push(`profile ${e.profile} in the annotation, ${t.profile} in thoughts.json`);
+    if (!same([...e.from].sort(), [...(t.from ?? [])].sort())) out.push(`cites ${e.from.join(', ') || 'nothing'} in the annotation, ${(t.from ?? []).join(', ') || 'nothing'} in thoughts.json`);
+    const rel = (rs) => rs.map((r) => `${r.type} ${r.target}${r.member ? ` (${r.member})` : ''}`).sort();
+    if (!same(rel(e.relations), rel(t.relations ?? []))) out.push(`relations ${rel(e.relations).join('; ') || 'none'} in the annotation, ${rel(t.relations ?? []).join('; ') || 'none'} in thoughts.json`);
+    const holmes = (h) => (h === undefined || h === null ? null : h === 'never' || h.never ? 'never' : { paras: h.paras ?? [], range: !!h.range });
+    if (!same(holmes(e.holmes), holmes(t.holmes))) out.push(`Holmes ${JSON.stringify(holmes(e.holmes))} in the annotation, ${JSON.stringify(holmes(t.holmes))} in thoughts.json`);
+    if (!same(e.reads, t.reads ?? null)) out.push('reads other words in the annotation');
+    if (prose(e.text) !== prose(t.text)) out.push('its prose differs from the annotation\'s');
+    return out;
 }
 
 // The short chains: each deduction-type thought against its inference.
