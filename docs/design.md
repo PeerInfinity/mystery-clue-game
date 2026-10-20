@@ -4541,3 +4541,13 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Fixed:** the build follows `import('./x.js')` (and stamps it with the build's version, as the static imports are)
   and `url(...)` in the stylesheets. The site gains exactly those two files (the old and new builds' lists diffed).
 - **Moved:** nothing in the logs, the reports or the gate listing (the build script only).
+
+## Round 191 (2026-10-20): the site publishes the action table
+
+- **Robert's report:** after Round 190, `?autoplay` on GitHub Pages failed at its start: `action-table.json` 404 (the
+  autoplay fetches it as its script, `ui/autoplay.js`); the build published only the case files `case.json` names.
+- **Fixed:** `scripts/build-site.js` adds each case's `action-table.json` when it has one.
+- **Checked this time through the built site:** `_site` built, served alone (port 8323), `?autoplay` opened in headless
+  Chrome: playing at ¶6 after 40 s at 1×, notes in the hand, no console error; no 404 but the favicon (none ever).
+  Round 190 checked only that the two files were served, which let this one through.
+- **Moved:** nothing (the build script only).
