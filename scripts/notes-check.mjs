@@ -88,6 +88,13 @@ await p.click('#notes-mode');
 const ok = await p.ev(`(() => { const m = document.querySelector('#story p[data-p="37"] .m'); if (!m) return false; m.click(); return true; })()`);
 await p.idle();
 check(ok && ((await game()).collected ?? []).length > collected0, 'mode off: a click collects');
+// A second click on the same words opens their card (Round 198), or the menu of their cards.
+const ids = await p.ev(`document.querySelector('#story p[data-p="37"] .m').dataset.ids.split(' ')`);
+await p.ev(`document.querySelector('#story p[data-p="37"] .m').click(); 1`);
+await p.idle();
+await p.ev(`document.querySelector('#pop:not([hidden]) .item')?.click(); 1`);
+await p.idle();
+check(ids.includes((await p.state())?.selected), 'a second click on collected words opens their card');
 // 7. The Notes tab: listed; delete and undo.
 await p.click('.panel[data-panel="1"] .tab[data-tab="notes"]');
 check((await p.ev(`document.querySelectorAll('.tool-body .n-list li').length`)) === 3, 'the Notes tab lists three');

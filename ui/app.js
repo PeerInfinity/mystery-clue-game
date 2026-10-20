@@ -1899,10 +1899,10 @@ function onStoryClick(e) {
         if (got.length) {
             toast(`Collected: ${got.map((id) => esc(shortName(id, 40))).join(', ')}`);
             changed();
-        } else if (ids.length) {
-            toast('You already have that.');
-        } else toast('Nothing to note there.');
-        return;
+            return;
+        }
+        if (!ids.length) { toast('Nothing to note there.'); return; }
+        // Words already collected open their card, as on the other levels (Round 198).
     }
     if (!m) return;
     const ids = m.dataset.ids.split(' ');

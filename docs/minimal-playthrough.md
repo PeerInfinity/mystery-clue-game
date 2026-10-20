@@ -138,10 +138,10 @@ the doubt, the weighing, and the asks, collects and builds nothing scored uses.
   the card panel is clicked; otherwise the list (as now). Collects first within a paragraph. Reading by the farthest of
   Next paragraph, Next scene and Next deduction. For the minimal playthrough only, or for both (the annotated one would
   save about 200 clicks; recommended for the minimal one only, so the annotated reader is shown as it was checked).
-- **(b) A change to the game (Robert's call; not proposed):** on Hard, a click on words already collected opens their
-  card (today: "You already have that."). With the story on the left and the card on the right, a clue would open in one
-  click from the story with no tab change; most of the 94 tab changes left are story↔list switches. It changes play for
-  every player, so it is a question of direction, not of this work.
+- **(b) Collected words open their card:** **fixed, Round 198** (Robert: a bug). On Hard a click on words that bring
+  nothing new opens their card (or the menu of their cards), as on the other levels. With the story on the left and the
+  card on the right, a clue opens in one click from the story with no tab change; the counts above predate it (most of
+  the 94 tab changes left were story↔list switches) and are to be measured again.
 
 ### M5. Where the minimal playthrough lives
 

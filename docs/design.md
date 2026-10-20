@@ -4630,3 +4630,16 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Found:** on Hard a click on collected words does not open the card (the kickoff assumed it did); a drop scores
   whatever its reason, held or not (`dropScores` does not consult `dropCheck`): both put to Robert, not changed.
 - **Moved:** nothing (documentation).
+
+## Round 198 (2026-10-20): on Hard, collected words open their card
+
+- **Robert's ruling** on the paper of Round 197: that on Hard a click on words already collected did not open their
+  card ("You already have that.") is a bug, to fix before the rest.
+- **Fixed** (`ui/app.js`, `onStoryClick`): on Hard a click that collects something new collects (as before); a click on
+  words whose cards are all held opens the card, or the small menu of the cards when the words carry several, as on the
+  other levels. Notes mode is unchanged (a click there writes a note).
+- **Checked** in headless Chrome: Watson and Holmes collected by a first click, opened by a second; "the favourite"
+  (two cards) collected, then the menu, then the event opened. `scripts/notes-check.mjs` gains the check (22 of 22);
+  `scripts/autoplay-check.mjs` 12 of 12 (70, no console error).
+- **The paper** (`docs/minimal-playthrough.md` M4 b) notes the fix; its click counts are to be measured again.
+- **Moved:** nothing in the logs, the reports or the gate listing (the page only).
