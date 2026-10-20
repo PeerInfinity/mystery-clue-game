@@ -4578,3 +4578,11 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   with the real mouse (deleted, the toast's undo); `scripts/autoplay-check.mjs` 12 of 12 (393 moves, 376 notes, 70, no
   console error); screenshots desktop and phone, and the autoplay typing at 1×.
 - **Moved:** nothing in the logs, the reports or the gate listing (the page only).
+
+## Round 194 (2026-10-20): the autoplay's cursor at half the speed
+
+- **Robert's ask:** the mouse movements at half their speed, the typing as it is. A glide now takes a second at 1×
+  (it was half a second, `docs/autoplay.md` A5), divided by the speed as before (4 s at ¼×, a quarter second at 4×);
+  the typing (about 12 characters a second at 1×) and the pauses are unchanged.
+- **Checked:** `scripts/autoplay-check.mjs` plays with no cursor (its fastest), so it is unaffected; nothing else moves.
+- **Moved:** nothing (the autoplay's cursor only).

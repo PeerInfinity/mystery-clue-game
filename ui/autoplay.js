@@ -80,7 +80,7 @@ export async function start({ store, fast, story, valueName, toast }) {
     async function glide(x, y) {
         if (fast) return;
         const f = factor();
-        const ms = f ? 500 / f : 0;
+        const ms = f ? 1000 / f : 0; // a second at 1× (Round 194: half the speed it had)
         cursor.style.transition = ms ? `transform ${ms}ms ease-in-out` : 'none';
         cursor.style.transform = `translate(${x}px, ${y}px)`;
         cx = x; cy = y;
