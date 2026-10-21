@@ -4665,3 +4665,22 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   counted (2)" say each; the merged mud rows counted once.
 - **Docs:** `docs/format-0.3.md` (as built), `docs/hypotheses.md` and `docs/predictions.md` (Changed),
   `docs/minimal-playthrough.md` (the finding settled).
+
+## Round 200 (2026-10-20): the minimal playthrough's table
+
+- **Robert agreed** `docs/minimal-playthrough.md` (every recommendation as written).
+- **Built:** `engine/minimalTable.js` (the replay of a list of moves as the action table makes them; the closure of the
+  scoring moves backwards through what each needs; the batching; the table) and `scripts/minimal-table.js` (`npm run
+  minimal-table`: the pruning in parallel worker threads, rounds until nothing can go alone) →
+  `cases/silver-blaze/action-table-minimal.json`: **144 moves at 13 paragraphs, 70 ahead**, none removable alone.
+  `engine/minimalTable.test.js`: made of the action table's moves, none earlier than the reader's; replayed, the maximum
+  with every move taking.
+- **Three changes from the paper's measures:** batched before pruning (no build put back by hand); the paragraphs with
+  moves chosen by a search for the fewest reading clicks (76; the stabbing's own paragraphs took 83); and two page
+  constraints the engine does not have, both found by `scripts/ui-run.mjs` on the first tables (69: "no answer box"):
+  an answer is proposed only on a question the page shows (a held clue speaks of it) and has not settled. The replay
+  now refuses such an answer, the answer is proposed before its question settles in the reader's game, and the card
+  that shows the question is kept (two collects more).
+- **Checked:** `scripts/ui-run.mjs` on the minimal table through the page: 144 moves, none failed, the record 70 (6
+  minutes). The script takes 75–80 minutes on this machine under load (three rounds of about 155 replays).
+- **Moved:** nothing in the logs or reports (new files only).

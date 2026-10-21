@@ -1,6 +1,6 @@
 # A minimal playthrough to the Hard maximum, a choice of playthroughs, and the game's statistics
 
-Status: **WRITTEN** (Round 197), for Robert to agree. Two findings settled first: collected words open their card on Hard (Round 198); drops score only for a reason that holds, hedged checks not at all (Round 199). Nothing is built until he does. The work of
+Status: **AGREED** (Robert, 2026-10-20, Round 200: every recommendation as written). Written Round 197. Two findings settled first: collected words open their card on Hard (Round 198); drops score only for a reason that holds, hedged checks not at all (Round 199). Nothing is built until he does. The work of
 `docs/kickoff-minimal-playthrough.md` (Robert's ask, Round 196). Builds on the action table
 (`cases/silver-blaze/action-table.json`, `engine/actionTable.js`: the annotated reader's moves on Hard) and the autoplay
 (`docs/autoplay.md`, `ui/autoplay.js`).
@@ -213,3 +213,31 @@ Each step one commit with a Round entry, gated on `npm test`; the logs, reports 
    `?autoplay=minimal`?
 6. **M7:** `stats.md` written by a script, and the autoplay's closing line counting its clicks?
 7. **The order of work** above?
+
+## Agreed (Robert, Round 200)
+
+Every recommendation as written: minimal = the fewest of the annotated reader's moves that reach 70, then the fewest
+clicks for them, the wrong turns kept (M1–M2); the moves batched just before their deadlines (M3 b); the autoplay
+takes the shortest way to each card in the minimal playthrough only (M4 a); a second table file built by a script and
+tested (M5 a); chosen on the strip before starting and by `?autoplay=minimal` (M6); `stats.md` written by a script,
+and the autoplay's closing line counting its clicks (M7 a, b); the order of work. Settled before: collected words open
+their card on Hard (Round 198), a drop scores only for a reason that holds and a hedged check not at all (Round 199).
+
+## As built (Rounds 200–202)
+
+- **The minimal table** (Round 200: `engine/minimalTable.js`, `npm run minimal-table`, `action-table-minimal.json`):
+  **144 moves at 13 paragraphs, 70 ahead** (collect 73, ask 10, build 37, notice 7, seal 7, raise 3, drop 3, candidate
+  2, theory 1, file 1); none can be removed alone. Three changes from the measures above:
+  - **batched first, then pruned** under the batched timing, so the pruning never removes a move that only proved a
+    step at the reader's own paragraph (in the measures one build had to be put back by hand);
+  - **the paragraphs with moves are chosen for the fewest reading clicks** (every move's window holds one; a search
+    over the paragraphs, the reading between them counted as the page reads, `readingClicks`): ¶29, 46, 80, 85, 92,
+    95, 101, 115, 122, 124, 143, 188, 201, **76 reading clicks** (231 a paragraph at a time; 18 to read the story
+    through with no moves at all);
+  - **what the page needs and the engine does not** (found by `scripts/ui-run.mjs`): an answer is proposed only on a
+    question the page shows and has not settled, so the two answers dropped are proposed before their questions settle
+    in the reader's game, and the cards that show the questions are kept (two collects more: 144, not 142).
+- **Checked:** `engine/minimalTable.test.js` (the table's moves are the action table's, none earlier than the reader
+  made them; replayed it reaches the maximum, every move taking); `scripts/ui-run.mjs` on it: 144 moves, none failed,
+  the record 70.
+

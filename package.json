@@ -10,7 +10,8 @@
     "foreshadow-log": "node scripts/foreshadow-log.js cases/silver-blaze > .cache/foreshadow-log.txt",
     "clash-log": "node scripts/clash-log.js cases/silver-blaze > .cache/clash-log.txt",
     "validate-thoughts": "node scripts/validate-thoughts.js cases/silver-blaze",
-    "action-table": "node scripts/action-table.js"
+    "action-table": "node scripts/action-table.js",
+    "minimal-table": "node scripts/minimal-table.js"
   },
   "devDependencies": {
     "ajv": "^8.17.1"
