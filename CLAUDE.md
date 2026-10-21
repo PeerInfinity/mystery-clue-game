@@ -1,10 +1,10 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/hints.md` — the hint system (Round 204): measured (70 rows, ~36 open at once, windows median 111 ¶), the
-  direction decided by Robert (free for now, a cooldown later; on request; the nearest deadline; all difficulties; the
-  bar and a Hints tab; four rungs, the last makes the move; a catch-up note at missed deadlines); its details H1–H9
-  await his agreement. Nothing built yet.
+- `docs/hints.md` — the hint system: agreed (Rounds 204–205: free for now, a cooldown later; on request; the nearest
+  deadline; all difficulties; the bar and a Hints tab; four rungs, the last makes the move (Do it); a catch-up note at
+  missed deadlines). Step 1 built (Round 205): `hints.json` (`npm run hints`), `engine/hints.js`, the hint-only player
+  to 70. Next: step 2, the page (the bar's Hint, More, Do it; the Hints tab; `scripts/hints-check.mjs`).
 - `docs/kickoff-hints.md` — the discussion it opened (Round 203), done in Round 204: its paper `docs/hints.md`.
 - `docs/minimal-playthrough.md` — agreed (Round 200), built (Rounds 200–202): the fewest of the annotated reader's
   moves that reach 70, batched before their deadlines (`action-table-minimal.json`, `npm run minimal-table`); the
@@ -87,6 +87,7 @@
 | Every clash met and what it sets aside, for three kinds of player (about a minute; `--build` adds a fourth, 5 min) | `npm run clash-log` (→ `.cache/clash-log.txt`) |
 | The action table (the annotation's moves in the UI on Hard, the autoplay's script) → `cases/silver-blaze/action-table.json`; rerun when the case or the thoughts change (a test checks it is up to date and reaches the Hard maximum) | `npm run action-table` (about 3–5 min) |
 | The minimal playthrough (`docs/minimal-playthrough.md`): the fewest of the action table's moves that reach the Hard maximum, batched before their deadlines → `cases/silver-blaze/action-table-minimal.json`; rerun when the action table changes (a test checks it is made of the table's moves and reaches the maximum) | `npm run minimal-table` (about 20–40 min; parallel, `WORKERS=n`) |
+| The hints' data (`docs/hints.md`): the minimal playthrough's moves with what each needs, and the 70 rows with the moves that make them → `cases/silver-blaze/hints.json`; rerun when the case or a table changes (a test checks it) | `npm run hints` (about 1½ minutes) |
 | The game's statistics (content, the two playthroughs by kind and by scene) → `cases/silver-blaze/stats.md`; rerun when the case or a table changes (a test checks it) | `npm run stats` |
 | Play the action table through the real UI in headless Chrome (port 9333; one script at a time), each move checked in the save; the record at the end (about 12–13 min) | `node scripts/ui-run.mjs` (→ `.cache/ui-run.json`; `STOP=<para>` for a part) |
 | The player's notes played through the page in headless Chrome (real mouse and keys: a note at a point, on marked words, a highlight, edit, delete and undo, the settings, reload, Start over), each step checked in the save (about a minute) | `node scripts/notes-check.mjs [shots dir]` |

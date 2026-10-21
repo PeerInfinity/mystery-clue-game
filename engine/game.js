@@ -350,6 +350,7 @@ export class Game {
         this.rereads = [];              // [{from, to, question, para}]: passages the player went back over (workstream 8)
         this.posed = [];                // [{id, template, cards, para, candidates, joined}]: the player's own questions (docs/questions.md)
         this.notes = [];                // [{id, para, at, from, to, text}]: the player's notes on the story (docs/notes.md); never read by the game
+        this.hintLog = [];              // [{para, thought, family, rung, at}]: the hints given (docs/hints.md); never read by a score
         // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
@@ -389,6 +390,7 @@ export class Game {
             rereads: this.rereads,
             posed: this.posed.map((q) => [q.id, q.template, q.cards, q.para, q.candidates, q.joined]),
             notes: this.notes.map((n) => [n.id, n.para, n.at, n.from, n.to, n.text]),
+            hints: this.hintLog,
             made: [...this.#noteMade()],
             board: this.board,
             openedSplits: this.openedSplits,
@@ -483,6 +485,7 @@ export class Game {
         }
         this.#noteJoins();
         for (const [id, para, at, from, to, text] of state.notes ?? []) this.addNote({ para, at, from, to, text }, id);
+        this.hintLog = structuredClone(state.hints ?? []);
         if (board) this.board = { ...TL.emptyBoard(), ...board };
     }
 
@@ -1257,6 +1260,15 @@ export class Game {
         this.filed.push({ id: a.id, para });
         if (this.clashCache) this.clashCache = { ...this.clashCache, key: null };
         return { ok: true, id: a.id };
+    }
+
+    // ---------- hints (docs/hints.md) ----------
+    /** Log a hint given at the paragraph just read: the row it serves (thought and family), its rung, and when
+     *  (`at`, a time for the cooldown to come). The log is never read by a score. */
+    logHint(thought, family, rung, at = null) {
+        const h = { para: this.read - 1, thought, family, rung, at };
+        this.hintLog.push(h);
+        return h;
     }
 
     // ---------- notices (workstream 5, Round 84) ----------

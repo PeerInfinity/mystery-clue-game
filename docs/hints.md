@@ -1,7 +1,8 @@
 # A hint system, from the data the game has
 
-Status: **DIRECTION DECIDED** (Robert, 2026-10-21, Round 204: the six choices of "Decided" below, by question and by
-sight); **the details (H1–H8) await his agreement. Nothing is built until he agrees.** The work of
+Status: **AGREED** (Robert, 2026-10-21: the direction in Round 204, the six choices of "Decided" below, by question
+and by sight; H1–H9 as recommended in Round 205). Step 1 (the engine) built in Round 205 ("As built", at the end); H8's
+question (a cooldown per press or per target) is left for when the cooldown is built. The work of
 `docs/kickoff-hints.md` (Robert's ask, Round 203).
 
 ## What is asked
@@ -214,3 +215,45 @@ Each step one commit with a Round entry, gated on `npm test`.
   view: agreed?
 - H6: with free hints, Hard's 70 can be reached by pressing Hint. Accepted as decided, the log kept for later?
 - H8 (later): a cooldown per press or per target?
+
+## Agreed (Robert, Round 205)
+
+"I agree with your recommendations": H1–H7 and H9 as recommended; H4 with Do it; H6 as decided (free, the log kept).
+H8's question stays open until the cooldown is built.
+
+## As built
+
+### Step 1, the engine (Round 205)
+
+- **The data** (`cases/silver-blaze/hints.json`, `npm run hints`, about 1½ minutes; `engine/hintData.js`): the
+  minimal playthrough's 144 moves, each at the reader's paragraph, with `needs` (the moves that first gave what it
+  needs: `dependencies`, drawn out of `closureAndBatch` in `engine/minimalTable.js`), `wants` (its cards, theories,
+  candidates, questions shown), `src` (for each want, the move it came from) and `lost` (the paragraph from which the
+  move is too late); and the 70 rows that score on Hard, each with its deadline and `makes`, the moves that make it.
+- **`makes` is found by replay as well as by kind.** A deduction can be made by an inference that covers its conclusion
+  rather than by its step's own (`t127.3`: the minimal playthrough never builds `k.first_up_and_no_subordinate`), so
+  the move after which each row is first made is added to the moves that make it by kind.
+- **Implicit inferences have a deadline of their own.** `k.wife_stayed_home` comes by itself once its premises are held
+  (the minimal playthrough collects them at ¶33); a player who has not collected them by ¶102 hears Holmes state it and
+  can never make the four deductions that need it (`t46.4`, `t220.3`, `t81.5`, `t173.2`). So the moves that give an
+  implicit inference's premises are among the moves that make the row, `lost` where the story states it; and a build is
+  `lost` where the story states its inference. A row's `due` is the nearer of its deadline and its moves' `lost`, and
+  the target is the open row with the nearest `due` (H1's "nearest deadline", made exact).
+- **A row is open as soon as a step of it can be made** (a move other than collecting or asking, all it wants held or
+  coming from another move that can be made now), not only when all of it can: the hint works on the deepest missing
+  piece, as H2a said. Readiness by the reader's paragraph alone was not enough: a raise wanted a card the reader held at
+  ¶40 and a player who had done less did not.
+- **`engine/hints.js`:** `madeRows(game)`; `new Hints(game, data)`: `plan(row)` (pruned by what the player has: a card
+  held, a fact asked, an inference built, an answer listed or settled, a theory held), `ready(plan)`, `open()`,
+  `next()` (the same row while it stays open, a rung a press, the fourth kept), `take()` (logged), `parts(row, rung)`:
+  `where` (paragraphs), `kind` (the move, what it is about, how many steps), `which` (each card held, or the words to
+  click in a read paragraph, or the held card to ask about, or a build first; the step's fields with any card not held
+  masked), `moves` (the fourth rung: what Do it makes). `Game.logHint` and `hintLog`, saved as `hints`.
+- **Tested** (`engine/hints.test.js`, about 1½ minutes): `hints.json` up to date; at every paragraph of a game that only
+  reads and of the hint-only player, every rung of every open row names only held cards, read paragraphs and words of
+  read paragraphs; **the hint-only player** (a fresh Hard game that only reads and takes every hint to the fourth rung)
+  **reaches 70 with 57 targets, 228 presses**; the ladder climbs one target and moves on; the log comes back with a save;
+  no hints in Trivial.
+- **Left for step 2, the page:** a candidate the drop needs is proposed in the page from its chip, while the question
+  shows and is not settled (Round 200); at ¶40 the hint-only player's candidate for `t58.3` does not take in the engine
+  (the engine drops an answer unlisted), so Do it in the page must propose it where the page allows, or the rung say so.

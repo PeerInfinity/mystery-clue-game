@@ -11,7 +11,7 @@
 //      before its question is settled (the page offers no answer box from then on).
 import { Game } from './game.js';
 
-const SCORING_OPS = { deduction: ['build'], notice: ['notice'], raise: ['raise'], drop: ['drop', 'theory'], check: ['seal'], absence: ['file'] };
+export const SCORING_OPS = { deduction: ['build'], notice: ['notice'], raise: ['raise'], drop: ['drop', 'theory'], check: ['seal'], absence: ['file'] };
 
 /** The action table's moves in order, each with its thought. */
 export const movesOf = (table) => table.thoughts.flatMap((t) => t.moves.map((m) => ({ ...m, thought: t.id }))).sort((a, b) => a.seq - b.seq);
@@ -41,7 +41,7 @@ export function replayMoves(model, moves, { onMove = null } = {}) {
     return { record: g.record(), fails, game: g };
 }
 
-function make(g, model, m) {
+export function make(g, model, m) {
     switch (m.op) {
         case 'collect': {
             const segs = g.story.segments(m.from);
@@ -99,7 +99,7 @@ export function atMaximum(record, table) {
 
 /** What a move needs held: cards, a theory (`theory:<label>`), a listed candidate (`cand:<slot>=<value>`) or a question
  *  shown (`shown:<slot>`: a held clue or inference that speaks of it, or the story raising it). */
-function needs(model, m) {
+export function needs(model, m) {
     const on = (s) => model.slots.get(s)?.on;
     const theoryCards = (id) => Object.keys((model.data.theories ?? []).find((x) => x.id === id)?.assignment ?? {}).map(on);
     switch (m.op) {
@@ -118,10 +118,11 @@ function needs(model, m) {
 }
 
 /**
- * Stages 1 and 2: the closure of the scoring moves and their batched paragraphs.
- * → {moves: [move with `at` its stop and `was` the reader's paragraph], stops, deps: Map(seq → Set(seq)), pageOnly: Set(seq)}
+ * What each of the table's moves needs: replayed, the move (or, for a background fact the story brought, the first ask
+ * of a card it is about) that first gave each card it needs. → {all: moves, bySeq, depsOf: (move) → Set(seq), settles:
+ * Map(slot → paragraph first settled, for the candidates), g0: a fresh Hard game}
  */
-export function closureAndBatch(model, table) {
+export function dependencies(model, table) {
     const all = movesOf(table);
     const bySeq = new Map(all.map((m) => [m.seq, m]));
     const g0 = new Game(model, { difficulty: 'hard' });
@@ -144,21 +145,34 @@ export function closureAndBatch(model, table) {
     const owners = new Map();
     for (const [c, rs] of g0.rulesOn) for (const r of rs) (owners.get(r) ?? owners.set(r, []).get(r)).push(c);
     const deps = new Map();
+    const sources = new Map(); // seq → {want: the seq of the move it came from}
     const depsOf = (m) => {
         if (deps.has(m.seq)) return deps.get(m.seq);
         const out = new Set();
+        const from = {};
         for (const c of needs(model, m)) {
             if (!c) continue;
             const p = provider.get(c);
-            if (typeof p === 'number') { if (p !== m.seq) out.add(p); continue; }
+            if (typeof p === 'number') { if (p !== m.seq) { out.add(p); from[c] = p; } continue; }
             if (!p) continue; // never held in the reader's game: the move would not have been made
             // A background fact that arrived as the story reached it: from the first ask of a card it is about.
             const ask = all.find((x) => x.op === 'ask' && (owners.get(c) ?? []).includes(x.card) && x.at < p.at);
-            if (ask) out.add(ask.seq);
+            if (ask) { out.add(ask.seq); from[c] = ask.seq; }
         }
         deps.set(m.seq, out);
+        sources.set(m.seq, from);
         return out;
     };
+    const sourcesOf = (m) => { depsOf(m); return sources.get(m.seq); };
+    return { all, bySeq, depsOf, sourcesOf, deps, settles, provider, g0 };
+}
+
+/**
+ * Stages 1 and 2: the closure of the scoring moves and their batched paragraphs.
+ * → {moves: [move with `at` its stop and `was` the reader's paragraph], stops, deps: Map(seq → Set(seq)), pageOnly: Set(seq)}
+ */
+export function closureAndBatch(model, table) {
+    const { all, bySeq, depsOf, deps, settles, provider, g0 } = dependencies(model, table);
     // The scoring moves: those of the families' scored thoughts, and the inferences Holmes's steps need.
     const latest = new Map();
     const seed = new Set();

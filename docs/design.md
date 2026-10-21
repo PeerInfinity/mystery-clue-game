@@ -4742,3 +4742,21 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   live from the engine, the moves from the action table; rung 4 shown with Do it, played through the page in view; the
   hint log in the save; the invariant test and a hint-only player that must reach 70). `CLAUDE.md` names it first.
 - **Moved:** nothing (documentation).
+
+## Round 205 (2026-10-21): hints agreed; step 1, the engine
+
+- **Robert agreed** `docs/hints.md` H1–H9 as recommended (H8's question waits for the cooldown).
+- **Built:** `engine/hintData.js` and `scripts/hints.js` (`npm run hints`) → `cases/silver-blaze/hints.json`: the
+  minimal playthrough's moves with what each needs (`dependencies`, drawn out of `closureAndBatch`), what it wants and
+  where each want came from, where it is too late (`lost`), and the 70 rows with the moves that make them.
+  `engine/hints.js`: the open rows, the target (the nearest `due`), the plan pruned by what the player has, the four
+  rungs' parts, the log (`Game.logHint`, saved as `hints`).
+- **Found on the way, by the hint-only player** (it reached 65, 52, 66, then 70): a deduction made by a covering
+  inference (`t127.3`), found by replay; a step that wanted a card the reader held and a lesser player did not (readiness
+  by what the step wants, each want's source move); an implicit inference stated by Holmes at ¶102 before a hinted
+  player held its premises, which loses four deductions for good (the premises' moves `lost` there, the target by the
+  nearest `due`); a collected span that gives two cards (`src`, not the move's own card).
+- **Tested:** `engine/hints.test.js`: up to date; every rung of every open row at every paragraph of two games names
+  only held cards, read paragraphs and their words; the hint-only player reaches 70 (57 targets, 228 presses); the
+  ladder; the save; Trivial.
+- **Moved:** nothing in the logs or reports (new files; `engine/minimalTable.js` refactored, its output unchanged).
