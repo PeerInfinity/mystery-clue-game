@@ -1,8 +1,11 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-hints.md` — the next session's work (Round 203): discuss with Robert a hint system designed from the
-  data the game has (the annotation, the two action tables, the engine's live state), then a paper (`docs/hints.md`).
+- `docs/hints.md` — the hint system (Round 204): measured (70 rows, ~36 open at once, windows median 111 ¶), the
+  direction decided by Robert (free for now, a cooldown later; on request; the nearest deadline; all difficulties; the
+  bar and a Hints tab; four rungs, the last makes the move; a catch-up note at missed deadlines); its details H1–H9
+  await his agreement. Nothing built yet.
+- `docs/kickoff-hints.md` — the discussion it opened (Round 203), done in Round 204: its paper `docs/hints.md`.
 - `docs/minimal-playthrough.md` — agreed (Round 200), built (Rounds 200–202): the fewest of the annotated reader's
   moves that reach 70, batched before their deadlines (`action-table-minimal.json`, `npm run minimal-table`); the
   autoplay's choice of playthroughs (`?autoplay=minimal`); the statistics (`stats.md`, `npm run stats`). Settled on the

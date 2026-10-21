@@ -4725,3 +4725,20 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   before Holmes gives the score away; the data a hint could draw on: the annotation, the two action tables, the
   engine's live state, the statistics; candidate questions for the paper `docs/hints.md`). `CLAUDE.md` names it first.
 - **Moved:** nothing (documentation).
+
+## Round 204 (2026-10-21): a hint system, discussed; the paper
+
+- **Measured** (a scratch replay of the action table through `closureAndBatch`): for the 70 rows that score on Hard,
+  the window from the paragraph where all a row needs is in the story to Holmes's: median 111 ¶, 34 rows over 100,
+  10 within 5; about 36 rows open at once from ¶47 (at most 45); 35 deadlines in the explanation (¶215–231); under one
+  deduction a median 6 moves (at most 31). So "something to do" says nothing, a hint must choose a target, and a hint
+  before the deadline helps the score.
+- **Robert decided:** hints free for now, a configurable cooldown on the Hint button later; on request only; the target
+  the open row with the nearest deadline; all three difficulties; the reading bar and a Hints tab; four rungs (where,
+  what kind, which, the move), the last making the move; the catch-up note at a missed deadline on all difficulties.
+  The look by sight: mock-ups injected into the page at ¶40 (target `t31.3`), two and four rungs, the catch-up note,
+  desktop and phone.
+- **Written:** `docs/hints.md`, the measurements, the decisions and the details H1–H9 for his agreement (the target
+  live from the engine, the moves from the action table; rung 4 shown with Do it, played through the page in view; the
+  hint log in the save; the invariant test and a hint-only player that must reach 70). `CLAUDE.md` names it first.
+- **Moved:** nothing (documentation).
