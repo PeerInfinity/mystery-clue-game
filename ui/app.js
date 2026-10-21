@@ -4,6 +4,7 @@
 
 import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
+import { Hints, madeRows } from '../engine/hints.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
 import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
@@ -345,6 +346,163 @@ function showNote(id, from) {
     setTimeout(() => el.classList.remove('n-flash'), 1200);
 }
 
+// ---------- hints (docs/hints.md) ----------
+// On request, a ladder of four rungs toward the open row with the nearest deadline (engine/hints.js): where, what kind
+// of move, which cards, and the step itself with Do it, which makes the moves through the page as the autoplay does.
+// The rungs given show under the reading bar, folded once the story is read on; the Hints tab lists every hint given.
+let hintSource = null;
+const hints = () => (HINT_DATA ? (hintSource?.g === game ? hintSource : (hintSource = new Hints(game, HINT_DATA))) : null);
+const RUNG_NAMES = ['where to look', 'what kind of move', 'which cards', 'the step itself'];
+const paraLink = (p) => `<span class="link" data-hint-para="${p}">¶${p}</span>`;
+const andList = (xs) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
+const KIND_WORD = { events: 'event', claims: 'statement', entities: 'person or thing', inferences: 'inference', propositions: 'statement', glosses: 'word explained' };
+/** One card of a hint's third rung: held (named), words to click, a card to ask about, or a build first. */
+function hintCard(c) {
+    if (c.card) return model.cards.get(c.card)?.section === 'rules' ? `the background fact ${names([c.card])}` : names([c.card]);
+    const words = (w, p) => `click “${esc(w.trim())}” in ${paraLink(p)}`;
+    if (c.words !== undefined && c.ask === undefined) return `the ${KIND_WORD[c.section] ?? 'card'} you get when you ${words(c.words, c.para)}`;
+    if (c.ask) return `a background fact (ask what you know about ${link(c.ask, shortName(c.ask, 50))})`;
+    if (c.ask === null) return c.words !== undefined ? `a background fact (${words(c.words, c.para)}, then ask what you know about it)` : 'a background fact';
+    if (c.build) return 'an inference to build first';
+    return 'a card';
+}
+/** The hint's rungs, each in words (docs/hints.md, H3), from `parts` (Hints.parts). */
+function hintRungs(p) {
+    const out = [`<b>Where.</b> Look again at ${andList(p.where.map(paraLink))}: something there lets you get ahead of Holmes.`];
+    if (p.kind) {
+        const k = p.kind;
+        const kind = {
+            build: `An inference to build${k.steps > 1 ? ` (the first of ${k.steps} steps)` : ''}. Its conclusion is about: <i>${esc((CONCLUSION_KINDS[k.about] ?? 'what').toLowerCase())}</i>.`,
+            notice: 'Something there is odd: mark it as odd.',
+            raise: 'A step you hold may not follow: raise an exception against it.',
+            drop: 'An answer can be ruled out: drop it, with a reason.',
+            seal: 'A check to plan before Holmes makes it (the Checks tab).',
+            file: 'Something that should have happened did not: file it as an absence.',
+            candidate: 'An answer to propose, so that it can then be ruled out.',
+            theory: 'A theory to write down, so that another can be weighed against it.',
+        }[k.op] ?? 'A move to make.';
+        out.push(`<b>What kind of move.</b> ${kind}`);
+    }
+    if (p.which) {
+        const w = p.which;
+        const m = w.move;
+        const cards = w.cards.map(hintCard);
+        const answer = (slot, v) => (v === null ? 'an answer' : `“${esc(valueName(slot, v))}”`);
+        const which = {
+            build: () => `Connect ${andList([...new Set(cards)])}.`,
+            notice: () => `Mark ${cards[0]} as odd${cards[1] ? `, against ${cards[1]}` : ''}.`,
+            raise: () => { const e = game.knows(m.target) ? game.applicationsOf(m.target).flatMap((a) => a.exceptions).find((x) => x.id === m.exception)?.text : null; return `Against ${cards[0]}, raise${e ? `: “${esc(e)}”` : ' an exception'}.`; },
+            drop: () => (m.target.theory ? `Drop the theory “${esc(game.theories.find((t) => t.id === m.target.theory)?.label ?? 'a theory')}”: ${esc(DROP_LABELS[m.reason])}.` : `Drop ${answer(m.target.slot, m.target.value)} for “${esc(game.promptOf(m.target.slot))}”: ${esc(DROP_LABELS[m.reason])}${m.reason === 'card' && cards.length ? ` (${andList([...new Set(cards)])})` : ''}.`),
+            seal: () => `Plan the check ${Object.values(m.fields).every((x) => x !== null) ? checkText(m) : `on ${andList([...new Set(cards)])}`}${m.expect ? `, expecting ${esc(OUTCOME_WORDS[m.expect])}` : ''}.`,
+            file: () => `File it: ${cards[0]} should have happened, and ${cards[1]} says it did not.`,
+            candidate: () => `Propose ${answer(m.slot, m.value)} for “${esc(game.promptOf(m.slot))}”.`,
+            theory: () => `Write down the theory “${esc(m.label)}”.`,
+        }[w.op];
+        out.push(`<b>Which.</b> ${which ? which() : andList(cards)}`);
+    }
+    if (p.moves) {
+        const name = (id) => (game.knows(id) ? link(id, shortName(id, 50)) : 'it');
+        const verb = (m) => ({
+            collect: () => `click “${esc(m.words.trim())}” in ${paraLink(m.from)}`,
+            ask: () => `ask what you know about ${name(m.card)}`,
+            build: () => `build “${esc(cardName(m.inference))}”`,
+            notice: () => 'mark it as odd',
+            raise: () => 'raise the exception',
+            drop: () => 'drop it',
+            seal: () => 'seal the check',
+            file: () => 'file the absence',
+            candidate: () => 'propose the answer',
+            theory: () => 'write down the theory',
+        }[m.op] ?? (() => 'make the move'))();
+        const steps = p.moves.map(verb);
+        const said = andList(steps.map((x, i) => (i ? x : x[0].toUpperCase() + x.slice(1)))).replace(/ and ([^,]*)$/, ', then $1');
+        out.push(`<b>The step.</b> ${said}. <button id="hint-do" class="quiet">Do it</button> <span class="small muted">the game makes ${p.moves.length > 1 ? 'them' : 'it'} for you, here on the page</span>`);
+    }
+    return out;
+}
+/** The hint under the reading bar: the rungs given on the current target, More or Do it; folded once read on. */
+function hintNote() {
+    if (!hints() || game.autoSolves()) return '';
+    if (ui.hintNone === game.read) return '<div class="note hint-note">Nothing you have read yet gets you ahead of Holmes. Read on.</div>';
+    const h = ui.hint;
+    if (!h) return '';
+    const open = hints().open().find((r) => r.thought === h.thought && r.family === h.family);
+    if (!open) {
+        const made = madeRows(game).has(`${h.thought}|${h.family}`);
+        return made && h.para === game.read - 1 ? '<div class="note hint-note">Made. Press Hint for the next.</div>' : '';
+    }
+    if (h.para !== game.read - 1 && !h.unfold) return `<div class="note hint-note folded small">Hint (from ${paraLink(h.para)}): ${h.rung} of 4 given · <span class="link" data-hint-unfold>show</span></div>`;
+    const p = hints().parts(open, h.rung);
+    const items = hintRungs(p).map((x, i) => `<li>${x}</li>`).join('');
+    const more = h.rung < 4 ? `<div class="small"><button id="hint-more" class="quiet">More</button> <span class="muted">the next says ${RUNG_NAMES[h.rung]}</span></div>` : '';
+    return `<div class="note hint-note"><ol>${items}</ol>${more}${ui.hintFailed ? `<div class="small bad">${esc(ui.hintFailed)}</div>` : ''}</div>`;
+}
+function hintButton() {
+    if (!hints() || game.autoSolves()) return '';
+    const h = ui.hint;
+    const on = h && hints().open().some((r) => r.thought === h.thought && r.family === h.family);
+    return `<button id="hint" class="quiet" title="A hint toward the next thing you could get before Holmes">Hint${on ? ` (${h.rung}/4)` : ''}</button>`;
+}
+/** Take the next hint (the button and More). */
+function takeHint() {
+    const p = hints().take({ at: Date.now() });
+    ui.hintFailed = null;
+    if (!p) { ui.hint = null; ui.hintNone = game.read; }
+    else { ui.hint = { thought: p.thought, family: p.family, rung: p.rung, fresh: p.fresh, para: game.read - 1 }; ui.hintNone = null; }
+    save();
+    renderReader();
+    renderTool();
+}
+/** Do it: the fourth rung's moves made through the page (the autoplay's player), the left panel's tab put back. */
+async function doHint() {
+    const h = ui.hint;
+    const open = h && hints().open().find((r) => r.thought === h.thought && r.family === h.family);
+    if (!open) return;
+    const tab = ui.panels[0].tab;
+    const { playMoves } = await import('./autoplay.js');
+    window.__hintDoing = true; // for scripts/hints-check.mjs: Do it goes on after the click
+    const r = await playMoves(hints().parts(open, 4).moves, { store: STORE, valueName, fast: HINT_FAST }).finally(() => { window.__hintDoing = false; });
+    ui.hintFailed = r.ok ? null : `Do it could not make the move here (${r.why}). The rungs above say how to make it yourself.`;
+    if (ui.panels[0].tab !== tab) $(`.panel[data-panel="0"] .tab[data-tab="${tab}"]`)?.click();
+    changed();
+}
+/** The Hints tab: every hint given, a target at a time, newest first; once its deadline is read, whether it was in time. */
+function toolHints() {
+    let h = '<h3 class="section">Hints</h3>';
+    if (game.autoSolves()) return `${h}<p class="small muted">In Trivial the game works the case out; there are no hints.</p>`;
+    const groups = [];
+    for (const x of game.hintLog) {
+        const g = groups.at(-1);
+        if (g && g.thought === x.thought && g.family === x.family) { g.rung = Math.max(g.rung, x.rung); g.last = x.para; } else groups.push({ thought: x.thought, family: x.family, rung: x.rung, first: x.para, last: x.para });
+    }
+    if (!groups.length) return `${h}<p class="empty">No hints yet. Press “Hint” in the reading bar for a hint toward the next thing you could get before Holmes: where to look, what kind of move, which cards, then the step itself.</p>`;
+    const made = madeRows(game);
+    const rows = piece('record', () => game.record(), null)?.rows ?? [];
+    h += '<ul class="list">';
+    for (const g of groups.reverse()) {
+        const row = HINT_DATA.rows.find((r) => r.thought === g.thought && r.family === g.family);
+        const passed = row && row.deadline < game.read;
+        const rec = passed ? rows.find((r) => r.thought === g.thought && r.family === g.family) : null;
+        const status = passed ? (rec?.scores ? `made before Holmes (${paraLabel(row.deadline)})` : `Holmes got there first (${paraLabel(row.deadline)})`)
+            : made.has(`${g.thought}|${g.family}`) ? 'made' : 'not made yet';
+        const open = !passed && hints().open().some((r) => r.thought === g.thought && r.family === g.family);
+        h += `<li><div>Given at ${g.first === g.last ? paraLink(g.first) : `${paraLink(g.first)}–${paraLink(g.last)}`} · ${esc(FAMILY_WORDS[g.family][0].replace(/s$/, '').toLowerCase())} · ${g.rung} of 4 (up to ${RUNG_NAMES[g.rung - 1]})</div>`
+            + `<div class="small muted">${esc(status)}${open ? ` · <span class="link" data-hint-show="${esc(g.thought)}|${esc(g.family)}|${g.rung}">show</span>` : ''}</div></li>`;
+    }
+    return `${h}</ul><p class="small muted">Hints are free for now: a move made after a hint, or by Do it, counts like any other.</p>`;
+}
+/** A paragraph a hint names, brought into view in the story and flashed. */
+function showPara(p, from) {
+    show('story', from);
+    renderToolNow();
+    renderStory();
+    const el = document.querySelector(`#story p[data-p="${p}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center' });
+    el.classList.add('n-flash');
+    setTimeout(() => el.classList.remove('n-flash'), 1200);
+}
+
 /** What the last read brought (docs/layout.md, Q2): said in the bar, so reading on with the story hidden still tells. */
 function broughtHtml() {
     const b = ui.brought;
@@ -396,7 +554,7 @@ function renderReader() {
     const points = game.showsSignals() ? game.storySignals().filter((x) => x.kind === 'reread' && x.para === game.read - 1) : [];
     for (const x of points) note += `<div class="note">The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</div>`;
     note = news + note;
-    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button><span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}<span id="note-hint" class="note-hint small">${noteHint()}</span>${note}${rereadForm()}`;
+    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button>${hintButton()}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}<span id="note-hint" class="note-hint small">${noteHint()}</span>${note}${hintNote()}${rereadForm()}`;
 }
 
 // Re-read (docs/reader-layer.md, Q4): go back over paragraphs already read, with a question in mind. Recorded; the
@@ -422,8 +580,8 @@ function scrollStory() {
 // Two panels, each drawing any tab; a tab is shown in one panel at a time. Choosing in one panel a tab the other shows
 // swaps the two (Q1); a link opens its tab in the other panel than the one clicked in, or in place if its own panel is
 // the one clicked in (Q3).
-const TABS = [['story', 'Story'], ['notes', 'Notes'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
-const TOOLS = { notes: toolNotes, card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
+const TABS = [['story', 'Story'], ['notes', 'Notes'], ['hints', 'Hints'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
+const TOOLS = { notes: toolNotes, hints: toolHints, card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
 // One column (the header's toggle) or two; a phone always one (docs/layout.md, Q4). In one column the second panel is
 // hidden, and keeps its tab for when there are two again.
 const NARROW = window.matchMedia('(max-width: 699px)');
@@ -1963,6 +2121,13 @@ function onClick(e) {
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
     const pointBack = e.target.closest('[data-reread-prompt]');
     if (pointBack) { const [from, to] = pointBack.dataset.rereadPrompt.split('-').map(Number); ui.reread = { from, to, question: '' }; renderReader(); return; }
+    if (e.target.closest('#hint, #hint-more')) { takeHint(); return; }
+    if (e.target.closest('#hint-do')) { doHint().catch((err) => { console.error(err); toast(`Something went wrong: ${esc(err.message)}`); }); return; }
+    if (e.target.closest('[data-hint-unfold]')) { ui.hint.unfold = true; renderReader(); return; }
+    const hintPara = e.target.closest('[data-hint-para]');
+    if (hintPara) { showPara(+hintPara.dataset.hintPara, fromPanel(e)); return; }
+    const hintShow = e.target.closest('[data-hint-show]');
+    if (hintShow) { const [thought, family, rung] = hintShow.dataset.hintShow.split('|'); ui.hint = { thought, family, rung: +rung, para: game.read - 1 }; renderReader(); return; }
     if (e.target.closest('#reread-open')) { ui.reread = ui.reread ? null : { from: 1, to: game.read - 1, question: '' }; renderReader(); return; }
     if (e.target.closest('#rr-close')) { ui.reread = null; ui.rereadShown = null; renderStory(); renderReader(); return; }
     if (e.target.closest('#rr-go')) {
@@ -2411,6 +2576,10 @@ function buildOptions() {
 
 // ---------- start ----------
 model = await loadCase(CASE);
+// The hints' data (docs/hints.md): without it, no Hint button.
+// `?hintfast`: Do it with no cursor travel (scripts/hints-check.mjs).
+const HINT_FAST = new URLSearchParams(location.search).has('hintfast');
+const HINT_DATA = await fetch(`${CASE}/hints.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 story = model.story;
 R = makeReadings({
     model,
@@ -2433,6 +2602,9 @@ rebuildProblem(model);
 run(() => {
     game = new Game(model, { difficulty: defaults.difficulty ?? MEDIUM, pace: defaults.pace ?? 'free', state: saved?.game ?? null });
     ui.selected = saved?.selected ?? null;
+    // The hint last given, from the saved log (its rungs show again until the story is read on).
+    const lastHint = game.hintLog.at(-1);
+    if (lastHint) ui.hint = { thought: lastHint.thought, family: lastHint.family, rung: lastHint.rung, para: lastHint.para };
     renderNow();
     scrollStory();
     if (AUTOPLAY !== null) import('./autoplay.js').then((m) => m.start({ store: STORE, fast: /(^|-)fast$/.test(AUTOPLAY), playthrough: AUTOPLAY.startsWith('minimal') ? 'minimal' : 'reader', story, valueName, toast }));

@@ -4760,3 +4760,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   only held cards, read paragraphs and their words; the hint-only player reaches 70 (57 targets, 228 presses); the
   ladder; the save; Trivial.
 - **Moved:** nothing in the logs or reports (new files; `engine/minimalTable.js` refactored, its output unchanged).
+
+## Round 206 (2026-10-21): hints, step 2: the page
+
+- **Built** (`docs/hints.md`, "As built", step 2): the bar's `Hint` (`Hint (2/4)` on a target), the rungs given in words
+  under the bar with More (the next rung named) and, on the fourth, Do it; folded once the story is read on; "Made" and
+  "Nothing you have read yet gets you ahead of Holmes"; the last hint shown again after a reload. Do it plays the
+  fourth rung's moves through the page with the autoplay's player, drawn out of `start()` into `makePlayer()`,
+  `makeCursor()` and `playMoves()` (`ui/autoplay.js`); `?hintfast` for the check. The Hints tab (after Notes): each
+  target hinted, how far, and once its deadline is read whether it was made in time. `hints.json` in the site build.
+- **Checked:** `scripts/hints-check.mjs` 12 of 12 (the ladder at ¶40, Do it, the tab, folding, reload, Trivial, Start
+  over); `all`: a game that only reads and takes every hint to Do it through the page reaches 70 (69 hints, 6 minutes,
+  no failure); `scripts/autoplay-check.mjs` 12 of 12 for both playthroughs after the player was drawn out (the fewest
+  moves: 734 clicks, as before; the reader: 393 moves, 376 notes); by sight, desktop and phone.
+- **Robert, on the way:** the Re-read button does nothing that scrolling back cannot; **remove it**, and the two places
+  where the story points back (Easy, ¶70 and ¶182) with it; Holmes's interest stays. Next, before the hints' steps 3–4.
+- **Moved:** nothing in the logs or reports (the page and the site build).

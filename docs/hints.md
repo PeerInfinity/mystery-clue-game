@@ -1,7 +1,7 @@
 # A hint system, from the data the game has
 
 Status: **AGREED** (Robert, 2026-10-21: the direction in Round 204, the six choices of "Decided" below, by question
-and by sight; H1–H9 as recommended in Round 205). Step 1 (the engine) built in Round 205 ("As built", at the end); H8's
+and by sight; H1–H9 as recommended in Round 205). Steps 1 (the engine) and 2 (the page) built in Rounds 205–206 ("As built", at the end); H8's
 question (a cooldown per press or per target) is left for when the cooldown is built. The work of
 `docs/kickoff-hints.md` (Robert's ask, Round 203).
 
@@ -257,3 +257,40 @@ H8's question stays open until the cooldown is built.
 - **Left for step 2, the page:** a candidate the drop needs is proposed in the page from its chip, while the question
   shows and is not settled (Round 200); at ¶40 the hint-only player's candidate for `t58.3` does not take in the engine
   (the engine drops an answer unlisted), so Do it in the page must propose it where the page allows, or the rung say so.
+
+### Step 2, the page (Round 206)
+
+- **The bar:** `Hint` beside Re-read… (`Hint (2/4)` while a target is climbed; none in Trivial, nor without
+  `hints.json`); under the bar the rungs given on the target, in words (`hintRungs` in `ui/app.js`, H3's table):
+  1. *Where.* "Look again at ¶4: something there lets you get ahead of Holmes." (each paragraph a link that brings it
+     into view in the story);
+  2. *What kind of move*, by the next step's move ("An inference to build (the first of 2 steps). Its conclusion is
+     about: *where*." · "Something there is odd: mark it as odd." · a check, a drop, an absence, an answer to propose,
+     a theory to write down);
+  3. *Which:* the cards, each held (named) or by how to get it without naming it ("the event you get when you click
+     'the favourite' in ¶4", "a background fact (ask what you know about ⟨held card⟩)"), in the move's sentence
+     ("Connect …", "Mark … as odd", "Against …, raise: '⟨exception⟩'", "Drop … : a card tells against it (…)", "Plan
+     the check …, expecting …", "File it: …");
+  4. *The step:* the moves in order ("Click 'the favourite' in ¶4, then mark it as odd"; a build named by its
+     inference's text) and **Do it**.
+
+  **More** under the rungs names the next ("the next says which cards"). Read on, the hint folds to one line ("Hint
+  (from ¶40): 2 of 4 given · show"). A made target says "Made. Press Hint for the next."; nothing open, "Nothing you
+  have read yet gets you ahead of Holmes. Read on." A reload shows the last hint again (from the saved log).
+- **Do it** (H4a): the fourth rung's moves made through the page by the autoplay's player, the cursor shown at 2×, a
+  card reached the shortest way; the left panel's tab put back after. The player was drawn out of the autoplay's
+  `start()` into `makePlayer()` (`ui/autoplay.js`, with `makeCursor()` and `playMoves()`); the autoplay plays as before.
+  A move the page cannot make says so under the rungs ("Do it could not make the move here (…). The rungs above say how
+  to make it yourself."). `?hintfast`: Do it with no cursor travel (the check).
+- **The Hints tab** (after Notes): each target hinted, newest first: "Given at ¶40 · odd detail · 4 of 4 (up to the
+  step itself)", then "not made yet" / "made" and, once its deadline is read, "made before Holmes (paragraph 57)" or
+  "Holmes got there first"; "show" brings an open target's rungs back to the bar.
+- **`scripts/hints-check.mjs`** (headless Chrome, real page): at ¶40 on Hard, Hint and More to the fourth rung, each
+  checked in the save; Do it (the notice of `t18.3`); the Hints tab; the next target at the first rung; folded on
+  reading on; a reload keeps the log; no Hint in Trivial; Start over clears it: 12 of 12. **`all`:** a fresh Hard game
+  that only reads and takes every hint to Do it through the page **reaches 70** (69 hints, 6 minutes; the engine's
+  hint-only player takes 57, not looked into), no Do it failed, no console error. `hints.json` is in the site build.
+- **The leak check:** the rung texts are fixed templates around held card names, paragraph numbers and the words of
+  read paragraphs, checked at every paragraph by `engine/hints.test.js`; the LLM checker reads card text and was not run
+  (as in Rounds 139 and 143). The fourth rung names the inference to build before it is built: that is its purpose
+  (H4c).

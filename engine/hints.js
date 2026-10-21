@@ -153,7 +153,7 @@ export class Hints {
         const g = this.g;
         if (g.knows(c)) return { card: c };
         const collect = (id) => plan.find((m) => m.op === 'collect' && m.card === id);
-        const click = (m) => ({ words: m.words, para: m.from });
+        const click = (m) => ({ words: m.words, para: m.from, section: g.model.cards.get(c)?.section ?? null });
         const p = plan.find((m) => m.seq === step.src[c])
             ?? collect(c)
             ?? plan.find((m) => m.op === 'build' && m.inference === c)

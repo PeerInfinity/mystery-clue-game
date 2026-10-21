@@ -3,8 +3,9 @@
 ## Read first
 - `docs/hints.md` — the hint system: agreed (Rounds 204–205: free for now, a cooldown later; on request; the nearest
   deadline; all difficulties; the bar and a Hints tab; four rungs, the last makes the move (Do it); a catch-up note at
-  missed deadlines). Step 1 built (Round 205): `hints.json` (`npm run hints`), `engine/hints.js`, the hint-only player
-  to 70. Next: step 2, the page (the bar's Hint, More, Do it; the Hints tab; `scripts/hints-check.mjs`).
+  missed deadlines). Built: step 1, the engine (Round 205: `hints.json`, `npm run hints`, `engine/hints.js`, the
+  hint-only player to 70); step 2, the page (Round 206: the bar's Hint, More and Do it, the Hints tab,
+  `scripts/hints-check.mjs`). Next: step 3, the catch-up note at missed deadlines; step 4, hints in `stats.md`.
 - `docs/kickoff-hints.md` — the discussion it opened (Round 203), done in Round 204: its paper `docs/hints.md`.
 - `docs/minimal-playthrough.md` — agreed (Round 200), built (Rounds 200–202): the fewest of the annotated reader's
   moves that reach 70, batched before their deadlines (`action-table-minimal.json`, `npm run minimal-table`); the
@@ -92,6 +93,7 @@
 | Play the action table through the real UI in headless Chrome (port 9333; one script at a time), each move checked in the save; the record at the end (about 12–13 min) | `node scripts/ui-run.mjs` (→ `.cache/ui-run.json`; `STOP=<para>` for a part) |
 | The player's notes played through the page in headless Chrome (real mouse and keys: a note at a point, on marked words, a highlight, edit, delete and undo, the settings, reload, Start over), each step checked in the save (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
 | The autoplay checked (`docs/autoplay.md` A7): the page opened on `?autoplay=fast` in headless Chrome, played to the end by `ui/autoplay.js`; the record must read 70 ahead, every family as the action table says, the notes all written, no console error, the player's game kept aside (about 6–8 minutes; one script at a time on port 9333) | `node scripts/autoplay-check.mjs [minimal] [shots dir]` (→ `.cache/autoplay-check[-minimal].json`; `minimal`: the fewest moves, no notes, its clicks counted) |
+| The hints played through the page in headless Chrome (`docs/hints.md`): at ¶40 Hint to the fourth rung, Do it, the Hints tab, reload, Trivial, Start over (about a minute); `all`: a game that only reads and takes every hint to Do it must reach 70 (about 6 minutes; one script at a time on port 9333) | `node scripts/hints-check.mjs [all] [shots dir]` |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 | LLM leak checker over the reader's notes the autoplay types (each `typed`, or the prose as it stands, against the story up to its paragraph; about $1 a fresh run) | `node checker/check.js cases/silver-blaze --notes --runs 2` (→ `.cache/checker-notes-haiku.json`) |
 

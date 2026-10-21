@@ -93,6 +93,10 @@ button.settings-rule { border-top: 1px solid var(--line); margin-top: 4px; }
 .reader .brought { color: var(--muted); }
 .reader .note { font-size: 13px; color: var(--muted); flex-basis: 100%; }
 .reader .note.block { color: var(--bad); }
+.reader .hint-note { color: var(--ink); border-left: 3px solid var(--note-ink); padding: 4px 10px; margin-top: 4px; }
+.reader .hint-note.folded { color: var(--muted); padding: 1px 10px; }
+.hint-note ol { margin: 0; padding-left: 1.4em; }
+.hint-note li { margin: 2px 0; }
 .tabs { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; gap: 2px; padding: 8px 8px 0; border-bottom: 1px solid var(--line); background: var(--panel); flex: none; }
 .tab { background: transparent; color: var(--muted); border-radius: 6px 6px 0 0; padding: 6px 10px; white-space: nowrap; flex: none; }
 .back-row { padding: 4px 20px; border-bottom: 1px solid var(--line); background: var(--bg); flex: none; }
