@@ -4717,3 +4717,11 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Done:** `docs/kickoff-minimal-playthrough.md` (Rounds 197–202). `CLAUDE.md` names the paper first, the kickoff done,
   and the new commands.
 - **Moved:** nothing in the logs or reports (new files only).
+
+## Round 203 (2026-10-21): handed off: a hint system
+
+- **Robert's ask:** discuss how to design a hint system from the data the game has, in a new session.
+- **Handed off:** `docs/kickoff-hints.md` (the hints today; the constraint of `docs/reader-layer.md` §5, that a hint
+  before Holmes gives the score away; the data a hint could draw on: the annotation, the two action tables, the
+  engine's live state, the statistics; candidate questions for the paper `docs/hints.md`). `CLAUDE.md` names it first.
+- **Moved:** nothing (documentation).
