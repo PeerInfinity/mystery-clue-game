@@ -4776,3 +4776,23 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Robert, on the way:** the Re-read button does nothing that scrolling back cannot; **remove it**, and the two places
   where the story points back (Easy, ¶70 and ¶182) with it; Holmes's interest stays. Next, before the hints' steps 3–4.
 - **Moved:** nothing in the logs or reports (the page and the site build).
+
+## Round 207 (2026-10-21): Re-read removed; Robert's page notes
+
+- **Removed** (Robert, Round 206: it does nothing that scrolling back cannot): the Re-read button, its form and its
+  record (`Game.reread`, `rereads` in the save; an old save with them loads and drops them), the two places where the
+  story points back (Easy, ¶70 and ¶182; `storySignals` now only Holmes's interest), the re-read move of the action
+  table (two moves), the autoplay's and `ui-run`'s step for it, the op in `stats.md`. `docs/reader-layer.md` notes it.
+- **Robert's notes on the page, built:** the paragraph's number in the story's margin (drawn by the stylesheet, not part
+  of the text; the latest paragraph's bar moved 3 px to make room); "Not odd after all" a button; a card's link shows its
+  whole name everywhere but the Timeline board's column heads; Do it no longer stops at the "about" menu where the game
+  does not ask what a conclusion is about (every difficulty but Hard).
+- **Found, not yet fixed:** the hints were checked on Hard only. The engine's hint-only player reaches 70 on Easy and
+  Medium too (58 targets each, no failure), but through the page `hints-check all` (now `DIFFICULTY=easy|medium`)
+  reaches 55 on Medium and 59 on Easy: Do it fails on drops (the answers are listed there, not proposed: "no answer
+  box"), targets come back again and again (124 and 255 hints), and a drop's button can be pressed without its reason
+  menu (a console error). Next, before the hints' steps 3–4.
+- **Checked:** the action table regenerated (394 moves), the minimal playthrough (144 moves, 70; its moves renumbered),
+  `hints.json`, `stats.md`, the thoughts report (0 errors); `autoplay-check` 12 of 12 for both playthroughs (the reader:
+  391 moves, 376 notes; the fewest: 734 clicks); `hints-check` 12 of 12; the numbers by sight, desktop and phone.
+- **Moved:** `action-table.json`, `action-table-minimal.json`, `hints.json`, `stats.md` (the re-read moves gone).

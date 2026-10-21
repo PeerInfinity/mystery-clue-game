@@ -157,11 +157,3 @@ test('asking everything moves no score family', () => {
     assert.equal(a.ahead, b.ahead);
     assert.ok(a.questions.length > 0);
 });
-
-test('a re-read can carry the player\'s own question', () => {
-    const g = easy();
-    readTo(g, 46);
-    const { id } = g.pose('why-person', ['straker']);
-    assert.deepEqual(g.reread(20, 30, id), { from: 20, to: 30, question: id, para: 46 });
-    assert.equal(g.reread(20, 30, 'pq.99'), null);
-});

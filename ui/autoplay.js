@@ -27,7 +27,6 @@ const CAPTIONS = {
     seal: () => 'Planning a check',
     file: () => 'Filing what did not happen',
     pose: () => 'Asking my own question',
-    reread: () => 'Going back over a passage',
     setAside: () => 'Setting it aside',
     split: () => 'Splitting a statement into what was seen and what was concluded',
     doubt: () => 'Doubting it',
@@ -401,6 +400,8 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
             const v = [...($(u.select_text)?.options ?? [])].find((o) => o.text === u.text)?.value ?? null;
             return v ? ((await choose(u.select_text, v)) || `cannot choose ${u.text}`) : `no option “${u.text}”`;
         }
+        // What a conclusion is about is asked only with that option on (Hard); the table is played on Hard, a hint's moves on any.
+        if (u.select === '#build-kind' && !$(u.select)) return true;
         if (u.select) return (await choose(u.select, u.value)) || `no option ${u.value} in ${u.select}`;
         if (u.fill) {
             const e = $(u.fill);
@@ -416,7 +417,6 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
             await idle();
             return true;
         }
-        if (u.click_if_absent && $(u.click_if_absent)) return true;
         if (u.click) return (await click(u.click)) || `nothing to click: ${u.click}`;
         if (u.expect) return true;
         return `unknown step ${JSON.stringify(u)}`;
@@ -434,7 +434,6 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
             case 'seal': return (g.seals ?? []).some((x) => x.verb === m.verb && JSON.stringify(x.fields) === JSON.stringify(m.fields) && (x.expect ?? null) === (m.expect ?? null) && JSON.stringify(x.answer ?? null) === JSON.stringify(m.answer ?? null));
             case 'file': return has(g.filed, m.absence);
             case 'pose': return (g.posed ?? []).some((q) => q[1] === m.template && JSON.stringify(q[2]) === JSON.stringify(m.cards));
-            case 'reread': return (g.rereads ?? []).some((r) => r.from === m.from && r.to === m.to);
             case 'setAside': return has(g.setAside, m.card);
             case 'split': return has(g.split, m.card);
             case 'doubt': return (g.suspected ?? []).includes(m.card) && (g.doubtReason ?? []).some(([id, r]) => id === m.card && r === m.reason);

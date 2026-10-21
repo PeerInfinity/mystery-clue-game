@@ -89,7 +89,7 @@ export const INF_CONNECT = 'connect';
 //   greying     grey the answers the player's clues rule out, and offer "Could it fit?" (and theory checks)
 //   clashes     list the clashes among the player's clues on the Questions tab
 //   hints       count the inferences left to build, and name where a waiting deduction starts; `story` also
-//               shows the story's own signals (Holmes's interest, passages to re-read; docs/reader-layer.md, Q3)
+//               shows the story's own signals (Holmes's interest; docs/reader-layer.md, Q3)
 //   kind        building an inference: the player names what its conclusion is about
 //   connect     building an inference: background facts needed in hand, or connected like clues
 //   background  when background facts arrive (BG_*)
@@ -347,7 +347,6 @@ export class Game {
         this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised (workstream 3)
         this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed (workstream 7)
         this.setAsideAt = new Map();    // card id → the paragraph the player set it aside at (workstream 8)
-        this.rereads = [];              // [{from, to, question, para}]: passages the player went back over (workstream 8)
         this.posed = [];                // [{id, template, cards, para, candidates, joined}]: the player's own questions (docs/questions.md)
         this.notes = [];                // [{id, para, at, from, to, text}]: the player's notes on the story (docs/notes.md); never read by the game
         this.hintLog = [];              // [{para, thought, family, rung, at}]: the hints given (docs/hints.md); never read by a score
@@ -387,7 +386,6 @@ export class Game {
             raised: [...this.raised.values()].map((r) => [r.id, r.n, r.exception, r.para, r.status]),
             seals: this.seals,
             setAside: [...this.setAsideAt],
-            rereads: this.rereads,
             posed: this.posed.map((q) => [q.id, q.template, q.cards, q.para, q.candidates, q.joined]),
             notes: this.notes.map((n) => [n.id, n.para, n.at, n.from, n.to, n.text]),
             hints: this.hintLog,
@@ -477,7 +475,6 @@ export class Game {
         }
         for (const x of state.seals ?? []) if (CHECK_TEMPLATES[x?.verb] && Object.values(x.fields ?? {}).every((id) => this.knows(id))) this.seals.push({ ...x });
         for (const [id, para] of state.setAside ?? []) this.setAside(id, para);
-        for (const r of state.rereads ?? []) if (r && r.to < this.read) this.rereads.push({ ...r });
         // The player's questions, after the marks: a joined question's candidates are in them already.
         for (const [id, template, cards, para, candidates, joined] of state.posed ?? []) {
             if (!this.#poseFits(template, cards) || this.posed.some((q) => q.id === id)) continue;
@@ -492,14 +489,14 @@ export class Game {
     /**
      * The story's own signals, as far as read (docs/reader-layer.md, Q3–Q4): Holmes's visible interest (each
      * GENRE·watch-holmes thought: the clause that shows it, and the held cards that clause mentions, never what it
-     * implies) and the passages the story points back to (GENRE·re-read: its `passage`, with the clause that
-     * prompts it). Hints only: never scored. Each: {thought, kind: 'watch' | 'reread', para, quote, cards, passage?}.
+     * implies). Hints only: never scored. Each: {thought, kind: 'watch', para, quote, cards}. (The passages the story
+     * points back to, GENRE·re-read, went with the Re-read button, Round 207.)
      */
     storySignals() {
         const byId = this.thoughtById ?? (this.thoughtById = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t])));
         const out = [];
         for (const t of this.model.data.thoughts ?? []) {
-            if (t.tag !== 'GENRE' || t.para >= this.read || !['watch-holmes', 're-read'].includes(t.subtype)) continue;
+            if (t.tag !== 'GENRE' || t.para >= this.read || t.subtype !== 'watch-holmes') continue;
             // The clause: the thought's own, else its first premise's that reads the text.
             const quotes = t.reads?.length ? t.reads : (t.from ?? []).map((f) => byId.get(f)).find((x) => x?.reads?.length)?.reads ?? [];
             const cards = [];
@@ -510,9 +507,7 @@ export class Game {
                     if (this.knows(id) && !this.hidden.has(id) && ['entities', 'claims', 'events'].includes(this.model.cards.get(id)?.section) && !cards.includes(id)) cards.push(id);
                 }
             }
-            const s = { thought: t.id, kind: t.subtype === 're-read' ? 'reread' : 'watch', para: t.para, quote: quotes.join(' … '), cards };
-            if (t.passage) s.passage = [...t.passage];
-            out.push(s);
+            out.push({ thought: t.id, kind: 'watch', para: t.para, quote: quotes.join(' … '), cards });
         }
         return out;
     }
@@ -532,18 +527,6 @@ export class Game {
     isSetAside(id) { return this.setAsideAt.has(id); }
     /** Cards set aside, in the order they were. */
     setAsideCards() { return [...this.setAsideAt].sort((a, b) => a[1] - b[1]).map(([id]) => id); }
-
-    /**
-     * Go back over paragraphs `from`–`to` (already read), optionally with a question: a raised case question's id, one
-     * of the player's own questions (`pq.N`), or a held card. Recorded with the paragraph it was made at; nothing else.
-     */
-    reread(from, to, question = null) {
-        if (!(Number.isInteger(from) && Number.isInteger(to) && from >= 1 && from <= to && to < this.read)) return null;
-        if (question && !this.knows(question) && !this.posed.some((q) => q.id === question) && !(this.model.data.questions ?? []).some((q) => q.id === question && this.questionRaised(q.id))) return null;
-        const r = { from, to, question, para: this.read - 1 };
-        this.rereads.push(r);
-        return r;
-    }
 
     // ---------- the player's notes on the story (docs/notes.md) ----------
     // The player's paper: a note written at a point of a paragraph read (`at`, an offset in its text), with the words it

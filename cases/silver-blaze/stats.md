@@ -61,16 +61,15 @@ the maximum, each made as late as its deadlines allow (`action-table-minimal.jso
 | Hold a theory | 1 | 1 |
 | Propose an answer | 17 | 2 |
 | Ask my own question | 10 | 0 |
-| Re-read | 2 | 0 |
 | Set aside | 5 | 0 |
 | Split a statement | 1 | 0 |
 | Doubt | 1 | 0 |
 | Weigh a theory | 1 | 0 |
-| **Moves** | **396** | **144** |
-| Paragraphs with moves | 78 | 13 |
+| **Moves** | **394** | **144** |
+| Paragraphs with moves | 76 | 13 |
 | Clicks to read the story (Next paragraph; Next scene, Next deduction) | 231 | 76 |
 | Cards connected in builds | 194 | 153 |
-| Thoughts whose moves are made | 185 | 107 |
+| Thoughts whose moves are made | 183 | 107 |
 | Notes and highlights written by the autoplay | 376 | 0 |
 
 ## The playthroughs: steps in the page
@@ -83,11 +82,11 @@ in view, the story's words) and reads by Next scene and Next deduction; it count
 |---|---:|---:|
 | words clicked | 151 | 73 |
 | card opened from a list | 380 | 187 |
-| button pressed | 395 | 207 |
+| button pressed | 391 | 207 |
 | menu chosen | 118 | 75 |
-| typed | 30 | 11 |
+| typed | 26 | 11 |
 | tab chosen | 14 | 9 |
-| **Steps** | **1,088** | **562** |
+| **Steps** | **1,080** | **562** |
 
 ## By scene
 
@@ -96,10 +95,10 @@ in view, the story's words) and reads by Next scene and Next deduction; it count
 | Breakfast at Baker Street | ¶1–7 | 379 | 7 | 0 |
 | The train: the facts of the case | ¶8–46 | 2,806 | 207 | 67 |
 | Tavistock and the drive with Gregory | ¶47–69 | 975 | 37 | 0 |
-| Straker's villa: the pockets and Mrs. Straker | ¶70–92 | 644 | 60 | 46 |
+| Straker's villa: the pockets and Mrs. Straker | ¶70–92 | 644 | 59 | 46 |
 | The hollow | ¶93–113 | 588 | 19 | 7 |
 | Across the moor to Mapleton | ¶114–143 | 1,056 | 31 | 15 |
 | The walk back | ¶144–156 | 423 | 5 | 0 |
-| Departure: the photograph, the sheep, the dog | ¶157–182 | 501 | 5 | 0 |
+| Departure: the photograph, the sheep, the dog | ¶157–182 | 501 | 4 | 0 |
 | The Wessex Cup | ¶183–214 | 907 | 19 | 9 |
 | The explanation on the train home | ¶215–231 | 1,292 | 6 | 0 |

@@ -30,7 +30,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null, reread: null, rereadShown: null };
+const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -49,7 +49,7 @@ function valueName(slot, v) {
     if (v === s?.on && s.facet === 'identity') return 'nobody else in the story';
     return cardName(v);
 }
-const link = (id, text = null) => `<span class="link" data-card="${esc(id)}">${esc(text ?? shortName(id))}</span>`;
+const link = (id, text = null) => `<span class="link" data-card="${esc(id)}">${esc(text ?? cardName(id))}</span>`;
 function kindOf(id) {
     const c = model.cards.get(id);
     if (!c) return '';
@@ -173,8 +173,7 @@ function renderStory() {
     const notes = game.allNotes();
     for (let i = 0; i < game.read; i++) {
         const body = paragraphHtml(i, notes.filter((n) => n.para === i));
-        const again = ui.rereadShown && i >= ui.rereadShown.from && i <= ui.rereadShown.to;
-        h += `<p class="${i === 0 ? 'title' : ''}${i === game.read - 1 && i > 0 ? ' latest' : ''}${again ? ' reread' : ''}" data-p="${i}">${body}</p>`;
+        h += `<p class="${i === 0 ? 'title' : ''}${i === game.read - 1 && i > 0 ? ' latest' : ''}" data-p="${i}">${body}</p>`;
     }
     const top = el.scrollTop;
     el.innerHTML = h;
@@ -361,7 +360,7 @@ function hintCard(c) {
     if (c.card) return model.cards.get(c.card)?.section === 'rules' ? `the background fact ${names([c.card])}` : names([c.card]);
     const words = (w, p) => `click “${esc(w.trim())}” in ${paraLink(p)}`;
     if (c.words !== undefined && c.ask === undefined) return `the ${KIND_WORD[c.section] ?? 'card'} you get when you ${words(c.words, c.para)}`;
-    if (c.ask) return `a background fact (ask what you know about ${link(c.ask, shortName(c.ask, 50))})`;
+    if (c.ask) return `a background fact (ask what you know about ${link(c.ask)})`;
     if (c.ask === null) return c.words !== undefined ? `a background fact (${words(c.words, c.para)}, then ask what you know about it)` : 'a background fact';
     if (c.build) return 'an inference to build first';
     return 'a card';
@@ -401,7 +400,7 @@ function hintRungs(p) {
         out.push(`<b>Which.</b> ${which ? which() : andList(cards)}`);
     }
     if (p.moves) {
-        const name = (id) => (game.knows(id) ? link(id, shortName(id, 50)) : 'it');
+        const name = (id) => (game.knows(id) ? link(id) : 'it');
         const verb = (m) => ({
             collect: () => `click “${esc(m.words.trim())}” in ${paraLink(m.from)}`,
             ask: () => `ask what you know about ${name(m.card)}`,
@@ -529,7 +528,7 @@ function renderReader() {
         // Holmes is about to reason: the story waits until the player has built the inferences he uses.
         const needs = [...new Set(blockers.flatMap((s) => game.stepInferences(s) ?? []))].filter((id) => !game.knows(id));
         note = blocked
-            ? `<div class="note block">Holmes has worked something out. Before reading on, build the ${needs.length === 1 ? 'inference' : `${needs.length} inferences`} he is about to draw (see <span class="link" data-tab-open="inferences">Inferences</span>).${game.helps('hints') ? ` They start from: ${[...new Set(needs.flatMap((id) => game.connectSet(id)))].filter((x) => game.knows(x)).map((x) => link(x, shortName(x, 40))).join(', ')}.` : ''}</div>`
+            ? `<div class="note block">Holmes has worked something out. Before reading on, build the ${needs.length === 1 ? 'inference' : `${needs.length} inferences`} he is about to draw (see <span class="link" data-tab-open="inferences">Inferences</span>).${game.helps('hints') ? ` They start from: ${[...new Set(needs.flatMap((id) => game.connectSet(id)))].filter((x) => game.knows(x)).map((x) => link(x)).join(', ')}.` : ''}</div>`
             : '<div class="note">Holmes is a step ahead of you here.</div>';
     } else if (blockers.length) {
         const prompts = blockers.map((s) => {
@@ -549,25 +548,8 @@ function renderReader() {
     const sceneJump = aheadScene > 1 && game.nextSceneAt() < story.paragraphs.length
         ? `<button id="read-scene" class="quiet" ${blocked ? 'disabled' : ''} title="Read on to the start of the next scene">Next scene <span class="small">(${aheadScene} ¶)</span></button>`
         : '';
-    // A re-read in progress names the question it was made with (docs/ui.md Q4).
-    if (ui.rereadShown) note += `<div class="note">Re-reading paragraphs ${ui.rereadShown.from}–${ui.rereadShown.to}${ui.rereadShown.question ? ` with the question: ${esc(questionName(ui.rereadShown.question))}` : ''}${ui.rereadShown.question && /[?.!]$/.test(questionName(ui.rereadShown.question)) ? '' : '.'}</div>`;
-    const points = game.showsSignals() ? game.storySignals().filter((x) => x.kind === 'reread' && x.para === game.read - 1) : [];
-    for (const x of points) note += `<div class="note">The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</div>`;
     note = news + note;
-    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}<button id="reread-open" class="quiet" title="Go back over a passage you have read, with a question in mind">Re-read…</button>${hintButton()}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}<span id="note-hint" class="note-hint small">${noteHint()}</span>${note}${hintNote()}${rereadForm()}`;
-}
-
-// Re-read (docs/reader-layer.md, Q4): go back over paragraphs already read, with a question in mind. Recorded; the
-// passage is outlined in the story until the next re-read is closed.
-function rereadForm() {
-    const r = ui.reread;
-    if (!r) return '';
-    const raised = model.data.questions.filter((q) => game.questionRaised(q.id));
-    const opt = (v, label, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label)}</option>`;
-    return `<div class="note reread-form small">Re-read from paragraph <input id="rr-from" type="number" min="1" max="${game.read - 1}" value="${r.from}">
-        to <input id="rr-to" type="number" min="1" max="${game.read - 1}" value="${r.to}">
-        with the question <select id="rr-q">${opt('', 'none in particular', r.question)}${raised.map((q) => opt(q.id, game.questionText(q), r.question)).join('')}${game.autoSolves() ? '' : game.posedQuestions().filter((q) => !q.joined || !raised.some((x) => x.slot === q.joined.slot)).map((q) => opt(q.id, `${q.text} (yours)`, r.question)).join('')}</select>
-        <button id="rr-go">Re-read</button> <button id="rr-close" class="quiet">Close</button>${r.error ? ` <span class="muted">${esc(r.error)}</span>` : ''}</div>`;
+    el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}${hintButton()}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}<span id="note-hint" class="note-hint small">${noteHint()}</span>${note}${hintNote()}`;
 }
 
 function scrollStory() {
@@ -821,7 +803,7 @@ function toolCard() {
     if (c.section === 'inferences') {
         const how = game.howHeld(id);
         h += `<p class="small muted">${how?.how === 'built' ? 'You built this inference' : how?.how === 'stated' ? `${esc(cardName(how.by))} drew this inference` : how?.how === 'implicit' ? 'Follows from what you hold' : 'Worked out for you'} · ${paraLabel(game.unlocked.get(id).para)}</p>`;
-        h += `<div class="small">Rests on: ${model.cards.get(id).premises.map((x) => (game.knows(x) ? link(x, shortName(x, 60)) : '<span class="muted">something you do not know yet</span>')).join(' · ')}</div>`;
+        h += `<div class="small">Rests on: ${model.cards.get(id).premises.map((x) => (game.knows(x) ? link(x) : '<span class="muted">something you do not know yet</span>')).join(' · ')}</div>`;
     }
     if (c.section === 'claims' || c.section === 'inferences') {
         if (c.section === 'inferences') h += `<p class="means"><span class="small muted">What it means for the case:</span> ${esc(readingOf(c.formula))}</p>`;
@@ -849,7 +831,7 @@ function toolCard() {
     // Noticing (workstream 5): mark a clue, a thing or an event as odd, against what one would expect (events: Round 98). Nothing is told back.
     if (['claims', 'entities', 'events'].includes(c.section) && !game.autoSolves()) {
         const n = game.noticed.get(id);
-        if (n) h += `<p class="small notice on">You marked this as odd at ${paraLabel(n.para)}${n.because ? `, against: ${link(n.because, shortName(n.because, 70))}` : ''}. <span class="link" data-unnotice="${esc(id)}">Not odd after all</span></p>`;
+        if (n) h += `<p class="small notice on">You marked this as odd at ${paraLabel(n.para)}${n.because ? `, against: ${link(n.because)}` : ''}. <button class="quiet small" data-unnotice="${esc(id)}">Not odd after all</button></p>`;
         else {
             const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && inHand(x));
             h += `<p class="small notice">Does something here go against what you would expect? <select id="notice-because"><option value="">because… (optional)</option>${rules.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 60))}</option>`).join('')}</select> <button data-notice="${esc(id)}" class="quiet">That's odd</button></p>`;
@@ -901,10 +883,10 @@ function renderSlot(s) {
     if (settled !== null) {
         chips.push(`<span class="chip proven" data-slot="${s.id}" data-val="${esc(settled)}">${esc(valueName(s.id, settled))}</span>`);
         if (game.autoSolves()) chips.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'settled by the story' : 'worked out from your clues'}</span>`);
-        else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim, shortName(given.claim, 60))} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
+        else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim)} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
         // The answers the player put forward (proposed or circled) stay in view beside the settled one, to be dropped (Round 164).
         if (!game.autoSolves()) chips.push(...[...new Set([...(m?.listed ?? []), ...(m?.circled ?? [])])].filter((v) => v !== settled && game.offered(s.id, v)).map((v) => chip(s.id, v, 'ruled')));
-        for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k, shortName(k, 60))}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
+        for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k)}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
     } else {
         const pencil = game.pencil(s.id);
         let live = pencil;
@@ -954,7 +936,7 @@ function renderSlot(s) {
     if (ruledOutChips.length) h += `<div class="chips small"><span class="muted">ruled out, with evidence:</span>${ruledOutChips.join('')}</div>`;
     if (lapsed.length) {
         const why = [...new Set(lapsed.flatMap((u) => game.lapsedBy(u)))];
-        h += `<div class="small bad">${lapsed.length === 1 ? 'A proof here' : `${lapsed.length} proofs here`} rested on ${why.map((k) => link(k, shortName(k, 50))).join(', ')}, which you now doubt.</div>`;
+        h += `<div class="small bad">${lapsed.length === 1 ? 'A proof here' : `${lapsed.length} proofs here`} rested on ${why.map((k) => link(k)).join(', ')}, which you now doubt.</div>`;
     }
     if (game.helps('greying') && settled === null && cache.get(s.id)?.length === 0) {
         // No value at all fits, met or not: the trusted clues contradict each other.
@@ -1033,7 +1015,7 @@ function layerName(id) {
 /** The REVISE moment: the old cards that an answer re-reads (Game.revisedBy). */
 function revisedNote(slot) {
     const cards = game.revisedBy(slot);
-    return cards.length ? ` It changes how you read: ${cards.map((x) => link(x, shortName(x, 40))).join(' · ')}.` : '';
+    return cards.length ? ` It changes how you read: ${cards.map((x) => link(x)).join(' · ')}.` : '';
 }
 /** A drop target from its key: t|theory or c|slot|value. */
 function dropTarget(key) {
@@ -1056,7 +1038,7 @@ function dropHtml(key) {
     const target = dropTarget(key);
     const d = game.dropOf(target);
     const rival = d.rival ? game.visibleTheories().find((t) => t.id === d.rival) : null;
-    let h = `<div class="small dropped-note">Dropped: ${esc(DROP_LABELS[d.reason])}${rival ? ` (${esc(shortName(rival.label, 50))})` : ''}${d.cites?.length ? ` (${d.cites.map((c) => link(c, shortName(c, 40))).join(', ')})` : ''}.`;
+    let h = `<div class="small dropped-note">Dropped: ${esc(DROP_LABELS[d.reason])}${rival ? ` (${esc(shortName(rival.label, 50))})` : ''}${d.cites?.length ? ` (${d.cites.map((c) => link(c)).join(', ')})` : ''}.`;
     if (weighMode() === 'counts') {
         const c = game.dropCheck(target);
         h += ` <span class="${c.ok ? 'good' : 'muted'}">${c.ok ? 'The game finds it so.' : 'The game does not find it so.'}</span>`;
@@ -1097,7 +1079,7 @@ const DOUBT_WORDS = { 'could-not-see': 'could not have seen it', 'inference-as-f
 function weighHtml(id) {
     let h = '';
     const chain = game.chainOf(id);
-    if (chain.length) h += `<p class="small chain">Passed on: ${chain.map((l) => (game.knows(l.by) ? link(l.by, shortName(l.by, 24)) : esc(cardName(l.by)))).join(' → ')}${chain[chain.length - 1].to ? '' : ' → the story'}</p>`;
+    if (chain.length) h += `<p class="small chain">Passed on: ${chain.map((l) => (game.knows(l.by) ? link(l.by) : esc(cardName(l.by)))).join(' → ')}${chain[chain.length - 1].to ? '' : ' → the story'}</p>`;
     const kindName = (k) => {
         const [kind, who] = k.split(':');
         const name = who ? (game.knows(who) ? shortName(who, 24) : cardName(who)) : 'the speaker';
@@ -1124,7 +1106,7 @@ function weighHtml(id) {
     }
     if (game.partsOf(id).length) {
         h += game.splitClaims.has(id)
-            ? `<p class="small muted">You split this statement: ${game.partsOf(id).filter((x) => game.knows(x)).map((x) => link(x, shortName(x, 50))).join(' · ')}. It counts nowhere itself.</p>`
+            ? `<p class="small muted">You split this statement: ${game.partsOf(id).filter((x) => game.knows(x)).map((x) => link(x)).join(' · ')}. It counts nowhere itself.</p>`
             : `<p class="small">Does this mix what was seen with what was concluded? <button data-split-claim="${esc(id)}" class="quiet">Split this statement</button></p>`;
     }
     return h;
@@ -1165,10 +1147,10 @@ function toolCards() {
     });
     h += shown.length ? `<ul class="list">${shown.map((id) => {
         const open = game.slotsOn(id).filter((s) => game.settled(s.id) === null).length;
-        return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id, shortName(id, 90))}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${open ? ` <span class="small muted">· ${open} open</span>` : ''}</li>`;
+        return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id)}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${open ? ` <span class="small muted">· ${open} open</span>` : ''}</li>`;
     }).join('')}</ul>` : `<p class="empty">${game.collecting() ? 'No cards yet. Click the words in the story that mention someone or something.' : 'No cards yet. Start reading.'}</p>`;
     const aside = game.setAsideCards();
-    if (aside.length) h += `<details class="set-aside"><summary class="small muted">Set aside (${aside.length})</summary><ul class="list">${aside.map((id) => `<li><span class="kind">${kindOf(id)}</span>${link(id, shortName(id, 90))} <button class="quiet small" data-putback="${id}">Put back</button></li>`).join('')}</ul></details>`;
+    if (aside.length) h += `<details class="set-aside"><summary class="small muted">Set aside (${aside.length})</summary><ul class="list">${aside.map((id) => `<li><span class="kind">${kindOf(id)}</span>${link(id)} <button class="quiet small" data-putback="${id}">Put back</button></li>`).join('')}</ul></details>`;
     return h;
 }
 
@@ -1217,14 +1199,13 @@ function toolQuestions() {
         d = '<h3 class="section">Statements you doubt</h3><ul class="list">';
         for (const c of doubts) {
             const v = game.settled(`${c}.truth`);
-            d += `<li class="q"><span>${link(c, shortName(c, 90))}</span><span class="state ${v !== null ? 'done' : ''}">${v === 'true' ? 'true after all' : v === 'false' ? 'false' : 'open'}</span></li>`;
+            d += `<li class="q"><span>${link(c)}</span><span class="state ${v !== null ? 'done' : ''}">${v === 'true' ? 'true after all' : v === 'false' ? 'false' : 'open'}</span></li>`;
         }
         d += '</ul>';
     }
     d += posedListHtml();
     d += oddThingsHtml();
     d += signalsHtml();
-    d += rereadsHtml();
     d += heldBackHtml();
     const c = game.helps('clashes') ? clashesHtml() : '';
     if (!raised.length) return `${c}<p class="empty">The story has not raised any questions yet.</p>${d}`;
@@ -1292,34 +1273,20 @@ function oddThingsHtml() {
     const filed = game.filed.filter((f) => game.knows(f.id));
     if (!noticed.length && !filed.length) return '';
     let h = '<h3 class="section">Odd things</h3><ul class="list">';
-    for (const [id, n] of noticed) h += `<li>${link(id, shortName(id, 80))} <span class="small muted">· ${paraLabel(n.para)}${n.because ? ` · against ${esc(shortName(n.because, 50))}` : ''}</span> <span class="link small" data-unnotice="${esc(id)}">not odd</span></li>`;
-    for (const f of filed) h += `<li>${link(f.id, shortName(f.id, 80))} <span class="small muted">· what did not happen, filed at ${paraLabel(f.para)}</span></li>`;
+    for (const [id, n] of noticed) h += `<li>${link(id)} <span class="small muted">· ${paraLabel(n.para)}${n.because ? ` · against ${esc(shortName(n.because, 50))}` : ''}</span> <span class="link small" data-unnotice="${esc(id)}">not odd</span></li>`;
+    for (const f of filed) h += `<li>${link(f.id)} <span class="small muted">· what did not happen, filed at ${paraLabel(f.para)}</span></li>`;
     return `${h}</ul>`;
 }
 
 // The story's own signals (hints 'story'; docs/reader-layer.md, Q3–Q4): what Holmes visibly attends to, quoted with
-// the cards it mentions and never interpreted, and the passages the story points back to.
-/** A re-read's question: a raised case question, or a held card. */
-function questionName(id) {
-    const q = model.data.questions.find((x) => x.id === id);
-    if (q) return game.questionText(q);
-    const mine = game.posedQuestions().find((x) => x.id === id);
-    return mine ? mine.text : shortName(id, 60);
-}
-/** The player's own re-reads, with their questions (recorded, never scored). */
-function rereadsHtml() {
-    if (!game.rereads.length) return '';
-    return `<h3 class="section">Your re-reads</h3><ul class="list small">${[...game.rereads].reverse().map((r) => `<li><span class="muted">${paraLabel(r.para)} ·</span> <span class="link" data-reread-prompt="${r.from}-${r.to}">paragraphs ${r.from}–${r.to}</span>${r.question ? ` · ${esc(questionName(r.question))}` : ''}</li>`).join('')}</ul>`;
-}
+// the cards it mentions and never interpreted.
 function signalsHtml() {
     if (!game.showsSignals()) return '';
     const list = game.storySignals().reverse();
     if (!list.length) return '';
     let h = '<h3 class="section">Holmes\'s interest</h3><p class="small muted">Where the story shows what Holmes attends to. It points; it proves nothing.</p><ul class="list">';
     for (const x of list) {
-        h += x.kind === 'reread'
-            ? `<li><span class="small muted">${paraLabel(x.para)} ·</span> The story points back: <span class="link" data-reread-prompt="${x.passage.join('-')}">re-read paragraphs ${x.passage[0]}–${x.passage[1]}</span>.</li>`
-            : `<li><span class="small muted">${paraLabel(x.para)} ·</span> <span class="quote-inline">“${esc(x.quote)}”</span>${x.cards.length ? ` <span class="small">· ${x.cards.map((c) => link(c, shortName(c, 40))).join(', ')}</span>` : ''}</li>`;
+        h += `<li><span class="small muted">${paraLabel(x.para)} ·</span> <span class="quote-inline">“${esc(x.quote)}”</span>${x.cards.length ? ` <span class="small">· ${x.cards.map((c) => link(c)).join(', ')}</span>` : ''}</li>`;
     }
     return `${h}</ul>`;
 }
@@ -1335,8 +1302,8 @@ function heldBackHtml() {
         const name = label(x.id);
         if (name) h += `<li>${esc(name)} — ${x.kind === 'late' ? `the result is told only at ${paraLabel(x.told)}` : 'the story never says what came of it'}.</li>`;
         else if (x.kind === 'supplied') h += `<li>${esc(model.cards.get(x.id).text)} — supplied by the game; ${x.told === null ? 'the story never says so' : `the story says so at ${paraLabel(x.told)}`}.</li>`;
-        else if (x.kind === 'late') h += `<li>${link(x.id, shortName(x.id, 80))} — due at ${paraLabel(x.due)}; the story tells it only at ${paraLabel(x.told)}.</li>`;
-        else h += `<li>${link(x.id, shortName(x.id, 80))} — the story never tells it${x.policy === 'inferred' ? '; it can only be inferred' : ''}.</li>`;
+        else if (x.kind === 'late') h += `<li>${link(x.id)} — due at ${paraLabel(x.due)}; the story tells it only at ${paraLabel(x.told)}.</li>`;
+        else h += `<li>${link(x.id)} — the story never tells it${x.policy === 'inferred' ? '; it can only be inferred' : ''}.</li>`;
     }
     return `${h}</ul>`;
 }
@@ -1353,7 +1320,7 @@ function clashesHtml() {
     }
     if (resolved.length) {
         h += `<details class="resolved"><summary class="small">${resolved.length} resolved by a doubt</summary><ul class="list">`;
-        for (const rc of resolved) h += `<li>${rc.doubted.map((x) => `You doubt ${link(x, shortName(x, 80))} <span class="link small" data-unsuspect="${x}">trust it again</span>`).join('; ')}</li>`;
+        for (const rc of resolved) h += `<li>${rc.doubted.map((x) => `You doubt ${link(x)} <span class="link small" data-unsuspect="${x}">trust it again</span>`).join('; ')}</li>`;
         h += '</ul></details>';
     }
     return h;
@@ -1378,12 +1345,12 @@ function toolTheories() {
         // The inferences the theory rests on (the ones its holders drew) and, among those the player holds, the
         // ones its answers agree with and the ones they go against.
         const restsOn = (t.rests_on ?? []).filter((x) => game.knows(x));
-        if (restsOn.length) h += `<div class="small">Rests on: ${restsOn.map((x) => link(x, shortName(x, 70))).join(' · ')}</div>`;
+        if (restsOn.length) h += `<div class="small">Rests on: ${restsOn.map((x) => link(x)).join(' · ')}</div>`;
         if (!w) h += '<div class="small muted weighing">Weighing…</div>';
         else {
             const { agree, against } = w.support;
-            if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
-            if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x, shortName(x, 60))).join(' · ')}</div>`;
+            if (agree.length) h += `<div class="small">Agrees with your inferences: ${agree.map((x) => link(x)).join(' · ')}</div>`;
+            if (against.length) h += `<div class="small bad">Goes against your inferences: ${against.map((x) => link(x)).join(' · ')}</div>`;
             h += cost ? w.html : `<div class="small"><span class="link" data-weigh="${esc(t.id)}">Weigh it</span></div>`;
         }
         const tkey = `t|${t.id}`;
@@ -1407,7 +1374,7 @@ const FAMILY_WORDS = {
     absence: ['What did not happen', 'absences Holmes has pointed to'],
 };
 // A card that is a sentence (a clue, an inference) is quoted; a thing or a person is named.
-const names = (ids) => ids.map((x) => (['claims', 'inferences', 'applied'].includes(model.cards.get(x)?.section) ? `“${link(x, shortName(x, 110).replace(/\.$/, ''))}”` : link(x, shortName(x, 60)))).join('; ');
+const names = (ids) => ids.map((x) => (['claims', 'inferences', 'applied'].includes(model.cards.get(x)?.section) ? `“${link(x, cardName(x).replace(/\.$/, ''))}”` : link(x))).join('; ');
 /** Each line once: two thoughts can rest on the same inference. */
 const once = (lines) => [...new Set(lines)];
 /** What a row says Holmes (or the story) did at its deadline, and what the player had done. */
@@ -1474,7 +1441,7 @@ function checkText(x) {
     const [a, b] = CHECK_WORDS[x.verb];
     const [f, g] = CHECK_TEMPLATES[x.verb].fields;
     // A clue is a sentence: it reads in quotation marks.
-    const name = (id) => (model.cards.get(id)?.section === 'claims' ? `“${link(id, shortName(id, 60).replace(/\.$/, ''))}”` : link(id, shortName(id, 50)));
+    const name = (id) => (model.cards.get(id)?.section === 'claims' ? `“${link(id, cardName(id).replace(/\.$/, ''))}”` : link(id));
     return `${a} ${name(x.fields[f])} ${b} ${name(x.fields[g])}`;
 }
 /**
@@ -1541,7 +1508,7 @@ const COST_WHY = { 'others-inference': 'someone else\'s reasoning', heuristic: '
 function costHtml(cost) {
     if (cost.refuted) return '<div class="small bad">It cannot hold, whatever you set aside.</div>';
     if (!cost.items.length) return '<div class="small good">It needs nothing you trust to be wrong.</div>';
-    const names = (i) => i.cards.map((x) => link(x, shortName(x, 60))).join(' and ');
+    const names = (i) => i.cards.map((x) => link(x)).join(' and ');
     const words = cost.items.filter((i) => i.why !== 'inference' && i.told !== 'seen');
     const own = cost.items.filter((i) => i.why === 'inference');
     const seen = cost.items.filter((i) => i.told === 'seen');
@@ -1586,7 +1553,7 @@ function countsHtml(cost, res, assumed = 0) {
 function residueHtml(res) {
     const all = res.explained.length + res.residue.length;
     if (!all) return '';
-    const cardsOf = (id) => (model.data.puzzles ?? []).find((z) => z.id === id).cards.map((x) => link(x, shortName(x, 50))).join(' with ');
+    const cardsOf = (id) => (model.data.puzzles ?? []).find((z) => z.id === id).cards.map((x) => link(x)).join(' with ');
     if (!res.residue.length) return `<div class="small good">It explains every odd thing you have met (${all}).</div>`;
     return `<div class="small">It leaves ${res.residue.length} of ${all} odd things unexplained: ${res.residue.map(cardsOf).join(' · ')}</div>`;
 }
@@ -1637,14 +1604,14 @@ function cardTimelineHtml(id) {
     if (!tl.kind) return '';
     const shown = game.timelineTimes().filter((t) => t.kind !== 'boundary');
     if (!shown.length) return '';
-    const evLink = (e) => link(e, shortName(e, 50));
+    const evLink = (e) => link(e);
     let h = '<h3 class="section">Timeline</h3>';
     if (tl.kind !== 'event') h += `<div class="row small card-layer">${picker}</div>`;
     if (tl.kind === 'event') {
         const line = tl.lines[0];
         if (!line) h += '<p class="small muted">When it happened is not settled yet.</p>';
         else {
-            h += `<p class="small">${esc(line.label ?? cardName(line.time))}${tl.place ? ` · ${link(tl.place, shortName(tl.place, 30))}` : ''}</p>`;
+            h += `<p class="small">${esc(line.label ?? cardName(line.time))}${tl.place ? ` · ${link(tl.place)}` : ''}</p>`;
             const sp = game.board.splits.find((x) => x.time === line.time);
             if (sp && sp.by !== id) h += `<p class="small">Split at ${evLink(sp.by)}: this happened <span class="link" data-move="${esc(`${id}|${line.time}.before.${sp.by.slice(2)}`)}">before</span> / <span class="link" data-move="${esc(`${id}|${line.time}.after.${sp.by.slice(2)}`)}">after</span> it?</p>`;
             if (line.placed) h += `<p class="small"><span class="link" data-order-prove="${esc(`${id}|${line.time}`)}">Prove it</span> · <span class="link" data-move="${esc(`${id}|`)}">Back to the whole window</span></p>`;
@@ -1722,7 +1689,7 @@ function boardHtml(layout) {
         <button data-pen-add="1">Pencil it in</button></div>`;
     h += absenceFormHtml(shown);
     const unfollowed = people.filter((id) => !followed.includes(id));
-    h += `<div class="small follow">Following ${followed.map((id) => `${link(id, shortName(id, 24))} <span class="link x" data-unfollow="${esc(id)}" title="Stop following">×</span>`).join(', ') || 'no one yet'}.
+    h += `<div class="small follow">Following ${followed.map((id) => `${link(id)} <span class="link x" data-unfollow="${esc(id)}" title="Stop following">×</span>`).join(', ') || 'no one yet'}.
         ${unfollowed.length ? `Follow <select id="follow-pick">${unfollowed.map((id) => opt(id, shortName(id, 30), null)).join('')}</select> <button data-follow-go="1" class="quiet">Follow</button>` : ''}</div>`;
     h += `<div class="row small split-toggle"><button data-split-toggle="1" class="quiet">${ui.showSplits ? 'Hide' : 'Show'} the split controls</button></div>`;
     const splitCtl = (t) => {
@@ -1745,7 +1712,7 @@ function boardHtml(layout) {
                     const mv = sp && t.kind !== 'boundary' ? ` <span class="small muted">→ <span class="link" data-move="${esc(`${e}|${t.id}.before.${sp.by.slice(2)}`)}">before</span> / <span class="link" data-move="${esc(`${e}|${t.id}.after.${sp.by.slice(2)}`)}">after</span></span>` : '';
                     const placedHere = game.board.placed.some((p) => p.event === e) && t.kind === 'part';
                     const back = placedHere ? ` <span class="link small" data-move="${esc(`${e}|`)}" title="Back to the whole window">↑</span> <span class="link small" data-order-prove="${esc(`${e}|${t.id}`)}" title="Prove it happened in this part, from what you hold and trust">prove</span>` : '';
-                    return `<div class="ev" title="${esc(cardName(e))}">• ${link(e, shortName(e, 26))}${mv}${back}</div>`;
+                    return `<div class="ev" title="${esc(cardName(e))}">• ${link(e)}${mv}${back}</div>`;
                 }).join('');
                 const pick = t.kind === 'boundary' || c === 'unknown' ? '' : ` data-pen-cell="${esc(`time=${t.id}|place=${c}`)}"${pen.time === t.id && pen.place === c ? ' class="picked"' : ''}`;
                 h += `<td${pick}>${cell.things.map((x) => thingChip({ value: c, ...x }, t.id)).join(' ')}${evs}</td>`;
@@ -1757,7 +1724,7 @@ function boardHtml(layout) {
         const bt = game.timeline('thing', layer);
         h += `<div class="board-wrap"><table class="board"><thead><tr><th></th>${bt.times.map((t) => `<th title="${esc(t.label)}">${esc(t.label)}</th>`).join('')}</tr></thead><tbody>`;
         for (const r of bt.rows) {
-            h += `<tr><th>${link(r.thing, shortName(r.thing, 24))}</th>`;
+            h += `<tr><th>${link(r.thing)}</th>`;
             for (const c of r.cells) {
                 const bits = [];
                 if (c.at) bits.push(markChip(r.thing, c.time, c.at, placeName(c.at), { given: true }));
@@ -1816,10 +1783,10 @@ function toolTimeline() {
         const open = rows.filter((r) => r.slot && r.settled === null);
         if (open.length) h += `<h3 class="section">Not yet placed (${open.length})</h3><ul class="list small">${open.map((r) => `<li>${link(r.event.id)}</li>`).join('')}</ul>`;
         const untimed = rows.filter((r) => !r.slot);
-        if (untimed.length) h += `<p class="small muted">No time given: ${untimed.map((r) => link(r.event.id, shortName(r.event.id, 40))).join(', ')}</p>`;
+        if (untimed.length) h += `<p class="small muted">No time given: ${untimed.map((r) => link(r.event.id)).join(', ')}</p>`;
     } else if (ui.timeline === 'found') {
         const inv = game.investigation().filter((r) => !['glosses', 'rules'].includes(model.cards.get(r.id).section));
-        h += inv.length ? `<ol class="small">${inv.map((r) => `<li>${link(r.id, shortName(r.id, 60))} <span class="muted">· ${paraLabel(r.para)}</span></li>`).join('')}</ol>` : '<p class="empty">Nothing yet.</p>';
+        h += inv.length ? `<ol class="small">${inv.map((r) => `<li>${link(r.id)} <span class="muted">· ${paraLabel(r.para)}</span></li>`).join('')}</ol>` : '<p class="empty">Nothing yet.</p>';
     } else {
         for (const s of model.scenes) {
             const at = story.find(s.source[0])?.para ?? 0;
@@ -1872,10 +1839,10 @@ function clueHtml(id, aside = null) {
     const k = model.constraints.get(id);
     const c = k.from_claim;
     if (!c) return esc(k.label);
-    if (game.suspected.has(c)) return `${link(c, shortName(c, 90))} <span class="small muted">doubted</span>`;
+    if (game.suspected.has(c)) return `${link(c)} <span class="small muted">doubted</span>`;
     // In a listed clash: the card the game set aside, and the others, which the player may doubt instead.
-    if (aside?.includes(c)) return `${link(c, shortName(c, 90))} <span class="small bad">set aside</span> <span class="link small" data-suspect="${c}">doubt it</span>`;
-    return `${link(c, shortName(c, 90))} <span class="link small" data-suspect="${c}">${aside ? 'doubt this instead' : 'doubt it'}</span>`;
+    if (aside?.includes(c)) return `${link(c)} <span class="small bad">set aside</span> <span class="link small" data-suspect="${c}">doubt it</span>`;
+    return `${link(c)} <span class="link small" data-suspect="${c}">${aside ? 'doubt this instead' : 'doubt it'}</span>`;
 }
 
 /**
@@ -1911,7 +1878,7 @@ function buildingBar() {
     const b = ui.building;
     if (!b) return '';
     let h = '<div class="building"><b>Building an inference</b> ';
-    h += b.cards.map((x) => `<span class="chip">${link(x, shortName(x, 40))} <span class="x" data-unbuild="${x}">✕</span></span>`).join(' + ') || '<span class="small muted">open a clue or background card and press “Infer from this”</span>';
+    h += b.cards.map((x) => `<span class="chip">${link(x)} <span class="x" data-unbuild="${x}">✕</span></span>`).join(' + ') || '<span class="small muted">open a clue or background card and press “Infer from this”</span>';
     if (game.opts.kind === 'on') {
         h += ` <label class="small">about <select id="build-kind"><option value="">…choose</option>${Object.entries(CONCLUSION_KINDS).map(([k, label]) => `<option value="${k}" ${b.kind === k ? 'selected' : ''}>${esc(label)}</option>`).join('')}</select></label>`;
     }
@@ -1942,7 +1909,7 @@ function runState() {
     const formula = st.neg ? { ne: [st.slot, st.value] } : { eq: [st.slot, st.value] };
     const res = game.concludeFrom(b.cards, formula);
     if (res.ok) {
-        b.note = `<span class="good">It follows:</span> ${link(res.id, shortName(res.id, 90))}`;
+        b.note = `<span class="good">It follows:</span> ${link(res.id)}`;
         toast(`New inference: ${esc(shortName(res.id, 70))}`);
         ui.state = null;
         b.cards = [];
@@ -1963,7 +1930,7 @@ function runPropose() {
     if (game.opts.kind === 'on' && !b.kind) { b.note = 'Choose what the conclusion would be about.'; renderTool(); return; }
     const res = game.propose(b.cards, b.kind);
     if (res.built.length) {
-        b.note = `<span class="good">You inferred:</span> ${res.built.map((x) => link(x, shortName(x, 90))).join('; ')}${res.onto ? ' <span class="muted">— and these cards are onto something more.</span>' : ''}`;
+        b.note = `<span class="good">You inferred:</span> ${res.built.map((x) => link(x)).join('; ')}${res.onto ? ' <span class="muted">— and these cards are onto something more.</span>' : ''}`;
         toast(`New inference: ${esc(shortName(res.built[0], 70))}`);
         if (!res.onto) b.cards = [];
         changed();
@@ -1990,7 +1957,7 @@ function toolInferences() {
     for (const id of held) {
         const how = game.howHeld(id);
         const by = how?.how === 'built' ? 'you' : how?.how === 'stated' ? cardName(how.by) : how?.how === 'implicit' ? 'follows' : 'worked out';
-        h += `<li class="${game.isSuspected(id) ? 'doubted' : ''}">${link(id, shortName(id, 140))} <span class="small muted">· ${esc(by)}, ${paraLabel(game.unlocked.get(id).para)}${game.isSuspected(id) ? ' · doubted' : ''}</span>`
+        h += `<li class="${game.isSuspected(id) ? 'doubted' : ''}">${link(id)} <span class="small muted">· ${esc(by)}, ${paraLabel(game.unlocked.get(id).para)}${game.isSuspected(id) ? ' · doubted' : ''}</span>`
             + `<div class="small muted">${esc(readingOf(model.cards.get(id).formula))}</div></li>`;
     }
     return `${h}</ul>`;
@@ -2015,7 +1982,7 @@ function doubtableHtml(ids) {
     const claims = [...new Set(ids.map((k) => model.constraints.get(k).from_claim).filter(Boolean))];
     const rest = ids.filter((k) => !model.constraints.get(k).from_claim);
     const doubt = (c) => (game.suspected.has(c) ? '<span class="small muted">doubted</span>' : `<span class="link small" data-suspect="${c}">doubt it</span>`);
-    return `${claims.map((c) => `${link(c, shortName(c, 70))} ${doubt(c)}`).join(' · ')}${rest.length ? (claims.length ? ` <span class="muted">(with: ${rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')})</span>` : rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')) : ''}`;
+    return `${claims.map((c) => `${link(c)} ${doubt(c)}`).join(' · ')}${rest.length ? (claims.length ? ` <span class="muted">(with: ${rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')})</span>` : rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')) : ''}`;
 }
 // Why the game set aside what it did (Game.clashes, docs/clashes.md): by the class of what weighed least.
 const CLASH_WHY = {
@@ -2119,8 +2086,6 @@ function onClick(e) {
     if (ui.notesMode && e.target.closest('#story')) return;
     if (e.target.closest('#story')) { onStoryClick(e); return; }
     if (!e.target.closest('#pop')) $('#pop').hidden = true;
-    const pointBack = e.target.closest('[data-reread-prompt]');
-    if (pointBack) { const [from, to] = pointBack.dataset.rereadPrompt.split('-').map(Number); ui.reread = { from, to, question: '' }; renderReader(); return; }
     if (e.target.closest('#hint, #hint-more')) { takeHint(); return; }
     if (e.target.closest('#hint-do')) { doHint().catch((err) => { console.error(err); toast(`Something went wrong: ${esc(err.message)}`); }); return; }
     if (e.target.closest('[data-hint-unfold]')) { ui.hint.unfold = true; renderReader(); return; }
@@ -2128,20 +2093,6 @@ function onClick(e) {
     if (hintPara) { showPara(+hintPara.dataset.hintPara, fromPanel(e)); return; }
     const hintShow = e.target.closest('[data-hint-show]');
     if (hintShow) { const [thought, family, rung] = hintShow.dataset.hintShow.split('|'); ui.hint = { thought, family, rung: +rung, para: game.read - 1 }; renderReader(); return; }
-    if (e.target.closest('#reread-open')) { ui.reread = ui.reread ? null : { from: 1, to: game.read - 1, question: '' }; renderReader(); return; }
-    if (e.target.closest('#rr-close')) { ui.reread = null; ui.rereadShown = null; renderStory(); renderReader(); return; }
-    if (e.target.closest('#rr-go')) {
-        const [from, to, question] = [+$('#rr-from').value, +$('#rr-to').value, $('#rr-q').value || null];
-        if (!game.reread(from, to, question)) { ui.reread = { from, to, question, error: 'Choose paragraphs you have read, the first no later than the last.' }; renderReader(); return; }
-        ui.reread = { from, to, question };
-        ui.rereadShown = { from, to, question };
-        show('story');
-        renderToolNow();
-        renderStory();
-        save();
-        document.querySelector(`#story p[data-p="${from}"]`)?.scrollIntoView({ block: 'start' });
-        return;
-    }
     const readBtn = e.target.closest('#read, #read-scene, #read-deduction');
     if (readBtn) {
         // The paragraphs this read covers: the record's rows whose deadline falls in them are told (recordNews).
@@ -2283,7 +2234,7 @@ function onClick(e) {
     if (t.dataset.withdraw) { const [id, n, x] = t.dataset.withdraw.split('|'); game.withdraw(id, Number(n), x); changed(); return; }
     if (t.dataset.splitClaim) {
         const res = game.splitClaim(t.dataset.splitClaim);
-        if (res.ok) toast(`Split into: ${res.parts.map((x) => link(x, shortName(x, 50))).join(' · ')}`); else toast(esc(res.reason));
+        if (res.ok) toast(`Split into: ${res.parts.map((x) => link(x)).join(' · ')}`); else toast(esc(res.reason));
         changed();
         return;
     }
@@ -2305,7 +2256,7 @@ function onClick(e) {
         const { expectation, time, witness } = ui.absence;
         if (!expectation || !time || !witness) { toast('Choose what you would expect, when, and who or what would have noticed.'); renderTool(); return; }
         const res = game.fileAbsence(expectation, time, witness);
-        if (res.ok) { toast(`Filed. ${res.existing ? 'You hold it already' : 'A new clue'}: ${link(res.id, shortName(res.id, 70))}`); ui.absence = null; }
+        if (res.ok) { toast(`Filed. ${res.existing ? 'You hold it already' : 'A new clue'}: ${link(res.id)}`); ui.absence = null; }
         else toast(esc(res.reason));
         changed();
         return;
@@ -2328,7 +2279,7 @@ function onClick(e) {
     if (t.dataset.orderProve) {
         const [ev, part] = t.dataset.orderProve.split('|');
         const res = game.proveOrder(ev, part);
-        if (res.ok) toast(res.card ? `Proven. A new card: ${link(res.card, shortName(res.card, 60))}` : 'Proven.');
+        if (res.ok) toast(res.card ? `Proven. A new card: ${link(res.card)}` : 'Proven.');
         else toast(esc(res.reason ?? res.error ?? 'Not proven.'));
         changed();
         return;
@@ -2336,7 +2287,7 @@ function onClick(e) {
     if (t.dataset.markProve || t.dataset.markRule) {
         const [thing, time, value, aspect] = (t.dataset.markProve ?? t.dataset.markRule).split('|');
         const res = t.dataset.markProve ? game.proveMark(thing, time, value, aspect) : game.ruleOutMark(thing, time, value, aspect);
-        if (res.ok && t.dataset.markProve) toast(res.card ? `Proven. A new card: ${link(res.card, shortName(res.card, 60))}` : 'Proven.');
+        if (res.ok && t.dataset.markProve) toast(res.card ? `Proven. A new card: ${link(res.card)}` : 'Proven.');
         else if (res.ok) toast(res.proof ? 'Ruled out: your clues exclude it.' : 'Crossed out.');
         else toast(res.contradiction ? 'Some of the clues you trust clash: one of them must be false.' : esc(res.reason ?? res.error ?? 'Not proven.'));
         ui.layerFit = null;
@@ -2550,7 +2501,7 @@ const OPTION_UI = {
     greying: ['Answers your clues rule out', { on: 'Greyed out', off: 'Not shown' }, 'Greyed out: the game greys the answers your clues already rule out, and offers “Could it fit?” on each answer and a check on each theory.'],
     clashes: ['Clashes among your clues', { on: 'Listed', off: 'Not listed' }, 'Listed: the Questions tab lists the clues you trust that cannot all be true.'],
     weigh: ['Weighing theories', { names: 'What and which', counts: 'How much', asked: 'When you ask' }, 'What and which: each theory shows what it needs you to disbelieve, what it goes against, and which odd things it leaves unexplained. How much: only the counts. When you ask: nothing until you weigh a theory, then the counts.'],
-    hints: ['Hints', { story: 'Also the story\'s own signals', on: 'How many, and where to start', off: 'None' }, 'How many: the Inferences tab counts how many more you could build; when the story waits on a deduction, it names the cards to start from. The story\'s own signals: the Questions tab also lists what Holmes visibly attends to, and the story points you back to a passage to re-read where it does so itself.'],
+    hints: ['Hints', { story: 'Also the story\'s own signals', on: 'How many, and where to start', off: 'None' }, 'How many: the Inferences tab counts how many more you could build; when the story waits on a deduction, it names the cards to start from. The story\'s own signals: the Questions tab also lists what Holmes visibly attends to.'],
     kind: ['Building an inference', { off: 'Connect the cards', on: 'Also name what it is about' }, 'Also name it: you say whether the conclusion is about who, when, where, what, why, or whether something is so.'],
     connect: ['Background in inferences', { implicit: 'Needed in hand', connect: 'Connected too' }, 'Needed in hand: connect an inference\'s clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.'],
     background: ['Background facts', { start: 'All at once', relevant: 'When relevant', ask: 'When asked' }, 'General knowledge a reader of the time had. All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.'],

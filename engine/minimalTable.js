@@ -56,7 +56,6 @@ export function make(g, model, m) {
         case 'seal': return !!g.seal(m.verb, m.fields, { expect: m.expect, answer: m.answer }).ok;
         case 'file': return !!g.fileAbsence(m.expectation, m.time, m.witness).ok;
         case 'pose': return g.pose(m.template, m.cards).ok !== false;
-        case 'reread': return !!g.reread(m.from, m.to);
         case 'setAside': return g.setAside(m.card) !== false;
         case 'split': return !!g.splitClaim(m.card).ok;
         case 'doubt': { const ok = !!g.suspect(m.card); g.setDoubtReason(m.card, m.reason); return ok; }

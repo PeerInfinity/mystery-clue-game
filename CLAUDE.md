@@ -5,7 +5,8 @@
   deadline; all difficulties; the bar and a Hints tab; four rungs, the last makes the move (Do it); a catch-up note at
   missed deadlines). Built: step 1, the engine (Round 205: `hints.json`, `npm run hints`, `engine/hints.js`, the
   hint-only player to 70); step 2, the page (Round 206: the bar's Hint, More and Do it, the Hints tab,
-  `scripts/hints-check.mjs`). Next: step 3, the catch-up note at missed deadlines; step 4, hints in `stats.md`.
+  `scripts/hints-check.mjs`). Found in Round 207: Do it fails on Easy and Medium through the page (`DIFFICULTY=easy
+  hints-check all`), to fix first. Next: step 3, the catch-up note at missed deadlines; step 4, hints in `stats.md`.
 - `docs/kickoff-hints.md` — the discussion it opened (Round 203), done in Round 204: its paper `docs/hints.md`.
 - `docs/minimal-playthrough.md` — agreed (Round 200), built (Rounds 200–202): the fewest of the annotated reader's
   moves that reach 70, batched before their deadlines (`action-table-minimal.json`, `npm run minimal-table`); the

@@ -27,7 +27,7 @@ test('the minimal table is made of the action table\'s moves, none earlier than 
     assert.equal(minimal.moves, moves.length);
     assert.deepEqual(minimal.stops, [...new Set(moves.map((m) => m.at))].sort((a, b) => a - b));
     // No notes, and none of the moves that never score nor feed a score on Hard.
-    for (const op of ['pose', 'reread', 'setAside', 'split', 'doubt', 'weigh']) assert.ok(!moves.some((m) => m.op === op), op);
+    for (const op of ['pose', 'setAside', 'split', 'doubt', 'weigh']) assert.ok(!moves.some((m) => m.op === op), op);
     // A candidate the page drops from its chip is proposed first.
     for (const d of moves.filter((m) => m.op === 'drop' && m.target.slot)) assert.ok(moves.some((m) => m.op === 'candidate' && m.slot === d.target.slot && m.value === d.target.value && m.seq < d.seq), JSON.stringify(d.target));
 });

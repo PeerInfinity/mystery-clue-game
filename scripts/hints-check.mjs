@@ -2,12 +2,13 @@
 // each rung and the log checked in the saved game; Do it made through the page; the Hints tab; a reload keeps the log;
 // Trivial has no Hint button; Start over clears the log. With `all`: a fresh Hard game that only reads and, at every
 // paragraph, takes every hint to Do it (on `?hintfast`), which must reach the Hard maximum (70) through the page (about
-// 15 minutes).
+// 15 minutes); `DIFFICULTY=easy|medium` plays that game on another difficulty (its maximum the same 70).
 //   node scripts/hints-check.mjs [all] [shots dir]   (the game served at URL, default http://localhost:8321/; Chrome on 9333)
 // Only one script may drive that Chrome at a time.
 import fs from 'node:fs';
 import { open } from './cdp.mjs';
 const ALL = process.argv[2] === 'all';
+const DIFFICULTY = process.env.DIFFICULTY ?? 'hard';
 const SHOTS = process.argv[ALL ? 3 : 2] ?? null;
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 const base = process.env.URL ?? 'http://localhost:8321/';
@@ -24,7 +25,7 @@ const settings = async (fn) => { await p.ev(`document.querySelector('.settings')
 const doIt = async () => { await p.click('#hint-do'); for (let i = 0; i < 1200 && (await p.ev('!!window.__hintDoing')); i++) await p.sleep(250); await p.idle(); };
 
 await p.ev(`localStorage.clear(); 1`); await reload();
-await settings(() => p.choose('#difficulty', 'hard'));
+await settings(() => p.choose('#difficulty', ALL ? DIFFICULTY : 'hard'));
 
 if (ALL) {
     // Every hint taken to Do it, paragraph by paragraph.

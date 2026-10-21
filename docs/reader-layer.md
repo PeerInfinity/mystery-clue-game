@@ -409,3 +409,10 @@ The recommendations of Q1–Q6 as written, and the order of work.
 - **Expert steps** took their follow-on gates with them: `t46.4` at ¶220 and `t37.13` at ¶226 as well as the three
   named. `k.horse_kicked` now reaches a free-pace player at ¶226, Holmes's explanation (Round 137).
 - **The re-read prompts** needed their passages as data: `passage` on `t70.2` and `t182.3` (Round 139).
+
+**Changed (Robert, Round 207): Re-read removed.** The Re-read button did nothing that scrolling back in the story cannot
+(the passage outlined, a question shown, a record nothing read). Removed with it: `Game.reread` and `rereads` (an old
+save's re-reads are dropped on load), the form, the outline and "Your re-reads", the re-read signals of Q4 (the two
+places the story points back on Easy, ¶70 and ¶182), and the reader's two re-read moves from the action table. The
+annotation keeps `t70.2` and `t182.3` and their `passage`: the reader's thoughts, no longer a move. Holmes's interest
+(Q4's watch-holmes log) stays.

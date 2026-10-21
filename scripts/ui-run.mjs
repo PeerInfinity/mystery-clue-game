@@ -74,7 +74,6 @@ async function step(u) {
         if (ok) await p.idle();
         return ok || `no answer box for ${u.propose}`;
     }
-    if (u.click_if_absent) { if (await p.ev(`!!document.querySelector(${JSON.stringify(u.click_if_absent)})`)) return true; }
     if (u.click) {
         return (await p.click(u.click)) || `nothing to click: ${u.click}`;
     }
@@ -94,7 +93,6 @@ async function took(m) {
         case 'seal': return (s.seals ?? []).some((x) => x.verb === m.verb && JSON.stringify(x.fields) === JSON.stringify(m.fields) && (x.expect ?? null) === (m.expect ?? null) && JSON.stringify(x.answer ?? null) === JSON.stringify(m.answer ?? null));
         case 'file': return has(s.filed, m.absence);
         case 'pose': return (s.posed ?? []).some((q) => q[1] === m.template && JSON.stringify(q[2]) === JSON.stringify(m.cards));
-        case 'reread': return (s.rereads ?? []).some((r) => r.from === m.from && r.to === m.to);
         case 'setAside': return has(s.setAside, m.card);
         case 'split': return has(s.split, m.card);
         case 'doubt': return (s.suspected ?? []).includes(m.card) && (s.doubtReason ?? []).some(([id, r]) => id === m.card && r === m.reason);

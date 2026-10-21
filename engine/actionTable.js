@@ -2,7 +2,8 @@
 // paragraph (retried each paragraph until they hold) and logged as the engine calls they are and as the UI makes them
 // (the tab, the card opened, the buttons and the fields). It is the autoplay's script, and its game reaches the Hard
 // maximum (engine/actionTable.test.js). Moves come from what thoughts.json says each thought holds (maps, inference,
-// notices, raises, checks, dropped, asks, passage, aside, candidates); a few are the script's own rules, marked below.
+// notices, raises, checks, dropped, asks, aside, candidates; a GENRE·re-read thought's `passage` makes no move since the
+// Re-read button went, Round 207); a few are the script's own rules, marked below.
 //   actionTable(model) → { table: {difficulty, families, ahead, thoughts: [{id, para, tag, profile, holmes, moves, same,
 //   scores, done}]}, game, never: [thought ids whose move never held] }
 import { Game } from './game.js';
@@ -137,7 +138,6 @@ export function actionTable(model) {
             const res = g.pose(t.asks.template, t.asks.cards);
             return log('pose', { template: t.asks.template, cards: t.asks.cards }, [openUi(t.asks.cards[0]), { select: '#pose-template', value: t.asks.template }, ...(t.asks.cards[1] ? [{ select: '#pose-second', value: t.asks.cards[1] }] : []), { click: `[data-pose="${t.asks.cards[0]}"]` }], res.ok !== false);
         });
-        if (t.passage) step(`rr:${t.id}`, () => log('reread', { from: t.passage[0], to: t.passage[1] }, [{ click_if_absent: '#rr-from', click: '#reread-open' }, { fill: '#rr-from', value: t.passage[0] }, { fill: '#rr-to', value: t.passage[1] }, { click: '#rr-go' }], g.reread(t.passage[0], t.passage[1])));
         if (ASIDE[t.id]) step(`sa:${t.id}`, () => acquire(ASIDE[t.id]) && log('setAside', { card: ASIDE[t.id] }, [openUi(ASIDE[t.id]), { click: `[data-setaside="${ASIDE[t.id]}"]` }], g.setAside(ASIDE[t.id]) !== false));
         if (DOUBTS[t.id]) step(`dbt:${t.id}`, () => {
             const d = DOUBTS[t.id];
