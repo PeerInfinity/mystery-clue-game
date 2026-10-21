@@ -10,7 +10,8 @@ import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS
 
 const CASE = 'cases/silver-blaze';
 // The autoplay (docs/autoplay.md, A2) plays in a save of its own, so the player's game is kept aside: `?autoplay` (or
-// `?autoplay=fast`, no pauses and notes at once, for the check) opens the page on it, fresh each time.
+// `?autoplay=fast`, no pauses and notes at once, for the check) opens the page on it, fresh each time; `?autoplay=minimal`
+// (and `minimal-fast`) plays the fewest moves instead (docs/minimal-playthrough.md).
 const AUTOPLAY = new URLSearchParams(location.search).get('autoplay');
 const STORE = AUTOPLAY === null ? 'mystery-clue-game:silver-blaze:v2' : 'mystery-clue-game:silver-blaze:autoplay';
 // The layout is the viewer's, the game is the case's: kept apart, and "Start over" keeps it (docs/layout.md, Q6).
@@ -580,7 +581,7 @@ function intro() {
 <li>${game.autoSolves() ? 'The game draws the inferences for you; they are listed under Inferences.' : `<b>Inferences</b> are the reasoning that connects clues. Open a clue or background card and press “Infer from this”, then connect further cards; the game tells you when you are onto something${game.opts.kind === 'on' ? ', and you name what the conclusion is about' : ''}. Holmes and the others state some inferences themselves.`}</li>
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>Your own notes: turn on <b>✎ Notes</b> in the header, then click in the story where a note goes, or drag over words to mark them. The Notes tab lists them; the game never reads them.</li>
-<li>To watch the game played to the end by a careful reader, its thoughts written in as notes: <b>Settings → Watch the autoplay…</b> Your game is kept aside meanwhile.</li>
+<li>To watch the game played to the end by a careful reader, its thoughts written in as notes, or by the fewest moves that reach the best score: <b>Settings → Watch the autoplay…</b> Your game is kept aside meanwhile.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
 }
@@ -2434,10 +2435,10 @@ run(() => {
     ui.selected = saved?.selected ?? null;
     renderNow();
     scrollStory();
-    if (AUTOPLAY !== null) import('./autoplay.js').then((m) => m.start({ store: STORE, fast: AUTOPLAY === 'fast', story, valueName, toast }));
+    if (AUTOPLAY !== null) import('./autoplay.js').then((m) => m.start({ store: STORE, fast: /(^|-)fast$/.test(AUTOPLAY), playthrough: AUTOPLAY.startsWith('minimal') ? 'minimal' : 'reader', story, valueName, toast }));
 });
 // "Watch the autoplay…" (docs/autoplay.md, A2): asks first, then opens the page on the autoplay's own save.
 $('#autoplay-open').addEventListener('click', () => {
-    if (!confirm('Watch the game played on Hard from the first paragraph to the last, as a careful reader plays it, with the reader\'s thoughts written in as notes? It takes about an hour at its own pace (faster at 4×). Your game is kept aside and comes back when you stop.')) return;
+    if (!confirm('Watch the game played on Hard from the first paragraph to the last, as a careful reader plays it, with the reader\'s thoughts written in as notes? It takes about an hour at its own pace (faster at 4×). Before it starts you can choose instead the fewest moves that reach the best score, with no notes. Your game is kept aside and comes back when you stop.')) return;
     location.search = '?autoplay';
 });

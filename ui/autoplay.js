@@ -7,9 +7,16 @@
 // thought's `typed` form, or its prose as it stands, and the words it `reads` highlighted (thoughts.json). Loaded by
 // ui/app.js only on `?autoplay`, in a save of its own; `?autoplay=fast` (the check, scripts/autoplay-check.mjs) plays
 // with no pauses and the notes at once.
+//
+// Two playthroughs (docs/minimal-playthrough.md, Round 201), chosen on the strip before it starts or by the address:
+// the annotated reader's (`?autoplay`) and the fewest moves (`?autoplay=minimal`, its check `?autoplay=minimal-fast`):
+// cases/silver-blaze/action-table-minimal.json, no notes, the moves gathered at a few paragraphs, read to by the
+// farthest of Next paragraph, Next scene and Next deduction, and each card reached the shortest way (left where it is
+// shown, a link on the card in view, the story's words, else its list). It counts its clicks.
 
 const CASE = 'cases/silver-blaze';
 const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], ['4', '4×'], ['at_once', 'notes at once']];
+const PLAYTHROUGHS = [['reader', 'The careful reader', '?autoplay', 'action-table.json', 'every move of the annotated reading, its thoughts written in as notes'], ['minimal', 'The fewest moves', '?autoplay=minimal', 'action-table-minimal.json', 'only the moves the best score needs, no notes']];
 // What a move is, in plain words (A2): never the thought's id or tag.
 const CAPTIONS = {
     collect: (m) => `Collecting: “${(m.words ?? '').trim()}”`,
@@ -34,12 +41,16 @@ const $ = (sel) => document.querySelector(sel);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const LEFT = '.panel[data-panel="0"]';
 
-export async function start({ store, fast, story, valueName, toast }) {
+export async function start({ store, fast, playthrough = 'reader', story, valueName, toast }) {
+    const minimal = playthrough === 'minimal';
     const [table, thoughts] = await Promise.all([
-        fetch(`${CASE}/action-table.json`).then((r) => r.json()),
+        fetch(`${CASE}/${PLAYTHROUGHS.find((x) => x[0] === playthrough)[3]}`).then((r) => r.json()),
         fetch(`${CASE}/thoughts.json`).then((r) => r.json()),
     ]);
-    const s = { speed: fast ? 'at_once' : 1, paused: false, stepping: false, skipTo: null, stopped: false, para: 0, failed: null, done: false, notes: 0, moves: 0 };
+    const s = { speed: fast ? 'at_once' : 1, paused: false, stepping: false, skipTo: null, stopped: false, para: 0, failed: null, done: false, notes: 0, moves: 0, had: 0, clicks: {} };
+    // Every click, choice and answer typed, by kind (the minimal playthrough's statistics, its closing line).
+    const tally = (kind) => { s.clicks[kind] = (s.clicks[kind] ?? 0) + 1; };
+    const clickCount = () => Object.values(s.clicks).reduce((a, b) => a + b, 0);
     const factor = () => (fast ? 0 : s.skipTo !== null ? 0 : s.speed === 'at_once' ? 4 : s.speed);
     const wait = async (ms) => { const f = factor(); if (f) await sleep(ms / f); await gate(); };
     const gate = async () => { while (s.paused && !s.stopped) await sleep(150); if (s.stopped) throw new Stopped(); };
@@ -48,9 +59,10 @@ export async function start({ store, fast, story, valueName, toast }) {
     const strip = document.createElement('div');
     strip.className = 'autoplay-strip';
     strip.innerHTML = `<span class="ap-title">Autoplay</span> <span id="ap-para" class="small"></span> <span id="ap-caption" class="ap-caption"></span>
-        <span class="ap-tools"><button id="ap-pause" class="quiet">Pause</button>
+        <span class="ap-tools"><select id="ap-play" aria-label="Playthrough" title="${PLAYTHROUGHS.find((x) => x[0] === playthrough)[4]}">${PLAYTHROUGHS.map(([v, l, , , what]) => `<option value="${v}" title="${what}"${v === playthrough ? ' selected' : ''}>${l}</option>`).join('')}</select>
+        <button id="ap-pause" class="quiet">Pause</button>
         <button id="ap-step" class="quiet" title="Make the next move, then pause">Step</button>
-        <select id="ap-speed" aria-label="Speed">${SPEEDS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
+        <select id="ap-speed" aria-label="Speed">${SPEEDS.filter(([v]) => !(minimal && v === 'at_once')).map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
         <button id="ap-skip" class="quiet" title="Make this paragraph's moves without pausing"><span class="long">Skip to the next paragraph</span><span class="short">Skip ¶</span></button>
         <button id="ap-stop" class="quiet">Stop</button></span>`;
     document.body.append(strip);
@@ -61,16 +73,20 @@ export async function start({ store, fast, story, valueName, toast }) {
     if (!fast) document.body.append(cursor);
     $('#ap-speed').value = String(s.speed);
     $('#ap-speed').addEventListener('change', (e) => { s.speed = e.target.value === 'at_once' ? 'at_once' : Number(e.target.value); });
+    // The playthrough is chosen before it starts (a fresh page on the other script); fixed once Resume or Step is pressed.
+    $('#ap-play').addEventListener('change', (e) => { location.search = PLAYTHROUGHS.find((x) => x[0] === e.target.value)[2]; });
+    // Once started, the menu gives way to the playthrough's name beside the title.
+    const started = () => { if (!$('#ap-play')) return; $('#ap-play').remove(); $('.ap-title').textContent = `Autoplay · ${PLAYTHROUGHS.find((x) => x[0] === playthrough)[1].toLowerCase()}`; };
     const setPaused = (on, why = 'Paused: the page is yours to look round; resume to go on.') => {
         s.paused = on;
         $('#ap-pause').textContent = on ? 'Resume' : 'Pause';
         if (on) $('#ap-caption').textContent = why;
         else caption(s.lastCaption ?? '');
     };
-    $('#ap-pause').addEventListener('click', () => { s.stepping = false; setPaused(!s.paused); });
+    $('#ap-pause').addEventListener('click', () => { s.stepping = false; started(); setPaused(!s.paused); });
     // One step (Round 195): the next move, note or paragraph read, then paused again (pressed while playing: pause
     // after the one under way).
-    $('#ap-step').addEventListener('click', () => { s.stepping = true; if (s.paused) setPaused(false); });
+    $('#ap-step').addEventListener('click', () => { s.stepping = true; started(); if (s.paused) setPaused(false); });
     const stepped = () => { if (s.stepping) { s.stepping = false; setPaused(true, `${s.lastCaption} · paused`); } };
     $('#ap-skip').addEventListener('click', () => { s.skipTo = s.para + 1; });
     $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; ending('Stopped.'); });
@@ -83,7 +99,7 @@ export async function start({ store, fast, story, valueName, toast }) {
         document.body.classList.remove('autoplaying');
         window.__autoplay = { ...status(), done: true };
     };
-    const status = () => ({ para: s.para, moves: s.moves, notes: s.notes, failed: s.failed, done: s.done, stopped: s.stopped });
+    const status = () => ({ playthrough, para: s.para, moves: s.moves, had: s.had, notes: s.notes, clicks: { ...s.clicks }, failed: s.failed, done: s.done, stopped: s.stopped });
     window.__autoplay = status();
 
     let cx = innerWidth / 2;
@@ -117,10 +133,11 @@ export async function start({ store, fast, story, valueName, toast }) {
         throw new Error('the page is still busy');
     }
     const saved = () => { try { return JSON.parse(localStorage.getItem(store) ?? 'null')?.game ?? {}; } catch { return {}; } };
-    async function click(sel, el = $(sel)) {
+    async function click(sel, el = $(sel), kind = null) {
         if (!el) return false;
         await pointAt(el);
         ring();
+        tally(kind ?? (el.matches('.tab') ? 'tab' : el.matches('#read, #read-scene, #read-deduction') ? 'read' : el.closest('[data-card], #pop .item') ? 'open' : 'button'));
         el.click();
         await idle();
         return true;
@@ -129,6 +146,7 @@ export async function start({ store, fast, story, valueName, toast }) {
         const e = $(sel);
         if (!e) return false;
         await pointAt(e);
+        tally('menu');
         e.value = value;
         e.dispatchEvent(new Event('change', { bubbles: true }));
         await idle();
@@ -136,7 +154,33 @@ export async function start({ store, fast, story, valueName, toast }) {
     }
     const chooseTab = async (t) => $(`${LEFT} .tab.on`)?.dataset.tab === t || click(`${LEFT} .tab[data-tab="${t}"]`);
     const showStory = async () => !!$('#story') || chooseTab('story');
+    // The panel showing the card, if one does (-1 if none).
+    const cardPanel = () => Number(document.querySelector('.panel:has(.tab.on[data-tab="card"])')?.dataset.panel ?? -1);
+    const held = () => new Set((saved().collected ?? []).map((x) => (Array.isArray(x) ? x[0] : x)));
+    // The shortest way to a card (the minimal playthrough): shown already; a link on the card in view; words of the
+    // story shown that carry it and nothing not held (a click there opens, Round 198); else null (its list).
+    async function openShortest(id) {
+        const at = cardPanel();
+        if (at >= 0 && saved().selected === id) return true;
+        if (at >= 0) {
+            const link = $(`#panel-${at} .link[data-card="${id}"]`);
+            if (link) return click(null, link, 'open');
+        }
+        if ($(`${LEFT} .tab.on`)?.dataset.tab === 'story' || $('#story')) {
+            const have = held();
+            // Only words whose cards are all held: a click on words with a card not held would collect it.
+            const words = [...document.querySelectorAll('#story .m')].filter((e) => { const ids = e.dataset.ids.split(' '); return ids.includes(id) && ids.every((x) => have.has(x) || /^[wq]\./.test(x)); });
+            const one = words.find((e) => e.dataset.ids.split(' ').length === 1);
+            if (one) return click(null, one, 'open');
+            if (words[0] && (await click(null, words[0], 'open'))) {
+                const item = $(`#pop:not([hidden]) .item[data-card="${id}"]`);
+                if (item) return click(null, item, 'open');
+            }
+        }
+        return null;
+    }
     async function openCard(id, tab) {
+        if (minimal) { const r = await openShortest(id); if (r !== null) return r; }
         for (const t of [...new Set([tab, 'cards', 'inferences', 'background', 'questions'])]) {
             await chooseTab(t);
             if (await click(`#panel-0 [data-card="${id}"]`)) return true;
@@ -153,6 +197,7 @@ export async function start({ store, fast, story, valueName, toast }) {
     };
     async function type(box, text) {
         await pointAt(box);
+        if (!box.isContentEditable) tally('typed');
         box.focus();
         let sofar = '';
         for (const ch of text) {
@@ -173,7 +218,7 @@ export async function start({ store, fast, story, valueName, toast }) {
             await showStory();
             const all = [...document.querySelectorAll(`#story p[data-p="${u.story}"] .m`)];
             const el = all.find((e) => e.dataset.ids.split(' ').includes(u.span) && e.textContent === u.words) ?? all.find((e) => e.dataset.ids.split(' ').includes(u.span));
-            return (el && click(null, el)) || `no words for the card in ¶${u.story}`;
+            return (el && click(null, el, 'words')) || `no words for the card in ¶${u.story}`;
         }
         if (u.open) return (await openCard(u.open, u.tab)) || `cannot open ${u.open}`;
         if (u.tab) return (await chooseTab(u.tab)) || `no tab ${u.tab}`;
@@ -227,9 +272,10 @@ export async function start({ store, fast, story, valueName, toast }) {
         }
     }
     async function move(m) {
-        if (took(m) && m.op !== 'theory') return;
+        if (took(m) && m.op !== 'theory') { s.had++; return; } // made already (one click collects all its words carry)
         caption((CAPTIONS[m.op] ?? (() => 'Making a move'))(m));
-        await click('[data-build-clear]');
+        // A connection left from before is cleared (the minimal playthrough: only when a build needs it, and has one).
+        if (!minimal || (m.op === 'build' && $('.building .chip'))) await click('[data-build-clear]');
         let why = null;
         for (const u of m.ui) {
             const r = await step(u);
@@ -340,11 +386,18 @@ export async function start({ store, fast, story, valueName, toast }) {
     for (const ms of movesAt.values()) ms.sort((a, b) => a.seq - b.seq);
     // A thought's note is written once its moves are made, at the last move's paragraph, or at its own.
     const notesAt = new Map();
-    for (const r of rows) {
+    if (!minimal) for (const r of rows) {
         const at = Math.max(r.para, ...r.moves.map((m) => m.at));
         (notesAt.get(at) ?? notesAt.set(at, []).get(at)).push(byId.get(r.id));
     }
     const last = story.paragraphs.length - 1;
+    // The reading button that goes farthest without passing `to` (the paragraph to read next): the buttons say how
+    // many paragraphs each reads.
+    const farthest = (to) => {
+        const read = saved().read ?? 1;
+        const by = (sel) => Number($(sel)?.textContent.match(/\((\d+) ¶\)/)?.[1] ?? 0);
+        return [['#read-deduction', by('#read-deduction')], ['#read-scene', by('#read-scene')]].filter(([sel, n]) => n > 1 && read + n <= to && !$(sel).disabled).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '#read';
+    };
     try {
         caption('Starting a fresh game on Hard');
         await idle();
@@ -353,14 +406,17 @@ export async function start({ store, fast, story, valueName, toast }) {
         document.querySelector('.settings').open = false;
         await showStory();
         // Paused at the start (Round 195): nothing moves until Resume (or Step) is pressed.
-        if (!fast) { setPaused(true, 'Ready: Resume to play, or Step for one move at a time.'); await gate(); }
-        for (let p = 1; p <= last; p++) {
+        if (!fast) { setPaused(true, 'Ready: choose what to watch, then Resume to play, or Step for one move at a time.'); await gate(); }
+        else started();
+        // The minimal playthrough reads from one paragraph with moves to the next; the reader, paragraph by paragraph.
+        const stops = minimal ? [...movesAt.keys()].sort((a, b) => a - b) : Array.from({ length: last }, (_, i) => i + 1);
+        for (const p of stops) {
             s.para = p;
             if (s.skipTo !== null && p >= s.skipTo) s.skipTo = null;
             $('#ap-para').textContent = `¶${p} of ${last}`;
             while ((saved().read ?? 1) <= p) {
                 caption('Reading on');
-                if (!(await click('#read'))) throw new Failed(`The autoplay could not read on at paragraph ${p}.`);
+                if (!(await click(minimal ? farthest(p + 1) : '#read'))) throw new Failed(`The autoplay could not read on at paragraph ${p}.`);
                 stepped();
             }
             await wait(1000);
@@ -376,7 +432,7 @@ export async function start({ store, fast, story, valueName, toast }) {
         caption('The story is over: the record against Holmes');
         await click('[data-record-open]');
         s.done = true;
-        ending(`The story is over. ${s.moves} moves, ${s.notes} notes. The record is open.`);
+        ending(`The story is over. ${s.moves} moves, ${minimal ? `${clickCount()} clicks` : `${s.notes} notes`}. The record is open.`);
     } catch (e) {
         if (e instanceof Stopped) return;
         s.failed = e.message;

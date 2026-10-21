@@ -240,4 +240,8 @@ their card on Hard (Round 198), a drop scores only for a reason that holds and a
 - **Checked:** `engine/minimalTable.test.js` (the table's moves are the action table's, none earlier than the reader
   made them; replayed it reaches the maximum, every move taking); `scripts/ui-run.mjs` on it: 144 moves, none failed,
   the record 70.
+- **The choice and the shortest way** (Round 201): the strip's menu while the autoplay waits, `?autoplay=minimal`; the
+  fewest moves play with no notes, read by jumps, and reach each card the shortest way. In the page: **734 clicks**
+  (the paper's model said about 726): cards opened 205, buttons 208, tabs 85, menus 76, reading 76, words collected 73,
+  answers typed 11. `scripts/autoplay-check.mjs minimal`: 12 of 12, about 2½ minutes.
 

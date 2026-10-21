@@ -145,3 +145,10 @@ save of its own with the player's game kept aside, the control strip and the cap
 thoughts that cannot be typed as they stand, written into `thoughts.json` and checked by the validator (A3 a); an
 inline field for a theory's name (A4); the order of work. Robert: the annotation needs cleaning up for this, so a new
 session reviews the annotation's content and writes the typed notes first (`docs/kickoff-annotations.md`).
+
+## Changed (Round 201): two playthroughs
+
+The strip's menu, while the autoplay waits to start, chooses **The careful reader** (this paper's) or **The fewest
+moves** (`docs/minimal-playthrough.md`: `action-table-minimal.json`, no notes, read by jumps, each card reached the
+shortest way); also `?autoplay=minimal`, and `?autoplay=minimal-fast` for `scripts/autoplay-check.mjs minimal`. Both
+count their clicks by kind.

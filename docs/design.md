@@ -4684,3 +4684,21 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Checked:** `scripts/ui-run.mjs` on the minimal table through the page: 144 moves, none failed, the record 70 (6
   minutes). The script takes 75–80 minutes on this machine under load (three rounds of about 155 replays).
 - **Moved:** nothing in the logs or reports (new files only).
+
+## Round 201 (2026-10-20): the autoplay plays either playthrough, the fewest moves the shortest way
+
+- **Built** (`ui/autoplay.js`, `ui/app.js`): a menu on the autoplay's strip while it waits to start, **The careful
+  reader** or **The fewest moves** (choosing reloads the page on that playthrough; once Resume or Step is pressed the
+  menu gives way to the name beside "Autoplay"); the address `?autoplay=minimal` (and `minimal-fast` for the check);
+  Settings → "Watch the autoplay…" says there are two. The fewest moves play `action-table-minimal.json` with no notes
+  (no "notes at once" speed), read from one paragraph with moves to the next by the farthest of Next paragraph, Next
+  scene and Next deduction, and reach each card the shortest way: left where it is shown, a link on the card in view,
+  the story's words whose cards are all held (Round 198), else its list; the connection is cleared only when a build
+  needs it. Both playthroughs count their clicks by kind (`window.__autoplay.clicks`), and the fewest moves say theirs
+  at the end. The phone's strip lets its tools wrap. `scripts/build-site.js` publishes the second table.
+- **Checked:** `scripts/autoplay-check.mjs minimal` (new: the record as its table says, every move made, no notes):
+  12 of 12, 144 moves, 70, **734 clicks** (open 205, button 208, tab 85, menu 76, read 76, words 73, typed 11), 2½
+  minutes (in one column, the phone's 390 × 844, also 12 of 12: 828 clicks, 187 of them tabs); the careful reader
+  12 of 12 (70; 1,910 clicks) at both sizes; the built site served alone (`_site` on 8323),
+  `?autoplay=minimal-fast` 12 of 12, no console error; the strip by sight, desktop and phone, waiting and playing.
+- **Moved:** nothing in the logs or reports (the autoplay and the site build only).
