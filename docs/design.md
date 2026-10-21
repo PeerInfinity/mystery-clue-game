@@ -4702,3 +4702,18 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   12 of 12 (70; 1,910 clicks) at both sizes; the built site served alone (`_site` on 8323),
   `?autoplay=minimal-fast` 12 of 12, no console error; the strip by sight, desktop and phone, waiting and playing.
 - **Moved:** nothing in the logs or reports (the autoplay and the site build only).
+
+## Round 202 (2026-10-20): the game's statistics
+
+- **Built:** `engine/stats.js` and `scripts/stats.js` (`npm run stats`) → `cases/silver-blaze/stats.md`, from the case
+  and the two action tables: the content (231 paragraphs, 9,571 words, 10 parts and scenes, 1,041 clickable spans, 690
+  cards by kind, 58 inferences to build and 32 that follow, 921 questions: 39 about the case, 784 about the events, 98
+  about states; 14 the story raises, 6 theories, 8 checks, 11 puzzles, 2 absences, 62 steps of Holmes's, 47 to beat;
+  296 thoughts by kind), the score on Hard (72 possible, 70 for both playthroughs), the moves by kind (396 against
+  144), paragraphs with moves (78 against 13), reading clicks (231 against 76), the tables' steps in the page with
+  every card opened from its list (1,088 against 562), and moves by scene. `engine/stats.test.js` checks it is current.
+- **Not in it:** the clicks the autoplay counts in the page (734 the shortest way, 828 in one column): a browser
+  measure, said at the autoplay's end and recorded in Round 201.
+- **Done:** `docs/kickoff-minimal-playthrough.md` (Rounds 197–202). `CLAUDE.md` names the paper first, the kickoff done,
+  and the new commands.
+- **Moved:** nothing in the logs or reports (new files only).

@@ -244,4 +244,9 @@ their card on Hard (Round 198), a drop scores only for a reason that holds and a
   fewest moves play with no notes, read by jumps, and reach each card the shortest way. In the page: **734 clicks**
   (the paper's model said about 726): cards opened 205, buttons 208, tabs 85, menus 76, reading 76, words collected 73,
   answers typed 11. `scripts/autoplay-check.mjs minimal`: 12 of 12, about 2½ minutes.
+- **The statistics** (Round 202): `npm run stats` (`engine/stats.js`) → `cases/silver-blaze/stats.md`: the content
+  (231 paragraphs, 9,571 words, 1,041 clickable spans, 690 cards by kind, 921 questions, 296 thoughts by kind…), the
+  score on Hard, the two playthroughs by move, reading clicks (231 against 76), the tables' steps in the page (1,088
+  against 562, every card from its list), and by scene; `engine/stats.test.js` keeps it current. The clicks the
+  autoplay makes the shortest way (734) are counted in the page and said at its end.
 

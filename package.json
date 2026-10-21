@@ -11,7 +11,8 @@
     "clash-log": "node scripts/clash-log.js cases/silver-blaze > .cache/clash-log.txt",
     "validate-thoughts": "node scripts/validate-thoughts.js cases/silver-blaze",
     "action-table": "node scripts/action-table.js",
-    "minimal-table": "node scripts/minimal-table.js"
+    "minimal-table": "node scripts/minimal-table.js",
+    "stats": "node scripts/stats.js"
   },
   "devDependencies": {
     "ajv": "^8.17.1"

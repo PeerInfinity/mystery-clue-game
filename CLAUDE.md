@@ -1,12 +1,12 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/minimal-playthrough.md` — the paper of Round 197 (written, for Robert to agree): the fewest of the annotated
-  reader's moves that reach 70 (141; 143 in the page), batched or not, the clicks they take, the choice of playthroughs
-  in the autoplay, the statistics. Nothing built until agreed.
-- `docs/kickoff-minimal-playthrough.md` — the next session's work (Round 196): a minimal playthrough to the Hard
-  maximum (no notes, no dead ends, fewest clicks), a choice of playthroughs in the autoplay, the game's statistics; a
-  paper first (`docs/minimal-playthrough.md`).
+- `docs/minimal-playthrough.md` — agreed (Round 200), built (Rounds 200–202): the fewest of the annotated reader's
+  moves that reach 70, batched before their deadlines (`action-table-minimal.json`, `npm run minimal-table`); the
+  autoplay's choice of playthroughs (`?autoplay=minimal`); the statistics (`stats.md`, `npm run stats`). Settled on the
+  way: collected words open their card on Hard (Round 198); a drop scores only for a reason that holds, a hedged check
+  not at all (Round 199).
+- `docs/kickoff-minimal-playthrough.md` — done (Rounds 197–202): its paper `docs/minimal-playthrough.md`, built.
 - `docs/review-annotations.md` — the annotation reviewed as a reader's paper (Round 182): a verdict per thought, batches
   B1–B5 for Robert to agree.
 - `docs/kickoff-annotations.md` — done (Rounds 182–188): the annotation reviewed (`docs/review-annotations.md`, B1–B5
@@ -81,9 +81,11 @@
 | What appears at each paragraph (leak checks) | `npm run reveal-log`, `npm run foreshadow-log` (→ `.cache/`) |
 | Every clash met and what it sets aside, for three kinds of player (about a minute; `--build` adds a fourth, 5 min) | `npm run clash-log` (→ `.cache/clash-log.txt`) |
 | The action table (the annotation's moves in the UI on Hard, the autoplay's script) → `cases/silver-blaze/action-table.json`; rerun when the case or the thoughts change (a test checks it is up to date and reaches the Hard maximum) | `npm run action-table` (about 3–5 min) |
+| The minimal playthrough (`docs/minimal-playthrough.md`): the fewest of the action table's moves that reach the Hard maximum, batched before their deadlines → `cases/silver-blaze/action-table-minimal.json`; rerun when the action table changes (a test checks it is made of the table's moves and reaches the maximum) | `npm run minimal-table` (about 20–40 min; parallel, `WORKERS=n`) |
+| The game's statistics (content, the two playthroughs by kind and by scene) → `cases/silver-blaze/stats.md`; rerun when the case or a table changes (a test checks it) | `npm run stats` |
 | Play the action table through the real UI in headless Chrome (port 9333; one script at a time), each move checked in the save; the record at the end (about 12–13 min) | `node scripts/ui-run.mjs` (→ `.cache/ui-run.json`; `STOP=<para>` for a part) |
 | The player's notes played through the page in headless Chrome (real mouse and keys: a note at a point, on marked words, a highlight, edit, delete and undo, the settings, reload, Start over), each step checked in the save (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
-| The autoplay checked (`docs/autoplay.md` A7): the page opened on `?autoplay=fast` in headless Chrome, played to the end by `ui/autoplay.js`; the record must read 70 ahead, every family as the action table says, the notes all written, no console error, the player's game kept aside (about 6–8 minutes; one script at a time on port 9333) | `node scripts/autoplay-check.mjs [shots dir]` (→ `.cache/autoplay-check.json`) |
+| The autoplay checked (`docs/autoplay.md` A7): the page opened on `?autoplay=fast` in headless Chrome, played to the end by `ui/autoplay.js`; the record must read 70 ahead, every family as the action table says, the notes all written, no console error, the player's game kept aside (about 6–8 minutes; one script at a time on port 9333) | `node scripts/autoplay-check.mjs [minimal] [shots dir]` (→ `.cache/autoplay-check[-minimal].json`; `minimal`: the fewest moves, no notes, its clicks counted) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 | LLM leak checker over the reader's notes the autoplay types (each `typed`, or the prose as it stands, against the story up to its paragraph; about $1 a fresh run) | `node checker/check.js cases/silver-blaze --notes --runs 2` (→ `.cache/checker-notes-haiku.json`) |
 
