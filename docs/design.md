@@ -4839,3 +4839,12 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Checked:** `engine/hints.test.js` 6 of 6; `hints-check` 16 of 16; `hints-check all` on Hard; by sight.
 - **Moved:** nothing in the logs or reports (the page, the hints engine).
 
+
+## Round 212 (2026-10-22): the DepGraph export, handed off
+
+- **Robert:** discuss exporting a dependency graph of the player's actions in Archipelago-CC's DepGraph format, in two
+  versions (the maximum score; keeping up with Holmes), with the actions needed on the cards at hand gating the story
+  and the story gating the next cards; in a new session.
+- **Handed off:** `docs/kickoff-depgraph.md` (the ask, the target format, the data here, the questions to settle);
+  `docs/kickoff-hints.md` is superseded.
+- **Moved:** nothing in the logs or reports.

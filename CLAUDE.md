@@ -1,6 +1,9 @@
 # Mystery clue game — quick reference
 
 ## Read first
+- `docs/kickoff-depgraph.md` — next (Round 212): discuss exporting the player's actions as an Archipelago-CC DepGraph,
+  two versions (the maximum score; keeping up with Holmes), story and actions gating each other; its paper
+  `docs/depgraph.md`.
 - `docs/hints.md` — the hint system: agreed (Rounds 204–205: free for now, a cooldown later; on request; the nearest
   deadline; all difficulties; the bar and a Hints tab; four rungs, the last makes the move (Do it); a catch-up note at
   missed deadlines). Built: step 1, the engine (Round 205: `hints.json`, `npm run hints`, `engine/hints.js`, the
@@ -9,7 +12,7 @@
   hints-check all`); step 3, the catch-up note at missed deadlines (Round 209); step 4, the hint-only player in `stats.md`
   (Round 210, `engine/hintPlayer.js`). The cooldown (per press, seconds, 30 by default)
   and the Record's count of rows by rungs of hint (Round 211).
-- `docs/kickoff-hints.md` — the discussion it opened (Round 203), done in Round 204: its paper `docs/hints.md`.
+- `docs/kickoff-hints.md` — done (Rounds 203–211): its paper `docs/hints.md`, built. Superseded by `docs/kickoff-depgraph.md`.
 - `docs/minimal-playthrough.md` — agreed (Round 200), built (Rounds 200–202): the fewest of the annotated reader's
   moves that reach 70, batched before their deadlines (`action-table-minimal.json`, `npm run minimal-table`); the
   autoplay's choice of playthroughs (`?autoplay=minimal`); the statistics (`stats.md`, `npm run stats`). Settled on the
