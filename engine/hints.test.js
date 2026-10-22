@@ -9,6 +9,7 @@ import { Game } from './game.js';
 import { Hints } from './hints.js';
 import { hintData, hintJson } from './hintData.js';
 import { make } from './minimalTable.js';
+import { playHints } from './hintPlayer.js';
 
 const dir = new URL('../cases/silver-blaze/', import.meta.url);
 const model = await loadCase(dir.pathname);
@@ -51,30 +52,13 @@ test('a player who only reads finds the rungs within what is read', () => {
 });
 
 test('a player who only reads and takes every hint to the fourth rung reaches the Hard maximum', () => {
-    const g = new Game(model, { difficulty: 'hard' });
-    const h = new Hints(g, data);
-    let targets = 0;
-    const fails = [];
-    while (!g.finished()) {
-        g.advance();
-        checkRungs(g, h);
-        const skip = new Set(); // a row whose moves did not make it, for this paragraph
-        for (let n = h.next({ skip }); n; n = h.next({ skip })) {
-            let p;
-            do p = h.take({ skip }); while (p.rung < 4);
-            targets++;
-            // As Do it: a drop whose reason would not hold now is left for later.
-            for (const m of p.moves) if (!(m.op === 'drop' && !h.wouldHold(m)) && !make(g, model, m) && m.op !== 'candidate') fails.push(`¶${g.read - 1} ${n.row.key}: ${m.op} ${m.seq}`);
-            if (h.open().some((r) => r.key === n.row.key)) skip.add(n.row.key);
-        }
-        g.clashes();
-    }
+    const { game: g, targets, fails } = playHints(model, data, { onRead: checkRungs });
     assert.deepEqual(fails, []);
     const rec = g.record();
     for (const [f, a] of Object.entries(table.families)) assert.equal(rec.families[f].scored, a.scored, f);
     assert.equal(rec.ahead, table.ahead);
     // Each hint logged, rung by rung; the log comes back with the save.
-    assert.equal(g.hintLog.length, targets * 4);
+    assert.equal(g.hintLog.length, targets.length * 4);
     const g2 = new Game(model, { difficulty: 'hard' });
     g2.load(JSON.parse(JSON.stringify(g.save())));
     assert.deepEqual(g2.hintLog, g.hintLog);

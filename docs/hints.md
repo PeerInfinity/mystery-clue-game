@@ -337,3 +337,13 @@ Step 2 was checked on Hard only; Robert met Do it failing on another difficulty.
 - **Checked:** `engine/hints.test.js` (every row's paragraph at or before its deadline); `scripts/hints-check.mjs` step
   9, at ¶57 on Hard with nothing made: "You could have had it from paragraph 31…" and "…marked it odd from paragraph
   18."; by sight, desktop and phone, and the end of a Medium game.
+
+### Step 4, the statistics (Round 210)
+
+- `stats.md` has a section "The hints": a player on Hard who only reads and takes each hint open to its fourth rung,
+  letting Do it make the moves: 57 hints taken to Do it, 228 presses, 4 rows hinted more than once (made in two goes,
+  or come back), 70 ahead of Holmes; and a column "Hints to Do it" by scene (22 in the train's facts, 14 at Straker's
+  villa, none in the explanation on the train home).
+- The player is `engine/hintPlayer.js` (`playHints`), shared by the test and the statistics; the page's
+  `engine/hints.js` stays free of node-only code. Hard only: it takes about half a minute there, minutes on Easy and
+  Medium (the page's `hints-check all` measures those: 55 and 56 hints).

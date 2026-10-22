@@ -4820,3 +4820,11 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Checked:** `engine/hints.test.js` 6 of 6; `hints-check` 13 of 13 (the notes at ¶57); by sight, desktop and phone; a
   Medium game that only reads ends with 65 rows listed.
 - **Moved:** nothing in the logs or reports (the page, the hints engine).
+
+## Round 210 (2026-10-21): hints, step 4: the statistics
+
+- **Built** (`docs/hints.md`, "As built", step 4): `stats.md`'s "The hints" (the hint-only player on Hard: 57 hints
+  taken to Do it, 228 presses, 70 ahead) and a "Hints to Do it" column by scene; the player drawn out of the test into
+  `engine/hintPlayer.js`, which the test and `engine/stats.js` share. The agreed order of work is done but step 5,
+  which waits on Robert's word: the cooldown (H8) and marking hinted rows (H6).
+- **Moved:** `stats.md` (the new section and column).

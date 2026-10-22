@@ -1,9 +1,11 @@
 // The game's statistics (docs/minimal-playthrough.md, M7): how much content the case has, and what each playthrough
-// (the annotated reader's action table and the minimal one) asks of a player, by kind and by scene. Written to
-// cases/<case>/stats.md by `npm run stats`; engine/stats.test.js checks it is up to date.
-//   statsMarkdown(model, {reader, minimal}) → markdown
+// (the annotated reader's action table and the minimal one) asks of a player, by kind and by scene, and the hints a
+// player who only reads takes (docs/hints.md, step 4). Written to cases/<case>/stats.md by `npm run stats`;
+// engine/stats.test.js checks it is up to date.
+//   statsMarkdown(model, {reader, minimal, hints}) → markdown   (hints: hints.json)
 import { Game } from './game.js';
 import { movesOf, readingClicks } from './minimalTable.js';
+import { playHints } from './hintPlayer.js';
 
 const n = (x) => x.toLocaleString('en-US');
 const count = (list, key) => list.reduce((o, x) => { const k = key(x); o[k] = (o[k] ?? 0) + 1; return o; }, {});
@@ -13,7 +15,7 @@ const OPS = [['collect', 'Collect (words clicked)'], ['ask', 'Ask what I know'],
 const stepKind = (u) => (u.story !== undefined ? 'words clicked' : u.open ? 'card opened from a list' : u.expect ? null : u.select || u.select_text ? 'menu chosen' : u.propose || u.fill ? 'typed' : u.tab ? 'tab chosen' : 'button pressed');
 const FAMILIES = { deduction: 'Deductions', notice: 'Odd details', raise: 'Steps seen through', drop: 'Wrong turns dropped', check: 'Checks planned', absence: 'What did not happen' };
 
-export function statsMarkdown(model, { reader, minimal }) {
+export function statsMarkdown(model, { reader, minimal, hints }) {
     const g = new Game(model, { difficulty: 'hard' });
     const d = model.data;
     const paras = g.story.paragraphs.slice(1); // ¶0 is the title
@@ -100,16 +102,31 @@ export function statsMarkdown(model, { reader, minimal }) {
     for (const k of ['words clicked', 'card opened from a list', 'button pressed', 'menu chosen', 'typed', 'tab chosen']) line(`| ${k} | ${rs[k] ?? 0} | ${ms[k] ?? 0} |`);
     line(`| **Steps** | **${n(Object.values(rs).reduce((a, b) => a + b, 0))}** | **${n(Object.values(ms).reduce((a, b) => a + b, 0))}** |`);
     line();
+    // The hint-only player (engine/hintPlayer.js), on Hard.
+    const hp = playHints(model, hints);
+    const hrec = hp.game.record();
+    line('## The hints');
+    line();
+    line('A player on Hard who only reads and, at every paragraph, takes each hint open to its fourth rung and lets Do it');
+    line('make the moves (`engine/hintPlayer.js`, `docs/hints.md`). Each hint taken that far is four presses of Hint and More.');
+    line();
+    line('| | The hint-only player |');
+    line('|---|---:|');
+    line(`| Hints taken to Do it | ${hp.targets.length} |`);
+    line(`| Presses (Hint and More) | ${hp.game.hintLog.length} |`);
+    line(`| Rows hinted more than once | ${Object.values(count(hp.targets, (t) => t.key)).filter((x) => x > 1).length} |`);
+    line(`| Ahead of Holmes | ${hrec.ahead} |`);
+    line();
     line('## By scene');
     line();
-    line('| Scene | Paragraphs | Words | Moves: the reader | Moves: the fewest |');
-    line('|---|---|---:|---:|---:|');
+    line('| Scene | Paragraphs | Words | Moves: the reader | Moves: the fewest | Hints to Do it |');
+    line('|---|---|---:|---:|---:|---:|');
     const starts = [...g.sceneStarts];
     const end = g.story.paragraphs.length;
     starts.forEach((a, i) => {
         const b = (starts[i + 1] ?? end) - 1;
         const inScene = (m) => m.at >= a && m.at <= b;
-        line(`| ${d.scenes[i]?.title ?? `Scene ${i + 1}`} | ¶${a}–${b} | ${n(g.story.paragraphs.slice(a, b + 1).reduce((x, p) => x + words(p), 0))} | ${rm.filter(inScene).length} | ${mm.filter(inScene).length} |`);
+        line(`| ${d.scenes[i]?.title ?? `Scene ${i + 1}`} | ¶${a}–${b} | ${n(g.story.paragraphs.slice(a, b + 1).reduce((x, p) => x + words(p), 0))} | ${rm.filter(inScene).length} | ${mm.filter(inScene).length} | ${hp.targets.filter((t) => t.para >= a && t.para <= b).length} |`);
     });
     line();
     return out.join('\n');
