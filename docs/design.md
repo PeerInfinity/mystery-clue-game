@@ -4867,3 +4867,19 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   in plain words, spoilers fine.
 - **Written:** `docs/depgraph.md` (D1–D7 open: the cut, nodes, edges, pruning, where it lives, the checks, Hard only).
 - **Moved:** nothing in the logs or reports.
+
+## Round 214 (2026-10-22): the DepGraph export, step 1: the maximum
+
+- **Robert:** D1–D7 as recommended (the story cut where something is due or lost; the two "keeping up" graphs pruned;
+  `npm test` loads the exports with DepGraph's own parser through Archipelago-CC's venv, skipped if absent; no copy in
+  Archipelago-CC for now); the rest agreed; build step 1.
+- **Built:** `engine/depgraph.js`, `npm run depgraph` → `cases/silver-blaze/depgraph-max.json` (180 nodes, 478 edges,
+  one node per line), `engine/depgraph.test.js` (up to date; a DAG with one sink last; DepGraph's `parse_json_graph`;
+  70 in the engine with every move as early as allowed, as late, and at a seeded draw). `dependencies()` takes an
+  `onMove`.
+- **Found on the way:** a move that gives an implicit inference needs the moves behind its other premises and the cards
+  its formula speaks of (`inferenceWaits`; proposal 204, "opium in the packet", refused in the latest order); a theory
+  needs its questions shown and answers offered (found through the page: "The inside story" refused at ¶101). And
+  `scripts/ui-run.mjs` plays by `seq`, so a table whose paragraphs do not rise with it must be renumbered first.
+- **Checked through the page:** the latest order, 144 moves, none failed, 70 ahead, no console error.
+- **Next:** step 2, the story's waits (the reader's table's closure, pruned, the 'wait' pace); step 3, every deduction.

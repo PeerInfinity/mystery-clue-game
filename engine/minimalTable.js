@@ -119,9 +119,10 @@ export function needs(model, m) {
 /**
  * What each of the table's moves needs: replayed, the move (or, for a background fact the story brought, the first ask
  * of a card it is about) that first gave each card it needs. → {all: moves, bySeq, depsOf: (move) → Set(seq), settles:
- * Map(slot → paragraph first settled, for the candidates), g0: a fresh Hard game}
+ * Map(slot → paragraph first settled, for the candidates), g0: a fresh Hard game}; `onMove` as replayMoves's, on the
+ * same replay.
  */
-export function dependencies(model, table) {
+export function dependencies(model, table, { onMove = null } = {}) {
     const all = movesOf(table);
     const bySeq = new Map(all.map((m) => [m.seq, m]));
     const g0 = new Game(model, { difficulty: 'hard' });
@@ -131,6 +132,7 @@ export function dependencies(model, table) {
     // And where each question a candidate answers is first settled (the page offers no answer box from then on).
     const settles = new Map(all.filter((m) => m.op === 'candidate').map((m) => [m.slot, Infinity]));
     replayMoves(model, all, { onMove: (m, got, g) => {
+        onMove?.(m, got, g);
         for (const c of got) if (!provider.has(c)) provider.set(c, m ? m.seq : { at: g.read - 1 });
         for (const [slot, at] of settles) {
             if (at === Infinity && g.settled(slot) !== null) settles.set(slot, g.read - 1);

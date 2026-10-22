@@ -1,7 +1,8 @@
 # The player's actions as an Archipelago-CC DepGraph
 
-Status: **DRAFT, partly decided** (Robert, 2026-10-22, Round 213: three choices below, by question). Written Round
-213, the work of `docs/kickoff-depgraph.md` (Robert's ask, Round 212). Nothing is built until he agrees the rest.
+Status: **AGREED** (Robert, 2026-10-22, Round 213: three choices below by question, then D1–D7 as recommended). Step 1
+(the maximum) built in Round 214 ("As built", at the end). Written Round 213, the work of `docs/kickoff-depgraph.md`
+(Robert's ask, Round 212).
 
 ## What is asked
 
@@ -170,3 +171,32 @@ minimal-table`. *Alternative:* the unpruned closure (faster, but not "just keepi
 2. **The story's waits:** its closure over the reader's table, pruned (D4), `depgraph-waits.json`, its checks.
 3. **Every deduction by its deadline:** the same, `depgraph-deductions.json`.
 4. `CLAUDE.md`'s commands; the copy into Archipelago-CC only if Robert asks there.
+
+## As built
+
+### Step 1, the maximum (Round 214)
+
+`engine/depgraph.js` (`maxData`, `depgraph`, `depgraphJson`, `checkGraph`, `placeMoves`), `npm run depgraph`
+(`scripts/depgraph.js`, about 40 seconds) → `cases/silver-blaze/depgraph-max.json`, one node per line: **180 nodes**
+(35 stretches, 144 moves, the end), **478 edges**. `engine/depgraph.test.js` (about 100 seconds): up to date; DepGraph's
+rules (a DAG, the one sink `end`, last in Kahn's order); loaded by Archipelago-CC's own `parse_json_graph` through its
+venv (`ARCHIPELAGO_CC`, default the tree beside this one; skipped when absent); and the three orders replayed: 70, every
+move taking. `dependencies()` (`engine/minimalTable.js`) takes an `onMove` on its replay.
+
+**A fourth rule, found by the latest order** (the loose end of move 204): a move gives an implicit inference (and the
+questions it raises) only if the inference's other premises **and the cards its formula speaks of** (`inferenceWaits`)
+are held. Collect 192 ("He did not attempt to deny…") shows the question of what the paper packet held only through
+`k.simpson_purpose` and `k.paper_held_opium_means_nobbling`, which also wait for "the paper in his hand" (move 75) and
+Simpson's card. So such a move depends on the moves that gave those (27 edges more, 448 → 475: 19 for the premises, 8 for the cards spoken of).
+
+**A fifth, found through the page** (D6 c): the latest order played by `scripts/ui-run.mjs` (its moves renumbered in
+paragraph order, since it plays by `seq` and reads forward to each move) failed one move, the theory "The inside story"
+at ¶101: the page holds a theory from its answers' chips, so **each of its questions must be shown and each answer
+offered** (its card held), as `needs()` already says for a proposal. In the latest order "Mapleton" (move 22) and what
+shows "was the horse disguised?" (build 243) came after ¶101. The theory now depends on them (3 edges, 478). Then the
+latest order through the page: **144 moves, none failed, no console error, 70 ahead** (every family full; 6 minutes).
+
+So the five rules the export keeps: (1) a row waits on the move after which it is first made; (2) a move lost in the
+story (a build once stated, a proposal once its question is settled) is waited on where it is lost; (3–4) a move that
+gives an implicit inference needs the moves that gave its other premises and the cards it speaks of; (5) a theory needs
+its questions shown and its answers offered.

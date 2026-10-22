@@ -1,9 +1,10 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/depgraph.md` — the DepGraph export (Round 213): measured, a prototype of the maximum checked (loads in DepGraph,
-  70 in three orders); decided: three exports (the maximum, the story's waits, every deduction), collects as nodes,
-  plain labels; D1–D7 for Robert to agree.
+- `docs/depgraph.md` — the DepGraph export: agreed (Round 213: three exports, the maximum, the story's waits at the
+  'wait' pace, every deduction by its deadline; collects as nodes; plain labels; D1–D7 as recommended). Built: step 1,
+  the maximum (Round 214: `engine/depgraph.js`, `npm run depgraph` → `depgraph-max.json`, loaded by DepGraph's own
+  parser, 70 in three orders). Next: step 2, the story's waits, pruned; step 3, every deduction.
 - `docs/kickoff-depgraph.md` — Round 212: discuss exporting the player's actions as an Archipelago-CC DepGraph,
   two versions (the maximum score; keeping up with Holmes), story and actions gating each other; its paper
   `docs/depgraph.md`.
@@ -103,6 +104,7 @@
 | The player's notes played through the page in headless Chrome (real mouse and keys: a note at a point, on marked words, a highlight, edit, delete and undo, the settings, reload, Start over), each step checked in the save (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
 | The autoplay checked (`docs/autoplay.md` A7): the page opened on `?autoplay=fast` in headless Chrome, played to the end by `ui/autoplay.js`; the record must read 70 ahead, every family as the action table says, the notes all written, no console error, the player's game kept aside (about 6–8 minutes; one script at a time on port 9333) | `node scripts/autoplay-check.mjs [minimal] [shots dir]` (→ `.cache/autoplay-check[-minimal].json`; `minimal`: the fewest moves, no notes, its clicks counted) |
 | The hints played through the page in headless Chrome (`docs/hints.md`): at ¶40 Hint to the fourth rung, Do it, the Hints tab, reload, Trivial, Start over, the catch-up notes at ¶57, the cooldown (about a minute); `all`: a game that only reads and takes every hint to Do it must reach 70 (about 6–9 minutes; `DIFFICULTY=easy|medium` for those; one script at a time on port 9333) | `node scripts/hints-check.mjs [all] [shots dir]` |
+| The DepGraph export (`docs/depgraph.md`): the maximum's moves between the story's stretches → `cases/silver-blaze/depgraph-max.json` (an Archipelago-CC DepGraph); rerun when the case, a table or `hints.json` changes (a test checks it, loads it with DepGraph's parser and replays three orders the graph allows) | `npm run depgraph` (about 40 seconds) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 | LLM leak checker over the reader's notes the autoplay types (each `typed`, or the prose as it stands, against the story up to its paragraph; about $1 a fresh run) | `node checker/check.js cases/silver-blaze --notes --runs 2` (→ `.cache/checker-notes-haiku.json`) |
 
