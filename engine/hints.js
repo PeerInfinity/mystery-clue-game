@@ -30,7 +30,8 @@ function had(g, m) {
         case 'raise': return [...g.raised.values()].some((r) => r.id === m.target && r.exception === m.exception);
         case 'file': return g.filed.some((f) => f.id === m.absence);
         // The engine drops an answer it does not list; the page drops it from its chip (a settled question shows none).
-        case 'candidate': return !!g.marks.get(m.slot)?.listed?.has(m.value) || g.settled(m.slot) !== null;
+        // Off Hard the game lists every answer itself.
+        case 'candidate': return !g.proposing() || !!g.marks.get(m.slot)?.listed?.has(m.value) || g.settled(m.slot) !== null;
         case 'theory': return g.theories.some((t) => t.label === m.label);
         case 'drop': return (g.dropOf(m.target)?.held ?? null) !== null;
         default: return false;
@@ -40,7 +41,7 @@ function had(g, m) {
 /** Is a want (a card, `theory:`, `cand:` or `shown:`) in hand already? */
 function holds(g, w) {
     if (w.startsWith('theory:')) return g.theories.some((t) => t.label === w.slice(7));
-    if (w.startsWith('cand:')) { const [slot, value] = w.slice(5).split('='); return !!g.marks.get(slot)?.listed?.has(value) || g.settled(slot) !== null; }
+    if (w.startsWith('cand:')) { const [slot, value] = w.slice(5).split('='); return !g.proposing() || !!g.marks.get(slot)?.listed?.has(value) || g.settled(slot) !== null; }
     if (w.startsWith('shown:')) return g.slotVisible(w.slice(6));
     return g.knows(w);
 }
@@ -75,11 +76,29 @@ export class Hints {
             if (ok.has(m.seq)) return ok.get(m.seq);
             ok.set(m.seq, false);
             const deps = plan.filter((x) => m.needs.includes(x.seq));
-            const v = m.at < g.read && deps.every(can) && m.wants.every((w) => holds(g, w) || deps.some((d) => d.seq === m.src[w]));
+            const v = m.at < g.read && deps.every(can) && m.wants.every((w) => holds(g, w) || deps.some((d) => d.seq === m.src[w]))
+                // A drop scores only for a reason that holds: with all it needs in hand, it waits until it would (and
+                // with steps before it, Do it leaves it for later if it would not hold once they are made).
+                && (m.op !== 'drop' || deps.length > 0 || this.wouldHold(m));
             ok.set(m.seq, v);
             return v;
         };
         return plan.filter(can);
+    }
+
+    /** Would drop `m` hold if made now? Tried, and the player's drops put back as they were, also when the page's
+     *  solver throws to be asked first (engine/remoteProblem.js: the call is made again once it has answered). */
+    wouldHold(m) {
+        const g = this.g;
+        const was = [...g.drops].find(([, d]) => d === g.dropOf(m.target)) ?? null; // [key, drop]
+        const rival = m.rival ? g.visibleTheories().find((t) => t.label === m.rival)?.id ?? null : null;
+        try {
+            const r = g.drop(m.target, m.reason, { rival, cites: m.cites ?? [] });
+            return r.ok && g.dropOf(m.target).held !== null;
+        } finally {
+            g.undrop(m.target);
+            if (was) g.drops.set(...was);
+        }
     }
 
     /**

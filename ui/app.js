@@ -391,7 +391,7 @@ function hintRungs(p) {
             build: () => `Connect ${andList([...new Set(cards)])}.`,
             notice: () => `Mark ${cards[0]} as odd${cards[1] ? `, against ${cards[1]}` : ''}.`,
             raise: () => { const e = game.knows(m.target) ? game.applicationsOf(m.target).flatMap((a) => a.exceptions).find((x) => x.id === m.exception)?.text : null; return `Against ${cards[0]}, raise${e ? `: “${esc(e)}”` : ' an exception'}.`; },
-            drop: () => (m.target.theory ? `Drop the theory “${esc(game.theories.find((t) => t.id === m.target.theory)?.label ?? 'a theory')}”: ${esc(DROP_LABELS[m.reason])}.` : `Drop ${answer(m.target.slot, m.target.value)} for “${esc(game.promptOf(m.target.slot))}”: ${esc(DROP_LABELS[m.reason])}${m.reason === 'card' && cards.length ? ` (${andList([...new Set(cards)])})` : ''}.`),
+            drop: () => (m.target.theory ? `Drop the theory “${esc(game.visibleTheories().find((t) => t.id === m.target.theory)?.label ?? 'a theory')}”: ${esc(DROP_LABELS[m.reason])}.` : `Drop ${answer(m.target.slot, m.target.value)} for “${esc(game.promptOf(m.target.slot))}”: ${esc(DROP_LABELS[m.reason])}${m.reason === 'card' && cards.length ? ` (${andList([...new Set(cards)])})` : ''}.`),
             seal: () => `Plan the check ${Object.values(m.fields).every((x) => x !== null) ? checkText(m) : `on ${andList([...new Set(cards)])}`}${m.expect ? `, expecting ${esc(OUTCOME_WORDS[m.expect])}` : ''}.`,
             file: () => `File it: ${cards[0]} should have happened, and ${cards[1]} says it did not.`,
             candidate: () => `Propose ${answer(m.slot, m.value)} for “${esc(game.promptOf(m.slot))}”.`,
@@ -460,7 +460,7 @@ async function doHint() {
     const tab = ui.panels[0].tab;
     const { playMoves } = await import('./autoplay.js');
     window.__hintDoing = true; // for scripts/hints-check.mjs: Do it goes on after the click
-    const r = await playMoves(hints().parts(open, 4).moves, { store: STORE, valueName, fast: HINT_FAST }).finally(() => { window.__hintDoing = false; });
+    const r = await playMoves(hints().parts(open, 4).moves, { store: STORE, valueName, fast: HINT_FAST, later: (m) => m.op === 'drop' && run(() => !hints().wouldHold(m)) }).finally(() => { window.__hintDoing = false; });
     ui.hintFailed = r.ok ? null : `Do it could not make the move here (${r.why}). The rungs above say how to make it yourself.`;
     if (ui.panels[0].tab !== tab) $(`.panel[data-panel="0"] .tab[data-tab="${tab}"]`)?.click();
     changed();
@@ -885,7 +885,12 @@ function renderSlot(s) {
         if (game.autoSolves()) chips.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'settled by the story' : 'worked out from your clues'}</span>`);
         else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim)} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
         // The answers the player put forward (proposed or circled) stay in view beside the settled one, to be dropped (Round 164).
-        if (!game.autoSolves()) chips.push(...[...new Set([...(m?.listed ?? []), ...(m?.circled ?? [])])].filter((v) => v !== settled && game.offered(s.id, v)).map((v) => chip(s.id, v, 'ruled')));
+        const put = [...new Set([...(m?.listed ?? []), ...(m?.circled ?? [])])].filter((v) => v !== settled && game.offered(s.id, v));
+        if (!game.autoSolves()) chips.push(...put.map((v) => chip(s.id, v, 'ruled')));
+        // Where the game lists the answers itself, the others too, folded: one can still be dropped for a reason.
+        const others = !game.autoSolves() && !game.proposing() ? s.domain.filter((v) => v !== settled && !put.includes(v) && game.offered(s.id, v) && !game.isHidden(v)) : [];
+        if (others.length && ui.expanded.has(`${s.id}|ruled`)) chips.push(...others.map((v) => chip(s.id, v, 'ruled')));
+        else if (others.length) chips.push(`<span class="link more" data-expand="${s.id}|ruled">${others.length} other answer${others.length > 1 ? 's' : ''} — show</span>`);
         for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k)}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
     } else {
         const pencil = game.pencil(s.id);
@@ -930,7 +935,10 @@ function renderSlot(s) {
     h += `<div class="chips">${chips.join('') || '<span class="empty">no candidates yet</span>'}</div>`;
     if (game.proposing() && settled === null) {
         const options = s.domain.filter((v) => game.offered(s.id, v));
-        h += `<div class="chips"><input list="dl-${s.id}" data-add="${s.id}" placeholder="+ propose an answer" size="26"><datalist id="dl-${s.id}">${options.map((v) => `<option value="${esc(valueName(s.id, v))}">`).join('')}</datalist></div>`;
+        // Or chosen from a menu, without the keyboard: the answers met and not proposed yet.
+        const pick = options.filter((v) => !game.marks.get(s.id)?.listed?.has(v));
+        h += `<div class="chips"><input list="dl-${s.id}" data-add="${s.id}" placeholder="+ propose an answer" size="26"><datalist id="dl-${s.id}">${options.map((v) => `<option value="${esc(valueName(s.id, v))}">`).join('')}</datalist>`
+            + (pick.length ? ` <select data-add-pick="${s.id}" aria-label="Propose an answer"><option value="">or choose…</option>${pick.map((v) => `<option value="${esc(v)}">${esc(valueName(s.id, v))}</option>`).join('')}</select>` : '') + '</div>';
     }
     if (crossedChips.length) h += `<div class="chips small"><span class="muted">crossed out:</span>${crossedChips.join('')}</div>`;
     if (ruledOutChips.length) h += `<div class="chips small"><span class="muted">ruled out, with evidence:</span>${ruledOutChips.join('')}</div>`;
@@ -2321,6 +2329,8 @@ function onClick(e) {
     if (t.dataset.dropOpen) { ui.dropping = t.dataset.dropOpen; renderTool(); return; }
     if (t.dataset.dropCancel) { ui.dropping = null; renderTool(); return; }
     if (t.dataset.dropGo) {
+        // A click that waited out a busy page may land after its form is gone.
+        if (!$('#drop-reason')) return;
         const reason = $('#drop-reason').value;
         const res = game.drop(dropTarget(t.dataset.dropGo), reason, { rival: $('#drop-rival')?.value ?? null, cites: reason === 'card' && $('#drop-cite')?.value ? [$('#drop-cite').value] : [] });
         if (!res.ok) { toast(esc(res.reason)); return; }
@@ -2452,6 +2462,7 @@ function onChange(e) {
     if (e.target.id === 'doubt-reason') { game.setDoubtReason(e.target.dataset.reasonFor, e.target.value || null); changed(); return; }
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }
     if (e.target.id === 'st-slot') { ui.state = { slot: e.target.value, neg: '', value: '' }; renderTool(); return; }
+    if (e.target.dataset.addPick && e.target.value) { game.addCandidate(e.target.dataset.addPick, e.target.value); changed(); return; }
     if (e.target.dataset.add) {
         const slot = e.target.dataset.add;
         const s = model.slots.get(slot);

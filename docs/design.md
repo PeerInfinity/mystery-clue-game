@@ -4796,3 +4796,17 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   `hints.json`, `stats.md`, the thoughts report (0 errors); `autoplay-check` 12 of 12 for both playthroughs (the reader:
   391 moves, 376 notes; the fewest: 734 clicks); `hints-check` 12 of 12; the numbers by sight, desktop and phone.
 - **Moved:** `action-table.json`, `action-table-minimal.json`, `hints.json`, `stats.md` (the re-read moves gone).
+
+## Round 208 (2026-10-21): hints on Easy and Medium; an answer chosen without the keyboard
+
+- **Robert:** Do it failed ("no option what in #build-kind"); the hints had been checked on Hard only. Fixed for Easy
+  and Medium (`docs/hints.md`, "Easy and Medium"): candidates had off Hard, the "about" menu passed over, a settled
+  question's other answers folded in view to be dropped, a drop ready only when its reason would hold (and Do it makes
+  again one that did not), the third rung's theory named. `hints-check all` takes `DIFFICULTY`; through the page every
+  difficulty reaches 70 with no Do it failing (Easy 55 hints, Medium 56, Hard 57). The page's solver works in a worker and
+  throws to be asked first: the trial of a drop puts the drops back also then (it had left a drop made, not held).
+- **Robert:** proposing an answer on Hard was the only move that needed the keyboard; keep the box, add a menu. Built:
+  "or choose…" beside each "+ propose an answer", the answers met and not yet proposed (by sight, Hard ¶60).
+- **Checked:** `engine/hints.test.js` 5 of 5; `hints-check` 12 of 12; `all` on the three difficulties; `autoplay-check`
+  for both playthroughs.
+- **Moved:** nothing in the logs or reports (the page, the hints engine, the check).

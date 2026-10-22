@@ -417,7 +417,12 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
             await idle();
             return true;
         }
-        if (u.click) return (await click(u.click)) || `nothing to click: ${u.click}`;
+        if (u.click) {
+            // An answer among the slot's others: off Hard every answer is listed, and those past the first few are folded.
+            const ans = u.click.match(/^\.chip\[data-slot="([^"]+)"\]/);
+            if (ans && !$(u.click)) for (const x of [ans[1], `${ans[1]}|ruled`]) if (!$(u.click) && $(`[data-expand="${x}"]`)) await click(`[data-expand="${x}"]`);
+            return (await click(u.click)) || `nothing to click: ${u.click}`;
+        }
         if (u.expect) return true;
         return `unknown step ${JSON.stringify(u)}`;
     }
@@ -460,20 +465,27 @@ export function makeCursor() {
  * shown (`fast`: none, no pauses; the check), a card reached the shortest way. A move made already is passed over.
  * → {ok} or {ok: false, move, why}
  */
-export async function playMoves(moves, { store, valueName, speed = 2, fast = false }) {
+export async function playMoves(moves, { store, valueName, speed = 2, fast = false, later = () => false }) {
     const cursor = makeCursor();
     if (!fast) document.body.append(cursor);
     const P = makePlayer({ store, fast, shortest: true, valueName, cursor, factor: () => (fast ? 0 : speed) });
     try {
         for (const m of moves) {
-            if (P.took(m) && m.op !== 'theory') continue;
+            // A drop made already for a reason that did not hold then (it scores only from a reason that holds) is
+            // taken back and made again, checked against what the player holds now.
+            const same = (d) => JSON.stringify(d.target) === JSON.stringify(m.target);
+            const unheld = m.op === 'drop' && (P.saved().drops ?? []).some((d) => same(d) && d.held === null);
+            if (P.took(m) && m.op !== 'theory' && !unheld) continue;
+            if (await later(m)) continue; // not yet (a drop whose reason would not hold now)
             if (m.op === 'build' && $('.building .chip')) await P.click('[data-build-clear]');
             let why = null;
-            for (const u of m.ui) {
+            const ui = unheld ? m.ui.flatMap((u) => (u.click?.startsWith('[data-drop-open=') ? [{ click: u.click.replace('data-drop-open', 'data-undrop') }, u] : [u])) : m.ui;
+            for (const u of ui) {
                 const r = await P.step(u);
                 if (r !== true) { why = r; if (m.op !== 'theory') break; }
             }
             if (!P.took(m)) return { ok: false, move: m, why: why ?? 'the save does not show it' };
+            if (m.op === 'drop' && (P.saved().drops ?? []).some((d) => same(d) && d.held === null)) return { ok: false, move: m, why: 'its reason does not hold yet' };
         }
         return { ok: true };
     } finally {

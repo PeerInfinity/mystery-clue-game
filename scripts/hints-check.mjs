@@ -34,19 +34,30 @@ if (ALL) {
     const t0 = Date.now();
     while (await p.ev(`!!document.querySelector('#read')`)) {
         await p.click('#read');
+        let prev = null;
         for (let n = 0; n < 12; n++) {
+            const logged = (await game()).hints?.length ?? 0;
+            if (!(await p.ev(`!!document.querySelector('#hint')`))) break;
             await p.click('#hint');
-            if (/Nothing you have read/.test((await note()) ?? '')) break;
+            if (/Nothing you have read/.test((await note()) ?? '') || ((await game()).hints?.length ?? 0) === logged) break;
             while (await p.ev(`!!document.querySelector('#hint-more')`)) await p.click('#hint-more');
             const at = (await game()).read - 1;
             const target = (await game()).hints.at(-1);
             await doIt();
             targets++;
             const bad = await p.text('.hint-note .bad');
-            if (bad) { failed.set(`${target.thought}|${target.family}`, `¶${at}: ${bad}`); break; }
+            if (bad) { failed.set(`${target.thought}|${target.family}`, `¶${at}: ${bad}${process.env.DUMP ? ` [${await p.ev(`[...document.querySelectorAll('.theory')].map((x) => x.innerText.replace(/\\s+/g, ' ').slice(0, 160)).join(' || ')`)}]` : ''}`); break; }
+            // Done without a fault, yet the next hint is on the same target: its moves did not make it.
+            if (prev === `${target.thought}|${target.family}`) {
+                const g = await game();
+                failed.set(prev, `¶${at}: Do it made its moves, the row is still open; the save's drops ${JSON.stringify(g.drops)}; the note: ${(await note())?.slice(0, 600)}`);
+                break;
+            }
+            prev = `${target.thought}|${target.family}`;
         }
     }
     const ahead = Number((await p.text('header'))?.match(/Ahead of Holmes: (\d+)/)?.[1] ?? -1);
+    if (process.env.DUMP) fs.writeFileSync(process.env.DUMP, JSON.stringify((await p.state()).game));
     console.log(`${targets} hints taken to Do it, ${Math.round((Date.now() - t0) / 60000)} minutes`);
     for (const [k, v] of failed) console.log(`  Do it failed for ${k} (${v})`);
     check(ahead === 70, `the hint-only player reaches 70 through the page (${ahead})`);

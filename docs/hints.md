@@ -294,3 +294,28 @@ H8's question stays open until the cooldown is built.
   read paragraphs, checked at every paragraph by `engine/hints.test.js`; the LLM checker reads card text and was not run
   (as in Rounds 139 and 143). The fourth rung names the inference to build before it is built: that is its purpose
   (H4c).
+
+### Easy and Medium (Round 208)
+
+Step 2 was checked on Hard only; Robert met Do it failing on another difficulty. The engine's hint-only player reached
+70 on all three, but through the page Easy and Medium fell short (59 and 55). What differed, and what was done:
+
+- **The answers are listed by the game** off Hard: a candidate move counts as had there (`!game.proposing()`), so no
+  hint asks to propose an answer (Do it found no answer box). The engine test lets a candidate fail on Hard, which hid it.
+- **What a conclusion is about** is asked only on Hard: Do it passes over that menu where it is not on the page.
+- **A settled question showed only its answer** off Hard, so an answer the story had already settled against could not
+  be dropped through the page (t58.3: the packet's question is settled at ¶58 on Easy and Medium, and dropping opium is
+  the row). Its other answers are now folded under "N other answers — show", as the player's proposed ones stay in view
+  on Hard (Round 164); Do it unfolds them, and folded answers past the first few.
+- **A drop counts only from a reason that holds** (Round 199), checked when it is made. On Easy the gypsies' theory,
+  hinted at ¶62, is dropped there before its reason holds (¶102); the ladder then stuck on it for fifty paragraphs and
+  the rows due meanwhile were never hinted. A drop step with all it needs in hand is now ready only if it would hold
+  (tried and put back, `wouldHold`), and Do it leaves for later a drop that would not hold once the steps before it are
+  made (the row is hinted again when it would count; in the page that question waits for the solver's worker, and the
+  trial puts the drops back also when the solver throws to be asked first, which had left a drop made and not held);
+  and Do it takes back a drop made already whose reason did not hold, and makes it
+  again.
+- On the way: the third rung named a story's theory as "a theory" (it looked among the player's own); a Drop pressed
+  after its form was gone threw (guarded).
+- **Checked:** `DIFFICULTY=easy|medium node scripts/hints-check.mjs all` (new) reaches 70 on both (55 and 56 hints; Hard 57), no Do it failing; it
+  now names a target whose moves Do it made without making it, and stops at the story's end.

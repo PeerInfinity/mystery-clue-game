@@ -63,7 +63,8 @@ test('a player who only reads and takes every hint to the fourth rung reaches th
             let p;
             do p = h.take({ skip }); while (p.rung < 4);
             targets++;
-            for (const m of p.moves) if (!make(g, model, m) && m.op !== 'candidate') fails.push(`¶${g.read - 1} ${n.row.key}: ${m.op} ${m.seq}`);
+            // As Do it: a drop whose reason would not hold now is left for later.
+            for (const m of p.moves) if (!(m.op === 'drop' && !h.wouldHold(m)) && !make(g, model, m) && m.op !== 'candidate') fails.push(`¶${g.read - 1} ${n.row.key}: ${m.op} ${m.seq}`);
             if (h.open().some((r) => r.key === n.row.key)) skip.add(n.row.key);
         }
         g.clashes();
