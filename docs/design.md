@@ -4883,3 +4883,20 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   `scripts/ui-run.mjs` plays by `seq`, so a table whose paragraphs do not rise with it must be renumbered first.
 - **Checked through the page:** the latest order, 144 moves, none failed, 70 ahead, no console error.
 - **Next:** step 2, the story's waits (the reader's table's closure, pruned, the 'wait' pace); step 3, every deduction.
+
+## Round 215 (2026-10-22): the DepGraph export, steps 2–3: the story's waits, every deduction
+
+- **Built:** `npm run depgraph` writes `depgraph-waits.json` (125 nodes, 24 stretches, **100** of the reader's 394
+  moves, 341 edges: the story read to its end at the 'wait' pace) and `depgraph-deductions.json` (138 nodes, 26
+  stretches, **111** of the minimal 144 moves, 390 edges: the 45 deductions ahead), each checked as written (DepGraph's
+  rules; three orders replayed to the target); `--prune` finds the two move sets (closures 128 and 112, then the minimal
+  table's pruning; about 2 hours on 7 workers, the 'wait' replays being of the reader's moves); a plain run reads them back
+  from the graphs (about 5 minutes). `engine/depgraph.js`: `playData` shared by the three, `waitedSteps`, `statedAt`,
+  `replayWait`, `closure`, `restrict`. The test covers the three files (up to date, the rules, DepGraph's parser).
+- **Found:** the waits' closure stopped at ¶102: a row first made after its last move also needs the step's other
+  inferences (`t81.5`, five). A row now waits on the moves giving its step's inferences and implicit premises too (not
+  those whose material comes at or after its paragraph: another way, `t117.2`); the maximum gained 30 edges (478 → 508),
+  its latest order played through the page again: 144 moves, none failed, 70, no console error.
+- **Labels:** a collect of fewer than three words names the card it gives ("Collect: Silver Blaze (¶4)").
+- **Left:** a copy in Archipelago-CC's `data/` (Robert's call there); the waits' pruning stopped at its third round with
+  2 removed (a fourth might remove more).

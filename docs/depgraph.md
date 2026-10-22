@@ -1,7 +1,7 @@
 # The player's actions as an Archipelago-CC DepGraph
 
-Status: **AGREED** (Robert, 2026-10-22, Round 213: three choices below by question, then D1–D7 as recommended). Step 1
-(the maximum) built in Round 214 ("As built", at the end). Written Round 213, the work of `docs/kickoff-depgraph.md`
+Status: **AGREED** (Robert, 2026-10-22, Round 213: three choices below by question, then D1–D7 as recommended). Built:
+step 1 (the maximum) in Round 214, steps 2–3 (the story's waits, every deduction) in Round 215 ("As built", at the end). Written Round 213, the work of `docs/kickoff-depgraph.md`
 (Robert's ask, Round 212).
 
 ## What is asked
@@ -74,6 +74,7 @@ read-only from Archipelago-CC's venv, no bytecode written), and its goal falls o
 ```json
 "story.01": {"label": "Read ¶1–¶35", "description": "The story from the start.", "depends_on": []},
 "move.86":  {"label": "Collect “The girl” (¶29)", "description": "collect, thought t29.2, from ¶29", "depends_on": ["story.01"]},
+             (as built, a collect of fewer than three words names its card: "Collect: As Edith fled she looked back and saw the stranger leaning through… (¶29)")
 "move.88":  {"label": "Build: If the opium went in at the stable window, it was while the stranger stood…",
              "description": "build, thought t29.3, from ¶29", "depends_on": ["story.01", "move.78", "move.86"]},
 "story.02": {"label": "Read ¶36–¶56", "description": "Holmes's paragraph ¶36: 1 row due (t29.3 deduction)",
@@ -200,3 +201,30 @@ So the five rules the export keeps: (1) a row waits on the move after which it i
 story (a build once stated, a proposal once its question is settled) is waited on where it is lost; (3–4) a move that
 gives an implicit inference needs the moves that gave its other premises and the cards it speaks of; (5) a theory needs
 its questions shown and its answers offered.
+
+### Steps 2–3, the story's waits and every deduction (Round 215)
+
+`npm run depgraph` now writes all three (about 5 minutes; each graph checked as it is written: DepGraph's rules and its
+three orders replayed to its target), and `npm run depgraph -- --prune` finds the two "keeping up" move sets again
+(about 2 hours on 7 workers; the waits' replays at the 'wait' pace play the reader's moves): the closure under the rows,
+then each move removed alone in parallel and the removals kept one by one (three rounds, as `minimal-table`). A plain
+run reads the kept moves back from the graphs written. `engine/depgraph.test.js` (about 3½ minutes): each file up to
+date and keeping DepGraph's rules, each loaded by its parser; the maximum's three orders replayed.
+
+| | Nodes | Stretches | Moves (collect / ask / build / file) | Edges | Target, three orders |
+|---|---:|---:|---|---:|---|
+| `depgraph-max.json` | 180 | 35 | 144 (73 / 10 / 37 / 24 other) | 508 | 70 ahead |
+| `depgraph-waits.json` | 125 | 24 | **100** of the reader's 394 (59 / 9 / 31 / 1); closure 128 | 341 | the story read to the end at the 'wait' pace |
+| `depgraph-deductions.json` | 138 | 26 | **111** of the minimal 144 (63 / 10 / 37 / 1); closure 112 | 390 | 45 deductions ahead |
+
+The waits' stretches are 24, not 26: a step waited on twice counts at its first wait (`t114.2` at ¶116 and ¶117), and
+a later wait on a step already made needs no edge. Its stretches read "From ¶57, where the story waits on: t31.3."
+
+**A sixth rule, found by the waits' closure** (it stopped at ¶102): a row is first made after the *last* move that
+completes it, but Holmes's step needs all its inferences (`t81.5`: five, two built at ¶37, one at ¶81). So a row also
+waits on the moves that give its step's inferences and an implicit one's premises (`with`), leaving out those whose
+material comes only at the row's paragraph or later (another way to the row: `t117.2` at ¶124, the cycle of the first
+prototype). The maximum gained 30 edges by it (478 → 508), every one a constraint its orders already kept.
+
+**Labels:** a collect names the words clicked when they are three words or more, else the card they give ("Collect:
+Silver Blaze (¶4)" for "the favourite"; "Collect “As ” (¶66)" read as nothing).

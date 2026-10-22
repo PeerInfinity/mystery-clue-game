@@ -4,10 +4,10 @@
 - `docs/depgraph.md` — the DepGraph export: agreed (Round 213: three exports, the maximum, the story's waits at the
   'wait' pace, every deduction by its deadline; collects as nodes; plain labels; D1–D7 as recommended). Built: step 1,
   the maximum (Round 214: `engine/depgraph.js`, `npm run depgraph` → `depgraph-max.json`, loaded by DepGraph's own
-  parser, 70 in three orders). Next: step 2, the story's waits, pruned; step 3, every deduction.
-- `docs/kickoff-depgraph.md` — Round 212: discuss exporting the player's actions as an Archipelago-CC DepGraph,
-  two versions (the maximum score; keeping up with Holmes), story and actions gating each other; its paper
-  `docs/depgraph.md`.
+  parser, 70 in three orders, the latest also through the page); steps 2–3 (Round 215: `depgraph-waits.json`, 100
+  moves that read to the end at the 'wait' pace; `depgraph-deductions.json`, 111 moves for the 45 deductions).
+- `docs/kickoff-depgraph.md` — done (Rounds 212–215): its paper `docs/depgraph.md`, built. A copy into Archipelago-CC's
+  `data/` is Robert's call, in that repo (not now, Round 213).
 - `docs/hints.md` — the hint system: agreed (Rounds 204–205: free for now, a cooldown later; on request; the nearest
   deadline; all difficulties; the bar and a Hints tab; four rungs, the last makes the move (Do it); a catch-up note at
   missed deadlines). Built: step 1, the engine (Round 205: `hints.json`, `npm run hints`, `engine/hints.js`, the
@@ -104,7 +104,7 @@
 | The player's notes played through the page in headless Chrome (real mouse and keys: a note at a point, on marked words, a highlight, edit, delete and undo, the settings, reload, Start over), each step checked in the save (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
 | The autoplay checked (`docs/autoplay.md` A7): the page opened on `?autoplay=fast` in headless Chrome, played to the end by `ui/autoplay.js`; the record must read 70 ahead, every family as the action table says, the notes all written, no console error, the player's game kept aside (about 6–8 minutes; one script at a time on port 9333) | `node scripts/autoplay-check.mjs [minimal] [shots dir]` (→ `.cache/autoplay-check[-minimal].json`; `minimal`: the fewest moves, no notes, its clicks counted) |
 | The hints played through the page in headless Chrome (`docs/hints.md`): at ¶40 Hint to the fourth rung, Do it, the Hints tab, reload, Trivial, Start over, the catch-up notes at ¶57, the cooldown (about a minute); `all`: a game that only reads and takes every hint to Do it must reach 70 (about 6–9 minutes; `DIFFICULTY=easy|medium` for those; one script at a time on port 9333) | `node scripts/hints-check.mjs [all] [shots dir]` |
-| The DepGraph export (`docs/depgraph.md`): the maximum's moves between the story's stretches → `cases/silver-blaze/depgraph-max.json` (an Archipelago-CC DepGraph); rerun when the case, a table or `hints.json` changes (a test checks it, loads it with DepGraph's parser and replays three orders the graph allows) | `npm run depgraph` (about 40 seconds) |
+| The DepGraph exports (`docs/depgraph.md`): moves between the story's stretches as Archipelago-CC DepGraphs → `cases/silver-blaze/depgraph-max.json` (70), `depgraph-waits.json` (the story read at the 'wait' pace), `depgraph-deductions.json` (45 deductions), each checked as written (three orders replayed to its target); rerun when the case, a table or `hints.json` changes (a test checks them and loads them with DepGraph's parser); `-- --prune` finds the two smaller move sets again when the tables change | `npm run depgraph` (about 5 min; `--prune` about 2 hours, `WORKERS=n`) |
 | LLM leak checker over every card text | `node checker/check.js cases/silver-blaze --all --runs 2` (costs money; cached) |
 | LLM leak checker over the reader's notes the autoplay types (each `typed`, or the prose as it stands, against the story up to its paragraph; about $1 a fresh run) | `node checker/check.js cases/silver-blaze --notes --runs 2` (→ `.cache/checker-notes-haiku.json`) |
 
