@@ -319,3 +319,21 @@ Step 2 was checked on Hard only; Robert met Do it failing on another difficulty.
   after its form was gone threw (guarded).
 - **Checked:** `DIFFICULTY=easy|medium node scripts/hints-check.mjs all` (new) reaches 70 on both (55 and 56 hints; Hard 57), no Do it failing; it
   now names a target whose moves Do it made without making it, and stops at the story's end.
+
+### Step 3, the catch-up note (Round 209)
+
+- **On the reading bar,** at each deadline read for a row the player did not make (every difficulty but Trivial), the
+  record's line of what Holmes did, then: "You could have had it from paragraph 31, from “Hunter locked the stable
+  door…”, “The stable window is not large enough…” and a background fact." The verb by family (had it, marked it odd,
+  raised it, dropped it, planned it, filed it). Before this, the bar told only the rows made or not counted.
+- **The paragraph** (`Hints.catchUp`) is the latest reader's paragraph among the moves that make the row and all they
+  need, from `hints.json`: where the last piece is in the story. Every row's is at or before its deadline (the test);
+  t117.2's is its deadline, ¶124, where Holmes speaks later in the same paragraph. It is a link to that paragraph.
+- **The cards** are those of the move that makes the row, less those the line already names: a card held is linked; a
+  statement, event, person or thing of the story not held is quoted, the story having told it; an inference not drawn
+  or a background fact not asked is named by its kind only ("an inference", "a background fact").
+- **At the end** the record lists the rows missed the same way, under "Where you could have been first" (65 for a
+  Medium game that only reads).
+- **Checked:** `engine/hints.test.js` (every row's paragraph at or before its deadline); `scripts/hints-check.mjs` step
+  9, at ¶57 on Hard with nothing made: "You could have had it from paragraph 31…" and "…marked it odd from paragraph
+  18."; by sight, desktop and phone, and the end of a Medium game.

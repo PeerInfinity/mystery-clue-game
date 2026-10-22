@@ -1396,6 +1396,7 @@ function recordLine(r) {
         check: () => (seal ? `Holmes does this: ${checkText(seal)}` : 'Holmes makes a check'),
         absence: () => `Holmes points to ${names(r.names)}`,
     }[r.family]();
+    if (!r.scores && !r.why) return `${what}.${catchUpText(r)}`;
     // Made but not counted (Round 199): a drop whose reason did not hold, a check expected both ways.
     if (r.why === 'reason') return `${what}. You dropped it at ${paraLabel(r.at)}, but the reason you gave did not hold, so it does not count.`;
     if (r.why === 'hedged') return `${what}. You planned it at ${paraLabel(seal.para)}, but expecting more than one result, so it does not count.`;
@@ -1403,11 +1404,32 @@ function recordLine(r) {
     const before = r.family === 'drop' ? 'before the story did' : 'before him';
     return `${what}. ${done} at ${paraLabel(r.at)}: ${r.lead} paragraph${r.lead === 1 ? '' : 's'} ${before}.`;
 }
-/** On the reading bar: the rows whose deadline fell in the paragraphs just read, scored. */
+/**
+ * The catch-up note on a row missed (docs/hints.md, H7): where the player could have had it, and from what. Held cards
+ * are linked; the story's own cards not held are quoted (the story has told them by now); an inference not drawn or a
+ * background fact not asked is named by its kind only.
+ */
+function catchUpText(r) {
+    const c = hints()?.catchUp(r.thought, r.family);
+    if (!c || c.para > r.deadline) return '';
+    const kinds = [];
+    const cards = c.cards.filter((x) => !r.names?.includes(x)).map((x) => {
+        const sec = model.cards.get(x)?.section;
+        if (game.knows(x)) return names([x]);
+        if (sec === 'claims' || sec === 'events') return `“${esc(cardName(x).replace(/\.$/, ''))}”`;
+        if (sec === 'entities') return esc(cardName(x));
+        kinds.push(sec === 'rules' || sec === 'glosses' ? 'a background fact' : 'an inference');
+        return null;
+    }).filter(Boolean);
+    const parts = [...cards, ...new Set(kinds)];
+    const verb = { deduction: 'had it', notice: 'marked it odd', raise: 'raised it', drop: 'dropped it', check: 'planned it', absence: 'filed it' }[r.family];
+    return ` You could have ${verb} from <span class="link" data-goto="${c.para}">${paraLabel(c.para)}</span>${parts.length ? `, from ${andList(parts)}` : ''}.`;
+}
+/** On the reading bar: the rows whose deadline fell in the paragraphs just read: scored, not counted, or missed. */
 function recordNews() {
     if (game.autoSolves() || ui.readFrom == null) return '';
     const from = ui.readFrom - 1;
-    const rows = piece(`news:${from}:${game.read}`, () => game.record().rows.filter((r) => (r.scores || r.why) && r.deadline >= from && r.deadline < game.read), []);
+    const rows = piece(`news:${from}:${game.read}`, () => game.record().rows.filter((r) => r.deadline >= from && r.deadline < game.read), []);
     const asked = piece(`news-q:${from}:${game.read}`, () => game.record().questions.filter((q) => q.deadline >= from && q.deadline < game.read), []);
     return once([
         ...rows.map((r) => `<div class="note record-news">${paraLabel(r.deadline)} · ${recordLine(r)}</div>`),
@@ -1434,6 +1456,9 @@ function toolRecord() {
     h += scored.length ? `<h3 class="section">Before Holmes (${scored.length})</h3><ul class="list small">${once([...scored].reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>` : '<p class="empty">Nothing yet.</p>';
     const uncounted = once(rec.rows.filter((r) => r.why).reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`));
     if (uncounted.length) h += `<h3 class="section">Not counted (${uncounted.length})</h3><ul class="list small">${uncounted.join('')}</ul>`;
+    // At the end, the rows missed: where the player could have been first (docs/hints.md, H7).
+    const missed = game.finished() ? once(rec.rows.filter((r) => !r.scores && !r.why).map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)) : [];
+    if (missed.length) h += `<h3 class="section">Where you could have been first (${missed.length})</h3><ul class="list small">${missed.join('')}</ul>`;
     // The player's own questions the story asked after them (docs/questions.md, Q5): shown, never counted.
     if (rec.questions.length) h += `<h3 class="section">Questions you asked before the story (${rec.questions.length})</h3><p class="small muted">Not counted: a question can be asked of anything.</p><ul class="list small">${[...rec.questions].reverse().map((q) => `<li>${paraLabel(q.deadline)} · <span class="link" data-slot-open="${q.slot}">${esc(game.promptOf(q.slot))}</span> You asked it at ${paraLabel(q.at)}: ${q.lead} ${q.lead === 1 ? 'paragraph' : 'paragraphs'} before.</li>`).join('')}</ul>`;
     if (game.finished()) h += heldBackHtml();

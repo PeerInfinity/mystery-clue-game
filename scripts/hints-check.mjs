@@ -1,6 +1,6 @@
 // The hints played through the real page (docs/hints.md, H9): on Hard at ¶40, Hint pressed and More to the fourth rung,
 // each rung and the log checked in the saved game; Do it made through the page; the Hints tab; a reload keeps the log;
-// Trivial has no Hint button; Start over clears the log. With `all`: a fresh Hard game that only reads and, at every
+// Trivial has no Hint button; Start over clears the log; read on to ¶57, the catch-up notes on the bar. With `all`: a fresh Hard game that only reads and, at every
 // paragraph, takes every hint to Do it (on `?hintfast`), which must reach the Hard maximum (70) through the page (about
 // 15 minutes); `DIFFICULTY=easy|medium` plays that game on another difficulty (its maximum the same 70).
 //   node scripts/hints-check.mjs [all] [shots dir]   (the game served at URL, default http://localhost:8321/; Chrome on 9333)
@@ -104,6 +104,12 @@ if (ALL) {
     await p.ev(`window.confirm = () => true; document.querySelector('.settings').open = true; 1`);
     await p.click('#reset');
     check(((await game()).hints ?? []).length === 0, 'Start over clears the log');
+    // 9. The catch-up note (H7): read on to Holmes's ¶57, nothing made; the bar says where the player could have had it.
+    await p.ev(`document.querySelector('.settings').open = false; 1`);
+    while ((await game()).read <= 57) await p.click('#read');
+    const bar = (await p.text('.reader')) ?? '';
+    check(/came in with a key”\. You could have had it from paragraph 31, from “Hunter locked the stable door/.test(bar) && /You could have marked it odd from paragraph 18\./.test(bar), 'at ¶57 the catch-up notes: had from ¶31, marked odd from ¶18');
+    await shot('hints-catchup-desktop');
 }
 check(p.errors.length === 0, `no console error${p.errors.length ? `: ${p.errors.join(' | ')}` : ''}`);
 console.log(fails.length ? `${fails.length} failed` : 'all passed');

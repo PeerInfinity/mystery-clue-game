@@ -108,3 +108,13 @@ test('no hints where the game works the case out (Trivial)', () => {
     while (g.read <= 60) g.advance();
     assert.equal(new Hints(g, data).next(), null);
 });
+
+test('the catch-up note of every row comes from before its deadline, from cards of the case', () => {
+    const h = new Hints(new Game(model, { difficulty: 'hard' }), data);
+    for (const r of data.rows) {
+        const c = h.catchUp(r.thought, r.family);
+        assert.ok(c.para <= r.deadline, `${r.thought} ${r.family}: ¶${c.para} after ¶${r.deadline}`);
+        assert.ok(c.cards.every((x) => model.cards.has(x)), `${r.thought} ${r.family}`);
+    }
+    assert.equal(h.catchUp('t0', 'deduction'), null);
+});

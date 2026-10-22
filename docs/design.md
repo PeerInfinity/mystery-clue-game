@@ -4810,3 +4810,13 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Checked:** `engine/hints.test.js` 5 of 5; `hints-check` 12 of 12; `all` on the three difficulties; `autoplay-check`
   for both playthroughs.
 - **Moved:** nothing in the logs or reports (the page, the hints engine, the check).
+
+## Round 209 (2026-10-21): hints, step 3: the catch-up note
+
+- **Built** (`docs/hints.md`, "As built", step 3; H7 as agreed): at each deadline the player missed, on the reading bar
+  after what Holmes did, where the player could have had it and from what (`Hints.catchUp`: the latest paragraph of the
+  row's moves and all they need; the cards of the move that makes it, held ones linked, the story's own quoted, an
+  inference or background fact by its kind only); at the end, the record's "Where you could have been first".
+- **Checked:** `engine/hints.test.js` 6 of 6; `hints-check` 13 of 13 (the notes at ¶57); by sight, desktop and phone; a
+  Medium game that only reads ends with 65 rows listed.
+- **Moved:** nothing in the logs or reports (the page, the hints engine).

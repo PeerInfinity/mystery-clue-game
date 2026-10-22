@@ -86,6 +86,22 @@ export class Hints {
         return plan.filter(can);
     }
 
+    /**
+     * The catch-up note on a row the player did not make (docs/hints.md, H7): `para`, where the last of what it needs
+     * is in the story (the reader's paragraph of the latest of its moves, with all they need), and `cards`, those the
+     * move that makes it connects or names. → {para, cards} or null (not a row of the hints).
+     */
+    catchUp(thought, family) {
+        const r = this.data.rows.find((x) => x.thought === thought && x.family === family);
+        if (!r) return null;
+        const all = new Map();
+        const visit = (seq) => { if (all.has(seq)) return; const m = this.bySeq.get(seq); all.set(seq, m); m.needs.forEach(visit); };
+        r.makes.forEach(visit);
+        const steps = r.makes.map((s) => this.bySeq.get(s)).filter((m) => !['collect', 'ask'].includes(m.op));
+        const step = steps.at(-1) ?? this.bySeq.get(r.makes.at(-1));
+        return { para: Math.max(...[...all.values()].map((m) => m.at)), cards: [...new Set(step.wants.filter((c) => this.g.model.cards.has(c)))] };
+    }
+
     /** Would drop `m` hold if made now? Tried, and the player's drops put back as they were, also when the page's
      *  solver throws to be asked first (engine/remoteProblem.js: the call is made again once it has answered). */
     wouldHold(m) {
