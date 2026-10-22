@@ -1247,7 +1247,7 @@ export class Game {
 
     // ---------- hints (docs/hints.md) ----------
     /** Log a hint given at the paragraph just read: the row it serves (thought and family), its rung, and when
-     *  (`at`, a time for the cooldown to come). The log is never read by a score. */
+     *  (`at`, the page's clock: the cooldown counts from it). The log is never read by a score. */
     logHint(thought, family, rung, at = null) {
         const h = { para: this.read - 1, thought, family, rung, at };
         this.hintLog.push(h);

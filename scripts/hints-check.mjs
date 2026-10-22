@@ -1,6 +1,7 @@
 // The hints played through the real page (docs/hints.md, H9): on Hard at ¶40, Hint pressed and More to the fourth rung,
 // each rung and the log checked in the saved game; Do it made through the page; the Hints tab; a reload keeps the log;
-// Trivial has no Hint button; Start over clears the log; read on to ¶57, the catch-up notes on the bar. With `all`: a fresh Hard game that only reads and, at every
+// the Record's tally by rungs; Trivial has no Hint button; Start over clears the log; read on to ¶57, the catch-up
+// notes on the bar; the cooldown (30 seconds by default; at 3 Hint and More wait). With `all`: a fresh Hard game that only reads and, at every
 // paragraph, takes every hint to Do it (on `?hintfast`), which must reach the Hard maximum (70) through the page (about
 // 15 minutes); `DIFFICULTY=easy|medium` plays that game on another difficulty (its maximum the same 70).
 //   node scripts/hints-check.mjs [all] [shots dir]   (the game served at URL, default http://localhost:8321/; Chrome on 9333)
@@ -26,6 +27,10 @@ const doIt = async () => { await p.click('#hint-do'); for (let i = 0; i < 1200 &
 
 await p.ev(`localStorage.clear(); 1`); await reload();
 await settings(() => p.choose('#difficulty', ALL ? DIFFICULTY : 'hard'));
+// The cooldown (Settings, seconds): 30 by default; this script presses at once, so 0 but where it checks the wait.
+const cooldown = (sec) => settings(() => p.ev(`(() => { const e = document.querySelector('#hint-cooldown'); e.value = '${sec}'; e.dispatchEvent(new Event('change', { bubbles: true })); return 1; })()`));
+const cooldownAtFirst = await p.ev(`document.querySelector('#hint-cooldown').value`);
+await cooldown(0);
 
 if (ALL) {
     // Every hint taken to Do it, paragraph by paragraph.
@@ -86,6 +91,9 @@ if (ALL) {
     const tab = (await p.text('#panel-1')) ?? '';
     check(/Given at ¶40 · odd detail · 4 of 4/.test(tab) && /made/.test(tab), 'the Hints tab lists the hint, made');
     await shot('hints-tab-desktop');
+    await p.ev(`document.querySelector('.panel[data-panel="1"] .tab[data-tab="record"]').click(); 1`); await p.idle();
+    // The tally counts rows as the Record tells them, at their deadlines: t18.3 (Holmes ¶57) is not in it yet.
+    check(/Made with hints: no hint 0 · one rung 0 · two rungs 0 · three rungs 0 · all four rungs 0\./.test((await p.text('#panel-1')) ?? ''), 'the Record has the tally of rows made by rungs of hint');
     // 5. The next hint starts at the first rung on a new target; read on, it folds.
     await p.click('#hint');
     g = await game();
@@ -110,6 +118,19 @@ if (ALL) {
     const bar = (await p.text('.reader')) ?? '';
     check(/came in with a key”\. You could have had it from paragraph 31, from “Hunter locked the stable door/.test(bar) && /You could have marked it odd from paragraph 18\./.test(bar), 'at ¶57 the catch-up notes: had from ¶31, marked odd from ¶18');
     await shot('hints-catchup-desktop');
+    // 11. The cooldown: 30 seconds by default; at 3, Hint and More wait, counting down, then work again.
+    check(cooldownAtFirst === '30', `the cooldown is 30 seconds by default (${cooldownAtFirst})`);
+    await cooldown(3);
+    const n0 = ((await game()).hints ?? []).length;
+    await p.click('#hint');
+    const waiting = await p.ev(`(() => { const b = document.querySelector('#hint'); const m = document.querySelector('#hint-more'); return b.disabled && /· [1-3] s/.test(b.textContent) && (!m || m.disabled); })()`);
+    await p.click('#hint');
+    const n1 = ((await game()).hints ?? []).length;
+    await p.sleep(3500);
+    await p.click('#hint-more') || await p.click('#hint');
+    const n2 = ((await game()).hints ?? []).length;
+    check(waiting && n1 === n0 + 1 && n2 === n1 + 1, `with a cooldown of 3 s, Hint and More wait and count down, then work (${n0}, ${n1}, ${n2})`);
+    await cooldown(0);
 }
 check(p.errors.length === 0, `no console error${p.errors.length ? `: ${p.errors.join(' | ')}` : ''}`);
 console.log(fails.length ? `${fails.length} failed` : 'all passed');

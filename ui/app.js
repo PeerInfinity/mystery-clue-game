@@ -4,7 +4,7 @@
 
 import { loadCase } from '../engine/loadCase.js';
 import { makeReadings } from './readings.js';
-import { Hints, madeRows } from '../engine/hints.js';
+import { Hints, madeRows, hintTiers } from '../engine/hints.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
 import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
@@ -30,7 +30,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
+const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', hintCooldown: 30, notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -69,7 +69,7 @@ function restore() {
 }
 function saveLayout() {
     if (AUTOPLAY !== null) return; // the autoplay lays out its own page and leaves the viewer's alone
-    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight })); } catch { /* private mode */ }
+    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight, hintCooldown: ui.hintCooldown })); } catch { /* private mode */ }
 }
 // The viewer's settings for notes (docs/notes.md, N9): each a select in Settings, a value kept with the layout, a class on the page.
 const VIEWER = { notesShown: ['notes-shown', ['story', 'tab']], notesHand: ['notes-hand', ['hand', 'page']], highlight: ['highlight', ['marker', 'underline', 'wash']] };
@@ -78,6 +78,7 @@ function applyViewer() {
         for (const v of values) document.body.classList.toggle(`${id}-${v}`, ui[k] === v);
         if ($(`#${id}`)) $(`#${id}`).value = ui[k];
     }
+    if ($('#hint-cooldown')) $('#hint-cooldown').value = ui.hintCooldown;
     document.body.classList.toggle('notes-mode', ui.notesMode);
     const b = $('#notes-mode');
     b.classList.toggle('on', ui.notesMode);
@@ -96,6 +97,7 @@ function restoreLayout() {
     const ok = (t) => TABS.some(([x]) => x === t);
     if (['system', 'light', 'dark'].includes(l?.theme)) ui.theme = l.theme;
     for (const [k, [, values]] of Object.entries(VIEWER)) if (values.includes(l?.[k])) ui[k] = l[k];
+    if (Number.isInteger(l?.hintCooldown) && l.hintCooldown >= 0) ui.hintCooldown = l.hintCooldown;
     applyTheme();
     if (AUTOPLAY !== null) return; // the default layout, as the autoplay plays it
     if (!l || ![1, 2].includes(l.columns) || l.panels?.length !== 2 || !l.panels.every(ok) || l.panels[0] === l.panels[1]) return;
@@ -433,17 +435,34 @@ function hintNote() {
     if (h.para !== game.read - 1 && !h.unfold) return `<div class="note hint-note folded small">Hint (from ${paraLink(h.para)}): ${h.rung} of 4 given · <span class="link" data-hint-unfold>show</span></div>`;
     const p = hints().parts(open, h.rung);
     const items = hintRungs(p).map((x, i) => `<li>${x}</li>`).join('');
-    const more = h.rung < 4 ? `<div class="small"><button id="hint-more" class="quiet">More</button> <span class="muted">the next says ${RUNG_NAMES[h.rung]}</span></div>` : '';
+    const left = hintWait();
+    const more = h.rung < 4 ? `<div class="small"><button id="hint-more" class="quiet"${left ? ' disabled' : ''}>More${waitLabel(left)}</button> <span class="muted">the next says ${RUNG_NAMES[h.rung]}</span></div>` : '';
     return `<div class="note hint-note"><ol>${items}</ol>${more}${ui.hintFailed ? `<div class="small bad">${esc(ui.hintFailed)}</div>` : ''}</div>`;
 }
 function hintButton() {
     if (!hints() || game.autoSolves()) return '';
     const h = ui.hint;
     const on = h && hints().open().some((r) => r.thought === h.thought && r.family === h.family);
-    return `<button id="hint" class="quiet" title="A hint toward the next thing you could get before Holmes">Hint${on ? ` (${h.rung}/4)` : ''}</button>`;
+    const left = hintWait();
+    return `<button id="hint" class="quiet" title="A hint toward the next thing you could get before Holmes"${left ? ' disabled' : ''}>Hint${on ? ` (${h.rung}/4)` : ''}${waitLabel(left)}</button>`;
 }
+/** The cooldown (docs/hints.md, Round 211): seconds still to wait after the last press of Hint or More (Settings). */
+function hintWait() {
+    const last = game.hintLog.at(-1)?.at;
+    return typeof last === 'number' ? Math.max(0, Math.ceil((last + ui.hintCooldown * 1000 - Date.now()) / 1000)) : 0;
+}
+const waitLabel = (left) => `<span class="hint-wait">${left ? ` · ${left} s` : ''}</span>`;
+// Each second while the cooldown runs, the buttons count down in place; at the end they are drawn again.
+setInterval(() => {
+    const b = [...document.querySelectorAll('#hint, #hint-more')];
+    if (!b.some((x) => x.disabled)) return;
+    const left = hintWait();
+    if (!left) { renderReader(); return; }
+    for (const x of b) { const w = x.querySelector('.hint-wait'); if (w) w.textContent = ` · ${left} s`; }
+}, 1000);
 /** Take the next hint (the button and More). */
 function takeHint() {
+    if (hintWait()) return;
     const p = hints().take({ at: Date.now() });
     ui.hintFailed = null;
     if (!p) { ui.hint = null; ui.hintNone = game.read; }
@@ -1448,6 +1467,8 @@ function toolRecord() {
         h += `<li><b>${label}:</b> ${a.scored} ${game.finished() ? `of ${a.possible}` : `of the ${a.passed} ${of} so far`}</li>`;
     }
     h += '</ul>';
+    const tiers = piece('tiers', () => hintTiers(game), null);
+    if (tiers && hints()) h += `<p class="small">Made with hints: ${['no hint', 'one rung', 'two rungs', 'three rungs', 'all four rungs'].map((w, i) => `${w} ${tiers[i]}`).join(' · ')}.</p>`;
     const scored = rec.rows.filter((r) => r.scores);
     if (game.finished() && scored.length) {
         const best = [...scored].sort((a, b) => b.lead - a.lead).slice(0, 5);
@@ -2481,6 +2502,7 @@ function onChange(e) {
     if (e.target.id === 'theme') { ui.theme = e.target.value; applyTheme(); saveLayout(); return; }
     const viewer = Object.entries(VIEWER).find(([, [id]]) => id === e.target.id);
     if (viewer) { ui[viewer[0]] = e.target.value; applyViewer(); saveLayout(); renderStory(); return; }
+    if (e.target.id === 'hint-cooldown') { ui.hintCooldown = Math.max(0, Math.round(Number(e.target.value)) || 0); e.target.value = ui.hintCooldown; saveLayout(); renderReader(); return; }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
     if (e.target.id === 'pose-template') { ui.poseTemplate = e.target.value; renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }

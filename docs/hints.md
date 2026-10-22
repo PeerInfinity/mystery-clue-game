@@ -178,7 +178,7 @@ reading* (the last of its pieces in the story; the action table's closure gives 
 rung 3. It names only what the story has now told. At the end the record lists the missed rows the same way, under
 "Where you could have been first". **Recommended.** It also covers rows with no hint taken.
 
-### H8. The cooldown (later)
+### H8. The cooldown (built Round 211: per press, seconds, 30 by default)
 
 A setting in the Settings menu: "Hint cooldown" (none, 1, 2, 5, 10 minutes; default none), per game. The Hint button
 shows the time left. **For Robert:** whether the cooldown counts per press (every rung waits) or per target (More and
@@ -347,3 +347,26 @@ Step 2 was checked on Hard only; Robert met Do it failing on another difficulty.
 - The player is `engine/hintPlayer.js` (`playHints`), shared by the test and the statistics; the page's
   `engine/hints.js` stays free of node-only code. Hard only: it takes about half a minute there, minutes on Easy and
   Medium (the page's `hints-check all` measures those: 55 and 56 hints).
+
+## Agreed (Robert, Round 211): the cooldown and the count
+
+- **The cooldown is per press** (H8): every press of Hint or More waits for it; a number of seconds in Settings, 0
+  allowed (no wait), **30 by default**.
+- **Count the rows made by the rung of hint taken on each** (H6): how many with no hint, one rung, two, three and all
+  four. The score itself is unchanged.
+
+### As built (Round 211)
+
+- **Settings → Hint cooldown:** a number of seconds (arrows step by 5; any whole number of 0 or more typed), kept with
+  the layout, so it is the viewer's and stays through Start over. The wait counts from the last press in the game's
+  hint log (its time, `at`, saved), so a reload does not end it. While it runs, Hint and More are greyed and count down
+  ("Hint (1/4) · 28 s", "More · 27 s"); Do it does not wait (the fourth rung that offers it was paid for). The countdown
+  is written in place each second, and the bar drawn again when it ends.
+- **The count** (`hintTiers` in `engine/hints.js`): the rows the Record counts as made before Holmes, each by the
+  highest rung of hint taken on it at or before the paragraph it was made; a row made by Do it counts four, a row made
+  on the way by another's moves none. In the Record, under the families: "Made with hints: no hint 50 · one rung 5 ·
+  two rungs 3 · three rungs 2 · all four rungs 10." Like the Record, it counts a row only once its deadline is read.
+- **Checked:** `engine/hints.test.js` (the hint-only player's tally sums to its 70, only none or four);
+  `scripts/hints-check.mjs` 16 of 16 (the default 30; at 3 s Hint and More wait and count down, then work; the Record's
+  line); by sight, the bar and Settings. The scripts set the cooldown to 0 where they press at once.
+

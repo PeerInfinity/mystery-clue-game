@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { loadCase } from './loadCase.js';
 import { Game } from './game.js';
-import { Hints } from './hints.js';
+import { Hints, hintTiers } from './hints.js';
 import { hintData, hintJson } from './hintData.js';
 import { make } from './minimalTable.js';
 import { playHints } from './hintPlayer.js';
@@ -57,6 +57,10 @@ test('a player who only reads and takes every hint to the fourth rung reaches th
     const rec = g.record();
     for (const [f, a] of Object.entries(table.families)) assert.equal(rec.families[f].scored, a.scored, f);
     assert.equal(rec.ahead, table.ahead);
+    // The rows by the rung of hint taken on each: all 70, most by Do it (four), some made by another's moves (none).
+    const tiers = hintTiers(g);
+    assert.equal(tiers.reduce((a, b) => a + b, 0), rec.ahead);
+    assert.ok(tiers[4] > 0 && tiers[1] === 0 && tiers[2] === 0 && tiers[3] === 0, `${tiers}`);
     // Each hint logged, rung by rung; the log comes back with the save.
     assert.equal(g.hintLog.length, targets.length * 4);
     const g2 = new Game(model, { difficulty: 'hard' });

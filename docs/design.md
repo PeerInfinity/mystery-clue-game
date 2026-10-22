@@ -4828,3 +4828,14 @@ then a paper for each later piece, agreed before it is built; the traps of Round
   `engine/hintPlayer.js`, which the test and `engine/stats.js` share. The agreed order of work is done but step 5,
   which waits on Robert's word: the cooldown (H8) and marking hinted rows (H6).
 - **Moved:** `stats.md` (the new section and column).
+
+## Round 211 (2026-10-21): the hint cooldown and the count by rungs
+
+- **Robert:** the cooldown per press, a configurable number of seconds, 0 allowed, 30 by default; and count separately
+  how many rows were made with 0, 1, 2, 3 and 4 rungs of hint.
+- **Built** (`docs/hints.md`, "Agreed (Robert, Round 211)"): Settings → Hint cooldown (seconds, kept with the layout),
+  counted from the last press in the saved log; Hint and More greyed with the seconds left; Do it does not wait. The
+  Record's "Made with hints" line (`hintTiers`).
+- **Checked:** `engine/hints.test.js` 6 of 6; `hints-check` 16 of 16; `hints-check all` on Hard; by sight.
+- **Moved:** nothing in the logs or reports (the page, the hints engine).
+

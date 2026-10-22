@@ -52,6 +52,10 @@
         Highlights
         <select id="highlight"><option value="marker">A yellow marker</option><option value="underline">A blue underline</option><option value="wash">A pale blue wash</option></select>
       </label>
+      <label title="How long to wait after each press of Hint or More before the next (0: no wait)">
+        Hint cooldown
+        <span class="cooldown"><input type="number" id="hint-cooldown" min="0" step="5" value="30"> seconds</span>
+      </label>
       <button id="autoplay-open" class="quiet" title="Watch the game played to the end on Hard, by a careful reader (its thoughts written in as notes) or by the fewest moves; your game is kept aside">Watch the autoplay…</button>
       <button id="reset" class="quiet settings-rule">Start over…</button>
       </div>

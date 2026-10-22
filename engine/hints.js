@@ -46,6 +46,19 @@ function holds(g, w) {
     return g.knows(w);
 }
 
+/**
+ * The rows the player has made in time, by the highest rung of hint taken on each before it was made: [no hint, one
+ * rung, two, three, four] (docs/hints.md, Round 211). A row made by Do it counts four.
+ */
+export function hintTiers(g) {
+    const out = [0, 0, 0, 0, 0];
+    for (const r of g.record().rows.filter((x) => x.scores)) {
+        const rungs = g.hintLog.filter((h) => h.thought === r.thought && h.family === r.family && h.para <= r.at).map((h) => h.rung);
+        out[Math.max(0, ...rungs)]++;
+    }
+    return out;
+}
+
 export class Hints {
     /** `data`: hints.json. */
     constructor(game, data) {
