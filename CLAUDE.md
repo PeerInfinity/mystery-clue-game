@@ -1,7 +1,10 @@
 # Mystery clue game — quick reference
 
 ## Read first
-- `docs/kickoff-depgraph.md` — next (Round 212): discuss exporting the player's actions as an Archipelago-CC DepGraph,
+- `docs/depgraph.md` — the DepGraph export (Round 213): measured, a prototype of the maximum checked (loads in DepGraph,
+  70 in three orders); decided: three exports (the maximum, the story's waits, every deduction), collects as nodes,
+  plain labels; D1–D7 for Robert to agree.
+- `docs/kickoff-depgraph.md` — Round 212: discuss exporting the player's actions as an Archipelago-CC DepGraph,
   two versions (the maximum score; keeping up with Holmes), story and actions gating each other; its paper
   `docs/depgraph.md`.
 - `docs/hints.md` — the hint system: agreed (Rounds 204–205: free for now, a cooldown later; on request; the nearest

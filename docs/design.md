@@ -4848,3 +4848,22 @@ then a paper for each later piece, agreed before it is built; the traps of Round
 - **Handed off:** `docs/kickoff-depgraph.md` (the ask, the target format, the data here, the questions to settle);
   `docs/kickoff-hints.md` is superseded.
 - **Moved:** nothing in the logs or reports.
+
+## Round 213 (2026-10-22): the DepGraph export, measured and partly decided
+
+- **Read:** Archipelago-CC's `worlds/depgraph` (`Rules.py`, `__init__.py`, `Options.py`, the docs, the bundled
+  graphs). The goal is the node last in Kahn's order, so each export needs one sink ("The end").
+- **Measured** (scratch replays): the story waits at 26 paragraphs on 35 of Holmes's steps at the 'wait' pace, some
+  earlier than the record's deadline (`t81.5` ¶102 against ¶221); the minimal playthrough stops at ¶146 at that pace (it
+  lets the story state `k.first_up_and_no_subordinate`), the reader's table's closure (106 moves, unpruned) reads to the
+  end; every deduction by its deadline, 110 moves (unpruned).
+- **Prototype** (the maximum, scratch): 180 nodes, 448 edges, loads under DepGraph's own parser; 70 in the engine in
+  three orders the graph allows (earliest, latest, random). Three rules found by failing: a row's `makes` are
+  alternatives (taken as dependencies, a cycle), so the stretch depends on the move that first makes the row; a move
+  can be lost (a build once the story states it, a proposal once its question is settled), so the story is cut there and
+  the stretch depends on it (without it, 59 in the latest order); implicit inferences need their premises' moves. Left:
+  proposal 204 refused in the latest order (the page would need it).
+- **Robert:** both readings of "keeping up" if both make sense (they do: three exports); collects as move nodes; labels
+  in plain words, spoilers fine.
+- **Written:** `docs/depgraph.md` (D1–D7 open: the cut, nodes, edges, pruning, where it lives, the checks, Hard only).
+- **Moved:** nothing in the logs or reports.
