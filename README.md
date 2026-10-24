@@ -1,54 +1,60 @@
 # Mystery clue game
 
-A deduction game built from fair-play mystery stories. You read the story a paragraph at a time; every person,
-place, thing, event and clue becomes a card when the text first mentions it (in Hard mode, when you click it). Every card has open questions (who did it, where, when, whose is it,
-is it true?), each with a list of candidate answers, like pencil marks in sudoku. You rule answers out, alone or
-with cited reasons that the game checks MetaMath-style, until only one solution is left. Any sufficient set of
-reasons is accepted, not just the detective's.
+**[Play it in your browser](https://peerinfinity.github.io/mystery-clue-game/)** ·
+[How to play](https://peerinfinity.github.io/mystery-clue-game/guide.html)
 
-The first case is Conan Doyle's "Silver Blaze" (1892, public domain).
+A deduction game built on a fair-play detective story. You read the story a paragraph at a time; the people,
+places, things, events and clues it mentions become cards; every card raises questions (who did it, where,
+when, whose is it, is it true?) with candidate answers, like pencil marks in sudoku. You rule answers out and draw
+conclusions, citing the cards that justify them, and the game checks your reasons. Your record is kept against
+the detective's: a step counts when you make it before he does.
 
-## Run it
+The first and only case is Arthur Conan Doyle's "Silver Blaze" (1892, public domain).
+
+## Status: an unfinished experiment
+
+The aim was to analyse the reasoning Sherlock Holmes uses to solve the case and turn it into game mechanics, so
+that solving the case would feel like solving a sudoku: any sufficient set of reasons accepted, not just the
+detective's.
+
+The modelling works. The whole case is in the game, it checks every step, and it never shows a clue before the
+story tells it. A player can beat Holmes to almost every one of his deductions.
+
+As a game, it falls short. It runs into the old adventure-game problem: even a player who has worked out the
+solution must then guess how to express it in the game's moves, and ends up trying combinations of cards until
+one is accepted. The size of the game (hundreds of cards and questions) makes that worse, and the play is not
+much like sudoku. Turning it into multiple choice would remove the guessing but make it too easy.
+
+Directions that might still make it playable, such as an incremental game about automating the search, or an
+[Archipelago](https://archipelago.gg/) randomizer integration in which clues arrive as items, are collected in
+[`docs/ideas.md`](docs/ideas.md) (which contains spoilers).
+
+## What is in it
+
+- **Four difficulties** (Trivial, Easy, Medium, Hard) and a custom mix, and a pace that can wait for you at each
+  of the detective's deductions.
+- **Theories, checks and your own questions**: weigh the possible stories of the crime, seal a prediction before
+  the detective acts, ask the questions a reader asks.
+- **The record**: how many of the detective's steps you made first, shown as the story reaches each one.
+- **Hints** on request, in four steps from a nudge to making the move for you.
+- **Notes and highlights** written into the story.
+- **An autoplay** that plays the whole case to the maximum score.
+
+See the [user guide](https://peerinfinity.github.io/mystery-clue-game/guide.html) for how to play.
+
+## Run it locally
 
 ```
 node scripts/serve.js            # http://localhost:8321/
-npm test                         # engine tests + full case validation (~30 s)
-npm run validate                 # validate the case and rewrite cases/silver-blaze/report.md
+npm test                         # engine tests and full case validation (about 7–8 minutes)
 ```
 
-No build step and no runtime dependencies. `ajv` (a dev dependency) checks the JSON Schema.
+No build step and no runtime dependencies (`npm install` fetches only the schema checker the tests use).
 
-## Layout
+## Documentation
 
-| Path | What |
-|---|---|
-| `index.html`, `ui/` | The casebook page: the story panel, cards, questions, theories, three timelines. |
-| `engine/story.js` | Paragraphs, and where every mention, clue, question, action and deduction sits in them; the gates. |
-| `cases/silver-blaze/mentions.json` | Which phrases in the text name each card. |
-| `engine/logic.js` | The formula language for constraints, in three-valued logic; schemas with variables, grounded against cards (format 0.3). |
-| `engine/solver.js` | A finite-domain solver: candidates per slot, checked eliminations, uniqueness, minimal conflict sets. |
-| `engine/caseModel.js` | Turns a case into cards, slots and constraints; `checkStep` checks a cited elimination or conclusion. |
-| `engine/game.js` | Player state: reading, collecting, pencil marks, givens, proofs, theories, the three time axes. Difficulty options (`OPTIONS`) with Trivial / Easy / Medium / Hard as presets and Custom for any other mix; pace Free / Wait. |
-| `cases/silver-blaze/` | The case: `case.json` (meta, time windows, scenes, questions, theories) and its parts, including `relations.json` and `propositions.json` (0.3). |
-| `cases/silver-blaze/report.md` | Generated: fair-play table, theories and what breaks them, the route check, every slot's status, the fabula. |
-| `schema/case.schema.json` | JSON Schema for case format 0.3. |
-| `scripts/validate-case.js` | Checks everything the schema can't, and writes the report. |
-| `docs/design.md` | Requirements, rulings, the model, open questions. |
-| `docs/format-0.3.md` | Case format 0.3: rule schemas, relations, propositions, verified inferences, the player's applyRule and conclude. |
-| `docs/redesign.md` | The redesign discussion: the reader's real process, what the logic and the gameplay are missing, alternatives, where to start. |
-| `reference/v0.1/` | The first extraction (one big hand-built clue graph), kept for comparison. |
-
-## The model in one paragraph
-
-The story's fabula is a set of **slots**: each event's agent, place, time, object and instrument; owners;
-identities of placeholder cards ("the stranger", "the midnight visitor", "the bay in Ross's colours"); and
-whether each piece of testimony is true. The solution is one value for each slot. A **claim** (an atomic clue)
-asserts something about slots. A plain fact that states a value outright is a *given*, but testimony can be
-false, so it gets its own truth slot. **Constraints** carry the reasoning, and each rests on premise cards,
-usually clues plus **rule cards** (general knowledge: opium can be tasted; a dog barks at strangers).
-Crossing out "Simpson" as the drugger, citing some cards, is accepted when the constraints those cards switch
-on make "Simpson" impossible. The validator proves the case is well formed: with all the evidence, every slot
-the story settles has exactly one value left.
-
-Three time axes are kept apart throughout: **fabula** (event time slots and `fabula_order`), **investigation**
-(`actions.json`, and the player's own log), and **disclosure** (the scene where each card is first told).
+- [`docs/technical.md`](docs/technical.md): how it is built, the commands, the checks. No spoilers.
+- [`docs/case-format.md`](docs/case-format.md): the case format and the engine behaviour it drives. Spoilers.
+- [`docs/reading-annotated.md`](docs/reading-annotated.md): a careful reader's thoughts through the whole story,
+  the specification the game's moves were built from. Spoilers.
+- [`docs/ideas.md`](docs/ideas.md): why the game falls short, ideas not built, known limitations. Spoilers.

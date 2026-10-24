@@ -1,4 +1,4 @@
-// The action table (docs/review-closing.md, Round 168): the annotation's player on Hard reaches the Hard maximum, and
+// The action table: the annotation's player on Hard reaches the Hard maximum, and
 // cases/silver-blaze/action-table.json is what `npm run action-table` writes from the case as it is now.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

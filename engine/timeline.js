@@ -1,4 +1,4 @@
-// The timeline (world model, step 3; docs/world-model.md): where each followed thing was in each time window, as
+// The timeline (world model, step 3): where each followed thing was in each time window, as
 // far as the player knows it and as they pencil it in, in two layouts over the same marks.
 //
 //   by place: rows are the time windows the story has reached (and the parts the player has split them into),
@@ -229,7 +229,7 @@ export function checkLayer(game, layer = MINE) {
     }
     // As "Could it fit?" does: against what the player trusts, the claims caught in a clash set aside.
     const active = game.workingConstraints();
-    // A theory's night is weighed as a scenario (docs/hypotheses.md, Q2): what it must disbelieve, not only whether.
+    // A theory's night is weighed as a scenario: what it must disbelieve, not only whether.
     const cost = theory ? { cost: game.scenarioCost(theory, { extra }), residue: game.residue(theory, { extra }), assumed: game.assumedAnswers(theory) } : {};
     if (game.model.problem.consistent(active, fixed, { extra }).ok) return { fits: true, conflict: null, fixed, checked, unchecked, ...cost };
     return { fits: false, conflict: game.model.problem.explainConflict(active, fixed, { extra }) ?? [], fixed, checked, unchecked, ...cost };

@@ -162,7 +162,7 @@ Not broken by the evidence.
 
 ## Puzzles
 
-Oddities a story of the night must explain (docs/hypotheses.md, Q3). A scenario explains one when its answers,
+Oddities a story of the night must explain. A scenario explains one when its answers,
 with the facts the player trusts (clues and the world's ties, not inferences), entail one of its explanations.
 "Story theories" lists those that do by their answers alone.
 
@@ -182,7 +182,7 @@ with the facts the player trusts (clues and the world's ties, not inferences), e
 
 ## Checks
 
-Checks Holmes makes that a reader can plan first (docs/predictions.md). "Plannable from" is the first paragraph
+Checks Holmes makes that a reader can plan first. "Plannable from" is the first paragraph
 by which the story has mentioned an accepted id for every field a plan names; a seal before Holmes's paragraph
 scores.
 
@@ -297,7 +297,7 @@ premise propositions or inferences. Asserted: it stands on the author's word unt
 
 ## Exceptions
 
-Named exceptions of default rules (workstream 3), per application: where each stands in the whole story, leaving
+Named exceptions of default rules, per application: where each stands in the whole story, leaving
 out the inference, what rests on it and every use of the default with the same exception. Raised by a player, an
 open one is a reservation and an established one a defeat.
 

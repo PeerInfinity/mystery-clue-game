@@ -3,7 +3,7 @@
 // It sees only the story up to the paragraph where the text appears, and the sentence that first mentions the
 // card's subject — never the card's id or the case's own name for it.
 //   node checker/check.js cases/silver-blaze --tests [--model haiku] [--only id,id] [--concurrency 4]
-//   node checker/check.js cases/silver-blaze --notes [--runs 2]   the reader's notes the autoplay types (Round 186)
+//   node checker/check.js cases/silver-blaze --notes [--runs 2]   the reader's notes the autoplay types
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -73,7 +73,7 @@ or object from the plot).
 
 Judge every fact in the text. Also say whether each fact is TRUE as general knowledge.`;
 
-// An exception to a background fact (workstream 3): the fact is the player's general knowledge, the exception a
+// An exception to a background fact: the fact is the player's general knowledge, the exception a
 // possibility it allows for. Checked for one thing: does it speak of anything in this story the story has not told?
 const SYSTEM_EXCEPTION = `You check the cards of a mystery game for spoilers.
 
@@ -98,8 +98,8 @@ story. Do not use any memory of this story: judge only from the text you are giv
 List each fact or possibility in the exception, say whether it is supported (general, or already in the story) or
 not (a particular of this story the story has not told), and give the verdict.`;
 
-// A note the autoplay types (docs/autoplay.md A3): the annotated reader's own thought at a paragraph, written into the
-// story. It may guess, ask and reason; it may not use what the story has not told (Round 186).
+// A note the autoplay types: the annotated reader's own thought at a paragraph, written into the
+// story. It may guess, ask and reason; it may not use what the story has not told.
 const SYSTEM_NOTE = `You check the notes of a careful first-time reader of a mystery story for spoilers.
 
 The reader reads the story one paragraph at a time and writes notes in the margin as they go: what they notice,
@@ -193,11 +193,11 @@ else if (args.includes('--background')) {
     // story-so-far check covers them.) Expected 'ok' is the hope, not a known answer: misses are the findings.
     items = (model.data.rules ?? []).map((r) => ({ id: r.id, kind: 'background fact', text: r.text, expect: 'ok', background: true }));
 } else if (args.includes('--all')) items = allPieces();
-// The reader's notes the autoplay types (Round 186): each thought's typed form, or its prose as it stands, at its
+// The reader's notes the autoplay types: each thought's typed form, or its prose as it stands, at its
 // paragraph (the autoplay writes it there or later).
 else if (args.includes('--notes')) items = JSON.parse(fs.readFileSync(path.join(caseDir, 'thoughts.json'), 'utf8')).thoughts
     .filter((t) => t.typed ?? t.text).map((t) => ({ id: t.id, para: t.para, kind: 'note', text: t.typed ?? t.text, expect: 'ok', note: true }));
-// A background fact's exceptions (workstream 3), each checked against the story so far where it first shows.
+// A background fact's exceptions, each checked against the story so far where it first shows.
 else if (args.includes('--exceptions')) items = allPieces().filter((x) => x.kind === 'exception').filter((x, i, all) => all.findIndex((y) => y.id.split('|').slice(1).join('|') === x.id.split('|').slice(1).join('|')) === i);
 else throw new Error('use --tests, --background, --all, --notes or --exceptions');
 

@@ -1,4 +1,4 @@
-// The player's notes on the story (docs/notes.md): written at a point of a paragraph read, the words they speak of
+// The player's notes on the story: written at a point of a paragraph read, the words they speak of
 // highlighted if marked, or a highlight alone; saved with the game, cleared by a reset, and read by nothing else.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -1,4 +1,4 @@
-// The game's statistics (docs/minimal-playthrough.md, M7): cases/<case>/stats.md, from the case and its two action
+// The game's statistics: cases/<case>/stats.md, from the case and its two action
 // tables and the hints' data (engine/stats.js). npm run stats [case dir]. Rerun when the case or the tables change (a test checks it).
 import fs from 'node:fs';
 import path from 'node:path';

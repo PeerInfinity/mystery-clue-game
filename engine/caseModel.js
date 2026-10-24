@@ -58,7 +58,7 @@ export function mergeCase(main, parts) {
 const EXCLUDED_FROM_DOMAINS = ['placeholder', 'fiction_within_story'];
 
 export function buildModel(data) {
-    // Holmes's steps come from the annotated reading (Round 57).
+    // Holmes's steps come from the annotated reading.
     if (!data.route && data.thoughts) data.route = stepsFromThoughts(data);
     const cards = new Map();
     const errors = [];
@@ -209,7 +209,7 @@ export function buildModel(data) {
         }
         const claimed = new Set();
         for (const c of data.claims ?? []) for (const m of JSON.stringify(c.asserts ?? {}).matchAll(/"(ord\.[a-z0-9_.]+)"/g)) claimed.add(m[1]);
-        // Two events a claim puts in order within one window (`seq`, Round 73): an order question of their own,
+        // Two events a claim puts in order within one window (`seq`): an order question of their own,
         // `ord.<a>.<b>`, whether or not a split asks it. The world's order ties carry it into the splits' questions.
         const sequenced = [];
         for (const c of data.claims ?? []) for (const [a, b] of seqPairs(c.asserts)) {
@@ -289,7 +289,7 @@ export function buildModel(data) {
         makeTrack = (t) => {
             const name = t.aspect === 'location' ? 'at' : t.aspect === 'possession' ? 'held' : t.aspect === 'intention' ? 'aims' : t.aspect === 'knowledge' ? knowsName(t.knows) : t.aspect === 'belief' ? believesName(t.believes) : t.condition;
             if (t.aspect === 'knowledge' && !propositions.has(t.knows)) errors.push(`${t.id}: knows ${t.knows}, which is not a proposition`);
-            // Belief (workstream 4): of a proposition, or of a statement's own content (a claim: what the speaker said).
+            // Belief: of a proposition, or of a statement's own content (a claim: what the speaker said).
             if (t.aspect === 'belief' && !propositions.has(t.believes) && !(data.claims ?? []).some((c) => c.id === t.believes)) errors.push(`${t.id}: believes ${t.believes}, which is neither a proposition nor a claim`);
             if (t.aspect === 'condition' && !conditions.has(t.condition)) errors.push(`${t.id}: unknown condition ${t.condition}`);
             const places = typeof t.places === 'string' ? sets.get(t.places) : t.places ?? [];
@@ -344,10 +344,10 @@ export function buildModel(data) {
             return track;
         };
         for (const t of data.states ?? []) makeTrack(t);
-        // Belief over statements (workstream 4, Round 87): whoever testifies or admits something has a belief about
+        // Belief over statements: whoever testifies or admits something has a belief about
         // what he said, at the time he said it (`said_at`, else his scene's time). Unless the case declares that
         // track, it is latent, like a clue's truth: open, and no part of the uniqueness check.
-        // A reporting chain (Round 89) gives each speaker along it a belief of his own, at the time he passed it on.
+        // A reporting chain gives each speaker along it a belief of his own, at the time he passed it on.
         for (const c of data.claims ?? []) {
             for (const sp of statementOf(c, entities, data.scenes)?.speakers ?? []) {
                 if (stateTracks.has(`${believesName(c.id)}|${sp.by}`) || !sp.at || !isTime(sp.at)) continue;
@@ -402,7 +402,7 @@ export function buildModel(data) {
             const g = groundOrError(r.id, r.formula);
             if (g) cards.get(r.id).formula = g;
         }
-        // Named exceptions (workstream 3): an id unique within the rule, a text, and a formula over the rule's own
+        // Named exceptions: an id unique within the rule, a text, and a formula over the rule's own
         // variables, grounded with each application's bind.
         const named = new Set();
         for (const u of r.unless ?? []) {
@@ -444,7 +444,7 @@ export function buildModel(data) {
             addConstraint({ ...base, id: `k.${c.id}#doubted`, formula: doubted, variant: true });
             claimForms.set(c.id, { trusted: `k.${c.id}`, doubted: `k.${c.id}#doubted` });
         }
-        // A statement doubted in one of two readings (workstream 4): mistaken (the speaker believed it, and it is
+        // A statement doubted in one of two readings: mistaken (the speaker believed it, and it is
         // false) or lying (he did not believe it). Both read his belief at the time he spoke.
         // Along a reporting chain each speaker's belief can be the one that failed: the kinds then name him
         // ('lying:straker', 'mistaken:mrs_straker').
@@ -511,7 +511,7 @@ export function buildModel(data) {
             let g;
             try { g = rule.schema ? ground(rule.schema.formula, { ...env, bind: use.bind ?? {} }) : rule.formula; } catch (e) { errors.push(`${k.id}: ${use.rule}: ${e.message}`); return; }
             const exceptions = namedExceptions(rule).map((u) => ({ id: u.id, formula: u.formula ? groundOrError(`${k.id}#rule${i + 1}: exception ${u.id}`, u.formula, use.bind ?? {}) : null }));
-            // An application the true story defeats (a character's wrong step, workstream 3): the exception that holds
+            // An application the true story defeats (a character's wrong step): the exception that holds
             // says so. It is the character's reasoning, held while a player trusts the inference, never the case's.
             if (use.defeated_by && !exceptions.some((x) => x.id === use.defeated_by && x.formula)) errors.push(`${k.id}: defeated by ${use.defeated_by}, which is not an exception of ${use.rule} with a formula`);
             if (use.defeated_by && k.truth !== false) errors.push(`${k.id}: only a false inference has an application defeated in the true story`);
@@ -587,7 +587,7 @@ export function rebuildProblem(model) {
  * Returns {ok, formula, premises} (premises: the rule and the bound cards) or {ok: false, error}.
  * A rule with a ground `formula` and no schema takes no bindings.
  */
-/** A rule's named exceptions (workstream 3): the `unless` entries with an id. */
+/** A rule's named exceptions: the `unless` entries with an id. */
 export function namedExceptions(rule) {
     return (rule?.unless ?? []).filter((u) => typeof u === 'object' && u?.id);
 }
@@ -854,7 +854,7 @@ function inTimeConds({ timeOrder, subwindows, slots, orderSlot }, a, w) {
     const root = timeOrder.has(w) ? w : subwindows.get(w).root;
     const conds = [{ eq: [`${a}.time`, root] }];
     for (const [dir, e] of subwindows.get(w)?.path ?? []) {
-        // The event that splits a window lies in neither part (Robert, Round 70): whoever does it is not tied to its
+        // The event that splits a window lies in neither part: whoever does it is not tied to its
         // place in the part before or after it (a flight from one place to another would put them in both).
         if (e === a) return null;
         const o = orderSlot(a, e);
@@ -905,7 +905,7 @@ function trackTies(ctx, t) {
     }
     if (t.name === 'aims') for (const k of aimTies(ctx, t.of, t.times)) world(k.id, k.label, k.formula);
     if (t.aspect === 'knowledge') for (const k of knowledgeTies(ctx, t, t.times)) world(k.id, k.label, k.formula);
-    // Knowing implies believing (workstream 4): where the same person has both tracks over one proposition.
+    // Knowing implies believing: where the same person has both tracks over one proposition.
     if (t.aspect === 'belief') {
         const kt = stateTracks.get(`${knowsName(t.believes)}|${t.of}`);
         for (const w of t.times) if (kt?.slotFor(w)) world(`k.world.${t.of}.${t.name}.known.${w.slice(2)}`, `What one knows one believes (${t.of}, ${t.believes}).`, { implies: [{ eq: [kt.slotFor(w), 'true'] }, { eq: [t.slotFor(w), 'true'] }] });
@@ -1058,7 +1058,7 @@ function orderTies(ctx) {
             { implies: [{ and: [same, { eq: [af, 'after'] }, { eq: [fe, 'after'] }] }, { eq: [ae, 'after'] }] },
         ] });
     }
-    // The same over every order question, not only the splitters' (Round 73): a pair a claim puts in order (`seq`)
+    // The same over every order question, not only the splitters': a pair a claim puts in order (`seq`)
     // reaches the questions of any split of its window, the case's or the player's. `lt(x, y)`: x is before y, read
     // off whichever of the two questions exists.
     const lt = (x, y) => (slots.has(orderSlot(x, y)) ? { eq: [orderSlot(x, y), 'before'] } : slots.has(orderSlot(y, x)) ? { eq: [orderSlot(y, x), 'after'] } : null);
@@ -1164,7 +1164,7 @@ export const believesName = (x) => `believes_${String(x).replace(/^[pc]\./, '')}
 const STATEMENT_VIAS = ['testimony', 'admission'];
 /**
  * A statement: a clue someone said (testimony, admission), with its speaker and scene; null otherwise. `speakers`:
- * who said it, in order along its reporting chain (`chain` on the attestation, Round 89), each with when.
+ * who said it, in order along its reporting chain (`chain` on the attestation), each with when.
  */
 export function statementOf(c, entities, scenes = []) {
     if (c.derived || !c.asserts) return null;
@@ -1178,7 +1178,7 @@ export function statementOf(c, entities, scenes = []) {
 }
 
 /**
- * The two laws of knowledge (built in, Round 72): what one knows one goes on knowing (in every later window of the
+ * The two laws of knowledge (built in): what one knows one goes on knowing (in every later window of the
  * track), and what one knows is true (the proposition holds). For these windows of track `t`. [{id, label, formula}]
  */
 function knowledgeTies(ctx, t, windows) {

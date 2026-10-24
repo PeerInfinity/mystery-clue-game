@@ -1,4 +1,4 @@
-// The player's actions as an Archipelago-CC DepGraph (docs/depgraph.md): the story cut into stretches, the moves of a
+// The player's actions as an Archipelago-CC DepGraph: the story cut into stretches, the moves of a
 // playthrough between them. A move depends on the stretch that holds its material and on the moves that first gave the
 // cards it needs; a stretch depends on the one before, on the move that first makes each row due at its first paragraph,
 // and on every move lost there (a build once the story states its inference, a proposal once its question is settled);
@@ -8,7 +8,7 @@ import { Game, WAIT } from './game.js';
 import { dependencies, needs, movesOf, make } from './minimalTable.js';
 import { madeRows } from './hints.js';
 
-/** The three versions' titles and goals (docs/depgraph.md, choice 1). */
+/** The three versions' titles and goals (choice 1). */
 export const MAX = { title: 'Silver Blaze: the maximum score (Hard, 70 ahead of Holmes)', end: 'The end: 70 ahead of Holmes' };
 export const WAITS = { title: 'Silver Blaze: keeping up with the story (Hard, at the pace that waits for Holmes\'s steps)', end: 'The end: the story read to its last paragraph', due: 'the story waits on' };
 export const DEDUCTIONS = { title: 'Silver Blaze: every deduction before Holmes (Hard, 45 of 47)', end: 'The end: 45 deductions ahead of Holmes' };
@@ -165,7 +165,7 @@ export function closure(data) {
     return keep;
 }
 
-/** A move in plain words (docs/depgraph.md, choice 3: spoilers are fine). */
+/** A move in plain words (choice 3: spoilers are fine). */
 function label(model, m) {
     const name = (id) => { const c = model.cards.get(id); return c ? c.name ?? c.label ?? c.text : id; };
     switch (m.op) {

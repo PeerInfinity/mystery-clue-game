@@ -10,12 +10,12 @@ import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remote
 import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
-// The autoplay (docs/autoplay.md, A2) plays in a save of its own, so the player's game is kept aside: `?autoplay` (or
+// The autoplay plays in a save of its own, so the player's game is kept aside: `?autoplay` (or
 // `?autoplay=fast`, no pauses and notes at once, for the check) opens the page on it, fresh each time; `?autoplay=minimal`
-// (and `minimal-fast`) plays the fewest moves instead (docs/minimal-playthrough.md).
+// (and `minimal-fast`) plays the fewest moves instead.
 const AUTOPLAY = new URLSearchParams(location.search).get('autoplay');
 const STORE = AUTOPLAY === null ? 'mystery-clue-game:silver-blaze:v2' : 'mystery-clue-game:silver-blaze:autoplay';
-// The layout is the viewer's, the game is the case's: kept apart, and "Start over" keeps it (docs/layout.md, Q6).
+// The layout is the viewer's, the game is the case's: kept apart, and "Start over" keeps it.
 const LAYOUT = 'mystery-clue-game:layout:v1';
 const KIND_GROUPS = [
     ['person', 'People'], ['animal', 'Animals'], ['group', 'Groups'], ['place', 'Places'],
@@ -57,7 +57,7 @@ function kindOf(id) {
     return { events: 'event', claims: 'clue', rules: 'background', glosses: 'background', inferences: 'inference', propositions: 'proposition', applied: 'applied fact' }[c.section] ?? c.section;
 }
 const paraLabel = (p) => `paragraph ${p}`;
-// A card in the player's hand: neither left out of the game nor set aside by the player (docs/reader-layer.md, Q5).
+// A card in the player's hand: neither left out of the game nor set aside by the player.
 const inHand = (id) => !game.isHidden(id) && !game.isSetAside(id);
 
 // ---------- state ----------
@@ -71,7 +71,7 @@ function saveLayout() {
     if (AUTOPLAY !== null) return; // the autoplay lays out its own page and leaves the viewer's alone
     try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight, hintCooldown: ui.hintCooldown })); } catch { /* private mode */ }
 }
-// The viewer's settings for notes (docs/notes.md, N9): each a select in Settings, a value kept with the layout, a class on the page.
+// The viewer's settings for notes: each a select in Settings, a value kept with the layout, a class on the page.
 const VIEWER = { notesShown: ['notes-shown', ['story', 'tab']], notesHand: ['notes-hand', ['hand', 'page']], highlight: ['highlight', ['marker', 'underline', 'wash']] };
 function applyViewer() {
     for (const [k, [id, values]] of Object.entries(VIEWER)) {
@@ -140,7 +140,7 @@ function run(fn) {
 }
 const later = (fn, ms) => setTimeout(() => run(fn), ms);
 
-// A piece of the page that may wait on the solver (a tab's count, a theory's weighing; docs/ui.md Q3): drawn now if
+// A piece of the page that may wait on the solver (a tab's count, a theory's weighing): drawn now if
 // its answer is at hand, else a placeholder; after the page is drawn the pieces are worked out one at a time, without
 // the busy veil, and the tool redrawn as each arrives. A piece only reads the game, so working it out again is harmless.
 const pending = new Map();
@@ -186,11 +186,11 @@ function renderStory() {
     if (hint) hint.innerHTML = noteHint();
 }
 
-// ---------- the player's notes (docs/notes.md) ----------
+// ---------- the player's notes ----------
 // A paragraph's text with the player's notes written in where they were put, and the words they speak of
 // highlighted. A note's point inside a marked segment (the words a card is collected or opened by) shows just after
 // it, so those words stay whole. The note being written or edited is written in the line at its place, in its finished
-// look (Round 193); what the keys do is said in the reading bar (noteHint).
+// look; what the keys do is said in the reading bar (noteHint).
 function paragraphHtml(i, notes) {
     const segs = story.segments(i);
     const edit = ui.noteEdit?.para === i ? ui.noteEdit : null;
@@ -261,7 +261,7 @@ function storyOffset(p, node, off) {
     f.querySelectorAll('.n-note, .n-mark, .n-edit').forEach((x) => x.remove());
     return f.textContent.length;
 }
-/** Notes mode (docs/notes.md, N8 a): a click opens a note at that point; a drag marks the words, the note after them. */
+/** Notes mode: a click opens a note at that point; a drag marks the words, the note after them. */
 function onNotesPointer(e) {
     if (!ui.notesMode || e.target.closest('.n-note, .n-mark, .n-edit')) return;
     const sel = getSelection();
@@ -347,7 +347,7 @@ function showNote(id, from) {
     setTimeout(() => el.classList.remove('n-flash'), 1200);
 }
 
-// ---------- hints (docs/hints.md) ----------
+// ---------- hints ----------
 // On request, a ladder of four rungs toward the open row with the nearest deadline (engine/hints.js): where, what kind
 // of move, which cards, and the step itself with Do it, which makes the moves through the page as the autoplay does.
 // The rungs given show under the reading bar, folded once the story is read on; the Hints tab lists every hint given.
@@ -367,7 +367,7 @@ function hintCard(c) {
     if (c.build) return 'an inference to build first';
     return 'a card';
 }
-/** The hint's rungs, each in words (docs/hints.md, H3), from `parts` (Hints.parts). */
+/** The hint's rungs, each in words, from `parts` (Hints.parts). */
 function hintRungs(p) {
     const out = [`<b>Where.</b> Look again at ${andList(p.where.map(paraLink))}: something there lets you get ahead of Holmes.`];
     if (p.kind) {
@@ -446,7 +446,7 @@ function hintButton() {
     const left = hintWait();
     return `<button id="hint" class="quiet" title="A hint toward the next thing you could get before Holmes"${left ? ' disabled' : ''}>Hint${on ? ` (${h.rung}/4)` : ''}${waitLabel(left)}</button>`;
 }
-/** The cooldown (docs/hints.md, Round 211): seconds still to wait after the last press of Hint or More (Settings). */
+/** The cooldown: seconds still to wait after the last press of Hint or More (Settings). */
 function hintWait() {
     const last = game.hintLog.at(-1)?.at;
     return typeof last === 'number' ? Math.max(0, Math.ceil((last + ui.hintCooldown * 1000 - Date.now()) / 1000)) : 0;
@@ -521,7 +521,7 @@ function showPara(p, from) {
     setTimeout(() => el.classList.remove('n-flash'), 1200);
 }
 
-/** What the last read brought (docs/layout.md, Q2): said in the bar, so reading on with the story hidden still tells. */
+/** What the last read brought: said in the bar, so reading on with the story hidden still tells. */
 function broughtHtml() {
     const b = ui.brought;
     if (!b || b.to !== game.read - 1) return '';
@@ -577,13 +577,13 @@ function scrollStory() {
     if (last) el.scrollTop = last.offsetTop + last.offsetHeight - el.clientHeight + 24;
 }
 
-// ---------- the panels (docs/layout.md) ----------
+// ---------- the panels ----------
 // Two panels, each drawing any tab; a tab is shown in one panel at a time. Choosing in one panel a tab the other shows
 // swaps the two (Q1); a link opens its tab in the other panel than the one clicked in, or in place if its own panel is
 // the one clicked in (Q3).
 const TABS = [['story', 'Story'], ['notes', 'Notes'], ['hints', 'Hints'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
 const TOOLS = { notes: toolNotes, hints: toolHints, card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
-// One column (the header's toggle) or two; a phone always one (docs/layout.md, Q4). In one column the second panel is
+// One column (the header's toggle) or two; a phone always one. In one column the second panel is
 // hidden, and keeps its tab for when there are two again.
 const NARROW = window.matchMedia('(max-width: 699px)');
 const columns = () => (NARROW.matches ? 1 : ui.columns);
@@ -741,6 +741,7 @@ function intro() {
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>Your own notes: turn on <b>✎ Notes</b> in the header, then click in the story where a note goes, or drag over words to mark them. The Notes tab lists them; the game never reads them.</li>
 <li>To watch the game played to the end by a careful reader, its thoughts written in as notes, or by the fewest moves that reach the best score: <b>Settings → Watch the autoplay…</b> Your game is kept aside meanwhile.</li>
+<li>Everything else is in the guide: <a href="guide.html" target="_blank" rel="noopener">How to play</a>.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
 }
@@ -799,7 +800,7 @@ function toolCard() {
             for (const n of words) h += `<div class="bg-note"><b>${esc(n.term)}.</b> ${esc(n.text)}</div>`;
             h += '</div>';
         }
-        // A background fact's exceptions (workstream 3) follow it; one whose own line comes later shows there, with
+        // A background fact's exceptions follow it; one whose own line comes later shows there, with
         // the fact it belongs to.
         const unless = g.items.filter((it) => it.kind === 'exception');
         const later = unless.filter((x) => !facts.some((n) => n.card === x.card));
@@ -836,7 +837,7 @@ function toolCard() {
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
 
-    // Readings (workstream 6, docs/hypotheses.md Q6): what this card means under each story, by the answers that carry it.
+    // Readings: what this card means under each story, by the answers that carry it.
     const readings = game.autoSolves() ? [] : game.readingsOf(id).filter((r) => r.mine !== null || r.layers.length);
     if (readings.length) {
         h += '<div class="readings small"><div class="muted">How it reads under each story</div>';
@@ -847,7 +848,7 @@ function toolCard() {
         }
         h += '</div>';
     }
-    // Noticing (workstream 5): mark a clue, a thing or an event as odd, against what one would expect (events: Round 98). Nothing is told back.
+    // Noticing: mark a clue, a thing or an event as odd, against what one would expect. Nothing is told back.
     if (['claims', 'entities', 'events'].includes(c.section) && !game.autoSolves()) {
         const n = game.noticed.get(id);
         if (n) h += `<p class="small notice on">You marked this as odd at ${paraLabel(n.para)}${n.because ? `, against: ${link(n.because)}` : ''}. <button class="quiet small" data-unnotice="${esc(id)}">Not odd after all</button></p>`;
@@ -856,9 +857,9 @@ function toolCard() {
             h += `<p class="small notice">Does something here go against what you would expect? <select id="notice-because"><option value="">because… (optional)</option>${rules.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 60))}</option>`).join('')}</select> <button data-notice="${esc(id)}" class="quiet">That's odd</button></p>`;
         }
     }
-    // The player's own questions on this card (docs/questions.md): alike whether the case asks them too, until it does.
+    // The player's own questions on this card: alike whether the case asks them too, until it does.
     if (['entities', 'events'].includes(c.section) && !game.autoSolves()) h += posedOnCardHtml(id);
-    // Filing an absence from the clue that would have registered it (docs/ui.md Q4); the board offers the same form.
+    // Filing an absence from the clue that would have registered it; the board offers the same form.
     if (c.section === 'claims' && !game.autoSolves()) h += `<details class="small absence-on-card"${ui.absence?.witness === id && (ui.absence.expectation || ui.absence.time) ? ' open' : ''}><summary>Should this have shown something that did not happen?</summary>${absenceFormHtml(game.timelineTimes().filter((t) => t.kind !== 'boundary'), id)}</details>`;
     if (game.canAsk(id)) {
         h += game.hasAsked(id)
@@ -903,7 +904,7 @@ function renderSlot(s) {
         chips.push(`<span class="chip proven" data-slot="${s.id}" data-val="${esc(settled)}">${esc(valueName(s.id, settled))}</span>`);
         if (game.autoSolves()) chips.push(`<span class="small muted">${game.autoPace === 'holmes' ? 'settled by the story' : 'worked out from your clues'}</span>`);
         else if (given && game.provenValue(s.id) === null) chips.push(`<span class="small muted">given by ${link(given.claim)} · <span class="link" data-suspect="${given.claim}">doubt it</span></span>`);
-        // The answers the player put forward (proposed or circled) stay in view beside the settled one, to be dropped (Round 164).
+        // The answers the player put forward (proposed or circled) stay in view beside the settled one, to be dropped.
         const put = [...new Set([...(m?.listed ?? []), ...(m?.circled ?? [])])].filter((v) => v !== settled && game.offered(s.id, v));
         if (!game.autoSolves()) chips.push(...put.map((v) => chip(s.id, v, 'ruled')));
         // Where the game lists the answers itself, the others too, folded: one can still be dropped for a reason.
@@ -1019,14 +1020,14 @@ function slotMenu(s, v) {
     const mine = game.theories.find((t) => t.id === ui.theory);
     if (mine && !isGiven) b.push(`<button data-op="theory" class="quiet">Add to “${esc(mine.label)}”</button>`);
     if (model.cards.has(v) && game.knows(v)) b.push(`<button data-op="open" class="quiet">Open ${esc(shortName(v, 30))}</button>`);
-    // Dropping a candidate for a reason that is not a proof (docs/hypotheses.md, Q5).
+    // Dropping a candidate for a reason that is not a proof.
     const key = `c|${s.id}|${v}`;
     if ((settledOther || (!isGiven && !isProven)) && !game.dropOf({ slot: s.id, value: v })) b.push(`<button class="quiet" data-drop-open="${esc(key)}">Drop it…</button>`);
     const drop = game.dropOf({ slot: s.id, value: v }) ? dropHtml(key) : ui.dropping === key ? dropForm(key) : '';
     return `<div class="menu" data-menu-slot="${s.id}" data-menu-val="${esc(v)}"><b>${esc(valueName(s.id, v))}</b>${b.join('')}${drop}${ui.menuNote ? `<div class="why">${ui.menuNote}</div>` : ''}</div>`;
 }
 
-// ---------- dropping a hypothesis (docs/hypotheses.md, Q5) ----------
+// ---------- dropping a hypothesis ----------
 const DROP_LABELS = {
     'out-explained': 'another theory explains more',
     'more-hands': 'it needs more people than another theory',
@@ -1052,7 +1053,7 @@ function dropTarget(key) {
 function dropForm(key) {
     const target = dropTarget(key);
     const rivals = game.visibleTheories().filter((t) => t.id !== target.theory);
-    // The card that tells against it: any clue or inference held, the card open first (Round 164).
+    // The card that tells against it: any clue or inference held, the card open first.
     const open = ui.selected && game.knows(ui.selected) && ['claims', 'inferences'].includes(model.cards.get(ui.selected)?.section) ? ui.selected : null;
     const cards = [...(open ? [open] : []), ...[...game.unlocked.keys()].filter((x) => x !== open && inHand(x) && ['claims', 'inferences'].includes(model.cards.get(x)?.section))];
     return `<div class="small drop-form">Why drop it? <select id="drop-reason">${DROP_REASONS.map((r) => `<option value="${r}">${esc(DROP_LABELS[r])}</option>`).join('')}</select>`
@@ -1097,11 +1098,11 @@ function cardTally(ids) {
 const tallyText = ({ fresh, updated }) => [fresh && `${fresh} new`, updated && `${updated} updated`].filter(Boolean).join(', ');
 
 /**
- * Weighing a clue (workstream 4): trust it or doubt it; for a statement, say how (mistaken: believed and false;
+ * Weighing a clue: trust it or doubt it; for a statement, say how (mistaken: believed and false;
  * lying: not believed), and along a reporting chain whose; why (recorded); split it into what was seen and what
  * concluded; trace who passed it on.
  */
-// The engine's reasons (DOUBT_REASONS), each with its words; "two stories" is t68.3's (docs/hypotheses.md Q5).
+// The engine's reasons (DOUBT_REASONS), each with its words; "two stories" is t68.3's.
 const DOUBT_WORDS = { 'could-not-see': 'could not have seen it', 'inference-as-fact': 'an inference written as fact', hearsay: 'hearsay', neutral: 'it cuts both ways', 'two-stories': 'the night is several stories, not one' };
 function weighHtml(id) {
     let h = '';
@@ -1116,7 +1117,7 @@ function weighHtml(id) {
     if (!game.canSuspect(id)) {
         // Nothing to doubt whole: only the split below.
     } else if (defeat) {
-        // A defeat (workstream 3): the step no longer counts, for the reason shown; its conclusion is not shown false.
+        // A defeat: the step no longer counts, for the reason shown; its conclusion is not shown false.
         h += `<p class="doubt on">This step no longer counts: you have shown that ${esc(defeat.text)}. That does not make its conclusion false; “Does it hold?” is open below. <button data-withdraw="${esc(`${id}|${defeat.n}|${defeat.exception}`)}" class="quiet">Count it again</button></p>`;
     } else if (game.isSuspected(id)) {
         const kind = game.doubtKind.get(id);
@@ -1139,7 +1140,7 @@ function weighHtml(id) {
     return h;
 }
 
-// The exceptions of the defaults a step applies (workstream 3): raise one against it; what was raised, where it stands.
+// The exceptions of the defaults a step applies: raise one against it; what was raised, where it stands.
 function unlessHtml(id) {
     const open = game.exceptionsOf(id);
     const raised = game.raisedOn(id);
@@ -1181,7 +1182,7 @@ function toolCards() {
     return h;
 }
 
-// A background fact this reader lacks is supplied by the game (docs/reader-layer.md, Q1): who would have known it,
+// A background fact this reader lacks is supplied by the game: who would have known it,
 // and, once the story has said so, where it does.
 function suppliedNote(ruleId) {
     // A period prejudice the story voices (flag `stereotype`): shown as the period's, not the game's (Q1, bk.gypsies).
@@ -1211,7 +1212,7 @@ function toolBackground() {
         const heading = game.knows(on) ? link(on) : model.cards.get(on)?.kind === 'topic' ? esc(game.nameOf(on)) : 'Other';
         h += `<h3 class="section">${heading}</h3><ul class="list">`;
         // By text, not id: ids would sort the filler apart from the facts that matter.
-        // Each fact opens its card, where it is connected into an inference (Hard connects background, Round 157).
+        // Each fact opens its card, where it is connected into an inference (Hard connects background).
         for (const r of list.sort((a, b) => model.cards.get(a).text.localeCompare(model.cards.get(b).text))) h += `<li>${link(r, model.cards.get(r).text)}${suppliedNote(r)}</li>`;
         h += '</ul>';
     }
@@ -1248,7 +1249,7 @@ function toolQuestions() {
     return `${h}</ul>${d}`;
 }
 
-// ---------- the player's own questions (docs/questions.md) ----------
+// ---------- the player's own questions ----------
 const poseKind = (id) => (model.cards.get(id).section === 'events' ? 'events' : model.cards.get(id).kind);
 /** Held cards of the kinds a template's place takes, by name. */
 function heldOfKinds(kinds) {
@@ -1294,7 +1295,7 @@ function posedListHtml() {
     return `${h}</ul>`;
 }
 
-/** The details the player marked as odd, and the absences they filed (workstream 5). */
+/** The details the player marked as odd, and the absences they filed. */
 function oddThingsHtml() {
     const noticed = [...game.noticed].filter(([id]) => game.knows(id));
     const filed = game.filed.filter((f) => game.knows(f.id));
@@ -1305,7 +1306,7 @@ function oddThingsHtml() {
     return `${h}</ul>`;
 }
 
-// The story's own signals (hints 'story'; docs/reader-layer.md, Q3–Q4): what Holmes visibly attends to, quoted with
+// The story's own signals (hints 'story', Q3–Q4): what Holmes visibly attends to, quoted with
 // the cards it mentions and never interpreted.
 function signalsHtml() {
     if (!game.showsSignals()) return '';
@@ -1318,7 +1319,7 @@ function signalsHtml() {
     return `${h}</ul>`;
 }
 
-// What the story held back (docs/reader-layer.md, Q2), as far as read: facts told late, background the game supplied,
+// What the story held back, as far as read: facts told late, background the game supplied,
 // results told late, and at the end what was never told.
 function heldBackHtml() {
     const list = game.heldBack();
@@ -1359,9 +1360,9 @@ function toolTheories() {
     let h = `<p class="small muted">A theory is a set of answers held together. ${weigh} To add answers, pick an answer on any question and choose “Add to theory”.</p>`;
     const all = game.visibleTheories();
     for (const t of all) {
-        // Weighed (docs/hypotheses.md, Q8): by name on Easy, as counts on Medium, on request on Hard.
+        // Weighed: by name on Easy, as counts on Medium, on request on Hard.
         const weighed = mode !== 'asked' || ui.weighed?.has(t.id);
-        // Weighed one theory at a time, after the panel is drawn (docs/ui.md Q3): until then, "weighing…".
+        // Weighed one theory at a time, after the panel is drawn: until then, "weighing…".
         const w = piece(`theory:${t.id}:${weighed}`, () => {
             const cost = weighed ? game.scenarioCost(t) : null;
             return { cost, support: game.theorySupport(t), html: !cost ? '' : mode === 'names' ? costHtml(cost) + residueHtml(game.residue(t)) + assumedHtml(game.assumedAnswers(t)) : countsHtml(cost, game.residue(t), game.assumedAnswers(t).length) };
@@ -1385,11 +1386,11 @@ function toolTheories() {
         if (!t.story) h += `<div class="small"><span class="link" data-theory-current="${t.id}">${ui.theory === t.id ? '★ new answers go here' : 'add answers here'}</span> · <span class="link" data-del-theory="${t.id}">delete</span></div>`;
         h += '</div>';
     }
-    // A new theory is named in place (docs/autoplay.md A4, Round 187), not by the browser's dialog.
+    // A new theory is named in place, not by the browser's dialog.
     return `${h}<div class="row"><label class="small" for="theory-name">New theory:</label> <input id="theory-name" type="text" placeholder="Theory ${game.theories.length + 1}" aria-label="The new theory's name"> <button data-new-theory="1">Create</button></div>`;
 }
 
-// ---------- the record against Holmes (workstream 9, docs/ui.md Q1) ----------
+// ---------- the record against Holmes ----------
 // Told only as the story reaches each deadline (Game.record never gives a row whose deadline is ahead), in fixed
 // templates around held cards and paragraph numbers: never the annotation's own words.
 const FAMILY_WORDS = {
@@ -1416,7 +1417,7 @@ function recordLine(r) {
         absence: () => `Holmes points to ${names(r.names)}`,
     }[r.family]();
     if (!r.scores && !r.why) return `${what}.${catchUpText(r)}`;
-    // Made but not counted (Round 199): a drop whose reason did not hold, a check expected both ways.
+    // Made but not counted: a drop whose reason did not hold, a check expected both ways.
     if (r.why === 'reason') return `${what}. You dropped it at ${paraLabel(r.at)}, but the reason you gave did not hold, so it does not count.`;
     if (r.why === 'hedged') return `${what}. You planned it at ${paraLabel(seal.para)}, but expecting more than one result, so it does not count.`;
     const done = { deduction: 'You had it', notice: 'You marked it odd', raise: 'You raised it', drop: 'You dropped it', check: 'You planned it', absence: 'You filed it' }[r.family];
@@ -1424,7 +1425,7 @@ function recordLine(r) {
     return `${what}. ${done} at ${paraLabel(r.at)}: ${r.lead} paragraph${r.lead === 1 ? '' : 's'} ${before}.`;
 }
 /**
- * The catch-up note on a row missed (docs/hints.md, H7): where the player could have had it, and from what. Held cards
+ * The catch-up note on a row missed: where the player could have had it, and from what. Held cards
  * are linked; the story's own cards not held are quoted (the story has told them by now); an inference not drawn or a
  * background fact not asked is named by its kind only.
  */
@@ -1477,16 +1478,16 @@ function toolRecord() {
     h += scored.length ? `<h3 class="section">Before Holmes (${scored.length})</h3><ul class="list small">${once([...scored].reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)).join('')}</ul>` : '<p class="empty">Nothing yet.</p>';
     const uncounted = once(rec.rows.filter((r) => r.why).reverse().map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`));
     if (uncounted.length) h += `<h3 class="section">Not counted (${uncounted.length})</h3><ul class="list small">${uncounted.join('')}</ul>`;
-    // At the end, the rows missed: where the player could have been first (docs/hints.md, H7).
+    // At the end, the rows missed: where the player could have been first.
     const missed = game.finished() ? once(rec.rows.filter((r) => !r.scores && !r.why).map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)) : [];
     if (missed.length) h += `<h3 class="section">Where you could have been first (${missed.length})</h3><ul class="list small">${missed.join('')}</ul>`;
-    // The player's own questions the story asked after them (docs/questions.md, Q5): shown, never counted.
+    // The player's own questions the story asked after them: shown, never counted.
     if (rec.questions.length) h += `<h3 class="section">Questions you asked before the story (${rec.questions.length})</h3><p class="small muted">Not counted: a question can be asked of anything.</p><ul class="list small">${[...rec.questions].reverse().map((q) => `<li>${paraLabel(q.deadline)} · <span class="link" data-slot-open="${q.slot}">${esc(game.promptOf(q.slot))}</span> You asked it at ${paraLabel(q.at)}: ${q.lead} ${q.lead === 1 ? 'paragraph' : 'paragraphs'} before.</li>`).join('')}</ul>`;
     if (game.finished()) h += heldBackHtml();
     return h;
 }
 
-// ---------- checks (workstream 7, docs/predictions.md) ----------
+// ---------- checks ----------
 const CHECK_WORDS = { look: ['Look for', 'at'], ask: ['Ask', 'about'], show: ['Show', 'to'], compare: ['Compare', 'with'] };
 const OUTCOME_WORDS = { found: 'found', 'not-found': 'not found', yes: 'yes', no: 'no', matches: 'they match', differs: 'they differ' };
 const SAYS_WORDS = { 'says-so': 'says so', 'says-otherwise': 'says otherwise', 'says-nothing': 'says nothing either way', refuted: 'cannot hold, whatever you set aside' };
@@ -1499,7 +1500,7 @@ function checkText(x) {
     return `${a} ${name(x.fields[f])} ${b} ${name(x.fields[g])}`;
 }
 /**
- * Plan a check before Holmes makes it (docs/predictions.md): a template filled with cards the player holds, the result
+ * Plan a check before Holmes makes it: a template filled with cards the player holds, the result
  * they expect, the answer it would give, and the theory it comes from. Sealed, it says nothing until the story
  * reaches it; then where Holmes made it and what the story shows of the result.
  */
@@ -1555,7 +1556,7 @@ function toolChecks() {
 const COST_TOLD = { testimony: 'someone\'s word', report: 'a report', admission: 'an admission' };
 const COST_WHY = { 'others-inference': 'someone else\'s reasoning', heuristic: 'a rule of thumb you applied' };
 /**
- * A scenario's cost (Game.scenarioCost, docs/hypotheses.md Q2): what it needs to be wrong among what you trust, and
+ * A scenario's cost (Game.scenarioCost): what it needs to be wrong among what you trust, and
  * what it goes against of your own reasoning or of what was seen. A story that says a witness is wrong is not
  * refuted; it pays for it.
  */
@@ -1601,7 +1602,7 @@ function countsHtml(cost, res, assumed = 0) {
 }
 
 /**
- * A scenario's residue (Game.residue, docs/hypotheses.md Q3): the odd things met that it leaves unexplained, each
+ * A scenario's residue (Game.residue): the odd things met that it leaves unexplained, each
  * shown by its cards, and how many it explains.
  */
 function residueHtml(res) {
@@ -1804,7 +1805,7 @@ function boardHtml(layout) {
 }
 
 /**
- * Filing an absence (workstream 5): something that should have happened did not. The player names what they
+ * Filing an absence: something that should have happened did not. The player names what they
  * expected (a background fact), when, and the clue that would have registered it. Easy suggests the expectation.
  */
 function absenceFormHtml(shown, witnessCard = null) {
@@ -1862,7 +1863,7 @@ function renderNow() {
     const settledQ = model.data.questions.filter((q) => game.settled(q.slot) !== null).length;
     const raised = model.data.questions.filter((q) => game.questionRaised(q.id)).length;
     const found = [...game.unlocked.keys()].filter((k) => !['glosses', 'rules'].includes(model.cards.get(k)?.section)).length;
-    // The record against Holmes (docs/ui.md Q1): only what the story has already reached; nothing in Trivial.
+    // The record against Holmes: only what the story has already reached; nothing in Trivial.
     const ahead = game.autoSolves() ? null : piece('count:record', () => (ui.ahead = game.record().ahead), ui.ahead ?? 0);
     $('#progress').innerHTML = `${found} cards · ${settledQ} of ${raised} questions settled${ahead === null ? '' : ` · <span class="link" data-record-open="1" title="Your record against Holmes, as far as the story has gone">Ahead of Holmes: ${ahead}</span>`}`;
     $('#difficulty').value = game.difficulty;
@@ -1943,7 +1944,7 @@ function buildingBar() {
 }
 
 /**
- * State it yourself (docs/ui.md Q2): a conclusion of the player's own from the cards connected, as an answer to a
+ * State it yourself: a conclusion of the player's own from the cards connected, as an answer to a
  * question on the table (or not that answer). The game says whether it follows, with the background facts the cards
  * call on applied as the case applies them; it never says what does follow.
  */
@@ -2038,7 +2039,7 @@ function doubtableHtml(ids) {
     const doubt = (c) => (game.suspected.has(c) ? '<span class="small muted">doubted</span>' : `<span class="link small" data-suspect="${c}">doubt it</span>`);
     return `${claims.map((c) => `${link(c)} ${doubt(c)}`).join(' · ')}${rest.length ? (claims.length ? ` <span class="muted">(with: ${rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')})</span>` : rest.map((k) => esc(model.constraints.get(k).label)).join(' · ')) : ''}`;
 }
-// Why the game set aside what it did (Game.clashes, docs/clashes.md): by the class of what weighed least.
+// Why the game set aside what it did (Game.clashes): by the class of what weighed least.
 const CLASH_WHY = {
     'others-inference': 'Someone else\'s reasoning gives way first.',
     heuristic: 'A rule of thumb gives way before what the story tells.',
@@ -2058,7 +2059,7 @@ function clashHtml(ids, clash = null) {
 
 // ---------- events ----------
 function openCard(id, from = null) {
-    // Moving from card to card in place: the card before is kept for "back" (docs/layout.md, Q3).
+    // Moving from card to card in place: the card before is kept for "back".
     const at = panelOf('card');
     if (at >= 0 && ui.selected && ui.selected !== id && game.knows(ui.selected)) leave(at);
     ui.selected = id;
@@ -2087,7 +2088,7 @@ function onStoryClick(e) {
             return;
         }
         if (!ids.length) { toast('Nothing to note there.'); return; }
-        // Words already collected open their card, as on the other levels (Round 198).
+        // Words already collected open their card, as on the other levels.
     }
     if (!m) return;
     const ids = m.dataset.ids.split(' ');
@@ -2114,7 +2115,7 @@ function onClick(e) {
     // A click anywhere outside the settings panel closes it.
     const settings = document.querySelector('.settings');
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
-    // The player's notes (docs/notes.md): their buttons, a note clicked to edit, the mode.
+    // The player's notes: their buttons, a note clicked to edit, the mode.
     if (e.target.closest('#notes-mode')) {
         ui.notesMode = !ui.notesMode;
         ui.noteEdit = null;
@@ -2352,7 +2353,7 @@ function onClick(e) {
         const layer = ui.layer ?? 'mine';
         const r = game.checkLayer(layer);
         const skip = r.unchecked ? ` <span class="small muted">(${r.unchecked} of your marks are at times or for things none of your clues speaks of: not checked.)</span>` : '';
-        // A theory's night, on Easy, is weighed for what it must disbelieve (docs/hypotheses.md, Q2).
+        // A theory's night, on Easy, is weighed for what it must disbelieve.
         const html = r.cost ? `${weighMode() === 'names' ? costHtml(r.cost) + residueHtml(r.residue) + assumedHtml(r.assumed) : countsHtml(r.cost, r.residue, r.assumed.length)}${skip}`
             : r.fits ? `<span class="good">This night fits everything you trust so far.</span>${skip}` : `<span class="bad">This night does not fit what you trust:</span>${chainHtml(r.conflict, r.fixed)}${skip}`;
         ui.layerFit = { layer, html };
@@ -2497,7 +2498,7 @@ function onChange(e) {
         if (['plan-verb', 'plan-expect', 'plan-slot'].includes(e.target.id)) renderTool();
         return;
     }
-    // The page's settings: the viewer's, kept with the layout (docs/notes.md, N9).
+    // The page's settings: the viewer's, kept with the layout.
     if (e.target.id === 'layout-cols') { ui.columns = Number(e.target.value); renderTool(); return; }
     if (e.target.id === 'theme') { ui.theme = e.target.value; applyTheme(); saveLayout(); return; }
     const viewer = Object.entries(VIEWER).find(([, [id]]) => id === e.target.id);
@@ -2567,7 +2568,7 @@ const OPTION_UI = {
     reader: ['You read as', { modern: 'A reader of today', 1892: 'A reader of 1892', racing: 'A racing man of 1892' }, 'What you bring to the story. The background facts such a reader would not know are marked as supplied by the game.'],
     irrelevant: ['Cards the solution does not need', { none: 'None', few: 'One in four', half: 'Half', most: 'Three in four', all: 'All' }, 'How many of the cards with no part in the solution you get at all (the people, places, things and facts that are only colour). The rest are left out of the game: no card, and nothing to click in the text.'],
 };
-// The options under four headings (docs/ui.md Q5); every option of OPTIONS appears once.
+// The options under four headings; every option of OPTIONS appears once.
 const OPTION_GROUPS = [
     ['You', ['reader', 'supplied']],
     ['The cards', ['cards', 'irrelevant', 'background']],
@@ -2585,7 +2586,7 @@ function buildOptions() {
 
 // ---------- start ----------
 model = await loadCase(CASE);
-// The hints' data (docs/hints.md): without it, no Hint button.
+// The hints' data: without it, no Hint button.
 // `?hintfast`: Do it with no cursor travel (scripts/hints-check.mjs).
 const HINT_FAST = new URLSearchParams(location.search).has('hintfast');
 const HINT_DATA = await fetch(`${CASE}/hints.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -2618,7 +2619,7 @@ run(() => {
     scrollStory();
     if (AUTOPLAY !== null) import('./autoplay.js').then((m) => m.start({ store: STORE, fast: /(^|-)fast$/.test(AUTOPLAY), playthrough: AUTOPLAY.startsWith('minimal') ? 'minimal' : 'reader', story, valueName, toast }));
 });
-// "Watch the autoplay…" (docs/autoplay.md, A2): asks first, then opens the page on the autoplay's own save.
+// "Watch the autoplay…": asks first, then opens the page on the autoplay's own save.
 $('#autoplay-open').addEventListener('click', () => {
     if (!confirm('Watch the game played on Hard from the first paragraph to the last, as a careful reader plays it, with the reader\'s thoughts written in as notes? It takes about an hour at its own pace (faster at 4×). Before it starts you can choose instead the fewest moves that reach the best score, with no notes. Your game is kept aside and comes back when you stop.')) return;
     location.search = '?autoplay';

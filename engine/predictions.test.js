@@ -1,4 +1,4 @@
-// Predictions and test plans (docs/predictions.md, workstream 7). The player seals a check before Holmes makes it:
+// Predictions and test plans. The player seals a check before Holmes makes it:
 // a template filled with cards they hold, and optionally the result they expect. It is matched quietly against the
 // case's checks: nothing says before Holmes's paragraph whether he will make it. A plan scores when he does, whatever
 // the story shows of the result; an expectation must not be contradicted; wrong ones cost nothing.
@@ -54,7 +54,7 @@ test('an expectation the story does not bear out costs nothing and scores nothin
     assert.equal(game.checkScore().scored, 0);
 });
 
-test('a check expected both ways is hedged and scores nothing; withdrawing one before Holmes acts lifts it (Round 199)', () => {
+test('a check expected both ways is hedged and scores nothing; withdrawing one before Holmes acts lifts it', () => {
     const game = readTo(fresh(), 80);
     const found = game.seal('look', { thing: 'tallow_candle', place: 'fatal_hollow' }, { expect: 'found' });
     const not = game.seal('look', { thing: 'tallow_candle', place: 'fatal_hollow' }, { expect: 'not-found' });

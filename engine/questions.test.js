@@ -1,4 +1,4 @@
-// The player's own questions (docs/questions.md): a template over held cards, matched quietly to a slot and alike
+// The player's own questions: a template over held cards, matched quietly to a slot and alike
 // whether it matches or not, joining the story's question only once the story (or the player's own inference) raises it.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -60,7 +60,7 @@ test('a question raised by the player\'s own inference joins where they made it'
     assert.equal(builder.posedQuestions()[0].joined?.para, 37, 'raised by an inference the builder holds at ¶37');
 });
 
-test('where the story itself asks: "Where is Silver Blaze?" is raised at ¶14 (docs/questions.md Q2 d)', () => {
+test('where the story itself asks: "Where is Silver Blaze?" is raised at ¶14', () => {
     const g = easy();
     readTo(g, 13);
     assert.equal(g.questionRaised('q.where_horse'), false);

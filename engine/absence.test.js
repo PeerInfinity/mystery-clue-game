@@ -1,4 +1,4 @@
-// Absences the player files (workstream 5, docs/noticing-absence.md): never dealt by mention; filed from an
+// Absences the player files: never dealt by mention; filed from an
 // expectation (a rule held), a time and a witness (a clue held); otherwise dealt at the story's next attestation.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -74,7 +74,7 @@ test('notices: a card the player holds marked odd, scored when made before Holme
     assert.deepEqual([bill.noticed < bill.holmes, bill.scores], [true, true]);
     assert.equal(game.noticeScores().find((r) => r.thought === 't84.7').scores, true, 'one card can serve two details');
     assert.deepEqual(game.noticeScore(), { noticed: 4, scored: 4, possible: 8, of: 11 });
-    // An event card can be noticed too (Round 98): the horse taken out at all, when laming him in his stall would do.
+    // An event card can be noticed too: the horse taken out at all, when laming him in his stall would do.
     assert.ok(game.notice('e.horse_led_out').ok);
     const taken = game.noticeScores().find((r) => r.thought === 't18.3');
     assert.deepEqual([taken.holmes, taken.scores], [57, false], 'marked at ¶84, after Holmes asked it at ¶57');

@@ -1,4 +1,4 @@
-// Hypotheses, scenarios and residue (docs/hypotheses.md, workstream 6). A scenario is weighed by its cost: its answers
+// Hypotheses, scenarios and residue. A scenario is weighed by its cost: its answers
 // held fast, the clashes they make with what the player trusts broken as clashes are, lightest first. A story that
 // says a witness is wrong pays for it; one that goes against the player's own reasoning is at odds with it. Never by
 // truth: the tests check the outcome against the answer key, the engine never reads it.
@@ -180,7 +180,7 @@ test('drops for reasons that are not proofs: checked where they can be, never re
     assert.equal(again.dropOf({ theory: 't.gypsies' }).cites[0], 'k.gypsies_did_not_take_him');
 });
 
-test('a drop scores only from where a reason that holds is given (Round 199)', () => {
+test('a drop scores only from where a reason that holds is given', () => {
     const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     const readTo = (p) => { while (game.read <= p) game.advance(); };
     const paper = { slot: 'paper_packet.contents', value: 'opium' };
@@ -200,7 +200,7 @@ test('a drop scores only from where a reason that holds is given (Round 199)', (
     const rows = Object.fromEntries(game.record().rows.filter((r) => r.family === 'drop').map((r) => [r.thought, r]));
     assert.deepEqual([rows['t58.3'].scores, rows['t58.3'].at, rows['t58.3'].why], [true, 60, undefined]);
     assert.deepEqual([rows['t92.7'].scores, rows['t92.7'].why], [false, 'reason']);
-    // Saved and loaded, with what held; a save from before Round 199 has its reason checked as it stands.
+    // Saved and loaded, with what held; an older save without `held` has its reason checked as it stands.
     const state = JSON.parse(JSON.stringify(game.save()));
     assert.equal(new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state }).dropOf(paper).held, 60);
     for (const d of state.drops) delete d.held;
@@ -211,7 +211,7 @@ test('a drop scores only from where a reason that holds is given (Round 199)', (
 
 test('the deadlines the annotation gives for the drops Holmes never makes are where the story makes them untenable', () => {
     // The passive reading's cost: the maid and the paper are at odds with the player's own reasoning first at ¶102, where Holmes searches the mud
-    // for the match the knife's purpose predicts (the 'wait' pace asks for that step there, Round 126).
+    // for the match the knife's purpose predicts (the 'wait' pace asks for that step there).
     const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     const maid = { assignment: { 'e.opium_added.agent': 'edith_baxter' } };
     const paper = { assignment: { 'paper_packet.contents': 'opium' } };

@@ -1,4 +1,4 @@
-// Belief over statements (workstream 4, docs/testimony-belief.md): a statement's speaker believes it or not; a doubt
+// Belief over statements: a statement's speaker believes it or not; a doubt
 // says how (mistaken: believed and false; lying: not believed); what the story tells for certain (`said`) holds
 // whatever the player makes of the content.
 import { test } from 'node:test';
@@ -52,7 +52,7 @@ test('Brown lied, Mrs. Straker and the Colonel believed what they said: the answ
     const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
     while (!game.knows('k.brown_broke')) { game.advance(); if (game.finished()) break; }
     if (!game.knows('k.brown_broke')) assert.deepEqual(game.propose(game.connectSet('k.brown_broke')).built, ['k.brown_broke']);
-    // The lie follows by itself once Brown is known to have the horse (implicit since Round 123: the reader's step is
+    // The lie follows by itself once Brown is known to have the horse (implicit: the reader's step is
     // the guilty denial at ¶135, k.denial_struck_home).
     assert.deepEqual([game.knows('k.brown_lied'), game.howHeld('k.brown_lied')?.how], [true, 'implicit']);
 });
@@ -123,7 +123,7 @@ test("Mrs. Straker's denial at the ruse is honest (t92.3): built from the sincer
     assert.equal(solved.settled('st.mrs_straker.believes_wife_never_had_dress.thu_evening'), 'true');
 });
 
-test("The stranger's 'Can you tell me where I am?' was a pretence (t24.2, Round 99): his lie is granted, and the clash sets aside only his statement", () => {
+test("The stranger's 'Can you tell me where I am?' was a pretence (t24.2): his lie is granted, and the clash sets aside only his statement", () => {
     const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
     while (!game.knows('c.stranger_knew_lad_alone')) game.advance();
     assert.ok(game.knows('c.stranger_says_lost'));

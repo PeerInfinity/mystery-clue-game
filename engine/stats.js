@@ -1,6 +1,6 @@
-// The game's statistics (docs/minimal-playthrough.md, M7): how much content the case has, and what each playthrough
+// The game's statistics: how much content the case has, and what each playthrough
 // (the annotated reader's action table and the minimal one) asks of a player, by kind and by scene, and the hints a
-// player who only reads takes (docs/hints.md, step 4). Written to cases/<case>/stats.md by `npm run stats`;
+// player who only reads takes (step 4). Written to cases/<case>/stats.md by `npm run stats`;
 // engine/stats.test.js checks it is up to date.
 //   statsMarkdown(model, {reader, minimal, hints}) → markdown   (hints: hints.json)
 import { Game } from './game.js';
@@ -72,7 +72,7 @@ export function statsMarkdown(model, { reader, minimal, hints }) {
     line('## The playthroughs: moves');
     line();
     line('The reader: the annotated reading\'s moves (`action-table.json`). The fewest moves: those of them that still reach');
-    line('the maximum, each made as late as its deadlines allow (`action-table-minimal.json`, `docs/minimal-playthrough.md`).');
+    line('the maximum, each made as late as its deadlines allow (`action-table-minimal.json`).');
     line();
     line('| Move | The reader | The fewest moves |');
     line('|---|---:|---:|');
@@ -108,7 +108,7 @@ export function statsMarkdown(model, { reader, minimal, hints }) {
     line('## The hints');
     line();
     line('A player on Hard who only reads and, at every paragraph, takes each hint open to its fourth rung and lets Do it');
-    line('make the moves (`engine/hintPlayer.js`, `docs/hints.md`). Each hint taken that far is four presses of Hint and More.');
+    line('make the moves (`engine/hintPlayer.js`). Each hint taken that far is four presses of Hint and More.');
     line();
     line('| | The hint-only player |');
     line('|---|---:|');

@@ -1,4 +1,4 @@
-// How a clash weighs what it sets aside (docs/clashes.md, Round 108): others' inferences first, then the player's
+// How a clash weighs what it sets aside: others' inferences first, then the player's
 // heuristics, then clues (someone's word before a report, a report before an admission), then the player's and
 // Holmes's inferences; one member goes, and on a tie every tied one. Never by truth: the tests check the outcome
 // against the answer key, the engine never reads it.
@@ -82,7 +82,7 @@ test('one culprit (t4.2), built as soon as it can be, gives way as a heuristic t
     for (const c of ['c.stall_empty', 'c.stable_door_open', 'c.head_shattered']) assert.ok(!met.some((x) => x.aside.includes(c)), c);
 });
 
-test('a reloaded game checks the clashes it met instead of searching for them again (docs/ui.md Q3)', () => {
+test('a reloaded game checks the clashes it met instead of searching for them again', () => {
     const played = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     while (played.read <= 110) { played.advance(); played.clashes(); }
     const show = (g) => g.clashes().map((c) => `${c.ids.join('|')}>${c.aside.join('|')}:${c.why}:${c.claims.join('|')}`);

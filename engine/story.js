@@ -117,10 +117,10 @@ export class Story {
             if (!this.firstAt.has(e.id)) for (const q of e.source ?? []) this.#quoteSpan(e.id, q, 'entity');
         }
         // Claims: every attestation quote is a span; the claim appears at the earliest. An absence the player files
-        // (`via: absence` with `files`, Round 83) is no span: its line is where it can first be filed (`absenceAt`).
+        // (`via: absence` with `files`) is no span: its line is where it can first be filed (`absenceAt`).
         this.absenceAt = new Map();
         for (const c of data.claims ?? []) {
-            // A part of a statement (`part_of`, workstream 4) comes only when the player splits the statement.
+            // A part of a statement (`part_of`) comes only when the player splits the statement.
             if (c.derived || c.part_of) continue;
             for (const a of c.attested ?? []) {
                 if (a.via === 'absence' && a.files) {
@@ -134,7 +134,7 @@ export class Story {
         }
         // Events told directly have their quote; implied ones also appear through claims (see Game).
         for (const e of data.events ?? []) for (const q of e.source ?? []) this.#quoteSpan(e.id, q, 'event');
-        // A proposition with lines of its own is raised there (workstream 3: what Hunter saw, the gypsies' habit).
+        // A proposition with lines of its own is raised there (what Hunter saw, the gypsies' habit).
         for (const p of data.propositions ?? []) for (const q of p.source ?? []) this.#quoteSpan(p.id, q, 'proposition');
         for (const q of data.questions ?? []) {
             const hit = this.#quoteSpan(q.id, q.raised, 'question');
@@ -214,7 +214,7 @@ export class Story {
         const rules = new Map((data.rules ?? []).map((r) => [r.id, r]));
         const premiseAt = (step) => Math.max(-1, ...step.premises.map((p) => (rules.has(p) ? ruleAt(rules.get(p)) : this.firstAt.get(p) ?? Infinity)));
         const route = new Map((data.route ?? []).map((r) => [r.id, r]));
-        // An expert's move (a leap almost nobody makes) is a bonus, never a gate (docs/reader-layer.md, Q3).
+        // An expert's move (a leap almost nobody makes) is a bonus, never a gate.
         const expert = new Set((data.thoughts ?? []).filter((t) => t.profile === 'expert').map((t) => t.id));
         const gates = new Map();
         const add = (para, stepId) => {

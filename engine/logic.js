@@ -499,7 +499,7 @@ export function ground(f, env) {
                 return { [op]: [t(a[0]), t(a[1])] };
             }
             case 'seq': {
-                // Events in one window, in this order (Round 73): each pair, the same window and the order question
+                // Events in one window, in this order: each pair, the same window and the order question
                 // `ord.<a>.<b>` before. The case model builds those questions for every pair a claim states.
                 if (!Array.isArray(a) || a.length < 2) throw new Error('seq takes two or more events');
                 const evs = a.map(card);

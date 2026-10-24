@@ -1,4 +1,4 @@
-// The record against Holmes (workstream 9, docs/ui.md Q1): a row is shown only once the story has read its deadline,
+// The record against Holmes: a row is shown only once the story has read its deadline,
 // it names only held cards, and at the end no family scores more than it could.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -37,7 +37,7 @@ test('the record shows a row only once its deadline is read, then the lead; at t
     assert.equal(r.families.deduction.possible, game.score().possible);
 });
 
-test('possible counts every row with a deadline (docs/ui.md Q1): notices 8, checks 10', () => {
+test('possible counts every row with a deadline: notices 8, checks 10', () => {
     const game = new Game(model, { difficulty: EASY });
     assert.equal(game.noticeScore().possible, 8);
     assert.equal(game.checkScore().possible, 10);
@@ -52,7 +52,7 @@ test('Trivial: the record scores nothing', () => {
     assert.ok(r.rows.every((x) => !x.scores));
 });
 
-test('an implicit inference neither makes a step nor blocks it: Straker took the horse, made by ¶46 (Round 159)', () => {
+test('an implicit inference neither makes a step nor blocks it: Straker took the horse, made by ¶46', () => {
     const steps = ['t46.4', 't81.5', 't173.2', 't220.3'];
     const builder = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     const passive = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
@@ -65,7 +65,7 @@ test('an implicit inference neither makes a step nor blocks it: Straker took the
     assert.deepEqual(Object.values(made(passive)), [null, null, null, null], 'the implicit inferences alone make nothing');
 });
 
-test('a reload keeps what the player built, though a character states it later: the sheep still count after it (Round 161)', () => {
+test('a reload keeps what the player built, though a character states it later: the sheep still count after it', () => {
     const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     while (game.read <= 110) { game.advance(); buildAll(game); }
     assert.equal(game.howHeld('k.drugger_took_the_horse')?.how, 'built');

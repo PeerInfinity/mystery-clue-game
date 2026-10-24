@@ -1,4 +1,4 @@
-// The autoplay (docs/autoplay.md, Rounds 180–181): the game played on Hard from the first paragraph to the last
+// The autoplay: the game played on Hard from the first paragraph to the last
 // through the page, as the annotated reader plays it, with the reader's thoughts written into the story as notes.
 //
 // Its script is the action table (cases/silver-blaze/action-table.json, engine/actionTable.js): each move's UI steps
@@ -8,7 +8,7 @@
 // ui/app.js only on `?autoplay`, in a save of its own; `?autoplay=fast` (the check, scripts/autoplay-check.mjs) plays
 // with no pauses and the notes at once.
 //
-// Two playthroughs (docs/minimal-playthrough.md, Round 201), chosen on the strip before it starts or by the address:
+// Two playthroughs, chosen on the strip before it starts or by the address:
 // the annotated reader's (`?autoplay`) and the fewest moves (`?autoplay=minimal`, its check `?autoplay=minimal-fast`):
 // cases/silver-blaze/action-table-minimal.json, no notes, the moves gathered at a few paragraphs, read to by the
 // farthest of Next paragraph, Next scene and Next deduction, and each card reached the shortest way (left where it is
@@ -81,7 +81,7 @@ export async function start({ store, fast, playthrough = 'reader', story, valueN
         else caption(s.lastCaption ?? '');
     };
     $('#ap-pause').addEventListener('click', () => { s.stepping = false; started(); setPaused(!s.paused); });
-    // One step (Round 195): the next move, note or paragraph read, then paused again (pressed while playing: pause
+    // One step: the next move, note or paragraph read, then paused again (pressed while playing: pause
     // after the one under way).
     $('#ap-step').addEventListener('click', () => { s.stepping = true; started(); if (s.paused) setPaused(false); });
     const stepped = () => { if (s.stepping) { s.stepping = false; setPaused(true, `${s.lastCaption} · paused`); } };
@@ -236,7 +236,7 @@ export async function start({ store, fast, playthrough = 'reader', story, valueN
         await choose('#difficulty', 'hard');
         document.querySelector('.settings').open = false;
         await showStory();
-        // Paused at the start (Round 195): nothing moves until Resume (or Step) is pressed.
+        // Paused at the start: nothing moves until Resume (or Step) is pressed.
         if (!fast) { setPaused(true, 'Ready: choose what to watch, then Resume to play, or Step for one move at a time.'); await gate(); }
         else started();
         // The minimal playthrough reads from one paragraph with moves to the next; the reader, paragraph by paragraph.
@@ -273,16 +273,16 @@ export async function start({ store, fast, playthrough = 'reader', story, valueN
     }
 }
 /**
- * The page player (Round 206): moves made through the page with its own events, a cursor shown going to each element,
+ * The page player: moves made through the page with its own events, a cursor shown going to each element,
  * each move's `ui` steps as the action table gives them and `took` checking the save; used by the autoplay and by a
- * hint's Do it (docs/hints.md, H4). `shortest`: a card reached the shortest way (the minimal playthrough's).
+ * hint's Do it. `shortest`: a card reached the shortest way (the minimal playthrough's).
  */
 export function makePlayer({ store, fast = false, shortest = false, valueName, cursor = null, factor = () => 1, gate = async () => {}, tally = () => {}, atOnce = () => false }) {
     const minimal = shortest;
     async function glide(x, y) {
         if (fast) return;
         const f = factor();
-        const ms = f ? 1000 / f : 0; // a second at 1× (Round 194: half the speed it had)
+        const ms = f ? 1000 / f : 0; // a second at 1×
         cursor.style.transition = ms ? `transform ${ms}ms ease-in-out` : 'none';
         cursor.style.transform = `translate(${x}px, ${y}px)`;
         if (ms) await sleep(ms + 30);
@@ -331,7 +331,7 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
     const cardPanel = () => Number(document.querySelector('.panel:has(.tab.on[data-tab="card"])')?.dataset.panel ?? -1);
     const held = () => new Set((saved().collected ?? []).map((x) => (Array.isArray(x) ? x[0] : x)));
     // The shortest way to a card (the minimal playthrough): shown already; a link on the card in view; words of the
-    // story shown that carry it and nothing not held (a click there opens, Round 198); else null (its list).
+    // story shown that carry it and nothing not held (a click there opens); else null (its list).
     async function openShortest(id) {
         const at = cardPanel();
         if (at >= 0 && saved().selected === id) return true;
@@ -362,7 +362,7 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
         document.querySelectorAll('#panel-0 details.set-aside').forEach((d) => { d.open = true; });
         return click(`#panel-0 [data-card="${id}"]`);
     }
-    // A field's value, or a note written in the line (Round 193), the caret kept after the last letter typed.
+    // A field's value, or a note written in the line, the caret kept after the last letter typed.
     const put = (box, text) => {
         if (!box.isContentEditable) { box.value = text; return; }
         box.textContent = text;
@@ -461,7 +461,7 @@ export function makeCursor() {
 }
 
 /**
- * A hint's Do it (docs/hints.md, H4): `moves` (hints.json's) made through the page on the player's own game, the cursor
+ * A hint's Do it: `moves` (hints.json's) made through the page on the player's own game, the cursor
  * shown (`fast`: none, no pauses; the check), a card reached the shortest way. A move made already is passed over.
  * → {ok} or {ok: false, move, why}
  */

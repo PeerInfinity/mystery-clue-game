@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Write every clash a player meets through the whole story, and what the game sets aside in it (docs/clashes.md):
+// Write every clash a player meets through the whole story, and what the game sets aside in it:
 // one section per kind of player (Easy, background when relevant), a line per clash as it first appears:
 // the paragraph, what is set aside and why, and what is kept. Each card is marked ✓ or ✗ by the answer key, so a
 // true card set aside stands out (the engine never reads the key; this log does, to judge it).

@@ -1,4 +1,4 @@
-// The hints (docs/hints.md): hints.json is what `npm run hints` writes; a player who only reads and takes every hint to
+// The hints: hints.json is what `npm run hints` writes; a player who only reads and takes every hint to
 // its fourth rung reaches the Hard maximum; at every paragraph, of that game and of one that only reads, every rung of
 // every open row names only held cards, read paragraphs and the words of read paragraphs; the log is saved.
 import { test } from 'node:test';

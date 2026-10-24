@@ -37,11 +37,11 @@ export const MEDIUM = 'medium';
 export const HARD = 'hard';
 export const CUSTOM = 'custom';
 export const DIFFICULTIES = [TRIVIAL, EASY, MEDIUM, HARD];
-/** Why a clue may be doubted, beyond mistaken and lying (workstream 4: recorded; their logic is workstream 3's). */
+/** Why a clue may be doubted, beyond mistaken and lying (recorded; their logic is the exceptions'). */
 export const DOUBT_REASONS = ['could-not-see', 'inference-as-fact', 'hearsay', 'neutral', 'two-stories'];
-// Why a hypothesis is dropped (docs/hypotheses.md, Q5): the game checks each where it can, and never refuses one.
+// Why a hypothesis is dropped: the game checks each where it can, and never refuses one.
 export const DROP_REASONS = ['out-explained', 'more-hands', 'cost', 'card'];
-// A check the player plans before Holmes makes it (docs/predictions.md, Q1–Q2): a template whose fields are filled
+// A check the player plans before Holmes makes it (Q1–Q2): a template whose fields are filled
 // with things the player holds, and the results it can have (what a sealed check may expect).
 export const CHECK_TEMPLATES = {
     look: { fields: ['thing', 'place'], outcomes: ['found', 'not-found'] },
@@ -49,7 +49,7 @@ export const CHECK_TEMPLATES = {
     show: { fields: ['thing', 'to'], outcomes: ['yes', 'no'] },
     compare: { fields: ['thing', 'with'], outcomes: ['matches', 'differs'] },
 };
-// A question the player poses (docs/questions.md, Q2): fixed words around one or two cards they hold, each of the
+// A question the player poses: fixed words around one or two cards they hold, each of the
 // kinds listed (an entity's kind, or 'events'). `facets`: the facets of a slot on the first card it may match, quietly;
 // never a state, order, truth or relation slot. A question that matches nothing is the player's own note.
 const THINGS = ['person', 'animal', 'object', 'document'];
@@ -89,13 +89,13 @@ export const INF_CONNECT = 'connect';
 //   greying     grey the answers the player's clues rule out, and offer "Could it fit?" (and theory checks)
 //   clashes     list the clashes among the player's clues on the Questions tab
 //   hints       count the inferences left to build, and name where a waiting deduction starts; `story` also
-//               shows the story's own signals (Holmes's interest; docs/reader-layer.md, Q3)
+//               shows the story's own signals (Holmes's interest)
 //   kind        building an inference: the player names what its conclusion is about
 //   connect     building an inference: background facts needed in hand, or connected like clues
 //   background  when background facts arrive (BG_*)
 //   irrelevant  how many of the cards the solution has no use for are shown at all
 //   supplied    the background facts the reader lacks: offered like the rest (marked), or withheld until the story
-//               states them (docs/reader-layer.md, Q1)
+//               states them
 //   reader      who the player is as a reader (engine/readers.js): not part of the difficulty
 export const OPTIONS = {
     solver: ['game', 'player'],
@@ -116,7 +116,7 @@ export const OPTIONS = {
 // The options that say who the player is, not how hard the game is: kept when the difficulty changes.
 export const READER_OPTIONS = ['reader'];
 // The options that only mean something while the player works out the answers.
-// What a clash sets aside first (Game.#clashWeight, docs/clashes.md): the classes, lightest first, and within the
+// What a clash sets aside first (Game.#clashWeight): the classes, lightest first, and within the
 // clues, how a clue was told (anything else, seen, found or written, weighs most).
 export const CLASH_CLASSES = ['others-inference', 'heuristic', 'statement', 'inference'];
 const CLASH_TOLD = { testimony: 0, inference: 0, report: 1, admission: 2 };
@@ -241,7 +241,7 @@ export class Game {
             const needs = this.stepNeeds.get(step.id);
             // Only Holmes's own steps are his to state (a thought's inference by Watson or Gregory is not).
             if (step.reasoner !== 'holmes') continue;
-            // At the earliest paragraph where the story waits for it (Round 126: not the first gate found), else where told.
+            // At the earliest paragraph where the story waits for it (not the first gate found), else where told.
             const gated = [...(this.story.gates ?? [])].filter(([, ids]) => ids.has(step.id)).map(([p]) => p);
             const at = gated.length ? Math.min(...gated) : this.story.anchors.steps.get(step.id);
             for (const id of needs ?? []) stateAt(at, id, 'holmes');
@@ -290,7 +290,7 @@ export class Game {
     }
 
     /**
-     * Who the reader is (docs/reader-layer.md, Q1): the rules they lack (`lacking`). Offered, they arrive like any
+     * Who the reader is: the rules they lack (`lacking`). Offered, they arrive like any
      * other and are marked as supplied; withheld, they arrive where the story states them, or never, and the 'wait'
      * pace counts them told there (its gates are this game's own).
      */
@@ -322,9 +322,9 @@ export class Game {
         this.theories = [];
         this.lastSeen = new Map();      // card id → {read, seq} when the player last looked at it
         this.suspected = new Set();     // claim ids the player doubts
-        this.doubtKind = new Map();     // claim id → 'mistaken' | 'lying', for a doubt that says how (workstream 4)
-        this.splitClaims = new Set();   // statements the player split into their parts (workstream 4)
-        this.doubtReason = new Map();   // claim id → why the player doubts it (recorded, not checked: workstream 3 gives it logic)
+        this.doubtKind = new Map();     // claim id → 'mistaken' | 'lying', for a doubt that says how
+        this.splitClaims = new Set();   // statements the player split into their parts
+        this.doubtReason = new Map();   // claim id → why the player doubts it (recorded, not checked)
         this.asked = [];                // [card id, paragraph] the player asked about (background 'ask')
         this.clashLog = [];             // every clash met (constraint ids), to show the ones a doubt resolved
         this.clashCache = null;
@@ -341,16 +341,16 @@ export class Game {
         this.openedSplits = [];
         this.applied = [];              // [{id, rule, bind, para}]
         this.concluded = [];            // [{id, cited, formula, label, para}]
-        this.filed = [];                // [{id, para}] absences the player filed (Round 83), or Trivial filed for them
-        this.noticed = new Map();       // card id → {para, because}: details the player marked as odd (Round 84)
-        this.drops = new Map();         // drop key → {target, reason, rival, cites, para, held}: hypotheses dropped (workstream 6)
-        this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised (workstream 3)
-        this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed (workstream 7)
-        this.setAsideAt = new Map();    // card id → the paragraph the player set it aside at (workstream 8)
-        this.posed = [];                // [{id, template, cards, para, candidates, joined}]: the player's own questions (docs/questions.md)
-        this.notes = [];                // [{id, para, at, from, to, text}]: the player's notes on the story (docs/notes.md); never read by the game
-        this.hintLog = [];              // [{para, thought, family, rung, at}]: the hints given (docs/hints.md); never read by a score
-        // Scoring (Round 58): Holmes's step (a thought) id → the last paragraph read when the player first made it
+        this.filed = [];                // [{id, para}] absences the player filed, or Trivial filed for them
+        this.noticed = new Map();       // card id → {para, because}: details the player marked as odd
+        this.drops = new Map();         // drop key → {target, reason, rival, cites, para, held}: hypotheses dropped
+        this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised
+        this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed
+        this.setAsideAt = new Map();    // card id → the paragraph the player set it aside at
+        this.posed = [];                // [{id, template, cards, para, candidates, joined}]: the player's own questions
+        this.notes = [];                // [{id, para, at, from, to, text}]: the player's notes on the story; never read by the game
+        this.hintLog = [];              // [{para, thought, family, rung, at}]: the hints given; never read by a score
+        // Scoring: Holmes's step (a thought) id → the last paragraph read when the player first made it
         // by their own reasoning; checked before each paragraph and on request, after a move of the player's.
         this.madeAt = new Map();
         this.moved = false;
@@ -409,7 +409,7 @@ export class Game {
         const target = Math.min(state.read ?? 1, this.story.paragraphs.length);
         const asked = [...(state.asked ?? [])].sort((a, b) => a[1] - b[1]);
         // An inference the player built comes back at the paragraph they built it, before a character can state it
-        // further on (a later statement would otherwise take its place: "Holmes drew this inference", Round 161).
+        // further on (a later statement would otherwise take its place: "Holmes drew this inference").
         const built = [...(state.built ?? [])].filter(([id]) => this.inferenceById.has(id)).sort((a, b) => a[1] - b[1]);
         const rebuild = ([id, para]) => { if (this.knows(id)) return; this.#unlock(id, para); this.inferenceHow.set(id, { how: 'built' }); };
         while (this.read < target) {
@@ -456,7 +456,7 @@ export class Game {
         this.doubtReason = new Map((state.doubtReason ?? []).filter(([id, r]) => this.suspected.has(id) && DOUBT_REASONS.includes(r)));
         this.clashLog = (state.clashLog ?? []).filter((ids) => ids.every((id) => this.model.constraints.has(id)));
         // The clashes met, in the order met, seed the weighing: clashes() checks them before it searches, so a reload
-        // does not search again for what the game already found (docs/ui.md Q3). Those no longer standing are skipped.
+        // does not search again for what the game already found. Those no longer standing are skipped.
         this.clashCache = this.clashLog.length ? { key: null, list: this.clashLog.map((ids) => ({ ids })) } : null;
         this.costCache = null;
         this.bearingCache = null;
@@ -487,10 +487,10 @@ export class Game {
     }
 
     /**
-     * The story's own signals, as far as read (docs/reader-layer.md, Q3–Q4): Holmes's visible interest (each
+     * The story's own signals, as far as read (Q3–Q4): Holmes's visible interest (each
      * GENRE·watch-holmes thought: the clause that shows it, and the held cards that clause mentions, never what it
      * implies). Hints only: never scored. Each: {thought, kind: 'watch', para, quote, cards}. (The passages the story
-     * points back to, GENRE·re-read, went with the Re-read button, Round 207.)
+     * points back to, GENRE·re-read, went with the Re-read button.)
      */
     storySignals() {
         const byId = this.thoughtById ?? (this.thoughtById = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t])));
@@ -512,7 +512,7 @@ export class Game {
         return out;
     }
 
-    // ---------- the reader's housekeeping (docs/reader-layer.md, Q4–Q5): never checked, never scored ----------
+    // ---------- the reader's housekeeping (Q4–Q5): never checked, never scored ----------
     /**
      * Set a card aside as scenery: it leaves the player's lists, stays held (it still counts as a premise), and the
      * game never says whether it was right to (the answer key is not consulted). Clues, people, things and events.
@@ -528,7 +528,7 @@ export class Game {
     /** Cards set aside, in the order they were. */
     setAsideCards() { return [...this.setAsideAt].sort((a, b) => a[1] - b[1]).map(([id]) => id); }
 
-    // ---------- the player's notes on the story (docs/notes.md) ----------
+    // ---------- the player's notes on the story ----------
     // The player's paper: a note written at a point of a paragraph read (`at`, an offset in its text), with the words it
     // speaks of highlighted if the player marked them (`from`–`to`), or a highlight with no words written. Saved with
     // the game and cleared by a reset; nothing in the game reads them (N5).
@@ -567,7 +567,7 @@ export class Game {
         return [...this.notes].sort((a, b) => a.para - b.para || a.at - b.at || +a.id.slice(2) - +b.id.slice(2)).map((n) => ({ ...n }));
     }
 
-    // ---------- the player's own questions (docs/questions.md) ----------
+    // ---------- the player's own questions ----------
     /**
      * Pose a question: a template (QUESTION_TEMPLATES) over held cards of its kinds. It is the player's own card, and
      * nothing about it says whether the case asks it too: it is matched quietly to a slot (#poseMatch), and joins
@@ -902,7 +902,7 @@ export class Game {
     /** Any claim the player holds can be doubted. Its question "Is it true?" opens, and it stops counting as fact. */
     canSuspect(id) { return this.knows(id) && this.model.claimForms.has(id); }
     /**
-     * Doubt a clue. `kind` (workstream 4) says how, for a statement whose speaker's belief the case can read:
+     * Doubt a clue. `kind` says how, for a statement whose speaker's belief the case can read:
      * 'mistaken' (he believed it, and it is false) or 'lying' (he did not believe it); none is the plain doubt (it
      * counts nowhere, and "Is it true?" opens). Doubting again with another kind changes it.
      */
@@ -919,7 +919,7 @@ export class Game {
         for (const [key, r] of this.raised) if (r.id === id && r.status === 'established') this.raised.delete(key);
     }
     /**
-     * Why the player doubts a clue (workstream 4, recorded only until workstream 3 gives undercuts their logic):
+     * Why the player doubts a clue (recorded only):
      * one of DOUBT_REASONS, or null to clear it. Only for a clue they doubt.
      */
     setDoubtReason(id, reason) {
@@ -937,7 +937,7 @@ export class Game {
         const a = (this.model.cards.get(id)?.attested ?? []).find((x) => x.chain?.length);
         return a ? [...a.chain.map((l) => ({ by: l.by, to: l.to })), { by: a.by, to: a.to ?? null }] : [];
     }
-    /** The parts a statement can be split into (claims with `part_of`, workstream 4): what was seen, what concluded. */
+    /** The parts a statement can be split into (claims with `part_of`): what was seen, what concluded. */
     partsOf(id) {
         if (!this.partsByClaim) {
             this.partsByClaim = new Map();
@@ -958,7 +958,7 @@ export class Game {
         this.moved = true;
         return { ok: true, parts };
     }
-    // ---------- exceptions (workstream 3, docs/defeasibility.md) ----------
+    // ---------- exceptions ----------
 
     /**
      * The rule applications a card rests on, each with the named exceptions of its rule: [{n, rule, bind,
@@ -1166,7 +1166,7 @@ export class Game {
             this.#unlock(id, p);
             this.inferenceHow.set(id, { how: 'stated', by });
         }
-        // Trivial files an absence for the player as soon as it can be filed (Round 83).
+        // Trivial files an absence for the player as soon as it can be filed.
         if (this.autoSolves()) for (const a of this.fileableAbsences()) this.fileAbsence(a.expectation, a.windows[0], a.witness);
         // The story is about to wait on a deduction: the card that holds its question is dealt now.
         for (const id of this.gates?.get(p + 1) ?? []) {
@@ -1201,7 +1201,7 @@ export class Game {
         }
     }
 
-    // ---------- absences (workstream 5, Round 83) ----------
+    // ---------- absences ----------
     /**
      * The absences the case lets the player file: claim id → {id, para, expectation, windows, witness}. An absence
      * is a clue no line states: something expected (a default rule) did not happen in a time, and a witness would
@@ -1245,7 +1245,7 @@ export class Game {
         return { ok: true, id: a.id };
     }
 
-    // ---------- hints (docs/hints.md) ----------
+    // ---------- hints ----------
     /** Log a hint given at the paragraph just read: the row it serves (thought and family), its rung, and when
      *  (`at`, the page's clock: the cooldown counts from it). The log is never read by a score. */
     logHint(thought, family, rung, at = null) {
@@ -1254,7 +1254,7 @@ export class Game {
         return h;
     }
 
-    // ---------- notices (workstream 5, Round 84) ----------
+    // ---------- notices ----------
     /**
      * Mark a card the player holds as odd, optionally because of a background fact they hold (the expectation it
      * goes against). Nothing is checked or told: a notice is the player's own. Marking it again changes the reason.
@@ -1282,7 +1282,7 @@ export class Game {
     }
     /**
      * In aggregate: details noticed, and those noticed before Holmes, out of those he draws attention to at all (a
-     * card can be noticed before the thought's own paragraph, so a row is possible once it has Holmes's; docs/ui.md Q1).
+     * card can be noticed before the thought's own paragraph, so a row is possible once it has Holmes's).
      */
     noticeScore() {
         const rows = this.noticeScores();
@@ -1290,7 +1290,7 @@ export class Game {
     }
 
     /**
-     * The exceptions the annotation counts (thoughts with `raises`, workstream 3): each thought with Holmes's
+     * The exceptions the annotation counts (thoughts with `raises`): each thought with Holmes's
      * paragraph (null if he never takes it up), where the player first raised one of its exceptions against its
      * inference (a reservation or a defeat; null if not), and whether that was before Holmes's (it scores). Nothing
      * counts in Trivial.
@@ -1330,7 +1330,7 @@ export class Game {
         const walk = (f) => {
             if (f.implies) return walk(f.implies[1]);
             if (f.and) return f.and.forEach(walk);
-            // A relation term ({rel: [name, ...args]}) speaks of the questions among its arguments (Round 158).
+            // A relation term ({rel: [name, ...args]}) speaks of the questions among its arguments.
             for (const x of [...slotsIn(f)].flatMap((y) => (y?.rel ? y.rel.slice(1).filter((a) => this.model.slots.has(a)) : [y]))) {
                 const sl = this.model.slots.get(x);
                 out.add(KIND_OF_FACET[sl.facet] ?? (sl.domain.length === 2 && sl.domain.includes('true') ? 'whether' : 'what'));
@@ -1528,7 +1528,7 @@ export class Game {
     }
 
     /**
-     * State it yourself (docs/ui.md Q2): conclude from the connected cards, with the background facts they call on
+     * State it yourself: conclude from the connected cards, with the background facts they call on
      * applied for the player. A rule is applied as the case's own inferences apply it (their `rules`), wherever the
      * cards it binds are held and one of them is cited or spoken of by a cited card; the rule must be cited when
      * background is connected, and only held otherwise. Within `budget` ms of solving; past it {ok: false, tooHard}.
@@ -1603,7 +1603,7 @@ export class Game {
         return p !== undefined && p < this.read;
     }
 
-    // ---------- scoring (Round 58) ----------
+    // ---------- scoring ----------
     /** Where Holmes states a step: its thought's Holmes paragraph, or the line of a conclusion he draws. */
     holmesAt(stepId) { return this.story.anchors.steps.get(stepId) ?? null; }
 
@@ -1641,7 +1641,7 @@ export class Game {
         const own = (id) => this.knows(id) && !this.suspected.has(id) && ['built', 'concluded', 'applied'].includes(this.inferenceHow.get(id)?.how);
         const needs = this.stepInferences(stepId);
         // An implicit inference (a step no reader notices making) is nobody's: it neither makes a step nor blocks one
-        // (Round 159). At least one of the inferences the step needs must be the player's own.
+        //. At least one of the inferences the step needs must be the player's own.
         const implicit = (id) => this.knows(id) && !this.suspected.has(id) && this.inferenceHow.get(id)?.how === 'implicit';
         if (needs && needs.some(own) && needs.every((id) => own(id) || implicit(id))) return true;
         const c = step.concludes;
@@ -1742,7 +1742,7 @@ export class Game {
                 if (!this.knows(r)) continue;
                 const at = Math.max(first, this.unlocked.get(r).para);
                 out.push({ key: r, para: at, kind: 'background', text: this.model.cards.get(r).text, card: r });
-                // Its exceptions (workstream 3): with it, or from their own line, whichever is later.
+                // Its exceptions: with it, or from their own line, whichever is later.
                 (this.model.cards.get(r).unless ?? []).forEach((u, i) => {
                     const para = Math.max(at, u.source?.length ? this.#paraOf(u.source[0]) : -1);
                     if (para < this.read) out.push({ key: `${r}|unless${i}`, para, kind: 'exception', text: u.text ?? u, card: r, ...(u.id ? { exception: u.id } : {}), ...(u.source ? { quote: u.source[0] } : {}) });
@@ -2161,8 +2161,8 @@ export class Game {
     }
 
     /**
-     * The clash weighing (docs/clashes.md), shared by clashes() and scenarioCost(). Doubtable: a trusted clue or
-     * inference. A rule application counts as part of its inference (workstream 3: a character's step the true story
+     * The clash weighing, shared by clashes() and scenarioCost(). Doubtable: a trusted clue or
+     * inference. A rule application counts as part of its inference (a character's step the true story
      * defeats is false): caught in a clash, it is set aside with the inference, at the inference's weight.
      *   order(set): the members to search, the heaviest tried first and the lightest last, so a clash rests on as light
      *     a member as it can;
@@ -2195,8 +2195,7 @@ export class Game {
     }
 
     /**
-     * How much a card caught in a clash weighs: [class, within it], lightest given up first (docs/clashes.md, Round
-     * 108). Never by whether it is true, only by what the player can see:
+     * How much a card caught in a clash weighs: [class, within it], lightest given up first. Never by whether it is true, only by what the player can see:
      *   0 an inference someone other than Holmes stated (the police's, Gregory's);
      *   1 an inference of the player's or Holmes's that applies a heuristic (a rule of thumb, held without ground);
      *   2 a clue: by how it was told, someone's word (or their inference stated as fact), then a report, then an
@@ -2274,7 +2273,7 @@ export class Game {
     }
 
     /**
-     * What a scenario must disbelieve (docs/hypotheses.md, Q2): its answers held fast, the clashes they make with what
+     * What a scenario must disbelieve: its answers held fast, the clashes they make with what
      * the player trusts (the clashes among it set aside first) broken as clashes() breaks them, until what is left
      * fits. Each item: {cards, why (CLASH_CLASSES), told (a clue's: testimony, report, admission or seen)}. `atOdds`
      * when it must give up the player's own (or Holmes's) reasoning, or something seen, found or written; `refuted`
@@ -2307,7 +2306,7 @@ export class Game {
     }
 
     /**
-     * A theory's assumed answers (docs/review-ws3-ws6.md, C2; the patches of `t58.4`): those nothing the player holds
+     * A theory's assumed answers (C2, the patches of `t58.4`): those nothing the player holds
      * and trusts gives, since the working set leaves them open (one it contradicts is in the cost instead). An answer that explains a puzzle this way takes it
      * out of the tray on the theory's word alone. Cached while the working set stands.
      */
@@ -2333,7 +2332,7 @@ export class Game {
     }
 
     /**
-     * The puzzles the player has met (docs/hypotheses.md, Q3): on Easy (and Trivial), once its cards are held and its
+     * The puzzles the player has met: on Easy (and Trivial), once its cards are held and its
      * thought's paragraph is read; otherwise once the player has noticed one of its cards, or filed one that is an
      * absence (filing it is the noticing).
      */
@@ -2402,7 +2401,7 @@ export class Game {
         return v;
     }
 
-    // ---------- readings (docs/hypotheses.md, Q6) ----------
+    // ---------- readings ----------
     /**
      * How a card reads under each story: for each reading (a slot that carries what the card means) whose question
      * the player has met, the player's own settled answer (null if open) and each theory met that answers it.
@@ -2421,7 +2420,7 @@ export class Game {
         return [...new Set((this.model.data.readings ?? []).filter((r) => r.slot === slot).flatMap((r) => r.cards))].filter((c) => this.knows(c));
     }
 
-    // ---------- dropping a hypothesis (docs/hypotheses.md, Q5) ----------
+    // ---------- dropping a hypothesis ----------
     /**
      * The scenario a drop speaks of: a theory, or a candidate (slot = value). A candidate weighed against a rival is
      * the rival's story with the candidate in its place ("the maid version": the inside story, the maid drugging).
@@ -2435,7 +2434,7 @@ export class Game {
     /**
      * Drop a theory or a candidate for a reason (DROP_REASONS): a stance, never refused, taken back with undrop. `rival`
      * is a theory id (out-explained, more hands), `cites` card ids (a card). Checked by dropCheck, never refused for it;
-     * `held` is the paragraph a reason that holds was first given (null if none yet): what the score counts (Round 199).
+     * `held` is the paragraph a reason that holds was first given (null if none yet): what the score counts.
      */
     drop(target, reason, { rival = null, cites = [] } = {}) {
         if (!DROP_REASONS.includes(reason) || !this.scenarioOf(target)) return { ok: false, reason: 'nothing to drop' };
@@ -2493,7 +2492,7 @@ export class Game {
     /**
      * The drops the annotation counts (thoughts with `dropped` naming a theory or a candidate): each with its deadline (Holmes's paragraph, or where
      * the story itself makes the hypothesis untenable, `dropped.deadline`), the paragraph the player dropped it (null
-     * if not), the paragraph they first gave a reason for it that holds (`held`, Round 199: a reason that does not hold
+     * if not), the paragraph they first gave a reason for it that holds (`held`: a reason that does not hold
      * scores nothing), and whether that was before the deadline (it scores). Wrong turns cost nothing; nothing counts in
      * Trivial.
      */
@@ -2502,7 +2501,7 @@ export class Game {
         return (this.model.data.thoughts ?? []).filter((t) => t.dropped && !t.dropped.inference).map((t) => {
             const d = t.dropped;
             const mine = this.autoSolves() ? null : this.dropOf(d);
-            // A save from before Round 199 has no `held`: its reason is checked as it stands, dated by the drop.
+            // An older save has no `held`: its reason is checked as it stands, dated by the drop.
             if (mine && mine.held === undefined) mine.held = this.dropCheck(d)?.ok ? mine.para : null;
             const at = mine?.para ?? null;
             const held = mine?.held ?? null;
@@ -2515,7 +2514,7 @@ export class Game {
         return { dropped: rows.filter((r) => r.dropped !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.deadline !== null).length, of: rows.length };
     }
 
-    // ---------- sealed checks (workstream 7, docs/predictions.md) ----------
+    // ---------- sealed checks ----------
     /**
      * Seal a check the player plans before Holmes makes it: a template verb with each of its fields filled by a card
      * the player holds, and optionally the result they expect (one of the template's outcomes), an answer over a
@@ -2542,8 +2541,8 @@ export class Game {
         return true;
     }
     /**
-     * What the theory a sealed check cites says of its expected answer (docs/predictions.md, Q6), tested as residue
-     * is (Round 115): the theory's answers held fast, with the facts left once its cost is paid (trusted clues and the
+     * What the theory a sealed check cites says of its expected answer, tested as residue
+     * is: the theory's answers held fast, with the facts left once its cost is paid (trusted clues and the
      * world's ties, not inferences). 'says-so' (they entail the answer), 'says-otherwise' (they contradict it),
      * 'says-nothing', or 'refuted' (the theory breaks with what the player holds). Null for a seal with no answer or
      * no theory still visible. Never refuses anything.
@@ -2567,7 +2566,7 @@ export class Game {
         return { says, cost };
     }
     /**
-     * Hedged (Round 199): another seal of the same check, live when Holmes makes it (sealed before, not withdrawn
+     * Hedged: another seal of the same check, live when Holmes makes it (sealed before, not withdrawn
      * before), expects a different result, or the same result with a different answer. Expecting every result of a
      * check is no expectation: none of them scores. Withdrawing all but one before Holmes acts lifts it.
      */
@@ -2619,7 +2618,7 @@ export class Game {
             const dated = !!(t.holmes && !t.holmes.never && t.holmes.paras?.length);
             const matching = this.autoSolves() ? [] : this.seals.filter((x) => x.withdrawn === null && this.#checkOf(x) === ck
                 && (want.expect === undefined || (x.expect === want.expect && this.#answerGiven(x.answer, want.answer))));
-            // An expectation hedged by another (Round 199) scores nothing; a plan with no expectation is not hedged.
+            // An expectation hedged by another scores nothing; a plan with no expectation is not hedged.
             const ok = want.expect === undefined ? matching : matching.filter((x) => !this.#hedged(x, ck));
             const sealed = ok.length ? Math.min(...ok.map((x) => x.para)) : null;
             const at = ck.result.shown ?? ck.result.late ?? null;
@@ -2627,7 +2626,7 @@ export class Game {
             return { thought: t.id, check: ck.id, para: t.para, deadline: ck.at, sealed, borne, scores: dated && sealed !== null && sealed < ck.at && borne !== false, ...(ok.length < matching.length && !ok.some((x) => x.para < ck.at) && { hedged: true }) };
         }));
     }
-    /** In aggregate: the thoughts' checks sealed, and those before Holmes, out of those he makes (docs/ui.md Q1). */
+    /** In aggregate: the thoughts' checks sealed, and those before Holmes, out of those he makes. */
     checkScore() {
         const rows = this.checkScores();
         const dated = this.#datedThoughts();
@@ -2655,7 +2654,7 @@ export class Game {
         return { filed: rows.filter((r) => r.filed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.length };
     }
 
-    // ---------- the record against Holmes (workstream 9, docs/ui.md Q1) ----------
+    // ---------- the record against Holmes ----------
     /**
      * The player's record against Holmes, as far as the story has been read: the rows of the six score families whose
      * deadline (Holmes's paragraph, or where the story makes a hypothesis untenable) has been read. A row whose
@@ -2663,7 +2662,7 @@ export class Game {
      * {family, thought, deadline, at (where the player made the move, or null), scores, lead (paragraphs ahead of the
      * deadline), names (held cards it can be told by)} and, by family, what it needs to be told: `concludes` (a step
      * with no inference of its own), `exceptions` ({target, exception, text}), `target` (a drop), `seal` (the earliest
-     * matching seal's id). `why` on a row the player made that does not count (Round 199): 'reason' (a drop whose reason
+     * matching seal's id). `why` on a row the player made that does not count: 'reason' (a drop whose reason
      * did not hold), 'hedged' (a check expected both ways). `families`: per family the rows scored and passed, and once
      * the story has ended, possible.
      * Rows that can never score (no deadline) are left out. Nothing scores in Trivial.
@@ -2703,7 +2702,7 @@ export class Game {
             const mine = rows.filter((r) => r.family === f);
             return [f, { scored: mine.filter((r) => r.scores).length, passed: mine.length, possible: this.finished() ? a.possible : null }];
         }));
-        // The player's questions the story raised after they asked them (docs/questions.md, Q5): recorded, never counted.
+        // The player's questions the story raised after they asked them: recorded, never counted.
         const questions = this.autoSolves() ? [] : this.posedQuestions().filter((q) => q.joined && q.joined.para > q.para).map((q) => ({ id: q.id, slot: q.joined.slot, at: q.para, deadline: q.joined.para, lead: q.joined.para - q.para })).sort((a, b) => a.deadline - b.deadline);
         return { rows: rows.sort((a, b) => a.deadline - b.deadline), families, ahead: rows.filter((r) => r.scores).length, questions };
     }
@@ -2724,7 +2723,7 @@ export class Game {
     }
 
     /**
-     * Disclosure (docs/reader-layer.md, Q2): where the story tells a card, and what it holds back.
+     * Disclosure: where the story tells a card, and what it holds back.
      *   a rule:   {at: where the game offers it, told: where the story states it (null: never), early: offered
      *             before the story states it, supplied: this reader lacks it (lacks: the background card that says so)}
      *   a check:  {at: where Holmes makes it, result: shown / late / never}

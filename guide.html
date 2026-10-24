@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to play</title>
+<script>
+// The theme chosen in the game's Settings (kept on this device with the layout), so the guide matches the game.
+try {
+    const t = JSON.parse(localStorage.getItem('mystery-clue-game:layout:v1') ?? 'null')?.theme;
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+} catch { /* no storage: as the system */ }
+</script>
+<style>
+:root {
+  --bg: #f6f1e7; --panel: #fffdf8; --ink: #2a2520; --muted: #7a6f63; --line: #ddd2c0;
+  --accent: #8a3b12; --accent-soft: #f3e2d4; --good: #2f6b3a; --good-soft: #e1efdf;
+  --bad: #9b2c2c; --chip: #efe7da; --note-ink: #1f4e9c; --hl: #ffe45c;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --hand: 'Caveat', cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1a17; --panel: #26221e; --ink: #ece4d8; --muted: #a39887; --line: #3d362f;
+    --accent: #e0915c; --accent-soft: #3a2a1f; --good: #8fcf98; --good-soft: #20331f;
+    --bad: #ef8f8f; --chip: #332d27; --note-ink: #9cbcff; --hl: rgba(255, 214, 0, .32);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d1a17; --panel: #26221e; --ink: #ece4d8; --muted: #a39887; --line: #3d362f;
+  --accent: #e0915c; --accent-soft: #3a2a1f; --good: #8fcf98; --good-soft: #20331f;
+  --bad: #ef8f8f; --chip: #332d27; --note-ink: #9cbcff; --hl: rgba(255, 214, 0, .32);
+}
+@font-face { font-family: 'Caveat'; font-style: normal; font-weight: 500; font-display: swap; src: url(ui/fonts/Caveat-500-latin.woff2) format('woff2'); }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.25; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+.top h1 { font-size: 22px; margin: 0; }
+.subtitle { font-size: 14px; color: var(--muted); font-style: italic; font-weight: 400; }
+.back { font-size: 14px; white-space: nowrap; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 8px 16px 64px; }
+.lead { font-family: var(--serif); font-size: 18px; }
+.aside { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 10px 14px; margin: 16px 0; font-size: 15px; }
+.aside.warn { border-left-color: var(--bad); }
+
+nav.toc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; margin: 20px 0 8px; }
+nav.toc h2 { font-size: 16px; margin: 0 0 4px; }
+nav.toc ol { margin: 0; padding-left: 1.4em; columns: 2 240px; column-gap: 24px; font-size: 15px; }
+nav.toc li { break-inside: avoid; }
+
+section { border-top: 1px solid var(--line); margin-top: 28px; padding-top: 4px; }
+section h2 { font-size: 24px; margin: 18px 0 8px; }
+section h3 { font-size: 18px; margin: 20px 0 4px; }
+p { margin: 0 0 .8em; }
+ul, ol { padding-left: 1.4em; margin: 0 0 .8em; }
+li { margin: 3px 0; }
+dl { margin: 0 0 1em; }
+dt { font-weight: 600; margin-top: 10px; }
+dd { margin: 2px 0 0 1.2em; }
+
+/* Bits of the game's own look, drawn for the examples. */
+.btn { display: inline-block; background: var(--accent); color: #fff; border-radius: 6px; padding: 1px 9px; font-size: 14px; white-space: nowrap; }
+.btn.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.tab { display: inline-block; border: 1px solid var(--line); border-bottom: 0; border-radius: 6px 6px 0 0; padding: 0 8px; font-size: 14px; background: var(--panel); white-space: nowrap; }
+.chip { display: inline-block; background: var(--chip); color: var(--ink); border-radius: 12px; padding: 1px 9px; font-size: 14px; border: 1px solid transparent; white-space: nowrap; }
+.chip.circled { border: 2px solid var(--accent); padding: 0 8px; font-weight: 600; }
+.chip.struck { text-decoration: line-through; opacity: .55; }
+.chip.ruled { opacity: .55; border-style: dashed; border-color: var(--line); }
+.chip.proved { text-decoration: line-through; background: var(--good-soft); opacity: .8; }
+.chip.proven { background: var(--good); color: #fff; font-weight: 600; }
+.chip.dropped { text-decoration: line-through dotted; opacity: .7; }
+.chip.pencil { border: 1px dashed var(--ink); }
+.chip.given { background: var(--accent); color: #fff; }
+.chip.theory { border: 1px dotted var(--accent); color: var(--accent); }
+.demo { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 10px 0 14px; }
+.demo .q { font-weight: 600; }
+.demo .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+.demo .lbl { font-size: 13px; color: var(--muted); }
+.story-demo { font-family: var(--serif); font-size: 17px; }
+.m-entity { border-bottom: 1px solid var(--accent); }
+.m-claim { background: var(--accent-soft); border-radius: 3px; }
+.m-event { border-bottom: 2px dotted var(--accent); }
+.m-window { border-bottom: 1px dashed var(--muted); }
+.m-got { border-bottom: 1px dotted var(--good); }
+.hand { font-family: var(--hand); font-size: 1.25em; color: var(--note-ink); }
+.hl { background: var(--hl); }
+.kbd { font: 13px var(--sans); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); white-space: nowrap; }
+.muted { color: var(--muted); }
+
+table.diff { border-collapse: collapse; width: 100%; font-size: 14px; margin: 10px 0 16px; display: block; overflow-x: auto; }
+table.diff th, table.diff td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
+table.diff thead th { background: var(--panel); font-family: var(--serif); }
+table.diff tbody th { background: var(--panel); font-weight: 600; white-space: nowrap; }
+
+@media (max-width: 480px) {
+  .subtitle { display: none; }
+  section h2 { font-size: 21px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Silver Blaze <span class="subtitle">how to play</span></h1>
+  <a class="back" href="index.html">← Back to the game</a>
+</header>
+
+<main class="wrap">
+
+<p class="lead">You read a Sherlock Holmes story a paragraph at a time and try to work things out before Holmes does.</p>
+
+<div class="aside">
+  <b>This is an experiment, and it is unfinished.</b> The game tries to turn a detective's reasoning into moves you can
+  make: noticing, connecting, doubting, ruling out. Some parts are rough, and some screens show more machinery than a
+  finished game would.
+</div>
+
+<p>This guide gives nothing away. Its examples come from the story's opening, where you learn that a famous racehorse
+has disappeared and its trainer has been found dead, or they are made up.</p>
+
+<nav class="toc" aria-label="Contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#what">What the game is</a></li>
+    <li><a href="#screen">Finding your way round the screen</a></li>
+    <li><a href="#reading">Reading and collecting cards</a></li>
+    <li><a href="#cards">Cards</a></li>
+    <li><a href="#questions">Questions and their answers</a></li>
+    <li><a href="#ruling">Ruling out and proving</a></li>
+    <li><a href="#inferences">Inferences: connecting cards</a></li>
+    <li><a href="#doubt">Doubting what you are told</a></li>
+    <li><a href="#more">Odd details, absences, your own questions</a></li>
+    <li><a href="#theories">Theories and wrong turns</a></li>
+    <li><a href="#checks">Checks</a></li>
+    <li><a href="#tabs">The other tabs</a></li>
+    <li><a href="#record">Deadlines and your record against Holmes</a></li>
+    <li><a href="#scoring">Scoring</a></li>
+    <li><a href="#difficulty">Difficulty and pace</a></li>
+    <li><a href="#hints">Hints</a></li>
+    <li><a href="#notes">Your notes</a></li>
+    <li><a href="#settings">Settings and layout</a></li>
+    <li><a href="#autoplay">Watching the autoplay</a></li>
+    <li><a href="#logic">The logic viewer</a></li>
+    <li><a href="#tips">Mouse and keyboard tips</a></li>
+  </ol>
+</nav>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="what">
+<h2>1. What the game is</h2>
+<p>The game is built on <i>Silver Blaze</i>, a Sherlock Holmes story by Arthur Conan Doyle, first published in 1892.
+You read it a paragraph at a time. Holmes reasons his way through it, and you try to make the same steps
+<b>before</b> the story shows him making them.</p>
+<p>Each step is a <b>move</b>: you might connect two clues into a conclusion, rule out an answer, notice that
+something is odd, or plan a check. The game tests your move against the clues you hold. It never tells you whether the
+move is the one Holmes will make. You learn that only when the story reaches the point where he makes it.</p>
+<p>The story never changes. You can read it to the end without making a single move, but then Holmes gets everywhere
+first.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="screen">
+<h2>2. Finding your way round the screen</h2>
+<ul>
+  <li><b>The header</b> holds the title, a progress line (cards held, questions settled, and
+  <i>Ahead of Holmes: N</i>), the <span class="btn quiet">⚙ Settings</span> menu, the
+  <span class="btn quiet">✎ Notes</span> switch, and <span class="btn quiet">?</span>, which opens this guide
+  (on a phone, the guide is in Settings).</li>
+  <li><b>The reading bar</b> sits under the header. It has
+  <span class="btn">Next paragraph</span> and the other reading buttons, the
+  <span class="btn quiet">Hint</span> button, how far you have read, and short messages from the game.</li>
+  <li><b>Two panels</b> fill the rest of the screen. Each panel has a row of tabs along its top, such as
+  <span class="tab">Story ¶12</span> <span class="tab">Card</span> <span class="tab">Cards</span>
+  <span class="tab">Questions</span>, and either panel can show any tab. Choose a tab in one panel that the other panel
+  is showing, and the two panels swap.</li>
+</ul>
+<p>When you click a link, such as a card's name, it opens in the <i>other</i> panel, so what you were looking at stays
+in view. If it opened in place, a <span class="muted">← back to …</span> link appears under the tabs and takes you
+back.</p>
+<p>When nothing is open in the Card tab, it shows a short "How to play" reminder that changes with the difficulty.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="reading">
+<h2>3. Reading and collecting cards</h2>
+<h3>Reading on</h3>
+<p>Press <span class="btn">Next paragraph</span> to read one more paragraph. The newest paragraph is marked with a bar
+in the margin, and every paragraph has its number in the margin. Hints and the record refer to paragraphs by these
+numbers. Two more buttons appear when they would save you clicks:</p>
+<ul>
+  <li><span class="btn quiet">Next scene</span> reads on to the start of the next scene.</li>
+  <li><span class="btn quiet">Next deduction</span> reads on to just before Holmes next works something out, so you
+  get one last try before he does. The button shows how many paragraphs it will read. Near the end it becomes
+  <span class="btn quiet">To the end</span>.</li>
+</ul>
+<p>After each read, the reading bar says what it brought, for example "¶4 read · 3 new cards". A small pop-up names
+the new cards.</p>
+
+<h3>Collecting cards</h3>
+<p>Every person, animal, place, thing, document, event and statement the story mentions becomes a <b>card</b>. How you
+get cards depends on the difficulty:</p>
+<ul>
+  <li><b>Trivial, Easy and Medium:</b> cards are <i>dealt</i>. Each one arrives when the story first mentions it. The
+  words that mention a card are marked in the text, and clicking them opens the card.</li>
+  <li><b>Hard:</b> cards are <i>collected</i>. Nothing in the text is marked. To get a card, click the words that
+  mention it. If they mention something, the card is yours and the words get a faint green dotted underline. If
+  they mention nothing, the game says "Nothing to note there". Clicking words you have already collected opens their
+  card.</li>
+</ul>
+<div class="demo story-demo">
+  <span class="lbl" style="font-family: var(--sans)">How the marks look on Easy and Medium (a made-up sentence):</span><br>
+  <span class="m-entity">The cook</span> said <span class="m-claim">the cake was on the pantry shelf at noon</span>, and
+  <span class="m-event">the cake vanished</span> <span class="m-window">before tea</span>.
+  <div class="lbl" style="font-family: var(--sans); margin-top: 6px">
+    Solid underline: a person, place or thing. Shaded: a statement (a clue). Dotted: an event or a question.
+    Dashed: a time. On Hard, only words you have collected are marked: <span class="m-got">like this</span>.
+  </div>
+</div>
+<p>When the same words mention several cards, a small menu lets you choose one.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="cards">
+<h2>4. Cards</h2>
+<p>A card opens in the <span class="tab">Card</span> tab. From top to bottom it shows:</p>
+<ul>
+  <li>its kind (person, place, clue, event, inference, background…) and any flags, such as <i>marked odd</i> or
+  <i>suspected</i>, plus other names the story has used for it;</li>
+  <li>what the story has said about it, grouped by paragraph, each part quoted. Anything you have not seen yet is
+  tagged <b>new</b>. Click a paragraph number to jump to that place in the story;</li>
+  <li>under <b>Words</b>, explanations of old or unusual words the story uses. Under <b>Background</b>, general
+  knowledge a reader of the time would have had (see <a href="#difficulty">Background facts</a>);</li>
+  <li>the moves you can make with this card. Each one is described in the sections below;</li>
+  <li>the card's own <b>Timeline</b>, where you can pencil in where it was and when;</li>
+  <li>the <b>open questions</b> on the card, each with its possible answers;</li>
+  <li>for a person or a thing, <b>Where it fits</b>: the questions on other cards it answers, or might.</li>
+</ul>
+<h3>The Cards tab</h3>
+<p><span class="tab">Cards</span> lists every card you hold. You can search it by name and filter it by kind, or by
+<i>New</i> (never opened) and <i>Updated</i> (the story has added something since you last looked). The tab's label
+counts the new and updated cards.</p>
+<h3>Setting a card aside</h3>
+<p>Some cards are scenery. <span class="btn quiet">Set aside</span> takes a card out of your lists without losing
+it. Set-aside cards are kept at the bottom of the Cards tab, each with a <span class="btn quiet">Put back</span>
+button.</p>
+<h3>“What do I know about this?”</h3>
+<p>On Medium and Hard, background knowledge comes when you ask. Press
+<span class="btn">What do I know about this?</span> on a card, and any facts you recall about it are added to that
+card and to the Background tab. More may come to mind about the same card later in the story.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="questions">
+<h2>5. Questions and their answers</h2>
+<p>Cards carry <b>open questions</b>, such as who did something, where, when, whose a thing is, or whether a statement
+is true. The <span class="tab">Questions</span> tab lists the questions the case turns on, as the story raises them.</p>
+<p>Each question shows its possible answers as <b>chips</b>, like pencil marks in a sudoku. Click a chip for its menu.
+A made-up example:</p>
+<div class="demo">
+  <div class="q">Who took the cake?</div>
+  <div class="row">
+    <span class="chip circled">the cook</span>
+    <span class="chip">the gardener</span>
+    <span class="chip ruled">the butler</span>
+    <span class="lbl">… 1 your clues already rule out</span>
+  </div>
+  <div class="row"><span class="lbl">crossed out:</span> <span class="chip struck">the cat</span></div>
+  <div class="row"><span class="lbl">ruled out, with evidence:</span> <span class="chip proved">the vicar ✓</span></div>
+</div>
+<ul>
+  <li><b>Circle</b> the answers you favour (heavy outline). Circling is just for you and proves nothing.</li>
+  <li>A <b>crossed-out</b> answer is struck through in pencil. An answer <b>ruled out with evidence</b> is struck
+  through on green, because the game checked it.</li>
+  <li>On Easy, answers your clues already exclude are <b>greyed</b> and folded away under a "show" link.</li>
+  <li>When one answer is left, or you prove one outright, the question is <b>settled</b> and the answer shows solid
+  green: <span class="chip proven">the cook</span>.</li>
+  <li>"3 so far" instead of "3 left" means the story may still bring in an answer you have not met yet.</li>
+</ul>
+<h3>Proposing answers (Hard)</h3>
+<p>On Hard the list starts empty. Type an answer into <i>+ propose an answer</i>, or pick one from <i>or choose…</i>.
+The game checks only that it is the right kind of thing (a person for "who", a place for "where"), not whether it is
+right. <span class="btn quiet">Take back</span> removes an answer you proposed.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="ruling">
+<h2>6. Ruling out and proving</h2>
+<p>Click a chip to open its menu. What it offers depends on the difficulty:</p>
+<dl>
+  <dt><span class="btn">Cross out</span> (Easy)</dt>
+  <dd>A plain pencil mark. You can cross out anything, and <span class="btn">Restore</span> it later.</dd>
+  <dt><span class="btn">Rule it out</span> (Medium and Hard)</dt>
+  <dd>The game checks the answer against every clue and inference you hold and trust. It is ruled out only if they
+  really exclude it. If they do not, you get "Not yet: nothing you hold and trust rules it out", and the usual cure is
+  to build the inference that would.</dd>
+  <dt><span class="btn">Prove it's this</span></dt>
+  <dd>The same check, but it must leave this answer as the only one. If it does, the question is settled.</dd>
+  <dt><span class="btn quiet">Could it fit?</span> (Easy)</dt>
+  <dd>Asks whether this answer could still fit everything you trust. If it cannot, the game shows the chain of clues
+  that rules it out, and offers to doubt any of them.</dd>
+  <dt><span class="btn quiet">Drop it…</span></dt>
+  <dd>Lets go of an answer for a reason that is not a proof. See <a href="#theories">wrong turns</a>.</dd>
+</dl>
+<p>Every proof <b>cites its reasons</b>. A message says what a ruling-out rests on ("It rests on 3 of your clues and
+inferences"), and on Trivial each excluded answer has a <span class="btn quiet">Why not?</span>. If you later doubt a
+clue that a proof rested on, the proof is flagged: "A proof here rested on …, which you now doubt."</p>
+<p>If the clues you trust contradict each other, a question can be left with nothing that fits. The game says so and
+offers <span class="muted">Find the clash</span>.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="inferences">
+<h2>7. Inferences: connecting cards</h2>
+<p>An <b>inference</b> is a step of reasoning that connects clues, such as "The cake was on the shelf at noon and gone by
+tea, so it was taken in the afternoon" (a made-up example). Once you hold an inference, it counts like a clue
+you trust. It is often what lets you rule an answer out.</p>
+<h3>Building one</h3>
+<ol>
+  <li>Open a clue, an event, a background fact or another inference, and press
+  <span class="btn quiet">Infer from this</span>.</li>
+  <li>A <b>Building an inference</b> bar appears above the card. Open another card and press
+  <span class="btn quiet">Connect to this</span>.</li>
+  <li>The game answers each time: "You're onto something: connect one more card", "… does not connect with the
+  others", or "You inferred: …". It may also say you need knowledge you do not have yet, in which case ask what you
+  know about the things involved.</li>
+  <li>On Hard you must also say what the conclusion is <i>about</i>: who, when, where, what or with what, why, or
+  whether it is so.</li>
+</ol>
+<p>Press <span class="btn quiet">Done</span> to put the connection away. ✕ takes a single card out of it.</p>
+<h3>Stating it yourself</h3>
+<p>While cards are connected, the bar also offers <i>Or state it yourself</i>. Pick a question, choose <i>is</i> or
+<i>is not</i>, pick an answer, and press <span class="btn quiet">Does it follow?</span>. The game tells you whether
+your connected cards really imply it, and never tells you what does follow.</p>
+<h3>The Inferences tab</h3>
+<p><span class="tab">Inferences</span> lists every inference you hold: the ones you built, the ones a character draws
+aloud in the story, and on Trivial the ones the game drew for you. Each says who drew it and where, and gives a plain
+reading of what it means for the case. On Easy, the tab also counts how many more you could build from what you
+hold.</p>
+<h3>“Unless…”</h3>
+<p>Some steps lean on a general rule that can fail. Such an inference shows <i>Unless…</i> links, each a way the rule
+might fail here. Click one to <b>raise</b> it. If what you hold shows the exception is true, the step no longer counts.
+If nothing settles it, it stays as a reservation and the step still counts. If what you hold rules it out, the game
+says so.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="doubt">
+<h2>8. Doubting what you are told</h2>
+<p>Until you say otherwise, the game takes every statement at its word. Witnesses can be wrong, though, and people
+lie. On a clue or an inference:</p>
+<ul>
+  <li><span class="btn">I suspect this may be false</span> stops it counting as fact anywhere, and opens the question
+  "Is it true?". Where it applies, you can say <i>how</i> it is false: the speaker was <i>mistaken</i> or <i>lied</i>.
+  You can also record <i>why</i>, for instance that they could not have seen it, or that it is hearsay.</li>
+  <li><span class="btn quiet">Trust it again</span> undoes the doubt.</li>
+  <li><span class="btn quiet">Split this statement</span> appears on statements that mix what someone saw with what
+  they concluded. It splits the statement into its parts, so you can doubt one and keep the other.</li>
+  <li><i>Passed on:</i> shows who told whom, for a statement that came second-hand.</li>
+</ul>
+<p><b>Clashes.</b> When clues you trust cannot all be true, the game sets aside the one that weighs least when it
+checks your answers, until you doubt one yourself. Someone else's reasoning gives way first, then a rule of thumb,
+then a person's word, and your own reasoning last. On Easy the clashes are listed at the top of the Questions tab,
+each laid out step by step, with a "doubt this instead" link on each claim.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="more">
+<h2>9. Odd details, absences and your own questions</h2>
+<h3>“That's odd”</h3>
+<p>A good detective notices when something goes against what one would expect. On a clue, a thing or an event, press
+<span class="btn quiet">That's odd</span>. You can choose a background fact as the reason (<i>because…</i>). The game
+tells you nothing back. It notes where you noticed, and the record compares that with Holmes later.
+<span class="btn quiet">Not odd after all</span> takes it back.</p>
+<h3>What did not happen</h3>
+<p>Sometimes the clue is something that <i>should</i> have happened and did not. You can file an absence from a clue
+card (<i>Should this have shown something that did not happen?</i>) or from the Timeline's board. Choose what you
+would expect, when, and who or what would have noticed, then press <span class="btn">File it</span>. A filed absence
+becomes a clue of its own.</p>
+<h3>Asking your own question</h3>
+<p>On a person, thing or event card, <i>Ask your own question</i> offers fixed wordings, such as "Where is …?",
+"Whose is …?", "Why would … do it?" or "Where was … during …?". Choose one and press
+<span class="btn quiet">Ask</span>. Your question can collect candidate answers from the cards you hold. The game
+checks nothing on it. If the story later asks the same question, yours joins it, and the record notes that you asked
+it first. This is never scored, because a question can be asked of anything.</p>
+<p>All three appear in the Questions tab under <i>Your questions</i> and <i>Odd things</i>.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="theories">
+<h2>10. Theories and wrong turns</h2>
+<p>A <b>theory</b> is a set of answers held together: one possible account of what happened. In
+<span class="tab">Theories</span>, type a name under <i>New theory</i> and press <span class="btn">Create</span>.
+New answers go into whichever theory is marked <i>★ new answers go here</i>. To add an answer, click its chip on any
+question and choose <span class="btn quiet">Add to “…”</span>.</p>
+<p>Characters in the story hold theories of their own, and these appear here as the story reaches them.</p>
+<p>The game <b>weighs</b> each theory against what you trust:</p>
+<ul>
+  <li>which things you trust it needs to be wrong, and whether it goes against your own reasoning or against what was
+  seen;</li>
+  <li>which of the odd things you have noticed it leaves unexplained;</li>
+  <li>which of its answers rest on nothing you hold.</li>
+</ul>
+<p>How much it says depends on the difficulty. On Easy it names everything. On Medium it gives counts only. On Hard
+it says nothing until you press <i>Weigh it</i>.</p>
+<h3>Dropping a wrong turn</h3>
+<p>Not every wrong idea can be disproved outright. <i>Drop it…</i> works on a theory or on a single answer. You choose
+a reason: <i>another theory explains more</i>, <i>it needs more people than another theory</i>, <i>it needs too much
+of what I trust to be wrong</i>, or <i>a card tells against it</i> (and which card). The game checks whether your
+reason holds. On Easy it says why; on Medium it says only whether. A dropped answer is struck through with dots, and
+<i>take it back</i> restores it.</p>
+<h3>The board's “nights”</h3>
+<p>Each theory can also be chosen as a <i>layer</i> on the Timeline's board, to see where its answers put everyone,
+and <span class="btn quiet">Does this night fit?</span> checks it (see <a href="#tabs">Timeline</a>).</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="checks">
+<h2>11. Checks</h2>
+<p>Detectives test their ideas: they look for something, ask someone, show a thing to a witness, or compare two
+things. In <span class="tab">Checks</span> you can plan such a test <b>before</b> Holmes makes it.</p>
+<ol>
+  <li>Pick a verb (<i>Look for … at …</i>, <i>Ask … about …</i>, <i>Show … to …</i>, <i>Compare … with …</i>) and fill
+  it in with cards you hold.</li>
+  <li>If you like, say what you expect (found / not found, yes / no, they match / they differ), which answer that
+  would give, and which of your theories it comes from.</li>
+  <li>Press <span class="btn">Seal it</span>.</li>
+</ol>
+<p>A sealed check says nothing until the story gets there. Then it shows whether Holmes made the same check and, if
+the story tells, what the result was. A check you planned before Holmes made it counts, whatever the result. A wrong
+guess costs nothing. You can <i>withdraw</i> a check until Holmes acts on it.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="tabs">
+<h2>12. The other tabs</h2>
+<dl>
+  <dt><span class="tab">Story ¶n</span></dt>
+  <dd>The text as far as you have read. The label shows the paragraph you are on.</dd>
+  <dt><span class="tab">Questions</span></dt>
+  <dd>The case's questions, with how many answers are left and which you circled. Below them: statements you doubt,
+  your own questions, odd things, and, depending on the difficulty, the clashes and <i>Holmes's interest</i> (places
+  where the story shows what Holmes pays attention to; it points, it proves nothing). As you read, a list of
+  <i>what the story held back</i> also appears: facts told later than they happened, and background the game
+  supplied.</dd>
+  <dt><span class="tab">Timeline</span></dt>
+  <dd>Five views:
+    <ul>
+      <li><b>By place</b> and <b>By thing</b>: a board of where everyone and everything was, and when. Your clues place
+      some of it (solid). The rest you pencil in yourself (dashed). Several marks in one place are several guesses, and
+      clicking a mark strikes it. On a mark you can also <i>prove</i> it or <i>rule it out</i>. You choose whom to
+      <i>follow</i>, and you can split a stretch of time at an event, into before and after.</li>
+      <li><b>What happened</b>: the events you hold, in order, once their time is settled.</li>
+      <li><b>What you found</b>: your cards in the order you collected them.</li>
+      <li><b>What the story told</b>: the scenes, and how many of your clues each one first told.</li>
+    </ul>
+  </dd>
+  <dt><span class="tab">Background</span></dt>
+  <dd>The background facts you have, grouped by subject. Most do not matter to the case and some do. Facts that a
+  reader like you would not know are marked <i>Supplied</i>.</dd>
+  <dt><span class="tab">Notes</span>, <span class="tab">Hints</span>, <span class="tab">Record</span></dt>
+  <dd>See <a href="#notes">Notes</a>, <a href="#hints">Hints</a> and <a href="#record">the record</a>.</dd>
+</dl>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="record">
+<h2>13. Deadlines and your record against Holmes</h2>
+<p>Each step Holmes takes has a <b>deadline</b>: the paragraph where the story shows him taking it. If you made the
+same move before that paragraph, you were ahead of him.</p>
+<p>The game keeps quiet about steps whose deadline you have not reached. Telling you early would give away which of
+your moves are right. So the record grows only as you read: when you pass a deadline, a line appears in the reading
+bar. It might say "Holmes reasons: … You had it at paragraph 9: 4 paragraphs before him", or, if you missed it, where
+you could have had it and from what.</p>
+<p>The header shows <i>Ahead of Holmes: N</i>, and the <span class="tab">Record (N ahead)</span> tab has the
+details. The rows are grouped under:</p>
+<ul>
+  <li><b>Deductions</b>: steps of reasoning Holmes makes;</li>
+  <li><b>Odd details</b>: things Holmes draws attention to;</li>
+  <li><b>Steps seen through</b>: reasoning Holmes shows does not hold;</li>
+  <li><b>Wrong turns dropped</b>: ideas the story leaves behind;</li>
+  <li><b>Checks planned</b>: tests Holmes makes;</li>
+  <li><b>What did not happen</b>: absences Holmes points to.</li>
+</ul>
+<p>When the story ends, the record shows your best leads (<i>Furthest ahead</i>), every move made before Holmes,
+moves that did not count and why, <i>Where you could have been first</i>, and the questions you asked before the
+story did.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="scoring">
+<h2>14. Scoring</h2>
+<ul>
+  <li>You score one point for each of Holmes's steps that you made <b>before</b> its deadline: an inference built or
+  an answer settled, an odd detail marked, an exception raised, a wrong turn dropped, a check sealed, or an absence
+  filed.</li>
+  <li>Hearing someone in the story state an inference gives you the inference, but no point.</li>
+  <li>A <b>dropped</b> wrong turn scores only if the reason you gave actually holds.</li>
+  <li>A <b>check</b> scores whatever its result. Sealing the same check twice with opposite expectations, to cover
+  both outcomes, does not count.</li>
+  <li>Your own questions are recorded but never scored.</li>
+  <li>Nothing is scored on <b>Trivial</b>, because the game does the reasoning there.</li>
+  <li>Hints do not cost points. A move made after a hint, or by <i>Do it</i>, counts like any other. The record does
+  show how many of your moves came with hints, and how far up the hint ladder each one went.</li>
+</ul>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="difficulty">
+<h2>15. Difficulty and pace</h2>
+<p>Open <span class="btn quiet">⚙ Settings</span>. The game starts on <b>Medium</b>, and you can change the
+difficulty at any time without losing your place.</p>
+<table class="diff">
+  <thead><tr><th></th><th>Trivial</th><th>Easy</th><th>Medium</th><th>Hard</th></tr></thead>
+  <tbody>
+    <tr><th>Who reasons</th><td>The game</td><td>You</td><td>You</td><td>You</td></tr>
+    <tr><th>Cards</th><td>Dealt</td><td>Dealt</td><td>Dealt</td><td>Collected by clicking</td></tr>
+    <tr><th>Answers</th><td>Listed</td><td>Listed</td><td>Listed</td><td>You propose them</td></tr>
+    <tr><th>Crossing out</th><td>—</td><td>Pencil</td><td>Checked</td><td>Checked</td></tr>
+    <tr><th>Help shown</th><td>—</td><td>Greyed answers, clashes, counts, Holmes's interest</td><td>None</td><td>None</td></tr>
+    <tr><th>Theories weighed</th><td>—</td><td>In full</td><td>As counts</td><td>When you ask</td></tr>
+    <tr><th>Background facts</th><td>When relevant</td><td>When relevant</td><td>When you ask</td><td>When you ask</td></tr>
+    <tr><th>Building an inference</th><td>—</td><td>Connect clues</td><td>Connect clues</td><td>Connect clues and background; name what it is about</td></tr>
+    <tr><th>Scored</th><td>No</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+  </tbody>
+</table>
+<dl>
+  <dt>Trivial</dt>
+  <dd>The game works out what your clues allow, and each question settles itself. You read and watch, and can ask
+  <i>Why?</i> or <i>Why not?</i> on any answer. An extra setting, <b>The game settles answers</b>, chooses whether an
+  answer settles when Holmes reaches it in the story (<i>Keeping pace with Holmes</i>), or as soon as your clues decide
+  it (<i>As soon as the clues allow</i>), which can be much earlier. There are no hints, checks or record.</dd>
+  <dt>Easy</dt>
+  <dd>You do the reasoning, with plenty of help: answers your clues exclude are greyed, you can ask <i>Could it
+  fit?</i>, clashes are listed, theories are weighed in full, and you cross out freely in pencil.</dd>
+  <dt>Medium</dt>
+  <dd>Every answer is listed, but the game checks each ruling-out against what you hold, and it gives no help.</dd>
+  <dt>Hard</dt>
+  <dd>You collect the cards from the text yourself, propose the answers yourself, connect background facts into
+  inferences like any other card, and say what each conclusion is about.</dd>
+  <dt>Custom</dt>
+  <dd>Open <i>Difficulty options</i> and change any option. The difficulty then reads <b>Custom</b>. You cannot pick
+  Custom from the list; it appears by itself.</dd>
+</dl>
+
+<h3>The difficulty options, in plain words</h3>
+<p>Hover over any option in the game for a longer explanation.</p>
+<dl>
+  <dt>You read as</dt>
+  <dd>A reader of today, a reader of 1892, or a racing man of 1892. This decides which background facts count as
+  things you would not have known. It is not part of the difficulty.</dd>
+  <dt>Background you would not know</dt>
+  <dd><i>Supplied by the game</i>: those facts arrive like the others, marked as supplied. <i>Only where the story says
+  it</i>: you get them only when the story states them, which may be late or never.</dd>
+  <dt>Cards</dt>
+  <dd><i>Dealt as you read</i>, or <i>Collected by clicking the text</i>.</dd>
+  <dt>Cards the solution does not need</dt>
+  <dd>How many of the "colour" cards you get at all: none, one in four, half, three in four, or all. Cards left out
+  are not marked in the text and cannot be collected.</dd>
+  <dt>Background facts</dt>
+  <dd><i>All at once</i> (like a reference book), <i>When relevant</i> (each appears where the story first touches its
+  subject), or <i>When asked</i> (press "What do I know about this?" on a card).</dd>
+  <dt>Who works out the answers</dt>
+  <dd><i>The game</i> or <i>You</i>.</dd>
+  <dt>Answers to a question</dt>
+  <dd><i>All listed</i>, or <i>You propose them</i>.</dd>
+  <dt>Crossing out</dt>
+  <dd><i>Freely, in pencil</i>, or <i>Checked by the game</i>.</dd>
+  <dt>Building an inference</dt>
+  <dd><i>Connect the cards</i>, or <i>Also name what it is about</i>.</dd>
+  <dt>Background in inferences</dt>
+  <dd><i>Needed in hand</i>: you connect the clues, and the background facts only need to be known. <i>Connected
+  too</i>: you connect background facts like clues.</dd>
+  <dt>Answers your clues rule out</dt>
+  <dd><i>Greyed out</i> (with "Could it fit?"), or <i>Not shown</i>.</dd>
+  <dt>Clashes among your clues</dt>
+  <dd><i>Listed</i> in the Questions tab, or <i>Not listed</i>.</dd>
+  <dt>Weighing theories</dt>
+  <dd><i>What and which</i> (in full), <i>How much</i> (counts only), or <i>When you ask</i>.</dd>
+  <dt>Hints</dt>
+  <dd>This option is about small built-in pointers, not the Hint button. <i>How many, and where to start</i>: the
+  Inferences tab counts what you could still build, and when the story waits for a deduction it names the cards to
+  start from. <i>Also the story's own signals</i>: adds Holmes's interest to the Questions tab. <i>None</i>: neither.
+  The <a href="#hints">Hint button</a> works whatever you choose here.</dd>
+</dl>
+<div class="aside warn">Changing <i>who works out the answers</i>, <i>answers to a question</i> or <i>crossing out</i>
+clears your answer marks, because they are kept differently under each, and the game asks you first. Your place in
+the story, your cards and your inferences are kept. Switching to collecting cards counts the cards you already hold
+as collected.</div>
+
+<h3>Pace</h3>
+<dl>
+  <dt>Free</dt>
+  <dd>Read on whenever you like. When Holmes is about to reason, the bar just says "Holmes is a step ahead of you
+  here".</dd>
+  <dt>Wait for deductions</dt>
+  <dd>When the story reaches a point where Holmes acts on a deduction, it stops until you have made it too. The
+  reading bar says what is needed: the inferences he is about to draw (see Inferences), or the question to settle, or
+  at least the answers he rules out. The reading buttons stay greyed until then. This is the closest thing to solving
+  the case alongside him.</dd>
+</dl>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="hints">
+<h2>16. Hints</h2>
+<p>Stuck? Press <span class="btn quiet">Hint</span> in the reading bar. It points you toward the next thing you could
+still do before Holmes, the one whose deadline is nearest. A hint comes in four <b>rungs</b>, each saying a little
+more:</p>
+<ol>
+  <li><b>Where.</b> Which paragraphs to look at again. Click a paragraph number to jump there.</li>
+  <li><b>What kind of move.</b> For example, an inference to build (and what its conclusion is about), something to
+  mark as odd, an answer to drop, or a check to plan.</li>
+  <li><b>Which.</b> The cards involved, or the words to click to get them.</li>
+  <li><b>The step.</b> The moves themselves, spelled out, with a <span class="btn quiet">Do it</span> button that makes
+  them for you on the page. You watch the game do the clicks.</li>
+</ol>
+<p>Press <span class="btn quiet">More</span> for the next rung. The Hint button shows how far you have gone, for
+example <span class="btn quiet">Hint (2/4)</span>. When the target is made, the bar says "Made. Press Hint for the
+next." If nothing you have read yet can put you ahead, it says "Read on". Once you read on, the hint folds up, and a
+<i>show</i> link opens it again.</p>
+<p><b>The cooldown.</b> After each press of Hint or More, both buttons wait a while before you can press again. They
+count down the seconds. The wait is 30 seconds unless you change it under <i>Hint cooldown</i> in Settings, and 0
+turns it off.</p>
+<p><b>The Hints tab</b> lists every hint you have been given: where, what kind, how many rungs, and whether you then
+made the move before Holmes or he got there first.</p>
+<p>Hints work on Easy, Medium and Hard. They do not cost points; see <a href="#scoring">Scoring</a>.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="notes">
+<h2>17. Your notes</h2>
+<p>You can write in the margins, so to speak. Press <span class="btn quiet">✎ Notes</span> in the header to turn on
+notes mode. While it is on, clicking in the story does not open or collect cards:</p>
+<ul>
+  <li><b>Click</b> anywhere in the text to start a note at that point. Type it, then press
+  <span class="kbd">Enter</span> to keep it.</li>
+  <li><b>Drag</b> over some words to mark them. The marking snaps to whole words and stops at the end of the
+  paragraph. Type a note about them, or press <span class="kbd">Enter</span> with nothing typed to keep just the
+  highlight.</li>
+</ul>
+<div class="demo story-demo">
+  It was <span class="hl">the favourite for the Wessex Cup</span> <span class="hand">front-page news</span> that
+  had disappeared.
+  <div class="lbl" style="font-family: var(--sans); margin-top: 4px">A made-up note on the story's opening: a highlight
+  and a handwritten note.</div>
+</div>
+<p>Click a note in the story to edit it. While you are writing or editing, the reading bar shows the keys and a
+<span class="btn quiet">Delete</span> button. A deleted note can be brought back with <i>undo</i>. The
+<span class="tab">Notes</span> tab lists every note, with <i>show</i>, <i>edit</i> and <i>delete</i>.</p>
+<p>Notes are only for you. The game never reads them, and they never affect your score. Press
+<span class="btn quiet">✎ Notes: on</span> again to go back to normal clicking.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="settings">
+<h2>18. Settings and layout</h2>
+<p><span class="btn quiet">⚙ Settings</span> has two parts.</p>
+<h3>The game</h3>
+<p>Difficulty, pace, (on Trivial) when answers settle, and the difficulty options. All of these are described
+<a href="#difficulty">above</a>.</p>
+<h3>The page</h3>
+<p>These settings are yours. They are kept on this device and survive <i>Start over</i>.</p>
+<dl>
+  <dt>Layout</dt>
+  <dd><i>Two columns</i> (two panels side by side) or <i>One column</i>. A narrow screen, such as a phone, always shows
+  one column.</dd>
+  <dt>Theme</dt>
+  <dd><i>As the system</i>, <i>Light</i> or <i>Dark</i>. This guide follows the same choice.</dd>
+  <dt>Notes in the story</dt>
+  <dd><i>Shown</i>: written into the text. <i>Only in the Notes tab</i>: a small ✎ marks each note's place, and the
+  marked words stay highlighted.</dd>
+  <dt>Notes written in</dt>
+  <dd><i>Handwriting</i>, or <i>the page's own face</i>.</dd>
+  <dt>Highlights</dt>
+  <dd><i>A yellow marker</i>, <i>a blue underline</i>, or <i>a pale blue wash</i>.</dd>
+  <dt>Hint cooldown</dt>
+  <dd>Seconds to wait between hint presses (0 for none).</dd>
+</dl>
+<h3>Saving and starting over</h3>
+<p>Your game saves itself in this browser as you play. Close the page and come back later, and you are where you
+left off. <span class="btn quiet">Start over…</span> at the bottom of Settings asks first, then clears your place,
+cards, marks, theories, notes and hints. It keeps your page settings.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="autoplay">
+<h2>19. Watching the autoplay</h2>
+<p><span class="btn quiet">Watch the autoplay…</span> in Settings plays the whole game on Hard, through the page,
+while you watch a cursor make the moves. It contains every answer, so <b>watch it only once you have played, or if
+you do not mind spoilers</b>.</p>
+<p>Your own game is put aside and comes back when you leave the autoplay. A strip at the bottom of the page (at the
+top on a phone) controls it:</p>
+<ul>
+  <li>Before it starts, choose what to watch: <b>The careful reader</b>, who makes every move a careful reader would
+  and writes their thoughts into the story as notes (about an hour at normal speed), or <b>The fewest moves</b> that
+  reach the best score, with no notes and a count of the clicks.</li>
+  <li><span class="btn quiet">Resume</span> / <span class="btn quiet">Pause</span>. While it is paused, the page is
+  yours to look round.</li>
+  <li><span class="btn quiet">Step</span> makes one move, then pauses again.</li>
+  <li>A speed menu runs from ¼× to 4×. The careful reader also has <i>notes at once</i>, which writes each note in a
+  single go.</li>
+  <li><span class="btn quiet">Skip to the next paragraph</span> makes the current paragraph's moves without
+  pausing.</li>
+  <li><span class="btn quiet">Stop</span> ends it. At the end, <span class="btn">Back to your game</span> returns you
+  to where you were.</li>
+</ul>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="logic">
+<h2>20. The logic viewer</h2>
+<p>A separate page, <a href="logic.html">logic.html</a>, lays the whole case open: every clue, inference, background
+fact and question, with how they connect, in several views you can filter and click through.</p>
+<div class="aside warn"><b>It shows every answer.</b> It is meant for the curious after playing, and for anyone
+working on the game. It is not part of play, and the game itself does not link to it.</div>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="tips">
+<h2>21. Mouse and keyboard tips</h2>
+<ul>
+  <li>Click any answer chip for its menu. Click it again to close the menu.</li>
+  <li>Card names in blue are links. They open in the other panel, so you can keep the story in view.</li>
+  <li>A paragraph number on a card or in a hint jumps the story to that paragraph.</li>
+  <li>Hover over almost any setting or button for a short explanation.</li>
+  <li>Writing a note: <span class="kbd">Enter</span> keeps it, <span class="kbd">Shift</span>+<span class="kbd">Enter</span>
+  starts a new line, and <span class="kbd">Esc</span> cancels. Clicking somewhere else also keeps it.</li>
+  <li>Naming a new theory: <span class="kbd">Enter</span> creates it.</li>
+  <li>Proposing an answer on Hard: type the name and the box suggests matches, or use the <i>or choose…</i> menu
+  instead.</li>
+  <li>Clicking anywhere outside the Settings menu closes it.</li>
+  <li>Sometimes a check takes a moment. A "Working it out…" box shows how far it has got, and your clicks wait until it
+  is done.</li>
+</ul>
+<p style="margin-top: 28px"><a href="index.html">← Back to the game</a></p>
+</section>
+
+</main>
+</body>
+</html>

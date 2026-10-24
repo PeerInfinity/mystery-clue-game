@@ -33,7 +33,7 @@ if (main.mentions_file) {
     const m = readJson(main.mentions_file);
     data.mentions = { entities: m.entities, windows: m.windows };
 }
-if (main.thoughts_file) data.thoughts = readJson(main.thoughts_file).thoughts; // Holmes's steps (Round 57); checked by validate-thoughts
+if (main.thoughts_file) data.thoughts = readJson(main.thoughts_file).thoughts; // Holmes's steps; checked by validate-thoughts
 if (main.thoughts_file) data.background = readJson(main.thoughts_file).background; // the reader marks (engine/readers.js)
 const raw = structuredClone(data); // the model grounds some formulas in place (route conclusions): check the schema on the file's own
 delete raw.thoughts;
@@ -281,13 +281,13 @@ const stateRows = [];
     for (const c of data.claims ?? []) { const f = model.cards.get(c.id)?.asserts; if (f) for (const x of slotsOf(f)) note(x, c.id); }
     for (const k of model.constraints.values()) if ((!k.from_claim || k.inference) && !k.defeated) for (const x of slotsOf(k.formula)) note(x, k.inference ?? k.id);
     for (const s of model.slots.values()) {
-        if (!s.track || s.latent) continue; // a statement's belief, unless the case declares it, is latent (workstream 4)
+        if (!s.track || s.latent) continue; // a statement's belief, unless the case declares it, is latent
         const by = [...new Set(filledBy.get(s.id) ?? [])];
         if (s.answer !== null && !by.length) err(`state ${s.id}: answered ${s.answer} but no claim states it and no inference derives it`);
         stateRows.push({ slot: s, by });
     }
 }
-// Parts of a statement (`part_of`, workstream 4): each quoted within its statement's own line; together they assert
+// Parts of a statement (`part_of`): each quoted within its statement's own line; together they assert
 // what the statement asserts (the same formula, or its conjuncts).
 {
     const byId = new Map((data.claims ?? []).map((c) => [c.id, c]));
@@ -313,7 +313,7 @@ const stateRows = [];
     }
 }
 
-// Absences the player files (`files` on a `via: absence` attestation, Round 83): what was expected (a default rule),
+// Absences the player files (`files` on a `via: absence` attestation): what was expected (a default rule),
 // when it did not happen (windows), and who or what would have registered it (a clue that is no absence itself).
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) {
     if (!a.files) continue;
@@ -327,7 +327,7 @@ for (const c of data.claims ?? []) for (const a of c.attested ?? []) {
     if (c.derived) err(`${c.id}: a derived claim is proven, not filed`);
 }
 
-// Orders within a window (`seq`, Round 73): only a claim states one, quoted through its own line; two different timed
+// Orders within a window (`seq`): only a claim states one, quoted through its own line; two different timed
 // events, in their true order where the claim is true.
 const seqRows = [];
 {
@@ -395,7 +395,7 @@ for (const s of model.slots.values()) if (!s.latent && s.answer !== null && s.an
 // Variant constraints and latent slots are the player's other reading of a claim (see caseModel): not the case's.
 for (const k of model.constraints.values()) {
     if (k.variant) continue;
-    // A defeated application (workstream 3): the true story need not keep it, but must bear out what defeats it.
+    // A defeated application: the true story need not keep it, but must bear out what defeats it.
     if (k.defeated) {
         const x = k.exceptions.find((e) => e.id === k.defeated);
         if (evaluate(x.formula, truth, model.timeOrder) === false) err(`${k.id}: defeated by ${k.defeated}, which does not hold in the true solution`);
@@ -470,7 +470,7 @@ const knownBy = (sceneIdx) => {
     for (const r of data.rules ?? []) known.add(r.id);
     return known;
 };
-// Per reader (docs/reader-layer.md, Q1): a rule the reader lacks counts only once the story has stated it.
+// Per reader: a rule the reader lacks counts only once the story has stated it.
 const background = data.background ?? [];
 const FAIR_READERS = ['1892', 'modern'];
 const fairRows = [];
@@ -490,7 +490,7 @@ const fairRows = [];
         });
     }
 }
-// What the story holds back (docs/reader-layer.md, Q2): a fact told late was due before its first mention.
+// What the story holds back: a fact told late was due before its first mention.
 const heldBackRows = [];
 {
     const g = new Game(model);
@@ -527,12 +527,12 @@ for (const k of data.constraints ?? []) {
     if (v.status === 'error') err(`inference ${k.id}: ${v.error}`);
     if (v.status === 'vacuous') err(`inference ${k.id}: its premises cannot all hold`);
     if (v.status === 'verified' && k.asserted) warn(`inference ${k.id} is marked asserted but the engine verifies it`);
-    // The report gate (slice 4, Round 104): an inference the engine does not derive says why.
+    // The report gate (slice 4): an inference the engine does not derive says why.
     if (v.status === 'asserted' && !k.asserted) err(`inference ${k.id} is asserted with no reason (asserted: "<why>")`);
     inferenceRows.push({ k, ...v });
 }
 
-// ---------- named exceptions (workstream 3): where each application's exception stands in the whole story ----------
+// ---------- named exceptions: where each application's exception stands in the whole story ----------
 // Left out of each check: the inference, what rests on it, and every use of a default with the same grounded exception.
 const exceptionRows = [];
 {
@@ -583,7 +583,7 @@ for (const t of data.theories ?? []) {
     theoryRows.push({ t, fitsTheirs, conflict });
 }
 
-// ---------- puzzles (docs/hypotheses.md, Q3) ----------
+// ---------- puzzles ----------
 // Each puzzle's cards, thought and explanations resolve; the true story explains it; and, for the report, which of
 // the story's theories explain it by their answers alone.
 const puzzleRows = [];
@@ -607,13 +607,13 @@ const puzzleRows = [];
     }
 }
 
-// ---------- readings (docs/hypotheses.md, Q6) ----------
+// ---------- readings ----------
 for (const r of data.readings ?? []) {
     if (!model.slots.has(r.slot)) err(`reading ${r.id}: unknown slot ${r.slot}`);
     for (const c of r.cards) if (!has(c)) err(`reading ${r.id}: unknown card ${c}`);
 }
 
-// ---------- checks (docs/predictions.md, Q2–Q4) ----------
+// ---------- checks (Q2–Q4) ----------
 // Each check's action, fields and answer resolve; its paragraphs are in the story and in order; and, for the report,
 // the paragraph from which a player could plan it: every field the plan names has an accepted id the story has
 // mentioned by then (the window opens there and closes at the check's own paragraph).
@@ -798,7 +798,7 @@ function writeReport() {
     }
     out('## Puzzles');
     out();
-    out('Oddities a story of the night must explain (docs/hypotheses.md, Q3). A scenario explains one when its answers,');
+    out('Oddities a story of the night must explain. A scenario explains one when its answers,');
     out('with the facts the player trusts (clues and the world\'s ties, not inferences), entail one of its explanations.');
     out('"Story theories" lists those that do by their answers alone.');
     out();
@@ -808,7 +808,7 @@ function writeReport() {
     out();
     out('## Checks');
     out();
-    out('Checks Holmes makes that a reader can plan first (docs/predictions.md). "Plannable from" is the first paragraph');
+    out('Checks Holmes makes that a reader can plan first. "Plannable from" is the first paragraph');
     out('by which the story has mentioned an accepted id for every field a plan names; a seal before Holmes\'s paragraph');
     out('scores.');
     out();
@@ -834,7 +834,7 @@ function writeReport() {
     if (exceptionRows.length) {
         out('## Exceptions');
         out();
-        out('Named exceptions of default rules (workstream 3), per application: where each stands in the whole story, leaving');
+        out('Named exceptions of default rules, per application: where each stands in the whole story, leaving');
         out('out the inference, what rests on it and every use of the default with the same exception. Raised by a player, an');
         out('open one is a reservation and an established one a defeat.');
         out();
@@ -897,7 +897,7 @@ function writeReport() {
         }
     }
     {
-        // Absences the player files (Round 83): never dealt by mention.
+        // Absences the player files: never dealt by mention.
         const rows = (data.claims ?? []).flatMap((c) => (c.attested ?? []).filter((a) => a.files).map((a) => ({ c, a })));
         if (rows.length) {
             out('## Absences the player files');

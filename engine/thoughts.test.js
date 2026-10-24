@@ -75,7 +75,7 @@ test('short chains: a rule the inference applies is its warrant; a miss can be e
     assert.ok(checkThoughts(bad, model).errors.includes("t20.3: date_note explains the date of a thought's inference"));
 });
 
-test('short chains: a weighed statement counts as cited, used or set aside; so does one a rule application binds (Round 97)', () => {
+test('short chains: a weighed statement counts as cited, used or set aside; so does one a rule application binds', () => {
     const row = (id) => checkThoughts(data, model).chains.rows.find((x) => x.thought === id);
     assert.deepEqual(row('t84.6').uncited, [], "Mrs. Straker's 'friend', weighed (t84.5), is what the merge sets aside");
     assert.deepEqual(row('t92.4').uncited, [], 'her honest denial, weighed (t92.3), is what the dress test uses');
@@ -86,7 +86,7 @@ test('short chains: a weighed statement counts as cited, used or set aside; so d
     assert.deepEqual(checkThoughts(bad, model).chains.rows.find((x) => x.thought === 't84.6').uncited, ['t36.2']);
 });
 
-test('readers lack the rules of the background cards they do not hold (docs/reader-layer.md, Q1)', async () => {
+test('readers lack the rules of the background cards they do not hold', async () => {
     const { lackingRules } = await import('./readers.js');
     const lacks = (reader) => [...lackingRules(data.background, reader).keys()].sort();
     assert.deepEqual(lacks('racing'), ['r.tendon_nick']);
@@ -97,7 +97,7 @@ test('readers lack the rules of the background cards they do not hold (docs/read
     assert.equal(lackingRules(data.background, 'nobody').size, 0);
 });
 
-test('a set-aside names a card the reader holds, and a hypothesis\'s candidates are answers to its question (Round 167)', async () => {
+test('a set-aside names a card the reader holds, and a hypothesis\'s candidates are answers to its question', async () => {
     const { checkThoughts } = await import('./thoughts.js');
     const data = JSON.parse(fs.readFileSync(new URL('../cases/silver-blaze/thoughts.json', import.meta.url)));
     assert.equal(data.thoughts.filter((t) => t.aside).length, 5);
@@ -111,7 +111,7 @@ test('a set-aside names a card the reader holds, and a hypothesis\'s candidates 
     for (const e of ['t6.2: sets aside r.opium_taste', 't24.3: arsenic is no answer', 't4.1: only a SET ASIDE thought']) assert.ok(errors.some((x) => x.startsWith(e)), e);
 });
 
-test('the annotation mirrors the data field by field, and the prose cites only thoughts that exist (Round 183)', () => {
+test('the annotation mirrors the data field by field, and the prose cites only thoughts that exist', () => {
     const bad = structuredClone(data);
     const t = (id) => bad.thoughts.find((x) => x.id === id);
     t('t37.4').text += ' And more.';
@@ -133,7 +133,7 @@ test('the annotation mirrors the data field by field, and the prose cites only t
     ]) assert.ok(r.errors.includes(e), e);
 });
 
-test('the prose is the reader\'s note: a later thought or paragraph goes in the remark, which the annotation marks (Round 184)', () => {
+test('the prose is the reader\'s note: a later thought or paragraph goes in the remark, which the annotation marks', () => {
     const bad = structuredClone(data);
     const t = (id) => bad.thoughts.find((x) => x.id === id);
     t('t4.2').text += ' It breaks at `t68.3`.';
@@ -150,7 +150,7 @@ test('the prose is the reader\'s note: a later thought or paragraph goes in the 
     assert.ok(data.thoughts.some((x) => /¶\d+/.test(x.remark ?? '') && +x.remark.match(/¶(\d+)/)[1] > x.para), 'a remark may look ahead');
 });
 
-test('a ⚠ is the annotator\'s: in the remark, at the level the data records (Round 185)', () => {
+test('a ⚠ is the annotator\'s: in the remark, at the level the data records', () => {
     const bad = structuredClone(data);
     const t = (id) => bad.thoughts.find((x) => x.id === id);
     t('t4.1').text += ' ⚠ low: easy.';
@@ -164,7 +164,7 @@ test('a ⚠ is the annotator\'s: in the remark, at the level the data records (R
     ]) assert.ok(r.errors.includes(e), e);
 });
 
-test('what the autoplay types holds none of the annotation\'s notation: a typed form where the prose cannot be typed (Round 186)', () => {
+test('what the autoplay types holds none of the annotation\'s notation: a typed form where the prose cannot be typed', () => {
     const bad = structuredClone(data);
     const t = (id) => bad.thoughts.find((x) => x.id === id);
     delete t('t46.5').typed;

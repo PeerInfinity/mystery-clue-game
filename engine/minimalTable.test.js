@@ -1,4 +1,4 @@
-// The minimal playthrough (docs/minimal-playthrough.md, Round 200): cases/silver-blaze/action-table-minimal.json, written
+// The minimal playthrough: cases/silver-blaze/action-table-minimal.json, written
 // by `npm run minimal-table`, is made of the action table's own moves, each made no earlier than the reader made it,
 // and replayed it reaches the Hard maximum with every move taking. (The pruning is the script's: too slow for a test.)
 import { test } from 'node:test';

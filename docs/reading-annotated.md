@@ -5,7 +5,7 @@ ids, premises and two dates, then the rest of the story in the same format. Not 
 compared with the case format (that is the gap analysis, next).
 
 **Data:** the thoughts and background cards are mirrored, one per line, in `cases/silver-blaze/thoughts.json`
-(generated once from this document, Round 37), which also maps each thought to the case cards that hold it.
+(generated once from this document), which also maps each thought to the case cards that hold it.
 From now on the JSON is the data and this document the prose: change both together; `npm test` checks that the
 ids and tags agree, and `npm run validate-thoughts` checks the rest and writes `thoughts-report.md`.
 
@@ -62,7 +62,7 @@ quotes the clause it reads (`reads "..."`). That quote, not the whole paragraph,
 | relations | `supports`, `strains` (makes the target less likely), `refutes`, `undercuts` (attacks the link from the target's premises to its conclusion, not the conclusion itself), `revises` (changes what an earlier item means), `drops` (abandons a hypothesis). A target may name a member of a set: `t24.3 (drug)`. |
 | Holmes date | `Holmes ¶N`: where Holmes (or the story) states or confirms the same step; `(contradicts)` where it overturns it; `Holmes —` where he never states it. The gap between the earliest date and Holmes's date is the window in which the reader can beat Holmes. RECORDs have no Holmes date. |
 | ⚠ | Hindsight risk, with a note (in the remark). |
-| *Note:* | The annotator's remark (`remark` in the data), apart from the reader's note: hindsight notes, forward references, scoring, what the game should do, when a thought was added (Round 184). The note itself cites no later thought or paragraph; the remark may. |
+| *Note:* | The annotator's remark (`remark` in the data), apart from the reader's note: hindsight notes, forward references, scoring, what the game should do, when a thought was added. The note itself cites no later thought or paragraph; the remark may. |
 
 ### Tags
 
@@ -334,11 +334,11 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
   Someone came in and took a horse while the dog was there, and nobody heard it: a guard dog barks at strangers, so
   the visitor was someone the dog knew, one of King's Pyland. Exceptions: the dog was drugged too, or barked unheard
   (`t34.3`).
-  *Note:* Added in Round 44: Holmes's step, which a careful reader can take here.
+  *Note:* Added later: Holmes's step, which a careful reader can take here.
 - `t34.8` **ABSENCE** · *fair* · careful · from `t34.1`, `t32.2`, `t33.1`, `bk.alarm` · Holmes —
   Nobody raised the alarm in the night: the lads in the loft slept until Mrs. Straker came at seven, though the
   stall was empty and the guard drugged.
-  *Note:* Added in the annotation review, Round 93: the absence `t34.5` rests on, which the annotation had not
+  *Note:* Added in the annotation review: the absence `t34.5` rests on, which the annotation had not
   tagged.
 
 **¶35**
@@ -418,16 +418,14 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t37.14` **DEFAULT·period** · *fair* · careful · from `t19.1`, `t37.3` · Holmes ¶218 ("the only two people who could have chosen curried mutton")
   In a small household with one maid, the master or the mistress decides what is cooked: Straker or his wife chose
   the curry.
-  *Note:* Added in Round 42: Holmes's step, which a careful reader can take here.
+  *Note:* Added later: Holmes's step, which a careful reader can take here.
 - `t37.15` **DEFAULT** · *weak* · careful · from `t37.6`, `t37.3`, `t20.2`, `t19.1` · strains `t37.9 (maid)` · Holmes ¶218 ("our attention centres upon Straker and his wife")
   If the drugger chose the dish rather than merely knew of it, the drugger is one of the two who decide what the
   house eats: Straker or his wife. Exception: the maid knew the menu without choosing it, so she survives through
   `t37.7`'s "knew".
-  *Note:* Added in Round 42.
 - `t37.16` **INFER** · *strong* · typical · from `t37.3`, `t33.1`, `t20.1`, `t32.1` · Holmes ¶220
   The lad on guard was drugged and by morning the horse was gone: he was drugged so the horse could be taken.
   Whoever drugged him took the horse, after he had eaten and after he sent word of the tout.
-  *Note:* Added in Round 53.
 
 **¶38**
 - `t38.1` **GENRE** · *fair* · careful · from `t35.6`, `t36.2`
@@ -509,7 +507,6 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t46.7` **INFER** · *fair* · careful · from `t37.3`, `t33.1`, `t20.1`, `t32.1`, `t37.16` · Holmes ¶220
   If Straker drugged his own lad, it was for no honest purpose: nobody drugs a guard to take a horse out for
   exercise. Straker would be a dishonest man, and the horse went out for some harm.
-  *Note:* Added in Round 55.
 
 ### State of mind after s02
 
@@ -591,7 +588,6 @@ the horse is (`t14.3`).
 - `t60.4` **INFER** · *strong* · careful · from `t60.1`, `t35.5`, `t32.2`, `t35.2` · Holmes ¶226
   The cravat is Simpson's, and it was in Straker's dead hand. Simpson parted with it before it came into Straker's
   hand, and Straker had it only after he left home at one and before he died.
-  *Note:* Added in Round 54.
 
 **¶62**
 - `t62.1` **RECORD** · typical
@@ -676,7 +672,7 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
   reads "It is what we call a cataract knife"
 - `t80.2` **NOTICE** · *strong* · typical · from `t80.1`, `t32.1` · Holmes ¶81, ¶221
   A horse-trainer carrying **a surgeon's eye-knife** on a night when he expected trouble.
-  *Note:* This is the loudest clue in the story, and the story says so through Holmes. Dated ¶80 in Round 160: the
+  *Note:* This is the loudest clue in the story, and the story says so through Holmes. Dated ¶80: the
   cataract knife is named there, a paragraph before Holmes calls it strange.
 - `t81.1` **RECORD** · *strong* · typical
   reads "A very delicate blade devised for very delicate work"; "it would not shut in his pocket"
@@ -726,7 +722,7 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t84.9` **DEFAULT** · *fair* · careful · from `t84.1`, `t84.3`, `bk.bills` · Holmes ¶225 ("men do not carry other people's bills about in their pockets")
   Men don't carry other people's bills: the account in Straker's pocket was his own, whatever name it bears.
   Exception: settling it for a friend (`t84.4`).
-  *Note:* Added in Round 46: Holmes's step, which `t84.3` notices and `t84.6` uses.
+  *Note:* Added later: Holmes's step, which `t84.3` notices and `t84.6` uses.
 
 **¶85**
 - `t85.1` **RECORD** · typical
@@ -782,7 +778,6 @@ took the horse out (inside, probably Straker, `t46.4`), what killed Straker (`t4
 - `t92.15` **INFER** · *fair* · careful · from `t92.4`, `t84.1`, `t85.1`, `bk.milliner_prices`, `bk.lay_against` · Holmes ¶225
   The costume went to another woman, and a trainer's household does not run to twenty-guinea dresses: if Derbyshire
   is Straker, Straker is keeping a second household, and its debts are his motive.
-  *Note:* Added in Round 55.
 
 **Predictions a reader can make here, before Holmes checks them:**
 - `t92.9` **PREDICT** · *weak* · careful · from `t78.5` · Holmes ¶102–¶106
@@ -828,7 +823,7 @@ ahead by predicting what each action will find.
   reads "There was no wind that night, I understand," "None; but very heavy rain."
 - `t95.2` **PHYSICAL** · *strong* · typical · from `t95.1`, `t35.1`, `t32.2` · refutes `t35.9 (blown)`; supports `t92.10` · Holmes ¶96
   With no wind, the coat wasn't blown onto the bush: it was put there.
-  *Note:* A reader who made `t92.10` scores it here. Dated ¶95 in Round 160: Gregory's answer, its last premise, is
+  *Note:* A reader who made `t92.10` scores it here. Dated ¶95: Gregory's answer, its last premise, is
   there.
 - `t97.1` **RECORD** · typical
   reads "Yes, it was laid across the bush."
@@ -1113,7 +1108,7 @@ are what killed Straker (`t46.6`) and what Holmes asked the maid (`t163.2`).
   reads "You could have got fifteen to one yesterday, but the price has become shorter and shorter, until you can hardly get three to one now"
 - `t188.2` **NOTICE·calculate** · *fair* · careful · from `t188.1`, `bk.odds` · supports `t141.2` · Holmes ¶189
   Odds shortening from 15 to 1 to 3 to 1 means informed money: someone knows the horse will run.
-  *Note:* Holmes, ¶214: "stand[s] to win a little". Dated ¶188 in Round 160: the odds are told there; Holmes remarks
+  *Note:* Holmes, ¶214: "stand[s] to win a little". Dated ¶188: the odds are told there; Holmes remarks
   on them at ¶189.
 
 **¶191**

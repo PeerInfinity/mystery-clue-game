@@ -1,4 +1,4 @@
-// Who the reader is (docs/reader-layer.md, Q1). Each background card (`bk.*` in thoughts.json) is marked for what a
+// Who the reader is. Each background card (`bk.*` in thoughts.json) is marked for what a
 // reader of 1892 and a modern reader know (`reader_1892`, `reader_modern`), and `maps` to the rules that hold it. A
 // reader lacks a rule when a card mapping to it carries a mark that reader does not hold; the game then supplies it.
 

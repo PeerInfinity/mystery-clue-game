@@ -59,6 +59,10 @@ a:hover, .link:hover { text-decoration: underline; }
 .settings-panel .cooldown { display: block; }
 .settings-panel #hint-cooldown { width: 5em; margin-right: 4px; }
 .settings .short { display: none; }
+.settings-link { color: var(--ink); text-decoration: none; padding: 4px 6px; }
+.settings-link:hover { text-decoration: underline; }
+.guide-link { display: inline-block; min-width: 1.6em; padding: 3px 6px; text-align: center; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); text-decoration: none; font-weight: bold; }
+.guide-link:hover { color: var(--ink); }
 .settings-rule { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 2px; }
 button.settings-rule { border-top: 1px solid var(--line); margin-top: 4px; }
 @media (max-width: 600px) {
@@ -71,6 +75,7 @@ button.settings-rule { border-top: 1px solid var(--line); margin-top: 4px; }
   .top #reset { order: 3; }
   .top .progress { order: 4; flex-basis: 100%; font-size: 13px; }
   .settings-panel { right: 0; left: auto; }
+  .guide-link { display: none; } /* the guide is in Settings */
 }
 @media (max-width: 420px) {
   .subtitle { display: none; }
@@ -124,7 +129,7 @@ button.settings-rule { border-top: 1px solid var(--line); margin-top: 4px; }
 .pop .item:hover { background: var(--bg); }
 .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 6px 14px; border-radius: 16px; font-size: 14px; z-index: 11; max-width: 90vw; }
 
-/* A phone: always one column, the reading bar at the bottom of the screen, where the thumb is (docs/layout.md, Q4). */
+/* A phone: always one column, the reading bar at the bottom of the screen, where the thumb is. */
 @media (max-width: 699px) {
   #layout-label { display: none; }
   .layout { grid-template-columns: 1fr; order: 1; }
@@ -313,7 +318,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .chip.pencil.mark-ruled { border-color: var(--good); }
 .chip.pencil.mark-excluded { opacity: 0.5; }
 
-/* The player's notes (docs/notes.md): written into the story in the note's ink, the words they speak of highlighted. */
+/* The player's notes: written into the story in the note's ink, the words they speak of highlighted. */
 @font-face { font-family: 'Caveat'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/Caveat-500-latin.woff2) format('woff2'); }
 :root { --note-ink: #1f4e9c; --note-soft: #8aa3cc; --hl: #ffe45c; --wash: rgba(31, 78, 156, .13); --hand: 'Caveat', cursive; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --note-ink: #9cbcff; --note-soft: #5f79a8; --hl: rgba(255, 214, 0, .32); --wash: rgba(156, 188, 255, .18); } }
@@ -330,7 +335,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .highlight-underline .n-hl { text-decoration: underline solid var(--note-ink); text-decoration-thickness: 2.5px; text-underline-offset: 5px; }
 .highlight-wash .n-hl { background: var(--wash); }
 .n-flash { outline: 2px solid var(--note-ink); outline-offset: 2px; }
-/* The note being written: in the line, as it will look when kept (Round 193); the caret in the note's ink. */
+/* The note being written: in the line, as it will look when kept; the caret in the note's ink. */
 .n-edit { margin: 0 3px; outline: none; white-space: pre-wrap; caret-color: var(--note-ink); cursor: text; }
 .note-hint:not(:empty) { color: var(--note-ink); border: 1.5px solid var(--note-ink); border-radius: 6px; padding: 1px 8px; }
 .note-hint button { padding: 0 7px; font-size: 12px; margin-left: 2px; }
@@ -339,7 +344,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .n-list li { padding: 6px 0; border-bottom: 1px dotted var(--line); }
 .n-list .n-tools { float: right; }
 
-/* The autoplay (docs/autoplay.md, A2, A5): its strip over the foot of the page, its own cursor, a ring on a click. */
+/* The autoplay: its strip over the foot of the page, its own cursor, a ring on a click. */
 .autoplay-strip { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 60; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; max-width: calc(100vw - 32px); padding: 6px 12px; background: var(--panel); color: var(--ink); border: 1.5px solid var(--accent); border-radius: 10px; box-shadow: 0 4px 16px rgb(0 0 0 / .18); font-size: 14px; }
 .autoplay-strip .ap-title { font-weight: 600; color: var(--accent); }
 .autoplay-strip .ap-caption { flex: 1 1 18em; min-width: 0; }

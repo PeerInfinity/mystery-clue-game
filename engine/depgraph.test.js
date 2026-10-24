@@ -1,4 +1,4 @@
-// The DepGraph exports (docs/depgraph.md): each of depgraph-max.json, depgraph-waits.json and depgraph-deductions.json is
+// The DepGraph exports: each of depgraph-max.json, depgraph-waits.json and depgraph-deductions.json is
 // what `npm run depgraph` draws from the moves it holds; each keeps DepGraph's rules (every dependency a node, no cycle,
 // one sink, the goal last in its order) and loads under Archipelago-CC's own parser when that tree is there; and for the
 // maximum, the orders it allows (every move as early as allowed, as late, a seeded draw between) all reach the Hard

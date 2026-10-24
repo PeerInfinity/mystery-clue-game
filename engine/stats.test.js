@@ -1,4 +1,4 @@
-// The game's statistics (docs/minimal-playthrough.md, M7): cases/silver-blaze/stats.md is what `npm run stats` writes
+// The game's statistics: cases/silver-blaze/stats.md is what `npm run stats` writes
 // from the case, its two action tables and the hints' data as they are now.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

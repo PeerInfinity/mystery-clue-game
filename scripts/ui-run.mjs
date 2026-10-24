@@ -1,4 +1,4 @@
-// Play the action table through the real UI in headless Chrome (docs/review-closing.md, Rounds 163–168): a fresh game on
+// Play the action table through the real UI in headless Chrome: a fresh game on
 // Hard chosen in the settings, "Next paragraph" until each move's paragraph, then the move's clicks and fields; after
 // each move the saved game is read to check that the engine took it. At the end, the record against Holmes.
 //   node scripts/ui-run.mjs [table.json] [out.json]   (default: cases/silver-blaze/action-table.json → .cache/ui-run.json)
@@ -35,7 +35,7 @@ const label = async (slot, v) => {
     const c = model.cards.get(v);
     return c && (c.section === 'entities' || c.section === 'events') ? mirror.nameOf(v) : c?.text ?? v;
 };
-// The default layout (docs/layout.md): the story in the left panel, the card in the right. As a player would, the
+// The default layout: the story in the left panel, the card in the right. As a player would, the
 // lists are chosen in the left panel, so a card clicked there opens on the right, and the left goes back to the story
 // to click its words. The reading bar is above both panels. In one column the card opens in place of the list.
 const LEFT = '.panel[data-panel="0"]';

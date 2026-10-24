@@ -1,4 +1,4 @@
-// The reader layer (docs/reader-layer.md, workstream 8): disclosure, readers, hints from the story, set aside.
+// The reader layer: disclosure, readers, hints from the story, set aside.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
@@ -89,7 +89,7 @@ test('an expert step is a bonus: it never gates the wait pace, arrives as Holmes
     assert.ok(free.knows('k.horse_kicked'));
     const rows = new Game(model, { difficulty: EASY }).thoughtScores().map((r) => r.thought);
     assert.ok(rows.includes('t102.4') && rows.includes('t37.13'), 'still scored rows');
-    // The wait pace reads ¶202 without the kick (it held there before, Round 137).
+    // The wait pace reads ¶202 without the kick (it held there before).
     const w = new Game(model, { difficulty: EASY, pace: WAIT });
     const state = w.save();
     w.load({ ...state, read: 202 });
@@ -115,7 +115,7 @@ test('set aside: a card leaves the lists, stays held, is saved, and changes no s
     assert.deepEqual(scores(b), scores(a));
 });
 
-test('re-read went (Round 207): an old save with re-reads still loads, and drops them', () => {
+test('re-read went: an old save with re-reads still loads, and drops them', () => {
     const g = readTo(new Game(model, { difficulty: EASY }), 70);
     const g2 = new Game(model, { difficulty: EASY, state: { ...g.save(), rereads: [{ from: 8, to: 46, question: null, para: 70 }] } });
     assert.equal(g2.read, g.read);
@@ -133,7 +133,7 @@ test('the story\'s own signals: Holmes\'s interest quoted with the cards it ment
     assert.ok(!s.some((x) => x.thought === 't111.2'), 'not before its paragraph');
     const shoe = s.find((x) => x.thought === 't109.2');
     assert.ok(shoe.cards.includes('horseshoe') && shoe.quote.includes('horseshoe into my pocket'));
-    assert.ok(s.every((x) => x.kind === 'watch') && !s.some((x) => x.thought === 't70.2'), 'no passage to re-read (Round 207)');
+    assert.ok(s.every((x) => x.kind === 'watch') && !s.some((x) => x.thought === 't70.2'), 'no passage to re-read');
     // A signal names only cards held, and says nothing of what it implies: no check, no slot, no inference.
     for (const x of s) for (const c of x.cards) assert.ok(g.knows(c) && !c.startsWith('k.') && !c.startsWith('ck.'), c);
     assert.ok(!new Game(model, { difficulty: MEDIUM }).showsSignals());

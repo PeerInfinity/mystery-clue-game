@@ -1,9 +1,9 @@
-// The action table (docs/review-closing.md, Round 168): the annotation's player on Hard, each thought's moves made at its
+// The action table: the annotation's player on Hard, each thought's moves made at its
 // paragraph (retried each paragraph until they hold) and logged as the engine calls they are and as the UI makes them
 // (the tab, the card opened, the buttons and the fields). It is the autoplay's script, and its game reaches the Hard
 // maximum (engine/actionTable.test.js). Moves come from what thoughts.json says each thought holds (maps, inference,
 // notices, raises, checks, dropped, asks, aside, candidates; a GENRE·re-read thought's `passage` makes no move since the
-// Re-read button went, Round 207); a few are the script's own rules, marked below.
+// Re-read button went); a few are the script's own rules, marked below.
 //   actionTable(model) → { table: {difficulty, families, ahead, thoughts: [{id, para, tag, profile, holmes, moves, same,
 //   scores, done}]}, game, never: [thought ids whose move never held] }
 import { Game } from './game.js';
@@ -18,10 +18,10 @@ export function actionTable(model) {
     for (let i = 0; i < story.paragraphs.length; i++) for (const s of story.segments(i)) for (const id of s.ids) if (model.cards.has(id)) { if (!spansOf.has(id)) spansOf.set(id, []); spansOf.get(id).push({ p: i, text: s.text, ids: s.ids.filter((x) => model.cards.has(x)) }); }
     const ruleOwners = new Map();
     for (const [c, rs] of g.rulesOn) for (const r of rs) { if (!ruleOwners.has(r)) ruleOwners.set(r, []); ruleOwners.get(r).push(c); }
-    // The card a SET ASIDE thought sets aside and a hypothesis's candidates are data (thoughts.json, Round 167).
+    // The card a SET ASIDE thought sets aside and a hypothesis's candidates are data (thoughts.json).
     const ASIDE = Object.fromEntries(T.filter((t) => t.aside).map((t) => [t.id, t.aside]));
-    // The script's own rules (docs/review-closing.md), what the annotation's data does not say:
-    // a statement split, or an inference doubted with its reason (t35.6, t68.3; docs/annotation-review.md, review-ws3-ws6);
+    // The script's own rules, what the annotation's data does not say:
+    // a statement split, or an inference doubted with its reason (t35.6, t68.3);
     const DOUBTS = { 't35.6': { split: 'c.straker_defended_himself', reason: 'inference-as-fact' }, 't68.3': { card: 'k.one_culprit', reason: 'two-stories' } };
     // The scenario thoughts the player writes as theories (t92.6: the fixture of engine/hypotheses.test.js).
     const THEORIES = { 't92.6': { label: 'The inside story', assignment: { 'e.opium_added.agent': 'straker', 'e.opium_added.place': 'straker_villa', 'e.horse_led_out.agent': 'straker', 'e.horse_led_out.purpose': 'injure', 'e.fatal_blow.agent': 'silver_blaze', 'e.knife_taken.purpose': 'operation', 'e.coat_off.purpose': 'work', 'william_derbyshire.identity': 'straker', 'straker.honest': 'false', 'silver_blaze.hidden_at': 'mapleton', 'silver_blaze.disguised': 'true', 'e.fatal_blow.instrument': 'steel_shoe', 'e.light_struck.purpose': 'work' } } };
@@ -58,7 +58,7 @@ export function actionTable(model) {
         // A click on the words collects every card they carry, as the UI does (onStoryClick).
         const got = g.collect(sp.p, sp.ids);
         const ok = log('collect', { card: id, from: sp.p, words: sp.text, got }, [{ story: sp.p, span: id, words: sp.text }], g.knows(id));
-        // The script's rule (Round 161): a careful Hard player asks what they know about each card they collect.
+        // The script's rule: a careful Hard player asks what they know about each card they collect.
         for (const c of got) if (g.canAsk(c) && !g.hasAsked(c)) { const learnt = g.ask(c); log('ask', { card: c, got: learnt }, [openUi(c), { click: `[data-ask="${c}"]` }]); }
         return ok;
     }

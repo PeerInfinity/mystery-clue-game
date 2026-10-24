@@ -1,4 +1,4 @@
-// The player's actions as Archipelago-CC DepGraphs (docs/depgraph.md, engine/depgraph.js), in cases/<case>/:
+// The player's actions as Archipelago-CC DepGraphs (engine/depgraph.js), in cases/<case>/:
 //   depgraph-max.json         the maximum score: the minimal playthrough's moves;
 //   depgraph-waits.json       keeping up with the story: the fewest of the reader's moves that read to the end at the
 //                             pace that waits for Holmes's steps;

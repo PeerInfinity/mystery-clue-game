@@ -1,4 +1,4 @@
-// The hints (docs/hints.md): on request, a ladder of four rungs toward the open row with the nearest deadline. A row is
+// The hints: on request, a ladder of four rungs toward the open row with the nearest deadline. A row is
 // one of the score's (a thought and its family); it is open while its deadline is not read, the player has not made it,
 // and all it needs is in what the player has read. What it needs comes from cases/<case>/hints.json (engine/hintData.js:
 // the minimal playthrough's moves, each with the moves that first gave what it needs), pruned live by what the player
@@ -48,7 +48,7 @@ function holds(g, w) {
 
 /**
  * The rows the player has made in time, by the highest rung of hint taken on each before it was made: [no hint, one
- * rung, two, three, four] (docs/hints.md, Round 211). A row made by Do it counts four.
+ * rung, two, three, four]. A row made by Do it counts four.
  */
 export function hintTiers(g) {
     const out = [0, 0, 0, 0, 0];
@@ -100,7 +100,7 @@ export class Hints {
     }
 
     /**
-     * The catch-up note on a row the player did not make (docs/hints.md, H7): `para`, where the last of what it needs
+     * The catch-up note on a row the player did not make: `para`, where the last of what it needs
      * is in the story (the reader's paragraph of the latest of its moves, with all they need), and `cards`, those the
      * move that makes it connects or names. → {para, cards} or null (not a row of the hints).
      */

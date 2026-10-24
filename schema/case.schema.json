@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "mystery-clue-game/case.schema.json",
   "title": "Mystery case, format 0.2 (merged: case.json plus every part it lists)",
-  "description": "A case is a constraint puzzle over the story's fabula. Cards (entities, events, claims, rules, glosses) are what the player sees and connects. Slots are the open questions on cards (an event's agent, place, time...). Constraints rest on cards: once all of a constraint's premises are known it rules values out. The engine (engine/caseModel.js) builds slots from event and entity facets, claim truth slots and the declared slots; scripts/validate-case.js checks everything the schema cannot (references, quotes, uniqueness, theories, Holmes's steps, playability). Format 0.3 adds relations, propositions, rule schemas and verified inferences (docs/format-0.3.md).",
+  "description": "A case is a constraint puzzle over the story's fabula. Cards (entities, events, claims, rules, glosses) are what the player sees and connects. Slots are the open questions on cards (an event's agent, place, time...). Constraints rest on cards: once all of a constraint's premises are known it rules values out. The engine (engine/caseModel.js) builds slots from event and entity facets, claim truth slots and the declared slots; scripts/validate-case.js checks everything the schema cannot (references, quotes, uniqueness, theories, Holmes's steps, playability). Format 0.3 adds relations, propositions, rule schemas and verified inferences.",
   "type": "object",
   "required": [
     "schema_version",
@@ -262,7 +262,7 @@
     },
     "thoughts_file": {
       "type": "string",
-      "description": "The case's annotated reading (thoughts.json): a careful reader's thoughts, checked by scripts/validate-thoughts.js. Holmes's steps come from it (engine/steps.js, Round 57): each thought that names an inference, and each that carries a conclusion of Holmes's (`concludes`)."
+      "description": "The case's annotated reading (thoughts.json): a careful reader's thoughts, checked by scripts/validate-thoughts.js. Holmes's steps come from it (engine/steps.js): each thought that names an inference, and each that carries a conclusion of Holmes's (`concludes`)."
     },
     "mentions_file": {
       "type": "string",
@@ -864,7 +864,7 @@
         "chain": {
           "type": "array",
           "minItems": 1,
-          "description": "Who passed it on before the one quoted (workstream 4, Round 89), first speaker first: each link's speaker, hearer and when.",
+          "description": "Who passed it on before the one quoted, first speaker first: each link's speaker, hearer and when.",
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -880,7 +880,7 @@
           "type": "object",
           "additionalProperties": false,
           "required": ["expectation", "windows", "witness"],
-          "description": "An absence (via absence) the player files rather than is dealt (Round 83): the default rule that expected what did not happen, the windows it did not happen in, and the clue that would have registered it.",
+          "description": "An absence (via absence) the player files rather than is dealt: the default rule that expected what did not happen, the windows it did not happen in, and the clue that would have registered it.",
           "properties": {
             "expectation": { "$ref": "#/$defs/id" },
             "windows": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 1 },
@@ -891,7 +891,7 @@
     },
     "disclosure": {
       "type": "object",
-      "description": "A fact the story discloses late or never (docs/reader-layer.md, Q2): late = the paragraph where it should have been shown (the card is told at its own first mention); never = the story never tells it. The policy is what the case does about it: withhold (as the story does), background (offered early), inferred (the player supplies it).",
+      "description": "A fact the story discloses late or never: late = the paragraph where it should have been shown (the card is told at its own first mention); never = the story never tells it. The policy is what the case does about it: withhold (as the story does), background (offered early), inferred (the player supplies it).",
       "additionalProperties": false,
       "required": ["policy"],
       "properties": {
@@ -929,11 +929,11 @@
         "part_of": {
           "type": "string",
           "pattern": "^c\\.[a-z0-9_]+$",
-          "description": "A part of a statement (workstream 4): dealt only when the player splits that statement, to trust or doubt apart (what was seen, what concluded)."
+          "description": "A part of a statement: dealt only when the player splits that statement, to trust or doubt apart (what was seen, what concluded)."
         },
         "said": {
           "$ref": "#/$defs/formula",
-          "description": "What the clue tells for certain, whatever the player makes of its content (e.g. that the speaker was certain of it): true whenever the clue is held, doubted or not (workstream 4)."
+          "description": "What the clue tells for certain, whatever the player makes of its content (e.g. that the speaker was certain of it): true whenever the clue is held, doubted or not."
         },
         "said_at": {
           "type": "string",
@@ -1089,13 +1089,13 @@
               }
             ]
           },
-          "description": "Exceptions (workstream 3): what would make the fact not apply. A plain string is text only; a named exception (id, text, source, formula) can be raised against one application of the rule."
+          "description": "Exceptions: what would make the fact not apply. A plain string is text only; a named exception (id, text, source, formula) can be raised against one application of the rule."
         }
       },
       "description": "A background fact that serves as a premise. It is shown on the card(s) it attaches to, mixed with the period notes, so that it does not stand out as a clue."
     },
     "reading": {
-      "description": "A slot that carries what old cards mean (docs/hypotheses.md, Q6): its value under each story re-reads the cards.",
+      "description": "A slot that carries what old cards mean: its value under each story re-reads the cards.",
       "type": "object",
       "required": ["id", "slot", "cards"],
       "additionalProperties": false,
@@ -1106,7 +1106,7 @@
       }
     },
     "check": {
-      "description": "A check Holmes makes that a reader can plan first (docs/predictions.md, Q2): the action, the templates a player's plan may take (each field lists the ids it accepts; a field left out accepts anything), the paragraph where Holmes makes it, its result (shown at, late at, or never told), the outcome, and optionally the answer the result asserts. No text of its own.",
+      "description": "A check Holmes makes that a reader can plan first: the action, the templates a player's plan may take (each field lists the ids it accepts; a field left out accepts anything), the paragraph where Holmes makes it, its result (shown at, late at, or never told), the outcome, and optionally the answer the result asserts. No text of its own.",
       "type": "object",
       "required": ["id", "action", "plans", "at", "result"],
       "additionalProperties": false,
@@ -1141,7 +1141,7 @@
       }
     },
     "puzzle": {
-      "description": "An oddity a story of the night must explain (docs/hypotheses.md, Q3): the cards that show it, the annotated thought that reads it, and its explanations. No text of its own.",
+      "description": "An oddity a story of the night must explain: the cards that show it, the annotated thought that reads it, and its explanations. No text of its own.",
       "type": "object",
       "required": ["id", "cards", "thought", "explanations"],
       "additionalProperties": false,
@@ -1484,7 +1484,7 @@
               },
               "defeated_by": {
                 "type": "string",
-                "description": "A false inference's application that the true story defeats (workstream 3): the id of the rule's named exception that holds. Verification keeps the application; the case's reading does not, and the validator checks the exception in the answer key."
+                "description": "A false inference's application that the true story defeats: the id of the rule's named exception that holds. Verification keeps the application; the case's reading does not, and the validator checks the exception in the answer key."
               }
             }
           }
@@ -1972,7 +1972,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Lines that raise the question (workstream 3): the card is dealt at the first, as an event told directly is. Without it, a proposition comes with a clue or inference that speaks of it."
+          "description": "Lines that raise the question: the card is dealt at the first, as an event told directly is. Without it, a proposition comes with a clue or inference that speaks of it."
         },
         "note": {
           "type": "string"
@@ -2010,7 +2010,7 @@
         "believes": {
           "type": "string",
           "pattern": "^[pc]\\.[a-z0-9_]+$",
-          "description": "Belief (workstream 4): the proposition, or the statement (a claim: what the speaker said), believed or not; the track is st.<thing>.believes_<name>."
+          "description": "Belief: the proposition, or the statement (a claim: what the speaker said), believed or not; the track is st.<thing>.believes_<name>."
         },
         "condition": {
           "type": "string"

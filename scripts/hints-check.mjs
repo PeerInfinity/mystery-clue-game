@@ -1,4 +1,4 @@
-// The hints played through the real page (docs/hints.md, H9): on Hard at ¶40, Hint pressed and More to the fourth rung,
+// The hints played through the real page: on Hard at ¶40, Hint pressed and More to the fourth rung,
 // each rung and the log checked in the saved game; Do it made through the page; the Hints tab; a reload keeps the log;
 // the Record's tally by rungs; Trivial has no Hint button; Start over clears the log; read on to ¶57, the catch-up
 // notes on the bar; the cooldown (30 seconds by default; at 3 Hint and More wait). With `all`: a fresh Hard game that only reads and, at every

@@ -1,4 +1,4 @@
-// The hint-only player (docs/hints.md, H9): a game that only reads and, at every paragraph, takes every hint to its
+// The hint-only player: a game that only reads and, at every paragraph, takes every hint to its
 // fourth rung and makes its moves, as Do it does (a drop whose reason would not hold now is left for later). For the
 // test (engine/hints.test.js: it must reach the maximum) and the statistics (engine/stats.js: its hints by scene).
 // Node only: the page's Do it plays the moves through the page instead.

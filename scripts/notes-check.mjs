@@ -1,4 +1,4 @@
-// The player's notes played through the real page (docs/notes.md): with real mouse and keys over the DevTools protocol,
+// The player's notes played through the real page: with real mouse and keys over the DevTools protocol,
 // on Hard at ¶37, a note at a point, a note on marked words, a highlight alone, an edit, a delete and its undo, from the
 // story and from the Notes tab; that notes mode neither collects nor opens cards; a reload keeps the notes and Start over
 // clears them. Each step is checked in the saved game.
@@ -88,7 +88,7 @@ await p.click('#notes-mode');
 const ok = await p.ev(`(() => { const m = document.querySelector('#story p[data-p="37"] .m'); if (!m) return false; m.click(); return true; })()`);
 await p.idle();
 check(ok && ((await game()).collected ?? []).length > collected0, 'mode off: a click collects');
-// A second click on the same words opens their card (Round 198), or the menu of their cards.
+// A second click on the same words opens their card, or the menu of their cards.
 const ids = await p.ev(`document.querySelector('#story p[data-p="37"] .m').dataset.ids.split(' ')`);
 await p.ev(`document.querySelector('#story p[data-p="37"] .m').click(); 1`);
 await p.idle();

@@ -1,8 +1,8 @@
-// The autoplay checked (docs/autoplay.md, A7): the page opened on `?autoplay=fast` in the headless Chrome on port 9333
+// The autoplay checked: the page opened on `?autoplay=fast` in the headless Chrome on port 9333
 // (no pauses, the notes at once), played to the end by ui/autoplay.js itself; then the record must read 70 ahead of
 // Holmes with every family as the action table says, no console error, and the save must hold the notes it wrote.
 //   node scripts/autoplay-check.mjs [minimal] [shots dir]
-// `minimal`: the fewest moves (docs/minimal-playthrough.md, `?autoplay=minimal-fast`): the record as its table says, no
+// `minimal`: the fewest moves (`?autoplay=minimal-fast`): the record as its table says, no
 // notes written, and its clicks counted by kind (→ .cache/autoplay-check-minimal.json).
 // Needs the game served (node scripts/serve.js → URL, default http://localhost:8321/). Only one script may drive that
 // Chrome at a time. About the runner's time (scripts/ui-run.mjs).

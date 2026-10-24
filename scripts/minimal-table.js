@@ -1,4 +1,4 @@
-// The minimal playthrough (docs/minimal-playthrough.md): from the action table, the fewest of its moves that still reach
+// The minimal playthrough: from the action table, the fewest of its moves that still reach
 // the Hard maximum, batched at as few paragraphs as the deadlines allow, written to cases/<case>/action-table-minimal.json
 // (the autoplay's second script). npm run minimal-table [case dir]. The pruning replays the game once per move, in
 // parallel worker threads (WORKERS, default the cores less one): about 20–30 minutes. Rerun when the action table changes.

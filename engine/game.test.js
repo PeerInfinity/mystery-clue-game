@@ -46,9 +46,9 @@ test('reading the whole story (free pace, Easy, background when relevant) collec
     const missing = [...model.cards.values()]
         .filter((c) => ['entities', 'events', 'rules'].includes(c.section) || (c.section === 'claims' && !c.derived))
         .filter((c) => !game.knows(c.id)).map((c) => c.id);
-    // An absence no later line states comes only when the player files it (workstream 5); it can be filed.
+    // An absence no later line states comes only when the player files it; it can be filed.
     const filedOnly = [...game.absenceById().keys()].filter((id) => !game.story.firstAt.has(id));
-    // A part of a statement comes when the player splits the statement (workstream 4); each can be.
+    // A part of a statement comes when the player splits the statement; each can be.
     const parts = model.data.claims.filter((c) => c.part_of).map((c) => c.id);
     assert.deepEqual(missing.filter((id) => !parts.includes(id)), filedOnly);
     assert.deepEqual(game.fileableAbsences().map((a) => a.id), filedOnly);
@@ -435,7 +435,7 @@ test('scoring: a thought the player makes before Holmes states it scores; one Ho
     assert.equal(trivial.score().scored, 0);
 });
 
-test('Hard: an inference whose conclusion speaks through a relation (the curry, the dog) names its kind, and the curry builds (Round 158)', () => {
+test('Hard: an inference whose conclusion speaks through a relation (the curry, the dog) names its kind, and the curry builds', () => {
     const game = new Game(model, { difficulty: HARD, background: BG_START });
     for (const id of ['k.drugger_knew_the_menu', 'k.drugger_knew_the_dish', 'k.dog_knew_the_visitor']) assert.deepEqual(game.conclusionKinds(id), ['who'], id);
     while (game.read < 38) game.advance();

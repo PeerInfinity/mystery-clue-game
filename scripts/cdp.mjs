@@ -1,4 +1,4 @@
-// A small DevTools client for the headless Chrome on port 9333 (Rounds 125–168): load a save, wait on the page (the busy
+// A small DevTools client for the headless Chrome on port 9333: load a save, wait on the page (the busy
 // veil, not a timer), click, choose, read the saved game, take a screenshot. The cache is off, so the page is always the
 // served tree as it is now. Used by scripts/ui-run.mjs.
 import fs from 'node:fs';

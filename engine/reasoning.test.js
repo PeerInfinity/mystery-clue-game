@@ -63,7 +63,7 @@ test('verified inferences: the engine derives the conclusion; an asserted one on
 
 test('applyRule: the player grounds a background fact against cards and holds it', () => {
     const game = new Game(model, { background: BG_START });
-    // The dog's silence is an absence the player files (workstream 5): the dog should have barked, the lads heard nothing.
+    // The dog's silence is an absence the player files: the dog should have barked, the lads heard nothing.
     while (!game.knows('c.lads_heard_nothing')) game.advance();
     assert.ok(game.fileAbsence('r.dog_barks_at_strangers', 'w.tue_stable', 'c.lads_heard_nothing').ok);
     assert.ok(game.knows('e.stable_entered') && game.knows('e.dog_silent'));
@@ -211,7 +211,7 @@ test('the default knowledge rules range over propositions: a bound proposition n
     for (const r of ['r.told_knows', 'r.present_sees', 'r.acts_on_knows']) assert.equal(model.cards.get(r).strength, 'default');
 });
 
-test('concludeFrom: a conclusion of the player\'s own, the cited cards\' background applied as the case applies it (docs/ui.md Q2)', () => {
+test('concludeFrom: a conclusion of the player\'s own, the cited cards\' background applied as the case applies it', () => {
     const game = new Game(model, { difficulty: EASY, options: { background: 'relevant' } });
     game.readTo(38);
     const k = model.cards.get('k.drugged_in_food');

@@ -5,15 +5,15 @@
 // checkThoughts() returns errors (the data is wrong) and a report: how far the case's cards cover the thoughts,
 // and where the game deals a mapped card later than the reader could have it.
 //
-// Short chains (docs/short-chains.md): each deduction-type thought names one authored inference (`inference`, a
+// Short chains: each deduction-type thought names one authored inference (`inference`, a
 // `k.*` id in constraints.json) whose premises are its cited thoughts' cards. The checker reports, as warnings,
 // the thoughts with no inference yet, premises that do not agree with what the thought cites, an inference named
 // by two thoughts, inferences no thought names that are not marked `implicit`, and the thoughts whose inference
 // the game cannot have dealt by the thought's own paragraph (the earliest date). A rule the inference applies is
-// the step's warrant and need not be cited (Round 42); a premise that is an implicit inference is bookkeeping and
+// the step's warrant and need not be cited; a premise that is an implicit inference is bookkeeping and
 // need not be either. A thought may explain an accepted earliest-date miss in `date_note`. A deduction that can
-// have no inference says why in `no_inference` (Round 56) (`workstream-3` and `workstream-6` were retired in Rounds 112
-// and 116, their thoughts all held): `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files, Round 82), `doubt` (the move doubts an inference rather than drawing one: `t68.3`, Round 116).
+// have no inference says why in `no_inference` (the older `workstream-3` and `workstream-6` reasons are
+// retired, their thoughts all held): `action` (a prediction played as an action), `world-model` (it needs a slot the case lacks yet), `absence` (it rests on an absence the player files), `doubt` (the move doubts an inference rather than drawing one: `t68.3`).
 
 import { Game, BG_RELEVANT, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from './game.js';
 import { READER_MARKS } from './readers.js';
@@ -34,8 +34,8 @@ const PROFILES = ['typical', 'careful', 'expert'];
 const NO_CONFIDENCE = (t) => ['RECORD', 'QUESTION', 'SET ASIDE'].includes(t.tag) || t.subtype === 're-read';
 // The deduction-type tags: each such thought becomes one authored inference (short chains, Q1).
 export const DEDUCTION = ['INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY'];
-// A TEST that concludes something (the costume went to another woman) may name its inference too (Round 46).
-const CAN_NAME = [...DEDUCTION, 'TEST', 'WEIGH', 'SOURCE', 'DROP']; // WEIGH and SOURCE: a belief weighed (workstream 4, Round 87); DROP: a candidate dropped, "not X" (Round 96)
+// A TEST that concludes something (the costume went to another woman) may name its inference too.
+const CAN_NAME = [...DEDUCTION, 'TEST', 'WEIGH', 'SOURCE', 'DROP']; // WEIGH and SOURCE: a belief weighed; DROP: a candidate dropped, "not X"
 export const NO_INFERENCE = ['action', 'world-model', 'absence', 'doubt'];
 
 /**
@@ -103,7 +103,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         if (t.subtype && !(SUBTYPES[t.tag] ?? []).includes(t.subtype)) err(`${t.id}: ${t.tag} has no subtype ${t.subtype}`);
         if (t.confidence ? !CONFIDENCE.includes(t.confidence) : !NO_CONFIDENCE(t)) err(`${t.id}: confidence ${t.confidence ?? 'missing'}`);
         if (!PROFILES.includes(t.profile)) err(`${t.id}: profile ${t.profile ?? 'missing'}`);
-        // The passage a re-read points back to (docs/reader-layer.md, Q4): read already, within the story.
+        // The passage a re-read points back to: read already, within the story.
         if (t.passage && !(t.tag === 'GENRE' && t.subtype === 're-read')) err(`${t.id}: only a GENRE·re-read thought names a passage`);
         if (t.passage && !(Array.isArray(t.passage) && t.passage.length === 2 && t.passage[0] >= 1 && t.passage[0] <= t.passage[1] && t.passage[1] < t.para)) err(`${t.id}: passage ${JSON.stringify(t.passage)} is not paragraphs already read`);
         // Premises and relation targets exist and are no later than the thought.
@@ -130,12 +130,12 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         }
         if (t.holmes && !t.holmes.never) for (const p of t.holmes.paras ?? []) if (p < 0 || p > last) err(`${t.id}: Holmes paragraph ${p} is outside the story`);
         for (const x of t.maps ?? []) if (!caseIds.has(x)) err(`${t.id}: maps to unknown ${x}`);
-        // The cards whose marking as odd counts for a notable detail (workstream 5, Round 84).
+        // The cards whose marking as odd counts for a notable detail.
         if (t.notices && t.tag !== 'NOTICE') err(`${t.id}: only a NOTICE thought lists the cards it notices`);
-        // An event card too (Round 98): the odd thing may be that something happened at all (the horse taken, not lamed in his stall).
+        // An event card too: the odd thing may be that something happened at all (the horse taken, not lamed in his stall).
         for (const x of t.notices ?? []) if (!['claims', 'entities', 'events'].includes(model?.cards.get(x)?.section ?? (caseIds.has(x) ? 'claims' : null))) err(`${t.id}: notices ${x}, which is not a clue, entity or event card`);
-        // The card a SET ASIDE thought puts aside, and the answers a hypothesis proposes on a question (Round 167): the
-        // reader's moves the action table makes (docs/review-closing.md).
+        // The card a SET ASIDE thought puts aside, and the answers a hypothesis proposes on a question: the
+        // reader's moves the action table makes.
         if (t.aside !== undefined && t.tag !== 'SET ASIDE') err(`${t.id}: only a SET ASIDE thought names a card to set aside`);
         if (t.aside !== undefined && model && !['entities', 'events', 'claims'].includes(model.cards.get(t.aside)?.section)) err(`${t.id}: sets aside ${t.aside}, which is not an entity, event or clue card`);
         if (t.candidates !== undefined && t.tag !== 'HYPOTHESIS') err(`${t.id}: only a HYPOTHESIS thought proposes candidates`);
@@ -145,7 +145,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             else for (const v of t.candidates.values ?? []) if (!s.domain.includes(v)) err(`${t.id}: ${v} is no answer to ${t.candidates.slot}`);
             if (!(t.candidates.values ?? []).length) err(`${t.id}: candidates name no answer`);
         }
-        // The question a QUESTION thought poses, as a template over cards (docs/questions.md, Q2).
+        // The question a QUESTION thought poses, as a template over cards.
         if (t.asks && t.tag !== 'QUESTION') err(`${t.id}: only a QUESTION thought poses a question`);
         if (t.asks) {
             const tpl = QUESTION_TEMPLATES[t.asks.template];
@@ -156,7 +156,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
                 if (!c || !(tpl.cards[i].includes('events') ? c.section === 'events' : c.section === 'entities' && tpl.cards[i].includes(c.kind))) err(`${t.id}: asks about ${x}, which is not of the kinds ${t.asks.template} takes`);
             });
         }
-        // The exceptions whose raising counts for a thought (workstream 3, Round 105): a named exception of a rule
+        // The exceptions whose raising counts for a thought: a named exception of a rule
         // that one of the target inference's applications applies.
         for (const x of t.raises ?? []) {
             const k = inferenceById.get(x.target);
@@ -164,7 +164,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             const rules = new Map((model?.data.rules ?? []).map((r) => [r.id, r]));
             if (!(k.rules ?? []).some((u) => (rules.get(u.rule)?.unless ?? []).some((e) => e?.id === x.exception))) err(`${t.id}: ${x.exception} is not a named exception of a rule ${x.target} applies`);
         }
-        // What a drop drops in the game (workstream 6, Round 116): a story theory, a candidate (slot = value), or, by a
+        // What a drop drops in the game: a story theory, a candidate (slot = value), or, by a
         // doubt, an inference; with its reason, the cards it cites, and, where Holmes never takes it up, the paragraph by
         // which the story makes it untenable (the deadline it scores against).
         if (t.dropped) {
@@ -177,7 +177,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             for (const c of d.cites ?? []) if (!caseIds.has(c)) err(`${t.id}: drop cites unknown ${c}`);
             if (d.deadline !== undefined && !(d.deadline > t.para)) err(`${t.id}: drop deadline ¶${d.deadline} is not after the thought`);
         }
-        // The checks a PREDICT or TEST PLAN thought plans (workstream 7, Round 127): the check, and what it expects of
+        // The checks a PREDICT or TEST PLAN thought plans: the check, and what it expects of
         // the result (one of the template's outcomes) and, with that, the answer the result would assert.
         if (t.checks && ![t.tag, t.then_tag].some((x) => ['PREDICT', 'TEST PLAN', 'HYPOTHESIS'].includes(x))) err(`${t.id}: only a PREDICT, TEST PLAN or HYPOTHESIS thought plans a check`);
         for (const x of t.checks ?? []) {
@@ -200,27 +200,27 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
         } else if (implicitRequired && DEDUCTION.includes(t.tag) && t.inference === undefined) err(`${t.id}: a ${t.tag} thought names no inference and gives no no_inference reason`);
     }
 
-    // The ids a thought's prose and remark cite (Round 183): each one a thought or a background card that exists. The
+    // The ids a thought's prose and remark cite: each one a thought or a background card that exists. The
     // prose is the reader's note at its paragraph, so a thought or paragraph it cites lies no later; looking ahead is
-    // the annotator's, in the remark (Round 184).
+    // the annotator's, in the remark.
     for (const t of thoughts) {
         for (const id of [...citedIds(t.text), ...citedIds(t.remark)]) if (!byId.has(id) && !bkIds.has(id)) err(`${t.id}: its prose cites ${id}, which does not exist`);
         for (const id of citedIds(t.text)) if (byId.get(id)?.para > t.para) err(`${t.id}: its prose cites ${id}, which comes later (¶${byId.get(id).para}); a remark may`);
         for (const x of (t.text ?? '').matchAll(/¶(\d+)/g)) if (+x[1] > t.para) err(`${t.id}: its prose cites ¶${x[1]}, after its own paragraph; a remark may`);
         if (t.remark !== undefined && !(typeof t.remark === 'string' && t.remark.trim())) err(`${t.id}: a remark is some text`);
-        // What the autoplay types as the reader's note (docs/autoplay.md A3, Round 186): the typed form, or else the
+        // What the autoplay types as the reader's note: the typed form, or else the
         // prose as it stands; either way no ⚠, backtick, ¶, thought or card id, or set in braces, which are the
         // annotation's notation and would run ahead of the story or mean nothing on the page.
         if (t.typed !== undefined && !(typeof t.typed === 'string' && t.typed.trim() && t.text)) err(`${t.id}: a typed note is some text, for a thought with prose`);
         const typed = t.typed ?? t.text;
         if (typed) for (const [what, re] of TYPED_REFUSES) if (re.test(typed)) err(`${t.id}: ${t.typed !== undefined ? 'its typed note' : 'its prose, typed as it stands,'} has ${what}${t.typed !== undefined ? '' : '; give it a typed form'}`);
-        // A hindsight mark (⚠) is the annotator's: in the remark, with the level the data records (Round 185).
+        // A hindsight mark (⚠) is the annotator's: in the remark, with the level the data records.
         if ((t.text ?? '').includes('⚠')) err(`${t.id}: a ⚠ belongs in the remark, not the reader's note`);
         const mark = t.hindsight === undefined ? null : t.hindsight === 'noted' ? '⚠ fair play' : `⚠ ${t.hindsight}`;
         if (mark ? !(t.remark ?? '').includes(mark) : (t.remark ?? '').includes('⚠')) err(`${t.id}: hindsight ${t.hindsight ?? 'none'}, but its remark ${mark ? `has no "${mark}"` : 'carries a ⚠'}`);
     }
 
-    // The Markdown mirror (Round 183): the same thoughts, field by field (bold and line breaks aside).
+    // The Markdown mirror: the same thoughts, field by field (bold and line breaks aside).
     if (markdown !== null) {
         const md = parseAnnotation(markdown);
         for (const [id, e] of md) {
@@ -258,7 +258,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
             const at = reader.unlocked.get(t.aside)?.para;
             if (at === undefined || at > t.para) err(`${t.id}: sets aside ${t.aside}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
         }
-        // A question can be posed only about cards the player holds by the thought's paragraph (docs/questions.md).
+        // A question can be posed only about cards the player holds by the thought's paragraph.
         for (const t of thoughts.filter((x) => x.asks)) for (const id of t.asks.cards ?? []) {
             const at = reader.unlocked.get(id)?.para;
             if (at === undefined || at > t.para) err(`${t.id}: asks about ${id}, which the game deals ${at === undefined ? 'never' : `at ¶${at}`}, after ¶${t.para}`);
@@ -271,7 +271,7 @@ export function checkThoughts(data, model, { markdown = null, dates = false, imp
     return { errors, coverage, dateGaps, chains, unmappedBackground: background.filter((b) => !(b.maps ?? []).length).map((b) => b.id) };
 }
 
-// What a note the autoplay types may not hold (docs/autoplay.md A3).
+// What a note the autoplay types may not hold.
 export const TYPED_REFUSES = [['a ⚠', /⚠/], ['a backtick', /`/], ['a ¶', /¶/], ['a thought or card id', /\b(t\d+\.\d+|(bk|[ckreqa]|pz|rd|ck)\.[a-z_]{2,})\b/], ['a set in braces', /[{}]/]];
 
 // The ids a piece of prose cites: thoughts (t<¶>.<n>) and background cards (bk.<name>).
@@ -355,7 +355,7 @@ function checkChains(thoughts, background, inferenceById, byId, model, claimById
     const bkById = new Map(background.map((b) => [b.id, b]));
     // The case cards a cited item stands for: a thought's inference and the cards it maps to; a background card's rules.
     // A cited WEIGH or SOURCE thought whose inference is a belief about a statement stands for that statement
-    // (the statements its rule applications bind): the step weighed it before using it or setting it aside (Round 97).
+    // (the statements its rule applications bind): the step weighed it before using it or setting it aside.
     const weighed = (id) => {
         const o = byId.get(id);
         if (!o || !['WEIGH', 'SOURCE'].includes(o.tag)) return [];
@@ -408,7 +408,7 @@ function checkChains(thoughts, background, inferenceById, byId, model, claimById
         // QUESTION stands for the question it poses).
         const asked = new Set([k, ...k.premises.map((p) => inferenceById.get(p)).filter(Boolean)].flatMap((x) => [...slotsOf(x.formula)]));
         // Statements the inference binds in its rule applications: it weighs them without resting on them (a denial
-        // that, trusted, would contradict the deed; Round 87).
+        // that, trusted, would contradict the deed).
         const bound = new Set((k.rules ?? []).flatMap((u) => Object.values(u.bind ?? {})));
         const conclusionSlots = new Set(slotsOf(k.formula));
         for (const p of t.from ?? []) {
@@ -439,13 +439,13 @@ function checkChains(thoughts, background, inferenceById, byId, model, claimById
     const implicit = [...inferenceById.values()].filter((k) => k.implicit).map((k) => k.id);
     const implicitNamed = [...namedBy].filter(([id]) => inferenceById.get(id).implicit).map(([inference, ts]) => ({ inference, thought: ts[0] }));
     // A character's wrong reasoning (`truth: false`, the police's four) is not a reader's step: it becomes a
-    // candidate defeated by undercut, strain and drop in workstream 3 (Round 33), so it needs no thought here.
+    // candidate defeated by undercut, strain and drop, so it needs no thought here.
     const wrong = [...inferenceById.values()].filter((k) => k.truth === false && !namedBy.has(k.id)).map((k) => k.id);
     const unnamed = [...inferenceById.values()].filter((k) => !k.implicit && k.truth !== false && !namedBy.has(k.id)).map((k) => k.id);
     return { rows, shared, implicit, implicitNamed, unnamed, wrong };
 }
 
-/** Read a game through to the end, filing each absence as soon as it can be filed (a careful reader; workstream 5). */
+/** Read a game through to the end, filing each absence as soon as it can be filed (a careful reader). */
 function readThrough(game) {
     const fileAll = () => { for (const a of game.fileableAbsences()) game.fileAbsence(a.expectation, a.windows[0], a.witness); };
     fileAll();

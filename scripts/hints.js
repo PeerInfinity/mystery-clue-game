@@ -1,4 +1,4 @@
-// The hints' data (docs/hints.md, H2): cases/<case>/hints.json, from the case and its two action tables
+// The hints' data: cases/<case>/hints.json, from the case and its two action tables
 // (engine/hintData.js). npm run hints [case dir], about a minute. Rerun when the case or the tables change (a test checks it).
 import fs from 'node:fs';
 import path from 'node:path';
