@@ -1132,11 +1132,14 @@ export class Game {
             && (witness === null || a.witness === witness) && (root === null || (a.windows.includes(root) && this.reached(root))));
     }
     /** Does a check a row still waits for (one that scores, not yet sealed), which Holmes has yet to make, take this verb
-     *  and these fields ({field: card}, any)? */
-    sealOnto(verb, fields = {}) {
+     *  and these fields ({field: card}, any)? With `slot`: does such a row expect an answer to that question (a question
+     *  the player holds; never the answer's value)? */
+    sealOnto(verb, fields = {}, { slot = null } = {}) {
         if (this.pace !== INCREMENTAL || !CHECK_TEMPLATES[verb]) return false;
-        const dated = new Set((this.model.data.thoughts ?? []).filter((t) => t.holmes && !t.holmes.never && t.holmes.paras?.length).map((t) => t.id));
-        const counted = new Set(this.checkScores().filter((r) => dated.has(r.thought) && (r.sealed === null || r.hedged)).map((r) => r.check));
+        if (slot !== null && !(this.model.slots.has(slot) && this.slotVisible(slot))) return false;
+        const thoughts = new Map((this.model.data.thoughts ?? []).filter((t) => t.holmes && !t.holmes.never && t.holmes.paras?.length).map((t) => [t.id, t]));
+        const asks = (r) => slot === null || thoughts.get(r.thought).checks.some((w) => w.check === r.check && w.answer && slotsIn(w.answer).has(slot));
+        const counted = new Set(this.checkScores().filter((r) => thoughts.has(r.thought) && (r.sealed === null || r.hedged) && asks(r)).map((r) => r.check));
         return (this.model.data.checks ?? []).some((ck) => counted.has(ck.id) && ck.at >= this.read && ck.plans.some((p) => p.verb === verb
             && CHECK_TEMPLATES[verb].fields.every((f) => !p[f] || p[f].some((c) => this.knows(c)))
             && Object.entries(fields).every(([f, c]) => this.knows(c) && (!p[f] || p[f].includes(c)))));

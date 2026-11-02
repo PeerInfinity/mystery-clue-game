@@ -96,7 +96,7 @@ test('incremental mode answers for part of an absence, a sealed check or a drop,
     free.readTo(60);
     assert.equal(free.sealOnto('look', {}), false);
     assert.equal(free.absenceOnto({}), false);
-    const seen = { file: 0, seal: 0, drop: 0 };
+    const seen = { file: 0, seal: 0, answer: 0, drop: 0 };
     const check = (g, model, m) => {
         if (m.op === 'file' && !g.knows(m.absence)) {
             assert.ok(g.absenceOnto({ expectation: m.expectation }) && g.absenceOnto({ witness: m.witness }) && g.absenceOnto({ time: m.time }), `absence parts at ¶${g.read}`);
@@ -110,6 +110,13 @@ test('incremental mode answers for part of an absence, a sealed check or a drop,
             if (g.sealOnto(m.verb, m.fields)) {
                 assert.ok(g.sealOnto(m.verb, {}) && g.sealOnto(m.verb, { [f1]: m.fields[f1] }) && g.sealOnto(m.verb, { [f2]: m.fields[f2] }));
                 seen.seal++;
+                // The question an expected answer is about, never its value.
+                if (m.answer?.eq) {
+                    assert.ok(g.sealOnto(m.verb, m.fields, { slot: m.answer.eq[0] }), `answer question at ¶${g.read}`);
+                    const other = g.visibleSlots().find((sl) => sl.id !== m.answer.eq[0]);
+                    assert.equal(g.sealOnto(m.verb, m.fields, { slot: other.id }), false);
+                    seen.answer++;
+                }
             }
         }
         if (m.op === 'drop') {
@@ -122,7 +129,7 @@ test('incremental mode answers for part of an absence, a sealed check or a drop,
     };
     const { stuck } = playLazy(model, hints, waits, check);
     assert.equal(stuck, null);
-    assert.ok(seen.file >= 1 && seen.seal >= 5 && seen.drop >= 3, JSON.stringify(seen));
+    assert.ok(seen.file >= 1 && seen.seal >= 5 && seen.answer >= 1 && seen.drop >= 3, JSON.stringify(seen));
     // A card not held answers nothing.
     const g = new Game(model, { pace: INCREMENTAL, waits: waits.waits });
     g.readTo(30);

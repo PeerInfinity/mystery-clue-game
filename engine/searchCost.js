@@ -14,7 +14,8 @@
 //   answers    the other route to a deduction that rules one answer out: the answer pairs, one of which (if provable
 //              now) makes it; expected (A + 1) / 2. Counted, never taken (the run builds).
 // With `onto` (the default), absences, sealed checks and drops are searched too, part by part with incremental mode's
-// feedback (Game.absenceOnto, sealOnto, dropOnto), the expectation, the answer and the reason tried whole; without it
+// feedback (Game.absenceOnto, sealOnto, dropOnto; the question an expected answer is about too), the expectation, the
+// answer's value and the reason tried whole; without it
 // they are counted only. A wait no search meets is made with the minimal playthrough's moves (hints.json), so the game
 // goes on, and reported. → {stops: [...], rows: [...], extra: {...}}
 import { Game, INCREMENTAL, CHECK_TEMPLATES, CONCLUSION_KINDS, DROP_REASONS } from './game.js';
@@ -199,7 +200,11 @@ export function searchCost(model, hints, waits, make, { seed = 1, onto = true } 
                             // No expectation first: it never hedges another seal of the same check.
                             const expects = [null, ...shuffle(CHECK_TEMPLATES[verb].outcomes, r)];
                             for (const expect of expects) if (sealOnce(verb, fields, { expect })) break search;
-                            if (answer) for (const expect of CHECK_TEMPLATES[verb].outcomes) for (const sl of shuffle(slots, r)) for (const v of sl.domain.filter((x) => g.offered(sl.id, x))) if (sealOnce(verb, fields, { expect, answer: { eq: [sl.id, v] } })) break search;
+                            // The question an expected answer is about is a part too; its value is tried whole.
+                            if (answer) {
+                                const qs = shuffle(slots, r).filter((sl) => { checks++; return g.sealOnto(verb, fields, { slot: sl.id }); });
+                                for (const expect of CHECK_TEMPLATES[verb].outcomes) for (const sl of qs) for (const v of shuffle(sl.domain.filter((x) => g.offered(sl.id, x)), r)) if (sealOnce(verb, fields, { expect, answer: { eq: [sl.id, v] } })) break search;
+                            }
                         }
                     }
                     row.checks = checks;
