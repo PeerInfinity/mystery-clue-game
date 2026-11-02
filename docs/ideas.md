@@ -88,7 +88,7 @@ deciding where to look first: which cards, questions or scenes to point the sear
 any proposed move cheaply (`checkStep`, `propose`, `concludeFrom`), the action tables and `hints.json` list every
 scoring move with what it needs, and the statistics give the size of each search space.
 
-**Decided so far (2026-11-02; nothing built).**
+**Decided so far (2026-11-02).**
 
 - **No purchases.** Nothing is bought or upgraded: progress speeds up by itself as parts of the search space are
   ruled out.
@@ -253,6 +253,37 @@ forced.
 - **Lessons for the automation**: never take back a move that made another row (a notice, a raise, a drop, a seal);
   feedback stops pointing at a row once it is made; rebuild the card pool after a build (an inference is a premise
   too).
+
+**Step 4 built: the automation** (engine only; `engine/automation.js`). An `Automation` plays a game at the
+incremental pace a check at a time (`step(budget)`): it reads until the story waits, collects every span read and asks
+about every card, then searches the families the open waits name in turn, with only the feedback the game gives (step
+3's parts, the question of an expected answer among them: the user's choice for `t92.12`). What it built on the
+measurement of steps 2 and 3:
+
+- **Alone it reaches 70** in every order tried (three), with no hints: 20–30 seconds of engine time, except where a
+  drop's reasons are tried against a theory (`t62.4`, about 5,000 solver checks, four minutes in one order).
+- **The player steers with the marks**, never the case data: a card set aside goes last; the cards of a circled answer
+  (its question's card, the answer if it is a card) first, then cards marked odd. A circled answer is tried first as
+  a check's expected answer and last as a drop; a crossed-out one the other way. Each category can be paused
+  (`setRunning`); a paused one leaves its wait open, and the automation goes idle naming it.
+- **The counts** (`counts()`), per category: the space as terms added, each a product of factors (sealed checks: Σ
+  over the verbs of field × field × expected results; builds: Σ over the set sizes of C(cards, k) × kinds), the
+  checks made, what they found, what is ruled out now, and the stale count. What a build rules out is a lower bound
+  (only cards alone not onto anything are counted).
+- **Stale negatives, option (c)**: a build set that is part of a recipe now complete; a check's verb or field card
+  when a plan that takes it names the new card in another field; an absence's parts when one of its cards or times
+  arrives or the story passes it; a drop's reasons on any new card; a notice, a raise or a sealed check that lifted
+  nothing, when a new wait of its family opens. At the end of a run: 10–24 build sets, 60–90 check parts, 35–200 drop
+  reasons, and 440–575 notices (each new notice wait makes every earlier "no" stale, and the wait lifts long
+  before they are all checked again).
+- **Checks over a whole run** (three orders): builds about 35,000 (54 inferences built), notices 1,200–1,550,
+  sealed checks 4,500–6,800, drops 4,600–7,100, the absence about 280, raises about 20; collecting about 340 spans
+  and asking about 265 cards.
+- **Traps**: a search is a generator abandoned whenever the hand changes, so whatever it counts must be counted before
+  it yields; a move that made something is never taken back (it may be another row's).
+
+Next: the page (a panel per category with the counts and their factors, the waits, pause and resume, the marks as
+the steering, and the hedge of a sealed check made plain).
 
 **Settings proposed.** Kept apart from the difficulty presets, as the reader option is; the first build uses the
 largest space of each (builds and answers, no added feedback):
