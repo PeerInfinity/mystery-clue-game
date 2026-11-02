@@ -15,6 +15,7 @@
     "stats": "node scripts/stats.js",
     "hints": "node scripts/hints.js",
     "incremental": "node scripts/incremental.js",
+    "search-cost": "node scripts/search-cost.js",
     "depgraph": "node scripts/depgraph.js"
   },
   "devDependencies": {

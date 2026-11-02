@@ -204,6 +204,30 @@ over limits or costs on false marks). Found on the way:
   would lose that row in the page: an expiry caused by a move, not by reading. To check when the page has the mode
   (`scripts/ui-run.mjs`).
 
+**Step 2 measured: what a blind search costs** (`npm run search-cost` → `.cache/search-cost.md`;
+`engine/searchCost.js`). An automaton plays incremental mode on the page's rules with only the feedback the game
+gives: at each wait it collects every span and asks about every card, then searches each open wait. Builds grow sets
+card by card with "onto something" (one check per set tried, then the kinds); notices and exceptions are tried one
+by one, the wait lifting as the check; seals, absences, drops and the answers route are counted (the space, the
+solutions in it, the expected position of the first). Three random orders:
+
+- **It reaches 70 every time**, every wait met by its own search.
+- **Builds are cheap with "onto something"**: about 71,000 checks over the whole game (lookups), most at the first
+  stops, where the search builds every recipe in hand; the dearest wait is ¶93 (`k.dresses_for_the_other_woman`,
+  about 37,000: it rests on another inference that must be built first). Most deduction waits find their row made
+  already. No deduction needed the answers route.
+- **Notices about 250 checks a wait** (1,900 in all), **exceptions under 10**: small spaces, the wait as the check.
+- **Seals, absences and drops need narrowing**: a seal wait costs 15,000–130,000 checks (589,000 in all), the one
+  absence 188,000, a drop 82,000–107,000 (and each drop check runs the solver). Their spaces are products with very
+  few solutions (2–24 seal plans, 1 absence, 5–12 drop reasons that hold).
+- **A row the page cannot reach**: `t58.3`'s drop, at ¶102. Once the ten-pound note is collected the packet's
+  contents are settled, and the page shows no "opium" answer to drop. A search that collects everything always
+  meets it.
+- **Side effects of building everything**: about 16 inferences the minimal playthrough never builds (the police's
+  and Gregory's among them) and 13 clashes at the end. They cost no row here, but they slow every solver check.
+- **Stale negatives** at a stop are few (0–9 sets of the build search, checked again where a new card completes a
+  recipe).
+
 **Settings proposed.** Kept apart from the difficulty presets, as the reader option is; the first build uses the
 largest space of each (builds and answers, no added feedback):
 

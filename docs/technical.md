@@ -47,7 +47,7 @@ the reader's own background, and the record against Holmes. `docs/case-format.md
 | `engine/timeline.js` | The timeline board. |
 | `engine/actionTable.js`, `engine/minimalTable.js` | The annotated reader's moves as a script for the page, and the fewest of them that reach the maximum. |
 | `engine/hints.js`, `engine/hintData.js`, `engine/hintPlayer.js` | Hints: which row to hint, its rungs, and a player that only takes hints. |
-| `engine/incremental.js` | Incremental mode's waits (an experiment, engine only so far) and a player that moves only when the story waits. |
+| `engine/incremental.js`, `engine/searchCost.js` | Incremental mode's waits (an experiment, engine only so far), a player that moves only when the story waits, and a blind search's cost at each wait. |
 | `engine/stats.js`, `engine/depgraph.js` | The statistics page and the DepGraph exports. |
 | `cases/silver-blaze/` | The case: `story.txt`, `case.json` and its parts (entities, events, claims, relations, propositions, constraints, knowledge, states, actions, mentions, thoughts) and the generated files. |
 | `schema/case.schema.json` | JSON Schema for the case format. |
@@ -73,6 +73,7 @@ scripts need a local Chrome.
 | The minimal playthrough: the fewest of those moves that reach the maximum (about 20–40 min; `WORKERS=n`) | `npm run minimal-table` |
 | The hints' data (about 1½ min) | `npm run hints` |
 | Incremental mode's waits, from the hints' data (a few seconds) | `npm run incremental` |
+| What a blind search costs at each wait in incremental mode, over random orders (a measurement, about 2 min) | `npm run search-cost [seeds]` (→ `.cache/search-cost.md`) |
 | The statistics, `cases/silver-blaze/stats.md` (about 1½ min) | `npm run stats` |
 | The DepGraph exports (about 5 min; `-- --prune` about 2 hours) | `npm run depgraph` |
 | Play the action table through the page in headless Chrome, each move checked in the save (about 12–13 min; `STOP=<para>` for a part) | `node scripts/ui-run.mjs` |
