@@ -84,11 +84,105 @@ game too easy. And the play is not like sudoku.
 
 Embrace the absurdity: the combination-trying the game forces on the player becomes the game. The player
 automates the search (try every pairing of these cards, every answer to that question) and the main mechanic is
-deciding where to look first: which cards, questions or scenes to point the search at, with limited capacity that
-grows. The engine already checks any proposed move cheaply (`checkStep`, `propose`, `concludeFrom`), the action
-tables and `hints.json` list every scoring move with what it needs, and the statistics give the size of each
-search space. Open questions: what the player buys and upgrades; whether reading stays paced by the story; how the
-deadlines against Holmes fit an idle game.
+deciding where to look first: which cards, questions or scenes to point the search at. The engine already checks
+any proposed move cheaply (`checkStep`, `propose`, `concludeFrom`), the action tables and `hints.json` list every
+scoring move with what it needs, and the statistics give the size of each search space.
+
+**Decided so far (2026-11-02; nothing built).**
+
+- **No purchases.** Nothing is bought or upgraded: progress speeds up by itself as parts of the search space are
+  ruled out.
+- **Every existing mechanic stays.** The search is steered with the marks the game has: circling and crossing out
+  answers, setting cards aside, marking them odd.
+- **The counts are shown.** For each category: the combinations in all, how many are checked and how many ruled
+  out, and the separate numbers that are added or multiplied to make the total.
+- **Every scored family is a search space**, however few its targets.
+- **The search narrows with "onto something"** (`propose`: is this set part of a recipe whose cards are all in
+  hand, and how many are missing); more feedback of that kind is wanted for the other families.
+- **Hard only.** Incremental mode is built on the Hard preset.
+- **The maximum is mandatory**, and the game allows no move that would lose a point.
+
+**The search spaces, measured.** On Hard, the story read to a paragraph, every card there collected and asked
+about, each move's arguments counted (at the end of the story the player holds 611 cards: 175 entities, 93 events,
+150 statements, 121 background facts, 68 inferences, 4 propositions):
+
+| Category | Made of | ¶46 | ¶92 | ¶146 | End | Targets |
+|---|---|---:|---:|---:|---:|---|
+| Collect | spans clicked (→ cards) | 383 | 573 | 717 | 977 (→ 422) | all; linear |
+| Ask what I know | entity and event cards | 141 | 195 | 218 | 268 (→ 121 facts) | linear |
+| Answers (propose, cross out, circle, prove) | Σ over the visible questions of their answers | 4,734 | 8,013 | 9,816 | 14,717 | one solver check each |
+| Build: pairs (any size) | C(cards held, k), k = 2…8; ×6 kinds on Hard | 52,650 | 94,830 | 126,253 | 186,355 (4.7×10¹⁷) | 58 recipes |
+| Theory | Π over the visible questions of (answers + 1) | 10²⁷⁸ | 10³⁷⁴ | 10⁴²⁴ | 10⁵³⁰ | the solution |
+| Seal a check | look and compare: cards² × 3; ask and show: people × cards × 3 | 167,040 | 350,784 | 476,418 | 692,250 | 31 field pairs, 10 rows |
+| File an absence | facts × times × statements | 128,744 | 256,520 | 346,104 | 490,050 (121 × 27 × 150) | 2 (1 row) |
+| Drop | (theories + answers) × (2 × theories + cost + cards) | 1.57 M | 3.58 M | 5.05 M | 9.19 M | 3 |
+| Mark as odd | cards held (a reason, ×122, does not count) | 325 | 436 | 503 | 611 | 11 (8 rows) |
+| Raise an exception | exceptions open against held cards | 1 | 5 | 6 | 18 | 5 (3 rows) |
+| Ask my own question | Σ over the 13 templates of their card choices | 4,502 | 8,742 | 11,069 | 16,743 | unscored |
+| Board: a place / a holder / a split | things × times × places (holders); times × events | | | | 151,200 / 305,424 / 2,511 | unscored |
+| Doubt, split, set aside, weigh | | | | | 274 / 2 / 418 / 6 | |
+
+"State it yourself" takes a free formula and has no size. The questions of the whole case (921, not only the 335
+visible at the end) have 17,322 answers and 10⁷⁷⁵ scenarios. Not yet measured: how many of the answer pairs can be
+crossed out with everything held.
+
+What the counts show:
+
+- **Two shapes.** Answers, notices and asks are sums: a check removes one item. Builds, theories, seals, absences
+  and drops are products: ruling out one value of a factor removes a slice (a card in no recipe removes 610 pairs;
+  a crossed-out answer shrinks the scenarios by a factor). The products give the speed-up without purchases.
+- **The build space is far smaller than it looks.** Only 157 cards are a premise of any recipe (70 statements, 65
+  facts, 20 inferences, 2 events). Tried one card at a time first (611 probes), "onto something" finds them; at the
+  end there are 1,763 distinct sets it accepts.
+- **Checks differ in cost.** Collect, ask, notice, seal, pose and propose are lookups; cross-outs, proofs, drop
+  checks and absences call the solver (milliseconds to seconds, some over the 20 s budget).
+- **The space grows while it is searched**: every paragraph adds cards.
+- **Moves the game never checks** (notices, seals) are not search spaces as they stand: marking all 611 cards odd
+  scores every notice row, and sealing every plan with no expectation scores the checks.
+
+**Feedback like "onto something" for every family.** It answers for a part of a combination (is this part in some
+complete target whose cards are all in hand?), which turns a product into about a sum: an absence's fact, statement
+and time checked apart (121 + 150 + 27 instead of their product); a check's verb and each field card; a drop's
+target, after which `dropCheck` searches its reasons; for notices and exceptions the part is the whole target, and
+the spaces are small (611, 18). The leak guard stays: only targets whose cards are all in hand count.
+
+**A "no" lasts only until the next card.** A set not "onto something" becomes so once a missing card is collected;
+an answer not ruled out now may be later. Only "yes" answers last. Three ways: (a) check everything again after
+each new card; (b) make negatives permanent by asking over every recipe of the case; (c) check again only what a
+new card can complete (the engine knows which recipes, absences and checks each card is in), shown as a "stale"
+count. (b) comes from the answer key, not from what the player holds, and is ruled out at every level ("fewer cards
+is itself a hint"). (c) is preferred; (a) against (c) is only a cost.
+
+**No move that loses a point.** The two rows that can never score leave a maximum of 70. Points are lost by:
+
+- reading past a row's deadline (every family);
+- reading past where a move expires: a build once the story states its inference, a proposal once its question is
+  settled, the implicit inference not collected by ¶102 (four deductions). The DepGraph waits export computes
+  these points (`engine/depgraph.js`, `lost`);
+- moves that can be undone before the deadline: a doubt that lapses a built inference, a seal hedged by an opposite
+  expectation (withdrawing it before Holmes acts clears it), the clash tie of the police's "Simpson drugged him"
+  beside the dish step (a doubt resolves it), a drop whose reason does not hold (it can be dropped again).
+
+A made row stays made. So only reading is irreversible, and the preferred design gates it: the story waits before
+every row's deadline and every expiry point until the move is made, and refuses to read on when the state can no
+longer reach the gated row, naming what to undo. The alternative, refusing every move that makes a needed move
+impossible, needs a reachability check per move. Before building: the 'wait' pace gates only Holmes's sharp,
+non-expert deductions, so incremental mode needs gates on all 70 rows and the expiry points; and the minimal
+playthrough at the 'wait' pace stops at ¶146 (section 4), which a mandatory maximum turns into a blocker, so it
+comes first. A gate on every row tells the player that something scores before ¶N; the 'wait' pace already
+accepts that for deductions, and the search would find the row anyway.
+
+**Settings proposed (to be decided).** Kept apart from the difficulty presets, as the reader option is:
+
+- **The routes to a deduction**: builds only (proven enough: the minimal playthrough reaches 70 with no cross-out or
+  proof), or builds and answers (a second, often cheaper way to a one-answer deduction, steered by circles and
+  cross-outs). Not answers only: steps concluding a formula probably cannot be reached that way.
+- **The strength of the feedback**: the whole combination only, pairs, or each part apart. It sets how far a
+  product collapses, so it sets the pace more than anything else.
+- **Stale negatives**: (a) or (c), a cost only; never (b).
+
+Each setting multiplies the runs of the page checks (12–13 minutes each; "check every difficulty"), so start with
+the feedback strength and the routes, and add more only when play shows the need.
 
 ### Archipelago integration
 
