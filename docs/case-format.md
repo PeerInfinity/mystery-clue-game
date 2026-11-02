@@ -393,6 +393,26 @@ Holmes's needed inferences are **stated by Holmes** at the earliest paragraph th
 anchor. One paragraph before a gate, the card holding the step's question is dealt, so the player can see what the
 story waits for.
 
+### The 'incremental' pace
+
+Incremental mode (an experiment: `docs/ideas.md`, section 2) is Hard whatever the options say (the reader option is
+kept), and reads at its own pace, `INCREMENTAL`, which waits on **`incremental.json`** (`engine/incremental.js`, from
+`hints.json`) instead of the gates. Each wait is before a paragraph:
+
+- `{para, row}`: a row that scores on Hard (`thought|family`, as `hints.json`'s rows), at its deadline, until the
+  player has made it (`madeRows`, as the score functions count it);
+- `{para, keep: {inferences}, rows}`: a move a later row needs is lost there (`hints.json`'s `lost`: the story states
+  the inference it builds, or an implicit inference it gives a premise of), until the player holds the inference (by
+  any route), or every row in `rows` is made.
+
+A wait names the row or the inference, never the move or the cards. `advance` refuses a paragraph with a wait not
+met, returning the open waits (`blockers`). The maximum is therefore mandatory. Without the keeps, a player who
+moves only when the story waits is stuck at ¶146 with 23 rows made; with them, it reaches 70
+(`engine/incremental.test.js`, `playLazy`). The page has no incremental mode yet.
+
+Notices and sealed checks, which the game otherwise never checks, return `lifts`: how many of the rows the story
+waits on now the move made. It tells nothing about a row that is not yet due.
+
 ## The world model
 
 ### Tracks
@@ -838,9 +858,10 @@ The LLM leak checker (`checker/check.js`) checks each card text, exception (`--e
 | `action-table.json` | `npm run action-table` | the annotated reader's moves made on Hard at each thought's paragraph, logged as engine calls and as the page makes them; the autoplay's script; must reach the Hard maximum |
 | `action-table-minimal.json` | `npm run minimal-table` | the fewest of the table's moves that still reach the maximum, each as late as its deadlines allow, batched at as few stops as possible |
 | `hints.json` | `npm run hints` | the minimal playthrough's moves with what each needs, and every scoring row with the moves that make it |
+| `incremental.json` | `npm run incremental` | incremental mode's waits: each row's deadline, and each paragraph where a needed move is lost, from `hints.json` |
 | `stats.md` | `npm run stats` | content counts, both playthroughs by kind and by scene, the hint-only player |
 | `depgraph-max.json`, `depgraph-waits.json`, `depgraph-deductions.json` | `npm run depgraph` | the moves between the story's stretches as Archipelago-CC DepGraphs: the maximum, the story read at the 'wait' pace, every deduction by its deadline |
 
 After a change to the case or to `thoughts.json`, regenerate in this order: `validate` and `validate-thoughts`,
-then `action-table`, `minimal-table`, `hints`, `stats`, `depgraph`. Tests check that each is up to date. Never edit
+then `action-table`, `minimal-table`, `hints`, `incremental`, `stats`, `depgraph`. Tests check that each is up to date. Never edit
 a generated file by hand.

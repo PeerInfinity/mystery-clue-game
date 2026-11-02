@@ -184,6 +184,26 @@ non-expert deductions, so incremental mode needs gates on all 70 rows and the ex
 tells the player that something scores before ¶N; the 'wait' pace already accepts that for deductions, and the
 search would find the row anyway.
 
+**Step 1 built: the waits** (engine only; `docs/case-format.md`, "The 'incremental' pace"). The story waits before
+the deadline of each of the 70 rows and at 16 paragraphs where a needed move is lost (33 paragraphs in all), each
+wait met by any route; notices and sealed checks say how many waits they lifted (the wait as their check, agreed
+over limits or costs on false marks). Found on the way:
+
+- **The waits for moves that expire are needed.** A player who moves only when the story waits reaches 70 with
+  them; without them, it is stuck at ¶146 with 23 rows made. The heaviest is ¶102, where four inferences of the
+  night (`k.wife_stayed_home` serves 19 rows) are stated.
+- **`hints.json`'s `needs` miss the hidden needs the DepGraph export found**: a move that gives an implicit
+  inference also needs the moves that give its other premises and the cards it waits for (proposing "opium" for the
+  paper packet needs the question shown, which `k.paper_held_opium_means_nobbling` raises once Simpson is held). The
+  lazy player adds them; the hints' data does not.
+- **The hints' `at` is the reader's paragraph, not a schedule**: replayed there even the free pace loses the raise
+  of `t36.2`. The minimal table's own `at` is one.
+- **A move only the page can lose.** The page offers "Drop it…" on an answer only from its chip; once the
+  ten-pound note is held the packet's contents are settled, the "opium" chip no longer shows, and the drop of
+  `t58.3` cannot be made in the page (the engine takes it). A player who collects the note before proposing "opium"
+  would lose that row in the page: an expiry caused by a move, not by reading. To check when the page has the mode
+  (`scripts/ui-run.mjs`).
+
 **Settings proposed.** Kept apart from the difficulty presets, as the reader option is; the first build uses the
 largest space of each (builds and answers, no added feedback):
 

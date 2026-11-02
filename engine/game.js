@@ -22,6 +22,7 @@ import { evaluate, render, slotsOf } from './logic.js';
 import * as TL from './timeline.js';
 import { OverBudget } from './solver.js';
 import { READER_KINDS, lackingRules } from './readers.js';
+import { madeRows } from './hints.js';
 
 /** Holmes's steps' needs (Game.stepNeeds), per problem. */
 const STEP_NEEDS = new WeakMap();
@@ -73,6 +74,10 @@ export const AUTO_HOLMES = 'holmes';
 export const AUTO_LOGIC = 'logic';
 export const FREE = 'free';
 export const WAIT = 'wait';
+// Incremental mode's pace (Hard only): the story waits before the deadline of every row that can score, and before
+// every paragraph where a move it needs is lost, until the player has made it (`waits`: engine/incremental.js,
+// cases/<case>/incremental.json). The maximum is mandatory.
+export const INCREMENTAL = 'incremental';
 // When background facts become available: all at once, where the story first touches each one's subject, or
 // when the player asks about a card they hold.
 export const BG_START = 'start';
@@ -152,11 +157,16 @@ const KIND_OF_FACET = {
 const OLD_DIFFICULTY = { trivial: EASY, easy: MEDIUM, hard: HARD };
 
 export class Game {
-    constructor(model, { difficulty = MEDIUM, options = null, pace = FREE, background = null, autoPace = AUTO_HOLMES, connect = null, state = null } = {}) {
+    constructor(model, { difficulty = MEDIUM, options = null, pace = FREE, background = null, autoPace = AUTO_HOLMES, connect = null, waits = null, state = null } = {}) {
         this.model = model;
         this.story = model.story;
-        this.opts = optionsFrom(difficulty, { ...options, ...(background && { background }), ...(connect && { connect }) });
+        this.opts = pace === INCREMENTAL
+            ? optionsFrom(HARD, { reader: options?.reader })
+            : optionsFrom(difficulty, { ...options, ...(background && { background }), ...(connect && { connect }) });
         this.pace = pace;
+        // Incremental mode's waits: paragraph → [wait] (engine/incremental.js).
+        this.waits = new Map();
+        for (const w of waits ?? []) (this.waits.get(w.para) ?? this.waits.set(w.para, []).get(w.para)).push(w);
         this.autoPace = autoPace;
         this.actions = [...(model.data.actions ?? [])].sort((a, b) => a.order - b.order);
         this.actionById = new Map(this.actions.map((a) => [a.id, a]));
@@ -1083,10 +1093,40 @@ export class Game {
     // ---------- reading ----------
     finished() { return this.read >= this.story.paragraphs.length; }
 
-    /** Reasoning steps the next paragraph waits for, not yet made. */
+    /**
+     * What the next paragraph waits for, not yet made: reasoning steps (the 'wait' pace), or incremental mode's waits
+     * ({para, row} a row to make; {para, keep, rows} a move to make before the story makes it impossible, unless the
+     * rows it serves are made already).
+     */
     blockers() {
         if (this.finished()) return [];
+        if (this.pace === INCREMENTAL) return this.#waitsOpen(this.read);
         return [...(this.gates.get(this.read) ?? [])].filter((s) => !this.stepMade(s));
+    }
+
+    /** Incremental mode: the waits before paragraph `p` not yet met. */
+    #waitsOpen(p) {
+        const waits = this.waits.get(p) ?? [];
+        if (!waits.length) return [];
+        const made = madeRows(this);
+        return waits.filter((w) => (w.row ? !made.has(w.row) : !(this.#keeps(w.keep) || w.rows.every((r) => made.has(r)))));
+    }
+    /** Does the player have what an incremental wait keeps: an inference held, or an answer proposed? */
+    #keeps(k) {
+        if (k.inferences) return k.inferences.every((id) => this.knows(id));
+        if (k.listed) return !!this.marks.get(k.listed[0])?.listed?.has(k.listed[1]);
+        return false;
+    }
+    /**
+     * Incremental mode's check for moves the game otherwise never checks (notices, sealed checks): how many of the
+     * rows the story waits on now the move has made. Run `move` and compare; 0 outside incremental mode.
+     */
+    #lifts(move) {
+        if (this.pace !== INCREMENTAL || this.finished()) return move();
+        const before = this.#waitsOpen(this.read).filter((w) => w.row).length;
+        const res = move();
+        if (res?.ok === false) return res;
+        return { ...res, lifts: before - this.#waitsOpen(this.read).filter((w) => w.row).length };
     }
 
     /** The action the next paragraph shows Holmes doing, if any (labels the read-on button). */
@@ -1098,7 +1138,7 @@ export class Game {
         if (this.finished()) return { ok: false, end: true };
         this.#noteMade();
         const blocking = this.blockers();
-        if (blocking.length && this.pace === WAIT) return { ok: false, needs: blocking };
+        if (blocking.length && (this.pace === WAIT || this.pace === INCREMENTAL)) return { ok: false, needs: blocking };
         this.told.push(...blocking);
         const before = new Set(this.unlocked.keys());
         this.#readNext();
@@ -1258,8 +1298,12 @@ export class Game {
     /**
      * Mark a card the player holds as odd, optionally because of a background fact they hold (the expectation it
      * goes against). Nothing is checked or told: a notice is the player's own. Marking it again changes the reason.
+     * Incremental mode: `lifts` says how many of the rows the story waits on now it made (its only check).
      */
     notice(card, because = null) {
+        return this.#lifts(() => this.#notice(card, because));
+    }
+    #notice(card, because) {
         if (!this.knows(card)) return { ok: false, reason: 'you do not hold that card' };
         if (because !== null && (!this.knows(because) || this.model.cards.get(because)?.section !== 'rules')) return { ok: false, reason: 'the reason must be a background fact you hold' };
         const was = this.noticed.get(card);
@@ -2519,9 +2563,13 @@ export class Game {
      * Seal a check the player plans before Holmes makes it: a template verb with each of its fields filled by a card
      * the player holds, and optionally the result they expect (one of the template's outcomes), an answer over a
      * question they hold that the result would give, and a theory it comes from. It is recorded with the paragraph
-     * and never edited; nothing says whether Holmes will make it.
+     * and never edited; nothing says whether Holmes will make it. Incremental mode: `lifts` says how many of the rows
+     * the story waits on now it made (its only check).
      */
-    seal(verb, fields, { expect = null, answer = null, theory = null } = {}) {
+    seal(verb, fields, opts = {}) {
+        return this.#lifts(() => this.#seal(verb, fields, opts));
+    }
+    #seal(verb, fields, { expect = null, answer = null, theory = null } = {}) {
         const tpl = CHECK_TEMPLATES[verb];
         if (!tpl) return { ok: false, reason: `a check is one of: ${Object.keys(CHECK_TEMPLATES).join(', ')}` };
         for (const f of tpl.fields) if (!fields?.[f] || !this.knows(fields[f])) return { ok: false, reason: `choose a card you hold for ${f}` };

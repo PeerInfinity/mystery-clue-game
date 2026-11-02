@@ -14,6 +14,7 @@
     "minimal-table": "node scripts/minimal-table.js",
     "stats": "node scripts/stats.js",
     "hints": "node scripts/hints.js",
+    "incremental": "node scripts/incremental.js",
     "depgraph": "node scripts/depgraph.js"
   },
   "devDependencies": {
