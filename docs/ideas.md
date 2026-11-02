@@ -102,6 +102,19 @@ scoring move with what it needs, and the statistics give the size of each search
 - **Hard only.** Incremental mode is built on the Hard preset.
 - **The maximum is mandatory**, and the game allows no move that would lose a point.
 
+**Decided next (2026-11-02).**
+
+- **No new feedback at first.** Try with only the feedback the game has ("onto something" for builds, the checks
+  of cross-outs, exceptions and drops), and measure which categories need more.
+- **The stale count is shown**: negatives that a new card may have overturned, checked again only where it can
+  complete a target ((c) below).
+- **The story waits before every deadline** of the 70 rows, and before every point where a move expires.
+- **Start with the options that give the largest search space** (builds and answers as routes; no added feedback),
+  and narrow only what turns out to need it.
+- **The story need not be read to the end at the waiting pace.** Once the maximum is reached the player reads on
+  freely. (The 'wait' pace's stop at ¶146 does not carry over: it waits on `k.first_up_and_no_subordinate`, a step
+  of Holmes's that scores nothing; incremental mode waits only on scoring rows.)
+
 **The search spaces, measured.** On Hard, the story read to a paragraph, every card there collected and asked
 about, each move's arguments counted (at the end of the story the player holds 611 cards: 175 entities, 93 events,
 150 statements, 121 background facts, 68 inferences, 4 propositions):
@@ -167,12 +180,12 @@ A made row stays made. So only reading is irreversible, and the preferred design
 every row's deadline and every expiry point until the move is made, and refuses to read on when the state can no
 longer reach the gated row, naming what to undo. The alternative, refusing every move that makes a needed move
 impossible, needs a reachability check per move. Before building: the 'wait' pace gates only Holmes's sharp,
-non-expert deductions, so incremental mode needs gates on all 70 rows and the expiry points; and the minimal
-playthrough at the 'wait' pace stops at ¶146 (section 4), which a mandatory maximum turns into a blocker, so it
-comes first. A gate on every row tells the player that something scores before ¶N; the 'wait' pace already
-accepts that for deductions, and the search would find the row anyway.
+non-expert deductions, so incremental mode needs gates on all 70 rows and the expiry points. A gate on every row
+tells the player that something scores before ¶N; the 'wait' pace already accepts that for deductions, and the
+search would find the row anyway.
 
-**Settings proposed (to be decided).** Kept apart from the difficulty presets, as the reader option is:
+**Settings proposed.** Kept apart from the difficulty presets, as the reader option is; the first build uses the
+largest space of each (builds and answers, no added feedback):
 
 - **The routes to a deduction**: builds only (proven enough: the minimal playthrough reaches 70 with no cross-out or
   proof), or builds and answers (a second, often cheaper way to a one-answer deduction, steered by circles and
