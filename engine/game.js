@@ -1117,6 +1117,40 @@ export class Game {
         if (k.listed) return !!this.marks.get(k.listed[0])?.listed?.has(k.listed[1]);
         return false;
     }
+    // ---------- incremental mode: is part of a move onto something? ----------
+    // As "onto something" is for an inference (propose), for the moves whose spaces are products: an absence, a sealed
+    // check, a drop. Each answers for a part of a move, over the moves that would make a row the record counts, whose
+    // cards are all in hand and whose time has not passed. Never for the part that is a guess at the story itself (a
+    // check's expected result, a drop's reason): those are tried whole, with the wait or dropCheck as their check.
+    // False outside incremental mode.
+
+    /** Does an absence the player could file now take these parts (any of expectation, time, witness)? */
+    absenceOnto({ expectation = null, time = null, witness = null } = {}) {
+        if (this.pace !== INCREMENTAL) return false;
+        const root = time === null ? null : String(time).split('.').slice(0, 2).join('.');
+        return this.fileableAbsences().some((a) => (expectation === null || a.expectation === expectation)
+            && (witness === null || a.witness === witness) && (root === null || (a.windows.includes(root) && this.reached(root))));
+    }
+    /** Does a check a row still waits for (one that scores, not yet sealed), which Holmes has yet to make, take this verb
+     *  and these fields ({field: card}, any)? */
+    sealOnto(verb, fields = {}) {
+        if (this.pace !== INCREMENTAL || !CHECK_TEMPLATES[verb]) return false;
+        const dated = new Set((this.model.data.thoughts ?? []).filter((t) => t.holmes && !t.holmes.never && t.holmes.paras?.length).map((t) => t.id));
+        const counted = new Set(this.checkScores().filter((r) => dated.has(r.thought) && (r.sealed === null || r.hedged)).map((r) => r.check));
+        return (this.model.data.checks ?? []).some((ck) => counted.has(ck.id) && ck.at >= this.read && ck.plans.some((p) => p.verb === verb
+            && CHECK_TEMPLATES[verb].fields.every((f) => !p[f] || p[f].some((c) => this.knows(c)))
+            && Object.entries(fields).every(([f, c]) => this.knows(c) && (!p[f] || p[f].includes(c)))));
+    }
+    /** Is this hypothesis ({theory} or {slot, value}), shown to the player, one the record counts dropping, not yet past
+     *  and not yet dropped for a reason that holds? */
+    dropOnto(target) {
+        if (this.pace !== INCREMENTAL || !target) return false;
+        const shown = target.theory ? this.visibleTheories().some((t) => t.id === target.theory) : this.slotVisible(target.slot) && this.offered(target.slot, target.value);
+        if (!shown) return false;
+        const thoughts = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t]));
+        return this.dropScores().some((r) => r.deadline !== null && r.deadline >= this.read && r.held === null && dropKey(thoughts.get(r.thought).dropped) === dropKey(target));
+    }
+
     /**
      * Incremental mode's check for moves the game otherwise never checks (notices, sealed checks): how many of the
      * rows the story waits on now the move has made. Run `move` and compare; 0 outside incremental mode.

@@ -88,3 +88,43 @@ test('a notice or a sealed check says how many waits it lifted; a wrong one lift
     assert.equal(tried.notice, hints.moves.filter((m) => m.op === 'notice').length);
     assert.ok(tried.seal >= 1);
 });
+
+test('incremental mode answers for part of an absence, a sealed check or a drop, only over what is in hand', () => {
+    // At each wait the lazy player meets, before it moves: a part of the row's own move is onto something once its
+    // cards are held, and nothing is outside incremental mode or for a card not held.
+    const free = new Game(model, { difficulty: 'hard' });
+    free.readTo(60);
+    assert.equal(free.sealOnto('look', {}), false);
+    assert.equal(free.absenceOnto({}), false);
+    const seen = { file: 0, seal: 0, drop: 0 };
+    const check = (g, model, m) => {
+        if (m.op === 'file' && !g.knows(m.absence)) {
+            assert.ok(g.absenceOnto({ expectation: m.expectation }) && g.absenceOnto({ witness: m.witness }) && g.absenceOnto({ time: m.time }), `absence parts at ¶${g.read}`);
+            assert.ok(g.absenceOnto({ expectation: m.expectation, witness: m.witness, time: m.time }));
+            const other = [...g.unlocked.keys()].find((c) => model.cards.get(c)?.section === 'claims' && !g.absenceOnto({ witness: c }));
+            assert.ok(other, 'some statement is no witness of an absence');
+            seen.file++;
+        }
+        if (m.op === 'seal') {
+            const [f1, f2] = Object.keys(m.fields);
+            if (g.sealOnto(m.verb, m.fields)) {
+                assert.ok(g.sealOnto(m.verb, {}) && g.sealOnto(m.verb, { [f1]: m.fields[f1] }) && g.sealOnto(m.verb, { [f2]: m.fields[f2] }));
+                seen.seal++;
+            }
+        }
+        if (m.op === 'drop') {
+            assert.ok(g.dropOnto(m.target), `drop target at ¶${g.read}`);
+            const wrong = g.visibleSlots().flatMap((s) => s.domain.filter((v) => g.offered(s.id, v)).map((v) => ({ slot: s.id, value: v }))).find((t) => !g.dropOnto(t));
+            assert.ok(wrong, 'some answer is no wrong turn');
+            seen.drop++;
+        }
+        return make(g, model, m);
+    };
+    const { stuck } = playLazy(model, hints, waits, check);
+    assert.equal(stuck, null);
+    assert.ok(seen.file >= 1 && seen.seal >= 5 && seen.drop >= 3, JSON.stringify(seen));
+    // A card not held answers nothing.
+    const g = new Game(model, { pace: INCREMENTAL, waits: waits.waits });
+    g.readTo(30);
+    assert.equal(g.sealOnto('look', { thing: 'silver_blaze', place: 'mapleton' }), false);
+});

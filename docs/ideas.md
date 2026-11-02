@@ -230,6 +230,28 @@ solutions in it, the expected position of the first). Three random orders:
 - **Stale negatives** at a stop are few (0–9 sets of the build search, checked again where a new card completes a
   recipe).
 
+**Step 3 built: feedback on part of a move** (the user's choice, for the three families that needed narrowing;
+`docs/case-format.md`). Absences, sealed checks and drops answer for each part apart, as "onto something" does for a
+build; the expected result and answer of a check and the reason of a drop are still tried whole. Measured again
+(`npm run search-cost`, three orders, the searches now run, not counted): 70 every time, no wait forced.
+
+| Family | Blind (expected, counted) | With the feedback (run) |
+|---|---:|---:|
+| Sealed checks (8 waits) | about 2.5 × 10⁹ (2.5 × 10⁹ for `t92.12` alone, 120,000 for the others) | 35,600 (30,400 for `t92.12`; 500–900 for the others) |
+| Drops (3 waits) | 1.6 million (each a solver check) | 11,300, of which 650 solver checks |
+| The absence | 188,000 | 284 |
+
+- **What is left large: `t92.12`**, the photograph check that must expect the answer "William Derbyshire is
+  Straker". The answer is a guess at the story and gets no feedback, so the search tries answers one by one
+  (836–45,531 checks).
+- **A trap of sealed checks, found by the search.** Two rows can wait on one check, one wanting any plan, the other a
+  given result (`t116.3` and `t92.11`; `t92.5` and `t92.12`). A seal that expects the wrong result makes the first row
+  and then hedges the second (a check sealed expecting both results scores nothing). It can be undone (withdrawing the
+  wrong seal before Holmes acts clears it), so the page must make that plain; a seal with no expectation never hedges.
+- **Lessons for the automation**: never take back a move that made another row (a notice, a raise, a drop, a seal);
+  feedback stops pointing at a row once it is made; rebuild the card pool after a build (an inference is a premise
+  too).
+
 **Settings proposed.** Kept apart from the difficulty presets, as the reader option is; the first build uses the
 largest space of each (builds and answers, no added feedback):
 

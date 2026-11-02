@@ -413,6 +413,14 @@ moves only when the story waits is stuck at ¶146 with 23 rows made; with them, 
 Notices and sealed checks, which the game otherwise never checks, return `lifts`: how many of the rows the story
 waits on now the move made. It tells nothing about a row that is not yet due.
 
+**Part of a move.** As `propose` says whether a set of cards is "onto something", incremental mode answers for part of
+the moves whose spaces are products, over the moves that would make a row not yet made, whose cards are all in hand
+and whose time has not passed: `absenceOnto({expectation, time, witness})` (any of them), `sealOnto(verb, fields)`
+(the verb and any of its fields; only checks Holmes has yet to make that a dated row still waits for) and
+`dropOnto(target)` (a hypothesis shown to the player that the record counts dropping). Never the part that guesses at
+the story (a check's expected result and answer, a drop's reason): those are tried whole, with `lifts` or `dropCheck`.
+All three are false outside incremental mode.
+
 ## The world model
 
 ### Tracks

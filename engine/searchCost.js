@@ -9,12 +9,14 @@
 //   check      sealed checks: the space (verb × field × field × expectation, × the answers for a check that expects
 //              one) and the plans in it that make the row; expected checks (N + 1) / (t + 1). Counted.
 //   absence    fact × time × statement, and the combinations that file the row's absence. Counted.
-//   drop       target × reason: the targets the page offers (theories, and answers it would let the player propose),
+//   drop       target × reason: the targets the page offers (theories, and every answer the story has shown),
 //              the reasons tried on the true target with dropCheck; expected (T·R + 1) / (holding + 1). Counted.
 //   answers    the other route to a deduction that rules one answer out: the answer pairs, one of which (if provable
 //              now) makes it; expected (A + 1) / 2. Counted, never taken (the run builds).
-// Counted families are then made with the minimal playthrough's moves (hints.json), so the game goes on. A wait no
-// search meets is made the same way and reported. → {stops: [...], rows: [...], extra: {...}}
+// With `onto` (the default), absences, sealed checks and drops are searched too, part by part with incremental mode's
+// feedback (Game.absenceOnto, sealOnto, dropOnto), the expectation, the answer and the reason tried whole; without it
+// they are counted only. A wait no search meets is made with the minimal playthrough's moves (hints.json), so the game
+// goes on, and reported. → {stops: [...], rows: [...], extra: {...}}
 import { Game, INCREMENTAL, CHECK_TEMPLATES, CONCLUSION_KINDS, DROP_REASONS } from './game.js';
 import { madeRows } from './hints.js';
 import { closure } from './incremental.js';
@@ -28,7 +30,7 @@ function rng(seed) {
 }
 const shuffle = (xs, r) => { const a = [...xs]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-export function searchCost(model, hints, waits, make, { seed = 1 } = {}) {
+export function searchCost(model, hints, waits, make, { seed = 1, onto = true } = {}) {
     const r = rng(seed);
     const T0 = Date.now();
     const g = new Game(model, { pace: INCREMENTAL, waits: waits.waits });
@@ -120,7 +122,8 @@ export function searchCost(model, hints, waits, make, { seed = 1 } = {}) {
         const times = TL.times(g).filter((t) => t.kind !== 'boundary');
         const absenceSpace = cards.filter((x) => sec(x) === 'rules').length * times.length * cards.filter((x) => sec(x) === 'claims').length;
         const theories = g.visibleTheories();
-        const dropTargets = theories.length + slots.reduce((a, s) => a + (g.settled(s.id) !== null ? 0 : s.domain.filter((v) => g.offered(s.id, v)).length), 0);
+        // The page offers a drop on every answer the story has shown, a settled question's others folded.
+        const dropTargets = theories.length + answers;
         const dropReasons = 2 * theories.length + 1 + cards.length;
         Object.assign(stop, { cards: cards.length, answers, sealSpace, absenceSpace, dropTargets, dropReasons });
         out.stops.push(stop);
@@ -177,7 +180,31 @@ export function searchCost(model, hints, waits, make, { seed = 1 } = {}) {
                 const answer = (t.checks ?? []).some((x) => x.answer);
                 const space = sealSpace * (answer ? answers : 1);
                 Object.assign(row, { space, solutions: sol, expected: (space + 1) / (sol + 1), answer });
-                forceRow(w.row);
+                if (onto) {
+                    // Each part apart: the verb, then each field's cards; their positives together; then the
+                    // expectation (and, for a check that expects an answer, the answer) tried whole, the wait as check.
+                    let checks = 0;
+                    const tryPart = (verb, fields) => { checks++; return g.sealOnto(verb, fields); };
+                    // A seal is kept only if it makes this row: one kept for another row could hedge this one (a check
+                    // sealed expecting both results scores nothing); that row is searched in its own turn.
+                    const sealOnce = (verb, fields, opts) => { checks++; const res = g.seal(verb, fields, opts); if (made(w.row)) return true; if (res.ok) g.unseal(res.id); return false; };
+                    search: for (const verb of shuffle(Object.keys(CHECK_TEMPLATES), r)) {
+                        if (!tryPart(verb, {})) continue;
+                        const [f1, f2] = CHECK_TEMPLATES[verb].fields;
+                        const p1 = shuffle(fieldList(f1), r).filter((c) => tryPart(verb, { [f1]: c }));
+                        const p2 = shuffle(fieldList(f2), r).filter((c) => tryPart(verb, { [f2]: c }));
+                        for (const c1 of p1) for (const c2 of p2) {
+                            const fields = { [f1]: c1, [f2]: c2 };
+                            if (!tryPart(verb, fields)) continue;
+                            // No expectation first: it never hedges another seal of the same check.
+                            const expects = [null, ...shuffle(CHECK_TEMPLATES[verb].outcomes, r)];
+                            for (const expect of expects) if (sealOnce(verb, fields, { expect })) break search;
+                            if (answer) for (const expect of CHECK_TEMPLATES[verb].outcomes) for (const sl of shuffle(slots, r)) for (const v of sl.domain.filter((x) => g.offered(sl.id, x))) if (sealOnce(verb, fields, { expect, answer: { eq: [sl.id, v] } })) break search;
+                        }
+                    }
+                    row.checks = checks;
+                }
+                if (!made(w.row)) { row.forced = true; forceRow(w.row); }
                 row.ok = made(w.row);
             } else if (family === 'absence') {
                 const t = thoughts.get(thought);
@@ -187,13 +214,23 @@ export function searchCost(model, hints, waits, make, { seed = 1 } = {}) {
                     sol += times.filter((x) => a.windows.includes(x.root)).length;
                 }
                 Object.assign(row, { space: absenceSpace, solutions: sol, expected: (absenceSpace + 1) / (sol + 1) });
-                forceRow(w.row);
+                if (onto) {
+                    // Each part apart (fact, statement, time), then their positives together, filed.
+                    let checks = 0;
+                    const part = (list, key) => shuffle(list, r).filter((x) => { checks++; return g.absenceOnto({ [key]: x }); });
+                    const fs = part(cards.filter((x) => sec(x) === 'rules'), 'expectation');
+                    const ws = part(cards.filter((x) => sec(x) === 'claims'), 'witness');
+                    const ts = part(times.map((x) => x.id), 'time');
+                    search: for (const f of fs) for (const x of ws) for (const t of ts) { checks++; g.fileAbsence(f, t, x); if (made(w.row)) break search; }
+                    row.checks = checks;
+                }
+                if (!made(w.row)) { row.forced = true; forceRow(w.row); }
                 row.ok = made(w.row);
             } else if (family === 'drop') {
                 const target = thoughts.get(thought).dropped;
                 const tgt = target.theory ? { theory: target.theory } : { slot: target.slot, value: target.value };
                 const offered = target.theory ? theories.some((x) => x.id === target.theory)
-                    : g.slotVisible(target.slot) && g.offered(target.slot, target.value) && g.settled(target.slot) === null;
+                    : g.slotVisible(target.slot) && g.offered(target.slot, target.value);
                 let holding = 0;
                 const reasons = [...theories.flatMap((x) => [['out-explained', x.id], ['more-hands', x.id]]), ['cost'], ...cards.map((c) => ['card', null, c])];
                 if (offered || g.scenarioOf(tgt)) {
@@ -205,7 +242,25 @@ export function searchCost(model, hints, waits, make, { seed = 1 } = {}) {
                 }
                 Object.assign(row, { targets: dropTargets, reasons: reasons.length, offered, holding, expected: offered && holding ? (dropTargets * reasons.length + 1) / (holding + 1) : null });
                 if (!offered) out.extra.unreachable.push({ para: g.read, row: w.row, why: g.settled(target.slot ?? '') !== null ? `the question is settled (${g.settled(target.slot)})` : 'not offered' });
-                forceRow(w.row);
+                if (onto && offered) {
+                    // The target alone first ("is this a wrong turn?"), then its reasons tried whole (dropCheck, a solver
+                    // check each, counted apart).
+                    let checks = 0;
+                    let solver = 0;
+                    const targets = shuffle([...theories.map((x) => ({ theory: x.id })), ...slots.flatMap((sl) => sl.domain.filter((v) => g.offered(sl.id, v)).map((v) => ({ slot: sl.id, value: v })))], r);
+                    search: for (const tg of targets) {
+                        checks++;
+                        if (!g.dropOnto(tg)) continue;
+                        for (const [reason, rival, cite] of shuffle(reasons, r)) {
+                            checks++; solver++;
+                            g.drop(tg, reason, { rival, cites: cite ? [cite] : [] });
+                            if (made(w.row)) break search;
+                            g.undrop(tg);
+                        }
+                    }
+                    Object.assign(row, { checks, solver });
+                }
+                if (!made(w.row)) { row.forced = true; forceRow(w.row); }
                 row.ok = made(w.row);
             }
             out.rows.push(row);
