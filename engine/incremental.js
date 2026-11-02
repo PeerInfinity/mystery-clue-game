@@ -66,24 +66,14 @@ export function incrementalJson(data) {
 
 /**
  * A player who only moves when the story waits: reads on until it stops, then makes the moves of the hints' data that
- * the open waits need (a row's moves, or a kept move, each with what it needs), oldest first. A move that gives an
- * implicit inference needs, besides, the moves that give its other premises and the cards it waits for (as the
- * DepGraph export found: the hints' `needs` leave them out). → {game, stuck: null | {para, open}, fails: [seq]}.
+ * the open waits need (a row's moves, or a kept move, each with what it needs), oldest first. → {game, stuck: null |
+ * {para, open}, fails: [seq]}.
  * `make(g, model, m)` makes one move (engine/minimalTable.js's make).
  */
 export function playLazy(model, hints, waits, make) {
     const g = new Game(model, { pace: 'incremental', waits: waits.waits });
     const bySeq = new Map(hints.moves.map((m) => [m.seq, m]));
     const rowOf = new Map(hints.rows.map((r) => [key(r.thought, r.family), r]));
-    // The first move that gives each card, and each move's needs with the hidden ones of the implicit inferences it gives.
-    const provider = new Map();
-    for (const m of hints.moves) for (const c of m.got ?? (m.card ? [m.card] : [])) if (!provider.has(c)) provider.set(c, m.seq);
-    for (const m of hints.moves) {
-        const extra = (m.got ?? []).filter((k) => g.inferenceById.get(k)?.implicit)
-            .flatMap((k) => [...g.inferenceById.get(k).premises, ...g.inferenceWaits.get(k)]).map((c) => provider.get(c))
-            .filter((s) => s !== undefined && s < m.seq && !m.needs.includes(s));
-        if (extra.length) bySeq.set(m.seq, { ...m, needs: [...m.needs, ...new Set(extra)] });
-    }
     const done = new Set();
     const fails = [];
     while (!g.finished()) {

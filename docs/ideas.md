@@ -43,7 +43,7 @@ game too easy. And the play is not like sudoku.
   the minimal playthrough to 70 makes 144 moves and 734 clicks in the page, of which the 37 builds alone take about
   300. Most of the careful reader's moves are not needed to score: 121 of their 123 asks are redundant on Hard.
 - **The hints solve the game.** Pressing Hint to its last rung and Do it, and nothing else, reaches 70 on every
-  difficulty (57 hints, 228 presses on Hard). Only the cooldown costs anything.
+  difficulty (58 hints, 232 presses on Hard). Only the cooldown costs anything.
 - **The scored moves are mostly confirmations.** Most of what scores is a step Holmes later states; 35 of the 70
   deadlines fall in his final explanation (¶215–231).
 
@@ -194,8 +194,9 @@ over limits or costs on false marks). Found on the way:
   night (`k.wife_stayed_home` serves 19 rows) are stated.
 - **`hints.json`'s `needs` miss the hidden needs the DepGraph export found**: a move that gives an implicit
   inference also needs the moves that give its other premises and the cards it waits for (proposing "opium" for the
-  paper packet needs the question shown, which `k.paper_held_opium_means_nobbling` raises once Simpson is held). The
-  lazy player adds them; the hints' data does not.
+  paper packet needs the question shown, which `k.paper_held_opium_means_nobbling` raises once Simpson is held). Now
+  in the hints' data (`engine/hintData.js`). This also closed an old gap: the page's hint-only player needed 69 hints
+  against the engine's 57; both now need 58.
 - **The hints' `at` is the reader's paragraph, not a schedule**: replayed there even the free pace loses the raise
   of `t36.2`. The minimal table's own `at` is one.
 - **A move only the page can lose.** The page offers "Drop it…" on an answer only from its chip; once the
@@ -364,7 +365,6 @@ From the redesign discussion and the later papers; any of them may be worth revi
 - **Hard shows none of the story's signals**, so the watch-Holmes thoughts exist only on Easy and Trivial. The
   purist reader (`supplied: withheld`) still hears Holmes at the story's gates.
 - **The minimal playthrough at the 'wait' pace stops at ¶146.**
-- **The engine's hint-only player takes 57 hints to reach 70, the page's 69**; the gap was never looked into.
 - **The engine accepts moves the page cannot make** (dropping an answer never proposed, a candidate that fails on
   Hard). Only runs through the page (`scripts/ui-run.mjs`, `hints-check all`) catch these.
 - **Speed.** The case loads on the main thread (about 5 s blank); weighing all six theories at the end of an Easy
