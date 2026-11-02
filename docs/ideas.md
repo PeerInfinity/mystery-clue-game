@@ -202,8 +202,9 @@ over limits or costs on false marks). Found on the way:
 - **A move only the page can lose.** The page offers "Drop it…" on an answer only from its chip; once the
   ten-pound note is held the packet's contents are settled, the "opium" chip no longer shows, and the drop of
   `t58.3` cannot be made in the page (the engine takes it). A player who collects the note before proposing "opium"
-  would lose that row in the page: an expiry caused by a move, not by reading. To check when the page has the mode
-  (`scripts/ui-run.mjs`).
+  would lose that row in the page: an expiry caused by a move, not by reading. Fixed (the user's choice): a settled
+  question keeps the other answers the story has shown folded beside it on Hard too, as on Easy and Medium, each with
+  "Drop it…".
 
 **Step 2 measured: what a blind search costs** (`npm run search-cost` → `.cache/search-cost.md`;
 `engine/searchCost.js`). An automaton plays incremental mode on the page's rules with only the feedback the game
@@ -221,9 +222,9 @@ solutions in it, the expected position of the first). Three random orders:
 - **Seals, absences and drops need narrowing**: a seal wait costs 15,000–130,000 checks (589,000 in all), the one
   absence 188,000, a drop 82,000–107,000 (and each drop check runs the solver). Their spaces are products with very
   few solutions (2–24 seal plans, 1 absence, 5–12 drop reasons that hold).
-- **A row the page cannot reach**: `t58.3`'s drop, at ¶102. Once the ten-pound note is collected the packet's
-  contents are settled, and the page shows no "opium" answer to drop. A search that collects everything always
-  meets it.
+- **A row the page could not reach**: `t58.3`'s drop, at ¶102. Once the ten-pound note is collected the packet's
+  contents are settled, and the page showed no "opium" answer to drop. A search that collects everything always
+  met it. Fixed as above.
 - **Side effects of building everything**: about 16 inferences the minimal playthrough never builds (the police's
   and Gregory's among them) and 13 clashes at the end. They cost no row here, but they slow every solver check.
 - **Stale negatives** at a stop are few (0–9 sets of the build search, checked again where a new card completes a

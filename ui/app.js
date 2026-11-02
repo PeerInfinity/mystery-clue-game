@@ -907,8 +907,10 @@ function renderSlot(s) {
         // The answers the player put forward (proposed or circled) stay in view beside the settled one, to be dropped.
         const put = [...new Set([...(m?.listed ?? []), ...(m?.circled ?? [])])].filter((v) => v !== settled && game.offered(s.id, v));
         if (!game.autoSolves()) chips.push(...put.map((v) => chip(s.id, v, 'ruled')));
-        // Where the game lists the answers itself, the others too, folded: one can still be dropped for a reason.
-        const others = !game.autoSolves() && !game.proposing() ? s.domain.filter((v) => v !== settled && !put.includes(v) && game.offered(s.id, v) && !game.isHidden(v)) : [];
+        // The other answers the story has shown, folded: one can still be dropped for a reason. On Hard too, where the
+        // player proposes answers: once the question is settled, listing them gives nothing away, and no answer is lost
+        // to drop because a clue settled the question before the player proposed it.
+        const others = !game.autoSolves() ? s.domain.filter((v) => v !== settled && !put.includes(v) && game.offered(s.id, v) && !game.isHidden(v)) : [];
         if (others.length && ui.expanded.has(`${s.id}|ruled`)) chips.push(...others.map((v) => chip(s.id, v, 'ruled')));
         else if (others.length) chips.push(`<span class="link more" data-expand="${s.id}|ruled">${others.length} other answer${others.length > 1 ? 's' : ''} — show</span>`);
         for (const k of game.givenClash(s.id)) chips.push(`<span class="small bad">but ${link(k)}, which you trust, says ${esc(valueName(s.id, game.given(s.id)?.value ?? ''))} · <span class="link" data-suspect="${k}">doubt it</span></span>`);
