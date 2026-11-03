@@ -30,7 +30,7 @@ test('the automation alone, with only the feedback the game gives, reaches the m
     const g = fresh();
     const a = new Automation(g, { seed: 1 });
     const s = run(a);
-    assert.equal(s.idle, null);
+    assert.equal(s.idle, 'end');
     assert.ok(g.finished());
     assert.equal(scored(g), hints.rows.length);
     const c = a.counts();
@@ -69,10 +69,36 @@ test('a paused category leaves its wait open; resumed, the search meets it', () 
     const a = new Automation(g, { seed: 3, running: ['collect', 'ask', 'build', 'raise', 'check', 'absence', 'drop'] });
     let s;
     // Run until a notice wait is open with nothing else to search.
-    for (;;) { s = run(a); if (s.idle && a.open.some((w) => w.row?.endsWith('|notice'))) break; assert.ok(!s.end, 'some wait is a notice'); }
-    assert.match(s.idle, /\|notice/);
+    for (;;) { s = run(a); if (s.idle === 'paused') break; assert.ok(!s.end, 'some wait is a notice'); }
+    assert.ok(a.open.some((w) => w.row?.endsWith('|notice')));
     const at = g.read;
     a.setRunning('notice', true);
-    s = a.step(5000);
+    a.step(5000);
     assert.ok(g.read > at || !a.open.some((w) => w.row?.endsWith('|notice')), 'the notice search lifts its wait');
+});
+
+test('a check is planned before it is made; the queue starts with it; a save carries the counts and the negatives', () => {
+    const g = fresh();
+    const a = new Automation(g, { seed: 4 });
+    a.step(300);
+    const next = a.next();
+    assert.ok(next?.label, 'a check is planned');
+    assert.equal(a.next(), next, 'planning again plans the same check');
+    const q = a.queue();
+    assert.equal(q[0], next);
+    assert.equal(new Set(q.map((c) => c.cat)).size, q.length, 'one check per category');
+    const before = a.n;
+    const entry = a.execute();
+    assert.equal(entry.label, next.label);
+    assert.equal(a.n, before + 1);
+    assert.equal(a.log.at(-1), entry);
+    // Saved and restored: the counts and the negatives come back; the same game goes on searching.
+    const saved = JSON.parse(JSON.stringify(a.save()));
+    const b = new Automation(g, { seed: 4, state: saved });
+    const ca = a.counts(), cb = b.counts();
+    for (const cat of CATEGORIES) {
+        assert.equal(cb[cat].checked, ca[cat].checked, cat);
+        assert.equal(cb[cat].ruledOut, ca[cat].ruledOut, cat);
+    }
+    assert.ok(b.next());
 });

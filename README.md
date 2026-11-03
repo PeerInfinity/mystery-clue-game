@@ -25,9 +25,9 @@ solution must then guess how to express it in the game's moves, and ends up tryi
 one is accepted. The size of the game (hundreds of cards and questions) makes that worse, and the play is not
 much like sudoku. Turning it into multiple choice would remove the guessing but make it too easy.
 
-Directions that might still make it playable, such as an incremental game about automating the search, or an
-[Archipelago](https://archipelago.gg/) randomizer integration in which clues arrive as items, are collected in
-[`docs/ideas.md`](docs/ideas.md) (which contains spoilers).
+Directions that might still make it playable, such as an incremental game about automating the search (now in the
+game as an experimental pace, *Incremental*), or an [Archipelago](https://archipelago.gg/) randomizer integration in
+which clues arrive as items, are collected in [`docs/ideas.md`](docs/ideas.md) (which contains spoilers).
 
 ## What is in it
 

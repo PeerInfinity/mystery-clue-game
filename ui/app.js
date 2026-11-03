@@ -7,7 +7,8 @@ import { makeReadings } from './readings.js';
 import { Hints, madeRows, hintTiers } from '../engine/hints.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
-import { Game, MEDIUM, CUSTOM, WAIT, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
+import { makeSearch } from './search.js';
+import { Game, MEDIUM, CUSTOM, WAIT, INCREMENTAL, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 // The autoplay plays in a save of its own, so the player's game is kept aside: `?autoplay` (or
@@ -30,7 +31,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', hintCooldown: 30, notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
+const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', hintCooldown: 30, searchDelay: 1, notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -69,7 +70,7 @@ function restore() {
 }
 function saveLayout() {
     if (AUTOPLAY !== null) return; // the autoplay lays out its own page and leaves the viewer's alone
-    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight, hintCooldown: ui.hintCooldown })); } catch { /* private mode */ }
+    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight, hintCooldown: ui.hintCooldown, searchDelay: ui.searchDelay })); } catch { /* private mode */ }
 }
 // The viewer's settings for notes: each a select in Settings, a value kept with the layout, a class on the page.
 const VIEWER = { notesShown: ['notes-shown', ['story', 'tab']], notesHand: ['notes-hand', ['hand', 'page']], highlight: ['highlight', ['marker', 'underline', 'wash']] };
@@ -79,6 +80,7 @@ function applyViewer() {
         if ($(`#${id}`)) $(`#${id}`).value = ui[k];
     }
     if ($('#hint-cooldown')) $('#hint-cooldown').value = ui.hintCooldown;
+    if ($('#search-delay')) $('#search-delay').value = ui.searchDelay;
     document.body.classList.toggle('notes-mode', ui.notesMode);
     const b = $('#notes-mode');
     b.classList.toggle('on', ui.notesMode);
@@ -98,6 +100,7 @@ function restoreLayout() {
     if (['system', 'light', 'dark'].includes(l?.theme)) ui.theme = l.theme;
     for (const [k, [, values]] of Object.entries(VIEWER)) if (values.includes(l?.[k])) ui[k] = l[k];
     if (Number.isInteger(l?.hintCooldown) && l.hintCooldown >= 0) ui.hintCooldown = l.hintCooldown;
+    if (typeof l?.searchDelay === 'number' && l.searchDelay >= 0) ui.searchDelay = l.searchDelay;
     applyTheme();
     if (AUTOPLAY !== null) return; // the default layout, as the autoplay plays it
     if (!l || ![1, 2].includes(l.columns) || l.panels?.length !== 2 || !l.panels.every(ok) || l.panels[0] === l.panels[1]) return;
@@ -108,6 +111,8 @@ function changed() {
     cache.clear();
     save();
     render();
+    // Incremental mode: a move of the player's may change the search's order (the marks) or its space (the hand).
+    search?.moved();
 }
 function toast(html) {
     const t = $('#toast');
@@ -541,9 +546,12 @@ function renderReader() {
     const blockers = game.blockers();
     const ahead = game.nextDeductionAt() - game.read;
     const aheadScene = game.nextSceneAt() - game.read;
-    const blocked = blockers.length && game.pace === WAIT;
+    const blocked = blockers.length && (game.pace === WAIT || game.pace === INCREMENTAL);
     let note = '';
-    if (blockers.length && blockers.some((s) => game.stepInferences(s))) {
+    // Incremental mode: the story waits for rows the search finds; the bar says what for, and the check under way.
+    if (game.pace === INCREMENTAL) {
+        note = search.readerHtml();
+    } else if (blockers.length && blockers.some((s) => game.stepInferences(s))) {
         // Holmes is about to reason: the story waits until the player has built the inferences he uses.
         const needs = [...new Set(blockers.flatMap((s) => game.stepInferences(s) ?? []))].filter((id) => !game.knows(id));
         note = blocked
@@ -581,8 +589,8 @@ function scrollStory() {
 // Two panels, each drawing any tab; a tab is shown in one panel at a time. Choosing in one panel a tab the other shows
 // swaps the two (Q1); a link opens its tab in the other panel than the one clicked in, or in place if its own panel is
 // the one clicked in (Q3).
-const TABS = [['story', 'Story'], ['notes', 'Notes'], ['hints', 'Hints'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
-const TOOLS = { notes: toolNotes, hints: toolHints, card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
+const TABS = [['story', 'Story'], ['search', 'Search'], ['notes', 'Notes'], ['hints', 'Hints'], ['card', 'Card'], ['cards', 'Cards'], ['questions', 'Questions'], ['inferences', 'Inferences'], ['theories', 'Theories'], ['checks', 'Checks'], ['timeline', 'Timeline'], ['background', 'Background'], ['record', 'Record']];
+const TOOLS = { search: () => search.tool(), notes: toolNotes, hints: toolHints, card: toolCard, cards: toolCards, questions: toolQuestions, inferences: toolInferences, theories: toolTheories, checks: toolChecks, timeline: toolTimeline, background: toolBackground, record: toolRecord };
 // One column (the header's toggle) or two; a phone always one. In one column the second panel is
 // hidden, and keeps its tab for when there are two again.
 const NARROW = window.matchMedia('(max-width: 699px)');
@@ -676,7 +684,8 @@ function renderTabs() {
     label.story = `Story ¶${game.read - 1}`;
     if (game.notes.length) label.notes = `Notes (${game.notes.length})`;
     if (!game.autoSolves()) label.record = `Record (${ui.ahead ?? 0} ahead)`;
-    const hidden = { inferences: game.autoSolves() && !game.heldInferences().length, record: game.autoSolves() };
+    label.search = search.tabLabel();
+    const hidden = { inferences: game.autoSolves() && !game.heldInferences().length, record: game.autoSolves(), search: game.pace !== INCREMENTAL };
     document.querySelectorAll('.panel').forEach((el, i) => {
         if (!shown(i)) return;
         // One row that scrolls sideways (Q5), the tab shown kept in view.
@@ -1877,7 +1886,11 @@ function renderNow() {
         // With the game working out the answers, the player's options have nothing to act on.
         $(`#opt-${k}`).closest('label').classList.toggle('opt-off', game.autoSolves() && PLAYER_OPTIONS.includes(k));
     }
-    if (game.difficulty === CUSTOM) $('#difficulty-options').open = true;
+    // Incremental mode is Hard, whatever is chosen: only the reader may change.
+    const incremental = game.pace === INCREMENTAL;
+    $('#difficulty').disabled = incremental;
+    for (const k of Object.keys(OPTIONS)) $(`#opt-${k}`).disabled = incremental && !READER_OPTIONS.includes(k);
+    if (game.difficulty === CUSTOM && !incremental) $('#difficulty-options').open = true;
     const pick = (id) => $(`#${id}`).selectedOptions[0]?.textContent ?? '';
     $('#settings-summary').textContent = `Settings · ${pick('difficulty')}`;
     $('#settings-short').textContent = 'Settings';
@@ -2117,6 +2130,7 @@ function onClick(e) {
     // A click anywhere outside the settings panel closes it.
     const settings = document.querySelector('.settings');
     if (settings?.open && !e.target.closest('.settings')) settings.open = false;
+    if (search.onClick(e)) return;
     // The player's notes: their buttons, a note clicked to edit, the mode.
     if (e.target.closest('#notes-mode')) {
         ui.notesMode = !ui.notesMode;
@@ -2505,6 +2519,8 @@ function onChange(e) {
     if (e.target.id === 'theme') { ui.theme = e.target.value; applyTheme(); saveLayout(); return; }
     const viewer = Object.entries(VIEWER).find(([, [id]]) => id === e.target.id);
     if (viewer) { ui[viewer[0]] = e.target.value; applyViewer(); saveLayout(); renderStory(); return; }
+    if (search.onChange(e)) return;
+    if (e.target.id === 'search-delay') { ui.searchDelay = Math.max(0, Number(e.target.value) || 0); e.target.value = ui.searchDelay; saveLayout(); drawSearch(); return; }
     if (e.target.id === 'hint-cooldown') { ui.hintCooldown = Math.max(0, Math.round(Number(e.target.value)) || 0); e.target.value = ui.hintCooldown; saveLayout(); renderReader(); return; }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
     if (e.target.id === 'pose-template') { ui.poseTemplate = e.target.value; renderTool(); return; }
@@ -2522,6 +2538,21 @@ function onChange(e) {
         // Not in the slot's domain: is it a card of the wrong kind?
         const other = [...game.unlocked.keys()].find((k) => cardName(k).toLowerCase() === typed);
         toast(other ? 'That is not the right kind of thing for this question.' : 'No card of yours by that name.');
+    }
+    // Incremental mode starts the case over on Hard (every point must stay within reach); leaving it keeps the game.
+    if (e.target.id === 'pace' && (e.target.value === INCREMENTAL || game.pace === INCREMENTAL)) {
+        if (e.target.value === INCREMENTAL) {
+            if (!confirm('Incremental mode starts the case over on Hard: the story waits before everything Holmes does until your search has found it too. Your present game will be lost. Start?')) { render(); return; }
+            game.load({ options: { ...PRESETS.hard, reader: game.opts.reader }, pace: INCREMENTAL });
+            search.attach(true);
+        } else {
+            game.load({ ...game.save(), pace: e.target.value });
+            search.clear();
+            search.attach();
+        }
+        ui.building = null;
+        changed();
+        return;
     }
     if (['difficulty', 'pace', 'autopace'].includes(e.target.id) || e.target.id.startsWith('opt-')) {
         const state = game.save();
@@ -2548,6 +2579,7 @@ $('#reset').addEventListener('click', () => run(() => {
     document.querySelector('.settings').open = false;
     ui.noteEdit = null;
     game.reset();
+    search.attach(true);
     ui.selected = null;
     changed();
 }));
@@ -2586,12 +2618,42 @@ function buildOptions() {
     }).join('')}</div>`).join('');
 }
 
+// ---------- incremental mode's search (ui/search.js) ----------
+const search = makeSearch({
+    $, esc,
+    game: () => game,
+    names: {
+        card: (id) => shortName(id, 60),
+        slot: (id) => `${shortName(model.slots.get(id).on, 40)}: ${game.promptOf(id)}`,
+        value: (slot, v) => valueName(slot, v),
+    },
+    // The search's checks wait on the solver without the busy veil: the player may go on meanwhile.
+    quiet: (fn) => settle(fn, () => model.problem).catch((e) => { console.error(e); toast(`The search stopped: ${esc(e.message)}`); }),
+    changed: () => changed(),
+    draw: () => drawSearch(),
+    delay: () => ui.searchDelay * 1000,
+    store: `${STORE}:search`,
+});
+/** The search's own pieces: its tab, the tab labels, the reading bar (the rest of the page stays as it is). */
+function drawSearch() {
+    settle(() => {
+        const i = panelOf('search');
+        if (i >= 0) { const body = $(`#panel-${i}`); const top = body.scrollTop; body.innerHTML = search.tool(); body.scrollTop = top; }
+        renderTabs();
+        renderReader();
+    }, () => model.problem).catch((e) => console.error(e));
+}
+window.addEventListener('pagehide', () => search.save());
+
 // ---------- start ----------
 model = await loadCase(CASE);
 // The hints' data: without it, no Hint button.
 // `?hintfast`: Do it with no cursor travel (scripts/hints-check.mjs).
 const HINT_FAST = new URLSearchParams(location.search).has('hintfast');
 const HINT_DATA = await fetch(`${CASE}/hints.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+// Incremental mode's waits: without them, no incremental pace.
+const WAITS = await fetch(`${CASE}/incremental.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+if (!WAITS) $('#pace option[value="incremental"]')?.remove();
 story = model.story;
 R = makeReadings({
     model,
@@ -2612,7 +2674,8 @@ const client = workerClient(new Worker(new URL('../engine/solverWorker.js', impo
 model.wrapProblem = (local, args) => { client.init(args); return new RemoteProblem(local, client); };
 rebuildProblem(model);
 run(() => {
-    game = new Game(model, { difficulty: defaults.difficulty ?? MEDIUM, pace: defaults.pace ?? 'free', state: saved?.game ?? null });
+    game = new Game(model, { difficulty: defaults.difficulty ?? MEDIUM, pace: defaults.pace ?? 'free', waits: WAITS?.waits ?? null, state: saved?.game ?? null });
+    search.attach();
     ui.selected = saved?.selected ?? null;
     // The hint last given, from the saved log (its rungs show again until the story is read on).
     const lastHint = game.hintLog.at(-1);

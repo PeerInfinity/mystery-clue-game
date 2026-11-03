@@ -282,8 +282,28 @@ measurement of steps 2 and 3:
 - **Traps**: a search is a generator abandoned whenever the hand changes, so whatever it counts must be counted before
   it yields; a move that made something is never taken back (it may be another row's).
 
-Next: the page (a panel per category with the counts and their factors, the waits, pause and resume, the marks as
-the steering, and the hedge of a sealed check made plain).
+**Step 5 built: the page** (the user's asks: a new panel with the contents above and a log of past actions; each
+check one second, configurable; a progress bar, in more than one place). The pace *Incremental* in Settings starts
+the case over on Hard (difficulty locked). The **Search tab** (`ui/search.js`) shows what the story waits for (by
+family only, never the row), the check under way with a bar filling over its time, *Next up*, the counts per category
+with the numbers they are made of (and a bar of what is ruled out), and the log (newest first; the finds alone on a
+tick). Each category can be paused; *Read on by itself* lets the search read the story on. *Time per check* (the
+page's settings, default 1 s, 0 as fast as it can) sets the clock; the reading bar carries a second bar and the check
+under way.
+
+- **The queue** (the user asked whether it makes sense): only the next check of each category, in the order they take
+  turns. Further ahead it would be invented, since each check's answer decides the next (a "yes" grows the set, a
+  "no" moves on). The engine plans a check before making it (`next()`, `queue()`, `execute()`), which also makes a
+  check safe to make again when the solver hands it to its worker (the move is made once).
+- **Kept across reloads**: the counts, the negatives and the last 200 log lines, beside the game's save. A whole game's
+  negatives are 2.8 MB written as card ids; as the cards' places in the case, under 0.9 MB.
+- **The time a game takes**: one run made about 46,000 checks, which is about 13 hours at one a second. Most are
+  builds at the first stops; the steering is meant to shorten that.
+- **Checked through the page** (`scripts/search-check.mjs`): the clock, both bars, the queue, pause, a wait lifted at
+  0 s, reading by itself past ¶110, a reload, no console error.
+
+Not yet done: the hedge of a sealed check made plain on the page (the search itself never hedges: no expectation
+first, a seal kept only if a wait lifts).
 
 **Settings proposed.** Kept apart from the difficulty presets, as the reader option is; the first build uses the
 largest space of each (builds and answers, no added feedback):

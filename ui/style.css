@@ -366,3 +366,31 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 }
 /* Room under the story while the autoplay plays, so the paragraph just read can come to the middle of the panel. */
 .autoplaying #story { padding-bottom: 50vh; }
+
+/* ---------- incremental mode: the Search tab (ui/search.js) ---------- */
+.search-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 6px 0 10px; }
+.search-controls label { display: inline-flex; align-items: center; gap: 4px; }
+.search-now { margin: 8px 0 4px; }
+.search-bar { height: 6px; margin: 4px 0; border-radius: 3px; background: rgba(127, 127, 127, 0.22); overflow: hidden; }
+.search-bar.thin { height: 3px; margin: 2px 0 0; min-width: 48px; }
+.search-bar.in-reader { margin: 4px 0 0; max-width: 420px; }
+.search-fill { height: 100%; width: 0; background: var(--accent); }
+.search-fill.run { animation-name: search-fill; animation-timing-function: linear; animation-fill-mode: forwards; }
+.search-bar.thin .search-fill { background: var(--good); }
+@keyframes search-fill { from { width: 0; } to { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .search-fill.run { animation: none; width: 100%; opacity: .5; } }
+.cat-tag { display: inline-block; font-size: 11px; padding: 0 6px; border-radius: 8px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+h4.sub { margin: 14px 0 4px; font-size: 14px; }
+.search-queue, .search-log { margin: 4px 0; padding-left: 0; list-style: none; }
+.search-queue li, .search-log li { padding: 2px 0; border-bottom: 1px dotted var(--line); overflow-wrap: anywhere; }
+.search-log { max-height: 340px; overflow-y: auto; }
+.search-log li.out-found { background: var(--good-soft); }
+.search-log li.out-no b { color: var(--muted); font-weight: 500; }
+.search-table { width: 100%; border-collapse: collapse; }
+.search-table th { text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--line); padding: 2px 4px; }
+.search-table td { padding: 2px 4px; vertical-align: top; }
+.search-table td:nth-child(n+3) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.search-table tr.terms td { font-size: 11px; text-align: left; padding-bottom: 6px; border-bottom: 1px solid var(--line); white-space: normal; }
+.search-table tr.waiting td:nth-child(2) { font-weight: 600; }
+.reader .search-note { color: var(--ink); }
+.search-table-wrap { overflow-x: auto; }

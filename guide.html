@@ -444,6 +444,8 @@ guess costs nothing. You can <i>withdraw</i> a check until Holmes acts on it.</p
 <dl>
   <dt><span class="tab">Story ¶n</span></dt>
   <dd>The text as far as you have read. The label shows the paragraph you are on.</dd>
+  <dt><span class="tab">Search (n)</span></dt>
+  <dd>Incremental mode only: the automated search and its checks (see <a href="#incremental">Incremental mode</a>).</dd>
   <dt><span class="tab">Questions</span></dt>
   <dd>The case's questions, with how many answers are left and which you circled. Below them: statements you doubt,
   your own questions, odd things, and, depending on the difficulty, the clashes and <i>Holmes's interest</i> (places
@@ -605,7 +607,36 @@ as collected.</div>
   reading bar says what is needed: the inferences he is about to draw (see Inferences), or the question to settle, or
   at least the answers he rules out. The reading buttons stay greyed until then. This is the closest thing to solving
   the case alongside him.</dd>
+  <dt>Incremental (automated search)</dt>
+  <dd>An experiment: a different way to play, described below. Choosing it starts the case over on Hard.</dd>
 </dl>
+
+<h3 id="incremental">Incremental mode: the search</h3>
+<p>In incremental mode you do not have to guess how to put a step into moves: a search tries every combination for
+you, one check at a time, and you steer it. The story waits before everything Holmes does that scores, until the
+search (or you) has done it too, so you cannot miss a point. Once you have done everything, read on to the end at
+your own pace.</p>
+<ul>
+<li><b>The Search tab</b> (only in this mode) shows what the story waits for, the check under way with a bar that
+fills while it is made, and <i>Next up</i>: the next check of each kind, in the order they take turns. Only the next
+one of each kind can be shown, because what each check finds decides the one after it.</li>
+<li><b>What there is to try</b>: for each kind of move (collecting, asking, building inferences, marking odd details,
+raising exceptions, sealing checks, filing absences, dropping wrong turns), how many combinations there are with what
+you hold now, and the numbers that are added or multiplied to make that total; how many have been checked, how many
+found something, how many are ruled out, and how many are <i>stale</i>: a “no” that a new card may have turned into a
+“yes”, waiting to be checked again. The bar under <i>Ruled out</i> shows how much of the total that is.</li>
+<li><b>What has been tried</b>: a log of the checks made, newest first; tick <i>Only what was found</i> to see just
+the finds.</li>
+<li><b>Steering</b>: the search reads your marks. Cards you set aside are tried last. The cards of an answer you circle
+are tried first, then the cards you marked odd. A circled answer is tried first when a check expects an answer, and
+last as a wrong turn to drop; a crossed-out one the other way round. Untick a kind of move to pause it (if the story
+waits for that kind, the search says so and waits too).</li>
+<li><b>Controls</b>: <span class="btn">⏸ Pause</span> / <span class="btn">▶ Search</span>, and <i>Read on by
+itself</i>, which lets the search read the story on whenever it is not waiting (otherwise you read on). How long each
+check takes is <i>Time per check</i> in Settings: one second unless you change it, 0 for as fast as it can go. A
+whole game takes tens of thousands of checks.</li>
+<li>Your own moves still count: anything you find yourself, the search does not need to.</li>
+</ul>
 </section>
 
 <!-- ------------------------------------------------------------------ -->
@@ -683,6 +714,9 @@ notes mode. While it is on, clicking in the story does not open or collect cards
   <dd><i>A yellow marker</i>, <i>a blue underline</i>, or <i>a pale blue wash</i>.</dd>
   <dt>Hint cooldown</dt>
   <dd>Seconds to wait between hint presses (0 for none).</dd>
+  <dt>Time per check</dt>
+  <dd>Incremental mode: seconds the search takes over each check (0 for as fast as it can go; see
+  <a href="#incremental">Incremental mode</a>).</dd>
 </dl>
 <h3>Saving and starting over</h3>
 <p>Your game saves itself in this browser as you play. Close the page and come back later, and you are where you

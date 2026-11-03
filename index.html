@@ -19,9 +19,9 @@
         Difficulty
         <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option><option value="custom" disabled>Custom</option></select>
       </label>
-      <label title="Free: read on whenever you like. Wait for deductions: when Holmes acts on a deduction, the story waits until you have made it too.">
+      <label title="Free: read on whenever you like. Wait for deductions: when Holmes acts on a deduction, the story waits until you have made it too. Incremental: on Hard, the story waits before everything Holmes does, and an automated search tries every combination for you (the Search tab).">
         Pace
-        <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option></select>
+        <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option><option value="incremental">Incremental (automated search)</option></select>
       </label>
       <label id="autopace-label" title="When the game works out the answers. Keep pace with Holmes: an answer settles when Holmes reaches it in the story. As soon as the clues allow: an answer settles the moment the clues you hold decide it, which can be long before Holmes says so.">
         The game settles answers
@@ -55,6 +55,10 @@
       <label title="How long to wait after each press of Hint or More before the next (0: no wait)">
         Hint cooldown
         <span class="cooldown"><input type="number" id="hint-cooldown" min="0" step="5" value="30"> seconds</span>
+      </label>
+      <label title="Incremental mode: how long the search takes over each check (0: as fast as it can)">
+        Time per check
+        <span class="cooldown"><input type="number" id="search-delay" min="0" step="0.1" value="1"> seconds</span>
       </label>
       <a class="settings-link" href="guide.html" target="_blank" rel="noopener">How to play (the guide)…</a>
       <button id="autoplay-open" class="quiet" title="Watch the game played to the end on Hard, by a careful reader (its thoughts written in as notes) or by the fewest moves; your game is kept aside">Watch the autoplay…</button>

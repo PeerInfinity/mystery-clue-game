@@ -408,7 +408,8 @@ kept), and reads at its own pace, `INCREMENTAL`, which waits on **`incremental.j
 A wait names the row or the inference, never the move or the cards. `advance` refuses a paragraph with a wait not
 met, returning the open waits (`blockers`). The maximum is therefore mandatory. Without the keeps, a player who
 moves only when the story waits is stuck at ¶146 with 23 rows made; with them, it reaches 70
-(`engine/incremental.test.js`, `playLazy`). The page has no incremental mode yet.
+(`engine/incremental.test.js`, `playLazy`). The page offers it as a pace (Settings), with the Search tab
+(`ui/search.js`).
 
 Notices and sealed checks, which the game otherwise never checks, return `lifts`: how many of the rows the story
 waits on now the move made. It tells nothing about a row that is not yet due.

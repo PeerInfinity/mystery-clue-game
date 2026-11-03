@@ -47,7 +47,7 @@ the reader's own background, and the record against Holmes. `docs/case-format.md
 | `engine/timeline.js` | The timeline board. |
 | `engine/actionTable.js`, `engine/minimalTable.js` | The annotated reader's moves as a script for the page, and the fewest of them that reach the maximum. |
 | `engine/hints.js`, `engine/hintData.js`, `engine/hintPlayer.js` | Hints: which row to hint, its rungs, and a player that only takes hints. |
-| `engine/incremental.js`, `engine/searchCost.js`, `engine/automation.js` | Incremental mode (an experiment, engine only so far): its waits, a player that moves only when the story waits, a blind search's cost at each wait, and the automation (the searches a check at a time, steered by the player's marks, with the counts per category). |
+| `engine/incremental.js`, `engine/searchCost.js`, `engine/automation.js`, `ui/search.js` | Incremental mode (an experiment): its waits, a player that moves only when the story waits, a blind search's cost at each wait, and the automation (the searches a check at a time, steered by the player's marks, with the counts per category; a check planned before it is made), and its page (the Search tab and the clock). |
 | `engine/stats.js`, `engine/depgraph.js` | The statistics page and the DepGraph exports. |
 | `cases/silver-blaze/` | The case: `story.txt`, `case.json` and its parts (entities, events, claims, relations, propositions, constraints, knowledge, states, actions, mentions, thoughts) and the generated files. |
 | `schema/case.schema.json` | JSON Schema for the case format. |
@@ -79,6 +79,7 @@ scripts need a local Chrome.
 | Play the action table through the page in headless Chrome, each move checked in the save (about 12–13 min; `STOP=<para>` for a part) | `node scripts/ui-run.mjs` |
 | The player's notes through the page (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
 | The autoplay through the page to the end (about 6–8 min) | `node scripts/autoplay-check.mjs [minimal] [shots dir]` |
+| Incremental mode's Search tab through the page: the clock, the bars, the queue, pause, reading by itself, a reload (about 5 min) | `node scripts/search-check.mjs [shots dir]` |
 | The hints through the page; `all`: a game that only takes hints must reach the maximum (`DIFFICULTY=easy\|medium`) | `node scripts/hints-check.mjs [all] [shots dir]` |
 | LLM leak checker over every card text (costs money; cached) | `node checker/check.js cases/silver-blaze --all --runs 2` |
 | LLM leak checker over the notes the autoplay types | `node checker/check.js cases/silver-blaze --notes --runs 2` |
