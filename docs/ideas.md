@@ -447,9 +447,6 @@ From the redesign discussion and the later papers; any of them may be worth revi
 
 ## 4. Known limitations
 
-- **The autoplay check misses 7 story notes** (`node scripts/autoplay-check.mjs`: 369 notes of 376; `t4.2`, `t35.7`,
-  `t35.8`, `t35.10`, `t36.2`, `t57.3`, `t114.2`). Found 2026-11-02; it fails the same way at `cf3e6ab`, before the
-  Search tab, so it is older than incremental mode's page. The record (70, every family) passes. Not yet traced.
 
 - **Two rows can never score**, so the Hard maximum is 70 of 72: `t127.4` (the square toes are disclosed only at
   Holmes's own ¶146) and `t36.2` (its background fact is offered only at ¶218). `t212.1` and `t214.1` are never
@@ -478,6 +475,9 @@ From the redesign discussion and the later papers; any of them may be worth revi
 - **Hard shows none of the story's signals**, so the watch-Holmes thoughts exist only on Easy and Trivial. The
   purist reader (`supplied: withheld`) still hears Holmes at the story's gates.
 - **The minimal playthrough at the 'wait' pace stops at ¶146.**
+- **A toast took the clicks under it** (found 2026-11-02, by the autoplay check missing 7 of its 376 notes, an older
+  fault): on a short window the toast at the foot covers the story's last lines, and a click there (a note at a
+  paragraph's end) went to the toast. Toasts now let clicks through, except on their links (undo).
 - **The engine accepts moves the page cannot make** (dropping an answer never proposed, a candidate that fails on
   Hard). Only runs through the page (`scripts/ui-run.mjs`, `hints-check all`) catch these.
 - **Speed.** The case loads on the main thread (about 5 s blank); weighing all six theories at the end of an Easy

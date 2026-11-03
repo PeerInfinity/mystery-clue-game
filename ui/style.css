@@ -128,6 +128,10 @@ button.settings-rule { border-top: 1px solid var(--line); margin-top: 4px; }
 .pop .item { display: block; padding: 4px 6px; border-radius: 4px; }
 .pop .item:hover { background: var(--bg); }
 .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 6px 14px; border-radius: 16px; font-size: 14px; z-index: 11; max-width: 90vw; }
+/* A toast lets clicks through to what is under it (the story's last lines, on a short window), except on its links
+   (undo). It used to take them: the autoplay's notes at a paragraph's end went to the toast (7 notes lost). */
+.toast { pointer-events: none; }
+.toast .link, .toast a, .toast button { pointer-events: auto; }
 
 /* A phone: always one column, the reading bar at the bottom of the screen, where the thumb is. */
 @media (max-width: 699px) {
