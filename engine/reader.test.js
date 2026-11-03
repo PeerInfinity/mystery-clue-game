@@ -115,13 +115,6 @@ test('set aside: a card leaves the lists, stays held, is saved, and changes no s
     assert.deepEqual(scores(b), scores(a));
 });
 
-test('re-read went: an old save with re-reads still loads, and drops them', () => {
-    const g = readTo(new Game(model, { difficulty: EASY }), 70);
-    const g2 = new Game(model, { difficulty: EASY, state: { ...g.save(), rereads: [{ from: 8, to: 46, question: null, para: 70 }] } });
-    assert.equal(g2.read, g.read);
-    assert.ok(!('rereads' in g2.save()));
-});
-
 test('the story\'s own signals: Holmes\'s interest quoted with the cards it mentions, and nothing else', async () => {
     const { PRESETS, MEDIUM } = await import('./game.js');
     assert.equal(PRESETS.easy.hints, 'story');

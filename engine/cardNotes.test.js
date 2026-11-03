@@ -1,6 +1,6 @@
 // The player's own words and marks on a card (2026-11-02, replacing the question form and the "because" of a notice):
 // a free note per card, never read by the game; the two marks, important (noticed) and unimportant (set aside),
-// exclude each other; an older save's questions and reasons become notes.
+// exclude each other.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCase } from './loadCase.js';
@@ -39,24 +39,3 @@ test('important and unimportant exclude each other', () => {
     assert.deepEqual([g.noticed.has('c.curry_for_supper'), g.isSetAside('c.curry_for_supper')], [true, false]);
 });
 
-test('an older save: its questions and a notice\'s reason become notes on the card; important wins over unimportant', () => {
-    const g = easy();
-    readTo(g, 31);
-    const s = g.save();
-    const stick = model.cards.has('penang_lawyer') && g.knows('penang_lawyer') ? 'penang_lawyer' : [...g.unlocked.keys()].find((x) => model.cards.get(x)?.kind === 'object');
-    const rule = [...g.unlocked.keys()].find((x) => model.cards.get(x)?.section === 'rules');
-    const odd = [...g.unlocked.keys()].find((x) => model.cards.get(x)?.section === 'claims');
-    s.posed = [['pq.1', 'whose', [stick], 20, [], null]];
-    s.noticed = [[odd, 25, rule]];
-    s.setAside = [[odd, 26]];
-    const again = easy();
-    again.load(s);
-    assert.match(again.cardNote(stick), /^Whose is .*\?$/);
-    assert.ok(again.cardNote(odd).startsWith('Important because: '));
-    assert.deepEqual([again.noticed.has(odd), again.isSetAside(odd)], [true, false]);
-    assert.ok(!('posed' in again.save()), 'saved again, the questions are notes');
-    // Loading the converted save again does not write the lines twice.
-    const third = easy();
-    third.load({ ...again.save(), posed: s.posed });
-    assert.equal(third.cardNote(stick), again.cardNote(stick));
-});

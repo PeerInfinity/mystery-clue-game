@@ -8,7 +8,7 @@ import { Hints, madeRows, hintTiers } from '../engine/hints.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
 import { makeSearch, CATEGORY_WORDS, num } from './search.js';
-import { Game, MEDIUM, CUSTOM, WAIT, INCREMENTAL, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
+import { Game, SAVE_VERSION, MEDIUM, CUSTOM, WAIT, INCREMENTAL, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 // The autoplay plays in a save of its own, so the player's game is kept aside: `?autoplay` (or
@@ -66,7 +66,12 @@ function save() {
     try { localStorage.setItem(STORE, JSON.stringify({ game: game.save(), selected: ui.selected })); } catch { /* private mode */ }
 }
 function restore() {
-    try { return JSON.parse(localStorage.getItem(STORE) ?? 'null'); } catch { return null; }
+    // A save of another version is dropped, with its search: there are no players to keep old saves for.
+    try {
+        const s = JSON.parse(localStorage.getItem(STORE) ?? 'null');
+        if (s && s.game?.version !== SAVE_VERSION) { localStorage.removeItem(STORE); localStorage.removeItem(`${STORE}:search`); return null; }
+        return s;
+    } catch { return null; }
 }
 function saveLayout() {
     if (AUTOPLAY !== null) return; // the autoplay lays out its own page and leaves the viewer's alone

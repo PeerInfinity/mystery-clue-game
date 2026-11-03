@@ -536,7 +536,7 @@ also told at ¶181) and no alarm (`c.no_alarm`, filed only), both witnessed by t
 A **notice** marks a held card as odd (`notice(card)`; the page calls the mark *important*); nothing is checked or
 told. NOTICE thoughts with `notices` count (Scoring). Noticing a card of a puzzle meets the puzzle. A notice and a
 set-aside exclude each other (each takes the other off). The optional reason (`because`, a held rule) went on
-2026-11-02: an older save's reason becomes a line of the card's note.
+2026-11-02 for the card's note.
 
 ## Defeasibility
 
@@ -767,7 +767,7 @@ whose is, who really is, why would {person} do it; who had, who could get at, wh
 did {thing} leave {place}, what could not be done at {place}. `askedText(template, cards)` gives the words. Until
 2026-11-02 the player could pose them (matched quietly to a slot, joining it once the story raised it, its candidates
 then becoming circles); the form went for a free note on the card, which is all it ever was to the score. The action
-table writes the reader's question as that note (`cardNote` moves); an older save's questions load as note lines.
+table writes the reader's question as that note (`cardNote` moves).
 
 ## Scoring and the record
 
@@ -812,14 +812,14 @@ and never read by a score.
 
 ## The save
 
-`Game.save()` (version 8): `difficulty`, `options`, `pace`, `autoPace`, `read`, `collected` (Hard), `marks`
+`Game.save()` (version `SAVE_VERSION`, 9): `difficulty`, `options`, `pace`, `autoPace`, `read`, `collected` (Hard), `marks`
 (listed, struck with their proofs, proven, circled), `theories`, `lastSeen`, `suspected`, `doubtKind`,
 `doubtReason`, `split`, `asked`, `clashLog`, `built`, `applied`, `concluded`, `filed`, `noticed`, `drops`, `raised`,
 `seals`, `setAside`, `cardNotes`, `notes`, `hints`, `made`, `board`, `openedSplits`, `opened`. `load` replays the
 reading to `read` (re-asking and rebuilding at the paragraphs they were made), reopens splits and states before the
 cards and marks that speak of them, and remakes the player's cards in order (fresh ids where a saved id is taken on
-the same model). Older saves without a field load with none; saves without options map their old difficulty names;
-an older save's `posed` questions and notice reasons become lines of the cards' notes.
+the same model). Saves are not kept across versions (there are no players yet): the page drops a save of another
+version, with its search, and starts over; there is no migration code.
 
 ## The solver
 

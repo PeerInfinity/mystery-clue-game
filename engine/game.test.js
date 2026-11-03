@@ -130,10 +130,7 @@ test('Trivial works it out: questions settle themselves as the clues come in, an
     assert.ok(game.whyNot('the_bay.identity', 'bayard').length > 0);
 });
 
-test('a save from before Medium existed keeps its meaning', () => {
-    const old = { difficulty: 'easy', pace: 'free', read: 5 };
-    assert.equal(new Game(model, { state: old }).difficulty, MEDIUM);
-    assert.equal(new Game(model, { state: { ...old, difficulty: 'trivial' } }).difficulty, EASY);
+test('a save keeps its difficulty', () => {
     const now = new Game(model, { difficulty: TRIVIAL });
     assert.equal(new Game(model, { state: now.save() }).difficulty, TRIVIAL);
 });
@@ -361,12 +358,6 @@ test('the difficulties are presets of the options; any other mix is Custom', () 
     // With the game solving, the player's options do not count against Trivial.
     assert.equal(presetOf({ ...PRESETS.trivial, kind: 'on' }), TRIVIAL);
     assert.equal(presetOf({ ...PRESETS.trivial, irrelevant: 'half' }), CUSTOM);
-    // A save from before options keeps its background and connect choices.
-    const old = { difficulty: 'medium', background: BG_START, connect: 'connect', pace: 'free', read: 3, version: 3 };
-    const back = new Game(model, { state: old });
-    assert.equal(back.background, BG_START);
-    assert.equal(back.connect, 'connect');
-    assert.equal(back.difficulty, CUSTOM);
 });
 
 test('pencil cross-outs and collecting cards are options of their own', () => {

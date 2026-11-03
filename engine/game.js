@@ -153,8 +153,8 @@ const KIND_OF_FACET = {
     time: 'when', place: 'where', whereabouts: 'where', object: 'what', instrument: 'what', contents: 'what',
     purpose: 'why', motive: 'why', truth: 'whether', state: 'whether', character: 'whether',
 };
-// Saves made before Medium existed: their 'trivial' is today's Easy, their 'easy' today's Medium.
-const OLD_DIFFICULTY = { trivial: EASY, easy: MEDIUM, hard: HARD };
+/** The version of the saves this code writes and reads; a save of another version is not loaded (the page starts over). */
+export const SAVE_VERSION = 9;
 
 export class Game {
     constructor(model, { difficulty = MEDIUM, options = null, pace = FREE, background = null, autoPace = AUTO_HOLMES, connect = null, waits = null, state = null } = {}) {
@@ -403,16 +403,13 @@ export class Game {
             board: this.board,
             openedSplits: this.openedSplits,
             opened: this.openedStates.map((slot) => { const o = this.model.opened.find((x) => x.slot === slot); return [o.thing, o.name, o.window]; }),
-            version: 8,
+            version: SAVE_VERSION,
         };
     }
 
     load(state) {
         const board = state.board ? structuredClone(state.board) : null;
-        if (state.difficulty && !state.version) state = { ...state, difficulty: OLD_DIFFICULTY[state.difficulty] ?? state.difficulty };
-        // Saves before options (version < 4): a difficulty, with background and connect kept beside it.
         if (state.options) this.opts = optionsFrom(MEDIUM, state.options);
-        else if (state.difficulty) this.opts = optionsFrom(state.difficulty, { background: state.background, connect: state.connect });
         this.pace = state.pace ?? this.pace;
         this.autoPace = state.autoPace ?? this.autoPace;
         this.reset();
@@ -478,24 +475,14 @@ export class Game {
         this.clashCache = this.clashLog.length ? { key: null, list: this.clashLog.map((ids) => ({ ids })) } : null;
         this.costCache = null;
         this.bearingCache = null;
-        // Where the player made each step, as saved (an older save is scored from here on).
+        // Where the player made each step, as saved.
         if (state.made) {
             this.madeAt = new Map(state.made.filter(([id]) => this.routeById.has(id)));
             this.moved = false;
         }
         for (const [id, para] of state.split ?? []) if (this.knows(id) && this.partsOf(id).length) { this.splitClaims.add(id); for (const x of this.partsOf(id)) this.#unlock(x, para); }
         for (const [id, para, text] of state.cardNotes ?? []) if (this.knows(id)) this.cardNotes.set(id, { para, text });
-        // An older save: a mark's "because" (a background fact) and the player's own questions become notes on the card.
-        const migrate = (id, para, line) => {
-            if (!this.knows(id)) return;
-            const n = this.cardNotes.get(id);
-            if (!n?.text.includes(line)) this.cardNotes.set(id, { para: n?.para ?? para, text: n ? `${n.text}\n${line}` : line });
-        };
-        for (const [id, para, because] of state.noticed ?? []) {
-            if (!this.knows(id)) continue;
-            this.noticed.set(id, { para });
-            if (because && this.knows(because)) migrate(id, para, `Important because: ${this.model.cards.get(because).text ?? because}`);
-        }
+        for (const [id, para] of state.noticed ?? []) if (this.knows(id)) this.noticed.set(id, { para });
         for (const d of state.drops ?? []) if (d?.target && DROP_REASONS.includes(d.reason)) this.drops.set(dropKey(d.target), d);
         for (const [id, n, exception, para, status] of state.raised ?? []) {
             const e = this.knows(id) && this.applicationsOf(id).find((a) => a.n === n)?.exceptions.find((x) => x.id === exception);
@@ -503,13 +490,7 @@ export class Game {
             this.raised.set(`${id}#${n}:${exception}`, { id, n, rule: e.rule, exception, status, para });
         }
         for (const x of state.seals ?? []) if (CHECK_TEMPLATES[x?.verb] && Object.values(x.fields ?? {}).every((id) => this.knows(id))) this.seals.push({ ...x });
-        // Marked important wins over unimportant (an older save could hold both).
-        for (const [id, para] of state.setAside ?? []) if (!this.noticed.has(id)) this.setAside(id, para);
-        for (const [, template, cards, para, candidates] of state.posed ?? []) {
-            if (!QUESTION_TEMPLATES[template] || !cards?.every((x) => this.knows(x))) continue;
-            const named = (candidates ?? []).filter((c) => this.knows(c)).map((c) => this.nameOf(c));
-            migrate(cards[0], para, `${this.askedText(template, cards)}${named.length ? ` (${named.join(', ')}?)` : ''}`);
-        }
+        for (const [id, para] of state.setAside ?? []) this.setAside(id, para);
         for (const [id, para, at, from, to, text] of state.notes ?? []) this.addNote({ para, at, from, to, text }, id);
         this.hintLog = structuredClone(state.hints ?? []);
         if (board) this.board = { ...TL.emptyBoard(), ...board };
@@ -2539,8 +2520,6 @@ export class Game {
         return (this.model.data.thoughts ?? []).filter((t) => t.dropped && !t.dropped.inference).map((t) => {
             const d = t.dropped;
             const mine = this.autoSolves() ? null : this.dropOf(d);
-            // An older save has no `held`: its reason is checked as it stands, dated by the drop.
-            if (mine && mine.held === undefined) mine.held = this.dropCheck(d)?.ok ? mine.para : null;
             const at = mine?.para ?? null;
             const held = mine?.held ?? null;
             const holmes = t.holmes && !t.holmes.never && t.holmes.paras?.length ? t.holmes.paras[0] : d.deadline ?? null;

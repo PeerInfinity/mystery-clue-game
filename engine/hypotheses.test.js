@@ -200,13 +200,9 @@ test('a drop scores only from where a reason that holds is given', () => {
     const rows = Object.fromEntries(game.record().rows.filter((r) => r.family === 'drop').map((r) => [r.thought, r]));
     assert.deepEqual([rows['t58.3'].scores, rows['t58.3'].at, rows['t58.3'].why], [true, 60, undefined]);
     assert.deepEqual([rows['t92.7'].scores, rows['t92.7'].why], [false, 'reason']);
-    // Saved and loaded, with what held; an older save without `held` has its reason checked as it stands.
+    // Saved and loaded, with what held.
     const state = JSON.parse(JSON.stringify(game.save()));
     assert.equal(new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state }).dropOf(paper).held, 60);
-    for (const d of state.drops) delete d.held;
-    const old = new Game(model, { difficulty: EASY, options: { background: 'relevant' }, state });
-    const oldRows = Object.fromEntries(old.dropScores().map((r) => [r.thought, r]));
-    assert.deepEqual([oldRows['t58.3'].held, oldRows['t92.7'].held], [58, null]);
 });
 
 test('the deadlines the annotation gives for the drops Holmes never makes are where the story makes them untenable', () => {

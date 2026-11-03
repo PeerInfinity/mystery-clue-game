@@ -376,8 +376,7 @@ recommendations).**
 - **The "because…" of a notice and the question form went for one free note per card** (`setCardNote`). Neither was
   ever scored: the reason was only stored and shown, a question only joined the story's when the story asked it (the
   record showed the lead, never counted it; its candidates became circles). The careful reader's 10 questions are now
-  `cardNote` moves of the action table (the question's words written as the note); an older save's questions and
-  reasons load as lines of the notes. Card notes show on the card, in the Notes tab beside the story notes, and as ✎.
+  `cardNote` moves of the action table (the question's words written as the note). Card notes show on the card, in the Notes tab beside the story notes, and as ✎.
   In incremental mode the note box keeps its words and focus through the search's redraws.
 - **Two more folds (2026-11-02, the user's choice of the surveyed candidates; the rest kept as they are):** a card's
   doubt and split sit in one section, *I don't believe this…*, folded until either is in force (weighing a theory
