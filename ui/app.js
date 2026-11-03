@@ -538,6 +538,8 @@ function broughtHtml() {
 
 function renderReader() {
     const el = $('#reader');
+    // Incremental mode: the reading bar keeps its tallest height until the story moves on (ui/search.js floors()).
+    if (game.pace === INCREMENTAL && !game.finished()) el.dataset.floor = 'reader'; else { delete el.dataset.floor; el.style.minHeight = ''; }
     const news = recordNews();
     if (game.finished()) {
         el.innerHTML = `${news}<span class="muted">The end.</span> ${game.autoSolves() ? '<span class="small muted">In Trivial the game worked the case out: nothing is scored. On Easy you can race Holmes.</span>' : '<span class="link small" data-record-open="1">Your record against Holmes</span>'}`;
@@ -577,6 +579,7 @@ function renderReader() {
         : '';
     note = news + note;
     el.innerHTML = `<button id="read" ${blocked ? 'disabled' : ''}>Next paragraph</button>${sceneJump}${jump}${hintButton()}<span class="muted small">${game.read - 1} of ${story.paragraphs.length - 1} paragraphs</span>${broughtHtml() ? `<span class="small brought">${broughtHtml()}</span>` : ''}<span id="note-hint" class="note-hint small">${noteHint()}</span>${note}${hintNote()}`;
+    if (el.dataset.floor) search.floors(el);
 }
 
 function scrollStory() {
@@ -714,7 +717,10 @@ function renderToolNow() {
     ui.panels.forEach(({ tab }, i) => {
         if (tab === 'story' || !shown(i)) return;
         const body = $(`#panel-${i}`);
+        // The Search tab: its log's scroll and its grow-only pieces kept across a full redraw.
+        const held = tab === 'search' ? search.hold(body) : null;
         body.innerHTML = (i === bar ? buildingBar() : '') + TOOLS[tab]();
+        if (tab === 'search') search.fit(body, held);
         if (body.dataset.fresh) { body.scrollTop = 0; delete body.dataset.fresh; }
     });
     // Back to a view: where it was scrolled.
@@ -2638,7 +2644,7 @@ const search = makeSearch({
 function drawSearch() {
     settle(() => {
         const i = panelOf('search');
-        if (i >= 0) { const body = $(`#panel-${i}`); const top = body.scrollTop; body.innerHTML = search.tool(); body.scrollTop = top; }
+        if (i >= 0) search.paint($(`#panel-${i}`));
         renderTabs();
         renderReader();
     }, () => model.problem).catch((e) => console.error(e));

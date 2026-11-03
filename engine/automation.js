@@ -201,25 +201,43 @@ export class Automation {
     }
 
     // ---------- the searches (each a pass; returns 'changed' when it should start again) ----------
+    #spanLabel(q, s, ids) { return `collect “${this.g.story.paragraphs[q]?.display?.slice(s.start, s.end) ?? ids.join(', ')}” (¶${q})`; }
     *collect() {
         for (let q = 1; q < this.g.read; q++) for (const s of this.g.story.spans[q] ?? []) {
             const ids = s.ids.filter((x) => this.model.cards.has(x));
             if (!ids.some((x) => !this.g.knows(x) && !this.g.hidden.has(x))) continue;
-            const text = this.g.story.paragraphs[q]?.display?.slice(s.start, s.end) ?? ids.join(', ');
-            const got = yield { cat: 'collect', label: `collect “${text}” (¶${q})`, run: () => this.g.collect(q, ids).length > 0 };
+            const got = yield { cat: 'collect', label: this.#spanLabel(q, s, ids), run: () => this.g.collect(q, ids).length > 0 };
             if (got) this.stats.collect.found++;
         }
     }
+    /** The collects still to come, in order: each span's cards (and the events its claims name) taken as collected. */
+    #collectAhead(limit) {
+        const got = new Set();
+        const out = [];
+        for (let q = 1; q < this.g.read && out.length < limit; q++) for (const s of this.g.story.spans[q] ?? []) {
+            const ids = s.ids.filter((x) => this.model.cards.has(x));
+            if (!ids.some((x) => !this.g.knows(x) && !this.g.hidden.has(x) && !got.has(x))) continue;
+            out.push({ cat: 'collect', label: this.#spanLabel(q, s, ids) });
+            for (const x of ids) { got.add(x); for (const e of this.g.claimEvents.get(x) ?? []) got.add(e); }
+            if (out.length >= limit) break;
+        }
+        return out;
+    }
+    #askLabel(id) { return `ask what I know about ${this.#card(id)}`; }
     *ask() {
         for (let grew = true; grew;) {
             grew = false;
             for (const id of this.#held()) {
                 if (!this.g.canAsk(id) || this.g.hasAsked(id)) continue;
-                yield { cat: 'ask', label: `ask what I know about ${this.#card(id)}`, run: () => { if (!this.g.hasAsked(id)) this.g.ask(id); return true; } };
+                yield { cat: 'ask', label: this.#askLabel(id), run: () => { if (!this.g.hasAsked(id)) this.g.ask(id); return true; } };
                 this.stats.ask.found++;
                 grew = true;
             }
         }
+    }
+    /** The asks still to come about the cards held now, in order (cards still to arrive are asked about after them). */
+    #askAhead(limit) {
+        return this.#held().filter((id) => this.g.canAsk(id) && !this.g.hasAsked(id)).slice(0, limit).map((id) => ({ cat: 'ask', label: this.#askLabel(id) }));
     }
     *build() {
         const pool = this.order(this.#held().filter((x) => POOL.includes(this.#sec(x))));
@@ -462,10 +480,29 @@ export class Automation {
         if (!this.open.length) return 'reading';
         return this.open.some((w) => !this.running.has(waitCategory(w))) ? 'paused' : 'stuck';
     }
-    /** The next check of each category with something to search, in the order they take turns (the first is next()). */
-    queue() {
-        if (!this.next()) return [];
-        return this.#turns().map((cat) => this.#pending(cat)).filter(Boolean);
+    /**
+     * The checks to come, in the order they will be made while nothing is found (the first is next()): every collect,
+     * then every ask about the cards held (these two run to the end before the rest), then the next check of each
+     * category of the open waits, in turn. A find changes what comes after it; the categories in turn show only
+     * their next check, as what each answers decides the one after.
+     */
+    queue(limit = 12) {
+        const c = this.next();
+        if (!c) return [];
+        const out = [];
+        for (const cat of this.#turns()) {
+            if (out.length >= limit) break;
+            if (cat === 'collect' || cat === 'ask') {
+                if (!this.#pending(cat)) continue;
+                out.push(...(cat === 'collect' ? this.#collectAhead(limit) : this.#askAhead(limit)));
+            } else {
+                const p = this.#pending(cat);
+                if (p) out.push(p);
+            }
+        }
+        // The head is the check planned (the same one, not a copy).
+        if (out[0]?.label === c.label && out[0]?.cat === c.cat) out[0] = c; else out.unshift(c);
+        return out.slice(0, limit);
     }
     /**
      * Make the check next() planned: → its log entry {n, para, cat, label, out: 'yes' | 'no' | 'found', what?} (null if

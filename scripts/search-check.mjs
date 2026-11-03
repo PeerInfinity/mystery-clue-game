@@ -1,5 +1,6 @@
 // Incremental mode's Search tab in the real page: the pace chosen (Hard, locked), the tab, the story waiting, one check
-// a second with a bar in the tab and in the reading bar, the queue, the nine categories counted; Pause; at 0 s a
+// a second with a bar in the tab and in the reading bar, the queue (its first is the next check), the nine categories
+// counted; the page does not jump and the log keeps its place; Pause; at 0 s a
 // check the search lifts the wait and the player reads on; reading by itself it goes on; a reload keeps the counts; no
 // console error (about 5 minutes).
 //   node scripts/search-check.mjs [shots dir]   (the game served at URL, default http://localhost:8321/; Chrome on 9333)
@@ -36,6 +37,44 @@ check(await p.ev(`!!document.querySelector('#panel-1 .search-fill.run') && !!doc
 check(await p.ev(`document.querySelectorAll('.search-queue li').length`) >= 1, 'the queue shows the next checks');
 check(await p.ev(`document.querySelectorAll('.search-table tbody tr:not(.terms)').length`) === 9, 'nine categories counted');
 if (SHOTS) await p.shot(`${SHOTS}/search-1s.png`);
+// The page does not jump: over about eight checks, nothing below the reading bar moves up (a piece may grow, never
+// shrink back). And the queue says what comes next: when the check under way changes, it is the one the queue showed
+// first, unless the check before it found something.
+const look = `JSON.stringify({
+    tops: [...document.querySelectorAll('#panel-1 h4.sub, #panel-1 .search-table-wrap, .layout')].map((e) => Math.round(e.getBoundingClientRect().top)),
+    now: document.querySelector('#panel-1 .search-now b')?.parentElement.textContent.replace(/^\\S+:\\s*/, '') ?? '',
+    head: document.querySelector('#panel-1 .search-queue li')?.textContent ?? '',
+    found: document.querySelector('#panel-1 .search-log li')?.classList.contains('out-found') ?? false })`;
+let prev = JSON.parse(await p.ev(look));
+let movedUp = 0, nexts = 0, wrong = [];
+for (let i = 0; i < 40; i++) {
+    await p.sleep(200);
+    const cur = JSON.parse(await p.ev(look));
+    if (cur.tops.length === prev.tops.length && cur.tops.some((t, j) => t < prev.tops[j])) movedUp++;
+    if (cur.now && prev.now && cur.now !== prev.now) {
+        nexts++;
+        if (!cur.found && cur.now !== prev.head) wrong.push(`${prev.head} ≠ ${cur.now}`);
+    }
+    prev = cur;
+}
+check(movedUp === 0, `the page does not jump (moved up ${movedUp} times in 8 s)`);
+check(nexts >= 4 && wrong.length === 0, `the queue's first is the next check (${nexts} checks${wrong.length ? `; ${wrong.slice(0, 2).join(' | ')}` : ''})`);
+// The log keeps its place: scrolled down, new entries come in above, out of view.
+await p.ev(`document.querySelector('.settings').open = true; 1`);
+await p.choose('#search-delay', '0.2');
+await p.ev(`document.querySelector('.settings').open = false; 1`);
+for (let i = 0; i < 60 && (await p.ev(`document.querySelectorAll('.search-log li').length`)) < 30; i++) await p.sleep(500);
+const topEntry = `(() => { const l = document.querySelector('.search-log'); const li = [...l.children].find((x) => x.offsetTop + x.offsetHeight > l.scrollTop); return li?.dataset.n + '@' + Math.round(li.offsetTop - l.scrollTop); })()`;
+await p.ev(`document.querySelector('.search-log').scrollTop = 200; 1`);
+const before = await p.ev(topEntry);
+const logN = await p.ev(`document.querySelectorAll('.search-log li').length`);
+await p.sleep(2500);
+const after = await p.ev(topEntry);
+const grew = (await p.ev(`document.querySelectorAll('.search-log li').length`)) - logN;
+check(before === after && grew > 0, `the log keeps its place while entries come in (${before} → ${after}, ${grew} new)`);
+await p.ev(`document.querySelector('.settings').open = true; 1`);
+await p.choose('#search-delay', '1');
+await p.ev(`document.querySelector('.settings').open = false; 1`);
 // Pause, then fast.
 check(await p.click('[data-search-play="0"]'), 'the Pause button');
 await p.sleep(1500); // the check under way may finish

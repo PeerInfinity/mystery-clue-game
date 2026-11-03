@@ -291,16 +291,29 @@ tick). Each category can be paused; *Read on by itself* lets the search read the
 page's settings, default 1 s, 0 as fast as it can) sets the clock; the reading bar carries a second bar and the check
 under way.
 
-- **The queue** (the user asked whether it makes sense): only the next check of each category, in the order they take
-  turns. Further ahead it would be invented, since each check's answer decides the next (a "yes" grows the set, a
-  "no" moves on). The engine plans a check before making it (`next()`, `queue()`, `execute()`), which also makes a
+- **The queue** (the user asked whether it makes sense): the checks to come while nothing is found. Collect and ask run
+  to the end before the rest, and their lists are known ahead (the spans not yet collected, the cards held not yet
+  asked about), so each is listed; after them, only the next check of each category in turn. Further ahead it would
+  be invented, since each check's answer decides the next (a "yes" grows the set, a "no" moves on). The first version
+  showed one check per category including collect and ask, and the user found it wrong: it named an ask while a dozen
+  collects came first. Measured over 20,000 checks, the queue now names what follows in 4,570 of 4,578 predictions
+  (the misses: a check that changed the hand without counting as a find).
+- **A page that does not jump** (the user's ask, after the Prestige Tree loader's grow-only floors): every piece of
+  the tab (the waits, the check under way, *Next up*, the table, the log) is drawn even when empty and keeps the
+  largest height it has had; the reading bar too. Each number in the table has its own box whose width in characters
+  only grows, with tabular figures. The floors are the page's, not the save's, and start again when the story moves
+  on. A first try floored the measured column widths and fed back on itself (the table spreads its spare width over
+  the columns and the floor kept the spread, pushing *Stale* out of view). The log, redrawn with the tab, keeps the
+  entry at its top in place when scrolled down; the next check is planned before the page is drawn, so "nothing under
+  way" no longer flashes between checks. The engine plans a check before making it (`next()`, `queue()`, `execute()`), which also makes a
   check safe to make again when the solver hands it to its worker (the move is made once).
 - **Kept across reloads**: the counts, the negatives and the last 200 log lines, beside the game's save. A whole game's
   negatives are 2.8 MB written as card ids; as the cards' places in the case, under 0.9 MB.
 - **The time a game takes**: one run made about 46,000 checks, which is about 13 hours at one a second. Most are
   builds at the first stops; the steering is meant to shorten that.
-- **Checked through the page** (`scripts/search-check.mjs`): the clock, both bars, the queue, pause, a wait lifted at
-  0 s, reading by itself past ¶110, a reload, no console error.
+- **Checked through the page** (`scripts/search-check.mjs`): the clock, both bars, the queue (its first is the next
+  check), nothing moving up over eight checks, the log keeping its place, pause, a wait lifted at 0 s, reading by
+  itself past ¶110, a reload, no console error.
 
 Not yet done: the hedge of a sealed check made plain on the page (the search itself never hedges: no expectation
 first, a seal kept only if a wait lifts).

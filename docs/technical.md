@@ -79,7 +79,7 @@ scripts need a local Chrome.
 | Play the action table through the page in headless Chrome, each move checked in the save (about 12–13 min; `STOP=<para>` for a part) | `node scripts/ui-run.mjs` |
 | The player's notes through the page (about a minute) | `node scripts/notes-check.mjs [shots dir]` |
 | The autoplay through the page to the end (about 6–8 min) | `node scripts/autoplay-check.mjs [minimal] [shots dir]` |
-| Incremental mode's Search tab through the page: the clock, the bars, the queue, pause, reading by itself, a reload (about 5 min) | `node scripts/search-check.mjs [shots dir]` |
+| Incremental mode's Search tab through the page: the clock, the bars, the queue, a page that does not jump, the log's scroll, pause, reading by itself, a reload (about 5 min) | `node scripts/search-check.mjs [shots dir]` |
 | The hints through the page; `all`: a game that only takes hints must reach the maximum (`DIFFICULTY=easy\|medium`) | `node scripts/hints-check.mjs [all] [shots dir]` |
 | LLM leak checker over every card text (costs money; cached) | `node checker/check.js cases/silver-blaze --all --runs 2` |
 | LLM leak checker over the notes the autoplay types | `node checker/check.js cases/silver-blaze --notes --runs 2` |

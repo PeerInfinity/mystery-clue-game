@@ -42,7 +42,8 @@ export function num(n) {
  */
 export function makeSearch(ctx) {
     const { esc } = ctx;
-    const S = { a: null, playing: false, timer: null, startedAt: 0, busy: false, onlyFound: false, saveCountdown: 0 };
+    // floors: the grow-only heights (and widths) of the tab's pieces, see floors() below.
+    const S = { a: null, playing: false, timer: null, startedAt: 0, busy: false, onlyFound: false, saveCountdown: 0, floors: new Map(), chars: new Map(), floorRead: 0 };
 
     function load() {
         try { return JSON.parse(localStorage.getItem(ctx.store) ?? 'null'); } catch { return null; }
@@ -61,6 +62,7 @@ export function makeSearch(ctx) {
         if (fresh) clear();
         const saved = load();
         const time = (id) => TL.times(g).find((t) => t.id === id)?.label ?? id;
+        S.floors.clear(); S.chars.clear();
         S.a = new Automation(g, { autoRead: false, names: { ...ctx.names, time }, state: saved?.automation ?? null });
         S.playing = saved?.playing ?? true;
         kick();
@@ -106,6 +108,8 @@ export function makeSearch(ctx) {
                 if (ms > 0) break;
                 await ctx.quiet(() => S.a.next());
             } while (Date.now() - t0 < 40 && S.a.current && S.playing);
+            // The next check planned before the page is drawn: the tab never shows "nothing under way" in between.
+            if (S.playing) await ctx.quiet(() => S.a.next());
         } finally { S.busy = false; }
         if (--S.saveCountdown <= 0 || changedAny) { save(); S.saveCountdown = 20; }
         if (changedAny) ctx.changed(); else ctx.draw();
@@ -162,24 +166,30 @@ export function makeSearch(ctx) {
         h += `<div class="search-controls"><button data-search-play="${S.playing ? '0' : '1'}">${S.playing ? '⏸ Pause' : '▶ Search'}</button>
 <label class="small"><input type="checkbox" data-search-autoread ${a.autoRead ? 'checked' : ''}> Read on by itself</label>
 <span class="small muted">${num(a.n)} checks · one every ${sec} s (Settings)</span></div>`;
-        if (a.open.length) h += `<p class="small">Before ¶${ctx.game().read}, the story waits for ${esc(waitsHtml())}.</p>`;
-        if (a.current) h += `<div class="search-now"><div class="small"><b>${S.playing ? 'Now' : 'Next'}:</b> <span class="cat-tag">${esc(CATEGORY_WORDS[a.current.cat][0])}</span> ${esc(a.current.label)}</div>${bar()}</div>`;
-        else h += `<p class="small muted">${esc(idleWords())}</p>`;
-        // The next check of each category, in the order they take turns: each answer decides the one after it.
+        // Every piece is drawn even when empty, and keeps the largest size it has had (floors()): the page does not jump.
+        h += `<div class="small search-waits" data-floor="waits">${a.open.length ? `Before ¶${ctx.game().read}, the story waits for ${esc(waitsHtml())}.` : ''}</div>`;
+        h += `<div class="search-now" data-floor="now">${a.current
+            ? `<div class="small"><b>${S.playing ? 'Now' : 'Next'}:</b> <span class="cat-tag">${esc(CATEGORY_WORDS[a.current.cat][0])}</span> ${esc(a.current.label)}</div>${bar()}`
+            : `<p class="small muted">${esc(idleWords())}</p>`}</div>`;
+        // The checks to come while nothing is found (automation.queue()).
         let queue = [];
         try { queue = a.queue(); } catch { queue = a.current ? [a.current] : []; }
+        h += '<h4 class="sub">Next up</h4><div data-floor="queue">';
         if (queue.length > 1) {
-            h += '<h4 class="sub">Next up</h4><ol class="search-queue small">';
+            h += '<ol class="search-queue small">';
             for (const c of queue.slice(1)) h += `<li><span class="cat-tag">${esc(CATEGORY_WORDS[c.cat][0])}</span> ${esc(c.label)}</li>`;
-            h += '</ol><p class="small muted">The next check of each category, in turn; what each finds decides the one after.</p>';
+            h += '</ol>';
         }
+        h += `<p class="small muted">${queue.length > 1
+            ? 'In the order they will be made while nothing is found: every collect, then every ask, then the next check of each category the story waits for, in turn. A find changes what comes after it.'
+            : queue.length ? 'What comes after this check depends on what it finds.' : ''}</p></div>`;
         // The counts.
         let counts = null;
         try { counts = a.counts(); } catch { /* waiting on the solver: the last drawn stand */ }
         counts = counts ?? S.lastCounts;
         S.lastCounts = counts;
         if (counts) {
-            h += '<h4 class="sub">What there is to try</h4><div class="search-table-wrap"><table class="search-table small"><thead><tr><th></th><th>Category</th><th>In all</th><th>Checked</th><th>Found</th><th>Ruled out</th><th>Stale</th></tr></thead><tbody>';
+            h += `<h4 class="sub">What there is to try</h4><div class="search-table-wrap" data-floor="table"><table class="search-table small"><thead><tr><th></th><th>Category</th><th>In all</th><th>Checked</th><th>Found</th><th>Ruled out</th><th>Stale</th></tr></thead><tbody>`;
             for (const cat of CATEGORIES) {
                 const x = counts[cat];
                 const searched = SEARCHED.includes(cat);
@@ -188,18 +198,76 @@ export function makeSearch(ctx) {
                 const terms = x.terms.filter((t) => x.terms.length === 1 || t.factors.every((f) => f.n > 0)).map((t) => (x.terms.length > 1 ? `${esc(t.label)}: ` : '') + t.factors.map((f) => `${num(f.n)} ${esc(f.label)}`).join(' × ')).join(' + ');
                 h += `<tr class="${waiting ? 'waiting' : ''}"><td>${searched ? `<input type="checkbox" data-search-run="${cat}" ${a.running.has(cat) ? 'checked' : ''} title="Search this category">` : ''}</td>
 <td title="${esc(CATEGORY_WORDS[cat][1])}">${esc(CATEGORY_WORDS[cat][0])}${waiting ? ' <span class="small muted">· waited for</span>' : ''}</td>
-<td>${num(x.total)}</td><td>${num(x.checked)}</td><td>${num(x.found)}</td>
-<td>${num(x.ruledOut)}<div class="search-bar thin"><div class="search-fill" style="width:${(100 * pct).toFixed(1)}%"></div></div></td><td>${num(x.stale)}</td></tr>
+<td>${wide(`${cat}:total`, x.total)}</td><td>${wide(`${cat}:checked`, x.checked)}</td><td>${wide(`${cat}:found`, x.found)}</td>
+<td>${wide(`${cat}:ruledOut`, x.ruledOut)}<div class="search-bar thin"><div class="search-fill" style="width:${(100 * pct).toFixed(1)}%"></div></div></td><td>${wide(`${cat}:stale`, x.stale)}</td></tr>
 <tr class="terms"><td></td><td colspan="6" class="muted">${terms} ${x.terms.length > 1 || x.terms[0]?.factors.length > 1 ? `= ${num(x.total)}` : ''}</td></tr>`;
             }
             h += '</tbody></table></div><p class="small muted">In all: what could be tried with what you hold now, the numbers it is made of beneath. Ruled out: known not to make anything now. Stale: a “no” that something new may have turned into a “yes”, to be checked again.</p>';
         }
         // The log, newest first.
         const log = a.log.filter((e) => !S.onlyFound || e.out === 'found').slice(-150).reverse();
-        h += `<h4 class="sub">What has been tried</h4><label class="small"><input type="checkbox" data-search-onlyfound ${S.onlyFound ? 'checked' : ''}> Only what was found</label><ol class="search-log small">`;
-        for (const e of log) h += `<li class="out-${e.out}"><span class="muted">#${num(e.n)} ¶${e.para}</span> <span class="cat-tag">${esc(CATEGORY_WORDS[e.cat][0])}</span> ${esc(e.label)} → <b>${OUT_WORDS[e.out]}</b>${e.what ? `: ${esc(e.what)}` : ''}</li>`;
+        h += `<h4 class="sub">What has been tried</h4><label class="small"><input type="checkbox" data-search-onlyfound ${S.onlyFound ? 'checked' : ''}> Only what was found</label><ol class="search-log small" data-floor="log">`;
+        for (const e of log) h += `<li data-n="${e.n}" class="out-${e.out}"><span class="muted">#${num(e.n)} ¶${e.para}</span> <span class="cat-tag">${esc(CATEGORY_WORDS[e.cat][0])}</span> ${esc(e.label)} → <b>${OUT_WORDS[e.out]}</b>${e.what ? `: ${esc(e.what)}` : ''}</li>`;
         h += `</ol>${log.length ? '' : '<p class="small muted">Nothing yet.</p>'}`;
         return h;
+    }
+
+    // ---------- a page that does not jump ----------
+    // Two kinds of floor, as in the Prestige Tree loader. (1) Each piece of the tab marked data-floor keeps the largest
+    // height it has had: a piece may grow, never shrink back, so what is below it stays where it is. (2) Each number in
+    // the table sits in its own box whose width in characters only grows (wide()), with tabular figures: a number that
+    // gets longer does not move its column back and forth. The floors are the page's, not the save's: they start again
+    // when the story moves on (the page is laid out afresh then anyway), and a piece whose width changed (the window,
+    // the layout) is measured afresh. (Measured column widths were tried and fed back on themselves: a table spreads
+    // its spare width over the columns, and the floor kept the spread.)
+    function fresh() {
+        const read = ctx.game().read;
+        if (S.floorRead !== read) { S.floors.clear(); S.chars.clear(); S.floorRead = read; }
+    }
+    function wide(key, n) {
+        fresh();
+        const t = num(n);
+        const ch = Math.max(t.length, S.chars.get(key) ?? 0);
+        S.chars.set(key, ch);
+        return `<span class="num" style="min-width:${ch}ch">${t}</span>`;
+    }
+    function floors(root) {
+        fresh();
+        const els = [...root.querySelectorAll('[data-floor]')];
+        if (root.matches('[data-floor]')) els.unshift(root);
+        for (const el of els) {
+            const key = el.dataset.floor;
+            const along = el.offsetWidth;   // a floor holds at one width
+            if (!along) continue;           // not laid out (a hidden tab)
+            const f = S.floors.get(key);
+            const keep = f && f.along === along ? f.px : 0;
+            el.style.minHeight = keep ? `${keep}px` : '';
+            S.floors.set(key, { along, px: Math.max(el.offsetHeight, keep) });   // the whole box (border-box, style.css)
+        }
+    }
+    /** Before the tab is drawn again: where the log was scrolled to, as the entry at its top. */
+    function hold(body) {
+        const log = body?.querySelector('.search-log');
+        if (!log || log.scrollTop <= 0) return null;
+        const li = [...log.children].find((x) => x.offsetTop + x.offsetHeight > log.scrollTop);
+        return { top: log.scrollTop, n: li?.dataset.n, d: li ? li.offsetTop - log.scrollTop : 0 };
+    }
+    /** After: the floors, and the log scrolled back to the same entry (new entries come in above it, out of view). */
+    function fit(body, held) {
+        if (!body) return;
+        floors(body);
+        const log = body.querySelector('.search-log');
+        if (!log || !held) return;
+        const li = held.n && log.querySelector(`li[data-n="${held.n}"]`);
+        log.scrollTop = li ? li.offsetTop - held.d : held.top;
+    }
+    /** The tab drawn again in place: the panel's scroll, the log's and the floors kept. */
+    function paint(body) {
+        const held = hold(body);
+        const top = body.scrollTop;
+        body.innerHTML = tool();
+        fit(body, held);
+        body.scrollTop = top;
     }
 
     // ---------- the player's clicks ----------
@@ -224,5 +292,5 @@ export function makeSearch(ctx) {
         kick();
     }
 
-    return { attach, clear, tool, readerHtml, tabLabel, onClick, onChange, moved, save, active: () => !!S.a, get automation() { return S.a; } };
+    return { attach, clear, tool, paint, hold, fit, floors, readerHtml, tabLabel, onClick, onChange, moved, save, active: () => !!S.a, get automation() { return S.a; } };
 }
