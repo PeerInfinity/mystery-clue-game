@@ -85,11 +85,11 @@ if (ALL) {
     // 3. Do it, through the page.
     await doIt();
     g = await game();
-    check((g.noticed ?? []).some((x) => x[0] === 'e.horse_led_out') && /Made\./.test((await note()) ?? ''), 'Do it makes the move through the page (the notice of t18.3), and the bar says so');
+    check((g.investigating ?? []).some((x) => x[0] === 'lead.taken') && /Made\./.test((await note()) ?? ''), 'Do it makes the move through the page (the lead of t18.3), and the bar says so');
     // 4. The Hints tab.
     await p.ev(`document.querySelector('.panel[data-panel="1"] .tab[data-tab="hints"]').click(); 1`); await p.idle();
     const tab = (await p.text('#panel-1')) ?? '';
-    check(/Given at ¶40 · important detail · 4 of 4/.test(tab) && /made/.test(tab), 'the Hints tab lists the hint, made');
+    check(/Given at ¶40 · lead · 4 of 4/.test(tab) && /made/.test(tab), 'the Hints tab lists the hint, made');
     await shot('hints-tab-desktop');
     await p.ev(`document.querySelector('.panel[data-panel="1"] .tab[data-tab="record"]').click(); 1`); await p.idle();
     // The tally counts rows as the Record tells them, at their deadlines: t18.3 (Holmes ¶57) is not in it yet.
@@ -116,7 +116,7 @@ if (ALL) {
     await p.ev(`document.querySelector('.settings').open = false; 1`);
     while ((await game()).read <= 57) await p.click('#read');
     const bar = (await p.text('.reader')) ?? '';
-    check(/came in with a key”\. You could have had it from paragraph 31, from “Hunter locked the stable door/.test(bar) && /You could have marked it important from paragraph 18\./.test(bar), 'at ¶57 the catch-up notes: had from ¶31, marked important from ¶18');
+    check(/came in with a key”\. You could have had it from paragraph 31, from “Hunter locked the stable door/.test(bar) && /You could have investigated it from paragraph 18\./.test(bar), 'at ¶57 the catch-up notes: had from ¶31, investigated from ¶18');
     await shot('hints-catchup-desktop');
     // 11. The cooldown: 30 seconds by default; at 3, Hint and More wait, counting down, then work again.
     check(cooldownAtFirst === '30', `the cooldown is 30 seconds by default (${cooldownAtFirst})`);

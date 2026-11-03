@@ -106,6 +106,28 @@ for (const r of data.rules ?? []) if (r.relevant_from) checkQuotes(r.id, [r.rele
 // Every time window says where the story first reaches it: before that it is not offered as an answer.
 for (const w of model.windows) { if (!w.reveal) err(`${w.id}: no 'reveal' quote`); else checkQuotes(w.id, [w.reveal]); }
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes(c.id, a.source);
+// The leads (leads.json): quoted, their cards known, each scoring for a NOTICE thought and proposed before Holmes's
+// paragraph on it; every NOTICE thought Holmes speaks to has a lead (otherwise it could not score).
+{
+    const thoughts = new Map((data.thoughts ?? []).map((t) => [t.id, t]));
+    const ids = new Set();
+    const story = new Story(storyRaw, data);
+    for (const l of data.leads ?? []) {
+        if (ids.has(l.id) || model.cards.has(l.id)) err(`${l.id}: duplicate lead id`);
+        ids.add(l.id);
+        if (!l.text) err(`${l.id}: a lead needs text`);
+        if (!(l.source ?? []).length) err(`${l.id}: a lead needs a quote`);
+        checkQuotes(l.id, l.source);
+        for (const c of l.needs ?? []) if (!model.cards.has(c)) err(`${l.id}: needs unknown card ${c}`);
+        if (l.scores === null || l.scores === undefined) continue;
+        const t = thoughts.get(l.scores);
+        if (!t || t.tag !== 'NOTICE') { err(`${l.id}: scores ${l.scores}, not a NOTICE thought`); continue; }
+        const holmes = t.holmes?.paras?.[0];
+        const at = Math.max(0, ...(l.source ?? []).map((q) => story.find(q)?.para ?? Infinity));
+        if (holmes !== undefined && at >= holmes) err(`${l.id}: proposed at ¶${at}, not before Holmes's ¶${holmes}`);
+    }
+    for (const t of data.thoughts ?? []) if (t.tag === 'NOTICE' && t.notices?.length && t.holmes?.paras?.length && !(data.leads ?? []).some((l) => l.scores === t.id)) err(`${t.id}: a NOTICE Holmes speaks to, with no lead to score it`);
+}
 
 // ---------- the story index: mentions, quotes per paragraph, gates ----------
 const storyIndex = new Story(storyRaw, data);

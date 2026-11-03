@@ -260,6 +260,22 @@
         "$ref": "#/$defs/action"
       }
     },
+    "leads": {
+      "description": "Lines of inquiry the game proposes (leads.json): text in plain words, its quotes, the cards it needs held, and the NOTICE thought it scores for (null: none).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^lead\\." },
+          "text": { "type": "string" },
+          "source": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "needs": { "type": "array", "items": { "type": "string" } },
+          "scores": { "type": ["string", "null"] }
+        }
+      }
+    },
     "thoughts_file": {
       "type": "string",
       "description": "The case's annotated reading (thoughts.json): a careful reader's thoughts, checked by scripts/validate-thoughts.js. Holmes's steps come from it (engine/steps.js): each thought that names an inference, and each that carries a conclusion of Holmes's (`concludes`)."

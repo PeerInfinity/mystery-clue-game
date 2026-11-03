@@ -173,7 +173,7 @@ function label(model, m) {
         case 'collect': return m.words.trim().split(/\s+/).length >= 3 ? `Collect “${short(m.words.trim(), 60)}” (¶${m.from})` : `Collect: ${short(name(m.card), 70)} (¶${m.from})`;
         case 'ask': return `Ask what I know: ${name(m.card)}`;
         case 'build': return `Build: ${short(name(m.inference), 90)}`;
-        case 'notice': return `Mark as important: ${short(name(m.card), 70)}`;
+        case 'investigate': return `Investigate: ${short((model.data.leads ?? []).find((l) => l.id === m.lead)?.text ?? m.lead, 70)}`;
         case 'raise': return `Raise an exception: ${short(name(m.target), 70)}`;
         case 'seal': return `Seal the check: ${short(name(m.check), 70)}`;
         case 'file': return `File what did not happen: ${short(name(m.expectation), 70)}`;

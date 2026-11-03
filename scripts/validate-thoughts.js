@@ -54,7 +54,7 @@ if (r.dateGaps.length) {
 {
     // Notable details: the cards whose marking as odd counts, and Holmes's paragraph.
     const rows = data.thoughts.filter((t) => t.notices);
-    out.push('', '## Notable details', '', 'NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice scores when made before Holmes\'s paragraph; one he speaks of in its own paragraph, or never, is noticed but cannot score.', '');
+    out.push('', '## Notable details', '', 'NOTICE thoughts with their cards (`notices`); each scores through its leads (leads.json): a lead under investigation when the story reaches Holmes\'s paragraph. One he speaks of in its own paragraph, or never, cannot score.', '');
     if (rows.length) {
         out.push('| Thought | Cards | Reader | Holmes | Can score |', '|---|---|---|---|---|');
         for (const t of rows) {

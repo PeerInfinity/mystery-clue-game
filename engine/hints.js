@@ -12,7 +12,7 @@ export function madeRows(g) {
     const out = new Set();
     const add = (family, rows, made) => { for (const r of rows) if (made(r)) out.add(key(r.thought, family)); };
     add('deduction', g.thoughtScores(), (r) => r.made !== null);
-    add('notice', g.noticeScores(), (r) => r.noticed !== null);
+    add('notice', g.noticeScores(), (r) => r.investigated !== null);
     add('raise', g.raiseScores(), (r) => r.raised !== null);
     add('drop', g.dropScores(), (r) => r.held !== null);
     add('check', g.checkScores(), (r) => r.sealed !== null && !r.hedged);
@@ -26,7 +26,7 @@ function had(g, m) {
         case 'collect': return g.knows(m.card);
         case 'ask': return g.hasAsked(m.card) || (!!m.got?.length && m.got.every((x) => g.knows(x)));
         case 'build': return g.knows(m.inference);
-        case 'notice': return g.noticed.has(m.card);
+        case 'investigate': return g.investigatedAt(m.lead) !== null;
         case 'raise': return [...g.raised.values()].some((r) => r.id === m.target && r.exception === m.exception);
         case 'file': return g.filed.some((f) => f.id === m.absence);
         // The engine drops an answer it does not list; the page drops it from its chip (a settled question shows none).

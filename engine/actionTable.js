@@ -102,9 +102,9 @@ export function actionTable(model) {
         if (WEIGHS[t.id]) step(`w:${t.id}`, () => g.visibleTheories().some((x) => x.id === WEIGHS[t.id]) && log('weigh', { theory: WEIGHS[t.id], residue: g.residue(g.visibleTheories().find((x) => x.id === WEIGHS[t.id])).residue }, [{ tab: 'theories' }, { click: `[data-weigh="${WEIGHS[t.id]}"]` }]));
         if (t.inference) step(`i:${t.inference}`, () => build(t.inference));
         if (!['TEST', 'RECORD', 'REVISE'].includes(t.tag)) for (const m of t.maps ?? []) if (sec(m) === 'inferences' && !g.inferenceById.get(m)?.implicit) step(`i:${m}`, () => build(m));
-        for (const c of t.notices ?? []) step(`n:${c}`, () => {
-            if (!acquire(c)) return false;
-            return log('notice', { card: c }, [openUi(c), { click: `[data-notice="${c}"]` }], g.notice(c).ok !== false);
+        for (const l of (model.data.leads ?? []).filter((x) => x.scores === t.id)) step(`l:${l.id}`, () => {
+            if (!(l.needs ?? []).every((c) => acquire(c)) || !g.leadProposed(l.id)) return false;
+            return log('investigate', { lead: l.id }, [{ tab: 'leads' }, { click: `[data-investigate="${l.id}"]` }], g.investigate(l.id).ok !== false);
         });
         for (const r of t.raises ?? []) step(`r:${r.target}:${r.exception}`, () => {
             if (!acquire(r.target)) return false;

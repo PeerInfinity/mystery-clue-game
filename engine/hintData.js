@@ -11,7 +11,7 @@ import { madeRows } from './hints.js';
 function makes(g, m, family, t) {
     switch (family) {
         case 'deduction': return m.op === 'build' && ((g.stepInferences(t.id) ?? []).includes(m.inference) || m.inference === t.inference);
-        case 'notice': return m.op === 'notice' && (t.notices ?? []).includes(m.card);
+        case 'notice': return m.op === 'investigate' && g.leadById().get(m.lead)?.scores === t.id;
         case 'raise': return m.op === 'raise' && (t.raises ?? []).some((x) => x.target === m.target && x.exception === m.exception);
         case 'drop': return m.op === 'drop' && (t.dropped.theory ? m.target.theory === t.dropped.theory : m.target.slot === t.dropped.slot && m.target.value === t.dropped.value);
         case 'check': return m.op === 'seal' && (t.checks ?? []).some((c) => c.check === m.check);

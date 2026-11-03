@@ -278,7 +278,7 @@ holmes?, maps?, text?, typed?, remark?, hindsight?, …}`.
   `hindsight` (`low`, `medium`, `high`, `noted`) matches the ⚠ mark in the remark.
 - Game fields: `inference` (a deduction's authored inference; also allowed on TEST, WEIGH, SOURCE and DROP),
   `date_note` (an accepted miss of the earliest date), `no_inference` (`action`, `world-model`, `absence`,
-  `doubt`), `concludes` (below), `notices` (cards whose marking as odd counts; NOTICE only), `raises`
+  `doubt`), `concludes` (below), `notices` (the notable detail's cards; NOTICE only; it scores through its leads), `raises`
   (`[{target, exception}]`), `dropped`, `checks` (`[{check, expect?, answer?}]`; PREDICT, TEST PLAN or
   HYPOTHESIS), `asks` (`{template, cards}`; QUESTION only), `candidates` (`{slot, values}`; HYPOTHESIS only),
   `aside` (a card to set aside; SET ASIDE only), `passage` (`[from, to]`, paragraphs already read; GENRE·re-read
@@ -411,7 +411,7 @@ moves only when the story waits is stuck at ¶146 with 23 rows made; with them, 
 (`engine/incremental.test.js`, `playLazy`). The page offers it as a pace (Settings), with the Search tab
 (`ui/search.js`).
 
-Notices and sealed checks, which the game otherwise never checks, return `lifts`: how many of the rows the story
+Leads investigated and sealed checks, which the game otherwise never checks, return `lifts`: how many of the rows the story
 waits on now the move made. It tells nothing about a row that is not yet due.
 
 **Part of a move.** As `propose` says whether a set of cards is "onto something", incremental mode answers for part of
@@ -533,10 +533,23 @@ the time reached and among `windows`, a part counting as its window, the line re
 later attestation of its own. Trivial files it by itself. Silver Blaze: the dog did nothing (`c.dog_did_nothing`,
 also told at ¶181) and no alarm (`c.no_alarm`, filed only), both witnessed by the lads' "They had heard nothing".
 
-A **notice** marks a held card as odd (`notice(card)`; the page calls the mark *important*); nothing is checked or
-told. NOTICE thoughts with `notices` count (Scoring). Noticing a card of a puzzle meets the puzzle. A notice and a
-set-aside exclude each other (each takes the other off). The optional reason (`because`, a held rule) went on
-2026-11-02 for the card's note.
+**Important** (`markImportant(card)`, `unmarkImportant`, `isImportant`) is the player's own mark on a held card: it
+lists the card first among theirs, the search tries it early, and marking a card of a puzzle meets the puzzle. Nothing
+is checked, told or scored. It and *unimportant* (set aside) exclude each other. Until 2026-11-03 the mark was also
+the scored notice; that job went to leads.
+
+**Leads** (`leads.json`, section `leads`, one per line): lines of inquiry the game proposes. Each has `text` (plain
+words, a question or a detail; never ahead of the story), `source` (its quotes: it is proposed once they are all
+read), `needs` (cards that must be held) and `scores` (the NOTICE thought it scores for; null for a lead that scores
+nothing). `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
+says which score. `investigate(id)` puts a proposed lead under investigation, `stopInvestigating(id)` takes it off;
+both are free. Before Holmes's first paragraph on its NOTICE thought is read, the lead is settled as it stands
+(`leadsSettled`: under investigation then or not) and can no longer be changed. A NOTICE row scores if a lead for it
+was under investigation at that point. `npm run validate` checks the quotes and cards, that a lead is proposed before
+its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver Blaze: the 8 scored NOTICE rows, one
+lead each (two on the milliner's bill, its name and its sum). Planned (docs/ideas.md): the story's false leads, new
+inferences that propose the true ones, a budget of leads under investigation at a time (larger on lower
+difficulties), and in incremental mode a minute per investigation running beside the checks.
 
 ## Defeasibility
 
@@ -606,8 +619,8 @@ player makes theories of their own (`addTheory(label, assignment)`).
 - **Residue** (`residue(theory)`): a met puzzle is explained when the theory's answers, with the facts left once
   its cost is paid (trusted clues and world ties, **not inferences**), entail one of its explanations. Read against
   inferences, every consistent story would borrow Holmes's explanations. A puzzle is met on Easy and Trivial once
-  its cards are held and its thought's paragraph read; otherwise once the player notices one of its cards or files
-  one that is an absence.
+  its cards are held and its thought's paragraph read; otherwise once the player marks one of its cards important,
+  investigates a lead that needs one, or files one that is an absence.
 - **Support** (`theorySupport`): held inferences that agree with or go against its answers.
 - **Readings** (`readingsOf(card)`, `revisedBy(slot)`): for each reading whose question is visible, the player's
   settled answer and each met theory's; the held cards an answer re-reads.
@@ -672,7 +685,7 @@ as its clause and the held cards that clause mentions; never what it implies, ne
 
 **Set aside** (`setAside(id)`, `putBack`; the page calls the mark *unimportant*): a held entity, event or claim set
 aside as scenery. It stays held and counts as a premise; nothing checks it against the key; no score reads it. It takes
-off a notice (the two marks exclude each other).
+off the mark important (the two marks exclude each other).
 
 **Notes on cards** (`setCardNote(id, text)`, `cardNote`, `allCardNotes`): the player's free words on a held card,
 with the paragraph first written at; no words removes it. Never read by the game.
@@ -748,7 +761,8 @@ before its line is read. `nameOf` gives the latest name read, never the case's o
 | `splitClaim(id)` | deal a statement's parts; the statement counts nowhere from then on |
 | `raise`, `withdraw` | an exception against an application (Defeasibility) |
 | `fileAbsence(rule, time, witness)` | file an absence (Absences) |
-| `notice(card)`, `unnotice` | mark a held card odd (the page: important) |
+| `markImportant(card)`, `unmarkImportant` | the player's own mark (the page: important) |
+| `investigate(lead)`, `stopInvestigating` | a lead under investigation (Leads) |
 | `setCardNote(id, text)` | the player's note on a card; never read by the game |
 | `pencilPlace`, `erasePlace`, `follow`, `unfollow`, `splitTime`, `unsplitTime`, `placeEvent`, `proveMark`, `ruleOutMark`, `proveOrder` | the board |
 | `addTheory`, `drop`, `undrop` | theories and drops |
@@ -778,7 +792,7 @@ scores in Trivial.
 | Family | Rows | Made when | Deadline |
 |---|---|---|---|
 | deduction | Holmes's steps with an anchor | every inference the step needs is the player's own (built, concluded or applied, and trusted) or implicit, at least one their own; or their proven cross-out of its slot's value; or a trusted card of theirs covers its conclusion; or their proofs entail it (a clue's given value is not theirs) | the anchor |
-| notice | NOTICE thoughts with `notices` | the player first marks one of its cards | Holmes's first paragraph |
+| notice | NOTICE thoughts with `notices` | a lead for it is under investigation when Holmes's paragraph is read (the paragraph it was put under investigation is the move's) | Holmes's first paragraph |
 | raise | thoughts with `raises` | the player first raises one of its exceptions against its target (a reservation or a defeat) | Holmes's first paragraph |
 | drop | thoughts with `dropped` naming a theory or candidate | the player gives a reason that holds (`held`) | Holmes's first paragraph, else `dropped.deadline` |
 | check | each of a thought's `checks` | a live, unhedged seal matching the check and its expectation; it must not be contradicted once the result is told | the check's `at` |
@@ -788,11 +802,11 @@ A deduction is checked before each paragraph and on request after a player's mov
 Inferences stated by a character, granted by the game or implicit do not count as the player's own. `possible` is
 every row with a deadline; rows with none (Holmes never takes it up) are recorded and cannot score. Expert steps
 score as bonuses. The annotated reader's game reaches 70 on Hard (45 of 47 deductions, every other family full:
-8 notices, 3 raises, 3 drops, 10 checks, 1 absence), as `action-table.json` records.
+8 notices (leads investigated), 3 raises, 3 drops, 10 checks, 1 absence), as `action-table.json` records.
 
 **What does not count**: anything in Trivial; a drop whose reason did not hold (it scores only from where a
 reason that holds was given); a hedged or withdrawn seal; a seal contradicted by the result; a move made at or
-after its deadline; set-asides, signals, notes (on the story or on cards) and hints.
+after its deadline; the marks important and unimportant, signals, notes (on the story or on cards) and hints.
 
 **`Game.record()`**: the rows whose deadline has been read (never one still ahead: shown early, it would tell the
 player the move is right), each `{family, thought, deadline, at, scores, lead, names}` plus what its family needs
@@ -814,7 +828,8 @@ and never read by a score.
 
 `Game.save()` (version `SAVE_VERSION`, 9): `difficulty`, `options`, `pace`, `autoPace`, `read`, `collected` (Hard), `marks`
 (listed, struck with their proofs, proven, circled), `theories`, `lastSeen`, `suspected`, `doubtKind`,
-`doubtReason`, `split`, `asked`, `clashLog`, `built`, `applied`, `concluded`, `filed`, `noticed`, `drops`, `raised`,
+`doubtReason`, `split`, `asked`, `clashLog`, `built`, `applied`, `concluded`, `filed`, `important`, `investigating`,
+`leadsSettled`, `drops`, `raised`,
 `seals`, `setAside`, `cardNotes`, `notes`, `hints`, `made`, `board`, `openedSplits`, `opened`. `load` replays the
 reading to `read` (re-asking and rebuilding at the paragraphs they were made), reopens splits and states before the
 cards and marks that speak of them, and remakes the player's cards in order (fresh ids where a saved id is taken on

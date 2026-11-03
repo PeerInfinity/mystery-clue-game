@@ -136,7 +136,7 @@ has disappeared and its trainer has been found dead, or they are made up.</p>
     <li><a href="#ruling">Ruling out and proving</a></li>
     <li><a href="#inferences">Inferences: connecting cards</a></li>
     <li><a href="#doubt">Doubting what you are told</a></li>
-    <li><a href="#more">Important details, absences, notes on cards</a></li>
+    <li><a href="#more">Leads, absences, notes on cards</a></li>
     <li><a href="#theories">Theories and wrong turns</a></li>
     <li><a href="#checks">Checks</a></li>
     <li><a href="#tabs">The other tabs</a></li>
@@ -158,8 +158,8 @@ has disappeared and its trainer has been found dead, or they are made up.</p>
 <p>The game is built on <i>Silver Blaze</i>, a Sherlock Holmes story by Arthur Conan Doyle, first published in 1892.
 You read it a paragraph at a time. Holmes reasons his way through it, and you try to make the same steps
 <b>before</b> the story shows him making them.</p>
-<p>Each step is a <b>move</b>: you might connect two clues into a conclusion, rule out an answer, mark a detail as
-important, or plan a check. The game tests your move against the clues you hold. It never tells you whether the
+<p>Each step is a <b>move</b>: you might connect two clues into a conclusion, rule out an answer, investigate a lead,
+or plan a check. The game tests your move against the clues you hold. It never tells you whether the
 move is the one Holmes will make. You learn that only when the story reaches the point where he makes it.</p>
 <p>The story never changes. You can read it to the end without making a single move, but then Holmes gets everywhere
 first.</p>
@@ -258,8 +258,8 @@ have all been tried, none onto anything, has nothing left to build with. Hover f
 this says whether a card matters.</p>
 <h3>Important and unimportant</h3>
 <p>Two marks of your own, and a card has at most one. <span class="btn quiet">★ Important</span> says a detail
-matters: the game tells you nothing back, but notes where you marked it, and when Holmes draws attention to the same
-detail the record compares the two (see <a href="#more">Important details</a>). <span class="btn quiet">Unimportant</span>
+matters to you: the card is listed first, and the game tells you nothing back and scores nothing for it (what scores
+is investigating a lead: see <a href="#more">Leads</a>). <span class="btn quiet">Unimportant</span>
 says it is scenery: the card leaves your lists without being lost. Press a mark again to take it off; in the
 <i>Unimportant</i> list, <span class="btn quiet">Not unimportant</span> does the same.</p>
 <h3>“What do I know about this?”</h3>
@@ -386,12 +386,15 @@ each laid out step by step, with a "doubt this instead" link on each claim.</p>
 
 <!-- ------------------------------------------------------------------ -->
 <section id="more">
-<h2>9. Important details, absences and notes on cards</h2>
-<h3>Important details</h3>
-<p>A good detective notices when something goes against what one would expect. On a clue, a thing or an event, press
-<span class="btn quiet">★ Important</span>. The game tells you nothing back. It notes where you marked it, and the
-record compares that with Holmes later. Press it again to take the mark off. Some of these details are puzzles a
-theory has to explain: a theory is weighed by the odd things it leaves unexplained.</p>
+<h2>9. Leads, absences and notes on cards</h2>
+<h3>Leads</h3>
+<p>As the story goes on, the case raises lines of inquiry: a detail that does not fit, a question someone asks. They
+appear in the <span class="tab">Leads</span> tab once you hold what they are about. Press
+<span class="btn quiet">Investigate</span> on the ones you think matter, and <span class="btn quiet">Stop</span> to take
+one off; both are free. When Holmes takes a lead up, it moves to <i>Taken up by Holmes</i>, and it counts if you were
+investigating it at that moment. The tab never says which leads will count. A card with a lead under investigation,
+like a card you mark <span class="btn quiet">★ Important</span>, also counts as an odd thing a theory has to explain:
+a theory is weighed by the odd things it leaves unexplained.</p>
 <h3>What did not happen</h3>
 <p>Sometimes the clue is something that <i>should</i> have happened and did not. You can file an absence from a clue
 card (<i>Should this have shown something that did not happen?</i>) or from the Timeline's board. Choose what you
@@ -465,6 +468,8 @@ guess costs nothing. You can <i>withdraw</i> a check until Holmes acts on it.</p
   where the story shows what Holmes pays attention to; it points, it proves nothing). As you read, a list of
   <i>what the story held back</i> also appears: facts told later than they happened, and background the game
   supplied.</dd>
+  <dt><span class="tab">Leads</span></dt>
+  <dd>The lines of inquiry the case has raised, and the ones Holmes has taken up (see <a href="#more">Leads</a>).</dd>
   <dt><span class="tab">Timeline</span></dt>
   <dd>Five views:
     <ul>
@@ -498,7 +503,7 @@ you could have had it and from what.</p>
 details. The rows are grouped under:</p>
 <ul>
   <li><b>Deductions</b>: steps of reasoning Holmes makes;</li>
-  <li><b>Important details</b>: things Holmes draws attention to;</li>
+  <li><b>Leads investigated</b>: leads Holmes takes up;</li>
   <li><b>Steps seen through</b>: reasoning Holmes shows does not hold;</li>
   <li><b>Wrong turns dropped</b>: ideas the story leaves behind;</li>
   <li><b>Checks planned</b>: tests Holmes makes;</li>
@@ -513,7 +518,7 @@ moves that did not count and why, and <i>Where you could have been first</i>.</p
 <h2>14. Scoring</h2>
 <ul>
   <li>You score one point for each of Holmes's steps that you made <b>before</b> its deadline: an inference built or
-  an answer settled, a detail marked important, an exception raised, a wrong turn dropped, a check sealed, or an absence
+  an answer settled, a lead under investigation when Holmes takes it up, an exception raised, a wrong turn dropped, a check sealed, or an absence
   filed.</li>
   <li>Hearing someone in the story state an inference gives you the inference, but no point.</li>
   <li>A <b>dropped</b> wrong turn scores only if the reason you gave actually holds.</li>
@@ -642,7 +647,7 @@ read all of it). The other pieces of the tab and the reading bar keep the larges
 while the story stays at one paragraph, so the page does not jump as checks come and go; they fit themselves afresh
 when the story moves on. Scrolled down, the log stays where you left it while new checks come in above; scrolled
 sideways, the table stays there too.</li>
-<li><b>What there is to try</b>: for each kind of move (collecting, asking, building inferences, marking details important,
+<li><b>What there is to try</b>: for each kind of move (collecting, asking, building inferences, investigating leads,
 raising exceptions, sealing checks, filing absences, dropping wrong turns), how many combinations there are with what
 you hold now, and the numbers that are added or multiplied to make that total; how many have been checked, how many
 found something, how many are still <i>unchecked</i> (not ruled out yet), and how many are <i>stale</i>: a “no” that a
@@ -678,7 +683,7 @@ more:</p>
 <ol>
   <li><b>Where.</b> Which paragraphs to look at again. Click a paragraph number to jump there.</li>
   <li><b>What kind of move.</b> For example, an inference to build (and what its conclusion is about), something to
-  mark as important, an answer to drop, or a check to plan.</li>
+  investigate, an answer to drop, or a check to plan.</li>
   <li><b>Which.</b> The cards involved, or the words to click to get them.</li>
   <li><b>The step.</b> The moves themselves, spelled out, with a <span class="btn quiet">Do it</span> button that makes
   them for you on the page. You watch the game do the clicks.</li>

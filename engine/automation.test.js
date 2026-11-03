@@ -36,11 +36,11 @@ test('the automation alone, with only the feedback the game gives, reaches the m
     const c = a.counts();
     checkCounts(c);
     // Every family the waits name was searched, and found what it needed.
-    for (const cat of ['collect', 'ask', 'build', 'notice', 'raise', 'check', 'absence', 'drop']) assert.ok(c[cat].found > 0, cat);
+    for (const cat of ['collect', 'ask', 'build', 'lead', 'raise', 'check', 'absence', 'drop']) assert.ok(c[cat].found > 0, cat);
     assert.equal(c.answers.checked, 0, 'the answers route is not searched');
 });
 
-test('the player\'s marks set the order: circled, odd, the rest, set aside', () => {
+test('the player\'s marks set the order: circled, important, the rest, set aside', () => {
     const g = fresh();
     const a = new Automation(g, { seed: 2, running: ['collect', 'ask'] });
     const s = run(a);
@@ -52,7 +52,7 @@ test('the player\'s marks set the order: circled, odd, the rest, set aside', () 
     const aside = held.find((x) => x !== slot.on && x !== value);
     const odd = held.find((x) => ![slot.on, value, aside].includes(x));
     g.setAside(aside);
-    g.notice(odd);
+    g.markImportant(odd);
     const order = a.order(held);
     assert.deepEqual(new Set(order.slice(0, 2)), new Set([slot.on, value]));
     assert.equal(order[2], odd);
@@ -68,13 +68,13 @@ test('a paused category leaves its wait open; resumed, the search meets it', () 
     const g = fresh();
     const a = new Automation(g, { seed: 3, running: ['collect', 'ask', 'build', 'raise', 'check', 'absence', 'drop'] });
     let s;
-    // Run until a notice wait is open with nothing else to search.
+    // Run until a notice wait (a lead to investigate) is open with nothing else to search.
     for (;;) { s = run(a); if (s.idle === 'paused') break; assert.ok(!s.end, 'some wait is a notice'); }
     assert.ok(a.open.some((w) => w.row?.endsWith('|notice')));
     const at = g.read;
-    a.setRunning('notice', true);
+    a.setRunning('lead', true);
     a.step(5000);
-    assert.ok(g.read > at || !a.open.some((w) => w.row?.endsWith('|notice')), 'the notice search lifts its wait');
+    assert.ok(g.read > at || !a.open.some((w) => w.row?.endsWith('|notice')), 'the lead search lifts its wait');
 });
 
 test('a check is planned before it is made; the queue starts with it; a save carries the counts and the negatives', () => {

@@ -4,7 +4,7 @@
 // the wait is met, and counts the checks.
 //   build      grown card by card with "onto something" (propose): every set tried is one check; a complete set
 //              tries the conclusion's kinds (Hard). Run.
-//   notice     each held card marked odd, kept only if a wait lifts (the wait as its check). Run.
+//   notice     each lead proposed put under investigation, kept only if a wait lifts (the wait as its check). Run.
 //   raise      each exception open against a held card, withdrawn unless a wait lifts. Run.
 //   check      sealed checks: the space (verb × field × field × expectation, × the answers for a check that expects
 //              one) and the plans in it that make the row; expected checks (N + 1) / (t + 1). Counted.
@@ -151,11 +151,11 @@ export function searchCost(model, hints, waits, make, { seed = 1, onto = true } 
                 Object.assign(row, buildSearch(() => made(w.row)));
             } else if (family === 'notice') {
                 let checks = 0;
-                // A mark already made stays (taking it back would undo an earlier row).
-                for (const x of shuffle(cards.filter((c) => !g.noticed.has(c)), r)) {
+                // A lead already under investigation stays (stopping it would undo an earlier row).
+                for (const l of shuffle(g.leads().filter((x) => x.state === 'open'), r)) {
                     checks++;
-                    if (g.notice(x).lifts > 0) break;
-                    g.unnotice(x);
+                    if (g.investigate(l.id).lifts > 0) break;
+                    g.stopInvestigating(l.id);
                 }
                 Object.assign(row, { checks, ok: made(w.row) });
             } else if (family === 'raise') {

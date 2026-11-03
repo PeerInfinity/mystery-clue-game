@@ -400,23 +400,44 @@ largest space of each (builds and answers, no added feedback):
 Each setting multiplies the runs of the page checks (12–13 minutes each; "check every difficulty"), so start with
 the feedback strength and the routes, and add more only when play shows the need.
 
-### Investigation, split from "important" (under discussion, 2026-11-03)
+### Investigation: leads, split from "important" (2026-11-03)
 
-"Mark as important" does two jobs: the player's own mark (it sorts the Cards list and steers the search) and the
-scored notice (a NOTICE row scores if one of its cards is marked before Holmes's paragraph). The scored job costs
-nothing (marking every card scores all 8 rows), the player gets no signal, and the automation can only brute-force
-it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a single card). The user agreed to split
-them: *important / unimportant* stay as personal marks; the scored act becomes **flag for investigation**, to be
-reworked in a session of its own. The user's current ideas, none decided:
+"Mark as important" did two jobs: the player's own mark (it sorts the Cards list and steers the search) and the
+scored notice (a NOTICE row scored if one of its cards was marked before Holmes's paragraph). The scored job cost
+nothing (marking every card scored all 8 rows), the player got no signal, and the automation could only brute-force
+it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a single card). The user's rulings:
 
-- Investigation as an action apart from inference: an inference check takes a second, an investigation a minute;
-  perhaps both clocks run at once on different tasks (undecided); perhaps the 8 unscored investigations cost the
-  minute too (undecided).
-- The game proposes what to prioritise investigating, the false leads the story proposes among them; new
-  inferences, once built, propose the real ones. Perhaps a panel of its own.
-- The aim: choosing the right investigations is the player's highest-impact decision.
-- Raised and set aside: a limit on flags at a time (a guess that blocks a slot, with nothing for the automation
-  to choose by), and a flag with feedback and a cooldown (an oracle on a timer: brute force, slower).
+- **The split (built, step 1).** *Important / unimportant* are personal marks only: no score, still sorting the list
+  and steering the search, and *important* still meets a puzzle on Hard. The scored act is **investigating a lead**.
+- **A lead, not a card.** The game proposes leads (leads.json): lines of inquiry in plain words, each proposed once
+  its quotes are read and its cards held; a lead can be false where a card cannot.
+- **One verb, "Investigate", in every mode.** Outside incremental mode a lead is a flag set and cleared freely, with a
+  budget of leads under investigation at a time (larger on lower difficulties); what scores is whether it is under
+  investigation when the story reaches Holmes's paragraph. A wrong flag costs a place a true lead needed at its
+  deadline. Once Holmes's paragraph passes, the lead is settled and its place frees.
+- **Incremental mode:** an investigation takes a minute, its clock running beside the checks (one investigation at a
+  time), and ends with its result at once (*something in it* / *nothing came of it*); the minute is the only cost. The
+  automation investigates every lead, by default in the order they came; the player chooses which to put first.
+  Open: what a false lead's result says before the story drops it (a flat "nothing" for the maid at ¶37 tells more
+  than the story does until ¶92; *nothing yet* until the story drops it is one answer).
+- **As many leads as possible**, the story's false ones among them (police, Gregory, Hunter, Mrs. Straker, Ross, the
+  papers), each proposed only once the player holds what it rests on, some only after an inference is built; new
+  inferences so that the true leads are earned by reasoning. Of the 8 unscored NOTICE rows only t40.5 (one blow,
+  against "repeated blows") reads as a lead; t20.5, t82.4 and t100.1 are better premises of a proposing inference,
+  t57.2 and t116.2 are the story proposing a lead itself, t218.3 and t220.3 commentary.
+- **A panel of its own**: the Leads tab.
+- **No backward-compatible saves** (there are no players): the save version is checked, a save of another version
+  dropped, and the migration code removed.
+
+Measured after step 1 (seeds 1–3 to 70): the lead search takes 18 checks a game for its 8 rows (the 1,200–1,550 of
+the card search gone), 18,718, 17,544 and 18,053 checks in all (were 18,522, 18,648 and 22,324: the other searches
+move with the shuffle). Step 1 has only the 8 scored leads, so the tab is an answer key for now; the budget, the timer and the false leads
+come next. A first catalogue of candidates (72 leads, 36 true, 31 false, 5 ambiguous; 11 new inferences drafted)
+raised the problems the later steps must meet: where a lead came from must not tell true from false (the story
+itself has characters proposing true things and buildable inferences that are false); an inference that proposes a
+lead often also settles it, which makes the flag free, so proposers must sit earlier in the chain; late in the story
+almost only true leads remain; some deadlines are later than Holmes's own act (the coat until ¶226, though he asks
+about the wind at ¶94); some leads overlap scored drops and checks.
 
 ### Archipelago integration
 

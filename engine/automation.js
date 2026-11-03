@@ -11,7 +11,7 @@
 //   collect, ask  every span read, every card that can be asked about (lookups; run first, they feed the rest)
 //   build         level by level by "onto something" (propose): each card alone, then a set onto something and one
 //                 more card onto something alone; a complete set tries the kinds (Hard)
-//   notice        each held card marked important (odd, in the data), kept only if a wait lifts
+//   lead          each lead proposed put under investigation, in the order the leads came, kept only if a wait lifts
 //   raise         each exception open against a held card, kept only if a wait lifts
 //   check         a sealed check part by part (sealOnto: the verb, each field, the pair, the question of an expected
 //                 answer), then the expectation (none first: it never hedges) and the answer's value, kept if a wait lifts
@@ -20,24 +20,24 @@
 // A move that made something is never taken back (it may be another row's); a move that made nothing is.
 //
 // The player steers with the marks the game has (never the case data): a card set aside goes last; the cards of a
-// circled answer (its question's card, and the answer if it is a card) go first, then cards marked odd. A circled
+// circled answer (its question's card, and the answer if it is a card) go first, then cards marked important. A circled
 // answer is tried first as a check's expected answer and last as a drop; a crossed-out one the other way. `running`
 // pauses or resumes a category. The order within a tier is a seeded shuffle.
 //
 // A "no" lasts only until something changes (docs/ideas.md, option (c)): negatives are kept across passes, and those
 // a new card could overturn are marked stale and checked again: a build set that is part of a recipe now complete; a
 // check's verb or field card when a plan that takes it names the new card in another field; an absence's parts when
-// one of its cards or times arrives or the story passes it; a drop's reasons on a new card; a notice, a raise or a
+// one of its cards or times arrives or the story passes it; a drop's reasons on a new card; a lead, a raise or a
 // sealed check that lifted nothing, when a new wait of its family opens. `counts()` reports, per category, the space
 // (terms added, each a product of factors), the checks made, what they found, what is ruled out now, and the stale
 // count; `log` the checks made, newest last.
 import { INCREMENTAL, CHECK_TEMPLATES, CONCLUSION_KINDS, dropKey } from './game.js';
 import * as TL from './timeline.js';
 
-export const CATEGORIES = ['collect', 'ask', 'build', 'notice', 'raise', 'check', 'absence', 'drop', 'answers'];
-export const SEARCHED = ['collect', 'ask', 'build', 'notice', 'raise', 'check', 'absence', 'drop'];
+export const CATEGORIES = ['collect', 'ask', 'build', 'lead', 'raise', 'check', 'absence', 'drop', 'answers'];
+export const SEARCHED = ['collect', 'ask', 'build', 'lead', 'raise', 'check', 'absence', 'drop'];
 /** The category that searches for a wait: a row's family, or a keep (an inference to build). */
-export const FAMILY = { deduction: 'build', notice: 'notice', raise: 'raise', check: 'check', absence: 'absence', drop: 'drop' };
+export const FAMILY = { deduction: 'build', notice: 'lead', raise: 'raise', check: 'check', absence: 'absence', drop: 'drop' };
 export const waitCategory = (w) => (w.keep ? 'build' : FAMILY[w.row.split('|')[1]]);
 const POOL = ['entities', 'events', 'claims', 'rules', 'inferences', 'propositions'];
 const MAX_SET = 8;
@@ -149,10 +149,10 @@ export class Automation {
         return out;
     }
     #byTier(xs, tier) { return this.#shuffle(xs).map((x, i) => [tier(x), i, x]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((x) => x[2]); }
-    /** Cards in the player's order: circled, odd, the rest, set aside; shuffled within a tier. */
+    /** Cards in the player's order: circled, important, the rest, set aside; shuffled within a tier. */
     order(cards) {
         const circled = this.#circledCards();
-        return this.#byTier(cards, (c) => (this.g.isSetAside(c) ? 3 : circled.has(c) ? 0 : this.g.noticed.has(c) ? 1 : 2));
+        return this.#byTier(cards, (c) => (this.g.isSetAside(c) ? 3 : circled.has(c) ? 0 : this.g.isImportant(c) ? 1 : 2));
     }
     /** A question's answers as a check expects them: circled first, crossed out last. */
     orderValues(slot, values) {
@@ -362,15 +362,12 @@ export class Automation {
         }
         return null;
     }
-    *notice() {
-        const label = (x) => `mark ${this.#card(x)} as important`;
-        const f = this.#frame('notice', { list: this.order(this.#held().filter((c) => !this.g.noticed.has(c))), key: (x) => x, label, after: () => 'done until a new card or a new wait' });
+    *lead() {
+        const label = (l) => `investigate: ${l.text}`;
+        const f = this.#frame('lead', { list: this.g.leads().filter((l) => l.state === 'open'), key: (l) => l.id, label, after: () => 'done until a new lead or a new wait' });
         for (f.i = 0; f.i < f.list.length; f.i++) {
-            const x = f.list[f.i];
-            // Marking important takes a card out of the unimportant ones: undone, it goes back there.
-            const aside = this.g.setAsideAt.get(x);
-            const undo = () => { this.g.unnotice(x); if (aside !== undefined) this.g.setAside(x, aside); };
-            if (yield* this.#try('notice', x, label(x), () => this.g.notice(x), (res) => res.lifts > 0, undo)) return 'changed';
+            const l = f.list[f.i];
+            if (yield* this.#try('lead', l.id, label(l), () => this.g.investigate(l.id), (res) => res.lifts > 0, () => this.g.stopInvestigating(l.id))) return 'changed';
         }
         return null;
     }
@@ -523,9 +520,9 @@ export class Automation {
             if (key !== this.waitsKey) {
                 const before = new Set(JSON.parse(this.waitsKey || '[]').map((w) => JSON.stringify(w)));
                 this.families = new Set(open.map(waitCategory));
-                // A notice, a raise or a seal that lifted nothing may lift a wait that has just opened.
+                // A lead, a raise or a seal that lifted nothing may lift a wait that has just opened.
                 const opened = new Set(open.filter((w) => !before.has(JSON.stringify(w))).map(waitCategory));
-                for (const cat of ['notice', 'raise']) if (opened.has(cat)) for (const k of this.neg[cat].keys()) this.stale[cat].add(k);
+                for (const cat of ['lead', 'raise']) if (opened.has(cat)) for (const k of this.neg[cat].keys()) this.stale[cat].add(k);
                 if (opened.has('check')) for (const k of this.neg.check.keys()) if (k.startsWith('s|')) this.stale.check.add(k);
                 this.waitsKey = key;
                 this.current = null;
@@ -743,7 +740,6 @@ export class Automation {
         const add = (x, cat, n) => { const o = out.get(x); if (!o || !n) return; o.cats[cat] = (o.cats[cat] ?? 0) + n; o.left += n; };
         for (const x of held) {
             if (g.canAsk(x) && !g.hasAsked(x)) add(x, 'ask', 1);
-            if (!g.noticed.has(x) && !live('notice', x)) add(x, 'notice', 1);
             for (const e of g.exceptionsOf(x)) { const k = `${x}#${e.n}:${e.id}`; if (!g.raised.has(k) && !live('raise', k)) add(x, 'raise', 1); }
         }
         // Builds, as far as "onto something" has told (never more): the card alone if not tried yet; the pairs with it
@@ -872,7 +868,8 @@ export class Automation {
         // The whole: the sizes known, and whether a size is not known yet (more may come).
         out.build.left = bySize.reduce((a, x) => a + (x.left ?? 0), 0);
         out.build.leftMore = bySize.some((x) => x.left === null);
-        put('notice', [{ label: 'cards held', factors: [{ label: 'cards', n: held.length }] }], held.filter((x) => g.noticed.has(x) || live('notice', x)).length);
+        const leads = g.leads().filter((l) => l.state !== 'settled');
+        put('lead', [{ label: 'leads proposed', factors: [{ label: 'leads', n: leads.length }] }], leads.filter((l) => l.state === 'investigating' || live('lead', l.id)).length);
         const exc = held.flatMap((id) => g.exceptionsOf(id).map((x) => `${id}#${x.n}:${x.id}`));
         put('raise', [{ label: 'exceptions open', factors: [{ label: 'exceptions', n: exc.length }] }], exc.filter((k) => g.raised.has(k) || live('raise', k)).length);
         // Sealed checks: Σ over the verbs of field × field × (results + none).

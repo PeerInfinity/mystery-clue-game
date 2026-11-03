@@ -11,7 +11,7 @@
 //      before its question is settled (the page offers no answer box from then on).
 import { Game } from './game.js';
 
-export const SCORING_OPS = { deduction: ['build'], notice: ['notice'], raise: ['raise'], drop: ['drop', 'theory'], check: ['seal'], absence: ['file'] };
+export const SCORING_OPS = { deduction: ['build'], notice: ['investigate'], raise: ['raise'], drop: ['drop', 'theory'], check: ['seal'], absence: ['file'] };
 
 /** The action table's moves in order, each with its thought. */
 export const movesOf = (table) => table.thoughts.flatMap((t) => t.moves.map((m) => ({ ...m, thought: t.id }))).sort((a, b) => a.seq - b.seq);
@@ -51,7 +51,7 @@ export function make(g, model, m) {
         }
         case 'ask': if (!g.canAsk(m.card) || g.hasAsked(m.card)) return false; g.ask(m.card); return true;
         case 'build': g.propose(m.cards, m.about); return g.knows(m.inference);
-        case 'notice': return g.notice(m.card).ok !== false;
+        case 'investigate': return g.investigate(m.lead).ok !== false;
         case 'raise': return g.raise(m.target, m.n, m.exception).ok !== false;
         case 'seal': return !!g.seal(m.verb, m.fields, { expect: m.expect, answer: m.answer }).ok;
         case 'file': return !!g.fileAbsence(m.expectation, m.time, m.witness).ok;
@@ -104,7 +104,7 @@ export function needs(model, m) {
     switch (m.op) {
         case 'collect': return [];
         case 'build': return m.cards;
-        case 'notice': return [m.card, m.because];
+        case 'investigate': return (model.data.leads ?? []).find((l) => l.id === m.lead)?.needs ?? [];
         case 'raise': return [m.target];
         case 'seal': return [...Object.values(m.fields), ...(m.answer ? [on(m.answer.eq[0])] : [])];
         case 'file': return [m.expectation, m.witness];

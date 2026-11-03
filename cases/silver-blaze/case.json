@@ -39,7 +39,8 @@
     "states.json",
     "slots.json",
     "constraints.json",
-    "actions.json"
+    "actions.json",
+    "leads.json"
   ],
   "mentions_file": "mentions.json",
   "thoughts_file": "thoughts.json",

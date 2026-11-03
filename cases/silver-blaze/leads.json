@@ -1,0 +1,13 @@
+{
+ "description": "The leads the game proposes: lines of inquiry the player may investigate (docs/case-format.md, Leads). One per line: `text` (plain words, never ahead of the story), `source` (its quotes; a lead is proposed once they are read and its `needs` are held), `scores` (the NOTICE thought it scores for when investigated before Holmes's paragraph; null for a lead that scores nothing).",
+ "leads": [
+  {"id":"lead.taken","text":"Why was Silver Blaze taken away, when the interest was in keeping him from the race?","source":["the singular disappearance of the favourite for the Wessex Cup","preventing Silver Blaze from being there at the fall of the flag"],"needs":["e.horse_led_out"],"scores":"t18.3"},
+  {"id":"lead.curry","text":"The dish of curried mutton at Hunter's supper.","source":["his supper, which consisted of a dish of curried mutton"],"needs":["c.curry_for_supper"],"scores":"t20.4"},
+  {"id":"lead.coat","text":"Why was Straker's overcoat on a furze-bush?","source":["John Straker’s overcoat was flapping from a furze-bush"],"needs":["c.coat_on_bush_seen"],"scores":"t35.8"},
+  {"id":"lead.candle","text":"Why did Straker carry a tallow candle as well as his vestas?","source":["There was a box of vestas, two inches of tallow candle"],"needs":["c.pocket_inventory"],"scores":"t78.3"},
+  {"id":"lead.knife","text":"Why did Straker have a cataract knife?","source":["It is what we call a cataract knife"],"needs":["c.knife_is_cataract_knife"],"scores":"t80.2"},
+  {"id":"lead.bill_name","text":"Why did Straker carry a bill made out to William Derbyshire?","source":["made out by Madame Lesurier, of Bond Street, to William Derbyshire"],"needs":["c.milliner_bill"],"scores":"t84.3"},
+  {"id":"lead.bill_sum","text":"Who ran up thirty-seven pounds fifteen at a Bond Street milliner's?","source":["a milliner’s account for thirty-seven pounds fifteen"],"needs":["c.milliner_bill"],"scores":"t84.7"},
+  {"id":"lead.odds","text":"Why have the odds on Silver Blaze shortened?","source":["the price has become shorter and shorter"],"needs":["c.odds_shortened"],"scores":"t188.2"}
+ ]
+}

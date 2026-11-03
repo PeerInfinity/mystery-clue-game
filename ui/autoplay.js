@@ -22,7 +22,7 @@ const CAPTIONS = {
     collect: (m) => `Collecting: “${(m.words ?? '').trim()}”`,
     ask: () => 'Asking what I know about it',
     build: (m) => `Building an inference${m.cards?.length ? ` from ${m.cards.length} cards` : ''}`,
-    notice: () => 'Marking it as important',
+    investigate: () => 'Investigating a lead',
     raise: () => 'Raising an exception to a step',
     seal: () => 'Planning a check',
     file: () => 'Filing what did not happen',
@@ -439,7 +439,7 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
             case 'collect': return has(g.collected, m.card);
             case 'ask': return has(g.asked, m.card);
             case 'build': return has(g.built, m.inference);
-            case 'notice': return has(g.noticed, m.card);
+            case 'investigate': return has(g.investigating, m.lead) || (g.leadsSettled ?? []).some(([id, at]) => id === m.lead && at !== null);
             case 'raise': return (g.raised ?? []).some((r) => r[0] === m.target && r[2] === m.exception);
             case 'seal': return (g.seals ?? []).some((x) => x.verb === m.verb && JSON.stringify(x.fields) === JSON.stringify(m.fields) && (x.expect ?? null) === (m.expect ?? null) && JSON.stringify(x.answer ?? null) === JSON.stringify(m.answer ?? null));
             case 'file': return has(g.filed, m.absence);

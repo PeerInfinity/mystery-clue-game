@@ -1,5 +1,5 @@
 // The player's own words and marks on a card (2026-11-02, replacing the question form and the "because" of a notice):
-// a free note per card, never read by the game; the two marks, important (noticed) and unimportant (set aside),
+// a free note per card, never read by the game; the two marks, important and unimportant (set aside),
 // exclude each other.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -32,10 +32,10 @@ test('a note on a card: written, rewritten, removed, saved; only on a card held;
 test('important and unimportant exclude each other', () => {
     const g = easy();
     readTo(g, 20);
-    assert.ok(g.notice('c.curry_for_supper').ok);
+    assert.ok(g.markImportant('c.curry_for_supper').ok);
     assert.ok(g.setAside('c.curry_for_supper'));
-    assert.deepEqual([g.noticed.has('c.curry_for_supper'), g.isSetAside('c.curry_for_supper')], [false, true]);
-    assert.ok(g.notice('c.curry_for_supper').ok);
-    assert.deepEqual([g.noticed.has('c.curry_for_supper'), g.isSetAside('c.curry_for_supper')], [true, false]);
+    assert.deepEqual([g.isImportant('c.curry_for_supper'), g.isSetAside('c.curry_for_supper')], [false, true]);
+    assert.ok(g.markImportant('c.curry_for_supper').ok);
+    assert.deepEqual([g.isImportant('c.curry_for_supper'), g.isSetAside('c.curry_for_supper')], [true, false]);
 });
 

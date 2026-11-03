@@ -10,10 +10,10 @@ import { playHints } from './hintPlayer.js';
 const n = (x) => x.toLocaleString('en-US');
 const count = (list, key) => list.reduce((o, x) => { const k = key(x); o[k] = (o[k] ?? 0) + 1; return o; }, {});
 const SECTION_NAMES = { entities: 'people, places and things', events: 'events', claims: 'statements', rules: 'background facts', glosses: 'words explained', propositions: 'propositions', inferences: 'inferences' };
-const OPS = [['collect', 'Collect (words clicked)'], ['ask', 'Ask what I know'], ['build', 'Build an inference'], ['notice', 'Mark as important'], ['raise', 'Raise an exception'], ['seal', 'Seal a check'], ['file', 'File what did not happen'], ['drop', 'Drop a wrong turn'], ['theory', 'Hold a theory'], ['candidate', 'Propose an answer'], ['cardNote', 'Write a note on a card'], ['setAside', 'Mark as unimportant'], ['split', 'Split a statement'], ['doubt', 'Doubt'], ['weigh', 'Weigh a theory']];
+const OPS = [['collect', 'Collect (words clicked)'], ['ask', 'Ask what I know'], ['build', 'Build an inference'], ['investigate', 'Investigate a lead'], ['raise', 'Raise an exception'], ['seal', 'Seal a check'], ['file', 'File what did not happen'], ['drop', 'Drop a wrong turn'], ['theory', 'Hold a theory'], ['candidate', 'Propose an answer'], ['cardNote', 'Write a note on a card'], ['setAside', 'Mark as unimportant'], ['split', 'Split a statement'], ['doubt', 'Doubt'], ['weigh', 'Weigh a theory']];
 // A UI step of the tables, by kind (as scripts/ui-run.mjs plays them: each card opened from its list).
 const stepKind = (u) => (u.story !== undefined ? 'words clicked' : u.open ? 'card opened from a list' : u.expect ? null : u.select || u.select_text ? 'menu chosen' : u.propose || u.fill ? 'typed' : u.tab ? 'tab chosen' : 'button pressed');
-const FAMILIES = { deduction: 'Deductions', notice: 'Odd details', raise: 'Steps seen through', drop: 'Wrong turns dropped', check: 'Checks planned', absence: 'What did not happen' };
+const FAMILIES = { deduction: 'Deductions', notice: 'Leads investigated', raise: 'Steps seen through', drop: 'Wrong turns dropped', check: 'Checks planned', absence: 'What did not happen' };
 
 export function statsMarkdown(model, { reader, minimal, hints }) {
     const g = new Game(model, { difficulty: 'hard' });

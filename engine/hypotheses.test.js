@@ -132,11 +132,15 @@ test('a patch takes an item out of the tray, and shows as resting on nothing hel
     assert.ok(!at92.assumed.some((a) => a.slot === 'e.opium_added.agent'), JSON.stringify(at92.assumed));
 });
 
-test('off Easy, a puzzle is met only once the player notices one of its cards', () => {
+test('off Easy, a puzzle is met only once the player marks one of its cards important or investigates a lead on it', () => {
     const game = new Game(model, { difficulty: MEDIUM });
     while (game.read <= 40) game.advance();
     assert.ok(!game.metPuzzles().some((z) => z.id === 'pz.curry'));
-    assert.ok(game.notice('c.curry_for_supper').ok);
+    assert.ok(game.markImportant('c.curry_for_supper').ok);
+    assert.ok(game.metPuzzles().some((z) => z.id === 'pz.curry'));
+    game.unmarkImportant('c.curry_for_supper');
+    assert.ok(!game.metPuzzles().some((z) => z.id === 'pz.curry'));
+    assert.ok(game.investigate('lead.curry').ok);
     assert.ok(game.metPuzzles().some((z) => z.id === 'pz.curry'));
     assert.ok(game.residue(theory('t.police')).residue.includes('pz.curry'));
 });

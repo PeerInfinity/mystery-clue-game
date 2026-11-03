@@ -11,7 +11,7 @@ export const CATEGORY_WORDS = {
     collect: ['Collect', 'click every span of the story read'],
     ask: ['Ask what I know', 'every person, thing and event held'],
     build: ['Build inferences', 'connect cards while “onto something”'],
-    notice: ['Mark as important', 'each card held, kept if the story stops waiting'],
+    lead: ['Investigate a lead', 'each lead proposed, kept if the story stops waiting'],
     raise: ['Raise an exception', 'each exception open against a card held'],
     check: ['Seal a check', 'each check, part by part, then what to expect'],
     absence: ['File an absence', 'what should have happened, when, who would have noticed'],

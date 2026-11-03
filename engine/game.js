@@ -352,7 +352,9 @@ export class Game {
         this.applied = [];              // [{id, rule, bind, para}]
         this.concluded = [];            // [{id, cited, formula, label, para}]
         this.filed = [];                // [{id, para}] absences the player filed, or Trivial filed for them
-        this.noticed = new Map();       // card id → {para}: details the player marked as important (the page's words; "odd" in the data)
+        this.important = new Map();     // card id → {para}: the player's own mark "important" (sorts their lists, steers the search; never scored)
+        this.investigating = new Map(); // lead id → {para}: the leads under investigation now
+        this.leadsSettled = new Map();  // lead id → {at}: leads past Holmes's paragraph; `at` the paragraph its investigation began, or null
         this.drops = new Map();         // drop key → {target, reason, rival, cites, para, held}: hypotheses dropped
         this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised
         this.seals = [];                // [{id, verb, fields, expect, answer, theory, para, withdrawn}]: checks sealed
@@ -391,7 +393,9 @@ export class Game {
             applied: this.applied.map((a) => [a.id, a.rule, a.bind, a.para]),
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             filed: this.filed.map((f) => [f.id, f.para]),
-            noticed: [...this.noticed].map(([id, n]) => [id, n.para]),
+            important: [...this.important].map(([id, n]) => [id, n.para]),
+            investigating: [...this.investigating].map(([id, n]) => [id, n.para]),
+            leadsSettled: [...this.leadsSettled].map(([id, n]) => [id, n.at]),
             drops: [...this.drops.values()],
             raised: [...this.raised.values()].map((r) => [r.id, r.n, r.exception, r.para, r.status]),
             seals: this.seals,
@@ -482,7 +486,10 @@ export class Game {
         }
         for (const [id, para] of state.split ?? []) if (this.knows(id) && this.partsOf(id).length) { this.splitClaims.add(id); for (const x of this.partsOf(id)) this.#unlock(x, para); }
         for (const [id, para, text] of state.cardNotes ?? []) if (this.knows(id)) this.cardNotes.set(id, { para, text });
-        for (const [id, para] of state.noticed ?? []) if (this.knows(id)) this.noticed.set(id, { para });
+        for (const [id, para] of state.important ?? []) if (this.knows(id)) this.important.set(id, { para });
+        // The leads: replaying the reading settled each lead passed with none under investigation; the save says which were.
+        for (const [id, at] of state.leadsSettled ?? []) if (this.leadById().has(id)) this.leadsSettled.set(id, { at });
+        for (const [id, para] of state.investigating ?? []) if (this.leadById().has(id) && !this.leadsSettled.has(id)) this.investigating.set(id, { para });
         for (const d of state.drops ?? []) if (d?.target && DROP_REASONS.includes(d.reason)) this.drops.set(dropKey(d.target), d);
         for (const [id, n, exception, para, status] of state.raised ?? []) {
             const e = this.knows(id) && this.applicationsOf(id).find((a) => a.n === n)?.exceptions.find((x) => x.id === exception);
@@ -530,7 +537,7 @@ export class Game {
     setAside(id, para = this.read - 1) {
         if (!this.knows(id) || !['entities', 'events', 'claims'].includes(this.model.cards.get(id)?.section)) return false;
         // The page's two marks, important and unimportant, exclude each other.
-        this.noticed.delete(id);
+        this.important.delete(id);
         if (!this.setAsideAt.has(id)) this.setAsideAt.set(id, para);
         return true;
     }
@@ -1157,6 +1164,7 @@ export class Game {
 
     #readNext() {
         const p = this.read;
+        this.#settleLeads(p);
         this.read++;
         this.#process(p);
     }
@@ -1269,43 +1277,98 @@ export class Game {
         return h;
     }
 
-    // ---------- notices ----------
+    // ---------- the player's mark "important" ----------
     /**
-     * Mark a card the player holds as odd (the page says "important"). Nothing is checked or told: a notice is the
-     * player's own. It takes the card out of the unimportant ones (the two marks exclude each other).
-     * Incremental mode: `lifts` says how many of the rows the story waits on now it made (its only check).
+     * Mark a held card important: the player's own mark. It lists the card first among theirs and the search tries it
+     * early; nothing is checked, told or scored. It takes the card out of the unimportant ones (the marks exclude each other).
      */
-    notice(card) {
-        return this.#lifts(() => this.#notice(card));
-    }
-    #notice(card) {
+    markImportant(card) {
         if (!this.knows(card)) return { ok: false, reason: 'you do not hold that card' };
-        const was = this.noticed.get(card);
-        this.noticed.set(card, { para: was?.para ?? this.read - 1 });
+        const was = this.important.get(card);
+        this.important.set(card, { para: was?.para ?? this.read - 1 });
         this.setAsideAt.delete(card);
         return { ok: true };
     }
-    unnotice(card) { return this.noticed.delete(card); }
-    /**
-     * The notable details the annotation lists (NOTICE thoughts with `notices`): each with Holmes's paragraph (the
-     * first where he draws attention to it; null if he never does), the paragraph the player first marked one of its
-     * cards (null if not), and whether that was before Holmes's (it scores). Nothing counts in Trivial.
-     */
-    noticeScores() {
-        return (this.model.data.thoughts ?? []).filter((t) => t.tag === 'NOTICE' && t.notices?.length).map((t) => {
-            const at = t.notices.map((c) => this.noticed.get(c)?.para).filter((x) => x !== undefined);
-            const noticed = this.autoSolves() || !at.length ? null : Math.min(...at);
-            const holmes = t.holmes?.paras?.length ? t.holmes.paras[0] : null;
-            return { thought: t.id, cards: t.notices, para: t.para, holmes, noticed, scores: noticed !== null && holmes !== null && noticed < holmes };
-        });
+    unmarkImportant(card) { return this.important.delete(card); }
+    isImportant(card) { return this.important.has(card); }
+
+    // ---------- leads ----------
+    /** The case's leads (leads.json) by id, each with `at` (the paragraph its last quote is in) and `deadline` (Holmes's
+     *  first paragraph on the NOTICE thought it scores for; null if it scores nothing). */
+    leadById() {
+        if (this.leadCache) return this.leadCache;
+        const thoughts = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t]));
+        this.leadCache = new Map((this.model.data.leads ?? []).map((l) => {
+            const t = l.scores ? thoughts.get(l.scores) : null;
+            const at = Math.max(0, ...(l.source ?? []).map((q) => this.story.find(q)?.para ?? Infinity));
+            return [l.id, { ...l, at, deadline: t?.holmes?.paras?.length ? t.holmes.paras[0] : null }];
+        }));
+        return this.leadCache;
+    }
+    /** Is the lead proposed: its quotes read and the cards it needs held? */
+    leadProposed(id) {
+        const l = this.leadById().get(id);
+        return !!l && l.at < this.read && (l.needs ?? []).every((c) => this.knows(c));
     }
     /**
-     * In aggregate: details noticed, and those noticed before Holmes, out of those he draws attention to at all (a
-     * card can be noticed before the thought's own paragraph, so a row is possible once it has Holmes's).
+     * The leads the game proposes, in the order they came: each {id, text, at, state}, state 'investigating', 'open' or
+     * 'settled' (Holmes's paragraph is read; `investigated` says whether it was under investigation then). Never says
+     * which leads score.
      */
+    leads() {
+        return [...this.leadById().values()].filter((l) => this.leadProposed(l.id)).sort((a, b) => a.at - b.at).map((l) => {
+            const settled = this.leadsSettled.get(l.id);
+            return { id: l.id, text: l.text, at: l.at, state: settled ? 'settled' : this.investigating.has(l.id) ? 'investigating' : 'open', ...(settled && { investigated: settled.at !== null }) };
+        });
+    }
+    isInvestigating(id) { return this.investigating.has(id); }
+    /** Was the lead under investigation, now or when Holmes's paragraph was read (the paragraph it began, or null)? */
+    investigatedAt(id) {
+        const s = this.leadsSettled.get(id);
+        return s ? s.at : this.investigating.get(id)?.para ?? null;
+    }
+    /**
+     * Put a proposed lead under investigation: it scores if it still is when the story reaches Holmes's paragraph on it.
+     * Incremental mode: `lifts` says how many of the rows the story waits on it made.
+     */
+    investigate(id) {
+        return this.#lifts(() => {
+            if (!this.leadProposed(id)) return { ok: false, reason: 'no such lead yet' };
+            if (this.leadsSettled.has(id)) return { ok: false, reason: 'Holmes has followed this up already' };
+            if (!this.investigating.has(id)) this.investigating.set(id, { para: this.read - 1 });
+            return { ok: true };
+        });
+    }
+    stopInvestigating(id) { return !this.leadsSettled.has(id) && this.investigating.delete(id); }
+    /** Before paragraph p is read: the leads whose deadline it is are settled, as they stand. */
+    #settleLeads(p) {
+        for (const l of this.leadById().values()) {
+            if (l.deadline !== p || this.leadsSettled.has(l.id)) continue;
+            this.leadsSettled.set(l.id, { at: this.investigating.get(l.id)?.para ?? null });
+            this.investigating.delete(l.id);
+        }
+    }
+    /**
+     * The notable details the annotation lists (NOTICE thoughts with `notices`), each scored by its leads: Holmes's
+     * paragraph (the first where he draws attention to it; null if he never does), `investigated` the paragraph a lead
+     * for it was put under investigation (and still was at Holmes's paragraph, or still is), and whether that was
+     * before Holmes's (it scores). Nothing counts in Trivial.
+     */
+    noticeScores() {
+        const leadsFor = new Map();
+        for (const l of this.leadById().values()) if (l.scores) (leadsFor.get(l.scores) ?? leadsFor.set(l.scores, []).get(l.scores)).push(l.id);
+        return (this.model.data.thoughts ?? []).filter((t) => t.tag === 'NOTICE' && t.notices?.length).map((t) => {
+            const leads = leadsFor.get(t.id) ?? [];
+            const at = leads.map((id) => this.investigatedAt(id)).filter((x) => x !== null);
+            const investigated = this.autoSolves() || !at.length ? null : Math.min(...at);
+            const holmes = t.holmes?.paras?.length ? t.holmes.paras[0] : null;
+            return { thought: t.id, leads, cards: t.notices, para: t.para, holmes, investigated, scores: investigated !== null && holmes !== null && investigated < holmes };
+        });
+    }
+    /** In aggregate: details investigated, and those before Holmes, out of those he draws attention to at all. */
     noticeScore() {
         const rows = this.noticeScores();
-        return { noticed: rows.filter((r) => r.noticed !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.holmes !== null).length, of: rows.length };
+        return { investigated: rows.filter((r) => r.investigated !== null).length, scored: rows.filter((r) => r.scores).length, possible: rows.filter((r) => r.holmes !== null).length, of: rows.length };
     }
 
     /**
@@ -2352,14 +2415,15 @@ export class Game {
 
     /**
      * The puzzles the player has met: on Easy (and Trivial), once its cards are held and its
-     * thought's paragraph is read; otherwise once the player has noticed one of its cards, or filed one that is an
-     * absence (filing it is the noticing).
+     * thought's paragraph is read; otherwise once the player has marked one of its cards important, or investigates
+     * (or investigated) a lead that needs one, or filed one that is an absence (filing it is the noticing).
      */
     metPuzzles() {
+        const leadCards = new Set([...this.leadById().values()].filter((l) => this.investigatedAt(l.id) !== null).flatMap((l) => l.needs ?? []));
         const paraOf = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t.para]));
         return (this.model.data.puzzles ?? []).filter((pz) => (this.assisted()
             ? pz.cards.every((c) => this.knows(c)) && this.read > (paraOf.get(pz.thought) ?? 0)
-            : pz.cards.some((c) => this.noticed.has(c) || (this.knows(c) && (this.model.cards.get(c)?.attested ?? []).some((a) => a.via === 'absence')))));
+            : pz.cards.some((c) => this.important.has(c) || leadCards.has(c) || (this.knows(c) && (this.model.cards.get(c)?.attested ?? []).some((a) => a.via === 'absence')))));
     }
 
     /**
@@ -2702,7 +2766,7 @@ export class Game {
             const needs = this.stepInferences(r.thought);
             add('deduction', r, r.holmes, r.made, needs ?? [], needs ? {} : { concludes: this.routeById.get(r.thought)?.concludes ?? null });
         }
-        for (const r of this.noticeScores()) add('notice', r, r.holmes, r.noticed, r.cards);
+        for (const r of this.noticeScores()) add('notice', r, r.holmes, r.investigated, r.cards, { leads: r.leads });
         for (const r of this.raiseScores()) {
             const exceptions = r.raises.map((x) => ({ ...x, text: this.applicationsOf(x.target).flatMap((a) => a.exceptions).find((e) => e.id === x.exception)?.text ?? null }));
             add('raise', r, r.holmes, r.raised, r.raises.map((x) => x.target), { exceptions });

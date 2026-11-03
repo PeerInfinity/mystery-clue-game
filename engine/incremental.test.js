@@ -1,6 +1,6 @@
 // Incremental mode's waits: incremental.json is what `npm run incremental` writes; a player who moves only when the
 // story waits reaches the Hard maximum, and without the waits for moves that expire does not; the minimal playthrough
-// is never held up; a reader who only reads stops at the first wait; the mode is Hard whatever is asked; and a notice
+// is never held up; a reader who only reads stops at the first wait; the mode is Hard whatever is asked; and a lead
 // or a sealed check says whether it lifted a wait.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -61,17 +61,18 @@ test('incremental mode is Hard, whatever difficulty or options are asked for', (
     assert.equal(g.opts.reader, optionsFrom('hard', { reader: '1892' }).reader);
 });
 
-test('a notice or a sealed check says how many waits it lifted; a wrong one lifts none', () => {
-    const noticed = new Set(model.data.thoughts.flatMap((t) => t.notices ?? []));
-    const tried = { notice: 0, seal: 0 };
+test('a lead investigated or a sealed check says how many waits it lifted; a mark "important" lifts none', () => {
+    const tried = { investigate: 0, seal: 0 };
     const check = (g, model, m) => {
-        if (m.op === 'notice') {
-            const wrong = [...g.unlocked.keys()].find((c) => !noticed.has(c) && model.cards.get(c)?.section === 'entities');
-            assert.equal(g.notice(wrong).lifts, 0);
-            g.unnotice(wrong);
-            const res = g.notice(m.card, m.because);
-            assert.ok(res.lifts >= 1, `notice ${m.card} at ¶${g.read}`);
-            tried.notice++;
+        if (m.op === 'investigate') {
+            const card = g.leadById().get(m.lead).needs[0];
+            const open = () => g.blockers().filter((w) => w.row).length;
+            const before = open();
+            assert.ok(g.markImportant(card).ok);
+            assert.equal(open(), before, 'the mark "important" makes no row');
+            const res = g.investigate(m.lead);
+            assert.ok(res.lifts >= 1, `investigate ${m.lead} at ¶${g.read}`);
+            tried.investigate++;
             return true;
         }
         if (m.op === 'seal') {
@@ -85,7 +86,7 @@ test('a notice or a sealed check says how many waits it lifted; a wrong one lift
     };
     const { stuck } = playLazy(model, hints, waits, check);
     assert.equal(stuck, null);
-    assert.equal(tried.notice, hints.moves.filter((m) => m.op === 'notice').length);
+    assert.equal(tried.investigate, hints.moves.filter((m) => m.op === 'investigate').length);
     assert.ok(tried.seal >= 1);
 });
 

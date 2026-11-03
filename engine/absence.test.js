@@ -62,32 +62,3 @@ test('no alarm was raised: either Straker never got to the stable, or he was not
     assert.deepEqual(game.propose(game.connectSet('k.straker_raised_no_alarm')).built, ['k.straker_raised_no_alarm']);
 });
 
-test('notices: a card the player holds marked odd (the page: important), scored when made before Holmes draws attention to it', () => {
-    const game = new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
-    assert.equal(game.notice('c.milliner_bill').ok, false, 'not before the card is held');
-    while (!game.knows('c.milliner_bill')) game.advance();
-    assert.ok(game.notice('c.milliner_bill').ok);
-    assert.ok(game.notice('c.curry_for_supper').ok, 'a notice made late still counts for its card');
-    assert.ok(game.notice('c.pocket_inventory').ok);
-    const bill = game.noticeScores().find((r) => r.thought === 't84.3');
-    assert.deepEqual([bill.noticed < bill.holmes, bill.scores], [true, true]);
-    assert.equal(game.noticeScores().find((r) => r.thought === 't84.7').scores, true, 'one card can serve two details');
-    assert.deepEqual(game.noticeScore(), { noticed: 4, scored: 4, possible: 8, of: 11 });
-    // An event card can be noticed too: the horse taken out at all, when laming him in his stall would do.
-    assert.ok(game.notice('e.horse_led_out').ok);
-    const taken = game.noticeScores().find((r) => r.thought === 't18.3');
-    assert.deepEqual([taken.holmes, taken.scores], [57, false], 'marked at ¶84, after Holmes asked it at ¶57');
-    game.unnotice('e.horse_led_out');
-    // Saved and restored; withdrawn.
-    const again = new Game(model);
-    again.load(game.save());
-    assert.deepEqual(again.noticeScore(), game.noticeScore());
-    assert.ok(again.noticed.has('c.pocket_inventory'));
-    assert.ok(again.unnotice('c.curry_for_supper'));
-    assert.equal(again.noticeScore().noticed, 3);
-    // Trivial scores nothing.
-    const trivial = new Game(model, { difficulty: TRIVIAL });
-    while (!trivial.knows('c.milliner_bill')) trivial.advance();
-    trivial.notice('c.milliner_bill');
-    assert.equal(trivial.noticeScore().scored, 0);
-});

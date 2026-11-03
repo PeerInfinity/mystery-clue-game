@@ -88,7 +88,7 @@ async function took(m) {
         case 'collect': return has(s.collected, m.card);
         case 'ask': return has(s.asked, m.card);
         case 'build': return has(s.built, m.inference);
-        case 'notice': return has(s.noticed, m.card);
+        case 'investigate': return has(s.investigating, m.lead) || (s.leadsSettled ?? []).some(([id, at]) => id === m.lead && at !== null);
         case 'raise': return (s.raised ?? []).some((r) => r[0] === m.target && r[2] === m.exception);
         case 'seal': return (s.seals ?? []).some((x) => x.verb === m.verb && JSON.stringify(x.fields) === JSON.stringify(m.fields) && (x.expect ?? null) === (m.expect ?? null) && JSON.stringify(x.answer ?? null) === JSON.stringify(m.answer ?? null));
         case 'file': return has(s.filed, m.absence);
