@@ -9,7 +9,8 @@
 //
 // The searches (one generator per category, yielding the checks it plans):
 //   collect, ask  every span read, every card that can be asked about (lookups; run first, they feed the rest)
-//   build         sets grown card by card while "onto something" (propose); a complete set tries the kinds (Hard)
+//   build         level by level by "onto something" (propose): each card alone, then a set onto something and one
+//                 more card onto something alone; a complete set tries the kinds (Hard)
 //   notice        each held card marked important (odd, in the data), kept only if a wait lifts
 //   raise         each exception open against a held card, kept only if a wait lifts
 //   check         a sealed check part by part (sealOnto: the verb, each field, the pair, the question of an expected
@@ -244,34 +245,62 @@ export class Automation {
     #askAhead(limit) {
         return this.#held().filter((id) => this.g.canAsk(id) && !this.g.hasAsked(id)).slice(0, limit).map((id) => ({ cat: 'ask', label: this.#askLabel(id) }));
     }
+    /**
+     * Builds, by what "onto something" tells (propose: a set is onto something when it is a strict part of a recipe
+     * whose cards are all held). Level by level: every card on its own first; then sets one card larger, only from a
+     * set found onto something, with a card itself onto something, and only when every part one card smaller is onto
+     * something too (no part can be onto anything unless the whole is). A set already answered is not tried again:
+     * a "no" until it goes stale, an "onto something" until an inference it may have pointed to is learned
+     * (#update). A complete set (the game asks what the conclusion is about) tries the kinds; one that builds starts
+     * the search again with the new card.
+     */
     *build() {
-        const pool = this.order(this.#held().filter((x) => POOL.includes(this.#sec(x))));
-        const tried = new Set();
         const self = this;
+        const pool = this.order(this.#held().filter((x) => POOL.includes(this.#sec(x))));
+        const rank = new Map(pool.map((x, i) => [x, i]));
+        const inPool = (T) => T.every((x) => rank.has(x));
+        const key = (T) => [...T].sort().join('|');
+        const live = (k) => this.neg.build.has(k) && !this.stale.build.has(k);
+        const known = (k) => live(k) || this.onto.has(k);
         const names = (T) => T.map((x) => this.#card(x)).join(' + ');
-        function* grow(S) {
-            for (const x of pool) {
-                if (S.includes(x)) continue;
-                const T = [...S, x];
-                const k = [...T].sort().join('|');
-                if (tried.has(k)) continue;
-                tried.add(k);
-                if (self.neg.build.has(k) && !self.stale.build.has(k)) continue;
-                const res = yield { cat: 'build', label: `connect ${names(T)}: onto something?`, run: () => self.g.propose(T), out: (r) => (r.onto || r.needsKind || r.wrongKind ? 'yes' : 'no') };
-                self.stale.build.delete(k);
-                if (res.onto) self.onto.add(k); else self.onto.delete(k);
-                if (res.needsKind || res.wrongKind) {
-                    for (const kind of self.#shuffle(Object.keys(CONCLUSION_KINDS))) {
-                        const b = yield { cat: 'build', label: `connect ${names(T)} as ${CONCLUSION_KINDS[kind].toLowerCase()}`, run: () => self.g.propose(T, kind), out: (r) => (r.built.length ? 'found' : 'no'), what: (r) => r.built.map((id) => self.#card(id)).join('; ') };
-                        // A built inference is a card: the search starts again with it in the pool.
-                        if (b.built.length) { self.stats.build.found += b.built.length; self.dirty = true; return 'changed'; }
-                    }
+        // One set: → 'changed' when it built something. Its answer is kept only once its kinds (if any) are all tried:
+        // a pass abandoned between them tries the set again.
+        function* attempt(T) {
+            const k = key(T);
+            const res = yield { cat: 'build', label: `connect ${names(T)}: onto something?`, run: () => self.g.propose(T), out: (r) => (r.onto || r.needsKind || r.wrongKind ? 'yes' : 'no') };
+            if (res.needsKind || res.wrongKind) {
+                for (const kind of self.#shuffle(Object.keys(CONCLUSION_KINDS))) {
+                    const b = yield { cat: 'build', label: `connect ${names(T)} as ${CONCLUSION_KINDS[kind].toLowerCase()}`, run: () => self.g.propose(T, kind), out: (r) => (r.built.length ? 'found' : 'no'), what: (r) => r.built.map((id) => self.#card(id)).join('; ') };
+                    // A built inference is a card: the search starts again with it in the pool.
+                    if (b.built.length) { self.stats.build.found += b.built.length; self.dirty = true; return 'changed'; }
                 }
-                if (res.onto && T.length < MAX_SET) { if ((yield* grow(T)) === 'changed') return 'changed'; } else if (!res.onto && !res.needsKind && !res.wrongKind) self.neg.build.set(k, T);
             }
+            self.stale.build.delete(k);
+            if (res.onto) { self.onto.add(k); self.neg.build.delete(k); } else { self.onto.delete(k); self.neg.build.set(k, T); }
             return null;
         }
-        return yield* grow([]);
+        // Level 1: every card on its own.
+        for (const x of pool) if (!known(x) && (yield* attempt([x])) === 'changed') return 'changed';
+        // Levels 2 and up: a set onto something and one more card.
+        const ones = pool.filter((x) => this.onto.has(x));
+        for (let d = 1; d < MAX_SET; d++) {
+            const base = [...this.onto].map((k) => k.split('|')).filter((T) => T.length === d && inPool(T))
+                .map((T) => T.sort((x, y) => rank.get(x) - rank.get(y)))
+                .sort((A, B) => { for (let i = 0; i < d; i++) if (rank.get(A[i]) !== rank.get(B[i])) return rank.get(A[i]) - rank.get(B[i]); return 0; });
+            if (!base.length) break;
+            const seen = new Set();
+            for (const T of base) for (const z of ones) {
+                if (T.includes(z)) continue;
+                const U = [...T, z];
+                const k = key(U);
+                if (seen.has(k)) continue;
+                seen.add(k);
+                if (known(k)) continue;
+                if (d >= 2 && !U.every((_, i) => this.onto.has(key(U.filter((__, j) => j !== i))))) continue;
+                if ((yield* attempt(U)) === 'changed') return 'changed';
+            }
+        }
+        return null;
     }
     *notice() {
         for (const x of this.order(this.#held().filter((c) => !this.g.noticed.has(c)))) {
@@ -362,6 +391,13 @@ export class Automation {
             for (const x of fresh) this.hand.add(x);
             for (const t of newTimes) this.reached.add(t);
             this.lastRead = this.g.read;
+            // An inference now held no longer counts as a recipe: a set onto something may have been so only for it.
+            for (const x of fresh) {
+                const inf = this.g.inferenceById.get(x);
+                if (!inf) continue;
+                const ps = new Set(inf.premises);
+                for (const k of [...this.onto]) if (k.split('|').every((c) => ps.has(c))) this.onto.delete(k);
+            }
             const marked = this.#staleOn(fresh, new Set(newTimes), from);
             if (fresh.length || newTimes.length || marked) { this.version++; this.dirty = true; }
         }
@@ -585,15 +621,21 @@ export class Automation {
             if (T.length !== 2 || !T.every((x) => freeSet.has(x)) || (!this.onto.has(k) && !live('build', k))) continue;
             for (const x of T) triedPairs.set(x, (triedPairs.get(x) ?? 0) + 1);
         }
-        const larger = new Map();       // card → the sets of one more card than an onto set with it, not tried yet
+        // Larger sets: those the search will try (*build): an onto set of two or more and one more card onto something
+        // alone, every part one card smaller onto something too, not tried yet.
+        const larger = new Map();       // card → those sets with it
+        const ones = free.filter((x) => this.onto.has(x));
+        const key = (T) => [...T].sort().join('|');
         for (const k of this.onto) {
             const T = k.split('|');
             if (T.length < 2 || T.length >= MAX_SET || !T.every((x) => freeSet.has(x))) continue;
-            for (const z of free) {
+            for (const z of ones) {
                 if (T.includes(z)) continue;
-                const k2 = [...T, z].sort().join('|');
+                const U = [...T, z];
+                const k2 = key(U);
                 if (live('build', k2) || this.onto.has(k2)) continue;
-                for (const x of T) (larger.get(x) ?? larger.set(x, new Set()).get(x)).add(k2);
+                if (!U.every((_, i) => this.onto.has(key(U.filter((__, j) => j !== i))))) continue;
+                for (const x of U) (larger.get(x) ?? larger.set(x, new Set()).get(x)).add(k2);
             }
         }
         for (const x of free) {

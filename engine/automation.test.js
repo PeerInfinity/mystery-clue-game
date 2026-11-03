@@ -127,3 +127,22 @@ test('what is left with each card: pairs not tried, larger sets only where a set
     const b = new Automation(g, { seed: 1, state: JSON.parse(JSON.stringify(a.save())) });
     assert.deepEqual([...b.onto].sort(), [...a.onto].sort(), 'the onto sets are saved');
 });
+
+test('builds go by "onto something": every card on its own first, a pair only of cards each onto something alone', () => {
+    const g = fresh();
+    const a = new Automation(g, { seed: 2 });
+    const alone = new Map();    // card name → its answer alone ('yes' | 'no'), the last given
+    let pairs = 0;
+    while (a.n < 6000) {
+        const c = a.next();
+        if (!c) break;
+        const e = a.execute();
+        const m = e.cat === 'build' && e.label.match(/^connect (.+): onto something\?$/);
+        if (!m) continue;
+        const cards = m[1].split(' + ');
+        if (cards.length === 1) { alone.set(cards[0], e.out); continue; }
+        pairs++;
+        for (const x of cards) assert.equal(alone.get(x), 'yes', `${e.label}: ${x} was tried alone first, and was onto something`);
+    }
+    assert.ok(pairs > 0, 'some larger sets were tried');
+});

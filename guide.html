@@ -647,10 +647,14 @@ the finds.</li>
 are tried first, then the cards you marked important. A circled answer is tried first when a check expects an answer, and
 last as a wrong turn to drop; a crossed-out one the other way round. Untick a kind of move to pause it (if the story
 waits for that kind, the search says so and waits too).</li>
+<li><b>How it builds</b>: every card on its own first. A card that is not <i>onto something</i> on its own is never
+put in a pair, since no set can be onto anything unless each of its cards is. Then pairs of cards that each were onto
+something, and larger sets only from a set found onto something. Nothing already answered is tried again unless
+something new could change the answer.</li>
 <li><b>Controls</b>: <span class="btn">⏸ Pause</span> / <span class="btn">▶ Search</span>, and <i>Read on by
 itself</i>, which lets the search read the story on whenever it is not waiting (otherwise you read on). How long each
 check takes is <i>Time per check</i> in Settings: one second unless you change it, 0 for as fast as it can go. A
-whole game takes tens of thousands of checks.</li>
+whole game takes about twenty thousand checks.</li>
 <li>Your own moves still count: anything you find yourself, the search does not need to.</li>
 </ul>
 </section>

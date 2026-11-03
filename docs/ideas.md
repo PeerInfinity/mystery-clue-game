@@ -309,8 +309,17 @@ under way.
   check safe to make again when the solver hands it to its worker (the move is made once).
 - **Kept across reloads**: the counts, the negatives and the last 200 log lines, beside the game's save. A whole game's
   negatives are 2.8 MB written as card ids; as the cards' places in the case, under 0.9 MB.
-- **The time a game takes**: one run made about 46,000 checks, which is about 13 hours at one a second. Most are
-  builds at the first stops; the steering is meant to shorten that.
+- **The time a game takes**: at first 46,000–55,000 checks over three orders (13–15 hours at one a second), 33,000–38,000
+  of them builds. Since builds go by "onto something" (below), 18,500–22,300 (5–6 hours), 5,500–6,000 of them builds.
+- **Builds by "onto something"** (the user's ask, 2026-11-02, after the Cards list showed 206 of 517 cards never
+  tried alone at 30,000 checks: the old search grew sets depth first from the top of the order and began again at
+  every find). Propose's "onto something" means a strict part of a recipe whose cards are all held, so no set is onto
+  anything unless every part of it is. The search now goes level by level: every card alone first; then a set found
+  onto something and one more card itself onto something alone, only when every part one card smaller is onto
+  something too. Both answers are kept: a "no" until it goes stale, an "onto something" (`onto`, saved) until an
+  inference it may have pointed to is held. Before, a pair could pair a card with one already "no" alone, and
+  "onto" sets were proposed again on every pass. A test holds the order: no set of two or more before each of its
+  cards was onto something alone.
 - **Checked through the page** (`scripts/search-check.mjs`): the clock, both bars, the queue (its first is the next
   check), nothing moving up over eight checks, the log keeping its place, pause, a wait lifted at 0 s, reading by
   itself past ¶110, a reload, no console error.
