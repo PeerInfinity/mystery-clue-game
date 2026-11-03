@@ -104,8 +104,7 @@ export function actionTable(model) {
         if (!['TEST', 'RECORD', 'REVISE'].includes(t.tag)) for (const m of t.maps ?? []) if (sec(m) === 'inferences' && !g.inferenceById.get(m)?.implicit) step(`i:${m}`, () => build(m));
         for (const c of t.notices ?? []) step(`n:${c}`, () => {
             if (!acquire(c)) return false;
-            const because = (t.maps ?? []).find((m) => sec(m) === 'rules' && (acquire(m) || g.knows(m))) ?? null;
-            return log('notice', { card: c, because }, [openUi(c), ...(because ? [{ select: '#notice-because', value: because }] : []), { click: `[data-notice="${c}"]` }], g.notice(c, because).ok !== false);
+            return log('notice', { card: c }, [openUi(c), { click: `[data-notice="${c}"]` }], g.notice(c).ok !== false);
         });
         for (const r of t.raises ?? []) step(`r:${r.target}:${r.exception}`, () => {
             if (!acquire(r.target)) return false;
@@ -135,8 +134,11 @@ export function actionTable(model) {
         });
         if (t.asks) step(`q:${t.id}`, () => {
             if (!t.asks.cards.every((c) => acquire(c))) return false;
-            const res = g.pose(t.asks.template, t.asks.cards);
-            return log('pose', { template: t.asks.template, cards: t.asks.cards }, [openUi(t.asks.cards[0]), { select: '#pose-template', value: t.asks.template }, ...(t.asks.cards[1] ? [{ select: '#pose-second', value: t.asks.cards[1] }] : []), { click: `[data-pose="${t.asks.cards[0]}"]` }], res.ok !== false);
+            // The careful reader's question, written as a note on its first card (after any note there already).
+            const card = t.asks.cards[0];
+            const q = g.askedText(t.asks.template, t.asks.cards);
+            const text = g.cardNote(card) ? `${g.cardNote(card)}\n${q}` : q;
+            return log('cardNote', { card, text }, [openUi(card), { fill: '#card-note-text', value: text }, { click: `[data-card-note="${card}"]` }], g.setCardNote(card, text).ok);
         });
         if (ASIDE[t.id]) step(`sa:${t.id}`, () => acquire(ASIDE[t.id]) && log('setAside', { card: ASIDE[t.id] }, [openUi(ASIDE[t.id]), { click: `[data-setaside="${ASIDE[t.id]}"]` }], g.setAside(ASIDE[t.id]) !== false));
         if (DOUBTS[t.id]) step(`dbt:${t.id}`, () => {

@@ -533,8 +533,10 @@ the time reached and among `windows`, a part counting as its window, the line re
 later attestation of its own. Trivial files it by itself. Silver Blaze: the dog did nothing (`c.dog_did_nothing`,
 also told at ¶181) and no alarm (`c.no_alarm`, filed only), both witnessed by the lads' "They had heard nothing".
 
-A **notice** marks a held card as odd, optionally because of a held rule (`notice(card, because)`); nothing is
-checked or told. NOTICE thoughts with `notices` count (Scoring). Noticing a card of a puzzle meets the puzzle.
+A **notice** marks a held card as odd (`notice(card)`; the page calls the mark *important*); nothing is checked or
+told. NOTICE thoughts with `notices` count (Scoring). Noticing a card of a puzzle meets the puzzle. A notice and a
+set-aside exclude each other (each takes the other off). The optional reason (`because`, a held rule) went on
+2026-11-02: an older save's reason becomes a line of the card's note.
 
 ## Defeasibility
 
@@ -668,8 +670,12 @@ names a paragraph not yet read; never scored.
 **The story's signals** (`hints: story`): `storySignals()` gives, as far as read, each GENRE·watch-holmes thought
 as its clause and the held cards that clause mentions; never what it implies, never scored.
 
-**Set aside** (`setAside(id)`, `putBack`): a held entity, event or claim set aside as scenery. It stays held and
-counts as a premise; nothing checks it against the key; no score reads it.
+**Set aside** (`setAside(id)`, `putBack`; the page calls the mark *unimportant*): a held entity, event or claim set
+aside as scenery. It stays held and counts as a premise; nothing checks it against the key; no score reads it. It takes
+off a notice (the two marks exclude each other).
+
+**Notes on cards** (`setCardNote(id, text)`, `cardNote`, `allCardNotes`): the player's free words on a held card,
+with the paragraph first written at; no words removes it. Never read by the game.
 
 The report's fair-play table gives, for each case question, the candidates left by the challenge scene with every
 rule, and for the 1892 and modern readers without the rules they lack (unless stated by then).
@@ -742,27 +748,26 @@ before its line is read. `nameOf` gives the latest name read, never the case's o
 | `splitClaim(id)` | deal a statement's parts; the statement counts nowhere from then on |
 | `raise`, `withdraw` | an exception against an application (Defeasibility) |
 | `fileAbsence(rule, time, witness)` | file an absence (Absences) |
-| `notice(card, because?)`, `unnotice` | mark a held card odd |
-| `pose(template, cards)`, `unpose`, `poseCandidate` | a question of the player's own (below) |
+| `notice(card)`, `unnotice` | mark a held card odd (the page: important) |
+| `setCardNote(id, text)` | the player's note on a card; never read by the game |
 | `pencilPlace`, `erasePlace`, `follow`, `unfollow`, `splitTime`, `unsplitTime`, `placeEvent`, `proveMark`, `ruleOutMark`, `proveOrder` | the board |
 | `addTheory`, `drop`, `undrop` | theories and drops |
 | `seal`, `unseal` | sealed checks |
-| `setAside`, `putBack` | scenery |
+| `setAside`, `putBack` | scenery (the page: unimportant) |
 | `addNote`, `editNote`, `deleteNote` | the player's notes on the story: at a point of a read paragraph, optionally on marked words; never read by the game |
 | `ask(card)` | background `ask` |
 | `logHint` | the hints given; never read by a score |
 
-Trivial refuses `applyRule`, `conclude` and `pose`. Where a whole-hand check runs late in the story it can take
+Trivial refuses `applyRule` and `conclude`. Where a whole-hand check runs late in the story it can take
 seconds; the page runs it in a worker (see The solver).
 
-**The player's own questions** (`QUESTION_TEMPLATES`, thirteen): fixed words around one or two held cards of named
-kinds (an entity kind, or `events`): who, where, when, why of an event; where is, whose is, who really is, why would
-{person} do it; who had, who could get at, where was {thing} during {event}, how did {thing} leave {place}, what
-could not be done at {place}. Each template lists the facets it may match on its first card. A posed question
-(`pq.N`) is matched quietly to a slot (never a state, order, truth or relation slot) and **joins** it only once
-that slot is visible (checked before and after each paragraph and on listing, so a slot raised by the player's own
-inference joins where they made it); nothing shows the match before. At the join its candidates become circles
-(and proposals on Hard). A question that matches nothing stays the player's note.
+**The annotated reader's questions** (`QUESTION_TEMPLATES`, thirteen; a QUESTION thought's `asks`): fixed words
+around one or two cards of named kinds (an entity kind, or `events`): who, where, when, why of an event; where is,
+whose is, who really is, why would {person} do it; who had, who could get at, where was {thing} during {event}, how
+did {thing} leave {place}, what could not be done at {place}. `askedText(template, cards)` gives the words. Until
+2026-11-02 the player could pose them (matched quietly to a slot, joining it once the story raised it, its candidates
+then becoming circles); the form went for a free note on the card, which is all it ever was to the score. The action
+table writes the reader's question as that note (`cardNote` moves); an older save's questions load as note lines.
 
 ## Scoring and the record
 
@@ -787,7 +792,7 @@ score as bonuses. The annotated reader's game reaches 70 on Hard (45 of 47 deduc
 
 **What does not count**: anything in Trivial; a drop whose reason did not hold (it scores only from where a
 reason that holds was given); a hedged or withdrawn seal; a seal contradicted by the result; a move made at or
-after its deadline; the player's own questions (recorded, never counted); set-asides, signals, notes and hints.
+after its deadline; set-asides, signals, notes (on the story or on cards) and hints.
 
 **`Game.record()`**: the rows whose deadline has been read (never one still ahead: shown early, it would tell the
 player the move is right), each `{family, thought, deadline, at, scores, lead, names}` plus what its family needs
@@ -810,10 +815,11 @@ and never read by a score.
 `Game.save()` (version 8): `difficulty`, `options`, `pace`, `autoPace`, `read`, `collected` (Hard), `marks`
 (listed, struck with their proofs, proven, circled), `theories`, `lastSeen`, `suspected`, `doubtKind`,
 `doubtReason`, `split`, `asked`, `clashLog`, `built`, `applied`, `concluded`, `filed`, `noticed`, `drops`, `raised`,
-`seals`, `setAside`, `posed`, `notes`, `hints`, `made`, `board`, `openedSplits`, `opened`. `load` replays the
+`seals`, `setAside`, `cardNotes`, `notes`, `hints`, `made`, `board`, `openedSplits`, `opened`. `load` replays the
 reading to `read` (re-asking and rebuilding at the paragraphs they were made), reopens splits and states before the
 cards and marks that speak of them, and remakes the player's cards in order (fresh ids where a saved id is taken on
-the same model). Older saves without a field load with none; saves without options map their old difficulty names.
+the same model). Older saves without a field load with none; saves without options map their old difficulty names;
+an older save's `posed` questions and notice reasons become lines of the cards' notes.
 
 ## The solver
 
@@ -853,7 +859,7 @@ the text's inconsistencies.
 
 `npm run validate-thoughts` runs the thoughts checker (above) with the dates and the Markdown mirror, and writes
 `cases/silver-blaze/thoughts-report.md`: coverage, the notes the autoplay types, cards dealt later than the reader
-has them, notable details, questions posed, exceptions raised, checks planned, the short chains with their dates,
+has them, notable details, the reader's questions, exceptions raised, checks planned, the short chains with their dates,
 and background cards with no rule.
 
 The LLM leak checker (`checker/check.js`) checks each card text, exception (`--exceptions`) and typed note

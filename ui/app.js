@@ -7,8 +7,8 @@ import { makeReadings } from './readings.js';
 import { Hints, madeRows, hintTiers } from '../engine/hints.js';
 import { rebuildProblem } from '../engine/caseModel.js';
 import { RemoteProblem, NeedSolve, workerClient, settle } from '../engine/remoteProblem.js';
-import { makeSearch } from './search.js';
-import { Game, MEDIUM, CUSTOM, WAIT, INCREMENTAL, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES, QUESTION_TEMPLATES } from '../engine/game.js';
+import { makeSearch, CATEGORY_WORDS, num } from './search.js';
+import { Game, MEDIUM, CUSTOM, WAIT, INCREMENTAL, BG_START, BG_ASK, CONCLUSION_KINDS, OPTIONS, PLAYER_OPTIONS, READER_OPTIONS, PRESETS, DROP_REASONS, DOUBT_REASONS, CHECK_TEMPLATES } from '../engine/game.js';
 
 const CASE = 'cases/silver-blaze';
 // The autoplay plays in a save of its own, so the player's game is kept aside: `?autoplay` (or
@@ -332,8 +332,16 @@ function notePlace(n) {
 const shortText = (s, k) => (s.length > k ? `${s.slice(0, k - 1)}…` : s);
 function toolNotes() {
     const ns = game.allNotes();
-    let h = `<h3 class="section">Your notes${ns.length ? ` (${ns.length})` : ''}</h3>`;
-    if (!ns.length) return `${h}<p class="empty">No notes yet. Turn on “✎ Notes” in the header, then click in the story where a note goes, or drag over words to mark them.</p><p class="small muted">Notes are yours: the game never reads them.</p>`;
+    // The notes on cards first (each card's own box), then the notes in the story.
+    const cn = game.allCardNotes().filter((n) => game.knows(n.card));
+    let c = '';
+    if (cn.length) {
+        c = `<h3 class="section">On cards (${cn.length})</h3><ul class="list n-list">`;
+        for (const n of cn) c += `<li><div class="small muted">${link(n.card)} · ${paraLabel(n.para)}</div><div class="n-text">${esc(n.text).replace(/\n/g, '<br>')}</div></li>`;
+        c += '</ul>';
+    }
+    let h = `${c}<h3 class="section">${cn.length ? 'In the story' : 'Your notes'}${ns.length ? ` (${ns.length})` : ''}</h3>`;
+    if (!ns.length) return `${h}<p class="empty">No notes in the story yet. Turn on “✎ Notes” in the header, then click in the story where a note goes, or drag over words to mark them. Each card also has a box for a note of its own.</p><p class="small muted">Notes are yours: the game never reads them.</p>`;
     h += '<ul class="list n-list">';
     for (const n of ns) {
         h += `<li><div class="small muted">¶${n.para} · ${esc(notePlace(n))} <span class="n-tools"><span class="link" data-note-show="${n.id}">show</span> · <span class="link" data-note-edit="${n.id}">edit</span> · <span class="link" data-note-delete="${n.id}">delete</span></span></div>${n.text ? `<div class="n-text">${esc(n.text)}</div>` : '<div class="small muted">a highlight</div>'}</li>`;
@@ -379,7 +387,7 @@ function hintRungs(p) {
         const k = p.kind;
         const kind = {
             build: `An inference to build${k.steps > 1 ? ` (the first of ${k.steps} steps)` : ''}. Its conclusion is about: <i>${esc((CONCLUSION_KINDS[k.about] ?? 'what').toLowerCase())}</i>.`,
-            notice: 'Something there is odd: mark it as odd.',
+            notice: 'Something there matters: mark it as important.',
             raise: 'A step you hold may not follow: raise an exception against it.',
             drop: 'An answer can be ruled out: drop it, with a reason.',
             seal: 'A check to plan before Holmes makes it (the Checks tab).',
@@ -396,7 +404,7 @@ function hintRungs(p) {
         const answer = (slot, v) => (v === null ? 'an answer' : `“${esc(valueName(slot, v))}”`);
         const which = {
             build: () => `Connect ${andList([...new Set(cards)])}.`,
-            notice: () => `Mark ${cards[0]} as odd${cards[1] ? `, against ${cards[1]}` : ''}.`,
+            notice: () => `Mark ${cards[0]} as important.`,
             raise: () => { const e = game.knows(m.target) ? game.applicationsOf(m.target).flatMap((a) => a.exceptions).find((x) => x.id === m.exception)?.text : null; return `Against ${cards[0]}, raise${e ? `: “${esc(e)}”` : ' an exception'}.`; },
             drop: () => (m.target.theory ? `Drop the theory “${esc(game.visibleTheories().find((t) => t.id === m.target.theory)?.label ?? 'a theory')}”: ${esc(DROP_LABELS[m.reason])}.` : `Drop ${answer(m.target.slot, m.target.value)} for “${esc(game.promptOf(m.target.slot))}”: ${esc(DROP_LABELS[m.reason])}${m.reason === 'card' && cards.length ? ` (${andList([...new Set(cards)])})` : ''}.`),
             seal: () => `Plan the check ${Object.values(m.fields).every((x) => x !== null) ? checkText(m) : `on ${andList([...new Set(cards)])}`}${m.expect ? `, expecting ${esc(OUTCOME_WORDS[m.expect])}` : ''}.`,
@@ -412,7 +420,7 @@ function hintRungs(p) {
             collect: () => `click “${esc(m.words.trim())}” in ${paraLink(m.from)}`,
             ask: () => `ask what you know about ${name(m.card)}`,
             build: () => `build “${esc(cardName(m.inference))}”`,
-            notice: () => 'mark it as odd',
+            notice: () => 'mark it as important',
             raise: () => 'raise the exception',
             drop: () => 'drop it',
             seal: () => 'seal the check',
@@ -685,7 +693,7 @@ function renderTabs() {
         questions: `Questions${clashes ? ` (${clashes} clash${clashes > 1 ? 'es' : ''})` : ''}`,
     };
     label.story = `Story ¶${game.read - 1}`;
-    if (game.notes.length) label.notes = `Notes (${game.notes.length})`;
+    if (game.notes.length + game.cardNotes.size) label.notes = `Notes (${game.notes.length + game.cardNotes.size})`;
     if (!game.autoSolves()) label.record = `Record (${ui.ahead ?? 0} ahead)`;
     label.search = search.tabLabel();
     const hidden = { inferences: game.autoSolves() && !game.heldInferences().length, record: game.autoSolves(), search: game.pace !== INCREMENTAL };
@@ -711,6 +719,8 @@ function backName(b) {
 }
 function renderTool() { run(renderToolNow); }
 function renderToolNow() {
+    // A box being typed in keeps its focus through the redraw (the note on a card).
+    const typing = document.activeElement?.id === 'card-note-text' ? { start: document.activeElement.selectionStart, end: document.activeElement.selectionEnd } : null;
     if (layoutPanels()) { renderStory(); scrollStory(); }
     // The connection in progress shows above the card, or above the first tool shown.
     const bar = panelOf('card') >= 0 ? panelOf('card') : ui.panels.findIndex((p, i) => p.tab !== 'story' && shown(i));
@@ -732,6 +742,7 @@ function renderToolNow() {
     renderTabs();
     // The reading bar says whether the story is in view (on Hard, "open the story to collect").
     renderReader();
+    if (typing) { const box = $('#card-note-text'); if (box) { box.focus(); box.setSelectionRange(typing.start, typing.end); } }
     if (ui.focusSlot) {
         document.getElementById(`slot-${ui.focusSlot.replace(/\./g, '-')}`)?.scrollIntoView({ block: 'center' });
         ui.focusSlot = null;
@@ -767,6 +778,24 @@ function source(it) {
     return `${who ? `${who} — ` : ''}${esc(via)}`;
 }
 
+/**
+ * The player's marks on a card: important (the data's "noticed", scored when Holmes draws attention to it before the
+ * story does) or unimportant (out of the lists as scenery; the data's "set aside"), never both. Nothing is told back.
+ * Then the player's note on the card: free words, never read by the game.
+ */
+function markHtml(id) {
+    const c = model.cards.get(id);
+    let h = '';
+    if (['entities', 'events', 'claims'].includes(c.section)) {
+        const n = game.noticed.get(id);
+        const imp = !game.autoSolves();
+        const state = n ? `marked important at ${paraLabel(n.para)}` : game.isSetAside(id) ? `marked unimportant at ${paraLabel(game.setAsideAt.get(id))}: out of your lists, still held` : '';
+        h += `<p class="small mark-row">${imp ? `<button class="quiet${n ? ' on' : ''}" ${n ? `data-unnotice="${esc(id)}" title="Take the mark off"` : `data-notice="${esc(id)}" title="It matters: listed first among your cards"`}>★ Important</button> ` : ''}<button class="quiet${game.isSetAside(id) ? ' on' : ''}" ${game.isSetAside(id) ? `data-putback="${esc(id)}" title="Back among your cards"` : `data-setaside="${esc(id)}" title="Scenery: out of your lists; you still hold it, and can take the mark off"`}>Unimportant</button>${state ? ` <span class="muted">${state}</span>` : ''}</p>`;
+    }
+    const note = ui.cardDraft?.id === id ? ui.cardDraft.text : game.cardNote(id);
+    h += `<div class="card-note small"><textarea id="card-note-text" data-card-note-for="${esc(id)}" rows="${Math.min(8, Math.max(2, note.split('\n').length + 1))}" placeholder="Your note on this card: anything you like (the game never reads it)">${esc(note)}</textarea><button class="quiet" data-card-note="${esc(id)}">Save note</button></div>`;
+    return h;
+}
 function toolCard() {
     const id = ui.selected;
     if (!id || !game.knows(id)) return intro();
@@ -774,8 +803,8 @@ function toolCard() {
     const hideFlags = ['placeholder', 'fiction_within_story', 'implied'];
     let h = `<div class="card-head"><span class="kind">${kindOf(id)}</span>${(c.flags ?? []).filter((f) => !hideFlags.includes(f)).map((f) => `<span class="flag">${esc(f.replace(/_/g, ' '))}</span>`).join('')}`;
     if (game.isSuspected(id)) h += '<span class="flag doubted">suspected</span>';
-    if (game.noticed.has(id)) h += '<span class="flag odd">marked odd</span>';
-    if (game.isSetAside(id)) h += '<span class="flag">set aside</span>';
+    if (game.noticed.has(id)) h += '<span class="flag odd">important</span>';
+    if (game.isSetAside(id)) h += '<span class="flag">unimportant</span>';
     if (c.section === 'entities' || c.section === 'events') h += `<h2>${esc(game.nameOf(id))}</h2>`;
     else h += `<p class="desc">${esc(c.text)}</p>`;
     const names = [...new Set(story.spans.slice(0, game.read).flatMap((list, p) => list.filter((sp) => sp.kind === 'entity' && sp.ids.includes(id)).map((sp) => story.paragraphs[p].display.slice(sp.start, sp.end))))]
@@ -833,8 +862,8 @@ function toolCard() {
     });
     // Any card an inference can rest on can be connected: a clue, a background fact, an inference, an event.
     if (['claims', 'rules', 'inferences', 'events'].includes(c.section) && !game.autoSolves()) h += inferButton(id);
-    // Scenery: set it aside (it leaves your lists and costs nothing), or put it back.
-    if (['entities', 'events', 'claims'].includes(c.section)) h += `<p class="small"><button class="quiet" data-${game.isSetAside(id) ? 'putback' : 'setaside'}="${id}" title="${game.isSetAside(id) ? 'Back among your cards' : 'Out of your lists as scenery; you still hold it, and you can put it back'}">${game.isSetAside(id) ? 'Put back' : 'Set aside'}</button></p>`;
+    // The player's marks and note on the card.
+    h += markHtml(id);
     if (c.section === 'inferences') {
         const how = game.howHeld(id);
         h += `<p class="small muted">${how?.how === 'built' ? 'You built this inference' : how?.how === 'stated' ? `${esc(cardName(how.by))} drew this inference` : how?.how === 'implicit' ? 'Follows from what you hold' : 'Worked out for you'} · ${paraLabel(game.unlocked.get(id).para)}</p>`;
@@ -863,17 +892,6 @@ function toolCard() {
         }
         h += '</div>';
     }
-    // Noticing: mark a clue, a thing or an event as odd, against what one would expect. Nothing is told back.
-    if (['claims', 'entities', 'events'].includes(c.section) && !game.autoSolves()) {
-        const n = game.noticed.get(id);
-        if (n) h += `<p class="small notice on">You marked this as odd at ${paraLabel(n.para)}${n.because ? `, against: ${link(n.because)}` : ''}. <button class="quiet small" data-unnotice="${esc(id)}">Not odd after all</button></p>`;
-        else {
-            const rules = [...game.unlocked.keys()].filter((x) => model.cards.get(x)?.section === 'rules' && inHand(x));
-            h += `<p class="small notice">Does something here go against what you would expect? <select id="notice-because"><option value="">because… (optional)</option>${rules.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 60))}</option>`).join('')}</select> <button data-notice="${esc(id)}" class="quiet">That's odd</button></p>`;
-        }
-    }
-    // The player's own questions on this card: alike whether the case asks them too, until it does.
-    if (['entities', 'events'].includes(c.section) && !game.autoSolves()) h += posedOnCardHtml(id);
     // Filing an absence from the clue that would have registered it; the board offers the same form.
     if (c.section === 'claims' && !game.autoSolves()) h += `<details class="small absence-on-card"${ui.absence?.witness === id && (ui.absence.expectation || ui.absence.time) ? ' open' : ''}><summary>Should this have shown something that did not happen?</summary>${absenceFormHtml(game.timelineTimes().filter((t) => t.kind !== 'boundary'), id)}</details>`;
     if (game.canAsk(id)) {
@@ -1190,12 +1208,24 @@ function toolCards() {
         const k = c.section === 'entities' ? c.kind : c.section;
         return (!ui.kind || k === ui.kind || (ui.kind === 'new' && game.lastSeen.has(id) && game.hasNew(id)) || (ui.kind === 'unread' && !game.lastSeen.has(id))) && (!q || cardName(id).toLowerCase().includes(q));
     });
-    h += shown.length ? `<ul class="list">${shown.map((id) => {
+    // What is left to do with each card, from what the page shows anyway (never whether it matters): its questions
+    // still open, whether it has been asked about, and in incremental mode what the search still has to try with it.
+    const per = search.active() ? search.perCard() : null;
+    const row = (id) => {
         const open = game.slotsOn(id).filter((s) => game.settled(s.id) === null).length;
-        return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id)}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${open ? ` <span class="small muted">· ${open} open</span>` : ''}</li>`;
-    }).join('')}</ul>` : `<p class="empty">${game.collecting() ? 'No cards yet. Click the words in the story that mention someone or something.' : 'No cards yet. Start reading.'}</p>`;
+        const left = [
+            open ? `${open} open` : '',
+            game.canAsk(id) && !game.hasAsked(id) ? 'not asked' : '',
+            per?.get(id)?.left ? `<span title="${esc(Object.entries(per.get(id).cats).map(([k, n]) => `${CATEGORY_WORDS[k][0]}: ${num(n)}`).join('\n'))}">search: ${num(per.get(id).left)} to try</span>` : '',
+        ].filter(Boolean);
+        return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id)}${game.cardNote(id) ? ' <span class="note-mark" title="Your note on it">✎</span>' : ''}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${left.length ? ` <span class="small muted">· ${left.join(' · ')}</span>` : ''}</li>`;
+    };
+    const important = shown.filter((id) => game.noticed.has(id));
+    const rest = shown.filter((id) => !game.noticed.has(id));
+    if (important.length) h += `<details class="important-cards" open><summary class="small">★ Important (${important.length})</summary><ul class="list">${important.map(row).join('')}</ul></details>`;
+    h += rest.length ? `<ul class="list">${rest.map(row).join('')}</ul>` : important.length ? '' : `<p class="empty">${game.collecting() ? 'No cards yet. Click the words in the story that mention someone or something.' : 'No cards yet. Start reading.'}</p>`;
     const aside = game.setAsideCards();
-    if (aside.length) h += `<details class="set-aside"><summary class="small muted">Set aside (${aside.length})</summary><ul class="list">${aside.map((id) => `<li><span class="kind">${kindOf(id)}</span>${link(id)} <button class="quiet small" data-putback="${id}">Put back</button></li>`).join('')}</ul></details>`;
+    if (aside.length) h += `<details class="set-aside"><summary class="small muted">Unimportant (${aside.length})</summary><ul class="list">${aside.map((id) => `<li><span class="kind">${kindOf(id)}</span>${link(id)} <button class="quiet small" data-putback="${id}" title="Back among your cards">Not unimportant</button></li>`).join('')}</ul></details>`;
     return h;
 }
 
@@ -1248,7 +1278,6 @@ function toolQuestions() {
         }
         d += '</ul>';
     }
-    d += posedListHtml();
     d += oddThingsHtml();
     d += signalsHtml();
     d += heldBackHtml();
@@ -1266,59 +1295,13 @@ function toolQuestions() {
     return `${h}</ul>${d}`;
 }
 
-// ---------- the player's own questions ----------
-const poseKind = (id) => (model.cards.get(id).section === 'events' ? 'events' : model.cards.get(id).kind);
-/** Held cards of the kinds a template's place takes, by name. */
-function heldOfKinds(kinds) {
-    return [...game.unlocked.keys()].filter((x) => ['entities', 'events'].includes(model.cards.get(x)?.section) && kinds.includes(poseKind(x)) && inHand(x)).sort((a, b) => cardName(a).localeCompare(cardName(b)));
-}
-/** A template's words with this card in its first place and "…" in its second. */
-function templateLabel(t, id) {
-    const name = cardName(id);
-    return t.text.replace('{0}', model.cards.get(id).section === 'entities' ? name.replace(/^(The|A|An) /, (a) => a.toLowerCase()) : name).replace('{1}', '…');
-}
-/** One of the player's questions: its words, then its candidates (before the join) or the story's question (after). */
-function posedHtml(q) {
-    let h = `<div class="slot posed"><div class="slot-head"><b>${esc(q.text)}</b><span class="state">${q.joined ? 'the story asks it too' : `yours, asked at ${paraLabel(q.para)}`}</span></div>`;
-    if (q.joined) {
-        h += `<div class="small"><span class="link" data-slot-open="${q.joined.slot}">${esc(game.promptOf(q.joined.slot))}</span>${q.joined.para > q.para ? ` <span class="muted">· raised at ${paraLabel(q.joined.para)}; you asked it at ${paraLabel(q.para)}</span>` : ''}</div>`;
-    } else {
-        const chips = q.candidates.map((c) => `<span class="chip">${esc(cardName(c))} <span class="link" data-pose-uncand="${q.id}|${esc(c)}" title="Take it off">×</span></span>`);
-        const opts = heldOfKinds(['person', 'animal', 'object', 'document', 'place', 'group']).filter((x) => !q.candidates.includes(x) && !q.cards.includes(x));
-        h += `<div class="chips">${chips.join('') || '<span class="empty">no candidates of your own yet</span>'}</div>`;
-        h += `<div class="small">Candidates: <select id="pose-cand-${q.id.replace('.', '-')}"><option value="">a card you hold…</option>${opts.map((x) => `<option value="${esc(x)}">${esc(shortName(x, 50))}</option>`).join('')}</select> <button class="quiet" data-pose-cand="${q.id}">Add</button> · <span class="link" data-unpose="${q.id}">withdraw the question</span></div>`;
-    }
-    return `${h}</div>`;
-}
-/** On a card: the player's questions that name it, and the form to ask one about it. */
-function posedOnCardHtml(id) {
-    const mine = game.posedQuestions().filter((q) => q.cards.includes(id));
-    let h = mine.length ? `<h3 class="section">Your questions (${mine.length})</h3>${mine.map(posedHtml).join('')}` : '';
-    const fits = Object.entries(QUESTION_TEMPLATES).filter(([, t]) => t.cards[0].includes(poseKind(id)));
-    if (!fits.length) return h;
-    const sel = fits.some(([k]) => k === ui.poseTemplate) ? ui.poseTemplate : fits[0][0];
-    const t = QUESTION_TEMPLATES[sel];
-    const second = t.cards.length > 1 ? ` <select id="pose-second"><option value="">${t.cards[1].includes('events') ? 'what happened…' : t.cards[1].includes('place') ? 'where…' : 'what…'}</option>${heldOfKinds(t.cards[1]).filter((x) => x !== id).map((x) => `<option value="${esc(x)}">${esc(shortName(x, 50))}</option>`).join('')}</select>` : '';
-    h += `<p class="small pose">Ask your own question: <select id="pose-template">${fits.map(([k, x]) => `<option value="${k}"${k === sel ? ' selected' : ''}>${esc(templateLabel(x, id))}</option>`).join('')}</select>${second} <button class="quiet" data-pose="${esc(id)}">Ask</button></p>`;
-    return h;
-}
-/** The Questions tab: every question the player asked, newest first. */
-function posedListHtml() {
-    if (game.autoSolves()) return '';
-    const list = game.posedQuestions().reverse();
-    if (!list.length) return '';
-    let h = '<h3 class="section">Your questions</h3><p class="small muted">Questions you asked yourself. The game checks nothing on them; when the story asks the same question, yours joins it.</p><ul class="list">';
-    for (const q of list) h += `<li class="q"><span>${q.joined ? `<span class="link" data-slot-open="${q.joined.slot}">${esc(q.text)}</span>` : `<span class="link" data-card="${esc(q.cards[0])}">${esc(q.text)}</span>`}</span><span class="state ${q.joined ? 'done' : ''}">${q.joined ? 'the story asks it too' : `${paraLabel(q.para)}${q.candidates.length ? ` · ${q.candidates.map((c) => esc(cardName(c))).join(', ')}` : ''}`}</span></li>`;
-    return `${h}</ul>`;
-}
-
-/** The details the player marked as odd, and the absences they filed. */
+/** The details the player marked as important, and the absences they filed. */
 function oddThingsHtml() {
     const noticed = [...game.noticed].filter(([id]) => game.knows(id));
     const filed = game.filed.filter((f) => game.knows(f.id));
     if (!noticed.length && !filed.length) return '';
-    let h = '<h3 class="section">Odd things</h3><ul class="list">';
-    for (const [id, n] of noticed) h += `<li>${link(id)} <span class="small muted">· ${paraLabel(n.para)}${n.because ? ` · against ${esc(shortName(n.because, 50))}` : ''}</span> <span class="link small" data-unnotice="${esc(id)}">not odd</span></li>`;
+    let h = '<h3 class="section">Marked important, and what did not happen</h3><ul class="list">';
+    for (const [id, n] of noticed) h += `<li>${link(id)} <span class="small muted">· ${paraLabel(n.para)}</span> <span class="link small" data-unnotice="${esc(id)}">not important</span></li>`;
     for (const f of filed) h += `<li>${link(f.id)} <span class="small muted">· what did not happen, filed at ${paraLabel(f.para)}</span></li>`;
     return `${h}</ul>`;
 }
@@ -1412,7 +1395,7 @@ function toolTheories() {
 // templates around held cards and paragraph numbers: never the annotation's own words.
 const FAMILY_WORDS = {
     deduction: ['Deductions', 'steps Holmes has made'],
-    notice: ['Odd details', 'details Holmes has drawn attention to'],
+    notice: ['Important details', 'details Holmes has drawn attention to'],
     raise: ['Steps seen through', 'steps Holmes has taken apart'],
     drop: ['Wrong turns dropped', 'wrong turns the story has left behind'],
     check: ['Checks planned', 'checks Holmes has made'],
@@ -1437,7 +1420,7 @@ function recordLine(r) {
     // Made but not counted: a drop whose reason did not hold, a check expected both ways.
     if (r.why === 'reason') return `${what}. You dropped it at ${paraLabel(r.at)}, but the reason you gave did not hold, so it does not count.`;
     if (r.why === 'hedged') return `${what}. You planned it at ${paraLabel(seal.para)}, but expecting more than one result, so it does not count.`;
-    const done = { deduction: 'You had it', notice: 'You marked it odd', raise: 'You raised it', drop: 'You dropped it', check: 'You planned it', absence: 'You filed it' }[r.family];
+    const done = { deduction: 'You had it', notice: 'You marked it important', raise: 'You raised it', drop: 'You dropped it', check: 'You planned it', absence: 'You filed it' }[r.family];
     const before = r.family === 'drop' ? 'before the story did' : 'before him';
     return `${what}. ${done} at ${paraLabel(r.at)}: ${r.lead} paragraph${r.lead === 1 ? '' : 's'} ${before}.`;
 }
@@ -1459,7 +1442,7 @@ function catchUpText(r) {
         return null;
     }).filter(Boolean);
     const parts = [...cards, ...new Set(kinds)];
-    const verb = { deduction: 'had it', notice: 'marked it odd', raise: 'raised it', drop: 'dropped it', check: 'planned it', absence: 'filed it' }[r.family];
+    const verb = { deduction: 'had it', notice: 'marked it important', raise: 'raised it', drop: 'dropped it', check: 'planned it', absence: 'filed it' }[r.family];
     return ` You could have ${verb} from <span class="link" data-goto="${c.para}">${paraLabel(c.para)}</span>${parts.length ? `, from ${andList(parts)}` : ''}.`;
 }
 /** On the reading bar: the rows whose deadline fell in the paragraphs just read: scored, not counted, or missed. */
@@ -1467,11 +1450,7 @@ function recordNews() {
     if (game.autoSolves() || ui.readFrom == null) return '';
     const from = ui.readFrom - 1;
     const rows = piece(`news:${from}:${game.read}`, () => game.record().rows.filter((r) => r.deadline >= from && r.deadline < game.read), []);
-    const asked = piece(`news-q:${from}:${game.read}`, () => game.record().questions.filter((q) => q.deadline >= from && q.deadline < game.read), []);
-    return once([
-        ...rows.map((r) => `<div class="note record-news">${paraLabel(r.deadline)} · ${recordLine(r)}</div>`),
-        ...asked.map((q) => `<div class="note record-news">${paraLabel(q.deadline)} · The story asks here: <span class="link" data-slot-open="${q.slot}">${esc(game.promptOf(q.slot))}</span> You asked it at ${paraLabel(q.at)}.</div>`),
-    ]).join('');
+    return once(rows.map((r) => `<div class="note record-news">${paraLabel(r.deadline)} · ${recordLine(r)}</div>`)).join('');
 }
 function toolRecord() {
     if (game.autoSolves()) return '<h3 class="section">Your record against Holmes</h3><p class="small muted">In Trivial the game works the case out: nothing is scored. On Easy you can race Holmes.</p>';
@@ -1498,8 +1477,6 @@ function toolRecord() {
     // At the end, the rows missed: where the player could have been first.
     const missed = game.finished() ? once(rec.rows.filter((r) => !r.scores && !r.why).map((r) => `<li>${paraLabel(r.deadline)} · ${recordLine(r)}</li>`)) : [];
     if (missed.length) h += `<h3 class="section">Where you could have been first (${missed.length})</h3><ul class="list small">${missed.join('')}</ul>`;
-    // The player's own questions the story asked after them: shown, never counted.
-    if (rec.questions.length) h += `<h3 class="section">Questions you asked before the story (${rec.questions.length})</h3><p class="small muted">Not counted: a question can be asked of anything.</p><ul class="list small">${[...rec.questions].reverse().map((q) => `<li>${paraLabel(q.deadline)} · <span class="link" data-slot-open="${q.slot}">${esc(game.promptOf(q.slot))}</span> You asked it at ${paraLabel(q.at)}: ${q.lead} ${q.lead === 1 ? 'paragraph' : 'paragraphs'} before.</li>`).join('')}</ul>`;
     if (game.finished()) h += heldBackHtml();
     return h;
 }
@@ -2191,6 +2168,8 @@ function onClick(e) {
         changed();
         return;
     }
+    const noteBtn = e.target.closest('[data-card-note]');
+    if (noteBtn) { saveCardNote(noteBtn.dataset.cardNote); return; }
     const aside = e.target.closest('[data-setaside]');
     if (aside) { game.setAside(aside.dataset.setaside); changed(); return; }
     const back = e.target.closest('[data-putback]');
@@ -2242,7 +2221,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],[data-pose],[data-pose-cand],[data-pose-uncand],[data-unpose],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-notice],[data-unnotice],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { choose(fromPanel(e), t.dataset.tab); renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card, fromPanel(e)); return; }
@@ -2275,29 +2254,12 @@ function onClick(e) {
         return;
     }
     if (t.dataset.notice) {
-        const res = game.notice(t.dataset.notice, $('#notice-because')?.value || null);
+        const res = game.notice(t.dataset.notice);
         if (!res.ok) toast(esc(res.reason));
         changed();
         return;
     }
     if (t.dataset.unnotice) { game.unnotice(t.dataset.unnotice); changed(); return; }
-    if (t.dataset.pose) {
-        const tpl = $('#pose-template')?.value;
-        const cards = [t.dataset.pose, ...(QUESTION_TEMPLATES[tpl]?.cards.length > 1 ? [$('#pose-second')?.value] : [])];
-        if (cards.some((x) => !x)) { toast('Choose what the question is about.'); return; }
-        const res = game.pose(tpl, cards);
-        if (!res.ok) toast(esc(res.reason));
-        else if (res.again) toast('You have asked that already.');
-        changed();
-        return;
-    }
-    if (t.dataset.poseCand) {
-        const card = $(`#pose-cand-${t.dataset.poseCand.replace('.', '-')}`)?.value;
-        if (card) { game.poseCandidate(t.dataset.poseCand, card); changed(); }
-        return;
-    }
-    if (t.dataset.poseUncand) { const [q, card] = t.dataset.poseUncand.split('|'); game.poseCandidate(q, card, false); changed(); return; }
-    if (t.dataset.unpose) { game.unpose(t.dataset.unpose); changed(); return; }
     if (t.dataset.raise) {
         const [id, n, x] = t.dataset.raise.split('|');
         const res = game.raise(id, Number(n), x);
@@ -2496,6 +2458,18 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { e.preventDefault(); ui.noteEdit = null; run(renderStory); }
 });
 document.addEventListener('input', (e) => { if (e.target.id === 'note-text' && ui.noteEdit) ui.noteEdit.text = noteText(); });
+// The note on a card being written: kept through a redraw (incremental mode redraws as its search finds things).
+document.addEventListener('input', (e) => { if (e.target.id === 'card-note-text') ui.cardDraft = { id: e.target.dataset.cardNoteFor, text: e.target.value }; });
+/** Keep the note on a card as written (Save note, or leaving the box). */
+function saveCardNote(id) {
+    const el = $('#card-note-text');
+    const text = el?.dataset.cardNoteFor === id ? el.value : ui.cardDraft?.id === id ? ui.cardDraft.text : null;
+    if (ui.cardDraft?.id === id) ui.cardDraft = null;
+    if (text === null || text.trim() === game.cardNote(id)) return;
+    const res = game.setCardNote(id, text);
+    if (!res.ok) toast(esc(res.reason));
+    changed();
+}
 document.addEventListener('focusout', (e) => {
     if (e.target.id !== 'note-text') return;
     const was = ui.noteEdit;
@@ -2514,6 +2488,7 @@ function readPlan() {
     f.theory = $('#plan-theory')?.value ?? '';
 }
 function onChange(e) {
+    if (e.target.id === 'card-note-text') { saveCardNote(e.target.dataset.cardNoteFor); return; }
     if (e.target.id?.startsWith('plan-')) {
         if (e.target.id === 'plan-verb') ui.plan = { verb: e.target.value, fields: {}, expect: '', slot: '', value: '', theory: '' };
         else readPlan();
@@ -2529,7 +2504,6 @@ function onChange(e) {
     if (e.target.id === 'search-delay') { ui.searchDelay = Math.max(0, Number(e.target.value) || 0); e.target.value = ui.searchDelay; saveLayout(); drawSearch(); return; }
     if (e.target.id === 'hint-cooldown') { ui.hintCooldown = Math.max(0, Math.round(Number(e.target.value)) || 0); e.target.value = ui.hintCooldown; saveLayout(); renderReader(); return; }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
-    if (e.target.id === 'pose-template') { ui.poseTemplate = e.target.value; renderTool(); return; }
     if (e.target.id === 'layer-pick') { ui.layer = e.target.value; ui.layerFit = null; renderTool(); return; }
     if (e.target.id === 'doubt-reason') { game.setDoubtReason(e.target.dataset.reasonFor, e.target.value || null); changed(); return; }
     if (e.target.id === 'build-kind') { ui.building.kind = e.target.value || null; runPropose(); return; }

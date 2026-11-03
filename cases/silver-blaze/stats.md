@@ -53,15 +53,15 @@ the maximum, each made as late as its deadlines allow (`action-table-minimal.jso
 | Collect (words clicked) | 151 | 73 |
 | Ask what I know | 123 | 10 |
 | Build an inference | 52 | 37 |
-| Mark as odd | 11 | 7 |
+| Mark as important | 11 | 7 |
 | Raise an exception | 5 | 3 |
 | Seal a check | 11 | 7 |
 | File what did not happen | 2 | 1 |
 | Drop a wrong turn | 3 | 3 |
 | Hold a theory | 1 | 1 |
 | Propose an answer | 17 | 2 |
-| Ask my own question | 10 | 0 |
-| Set aside | 5 | 0 |
+| Write a note on a card | 10 | 0 |
+| Mark as unimportant | 5 | 0 |
 | Split a statement | 1 | 0 |
 | Doubt | 1 | 0 |
 | Weigh a theory | 1 | 0 |
@@ -83,10 +83,10 @@ in view, the story's words) and reads by Next scene and Next deduction; it count
 | words clicked | 151 | 73 |
 | card opened from a list | 380 | 187 |
 | button pressed | 391 | 207 |
-| menu chosen | 118 | 75 |
-| typed | 26 | 11 |
+| menu chosen | 104 | 73 |
+| typed | 36 | 11 |
 | tab chosen | 14 | 9 |
-| **Steps** | **1,080** | **562** |
+| **Steps** | **1,076** | **560** |
 
 ## The hints
 

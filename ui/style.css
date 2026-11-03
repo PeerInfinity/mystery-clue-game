@@ -238,9 +238,14 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .doubt button { margin-left: 6px; }
 .unless { margin: 8px 0; padding: 4px 0 4px 10px; border-left: 2px solid var(--line); }
 .flag.doubted { color: var(--bad); }
-.notice { font-size: 13px; color: var(--muted); margin: 8px 0; }
-.notice select { max-width: 14em; }
-.notice.on, .flag.odd { color: var(--accent, #8a5a00); }
+/* The player's marks on a card (important, unimportant) and the note on it (markHtml in ui/app.js). */
+.mark-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0; }
+.mark-row button.on { border-color: var(--accent, #8a5a00); color: var(--accent, #8a5a00); font-weight: 600; }
+.flag.odd { color: var(--accent, #8a5a00); }
+.card-note { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin: 8px 0; }
+.card-note textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); resize: vertical; }
+.note-mark { color: var(--accent, #8a5a00); }
+.important-cards > summary { font-weight: 600; margin: 6px 0 2px; cursor: pointer; }
 .absence { margin-top: 6px; }
 .small.bad, div.bad { color: var(--bad); }
 

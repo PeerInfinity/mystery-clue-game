@@ -51,11 +51,11 @@ export function make(g, model, m) {
         }
         case 'ask': if (!g.canAsk(m.card) || g.hasAsked(m.card)) return false; g.ask(m.card); return true;
         case 'build': g.propose(m.cards, m.about); return g.knows(m.inference);
-        case 'notice': return g.notice(m.card, m.because).ok !== false;
+        case 'notice': return g.notice(m.card).ok !== false;
         case 'raise': return g.raise(m.target, m.n, m.exception).ok !== false;
         case 'seal': return !!g.seal(m.verb, m.fields, { expect: m.expect, answer: m.answer }).ok;
         case 'file': return !!g.fileAbsence(m.expectation, m.time, m.witness).ok;
-        case 'pose': return g.pose(m.template, m.cards).ok !== false;
+        case 'cardNote': return g.setCardNote(m.card, m.text).ok;
         case 'setAside': return g.setAside(m.card) !== false;
         case 'split': return !!g.splitClaim(m.card).ok;
         case 'doubt': { const ok = !!g.suspect(m.card); g.setDoubtReason(m.card, m.reason); return ok; }

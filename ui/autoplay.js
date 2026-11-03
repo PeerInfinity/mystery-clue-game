@@ -22,12 +22,12 @@ const CAPTIONS = {
     collect: (m) => `Collecting: “${(m.words ?? '').trim()}”`,
     ask: () => 'Asking what I know about it',
     build: (m) => `Building an inference${m.cards?.length ? ` from ${m.cards.length} cards` : ''}`,
-    notice: () => 'Marking it as odd',
+    notice: () => 'Marking it as important',
     raise: () => 'Raising an exception to a step',
     seal: () => 'Planning a check',
     file: () => 'Filing what did not happen',
-    pose: () => 'Asking my own question',
-    setAside: () => 'Setting it aside',
+    cardNote: () => 'Writing a note on the card',
+    setAside: () => 'Marking it as unimportant',
     split: () => 'Splitting a statement into what was seen and what was concluded',
     doubt: () => 'Doubting it',
     candidate: () => 'Proposing an answer',
@@ -407,6 +407,9 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
             const e = $(u.fill);
             if (!e) return `no field ${u.fill}`;
             await type(e, String(u.value));
+            // Done with the field, as a player moves on: a synthetic click moves no focus, and a field left focused
+            // keeps it through the page's redraws (the note on a card), away from the notes written in the story.
+            e.blur();
             return true;
         }
         if (u.propose) {
@@ -438,7 +441,7 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
             case 'raise': return (g.raised ?? []).some((r) => r[0] === m.target && r[2] === m.exception);
             case 'seal': return (g.seals ?? []).some((x) => x.verb === m.verb && JSON.stringify(x.fields) === JSON.stringify(m.fields) && (x.expect ?? null) === (m.expect ?? null) && JSON.stringify(x.answer ?? null) === JSON.stringify(m.answer ?? null));
             case 'file': return has(g.filed, m.absence);
-            case 'pose': return (g.posed ?? []).some((q) => q[1] === m.template && JSON.stringify(q[2]) === JSON.stringify(m.cards));
+            case 'cardNote': return (g.cardNotes ?? []).some(([id, , text]) => id === m.card && text === m.text);
             case 'setAside': return has(g.setAside, m.card);
             case 'split': return has(g.split, m.card);
             case 'doubt': return (g.suspected ?? []).includes(m.card) && (g.doubtReason ?? []).some(([id, r]) => id === m.card && r === m.reason);

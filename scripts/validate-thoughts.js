@@ -64,24 +64,20 @@ if (r.dateGaps.length) {
     } else out.push('None.');
 }
 {
-    // The player's own questions: each QUESTION thought's template, posed at its
-    // paragraph by a reader who only reads on (Easy), and where it joins the story's question (if it matches one).
+    // The careful reader's own questions: each QUESTION thought's template, in the words a reader who only reads on
+    // (Easy) has for its cards at the thought's paragraph. The autoplay writes it as a note on the first card.
     const rows = data.thoughts.filter((t) => t.asks);
     const { Game: G } = await import('../engine/game.js');
     const game = new G(model, { difficulty: 'easy' });
-    const ids = new Map();
+    const texts = new Map();
     while (!game.finished()) {
         game.advance();
-        for (const t of rows) if (t.para === game.read - 1) ids.set(t.id, game.pose(t.asks.template, t.asks.cards).id ?? null);
+        for (const t of rows) if (t.para === game.read - 1 && t.asks.cards.every((x) => game.knows(x))) texts.set(t.id, game.askedText(t.asks.template, t.asks.cards));
     }
-    const byId = new Map(game.posedQuestions().map((q) => [q.id, q]));
-    out.push('', '## Questions posed', '', 'QUESTION thoughts with the question the player can pose (`asks`), posed at the thought\'s paragraph by a reader who only reads on (Easy), and where it joins the story\'s question. One that matches no slot stays the player\'s note; joining later than it was asked is recorded, never scored.', '');
+    out.push('', '## Questions asked', '', 'QUESTION thoughts with the question the careful reader asks (`asks`), in the words a reader who only reads on (Easy) has at the thought\'s paragraph. The page has no question form: the autoplay writes the question as a note on the first card. Never scored.', '');
     if (rows.length) {
-        out.push('| Thought | Question | Reader | Joins |', '|---|---|---|---|');
-        for (const t of rows) {
-            const q = byId.get(ids.get(t.id));
-            out.push(`| \`${t.id}\` | ${q ? q.text : '(could not be posed)'} | ¶${t.para} | ${q?.joined ? `\`${q.joined.slot}\` at ¶${q.joined.para}` : '—'} |`);
-        }
+        out.push('| Thought | Question | Reader |', '|---|---|---|');
+        for (const t of rows) out.push(`| \`${t.id}\` | ${texts.get(t.id) ?? '(cards not held)'} | ¶${t.para} |`);
     } else out.push('None.');
 }
 {

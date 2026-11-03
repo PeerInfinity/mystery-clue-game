@@ -315,6 +315,26 @@ under way.
   check), nothing moving up over eight checks, the log keeping its place, pause, a wait lifted at 0 s, reading by
   itself past ¶110, a reload, no console error.
 
+**Simplifications (2026-11-02, the user's asks, after the alternatives were laid out; the user took the
+recommendations).**
+
+- **"Mark as odd" and "Set aside" are now *important* and *unimportant*** on the page (the engine keeps `notice` and
+  `setAside`, the saves and the action tables their names). They exclude each other: one mark of three states. The
+  record's family reads *Important details*; the theories still weigh the *odd things* left unexplained, because that
+  speaks of the case's puzzles, not of the mark. The rename also ends a clash of words: the game's own clash weighing
+  "sets aside" a card, which is a different thing.
+- **Important cards are listed first** in the Cards tab (open), the unimportant folded at the bottom.
+- **The Cards list says what is left with each card**, from what the page shows anyway and never whether a card
+  matters: its open questions, *not asked*, a ✎ for a note, and in incremental mode the combinations the search still
+  has to try with it (`Automation.perCard()`, by the same rules as the counts). A "still matters" list was rejected as
+  a spoiler (it would run ahead of the story); the hints already give that a rung at a time.
+- **The "because…" of a notice and the question form went for one free note per card** (`setCardNote`). Neither was
+  ever scored: the reason was only stored and shown, a question only joined the story's when the story asked it (the
+  record showed the lead, never counted it; its candidates became circles). The careful reader's 10 questions are now
+  `cardNote` moves of the action table (the question's words written as the note); an older save's questions and
+  reasons load as lines of the notes. Card notes show on the card, in the Notes tab beside the story notes, and as ✎.
+  In incremental mode the note box keeps its words and focus through the search's redraws.
+
 Not yet done: the hedge of a sealed check made plain on the page (the search itself never hedges: no expectation
 first, a seal kept only if a wait lifts).
 
@@ -426,6 +446,10 @@ From the redesign discussion and the later papers; any of them may be worth revi
 - **Freestyle formulas** for power users, run without comparing to an authored one.
 
 ## 4. Known limitations
+
+- **The autoplay check misses 7 story notes** (`node scripts/autoplay-check.mjs`: 369 notes of 376; `t4.2`, `t35.7`,
+  `t35.8`, `t35.10`, `t36.2`, `t57.3`, `t114.2`). Found 2026-11-02; it fails the same way at `cf3e6ab`, before the
+  Search tab, so it is older than incremental mode's page. The record (70, every family) passes. Not yet traced.
 
 - **Two rows can never score**, so the Hard maximum is 70 of 72: `t127.4` (the square toes are disclosed only at
   Holmes's own ¶146) and `t36.2` (its background fact is offered only at ¶218). `t212.1` and `t214.1` are never

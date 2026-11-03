@@ -92,7 +92,7 @@ async function took(m) {
         case 'raise': return (s.raised ?? []).some((r) => r[0] === m.target && r[2] === m.exception);
         case 'seal': return (s.seals ?? []).some((x) => x.verb === m.verb && JSON.stringify(x.fields) === JSON.stringify(m.fields) && (x.expect ?? null) === (m.expect ?? null) && JSON.stringify(x.answer ?? null) === JSON.stringify(m.answer ?? null));
         case 'file': return has(s.filed, m.absence);
-        case 'pose': return (s.posed ?? []).some((q) => q[1] === m.template && JSON.stringify(q[2]) === JSON.stringify(m.cards));
+        case 'cardNote': return (s.cardNotes ?? []).some(([id, , text]) => id === m.card && text === m.text);
         case 'setAside': return has(s.setAside, m.card);
         case 'split': return has(s.split, m.card);
         case 'doubt': return (s.suspected ?? []).includes(m.card) && (s.doubtReason ?? []).some(([id, r]) => id === m.card && r === m.reason);

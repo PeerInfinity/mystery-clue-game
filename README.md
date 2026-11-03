@@ -33,8 +33,8 @@ which clues arrive as items, are collected in [`docs/ideas.md`](docs/ideas.md) (
 
 - **Four difficulties** (Trivial, Easy, Medium, Hard) and a custom mix, and a pace that can wait for you at each
   of the detective's deductions.
-- **Theories, checks and your own questions**: weigh the possible stories of the crime, seal a prediction before
-  the detective acts, ask the questions a reader asks.
+- **Theories and checks**: weigh the possible stories of the crime, and seal a prediction before the detective acts.
+- **Your own marks and notes**: mark a card important or unimportant, and write a note on any card.
 - **The record**: how many of the detective's steps you made first, shown as the story reaches each one.
 - **Hints** on request, in four steps from a nudge to making the move for you.
 - **Notes and highlights** written into the story.

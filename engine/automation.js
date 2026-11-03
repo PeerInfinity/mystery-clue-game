@@ -10,7 +10,7 @@
 // The searches (one generator per category, yielding the checks it plans):
 //   collect, ask  every span read, every card that can be asked about (lookups; run first, they feed the rest)
 //   build         sets grown card by card while "onto something" (propose); a complete set tries the kinds (Hard)
-//   notice        each held card marked odd, kept only if a wait lifts
+//   notice        each held card marked important (odd, in the data), kept only if a wait lifts
 //   raise         each exception open against a held card, kept only if a wait lifts
 //   check         a sealed check part by part (sealOnto: the verb, each field, the pair, the question of an expected
 //                 answer), then the expectation (none first: it never hedges) and the answer's value, kept if a wait lifts
@@ -269,7 +269,10 @@ export class Automation {
     }
     *notice() {
         for (const x of this.order(this.#held().filter((c) => !this.g.noticed.has(c)))) {
-            if (yield* this.#try('notice', x, `mark ${this.#card(x)} as odd`, () => this.g.notice(x), (res) => res.lifts > 0, () => this.g.unnotice(x))) return 'changed';
+            // Marking important takes a card out of the unimportant ones: undone, it goes back there.
+            const aside = this.g.setAsideAt.get(x);
+            const undo = () => { this.g.unnotice(x); if (aside !== undefined) this.g.setAside(x, aside); };
+            if (yield* this.#try('notice', x, `mark ${this.#card(x)} as important`, () => this.g.notice(x), (res) => res.lifts > 0, undo)) return 'changed';
         }
         return null;
     }
@@ -546,6 +549,49 @@ export class Automation {
      * Per category: {terms: [{label, factors: [{label, n}]}], total (Σ of the terms' products), checked, found, ruledOut
      * (of the space as it stands, known not to make anything now), stale (negatives to check again), searched}.
      */
+    /**
+     * Per card held, what the search still has to try with it, by the same rules as counts() (a negative not stale
+     * rules out every combination it is part of): → Map card → {left, cats: {category: n}}. Collect, drops and answers
+     * are not per card.
+     */
+    perCard() {
+        const g = this.g;
+        const held = this.#held();
+        const live = (cat, k) => this.neg[cat].has(k) && !this.stale[cat].has(k);
+        const out = new Map(held.map((x) => [x, { left: 0, cats: {} }]));
+        const add = (x, cat, n) => { const o = out.get(x); if (!o || !n) return; o.cats[cat] = (o.cats[cat] ?? 0) + n; o.left += n; };
+        for (const x of held) {
+            if (g.canAsk(x) && !g.hasAsked(x)) add(x, 'ask', 1);
+            if (!g.noticed.has(x) && !live('notice', x)) add(x, 'notice', 1);
+            for (const e of g.exceptionsOf(x)) { const k = `${x}#${e.n}:${e.id}`; if (!g.raised.has(k) && !live('raise', k)) add(x, 'raise', 1); }
+        }
+        // Builds: the sets with the card none of whose cards is ruled out alone, × the kinds.
+        const pool = held.filter((x) => POOL.includes(this.#sec(x)));
+        const out1 = new Set(pool.filter((x) => live('build', x)));
+        const kinds = Object.keys(CONCLUSION_KINDS).length;
+        const free = pool.length - out1.size;
+        let sets = 0;
+        for (let k = 1; k <= MAX_SET; k++) sets += choose(free - 1, k - 1);
+        for (const x of pool) if (!out1.has(x)) add(x, 'build', sets * kinds);
+        // Sealed checks: for each verb and field the card can fill, the other field's cards not ruled out × the results.
+        for (const [verb, t] of Object.entries(CHECK_TEMPLATES)) {
+            if (live('check', `v|${verb}`)) continue;
+            const [f1, f2] = t.fields;
+            const e = t.outcomes.length + 1;
+            const open = (f) => this.#fieldList(f).filter((c) => !live('check', `f|${verb}|${f}|${c}`));
+            const a = open(f1), b = open(f2);
+            for (const x of a) add(x, 'check', b.length * e);
+            for (const x of b) add(x, 'check', a.length * e);
+        }
+        // Absences: a fact or a statement not ruled out, × the times and the other part not ruled out.
+        const facts = held.filter((x) => this.#sec(x) === 'rules' && !live('absence', `e|${x}`));
+        const stmts = held.filter((x) => this.#sec(x) === 'claims' && !live('absence', `w|${x}`));
+        const times = this.#times().filter((t) => !live('absence', `t|${t.id}`)).length;
+        for (const x of facts) add(x, 'absence', times * stmts.length);
+        for (const x of stmts) add(x, 'absence', times * facts.length);
+        return out;
+    }
+
     counts() {
         const g = this.g;
         const held = this.#held();

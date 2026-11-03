@@ -42,7 +42,7 @@ check('played to the end', !!st?.done && !st?.failed, st?.failed ?? `${st?.moves
 if (MINIMAL) check('every move of the table made', st?.moves + st?.had === table.moves, `${st?.moves} made, ${st?.had} made already by another, of ${table.moves}`);
 const ahead = (await p.text('#progress'))?.match(/Ahead of Holmes: (\d+)/)?.[1];
 check('70 ahead of Holmes', String(table.ahead) === '70' && ahead === '70', `the page: ${ahead ?? 'not found'}; the table: ${table.ahead}`);
-const LABELS = { deduction: 'Deductions', notice: 'Odd details', raise: 'Steps seen through', drop: 'Wrong turns dropped', check: 'Checks planned', absence: 'What did not happen' };
+const LABELS = { deduction: 'Deductions', notice: 'Important details', raise: 'Steps seen through', drop: 'Wrong turns dropped', check: 'Checks planned', absence: 'What did not happen' };
 for (const [fam, f] of Object.entries(table.families)) check(`${LABELS[fam]}: ${f.scored} of ${f.possible}`, (record ?? '').includes(`${LABELS[fam]}: ${f.scored} of ${f.possible}`));
 // The notes: one per clause read, and one for a note with no clause (the highlights and notes it wrote).
 const want = MINIMAL ? 0 : thoughts.reduce((n, t) => n + Math.max((t.reads ?? []).length, (t.typed ?? t.text) ? 1 : 0), 0);

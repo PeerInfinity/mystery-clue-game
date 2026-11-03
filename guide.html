@@ -136,7 +136,7 @@ has disappeared and its trainer has been found dead, or they are made up.</p>
     <li><a href="#ruling">Ruling out and proving</a></li>
     <li><a href="#inferences">Inferences: connecting cards</a></li>
     <li><a href="#doubt">Doubting what you are told</a></li>
-    <li><a href="#more">Odd details, absences, your own questions</a></li>
+    <li><a href="#more">Important details, absences, notes on cards</a></li>
     <li><a href="#theories">Theories and wrong turns</a></li>
     <li><a href="#checks">Checks</a></li>
     <li><a href="#tabs">The other tabs</a></li>
@@ -158,8 +158,8 @@ has disappeared and its trainer has been found dead, or they are made up.</p>
 <p>The game is built on <i>Silver Blaze</i>, a Sherlock Holmes story by Arthur Conan Doyle, first published in 1892.
 You read it a paragraph at a time. Holmes reasons his way through it, and you try to make the same steps
 <b>before</b> the story shows him making them.</p>
-<p>Each step is a <b>move</b>: you might connect two clues into a conclusion, rule out an answer, notice that
-something is odd, or plan a check. The game tests your move against the clues you hold. It never tells you whether the
+<p>Each step is a <b>move</b>: you might connect two clues into a conclusion, rule out an answer, mark a detail as
+important, or plan a check. The game tests your move against the clues you hold. It never tells you whether the
 move is the one Holmes will make. You learn that only when the story reaches the point where he makes it.</p>
 <p>The story never changes. You can read it to the end without making a single move, but then Holmes gets everywhere
 first.</p>
@@ -231,12 +231,14 @@ get cards depends on the difficulty:</p>
 <h2>4. Cards</h2>
 <p>A card opens in the <span class="tab">Card</span> tab. From top to bottom it shows:</p>
 <ul>
-  <li>its kind (person, place, clue, event, inference, background…) and any flags, such as <i>marked odd</i> or
-  <i>suspected</i>, plus other names the story has used for it;</li>
+  <li>its kind (person, place, clue, event, inference, background…) and any flags, such as <i>important</i>,
+  <i>unimportant</i> or <i>suspected</i>, plus other names the story has used for it;</li>
   <li>what the story has said about it, grouped by paragraph, each part quoted. Anything you have not seen yet is
   tagged <b>new</b>. Click a paragraph number to jump to that place in the story;</li>
   <li>under <b>Words</b>, explanations of old or unusual words the story uses. Under <b>Background</b>, general
   knowledge a reader of the time would have had (see <a href="#difficulty">Background facts</a>);</li>
+  <li>your marks (<span class="btn quiet">★ Important</span>, <span class="btn quiet">Unimportant</span>) and your
+  note on the card;</li>
   <li>the moves you can make with this card. Each one is described in the sections below;</li>
   <li>the card's own <b>Timeline</b>, where you can pencil in where it was and when;</li>
   <li>the <b>open questions</b> on the card, each with its possible answers;</li>
@@ -246,10 +248,17 @@ get cards depends on the difficulty:</p>
 <p><span class="tab">Cards</span> lists every card you hold. You can search it by name and filter it by kind, or by
 <i>New</i> (never opened) and <i>Updated</i> (the story has added something since you last looked). The tab's label
 counts the new and updated cards.</p>
-<h3>Setting a card aside</h3>
-<p>Some cards are scenery. <span class="btn quiet">Set aside</span> takes a card out of your lists without losing
-it. Set-aside cards are kept at the bottom of the Cards tab, each with a <span class="btn quiet">Put back</span>
-button.</p>
+<p>Cards you marked important are listed first, under <i>★ Important</i>; cards you marked unimportant are folded away
+at the bottom, under <i>Unimportant</i>. Beside each card, what is left to do with it from what the page shows anyway:
+how many of its questions are open, <i>not asked</i> if you have not yet asked what you know about it, a ✎ if you
+wrote a note on it, and in incremental mode how many combinations with it the search still has to try (hover for the
+kinds of move). None of this says whether a card matters.</p>
+<h3>Important and unimportant</h3>
+<p>Two marks of your own, and a card has at most one. <span class="btn quiet">★ Important</span> says a detail
+matters: the game tells you nothing back, but notes where you marked it, and when Holmes draws attention to the same
+detail the record compares the two (see <a href="#more">Important details</a>). <span class="btn quiet">Unimportant</span>
+says it is scenery: the card leaves your lists without being lost. Press a mark again to take it off; in the
+<i>Unimportant</i> list, <span class="btn quiet">Not unimportant</span> does the same.</p>
 <h3>“What do I know about this?”</h3>
 <p>On Medium and Hard, background knowledge comes when you ask. Press
 <span class="btn">What do I know about this?</span> on a card, and any facts you recall about it are added to that
@@ -373,24 +382,22 @@ each laid out step by step, with a "doubt this instead" link on each claim.</p>
 
 <!-- ------------------------------------------------------------------ -->
 <section id="more">
-<h2>9. Odd details, absences and your own questions</h2>
-<h3>“That's odd”</h3>
+<h2>9. Important details, absences and notes on cards</h2>
+<h3>Important details</h3>
 <p>A good detective notices when something goes against what one would expect. On a clue, a thing or an event, press
-<span class="btn quiet">That's odd</span>. You can choose a background fact as the reason (<i>because…</i>). The game
-tells you nothing back. It notes where you noticed, and the record compares that with Holmes later.
-<span class="btn quiet">Not odd after all</span> takes it back.</p>
+<span class="btn quiet">★ Important</span>. The game tells you nothing back. It notes where you marked it, and the
+record compares that with Holmes later. Press it again to take the mark off. Some of these details are puzzles a
+theory has to explain: a theory is weighed by the odd things it leaves unexplained.</p>
 <h3>What did not happen</h3>
 <p>Sometimes the clue is something that <i>should</i> have happened and did not. You can file an absence from a clue
 card (<i>Should this have shown something that did not happen?</i>) or from the Timeline's board. Choose what you
 would expect, when, and who or what would have noticed, then press <span class="btn">File it</span>. A filed absence
 becomes a clue of its own.</p>
-<h3>Asking your own question</h3>
-<p>On a person, thing or event card, <i>Ask your own question</i> offers fixed wordings, such as "Where is …?",
-"Whose is …?", "Why would … do it?" or "Where was … during …?". Choose one and press
-<span class="btn quiet">Ask</span>. Your question can collect candidate answers from the cards you hold. The game
-checks nothing on it. If the story later asks the same question, yours joins it, and the record notes that you asked
-it first. This is never scored, because a question can be asked of anything.</p>
-<p>All three appear in the Questions tab under <i>Your questions</i> and <i>Odd things</i>.</p>
+<h3>Notes on cards</h3>
+<p>Every card has a box for your own note: a question you want answered, why a detail matters, anything at all.
+<span class="btn quiet">Save note</span> keeps it (so does leaving the box). The game never reads it. Cards with a note
+show a ✎ in the Cards tab, and your notes on cards are listed in the Notes tab with your notes on the story.</p>
+<p>What you marked important and the absences you filed appear in the Questions tab.</p>
 </section>
 
 <!-- ------------------------------------------------------------------ -->
@@ -405,7 +412,7 @@ question and choose <span class="btn quiet">Add to “…”</span>.</p>
 <ul>
   <li>which things you trust it needs to be wrong, and whether it goes against your own reasoning or against what was
   seen;</li>
-  <li>which of the odd things you have noticed it leaves unexplained;</li>
+  <li>which of the odd things met so far it leaves unexplained;</li>
   <li>which of its answers rest on nothing you hold.</li>
 </ul>
 <p>How much it says depends on the difficulty. On Easy it names everything. On Medium it gives counts only. On Hard
@@ -448,7 +455,7 @@ guess costs nothing. You can <i>withdraw</i> a check until Holmes acts on it.</p
   <dd>Incremental mode only: the automated search and its checks (see <a href="#incremental">Incremental mode</a>).</dd>
   <dt><span class="tab">Questions</span></dt>
   <dd>The case's questions, with how many answers are left and which you circled. Below them: statements you doubt,
-  your own questions, odd things, and, depending on the difficulty, the clashes and <i>Holmes's interest</i> (places
+  the details you marked important and the absences you filed, and, depending on the difficulty, the clashes and <i>Holmes's interest</i> (places
   where the story shows what Holmes pays attention to; it points, it proves nothing). As you read, a list of
   <i>what the story held back</i> also appears: facts told later than they happened, and background the game
   supplied.</dd>
@@ -485,15 +492,14 @@ you could have had it and from what.</p>
 details. The rows are grouped under:</p>
 <ul>
   <li><b>Deductions</b>: steps of reasoning Holmes makes;</li>
-  <li><b>Odd details</b>: things Holmes draws attention to;</li>
+  <li><b>Important details</b>: things Holmes draws attention to;</li>
   <li><b>Steps seen through</b>: reasoning Holmes shows does not hold;</li>
   <li><b>Wrong turns dropped</b>: ideas the story leaves behind;</li>
   <li><b>Checks planned</b>: tests Holmes makes;</li>
   <li><b>What did not happen</b>: absences Holmes points to.</li>
 </ul>
 <p>When the story ends, the record shows your best leads (<i>Furthest ahead</i>), every move made before Holmes,
-moves that did not count and why, <i>Where you could have been first</i>, and the questions you asked before the
-story did.</p>
+moves that did not count and why, and <i>Where you could have been first</i>.</p>
 </section>
 
 <!-- ------------------------------------------------------------------ -->
@@ -501,13 +507,13 @@ story did.</p>
 <h2>14. Scoring</h2>
 <ul>
   <li>You score one point for each of Holmes's steps that you made <b>before</b> its deadline: an inference built or
-  an answer settled, an odd detail marked, an exception raised, a wrong turn dropped, a check sealed, or an absence
+  an answer settled, a detail marked important, an exception raised, a wrong turn dropped, a check sealed, or an absence
   filed.</li>
   <li>Hearing someone in the story state an inference gives you the inference, but no point.</li>
   <li>A <b>dropped</b> wrong turn scores only if the reason you gave actually holds.</li>
   <li>A <b>check</b> scores whatever its result. Sealing the same check twice with opposite expectations, to cover
   both outcomes, does not count.</li>
-  <li>Your own questions are recorded but never scored.</li>
+  <li>Your notes are never read, and marking a card unimportant costs nothing.</li>
   <li>Nothing is scored on <b>Trivial</b>, because the game does the reasoning there.</li>
   <li>Hints do not cost points. A move made after a hint, or by <i>Do it</i>, counts like any other. The record does
   show how many of your moves came with hints, and how far up the hint ladder each one went.</li>
@@ -624,15 +630,15 @@ and only the next one of each can be shown, because what each check finds decide
 <li><b>A page that holds still</b>: the pieces of the tab and the reading bar keep the largest size they have had
 while the story stays at one paragraph, so the page does not jump as checks come and go; they fit themselves afresh
 when the story moves on. Scrolled down, the log stays where you left it while new checks come in above.</li>
-<li><b>What there is to try</b>: for each kind of move (collecting, asking, building inferences, marking odd details,
+<li><b>What there is to try</b>: for each kind of move (collecting, asking, building inferences, marking details important,
 raising exceptions, sealing checks, filing absences, dropping wrong turns), how many combinations there are with what
 you hold now, and the numbers that are added or multiplied to make that total; how many have been checked, how many
 found something, how many are ruled out, and how many are <i>stale</i>: a “no” that a new card may have turned into a
 “yes”, waiting to be checked again. The bar under <i>Ruled out</i> shows how much of the total that is.</li>
 <li><b>What has been tried</b>: a log of the checks made, newest first; tick <i>Only what was found</i> to see just
 the finds.</li>
-<li><b>Steering</b>: the search reads your marks. Cards you set aside are tried last. The cards of an answer you circle
-are tried first, then the cards you marked odd. A circled answer is tried first when a check expects an answer, and
+<li><b>Steering</b>: the search reads your marks. Cards you marked unimportant are tried last. The cards of an answer you circle
+are tried first, then the cards you marked important. A circled answer is tried first when a check expects an answer, and
 last as a wrong turn to drop; a crossed-out one the other way round. Untick a kind of move to pause it (if the story
 waits for that kind, the search says so and waits too).</li>
 <li><b>Controls</b>: <span class="btn">⏸ Pause</span> / <span class="btn">▶ Search</span>, and <i>Read on by
@@ -652,7 +658,7 @@ more:</p>
 <ol>
   <li><b>Where.</b> Which paragraphs to look at again. Click a paragraph number to jump there.</li>
   <li><b>What kind of move.</b> For example, an inference to build (and what its conclusion is about), something to
-  mark as odd, an answer to drop, or a check to plan.</li>
+  mark as important, an answer to drop, or a check to plan.</li>
   <li><b>Which.</b> The cards involved, or the words to click to get them.</li>
   <li><b>The step.</b> The moves themselves, spelled out, with a <span class="btn quiet">Do it</span> button that makes
   them for you on the page. You watch the game do the clicks.</li>
@@ -689,7 +695,8 @@ notes mode. While it is on, clicking in the story does not open or collect cards
 </div>
 <p>Click a note in the story to edit it. While you are writing or editing, the reading bar shows the keys and a
 <span class="btn quiet">Delete</span> button. A deleted note can be brought back with <i>undo</i>. The
-<span class="tab">Notes</span> tab lists every note, with <i>show</i>, <i>edit</i> and <i>delete</i>.</p>
+<span class="tab">Notes</span> tab lists every note, with <i>show</i>, <i>edit</i> and <i>delete</i>, after your notes on
+cards (see <a href="#more">Notes on cards</a>).</p>
 <p>Notes are only for you. The game never reads them, and they never affect your score. Press
 <span class="btn quiet">✎ Notes: on</span> again to go back to normal clicking.</p>
 </section>

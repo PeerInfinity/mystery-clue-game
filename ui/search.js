@@ -2,7 +2,7 @@
 // the page shows it with a bar that fills over the time a check takes (Settings: "Time per check"), then makes it.
 // The tab shows what the story waits for, the check under way and the next of each category, the counts per
 // category with the numbers they are made of, and a log of the checks made. The player steers with the marks the
-// game has (circles, cross-outs, odd, set aside) and pauses or resumes each category.
+// game has (circles, cross-outs, important, unimportant) and pauses or resumes each category.
 import { Automation, CATEGORIES, SEARCHED, waitCategory } from '../engine/automation.js';
 import { INCREMENTAL } from '../engine/game.js';
 import * as TL from '../engine/timeline.js';
@@ -11,7 +11,7 @@ export const CATEGORY_WORDS = {
     collect: ['Collect', 'click every span of the story read'],
     ask: ['Ask what I know', 'every person, thing and event held'],
     build: ['Build inferences', 'connect cards while “onto something”'],
-    notice: ['Mark as odd', 'each card held, kept if the story stops waiting'],
+    notice: ['Mark as important', 'each card held, kept if the story stops waiting'],
     raise: ['Raise an exception', 'each exception open against a card held'],
     check: ['Seal a check', 'each check, part by part, then what to expect'],
     absence: ['File an absence', 'what should have happened, when, who would have noticed'],
@@ -20,7 +20,7 @@ export const CATEGORY_WORDS = {
 };
 const WAIT_WORDS = {
     deduction: 'a deduction Holmes is about to make',
-    notice: 'an odd detail Holmes is about to point to',
+    notice: 'a detail Holmes is about to point to',
     raise: 'a step Holmes is about to take apart',
     check: 'a check Holmes is about to make',
     absence: 'something that did not happen, which Holmes is about to point to',
@@ -292,5 +292,8 @@ export function makeSearch(ctx) {
         kick();
     }
 
-    return { attach, clear, tool, paint, hold, fit, floors, readerHtml, tabLabel, onClick, onChange, moved, save, active: () => !!S.a, get automation() { return S.a; } };
+    /** Per card held, what the search still has to try with it (Automation.perCard); null while the solver is busy. */
+    function perCard() { try { return S.a?.perCard() ?? null; } catch { return null; } }
+
+    return { attach, clear, tool, paint, perCard, hold, fit, floors, readerHtml, tabLabel, onClick, onChange, moved, save, active: () => !!S.a, get automation() { return S.a; } };
 }
