@@ -272,7 +272,9 @@
           "text": { "type": "string" },
           "source": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
           "needs": { "type": "array", "items": { "type": "string" } },
-          "scores": { "type": ["string", "null"] }
+          "scores": { "type": ["string", "null"] },
+          "answer": { "type": "string" },
+          "answer_source": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
         }
       }
     },

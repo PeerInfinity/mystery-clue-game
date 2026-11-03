@@ -541,7 +541,8 @@ the scored notice; that job went to leads.
 **Leads** (`leads.json`, section `leads`, one per line): lines of inquiry the game proposes. Each has `text` (plain
 words, a question or a detail; never ahead of the story), `source` (its quotes: it is proposed once they are all
 read), `needs` (cards that must be held) and `scores` (the NOTICE thought it scores for; null for a lead that scores
-nothing). `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
+nothing), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
+read, *pending* until then; the validator wants them at or after Holmes's paragraph). `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
 says which score. `investigate(id)` puts a proposed lead under investigation, `stopInvestigating(id)` takes it off;
 both are free. Before Holmes's first paragraph on its NOTICE thought is read, the lead is settled as it stands
 (`leadsSettled`: under investigation then or not) and can no longer be changed. A NOTICE row scores if a lead for it

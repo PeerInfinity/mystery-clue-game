@@ -1300,8 +1300,8 @@ export class Game {
         const thoughts = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t]));
         this.leadCache = new Map((this.model.data.leads ?? []).map((l) => {
             const t = l.scores ? thoughts.get(l.scores) : null;
-            const at = Math.max(0, ...(l.source ?? []).map((q) => this.story.find(q)?.para ?? Infinity));
-            return [l.id, { ...l, at, deadline: t?.holmes?.paras?.length ? t.holmes.paras[0] : null }];
+            const paraOf = (qs) => Math.max(0, ...(qs ?? []).map((q) => this.story.find(q)?.para ?? Infinity));
+            return [l.id, { ...l, at: paraOf(l.source), answerAt: l.answer ? paraOf(l.answer_source) : null, deadline: t?.holmes?.paras?.length ? t.holmes.paras[0] : null }];
         }));
         return this.leadCache;
     }
@@ -1312,13 +1312,13 @@ export class Game {
     }
     /**
      * The leads the game proposes, in the order they came: each {id, text, at, state}, state 'investigating', 'open' or
-     * 'settled' (Holmes's paragraph is read; `investigated` says whether it was under investigation then). Never says
-     * which leads score.
+     * 'settled' (Holmes's paragraph is read; `investigated` says whether it was under investigation then, `answer` the
+     * story's answer once its quotes are read, else null: pending). Never says which leads score.
      */
     leads() {
         return [...this.leadById().values()].filter((l) => this.leadProposed(l.id)).sort((a, b) => a.at - b.at).map((l) => {
             const settled = this.leadsSettled.get(l.id);
-            return { id: l.id, text: l.text, at: l.at, state: settled ? 'settled' : this.investigating.has(l.id) ? 'investigating' : 'open', ...(settled && { investigated: settled.at !== null }) };
+            return { id: l.id, text: l.text, at: l.at, state: settled ? 'settled' : this.investigating.has(l.id) ? 'investigating' : 'open', ...(settled && { investigated: settled.at !== null, answer: l.answerAt !== null && l.answerAt < this.read ? l.answer : null }) };
         });
     }
     isInvestigating(id) { return this.investigating.has(id); }

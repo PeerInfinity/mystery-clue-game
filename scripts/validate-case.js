@@ -118,6 +118,8 @@ for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes
         if (!l.text) err(`${l.id}: a lead needs text`);
         if (!(l.source ?? []).length) err(`${l.id}: a lead needs a quote`);
         checkQuotes(l.id, l.source);
+        if (!l.answer !== !(l.answer_source ?? []).length) err(`${l.id}: an answer and its quotes go together`);
+        checkQuotes(`${l.id} answer`, l.answer_source);
         for (const c of l.needs ?? []) if (!model.cards.has(c)) err(`${l.id}: needs unknown card ${c}`);
         if (l.scores === null || l.scores === undefined) continue;
         const t = thoughts.get(l.scores);
@@ -125,6 +127,8 @@ for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes
         const holmes = t.holmes?.paras?.[0];
         const at = Math.max(0, ...(l.source ?? []).map((q) => story.find(q)?.para ?? Infinity));
         if (holmes !== undefined && at >= holmes) err(`${l.id}: proposed at ¶${at}, not before Holmes's ¶${holmes}`);
+        const answerAt = Math.max(0, ...(l.answer_source ?? []).map((q) => story.find(q)?.para ?? Infinity));
+        if (l.answer && holmes !== undefined && answerAt < holmes) err(`${l.id}: answered at ¶${answerAt}, before Holmes takes it up at ¶${holmes}`);
     }
     for (const t of data.thoughts ?? []) if (t.tag === 'NOTICE' && t.notices?.length && t.holmes?.paras?.length && !(data.leads ?? []).some((l) => l.scores === t.id)) err(`${t.id}: a NOTICE Holmes speaks to, with no lead to score it`);
 }

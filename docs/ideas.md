@@ -425,7 +425,10 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   inferences so that the true leads are earned by reasoning. Of the 8 unscored NOTICE rows only t40.5 (one blow,
   against "repeated blows") reads as a lead; t20.5, t82.4 and t100.1 are better premises of a proposing inference,
   t57.2 and t116.2 are the story proposing a lead itself, t218.3 and t220.3 commentary.
-- **A panel of its own**: the Leads tab.
+- **A panel of its own**: the Leads tab. Under *Taken up by Holmes* each lead shows the story's answer once it is
+  given (`answer`, with its quotes), *Answer pending* until then.
+- **To look into later** (the user, 2026-11-03): how leads relate to the Questions mechanic (the case's questions and
+  their answers).
 - **No backward-compatible saves** (there are no players): the save version is checked, a save of another version
   dropped, and the migration code removed.
 

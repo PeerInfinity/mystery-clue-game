@@ -46,8 +46,11 @@ test('settled at Holmes\'s paragraph as it stands: under investigation then, it 
     assert.deepEqual([knife.state, knife.investigated], ['settled', true]);
     assert.equal(g.stopInvestigating('lead.knife'), false, 'settled: it can no longer be stopped');
     assert.equal(row(g, 't80.2').scores, true);
+    assert.equal(knife.answer, null, 'answer pending until the story gives it (¶221)');
+    readTo(g, 221);
+    assert.match(g.leads().find((l) => l.id === 'lead.knife').answer, /tendons/);
+    assert.ok(g.leads().filter((l) => l.state !== 'settled').every((l) => !('answer' in l)), 'no answer on a lead Holmes has not taken up');
     // Saved and loaded: settled and open investigations come back.
-    readTo(g, 84);
     g.investigate('lead.bill_sum');
     const again = medium();
     again.load(JSON.parse(JSON.stringify(g.save())));

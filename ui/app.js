@@ -1358,7 +1358,7 @@ function toolLeads() {
     }
     if (done.length) {
         h += '<h3 class="section">Taken up by Holmes</h3><ul class="list leads">';
-        for (const l of done) h += `<li>${esc(l.text)} <span class="small muted">· ${l.investigated ? 'you were investigating it' : 'not under investigation then'}</span></li>`;
+        for (const l of done) h += `<li>${esc(l.text)} <span class="small muted">· ${l.investigated ? 'you were investigating it' : 'not under investigation then'}</span><div class="small">${l.answer ? esc(l.answer) : '<span class="muted">Answer pending.</span>'}</div></li>`;
         h += '</ul>';
     }
     return h;
