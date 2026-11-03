@@ -298,6 +298,11 @@ under way.
   showed one check per category including collect and ask, and the user found it wrong: it named an ask while a dozen
   collects came first. Measured over 20,000 checks, the queue now names what follows in 4,570 of 4,578 predictions
   (the misses: a check that changed the hand without counting as a find).
+- **Next up keeps one shape** (the user saw the panel shift as the queue changed): the grow-only floor alone did not
+  hold it, since the floors start again when the story moves on or the width changes, and the rows' wrapping and
+  count changed the height from one check to the next. The box now always has ten one-line rows (a long label cut
+  short, the whole of it on hover; blank rows where the queue is shorter) and the same words beneath; search-check
+  measures its height over eight checks.
 - **A page that does not jump** (the user's ask, after the Prestige Tree loader's grow-only floors): every piece of
   the tab (the waits, the check under way, *Next up*, the table, the log) is drawn even when empty and keeps the
   largest height it has had; the reading bar too. Each number in the table has its own box whose width in characters

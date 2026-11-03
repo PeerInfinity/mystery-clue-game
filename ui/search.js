@@ -27,6 +27,8 @@ const WAIT_WORDS = {
     drop: 'a wrong turn the story is about to leave behind',
 };
 const OUT_WORDS = { yes: 'yes', no: 'no', found: 'found' };
+/** The rows of the "Next up" box, always this many (the box keeps one shape). */
+const QUEUE = 10;
 const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
 /** A count as a person reads it: grouped digits up to a million, then a × 10ⁿ. */
 export function num(n) {
@@ -169,20 +171,21 @@ export function makeSearch(ctx) {
         // Every piece is drawn even when empty, and keeps the largest size it has had (floors()): the page does not jump.
         h += `<div class="small search-waits" data-floor="waits">${a.open.length ? `Before ¶${ctx.game().read}, the story waits for ${esc(waitsHtml())}.` : ''}</div>`;
         h += `<div class="search-now" data-floor="now">${a.current
-            ? `<div class="small"><b>${S.playing ? 'Now' : 'Next'}:</b> <span class="cat-tag">${esc(CATEGORY_WORDS[a.current.cat][0])}</span> ${esc(a.current.label)}</div>${bar()}`
+            ? `<div class="small search-now-line"><b>${S.playing ? 'Now' : 'Next'}:</b> <span class="cat-tag">${esc(CATEGORY_WORDS[a.current.cat][0])}</span> ${esc(a.current.label)}</div>${bar()}`
             : `<p class="small muted">${esc(idleWords())}</p>`}</div>`;
-        // The checks to come while nothing is found (automation.queue()).
+        // The checks to come while nothing is found (automation.queue()). A box of a fixed shape, whatever it holds: always
+        // QUEUE rows of one line each (a long label cut short, the whole of it on hover), blank rows where the queue is
+        // shorter, and the same words beneath. (A grow-only floor was not enough: it starts again when the story moves
+        // on or the width changes, and the rows' wrapping changed the height from one check to the next.)
         let queue = [];
-        try { queue = a.queue(); } catch { queue = a.current ? [a.current] : []; }
-        h += '<h4 class="sub">Next up</h4><div data-floor="queue">';
-        if (queue.length > 1) {
-            h += '<ol class="search-queue small">';
-            for (const c of queue.slice(1)) h += `<li><span class="cat-tag">${esc(CATEGORY_WORDS[c.cat][0])}</span> ${esc(c.label)}</li>`;
-            h += '</ol>';
+        try { queue = a.queue(QUEUE + 1); } catch { queue = a.current ? [a.current] : []; }
+        const rows = queue.slice(1);
+        h += '<h4 class="sub">Next up</h4><div class="search-queue-box"><ol class="search-queue small">';
+        for (let i = 0; i < QUEUE; i++) {
+            const c = rows[i];
+            h += c ? `<li title="${esc(c.label)}"><span class="cat-tag">${esc(CATEGORY_WORDS[c.cat][0])}</span> ${esc(c.label)}</li>` : '<li class="blank">&nbsp;</li>';
         }
-        h += `<p class="small muted">${queue.length > 1
-            ? 'In the order they will be made while nothing is found: every collect, then every ask, then the next check of each category the story waits for, in turn. A find changes what comes after it.'
-            : queue.length ? 'What comes after this check depends on what it finds.' : ''}</p></div>`;
+        h += '</ol><p class="small muted">In the order they will be made while nothing is found: every collect, then every ask, then the next check of each category the story waits for, in turn. A find changes what comes after it.</p></div>';
         // The counts.
         let counts = null;
         try { counts = a.counts(); } catch { /* waiting on the solver: the last drawn stand */ }

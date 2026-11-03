@@ -1,5 +1,5 @@
 // Incremental mode's Search tab in the real page: the pace chosen (Hard, locked), the tab, the story waiting, one check
-// a second with a bar in the tab and in the reading bar, the queue (its first is the next check), the nine categories
+// a second with a bar in the tab and in the reading bar, the queue (its first is the next check; its box one height), the nine categories
 // counted; the page does not jump, the log and the tab bars keep their place; Pause; at 0 s a
 // check the search lifts the wait and the player reads on; reading by itself it goes on; a reload keeps the counts; no
 // console error (about 5 minutes).
@@ -41,16 +41,19 @@ if (SHOTS) await p.shot(`${SHOTS}/search-1s.png`);
 // shrink back). And the queue says what comes next: when the check under way changes, it is the one the queue showed
 // first, unless the check before it found something.
 const look = `JSON.stringify({
+    box: Math.round(document.querySelector('#panel-1 .search-queue-box')?.getBoundingClientRect().height ?? -1),
     tops: [...document.querySelectorAll('#panel-1 h4.sub, #panel-1 .search-table-wrap, .layout')].map((e) => Math.round(e.getBoundingClientRect().top)),
     now: document.querySelector('#panel-1 .search-now b')?.parentElement.textContent.replace(/^\\S+:\\s*/, '') ?? '',
     head: document.querySelector('#panel-1 .search-queue li')?.textContent ?? '',
     found: document.querySelector('#panel-1 .search-log li')?.classList.contains('out-found') ?? false })`;
 let prev = JSON.parse(await p.ev(look));
 let movedUp = 0, nexts = 0, wrong = [];
+const boxes = new Set([prev.box]);
 for (let i = 0; i < 40; i++) {
     await p.sleep(200);
     const cur = JSON.parse(await p.ev(look));
     if (cur.tops.length === prev.tops.length && cur.tops.some((t, j) => t < prev.tops[j])) movedUp++;
+    boxes.add(cur.box);
     if (cur.now && prev.now && cur.now !== prev.now) {
         nexts++;
         if (!cur.found && cur.now !== prev.head) wrong.push(`${prev.head} ≠ ${cur.now}`);
@@ -58,6 +61,7 @@ for (let i = 0; i < 40; i++) {
     prev = cur;
 }
 check(movedUp === 0, `the page does not jump (moved up ${movedUp} times in 8 s)`);
+check(boxes.size === 1 && !boxes.has(-1), `the "Next up" box keeps one height (${[...boxes].join(', ')} px)`);
 check(nexts >= 4 && wrong.length === 0, `the queue's first is the next check (${nexts} checks${wrong.length ? `; ${wrong.slice(0, 2).join(' | ')}` : ''})`);
 // The tab bars keep where they were scrolled sideways: a check redraws the Search tab's label in place, and a full
 // redraw (a find) keeps the scroll.
