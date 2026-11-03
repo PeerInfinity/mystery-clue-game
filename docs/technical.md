@@ -110,4 +110,8 @@ any change to the UI or to what a move needs, and check every difficulty, not on
 ## The live site
 
 `.github/workflows/pages.yml` publishes the game to GitHub Pages on every push to `main`. `scripts/build-site.js`
-collects what the pages load (following `import()`, CSS `url()` and the case's data files) into `_site/`.
+collects what the pages load (following `import()`, CSS `url()` and the case's data files) into `_site/`. A case's
+data files the page fetches itself are listed there by name (the action tables, `hints.json`, `incremental.json`): a
+new one must be added, or the live page quietly goes without it (incremental mode was missing from the live site for
+that reason). A page check can run against the built site: `node scripts/build-site.js <dir>`, serve `<dir>`, and run
+the check with `URL=http://localhost:<port>/`.

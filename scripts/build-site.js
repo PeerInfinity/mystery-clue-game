@@ -37,12 +37,13 @@ while (todo.length) {
     }
 }
 
-// Cases: what loadCase reads, and the action tables the autoplay plays (ui/autoplay.js: the reader's and the minimal one).
+// Cases: what loadCase reads, the action tables the autoplay plays (ui/autoplay.js: the reader's and the minimal one),
+// the hints' data and incremental mode's waits (without them the page offers no Hint button and no incremental pace).
 for (const dir of fs.readdirSync(path.join(root, 'cases'))) {
     const base = path.join('cases', dir);
     const main = JSON.parse(fs.readFileSync(path.join(root, base, 'case.json'), 'utf8'));
     for (const f of ['case.json', ...(main.parts ?? []), main.mentions_file, main.thoughts_file, main.case?.source?.text_file].filter(Boolean)) files.add(path.join(base, f));
-    for (const f of ['action-table.json', 'action-table-minimal.json', 'hints.json']) if (fs.existsSync(path.join(root, base, f))) files.add(path.join(base, f));
+    for (const f of ['action-table.json', 'action-table-minimal.json', 'hints.json', 'incremental.json']) if (fs.existsSync(path.join(root, base, f))) files.add(path.join(base, f));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
