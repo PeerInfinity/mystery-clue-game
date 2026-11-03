@@ -63,6 +63,8 @@ export function playData(model, play, { made, lost }) {
         for (const c of needs(model, m)) {
             const q = c && provider.get(c);
             if (typeof q === 'number') { if (q !== m.seq) p = Math.max(p, from.get(q)); } else if (q) p = Math.max(p, q.at);
+            // A background fact an ask gives only once the story makes it relevant (`relevant_from`): not before that.
+            if (typeof q === 'number' && all.find((x) => x.seq === q)?.op === 'ask' && g0.ruleAt.has(c)) p = Math.max(p, g0.ruleAt.get(c));
         }
         for (const d of depsOf2(m)) p = Math.max(p, from.get(d));
         from.set(m.seq, p);

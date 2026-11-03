@@ -520,6 +520,8 @@ export class Automation {
             if (key !== this.waitsKey) {
                 const before = new Set(JSON.parse(this.waitsKey || '[]').map((w) => JSON.stringify(w)));
                 this.families = new Set(open.map(waitCategory));
+                // Some leads are proposed only once an inference is built: a lead wait searches builds too.
+                if (this.families.has('lead')) this.families.add('build');
                 // A lead, a raise or a seal that lifted nothing may lift a wait that has just opened.
                 const opened = new Set(open.filter((w) => !before.has(JSON.stringify(w))).map(waitCategory));
                 for (const cat of ['lead', 'raise']) if (opened.has(cat)) for (const k of this.neg[cat].keys()) this.stale[cat].add(k);

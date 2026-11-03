@@ -540,7 +540,7 @@ the scored notice; that job went to leads.
 
 **Leads** (`leads.json`, section `leads`, one per line): lines of inquiry the game proposes. Each has `text` (plain
 words, a question or a detail; never ahead of the story), `source` (its quotes: it is proposed once they are all
-read), `needs` (cards that must be held) and `scores` (the NOTICE thought it scores for; null for a lead that scores
+read), `needs` (cards that must be held; an inference among them makes the lead wait until it is built) and `scores` (the NOTICE thought it scores for; null for a lead that scores
 nothing), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
 read, *pending* until then; the validator wants them at or after Holmes's paragraph). A lead that scores nothing (a false
 lead, or a true one Holmes never draws attention to) must have an answer after it is proposed: its deadline is the

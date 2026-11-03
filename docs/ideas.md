@@ -443,9 +443,19 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   ¶220), the cravat (¶35 → ¶226), the blood on the knife (¶35 → ¶226), why nobody has seen the horse (¶37 → ¶146,
   Brown's dawn rather than Holmes's ¶114 "would surely have been seen"), the winner with no white (¶198 → ¶202): true
   leads that score nothing, but the stranger's. Worded as detail questions, most of the catalogue's false theories
-  become the detail they rest on, whose answer is true: real red herrings are few. Next (batch 3): the inferences that
-  propose the scored leads, so they are earned by reasoning (the catalogue's NEW-1 to NEW-11), and the leads those
-  inferences raise.
+  become the detail they rest on, whose answer is true: real red herrings are few.
+- **Batch 3 (built 2026-11-03)**: scored leads proposed only once an inference is built (an inference in `needs`),
+  so they are earned by reasoning. The proposer must raise the question without answering it (an inference that
+  also settles the lead would make the flag free). Four, three on inferences the case had: the horse led out onto
+  the moor (k.taker_had_a_key, ¶37; reworded from "Why is Silver Blaze missing?"), the curry (k.drugged_in_food,
+  ¶37), the milliner's sum (k.bill_is_his_own, ¶84); and one new, k.coat_came_off (t35.11, ¶35: he went out in his
+  overcoat at one, by morning it hung on a bush). Left card-proposed: the knife and the odds (one paragraph before
+  Holmes), the bill's name (anything upstream answers it), and the candle: its only reasoning, r.candle_for_work,
+  answers it (a steady light for close work), and the cards say nothing short of that. Measured: Hard still reaches 70 (notice
+  8/8); the minimal playthrough grows from 145 to 148 moves (39 builds). Two fixes it needed: the automation runs
+  the build search while a lead wait is open (it stalled at ¶57: the horse lead waits on k.taker_had_a_key, whose own
+  row is not due until ¶220), and the DepGraph places a move no earlier than a background fact it needs becomes
+  relevant when an ask gives it (k.drugged_in_food, new to the maximum graph, was placed before ¶37's opium).
 - **To look into later** (the user, 2026-11-03): how leads relate to the Questions mechanic (the case's questions and
   their answers).
 - **No backward-compatible saves** (there are no players): the save version is checked, a save of another version

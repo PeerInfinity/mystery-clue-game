@@ -4,7 +4,7 @@
     {"para":36,"row":"t29.3|deduction"},
     {"para":57,"row":"t18.3|notice"},
     {"para":57,"row":"t31.3|deduction"},
-    {"para":57,"keep":{"inferences":["k.later_entry_needs_key"]},"rows":["t173.2|deduction","t220.3|deduction","t34.3|raise","t34.7|deduction","t37.15|deduction","t37.16|deduction","t37.4|deduction","t37.5|deduction","t37.7|deduction","t37.8|deduction","t37.9|deduction","t46.4|deduction","t46.7|deduction","t81.5|deduction"]},
+    {"para":57,"keep":{"inferences":["k.later_entry_needs_key"]},"rows":["t173.2|deduction","t175.1|deduction","t220.3|deduction","t34.3|raise","t34.7|deduction","t37.15|deduction","t37.16|deduction","t37.4|deduction","t37.5|deduction","t37.7|deduction","t37.8|deduction","t37.9|deduction","t46.4|deduction","t46.7|deduction","t81.5|deduction"]},
     {"para":81,"row":"t80.2|notice"},
     {"para":89,"row":"t85.3|check"},
     {"para":93,"row":"t92.4|deduction"},

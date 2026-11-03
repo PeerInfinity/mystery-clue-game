@@ -8,8 +8,12 @@ import { Game, MEDIUM, TRIVIAL } from './game.js';
 
 const model = await loadCase(new URL('../cases/silver-blaze', import.meta.url).pathname);
 const medium = () => new Game(model, { difficulty: MEDIUM, options: { background: 'relevant' } });
-const readTo = (g, p) => { while (g.read <= p) g.advance(); }; // ¶p read
 const row = (g, t) => g.noticeScores().find((r) => r.thought === t);
+// Some leads are proposed only once an inference is built (their `needs`): build those the player can.
+const build = (g, id) => g.knows(id) || g.propose(g.connectSet(id), g.conclusionKinds(id)[0]).ok !== false && g.knows(id);
+const ready = (g, id) => g.knows(id) || (g.inferenceById.has(id) && !g.inferenceById.get(id).implicit && g.inferenceById.get(id).premises.every((p) => ready(g, p)) && build(g, id));
+const buildGates = (g) => { for (const l of g.leadById().values()) for (const c of l.needs ?? []) if (g.inferenceById.has(c)) ready(g, c); };
+const readTo = (g, p) => { while (g.read <= p) { g.advance(); buildGates(g); } }; // ¶p read, the gates built as soon as they can be
 
 test('a lead is proposed once its quotes are read and its cards held, and not before', () => {
     const g = medium();
@@ -21,6 +25,16 @@ test('a lead is proposed once its quotes are read and its cards held, and not be
     assert.ok(ids.includes('lead.bill_name') && ids.includes('lead.bill_sum'), 'one card, two leads');
     assert.deepEqual(ids, [...ids].sort((a, b) => g.leadById().get(a).at - g.leadById().get(b).at), 'in the order they came');
     for (const l of g.leads()) assert.ok(!('scores' in l) && !('deadline' in l), 'the list never says which leads count');
+});
+
+test('a lead that waits on an inference is proposed only once the inference is built', () => {
+    const g = medium();
+    while (g.read <= 84) g.advance(); // read, nothing built
+    const ids = g.leads().map((l) => l.id);
+    assert.ok(ids.includes('lead.bill_name') && !ids.includes('lead.bill_sum'), 'the sum waits on the bill being his own');
+    assert.equal(g.investigate('lead.bill_sum').ok, false);
+    assert.ok(build(g, 'k.bill_is_his_own'));
+    assert.ok(g.leads().some((l) => l.id === 'lead.bill_sum'));
 });
 
 test('investigating scores; the mark "important" does not', () => {

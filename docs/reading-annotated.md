@@ -369,6 +369,9 @@ Only the headline: a valuable horse stolen by someone who killed the trainer whi
 - `t35.10` **HYPOTHESIS** · *weak* · typical · from `t35.5`
   The cravat in his hand: {torn from the assailant (the police reading); planted on the body; Straker had it for
   some reason of his own}.
+- `t35.11` **INFER** · *strong* · careful · from `t32.2`, `t35.1`
+  He went out at one in his overcoat; by the morning it hangs on a bush on the moor. It came off him in the night,
+  in the rain.
 
 **¶36**
 - `t36.1` **RECORD** · typical
