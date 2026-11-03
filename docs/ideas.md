@@ -429,8 +429,16 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   inferences so that the true leads are earned by reasoning. Of the 8 unscored NOTICE rows only t40.5 (one blow,
   against "repeated blows") reads as a lead; t20.5, t82.4 and t100.1 are better premises of a proposing inference,
   t57.2 and t116.2 are the story proposing a lead itself, t218.3 and t220.3 commentary.
-- **A panel of its own**: the Leads tab. Under *Taken up by Holmes* each lead shows the story's answer once it is
+- **A panel of its own**: the Leads tab. Under *Settled by the story* each lead shows the story's answer once it is
   given (`answer`, with its quotes), *Answer pending* until then.
+- **False leads, batch 1 (built 2026-11-03)**, the user's rulings: every lead is worded as a question about a detail
+  the player holds (*why / what / who*), never as a theory ("Did the maid drug it?"), so the form of the question does
+  not tell true from false; a false lead is a red herring, not a wrong theory. A lead that scores nothing settles when
+  the story answers it, frees its place and shows its answer, with no score and no penalty; true leads that score
+  nothing are allowed (the wound, t40.5) and settle the same way. Built: the paper offered the maid (¶24 → ¶58), the
+  gypsies breaking camp (¶62 → ¶114), Simpson's £5,000 against the favourite (¶39 → ¶218), the wound (¶40 → ¶226).
+  Left out: the maid (as a detail question, "who could get at the dish?", it leads to Straker, and the scored drop
+  covers her) and Brown's bets (too borderline: they explain why he hid the horse).
 - **To look into later** (the user, 2026-11-03): how leads relate to the Questions mechanic (the case's questions and
   their answers).
 - **No backward-compatible saves** (there are no players): the save version is checked, a save of another version
@@ -438,7 +446,7 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
 
 Measured after step 1 (seeds 1–3 to 70): the lead search takes 18 checks a game for its 8 rows (the 1,200–1,550 of
 the card search gone), 18,718, 17,544 and 18,053 checks in all (were 18,522, 18,648 and 22,324: the other searches
-move with the shuffle). Steps 1–2 have only the 8 scored leads, so the tab is an answer key for now; the false leads and the timer come next. A first catalogue of candidates (72 leads, 36 true, 31 false, 5 ambiguous; 11 new inferences drafted)
+move with the shuffle). Steps 1–2 had only the 8 scored leads, so the tab was an answer key; batch 1 of false leads (below) began to change that, and the timer comes later. A first catalogue of candidates (72 leads, 36 true, 31 false, 5 ambiguous; 11 new inferences drafted)
 raised the problems the later steps must meet: where a lead came from must not tell true from false (the story
 itself has characters proposing true things and buildable inferences that are false); an inference that proposes a
 lead often also settles it, which makes the flag free, so proposers must sit earlier in the chain; late in the story

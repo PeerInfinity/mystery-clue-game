@@ -1296,14 +1296,17 @@ export class Game {
 
     // ---------- leads ----------
     /** The case's leads (leads.json) by id, each with `at` (the paragraph its last quote is in) and `deadline` (Holmes's
-     *  first paragraph on the NOTICE thought it scores for; null if it scores nothing). */
+     *  first paragraph on the NOTICE thought it scores for; for a lead that scores nothing, the paragraph that answers it). */
     leadById() {
         if (this.leadCache) return this.leadCache;
         const thoughts = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t]));
         this.leadCache = new Map((this.model.data.leads ?? []).map((l) => {
             const t = l.scores ? thoughts.get(l.scores) : null;
             const paraOf = (qs) => Math.max(0, ...(qs ?? []).map((q) => this.story.find(q)?.para ?? Infinity));
-            return [l.id, { ...l, at: paraOf(l.source), answerAt: l.answer ? paraOf(l.answer_source) : null, deadline: t?.holmes?.paras?.length ? t.holmes.paras[0] : null }];
+            const answerAt = l.answer ? paraOf(l.answer_source) : null;
+            // A lead that scores settles at Holmes's paragraph; one that scores nothing (a false lead, or a true one
+            // Holmes never draws attention to) settles when the story answers it, and frees its place then.
+            return [l.id, { ...l, at: paraOf(l.source), answerAt, deadline: t ? (t.holmes?.paras?.length ? t.holmes.paras[0] : null) : answerAt }];
         }));
         return this.leadCache;
     }
@@ -1314,7 +1317,7 @@ export class Game {
     }
     /**
      * The leads the game proposes, in the order they came: each {id, text, at, state}, state 'investigating', 'open' or
-     * 'settled' (Holmes's paragraph is read; `investigated` says whether it was under investigation then, `answer` the
+     * 'settled' (its deadline is read: Holmes's paragraph, or the story's answer; `investigated` says whether it was under investigation then, `answer` the
      * story's answer once its quotes are read, else null: pending). Never says which leads score.
      */
     leads() {
@@ -1339,7 +1342,7 @@ export class Game {
     investigate(id) {
         return this.#lifts(() => {
             if (!this.leadProposed(id)) return { ok: false, reason: 'no such lead yet' };
-            if (this.leadsSettled.has(id)) return { ok: false, reason: 'Holmes has followed this up already' };
+            if (this.leadsSettled.has(id)) return { ok: false, reason: 'the story has settled this lead already' };
             if (this.investigating.has(id)) return { ok: true };
             if (this.investigating.size >= this.leadBudget()) return { ok: false, full: true, reason: `${this.investigating.size} leads are under investigation, as many as you may have at a time: stop one first` };
             this.investigating.set(id, { para: this.read - 1 });

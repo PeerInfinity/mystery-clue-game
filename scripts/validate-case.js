@@ -106,8 +106,8 @@ for (const r of data.rules ?? []) if (r.relevant_from) checkQuotes(r.id, [r.rele
 // Every time window says where the story first reaches it: before that it is not offered as an answer.
 for (const w of model.windows) { if (!w.reveal) err(`${w.id}: no 'reveal' quote`); else checkQuotes(w.id, [w.reveal]); }
 for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes(c.id, a.source);
-// The leads (leads.json): quoted, their cards known, each scoring for a NOTICE thought and proposed before Holmes's
-// paragraph on it; every NOTICE thought Holmes speaks to has a lead (otherwise it could not score).
+// The leads (leads.json): quoted, their cards known; one that scores, for a NOTICE thought, is proposed before Holmes's
+// paragraph on it, and one that scores nothing is answered after it is proposed; every NOTICE thought Holmes speaks to has a lead (otherwise it could not score).
 {
     const thoughts = new Map((data.thoughts ?? []).map((t) => [t.id, t]));
     const ids = new Set();
@@ -121,7 +121,14 @@ for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes
         if (!l.answer !== !(l.answer_source ?? []).length) err(`${l.id}: an answer and its quotes go together`);
         checkQuotes(`${l.id} answer`, l.answer_source);
         for (const c of l.needs ?? []) if (!model.cards.has(c)) err(`${l.id}: needs unknown card ${c}`);
-        if (l.scores === null || l.scores === undefined) continue;
+        if (l.scores === null || l.scores === undefined) {
+            // A lead that scores nothing settles at its answer: it needs one, after the lead is proposed.
+            if (!l.answer) { err(`${l.id}: a lead that scores nothing needs an answer, where it settles`); continue; }
+            const at = Math.max(0, ...(l.source ?? []).map((q) => story.find(q)?.para ?? Infinity));
+            const answerAt = Math.max(0, ...(l.answer_source ?? []).map((q) => story.find(q)?.para ?? Infinity));
+            if (answerAt <= at) err(`${l.id}: answered at ¶${answerAt}, not after it is proposed at ¶${at}`);
+            continue;
+        }
         const t = thoughts.get(l.scores);
         if (!t || t.tag !== 'NOTICE') { err(`${l.id}: scores ${l.scores}, not a NOTICE thought`); continue; }
         const holmes = t.holmes?.paras?.[0];

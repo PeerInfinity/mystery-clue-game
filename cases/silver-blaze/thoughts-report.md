@@ -53,7 +53,7 @@ None.
 
 ## Notable details
 
-NOTICE thoughts with the cards whose marking as odd counts (`notices`). A notice scores when made before Holmes's paragraph; one he speaks of in its own paragraph, or never, is noticed but cannot score.
+NOTICE thoughts with their cards (`notices`); each scores through its leads (leads.json): a lead under investigation when the story reaches Holmes's paragraph. One he speaks of in its own paragraph, or never, cannot score.
 
 | Thought | Cards | Reader | Holmes | Can score |
 |---|---|---|---|---|

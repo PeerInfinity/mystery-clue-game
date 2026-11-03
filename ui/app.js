@@ -1346,7 +1346,7 @@ function toolLeads() {
     const leads = game.leads();
     const budget = game.leadBudget();
     const under = leads.filter((l) => l.state === 'investigating').length;
-    let h = `<p class="small muted">Lines of inquiry the case has raised. Put the ones you think matter under investigation: what counts is what is under investigation when Holmes takes the matter up. You can stop an investigation at any time.${Number.isFinite(budget) ? ` You may have up to ${budget} at a time.` : ''}</p>`;
+    let h = `<p class="small muted">Lines of inquiry the case has raised. Put the ones you think matter under investigation: what counts is what is under investigation when Holmes takes the matter up. Not every lead goes anywhere. You can stop an investigation at any time.${Number.isFinite(budget) ? ` You may have up to ${budget} at a time.` : ''}</p>`;
     if (Number.isFinite(budget) && under) h += `<p class="small">${under} of ${budget} under investigation${under >= budget ? ': stop one to investigate another' : ''}.</p>`;
     if (!leads.length) return `${h}<p class="muted">No leads yet.</p>`;
     const open = leads.filter((l) => l.state !== 'settled');
@@ -1360,7 +1360,7 @@ function toolLeads() {
         h += '</ul>';
     }
     if (done.length) {
-        h += '<h3 class="section">Taken up by Holmes</h3><ul class="list leads">';
+        h += '<h3 class="section">Settled by the story</h3><ul class="list leads">';
         for (const l of done) h += `<li>${esc(l.text)} <span class="small muted">· ${l.investigated ? 'you were investigating it' : 'not under investigation then'}</span><div class="small">${l.answer ? esc(l.answer) : '<span class="muted">Answer pending.</span>'}</div></li>`;
         h += '</ul>';
     }

@@ -92,3 +92,19 @@ test('a cap on leads under investigation at a time: refused at it, nothing dropp
     assert.ok(h.investigate('lead.curry').ok, 'the knife, taken up at ¶81, left its place');
     assert.equal(new Game(model, { pace: INCREMENTAL }).leadBudget(), Infinity);
 });
+
+test('a lead that scores nothing settles when the story answers it, frees its place and shows the answer', () => {
+    const g = medium();
+    const l = g.leadById().get('lead.paper');
+    assert.equal(l.deadline, l.answerAt, 'its deadline is its answer');
+    readTo(g, l.at);
+    assert.ok(g.investigate('lead.paper').ok);
+    readTo(g, l.answerAt - 1);
+    assert.equal(g.leads().find((x) => x.id === 'lead.paper').state, 'investigating');
+    readTo(g, l.answerAt);
+    const s = g.leads().find((x) => x.id === 'lead.paper');
+    assert.equal(s.state, 'settled');
+    assert.ok(s.investigated && s.answer, 'investigated, and the answer shown');
+    assert.ok(!g.isInvestigating('lead.paper'), 'its place is free');
+    assert.equal(g.noticeScore().investigated, 0, 'and it scores nothing');
+});

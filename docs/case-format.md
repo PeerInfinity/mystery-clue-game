@@ -542,7 +542,9 @@ the scored notice; that job went to leads.
 words, a question or a detail; never ahead of the story), `source` (its quotes: it is proposed once they are all
 read), `needs` (cards that must be held) and `scores` (the NOTICE thought it scores for; null for a lead that scores
 nothing), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
-read, *pending* until then; the validator wants them at or after Holmes's paragraph). `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
+read, *pending* until then; the validator wants them at or after Holmes's paragraph). A lead that scores nothing (a false
+lead, or a true one Holmes never draws attention to) must have an answer after it is proposed: its deadline is the
+answer's paragraph, where it settles and frees its place; it never scores and costs only the place while it is held. `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
 says which score. `investigate(id)` puts a proposed lead under investigation, `stopInvestigating(id)` takes it off;
 both are free, within a cap (`leadBudget()`, the option `leads`: 16 on Trivial and Easy, 12 on Medium, 8 on Hard; no
 cap in incremental mode): at the cap `investigate` is refused (`full`) and nothing is dropped to make room. A lead
@@ -550,7 +552,8 @@ Holmes has taken up leaves its place. Before Holmes's first paragraph on its NOT
 (`leadsSettled`: under investigation then or not) and can no longer be changed. A NOTICE row scores if a lead for it
 was under investigation at that point. `npm run validate` checks the quotes and cards, that a lead is proposed before
 its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver Blaze: the 8 scored NOTICE rows, one
-lead each (two on the milliner's bill, its name and its sum). Planned (docs/ideas.md): the story's false leads, new
+lead each (two on the milliner's bill, its name and its sum), and 4 that score nothing: the paper offered the maid
+(answered ¶58), the gypsies breaking camp (¶114), Simpson's bets (¶218) and the wound (¶226, the horse's shoe). Planned (docs/ideas.md): the story's false leads, new
 inferences that propose the true ones, and in incremental mode a minute per investigation running beside the checks.
 
 ## Defeasibility
