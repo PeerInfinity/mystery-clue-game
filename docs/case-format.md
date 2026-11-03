@@ -553,7 +553,9 @@ Holmes has taken up leaves its place. Before Holmes's first paragraph on its NOT
 was under investigation at that point. `npm run validate` checks the quotes and cards, that a lead is proposed before
 its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver Blaze: the 8 scored NOTICE rows, one
 lead each (two on the milliner's bill, its name and its sum), and 4 that score nothing: the paper offered the maid
-(answered ¶58), the gypsies breaking camp (¶114), Simpson's bets (¶218) and the wound (¶226, the horse's shoe). Planned (docs/ideas.md): the story's false leads, new
+(answered ¶58), the gypsies breaking camp (¶114), Simpson's bets (¶218), the wound (¶226, the horse's shoe), what the
+stranger wanted (¶40), Straker going down at one (¶220), the cravat and the blood on the knife (¶226), why nobody has
+seen the horse (¶146) and the winner with no white (¶202). Planned (docs/ideas.md): the story's false leads, new
 inferences that propose the true ones, and in incremental mode a minute per investigation running beside the checks.
 
 ## Defeasibility

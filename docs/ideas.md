@@ -439,6 +439,13 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   gypsies breaking camp (¶62 → ¶114), Simpson's £5,000 against the favourite (¶39 → ¶218), the wound (¶40 → ¶226).
   Left out: the maid (as a detail question, "who could get at the dish?", it leads to Straker, and the scored drop
   covers her) and Brown's bets (too borderline: they explain why he hid the horse).
+- **Batch 2 (built 2026-11-03)**: what the stranger wanted (¶28 → ¶40, false), Straker going down at one (¶32 →
+  ¶220), the cravat (¶35 → ¶226), the blood on the knife (¶35 → ¶226), why nobody has seen the horse (¶37 → ¶146,
+  Brown's dawn rather than Holmes's ¶114 "would surely have been seen"), the winner with no white (¶198 → ¶202): true
+  leads that score nothing, but the stranger's. Worded as detail questions, most of the catalogue's false theories
+  become the detail they rest on, whose answer is true: real red herrings are few. Next (batch 3): the inferences that
+  propose the scored leads, so they are earned by reasoning (the catalogue's NEW-1 to NEW-11), and the leads those
+  inferences raise.
 - **To look into later** (the user, 2026-11-03): how leads relate to the Questions mechanic (the case's questions and
   their answers).
 - **No backward-compatible saves** (there are no players): the save version is checked, a save of another version
