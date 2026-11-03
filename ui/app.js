@@ -701,11 +701,22 @@ function renderTabs() {
         if (!shown(i)) return;
         // One row that scrolls sideways (Q5), the tab shown kept in view.
         const row = el.querySelector('.tabs');
-        row.innerHTML = TABS.filter(([t]) => !hidden[t] || ui.panels[i].tab === t)
+        // Rebuilt only when it changed, and where it was scrolled sideways kept (a redraw never sends it back to the left).
+        const html = TABS.filter(([t]) => !hidden[t] || ui.panels[i].tab === t)
             .map(([t, name]) => `<button data-tab="${t}" class="tab${ui.panels[i].tab === t ? ' on' : ''}">${esc(label[t] ?? name)}</button>`).join('');
-        const on = row.querySelector('.tab.on')?.getBoundingClientRect();
-        const box = row.getBoundingClientRect();
-        if (on && (on.left < box.left || on.right > box.right)) row.scrollLeft += on.left - box.left - 8;
+        if (row.dataset.html !== html) {
+            const left = row.scrollLeft;
+            row.innerHTML = html;
+            row.dataset.html = html;
+            row.scrollLeft = left;
+        }
+        // The tab shown brought into view when it changes (not on every redraw: the player may have scrolled away).
+        if (row.dataset.on !== ui.panels[i].tab) {
+            row.dataset.on = ui.panels[i].tab;
+            const on = row.querySelector('.tab.on')?.getBoundingClientRect();
+            const box = row.getBoundingClientRect();
+            if (on && (on.left < box.left || on.right > box.right)) row.scrollLeft += on.left - box.left - 8;
+        }
         const k = backFor(i);
         const back = el.querySelector('.back-row');
         back.hidden = k < 0;
@@ -2644,8 +2655,20 @@ function drawSearch() {
     settle(() => {
         const i = panelOf('search');
         if (i >= 0) search.paint($(`#panel-${i}`));
-        renderTabs();
-        renderReader();
+        // A check changes only the Search tab's label and the search's line in the reading bar: those are updated in
+        // place, and the rest of the page is left as it is (a find, a collect, an ask or a paragraph read redraws it all,
+        // through changed()).
+        const label = search.tabLabel();
+        document.querySelectorAll('.tabs .tab[data-tab="search"]').forEach((b) => { if (b.textContent !== label) b.textContent = label; });
+        const reader = $('#reader');
+        const line = reader.querySelector('.search-note');
+        const html = search.readerHtml();
+        if (line && html) {
+            const t = document.createElement('template');
+            t.innerHTML = html;
+            line.replaceWith(t.content);
+            if (reader.dataset.floor) search.floors(reader);
+        } else if (line || html) renderReader();
     }, () => model.problem).catch((e) => console.error(e));
 }
 window.addEventListener('pagehide', () => search.save());

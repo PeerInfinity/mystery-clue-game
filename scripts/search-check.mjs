@@ -1,6 +1,6 @@
 // Incremental mode's Search tab in the real page: the pace chosen (Hard, locked), the tab, the story waiting, one check
 // a second with a bar in the tab and in the reading bar, the queue (its first is the next check), the nine categories
-// counted; the page does not jump and the log keeps its place; Pause; at 0 s a
+// counted; the page does not jump, the log and the tab bars keep their place; Pause; at 0 s a
 // check the search lifts the wait and the player reads on; reading by itself it goes on; a reload keeps the counts; no
 // console error (about 5 minutes).
 //   node scripts/search-check.mjs [shots dir]   (the game served at URL, default http://localhost:8321/; Chrome on 9333)
@@ -59,6 +59,16 @@ for (let i = 0; i < 40; i++) {
 }
 check(movedUp === 0, `the page does not jump (moved up ${movedUp} times in 8 s)`);
 check(nexts >= 4 && wrong.length === 0, `the queue's first is the next check (${nexts} checks${wrong.length ? `; ${wrong.slice(0, 2).join(' | ')}` : ''})`);
+// The tab bars keep where they were scrolled sideways: a check redraws the Search tab's label in place, and a full
+// redraw (a find) keeps the scroll.
+const rowsAt = `[...document.querySelectorAll('.tabs')].map((r) => r.scrollLeft).join(',')`;
+await p.ev(`document.querySelectorAll('.tabs').forEach((r) => { r.scrollLeft = 60; }); 1`);
+const rows0 = await p.ev(rowsAt);
+const tabN0 = await p.ev(`document.querySelectorAll('.search-log li').length`);
+await p.sleep(4500);
+const rows1 = await p.ev(rowsAt);
+const tabN1 = await p.ev(`document.querySelectorAll('.search-log li').length`);
+check(rows0 === rows1 && rows0 !== '0,0' && tabN1 > tabN0, `the tab bars keep their sideways scroll over ${tabN1 - tabN0} checks (${rows0} → ${rows1})`);
 // The log keeps its place: scrolled down, new entries come in above, out of view.
 await p.ev(`document.querySelector('.settings').open = true; 1`);
 await p.choose('#search-delay', '0.2');
