@@ -418,13 +418,21 @@ export class Game {
         this.reset();
         const target = Math.min(state.read ?? 1, this.story.paragraphs.length);
         const asked = [...(state.asked ?? [])].sort((a, b) => a[1] - b[1]);
+        const collectedAt = new Map(state.collected ?? []);
         // An inference the player built comes back at the paragraph they built it, before a character can state it
         // further on (a later statement would otherwise take its place: "Holmes drew this inference").
         const built = [...(state.built ?? [])].filter(([id]) => this.inferenceById.has(id)).sort((a, b) => a[1] - b[1]);
         const rebuild = ([id, para]) => { if (this.knows(id)) return; this.#unlock(id, para); this.inferenceHow.set(id, { how: 'built' }); };
         while (this.read < target) {
             this.#readNext();
-            while (asked.length && asked[0][1] < this.read) this.ask(asked.shift()[0]);
+            while (asked.length && asked[0][1] < this.read) {
+                // Hard: the card asked about is collected before it is asked about; the cards collected come back only
+                // after the reading, so this one comes back here, from the paragraph it was collected from.
+                const id = asked.shift()[0];
+                const was = this.collecting() && !this.knows(id) && collectedAt.get(id);
+                if (was !== undefined && was !== false) this.#unlock(id, was);
+                this.ask(id);
+            }
             while (built.length && built[0][1] < this.read) rebuild(built.shift());
         }
         if (this.collecting()) for (const [id, para] of state.collected ?? []) this.#unlock(id, para);
