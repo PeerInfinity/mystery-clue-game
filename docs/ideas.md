@@ -401,6 +401,24 @@ largest space of each (builds and answers, no added feedback):
 Each setting multiplies the runs of the page checks (12–13 minutes each; "check every difficulty"), so start with
 the feedback strength and the routes, and add more only when play shows the need.
 
+### Investigation, split from "important" (under discussion, 2026-11-03)
+
+"Mark as important" does two jobs: the player's own mark (it sorts the Cards list and steers the search) and the
+scored notice (a NOTICE row scores if one of its cards is marked before Holmes's paragraph). The scored job costs
+nothing (marking every card scores all 8 rows), the player gets no signal, and the automation can only brute-force
+it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a single card). The user agreed to split
+them: *important / unimportant* stay as personal marks; the scored act becomes **flag for investigation**, to be
+reworked in a session of its own. The user's current ideas, none decided:
+
+- Investigation as an action apart from inference: an inference check takes a second, an investigation a minute;
+  perhaps both clocks run at once on different tasks (undecided); perhaps the 8 unscored investigations cost the
+  minute too (undecided).
+- The game proposes what to prioritise investigating, the false leads the story proposes among them; new
+  inferences, once built, propose the real ones. Perhaps a panel of its own.
+- The aim: choosing the right investigations is the player's highest-impact decision.
+- Raised and set aside: a limit on flags at a time (a guess that blocks a slot, with nothing for the automation
+  to choose by), and a flag with feedback and a cooldown (an oracle on a timer: brute force, slower).
+
 ### Archipelago integration
 
 Clues cannot be used for inference until the player receives their Archipelago item, much like the DepGraph
