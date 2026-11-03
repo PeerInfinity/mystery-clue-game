@@ -47,13 +47,15 @@ const look = `JSON.stringify({
     head: document.querySelector('#panel-1 .search-queue li')?.textContent ?? '',
     found: document.querySelector('#panel-1 .search-log li')?.classList.contains('out-found') ?? false })`;
 let prev = JSON.parse(await p.ev(look));
-let movedUp = 0, nexts = 0, wrong = [];
+let movedUp = 0, moved = 0, nexts = 0, wrong = [];
 const boxes = new Set([prev.box]);
 for (let i = 0; i < 40; i++) {
     await p.sleep(200);
     const cur = JSON.parse(await p.ev(look));
     if (cur.tops.length === prev.tops.length && cur.tops.some((t, j) => t < prev.tops[j])) movedUp++;
     boxes.add(cur.box);
+    // A check that found nothing moves nothing at all, down either (the table's rows are one line each).
+    if (!cur.found && cur.tops.length === prev.tops.length && cur.tops.some((t, j) => t !== prev.tops[j])) moved++;
     if (cur.now && prev.now && cur.now !== prev.now) {
         nexts++;
         if (!cur.found && cur.now !== prev.head) wrong.push(`${prev.head} ≠ ${cur.now}`);
@@ -61,6 +63,7 @@ for (let i = 0; i < 40; i++) {
     prev = cur;
 }
 check(movedUp === 0, `the page does not jump (moved up ${movedUp} times in 8 s)`);
+check(moved === 0, `a check that finds nothing moves nothing (moved ${moved} times)`);
 check(boxes.size === 1 && !boxes.has(-1), `the "Next up" box keeps one height (${[...boxes].join(', ')} px)`);
 check(nexts >= 4 && wrong.length === 0, `the queue's first is the next check (${nexts} checks${wrong.length ? `; ${wrong.slice(0, 2).join(' | ')}` : ''})`);
 // The tab bars keep where they were scrolled sideways: a check redraws the Search tab's label in place, and a full

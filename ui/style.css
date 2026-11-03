@@ -407,9 +407,11 @@ h4.sub { margin: 14px 0 4px; font-size: 14px; }
 .search-log li.gap { text-align: center; font-style: italic; border-bottom: none; }
 .search-table { width: 100%; border-collapse: collapse; }
 .search-table th { text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--line); padding: 2px 4px; }
-.search-table td { padding: 2px 4px; vertical-align: top; }
+.search-table td { padding: 2px 4px; vertical-align: top; white-space: nowrap; }
 .search-table td:nth-child(n+3) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.search-table tr.terms td { font-size: 11px; text-align: left; padding-bottom: 6px; border-bottom: 1px solid var(--line); white-space: normal; }
+/* Every row one line, whatever its numbers (a row that wrapped as they grew pushed the page down): the numbers that
+   make up a count are cut short, the whole of them on hover (max-width 0: the cell takes the table's width, not its own). */
+.search-table tr.terms td { font-size: 11px; text-align: left; padding-bottom: 6px; border-bottom: 1px solid var(--line); max-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .search-table tr.waiting td:nth-child(2) { font-weight: 600; }
 .reader .search-note { color: var(--ink); }
 .search-table-wrap { overflow-x: auto; }

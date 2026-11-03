@@ -302,7 +302,9 @@ under way.
   hold it, since the floors start again when the story moves on or the width changes, and the rows' wrapping and
   count changed the height from one check to the next. The box now always has ten one-line rows (a long label cut
   short, the whole of it on hover; blank rows where the queue is shorter) and the same words beneath; search-check
-  measures its height over eight checks.
+  measures its height over eight checks. The panel still moved below it: the table's rows wrapped as their numbers
+  grew (a category row 28 → 42 px, its line of terms 24 → 56 px), and the floor kept each growth. Every row is now one
+  line (the terms cut short, whole on hover); search-check now fails if a check that finds nothing moves anything.
 - **A page that does not jump** (the user's ask, after the Prestige Tree loader's grow-only floors): every piece of
   the tab (the waits, the check under way, *Next up*, the table, the log) is drawn even when empty and keeps the
   largest height it has had; the reading bar too. Each number in the table has its own box whose width in characters

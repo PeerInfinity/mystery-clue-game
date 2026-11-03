@@ -199,11 +199,12 @@ export function makeSearch(ctx) {
                 const waiting = a.families.has(cat);
                 const pct = x.total ? x.ruledOut / x.total : 0;
                 const terms = x.terms.filter((t) => x.terms.length === 1 || t.factors.every((f) => f.n > 0)).map((t) => (x.terms.length > 1 ? `${esc(t.label)}: ` : '') + t.factors.map((f) => `${num(f.n)} ${esc(f.label)}`).join(' × ')).join(' + ');
+                const sum = `${terms} ${x.terms.length > 1 || x.terms[0]?.factors.length > 1 ? `= ${num(x.total)}` : ''}`;
                 h += `<tr class="${waiting ? 'waiting' : ''}"><td>${searched ? `<input type="checkbox" data-search-run="${cat}" ${a.running.has(cat) ? 'checked' : ''} title="Search this category">` : ''}</td>
 <td title="${esc(CATEGORY_WORDS[cat][1])}">${esc(CATEGORY_WORDS[cat][0])}${waiting ? ' <span class="small muted">· waited for</span>' : ''}</td>
 <td>${wide(`${cat}:total`, x.total)}</td><td>${wide(`${cat}:checked`, x.checked)}</td><td>${wide(`${cat}:found`, x.found)}</td>
 <td>${wide(`${cat}:ruledOut`, x.ruledOut)}<div class="search-bar thin"><div class="search-fill" style="width:${(100 * pct).toFixed(1)}%"></div></div></td><td>${wide(`${cat}:stale`, x.stale)}</td></tr>
-<tr class="terms"><td></td><td colspan="6" class="muted">${terms} ${x.terms.length > 1 || x.terms[0]?.factors.length > 1 ? `= ${num(x.total)}` : ''}</td></tr>`;
+<tr class="terms"><td></td><td colspan="6" class="muted" title="${sum}">${sum}</td></tr>`;
             }
             h += '</tbody></table></div><p class="small muted">In all: what could be tried with what you hold now, the numbers it is made of beneath. Ruled out: known not to make anything now. Stale: a “no” that something new may have turned into a “yes”, to be checked again.</p>';
         }
