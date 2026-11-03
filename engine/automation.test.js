@@ -146,3 +146,23 @@ test('builds go by "onto something": every card on its own first, a pair only of
     }
     assert.ok(pairs > 0, 'some larger sets were tried');
 });
+
+test('the log keeps every find and the last 100 other checks; the save keeps the same', () => {
+    const g = fresh();
+    const a = new Automation(g, { seed: 1 });
+    let finds = 0;
+    const rest = [];
+    while (a.n < 3000) {
+        if (!a.next()) break;
+        const e = a.execute();
+        if (e.out === 'found') finds++; else rest.push(e.n);
+    }
+    assert.ok(finds > 0, 'something was found');
+    assert.equal(a.log.filter((e) => e.out === 'found').length, finds, 'every find kept');
+    const others = a.log.filter((e) => e.out !== 'found');
+    assert.equal(others.length, 100, 'the last 100 others');
+    assert.deepEqual(others.map((e) => e.n), rest.slice(-100), 'the newest 100 of the others');
+    assert.ok(a.log.every((e, i) => i === 0 || e.n > a.log[i - 1].n), 'in order');
+    const b = new Automation(g, { seed: 1, state: JSON.parse(JSON.stringify(a.save())) });
+    assert.deepEqual(b.log, a.log);
+});

@@ -205,9 +205,16 @@ export function makeSearch(ctx) {
             h += '</tbody></table></div><p class="small muted">In all: what could be tried with what you hold now, the numbers it is made of beneath. Ruled out: known not to make anything now. Stale: a “no” that something new may have turned into a “yes”, to be checked again.</p>';
         }
         // The log, newest first.
-        const log = a.log.filter((e) => !S.onlyFound || e.out === 'found').slice(-150).reverse();
+        // The log, newest first: every find, and the last 100 other checks (Automation's RECENT); where checks between
+        // two entries were not kept, a line says how many.
+        const log = a.log.filter((e) => !S.onlyFound || e.out === 'found').reverse();
+        const gap = (k) => `<li class="gap muted">· ${num(k)} earlier check${k === 1 ? '' : 's'} not shown ·</li>`;
         h += `<h4 class="sub">What has been tried</h4><label class="small"><input type="checkbox" data-search-onlyfound ${S.onlyFound ? 'checked' : ''}> Only what was found</label><ol class="search-log small" data-floor="log">`;
-        for (const e of log) h += `<li data-n="${e.n}" class="out-${e.out}"><span class="muted">#${num(e.n)} ¶${e.para}</span> <span class="cat-tag">${esc(CATEGORY_WORDS[e.cat][0])}</span> ${esc(e.label)} → <b>${OUT_WORDS[e.out]}</b>${e.what ? `: ${esc(e.what)}` : ''}</li>`;
+        log.forEach((e, i) => {
+            h += `<li data-n="${e.n}" class="out-${e.out}"><span class="muted">#${num(e.n)} ¶${e.para}</span> <span class="cat-tag">${esc(CATEGORY_WORDS[e.cat][0])}</span> ${esc(e.label)} → <b>${OUT_WORDS[e.out]}</b>${e.what ? `: ${esc(e.what)}` : ''}</li>`;
+            const k = e.n - (log[i + 1]?.n ?? 0) - 1;
+            if (!S.onlyFound && k > 0) h += gap(k);
+        });
         h += `</ol>${log.length ? '' : '<p class="small muted">Nothing yet.</p>'}`;
         return h;
     }
@@ -249,7 +256,7 @@ export function makeSearch(ctx) {
     function hold(body) {
         const log = body?.querySelector('.search-log');
         if (!log || log.scrollTop <= 0) return null;
-        const li = [...log.children].find((x) => x.offsetTop + x.offsetHeight > log.scrollTop);
+        const li = [...log.children].find((x) => x.dataset.n && x.offsetTop + x.offsetHeight > log.scrollTop);
         return { top: log.scrollTop, n: li?.dataset.n, d: li ? li.offsetTop - log.scrollTop : 0 };
     }
     /** After: the floors, and the log scrolled back to the same entry (new entries come in above it, out of view). */

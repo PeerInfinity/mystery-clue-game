@@ -307,7 +307,12 @@ under way.
   entry at its top in place when scrolled down; the next check is planned before the page is drawn, so "nothing under
   way" no longer flashes between checks. The engine plans a check before making it (`next()`, `queue()`, `execute()`), which also makes a
   check safe to make again when the solver hands it to its worker (the move is made once).
-- **Kept across reloads**: the counts, the negatives and the last 200 log lines, beside the game's save. A whole game's
+- **The log** (the user's ask, 2026-11-02): every find and the last 100 other checks, saved whole. Before, the last 500
+  in the page and 200 in the save, so the finds (77 in a game of about 18,500 checks; 1,880 "yes" parts, 602
+  collects and asks, some 16,000 "no") were pushed out within minutes. The "yes" parts are not kept as finds: they
+  are steps on the way, and would be nearly 2,000. Where checks were let go, the page says how many (from the
+  check numbers).
+- **Kept across reloads**: the counts, the negatives and the log, beside the game's save. A whole game's
   negatives are 2.8 MB written as card ids; as the cards' places in the case, under 0.9 MB.
 - **The time a game takes**: at first 46,000–55,000 checks over three orders (13–15 hours at one a second), 33,000–38,000
   of them builds. Since builds go by "onto something" (below), 18,500–22,300 (5–6 hours), 5,500–6,000 of them builds.

@@ -41,7 +41,9 @@ export const FAMILY = { deduction: 'build', notice: 'notice', raise: 'raise', ch
 export const waitCategory = (w) => (w.keep ? 'build' : FAMILY[w.row.split('|')[1]]);
 const POOL = ['entities', 'events', 'claims', 'rules', 'inferences', 'propositions'];
 const MAX_SET = 8;
-const LOG_MAX = 500;
+// The log keeps every find and the last RECENT of the other checks (a game makes some 77 finds in about 18,500 checks);
+// the checks between two entries kept are told by their numbers (`n`).
+const RECENT = 100;
 
 function rng(seed) {
     let a = seed >>> 0;
@@ -71,7 +73,7 @@ export class Automation {
         // the Cards list's count (perCard); the search itself tries them again on each pass.
         this.onto = new Set();
         this.stale = Object.fromEntries(CATEGORIES.map((c) => [c, new Set()]));
-        this.log = [];                  // {n, para, cat, label, out: 'yes' | 'no' | 'found', what?}
+        this.log = [];                  // {n, para, cat, label, out: 'yes' | 'no' | 'found', what?}: every find, the last RECENT others
         this.n = 0;                     // checks made
         this.gens = new Map();          // category → {it, version, pending: check | null}
         this.spent = new Map();         // category → {version, waits}: a pass that found nothing
@@ -98,7 +100,7 @@ export class Automation {
     #unpack(c, k) { return c === 'build' ? k.split('.').map((i) => this.#ids()[parseInt(i, 36)]).join('|') : k; }
     save() {
         return {
-            seed: this.seed, n: this.n, cards: this.model.cards.size, running: [...this.running], autoRead: this.autoRead, stats: this.stats, log: this.log.slice(-200),
+            seed: this.seed, n: this.n, cards: this.model.cards.size, running: [...this.running], autoRead: this.autoRead, stats: this.stats, log: this.log,
             neg: Object.fromEntries(CATEGORIES.map((c) => [c, [...this.neg[c].keys()].map((k) => this.#pack(c, k))])),
             onto: [...this.onto].map((k) => this.#pack('build', k)),
             stale: Object.fromEntries(CATEGORIES.map((c) => [c, [...this.stale[c]].map((k) => this.#pack(c, k))])),
@@ -118,8 +120,16 @@ export class Automation {
         }
         if (same) for (const p of s.onto ?? []) this.onto.add(this.#unpack('build', p));
         this.log = s.log ?? [];
+        this.#trimLog();
         // The order goes on from where it was, not from the start.
         for (let i = 0; i < this.n % 1000; i++) this.r();
+    }
+
+    /** The log: every find kept; of the rest, only the last RECENT (the oldest dropped first). */
+    #trimLog() {
+        let others = this.log.reduce((m, e) => m + (e.out === 'found' ? 0 : 1), 0);
+        if (others <= RECENT) return;
+        this.log = this.log.filter((e) => e.out === 'found' || others-- <= RECENT);
     }
 
     // ---------- the steering ----------
@@ -564,7 +574,7 @@ export class Automation {
             const out = c.out ? c.out(result) : c.kept ? (result ? 'found' : 'no') : result ? 'yes' : 'no';
             c.entry = { n: this.n, para: this.g.read - 1, cat: c.cat, label: c.label, out, ...(c.what && out === 'found' && { what: c.what(result) }) };
             this.log.push(c.entry);
-            if (this.log.length > LOG_MAX) this.log.splice(0, this.log.length - LOG_MAX);
+            this.#trimLog();
         }
         const gen = this.gens.get(c.cat);
         if (gen?.pending === c) { gen.pending = null; this.#advance(c.cat, gen, c.result); }
