@@ -1,6 +1,6 @@
 // Incremental mode's Search tab in the real page: the pace chosen (Hard, locked), the tab, the story waiting, one check
-// a second with a bar in the tab and in the reading bar, the queue (its first is the next check; its box one height), the nine categories
-// counted; the page does not jump, the log and the tab bars keep their place; Pause; at 0 s a
+// a second with a bar in the tab and in the reading bar, the queue (its first is the next check; its box one height; a line per category of what is planned), the nine categories
+// counted; the page does not jump, the log, the table's sideways scroll and the tab bars keep their place; Pause; at 0 s a
 // check the search lifts the wait and the player reads on; reading by itself it goes on; a reload keeps the counts; no
 // console error (about 5 minutes).
 //   node scripts/search-check.mjs [shots dir]   (the game served at URL, default http://localhost:8321/; Chrome on 9333)
@@ -35,7 +35,7 @@ const log1 = await p.ev(`document.querySelectorAll('.search-log li').length`);
 check(log1 >= 2 && log1 <= 5, `about one check a second (${log1} in ~3.5 s)`);
 check(await p.ev(`!!document.querySelector('#panel-1 .search-fill.run') && !!document.querySelector('#reader .search-fill.run')`), 'a bar in the tab and one in the reading bar');
 check(await p.ev(`document.querySelectorAll('.search-queue li').length`) >= 1, 'the queue shows the next checks');
-check(await p.ev(`document.querySelectorAll('.search-table tbody tr:not(.terms)').length`) === 9, 'nine categories counted');
+check(await p.ev(`document.querySelectorAll('.search-table tbody tr:not(.terms):not(.size)').length`) === 9, 'nine categories counted');
 if (SHOTS) await p.shot(`${SHOTS}/search-1s.png`);
 // The page does not jump: over about eight checks, nothing below the reading bar moves up (a piece may grow, never
 // shrink back). And the queue says what comes next: when the check under way changes, it is the one the queue showed
@@ -76,6 +76,19 @@ await p.sleep(4500);
 const rows1 = await p.ev(rowsAt);
 const tabN1 = await p.ev(`document.querySelectorAll('.search-log li').length`);
 check(rows0 === rows1 && rows0 !== '0,0' && tabN1 > tabN0, `the tab bars keep their sideways scroll over ${tabN1 - tabN0} checks (${rows0} → ${rows1})`);
+// The plan: a line per category, how many more it has planned than the rows show.
+check(/more planned than shown|all shown|all planned so far shown/.test(await p.text('#panel-1 .search-plan') ?? ''), 'a line per category says how many more are planned');
+// The table keeps its sideways scroll when it is wider than the panel (made narrow here).
+await p.ev(`(() => { const st = document.createElement('style'); st.id = 'narrow'; st.textContent = '.search-table-wrap { max-width: 280px; }'; document.head.append(st); return 1; })()`);
+await p.sleep(1200);
+await p.ev(`document.querySelector('#panel-1 .search-table-wrap').scrollLeft = 90; 1`);
+const sideN0 = await p.ev(`document.querySelectorAll('.search-log li').length`);
+const side0 = await p.ev(`document.querySelector('#panel-1 .search-table-wrap').scrollLeft`);
+await p.sleep(3500);
+const side1 = await p.ev(`document.querySelector('#panel-1 .search-table-wrap').scrollLeft`);
+const sideN1 = await p.ev(`document.querySelectorAll('.search-log li').length`);
+await p.ev(`document.querySelector('#narrow').remove(); 1`);
+check(side0 > 0 && side0 === side1 && sideN1 > sideN0, `the table keeps its sideways scroll over ${sideN1 - sideN0} checks (${side0} → ${side1})`);
 // The log keeps its place: scrolled down, new entries come in above, out of view.
 await p.ev(`document.querySelector('.settings').open = true; 1`);
 await p.choose('#search-delay', '0.2');

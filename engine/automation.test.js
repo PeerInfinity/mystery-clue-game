@@ -86,8 +86,6 @@ test('a check is planned before it is made; the queue starts with it; a save car
     assert.equal(a.next(), next, 'planning again plans the same check');
     const q = a.queue();
     assert.equal(q[0], next);
-    const turns = q.filter((c) => !['collect', 'ask'].includes(c.cat));
-    assert.equal(new Set(turns.map((c) => c.cat)).size, turns.length, 'after the collects and asks, one check per category');
     const before = a.n;
     const entry = a.execute();
     assert.equal(entry.label, next.label);
@@ -165,4 +163,46 @@ test('the log keeps every find and the last 100 other checks; the save keeps the
     assert.ok(a.log.every((e, i) => i === 0 || e.n > a.log[i - 1].n), 'in order');
     const b = new Automation(g, { seed: 1, state: JSON.parse(JSON.stringify(a.save())) });
     assert.deepEqual(b.log, a.log);
+});
+
+test('a reload keeps what was asked about, and what the asks recalled (Hard collects its cards)', () => {
+    const g = fresh();
+    const a = new Automation(g, { seed: 2 });
+    a.step(1500);
+    assert.ok(g.asked.length > 5, `asked about ${g.asked.length} cards`);
+    const h = fresh();
+    h.load(JSON.parse(JSON.stringify(g.save())));
+    assert.deepEqual(h.asked.map(([id]) => id).sort(), g.asked.map(([id]) => id).sort(), 'the asks come back');
+    assert.deepEqual([...h.unlocked.keys()].sort(), [...g.unlocked.keys()].sort(), 'the same cards held, the facts the asks recalled among them');
+});
+
+test('the plan is what follows: every check it lists is made in its order while every answer is "no"', () => {
+    const g = fresh();
+    const a = new Automation(g, { seed: 3 });
+    let preds = [], hit = 0, lines = 0;
+    for (let i = 0; i < 2500 && a.next(); i++) {
+        const pl = a.plan(11);
+        assert.equal(pl.list[0], a.next(), 'the plan starts with the check planned');
+        if (pl.lines.some((l) => l.cat === 'build' && l.stage && l.more > 0)) lines++;
+        const e = a.execute();
+        preds = preds.filter((p) => {
+            const want = p.list.shift();
+            if (!want) return false;
+            if (p.excused) return false;
+            // A complete set's "yes" puts its kinds first (not foreseen: the answer says the set is complete).
+            if (e.cat === 'build' && / as /.test(e.label) && !/ as /.test(want.label)) return false;
+            assert.equal(`${want.cat}: ${want.label}`, `${e.cat}: ${e.label}`, `check #${e.n}`);
+            hit++;
+            // A build's "yes" leaves its level's list as it was; a "yes" elsewhere or a find may change what follows.
+            if (e.out === 'found' || (e.out === 'yes' && (e.cat !== 'build' || / as /.test(e.label)))) p.excused = true;
+            return true;
+        });
+        preds.push({ list: pl.list.slice(1), excused: e.out === 'found' || (e.out === 'yes' && (e.cat !== 'build' || / as /.test(e.label))) });
+    }
+    assert.ok(hit > 10000, `${hit} checks foretold`);
+    assert.ok(lines > 100, 'the builds say how many more of their level are planned');
+    // The builds counted by the size of their sets add up to the builds counted.
+    const sizes = a.counts().build.sizes;
+    assert.equal(sizes.reduce((n, z) => n + z.checked, 0), a.stats.build.checked);
+    assert.ok(a.log.filter((e) => e.cat === 'build').every((e) => e.size >= 1), 'a build in the log says the size of its set');
 });

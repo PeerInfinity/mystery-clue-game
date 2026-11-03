@@ -298,6 +298,17 @@ under way.
   showed one check per category including collect and ask, and the user found it wrong: it named an ask while a dozen
   collects came first. Measured over 20,000 checks, the queue now names what follows in 4,570 of 4,578 predictions
   (the misses: a check that changed the hand without counting as a find).
+- **The plan** (the user asked for the rest of the current category, what comes after it, a category per size of
+  set, and a list while builds run, rather than the one check of each category): each search's loops publish their
+  list and where they are (frames, `#frame`), and `plan()` interleaves them as the categories take turns
+  (`next()`/`execute()`'s own rule: a category leaves the turns after its last check). A frame's rest is exact while
+  every answer is "no"; a build level's list holds whatever its answers (they decide the next level), except that a
+  complete set's "yes" puts its kinds first; the list stops where a stage is not made yet (a build's next level, a
+  check's second field, the pairs) and a line says what comes then. Measured over 19,000 checks: 180,020 checks
+  foretold, none wrong outside those cases; the search itself unchanged (the same 18,522, 18,648 and 22,324 checks to
+  70 on seeds 1–3, since the lists consume the shuffle in the same order). Sizes are shown, not separate
+  categories (the user's choice): a size cannot take turns with the one before it, whose answers make its list. Per
+  size (seed 1) the checks were 875, 3,297, 472, 395, 257, 112, 29 and 15 for sets of 1 to 8.
 - **Next up keeps one shape** (the user saw the panel shift as the queue changed): the grow-only floor alone did not
   hold it, since the floors start again when the story moves on or the width changes, and the rows' wrapping and
   count changed the height from one check to the next. The box now always has ten one-line rows (a long label cut
@@ -305,6 +316,8 @@ under way.
   measures its height over eight checks. The panel still moved below it: the table's rows wrapped as their numbers
   grew (a category row 28 → 42 px, its line of terms 24 → 56 px), and the floor kept each growth. Every row is now one
   line (the terms cut short, whole on hover); search-check now fails if a check that finds nothing moves anything.
+  The rows no longer wrapping, the table scrolls sideways in a narrow panel: a check's redraw now keeps every
+  scroll of the tab, both ways (`hold`/`fit`).
 - **A page that does not jump** (the user's ask, after the Prestige Tree loader's grow-only floors): every piece of
   the tab (the waits, the check under way, *Next up*, the table, the log) is drawn even when empty and keeps the
   largest height it has had; the reading bar too. Each number in the table has its own box whose width in characters

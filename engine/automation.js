@@ -76,6 +76,7 @@ export class Automation {
         this.log = [];                  // {n, para, cat, label, out: 'yes' | 'no' | 'found', what?}: every find, the last RECENT others
         this.n = 0;                     // checks made
         this.gens = new Map();          // category → {it, version, pending: check | null}
+        this.plans = new Map();         // category → the frames of its search's plan (queue(); #frame)
         this.spent = new Map();         // category → {version, waits}: a pass that found nothing
         this.version = 0;               // bumped when the hand changes or a negative goes stale
         this.current = null;            // the check about to be made
@@ -185,6 +186,32 @@ export class Automation {
     #card(id) { return this.names.card(id); }
     #target(t) { return t.theory ? `the theory “${t.label ?? t.theory}”` : `${this.names.slot(t.slot)} — ${this.names.value(t.slot, t.value)}`; }
 
+    // ---------- the plan (queue()) ----------
+    /** A search's loop publishes its list and where it is: {list, i, key(x) (a negative in force skips it), label(x)}
+     *  or {items()}; gap(): a stage not made yet comes after it; then(): that stage; after(): what follows the pass;
+     *  stage(): the name of where it is. */
+    #frame(cat, f) { (this.plans.get(cat) ?? this.plans.set(cat, []).get(cat)).push(f); return f; }
+    #unframe(cat, f) { const st = this.plans.get(cat); const i = st ? st.lastIndexOf(f) : -1; if (i >= 0) st.splice(i, 1); }
+    #ruled(cat, k) { return this.neg[cat].has(k) && !this.stale[cat].has(k); }
+    #frameItems(cat, f) {
+        if (f.items) return f.items();
+        return f.list.slice(f.i + 1).filter((x) => !(f.key && this.#ruled(cat, f.key(x)))).map((x) => ({ cat, label: f.label(x) }));
+    }
+    /** A category's checks after the one it has planned, from the innermost loop out to the first stage not made yet:
+     *  {items, open (more after them, not known yet), then, stage}. */
+    #planOf(cat) {
+        const st = this.plans.get(cat) ?? [];
+        const items = [];
+        for (let j = st.length - 1; j >= 0; j--) {
+            const f = st[j];
+            items.push(...this.#frameItems(cat, f));
+            if (f.gap?.()) return { items, open: true, then: f.then?.() ?? null, stage: st.at(-1)?.stage?.() ?? null };
+        }
+        return { items, open: false, then: st[0]?.after?.() ?? null, stage: st.at(-1)?.stage?.() ?? null };
+    }
+    /** The build checks and finds of one set size (counts()). */
+    #bySize(k) { const by = (this.stats.build.sizes ??= {}); return (by[k] ??= { checked: 0, found: 0 }); }
+
     // ---------- a check ----------
     /** A part (a lookup): a negative not stale answers without a check. */
     *#part(cat, key, label, ask) {
@@ -273,25 +300,46 @@ export class Automation {
         const live = (k) => this.neg.build.has(k) && !this.stale.build.has(k);
         const known = (k) => live(k) || this.onto.has(k);
         const names = (T) => T.map((x) => this.#card(x)).join(' + ');
+        const ontoCheck = (T) => ({ cat: 'build', size: T.length, label: `connect ${names(T)}: onto something?` });
+        const kindCheck = (T, kind) => ({ cat: 'build', size: T.length, label: `connect ${names(T)} as ${CONCLUSION_KINDS[kind].toLowerCase()}` });
+        // The plan (queue()): the sets of this level still to try, in order, and the kinds left of a complete set. A
+        // level's list does not depend on its answers (they decide the next level), so it is exact until something builds.
+        const at = { level: 1, list: [], i: -1, kinds: null };
+        this.#frame('build', {
+            items: () => [...(at.kinds ? at.kinds.list.slice(at.kinds.i + 1).map((kind) => kindCheck(at.kinds.T, kind)) : []),
+                ...at.list.slice(at.i + 1).filter((T) => !known(key(T))).map(ontoCheck)],
+            gap: () => at.level < MAX_SET,
+            stage: () => `sets of ${at.level} card${at.level === 1 ? '' : 's'}`,
+            after: () => 'this pass is over (no set is larger than 8)',
+            then: () => {
+                const n = [...this.onto].filter((k) => k.split('|').length === at.level && inPool(k.split('|'))).length;
+                return `sets of ${at.level + 1} cards, made from the ${n} ${at.level === 1 ? `card${n === 1 ? '' : 's'}` : `set${n === 1 ? '' : 's'} of ${at.level}`} found onto something so far`;
+            },
+        });
         // One set: → 'changed' when it built something. Its answer is kept only once its kinds (if any) are all tried:
         // a pass abandoned between them tries the set again.
         function* attempt(T) {
             const k = key(T);
-            const res = yield { cat: 'build', label: `connect ${names(T)}: onto something?`, run: () => self.g.propose(T), out: (r) => (r.onto || r.needsKind || r.wrongKind ? 'yes' : 'no') };
+            const res = yield { ...ontoCheck(T), run: () => self.g.propose(T), out: (r) => (r.onto || r.needsKind || r.wrongKind ? 'yes' : 'no') };
             if (res.needsKind || res.wrongKind) {
-                for (const kind of self.#shuffle(Object.keys(CONCLUSION_KINDS))) {
-                    const b = yield { cat: 'build', label: `connect ${names(T)} as ${CONCLUSION_KINDS[kind].toLowerCase()}`, run: () => self.g.propose(T, kind), out: (r) => (r.built.length ? 'found' : 'no'), what: (r) => r.built.map((id) => self.#card(id)).join('; ') };
+                at.kinds = { T, list: self.#shuffle(Object.keys(CONCLUSION_KINDS)), i: -1 };
+                for (const kind of at.kinds.list) {
+                    at.kinds.i++;
+                    const b = yield { ...kindCheck(T, kind), run: () => self.g.propose(T, kind), out: (r) => (r.built.length ? 'found' : 'no'), what: (r) => r.built.map((id) => self.#card(id)).join('; ') };
                     // A built inference is a card: the search starts again with it in the pool.
-                    if (b.built.length) { self.stats.build.found += b.built.length; self.dirty = true; return 'changed'; }
+                    if (b.built.length) { self.stats.build.found += b.built.length; self.#bySize(T.length).found += b.built.length; self.dirty = true; return 'changed'; }
                 }
+                at.kinds = null;
             }
             self.stale.build.delete(k);
             if (res.onto) { self.onto.add(k); self.neg.build.delete(k); } else { self.onto.delete(k); self.neg.build.set(k, T); }
             return null;
         }
         // Level 1: every card on its own.
-        for (const x of pool) if (!known(x) && (yield* attempt([x])) === 'changed') return 'changed';
-        // Levels 2 and up: a set onto something and one more card.
+        at.list = pool.map((x) => [x]);
+        for (at.i = 0; at.i < at.list.length; at.i++) if (!known(pool[at.i]) && (yield* attempt([pool[at.i]])) === 'changed') return 'changed';
+        // Levels 2 and up: a set onto something and one more card onto something alone, every part one card smaller
+        // onto something too. The list of a level is made when it starts (its parts are the level before's answers).
         const ones = pool.filter((x) => this.onto.has(x));
         for (let d = 1; d < MAX_SET; d++) {
             const base = [...this.onto].map((k) => k.split('|')).filter((T) => T.length === d && inPool(T))
@@ -299,93 +347,148 @@ export class Automation {
                 .sort((A, B) => { for (let i = 0; i < d; i++) if (rank.get(A[i]) !== rank.get(B[i])) return rank.get(A[i]) - rank.get(B[i]); return 0; });
             if (!base.length) break;
             const seen = new Set();
+            const list = [];
             for (const T of base) for (const z of ones) {
                 if (T.includes(z)) continue;
                 const U = [...T, z];
                 const k = key(U);
                 if (seen.has(k)) continue;
                 seen.add(k);
-                if (known(k)) continue;
                 if (d >= 2 && !U.every((_, i) => this.onto.has(key(U.filter((__, j) => j !== i))))) continue;
-                if ((yield* attempt(U)) === 'changed') return 'changed';
+                list.push(U);
             }
+            Object.assign(at, { level: d + 1, list, i: -1 });
+            for (at.i = 0; at.i < list.length; at.i++) if (!known(key(list[at.i])) && (yield* attempt(list[at.i])) === 'changed') return 'changed';
         }
         return null;
     }
     *notice() {
-        for (const x of this.order(this.#held().filter((c) => !this.g.noticed.has(c)))) {
+        const label = (x) => `mark ${this.#card(x)} as important`;
+        const f = this.#frame('notice', { list: this.order(this.#held().filter((c) => !this.g.noticed.has(c))), key: (x) => x, label, after: () => 'done until a new card or a new wait' });
+        for (f.i = 0; f.i < f.list.length; f.i++) {
+            const x = f.list[f.i];
             // Marking important takes a card out of the unimportant ones: undone, it goes back there.
             const aside = this.g.setAsideAt.get(x);
             const undo = () => { this.g.unnotice(x); if (aside !== undefined) this.g.setAside(x, aside); };
-            if (yield* this.#try('notice', x, `mark ${this.#card(x)} as important`, () => this.g.notice(x), (res) => res.lifts > 0, undo)) return 'changed';
+            if (yield* this.#try('notice', x, label(x), () => this.g.notice(x), (res) => res.lifts > 0, undo)) return 'changed';
         }
         return null;
     }
     *raise() {
         const all = this.#held().flatMap((id) => this.g.exceptionsOf(id).map((x) => [id, x.n, x.id, x.text])).filter(([id, n, x]) => !this.g.raised.has(`${id}#${n}:${x}`));
-        for (const [id, n, x, text] of this.#shuffle(all)) {
+        const label = ([id, , x, text]) => `raise against ${this.#card(id)}: ${text ?? x}`;
+        const f = this.#frame('raise', { list: this.#shuffle(all), key: ([id, n, x]) => `${id}#${n}:${x}`, label, after: () => 'done until a new card or a new wait' });
+        for (f.i = 0; f.i < f.list.length; f.i++) {
+            const [id, n, x] = f.list[f.i];
             const move = (m) => { m.before ??= this.#openRows(); return this.g.raise(id, n, x); };
-            if (yield* this.#try('raise', `${id}#${n}:${x}`, `raise against ${this.#card(id)}: ${text ?? x}`, move, (res, m) => this.#openRows() < m.before, () => this.g.withdraw(id, n, x))) return 'changed';
+            if (yield* this.#try('raise', `${id}#${n}:${x}`, label(f.list[f.i]), move, (res, m) => this.#openRows() < m.before, () => this.g.withdraw(id, n, x))) return 'changed';
         }
         return null;
     }
+    // The part-by-part searches publish their plan in frames (queue()): each loop's list and where it is, innermost
+    // last. A frame's rest is exact while every answer is "no"; `gap`: a stage whose list is not made yet comes
+    // between it and the frame outside it (then: what), so the plan stops there.
     *check() {
         const slots = this.g.visibleSlots();
-        for (const verb of this.#shuffle(Object.keys(CHECK_TEMPLATES))) {
-            if (!(yield* this.#part('check', `v|${verb}`, `a check that ${verb}s: onto something?`, () => this.g.sealOnto(verb, {})))) continue;
+        const verbLabel = (verb) => `a check that ${verb}s: onto something?`;
+        const vf = this.#frame('check', { list: this.#shuffle(Object.keys(CHECK_TEMPLATES)), key: (verb) => `v|${verb}`, label: verbLabel, after: () => 'done, unless one is onto something (its fields come first)' });
+        for (vf.i = 0; vf.i < vf.list.length; vf.i++) {
+            const verb = vf.list[vf.i];
+            if (!(yield* this.#part('check', `v|${verb}`, verbLabel(verb), () => this.g.sealOnto(verb, {})))) continue;
             const tpl = CHECK_TEMPLATES[verb];
             const [f1, f2] = tpl.fields;
             const field = function* (self, f) {
                 const out = [];
-                for (const c of self.order(self.#fieldList(f))) if (yield* self.#part('check', `f|${verb}|${f}|${c}`, `${verb}, ${f} ${self.#card(c)}: onto something?`, () => self.g.sealOnto(verb, { [f]: c }))) out.push(c);
+                const label = (c) => `${verb}, ${f} ${self.#card(c)}: onto something?`;
+                const ff = self.#frame('check', { list: self.order(self.#fieldList(f)), key: (c) => `f|${verb}|${f}|${c}`, label, gap: () => true,
+                    then: () => (f === f1 ? `the ${f2} cards, then the pairs found onto something` : `the pairs of what was found onto something (${out.length ? `${p1.length} × ${out.length} so far` : `${p1.length} × none so far`})`) });
+                for (ff.i = 0; ff.i < ff.list.length; ff.i++) {
+                    const c = ff.list[ff.i];
+                    if (yield* self.#part('check', `f|${verb}|${f}|${c}`, label(c), () => self.g.sealOnto(verb, { [f]: c }))) out.push(c);
+                }
+                self.#unframe('check', ff);
                 return out;
             };
-            const p1 = yield* field(this, f1);
+            let p1 = [];
+            p1 = yield* field(this, f1);
             const p2 = yield* field(this, f2);
-            for (const c1 of p1) for (const c2 of p2) {
+            const planOf = ([c1, c2]) => `${verb}: ${f1} ${this.#card(c1)}, ${f2} ${this.#card(c2)}`;
+            const pairKey = ([c1, c2]) => `${verb}|${c1}|${c2}`;
+            const pf = this.#frame('check', { list: p1.flatMap((c1) => p2.map((c2) => [c1, c2])), key: (pr) => `p|${pairKey(pr)}`, label: (pr) => `${planOf(pr)}: onto something?` });
+            for (pf.i = 0; pf.i < pf.list.length; pf.i++) {
+                const [c1, c2] = pf.list[pf.i];
                 const fields = { [f1]: c1, [f2]: c2 };
-                const pair = `${verb}|${c1}|${c2}`;
-                const plan = `${verb}: ${f1} ${this.#card(c1)}, ${f2} ${this.#card(c2)}`;
+                const pair = pairKey(pf.list[pf.i]);
+                const plan = planOf(pf.list[pf.i]);
                 if (!(yield* this.#part('check', `p|${pair}`, `${plan}: onto something?`, () => this.g.sealOnto(verb, fields)))) continue;
                 const seal = (opts, key, label) => this.#try('check', `s|${pair}|${key}`, label, () => this.g.seal(verb, fields, opts), (res) => res.lifts > 0, (res) => this.g.unseal(res.id));
                 // No expectation first: it never hedges another seal of the same check.
-                for (const expect of [null, ...this.#shuffle(tpl.outcomes)]) if (yield* seal({ expect }, `${expect}`, `seal ${plan}${expect ? `, expecting ${expect}` : ''}`)) return 'changed';
+                const sealLabel = (expect) => `seal ${plan}${expect ? `, expecting ${expect}` : ''}`;
+                const ef = this.#frame('check', { list: [null, ...this.#shuffle(tpl.outcomes)], key: (expect) => `s|${pair}|${expect}`, label: sealLabel, gap: () => true,
+                    then: () => 'the questions an expected answer could be about, then the answers' });
+                for (ef.i = 0; ef.i < ef.list.length; ef.i++) if (yield* seal({ expect: ef.list[ef.i] }, `${ef.list[ef.i]}`, sealLabel(ef.list[ef.i]))) return 'changed';
+                this.#unframe('check', ef);
                 // The question an expected answer is about is a part; its value is tried whole.
                 const qs = [];
-                for (const sl of this.#shuffle(slots)) if (yield* this.#part('check', `q|${pair}|${sl.id}`, `${plan}, expecting an answer to “${this.names.slot(sl.id)}”?`, () => this.g.sealOnto(verb, fields, { slot: sl.id }))) qs.push(sl);
-                for (const expect of tpl.outcomes) for (const sl of qs) for (const v of this.orderValues(sl.id, sl.domain.filter((x) => this.g.offered(sl.id, x)))) {
-                    if (yield* seal({ expect, answer: { eq: [sl.id, v] } }, `${expect}|${sl.id}=${v}`, `seal ${plan}, expecting ${expect}: ${this.names.slot(sl.id)} — ${this.names.value(sl.id, v)}`)) return 'changed';
+                const qLabel = (sl) => `${plan}, expecting an answer to “${this.names.slot(sl.id)}”?`;
+                const qf = this.#frame('check', { list: this.#shuffle(slots), key: (sl) => `q|${pair}|${sl.id}`, label: qLabel, gap: () => true, then: () => 'the answers expected to the questions found' });
+                for (qf.i = 0; qf.i < qf.list.length; qf.i++) {
+                    const sl = qf.list[qf.i];
+                    if (yield* this.#part('check', `q|${pair}|${sl.id}`, qLabel(sl), () => this.g.sealOnto(verb, fields, { slot: sl.id }))) qs.push(sl);
+                }
+                this.#unframe('check', qf);
+                for (const expect of tpl.outcomes) for (const sl of qs) {
+                    const vLabel = (v) => `seal ${plan}, expecting ${expect}: ${this.names.slot(sl.id)} — ${this.names.value(sl.id, v)}`;
+                    const af = this.#frame('check', { list: this.orderValues(sl.id, sl.domain.filter((x) => this.g.offered(sl.id, x))), key: (v) => `s|${pair}|${expect}|${sl.id}=${v}`, label: vLabel, gap: () => true, then: () => 'the other answers expected' });
+                    for (af.i = 0; af.i < af.list.length; af.i++) if (yield* seal({ expect, answer: { eq: [sl.id, af.list[af.i]] } }, `${expect}|${sl.id}=${af.list[af.i]}`, vLabel(af.list[af.i]))) return 'changed';
+                    this.#unframe('check', af);
                 }
             }
+            this.#unframe('check', pf);
         }
         return null;
     }
     *absence() {
         const held = this.#held();
-        const parts = function* (self, list, key, prefix, what) {
+        const parts = function* (self, list, key, prefix, what, then) {
             const out = [];
-            for (const x of list) if (yield* self.#part('absence', `${prefix}|${x}`, `an absence, ${what} ${prefix === 't' ? self.names.time(x) : self.#card(x)}: onto something?`, () => self.g.absenceOnto({ [key]: x }))) out.push(x);
+            const label = (x) => `an absence, ${what} ${prefix === 't' ? self.names.time(x) : self.#card(x)}: onto something?`;
+            const f = self.#frame('absence', { list, key: (x) => `${prefix}|${x}`, label, gap: () => true, then });
+            for (f.i = 0; f.i < f.list.length; f.i++) {
+                const x = f.list[f.i];
+                if (yield* self.#part('absence', `${prefix}|${x}`, label(x), () => self.g.absenceOnto({ [key]: x }))) out.push(x);
+            }
+            self.#unframe('absence', f);
             return out;
         };
-        const fs = yield* parts(this, this.order(held.filter((x) => this.#sec(x) === 'rules')), 'expectation', 'e', 'what should have happened:');
-        const ws = yield* parts(this, this.order(held.filter((x) => this.#sec(x) === 'claims')), 'witness', 'w', 'who would have noticed:');
-        const ts = yield* parts(this, this.#shuffle(this.#times().map((x) => x.id)), 'time', 't', 'when:');
-        for (const f of fs) for (const w of ws) for (const t of ts) {
-            const label = `file an absence: ${this.#card(f)}; ${this.names.time(t)}; ${this.#card(w)}`;
-            if (yield* this.#try('absence', `a|${f}|${t}|${w}`, label, () => this.g.fileAbsence(f, t, w), (res) => res.ok && !res.existing, () => {})) return 'changed';
+        const fs = yield* parts(this, this.order(held.filter((x) => this.#sec(x) === 'rules')), 'expectation', 'e', 'what should have happened:', () => 'who would have noticed, then when, then the absences made of what was found');
+        const ws = yield* parts(this, this.order(held.filter((x) => this.#sec(x) === 'claims')), 'witness', 'w', 'who would have noticed:', () => 'when, then the absences made of what was found');
+        const ts = yield* parts(this, this.#shuffle(this.#times().map((x) => x.id)), 'time', 't', 'when:', () => `the absences made of what was found (${fs.length} × ${ws.length} × the times found)`);
+        const label = ([f, t, w]) => `file an absence: ${this.#card(f)}; ${this.names.time(t)}; ${this.#card(w)}`;
+        const cf = this.#frame('absence', { list: fs.flatMap((f) => ws.flatMap((w) => ts.map((t) => [f, t, w]))), key: ([f, t, w]) => `a|${f}|${t}|${w}`, label });
+        for (cf.i = 0; cf.i < cf.list.length; cf.i++) {
+            const [f, t, w] = cf.list[cf.i];
+            if (yield* this.#try('absence', `a|${f}|${t}|${w}`, label(cf.list[cf.i]), () => this.g.fileAbsence(f, t, w), (res) => res.ok && !res.existing, () => {})) return 'changed';
         }
         return null;
     }
     *drop() {
-        for (const tg of this.orderTargets(this.#dropTargets())) {
+        const tLabel = (tg) => `drop ${this.#target(tg)}: a wrong turn?`;
+        const tkOf = (tg) => dropKey(tg.theory ? { theory: tg.theory } : tg);
+        const tf = this.#frame('drop', { list: this.orderTargets(this.#dropTargets()), key: (tg) => `d|${tkOf(tg)}`, label: tLabel, after: () => 'done, unless one is a wrong turn (its reasons come first)' });
+        for (tf.i = 0; tf.i < tf.list.length; tf.i++) {
+            const tg = tf.list[tf.i];
             const target = tg.theory ? { theory: tg.theory } : tg;
             const tk = dropKey(target);
-            if (!(yield* this.#part('drop', `d|${tk}`, `drop ${this.#target(tg)}: a wrong turn?`, () => this.g.dropOnto(target)))) continue;
-            for (const [reason, rival, cite, rivalName] of this.#shuffle(this.#dropReasons())) {
-                const why = reason === 'card' ? `because of ${this.#card(cite)}` : reason === 'cost' ? 'for what it costs' : `${reason === 'out-explained' ? 'out-explained by' : 'needing more hands than'} “${rivalName}”`;
+            if (!(yield* this.#part('drop', `d|${tk}`, tLabel(tg), () => this.g.dropOnto(target)))) continue;
+            const rLabel = ([reason, , cite, rivalName]) => `drop ${this.#target(tg)} ${reason === 'card' ? `because of ${this.#card(cite)}` : reason === 'cost' ? 'for what it costs' : `${reason === 'out-explained' ? 'out-explained by' : 'needing more hands than'} “${rivalName}”`}`;
+            const rf = this.#frame('drop', { list: this.#shuffle(this.#dropReasons()), key: ([reason, rival, cite]) => `r|${tk}|${reason}|${rival}|${cite}`, label: rLabel });
+            for (rf.i = 0; rf.i < rf.list.length; rf.i++) {
+                const [reason, rival, cite] = rf.list[rf.i];
                 const move = () => { this.stats.drop.solver++; return this.g.drop(target, reason, { rival, cites: cite ? [cite] : [] }); };
-                if (yield* this.#try('drop', `r|${tk}|${reason}|${rival}|${cite}`, `drop ${this.#target(tg)} ${why}`, move, () => (this.g.dropOf(target)?.held ?? null) !== null, () => this.g.undrop(target))) return 'changed';
+                if (yield* this.#try('drop', `r|${tk}|${reason}|${rival}|${cite}`, rLabel(rf.list[rf.i]), move, () => (this.g.dropOf(target)?.held ?? null) !== null, () => this.g.undrop(target))) return 'changed';
             }
+            this.#unframe('drop', rf);
         }
         return null;
     }
@@ -488,7 +591,7 @@ export class Automation {
     #pending(cat) {
         let gen = this.gens.get(cat);
         if (gen && gen.version !== this.version) gen = null;
-        if (!gen) { gen = { it: this[cat](), version: this.version, pending: null }; this.gens.set(cat, gen); }
+        if (!gen) { this.plans.set(cat, []); gen = { it: this[cat](), version: this.version, pending: null }; this.gens.set(cat, gen); }
         if (gen.pending) return gen.pending;
         return this.#advance(cat, gen, undefined);
     }
@@ -536,29 +639,52 @@ export class Automation {
         return this.open.some((w) => !this.running.has(waitCategory(w))) ? 'paused' : 'stuck';
     }
     /**
-     * The checks to come, in the order they will be made while nothing is found (the first is next()): every collect,
-     * then every ask about the cards held (these two run to the end before the rest), then the next check of each
-     * category of the open waits, in turn. A find changes what comes after it; the categories in turn show only
-     * their next check, as what each answers decides the one after.
+     * The checks to come, in the order they will be made (the first is next()), as far as they can be known: every
+     * collect, then every ask (these two run to the end before the rest), then the categories of the open waits taking
+     * turns, each from its plan (#planOf: exact while every answer is "no"; a build level's list holds whatever its
+     * answers). The list stops where a category's next stage is not made yet. → {list (up to `limit`), lines: per
+     * category {cat, stage, more (planned, not in the list), open, then}, end (the list runs to the end of the search)}.
      */
-    queue(limit = 12) {
+    plan(limit = 11) {
         const c = this.next();
-        if (!c) return [];
-        const out = [];
+        if (!c) return { list: [], lines: [], end: false };
+        const lists = new Map();
         for (const cat of this.#turns()) {
-            if (out.length >= limit) break;
             if (cat === 'collect' || cat === 'ask') {
                 if (!this.#pending(cat)) continue;
-                out.push(...(cat === 'collect' ? this.#collectAhead(limit) : this.#askAhead(limit)));
+                lists.set(cat, { items: cat === 'collect' ? this.#collectAhead(Infinity) : this.#askAhead(Infinity), open: false, then: null, stage: null });
             } else {
                 const p = this.#pending(cat);
-                if (p) out.push(p);
+                if (!p) continue;
+                const pl = this.#planOf(cat);
+                lists.set(cat, { ...pl, items: [p, ...pl.items] });
+            }
+        }
+        const took = new Map([...lists.keys()].map((cat) => [cat, 0]));
+        const out = [];
+        const take = (cat) => { out.push(lists.get(cat).items[took.get(cat)]); took.set(cat, took.get(cat) + 1); };
+        for (const cat of ['collect', 'ask']) while (lists.has(cat) && out.length < limit && took.get(cat) < lists.get(cat).items.length) take(cat);
+        // The others take turns as next() and execute() turn them: a category leaves the turns after its last check.
+        let rest = SEARCHED.slice(2).filter((cat) => lists.has(cat));
+        let turn = this.turn, end = false;
+        if (['collect', 'ask'].every((cat) => !lists.has(cat) || took.get(cat) >= lists.get(cat).items.length)) {
+            while (out.length < limit) {
+                if (!rest.length) { end = true; break; }
+                const cat = rest[turn % rest.length];
+                const L = lists.get(cat);
+                if (took.get(cat) >= L.items.length) break;     // an open plan: what comes next is not known yet
+                take(cat);
+                turn++;
+                if (took.get(cat) >= L.items.length && !L.open) rest = rest.filter((x) => x !== cat);
             }
         }
         // The head is the check planned (the same one, not a copy).
         if (out[0]?.label === c.label && out[0]?.cat === c.cat) out[0] = c; else out.unshift(c);
-        return out.slice(0, limit);
+        const lines = [...lists].map(([cat, L]) => ({ cat, stage: L.stage, more: L.items.length - took.get(cat), open: L.open, then: L.then }));
+        return { list: out.slice(0, limit), lines, end };
     }
+    /** The checks to come (plan().list). */
+    queue(limit = 12) { return this.plan(limit).list; }
     /**
      * Make the check next() planned: → its log entry {n, para, cat, label, out: 'yes' | 'no' | 'found', what?} (null if
      * none). Safe to call again after the solver stopped it (the move is made once).
@@ -571,8 +697,9 @@ export class Automation {
             c.result = result;
             this.n++;
             this.stats[c.cat].checked++;
+            if (c.size) this.#bySize(c.size).checked++;
             const out = c.out ? c.out(result) : c.kept ? (result ? 'found' : 'no') : result ? 'yes' : 'no';
-            c.entry = { n: this.n, para: this.g.read - 1, cat: c.cat, label: c.label, out, ...(c.what && out === 'found' && { what: c.what(result) }) };
+            c.entry = { n: this.n, para: this.g.read - 1, cat: c.cat, ...(c.size && { size: c.size }), label: c.label, out, ...(c.what && out === 'found' && { what: c.what(result) }) };
             this.log.push(c.entry);
             this.#trimLog();
         }
@@ -701,8 +828,19 @@ export class Automation {
         const out1 = pool.filter((x) => live('build', x)).length;
         const kinds = Object.keys(CONCLUSION_KINDS).length;
         const sizes = Array.from({ length: MAX_SET }, (_, i) => i + 1);
+        // Per size: a set with a card ruled out alone, or itself a "no" in force (a lower bound, as for the whole).
+        const out1Set = new Set(pool.filter((x) => live('build', x)));
+        const negOf = new Map(sizes.map((k) => [k, 0]));
+        for (const [k, T] of this.neg.build) if (T.length > 1 && live('build', k) && !T.some((x) => out1Set.has(x))) negOf.set(T.length, negOf.get(T.length) + 1);
+        const staleOf = (k) => [...this.stale.build].filter((key) => key.split('|').length === k).length;
+        const bySize = sizes.map((k) => {
+            const total = choose(pool.length, k) * kinds;
+            const ruledOut = Math.min(total, (choose(pool.length, k) - choose(pool.length - out1, k) + negOf.get(k)) * kinds);
+            return { k, total, ruledOut, stale: staleOf(k), checked: this.#bySize(k).checked, found: this.#bySize(k).found, terms: `${choose(pool.length, k)} sets × ${kinds} kinds` };
+        });
         put('build', sizes.map((k) => ({ label: `sets of ${k}`, factors: [{ label: 'sets', n: choose(pool.length, k) }, { label: 'kinds', n: kinds }] })),
-            sizes.reduce((a, k) => a + (choose(pool.length, k) - choose(pool.length - out1, k)) * kinds, 0));
+            bySize.reduce((a, x) => a + x.ruledOut, 0));
+        out.build.sizes = bySize;
         put('notice', [{ label: 'cards held', factors: [{ label: 'cards', n: held.length }] }], held.filter((x) => g.noticed.has(x) || live('notice', x)).length);
         const exc = held.flatMap((id) => g.exceptionsOf(id).map((x) => `${id}#${x.n}:${x.id}`));
         put('raise', [{ label: 'exceptions open', factors: [{ label: 'exceptions', n: exc.length }] }], exc.filter((k) => g.raised.has(k) || live('raise', k)).length);
