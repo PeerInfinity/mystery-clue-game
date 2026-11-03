@@ -726,7 +726,9 @@ export class Automation {
     // ---------- the counts ----------
     /**
      * Per category: {terms: [{label, factors: [{label, n}]}], total (Σ of the terms' products), checked, found, ruledOut
-     * (of the space as it stands, known not to make anything now), stale (negatives to check again), searched}.
+     * (of the space as it stands, known not to make anything now), left (unchecked: the rest), leftMore (builds: a set
+     * size not known yet), stale (negatives to check again), searched; builds: sizes [{k, total, ruledOut, left (null:
+     * not known until the size below is all answered), stale, checked, found, terms}]}.
      */
     /**
      * Per card held, what the search still has to try with it, by the same rules as counts() (a negative not stale
@@ -808,7 +810,9 @@ export class Automation {
         const out = {};
         const put = (cat, terms, ruledOut) => {
             const total = terms.reduce((a, t) => a + t.factors.reduce((p, f) => p * f.n, 1), 0);
-            out[cat] = { terms, total, ...this.stats[cat], ruledOut: Math.min(total, Math.max(0, ruledOut)), stale: this.stale[cat].size, searched: SEARCHED.includes(cat) };
+            const r = Math.min(total, Math.max(0, ruledOut));
+            // left: unchecked, not ruled out (the rest of the space); leftMore: more may come (builds: a size not known yet).
+            out[cat] = { terms, total, ...this.stats[cat], ruledOut: r, left: total - r, leftMore: false, stale: this.stale[cat].size, searched: SEARCHED.includes(cat) };
         };
         // Collect: the spans read; ruled out, those with nothing left to give.
         let spans = 0, empty = 0;
@@ -833,14 +837,41 @@ export class Automation {
         const negOf = new Map(sizes.map((k) => [k, 0]));
         for (const [k, T] of this.neg.build) if (T.length > 1 && live('build', k) && !T.some((x) => out1Set.has(x))) negOf.set(T.length, negOf.get(T.length) + 1);
         const staleOf = (k) => [...this.stale.build].filter((key) => key.split('|').length === k).length;
+        // Unchecked, by the search's own rule (*build): alone, every card not answered yet; a size larger only once the
+        // size below is all answered, as the sets its level would list (a set onto something and a card onto something
+        // alone, every part one card smaller onto something), not answered yet. Before that, not known (null).
+        const keyOf = (T) => [...T].sort().join('|');
+        const known = (k) => live('build', k) || this.onto.has(k);
+        const inPool = new Set(pool);
+        const ones = pool.filter((x) => this.onto.has(x));
+        const unchecked = [pool.filter((x) => !known(x)).length];
+        for (let k = 2; k <= MAX_SET; k++) {
+            if (unchecked.at(-1) !== 0) { unchecked.push(null); continue; }
+            const seen = new Set();
+            let n = 0;
+            for (const T of [...this.onto].map((x) => x.split('|')).filter((T) => T.length === k - 1 && T.every((x) => inPool.has(x)))) for (const z of ones) {
+                if (T.includes(z)) continue;
+                const U = [...T, z];
+                const kk = keyOf(U);
+                if (seen.has(kk)) continue;
+                seen.add(kk);
+                if (k > 2 && !U.every((_, i) => this.onto.has(keyOf(U.filter((__, j) => j !== i))))) continue;
+                if (!known(kk)) n++;
+            }
+            unchecked.push(n);
+        }
         const bySize = sizes.map((k) => {
             const total = choose(pool.length, k) * kinds;
-            const ruledOut = Math.min(total, (choose(pool.length, k) - choose(pool.length - out1, k) + negOf.get(k)) * kinds);
-            return { k, total, ruledOut, stale: staleOf(k), checked: this.#bySize(k).checked, found: this.#bySize(k).found, terms: `${choose(pool.length, k)} sets × ${kinds} kinds` };
+            const left = unchecked[k - 1] === null ? null : unchecked[k - 1] * kinds;
+            const ruledOut = left === null ? Math.min(total, (choose(pool.length, k) - choose(pool.length - out1, k) + negOf.get(k)) * kinds) : total - left;
+            return { k, total, ruledOut, left, stale: staleOf(k), checked: this.#bySize(k).checked, found: this.#bySize(k).found, terms: `${choose(pool.length, k)} sets × ${kinds} kinds` };
         });
         put('build', sizes.map((k) => ({ label: `sets of ${k}`, factors: [{ label: 'sets', n: choose(pool.length, k) }, { label: 'kinds', n: kinds }] })),
             bySize.reduce((a, x) => a + x.ruledOut, 0));
         out.build.sizes = bySize;
+        // The whole: the sizes known, and whether a size is not known yet (more may come).
+        out.build.left = bySize.reduce((a, x) => a + (x.left ?? 0), 0);
+        out.build.leftMore = bySize.some((x) => x.left === null);
         put('notice', [{ label: 'cards held', factors: [{ label: 'cards', n: held.length }] }], held.filter((x) => g.noticed.has(x) || live('notice', x)).length);
         const exc = held.flatMap((id) => g.exceptionsOf(id).map((x) => `${id}#${x.n}:${x.id}`));
         put('raise', [{ label: 'exceptions open', factors: [{ label: 'exceptions', n: exc.length }] }], exc.filter((k) => g.raised.has(k) || live('raise', k)).length);

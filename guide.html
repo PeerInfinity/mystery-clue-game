@@ -645,9 +645,11 @@ sideways, the table stays there too.</li>
 <li><b>What there is to try</b>: for each kind of move (collecting, asking, building inferences, marking details important,
 raising exceptions, sealing checks, filing absences, dropping wrong turns), how many combinations there are with what
 you hold now, and the numbers that are added or multiplied to make that total; how many have been checked, how many
-found something, how many are ruled out, and how many are <i>stale</i>: a “no” that a new card may have turned into a
-“yes”, waiting to be checked again. The bar under <i>Ruled out</i> shows how much of the total that is. Building
-inferences has a row for each size of set, from one card to eight.</li>
+found something, how many are still <i>unchecked</i> (not ruled out yet), and how many are <i>stale</i>: a “no” that a
+new card may have turned into a “yes”, waiting to be checked again. The bar under <i>Unchecked</i> shows how much of
+the total is ruled out. Building inferences has a row for each size of set, from one card to eight. A set counts as
+unchecked only if the search would still try it, which for a larger size is known only once every set of the size
+below has been answered: until then its row shows —, and the total a +.</li>
 <li><b>What has been tried</b>: a log of the checks made, newest first. It keeps everything the search found and the
 last 100 other checks; where older checks were let go, a line says how many. Tick <i>Only what was found</i> to see
 just the finds, the whole game's.</li>

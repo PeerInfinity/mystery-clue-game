@@ -204,7 +204,7 @@ export function makeSearch(ctx) {
         counts = counts ?? S.lastCounts;
         S.lastCounts = counts;
         if (counts) {
-            h += `<h4 class="sub">What there is to try</h4><div class="search-table-wrap" data-floor="table"><table class="search-table small"><thead><tr><th></th><th>Category</th><th>In all</th><th>Checked</th><th>Found</th><th>Ruled out</th><th>Stale</th></tr></thead><tbody>`;
+            h += `<h4 class="sub">What there is to try</h4><div class="search-table-wrap" data-floor="table"><table class="search-table small"><thead><tr><th></th><th>Category</th><th>In all</th><th>Checked</th><th>Found</th><th>Unchecked</th><th>Stale</th></tr></thead><tbody>`;
             for (const cat of CATEGORIES) {
                 const x = counts[cat];
                 const searched = SEARCHED.includes(cat);
@@ -215,15 +215,15 @@ export function makeSearch(ctx) {
                 h += `<tr class="${waiting ? 'waiting' : ''}"><td>${searched ? `<input type="checkbox" data-search-run="${cat}" ${a.running.has(cat) ? 'checked' : ''} title="Search this category">` : ''}</td>
 <td title="${esc(CATEGORY_WORDS[cat][1])}">${esc(CATEGORY_WORDS[cat][0])}${waiting ? ' <span class="small muted">· waited for</span>' : ''}</td>
 <td>${wide(`${cat}:total`, x.total)}</td><td>${wide(`${cat}:checked`, x.checked)}</td><td>${wide(`${cat}:found`, x.found)}</td>
-<td>${wide(`${cat}:ruledOut`, x.ruledOut)}<div class="search-bar thin"><div class="search-fill" style="width:${(100 * pct).toFixed(1)}%"></div></div></td><td>${wide(`${cat}:stale`, x.stale)}</td></tr>
+<td title="${x.leftMore ? 'and the sets of a size not reached yet, not known until the size below is all answered' : ''}">${wide(`${cat}:left`, x.left)}${x.leftMore ? '<span class="more">+</span>' : ''}<div class="search-bar thin"><div class="search-fill" style="width:${(100 * pct).toFixed(1)}%"></div></div></td><td>${wide(`${cat}:stale`, x.stale)}</td></tr>
 ${x.sizes ? '' : `<tr class="terms"><td></td><td colspan="6" class="muted" title="${sum}">${sum}</td></tr>`}`;
                 // Builds: a row per size of set in place of the line of terms (its sets × the kinds on hover).
                 for (const z of x.sizes ?? []) {
                     h += `<tr class="size${z.k === x.sizes.length ? ' last' : ''}"><td></td><td title="${esc(z.terms)}">sets of ${z.k}</td><td>${wide(`build${z.k}:total`, z.total)}</td><td>${wide(`build${z.k}:checked`, z.checked)}</td><td>${wide(`build${z.k}:found`, z.found)}</td>
-<td>${wide(`build${z.k}:ruledOut`, z.ruledOut)}<div class="search-bar thin"><div class="search-fill" style="width:${(100 * (z.total ? z.ruledOut / z.total : 0)).toFixed(1)}%"></div></div></td><td>${wide(`build${z.k}:stale`, z.stale)}</td></tr>`;
+<td${z.left === null ? ' title="Not known until every set of the size below is answered"' : ''}>${z.left === null ? '<span class="num muted">—</span>' : wide(`build${z.k}:left`, z.left)}<div class="search-bar thin"><div class="search-fill" style="width:${(100 * (z.total ? z.ruledOut / z.total : 0)).toFixed(1)}%"></div></div></td><td>${wide(`build${z.k}:stale`, z.stale)}</td></tr>`;
                 }
             }
-            h += '</tbody></table></div><p class="small muted">In all: what could be tried with what you hold now, the numbers it is made of beneath. Ruled out: known not to make anything now. Stale: a “no” that something new may have turned into a “yes”, to be checked again.</p>';
+            h += '</tbody></table></div><p class="small muted">In all: what could be tried with what you hold now, the numbers it is made of beneath. Unchecked: what is not ruled out yet (the bar: how much of it all is ruled out). A build of a size is unchecked only if the search would still try it: before every set of the size below is answered, that is not known yet (—, and + on the whole). Stale: a “no” that something new may have turned into a “yes”, to be checked again.</p>';
         }
         // The log, newest first.
         // The log, newest first: every find, and the last 100 other checks (Automation's RECENT); where checks between

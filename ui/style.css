@@ -407,6 +407,7 @@ h4.sub { margin: 14px 0 4px; font-size: 14px; }
 /* The grow-only pieces (ui/search.js floors()): the min-height set is the whole box measured. */
 [data-floor] { box-sizing: border-box; }
 .search-table .num { display: inline-block; text-align: right; }
+.search-table .more { color: var(--muted); margin-left: 1px; }
 .search-log li.out-found { background: var(--good-soft); }
 .search-log li.out-no b { color: var(--muted); font-weight: 500; }
 .search-log li.gap { text-align: center; font-style: italic; border-bottom: none; }

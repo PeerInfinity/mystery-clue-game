@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { loadCase } from './loadCase.js';
-import { Game, INCREMENTAL } from './game.js';
+import { Game, INCREMENTAL, CONCLUSION_KINDS } from './game.js';
 import { Automation, CATEGORIES } from './automation.js';
 
 const dir = new URL('../cases/silver-blaze/', import.meta.url);
@@ -205,4 +205,26 @@ test('the plan is what follows: every check it lists is made in its order while 
     const sizes = a.counts().build.sizes;
     assert.equal(sizes.reduce((n, z) => n + z.checked, 0), a.stats.build.checked);
     assert.ok(a.log.filter((e) => e.cat === 'build').every((e) => e.size >= 1), 'a build in the log says the size of its set');
+});
+
+test('builds unchecked count what the search would still try: the plan of the level under way, the sizes beyond not known', () => {
+    const g = fresh();
+    const a = new Automation(g, { seed: 1 });
+    const kinds = Object.keys(CONCLUSION_KINDS).length;
+    let seen = 0;
+    for (let i = 0; i < 3000 && a.next(); i++) {
+        const c = a.next();
+        if (c.cat === 'build' && !/ as /.test(c.label) && i % 7 === 0) {
+            const pl = a.plan(1e6);
+            const planned = pl.list.filter((x) => x.cat === 'build').length + (pl.lines.find((l) => l.cat === 'build')?.more ?? 0);
+            const sizes = a.counts().build.sizes;
+            const z = sizes[c.size - 1];
+            assert.equal(z.left / kinds, planned, `sets of ${c.size} at check ${a.n + 1}`);
+            assert.ok(sizes.slice(c.size).every((y) => y.left === null), 'the sizes beyond are not known yet');
+            assert.ok(sizes.slice(0, c.size - 1).every((y) => y.left === 0), 'the sizes below are all answered');
+            seen++;
+        }
+        a.execute();
+    }
+    assert.ok(seen > 50, `${seen} builds compared`);
 });

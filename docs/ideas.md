@@ -309,6 +309,12 @@ under way.
   70 on seeds 1–3, since the lists consume the shuffle in the same order). Sizes are shown, not separate
   categories (the user's choice): a size cannot take turns with the one before it, whose answers make its list. Per
   size (seed 1) the checks were 875, 3,297, 472, 395, 257, 112, 29 and 15 for sets of 1 to 8.
+- **"Unchecked" in place of "Ruled out"** (the user's ask and name): for builds the two were huge and nearly equal
+  (2.38 × 10¹⁵ both), so what is left could not be read. The column is now In all − Ruled out, the bar still the
+  share ruled out. For builds it counts by the search's own rule rather than the lower bound: alone, the cards not
+  answered; a larger size only once the size below is all answered, as the sets its level would list, not answered
+  yet (the same count as the plan's); before that, "—" and a "+" on the whole. Otherwise sets of 3 would read in the
+  millions while the plan lists a few hundred.
 - **Next up keeps one shape** (the user saw the panel shift as the queue changed): the grow-only floor alone did not
   hold it, since the floors start again when the story moves on or the width changes, and the rows' wrapping and
   count changed the height from one check to the next. The box now always has ten one-line rows (a long label cut
