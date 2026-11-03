@@ -67,3 +67,28 @@ test('a lead not under investigation at Holmes\'s paragraph is settled unscored;
     t.investigate('lead.bill_name');
     assert.equal(t.noticeScore().scored, 0);
 });
+
+test('a cap on leads under investigation at a time: refused at it, nothing dropped; none in incremental mode', async () => {
+    const { PRESETS, INCREMENTAL } = await import('./game.js');
+    assert.deepEqual([PRESETS.easy.leads, PRESETS.medium.leads, PRESETS.hard.leads], ['16', '12', '8']);
+    const g = medium();
+    assert.equal(g.leadBudget(), 12);
+    g.opts.leads = '2'; // smaller than any preset, to meet the cap with the case's 8 leads
+    readTo(g, 84);
+    assert.ok(g.investigate('lead.curry').ok && g.investigate('lead.coat').ok);
+    const res = g.investigate('lead.candle');
+    assert.deepEqual([res.ok, res.full], [false, true]);
+    assert.deepEqual([...g.investigating.keys()], ['lead.curry', 'lead.coat'], 'nothing dropped to make room');
+    assert.ok(g.investigate('lead.coat').ok, 'one already under investigation is no new one');
+    g.stopInvestigating('lead.coat');
+    assert.ok(g.investigate('lead.candle').ok);
+    // A lead Holmes takes up frees its place.
+    const h = medium();
+    h.opts.leads = '1';
+    readTo(h, 80);
+    assert.ok(h.investigate('lead.knife').ok);
+    assert.equal(h.investigate('lead.curry').ok, false);
+    readTo(h, 81);
+    assert.ok(h.investigate('lead.curry').ok, 'the knife, taken up at ¶81, left its place');
+    assert.equal(new Game(model, { pace: INCREMENTAL }).leadBudget(), Infinity);
+});

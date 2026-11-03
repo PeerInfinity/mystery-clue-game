@@ -101,6 +101,7 @@ export const INF_CONNECT = 'connect';
 //   irrelevant  how many of the cards the solution has no use for are shown at all
 //   supplied    the background facts the reader lacks: offered like the rest (marked), or withheld until the story
 //               states them
+//   leads       how many leads may be under investigation at a time (incremental mode: no cap; its clock instead)
 //   reader      who the player is as a reader (engine/readers.js): not part of the difficulty
 export const OPTIONS = {
     solver: ['game', 'player'],
@@ -116,6 +117,7 @@ export const OPTIONS = {
     background: [BG_START, BG_RELEVANT, BG_ASK],
     irrelevant: ['none', 'few', 'half', 'most', 'all'],
     supplied: ['offered', 'withheld'],
+    leads: ['16', '12', '8'],
     reader: READER_KINDS,
 };
 // The options that say who the player is, not how hard the game is: kept when the difficulty changes.
@@ -127,13 +129,13 @@ export const CLASH_CLASSES = ['others-inference', 'heuristic', 'statement', 'inf
 const CLASH_TOLD = { testimony: 0, inference: 0, report: 1, admission: 2 };
 // A clue in a scenario's cost, by how it was told (the second key of a statement's weight).
 const COST_TOLD = ['testimony', 'report', 'admission', 'seen'];
-export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'weigh', 'hints', 'kind', 'connect'];
+export const PLAYER_OPTIONS = ['answers', 'crossOut', 'greying', 'clashes', 'weigh', 'hints', 'kind', 'connect', 'leads'];
 const IRRELEVANT_SHARE = { none: 0, few: 0.25, half: 0.5, most: 0.75, all: 1 };
 export const PRESETS = {
-    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'story', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
-    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'story', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered' },
-    medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'counts', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all', supplied: 'offered' },
-    hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'asked', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all', supplied: 'offered' },
+    trivial: { solver: 'game', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'story', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered', leads: '16' },
+    easy: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'pencil', greying: 'on', clashes: 'on', weigh: 'names', hints: 'story', kind: 'off', connect: INF_IMPLICIT, background: BG_RELEVANT, irrelevant: 'all', supplied: 'offered', leads: '16' },
+    medium: { solver: 'player', cards: 'dealt', answers: 'listed', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'counts', hints: 'off', kind: 'off', connect: INF_IMPLICIT, background: BG_ASK, irrelevant: 'all', supplied: 'offered', leads: '12' },
+    hard: { solver: 'player', cards: 'collect', answers: 'propose', crossOut: 'checked', greying: 'off', clashes: 'off', weigh: 'asked', hints: 'off', kind: 'on', connect: INF_CONNECT, background: BG_ASK, irrelevant: 'all', supplied: 'offered', leads: '8' },
 };
 /** The preset these options match, or CUSTOM. With the game solving, the player's options do not count. */
 export function presetOf(opts) {
@@ -1322,6 +1324,8 @@ export class Game {
         });
     }
     isInvestigating(id) { return this.investigating.has(id); }
+    /** How many leads may be under investigation at a time (the option `leads`); Infinity in incremental mode. */
+    leadBudget() { return this.pace === INCREMENTAL ? Infinity : Number(this.opts.leads ?? 8); }
     /** Was the lead under investigation, now or when Holmes's paragraph was read (the paragraph it began, or null)? */
     investigatedAt(id) {
         const s = this.leadsSettled.get(id);
@@ -1329,13 +1333,16 @@ export class Game {
     }
     /**
      * Put a proposed lead under investigation: it scores if it still is when the story reaches Holmes's paragraph on it.
-     * Incremental mode: `lifts` says how many of the rows the story waits on it made.
+     * Refused (`full: true`) when as many leads as the budget allows are under investigation already: nothing is
+     * dropped to make room. Incremental mode: `lifts` says how many of the rows the story waits on it made.
      */
     investigate(id) {
         return this.#lifts(() => {
             if (!this.leadProposed(id)) return { ok: false, reason: 'no such lead yet' };
             if (this.leadsSettled.has(id)) return { ok: false, reason: 'Holmes has followed this up already' };
-            if (!this.investigating.has(id)) this.investigating.set(id, { para: this.read - 1 });
+            if (this.investigating.has(id)) return { ok: true };
+            if (this.investigating.size >= this.leadBudget()) return { ok: false, full: true, reason: `${this.investigating.size} leads are under investigation, as many as you may have at a time: stop one first` };
+            this.investigating.set(id, { para: this.read - 1 });
             return { ok: true };
         });
     }

@@ -1344,7 +1344,10 @@ function toolQuestions() {
  */
 function toolLeads() {
     const leads = game.leads();
-    let h = '<p class="small muted">Lines of inquiry the case has raised. Put the ones you think matter under investigation: what counts is what is under investigation when Holmes takes the matter up. You can stop an investigation at any time.</p>';
+    const budget = game.leadBudget();
+    const under = leads.filter((l) => l.state === 'investigating').length;
+    let h = `<p class="small muted">Lines of inquiry the case has raised. Put the ones you think matter under investigation: what counts is what is under investigation when Holmes takes the matter up. You can stop an investigation at any time.${Number.isFinite(budget) ? ` You may have up to ${budget} at a time.` : ''}</p>`;
+    if (Number.isFinite(budget) && under) h += `<p class="small">${under} of ${budget} under investigation${under >= budget ? ': stop one to investigate another' : ''}.</p>`;
     if (!leads.length) return `${h}<p class="muted">No leads yet.</p>`;
     const open = leads.filter((l) => l.state !== 'settled');
     const done = leads.filter((l) => l.state === 'settled');
@@ -2655,6 +2658,7 @@ const OPTION_UI = {
     connect: ['Background in inferences', { implicit: 'Needed in hand', connect: 'Connected too' }, 'Needed in hand: connect an inference\'s clues; the background facts it rests on need only be known. Connected too: background facts are cards to connect like clues.'],
     background: ['Background facts', { start: 'All at once', relevant: 'When relevant', ask: 'When asked' }, 'General knowledge a reader of the time had. All at once: a reference book from the start. When relevant: each appears where the story first touches its subject. When asked: open a card and ask what you know about it.'],
     supplied: ['Background you would not know', { offered: 'Supplied by the game', withheld: 'Only where the story says it' }, 'The background facts a reader like you would not bring to the story. Supplied: they arrive like any other, marked as supplied. Only where the story says it: each comes when the story states it, often late, and some never.'],
+    leads: ['Leads under investigation', { 16: 'Up to 16 at a time', 12: 'Up to 12 at a time', 8: 'Up to 8 at a time' }, 'How many leads you may have under investigation at once. When you are at the limit, stop one before you investigate another. Incremental mode has no limit: an investigation takes time instead.'],
     reader: ['You read as', { modern: 'A reader of today', 1892: 'A reader of 1892', racing: 'A racing man of 1892' }, 'What you bring to the story. The background facts such a reader would not know are marked as supplied by the game.'],
     irrelevant: ['Cards the solution does not need', { none: 'None', few: 'One in four', half: 'Half', most: 'Three in four', all: 'All' }, 'How many of the cards with no part in the solution you get at all (the people, places, things and facts that are only colour). The rest are left out of the game: no card, and nothing to click in the text.'],
 };
@@ -2662,7 +2666,7 @@ const OPTION_UI = {
 const OPTION_GROUPS = [
     ['You', ['reader', 'supplied']],
     ['The cards', ['cards', 'irrelevant', 'background']],
-    ['Your reasoning', ['solver', 'answers', 'crossOut', 'kind', 'connect']],
+    ['Your reasoning', ['solver', 'answers', 'crossOut', 'kind', 'connect', 'leads']],
     ['What the game shows', ['greying', 'clashes', 'weigh', 'hints']],
 ];
 function buildOptions() {

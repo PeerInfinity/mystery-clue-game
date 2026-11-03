@@ -414,7 +414,11 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
 - **One verb, "Investigate", in every mode.** Outside incremental mode a lead is a flag set and cleared freely, with a
   budget of leads under investigation at a time (larger on lower difficulties); what scores is whether it is under
   investigation when the story reaches Holmes's paragraph. A wrong flag costs a place a true lead needed at its
-  deadline. Once Holmes's paragraph passes, the lead is settled and its place frees.
+  deadline. Once Holmes's paragraph passes, the lead is settled and its place frees. Built (step 2): the option
+  `leads`, 8 on Hard (the user's number), 12 on Medium, 16 on Easy and Trivial; at the cap the move is refused with a
+  message, never something dropped to make room (the user). With only the 8 true leads it never binds: the
+  careful reader, flagging each when noticed, holds at most 6 at once (¶188–189); a player who knew the deadlines
+  would need 2 (the two bill leads, both due at ¶225).
 - **Incremental mode:** an investigation takes a minute, its clock running beside the checks (one investigation at a
   time), and ends with its result at once (*something in it* / *nothing came of it*); the minute is the only cost. The
   automation investigates every lead, by default in the order they came; the player chooses which to put first.
@@ -434,8 +438,7 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
 
 Measured after step 1 (seeds 1–3 to 70): the lead search takes 18 checks a game for its 8 rows (the 1,200–1,550 of
 the card search gone), 18,718, 17,544 and 18,053 checks in all (were 18,522, 18,648 and 22,324: the other searches
-move with the shuffle). Step 1 has only the 8 scored leads, so the tab is an answer key for now; the budget, the timer and the false leads
-come next. A first catalogue of candidates (72 leads, 36 true, 31 false, 5 ambiguous; 11 new inferences drafted)
+move with the shuffle). Steps 1–2 have only the 8 scored leads, so the tab is an answer key for now; the false leads and the timer come next. A first catalogue of candidates (72 leads, 36 true, 31 false, 5 ambiguous; 11 new inferences drafted)
 raised the problems the later steps must meet: where a lead came from must not tell true from false (the story
 itself has characters proposing true things and buildable inferences that are false); an inference that proposes a
 lead often also settles it, which makes the flag free, so proposers must sit earlier in the chain; late in the story

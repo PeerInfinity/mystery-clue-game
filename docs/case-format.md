@@ -544,13 +544,14 @@ read), `needs` (cards that must be held) and `scores` (the NOTICE thought it sco
 nothing), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
 read, *pending* until then; the validator wants them at or after Holmes's paragraph). `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
 says which score. `investigate(id)` puts a proposed lead under investigation, `stopInvestigating(id)` takes it off;
-both are free. Before Holmes's first paragraph on its NOTICE thought is read, the lead is settled as it stands
+both are free, within a cap (`leadBudget()`, the option `leads`: 16 on Trivial and Easy, 12 on Medium, 8 on Hard; no
+cap in incremental mode): at the cap `investigate` is refused (`full`) and nothing is dropped to make room. A lead
+Holmes has taken up leaves its place. Before Holmes's first paragraph on its NOTICE thought is read, the lead is settled as it stands
 (`leadsSettled`: under investigation then or not) and can no longer be changed. A NOTICE row scores if a lead for it
 was under investigation at that point. `npm run validate` checks the quotes and cards, that a lead is proposed before
 its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver Blaze: the 8 scored NOTICE rows, one
 lead each (two on the milliner's bill, its name and its sum). Planned (docs/ideas.md): the story's false leads, new
-inferences that propose the true ones, a budget of leads under investigation at a time (larger on lower
-difficulties), and in incremental mode a minute per investigation running beside the checks.
+inferences that propose the true ones, and in incremental mode a minute per investigation running beside the checks.
 
 ## Defeasibility
 
@@ -714,6 +715,7 @@ Difficulty is a set of options (`OPTIONS` in `engine/game.js`); the four presets
 | `background` | start, relevant, ask | relevant | relevant | ask | ask |
 | `irrelevant` | none, few, half, most, all (share of unneeded cards shown) | all | all | all | all |
 | `supplied` | offered, withheld | offered | offered | offered | offered |
+| `leads` | 16, 12, 8 (leads under investigation at a time; none in incremental mode) | 16 | 16 | 12 | 8 |
 
 Also per game: `pace` (`free`, `wait`) and, for Trivial, `autoPace`: `holmes` (settle each answer when the story
 tells Holmes's step or a narrator statement excludes the rest) or `logic` (as soon as the held clues allow, read the
