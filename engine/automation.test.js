@@ -86,7 +86,8 @@ test('a check is planned before it is made; the queue starts with it; a save car
     assert.equal(a.next(), next, 'planning again plans the same check');
     const q = a.queue();
     assert.equal(q[0], next);
-    assert.equal(new Set(q.map((c) => c.cat)).size, q.length, 'one check per category');
+    const turns = q.filter((c) => !['collect', 'ask'].includes(c.cat));
+    assert.equal(new Set(turns.map((c) => c.cat)).size, turns.length, 'after the collects and asks, one check per category');
     const before = a.n;
     const entry = a.execute();
     assert.equal(entry.label, next.label);
@@ -101,4 +102,28 @@ test('a check is planned before it is made; the queue starts with it; a save car
         assert.equal(cb[cat].ruledOut, ca[cat].ruledOut, cat);
     }
     assert.ok(b.next());
+});
+
+test('what is left with each card: pairs not tried, larger sets only where a set with it was onto something', () => {
+    const g = fresh();
+    const a = new Automation(g, { seed: 1 });
+    while (a.n < 4000) { const s = a.step(500); if (s.end || s.idle) break; }
+    const pc = a.perCard();
+    const live = (k) => a.neg.build.has(k) && !a.stale.build.has(k);
+    const withBuild = [...pc].filter(([, o]) => o.build);
+    assert.ok(withBuild.length > 0);
+    for (const [x, o] of pc) {
+        // A card ruled out on its own: no pair with it is onto anything, so nothing is left to build with it.
+        if (live(x)) assert.equal(o.build, undefined, x);
+    }
+    const free = withBuild.map(([x]) => x);
+    for (const [x, o] of withBuild.slice(0, 40)) {
+        const tried = free.filter((y) => y !== x).filter((y) => { const k = [x, y].sort().join('|'); return a.onto.has(k) || live(k); }).length;
+        assert.equal(o.build.pairs, free.length - 1 - tried, `${x}: the pairs not tried`);
+        const ontoBig = [...a.onto].some((k) => k.split('|').length >= 2 && k.split('|').includes(x));
+        if (!ontoBig) assert.equal(o.build.larger, 0, `${x}: no larger sets until a set with it is onto something`);
+    }
+    assert.ok(a.onto.size > 0, 'some sets were onto something');
+    const b = new Automation(g, { seed: 1, state: JSON.parse(JSON.stringify(a.save())) });
+    assert.deepEqual([...b.onto].sort(), [...a.onto].sort(), 'the onto sets are saved');
 });

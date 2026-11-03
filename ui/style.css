@@ -240,6 +240,9 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .doubt { font-size: 13px; color: var(--muted); margin: 8px 0; }
 .doubt.on { color: var(--bad); }
 .doubt button { margin-left: 6px; }
+.disbelieve { margin: 8px 0; }
+.disbelieve > summary { cursor: pointer; color: var(--muted); }
+.disbelieve[open] > summary { margin-bottom: 2px; }
 .unless { margin: 8px 0; padding: 4px 0 4px 10px; border-left: 2px solid var(--line); }
 .flag.doubted { color: var(--bad); }
 /* The player's marks on a card (important, unimportant) and the note on it (markHtml in ui/app.js). */

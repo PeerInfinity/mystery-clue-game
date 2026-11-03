@@ -289,6 +289,8 @@ export function makePlayer({ store, fast = false, shortest = false, valueName, c
     }
     const ring = () => { if (fast) return; cursor.classList.remove('click'); void cursor.offsetWidth; cursor.classList.add('click'); };
     async function pointAt(el) {
+        // A control inside a folded section: the section opened first, as a player would.
+        for (let d = el.closest('details:not([open])'); d; d = d.parentElement?.closest('details:not([open])')) d.open = true;
         el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
         const r = el.getBoundingClientRect();
         await glide(r.left + Math.min(r.width / 2, 40), r.top + r.height / 2);

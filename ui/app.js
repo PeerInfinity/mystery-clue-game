@@ -881,8 +881,9 @@ function toolCard() {
         if (about.length) h += `<p class="small">About: ${about.map((x) => link(x)).join(', ')}</p>`;
     }
 
-    // Readings: what this card means under each story, by the answers that carry it.
-    const readings = game.autoSolves() ? [] : game.readingsOf(id).filter((r) => r.mine !== null || r.layers.length);
+    // Readings: what this card means under each story, by the answers that carry it. Only once the player has written
+    // a theory down (before that the section is only the settled answer again, and clutters the card).
+    const readings = game.autoSolves() || !game.theories.length ? [] : game.readingsOf(id).filter((r) => r.mine !== null || r.layers.length);
     if (readings.length) {
         h += '<div class="readings small"><div class="muted">How it reads under each story</div>';
         for (const r of readings) {
@@ -1149,6 +1150,9 @@ function weighHtml(id) {
         return kind === 'lying' ? `${name} lied` : `${name} was mistaken`;
     };
     const defeat = game.raisedOn(id).find((r) => r.status === 'established');
+    // Doubting it and splitting it, folded into one section ("I don't believe this…"), open while either is in force.
+    const chainHtml = h;
+    h = '';
     if (!game.canSuspect(id)) {
         // Nothing to doubt whole: only the split below.
     } else if (defeat) {
@@ -1172,7 +1176,9 @@ function weighHtml(id) {
             ? `<p class="small muted">You split this statement: ${game.partsOf(id).filter((x) => game.knows(x)).map((x) => link(x)).join(' · ')}. It counts nowhere itself.</p>`
             : `<p class="small">Does this mix what was seen with what was concluded? <button data-split-claim="${esc(id)}" class="quiet">Split this statement</button></p>`;
     }
-    return h;
+    if (!h) return chainHtml;
+    const state = defeat ? 'shown not to hold' : game.isSuspected(id) ? 'you suspect it' : game.splitClaims.has(id) ? 'split' : '';
+    return `${chainHtml}<details class="disbelieve"${state ? ' open' : ''}><summary class="small">I don't believe this…${state ? ` <span class="bad">(${state})</span>` : ''}</summary>${h}</details>`;
 }
 
 // The exceptions of the defaults a step applies: raise one against it; what was raised, where it stands.
@@ -1189,6 +1195,25 @@ function unlessHtml(id) {
     return h ? `<div class="unless"><div class="small muted">Unless…</div>${h}</div>` : '';
 }
 
+/**
+ * Incremental mode: what the search still has to try with a card (Automation.perCard). Builds as far as "onto
+ * something" has told: the card on its own if not tried, the pairs with it not tried, and larger sets only where a set
+ * with it was onto something; then the other kinds of check. Nothing shown: nothing left to try with it.
+ */
+function searchLeft(pc) {
+    const b = pc.build;
+    const parts = [];
+    if (b?.alone) parts.push('on its own');
+    if (b?.pairs) parts.push(`${num(b.pairs)} pair${b.pairs === 1 ? '' : 's'}`);
+    if (b?.larger) parts.push(`${num(b.larger)} larger set${b.larger === 1 ? '' : 's'}`);
+    const other = pc.left - (b ? b.alone + b.pairs + b.larger : 0);
+    if (other) parts.push(`${num(other)} other check${other === 1 ? '' : 's'}`);
+    const title = [
+        ...(b ? [`Build inferences: ${b.alone ? 'not yet tried on its own; ' : ''}${num(b.pairs)} pairs with it not tried yet${b.larger ? `; ${num(b.larger)} larger sets, because a set with it was onto something` : '; no set with it found onto something yet'}`] : []),
+        ...Object.entries(pc.cats).filter(([k]) => k !== 'build').map(([k, n]) => `${CATEGORY_WORDS[k][0]}: ${num(n)}`),
+    ].join('\n');
+    return `<span title="${esc(title)}">search: ${parts.join(', ')} to try</span>`;
+}
 function toolCards() {
     const known = [...game.unlocked.keys()].filter((id) => !['glosses', 'rules'].includes(model.cards.get(id)?.section) && !game.isSetAside(id));
     const counts = {};
@@ -1216,7 +1241,7 @@ function toolCards() {
         const left = [
             open ? `${open} open` : '',
             game.canAsk(id) && !game.hasAsked(id) ? 'not asked' : '',
-            per?.get(id)?.left ? `<span title="${esc(Object.entries(per.get(id).cats).map(([k, n]) => `${CATEGORY_WORDS[k][0]}: ${num(n)}`).join('\n'))}">search: ${num(per.get(id).left)} to try</span>` : '',
+            per?.get(id)?.left ? searchLeft(per.get(id)) : '',
         ].filter(Boolean);
         return `<li class="${ui.selected === id ? 'sel' : ''}"><span class="kind">${kindOf(id)}</span>${link(id)}${game.cardNote(id) ? ' <span class="note-mark" title="Your note on it">✎</span>' : ''}${!game.lastSeen.has(id) ? ' <span class="new-badge quiet">new</span>' : game.hasNew(id) ? ' <span class="new-badge">updated</span>' : ''}${left.length ? ` <span class="small muted">· ${left.join(' · ')}</span>` : ''}</li>`;
     };

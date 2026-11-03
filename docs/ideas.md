@@ -326,14 +326,24 @@ recommendations).**
 - **Important cards are listed first** in the Cards tab (open), the unimportant folded at the bottom.
 - **The Cards list says what is left with each card**, from what the page shows anyway and never whether a card
   matters: its open questions, *not asked*, a ✎ for a note, and in incremental mode the combinations the search still
-  has to try with it (`Automation.perCard()`, by the same rules as the counts). A "still matters" list was rejected as
-  a spoiler (it would run ahead of the story); the hints already give that a rung at a time.
+  has to try with it (`Automation.perCard()`). For builds, the user's rule: only as far as "onto something" has told.
+  The card alone if not tried; the pairs with it not tried (a card "no" alone rules out every pair: onto means a
+  strict part of a recipe whose cards are all held); larger sets only where a set of two or more with it was onto
+  something (that proves a larger recipe), counted as that set and one more card. So a card whose pairs are all "no"
+  shows nothing left to build. The search now remembers its "onto" sets (`onto`, saved) for this. A first version
+  counted every set of up to 8 cards (10⁹ and more per card: no use for steering). A "still matters" list was
+  rejected as a spoiler (it would run ahead of the story); the hints already give that a rung at a time.
 - **The "because…" of a notice and the question form went for one free note per card** (`setCardNote`). Neither was
   ever scored: the reason was only stored and shown, a question only joined the story's when the story asked it (the
   record showed the lead, never counted it; its candidates became circles). The careful reader's 10 questions are now
   `cardNote` moves of the action table (the question's words written as the note); an older save's questions and
   reasons load as lines of the notes. Card notes show on the card, in the Notes tab beside the story notes, and as ✎.
   In incremental mode the note box keeps its words and focus through the search's redraws.
+- **Two more folds (2026-11-02, the user's choice of the surveyed candidates; the rest kept as they are):** a card's
+  doubt and split sit in one section, *I don't believe this…*, folded until either is in force (weighing a theory
+  stays in the Theories tab; the autoplay opens a folded section before clicking in it); *How it reads under each
+  story* shows only once the player has written a theory down. Kept for now: propose, the card's timeline pencil, the
+  difficulty options, the 13 tabs.
 
 Not yet done: the hedge of a sealed check made plain on the page (the search itself never hedges: no expectation
 first, a seal kept only if a wait lifts).

@@ -66,6 +66,9 @@ export class Automation {
         this.stats = Object.fromEntries(CATEGORIES.map((c) => [c, { checked: 0, found: 0, solver: 0 }]));
         // Negatives per category: key → the set (builds) or true; stale: keys to check again.
         this.neg = Object.fromEntries(CATEGORIES.map((c) => [c, new Map()]));
+        // The build sets last found "onto something" (keys as in neg.build): part of a larger set that builds. Only for
+        // the Cards list's count (perCard); the search itself tries them again on each pass.
+        this.onto = new Set();
         this.stale = Object.fromEntries(CATEGORIES.map((c) => [c, new Set()]));
         this.log = [];                  // {n, para, cat, label, out: 'yes' | 'no' | 'found', what?}
         this.n = 0;                     // checks made
@@ -96,6 +99,7 @@ export class Automation {
         return {
             seed: this.seed, n: this.n, cards: this.model.cards.size, running: [...this.running], autoRead: this.autoRead, stats: this.stats, log: this.log.slice(-200),
             neg: Object.fromEntries(CATEGORIES.map((c) => [c, [...this.neg[c].keys()].map((k) => this.#pack(c, k))])),
+            onto: [...this.onto].map((k) => this.#pack('build', k)),
             stale: Object.fromEntries(CATEGORIES.map((c) => [c, [...this.stale[c]].map((k) => this.#pack(c, k))])),
         };
     }
@@ -111,6 +115,7 @@ export class Automation {
             for (const p of s.neg?.[c] ?? []) { const k = this.#unpack(c, p); this.neg[c].set(k, c === 'build' ? k.split('|') : true); }
             for (const p of s.stale?.[c] ?? []) this.stale[c].add(this.#unpack(c, p));
         }
+        if (same) for (const p of s.onto ?? []) this.onto.add(this.#unpack('build', p));
         this.log = s.log ?? [];
         // The order goes on from where it was, not from the start.
         for (let i = 0; i < this.n % 1000; i++) this.r();
@@ -254,6 +259,7 @@ export class Automation {
                 if (self.neg.build.has(k) && !self.stale.build.has(k)) continue;
                 const res = yield { cat: 'build', label: `connect ${names(T)}: onto something?`, run: () => self.g.propose(T), out: (r) => (r.onto || r.needsKind || r.wrongKind ? 'yes' : 'no') };
                 self.stale.build.delete(k);
+                if (res.onto) self.onto.add(k); else self.onto.delete(k);
                 if (res.needsKind || res.wrongKind) {
                     for (const kind of self.#shuffle(Object.keys(CONCLUSION_KINDS))) {
                         const b = yield { cat: 'build', label: `connect ${names(T)} as ${CONCLUSION_KINDS[kind].toLowerCase()}`, run: () => self.g.propose(T, kind), out: (r) => (r.built.length ? 'found' : 'no'), what: (r) => r.built.map((id) => self.#card(id)).join('; ') };
@@ -565,14 +571,39 @@ export class Automation {
             if (!g.noticed.has(x) && !live('notice', x)) add(x, 'notice', 1);
             for (const e of g.exceptionsOf(x)) { const k = `${x}#${e.n}:${e.id}`; if (!g.raised.has(k) && !live('raise', k)) add(x, 'raise', 1); }
         }
-        // Builds: the sets with the card none of whose cards is ruled out alone, × the kinds.
+        // Builds, as far as "onto something" has told (never more): the card alone if not tried yet; the pairs with it
+        // not tried yet (none with a card ruled out alone: no pair with it is onto anything); and larger sets only
+        // where a set of two or more with it was found onto something (a larger set builds), each such set and one
+        // more card. A card whose pairs are all tried, none onto anything, has nothing left.
         const pool = held.filter((x) => POOL.includes(this.#sec(x)));
         const out1 = new Set(pool.filter((x) => live('build', x)));
-        const kinds = Object.keys(CONCLUSION_KINDS).length;
-        const free = pool.length - out1.size;
-        let sets = 0;
-        for (let k = 1; k <= MAX_SET; k++) sets += choose(free - 1, k - 1);
-        for (const x of pool) if (!out1.has(x)) add(x, 'build', sets * kinds);
+        const free = pool.filter((x) => !out1.has(x));
+        const freeSet = new Set(free);
+        const triedPairs = new Map();   // card → pairs with it tried (a "no" still in force, or onto something)
+        for (const k of [...this.neg.build.keys(), ...this.onto]) {
+            const T = k.split('|');
+            if (T.length !== 2 || !T.every((x) => freeSet.has(x)) || (!this.onto.has(k) && !live('build', k))) continue;
+            for (const x of T) triedPairs.set(x, (triedPairs.get(x) ?? 0) + 1);
+        }
+        const larger = new Map();       // card → the sets of one more card than an onto set with it, not tried yet
+        for (const k of this.onto) {
+            const T = k.split('|');
+            if (T.length < 2 || T.length >= MAX_SET || !T.every((x) => freeSet.has(x))) continue;
+            for (const z of free) {
+                if (T.includes(z)) continue;
+                const k2 = [...T, z].sort().join('|');
+                if (live('build', k2) || this.onto.has(k2)) continue;
+                for (const x of T) (larger.get(x) ?? larger.set(x, new Set()).get(x)).add(k2);
+            }
+        }
+        for (const x of free) {
+            const o = out.get(x);
+            const alone = !this.neg.build.has(x) && !this.onto.has(x) ? 1 : this.stale.build.has(x) ? 1 : 0;
+            const pairs = free.length - 1 - (triedPairs.get(x) ?? 0);
+            const big = larger.get(x)?.size ?? 0;
+            o.build = { alone, pairs, larger: big };
+            add(x, 'build', alone + pairs + big);
+        }
         // Sealed checks: for each verb and field the card can fill, the other field's cards not ruled out × the results.
         for (const [verb, t] of Object.entries(CHECK_TEMPLATES)) {
             if (live('check', `v|${verb}`)) continue;
