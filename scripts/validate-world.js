@@ -1,21 +1,23 @@
 #!/usr/bin/env node
-// Validate the world-model pilot (<case>/world/: entities.json, times.json, facts.json, questions.json) and print
-// its counts.
+// Validate the world-model pilot (<case>/world/: entities, times, facts, accounts, questions) and print its counts.
 //
 //   node scripts/validate-world.js cases/silver-blaze [--quiet]
 //
-// Checks: ids unique; every `of`, entity-valued value (a location's, or any id with an underscore), `src` link and `covers` names an entity (the case's or the
-// world's own); every time reference names a time point and `after` has no cycle; every quote is found in its
-// paragraph; a stated or implied fact has a quote; an inferable fact names facts that exist and are told no later
-// than its `inferable_at`; an `observes` value names facts; `q`/`pick` name a question and one of its
-// possibilities; `old` names a claim, event, slot or question of the old game; a question's `from`/`by` name facts
-// (or a reader's thought, "thought t<id>") told no later than the possibility is available (or a `quote` in that
-// paragraph names it); every question has exactly one "something else", available from where it is raised; the
-// answer is one of the possibilities (or null); a `member_of` value is a group.
+// Checks: ids unique; every `of`, `to` and entity-valued value (a location's or lives_at's, or any id with an
+// underscore) names an entity (the case's or the world's own); every time reference names a time point and `after`
+// has no cycle; every quote is found in its paragraph; a stated or implied fact has a quote; an inferable fact names
+// facts that exist and are told no later than its `inferable_at`; an `observes` value names facts; `q`/`pick` name
+// a question and one of its possibilities; `old` names a claim, event, slot or question of the old game; a
+// `member_of` value is a group. Provenance: a `tells` fact passes accounts that exist; accounts' parts and facts
+// exist and no bundle contains itself; every told fact is in an account and a chain of tellings carries it to
+// Watson (scripts/world-provenance.js). Questions: `from`/`by` name facts (or a reader's thought, "thought t<id>")
+// told no later than the possibility is available (or a `quote` in that paragraph names it); exactly one
+// "something else", available from where the question is raised; the answer is one of the possibilities (or null).
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { normalize } from '../engine/story.js';
+import { provenance } from './world-provenance.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -38,6 +40,11 @@ const thoughts = new Set((read('thoughts.json').thoughts ?? []).map((t) => t.id)
 const times = read('world/times.json').times;
 const facts = read('world/facts.json').facts;
 const questions = read('world/questions.json').questions;
+const accounts = read('world/accounts.json').accounts;
+const accountIds = new Set(accounts.map((a) => a.id));
+const prov = provenance(dir);
+const TELL_HOWS = new Set(['told', 'statement', 'sworn statement', 'report', 'newspaper', 'telegram', 'analysis', 'letter']);
+const ACCOUNT_HOWS = new Set(['saw', 'did', 'said', 'examination', 'analysis', 'inference', 'own', 'report', 'bundle']);
 
 const errors = [];
 const err = (id, msg) => errors.push(`${id}: ${msg}`);
@@ -46,7 +53,7 @@ const factById = new Map(facts.map((f) => [f.id, f]));
 const qById = new Map(questions.map((q) => [q.id, q]));
 
 const seen = new Set();
-for (const x of [...times, ...facts, ...questions]) {
+for (const x of [...times, ...facts, ...questions, ...accounts]) {
     if (seen.has(x.id)) err(x.id, 'duplicate id');
     seen.add(x.id);
 }
@@ -93,16 +100,34 @@ for (const f of facts) {
     } else if (f.from) err(f.id, `from on a ${basis} fact`);
     if (f.attr === 'observes') for (const v of list(f.value)) if (!factById.has(v) && /^f\./.test(v)) err(f.id, `observes: no fact ${v}`);
     if ('truth' in f && ![true, false, null].includes(f.truth)) err(f.id, `truth ${f.truth}`);
-    const src = list(f.src);
-    if (!src.length) err(f.id, 'no src');
-    else if (src[0] !== 'watson' && src[0] !== 'holmes') err(f.id, `src starts with ${src[0]}`);
-    for (const s of src) if (s !== '…' && !entities.has(s)) err(f.id, `src: no entity ${s}`);
+    if (f.attr === 'tells') {
+        for (const v of list(f.value)) if (!accountIds.has(v)) err(f.id, `tells: no account ${v}`);
+        if (!f.to) err(f.id, 'tells without to');
+        if (!TELL_HOWS.has(f.how)) err(f.id, `tells: how ${f.how}`);
+        if (f.of === '?' && !f.q) err(f.id, 'a telling from "?" needs its question (q)');
+    }
     for (const o of list(f.old)) if (!oldIds.has(o)) err(f.id, `old: no ${o}`);
     if (f.q) {
         const q = qById.get(f.q);
         if (!q) err(f.id, `q: no question ${f.q}`);
         else if (f.pick && !q.possibilities.some((p) => p.value === f.pick)) err(f.id, `pick: ${f.q} has no possibility "${f.pick}"`);
     } else if (f.pick) err(f.id, 'pick without q');
+}
+
+// Accounts: parts and facts exist, no bundle contains itself, every told fact reaches Watson.
+for (const a of accounts) {
+    if (a.origin != null && !entities.has(a.origin)) err(a.id, `origin: no entity ${a.origin}`);
+    if (!ACCOUNT_HOWS.has(a.how)) err(a.id, `how ${a.how}`);
+    if ((a.how === 'bundle') !== !!list(a.parts).length) err(a.id, 'a bundle has parts, and only a bundle');
+    for (const x of list(a.parts)) if (!accountIds.has(x)) err(a.id, `parts: no account ${x}`);
+    for (const x of list(a.facts)) if (!factById.has(x)) err(a.id, `facts: no fact ${x}`);
+    if (prov.ancestors(a.id).has(a.id)) err(a.id, 'a bundle contains itself');
+}
+for (const f of facts) {
+    if (f.attr === 'tells') continue;
+    const held = prov.holdersOf.get(f.id);
+    if (!held.length && (f.basis ?? 'stated') !== 'inferable') err(f.id, 'a told fact in no account');
+    if (held.length && !prov.factChains(f.id).length) err(f.id, `no chain reaches Watson from ${held.join(', ')}`);
 }
 
 // Questions.
@@ -151,8 +176,15 @@ if (!quiet) {
     show('Facts by entity', count(facts, (f) => f.of));
     show('Facts by basis', count(facts, (f) => f.basis ?? 'stated'));
     show('Facts by truth', count(facts, (f) => String('truth' in f ? f.truth : true)));
-    show('Facts by first source link after Watson', count(facts, (f) => list(f.src).slice(0, 2).join(' < ')));
-    show('Facts by provenance depth (… = links still to fill)', count(facts, (f) => (list(f.src).includes('…') ? 'has gaps' : 'complete')));
+    const told = facts.filter((f) => f.attr !== 'tells');
+    console.log(`\n${accounts.length} accounts, ${prov.tellings.length} tellings`);
+    show('Facts by provenance', count(told, (f) => {
+        const cs = prov.factChains(f.id);
+        if (!cs.length) return 'none: the reader infers it';
+        const sure = cs.filter((c) => !c.links.some((l) => l.uncertain));
+        return `${sure.length ? 'a certain chain' : 'only uncertain chains'}, ${cs.length > 1 ? 'several' : 'one'}`;
+    }));
+    show('Facts by origin', count(told, (f) => [...new Set(prov.factChains(f.id).map((c) => c.origin ?? '?'))].join(' + ') || '(reader)'));
 }
 console.log(`${errors.length} error(s)`);
 process.exit(errors.length ? 1 : 0);

@@ -439,11 +439,11 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
   or a list) gives a partial order. `day` and `clock` are labels only: the weekday and the hour are facts on
   `calendar` and `clock`, each with its quote. `window` names the old game's nearest window.
 - **`facts.json`**: one fact each, `{id, of, attr, value, to?, time, para, quote, basis?, from?, inferable_at?,
-  truth?, src, q?, pick?, old?, note?}`.
+  truth?, q?, pick?, old?, how?, partial?, note?}`.
   - `attr` is one of `location` (where it is at that time), `lives_at` (where it lives or is kept), `member_of`,
     `carrying`, `wearing`, `action`, `says`, `observes`, `knows`, `believes`,
     `intends`, `condition`, `contents`, `role`, `reputed`, `rule`, `position`, `owner`, `identity`, `weekday`,
-    `hour`, `speed` or `time`.
+    `hour`, `speed`, `time` or `tells`.
   - `value` is an entity id where there is one, otherwise short text. `observes` takes fact ids: an observation is
     an event, and the root of a provenance chain.
   - `time` is `{at}`, `{from, to}` (an open end means until further notice) or `{after, before}` (somewhere
@@ -453,11 +453,26 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
   - `truth` comes from the answer key: `true` (the default), `false` or `null` (never settled).
   - A `says` fact records that it was said (true when said); what it says is a possibility (`pick`) of a question
     (`q`). A belief that is false is a fact with `truth: false` and its own `q`/`pick`.
-  - `src` is the provenance chain from Watson outward: `watson` alone means he saw or heard it; `holmes` next
-    means Holmes told him. `…` marks links still to be filled.
+  - A `tells` fact passes accounts (`value`, account ids) to `to`, `how` (told, statement, sworn statement,
+    report, newspaper, telegram, analysis, letter). `partial`: the story says only part of the account was passed
+    (Watson's papers held "most of the facts", ¶42). A telling the story never settles has `truth: null` and the
+    question of what else it could have been; an unknown sender is `of: "?"`, with its question.
   - `old` names the old game's claims and events the fact comes from.
-- **`questions.json`**: an uncertain entry `{id, entry, raised, quote, possibilities, answer, latent?, settled?,
-  old?, note?}`.
+- **`accounts.json`**: what one source tells, as a bundle of facts `{id, label, origin, how, facts?, parts?}`, so
+  that one telling passes many details: Edith's account, Hunter's, Mrs. Straker's, the searchers', the police
+  findings, Simpson's statement, the answer to Holmes's wire, Holmes's own part, what Watson sees himself. `origin`
+  is who first had it (null when not said), `how` how (saw, did, said, examination, analysis, inference, own,
+  report). A `bundle` is made of `parts` (everything the police hold; what the papers print; Holmes's account in
+  the train). A fact may be in several accounts: the talk at the window is in both Edith's and Hunter's.
+- **Provenance is derived, not written on facts.** `scripts/world-provenance.js` follows the tellings that carry an
+  account (or a bundle containing it) from its origin to Watson, and gives each fact its chains, for example
+  `edith_baxter sworn statement→ police ?report→ newspapers ?newspaper→ holmes told→ watson`, with `?` on uncertain
+  links. It also gives who holds each account from when. Every told fact must be in an account that reaches Watson;
+  the facts in none are the reader's own inferences.
+- **`questions.json`**: an uncertain entry `{id, entry, raised, quote, possibilities, answer, kind?, latent?,
+  settled?, old?, note?}`. `kind: provenance` marks a question about how something was passed on (who answered
+  Holmes's wire; whether the papers had the night from the police or from the witnesses). It is kept in the data
+  and off the player's list unless the story itself raises it.
   - `entry` is `{of, attr, time}`, with `of: "?"` for a question about who.
   - `raised` is the paragraph where the story opens the question (null while it never doubts the entry: `latent`).
   - Each possibility is `{value, how?, available, via, from?, quote?, out?, by?}`. An answer is listed to the
@@ -470,8 +485,8 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
   - `answer` is always one of the possibilities (null where the story never settles it), even when it is
     available only late: what Straker meant at one in the morning is available indirectly at ¶46 and named at ¶57.
 
-Not yet: the provenance chains' middle links, the two dates per fact (only `inferable_at` where it differs, and
-`para` as the date given), and anything after ¶46.
+Not yet: the two dates per fact (only `inferable_at` where it differs, and `para` as the date given), and anything
+after ¶46.
 
 ## The world model
 

@@ -14,6 +14,7 @@
     {"id": "kp_lads", "kind": "group", "name": "The three King's Pyland lads", "summary": "Ned Hunter and the two others; one sits up each night in the stable."},
     {"id": "lad_2", "kind": "person", "name": "A King's Pyland lad", "summary": "One of the two lads not named by ¶46 (the old game's other_lads)."},
     {"id": "lad_3", "kind": "person", "name": "Another King's Pyland lad", "summary": "The other of the two lads not named by ¶46."},
+    {"id": "analyst", "kind": "person", "name": "Whoever analysed the supper", "summary": "Not named: \"an analysis has shown\" (¶37)."},
     {"id": "hollow_mud", "kind": "object", "name": "The mud at the bottom of the hollow", "within": "fatal_hollow"}
   ]
 }
