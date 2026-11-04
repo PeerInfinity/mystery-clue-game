@@ -429,15 +429,19 @@ The new direction (`docs/ideas.md` §2, "Watson fills in the world model") is bu
 covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the page reads it yet;
 `npm run validate-world` checks it and prints its counts. Every file has one object per line.
 
-- **`entities.json`**: entities the old `entities.json` lacks (the kitchen, the train, the Wessex Cup, the
-  searchers…), plus three state entities: `calendar` (weekday), `clock` (hour) and `weather`. Ids share the old
-  file's namespace, and `of` may name either.
+- **`entities.json`**: entities the old `entities.json` lacks (the kitchen, the train, the Wessex Cup, the two
+  unnamed lads, the searchers…), plus three state entities: `calendar` (weekday), `clock` (hour) and `weather`. Ids
+  share the old file's namespace, and `of` may name either.
+- **Groups.** A group (`kind: group`) is an entity like any other; who is in it is the `member_of` attribute of each
+  member, with its own time, so membership changes like any attribute (the two lads join `searchers` at the stable
+  on Tuesday morning and leave it at the finding). A fact on a group holds for every member at that time.
 - **`times.json`**: time points `{id, label, day?, clock?, after?, para?, quote?, window?, note?}`. `after` (one id
   or a list) gives a partial order. `day` and `clock` are labels only: the weekday and the hour are facts on
   `calendar` and `clock`, each with its quote. `window` names the old game's nearest window.
 - **`facts.json`**: one fact each, `{id, of, attr, value, to?, time, para, quote, basis?, from?, inferable_at?,
   truth?, src, q?, pick?, old?, note?}`.
-  - `attr` is one of `location`, `carrying`, `wearing`, `action`, `says`, `observes`, `knows`, `believes`,
+  - `attr` is one of `location` (where it is at that time), `lives_at` (where it lives or is kept), `member_of`,
+    `carrying`, `wearing`, `action`, `says`, `observes`, `knows`, `believes`,
     `intends`, `condition`, `contents`, `role`, `reputed`, `rule`, `position`, `owner`, `identity`, `weekday`,
     `hour`, `speed` or `time`.
   - `value` is an entity id where there is one, otherwise short text. `observes` takes fact ids: an observation is
@@ -452,15 +456,19 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
   - `src` is the provenance chain from Watson outward: `watson` alone means he saw or heard it; `holmes` next
     means Holmes told him. `…` marks links still to be filled.
   - `old` names the old game's claims and events the fact comes from.
-- **`questions.json`**: an uncertain entry `{id, entry, raised, quote, possibilities, answer, answer_pick?,
-  answer_live?, latent?, settled?, old?, note?}`.
+- **`questions.json`**: an uncertain entry `{id, entry, raised, quote, possibilities, answer, latent?, settled?,
+  old?, note?}`.
   - `entry` is `{of, attr, time}`, with `of: "?"` for a question about who.
-  - Each possibility is `{value, how?, covers?, live, from, out?, by?}`: `live` is the paragraph where it becomes
-    open and `from` the fact (or `thought t<id>`, a careful reader's) that opens it; `out`/`by` the paragraph and
-    fact that rule it out.
-  - `answer` must be a possibility (or `answer_pick` names the one that covers it) unless `answer_live: false`,
-    which marks an answer the story has not yet made thinkable by ¶46.
-  - `latent`: the story never doubts the entry by then.
+  - `raised` is the paragraph where the story opens the question (null while it never doubts the entry: `latent`).
+  - Each possibility is `{value, how?, available, via, from?, quote?, out?, by?}`. An answer is listed to the
+    player only from its `available` paragraph, the point where the story makes it a possibility. `via: direct`
+    means the story names it; `via: indirect` means it follows from what has been told, or from a careful reader's
+    thought (`from` a fact, or `thought t<id>`, told no later). A `quote` in the `available` paragraph serves where
+    the facts so far do not reach (answers opened after ¶46). `out`/`by` give the paragraph and the fact that rule
+    it out.
+  - Every question has exactly one `something else` (`via: always`), available from the paragraph it is raised.
+  - `answer` is always one of the possibilities (null where the story never settles it), even when it is
+    available only late: what Straker meant at one in the morning is available indirectly at ¶46 and named at ¶57.
 
 Not yet: the provenance chains' middle links, the two dates per fact (only `inferable_at` where it differs, and
 `para` as the date given), and anything after ¶46.

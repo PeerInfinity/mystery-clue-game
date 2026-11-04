@@ -11,6 +11,9 @@
     {"id": "public", "kind": "group", "name": "The public", "summary": "England at large, which talks of nothing but the case."},
     {"id": "household", "kind": "group", "name": "The people at the trainer's house", "summary": "Those who ate the same curried mutton at the house on Monday night."},
     {"id": "searchers", "kind": "group", "name": "The two lads and the two women", "summary": "The other lads, Mrs. Straker and the maid, searching on Tuesday morning."},
+    {"id": "kp_lads", "kind": "group", "name": "The three King's Pyland lads", "summary": "Ned Hunter and the two others; one sits up each night in the stable."},
+    {"id": "lad_2", "kind": "person", "name": "A King's Pyland lad", "summary": "One of the two lads not named by ¶46 (the old game's other_lads)."},
+    {"id": "lad_3", "kind": "person", "name": "Another King's Pyland lad", "summary": "The other of the two lads not named by ¶46."},
     {"id": "hollow_mud", "kind": "object", "name": "The mud at the bottom of the hollow", "within": "fatal_hollow"}
   ]
 }
