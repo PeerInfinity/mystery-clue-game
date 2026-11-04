@@ -32,7 +32,7 @@
     {"id": "t.thu_evening", "label": "Thursday evening: Tavistock station", "day": "thu", "after": "t.thu_recital", "para": 47, "quote": "It was evening before we reached the little town of Tavistock", "window": "w.thu_evening"},
     {"id": "t.thu_drive", "label": "Thursday evening: the drive in the landau", "day": "thu", "after": "t.thu_evening", "para": 51, "quote": "A minute later we were all seated in a comfortable landau", "window": "w.thu_evening"},
     {"id": "t.thu_villa", "label": "Thursday evening: at Straker's villa", "day": "thu", "after": "t.thu_drive", "para": 69, "quote": "our driver pulled up at a neat little red-brick villa", "window": "w.thu_evening"},
-    {"id": "t.home_train", "label": "After the race: the train home", "after": "t.race_enclosure", "para": 215, "window": "w.race_evening"},
+    {"id": "t.home_train", "label": "Race day evening: the Pullman car back to London", "after": "t.race_enclosure", "para": 215, "quote": "We had the corner of a Pullman car to ourselves that evening", "window": "w.race_evening"},
     {"id": "t.thu_sitting", "label": "Thursday evening: the sitting-room, Straker's pockets", "day": "thu", "after": "t.thu_villa", "para": 78, "quote": "We all filed into the front room", "window": "w.thu_evening"},
     {"id": "t.thu_passage", "label": "Thursday evening: Mrs. Straker in the passage", "day": "thu", "after": "t.thu_sitting", "para": 86, "quote": "As we emerged from the sitting-room", "window": "w.thu_evening"},
     {"id": "t.fri", "label": "Friday: the inquest", "day": "fri", "after": "t.thu_night", "para": 73, "quote": "The inquest is to-morrow", "window": "w.fri", "note": "After all of Thursday; later Thursday points come before it too."},
@@ -53,6 +53,8 @@
     {"id": "t.race_train", "label": "Race day: the train to Winchester, the drag to the course", "after": "t.race", "para": 183, "quote": "Four days later Holmes and I were again in the train, bound for Winchester", "window": "w.race_day"},
     {"id": "t.race_drag", "label": "Race day: in the drag by the grand stand, before the race", "after": "t.race_train", "para": 190, "quote": "As the drag drew up in the enclosure near the grand stand", "window": "w.race_day"},
     {"id": "t.race_run", "label": "Race day: the race", "after": "t.race_drag", "para": 200, "quote": "as they came up the straight", "window": "w.race_day"},
-    {"id": "t.race_enclosure", "label": "Race day: in the weighing enclosure, after the race", "after": "t.race_run", "para": 202, "quote": "as we made our way into the weighing enclosure", "window": "w.race_day"}
+    {"id": "t.race_enclosure", "label": "Race day: in the weighing enclosure, after the race", "after": "t.race_run", "para": 202, "quote": "as we made our way into the weighing enclosure", "window": "w.race_day"},
+    {"id": "t.milliner_visit", "label": "Back in London: Holmes calls on the milliner", "after": "t.thu_night", "para": 229, "quote": "When I returned to London I called upon the milliner", "window": "w.fri", "note": "Before the race; the day is not given."},
+    {"id": "t.clapham", "label": "Race day evening: Clapham Junction", "after": "t.home_train", "para": 231, "quote": "This is Clapham Junction", "window": "w.race_evening"}
   ]
 }
