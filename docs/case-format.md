@@ -545,7 +545,8 @@ higher (never certain). A link is keyed by its telling, or for a speech by speak
 to Watson are one link), or for a member by member and group (`linkKey`). A person's level, when set, caps every link
 from that person. A chain is as strong as its weakest link, a fact as its best chain; a fact with no chain (the
 reader's own inference) is not modelled and not shown. A telling is shown as an event: certain when it is to Watson,
-uncertain otherwise.
+uncertain otherwise. `resolvingLinks` gives the links and people whose distrust alone would take a fact below the
+threshold (those every chain of it passes through): the page marks them when it traces a contradiction.
 
 The validator requires the true story to be consistent (no contradiction among the assertions the answer key holds
 true: every one it found was a data error) and prints the contradictions a reader who trusts every source meets, by

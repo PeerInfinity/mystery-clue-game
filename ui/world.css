@@ -43,6 +43,14 @@ body.world-page { display: block; height: auto; }
 .clash-box summary { cursor: pointer; color: var(--bad); font-weight: 600; }
 .clash-box ol { margin: 6px 0; padding-left: 20px; }
 .clash-box li { margin: 4px 0; }
+.clash-box li.sel { outline: 1px solid var(--bad); border-radius: 4px; padding: 2px 4px; }
+.drop { font-size: 11px; color: var(--bad); margin-left: 2px; }
+.trace { font-size: 12px; margin-left: 4px; }
+.side { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 4px; }
+.resolving, .link-step.resolving { background: #f5e3a3; border-radius: 4px; padding: 0 3px; color: var(--ink); }
+:root[data-theme="dark"] .resolving { background: #5a4a1a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .resolving { background: #5a4a1a; } }
+p.bad { color: var(--bad); } p.good { color: var(--good); }
 @media (max-width: 1000px) {
   .world-main { grid-template-columns: 1fr; }
   .world-story, .world-detail { position: static; max-height: 40vh; }

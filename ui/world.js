@@ -3,7 +3,7 @@
 // trusted as far as the player says (engine/world.js). Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, CLAIM_ATTRS } from '../engine/world.js';
+import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS } from '../engine/world.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -28,6 +28,7 @@ data.order = timeOrder(data.times);
 data.places = places(data);
 const prov = provenance(data);
 const allAssertions = assertions(data);
+const assertionById = new Map(allAssertions.map((x) => [x.id, x]));
 const story = text.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
 const entityById = new Map(data.entities.map((e) => [e.id, e]));
 const timeById = new Map(data.times.map((t) => [t.id, t]));
@@ -37,10 +38,12 @@ const accountById = new Map(data.accounts.map((a) => [a.id, a]));
 const LAST = story.length - 1;
 
 // --- State: how far the story is read, and the player's trust. Saved in this browser only.
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, sel: null };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, history: [], sel: null };
 try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 state.sel = null;
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, history: state.history })); } catch { /* not saved */ } };
+// Every change of trust can be undone: the trust before it is kept (the last 50).
+const changeTrust = (fn) => { state.history = [...state.history, JSON.stringify(state.trust)].slice(-50); fn(state.trust); save(); render(); };
 
 // --- Words.
 const DAYS = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
@@ -109,6 +112,8 @@ function levelOfFact(f) {
     if (f.attr === 'tells') return f.to === 'watson' ? LEVELS.length - 1 : DEFAULT_LEVEL;
     return levelOf(chainsOf(f), state.trust);
 }
+/** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
+const chainsOfAssertion = (x) => (x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factById.get(x.fact)));
 /** Told by the paragraph read to, and modelled (a chain reaches Watson, or a telling). */
 const visible = (f) => { const g = givenAt(f); return g != null && g <= state.para && levelOfFact(f) != null; };
 const accepted = (f) => levelOfFact(f) >= state.threshold;
@@ -188,6 +193,9 @@ function clashTitle(c) {
     return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : 'two identities?'}`;
 }
 
+const clashKey = (c) => `clash:${c.a.id}|${c.b.id}`;
+let current = [];
+
 function render() {
     document.getElementById('para').value = state.para;
     document.getElementById('para').max = LAST;
@@ -204,35 +212,72 @@ function render() {
 
     const clashes = contradictions(data, acceptedAssertions());
     const clashing = new Set(clashes.flatMap((c) => [c.a.fact, c.b.fact]));
+    current = clashes;
+    document.getElementById('undo').disabled = !state.history.length;
     document.getElementById('clashes').innerHTML = clashes.length
-        ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li><b>${clashTitle(c)}</b><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}</li>`).join('')}</ol><p class="small muted">Click a side to see where it comes from, then lower your trust in a link of its chain.</p></details>`
+        ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
         : '';
     document.getElementById('timeline').innerHTML = eventList(() => true, clashing);
     renderDetail(clashing);
 }
 
-function chainHtml(c) {
+function chainHtml(c, resolving = null) {
     const links = c.links.map((l) => {
         const key = linkKey(l);
+        const mark = resolving?.links.includes(key) ? ' resolving' : '';
         const level = state.trust.links[key] ?? DEFAULT_LEVEL;
         const opts = LEVELS.slice(0, -1).map((n, i) => `<option value="${i}"${i === level ? ' selected' : ''}>${n}</option>`).join('');
-        return `<span class="link-step">→ <span class="how">${esc(l.how)}${l.uncertain ? '?' : ''}</span> → ${ent(l.to)} <select class="link-trust" data-key="${esc(key)}" title="How far you trust this link">${opts}</select></span>`;
+        return `<span class="link-step${mark}"${mark ? ' title="Distrusting this link alone takes this side off the timeline"' : ''}>→ <span class="how">${esc(l.how)}${l.uncertain ? '?' : ''}</span> → ${ent(l.to)} <select class="link-trust" data-key="${esc(key)}" title="How far you trust this link">${opts}</select>${dropChip(resolving?.drop?.links.get(key))}</span>`;
     }).join(' ');
     return `<li>${dot(levelOf([c], state.trust))}${ent(c.origin ?? '?')}${c.links.length ? ' ' + links : ' <span class="muted">(Watson’s own)</span>'}</li>`;
 }
-function peopleHtml(chains) {
+function peopleHtml(chains, resolving = null) {
     const people = [...new Set(chains.flatMap((c) => c.links.map((l) => l.from)))].filter((p) => p && p !== '?' && p !== 'watson');
     if (!people.length) return '';
     return `<h3>People</h3><ul class="people">${people.map((p) => {
         const v = state.trust.people[p];
         const opts = ['<option value="">no limit</option>', ...LEVELS.slice(0, -1).map((n, i) => `<option value="${i}"${v === i ? ' selected' : ''}>${n}</option>`)].join('');
-        return `<li>${ent(p)}: at most <select class="person-trust" data-person="${esc(p)}">${opts}</select></li>`;
+        const mark = resolving?.people.includes(p) ? ' class="resolving" title="Distrusting this person alone takes this side off the timeline"' : '';
+        return `<li${mark}>${ent(p)}: at most <select class="person-trust" data-person="${esc(p)}">${opts}</select>${dropChip(resolving?.drop?.people.get(p))}</li>`;
     }).join('')}</ul>`;
+}
+
+/** How many events now on the timeline distrusting a link (or a person) would take off it. */
+function dropCounts(chains) {
+    const on = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
+    const count = (trust) => on.filter((f) => levelOf(chainsOf(f), trust) < state.threshold).length;
+    const links = new Map(), people = new Map();
+    for (const k of new Set(chains.flatMap((c) => c.links.map(linkKey)))) links.set(k, count({ ...state.trust, links: { ...state.trust.links, [k]: 0 } }));
+    for (const p of new Set(chains.flatMap((c) => c.links.map((l) => l.from)))) people.set(p, count({ ...state.trust, people: { ...state.trust.people, [p]: 0 } }));
+    return { links, people };
+}
+const dropChip = (n) => (!n ? '' : ` <span class="drop" title="Distrusting it takes ${n} event${n === 1 ? '' : 's'} now on the timeline off it">−${n}</span>`);
+
+function sideHtml(x, label) {
+    const f = factById.get(x.fact);
+    const chains = chainsOfAssertion(x);
+    const r = { ...resolvingLinks(chains, state.trust, state.threshold), drop: dropCounts(chains) };
+    const what = x.kind === 'pick'
+        ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : ''}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
+        : phrase(f);
+    return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${what}</a></p>
+      <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
+      <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>${r.links.length || r.people.length ? '; <span class="resolving">marked</span>: distrusting it alone takes this side off the timeline' : '; no single link takes it off: it has independent chains'}.</p>
+      <ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
 }
 
 function renderDetail(clashing) {
     const el = document.getElementById('detail');
     const sel = state.sel;
+    if (sel?.startsWith('clash:')) {
+        const [a, b] = sel.slice(6).split('|').map((id) => assertionById.get(id));
+        const open = current.find((c) => clashKey(c) === sel);
+        const c = open ?? { a, b };
+        el.innerHTML = `<h2>${clashTitle(c)}</h2>
+          <p class="small ${open ? 'bad' : 'good'}">${open ? 'Both sides are on the timeline: they cannot both hold.' : 'Resolved: one side is no longer on the timeline.'}</p>
+          ${sideHtml(c.a, 'One side')}${sideHtml(c.b, 'Against')}`;
+        return;
+    }
     if (sel && factById.has(sel)) {
         const f = factById.get(sel);
         const chains = chainsOf(f);
@@ -262,9 +307,17 @@ document.getElementById('threshold').addEventListener('change', (e) => { state.t
 document.getElementById('show-below').addEventListener('change', (e) => { state.showBelow = e.target.checked; save(); render(); });
 document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Put every link and person back to uncertain?')) return;
-    state.trust = { links: {}, people: {} }; save(); render();
+    changeTrust((tr) => { tr.links = {}; tr.people = {}; });
+});
+document.getElementById('undo').addEventListener('click', () => {
+    if (!state.history.length) return;
+    state.trust = JSON.parse(state.history.at(-1));
+    state.history = state.history.slice(0, -1);
+    save(); render();
 });
 document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-clash]');
+    if (t) { state.sel = t.dataset.clash; render(); return; }
     const a = e.target.closest('[data-ent]');
     if (a) { state.sel = a.dataset.ent; render(); return; }
     const f = e.target.closest('[data-fact]');
@@ -272,13 +325,11 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('change', (e) => {
     if (e.target.matches('.link-trust')) {
-        const v = Number(e.target.value);
-        if (v === DEFAULT_LEVEL) delete state.trust.links[e.target.dataset.key]; else state.trust.links[e.target.dataset.key] = v;
-        save(); render();
+        const v = Number(e.target.value), k = e.target.dataset.key;
+        changeTrust((tr) => { if (v === DEFAULT_LEVEL) delete tr.links[k]; else tr.links[k] = v; });
     } else if (e.target.matches('.person-trust')) {
-        const p = e.target.dataset.person;
-        if (e.target.value === '') delete state.trust.people[p]; else state.trust.people[p] = Number(e.target.value);
-        save(); render();
+        const p = e.target.dataset.person, v = e.target.value;
+        changeTrust((tr) => { if (v === '') delete tr.people[p]; else tr.people[p] = Number(v); });
     }
 });
 render();

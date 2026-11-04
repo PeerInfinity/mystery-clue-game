@@ -146,7 +146,11 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   list on clicking its name; a fact's quote and chains, with a trust select on each link and a cap per person; the
   threshold, and the facts below it shown faded on request; the contradictions among what is on the timeline, each
   side clickable to its chains. Distrusting the stranger's word to Edith clears the four contradictions of ¶46.
-  Next: the contradiction report proper (tracing both sides' chains side by side), then the grid view.
+- **Built (2026-11-04), the contradiction report:** "trace" on a contradiction shows both sides, each with its
+  quote, its trust and all its chains with their trust selects; the links and people whose distrust alone would take
+  that side off the timeline are marked, and each shows how many events now on the timeline distrusting it would
+  take off (at ¶58, the stranger's word to Edith 2, the police's report to the papers 151); a resolved contradiction
+  says so. Every change of trust can be undone. Next: the grid view (times as rows, places as columns).
 
 ### An incremental game about trying every combination
 

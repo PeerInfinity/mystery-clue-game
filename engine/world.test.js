@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -92,4 +92,14 @@ test('trust: a chain is as strong as its weakest link, a fact as its best chain;
     assert.equal(levelOf([]), null, 'no chain: not modelled');
     assert.equal(givenAt({ para: 9, basis: 'inferable' }), null);
     assert.equal(givenAt({ para: 9, given_at: 4 }), 4);
+});
+
+test('the links whose distrust alone takes a fact off the timeline: those every chain passes through', () => {
+    const a = { links: [{ from: 'edith', to: 'police', how: 'statement', telling: 'f.e' }, { from: 'police', to: 'papers', how: 'report', telling: 'f.p' }, { from: 'papers', to: 'watson', how: 'newspaper', telling: 'f.w' }] };
+    const b = { links: [{ from: 'edith', to: 'police', how: 'statement', telling: 'f.e' }, { from: 'police', to: 'papers', how: 'report', telling: 'f.p' }, { from: 'papers', to: 'holmes', how: 'newspaper', telling: 'f.h' }, { from: 'holmes', to: 'watson', how: 'told', telling: 'f.t' }] };
+    const r = resolvingLinks([a, b]);
+    assert.deepEqual(r.links, ['f.e', 'f.p']);
+    assert.deepEqual(r.people, ['edith', 'police', 'papers']);
+    assert.deepEqual(resolvingLinks([{ links: [] }]).links, [], "Watson's own: nothing takes it off");
+    assert.deepEqual(resolvingLinks([a], {}, 0).links, [], 'threshold distrusted: nothing is below it');
 });

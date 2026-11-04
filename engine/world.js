@@ -274,3 +274,17 @@ export function levelOf(chains, trust = {}) {
     if (!chains.length) return null;
     return Math.max(...chains.map((c) => chainLevel(c, trust)));
 }
+
+/**
+ * The links, and the people, whose distrust alone would take a fact below the threshold: every chain of it passes
+ * through them (and the fact is now at or above it). `chains`: the fact's chains; returns `{links: [key], people: [id]}`.
+ */
+export function resolvingLinks(chains, trust = {}, threshold = DEFAULT_LEVEL) {
+    const out = { links: [], people: [] };
+    if (!chains.length || threshold <= 0 || levelOf(chains, trust) < threshold) return out;
+    const keys = [...new Set(chains.flatMap((c) => c.links.map(linkKey)))];
+    for (const k of keys) if (levelOf(chains, { ...trust, links: { ...trust.links, [k]: 0 } }) < threshold) out.links.push(k);
+    const people = [...new Set(chains.flatMap((c) => c.links.map((l) => l.from)))].filter((p) => p && p !== '?');
+    for (const p of people) if (levelOf(chains, { ...trust, people: { ...trust.people, [p]: 0 } }) < threshold) out.people.push(p);
+    return out;
+}
