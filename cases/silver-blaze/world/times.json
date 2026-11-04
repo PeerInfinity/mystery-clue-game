@@ -27,6 +27,11 @@
     {"id": "t.thu_train", "label": "Thursday, an hour later: in the train", "day": "thu", "after": "t.thu_breakfast", "para": 7, "quote": "an hour or so later I found myself in the corner of a first-class carriage", "window": "w.thu_journey"},
     {"id": "t.thu_past_reading", "label": "Thursday, past Reading", "day": "thu", "after": "t.thu_train", "para": 7, "quote": "We had left Reading far behind us", "window": "w.thu_journey"},
     {"id": "t.thu_recital", "label": "Thursday, Holmes's account in the train", "day": "thu", "after": "t.thu_past_reading", "para": 17, "quote": "gave me a sketch of the events which had led to our journey", "window": "w.thu_journey"},
-    {"id": "t.race", "label": "Next Tuesday: the Wessex Cup", "day": "tue+7", "after": "t.thu_recital", "para": 18, "quote": "at the fall of the flag next Tuesday", "window": "w.race_day"}
+    {"id": "t.race", "label": "Next Tuesday: the Wessex Cup", "day": "tue+7", "after": "t.thu_recital", "para": 18, "quote": "at the fall of the flag next Tuesday", "window": "w.race_day"},
+    {"id": "t.tue_day", "label": "Tuesday, during the day", "day": "tue", "after": "t.tue_after", "para": 62, "quote": "On Tuesday they were gone", "window": "w.tue_day"},
+    {"id": "t.thu_evening", "label": "Thursday evening: Tavistock station", "day": "thu", "after": "t.thu_recital", "para": 47, "quote": "It was evening before we reached the little town of Tavistock", "window": "w.thu_evening"},
+    {"id": "t.thu_drive", "label": "Thursday evening: the drive in the landau", "day": "thu", "after": "t.thu_evening", "para": 51, "quote": "A minute later we were all seated in a comfortable landau", "window": "w.thu_evening"},
+    {"id": "t.thu_villa", "label": "Thursday evening: at Straker's villa", "day": "thu", "after": "t.thu_drive", "para": 69, "quote": "our driver pulled up at a neat little red-brick villa", "window": "w.thu_evening"},
+    {"id": "t.home_train", "label": "After the race: the train home", "after": "t.race", "para": 215, "window": "w.race_evening"}
   ]
 }

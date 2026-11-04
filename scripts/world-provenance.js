@@ -29,6 +29,11 @@ export function provenance(dir) {
         return seen;
     };
 
+    // A member holds what its groups hold (a fact on a group holds for its members): Gregory, of the police.
+    const groupsOf = new Map();
+    for (const f of facts) if (f.attr === 'member_of') for (const g of list(f.value)) groupsOf.set(f.of, [...(groupsOf.get(f.of) ?? []), g]);
+    const selves = (h) => [h, ...new Set(groupsOf.get(h) ?? [])];
+
     // Chains carrying account `id` to `holder`: each a list of links from the origin onwards.
     const memo = new Map();
     const chains = (id, holder, visiting = new Set()) => {
@@ -36,12 +41,15 @@ export function provenance(dir) {
         if (memo.has(key)) return memo.get(key);
         const a = byId.get(id);
         if (a.origin === holder) return [[]];
+        if (selves(holder).includes(a.origin)) return [[{ from: a.origin, to: holder, how: 'member', uncertain: false }]];
         if (visiting.has(holder)) return [];
         visiting.add(holder);
         const carriers = new Set([id, ...ancestors(id)]);
         const out = [];
         for (const t of tellings) {
-            if (t.to !== holder || !list(t.value).some((v) => carriers.has(v))) continue;
+            if (!selves(holder).includes(t.to) || !list(t.value).some((v) => carriers.has(v))) continue;
+            if (t.to !== holder) out.push(...chains(id, t.to, visiting).map((c) => [...c, { from: t.to, to: holder, how: 'member', uncertain: false }]));
+            if (t.to !== holder) continue;
             const link = { from: t.of, to: holder, how: t.how, telling: t.id, uncertain: t.of === '?' || t.truth === null || !!t.partial, q: t.q };
             if (t.of === '?') out.push([{ from: a.origin ?? '?', to: '?', how: 'unknown', gap: true, uncertain: true, q: t.q }, link]);
             else for (const c of chains(id, t.of, visiting)) out.push([...c, link]);

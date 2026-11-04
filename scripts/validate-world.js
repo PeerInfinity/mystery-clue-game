@@ -50,7 +50,7 @@ const STRENGTHS = new Set(['certain', 'likely']);
 // A fact is given where the story states it: `given_at`, else its own paragraph (an inferable fact: only by given_at).
 const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
 const earliest = (f) => f.inferable_at ?? givenAt(f);
-const TELL_HOWS = new Set(['told', 'statement', 'sworn statement', 'report', 'newspaper', 'telegram', 'analysis', 'letter']);
+const TELL_HOWS = new Set(['told', 'overheard', 'statement', 'sworn statement', 'report', 'newspaper', 'telegram', 'analysis', 'letter']);
 const ACCOUNT_HOWS = new Set(['saw', 'did', 'said', 'examination', 'analysis', 'inference', 'own', 'report', 'bundle']);
 
 const errors = [];
