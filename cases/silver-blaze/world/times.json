@@ -27,12 +27,12 @@
     {"id": "t.thu_train", "label": "Thursday, an hour later: in the train", "day": "thu", "after": "t.thu_breakfast", "para": 7, "quote": "an hour or so later I found myself in the corner of a first-class carriage", "window": "w.thu_journey"},
     {"id": "t.thu_past_reading", "label": "Thursday, past Reading", "day": "thu", "after": "t.thu_train", "para": 7, "quote": "We had left Reading far behind us", "window": "w.thu_journey"},
     {"id": "t.thu_recital", "label": "Thursday, Holmes's account in the train", "day": "thu", "after": "t.thu_past_reading", "para": 17, "quote": "gave me a sketch of the events which had led to our journey", "window": "w.thu_journey"},
-    {"id": "t.race", "label": "Next Tuesday: the Wessex Cup", "day": "tue+7", "after": "t.thu_recital", "para": 18, "quote": "at the fall of the flag next Tuesday", "window": "w.race_day"},
+    {"id": "t.race", "label": "Race day: the Wessex Cup", "day": "tue+7", "after": "t.race_eve", "para": 18, "quote": "at the fall of the flag next Tuesday", "window": "w.race_day"},
     {"id": "t.tue_day", "label": "Tuesday, during the day", "day": "tue", "after": "t.tue_after", "para": 62, "quote": "On Tuesday they were gone", "window": "w.tue_day"},
     {"id": "t.thu_evening", "label": "Thursday evening: Tavistock station", "day": "thu", "after": "t.thu_recital", "para": 47, "quote": "It was evening before we reached the little town of Tavistock", "window": "w.thu_evening"},
     {"id": "t.thu_drive", "label": "Thursday evening: the drive in the landau", "day": "thu", "after": "t.thu_evening", "para": 51, "quote": "A minute later we were all seated in a comfortable landau", "window": "w.thu_evening"},
     {"id": "t.thu_villa", "label": "Thursday evening: at Straker's villa", "day": "thu", "after": "t.thu_drive", "para": 69, "quote": "our driver pulled up at a neat little red-brick villa", "window": "w.thu_evening"},
-    {"id": "t.home_train", "label": "After the race: the train home", "after": "t.race", "para": 215, "window": "w.race_evening"},
+    {"id": "t.home_train", "label": "After the race: the train home", "after": "t.race_enclosure", "para": 215, "window": "w.race_evening"},
     {"id": "t.thu_sitting", "label": "Thursday evening: the sitting-room, Straker's pockets", "day": "thu", "after": "t.thu_villa", "para": 78, "quote": "We all filed into the front room", "window": "w.thu_evening"},
     {"id": "t.thu_passage", "label": "Thursday evening: Mrs. Straker in the passage", "day": "thu", "after": "t.thu_sitting", "para": 86, "quote": "As we emerged from the sitting-room", "window": "w.thu_evening"},
     {"id": "t.fri", "label": "Friday: the inquest", "day": "fri", "after": "t.thu_night", "para": 73, "quote": "The inquest is to-morrow", "window": "w.fri", "note": "After all of Thursday; later Thursday points come before it too."},
@@ -48,6 +48,11 @@
     {"id": "t.thu_kp_parlour", "label": "Thursday evening: back at the villa, in the parlour", "day": "thu", "after": "t.thu_walk_back", "para": 157, "quote": "The Colonel and the Inspector were awaiting us in the parlour", "window": "w.thu_night"},
     {"id": "t.thu_carriage", "label": "Thursday evening: into the carriage for Tavistock", "day": "thu", "after": "t.thu_kp_parlour", "para": 169, "quote": "As we stepped into the carriage", "window": "w.thu_night"},
     {"id": "t.thu_night", "label": "Thursday night: the night express to London", "day": "thu", "after": "t.thu_carriage", "para": 156, "quote": "we both go back to London by the night train", "window": "w.thu_night"},
-    {"id": "t.weeks_before", "label": "In the weeks before the crime", "after": "t.before", "para": 173, "quote": "three of them have gone lame", "window": "w.weeks_before", "note": "When the sheep went lame is not said: 'of late' (¶172)."}
+    {"id": "t.weeks_before", "label": "In the weeks before the crime", "after": "t.before", "para": 173, "quote": "three of them have gone lame", "window": "w.weeks_before", "note": "When the sheep went lame is not said: 'of late' (¶172)."},
+    {"id": "t.race_eve", "label": "The day before the race", "after": "t.fri", "para": 188, "quote": "You could have got fifteen to one yesterday", "window": "w.race_eve"},
+    {"id": "t.race_train", "label": "Race day: the train to Winchester, the drag to the course", "after": "t.race", "para": 183, "quote": "Four days later Holmes and I were again in the train, bound for Winchester", "window": "w.race_day"},
+    {"id": "t.race_drag", "label": "Race day: in the drag by the grand stand, before the race", "after": "t.race_train", "para": 190, "quote": "As the drag drew up in the enclosure near the grand stand", "window": "w.race_day"},
+    {"id": "t.race_run", "label": "Race day: the race", "after": "t.race_drag", "para": 200, "quote": "as they came up the straight", "window": "w.race_day"},
+    {"id": "t.race_enclosure", "label": "Race day: in the weighing enclosure, after the race", "after": "t.race_run", "para": 202, "quote": "as we made our way into the weighing enclosure", "window": "w.race_day"}
   ]
 }
