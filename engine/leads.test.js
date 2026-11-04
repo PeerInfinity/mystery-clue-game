@@ -156,3 +156,18 @@ test('a settled lead says whether it was real or false, whether or not it was in
     const taken = g.leads().find((l) => l.id === 'lead.taken');
     assert.deepEqual([taken.state, taken.real], ['settled', true]);
 });
+
+test('a lead with a check settles where Holmes makes it, and its row is due there', () => {
+    const g = medium();
+    readTo(g, 35);
+    assert.equal(g.leadById().get('lead.coat').deadline, 94, 'Holmes asks about the wind at ¶94, before he explains the coat at ¶226');
+    assert.equal(row(g, 't35.8').holmes, 94);
+    readTo(g, 93);
+    assert.equal(g.leads().find((l) => l.id === 'lead.coat').state, 'open');
+    readTo(g, 94);
+    const coat = g.leads().find((l) => l.id === 'lead.coat');
+    assert.deepEqual([coat.state, coat.investigated, coat.answer], ['settled', false, null], 'settled as it stood; its answer still pending');
+    assert.equal(g.investigate('lead.coat').ok, false);
+    // A check after the lead's own deadline changes nothing: the odds settle at ¶189, the race check is ¶197.
+    assert.equal(g.leadById().get('lead.odds').deadline, 189);
+});

@@ -463,8 +463,32 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   the build search while a lead wait is open (it stalled at ¶57: the horse lead waits on k.taker_had_a_key, whose own
   row is not due until ¶220), and the DepGraph places a move no earlier than a background fact it needs becomes
   relevant when an ask gives it (k.drugged_in_food, new to the maximum graph, was placed before ¶37's opium).
-- **To look into later** (the user, 2026-11-03): how leads relate to the Questions mechanic (the case's questions and
-  their answers).
+- **Leads, checks and questions as one chain (the user, 2026-11-03).** Laid side by side, most leads are a case
+  question in prose (16 of 18 name a slot; 11 a case question) and most of Holmes's checks are how he follows a lead
+  up (7 of 8), so the three tabs are one chain in the story: a detail that needs explaining (the coat on the bush),
+  how Holmes finds out (he asks whether the night was still), the answer (he took it off to work). The user's
+  rulings: the mechanics stay as they are, and each gives "onto something" hints for the next, where *onto
+  something* means which parts of the check or question (verb, fields, answer chips, cards) belong to a valid set.
+  An investigated lead opens hints for its check; a valid sealed check opens hints for its question; a question with
+  no check takes its hints from its lead. In incremental mode the hints come as soon as the investigation ends;
+  outside it, on Hard once a lead is investigated (it can then no longer be stopped), on the other difficulties once
+  the lead is settled, and then for its question only (its check is past by then). The links live on the lead
+  (`check`, `question`); a lead for every check and every question, questions joined to checks where it reads
+  sensibly, false leads linked to nothing, and the story's remaining false leads added. Before this, only the
+  incremental automation used the check hints (`sealOnto`: verb, field, pair, the question an expected answer is
+  about), and the page showed nothing of them. Order: settle at the check; the links and their validation; the new
+  leads; the check hints gated on a lead; the question hints; the incremental automation. Settling a question
+  scores nothing (its count is only the header's progress): making questions scoreable, the original aim of a
+  sudoku-like game of elimination, is a session of its own; the timeline's score later still.
+- **A lead settles at Holmes's check (built, 2026-11-03).** A lead stayed open, free to flag, long after the story
+  showed Holmes acting on it (the coat: he asks about the wind at ¶94, the lead settled at ¶226), because its
+  deadline was the paragraph where he explains it. A lead's `check` now settles it at the check's paragraph when
+  that comes first, and the NOTICE row's deadline moves with it (worked out in the engine; `thoughts.json` keeps the
+  explanation paragraph). Seven leads have a check: the curry ¶216 → ¶163 (ck.maid), the coat ¶226 → ¶94, the
+  candle ¶224 → ¶102 (ck.mud), the bill's name ¶225 → ¶161 (ck.photograph) and its sum ¶225 → ¶89 (ck.dress), the
+  odds (ck.race, ¶197, after its own ¶189: unchanged) and why nobody has seen the horse ¶146 → ¶116 (ck.tracks).
+  ck.boots waits for a lead of its own. The careful reader's moves are unchanged and still score 8/8 (the bill's sum
+  is the tightest: proposed at ¶84 once k.bill_is_his_own is built, due at ¶89).
 - **No backward-compatible saves** (there are no players): the save version is checked, a save of another version
   dropped, and the migration code removed.
 

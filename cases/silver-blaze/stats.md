@@ -95,8 +95,8 @@ make the moves (`engine/hintPlayer.js`). Each hint taken that far is four presse
 
 | | The hint-only player |
 |---|---:|
-| Hints taken to Do it | 58 |
-| Presses (Hint and More) | 232 |
+| Hints taken to Do it | 57 |
+| Presses (Hint and More) | 228 |
 | Rows hinted more than once | 4 |
 | Ahead of Holmes | 70 |
 
@@ -107,7 +107,7 @@ make the moves (`engine/hintPlayer.js`). Each hint taken that far is four presse
 | Breakfast at Baker Street | ¶1–7 | 379 | 7 | 0 | 0 |
 | The train: the facts of the case | ¶8–46 | 2,806 | 207 | 70 | 22 |
 | Tavistock and the drive with Gregory | ¶47–69 | 975 | 37 | 0 | 7 |
-| Straker's villa: the pockets and Mrs. Straker | ¶70–92 | 644 | 59 | 47 | 15 |
+| Straker's villa: the pockets and Mrs. Straker | ¶70–92 | 644 | 59 | 47 | 14 |
 | The hollow | ¶93–113 | 588 | 19 | 7 | 5 |
 | Across the moor to Mapleton | ¶114–143 | 1,056 | 31 | 15 | 6 |
 | The walk back | ¶144–156 | 423 | 5 | 0 | 0 |

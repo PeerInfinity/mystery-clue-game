@@ -540,22 +540,27 @@ the scored notice; that job went to leads.
 
 **Leads** (`leads.json`, section `leads`, one per line): lines of inquiry the game proposes. Each has `text` (plain
 words, a question or a detail; never ahead of the story), `source` (its quotes: it is proposed once they are all
-read), `needs` (cards that must be held; an inference among them makes the lead wait until it is built) and `scores` (the NOTICE thought it scores for; null for a lead that scores
-nothing), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
+read), `needs` (cards that must be held; an inference among them makes the lead wait until it is built), `scores` (the NOTICE thought it scores for; null for a lead that scores
+nothing), `check` (the case check Holmes makes on it, if any: the lead settles at the check's paragraph when that
+comes before its own deadline, since from there the story shows him on it; the validator wants the lead proposed
+before the check), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
 read, *pending* until then; the validator wants them at or after Holmes's paragraph). A lead that scores nothing (a false
 lead, or a true one Holmes never draws attention to) must have an answer after it is proposed: its deadline is the
 answer's paragraph, where it settles and frees its place; it never scores and costs only the place while it is held. `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
 says which score. `investigate(id)` puts a proposed lead under investigation, `stopInvestigating(id)` takes it off;
 both are free, within a cap (`leadBudget()`, the option `leads`: 16 on Trivial and Easy, 12 on Medium, 8 on Hard; no
 cap in incremental mode): at the cap `investigate` is refused (`full`) and nothing is dropped to make room. A lead
-Holmes has taken up leaves its place. Before Holmes's first paragraph on its NOTICE thought is read, the lead is settled as it stands
+Holmes has taken up leaves its place. Before Holmes's first paragraph on its NOTICE thought (or his check on it, if earlier) is read, the lead is settled as it stands
 (`leadsSettled`: under investigation then or not) and can no longer be changed. A NOTICE row scores if a lead for it
-was under investigation at that point. `npm run validate` checks the quotes and cards, that a lead is proposed before
+was under investigation at that point: the row's deadline is the earlier of Holmes's paragraph and the check of
+any of its leads (`thoughts.json` keeps the paragraph where Holmes explains it). `npm run validate` checks the quotes and cards, that a lead is proposed before
 its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver Blaze: the 8 scored NOTICE rows, one
 lead each (two on the milliner's bill, its name and its sum), and 10 that score nothing: the paper offered the maid
 (answered ¶58), the gypsies breaking camp (¶114), Simpson's bets (¶218), the wound (¶226, the horse's shoe), what the
 stranger wanted (¶40), Straker going down at one (¶220), the cravat and the blood on the knife (¶226), why nobody has
-seen the horse (¶146) and the winner with no white (¶202). Four are `false` (a red herring: the paper, the gypsies,
+seen the horse (¶146) and the winner with no white (¶202). Seven have a check, and settle there: the curry (ck.maid, ¶163, not ¶216), the coat (ck.coat, ¶94, not ¶226), the
+candle (ck.mud, ¶102, not ¶224), the bill's name (ck.photograph, ¶161) and its sum (ck.dress, ¶89; both were ¶225),
+the odds (ck.race, ¶197, after its own ¶189) and why nobody has seen the horse (ck.tracks, ¶116, not ¶146). Four are `false` (a red herring: the paper, the gypsies,
 Simpson's bets, what the stranger wanted); a settled lead says whether it was real (`real` in `leads()`), and shows
 its answer whether or not it was investigated.
 

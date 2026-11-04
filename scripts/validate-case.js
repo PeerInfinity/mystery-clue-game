@@ -122,6 +122,12 @@ for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes
         checkQuotes(`${l.id} answer`, l.answer_source);
         for (const c of l.needs ?? []) if (!model.cards.has(c)) err(`${l.id}: needs unknown card ${c}`);
         if (l.false && l.scores) err(`${l.id}: a false lead scores nothing`);
+        if (l.check) {
+            const ck = (data.checks ?? []).find((c) => c.id === l.check);
+            const at = Math.max(0, ...(l.source ?? []).map((q) => story.find(q)?.para ?? Infinity));
+            if (!ck) err(`${l.id}: unknown check ${l.check}`);
+            else if (at >= ck.at) err(`${l.id}: proposed at ¶${at}, not before Holmes's check ¶${ck.at}`);
+        }
         if (l.scores === null || l.scores === undefined) {
             // A lead that scores nothing settles at its answer: it needs one, after the lead is proposed.
             if (!l.answer) { err(`${l.id}: a lead that scores nothing needs an answer, where it settles`); continue; }

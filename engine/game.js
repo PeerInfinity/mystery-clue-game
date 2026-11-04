@@ -1299,17 +1299,22 @@ export class Game {
 
     // ---------- leads ----------
     /** The case's leads (leads.json) by id, each with `at` (the paragraph its last quote is in) and `deadline` (Holmes's
-     *  first paragraph on the NOTICE thought it scores for; for a lead that scores nothing, the paragraph that answers it). */
+     *  first paragraph on the NOTICE thought it scores for; for a lead that scores nothing, the paragraph that answers it;
+     *  for a lead with a `check`, the paragraph Holmes makes the check, if that comes first). */
     leadById() {
         if (this.leadCache) return this.leadCache;
         const thoughts = new Map((this.model.data.thoughts ?? []).map((t) => [t.id, t]));
+        const checks = new Map((this.model.data.checks ?? []).map((c) => [c.id, c]));
         this.leadCache = new Map((this.model.data.leads ?? []).map((l) => {
             const t = l.scores ? thoughts.get(l.scores) : null;
             const paraOf = (qs) => Math.max(0, ...(qs ?? []).map((q) => this.story.find(q)?.para ?? Infinity));
             const answerAt = l.answer ? paraOf(l.answer_source) : null;
             // A lead that scores settles at Holmes's paragraph; one that scores nothing (a false lead, or a true one
-            // Holmes never draws attention to) settles when the story answers it, and frees its place then.
-            return [l.id, { ...l, at: paraOf(l.source), answerAt, deadline: t ? (t.holmes?.paras?.length ? t.holmes.paras[0] : null) : answerAt }];
+            // Holmes never draws attention to) settles when the story answers it, and frees its place then. A lead with
+            // a check settles where Holmes makes it, if that comes first: from there the story shows him on it.
+            const own = t ? (t.holmes?.paras?.length ? t.holmes.paras[0] : null) : answerAt;
+            const ck = l.check ? checks.get(l.check)?.at ?? null : null;
+            return [l.id, { ...l, at: paraOf(l.source), answerAt, deadline: own === null ? ck : ck === null ? own : Math.min(own, ck) }];
         }));
         return this.leadCache;
     }
@@ -1395,7 +1400,9 @@ export class Game {
             const leads = leadsFor.get(t.id) ?? [];
             const at = leads.map((id) => this.investigatedAt(id)).filter((x) => x !== null);
             const investigated = this.autoSolves() || !at.length ? null : Math.min(...at);
-            const holmes = t.holmes?.paras?.length ? t.holmes.paras[0] : null;
+            // Holmes's paragraph, or his check on one of its leads where that comes first (the leads settle there).
+            const own = t.holmes?.paras?.length ? t.holmes.paras[0] : null;
+            const holmes = own === null ? null : Math.min(own, ...leads.map((id) => this.leadById().get(id).deadline ?? Infinity));
             return { thought: t.id, leads, cards: t.notices, para: t.para, holmes, investigated, scores: investigated !== null && holmes !== null && investigated < holmes };
         });
     }
