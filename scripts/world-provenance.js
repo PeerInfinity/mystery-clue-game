@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Provenance in the world-model pilot, derived: how each fact reached Watson, through the accounts that hold it
+// Provenance in the world model (world/), derived: how each fact reached Watson, through the accounts that hold it
 // (world/accounts.json) and the `tells` facts that pass an account, or a bundle containing it, from one holder to
 // the next. A link whose telling has `truth: null` (told by the story as possible, never settled), is `partial`
 // (it carried some of the account, the story does not say which) or whose sender is "?" is uncertain; its question (kind provenance) says what else it could have been.

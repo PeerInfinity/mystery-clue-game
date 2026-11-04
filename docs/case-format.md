@@ -423,10 +423,10 @@ whether such a row expects an answer to that question, which must be shown) and
 the story (a check's expected result and the value of its answer, a drop's reason): those are tried whole, with `lifts` or `dropCheck`.
 All three are false outside incremental mode.
 
-## The world-model pilot (`world/`)
+## The world model as data (`world/`)
 
-The new direction (`docs/ideas.md` §2, "Watson fills in the world model") is built beside the old game. Its pilot
-covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the page reads it yet;
+The new direction (`docs/ideas.md` §2, "Watson fills in the world model") is built beside the old game. It covers
+the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. Nothing in the engine or the page reads it yet;
 `npm run validate-world` checks it and prints its counts. Every file has one object per line.
 
 - **`entities.json`**: entities the old `entities.json` lacks (the kitchen, the train, the Wessex Cup, the two
@@ -498,8 +498,9 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
     `answer_from` (a fact, or the careful reader's thought from the audit in `docs/reading-annotated.md`) and
     `answer_strength: likely`; null when only the give-away brings it (how the cravat came into Straker's hand).
 
-Not yet: anything after ¶46. The two dates are computed only from ¶1–46 (and the give-aways after it); facts told
-later may move some earlier.
+A fact's `from`, like an answer's, may cite a careful reader's thought (`thought t<id>`) from the reading audit:
+most of what Holmes's explanation gives away (¶212–229) is reachable much earlier that way (Straker took the horse
+out: ¶46 → ¶220).
 
 ## The world model
 

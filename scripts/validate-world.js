@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Validate the world-model pilot (<case>/world/: entities, times, facts, accounts, questions) and print its counts.
+// Validate the world model as data (<case>/world/: entities, times, facts, accounts, questions) and print its counts.
 //
 //   node scripts/validate-world.js cases/silver-blaze [--quiet]
 //
@@ -102,6 +102,11 @@ for (const f of facts) {
     if (basis === 'inferable' && !list(f.from).length) err(f.id, 'inferable without from');
     if ((list(f.from).length > 0) !== Number.isInteger(f.inferable_at)) err(f.id, 'from and inferable_at go together');
     for (const p of list(f.from)) {
+        if (p.startsWith('thought ')) {
+            if (!thoughts.has(p.slice(8))) err(f.id, `from: no ${p}`);
+            else if (Number(p.slice(9).split('.')[0]) > f.inferable_at) err(f.id, `from: ${p} is after inferable_at ¶${f.inferable_at}`);
+            continue;
+        }
         const pf = factById.get(p);
         if (!pf) err(f.id, `from: no fact ${p}`);
         else if (earliest(pf) > f.inferable_at) err(f.id, `from: ${p} is not inferable before ¶${earliest(pf)}, after inferable_at ¶${f.inferable_at}`);

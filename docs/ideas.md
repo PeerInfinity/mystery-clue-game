@@ -113,6 +113,12 @@ came from builds, checks, leads, drops and the absence, never from elimination.
 - **First step: a pilot.** Fill the world model for ¶1–46 (Watson's present in Baker Street and the train, and
   Holmes's recital of the night at King's Pyland) and look at its shape before going on; provenance, the two dates
   and the questions with their possibilities as passes over the same data.
+- **Built (2026-11-04):** the pilot's shape was agreed on ¶1–46, then the passes were made (answers available
+  only from where the story opens them, "something else" on every question, groups by membership, `lives_at`,
+  provenance as accounts and tellings with its uncertainty as questions, the two dates), and the whole story was
+  filled in: 674 facts, 55 time points, 31 questions (`cases/silver-blaze/world/`, `docs/case-format.md` "The
+  world model as data"). Nothing reads it yet: the game's use of it (the timeline view, the player's moves) is
+  the next design question.
 
 ### An incremental game about trying every combination
 
