@@ -428,6 +428,9 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   player's priority: *Investigate next* in the Leads tab puts a lead ahead of the rest. The minute is the page's
   (Settings *Time per investigation*); the engine's move is instant, and the automation's slot (`inquiry`) sits
   beside the check queue rather than in it, so the lead category is no longer a check search.
+  Known and left as it is (the user, 2026-11-03): since every lead that goes somewhere finds *something* at once,
+  *nothing yet* still marks a false lead as soon as its minute is up, long before the story settles it. One way to
+  tell less, not built: some real leads also find *nothing yet* until nearer their answer.
 - **As many leads as possible**, the story's false ones among them (police, Gregory, Hunter, Mrs. Straker, Ross, the
   papers), each proposed only once the player holds what it rests on, some only after an inference is built; new
   inferences so that the true leads are earned by reasoning. Of the 8 unscored NOTICE rows only t40.5 (one blow,
