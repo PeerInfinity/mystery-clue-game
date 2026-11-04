@@ -5,7 +5,7 @@
     {"id": "t.7y_before", "label": "About seven years before", "after": "t.12y_before", "para": 19, "quote": "for seven as trainer", "window": "w.years_before"},
     {"id": "t.before", "label": "Before the story, undated", "window": "w.years_before", "note": "Simpson's lost fortune, the villas built, the horse's record: told without a date."},
     {"id": "t.simpson_comes", "label": "Before Monday evening: Simpson comes down to Dartmoor", "after": "t.before", "para": 40, "quote": "he had come down to Dartmoor", "window": "w.weeks_before"},
-    {"id": "t.mon_evening", "label": "Monday evening", "day": "mon", "after": "t.simpson_comes", "para": 20, "quote": "On that evening the horses had been exercised and watered as usual", "window": "w.mon_day"},
+    {"id": "t.mon_evening", "label": "Monday evening", "day": "mon", "after": ["t.simpson_comes", "t.weeks_before"], "para": 20, "quote": "On that evening the horses had been exercised and watered as usual", "window": "w.mon_day"},
     {"id": "t.mon_2100", "label": "Monday, nine o'clock", "day": "mon", "clock": "21:00", "after": "t.mon_evening", "para": 20, "quote": "the stables were locked up at nine o’clock", "window": "w.mon_2100"},
     {"id": "t.mon_2105", "label": "A few minutes after nine", "day": "mon", "clock": "21:05", "after": "t.mon_2100", "para": 20, "quote": "At a few minutes after nine", "window": "w.mon_2105"},
     {"id": "t.mon_meet", "label": "The stranger stops the maid", "day": "mon", "after": "t.mon_2105", "para": 21, "quote": "Edith Baxter was within thirty yards of the stables, when a man appeared", "window": "w.mon_2105"},
@@ -35,7 +35,7 @@
     {"id": "t.home_train", "label": "After the race: the train home", "after": "t.race", "para": 215, "window": "w.race_evening"},
     {"id": "t.thu_sitting", "label": "Thursday evening: the sitting-room, Straker's pockets", "day": "thu", "after": "t.thu_villa", "para": 78, "quote": "We all filed into the front room", "window": "w.thu_evening"},
     {"id": "t.thu_passage", "label": "Thursday evening: Mrs. Straker in the passage", "day": "thu", "after": "t.thu_sitting", "para": 86, "quote": "As we emerged from the sitting-room", "window": "w.thu_evening"},
-    {"id": "t.fri", "label": "Friday: the inquest", "day": "fri", "after": "t.thu_leave_mapleton", "para": 73, "quote": "The inquest is to-morrow", "window": "w.fri", "note": "After all of Thursday; later Thursday points come before it too."},
+    {"id": "t.fri", "label": "Friday: the inquest", "day": "fri", "after": "t.thu_night", "para": 73, "quote": "The inquest is to-morrow", "window": "w.fri", "note": "After all of Thursday; later Thursday points come before it too."},
     {"id": "t.thu_hollow", "label": "Thursday evening: in the hollow", "day": "thu", "after": "t.thu_passage", "para": 93, "quote": "A short walk across the moor took us to the hollow", "window": "w.thu_evening"},
     {"id": "t.thu_dusk", "label": "Thursday, sunset: Holmes and Watson walk across the moor", "day": "thu", "after": "t.thu_hollow", "para": 113, "quote": "The sun was beginning to sink behind the stables of Mapleton", "window": "w.thu_dusk"},
     {"id": "t.tue_dawn", "label": "Tuesday, early morning: the horse near Mapleton", "day": "tue", "after": "t.tue_struggle", "para": 146, "quote": "when according to his custom he was the first down", "window": "w.tue_dawn", "note": "Its order against seven o'clock is not given."},
@@ -43,6 +43,11 @@
     {"id": "t.thu_near_mapleton", "label": "Thursday dusk: the tracks near Mapleton", "day": "thu", "after": "t.thu_wet_hollow", "para": 119, "quote": "only to pick them up once more quite close to Mapleton", "window": "w.thu_dusk"},
     {"id": "t.thu_mapleton_gates", "label": "Thursday dusk: at the Mapleton gates", "day": "thu", "after": "t.thu_near_mapleton", "para": 124, "quote": "It ended at the paving of asphalt which led up to the gates of the Mapleton stables", "window": "w.thu_dusk"},
     {"id": "t.thu_parlour", "label": "Thursday dusk: Holmes with Brown, twenty minutes", "day": "thu", "after": "t.thu_mapleton_gates", "para": 137, "quote": "It was twenty minutes", "window": "w.thu_dusk"},
-    {"id": "t.thu_leave_mapleton", "label": "Thursday dusk: leaving Mapleton for King's Pyland", "day": "thu", "after": "t.thu_parlour", "para": 143, "quote": "we set off for King’s Pyland", "window": "w.thu_dusk"}
+    {"id": "t.thu_leave_mapleton", "label": "Thursday dusk: leaving Mapleton for King's Pyland", "day": "thu", "after": "t.thu_parlour", "para": 143, "quote": "we set off for King’s Pyland", "window": "w.thu_dusk"},
+    {"id": "t.thu_walk_back", "label": "Thursday dusk: the walk back to King's Pyland", "day": "thu", "after": "t.thu_leave_mapleton", "para": 144, "quote": "remarked Holmes as we trudged along together", "window": "w.thu_dusk"},
+    {"id": "t.thu_kp_parlour", "label": "Thursday evening: back at the villa, in the parlour", "day": "thu", "after": "t.thu_walk_back", "para": 157, "quote": "The Colonel and the Inspector were awaiting us in the parlour", "window": "w.thu_night"},
+    {"id": "t.thu_carriage", "label": "Thursday evening: into the carriage for Tavistock", "day": "thu", "after": "t.thu_kp_parlour", "para": 169, "quote": "As we stepped into the carriage", "window": "w.thu_night"},
+    {"id": "t.thu_night", "label": "Thursday night: the night express to London", "day": "thu", "after": "t.thu_carriage", "para": 156, "quote": "we both go back to London by the night train", "window": "w.thu_night"},
+    {"id": "t.weeks_before", "label": "In the weeks before the crime", "after": "t.before", "para": 173, "quote": "three of them have gone lame", "window": "w.weeks_before", "note": "When the sheep went lame is not said: 'of late' (¶172)."}
   ]
 }
