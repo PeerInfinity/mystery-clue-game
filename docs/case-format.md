@@ -557,13 +557,16 @@ Holmes has taken up leaves its place. Before Holmes's first paragraph on its NOT
 was under investigation at that point: the row's deadline is the earlier of Holmes's paragraph and the check of
 any of its leads (`thoughts.json` keeps the paragraph where Holmes explains it). `npm run validate` checks the quotes and cards, that a lead is proposed before
 its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver Blaze: the 8 scored NOTICE rows, one
-lead each (two on the milliner's bill, its name and its sum), and 10 that score nothing: the paper offered the maid
+lead each (two on the milliner's bill, its name and its sum), and 16 that score nothing: the paper offered the maid
 (answered ¶58), the gypsies breaking camp (¶114), Simpson's bets (¶218), the wound (¶226, the horse's shoe), what the
 stranger wanted (¶40), Straker going down at one (¶220), the cravat and the blood on the knife (¶226), why nobody has
-seen the horse (¶146) and the winner with no white (¶202). Sixteen name a question; the odds and the gypsies none. Seven have a check, and settle there: the curry (ck.maid, ¶163, not ¶216), the coat (ck.coat, ¶94, not ¶226), the
+seen the horse (¶146), the winner with no white (¶202), and six that give every check and case question a lead:
+who else was in the hollow (ck.boots, ¶107), why the house felt no ill effect from the same dish (¶218), who the
+stranger was (¶39), what Holmes said to Silas Brown (¶146), why Straker was unworthy of the Colonel's confidence
+(¶229; it needs no card: Holmes's line raises it), and why Hunter is sure the stranger drugged him (¶218, false). Twenty-two name a question; the odds and the gypsies none. Eight have a check, one per case check, and settle there: the hollow (ck.boots, ¶107, not ¶226), the curry (ck.maid, ¶163, not ¶216), the coat (ck.coat, ¶94, not ¶226), the
 candle (ck.mud, ¶102, not ¶224), the bill's name (ck.photograph, ¶161) and its sum (ck.dress, ¶89; both were ¶225),
-the odds (ck.race, ¶197, after its own ¶189) and why nobody has seen the horse (ck.tracks, ¶116, not ¶146). Four are `false` (a red herring: the paper, the gypsies,
-Simpson's bets, what the stranger wanted); a settled lead says whether it was real (`real` in `leads()`), and shows
+the odds (ck.race, ¶197, after its own ¶189) and why nobody has seen the horse (ck.tracks, ¶116, not ¶146). Five are `false` (a red herring: the paper, the gypsies,
+Simpson's bets, what the stranger wanted, Hunter's certainty); a settled lead says whether it was real (`real` in `leads()`), and shows
 its answer whether or not it was investigated.
 
 **Incremental mode:** `investigate(id)` ends with a `result`: `something` for a lead that goes somewhere (scored or

@@ -489,7 +489,14 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   odds (ck.race, ¶197, after its own ¶189: unchanged) and why nobody has seen the horse ¶146 → ¶116 (ck.tracks).
   ck.boots waits for a lead of its own. Step 2 (built): every lead but the odds and the gypsies names its `question`
   (two false leads share `simpson.purpose`; the paper's is `paper_packet.contents`, whose answer is the harmless one);
-  the validator checks the slot and that a check with an `answer` answers the lead's question. The careful reader's moves are unchanged and still score 8/8 (the bill's sum
+  the validator checks the slot and that a check with an `answer` answers the lead's question.
+  Step 3 (built): six leads so that every check and every case question has one, all scoring nothing: who else was
+  in the hollow (ck.boots, ¶37 → ¶107), why the house felt no ill effect from the same dish (q.where_drugged, ¶218),
+  who the stranger was (¶21 → ¶39), what Holmes said to Silas Brown (q.who_hid, ¶140 → ¶146), why Straker was
+  unworthy of the Colonel's confidence (q.motive, ¶214 → ¶229; it needs no card, Holmes's line raises it), and one
+  false: why Hunter is sure the stranger drugged him (¶36 → ¶218). Left out (the user agreed): a duplicate key (no
+  key found points to the truth, an insider), the pits and old mines (no way to word it but as a theory), Brown's
+  bets (borderline: they explain why he hid the horse). 24 leads, 5 false; the careful reader's moves unchanged. The careful reader's moves are unchanged and still score 8/8 (the bill's sum
   is the tightest: proposed at ¶84 once k.bill_is_his_own is built, due at ¶89).
 - **No backward-compatible saves** (there are no players): the save version is checked, a save of another version
   dropped, and the migration code removed.
