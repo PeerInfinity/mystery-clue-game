@@ -439,7 +439,7 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
   or a list) gives a partial order. `day` and `clock` are labels only: the weekday and the hour are facts on
   `calendar` and `clock`, each with its quote. `window` names the old game's nearest window.
 - **`facts.json`**: one fact each, `{id, of, attr, value, to?, time, para, quote, basis?, from?, inferable_at?,
-  truth?, q?, pick?, old?, how?, partial?, note?}`.
+  truth?, q?, pick?, old?, how?, partial?, given_at?, given_quote?, strength?, note?}`.
   - `attr` is one of `location` (where it is at that time), `lives_at` (where it lives or is kept), `member_of`,
     `carrying`, `wearing`, `action`, `says`, `observes`, `knows`, `believes`,
     `intends`, `condition`, `contents`, `role`, `reputed`, `rule`, `position`, `owner`, `identity`, `weekday`,
@@ -449,7 +449,16 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
   - `time` is `{at}`, `{from, to}` (an open end means until further notice) or `{after, before}` (somewhere
     between two points).
   - `basis` is `stated` (the default), `implied` (the text presupposes it) or `inferable` (`from` the facts it
-    follows from, at `inferable_at`; every premise is told no later).
+    follows from, at `inferable_at`).
+  - **Two dates.** `given_at` is where the story states the fact. It defaults to `para`; it is earlier, with a
+    `given_quote`, when an earlier line already says it (Straker's death at ¶4, "the tragic murder of its trainer",
+    told in full at ¶35); for an inferable fact it is where it is stated, if ever (past ¶46 too: the opium added
+    after the dish was set apart, ¶218), and absent when nothing yet states it. `inferable_at` is the earliest
+    paragraph the fact follows from what came before (`from`), each premise dated by its own earliest date. It
+    appears on a stated fact only when it is earlier than `given_at` (the lads back in the loft: ¶32 from "his
+    fellow-grooms had returned" and the night rule, stated at ¶34). `strength: likely` marks what a careful reader
+    would hold but does not strictly follow (the stranger is Simpson at ¶39, from the arrest of the man suspicion
+    rested on). Both dates will be revisited once the rest of the story is in.
   - `truth` comes from the answer key: `true` (the default), `false` or `null` (never settled).
   - A `says` fact records that it was said (true when said); what it says is a possibility (`pick`) of a question
     (`q`). A belief that is false is a fact with `truth: false` and its own `q`/`pick`.
@@ -484,9 +493,13 @@ covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the pag
   - Every question has exactly one `something else` (`via: always`), available from the paragraph it is raised.
   - `answer` is always one of the possibilities (null where the story never settles it), even when it is
     available only late: what Straker meant at one in the morning is available indirectly at ¶46 and named at ¶57.
+  - The answer's two dates: `answer_given_at` and `answer_given_quote`, where the story gives it away (often in
+    Holmes's explanation, ¶212–229), and `answer_inferable_at`, the earliest paragraph a reader can reach it, with
+    `answer_from` (a fact, or the careful reader's thought from the audit in `docs/reading-annotated.md`) and
+    `answer_strength: likely`; null when only the give-away brings it (how the cravat came into Straker's hand).
 
-Not yet: the two dates per fact (only `inferable_at` where it differs, and `para` as the date given), and anything
-after ¶46.
+Not yet: anything after ¶46. The two dates are computed only from ¶1–46 (and the give-aways after it); facts told
+later may move some earlier.
 
 ## The world model
 
