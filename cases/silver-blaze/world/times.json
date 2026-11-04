@@ -35,6 +35,8 @@
     {"id": "t.home_train", "label": "After the race: the train home", "after": "t.race", "para": 215, "window": "w.race_evening"},
     {"id": "t.thu_sitting", "label": "Thursday evening: the sitting-room, Straker's pockets", "day": "thu", "after": "t.thu_villa", "para": 78, "quote": "We all filed into the front room", "window": "w.thu_evening"},
     {"id": "t.thu_passage", "label": "Thursday evening: Mrs. Straker in the passage", "day": "thu", "after": "t.thu_sitting", "para": 86, "quote": "As we emerged from the sitting-room", "window": "w.thu_evening"},
-    {"id": "t.fri", "label": "Friday: the inquest", "day": "fri", "after": "t.thu_passage", "para": 73, "quote": "The inquest is to-morrow", "window": "w.fri", "note": "After all of Thursday; later Thursday points come before it too."}
+    {"id": "t.fri", "label": "Friday: the inquest", "day": "fri", "after": "t.thu_dusk", "para": 73, "quote": "The inquest is to-morrow", "window": "w.fri", "note": "After all of Thursday; later Thursday points come before it too."},
+    {"id": "t.thu_hollow", "label": "Thursday evening: in the hollow", "day": "thu", "after": "t.thu_passage", "para": 93, "quote": "A short walk across the moor took us to the hollow", "window": "w.thu_evening"},
+    {"id": "t.thu_dusk", "label": "Thursday, sunset: Holmes and Watson walk across the moor", "day": "thu", "after": "t.thu_hollow", "para": 113, "quote": "The sun was beginning to sink behind the stables of Mapleton", "window": "w.thu_dusk"}
   ]
 }
