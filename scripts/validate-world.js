@@ -20,7 +20,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { normalize } from '../engine/story.js';
-import { provenance } from './world-provenance.js';
+import { provenance, loadWorld } from './world-provenance.js';
+import { assertions, contradictions, CLAIM_ATTRS } from '../engine/world.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -46,6 +47,7 @@ const questions = read('world/questions.json').questions;
 const accounts = read('world/accounts.json').accounts;
 const accountIds = new Set(accounts.map((a) => a.id));
 const prov = provenance(dir);
+const world = loadWorld(dir);
 const STRENGTHS = new Set(['certain', 'likely']);
 // A fact is given where the story states it: `given_at`, else its own paragraph (an inferable fact: only by given_at).
 const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
@@ -123,6 +125,28 @@ for (const f of facts) {
         if (!TELL_HOWS.has(f.how)) err(f.id, `tells: how ${f.how}`);
         if (f.of === '?' && !f.q) err(f.id, 'a telling from "?" needs its question (q)');
     }
+    // What a claim asserts, and the facts that are a claim's content (`claim`) or a person's word in Watson's hearing (`word`).
+    if (f.asserts != null || f.modal != null) {
+        if (!CLAIM_ATTRS.has(f.attr)) err(f.id, 'asserts and modal belong on a says or believes fact');
+        if (f.modal != null && f.modal !== 'possible') err(f.id, `modal ${f.modal}`);
+        for (const x of list(f.asserts)) {
+            if (x.q) {
+                const q = qById.get(x.q);
+                if (!q) err(f.id, `asserts: no question ${x.q}`);
+                else if (!q.possibilities.some((p) => p.value === x.pick)) err(f.id, `asserts: ${x.q} has no possibility "${x.pick}"`);
+            } else if (!x.of || !x.attr || !('value' in x)) err(f.id, 'asserts: an item is a pick {q, pick} or a state {of, attr, value}');
+        }
+    }
+    if (CLAIM_ATTRS.has(f.attr) && f.pick != null) err(f.id, 'a claim asserts its picks in asserts, not pick');
+    if (f.claim) {
+        const c = factById.get(f.claim);
+        if (!c || !CLAIM_ATTRS.has(c.attr)) err(f.id, `claim: ${f.claim} is not a says or believes fact`);
+        else if (c.para > (f.given_at ?? f.para)) err(f.id, `claim: ${f.claim} is told after it (¶${c.para})`);
+    }
+    if (f.word && !entities.has(f.word)) err(f.id, `word: no entity ${f.word}`);
+    if (f.claim && f.word) err(f.id, 'claim or word, not both');
+    if ('neg' in f && f.neg !== true) err(f.id, 'neg is true or absent');
+    if (f.attr === 'location' && f.value != null && typeof f.value === 'string' && !entities.has(f.value)) err(f.id, `location: no entity ${f.value} (put the rest in detail)`);
     for (const o of list(f.old)) if (!oldIds.has(o)) err(f.id, `old: no ${o}`);
     if (f.q) {
         const q = qById.get(f.q);
@@ -143,6 +167,8 @@ for (const a of accounts) {
 for (const f of facts) {
     if (f.attr === 'tells') continue;
     const held = prov.holdersOf.get(f.id);
+    if ((f.claim || f.word) && held.length) err(f.id, `a claim's content or a word heard reaches Watson through its speaker, in no account (${held.join(', ')})`);
+    if (f.claim || f.word) continue;
     if (!held.length && (f.basis ?? 'stated') !== 'inferable') err(f.id, 'a told fact in no account');
     if (held.length && !prov.factChains(f.id).length) err(f.id, `no chain reaches Watson from ${held.join(', ')}`);
 }
@@ -197,6 +223,18 @@ for (const q of questions) {
     if (q.old && !oldIds.has(q.old)) err(q.id, `old: no ${q.old}`);
 }
 
+// Moving places, and the true story is consistent: no contradiction among the assertions the answer key holds true.
+for (const m of world.moves) if (!allEntities.some((e) => e.id === m && e.kind === 'place')) err(m, 'moves: not a place');
+const asserted = assertions(world);
+// A belief's `truth` is the truth of what it holds: false when something it asserts is false, and only then.
+for (const f of facts) if (f.attr === 'believes' && !f.modal && list(f.asserts).length) {
+    const items = asserted.filter((x) => x.claim === f.id && x.kind === 'pick');
+    if (items.some((x) => x.truth == null)) continue;
+    const anyFalse = items.some((x) => x.truth === false);
+    if (anyFalse !== (f.truth === false)) err(f.id, `truth ${'truth' in f ? f.truth : true}, but what it asserts is ${anyFalse ? 'false' : 'true'}`);
+}
+for (const c of contradictions(world, asserted.filter((x) => x.truth === true))) err(`${c.a.id} / ${c.b.id}`, `true assertions contradict: ${c.why}`);
+
 for (const e of errors) console.log(e);
 if (!quiet) {
     const count = (xs, key) => Object.entries(xs.reduce((m, x) => ((m[key(x)] = (m[key(x)] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
@@ -221,6 +259,9 @@ if (!quiet) {
     const never = facts.filter((f) => givenAt(f) == null);
     console.log(`\nFacts never stated by ¶46, only inferable (${never.length}): ${never.map((f) => f.id).join(', ')}`);
     console.log('\nAnswers: inferable → given\n' + questions.filter((q) => q.answer != null).map((q) => `  ${q.answer_inferable_at == null ? '  —' : `¶${q.answer_inferable_at}`.padStart(4)} → ¶${String(q.answer_given_at).padEnd(4)} ${q.id} = ${q.answer}${q.answer_strength === 'likely' ? ' (likely)' : ''}`).join('\n'));
+    const met = contradictions(world, asserted).sort((p, q) => Math.max(p.a.para, p.b.para) - Math.max(q.a.para, q.b.para));
+    const tag = (x) => `${x.id}${x.truth === false ? ' (false)' : x.truth == null ? ' (?)' : ''} ¶${x.para}`;
+    console.log(`\nContradictions a reader trusting every source meets (${met.length}), by the paragraph that completes them\n` + met.map((c) => `  ¶${Math.max(c.a.para, c.b.para)}  ${c.why}: ${tag(c.a)} / ${tag(c.b)}`).join('\n'));
     show('Facts by origin', count(told, (f) => [...new Set(prov.factChains(f.id).map((c) => c.origin ?? '?'))].join(' + ') || '(reader)'));
 }
 console.log(`${errors.length} error(s)`);

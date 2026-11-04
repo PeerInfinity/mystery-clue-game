@@ -117,8 +117,29 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   only from where the story opens them, "something else" on every question, groups by membership, `lives_at`,
   provenance as accounts and tellings with its uncertainty as questions, the two dates), and the whole story was
   filled in: 674 facts, 55 time points, 31 questions (`cases/silver-blaze/world/`, `docs/case-format.md` "The
-  world model as data"). Nothing reads it yet: the game's use of it (the timeline view, the player's moves) is
-  the next design question.
+  world model as data"). Then the game's use of it was settled (below).
+- **The timeline and trust (the user's rulings, 2026-11-04).** First the world model is shown as it is: an ordered
+  list of events, the passage of time as events of its own (styled apart), no cell holding several events and no
+  splitting of cells; the present-day section (the order Watson met each piece) stays, and each card shows its
+  entity's own plain event list. Later views: a grid with times as rows and places as columns, with alternates whose
+  columns are another detail (provenance, say); swimlanes and chips are advanced, for later. What Watson observes
+  himself fills in by itself; every other fact comes through a provenance chain, and the player sets a trust level on
+  each link (and on people, where that helps): four levels, *certain* (Watson's own, fixed), *trusted*, *uncertain*
+  (where every other link starts) and *distrusted*. What is at or above the threshold (uncertain, to begin with) is
+  on the timeline. Contradictions are found automatically, never written by hand; one is traced back through the
+  chains of its facts, and the player picks the link to downgrade. A speech Watson hears is certain as an event;
+  what it asserts goes through the speaker's link. Player inferences are left unmodelled for now. Later, unless
+  easy: highlighting the links that would resolve a contradiction, and undo.
+- **Built for it (2026-11-04), the data:** locations as place ids with `detail` and `neg`, and the places that move;
+  what each claim asserts (`asserts`, `modal`); facts that are a speaker's content tied to the claim or the speaker
+  (`claim`, `word`), out of Watson's own account (about 50 had been counted as his observations); `engine/world.js`
+  with the provenance, the time order, the assertions and the contradiction finder; the validator requiring the true
+  story to be consistent. What it shows: a reader trusting every source meets 41 contradictions, the first at ¶28,
+  all between a question's picks, most at Holmes's explanation. In this case the relayed witness accounts are all
+  true: what is false is four lies and some twenty beliefs and theories, so a contradiction sets a claimant's word or
+  a theory against evidence, almost never two witnesses against each other; and with player inferences unmodelled,
+  most come only when the story gives the answer away. Next: the event-list page, then the trust controls, then the
+  contradiction report.
 
 ### An incremental game about trying every combination
 

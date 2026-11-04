@@ -48,9 +48,10 @@ the reader's own background, and the record against Holmes. `docs/case-format.md
 | `engine/actionTable.js`, `engine/minimalTable.js` | The annotated reader's moves as a script for the page, and the fewest of them that reach the maximum. |
 | `engine/hints.js`, `engine/hintData.js`, `engine/hintPlayer.js` | Hints: which row to hint, its rungs, and a player that only takes hints. |
 | `engine/incremental.js`, `engine/searchCost.js`, `engine/automation.js`, `ui/search.js` | Incremental mode (an experiment): its waits, a player that moves only when the story waits, a blind search's cost at each wait, and the automation (the searches a check at a time, steered by the player's marks, with the counts per category; a check planned before it is made), and its page (the Search tab and the clock). |
+| `engine/world.js` | The world model as data, read (the new direction; no page uses it yet): provenance chains, the time order, what each fact and claim asserts, and the contradictions among accepted assertions. |
 | `engine/stats.js`, `engine/depgraph.js` | The statistics page and the DepGraph exports. |
 | `cases/silver-blaze/` | The case: `story.txt`, `case.json` and its parts (entities, events, claims, relations, propositions, constraints, knowledge, states, actions, mentions, thoughts) and the generated files. |
-| `cases/silver-blaze/world/` | The world model as data, the whole story (the new direction; nothing reads it yet): its own entities, time points, facts, accounts and questions. See `docs/case-format.md` "The world model as data". |
+| `cases/silver-blaze/world/` | The world model as data, the whole story (the new direction; read by `engine/world.js`, no page yet): its own entities, time points, facts, accounts and questions. See `docs/case-format.md` "The world model as data". |
 | `schema/case.schema.json` | JSON Schema for the case format. |
 | `scripts/` | Validation, generators, logs, the local server, the site build and the headless-Chrome checks. |
 | `checker/` | The LLM leak checker over card texts and the autoplay's notes. |
@@ -68,7 +69,7 @@ scripts need a local Chrome.
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Validate the case and rewrite `cases/silver-blaze/report.md` | `npm run validate` |
 | Check the annotated reading and rewrite `cases/silver-blaze/thoughts-report.md` | `npm run validate-thoughts` |
-| Check the world model (`cases/silver-blaze/world/`) and print its counts | `npm run validate-world` |
+| Check the world model (`cases/silver-blaze/world/`), including that the true story has no contradiction, and print its counts and the contradictions a reader trusting every source meets | `npm run validate-world` |
 | How each fact of the world model reached Watson (`--accounts`: per account, and who holds it when) | `node scripts/world-provenance.js cases/silver-blaze` |
 | What appears at each paragraph (leak checks) | `npm run reveal-log`, `npm run foreshadow-log` (→ `.cache/`) |
 | Every clash met and what it sets aside, for three kinds of player (about a minute; `--build` adds a fourth) | `npm run clash-log` (→ `.cache/clash-log.txt`) |

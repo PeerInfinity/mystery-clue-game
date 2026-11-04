@@ -426,25 +426,29 @@ All three are false outside incremental mode.
 ## The world model as data (`world/`)
 
 The new direction (`docs/ideas.md` §2, "Watson fills in the world model") is built beside the old game. It covers
-the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. Nothing in the engine or the page reads it yet;
-`npm run validate-world` checks it and prints its counts. Every file has one object per line.
+the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. `engine/world.js` reads it (provenance, the time
+order, assertions and contradictions, below); no page uses it yet. `npm run validate-world` checks it and prints its counts. Every file has one object per line.
 
 - **`entities.json`**: entities the old `entities.json` lacks (the kitchen, the train, the Wessex Cup, the two
   unnamed lads, the searchers…), plus three state entities: `calendar` (weekday), `clock` (hour) and `weather`. Ids
-  share the old file's namespace, and `of` may name either.
+  share the old file's namespace, and `of` may name either. `moves` (a list beside `entities`) names the places that
+  move (the carriage, the landau, the Pullman car); a thing that is not a place moves too (the train, a purse, a person).
 - **Groups.** A group (`kind: group`) is an entity like any other; who is in it is the `member_of` attribute of each
   member, with its own time, so membership changes like any attribute (the two lads join `searchers` at the stable
   on Tuesday morning and leave it at the finding). A fact on a group holds for every member at that time.
 - **`times.json`**: time points `{id, label, day?, clock?, after?, para?, quote?, window?, note?}`. `after` (one id
   or a list) gives a partial order. `day` and `clock` are labels only: the weekday and the hour are facts on
   `calendar` and `clock`, each with its quote. `window` names the old game's nearest window.
-- **`facts.json`**: one fact each, `{id, of, attr, value, to?, time, para, quote, basis?, from?, inferable_at?,
-  truth?, q?, pick?, old?, how?, partial?, given_at?, given_quote?, strength?, note?}`.
+- **`facts.json`**: one fact each, `{id, of, attr, value, detail?, neg?, to?, time, para, quote, basis?, from?,
+  inferable_at?, truth?, q?, pick?, asserts?, modal?, claim?, word?, old?, how?, partial?, given_at?, given_quote?,
+  strength?, note?}`.
   - `attr` is one of `location` (where it is at that time), `lives_at` (where it lives or is kept), `member_of`,
     `carrying`, `wearing`, `action`, `says`, `observes`, `knows`, `believes`,
     `intends`, `condition`, `contents`, `role`, `reputed`, `rule`, `position`, `owner`, `identity`, `weekday`,
     `hour`, `speed`, `time` or `tells`.
-  - `value` is an entity id where there is one, otherwise short text. `observes` takes fact ids: an observation is
+  - `value` is an entity id where there is one, otherwise short text. A `location` is always a place or thing id (or
+    null when unknown), with the rest in `detail` ("at the bottom", "walking slowly with Holmes"), so that places can
+    be compared; `neg: true` denies it ("not at King's Pyland", the stall empty). `observes` takes fact ids: an observation is
     an event, and the root of a provenance chain.
   - `time` is `{at}`, `{from, to}` (an open end means until further notice) or `{after, before}` (somewhere
     between two points).
@@ -460,8 +464,18 @@ the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. Nothin
     would hold but does not strictly follow (the stranger is Simpson at ¶39, from the arrest of the man suspicion
     rested on). Both dates will be revisited once the rest of the story is in.
   - `truth` comes from the answer key: `true` (the default), `false` or `null` (never settled).
-  - A `says` fact records that it was said (true when said); what it says is a possibility (`pick`) of a question
-    (`q`). A belief that is false is a fact with `truth: false` and its own `q`/`pick`.
+  - **Claims.** A `says` or `believes` fact records that it was said, or held (true: the saying happened). What it
+    asserts is in `asserts`, a list of picks `{q, pick, neg?}` (a question's possibility, or with `neg` its denial:
+    the police's "nothing connects Silas Brown" denies Mapleton) or states `{of, attr, value, time?, neg?, truth?}`.
+    One claim may assert several (the police theory: who drugged, opened the door, led the horse out, struck the
+    blow, with what). Each assertion is true or false by the answer key. On a `believes` fact, `truth` is the truth
+    of what it holds (false exactly when something it asserts is false; the validator checks). `modal: possible`
+    marks a claim of what may or could be (the stick could have made the wounds; the horse may be in a pit): shown,
+    but it contradicts nothing. A `q` with no `pick` on a claim only says which question it bears on.
+  - **A claim's content as a fact.** A fact that is what a claim says is tied to it by `claim` (the fact id: Brown is
+    an old horse-faker, from Holmes's words); a fact that is what someone said in Watson's hearing, with no speech
+    fact of its own, by `word` (the speaker: Gregory reading out the papers in Straker's pockets). Such a fact is in
+    no account: it reaches Watson through the speaker, so it is never Watson's own observation.
   - A `tells` fact passes accounts (`value`, account ids) to `to`, `how` (told, statement, sworn statement,
     report, newspaper, telegram, analysis, letter). `partial`: the story says only part of the account was passed
     (Watson's papers held "most of the facts", ¶42). A telling the story never settles has `truth: null` and the
@@ -476,7 +490,9 @@ the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. Nothin
 - **Provenance is derived, not written on facts.** `scripts/world-provenance.js` follows the tellings that carry an
   account (or a bundle containing it) from its origin to Watson, and gives each fact its chains, for example
   `edith_baxter sworn statement→ police ?report→ newspapers ?newspaper→ holmes told→ watson`, with `?` on uncertain
-  links. It also gives who holds each account from when. Every told fact must be in an account that reaches Watson;
+  links. A claim's content (by `claim`, or a claim's `asserts`) has the claim's chains with one link more at the
+  head, the claimant's word: `straker said→ mrs_straker statement→ police …`; a `word` fact the one link
+  `gregory said→ watson`. It also gives who holds each account from when. Every told fact must be in an account that reaches Watson;
   the facts in none are the reader's own inferences.
 - **`questions.json`**: an uncertain entry `{id, entry, raised, quote, possibilities, answer, kind?, latent?,
   settled?, old?, note?}`. `kind: provenance` marks a question about how something was passed on (who answered
@@ -501,6 +517,31 @@ the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. Nothin
 A fact's `from`, like an answer's, may cite a careful reader's thought (`thought t<id>`) from the reading audit:
 most of what Holmes's explanation gives away (¶212–229) is reachable much earlier that way (Straker took the horse
 out: ¶46 → ¶220).
+
+### Assertions and contradictions (`engine/world.js`)
+
+`assertions(data)` lists everything the data asserts: each fact (a `state`), the `pick` of a fact that is not a
+claim, and each item of a claim's `asserts`, with its truth by the answer key and the paragraph that tells it.
+`contradictions(data, accepted)` finds the pairs among accepted assertions that cannot both hold, with no
+contradiction written by hand:
+
+- **Picks** of one question: two different possibilities, or one possibility asserted and denied. A question's
+  possibilities exclude each other, so Hunter's belief that the stranger drugged him contradicts the explanation's
+  "why should he drug his own stable-boy?".
+- **States** of a single-valued attribute (`location`, `identity`) of one entity at times both certainly cover:
+  two places neither within the other, a place and its denial (of it or of a place containing it), two identities.
+  A thing that moves is placed through its own location at that time where that is certain (Watson in the carriage,
+  the carriage in the train); otherwise it is not compared.
+- **Time.** `{at}` covers its point; `{from, to}` from `from` up to, not including, `to`; an open end only its start
+  (a state lasts until the next change, and a later different value is a change, not a contradiction); `{after,
+  before}` nothing certain. Only the partial order of `after` decides "certainly": unordered points never overlap.
+  So a move needs its own time point (the horse near Mapleton at dawn, led into Mapleton after: `t.tue_into_mapleton`).
+- Claims with `modal: possible` take no part.
+
+The validator requires the true story to be consistent (no contradiction among the assertions the answer key holds
+true: every one it found was a data error) and prints the contradictions a reader who trusts every source meets, by
+the paragraph that completes them: 41 for the whole story, the first at ¶28 (the stranger "lost" against his asking
+for the straight tip), most at Holmes's explanation (¶212–229), since player inferences are not modelled.
 
 ## The world model
 
