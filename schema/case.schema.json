@@ -274,6 +274,7 @@
           "needs": { "type": "array", "items": { "type": "string" } },
           "scores": { "type": ["string", "null"] },
           "check": { "type": "string", "pattern": "^ck\\." },
+          "question": { "type": "string" },
           "false": { "type": "boolean" },
           "answer": { "type": "string" },
           "answer_source": { "type": "array", "items": { "type": "string" }, "minItems": 1 }

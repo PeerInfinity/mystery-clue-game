@@ -543,7 +543,9 @@ words, a question or a detail; never ahead of the story), `source` (its quotes: 
 read), `needs` (cards that must be held; an inference among them makes the lead wait until it is built), `scores` (the NOTICE thought it scores for; null for a lead that scores
 nothing), `check` (the case check Holmes makes on it, if any: the lead settles at the check's paragraph when that
 comes before its own deadline, since from there the story shows him on it; the validator wants the lead proposed
-before the check), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
+before the check), `question` (the slot the lead bears on: the question its check answers, or the lead's own where
+it has no check; the hints chain of docs/ideas.md, Investigation, runs lead → check → question; a check whose result
+has an `answer` must answer this slot; recorded, not yet read by the game), and `answer` with `answer_source` (the story's answer, its quotes; shown on a settled lead once they are
 read, *pending* until then; the validator wants them at or after Holmes's paragraph). A lead that scores nothing (a false
 lead, or a true one Holmes never draws attention to) must have an answer after it is proposed: its deadline is the
 answer's paragraph, where it settles and frees its place; it never scores and costs only the place while it is held. `leads()` lists those proposed, in the order they came, each `open`, `investigating` or `settled`; it never
@@ -558,7 +560,7 @@ its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver 
 lead each (two on the milliner's bill, its name and its sum), and 10 that score nothing: the paper offered the maid
 (answered ¶58), the gypsies breaking camp (¶114), Simpson's bets (¶218), the wound (¶226, the horse's shoe), what the
 stranger wanted (¶40), Straker going down at one (¶220), the cravat and the blood on the knife (¶226), why nobody has
-seen the horse (¶146) and the winner with no white (¶202). Seven have a check, and settle there: the curry (ck.maid, ¶163, not ¶216), the coat (ck.coat, ¶94, not ¶226), the
+seen the horse (¶146) and the winner with no white (¶202). Sixteen name a question; the odds and the gypsies none. Seven have a check, and settle there: the curry (ck.maid, ¶163, not ¶216), the coat (ck.coat, ¶94, not ¶226), the
 candle (ck.mud, ¶102, not ¶224), the bill's name (ck.photograph, ¶161) and its sum (ck.dress, ¶89; both were ¶225),
 the odds (ck.race, ¶197, after its own ¶189) and why nobody has seen the horse (ck.tracks, ¶116, not ¶146). Four are `false` (a red herring: the paper, the gypsies,
 Simpson's bets, what the stranger wanted); a settled lead says whether it was real (`real` in `leads()`), and shows

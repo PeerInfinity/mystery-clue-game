@@ -128,6 +128,13 @@ for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes
             if (!ck) err(`${l.id}: unknown check ${l.check}`);
             else if (at >= ck.at) err(`${l.id}: proposed at ¶${at}, not before Holmes's check ¶${ck.at}`);
         }
+        if (l.question) {
+            if (!model.slots.has(l.question)) err(`${l.id}: question ${l.question} is no slot`);
+            // A check whose result gives an answer gives it to the lead's question.
+            const ck = (data.checks ?? []).find((c) => c.id === l.check);
+            const eqs = ck?.answer ? (ck.answer.and ?? [ck.answer]).filter((f) => f.eq).map((f) => f.eq[0]) : [];
+            if (eqs.length && !eqs.includes(l.question)) err(`${l.id}: its check answers ${eqs.join(', ')}, not its question ${l.question}`);
+        }
         if (l.scores === null || l.scores === undefined) {
             // A lead that scores nothing settles at its answer: it needs one, after the lead is proposed.
             if (!l.answer) { err(`${l.id}: a lead that scores nothing needs an answer, where it settles`); continue; }

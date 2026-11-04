@@ -487,7 +487,9 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
   explanation paragraph). Seven leads have a check: the curry ¶216 → ¶163 (ck.maid), the coat ¶226 → ¶94, the
   candle ¶224 → ¶102 (ck.mud), the bill's name ¶225 → ¶161 (ck.photograph) and its sum ¶225 → ¶89 (ck.dress), the
   odds (ck.race, ¶197, after its own ¶189: unchanged) and why nobody has seen the horse ¶146 → ¶116 (ck.tracks).
-  ck.boots waits for a lead of its own. The careful reader's moves are unchanged and still score 8/8 (the bill's sum
+  ck.boots waits for a lead of its own. Step 2 (built): every lead but the odds and the gypsies names its `question`
+  (two false leads share `simpson.purpose`; the paper's is `paper_packet.contents`, whose answer is the harmless one);
+  the validator checks the slot and that a check with an `answer` answers the lead's question. The careful reader's moves are unchanged and still score 8/8 (the bill's sum
   is the tightest: proposed at ¶84 once k.bill_is_his_own is built, due at ¶89).
 - **No backward-compatible saves** (there are no players): the save version is checked, a save of another version
   dropped, and the migration code removed.
