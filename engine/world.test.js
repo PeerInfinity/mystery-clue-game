@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -77,4 +77,19 @@ test("a claim's content and a word heard reach Watson through the speaker", () =
     assert.deepEqual(p.factChains('c').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>watson:said']]]);
     assert.deepEqual(p.factChains('w').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>watson:said']]]);
     assert.deepEqual(p.factChains('s').map((c) => c.links.length), [0], 'the saying: Watson heard it');
+});
+
+test('trust: a chain is as strong as its weakest link, a fact as its best chain; Watson’s own is certain', () => {
+    const told = { links: [{ from: 'edith', to: 'police', how: 'sworn statement', telling: 'f.tell' }, { from: 'police', to: 'watson', how: 'report', telling: 'f.rep' }] };
+    const heard = { links: [{ from: 'holmes', to: 'watson', how: 'said' }] };
+    assert.equal(LEVELS[chainLevel({ links: [] })], 'certain');
+    assert.equal(LEVELS[chainLevel(told)], 'uncertain', 'every link starts uncertain');
+    assert.equal(LEVELS[chainLevel(told, { links: { 'f.tell': 2, 'f.rep': 2 } })], 'trusted');
+    assert.equal(LEVELS[chainLevel(told, { links: { 'f.tell': 2 } })], 'uncertain', 'the weakest link');
+    assert.equal(LEVELS[chainLevel(told, { links: { 'f.tell': 2, 'f.rep': 2 }, people: { edith: 0 } })], 'distrusted', 'a person caps their links');
+    assert.equal(linkKey(heard.links[0]), 'said:holmes>watson', 'all of one person’s words to another share a link');
+    assert.equal(LEVELS[levelOf([told, heard], { links: { 'f.tell': 0 } })], 'uncertain', 'the best chain');
+    assert.equal(levelOf([]), null, 'no chain: not modelled');
+    assert.equal(givenAt({ para: 9, basis: 'inferable' }), null);
+    assert.equal(givenAt({ para: 9, given_at: 4 }), 4);
 });

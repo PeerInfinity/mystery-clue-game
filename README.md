@@ -29,6 +29,12 @@ Directions that might still make it playable, such as an incremental game about 
 game as an experimental pace, *Incremental*), or an [Archipelago](https://archipelago.gg/) randomizer integration in
 which clues arrive as items, are collected in [`docs/ideas.md`](docs/ideas.md) (which contains spoilers).
 
+A new direction is being tried beside the game, as a draft page:
+**[Watson's timeline](https://peerinfinity.github.io/mystery-clue-game/world.html)**. You read the story as Watson;
+what happens fills in an ordered list of events. What Watson sees himself is certain; everything else reached him
+through a chain of people (a witness, the police, the papers, Holmes), and you choose how far to trust each link.
+The page lists the contradictions among what you accept.
+
 ## What is in it
 
 - **Four difficulties** (Trivial, Easy, Medium, Hard) and a custom mix, and a pace that can wait for you at each

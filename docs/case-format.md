@@ -444,7 +444,7 @@ order, assertions and contradictions, below); no page uses it yet. `npm run vali
   strength?, note?}`.
   - `attr` is one of `location` (where it is at that time), `lives_at` (where it lives or is kept), `member_of`,
     `carrying`, `wearing`, `action`, `says`, `observes`, `knows`, `believes`,
-    `intends`, `condition`, `contents`, `role`, `reputed`, `rule`, `position`, `owner`, `identity`, `weekday`,
+    `intends`, `condition`, `contents`, `role`, `reputed`, `rule`, `position`, `owner`, `identity`, `name`, `weekday`,
     `hour`, `speed`, `time` or `tells`.
   - `value` is an entity id where there is one, otherwise short text. A `location` is always a place or thing id (or
     null when unknown), with the rest in `detail` ("at the bottom", "walking slowly with Holmes"), so that places can
@@ -494,8 +494,9 @@ order, assertions and contradictions, below); no page uses it yet. `npm run vali
   head, the claimant's word: `straker said→ mrs_straker statement→ police …`; a `word` fact the one link
   `gregory said→ watson`. It also gives who holds each account from when. Every told fact must be in an account that reaches Watson;
   the facts in none are the reader's own inferences.
-- **`questions.json`**: an uncertain entry `{id, entry, raised, quote, possibilities, answer, kind?, latent?,
-  settled?, old?, note?}`. `kind: provenance` marks a question about how something was passed on (who answered
+- **`questions.json`**: an uncertain entry `{id, label, entry, raised, quote, possibilities, answer, kind?, latent?,
+  settled?, old?, note?}`. `label` is the question as the player reads it ("Who drugged Hunter's supper?"), shown only
+  once the story raises the question or gives its answer, so that a latent one (Straker's honesty) is not flagged early. `kind: provenance` marks a question about how something was passed on (who answered
   Holmes's wire; whether the papers had the night from the police or from the witnesses). It is kept in the data
   and off the player's list unless the story itself raises it.
   - `entry` is `{of, attr, time}`, with `of: "?"` for a question about who.
@@ -537,6 +538,14 @@ contradiction written by hand:
   before}` nothing certain. Only the partial order of `after` decides "certainly": unordered points never overlap.
   So a move needs its own time point (the horse near Mapleton at dawn, led into Mapleton after: `t.tue_into_mapleton`).
 - Claims with `modal: possible` take no part.
+
+**Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
+chain with no links is Watson's own and certain; every link starts uncertain, and the player may set it lower or
+higher (never certain). A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words
+to Watson are one link), or for a member by member and group (`linkKey`). A person's level, when set, caps every link
+from that person. A chain is as strong as its weakest link, a fact as its best chain; a fact with no chain (the
+reader's own inference) is not modelled and not shown. A telling is shown as an event: certain when it is to Watson,
+uncertain otherwise.
 
 The validator requires the true story to be consistent (no contradiction among the assertions the answer key holds
 true: every one it found was a data error) and prints the contradictions a reader who trusts every source meets, by

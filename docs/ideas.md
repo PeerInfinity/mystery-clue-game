@@ -138,8 +138,15 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   all between a question's picks, most at Holmes's explanation. In this case the relayed witness accounts are all
   true: what is false is four lies and some twenty beliefs and theories, so a contradiction sets a claimant's word or
   a theory against evidence, almost never two witnesses against each other; and with player inferences unmodelled,
-  most come only when the story gives the answer away. Next: the event-list page, then the trust controls, then the
-  contradiction report.
+  most come only when the story gives the answer away.
+- **Built (2026-11-04), the first page:** Watson's timeline (`world.html`, beside the game and not linked from it):
+  the story read to a paragraph; the world model as an ordered list of events under their time points (a time
+  point's label only once the story has dated it, before that only its day and hour; the clock, calendar and weather
+  styled as time events); a dot per event for its trust; a claim's assertions under it; an entity's own plain event
+  list on clicking its name; a fact's quote and chains, with a trust select on each link and a cap per person; the
+  threshold, and the facts below it shown faded on request; the contradictions among what is on the timeline, each
+  side clickable to its chains. Distrusting the stranger's word to Edith clears the four contradictions of ¶46.
+  Next: the contradiction report proper (tracing both sides' chains side by side), then the grid view.
 
 ### An incremental game about trying every combination
 

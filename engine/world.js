@@ -239,3 +239,38 @@ export function contradictions(data, accepted = null) {
     }
     return out;
 }
+
+/** Where the story states a fact: `given_at`, else its paragraph; an inferable fact only by `given_at` (else null). */
+export const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
+
+/** Trust levels, lowest first. `certain` is Watson's own observation, fixed; every other link starts `uncertain`. */
+export const LEVELS = ['distrusted', 'uncertain', 'trusted', 'certain'];
+export const DEFAULT_LEVEL = 1;
+
+/**
+ * The key of a link the player can trust: a telling by its fact id; a speech (a claim's or a word's link) by
+ * speaker and hearer, so all of one person's words to another share it; a member's link by member and group.
+ */
+export const linkKey = (l) => (l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
+
+/**
+ * How far the player trusts a chain: its weakest link, a link's level being the player's choice for it (default
+ * uncertain), lowered by the level set for the person it comes from, if any. A chain with no links is Watson's own:
+ * certain. `trust`: `{links: {key: level}, people: {id: level}}`.
+ */
+export function chainLevel(chain, trust = {}) {
+    let level = LEVELS.length - 1;
+    for (const l of chain.links) {
+        let x = trust.links?.[linkKey(l)] ?? DEFAULT_LEVEL;
+        const p = trust.people?.[l.from];
+        if (p != null) x = Math.min(x, p);
+        level = Math.min(level, x);
+    }
+    return level;
+}
+
+/** How far the player trusts a fact or a claim's content: its best chain (null: no chain, the reader's own inference). */
+export function levelOf(chains, trust = {}) {
+    if (!chains.length) return null;
+    return Math.max(...chains.map((c) => chainLevel(c, trust)));
+}

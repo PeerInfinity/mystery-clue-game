@@ -179,6 +179,7 @@ const refOk = (r) => factById.has(r) || (/^thought /.test(r) && thoughts.has(r.s
 for (const q of questions) {
     if (q.entry?.of && q.entry.of !== '?' && !entities.has(q.entry.of)) err(q.id, `entry.of: no entity ${q.entry.of}`);
     for (const t of [q.entry?.time, q.entry?.time?.from, q.entry?.time?.to]) if (typeof t === 'string' && t.startsWith('t.') && !timeIds.has(t)) err(q.id, `entry.time: no time ${t}`);
+    if (!q.label) err(q.id, 'a question needs its label (shown to the player; no spoiler)');
     if (q.quote) quoteIn(q.id, q.quote, q.raised);
     else if (q.raised != null) err(q.id, 'raised without quote');
     const ps = q.possibilities ?? [];

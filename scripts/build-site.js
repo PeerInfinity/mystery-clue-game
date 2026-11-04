@@ -1,4 +1,4 @@
-// Collects the files the live game loads into _site/, for GitHub Pages: the pages (the game, the guide and the logic viewer), their stylesheets, the modules
+// Collects the files the live game loads into _site/, for GitHub Pages: the pages (the game, the guide, the logic viewer and Watson's timeline), their stylesheets, the modules
 // it imports (followed from ui/app.js), and each case's runtime files. Nothing else is published — not the docs,
 // the tests, the reports or the reference material.
 //   node scripts/build-site.js [outDir=_site]
@@ -8,7 +8,7 @@ import { execSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const out = path.resolve(root, process.argv[2] ?? '_site');
-const PAGES = ['index.html', 'logic.html', 'guide.html'];
+const PAGES = ['index.html', 'logic.html', 'guide.html', 'world.html'];
 const files = new Set(PAGES);
 // Every reference to a page file carries the build's version (?v=<commit>), so a browser that caches files for a
 // while (GitHub Pages allows 10 minutes) never pairs a new page with an old stylesheet or module.
@@ -44,6 +44,8 @@ for (const dir of fs.readdirSync(path.join(root, 'cases'))) {
     const main = JSON.parse(fs.readFileSync(path.join(root, base, 'case.json'), 'utf8'));
     for (const f of ['case.json', ...(main.parts ?? []), main.mentions_file, main.thoughts_file, main.case?.source?.text_file].filter(Boolean)) files.add(path.join(base, f));
     for (const f of ['action-table.json', 'action-table-minimal.json', 'hints.json', 'incremental.json']) if (fs.existsSync(path.join(root, base, f))) files.add(path.join(base, f));
+    // The world model, for Watson's timeline (world.html).
+    for (const f of ['entities.json', 'times.json', 'facts.json', 'accounts.json', 'questions.json']) if (fs.existsSync(path.join(root, base, 'world', f))) files.add(path.join(base, 'world', f));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
