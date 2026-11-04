@@ -80,6 +80,40 @@ game too easy. And the play is not like sudoku.
 
 ## 2. Directions that might make it playable
 
+### The chosen direction: Watson fills in the world model (2026-11-04)
+
+Set by the user after the questions-scoring discussion, which measured that the annotated reader's game reaches the
+Hard maximum of 70 with none of the 14 case questions settled (no cross-out or proof on any of them): every point
+came from builds, checks, leads, drops and the absence, never from elimination.
+
+- **The player is Watson**, whose aim is to keep up with Holmes; the story is told from his side.
+- **The world model is the game.** It holds each entity's state over time: location, motive, knowledge, beliefs,
+  what it wears or carries, what it is doing, and more as needed. An event is a change of an attribute; the clock
+  and calendar are state; a character's observation is an event. The timeline is a view of the world model (events
+  in chronological order), and it includes what Watson is living through, filled in as the story goes on. The card's
+  own focused timeline stays, and the controls go there. The timeline's UI is not designed yet.
+- **Questions are uncertain entries** of the world model, each with possibilities that are eliminated as information
+  arrives; every question is about something in the world model. Details the story gives directly are filled in
+  automatically.
+- **Provenance:** every fact carries its source chain: Watson saw it, a character said it, or a character said what
+  another told them. Most facts before ¶47 reach Watson through Holmes's recital on the train, which relays the
+  papers and the police, who relay the witnesses.
+- **Two dates per fact:** when the story has given what is needed to infer it, and when it gives it away. Wanted
+  later: the story does not go past a give-away the player has not filled in (it must not name the entry, and it
+  needs a way through for a stuck player).
+- **Reasons, in steps.** First version (c): eliminating a possibility is a pencil mark, with no reason checked (the
+  answer key shows when the story gives the entry away). Later, (a) the player cites the cards that rule it out and
+  the engine checks them (any valid set accepted, as checked cross-outs are now), and/or (b) small authored steps of
+  one or two premises. Card-combining inferences, if kept, keep only those leading to world-model facts, split as
+  small as possible.
+- **Out for now:** scoring, difficulty levels, incremental mode and its Search tab, checks (wanted back later), and
+  every mechanic not leading to world-model information: leads, theories, exceptions, hints, notes, the
+  important/unimportant marks. Each may come back where it earns a place. The new model is to be built beside the
+  old game, which stays playable until it can be replaced.
+- **First step: a pilot.** Fill the world model for ¶1–46 (Watson's present in Baker Street and the train, and
+  Holmes's recital of the night at King's Pyland) and look at its shape before going on; provenance, the two dates
+  and the questions with their possibilities as passes over the same data.
+
 ### An incremental game about trying every combination
 
 Embrace the absurdity: the combination-trying the game forces on the player becomes the game. The player
