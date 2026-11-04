@@ -1,0 +1,32 @@
+{
+  "description": "Time points of the world model, finer than the old game's windows. `after` orders them (one id or a list; a partial order). `day` and `clock` are convenience labels: the sources are the facts on `calendar` and `clock` in facts.json. `para`/`quote` say where the story first fixes the point, where it does; `window` names the old game's nearest window.",
+  "times": [
+    {"id": "t.12y_before", "label": "About twelve years before", "para": 19, "quote": "He has served the Colonel for five years as jockey and for seven as trainer", "window": "w.years_before"},
+    {"id": "t.7y_before", "label": "About seven years before", "after": "t.12y_before", "para": 19, "quote": "for seven as trainer", "window": "w.years_before"},
+    {"id": "t.before", "label": "Before the story, undated", "window": "w.years_before", "note": "Simpson's lost fortune, the villas built, the horse's record: told without a date."},
+    {"id": "t.simpson_comes", "label": "Before Monday evening: Simpson comes down to Dartmoor", "after": "t.before", "para": 40, "quote": "he had come down to Dartmoor", "window": "w.weeks_before"},
+    {"id": "t.mon_evening", "label": "Monday evening", "day": "mon", "after": "t.simpson_comes", "para": 20, "quote": "On that evening the horses had been exercised and watered as usual", "window": "w.mon_day"},
+    {"id": "t.mon_2100", "label": "Monday, nine o'clock", "day": "mon", "clock": "21:00", "after": "t.mon_evening", "para": 20, "quote": "the stables were locked up at nine o’clock", "window": "w.mon_2100"},
+    {"id": "t.mon_2105", "label": "A few minutes after nine", "day": "mon", "clock": "21:05", "after": "t.mon_2100", "para": 20, "quote": "At a few minutes after nine", "window": "w.mon_2105"},
+    {"id": "t.mon_meet", "label": "The stranger stops the maid", "day": "mon", "after": "t.mon_2105", "para": 21, "quote": "Edith Baxter was within thirty yards of the stables, when a man appeared", "window": "w.mon_2105"},
+    {"id": "t.mon_window", "label": "At the stable window", "day": "mon", "after": "t.mon_meet", "para": 25, "quote": "ran past him to the window", "window": "w.mon_2110"},
+    {"id": "t.mon_dog", "label": "Hunter goes for the dog; the maid flees", "day": "mon", "after": "t.mon_window", "para": 29, "quote": "He sprang up and rushed across the stable to unloose the dog", "window": "w.mon_2110"},
+    {"id": "t.mon_search", "label": "A minute later: Hunter out with the hound", "day": "mon", "after": "t.mon_dog", "para": 29, "quote": "A minute later", "window": "w.mon_2110"},
+    {"id": "t.mon_late", "label": "Monday, later: the lads come back", "day": "mon", "after": "t.mon_search", "para": 32, "quote": "Hunter waited until his fellow-grooms had returned", "window": "w.mon_late"},
+    {"id": "t.tue_0100", "label": "Tuesday, one in the morning", "day": "tue", "clock": "01:00", "after": "t.mon_late", "para": 32, "quote": "waking at one in the morning", "window": "w.tue_0100"},
+    {"id": "t.tue_struggle", "label": "Tuesday, between one and seven: in the hollow, at the time of the struggle", "day": "tue", "after": "t.tue_0100", "para": 37, "quote": "he had been there at the time of the struggle", "window": "w.tue_blow", "note": "The story fixes no hour; the door opened, the horse led out, the coat and the blow all fall between t.tue_0100 and t.tue_0700."},
+    {"id": "t.tue_0700", "label": "Tuesday, seven in the morning", "day": "tue", "clock": "07:00", "after": "t.tue_struggle", "para": 33, "quote": "Mrs. Straker awoke at seven in the morning", "window": "w.tue_0700"},
+    {"id": "t.tue_stable", "label": "Tuesday morning, at the stable", "day": "tue", "after": "t.tue_0700", "para": 33, "quote": "set off for the stables", "window": "w.tue_0700"},
+    {"id": "t.tue_knoll", "label": "Tuesday morning, on the knoll", "day": "tue", "after": "t.tue_stable", "para": 34, "quote": "on ascending the knoll near the house", "window": "w.tue_morning"},
+    {"id": "t.tue_found", "label": "Tuesday morning, the body found", "day": "tue", "after": "t.tue_knoll", "para": 35, "quote": "at the bottom of this was found the dead body", "window": "w.tue_morning"},
+    {"id": "t.tue_after", "label": "Tuesday, after the finding: the cravat recognised, Hunter recovers", "day": "tue", "after": "t.tue_found", "para": 36, "quote": "Hunter, on recovering from his stupor", "window": "w.tue_morning"},
+    {"id": "t.arrest", "label": "Gregory arrives and arrests Simpson", "after": "t.tue_after", "para": 39, "quote": "On his arrival he promptly found and arrested the man", "window": "w.tue_day", "note": "Before Thursday morning (¶14); the day is not given."},
+    {"id": "t.tue_evening", "label": "Tuesday evening: the telegrams", "day": "tue", "after": "t.tue_after", "para": 12, "quote": "On Tuesday evening I received telegrams", "window": "w.tue_evening"},
+    {"id": "t.wed", "label": "Wednesday, a whole day at Baker Street", "day": "wed", "after": "t.tue_evening", "para": 14, "quote": "From hour to hour yesterday", "window": "w.wed"},
+    {"id": "t.thu_breakfast", "label": "Thursday, breakfast at Baker Street", "day": "thu", "after": "t.wed", "para": 1, "quote": "as we sat down together to our breakfast one morning", "window": "w.thu_morning"},
+    {"id": "t.thu_train", "label": "Thursday, an hour later: in the train", "day": "thu", "after": "t.thu_breakfast", "para": 7, "quote": "an hour or so later I found myself in the corner of a first-class carriage", "window": "w.thu_journey"},
+    {"id": "t.thu_past_reading", "label": "Thursday, past Reading", "day": "thu", "after": "t.thu_train", "para": 7, "quote": "We had left Reading far behind us", "window": "w.thu_journey"},
+    {"id": "t.thu_recital", "label": "Thursday, Holmes's account in the train", "day": "thu", "after": "t.thu_past_reading", "para": 17, "quote": "gave me a sketch of the events which had led to our journey", "window": "w.thu_journey"},
+    {"id": "t.race", "label": "Next Tuesday: the Wessex Cup", "day": "tue+7", "after": "t.thu_recital", "para": 18, "quote": "at the fall of the flag next Tuesday", "window": "w.race_day"}
+  ]
+}

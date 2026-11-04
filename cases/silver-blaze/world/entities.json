@@ -1,0 +1,16 @@
+{
+  "description": "Entities the world model needs that the old game's entities.json does not have. Same ids namespace: a fact's `of` (and an entity-valued `value`) is an id from ../entities.json or from here. `within` folds places as in the old file.",
+  "entities": [
+    {"id": "calendar", "kind": "state", "name": "The day of the week", "summary": "The calendar as state: its facts give the weekday at a time point, each from a quote."},
+    {"id": "clock", "kind": "state", "name": "The clock", "summary": "The time of day as state: its facts give the hour at a time point, each from a quote."},
+    {"id": "weather", "kind": "state", "name": "The weather on Dartmoor", "summary": "Darkness, rain and storm on the moor."},
+    {"id": "kitchen", "kind": "place", "name": "The kitchen of the trainer's house", "within": "straker_villa"},
+    {"id": "the_train", "kind": "object", "name": "The train to Exeter", "summary": "The train Holmes and Watson take from Paddington; the first-class carriage is in it."},
+    {"id": "quarter_mile_posts", "kind": "object", "name": "The quarter-mile posts"},
+    {"id": "wessex_cup", "kind": "race", "name": "The Wessex Cup", "summary": "The race Silver Blaze is favourite for; run next Tuesday."},
+    {"id": "public", "kind": "group", "name": "The public", "summary": "England at large, which talks of nothing but the case."},
+    {"id": "household", "kind": "group", "name": "The people at the trainer's house", "summary": "Those who ate the same curried mutton at the house on Monday night."},
+    {"id": "searchers", "kind": "group", "name": "The two lads and the two women", "summary": "The other lads, Mrs. Straker and the maid, searching on Tuesday morning."},
+    {"id": "hollow_mud", "kind": "object", "name": "The mud at the bottom of the hollow", "within": "fatal_hollow"}
+  ]
+}

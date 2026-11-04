@@ -423,6 +423,48 @@ whether such a row expects an answer to that question, which must be shown) and
 the story (a check's expected result and the value of its answer, a drop's reason): those are tried whole, with `lifts` or `dropCheck`.
 All three are false outside incremental mode.
 
+## The world-model pilot (`world/`)
+
+The new direction (`docs/ideas.md` §2, "Watson fills in the world model") is built beside the old game. Its pilot
+covers ¶1–46 in `cases/silver-blaze/world/`. Nothing in the engine or the page reads it yet;
+`npm run validate-world` checks it and prints its counts. Every file has one object per line.
+
+- **`entities.json`**: entities the old `entities.json` lacks (the kitchen, the train, the Wessex Cup, the
+  searchers…), plus three state entities: `calendar` (weekday), `clock` (hour) and `weather`. Ids share the old
+  file's namespace, and `of` may name either.
+- **`times.json`**: time points `{id, label, day?, clock?, after?, para?, quote?, window?, note?}`. `after` (one id
+  or a list) gives a partial order. `day` and `clock` are labels only: the weekday and the hour are facts on
+  `calendar` and `clock`, each with its quote. `window` names the old game's nearest window.
+- **`facts.json`**: one fact each, `{id, of, attr, value, to?, time, para, quote, basis?, from?, inferable_at?,
+  truth?, src, q?, pick?, old?, note?}`.
+  - `attr` is one of `location`, `carrying`, `wearing`, `action`, `says`, `observes`, `knows`, `believes`,
+    `intends`, `condition`, `contents`, `role`, `reputed`, `rule`, `position`, `owner`, `identity`, `weekday`,
+    `hour`, `speed` or `time`.
+  - `value` is an entity id where there is one, otherwise short text. `observes` takes fact ids: an observation is
+    an event, and the root of a provenance chain.
+  - `time` is `{at}`, `{from, to}` (an open end means until further notice) or `{after, before}` (somewhere
+    between two points).
+  - `basis` is `stated` (the default), `implied` (the text presupposes it) or `inferable` (`from` the facts it
+    follows from, at `inferable_at`; every premise is told no later).
+  - `truth` comes from the answer key: `true` (the default), `false` or `null` (never settled).
+  - A `says` fact records that it was said (true when said); what it says is a possibility (`pick`) of a question
+    (`q`). A belief that is false is a fact with `truth: false` and its own `q`/`pick`.
+  - `src` is the provenance chain from Watson outward: `watson` alone means he saw or heard it; `holmes` next
+    means Holmes told him. `…` marks links still to be filled.
+  - `old` names the old game's claims and events the fact comes from.
+- **`questions.json`**: an uncertain entry `{id, entry, raised, quote, possibilities, answer, answer_pick?,
+  answer_live?, latent?, settled?, old?, note?}`.
+  - `entry` is `{of, attr, time}`, with `of: "?"` for a question about who.
+  - Each possibility is `{value, how?, covers?, live, from, out?, by?}`: `live` is the paragraph where it becomes
+    open and `from` the fact (or `thought t<id>`, a careful reader's) that opens it; `out`/`by` the paragraph and
+    fact that rule it out.
+  - `answer` must be a possibility (or `answer_pick` names the one that covers it) unless `answer_live: false`,
+    which marks an answer the story has not yet made thinkable by ¶46.
+  - `latent`: the story never doubts the entry by then.
+
+Not yet: the provenance chains' middle links, the two dates per fact (only `inferable_at` where it differs, and
+`para` as the date given), and anything after ¶46.
+
 ## The world model
 
 ### Tracks
