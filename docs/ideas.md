@@ -422,8 +422,12 @@ it (1,200–1,550 checks a game for 8 rows; "onto something" cannot help a singl
 - **Incremental mode:** an investigation takes a minute, its clock running beside the checks (one investigation at a
   time), and ends with its result at once (*something in it* / *nothing came of it*); the minute is the only cost. The
   automation investigates every lead, by default in the order they came; the player chooses which to put first.
-  Open: what a false lead's result says before the story drops it (a flat "nothing" for the maid at ¶37 tells more
-  than the story does until ¶92; *nothing yet* until the story drops it is one answer).
+  Built (2026-11-03): the user chose *nothing yet* for a false lead (and *something* for any lead that goes somewhere,
+  scored or not); a false lead is answered like a real one, at the story's paragraph, and every settled lead shows its
+  answer whether or not it was investigated and says whether it was real or false (`false` in leads.json). The
+  player's priority: *Investigate next* in the Leads tab puts a lead ahead of the rest. The minute is the page's
+  (Settings *Time per investigation*); the engine's move is instant, and the automation's slot (`inquiry`) sits
+  beside the check queue rather than in it, so the lead category is no longer a check search.
 - **As many leads as possible**, the story's false ones among them (police, Gregory, Hunter, Mrs. Straker, Ross, the
   papers), each proposed only once the player holds what it rests on, some only after an inference is built; new
   inferences so that the true leads are earned by reasoning. Of the 8 unscored NOTICE rows only t40.5 (one blow,

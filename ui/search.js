@@ -47,7 +47,7 @@ export function num(n) {
 export function makeSearch(ctx) {
     const { esc } = ctx;
     // floors: the grow-only heights (and widths) of the tab's pieces, see floors() below.
-    const S = { a: null, playing: false, timer: null, startedAt: 0, busy: false, onlyFound: false, saveCountdown: 0, floors: new Map(), chars: new Map(), floorRead: 0 };
+    const S = { a: null, playing: false, timer: null, startedAt: 0, leadTimer: null, leadStarted: 0, busy: false, onlyFound: false, saveCountdown: 0, floors: new Map(), chars: new Map(), floorRead: 0 };
 
     function load() {
         try { return JSON.parse(localStorage.getItem(ctx.store) ?? 'null'); } catch { return null; }
@@ -71,13 +71,31 @@ export function makeSearch(ctx) {
         S.playing = saved?.playing ?? true;
         kick();
     }
-    function stop() { clearTimeout(S.timer); S.timer = null; }
+    function stop() { clearTimeout(S.timer); S.timer = null; clearTimeout(S.leadTimer); S.leadTimer = null; }
 
     /** The game changed (a move of the player's, a paragraph read): plan again, and go on if playing. */
     function kick() {
         if (!S.a) return;
+        kickLead();
         if (S.timer || S.busy) return;
         if (S.playing) S.timer = setTimeout(tick, 0);
+    }
+    /** The investigations' own clock, beside the checks: one lead at a time, each over the time an investigation takes. */
+    function kickLead() {
+        if (!S.a || !S.playing || S.leadTimer || ctx.game().finished()) return;
+        const q = S.a.startLead();
+        if (!q) return;
+        S.leadStarted = Date.now();
+        S.leadTimer = setTimeout(finishLead, ctx.leadDelay());
+    }
+    async function finishLead() {
+        S.leadTimer = null;
+        if (!S.a || !S.playing) return;
+        let e = null;
+        await ctx.quiet(() => { e = S.a.finishLead(); });
+        save();
+        if (e) ctx.changed(); else ctx.draw();
+        kick();
     }
     /** Plan the next check and wait the time it takes; then make it. */
     async function tick() {
@@ -130,6 +148,12 @@ export function makeSearch(ctx) {
 
     // ---------- drawing ----------
     /** The bar of the check under way: it goes on from where it was when the page is drawn again. */
+    function leadBar() {
+        const ms = ctx.leadDelay();
+        if (!S.a?.inquiry || !S.playing || !S.leadTimer) return '<div class="search-bar"><div class="search-fill idle"></div></div>';
+        const gone = Math.min(ms, Date.now() - S.leadStarted);
+        return `<div class="search-bar"><div class="search-fill run" style="animation-duration:${Math.max(ms, 1)}ms;animation-delay:-${gone}ms"></div></div>`;
+    }
     function bar(cls = '') {
         const ms = ctx.delay();
         if (!S.a?.current || !S.playing || !S.timer) return `<div class="search-bar ${cls}"><div class="search-fill idle"></div></div>`;
@@ -149,6 +173,7 @@ export function makeSearch(ctx) {
             case 'end': return 'The story is over.';
             case 'reading': return 'The story is not waiting: read on (or let the search read on by itself).';
             case 'paused': return `The story waits for a category that is paused: ${[...new Set(S.a.open.map(waitCategory).filter((c) => !S.a.running.has(c)))].map((c) => CATEGORY_WORDS[c][0]).join(', ')}.`;
+            case 'investigating': return 'The checks have tried everything they can for now; an investigation goes on.';
             case 'stuck': return 'Everything that can be tried with what you hold has been tried. Collect or build more, or change your marks.';
             default: return '';
         }
@@ -175,6 +200,10 @@ export function makeSearch(ctx) {
         h += `<div class="search-now" data-floor="now">${a.current
             ? `<div class="small search-now-line"><b>${S.playing ? 'Now' : 'Next'}:</b> ${tagOf(a.current)} ${esc(a.current.label)}</div>${bar()}`
             : `<p class="small muted">${esc(idleWords())}</p>`}</div>`;
+        // The investigation under way, on its own clock beside the checks.
+        h += `<div class="search-now" data-floor="lead">${a.inquiry
+            ? `<div class="small search-now-line"><b>Investigating:</b> ${esc(a.inquiry.text)} <span class="muted">(${ctx.leadDelay() / 1000} s; the Leads tab sets the order)</span></div>${leadBar()}`
+            : `<p class="small muted">${a.leadNext() ? 'A lead is next to investigate.' : 'No lead waits to be investigated.'}</p>`}</div>`;
         // The checks to come (automation.plan()). A box of a fixed shape, whatever it holds: always QUEUE rows of one
         // line each (a long label cut short, the whole of it on hover), blank rows where the plan is shorter. (A grow-only
         // floor was not enough: it starts again when the story moves on or the width changes, and the rows' wrapping
@@ -325,7 +354,7 @@ ${x.sizes ? '' : `<tr class="terms"><td></td><td colspan="6" class="muted" title
     function moved() {
         if (!S.a || S.busy) return;
         S.a.restart();
-        stop();
+        clearTimeout(S.timer); S.timer = null; // the investigation under way goes on
         kick();
     }
 

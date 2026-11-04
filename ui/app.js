@@ -31,7 +31,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let model;
 let game;
 let story;
-const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', hintCooldown: 30, searchDelay: 1, notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
+const ui = { columns: 2, theme: 'system', notesShown: 'story', notesHand: 'hand', highlight: 'marker', hintCooldown: 30, searchDelay: 1, leadDelay: 60, notesMode: false, noteEdit: null, panels: [{ tab: 'story' }, { tab: 'card' }], back: [], selected: null, kind: null, search: '', menu: null, menuNote: '', expanded: new Set(), timeline: 'fabula', theory: null, focusWindow: null, focusSlot: null, fit: null, building: null };
 const cache = new Map();
 
 // ---------- names ----------
@@ -75,7 +75,7 @@ function restore() {
 }
 function saveLayout() {
     if (AUTOPLAY !== null) return; // the autoplay lays out its own page and leaves the viewer's alone
-    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight, hintCooldown: ui.hintCooldown, searchDelay: ui.searchDelay })); } catch { /* private mode */ }
+    try { localStorage.setItem(LAYOUT, JSON.stringify({ columns: ui.columns, panels: ui.panels.map((p) => p.tab), theme: ui.theme, notesShown: ui.notesShown, notesHand: ui.notesHand, highlight: ui.highlight, hintCooldown: ui.hintCooldown, searchDelay: ui.searchDelay, leadDelay: ui.leadDelay })); } catch { /* private mode */ }
 }
 // The viewer's settings for notes: each a select in Settings, a value kept with the layout, a class on the page.
 const VIEWER = { notesShown: ['notes-shown', ['story', 'tab']], notesHand: ['notes-hand', ['hand', 'page']], highlight: ['highlight', ['marker', 'underline', 'wash']] };
@@ -86,6 +86,7 @@ function applyViewer() {
     }
     if ($('#hint-cooldown')) $('#hint-cooldown').value = ui.hintCooldown;
     if ($('#search-delay')) $('#search-delay').value = ui.searchDelay;
+    if ($('#lead-delay')) $('#lead-delay').value = ui.leadDelay;
     document.body.classList.toggle('notes-mode', ui.notesMode);
     const b = $('#notes-mode');
     b.classList.toggle('on', ui.notesMode);
@@ -106,6 +107,7 @@ function restoreLayout() {
     for (const [k, [, values]] of Object.entries(VIEWER)) if (values.includes(l?.[k])) ui[k] = l[k];
     if (Number.isInteger(l?.hintCooldown) && l.hintCooldown >= 0) ui.hintCooldown = l.hintCooldown;
     if (typeof l?.searchDelay === 'number' && l.searchDelay >= 0) ui.searchDelay = l.searchDelay;
+    if (typeof l?.leadDelay === 'number' && l.leadDelay >= 0) ui.leadDelay = l.leadDelay;
     applyTheme();
     if (AUTOPLAY !== null) return; // the default layout, as the autoplay plays it
     if (!l || ![1, 2].includes(l.columns) || l.panels?.length !== 2 || !l.panels.every(ok) || l.panels[0] === l.panels[1]) return;
@@ -701,7 +703,7 @@ function renderTabs() {
     if (game.notes.length + game.cardNotes.size) label.notes = `Notes (${game.notes.length + game.cardNotes.size})`;
     if (!game.autoSolves()) label.record = `Record (${ui.ahead ?? 0} ahead)`;
     const under = game.leads().filter((l) => l.state === 'investigating').length;
-    if (under) label.leads = `Leads (${under} under investigation)`;
+    if (under) label.leads = `Leads (${under} ${game.pace === INCREMENTAL ? 'investigated' : 'under investigation'})`;
     label.search = search.tabLabel();
     const hidden = { inferences: game.autoSolves() && !game.heldInferences().length, record: game.autoSolves(), leads: game.autoSolves(), search: game.pace !== INCREMENTAL };
     document.querySelectorAll('.panel').forEach((el, i) => {
@@ -1344,13 +1346,13 @@ function toolQuestions() {
  */
 function toolLeads() {
     const leads = game.leads();
+    if (game.pace === INCREMENTAL) return toolLeadsIncremental(leads);
     const budget = game.leadBudget();
     const under = leads.filter((l) => l.state === 'investigating').length;
     let h = `<p class="small muted">Lines of inquiry the case has raised. Put the ones you think matter under investigation: what counts is what is under investigation when Holmes takes the matter up. Not every lead goes anywhere. You can stop an investigation at any time.${Number.isFinite(budget) ? ` You may have up to ${budget} at a time.` : ''}</p>`;
     if (Number.isFinite(budget) && under) h += `<p class="small">${under} of ${budget} under investigation${under >= budget ? ': stop one to investigate another' : ''}.</p>`;
     if (!leads.length) return `${h}<p class="muted">No leads yet.</p>`;
     const open = leads.filter((l) => l.state !== 'settled');
-    const done = leads.filter((l) => l.state === 'settled');
     if (open.length) {
         h += '<ul class="list leads">';
         for (const l of open) {
@@ -1359,12 +1361,42 @@ function toolLeads() {
         }
         h += '</ul>';
     }
-    if (done.length) {
-        h += '<h3 class="section">Settled by the story</h3><ul class="list leads">';
-        for (const l of done) h += `<li>${esc(l.text)} <span class="small muted">· ${l.investigated ? 'you were investigating it' : 'not under investigation then'}</span><div class="small">${l.answer ? esc(l.answer) : '<span class="muted">Answer pending.</span>'}</div></li>`;
+    return h + settledLeadsHtml(leads, (l) => (l.investigated ? 'you were investigating it' : 'not under investigation then'));
+}
+/** Incremental mode's Leads tab: each investigation takes its time, one at a time beside the search, and finds
+ *  something or nothing yet; the search takes the leads as they came, those the player puts first before them. */
+function toolLeadsIncremental(leads) {
+    const now = search.automation?.inquiry ?? null;
+    let h = `<p class="small muted">Lines of inquiry the case has raised. The search investigates them one at a time, beside its checks, each in ${ui.leadDelay} s (Settings): first those you put first, then the rest as they came. An investigation finds <i>something</i> or <i>nothing yet</i>; not every lead goes anywhere.</p>`;
+    if (!leads.length) return `${h}<p class="muted">No leads yet.</p>`;
+    const order = game.leadOrder().map((l) => l.id);
+    const open = leads.filter((l) => l.state === 'open');
+    const done = leads.filter((l) => l.state === 'investigating');
+    if (open.length) {
+        h += '<h3 class="section">To investigate</h3><ul class="list leads">';
+        for (const l of open.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))) {
+            const first = game.leadFirst.includes(l.id);
+            const tag = now?.id === l.id ? '<span class="flag odd">investigating now</span>' : `<span class="small muted">· ${ordinal(order.indexOf(l.id) + 1)} in line</span>`;
+            const btn = now?.id === l.id || (!first && order.indexOf(l.id) === 0) ? '' : first ? `<button class="quiet" data-lead-unfirst="${esc(l.id)}">Back in its place</button>` : `<button class="quiet" data-lead-first="${esc(l.id)}">Investigate next</button>`;
+            h += `<li class="${now?.id === l.id ? 'sel' : ''}">${esc(l.text)} <span class="small muted">· ${paraLabel(l.at)}</span> ${tag} ${btn}</li>`;
+        }
         h += '</ul>';
     }
-    return h;
+    if (done.length) {
+        h += '<h3 class="section">Investigated</h3><ul class="list leads">';
+        for (const l of done) h += `<li>${esc(l.text)} <span class="small muted">· ${paraLabel(l.at)}</span> <span class="flag ${l.result === 'something' ? 'odd' : ''}">${l.result === 'something' ? 'something in it' : 'nothing yet'}</span></li>`;
+        h += '</ul>';
+    }
+    return h + settledLeadsHtml(leads, (l) => (l.result ? (l.result === 'something' ? 'you found something in it' : 'you found nothing') : 'not investigated then'));
+}
+const ordinal = (n) => `${n}${[, 'st', 'nd', 'rd'][(n % 100 >> 3) ^ 1 && n % 10] || 'th'}`;
+/** The leads the story has settled: whether each was a real lead or a false one, and its answer (pending until given). */
+function settledLeadsHtml(leads, yours) {
+    const done = leads.filter((l) => l.state === 'settled');
+    if (!done.length) return '';
+    let h = '<h3 class="section">Settled by the story</h3><ul class="list leads">';
+    for (const l of done) h += `<li>${esc(l.text)} <span class="flag ${l.real ? 'odd' : ''}">${l.real ? 'a real lead' : 'a false lead'}</span> <span class="small muted">· ${yours(l)}</span><div class="small">${l.answer ? esc(l.answer) : '<span class="muted">Answer pending.</span>'}</div></li>`;
+    return `${h}</ul>`;
 }
 
 /** The details the player marked as important, and the absences they filed. */
@@ -2293,7 +2325,7 @@ function onClick(e) {
         if (ui.menu && ui.fit?.slot === ui.menu.slot && ui.fit.value === ui.menu.value) runFit(ui.fit.slot, ui.fit.value);
         return;
     }
-    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-mark-important],[data-unmark-important],[data-investigate],[data-uninvestigate],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],.tab');
+    const t = e.target.closest('[data-card],[data-kind],[data-slot],[data-op],[data-expand],[data-timeline],[data-new-theory],[data-theory-current],[data-del-theory],[data-untheory],[data-slot-open],[data-goto],[data-window],[data-pen-cell],[data-pen-pick],[data-pen-add],[data-pen-toggle],[data-pen-erase],[data-follow-go],[data-unfollow],[data-split],[data-split-go],[data-unsplit],[data-move],[data-layer-check],[data-cpen-add],[data-split-toggle],[data-mark-prove],[data-mark-rule],[data-order-prove],[data-mark-important],[data-unmark-important],[data-investigate],[data-uninvestigate],[data-lead-first],[data-lead-unfirst],[data-raise],[data-withdraw],[data-absence-file],[data-split-claim],[data-drop-open],[data-drop-go],[data-drop-cancel],[data-undrop],[data-weigh],[data-plan-seal],[data-plan-test],[data-unseal],.tab');
     if (!t) return;
     if (t.classList.contains('tab')) { choose(fromPanel(e), t.dataset.tab); renderTool(); return; }
     if (t.dataset.card) { $('#pop').hidden = true; openCard(t.dataset.card, fromPanel(e)); return; }
@@ -2338,6 +2370,8 @@ function onClick(e) {
         return;
     }
     if (t.dataset.uninvestigate) { game.stopInvestigating(t.dataset.uninvestigate); changed(); return; }
+    if (t.dataset.leadFirst) { game.putLeadFirst(t.dataset.leadFirst); changed(); return; }
+    if (t.dataset.leadUnfirst) { game.unputLeadFirst(t.dataset.leadUnfirst); changed(); return; }
     if (t.dataset.unmarkImportant) { game.unmarkImportant(t.dataset.unmarkImportant); changed(); return; }
     if (t.dataset.raise) {
         const [id, n, x] = t.dataset.raise.split('|');
@@ -2580,6 +2614,7 @@ function onChange(e) {
     const viewer = Object.entries(VIEWER).find(([, [id]]) => id === e.target.id);
     if (viewer) { ui[viewer[0]] = e.target.value; applyViewer(); saveLayout(); renderStory(); return; }
     if (search.onChange(e)) return;
+    if (e.target.id === 'lead-delay') { ui.leadDelay = Math.max(0, Number(e.target.value) || 0); e.target.value = ui.leadDelay; saveLayout(); drawSearch(); return; }
     if (e.target.id === 'search-delay') { ui.searchDelay = Math.max(0, Number(e.target.value) || 0); e.target.value = ui.searchDelay; saveLayout(); drawSearch(); return; }
     if (e.target.id === 'hint-cooldown') { ui.hintCooldown = Math.max(0, Math.round(Number(e.target.value)) || 0); e.target.value = ui.hintCooldown; saveLayout(); renderReader(); return; }
     if (e.target.id === 'cpen-aspect') { Object.assign(ui.cardPen, { aspect: e.target.value, other: null, time: $('#cpen-time')?.value || null }); renderTool(); return; }
@@ -2692,6 +2727,7 @@ const search = makeSearch({
     changed: () => changed(),
     draw: () => drawSearch(),
     delay: () => ui.searchDelay * 1000,
+    leadDelay: () => ui.leadDelay * 1000,
     store: `${STORE}:search`,
 });
 /** The search's own pieces: its tab, the tab labels, the reading bar (the rest of the page stays as it is). */

@@ -396,8 +396,9 @@ one off; both are free, but you may have only so many under investigation at a t
 investigation</i>; 8 on Hard, more on the easier difficulties). At the limit, stop one before you investigate another.
 Not every lead goes anywhere. When the story settles a lead, it moves to <i>Settled by the story</i> and leaves
 its place: a lead Holmes takes up counts if you were investigating it at that moment, and one that comes to nothing
-counts neither for you nor against you. Its answer shows there once the story gives it (<i>Answer pending</i> until
-then).
+counts neither for you nor against you. There it says whether it was <i>a real lead</i> or <i>a false lead</i>, and
+its answer shows once the story gives it (<i>Answer pending</i> until then), whether or not you investigated it. In
+incremental mode leads work differently (see <a href="#incremental">Incremental mode</a>).
 The tab never says which leads will count. A card with a lead under investigation,
 like a card you mark <span class="btn quiet">★ Important</span>, also counts as an odd thing a theory has to explain:
 a theory is weighed by the odd things it leaves unexplained.</p>
@@ -676,6 +677,11 @@ something new could change the answer.</li>
 itself</i>, which lets the search read the story on whenever it is not waiting (otherwise you read on). How long each
 check takes is <i>Time per check</i> in Settings: one second unless you change it, 0 for as fast as it can go. A
 whole game takes about twenty thousand checks.</li>
+<li><b>Investigating leads</b> has a clock of its own, beside the checks: one lead at a time, each taking <i>Time per
+investigation</i> (Settings; a minute unless you change it). The search takes the leads in the order they came; in the
+<span class="tab">Leads</span> tab, <span class="btn quiet">Investigate next</span> puts one ahead of the rest. An
+investigation finds <i>something</i> or <i>nothing yet</i>; nothing yet may only mean the story has not got there.
+There is no limit on how many leads you investigate, and the time is the only cost.</li>
 <li>Your own moves still count: anything you find yourself, the search does not need to.</li>
 </ul>
 </section>
@@ -759,6 +765,8 @@ cards (see <a href="#more">Notes on cards</a>).</p>
   <dt>Time per check</dt>
   <dd>Incremental mode: seconds the search takes over each check (0 for as fast as it can go; see
   <a href="#incremental">Incremental mode</a>).</dd>
+  <dt>Time per investigation</dt>
+  <dd>Incremental mode: seconds each investigation of a lead takes (60 unless you change it; 0 for at once).</dd>
 </dl>
 <h3>Saving and starting over</h3>
 <p>Your game saves itself in this browser as you play. Close the page and come back later, and you are where you

@@ -121,6 +121,7 @@ for (const c of data.claims ?? []) for (const a of c.attested ?? []) checkQuotes
         if (!l.answer !== !(l.answer_source ?? []).length) err(`${l.id}: an answer and its quotes go together`);
         checkQuotes(`${l.id} answer`, l.answer_source);
         for (const c of l.needs ?? []) if (!model.cards.has(c)) err(`${l.id}: needs unknown card ${c}`);
+        if (l.false && l.scores) err(`${l.id}: a false lead scores nothing`);
         if (l.scores === null || l.scores === undefined) {
             // A lead that scores nothing settles at its answer: it needs one, after the lead is proposed.
             if (!l.answer) { err(`${l.id}: a lead that scores nothing needs an answer, where it settles`); continue; }

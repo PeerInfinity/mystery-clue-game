@@ -122,3 +122,37 @@ test('a lead that scores nothing settles when the story answers it, frees its pl
     assert.ok(!g.isInvestigating('lead.paper'), 'its place is free');
     assert.equal(g.noticeScore().investigated, 0, 'and it scores nothing');
 });
+
+test('incremental mode: an investigation finds something, or nothing yet for a false lead; the player sets the order', async () => {
+    const { INCREMENTAL } = await import('./game.js');
+    const g = new Game(model, { pace: INCREMENTAL, waits: [] }); // read freely to ¶40
+    // Hard: the cards are collected, every span of each paragraph read.
+    while (g.read <= 40) { g.advance(); const q = g.read - 1; for (const sp of g.story.spans[q] ?? []) g.collect(q, sp.ids.filter((x) => model.cards.has(x))); buildGates(g); }
+    const ids = g.leadOrder().map((l) => l.id);
+    assert.ok(ids.length >= 2, 'leads to order');
+    assert.deepEqual(ids, g.leads().filter((l) => l.state === 'open').map((l) => l.id), 'as they came');
+    const last = ids.at(-1);
+    g.putLeadFirst(last);
+    assert.equal(g.leadOrder()[0].id, last, 'put first');
+    g.unputLeadFirst(last);
+    assert.equal(g.leadOrder().at(-1).id, last, 'back in its place');
+    const paper = g.leads().find((l) => l.id === 'lead.paper');
+    if (paper) {
+        assert.equal(g.investigate('lead.paper').result, 'nothing yet', 'a false lead finds nothing yet');
+        assert.equal(g.leads().find((l) => l.id === 'lead.paper').result, 'nothing yet');
+    }
+    const real = g.leads().find((l) => l.state === 'open' && !g.leadById().get(l.id).false);
+    assert.equal(g.investigate(real.id).result, 'something');
+    const again = new Game(model, { pace: INCREMENTAL, waits: [] });
+    again.load(JSON.parse(JSON.stringify(g.save())));
+    assert.deepEqual(again.leads(), g.leads(), 'results kept in the save');
+});
+
+test('a settled lead says whether it was real or false, whether or not it was investigated', () => {
+    const g = medium();
+    readTo(g, 60);
+    const paper = g.leads().find((l) => l.id === 'lead.paper');
+    assert.deepEqual([paper.state, paper.real, paper.investigated, !!paper.answer], ['settled', false, false, true]);
+    const taken = g.leads().find((l) => l.id === 'lead.taken');
+    assert.deepEqual([taken.state, taken.real], ['settled', true]);
+});

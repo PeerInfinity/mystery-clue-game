@@ -36,6 +36,10 @@ import * as TL from './timeline.js';
 
 export const CATEGORIES = ['collect', 'ask', 'build', 'lead', 'raise', 'check', 'absence', 'drop', 'answers'];
 export const SEARCHED = ['collect', 'ask', 'build', 'lead', 'raise', 'check', 'absence', 'drop'];
+// The categories searched a check at a time; a lead is investigated in a slot of its own, beside them (`inquiry`).
+const CHECKED = SEARCHED.filter((c) => c !== 'lead');
+/** How long an investigation takes, in checks, when the automation runs without a page (step): the page times it. */
+export const LEAD_CHECKS = 60;
 /** The category that searches for a wait: a row's family, or a keep (an inference to build). */
 export const FAMILY = { deduction: 'build', notice: 'lead', raise: 'raise', check: 'check', absence: 'absence', drop: 'drop' };
 export const waitCategory = (w) => (w.keep ? 'build' : FAMILY[w.row.split('|')[1]]);
@@ -80,6 +84,8 @@ export class Automation {
         this.spent = new Map();         // category → {version, waits}: a pass that found nothing
         this.version = 0;               // bumped when the hand changes or a negative goes stale
         this.current = null;            // the check about to be made
+        this.inquiry = null;            // the lead under investigation now (its own slot, beside the checks): {id, text}
+        this.leadClock = 0;             // checks made since it began (step(), without a page)
         this.turn = 0;
         if (state) this.#restore(state);
         this.hand = new Set(this.#held());
@@ -101,7 +107,7 @@ export class Automation {
     #unpack(c, k) { return c === 'build' ? k.split('.').map((i) => this.#ids()[parseInt(i, 36)]).join('|') : k; }
     save() {
         return {
-            seed: this.seed, n: this.n, cards: this.model.cards.size, running: [...this.running], autoRead: this.autoRead, stats: this.stats, log: this.log,
+            seed: this.seed, n: this.n, cards: this.model.cards.size, running: [...this.running], autoRead: this.autoRead, stats: this.stats, log: this.log, inquiry: this.inquiry?.id ?? null,
             neg: Object.fromEntries(CATEGORIES.map((c) => [c, [...this.neg[c].keys()].map((k) => this.#pack(c, k))])),
             onto: [...this.onto].map((k) => this.#pack('build', k)),
             stale: Object.fromEntries(CATEGORIES.map((c) => [c, [...this.stale[c]].map((k) => this.#pack(c, k))])),
@@ -122,6 +128,9 @@ export class Automation {
         if (same) for (const p of s.onto ?? []) this.onto.add(this.#unpack('build', p));
         this.log = s.log ?? [];
         this.#trimLog();
+        // The investigation under way begins again (its minute is the page's, not saved).
+        const l = s.inquiry && this.g.leadOrder().find((x) => x.id === s.inquiry);
+        if (l) this.inquiry = { id: l.id, text: l.text };
         // The order goes on from where it was, not from the start.
         for (let i = 0; i < this.n % 1000; i++) this.r();
     }
@@ -362,15 +371,6 @@ export class Automation {
         }
         return null;
     }
-    *lead() {
-        const label = (l) => `investigate: ${l.text}`;
-        const f = this.#frame('lead', { list: this.g.leads().filter((l) => l.state === 'open'), key: (l) => l.id, label, after: () => 'done until a new lead or a new wait' });
-        for (f.i = 0; f.i < f.list.length; f.i++) {
-            const l = f.list[f.i];
-            if (yield* this.#try('lead', l.id, label(l), () => this.g.investigate(l.id), (res) => res.lifts > 0, () => this.g.stopInvestigating(l.id))) return 'changed';
-        }
-        return null;
-    }
     *raise() {
         const all = this.#held().flatMap((id) => this.g.exceptionsOf(id).map((x) => [id, x.n, x.id, x.text])).filter(([id, n, x]) => !this.g.raised.has(`${id}#${n}:${x}`));
         const label = ([id, , x, text]) => `raise against ${this.#card(id)}: ${text ?? x}`;
@@ -582,7 +582,7 @@ export class Automation {
     /** The categories with something to search now, in the order they take turns from the next one. */
     #turns() {
         const first = ['collect', 'ask'].filter((c) => this.#live(c));
-        const rest = SEARCHED.slice(2).filter((c) => this.families.has(c) && this.#live(c));
+        const rest = CHECKED.slice(2).filter((c) => this.families.has(c) && this.#live(c));
         const i = rest.length ? this.turn % rest.length : 0;
         return [...first, ...rest.slice(i), ...rest.slice(0, i)];
     }
@@ -635,7 +635,39 @@ export class Automation {
         if (this.g.finished()) return 'end';
         if (this.current) return null;
         if (!this.open.length) return 'reading';
+        if (this.inquiry || this.leadNext()) return 'investigating';
         return this.open.some((w) => !this.running.has(waitCategory(w))) ? 'paused' : 'stuck';
+    }
+
+    // ---------- the investigations (a slot of their own) ----------
+    /** The lead to investigate next: the player's first, then as they came; with the category paused, only the player's. */
+    leadNext() {
+        const order = this.g.leadOrder();
+        const l = this.running.has('lead') ? order[0] : order.find((x) => this.g.leadFirst.includes(x.id));
+        return l ?? null;
+    }
+    /** Begin the next investigation if none is under way: → the one under way ({id, text}) or null. */
+    startLead() {
+        if (this.inquiry && !this.g.leadOrder().some((l) => l.id === this.inquiry.id)) this.inquiry = null; // settled meanwhile
+        if (!this.inquiry) { const l = this.leadNext(); if (l) { this.inquiry = { id: l.id, text: l.text }; this.leadClock = 0; } }
+        return this.inquiry;
+    }
+    /** The investigation's time is up: the lead investigated, and what it found logged. → the log entry, or null. */
+    finishLead() {
+        const q = this.inquiry;
+        if (!q) return null;
+        this.inquiry = null;
+        const res = this.g.investigate(q.id);
+        if (res.ok === false) return null;
+        this.n++;
+        this.stats.lead.checked++;
+        const found = res.result === 'something';
+        if (found) this.stats.lead.found++;
+        const entry = { n: this.n, para: this.g.read - 1, cat: 'lead', label: `investigate: ${q.text}`, out: found ? 'found' : 'no', ...(found ? { what: 'something in it' } : { what: 'nothing yet' }) };
+        this.log.push(entry);
+        this.#trimLog();
+        this.dirty = true;
+        return entry;
     }
     /**
      * The checks to come, in the order they will be made (the first is next()), as far as they can be known: every
@@ -664,7 +696,7 @@ export class Automation {
         const take = (cat) => { out.push(lists.get(cat).items[took.get(cat)]); took.set(cat, took.get(cat) + 1); };
         for (const cat of ['collect', 'ask']) while (lists.has(cat) && out.length < limit && took.get(cat) < lists.get(cat).items.length) take(cat);
         // The others take turns as next() and execute() turn them: a category leaves the turns after its last check.
-        let rest = SEARCHED.slice(2).filter((cat) => lists.has(cat));
+        let rest = CHECKED.slice(2).filter((cat) => lists.has(cat));
         let turn = this.turn, end = false;
         if (['collect', 'ask'].every((cat) => !lists.has(cat) || took.get(cat) >= lists.get(cat).items.length)) {
             while (out.length < limit) {
@@ -712,12 +744,19 @@ export class Automation {
     }
 
     /** Up to `budget` checks at once: → {checks, idle: null | 'end' | 'reading' | 'paused' | 'stuck', end}. */
-    step(budget = 1000) {
+    step(budget = 1000, { leadChecks = LEAD_CHECKS } = {}) {
         let checks = 0;
         while (checks < budget) {
-            if (!this.next()) break;
-            this.execute();
-            checks++;
+            this.startLead();
+            if (this.next()) {
+                this.execute();
+                checks++;
+                if (this.inquiry && ++this.leadClock >= leadChecks) this.finishLead();
+                continue;
+            }
+            // Nothing to check: the investigation under way runs out its time.
+            if (this.inquiry) { this.finishLead(); continue; }
+            break;
         }
         return { checks, idle: checks < budget ? this.idle() : null, end: this.g.finished() };
     }
@@ -871,7 +910,7 @@ export class Automation {
         out.build.left = bySize.reduce((a, x) => a + (x.left ?? 0), 0);
         out.build.leftMore = bySize.some((x) => x.left === null);
         const leads = g.leads().filter((l) => l.state !== 'settled');
-        put('lead', [{ label: 'leads proposed', factors: [{ label: 'leads', n: leads.length }] }], leads.filter((l) => l.state === 'investigating' || live('lead', l.id)).length);
+        put('lead', [{ label: 'leads proposed', factors: [{ label: 'leads', n: leads.length }] }], leads.filter((l) => l.state === 'investigating').length);
         const exc = held.flatMap((id) => g.exceptionsOf(id).map((x) => `${id}#${x.n}:${x.id}`));
         put('raise', [{ label: 'exceptions open', factors: [{ label: 'exceptions', n: exc.length }] }], exc.filter((k) => g.raised.has(k) || live('raise', k)).length);
         // Sealed checks: Σ over the verbs of field × field × (results + none).

@@ -355,7 +355,8 @@ export class Game {
         this.concluded = [];            // [{id, cited, formula, label, para}]
         this.filed = [];                // [{id, para}] absences the player filed, or Trivial filed for them
         this.important = new Map();     // card id → {para}: the player's own mark "important" (sorts their lists, steers the search; never scored)
-        this.investigating = new Map(); // lead id → {para}: the leads under investigation now
+        this.investigating = new Map(); // lead id → {para, result?}: the leads under investigation now (incremental: investigated, with what it found)
+        this.leadFirst = [];            // lead ids the player put first (incremental mode: the order the investigations take)
         this.leadsSettled = new Map();  // lead id → {at}: leads past Holmes's paragraph; `at` the paragraph its investigation began, or null
         this.drops = new Map();         // drop key → {target, reason, rival, cites, para, held}: hypotheses dropped
         this.raised = new Map();        // 'card#n:exception' → {id, n, rule, exception, status, para}: exceptions raised
@@ -396,8 +397,9 @@ export class Game {
             concluded: this.concluded.map((c) => [c.id, c.cited, c.formula, c.label, c.para]),
             filed: this.filed.map((f) => [f.id, f.para]),
             important: [...this.important].map(([id, n]) => [id, n.para]),
-            investigating: [...this.investigating].map(([id, n]) => [id, n.para]),
-            leadsSettled: [...this.leadsSettled].map(([id, n]) => [id, n.at]),
+            investigating: [...this.investigating].map(([id, n]) => [id, n.para, n.result ?? null]),
+            leadFirst: this.leadFirst,
+            leadsSettled: [...this.leadsSettled].map(([id, n]) => [id, n.at, n.result ?? null]),
             drops: [...this.drops.values()],
             raised: [...this.raised.values()].map((r) => [r.id, r.n, r.exception, r.para, r.status]),
             seals: this.seals,
@@ -490,8 +492,9 @@ export class Game {
         for (const [id, para, text] of state.cardNotes ?? []) if (this.knows(id)) this.cardNotes.set(id, { para, text });
         for (const [id, para] of state.important ?? []) if (this.knows(id)) this.important.set(id, { para });
         // The leads: replaying the reading settled each lead passed with none under investigation; the save says which were.
-        for (const [id, at] of state.leadsSettled ?? []) if (this.leadById().has(id)) this.leadsSettled.set(id, { at });
-        for (const [id, para] of state.investigating ?? []) if (this.leadById().has(id) && !this.leadsSettled.has(id)) this.investigating.set(id, { para });
+        for (const [id, at, result] of state.leadsSettled ?? []) if (this.leadById().has(id)) this.leadsSettled.set(id, { at, ...(result && { result }) });
+        for (const [id, para, result] of state.investigating ?? []) if (this.leadById().has(id) && !this.leadsSettled.has(id)) this.investigating.set(id, { para, ...(result && { result }) });
+        this.leadFirst = (state.leadFirst ?? []).filter((id) => this.leadById().has(id));
         for (const d of state.drops ?? []) if (d?.target && DROP_REASONS.includes(d.reason)) this.drops.set(dropKey(d.target), d);
         for (const [id, n, exception, para, status] of state.raised ?? []) {
             const e = this.knows(id) && this.applicationsOf(id).find((a) => a.n === n)?.exceptions.find((x) => x.id === exception);
@@ -1318,14 +1321,30 @@ export class Game {
     /**
      * The leads the game proposes, in the order they came: each {id, text, at, state}, state 'investigating', 'open' or
      * 'settled' (its deadline is read: Holmes's paragraph, or the story's answer; `investigated` says whether it was under investigation then, `answer` the
-     * story's answer once its quotes are read, else null: pending). Never says which leads score.
+     * story's answer once its quotes are read, else null: pending; `real` false for a false lead). Incremental mode: an
+     * investigated lead's `result`, 'something' or 'nothing yet'. Never says which leads score.
      */
     leads() {
         return [...this.leadById().values()].filter((l) => this.leadProposed(l.id)).sort((a, b) => a.at - b.at).map((l) => {
             const settled = this.leadsSettled.get(l.id);
-            return { id: l.id, text: l.text, at: l.at, state: settled ? 'settled' : this.investigating.has(l.id) ? 'investigating' : 'open', ...(settled && { investigated: settled.at !== null, answer: l.answerAt !== null && l.answerAt < this.read ? l.answer : null }) };
+            const result = this.investigating.get(l.id)?.result ?? settled?.result;
+            return { id: l.id, text: l.text, at: l.at, state: settled ? 'settled' : this.investigating.has(l.id) ? 'investigating' : 'open', ...(result && { result }), ...(settled && { investigated: settled.at !== null, real: !l.false, answer: l.answerAt !== null && l.answerAt < this.read ? l.answer : null }) };
         });
     }
+    /** Incremental mode: the open leads in the order the investigations take them: the player's first, then as they came. */
+    leadOrder() {
+        const open = this.leads().filter((l) => l.state === 'open');
+        const first = this.leadFirst.map((id) => open.find((l) => l.id === id)).filter(Boolean);
+        return [...first, ...open.filter((l) => !this.leadFirst.includes(l.id))];
+    }
+    /** Put a lead first in the order (incremental mode); again, it goes back to where it came. */
+    putLeadFirst(id) {
+        if (!this.leadById().has(id)) return false;
+        this.leadFirst = this.leadFirst.filter((x) => x !== id);
+        this.leadFirst.unshift(id);
+        return true;
+    }
+    unputLeadFirst(id) { const n = this.leadFirst.length; this.leadFirst = this.leadFirst.filter((x) => x !== id); return this.leadFirst.length < n; }
     isInvestigating(id) { return this.investigating.has(id); }
     /** How many leads may be under investigation at a time (the option `leads`); Infinity in incremental mode. */
     leadBudget() { return this.pace === INCREMENTAL ? Infinity : Number(this.opts.leads ?? 8); }
@@ -1345,8 +1364,12 @@ export class Game {
             if (this.leadsSettled.has(id)) return { ok: false, reason: 'the story has settled this lead already' };
             if (this.investigating.has(id)) return { ok: true };
             if (this.investigating.size >= this.leadBudget()) return { ok: false, full: true, reason: `${this.investigating.size} leads are under investigation, as many as you may have at a time: stop one first` };
-            this.investigating.set(id, { para: this.read - 1 });
-            return { ok: true };
+            // Incremental mode: the investigation (the page's minute) ends with what it found: something, for a lead that
+            // goes somewhere; nothing yet, for a false one, until the story settles it.
+            const result = this.pace === INCREMENTAL ? (this.leadById().get(id).false ? 'nothing yet' : 'something') : null;
+            this.investigating.set(id, { para: this.read - 1, ...(result && { result }) });
+            this.leadFirst = this.leadFirst.filter((x) => x !== id);
+            return { ok: true, ...(result && { result }) };
         });
     }
     stopInvestigating(id) { return !this.leadsSettled.has(id) && this.investigating.delete(id); }
@@ -1354,7 +1377,8 @@ export class Game {
     #settleLeads(p) {
         for (const l of this.leadById().values()) {
             if (l.deadline !== p || this.leadsSettled.has(l.id)) continue;
-            this.leadsSettled.set(l.id, { at: this.investigating.get(l.id)?.para ?? null });
+            const n = this.investigating.get(l.id);
+            this.leadsSettled.set(l.id, { at: n?.para ?? null, ...(n?.result && { result: n.result }) });
             this.investigating.delete(l.id);
         }
     }

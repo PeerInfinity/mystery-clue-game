@@ -552,11 +552,21 @@ Holmes has taken up leaves its place. Before Holmes's first paragraph on its NOT
 (`leadsSettled`: under investigation then or not) and can no longer be changed. A NOTICE row scores if a lead for it
 was under investigation at that point. `npm run validate` checks the quotes and cards, that a lead is proposed before
 its deadline, and that every NOTICE thought Holmes speaks to has a lead. Silver Blaze: the 8 scored NOTICE rows, one
-lead each (two on the milliner's bill, its name and its sum), and 4 that score nothing: the paper offered the maid
+lead each (two on the milliner's bill, its name and its sum), and 10 that score nothing: the paper offered the maid
 (answered ¶58), the gypsies breaking camp (¶114), Simpson's bets (¶218), the wound (¶226, the horse's shoe), what the
 stranger wanted (¶40), Straker going down at one (¶220), the cravat and the blood on the knife (¶226), why nobody has
-seen the horse (¶146) and the winner with no white (¶202). Planned (docs/ideas.md): the story's false leads, new
-inferences that propose the true ones, and in incremental mode a minute per investigation running beside the checks.
+seen the horse (¶146) and the winner with no white (¶202). Four are `false` (a red herring: the paper, the gypsies,
+Simpson's bets, what the stranger wanted); a settled lead says whether it was real (`real` in `leads()`), and shows
+its answer whether or not it was investigated.
+
+**Incremental mode:** `investigate(id)` ends with a `result`: `something` for a lead that goes somewhere (scored or
+not), `nothing yet` for a false one (the user's ruling: what it says until the story settles it). The engine makes
+the move at once; the minute is the page's (ui/search.js, Settings *Time per investigation*, 60 s), one
+investigation at a time on a clock of its own beside the checks. The automation takes them in `leadOrder()`: those
+the player put first (`putLeadFirst`, `unputLeadFirst`; saved as `leadFirst`), then the rest as they came; with
+the category paused, only the player's. `Automation.startLead()` / `finishLead()` run the slot (`inquiry`); `step()`
+without a page lets an investigation take `LEAD_CHECKS` (60) checks, or ends it at once when nothing is left to
+check.
 
 ## Defeasibility
 
@@ -837,7 +847,7 @@ and never read by a score.
 `Game.save()` (version `SAVE_VERSION`, 9): `difficulty`, `options`, `pace`, `autoPace`, `read`, `collected` (Hard), `marks`
 (listed, struck with their proofs, proven, circled), `theories`, `lastSeen`, `suspected`, `doubtKind`,
 `doubtReason`, `split`, `asked`, `clashLog`, `built`, `applied`, `concluded`, `filed`, `important`, `investigating`,
-`leadsSettled`, `drops`, `raised`,
+`leadsSettled` (each with the incremental `result`), `leadFirst`, `drops`, `raised`,
 `seals`, `setAside`, `cardNotes`, `notes`, `hints`, `made`, `board`, `openedSplits`, `opened`. `load` replays the
 reading to `read` (re-asking and rebuilding at the paragraphs they were made), reopens splits and states before the
 cards and marks that speak of them, and remakes the player's cards in order (fresh ids where a saved id is taken on

@@ -113,6 +113,7 @@ await p.sleep(3000);
 check(await p.ev(`document.querySelectorAll('.search-log li').length`) === paused, 'paused: no further checks');
 await p.ev(`document.querySelector('.settings').open = true; 1`);
 await p.choose('#search-delay', '0');
+await p.choose('#lead-delay', '0'); // the investigations at once too (a minute each by default)
 await p.ev(`document.querySelector('.settings').open = false; 1`);
 await p.click('[data-search-play="1"]');
 const t0 = Date.now();
