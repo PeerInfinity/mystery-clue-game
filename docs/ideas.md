@@ -291,6 +291,21 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   one and not the other (leading out, striking, hiding against injuring), and the unmet needs in one and not the
   other (only the theft needs a hiding-place). Not built: that both goals serve one wish (Simpson stands to lose if
   the horse wins), so the comparison does not itself say the shorter plan would do.
+- **Built (2026-11-05), Straker's plan:** **the user's rulings:** (1) the reason leading out is needed comes from a
+  why-question, not a rule given in advance: "Why take the horse out of the stable?" (`q.why_out`), raised by
+  Holmes's objection at ¶57, offers "for early exercise" (¶34) and "to steal him" (the police) first, and behind
+  More "to do something that would be heard in the stable" and "... by a light that would be seen from the stable"
+  (the annotated reading's turn-around, t57.3; Holmes gives noise at ¶223). Circling either adds a need to injuring,
+  as the player's hypothesis: the horse away from the stable. (2) An aim implies its last step: "to injure the
+  horse" carries Straker injuring it, intended, never on the timeline. Played at ¶57: circle Straker for who led the
+  horse out and "to injure the horse" for why he went out; leading out serves nothing toward injuring until the noise
+  reason is circled, then it serves it (it puts the horse outside); "What would this need?" on the aim: only the
+  intended last step would reach the goal (he failed), the door open and Straker at it unmet. Holmes's own plan
+  ("injure it there") now has an unmet need: the horse is in its stall. Uncircling the reason announces the lapse.
+  A circled who-answer to a question whose entry is a typed action (who led the horse out, who opened the door) is
+  an action the moves can link. Not yet: the match and the candle (the light reason has the same coarse need), the
+  knife as what injuring needs, the hoof as why the last step never happened, the lapse's why for a lost
+  hypothesis need (it says only "nothing it brings about meets...").
 
 ### An incremental game about trying every combination
 

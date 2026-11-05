@@ -113,10 +113,13 @@ export function changePath(attr, from, to) {
 }
 
 /** A run of action types as one action: the first one's state needs, every other need, the last one's effects. */
-function pathRules(types) {
+function pathRules(types, ctx = {}) {
     const requires = [], effects = [];
     types.forEach((t, i) => {
-        for (const r of ACTIONS[t].requires) if (!r.state || i === 0) if (!requires.some((x) => JSON.stringify(x) === JSON.stringify(r))) requires.push(r);
+        // A need the player's hypothesis adds (`ctx.extraNeeds`: {action type: [rule]}; injuring the horse in the
+        // stable would be heard) carries `hyp`.
+        const extra = (ctx.extraNeeds?.[t] ?? []).map((r) => ({ ...r, hyp: true }));
+        for (const r of [...ACTIONS[t].requires, ...extra]) if (!r.state || i === 0) if (!requires.some((x) => JSON.stringify(x) === JSON.stringify(r))) requires.push(r);
         if (i === types.length - 1) effects.push(...ACTIONS[t].effects);
     });
     return { requires, effects };
@@ -145,20 +148,23 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
     if (!types.length || types.some((t) => !ACTIONS[t])) return { why: 'Not an action the engine knows the rules of.' };
     // A change pointed out by move (a) is already between the two states it came from: only its other needs are new.
     const change = f.from != null;
-    const { requires, effects } = pathRules(types);
+    const { requires, effects } = pathRules(types, ctx);
     const R = (r) => roleOf(f, r);
     const t = f.time ?? {};
     const point = t.at ?? null;
     const before = point ? { to: point } : { ...t };
     const during = point ? { at: point } : { ...t };
-    const after = point ? { from: point } : t.before ? { from: t.before } : null;
+    const after = point ? { from: point } : t.before ? { from: t.before } : t.to ? { from: t.to } : null;
     const out = [];
     requires.forEach((r, i) => {
-        const base = { id: `r:b:${f.id}:needs${i}`, role: 'requires', time: before, of: R(r.of) };
+        const base = { id: `r:b:${f.id}:needs${i}`, role: 'requires', time: before, of: R(r.of), ...(r.hyp ? { hyp: true } : {}) };
         if (base.of == null) return;
+        // A rule about a role the action does not have (injuring with no door named) is left out.
+        if ([r.at, r.key, r.carrying, r.away].some((x) => typeof x === 'string' && x.startsWith('$') && R(x) == null)) return;
         if (r.state) { if (!change) out.push({ ...base, attr: r.state, value: r.value, neg: !!r.neg }); }
         else if (r.key) out.push({ ...base, attr: 'carrying', value: `a key to ${String(nameOf(R(r.key))).replace(/^The /, 'the ')}`, key: R(r.key), time: during });
         else if (r.at) { if (base.of !== '?') out.push({ ...base, attr: 'location', value: R(r.at), at: R(r.at), time: during }); }
+        else if (r.away) out.push({ ...base, attr: 'location', value: `away from ${String(nameOf(R(r.away))).replace(/^The /, 'the ')}`, away: R(r.away), time: during });
         else if (r.carrying) out.push({ ...base, attr: 'carrying', value: R(r.carrying), item: R(r.carrying), time: during });
         else out.push({ ...base, attr: r.attr, value: R(r.value), neg: !!r.neg, time: during });
     });
@@ -169,9 +175,10 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
         if (e.state) out.push({ id, role: 'effects', time: after, of, attr: e.state, value: e.value, neg: false });
         else if (e.through) {
             // Through the door: on the other side from where it was just before (if the timeline says).
-            if (!point || !ctx.entries) return;
+            const ref = point ?? t.after ?? t.from;
+            if (!ref || !ctx.entries) return;
             const door = R(e.through);
-            const was = placeAt(ctx.order, ctx.entries, of, point, true, eq(ctx));
+            const was = placeAt(ctx.order, ctx.entries, of, ref, !!point, eq(ctx), ctx.homes);
             const side = sideOf(ctx, door, was?.value);
             if (side >= 0) out.push({ id, role: 'effects', time: after, of, attr: 'location', value: ctx.joins[door][1 - side], neg: false });
         } else {
@@ -255,6 +262,12 @@ export function requirementStatus(order, entries, req, ctx = {}) {
         }
         return p ? { status: 'against', entry: p } : { status: 'unknown' };
     }
+    if (req.away) {
+        // Away from a place: where it is then, not within that place.
+        const p = placeAt(order, others, req.of, t, !!req.time?.at, same, ctx.homes);
+        if (!p) return { status: 'unknown' };
+        return { status: (ctx.places?.chain(p.value) ?? [p.value]).includes(req.away) ? 'against' : 'met', entry: p };
+    }
     if (req.key) {
         const c = coverOf(req.time);
         const has = others.find((e) => e.attr === 'carrying' && same(e.of, req.of) && (e.key === req.key || /\bkey\b/.test(String(e.value))) && (!c || anchorOf(e.time) === t));
@@ -284,6 +297,7 @@ export function meets(eff, req, ctx = {}) {
     const same = eq(ctx);
     if (!same(eff.of, req.of)) return false;
     if (req.at) return eff.attr === 'location' && sideOf(ctx, req.at, eff.value) >= 0;
+    if (req.away) return eff.attr === 'location' && !(ctx.places?.chain(eff.value) ?? [eff.value]).includes(req.away);
     if (req.key) return eff.attr === 'carrying' && (eff.key === req.key || /\bkey\b/.test(String(eff.value)));
     if (eff.attr !== req.attr) return false;
     if (STATES[req.attr]) return req.neg ? eff.value !== req.value : eff.value === req.value;
@@ -317,6 +331,7 @@ export function checkFit(x, target, linked = [], nameOf = (id) => id, ctx = {}) 
     const products = productsOf(x, nameOf, ctx);
     if (!products.length) return { fits: false, why: 'The engine does not know what this brings about.' };
     const goal = { of: target.goal.of, attr: target.goal.attr, value: target.goal.value, neg: false };
+    linked = [...linked, ...impliedSteps(target)];
     const needs = [goal, ...linked.flatMap((s) => (pointImplications(s, nameOf, ctx).entries ?? []).filter((e) => e.role === 'requires'))];
     let conditional = null;
     for (const n of needs) for (const p of products) {
@@ -338,6 +353,12 @@ export function checkFit(x, target, linked = [], nameOf = (id) => id, ctx = {}) 
  * `of` or the plan's `agent`, its time its own or the plan's), each need met by an earlier step's effect, by the
  * timeline (`entries`), or by nothing; and whether the steps reach the goal. `open`: the needs nothing meets.
  */
+/**
+ * The last step an aim implies (`step` on a possibility: to injure the horse, Straker injuring it), as an intended
+ * action of the aim's agent at the aim's time: links can be made to its needs though it never happened.
+ */
+export const impliedSteps = (target) => (target.step ? [{ ...target.step, id: `${target.id}:step`, of: target.step.of ?? target.of, time: target.step.time ?? target.time, intended: true }] : []);
+
 /** A plan's steps as actions: each with an id, its agent (its own or the plan's) and its time (its own or the plan's). */
 const planSteps = (plan) => (plan.steps ?? []).map((s, i) => ({ ...s, id: s.id ?? `${plan.id}#${i}`, of: s.of ?? plan.agent, time: s.time ?? plan.time }));
 
@@ -352,7 +373,10 @@ export function checkPlan(plan, entries, nameOf = (id) => id, ctx = {}) {
         produced.push(...es.filter((e) => e.role === 'effects').map((e) => ({ ...e, step: i })));
         return { step: f, needs };
     });
-    const goal = plan.goal ? (produced.some((p) => !p.cond && meets(p, { ...plan.goal, neg: false }, ctx)) ? 'reached' : 'not reached') : null;
+    // A step only intended (an aim's last step, never on the timeline) does not reach the goal: it would, if done.
+    const done = produced.filter((p) => !steps[p.step].step.intended);
+    const reach = (ps) => ps.some((p) => !p.cond && meets(p, { ...plan.goal, neg: false }, ctx));
+    const goal = plan.goal ? (reach(done) ? 'reached' : reach(produced) ? 'intended' : 'not reached') : null;
     return { steps, goal, open: steps.flatMap((s) => s.needs.filter((n) => n.status !== 'met').map((n) => ({ ...n, step: s.step }))) };
 }
 

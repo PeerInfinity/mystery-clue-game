@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans } from './actions.js';
+import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps } from './actions.js';
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -149,6 +149,27 @@ test('two plans compared: the steps and the unmet needs in one and not the other
     assert.deepEqual(r.b.only.map((s) => s.act), ['injure']);
     assert.deepEqual(r.a.open.map((n) => [n.req.of, n.req.value]), [['horse', 'door'], ['man', 'a hiding-place']], 'only the theft needs the horse at the door and a hiding-place');
     assert.deepEqual(r.b.open, []);
+});
+
+test("Straker's plan in small: an aim's intended last step, and a need the player's hypothesis adds", () => {
+    // The stall is within the stable; the door joins the stable and the yard. The horse lives in the stall.
+    const pl = places({ entities: [...yard.entities, { id: 'horse', kind: 'animal' }] });
+    const c = { joins: { door: ['stable', 'yard'] }, places: pl, order, homes: (id) => id === 'horse' };
+    const lives = { id: 'f.lives', of: 'horse', attr: 'lives_at', value: 'stall', time: { from: 't9' } };
+    const leads = { id: 'h.leads', of: 'trainer', act: 'lead_out', thing: 'horse', via: 'door', time: { from: 't9', to: 'tmorn' } };
+    const aim = { id: 'h.aim', of: 'trainer', attr: 'intends', goal: { of: 'horse', attr: 'condition', value: 'injured' }, step: { act: 'injure', thing: 'horse' }, time: { at: 'tout' } };
+    assert.deepEqual(impliedSteps(aim).map((s) => [s.of, s.act, s.intended]), [['trainer', 'injure', true]]);
+    const plain = { ...c, entries: [lives] };
+    assert.equal(checkFit(leads, aim, [], nameOf, plain).fits, false, 'no reason circled: leading out serves nothing toward injuring');
+    const heard = { ...plain, extraNeeds: { injure: [{ of: '$thing', away: 'stable' }] } };
+    const r = checkFit(leads, aim, [], nameOf, heard);
+    assert.deepEqual([r.fits, r.need.away, r.need.hyp], [true, 'stable', true], 'it would be heard: injuring needs the horse away from the stable, and leading out does that');
+    assert.equal(requirementStatus(order, [lives], r.need, heard).status, 'against', 'in its stall it is in the stable');
+    const plan = { id: 'p', agent: 'trainer', goal: aim.goal, steps: [leads, ...impliedSteps(aim)] };
+    const d = checkPlan(plan, [lives], nameOf, heard);
+    assert.equal(d.goal, 'intended', 'only the intended step would injure it');
+    assert.equal(d.steps[1].needs.find((n) => n.req.away).by.step, 0, 'away from the stable: met by leading out');
+    assert.ok(!d.steps[1].needs.some((n) => n.req.attr === 'location' && !n.req.away), 'no door named for the injuring: no need to be at one');
 });
 
 test('a link that stops fitting is listed with why; one not yet told is not', () => {

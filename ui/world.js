@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans } from '../engine/actions.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -40,7 +40,7 @@ let reasonedById = new Map();
 let lapsed = [];          // the player's moves that no longer hold, each with why (engine/actions.js reasonedEntries)
 let heldKeys = null;      // the moves that held at the last drawing (null before the first): one that lapses is announced
 let lapseNews = [];       // the lapses announced, until dismissed or no longer lapsed
-const factOf = (id) => factById.get(id) ?? reasonedById.get(id) ?? hypIntention(id);
+const factOf = (id) => factById.get(id) ?? reasonedById.get(id) ?? hypIntention(id) ?? hypAction(id);
 /**
  * A circled aim with a goal (the stranger's "get information to bet on") as an intention: Watson's hypothesis, so
  * the player's plan can be built on it. Its id is the mark's key.
@@ -51,7 +51,20 @@ function hypIntention(id, anyMark = false) {
     const q = qById.get(m[1]);
     const p = q?.possibilities.find((x) => x.value === m[2]);
     if (!p?.goal || (!anyMark && markOf(q, p.value) !== 'circled') || !possShown(q, p.value)) return null;
-    return { id, of: q.entry.of, attr: 'intends', value: p.value, goal: p.goal, time: q.entry.time && typeof q.entry.time === 'object' ? q.entry.time : {}, hyp: { q: q.id, pick: p.value }, given_at: q.raised };
+    return { id, of: q.entry.of, attr: 'intends', value: p.value, goal: p.goal, ...(p.step ? { step: p.step } : {}), time: hypTime(q), hyp: { q: q.id, pick: p.value }, given_at: q.raised };
+}
+const hypTime = (q) => (q.entry.time && typeof q.entry.time === 'object' ? q.entry.time : typeof q.entry.time === 'string' ? { at: q.entry.time } : {});
+/**
+ * A circled answer to a who-question whose entry is a typed action (who led the horse out?): that one doing it, as an
+ * action of Watson's hypothesis, which the moves can link like any other.
+ */
+function hypAction(id) {
+    const m = /^hyp:(.+)=(.+)$/.exec(id ?? '');
+    if (!m) return null;
+    const q = qById.get(m[1]);
+    if (!q?.entry?.act || !entityById.has(m[2]) || markOf(q, m[2]) !== 'circled' || !possShown(q, m[2])) return null;
+    const { act, thing, to, item, via } = q.entry;
+    return { id, of: m[2], attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), time: hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
 }
 const allFacts = () => [...data.facts, ...reasoned];
 const qById = new Map(data.questions.map((q) => [q.id, q]));
@@ -147,14 +160,16 @@ const pickText = (q, pick) => (entityById.has(pick) ? ent(pick) : esc(pick));
 const KIND_WORD = { money: 'money', message: 'a message', drug: 'a drug' };
 /** A typed action or an intention as a short phrase: who, doing what, to whom, with what. */
 function stepText(x) {
-    if (!list(x.act).length) return x.hyp ? `${ent(x.of)}, aiming to ${esc(x.value)}` : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
+    if (!list(x.act).length) return x.hyp ? `${ent(x.of)}, aiming ${/^to /.test(x.value) ? '' : 'to '}${esc(x.value)}` : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
     const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && `with ${val(x.item)}`, x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
-    return `${x.of === '?' ? 'Someone' : ent(x.of)}: ${list(x.act).map((t) => ACTIONS[t].label).join(' and ')} ${roles}`;
+    const note = x.intended ? ' <span class="small muted">(intended)</span>' : x.hyp ? ' <span class="small muted">(your hypothesis)</span>' : '';
+    return `${x.of === '?' ? 'Someone' : ent(x.of)}: ${list(x.act).map((t) => ACTIONS[t].label).join(' and ')} ${roles}${note}`;
 }
 /** A fact as a short sentence. */
 function phrase(f) {
     const E = f.of === '?' ? 'Someone' : ent(f.of);
     if (f.reasoned && f.attr === 'action' && f.act) return `${E}: ${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${ent(f.thing)}`;
+    if (f.away) return `${E} away from ${ent(f.away)}${f.hyp === true ? ' <span class="small muted">(your hypothesis)</span>' : ''}`;
     const v = val(f.value);
     const d = f.detail ? ` <span class="muted">(${esc(f.detail)})</span>` : '';
     switch (f.attr) {
@@ -286,8 +301,9 @@ function questionRows(q, clashing, tag = 'li') {
         const lvl = markLevel(q, p.value);
         if (lvl < state.threshold && !state.showBelow) return '';
         const cls = ['event', 'hyp', lvl < state.threshold ? 'below' : '', clashing.has(hypothesisKey(q.id, p.value)) ? 'clash' : '', givenAway(q) ? (p.value === q.answer ? 'right' : 'wrong') : ''].filter(Boolean).join(' ');
-        const goal = q.possibilities.find((x) => x.value === p.value)?.goal;
-        return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span>${goal ? ` ${REASON_MARK}` : ''}</${tag}>`;
+        const pp = q.possibilities.find((x) => x.value === p.value);
+        const can = pp?.goal || pp?.need || hypAction(hypothesisKey(q.id, p.value));
+        return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span>${can ? ` ${REASON_MARK}` : ''}</${tag}>`;
     });
     return [head, ...circles];
 }
@@ -298,7 +314,7 @@ function questionRows(q, clashing, tag = 'li') {
  * it is (a circled aim with a goal). Elsewhere (an entity's own timeline in the detail) everything shows.
  */
 const movesOnly = (f) => !state.onlyMoves || canReason(f);
-const movesOnlyQ = (q) => !state.onlyMoves || q.possibilities.some((p) => p.goal && markOf(q, p.value) === 'circled');
+const movesOnlyQ = (q) => !state.onlyMoves || q.possibilities.some((p) => (p.goal || p.need || hypAction(hypothesisKey(q.id, p.value))) && markOf(q, p.value) === 'circled');
 function eventList(filter, clashing, qFilter = () => true) {
     const shown = allFacts().filter((f) => visible(f) && filter(f) && (state.showBelow || accepted(f)));
     const at = new Map();
@@ -546,10 +562,10 @@ function render() {
     const told = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
     placeCtx = engineCtx(told);
     const lapses = [], held = [];
-    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held });
+    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id) ?? hypAction(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held });
     reasonedById = new Map(reasoned.map((f) => [f.id, f]));
     // An aim still circled but not yet told (read back) is not a lapse: the link returns on reading on.
-    lapsed = lapses.filter((l) => !(l.gone && hypIntention(l.gone, true) === null && /^hyp:/.test(l.gone)));
+    lapsed = lapses.filter((l) => !(l.gone && /^hyp:/.test(l.gone) && !hypShown(l.gone)));
     // Announced: a move that held at the last drawing and no longer does (not one read back past and read on to again).
     const keys = new Set(lapsed.map((l) => moveKey(l.move)));
     lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
@@ -672,7 +688,13 @@ function engineCtx(told) {
         return (circled.length ? circled : ps.filter((p) => markOf(q, p.value) !== 'crossed')).map((p) => p.kind);
     };
     const homes = (id) => entityById.get(id)?.kind === 'animal';
-    return { joins: data.joins, places: data.places, same, itemKinds, homes };
+    // A circled reason with a need (injuring the horse would be heard in the stable) adds it to that action type.
+    const extraNeeds = {};
+    for (const q of baseQuestions) if (qListed(q)) for (const p of q.possibilities) if (p.need && markOf(q, p.value) === 'circled' && possShown(q, p.value)) {
+        const rules = (extraNeeds[p.need.act] ??= []);
+        if (!rules.some((r) => JSON.stringify(r) === JSON.stringify(p.need.rule))) rules.push(p.need.rule);
+    }
+    return { joins: data.joins, places: data.places, same, itemKinds, homes, extraNeeds };
 }
 const changeText = (f) => `${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${String(nameOf(f.thing)).replace(/^The /, 'the ')}`;
 /** The question whose entry is this change (the same action on the same thing, in a window that can meet it). */
@@ -782,7 +804,7 @@ function planOf(f) {
     if (!f.goal) return null;
     const steps = linkedTo(f.id).map((e) => factOf(e.reasoned.premises[0])).filter((x) => x && list(x.act).length)
         .sort((a, b) => rankOf(anchorOf(a.time ?? {})) - rankOf(anchorOf(b.time ?? {})));
-    return steps.length ? { id: f.id, agent: f.of, goal: f.goal, steps } : null;
+    return steps.length ? { id: f.id, agent: f.of, goal: f.goal, steps: [...steps, ...impliedSteps(f)] } : null;
 }
 function planHtml(f) {
     const plan = planOf(f);
@@ -792,22 +814,27 @@ function planHtml(f) {
     const r = checkPlan(plan, onTimeline(), nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
     const need = (n) => `<li>${phrase(n.req)} ${n.by ? `<span class="good small">met by step ${n.by.step + 1}</span>` : statusHtml(n)}</li>`;
     const steps = r.steps.map((s) => `<li>${stepText(s.step)}<ul class="moves">${s.needs.map(need).join('')}</ul></li>`).join('');
-    const goal = plan.goal ? `<p class="small">Goal: ${phrase({ ...plan.goal, id: '' })}: <b>${r.goal === 'reached' ? 'the steps reach it' : 'the steps do not reach it'}</b>.</p>` : '';
+    const goal = plan.goal ? `<p class="small">Goal: ${phrase({ ...plan.goal, id: '' })}: <b>${r.goal === 'reached' ? 'the steps reach it' : r.goal === 'intended' ? 'only the intended last step would reach it, and nothing on the timeline says it was done' : 'the steps do not reach it'}</b>.</p>` : '';
     const open = r.open.length ? `<p class="small bad">Needed, and nothing on the timeline meets it: ${[...new Set(r.open.map((n) => phrase(n.req)))].join('; ')}.</p>` : '<p class="small good">Every need is met.</p>';
     return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}${compareHtml(f, plan)}${accountHtml(f, plan)}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
 }
+/** Whether a hypothesis id's possibility is told so far (circled or not). */
+const hypShown = (id) => { const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return !!q && possShown(q, m[2]); };
 /** A move's key, to find it again in `state.reasoning`. */
 const moveKey = (m) => [m.move, m.a ?? m.of, m.b ?? m.for ?? ''].join('|');
 /** An entry a move was reasoned from, though it may no longer be there (an aim no longer circled). */
 const premiseText = (id) => {
-    const f = factOf(id) ?? hypIntention(id, true);
-    return f ? (f.hyp ? `${stepText(f)} <span class="small muted">(your hypothesis)</span>` : list(f.act).length || f.goal ? stepText(f) : phrase(f)) : esc(id);
+    const f = factOf(id) ?? hypIntention(id, true) ?? hypGhost(id);
+    return f ? (f.hyp && !list(f.act).length ? `${stepText(f)} <span class="small muted">(your hypothesis)</span>` : list(f.act).length || f.goal ? stepText(f) : phrase(f)) : esc(id);
 };
+/** A circled who-answer no longer circled, for its name in a lapse. */
+const hypGhost = (id) => { const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return q?.entry?.act && entityById.has(m[2]) ? { id, of: m[2], act: q.entry.act, thing: q.entry.thing, via: q.entry.via, hyp: { q: q.id, pick: m[2] } } : null; };
 /** Why a move no longer holds, in the page's words. */
 function lapseWhy(l) {
     if (l.gone) {
-        const h = hypIntention(l.gone, true);
-        return h ? `You no longer have “${esc(h.value)}” circled for “${esc(qById.get(h.hyp.q).label)}”.` : 'What it was reasoned from is no longer there.';
+        const m = /^hyp:(.+)=(.+)$/.exec(l.gone);
+        const q = m && qById.get(m[1]);
+        return q ? `You no longer have “${esc(entityById.has(m[2]) ? nameOf(m[2]) : m[2])}” circled for “${esc(q.label)}”.` : 'What it was reasoned from is no longer there.';
     }
     if (l.ruledOut) {
         const q = baseQuestions.find((x) => x.entry?.of === l.ruledOut.item && x.entry?.attr === 'contents');
@@ -939,6 +966,11 @@ function questionsPanel(clashing) {
       ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></div>` : ''}</li>`).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
+/** On a who-question whose entry is a typed action: each circled one doing it, with "what is this for?". */
+function actionMovesHtml(q) {
+    return shownPossibilities(q).map((p) => hypAction(hypothesisKey(q.id, p.value))).filter(Boolean)
+        .map((a) => `<h3>If ${ent(a.of)} did it</h3><p class="small">${stepText(a)}</p>${purposeHtml(a)}${lapsedHtml(a)}`).join('');
+}
 function aimPlansHtml(q) {
     const aims = q.possibilities.map((p) => hypIntention(hypothesisKey(q.id, p.value))).filter(Boolean);
     return aims.map((g) => {
@@ -955,7 +987,7 @@ function questionDetail(q, clashing) {
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}
       ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>` : ''}
-      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${aimPlansHtml(q)}`;
+      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${actionMovesHtml(q)}${aimPlansHtml(q)}`;
 }
 
 function renderDetail(clashing) {
@@ -989,7 +1021,7 @@ function renderDetail(clashing) {
         return;
     }
     if (sel?.startsWith('q:') && qById.has(sel.slice(2)) && qListed(qById.get(sel.slice(2)))) {
-        el.innerHTML = questionDetail(qById.get(sel.slice(2)), clashing);
+        el.innerHTML = noteHtml() + questionDetail(qById.get(sel.slice(2)), clashing);
         return;
     }
     if (sel && entityById.has(sel)) {
@@ -1043,7 +1075,7 @@ document.addEventListener('click', (e) => {
         const linked = linkedTo(t.id).map((l) => factOf(l.reasoned.premises[0])).filter((s) => s && list(s.act).length);
         const r = checkFit(x, t, linked, nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
         if (!r.fits) { state.note = `It does not serve that. ${r.why}`; render(); return; }
-        addMove({ move: 'c', of: x.id, for: t.id }, x.id);
+        addMove({ move: 'c', of: x.id, for: t.id }, x.hyp ? `q:${x.hyp.q}` : x.id);
         return;
     }
     const cp = e.target.closest('[data-compare]');
@@ -1062,7 +1094,7 @@ document.addEventListener('click', (e) => {
     const dr = e.target.closest('[data-drop]');
     if (dr) { remember(); state.reasoning = state.reasoning.filter((x) => moveKey(x) !== dr.dataset.drop); save(); render(); return; }
     const ls = e.target.closest('[data-lapse-show]');
-    if (ls) { lapseNews = []; select(ls.dataset.lapseShow, e); return; }
+    if (ls) { const id = ls.dataset.lapseShow, m = /^hyp:(.+)=/.exec(id); lapseNews = []; select(m ? `q:${m[1]}` : id, e); return; }
     if (e.target.closest('[data-lapse-close]')) { lapseNews = []; renderLapseNews(); return; }
     const wd = e.target.closest('[data-withdraw]');
     if (wd) {
