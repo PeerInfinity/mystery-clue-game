@@ -17,15 +17,18 @@ import { coverOf, STATES } from './world.js';
 export { STATES };
 
 /**
- * The generic action table. `requires`: a state of the thing (`state`, `value`, `neg`: not that value) or something
- * the agent carries (`carrying: 'key'`: a key to the thing), just before; `effects`: a state of the thing, just after.
+ * The generic action table. `requires`, just before: a state of the thing (`state`, `value`, `neg`: not that value),
+ * something the agent carries (`carrying: 'key'`: a key to the thing), or the agent at the thing (`at`: on one of a
+ * door's two sides, `joins` in the data). `effects`, just after: a state of the thing, or (`through`) the agent on the
+ * other side of the door from where it was.
  */
+const AT = { at: true };
 export const ACTIONS = {
-    lock: { label: 'locking', requires: [{ state: 'door', value: 'locked', neg: true }, { carrying: 'key' }], effects: [{ state: 'door', value: 'locked' }] },
-    unlock: { label: 'unlocking', requires: [{ state: 'door', value: 'locked' }, { carrying: 'key' }], effects: [{ state: 'door', value: 'shut' }] },
-    open: { label: 'opening', requires: [{ state: 'door', value: 'shut' }], effects: [{ state: 'door', value: 'open' }] },
-    close: { label: 'shutting', requires: [{ state: 'door', value: 'open' }], effects: [{ state: 'door', value: 'shut' }] },
-    go_through: { label: 'going through', requires: [{ state: 'door', value: 'open' }], effects: [] },
+    lock: { label: 'locking', requires: [{ state: 'door', value: 'locked', neg: true }, { carrying: 'key' }, AT], effects: [{ state: 'door', value: 'locked' }] },
+    unlock: { label: 'unlocking', requires: [{ state: 'door', value: 'locked' }, { carrying: 'key' }, AT], effects: [{ state: 'door', value: 'shut' }] },
+    open: { label: 'opening', requires: [{ state: 'door', value: 'shut' }, AT], effects: [{ state: 'door', value: 'open' }] },
+    close: { label: 'shutting', requires: [{ state: 'door', value: 'open' }, AT], effects: [{ state: 'door', value: 'shut' }] },
+    go_through: { label: 'going through', requires: [{ state: 'door', value: 'open' }, AT], effects: [{ through: true }] },
 };
 
 export const REASONING = 'watsons_reasoning';
@@ -33,6 +36,30 @@ const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const anchorOf = (t) => (t ? (t.at ?? t.from ?? t.after ?? t.before ?? t.to) : null);
 const startOf = (t) => (t ? (t.at ?? t.from ?? t.after ?? null) : null);
 const isTyped = (f) => f && STATES[f.attr] && f.value != null;
+
+/**
+ * Where a thing is at time `t`, as far as `entries` say: a location covering `t`, or the latest one starting before
+ * it that has no end (a place lasts until something moves it). `strict`: starting strictly before `t`.
+ */
+export function placeAt(order, entries, of, t, strict = false) {
+    const starts = (e) => { const s = startOf(e.time); return s && (strict ? order.lt(s, t) : order.le(s, t)); };
+    const ok = (e) => {
+        if (e.attr !== 'location' || e.of !== of || e.neg || typeof e.value !== 'string' || !starts(e)) return false;
+        const c = coverOf(e.time);
+        if (e.time?.to && c) return c.incl ? order.le(t, c.end) : order.lt(t, c.end);
+        return true;
+    };
+    const cands = entries.filter(ok);
+    const latest = cands.filter((e) => !cands.some((o) => o !== e && order.lt(startOf(e.time), startOf(o.time))));
+    return latest.length === 1 || new Set(latest.map((e) => e.value)).size === 1 ? latest[0] ?? null : null;
+}
+/** Which side of a door a place is on: 0 inside (within the inner side), 1 outside (the outer side itself), or -1. */
+export function sideOf(ctx, door, place) {
+    const sides = ctx.joins?.[door];
+    if (!sides || !place) return -1;
+    if (place === sides[1]) return 1;
+    return (ctx.places?.chain(place) ?? [place]).includes(sides[0]) ? 0 : -1;
+}
 
 /** The shortest run of actions that takes a state from one value to another (unlock, open: locked to open). */
 export function changePath(attr, from, to) {
@@ -69,7 +96,7 @@ function pathRules(types) {
  * `thing`; a change from move (a) has a run of types). `nameOf`: entity id → name. A requirement holds up to the
  * action (`{to}`), or over the action's own window if it has no point; an effect from it (`{from}`).
  */
-export function pointImplications(f, nameOf = (id) => id) {
+export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
     const types = list(f.act);
     if (!types.length || types.some((t) => !ACTIONS[t])) return { why: 'Not an action the engine knows the rules of.' };
     // A change pointed out by move (a) is already between the two states it came from: only its other needs are new.
@@ -84,8 +111,18 @@ export function pointImplications(f, nameOf = (id) => id) {
         const base = { id: `r:b:${f.id}:needs${i}`, role: 'requires', time: before };
         if (r.state && !change) out.push({ ...base, of: f.thing, attr: r.state, value: r.value, neg: !!r.neg });
         else if (r.carrying === 'key') out.push({ ...base, of: f.of, attr: 'carrying', value: `a key to ${String(nameOf(f.thing)).replace(/^The /, 'the ')}`, key: f.thing, time: point ? { at: point } : { ...t } });
+        else if (r.at && f.of !== '?') out.push({ ...base, of: f.of, attr: 'location', value: f.thing, at: f.thing, time: point ? { at: point } : { ...t } });
     });
-    if (after && !change) effects.forEach((e, i) => out.push({ id: `r:b:${f.id}:does${i}`, role: 'effects', time: after, of: f.thing, attr: e.state, value: e.value, neg: false }));
+    if (after && !change) effects.forEach((e, i) => {
+        const id = `r:b:${f.id}:does${i}`;
+        if (e.state) out.push({ id, role: 'effects', time: after, of: f.thing, attr: e.state, value: e.value, neg: false });
+        else if (e.through && point && ctx.entries) {
+            // Through the door: on the other side from where the agent was just before (if the timeline says).
+            const was = placeAt(ctx.order, ctx.entries, f.of, point, true);
+            const side = sideOf(ctx, f.thing, was?.value);
+            if (side >= 0) out.push({ id, role: 'effects', time: after, of: f.of, attr: 'location', value: ctx.joins[f.thing][1 - side], neg: false });
+        }
+    });
     return { entries: out.map((e) => ({ ...e, reasoned: { move: 'b', premises: [f.id], role: e.role } })) };
 }
 
@@ -139,10 +176,24 @@ export function holdsBefore(order, entries, of, attr, t) {
 
 /**
  * Whether a requirement is met by the timeline: `met` (by an entry), `against` (persistence gives another value, or
- * an entry denies it), or `unknown` (nothing says). `req`: an entry from `pointImplications`.
+ * an entry denies it), or `unknown` (nothing says). `req`: an entry from `pointImplications`. `ctx`: `{joins,
+ * places}`, for being at a door.
  */
-export function requirementStatus(order, entries, req) {
+export function requirementStatus(order, entries, req, ctx = {}) {
     const t = anchorOf(req.time);
+    if (req.at) {
+        // At the door: a place on one of its sides. Over a window, any place on a side within it will do.
+        const others = entries.filter((e) => e.id !== req.id);
+        // Just before the action: a place starting at its own point (going through puts him outside) does not count.
+        const p = placeAt(order, others, req.of, t, !!req.time?.at);
+        if (p && sideOf(ctx, req.at, p.value) >= 0) return { status: 'met', entry: p };
+        if (req.time?.after && req.time?.before) {
+            const inside = others.find((e) => e.attr === 'location' && e.of === req.of && !e.neg && startOf(e.time) && order.lt(req.time.after, startOf(e.time)) && order.lt(startOf(e.time), req.time.before) && sideOf(ctx, req.at, e.value) >= 0);
+            if (inside) return { status: 'met', entry: inside };
+            return { status: 'unknown', entry: p ?? undefined };
+        }
+        return p ? { status: 'against', entry: p } : { status: 'unknown' };
+    }
     if (req.attr === 'carrying') {
         const c = coverOf(req.time);
         const has = entries.find((e) => e.attr === 'carrying' && e.of === req.of && e.id !== req.id && (e.key === req.key || /\bkey\b/.test(String(e.value))) && (!c || anchorOf(e.time) === t));
@@ -161,7 +212,7 @@ export function requirementStatus(order, entries, req) {
  * The entries the player's moves give, in the order made; a move whose premises are gone gives nothing. `moves`:
  * `[{move: 'a', a, b} | {move: 'b', of}]`; `lookup`: id → a fact or an earlier entry; `givenAt`: when an entry is told.
  */
-export function reasonedEntries(moves, lookup, order, nameOf, givenAt) {
+export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {}) {
     const out = new Map();
     const find = (id) => out.get(id) ?? lookup(id);
     for (const m of moves) {
@@ -170,8 +221,17 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt) {
         if (ps.some((p) => !p)) continue;
         const given = Math.max(...ps.map((p) => givenAt(p) ?? Infinity));
         if (!Number.isFinite(given)) continue;
-        const r = m.move === 'a' ? pointChange(order, ps[0], ps[1]) : pointImplications(ps[0], nameOf);
+        const r = m.move === 'a' ? pointChange(order, ps[0], ps[1]) : pointImplications(ps[0], nameOf, { ...ctx, order });
         for (const e of r.entry ? [r.entry] : r.entries ?? []) out.set(e.id, { ...e, given_at: given });
     }
     return [...out.values()];
+}
+
+/**
+ * A hypothesis about who did a change pointed out by move (a): what that one would have needed (at the door, a key),
+ * each with what the timeline says. Returns `[{req, status, entry?}]`.
+ */
+export function agentNeeds(order, entries, change, agent, nameOf, ctx = {}) {
+    const { entries: reqs = [] } = pointImplications({ ...change, id: `${change.id}@${agent}`, of: agent }, nameOf, ctx);
+    return reqs.filter((r) => r.role === 'requires').map((req) => ({ req, ...requirementStatus(order, entries, req, ctx) }));
 }

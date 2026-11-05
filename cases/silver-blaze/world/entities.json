@@ -1,6 +1,7 @@
 {
-  "description": "Entities the world model needs that the old game's entities.json does not have. Same ids namespace: a fact's `of` (and an entity-valued `value`) is an id from ../entities.json or from here. `within` folds places as in the old file.",
+  "description": "Entities the world model needs that the old game's entities.json does not have. Same ids namespace: a fact's `of` (and an entity-valued `value`) is an id from ../entities.json or from here. `within` folds places as in the old file. `joins`: a door's two sides, inside first (engine/actions.js).",
   "moves": ["first_class_carriage", "landau", "pullman_car", "the_train", "race_train"],
+  "joins": {"stable_door": ["stable", "kings_pyland"]},
   "entities": [
     {"id": "calendar", "kind": "state", "name": "The day of the week", "summary": "The calendar as state: its facts give the weekday at a time point, each from a quote."},
     {"id": "clock", "kind": "state", "name": "The clock", "summary": "The time of day as state: its facts give the hour at a time point, each from a quote."},

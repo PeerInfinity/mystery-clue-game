@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries } from './actions.js';
+import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds } from './actions.js';
+import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
 const times = [{ id: 't9' }, { id: 'tout', after: 't9' }, { id: 'tnight', after: 'tout' }, { id: 'tmorn', after: 'tnight' }];
@@ -26,10 +27,11 @@ test('move (b): an action requires a state and a key just before, and effects a 
     assert.deepEqual(entries.map((e) => [e.role, e.of, e.attr, e.value, !!e.neg, JSON.stringify(e.time)]), [
         ['requires', 'door', 'door', 'locked', true, '{"to":"tout"}'],
         ['requires', 'boy', 'carrying', 'a key to the stable door', false, '{"at":"tout"}'],
+        ['requires', 'boy', 'location', 'door', false, '{"at":"tout"}'],
         ['effects', 'door', 'door', 'locked', false, '{"from":"tout"}'],
     ]);
     assert.ok(entries.every((e) => e.reasoned.move === 'b' && e.reasoned.premises[0] === 'f.locks'));
-    assert.deepEqual(pointImplications(goesOut).entries.map((e) => [e.attr, e.value]), [['door', 'open']], 'going through: the door open');
+    assert.deepEqual(pointImplications(goesOut).entries.map((e) => [e.attr, e.value]), [['door', 'open'], ['location', 'door']], 'going through: the door open, and at it');
     assert.ok(pointImplications({ id: 'x', of: 'a', attr: 'action', value: 'x' }).why, 'an untyped action: nothing');
 });
 
@@ -63,11 +65,44 @@ test("the player's moves in order: entries from facts and from earlier entries; 
     const facts = new Map([locked9, lockedOut, openMorn, goesOut, locks].map((f) => [f.id, f]));
     const moves = [{ move: 'b', of: 'f.out' }, { move: 'a', a: 'f.locked9', b: 'r:b:f.out:needs0' }, { move: 'b', of: 'r:a:f.locked9|r:b:f.out:needs0' }, { move: 'b', of: 'f.gone' }];
     const es = reasonedEntries(moves, (id) => facts.get(id), order, nameOf, (f) => f.given_at ?? f.para);
-    assert.deepEqual(es.map((e) => e.id), ['r:b:f.out:needs0', 'r:a:f.locked9|r:b:f.out:needs0', 'r:b:r:a:f.locked9|r:b:f.out:needs0:needs1']);
+    assert.deepEqual(es.map((e) => e.id), ['r:b:f.out:needs0', 'r:b:f.out:needs1', 'r:a:f.locked9|r:b:f.out:needs0', 'r:b:r:a:f.locked9|r:b:f.out:needs0:needs1'], 'someone: no place needed');
     assert.ok(es.every((e) => e.given_at === 2));
     // Open and locked at one time contradict; open up to the boy's going out and locked from nine do not.
     const asState = (f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time });
     const w = { times, order, entities: [], questions: [], facts: [] };
     assert.equal(contradictions(w, [asState(locked9), asState(es[0])]).length, 0);
     assert.equal(contradictions(w, [asState(lockedOut), asState({ ...openMorn, time: { at: 'tout' } })]).length, 1);
+});
+
+// The door's two sides: the stable (inside, with its stall) and the yard outside.
+const yard = { entities: [{ id: 'yard', kind: 'place' }, { id: 'stable', kind: 'place', within: 'yard' }, { id: 'stall', kind: 'place', within: 'stable' }, { id: 'moor', kind: 'place' }] };
+const ctx = { joins: { door: ['stable', 'yard'] }, places: places(yard), order };
+const inStable = { id: 'f.in', of: 'boy', attr: 'location', value: 'stall', time: { from: 't9' } };
+
+test('places: where a thing is at a time, which side of a door a place is on', () => {
+    assert.equal(placeAt(order, [inStable], 'boy', 'tout'), inStable, 'a place lasts until something moves him');
+    assert.equal(placeAt(order, [{ ...inStable, time: { from: 't9', to: 'tout' } }], 'boy', 'tout'), null, 'an interval that has ended');
+    assert.equal(placeAt(order, [inStable], 'boy', 't9', true), null, 'strictly before');
+    assert.deepEqual(['stall', 'stable', 'yard', 'moor', null].map((p) => sideOf(ctx, 'door', p)), [0, 0, 1, -1, -1]);
+});
+
+test('going through puts the agent on the other side; being at the door is a need', () => {
+    const es = pointImplications(goesOut, nameOf, { ...ctx, entries: [inStable] }).entries;
+    assert.deepEqual(es.filter((e) => e.role === 'effects').map((e) => [e.of, e.attr, e.value, JSON.stringify(e.time)]), [['boy', 'location', 'yard', '{"from":"tout"}']]);
+    const at = es.find((e) => e.attr === 'location' && e.role === 'requires');
+    assert.equal(requirementStatus(order, [inStable], at, ctx).status, 'met');
+    assert.equal(requirementStatus(order, [{ ...inStable, value: 'moor' }], at, ctx).status, 'against');
+    assert.equal(requirementStatus(order, [], at, ctx).status, 'unknown');
+    const after = es.find((e) => e.role === 'effects');
+    assert.equal(requirementStatus(order, [inStable, after], at, ctx).entry, inStable, 'his place once through is not where he was');
+});
+
+test('a hypothesis about who made a change: their needs, checked against the timeline', () => {
+    const change = pointChange(order, lockedOut, openMorn).entry;
+    const boy = agentNeeds(order, [inStable], change, 'boy', nameOf, ctx);
+    assert.deepEqual(boy.map((n) => [n.req.attr, n.status]), [['carrying', 'unknown'], ['location', 'met']], 'in the stable all night; no line gives him a key');
+    const man = agentNeeds(order, [{ id: 'f.m', of: 'man', attr: 'location', value: 'moor', time: { from: 't9' } }], change, 'man', nameOf, ctx);
+    assert.deepEqual(man.map((n) => n.status), ['unknown', 'unknown'], 'on the moor at nine: over a window, it could still be');
+    const keyed = agentNeeds(order, [{ id: 'k', of: 'man', attr: 'carrying', value: 'a duplicate key', time: { after: 'tout', before: 'tmorn' } }], change, 'man', nameOf, ctx);
+    assert.equal(keyed[0].status, 'met');
 });

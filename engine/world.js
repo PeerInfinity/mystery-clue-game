@@ -190,6 +190,7 @@ export const WHO = ['person', 'animal'];
 export const WHERE = ['place'];
 export function answerKinds(q, kindOf) {
     if (q.kind === 'provenance') return [];
+    if (q.who) return WHO;
     const kinds = new Set((q.possibilities ?? []).map((p) => kindOf(p.value)));
     if (WHO.some((k) => kinds.has(k))) return WHO;
     if (WHERE.some((k) => kinds.has(k))) return WHERE;

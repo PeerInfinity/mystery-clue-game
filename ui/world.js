@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries } from '../engine/actions.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -22,7 +22,7 @@ const [oldEntities, w, times, facts, accounts, questions, text] = await Promise.
     get(`${CASE}/${main.case.source.text_file}`, 'text'),
 ]);
 const data = {
-    entities: [...oldEntities.entities, ...w.entities], moves: w.moves ?? [], times: times.times, facts: facts.facts,
+    entities: [...oldEntities.entities, ...w.entities], moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
     accounts: accounts.accounts, questions: questions.questions,
 };
 data.order = timeOrder(data.times);
@@ -419,8 +419,12 @@ let current = [];
 
 let shownPara = null;
 function render() {
-    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id), data.order, nameOf, givenAt);
+    reasoned = [];
+    reasonedById = new Map();
+    const told = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
+    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told });
     reasonedById = new Map(reasoned.map((f) => [f.id, f]));
+    syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
     document.getElementById('para').value = state.para;
@@ -512,6 +516,45 @@ function sideHtml(x, label) {
 }
 
 // --- The player's moves on the timeline (engine/actions.js), and what they give.
+const placeCtx = { joins: data.joins, places: data.places };
+const changeText = (f) => `${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${String(nameOf(f.thing)).replace(/^The /, 'the ')}`;
+/** The question whose entry is this change (the same action on the same thing, in a window that can meet it). */
+function questionOfChange(f) {
+    const meets = (t, w) => !(w?.from && t.before && data.order.le(t.before, w.from)) && !(w?.to && t.after && data.order.le(w.to, t.after));
+    return baseQuestions.find((x) => x.entry?.act && list(f.act).includes(x.entry.act) && x.entry.thing === f.thing && meets(f.time ?? {}, x.entry.time) && qListed(x)) ?? null;
+}
+/**
+ * Who made a change the player pointed out is the player's hypothesis: the story's own question when the change is
+ * its entry, otherwise a question of the player's own ("Who was unlocking and opening the stable door?"), answered
+ * like any other: circling anyone met so far.
+ */
+const baseQuestions = data.questions.slice();
+function syncQuestions() {
+    const own = reasoned.filter((f) => f.reasoned.move === 'a' && f.of === '?' && !questionOfChange(f)).map((f) => ({
+        id: `who:${f.id}`, who: true, own: true, change: f.id, label: `Who was ${changeText(f)}?`, raised: f.given_at,
+        entry: { of: '?', attr: 'action', act: f.act, thing: f.thing, value: changeText(f), time: f.time },
+        possibilities: [{ value: 'something else', available: 0, via: 'always' }], answer: null,
+    }));
+    data.questions = [...baseQuestions, ...own];
+    qById.clear();
+    for (const q of data.questions) qById.set(q.id, q);
+}
+/** The change on the timeline a question is about: its own change, or one the player pointed out that is its entry. */
+const changeOfQuestion = (q) => (q.change ? reasonedById.get(q.change) : reasoned.find((f) => f.reasoned.move === 'a' && questionOfChange(f) === q)) ?? null;
+/** For each person or animal circled as who made the change: what they would have needed, and what the timeline says. */
+function candidatesHtml(q) {
+    const f = changeOfQuestion(q);
+    if (!f) return '';
+    const picks = Object.entries(state.marks[q.id] ?? {}).filter(([v, m]) => m === 'circled' && entityById.has(v)).map(([v]) => v);
+    if (!picks.length) return `<p class="small muted">Circle who you think it was, and what they would have needed shows here.</p>`;
+    const on = onTimeline();
+    return picks.map((v) => `<h3>If it was ${ent(v)}</h3><ul class="moves">${agentNeeds(data.order, on, f, v, nameOf, placeCtx).map((n) => `<li>${phrase(n.req)} ${statusHtml(n)}</li>`).join('')}</ul>`).join('');
+}
+function statusHtml(r) {
+    if (r.status === 'met') return `<span class="good small">met${r.entry ? `: ${phrase(r.entry)}` : ''}</span>`;
+    if (r.status === 'against') return `<span class="bad small">the timeline has ${phrase(r.entry)}${r.persisting ? `, since ${timeLabel(anchorOf(r.entry.time))}, and nothing changes it` : ''}</span>`;
+    return `<span class="muted small">nothing on the timeline says so${r.entry ? ` (it has ${phrase(r.entry)})` : ''}</span>`;
+}
 /** What is on the timeline now: told so far and trusted to the threshold, with the player's own entries. */
 const onTimeline = () => allFacts().filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
 const isTypedState = (f) => STATES[f.attr] && f.value != null && !f.neg;
@@ -528,11 +571,12 @@ function addMove(m, select) {
 function changeMoveHtml(f) {
     if (!isTypedState(f)) return '';
     const on = onTimeline();
-    const others = on.filter((o) => o.id !== f.id && isTypedState(o) && o.of === f.of && o.attr === f.attr && o.value !== f.value);
+    const done = (o) => state.reasoning.some((m) => m.move === 'a' && [m.a, m.b].includes(f.id) && [m.a, m.b].includes(o.id));
+    // Only the pairs the engine would accept (a state between them, or an uncertain order, rules a pair out).
+    const others = on.filter((o) => o.id !== f.id && isTypedState(o) && o.of === f.of && o.attr === f.attr && o.value !== f.value && (done(o) || !pointChange(data.order, f, o, on).why));
     const next = on.filter((o) => o.id !== f.id && isTypedState(o) && o.of === f.of && o.attr === f.attr && (o.time?.at ?? o.time?.from ?? o.time?.to) && f.time && data.order.lt(anchorOf(f.time), anchorOf(o.time)))
         .sort((a, b) => rankOf(anchorOf(a.time)) - rankOf(anchorOf(b.time)))[0];
     const lasts = `<p class="small">It lasts until something changes it${next ? `: next on the timeline, ${phrase(next)} (${timeLabel(anchorOf(next.time))}).` : '; nothing on the timeline does yet.'}</p>`;
-    const done = (o) => state.reasoning.some((m) => m.move === 'a' && [m.a, m.b].includes(f.id) && [m.a, m.b].includes(o.id));
     const items = others.map((o) => `<li>${done(o) ? '<span class="small muted">pointed out:</span> ' : `<button type="button" class="move" data-move-a="${esc(f.id)}" data-with="${esc(o.id)}">It changed</button> `}${phrase(o)} <span class="small muted">${timeLabel(anchorOf(o.time))}</span></li>`).join('');
     return `<h3>A state</h3>${lasts}${others.length ? `<p class="small">Point out a change: it differs from another state of ${ent(f.of)} on the timeline, so something changed it between them.</p><ul class="moves">${items}</ul>` : ''}`;
 }
@@ -543,15 +587,13 @@ function implicationsHtml(f) {
         return `<h3>An action</h3><p><button type="button" class="move" data-move-b="${esc(f.id)}">Point out what it needs and what it does</button></p>`;
     }
     const on = onTimeline();
-    const { entries = [] } = pointImplications(f, nameOf);
+    const { entries = [] } = pointImplications(f, nameOf, { ...placeCtx, order: data.order, entries: on });
     const row = (e) => {
         const mine = reasonedById.get(e.id);
         let st = '';
         if (e.role === 'requires') {
-            const r = requirementStatus(data.order, on, e);
-            st = r.status === 'met' ? `<span class="good small">met${r.entry && r.entry.id !== e.id ? `: ${phrase(r.entry)}` : ''}</span>`
-                : r.status === 'against' ? `<span class="bad small">the timeline has ${phrase(r.entry)}${r.persisting ? `, since ${timeLabel(anchorOf(r.entry.time))}, and nothing changes it` : ''}</span>`
-                : '<span class="muted small">nothing on the timeline says so</span>';
+            const r = requirementStatus(data.order, on, e, placeCtx);
+            st = statusHtml(r.entry?.id === e.id ? { ...r, entry: undefined } : r);
         }
         return `<li>${mine ? eventRow(mine, new Set(), 'span') : phrase(e)} ${st}</li>`;
     };
@@ -559,10 +601,10 @@ function implicationsHtml(f) {
     return `<h3>What it needs</h3><ul class="moves">${needs.map(row).join('')}</ul>${does.length ? `<h3>What it does</h3><ul class="moves">${does.map(row).join('')}</ul>` : ''}`;
 }
 function movesHtml(f) {
-    // A change pointed out that is a question's entry: the same action on the same thing, in a window that can meet it.
-    const meets = (t, w) => !(w?.from && t.before && data.order.le(t.before, w.from)) && !(w?.to && t.after && data.order.le(w.to, t.after));
-    const q = f.reasoned && f.act ? data.questions.find((x) => x.entry?.act && list(f.act).includes(x.entry.act) && x.entry.thing === f.thing && meets(f.time ?? {}, x.entry.time) && qListed(x)) : null;
-    return `${changeMoveHtml(f)}${implicationsHtml(f)}${q ? `<p class="small">This is the question <a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a></p>` : ''}`;
+    const q = f.reasoned?.move === 'a' && f.of === '?' ? (questionOfChange(f) ?? qById.get(`who:${f.id}`)) : null;
+    const who = q ? `<h3>Who did it? <span class="small muted">(your hypothesis)</span></h3>
+      <p class="small">${q.own ? 'Your own question' : 'The question'}: <a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a></p>${chipsHtml(q)}${candidatesHtml(q)}` : '';
+    return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}`;
 }
 function reasonedDetail(f) {
     const how = f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
@@ -617,11 +659,11 @@ function questionDetail(q, clashing) {
     const chains = marked.map((p) => hypothesisChain(q.id, p.value));
     const markLi = marked.map((p) => `<li>${markOf(q, p.value) === 'circled' ? 'Circled' : 'Crossed out'}: ${pickText(q, p.value)}${clashing.has(hypothesisKey(q.id, p.value)) ? ' <span class="bad small">in a contradiction</span>' : ''}<ul class="chains">${chainHtml(hypothesisChain(q.id, p.value))}</ul></li>`).join('');
     return `<h2><span class="q-mark">?</span> ${esc(q.label)}</h2>
-      <p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>
+      ${q.own ? `<p class="small">Raised by your reasoning: <a class="link" data-fact="${esc(q.change)}">${phrase(reasonedById.get(q.change) ?? {})}</a></p>` : `<p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>`}
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}
       ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>` : ''}
-      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}`;
+      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}`;
 }
 
 function renderDetail(clashing) {

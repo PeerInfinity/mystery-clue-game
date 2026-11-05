@@ -556,9 +556,13 @@ indirect possibility among them in its place) sit behind a "More" button, so tha
 (`STATES`; for now `door`: `open`, `shut`, `locked`): two of them at a time both certainly cover contradict, like two
 identities. A fact is a typed action when it has `act` (an action type of the generic table `ACTIONS`: `lock`,
 `unlock`, `open`, `close`, `go_through`) and `thing` (what it acts on); its agent is its `of`. The table gives each
-type its requirements just before (a state of the thing, or `carrying: 'key'`, a key to the thing) and its effects
-just after. Only the actions that matter are typed (Hunter going out through the stable door and locking it); the
-validator checks `act`, `thing` and a typed state's value. A question's entry may carry `act` and `thing` too, so a
+type its requirements just before (a state of the thing, `carrying: 'key'`, a key to the thing, or `at`: the agent at
+the thing, on one of a door's two sides) and its effects just after (a state of the thing, or `through`: the agent on
+the other side of the door from where it was). A door's sides are in `world/entities.json` `joins` (`{door: [inside,
+outside]}`; a place within the inside counts as inside, only the outside itself as outside). Where a thing is at a
+time (`placeAt`): a location covering it, or the latest one with no end (a place lasts until something moves it).
+Only the actions that matter are typed (Hunter going out through the stable door and locking it, Straker's
+unlocking and opening it at ¶220); the validator checks `act`, `thing` and a typed state's value. A question's entry may carry `act` and `thing` too, so a
 change the player points out can be recognised as its entry (who opened the stable door). Persistence
 (`holdsBefore`): a state lasts until something specific changes it; events the story never tells are not invented.
 The player's moves, each checked by these rules, give entries with the source *Watson's reasoning*, as trusted as
@@ -570,6 +574,10 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   it); a change from (a) gives only its other needs (the key), its states being its premises. Each requirement is
   shown met, against (persistence gives another value) or with nothing on the timeline saying so
   (`requirementStatus`).
+- Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
+  a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
+  animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:
+  at the door, a key) and what the timeline says of it.
 
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
 chain with no links is Watson's own and certain; every link starts uncertain, and the player may set it lower or

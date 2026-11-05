@@ -23,6 +23,7 @@ export function loadWorld(dir) {
     return {
         entities: [...read('entities.json').entities, ...w.entities],
         moves: w.moves ?? [],
+        joins: w.joins ?? {},
         times: read('world/times.json').times,
         facts: read('world/facts.json').facts,
         accounts: read('world/accounts.json').accounts,

@@ -231,10 +231,16 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   locked; locked then and open in the morning (a) gives a second unlocking and opening, recognised as the entry of
   "Who opened the stable door in the night?", whose need (b) is "someone has a key to the stable door": Holmes's
   "where is the key?" (¶57). None of it adds a contradiction, as the true story should not. Typed so far: the three
-  door states and Hunter's two actions; Straker's opening (¶220, untyped) and the tin box are not. Left for later:
-  the agent "?" of a change cannot yet be filled in by a move (Hunter, inside, is the obvious candidate for the first
-  change); an action's effect on its agent's place (going through) is not modelled; a pair refused (a state between)
-  is still offered as a button, refused with the reason.
+  door states and Hunter's two actions; the tin box is not.
+- **Built (2026-11-04), places and who did it (step 2b, the user's choice: naming the agent is a hypothesis, not a
+  list of candidates the engine allows, which would do the elimination and, with Hunter alone in the stable, give
+  the answer):** a door's two sides (`joins`); being at the door is a need of every door action; going through puts
+  the agent on the other side (Hunter going out: at King's Pyland). Who made a change the player pointed out is a
+  question: the story's when the change is its entry (who opened the door in the night), otherwise the player's own
+  ("Who was unlocking and opening the stable door?"), answered by circling anyone met so far; for each one circled,
+  their needs and what the timeline says (Hunter, before he went out: in the stable, met; a key, nothing says so;
+  Simpson and Straker at night: nothing says either). Straker's opening (¶220) is typed (unlocking and opening): the
+  key is never mentioned, so his key stays unsaid too. Only the pairs the engine would accept are offered for (a).
 
 ### An incremental game about trying every combination
 
