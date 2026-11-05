@@ -337,10 +337,12 @@ export function checkFit(x, target, linked = [], nameOf = (id) => id, ctx = {}) 
  * `of` or the plan's `agent`, its time its own or the plan's), each need met by an earlier step's effect, by the
  * timeline (`entries`), or by nothing; and whether the steps reach the goal. `open`: the needs nothing meets.
  */
+/** A plan's steps as actions: each with an id, its agent (its own or the plan's) and its time (its own or the plan's). */
+const planSteps = (plan) => (plan.steps ?? []).map((s, i) => ({ ...s, id: s.id ?? `${plan.id}#${i}`, of: s.of ?? plan.agent, time: s.time ?? plan.time }));
+
 export function checkPlan(plan, entries, nameOf = (id) => id, ctx = {}) {
     const produced = [];
-    const steps = (plan.steps ?? []).map((s, i) => {
-        const f = { ...s, id: s.id ?? `${plan.id}#${i}`, of: s.of ?? plan.agent, time: s.time ?? plan.time };
+    const steps = planSteps(plan).map((f, i) => {
         const es = pointImplications(f, nameOf, ctx).entries ?? [];
         const needs = es.filter((e) => e.role === 'requires').map((req) => {
             const by = produced.find((p) => !p.cond && meets(p, req, ctx));
@@ -351,6 +353,16 @@ export function checkPlan(plan, entries, nameOf = (id) => id, ctx = {}) {
     });
     const goal = plan.goal ? (produced.some((p) => !p.cond && meets(p, { ...plan.goal, neg: false }, ctx)) ? 'reached' : 'not reached') : null;
     return { steps, goal, open: steps.flatMap((s) => s.needs.filter((n) => n.status !== 'met').map((n) => ({ ...n, step: s.step }))) };
+}
+
+/**
+ * "Does this plan account for this?": whether an action or an intention outside the plan (the stranger's wish that
+ * the boy has the paper) brings about something the plan needs: its goal, or a need of one of its steps. As move (c),
+ * with the plan's steps as the steps linked: `{fits: true | 'if', need, cond?}` or `{fits: false, why}`.
+ */
+export function accountsFor(plan, x, nameOf = (id) => id, ctx = {}) {
+    if (!plan.goal) return { fits: false, why: 'The plan has no goal the engine can read.' };
+    return checkFit(x, { goal: plan.goal }, planSteps(plan), nameOf, ctx);
 }
 
 /**

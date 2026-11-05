@@ -277,6 +277,11 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   was in the stranger's paper?' rule that out"), Show (the entry's detail) and Dismiss; the entry's detail lists it
   under "No longer fits", with Withdraw. The move stays, so it comes back if what changed changes back (Undo).
   Reading back past a premise and on again is not a lapse.
+- **Built (2026-11-05), "what of the paper?" (step 3c, half):** on an open plan, "Does it account for this?" lists
+  the plan's agent's other typed actions and intentions on the timeline, each checked one at a time at the player's
+  click (the user's choice over checking every fact at once): does it bring about the plan's goal or a need of a
+  step? On the police theory at ¶46, neither the stranger's wish that the boy has the paper nor his asking for the
+  tip serves it, whatever the paper's marks: "the plan leaves it unexplained".
 
 ### An incremental game about trying every combination
 

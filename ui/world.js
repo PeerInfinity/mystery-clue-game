@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan } from '../engine/actions.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -794,7 +794,7 @@ function planHtml(f) {
     const steps = r.steps.map((s) => `<li>${stepText(s.step)}<ul class="moves">${s.needs.map(need).join('')}</ul></li>`).join('');
     const goal = plan.goal ? `<p class="small">Goal: ${phrase({ ...plan.goal, id: '' })}: <b>${r.goal === 'reached' ? 'the steps reach it' : 'the steps do not reach it'}</b>.</p>` : '';
     const open = r.open.length ? `<p class="small bad">Needed, and nothing on the timeline meets it: ${[...new Set(r.open.map((n) => phrase(n.req)))].join('; ')}.</p>` : '<p class="small good">Every need is met.</p>';
-    return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
+    return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}${accountHtml(f, plan)}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
 }
 /** A move's key, to find it again in `state.reasoning`. */
 const moveKey = (m) => [m.move, m.a ?? m.of, m.b ?? m.for ?? ''].join('|');
@@ -836,6 +836,26 @@ function renderLapseNews() {
     el.hidden = !lapseNews.length;
     el.innerHTML = lapseNews.length ? `<p><b>No longer fits:</b> ${lapseText(lapseNews.at(-1))}${lapseNews.length > 1 ? ` <span class="small muted">(and ${lapseNews.length - 1} more)</span>` : ''}</p>
       <p><button type="button" data-lapse-show="${esc(lapseNews.at(-1).move.of ?? lapseNews.at(-1).move.a)}">Show</button> <button type="button" class="quiet" data-lapse-close>Dismiss</button></p>` : '';
+}
+/**
+ * "Does it account for this?", on an open plan: the other actions and intentions of its agent on the timeline, each to
+ * check, one at a time, for whether it brings about something the plan needs. Checked ones show the answer, worked
+ * out again at each drawing (it changes with the marks).
+ */
+const accountChecked = new Set();
+function accountHtml(f, plan) {
+    const own = new Set(plan.steps.map((s) => s.id).filter(Boolean));
+    const xs = onTimeline().filter((x) => x.id !== f.id && !own.has(x.id) && !x.plan && (list(x.act).length || x.goal) && !x.reasoned && placeCtx.same(x.of, plan.agent));
+    if (!xs.length) return '';
+    const answer = (x) => {
+        const r = accountsFor(plan, x, nameOf, { ...placeCtx, order: data.order });
+        if (r.fits === true) return `<span class="good small">yes: it brings about ${phrase({ ...r.need, id: '' })}, which the plan needs</span>`;
+        if (r.fits === 'if') return `<span class="good small">only if ${val(r.cond.item)} is ${r.cond.kinds.map((k) => KIND_WORD[k] ?? k).join(' or ')}: it would bring about ${phrase({ ...r.need, id: '' })}, which the plan needs</span>`;
+        return `<span class="bad small">no: nothing it brings about is the plan's goal or a need of its steps; the plan leaves it unexplained</span>`;
+    };
+    const key = (x) => `${f.id}|${x.id}`;
+    const items = xs.map((x) => `<li>${accountChecked.has(key(x)) ? '' : `<button type="button" class="move" data-account="${esc(key(x))}">Check</button> `}${stepText(x)} <span class="para">¶${givenAt(x)}</span>${accountChecked.has(key(x)) ? ` ${answer(x)}` : ''}</li>`).join('');
+    return `<h3>Does it account for this?</h3><p class="small">What else ${ent(plan.agent)} did or wanted, on the timeline: does it serve the plan?</p><ul class="moves">${items}</ul>`;
 }
 function movesHtml(f) {
     const q = f.reasoned?.move === 'a' && f.of === '?' ? (questionOfChange(f) ?? qById.get(`who:${f.id}`)) : null;
@@ -999,6 +1019,8 @@ document.addEventListener('click', (e) => {
         addMove({ move: 'c', of: x.id, for: t.id }, x.id);
         return;
     }
+    const ac = e.target.closest('[data-account]');
+    if (ac) { accountChecked.add(ac.dataset.account); render(); return; }
     const md = e.target.closest('[data-move-d]');
     if (md) { const id = md.dataset.moveD; if (planOpen.has(id)) planOpen.delete(id); else planOpen.add(id); render(); return; }
     const mb = e.target.closest('[data-move-b]');

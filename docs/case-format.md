@@ -597,6 +597,9 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
 - (d) `checkPlan`, "what would this need?": a plan's steps in order, each need met by an earlier step's effect, by
   the timeline, or by nothing (`open`), and whether the steps reach the goal. On a claim's plan (the police theory)
   or on the steps the player has linked to an intention.
+- "Does this plan account for this?" (`accountsFor`): as (c), with a plan's own steps as the steps linked to its
+  goal: an action or intention outside the plan accounts for nothing unless it brings about the goal or a need of a
+  step (the paper, on the police theory).
 - Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
   animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:

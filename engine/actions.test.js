@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan } from './actions.js';
+import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor } from './actions.js';
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -128,6 +128,16 @@ test('move (c) along a chain: the paper serves the tip only through a linked ste
     assert.equal(checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['drug'])).fits, false, 'a drug would not: a poisoner does not ask the boy for a tip');
     assert.deepEqual(checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['drug'])).ruledOut, { item: 'paper', kinds: ['money', 'message'] }, 'what rules it out: the kind');
     assert.equal(checkFit(asks, aimWay, [], nameOf, kinds(['drug'])).ruledOut, undefined, 'no kind would make it fit');
+});
+
+test('does a plan account for this? only if it brings about the goal or a need of a step', () => {
+    const plan = { id: 'p', agent: 'man', goal: { of: 'horse', attr: 'held_by', value: 'man' }, steps: [{ act: 'drug', to: 'boy', item: 'opium' }, { act: 'hide', thing: 'horse' }] };
+    const k = kinds(['money', 'message', 'drug']);
+    assert.equal(accountsFor(plan, wantsPaper, nameOf, k).fits, false, 'the paper: nothing the plan needs');
+    assert.equal(accountsFor(plan, asks, nameOf, k).fits, false, 'asking for the tip: nor that');
+    const sells = { id: 'f.sells', of: 'chemist', act: 'give', to: 'man', item: 'opium', time: { at: 't9' } };
+    const r = accountsFor(plan, sells, nameOf, k);
+    assert.deepEqual([r.fits, r.need.attr, r.need.value], [true, 'carrying', 'opium'], 'opium sold to him: the drugging needs it');
 });
 
 test('a link that stops fitting is listed with why; one not yet told is not', () => {
