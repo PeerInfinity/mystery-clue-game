@@ -217,7 +217,10 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   whose entry has no time (who the man by the tracks is, the two Derbyshires, the bay, who drugged the supper, where
   the opium went in) are in the panel only. Seen in play: at ¶37 the panel already offers Silver Blaze as a candidate
   for the blow (an indirect possibility from the horse being in the hollow): the data's availability rulings now
-  decide what the menu shows, and so what it hints.
+  decide what the menu shows, and so what it hints. The user's idea against it (not yet ruled): a "who" question
+  offers every person met so far and a "where" question every place, so the true answer hides among many; a "why"
+  question may get a bigger list later; the possibilities the story itself proposes come first, the rest from a
+  drop-down or behind "something else".
 
 ### An incremental game about trying every combination
 

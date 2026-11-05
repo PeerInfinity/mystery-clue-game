@@ -298,10 +298,10 @@ function eventGrid(clashing) {
         for (const q of qq) for (const html of questionRows(q, clashing, 'div')) if (html) rows.push({ html });
     }
     if (!rows.length) return '<p class="muted">Nothing yet.</p>';
-    // Columns in order of first appearance, those of one region together; "—" (no place known) last.
+    // Columns in order of first appearance, those of one region together; "—" (no place known) first.
     const region = (c) => (state.view === 'place' && entityById.has(c) ? data.places.chain(c).at(-1) : c);
     const regions = [...new Set(cols.map(region))];
-    cols.sort((a, b) => (a === '—') - (b === '—') || regions.indexOf(region(a)) - regions.indexOf(region(b)) || 0);
+    cols.sort((a, b) => (b === '—') - (a === '—') || regions.indexOf(region(a)) - regions.indexOf(region(b)) || 0);
     const colName = (c) => (c === '—' ? (state.view === 'place' ? 'place not known' : 'not modelled') : c === '?' ? 'unknown' : ent(c));
     // Each entry is placed by packGrid once it is drawn: `data-col` its column, or none for one across the grid.
     const head = `<div class="pack-head" style="--cols:${cols.length}">${cols.map((c) => `<div>${colName(c)}</div>`).join('')}</div>`;
@@ -369,7 +369,10 @@ function clashTitle(c) {
 const clashKey = (c) => `clash:${c.a.id}|${c.b.id}`;
 let current = [];
 
+let shownPara = null;
 function render() {
+    const qList = document.querySelector('#q-box ol');
+    const qScroll = qList?.scrollTop ?? 0;
     document.getElementById('para').value = state.para;
     document.getElementById('para').max = LAST;
     document.getElementById('next').disabled = state.para >= LAST;
@@ -381,7 +384,8 @@ function render() {
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
     st.innerHTML = story.slice(1, state.para + 1).map((p, i) => `<p class="${i + 1 === state.para ? 'now' : ''}"><span class="para">¶${i + 1}</span> ${esc(p).replace(/_([^_]+)_/g, '<em>$1</em>')}</p>`).join('');
-    st.lastElementChild?.scrollIntoView({ block: 'nearest' });
+    // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
+    if (shownPara !== state.para) { shownPara = state.para; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
 
     const clashes = contradictions(data, acceptedAssertions());
     const clashing = new Set(clashes.flatMap((c) => [c.a, c.b]).flatMap((x) => (x.mark ? [x.id, `q:${x.q}`] : [x.fact])));
@@ -391,6 +395,8 @@ function render() {
         ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
         : '';
     document.getElementById('questions').innerHTML = questionsPanel(clashing);
+    const ol = document.querySelector('#q-box ol');
+    if (ol) ol.scrollTop = qScroll;
     document.getElementById('view').value = state.view;
     document.getElementById('depth').value = String(state.depth);
     document.getElementById('depth-label').hidden = state.view !== 'place';
@@ -496,8 +502,8 @@ function renderDetail(clashing) {
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.</p>
           ${f.attr === 'tells' ? '<p class="small muted">A telling: how an account passed from one person to another.</p>'
-            : `<h3>How Watson has it</h3><ul class="chains">${chains.map(chainHtml).join('')}</ul>`}
-          ${content.length ? `<h3>What it asserts reaches him</h3><ul class="chains">${content.map(chainHtml).join('')}</ul>${assertsHtml(f)}` : ''}
+            : `<h3>How Watson has it</h3><ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
+          ${content.length ? `<h3>What it asserts reaches him</h3><ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
           ${peopleHtml([...chains, ...content])}`;
         return;
     }
@@ -535,7 +541,27 @@ document.getElementById('undo').addEventListener('click', () => {
 });
 document.addEventListener('click', (e) => {
     const m = e.target.closest('[data-mark-q]');
-    if (m) { cycleMark(m.dataset.markQ, m.dataset.markPick); return; }
+    if (m) {
+        // The page is drawn afresh, and a contradiction box may open or close above: keep the clicked chip under the
+        // pointer, so a second click lands on it.
+        const inPanel = !!m.closest('#q-box'), top = m.getBoundingClientRect().top;
+        cycleMark(m.dataset.markQ, m.dataset.markPick);
+        const again = [...document.querySelectorAll(`[data-mark-q="${CSS.escape(m.dataset.markQ)}"][data-mark-pick="${CSS.escape(m.dataset.markPick)}"]`)].find((x) => !!x.closest('#q-box') === inPanel);
+        if (again) window.scrollBy(0, again.getBoundingClientRect().top - top);
+        return;
+    }
+    const pa = e.target.closest('.para');
+    if (pa && !e.target.closest('#story')) {
+        // A paragraph number scrolls the story to that paragraph.
+        const n = Number(pa.textContent.match(/\d+/)?.[0]);
+        const p = document.querySelectorAll('#story p')[n - 1];
+        if (p) {
+            const box = document.querySelector('.world-story');
+            box.scrollTop += p.getBoundingClientRect().top - box.getBoundingClientRect().top - 30;
+            p.classList.remove('flash'); void p.offsetWidth; p.classList.add('flash');
+        }
+        return;
+    }
     const q = e.target.closest('[data-q]');
     if (q && !e.target.closest('select, [data-ent]')) { state.sel = `q:${q.dataset.q}`; render(); return; }
     const t = e.target.closest('[data-clash]');

@@ -9,6 +9,9 @@ body.world-page { display: block; height: auto; }
 .world-story { font-family: var(--serif); font-size: 14px; padding-right: 6px; }
 .world-story p { margin: 0 0 8px; color: var(--muted); }
 .world-story p.now { color: var(--ink); }
+.world-story p.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { from { background: var(--chip); color: var(--ink); } to { background: transparent; } }
+#timeline .para, #detail .para, #q-box .para, #clashes .para { cursor: pointer; }
 .world-detail { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
 .world-detail h2 { font-family: var(--sans); font-size: 15px; font-weight: 600; }
 .world-detail h3 { font-size: 13px; color: var(--muted); font-family: var(--sans); margin: 12px 0 4px; }
