@@ -40,7 +40,7 @@ let reasonedById = new Map();
 let lapsed = [];          // the player's moves that no longer hold, each with why (engine/actions.js reasonedEntries)
 let heldKeys = null;      // the moves that held at the last drawing (null before the first): one that lapses is announced
 let lapseNews = [];       // the lapses announced, until dismissed or no longer lapsed
-const factOf = (id) => factById.get(id) ?? reasonedById.get(id) ?? hypIntention(id) ?? hypAction(id);
+const factOf = (id) => factById.get(id) ?? reasonedById.get(id) ?? hypIntention(id) ?? hypAction(id) ?? presupposed(id);
 /**
  * A circled aim with a goal (the stranger's "get information to bet on") as an intention: Watson's hypothesis, so
  * the player's plan can be built on it. Its id is the mark's key.
@@ -58,6 +58,16 @@ const hypTime = (q) => (q.entry.time && typeof q.entry.time === 'object' ? q.ent
  * A circled answer to a who-question whose entry is a typed action (who led the horse out?): that one doing it, as an
  * action of Watson's hypothesis, which the moves can link like any other.
  */
+/**
+ * A why-question presupposes its action ("Why was a match struck in the hollow?": Straker struck a light): with any of
+ * its answers circled, that action is on the timeline as the player's hypothesis. Its id: `pre:<question>`.
+ */
+function presupposed(id) {
+    const m = /^pre:(.+)$/.exec(id ?? '');
+    const q = m && qById.get(m[1]);
+    if (!q?.presupposes || !qListed(q) || !q.possibilities.some((p) => markOf(q, p.value) === 'circled' && possShown(q, p.value))) return null;
+    return { id, of: q.entry.of, attr: 'action', ...q.presupposes, time: hypTime(q), hyp: { q: q.id, pre: true }, given_at: q.raised };
+}
 function hypAction(id) {
     const m = /^hyp:(.+)=(.+)$/.exec(id ?? '');
     if (!m) return null;
@@ -161,7 +171,7 @@ const KIND_WORD = { money: 'money', message: 'a message', drug: 'a drug' };
 /** A typed action or an intention as a short phrase: who, doing what, to whom, with what. */
 function stepText(x) {
     if (!list(x.act).length) return x.hyp ? `${ent(x.of)}, aiming ${/^to /.test(x.value) ? '' : 'to '}${esc(x.value)}` : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
-    const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && `with ${val(x.item)}`, x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
+    const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && (list(x.act).includes('take') ? val(x.item) : `with ${val(x.item)}`), x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
     const note = x.intended ? ' <span class="small muted">(intended)</span>' : x.hyp ? ' <span class="small muted">(your hypothesis)</span>' : '';
     return `${x.of === '?' ? 'Someone' : ent(x.of)}: ${list(x.act).map((t) => ACTIONS[t].label).join(' and ')} ${roles}${note}`;
 }
@@ -192,6 +202,7 @@ function phrase(f) {
         case 'says': return `${E}${f.to ? ` to ${ent(f.to)}` : ''}: <span class="said">${v}</span>`;
         case 'believes': return `${E} believes ${v}`;
         case 'knows': return `${E} knows ${v}`;
+        case 'lit': return `${E} has ${v}${f.hyp === true ? ' <span class="small muted">(your hypothesis)</span>' : ''}`;
         case 'intends': return `${E} means ${v}`;
         case 'observes': {
             const seen = list(f.value).map((x) => factById.get(x)).filter((o) => o && visible(o));
@@ -302,7 +313,7 @@ function questionRows(q, clashing, tag = 'li') {
         if (lvl < state.threshold && !state.showBelow) return '';
         const cls = ['event', 'hyp', lvl < state.threshold ? 'below' : '', clashing.has(hypothesisKey(q.id, p.value)) ? 'clash' : '', givenAway(q) ? (p.value === q.answer ? 'right' : 'wrong') : ''].filter(Boolean).join(' ');
         const pp = q.possibilities.find((x) => x.value === p.value);
-        const can = pp?.goal || pp?.need || hypAction(hypothesisKey(q.id, p.value));
+        const can = pp?.goal || pp?.need || q.presupposes || hypAction(hypothesisKey(q.id, p.value));
         return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span>${can ? ` ${REASON_MARK}` : ''}</${tag}>`;
     });
     return [head, ...circles];
@@ -314,7 +325,7 @@ function questionRows(q, clashing, tag = 'li') {
  * it is (a circled aim with a goal). Elsewhere (an entity's own timeline in the detail) everything shows.
  */
 const movesOnly = (f) => !state.onlyMoves || canReason(f);
-const movesOnlyQ = (q) => !state.onlyMoves || q.possibilities.some((p) => (p.goal || p.need || hypAction(hypothesisKey(q.id, p.value))) && markOf(q, p.value) === 'circled');
+const movesOnlyQ = (q) => !state.onlyMoves || q.possibilities.some((p) => (p.goal || p.need || q.presupposes || hypAction(hypothesisKey(q.id, p.value))) && markOf(q, p.value) === 'circled');
 function eventList(filter, clashing, qFilter = () => true) {
     const shown = allFacts().filter((f) => visible(f) && filter(f) && (state.showBelow || accepted(f)));
     const at = new Map();
@@ -562,10 +573,10 @@ function render() {
     const told = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
     placeCtx = engineCtx(told);
     const lapses = [], held = [];
-    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id) ?? hypAction(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held });
+    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id) ?? hypAction(id) ?? presupposed(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held });
     reasonedById = new Map(reasoned.map((f) => [f.id, f]));
     // An aim still circled but not yet told (read back) is not a lapse: the link returns on reading on.
-    lapsed = lapses.filter((l) => !(l.gone && /^hyp:/.test(l.gone) && !hypShown(l.gone)));
+    lapsed = lapses.filter((l) => !(l.gone && /^(hyp|pre):/.test(l.gone) && !hypShown(l.gone)));
     // Announced: a move that held at the last drawing and no longer does (not one read back past and read on to again).
     const keys = new Set(lapsed.map((l) => moveKey(l.move)));
     lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
@@ -823,8 +834,14 @@ function planHtml(f) {
     const open = r.open.length ? `<p class="small bad">Needed, and nothing on the timeline meets it: ${[...new Set(r.open.map((n) => phrase(n.req)))].join('; ')}.</p>` : '<p class="small good">Every need is met.</p>';
     return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}${compareHtml(f, plan)}${accountHtml(f, plan)}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
 }
-/** Whether a hypothesis id's possibility is told so far (circled or not). */
-const hypShown = (id) => { const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return !!q && possShown(q, m[2]); };
+/** Whether a hypothesis id's possibility (or a presupposing question) is told so far, circled or not. */
+const hypShown = (id) => {
+    const p = /^pre:(.+)$/.exec(id);
+    if (p) { const q = qById.get(p[1]); return !!q && q.raised <= state.para; }
+    const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return !!q && possShown(q, m[2]);
+};
+/** The question a hypothesis id or a presupposition belongs to. */
+const qOfHyp = (id) => qById.get(/^(?:hyp|pre):(.+?)(?:=.*)?$/.exec(id ?? '')?.[1]) ?? null;
 /** A move's key, to find it again in `state.reasoning`. */
 const moveKey = (m) => [m.move, m.a ?? m.of, m.b ?? m.for ?? ''].join('|');
 /** An entry a move was reasoned from, though it may no longer be there (an aim no longer circled). */
@@ -833,10 +850,14 @@ const premiseText = (id) => {
     return f ? (f.hyp && !list(f.act).length ? `${stepText(f)} <span class="small muted">(your hypothesis)</span>` : list(f.act).length || f.goal ? stepText(f) : phrase(f)) : esc(id);
 };
 /** A circled who-answer no longer circled, for its name in a lapse. */
-const hypGhost = (id) => { const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return q?.entry?.act && entityById.has(m[2]) ? { id, of: m[2], act: q.entry.act, thing: q.entry.thing, via: q.entry.via, hyp: { q: q.id, pick: m[2] } } : null; };
+const hypGhost = (id) => {
+    const p = /^pre:(.+)$/.exec(id);
+    if (p) { const q = qById.get(p[1]); return q?.presupposes ? { id, of: q.entry.of, ...q.presupposes, hyp: { q: q.id, pre: true } } : null; }
+    const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return q?.entry?.act && entityById.has(m[2]) ? { id, of: m[2], act: q.entry.act, thing: q.entry.thing, via: q.entry.via, hyp: { q: q.id, pick: m[2] } } : null; };
 /** Why a move no longer holds, in the page's words. */
 function lapseWhy(l) {
     if (l.gone) {
+        if (/^pre:/.test(l.gone)) return `It came from your answer to “${esc(qOfHyp(l.gone)?.label ?? '')}”, which presupposes it: no answer is circled there now.`;
         const m = /^hyp:(.+)=(.+)$/.exec(l.gone);
         const q = m && qById.get(m[1]);
         return q ? `You no longer have “${esc(entityById.has(m[2]) ? nameOf(m[2]) : m[2])}” circled for “${esc(q.label)}”.` : 'What it was reasoned from is no longer there.';
@@ -990,8 +1011,11 @@ function questionsPanel(clashing) {
 }
 /** On a who-question whose entry is a typed action: each circled one doing it, with "what is this for?". */
 function actionMovesHtml(q) {
+    const pre = presupposed(`pre:${q.id}`);
     return shownPossibilities(q).map((p) => hypAction(hypothesisKey(q.id, p.value))).filter(Boolean)
-        .map((a) => `<h3>If ${ent(a.of)} did it</h3><p class="small">${stepText(a)}</p>${purposeHtml(a)}${lapsedHtml(a)}`).join('');
+        .map((a) => `<h3>If ${ent(a.of)} did it</h3><p class="small">${stepText(a)}</p>${purposeHtml(a)}${lapsedHtml(a)}`).join('')
+        + (pre ? `<h3>What your answer takes for granted</h3><p class="small">${stepText(pre)}</p>${purposeHtml(pre)}${lapsedHtml(pre)}`
+            : q.presupposes ? `<p class="small muted">Circle an answer, and what the question takes for granted (${stepText({ of: q.entry.of, ...q.presupposes })}) goes on the timeline as your hypothesis.</p>` : '');
 }
 function aimPlansHtml(q) {
     const aims = q.possibilities.map((p) => hypIntention(hypothesisKey(q.id, p.value))).filter(Boolean);
@@ -1116,7 +1140,7 @@ document.addEventListener('click', (e) => {
     const dr = e.target.closest('[data-drop]');
     if (dr) { remember(); state.reasoning = state.reasoning.filter((x) => moveKey(x) !== dr.dataset.drop); save(); render(); return; }
     const ls = e.target.closest('[data-lapse-show]');
-    if (ls) { const id = ls.dataset.lapseShow, m = /^hyp:(.+)=/.exec(id); lapseNews = []; select(m ? `q:${m[1]}` : id, e); return; }
+    if (ls) { const id = ls.dataset.lapseShow, q = qOfHyp(id); lapseNews = []; select(q ? `q:${q.id}` : id, e); return; }
     if (e.target.closest('[data-lapse-close]')) { lapseNews = []; renderLapseNews(); return; }
     const wd = e.target.closest('[data-withdraw]');
     if (wd) {

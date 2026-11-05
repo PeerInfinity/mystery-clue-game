@@ -313,6 +313,13 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   for?", adds to injuring the need to carry that knife, so the taking links to his aim. "To light the candle for
   close work" adds a light; the light answer of `q.why_out` now adds a light and away from the stable. The struck
   match (`strike_light`) is typed but reaches the timeline only at ¶226 (an inference until then).
+- **Built (2026-11-05), a why-question presupposes its action (the user's choice):** "Why was a match struck in the
+  hollow?" (¶102) carries `presupposes` (Straker striking a light with his vestas); with any answer circled, that
+  action is on the timeline as the player's hypothesis, offered on the question's detail ("What your answer takes for
+  granted") for "What is this for?". Played at ¶102: with the noise, the knife and the candle reasons circled,
+  Straker's plan has leading out, taking the knife and striking a light, each meeting a need of the intended
+  injuring; only the door (open, Straker at it) stays unmet. Uncircling the answer announces the lapse ("It came
+  from your answer to ..., which presupposes it").
 
 ### An incremental game about trying every combination
 

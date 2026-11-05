@@ -208,6 +208,7 @@ for (const q of questions) {
         if (!VIAS.has(p.via)) err(q.id, `${p.value}: via ${p.via}`);
         if (p.via === 'always' && p.value !== 'something else') err(q.id, `${p.value}: via always is for "something else"`);
         // An aim's goal and the last step it implies; a reason's need, added to an action type when circled.
+        if (p === ps[0] && q.presupposes && (!entities.has(q.entry?.of) || list(q.presupposes.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via', 'item'].some((r) => q.presupposes[r] != null && !entities.has(q.presupposes[r])))) err(q.id, 'presupposes: a typed action of the entry\'s entity');
         if (p.goal && (!entities.has(p.goal.of) || !p.goal.attr || p.goal.value == null)) err(q.id, `${p.value}: a goal is {of: an entity, attr, value}`);
         if (p.step && (!list(p.step.act).length || list(p.step.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via'].some((r) => p.step[r] != null && !entities.has(p.step[r])))) err(q.id, `${p.value}: step is a typed action`);
         if (p.step && !p.goal) err(q.id, `${p.value}: a step belongs to an aim with a goal`);
