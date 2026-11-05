@@ -619,6 +619,11 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   may carry `action`, the answer as an action of an entity (`q.thigh_cut`'s "Straker's own knife": `cut_self`), a
   hypothesis when circled. "What stopped it?" (`stops`): an action stops an intended step if one of its effects leaves
   the step's agent unable to act (`DISABLED`: struck down, dead, drugged) no later than the step's window ends.
+- Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
+  question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
+  question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's
+  and both sides are on the timeline; all a question's pairs show at its give-away. The validator checks the sides,
+  that `available` is no earlier than both, and the key.
 - Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
   animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:

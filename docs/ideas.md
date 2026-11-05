@@ -337,6 +337,19 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   thigh cut is an answer that is itself an action (`action` on a possibility): cut, as he fell, by his knife; its
   needs (carrying the knife, struck down) are met by his taking it up and by the kick, shown on the question's
   detail. A circled Simpson would stop it too: the marks, and the key at ¶212 and ¶226, decide between them.
+- **Built (2026-11-05), likely clashes ("unlikely together"). The user's rulings:** they come from the moves where
+  the moves can catch them, otherwise from the data; in play one is shown only when one side is the player's own
+  circle and the other is on the timeline (a reaction to the player's hypothesis, not a hint), and every one is
+  listed at its question's give-away as "what a careful reader would have noticed"; shown as an amber entry, softer
+  than a contradiction (when to show them may become a setting later: all four ways seemed reasonable). Data:
+  `world/strains.json`, 13 pairs from the annotated reading's `strains` and the questions' ruled-out answers (the
+  lost stranger who knows the night arrangements; the stranger who could not have known the dish; a horse loose but
+  bridled; the coat torn off in a fight, or blown by a wind that did not blow, yet laid across the bush; the knife
+  as a weapon; the moor and the gypsies against Holmes's reasoning; and, for the key only, three between story
+  facts: the police's repeated blows against a single savage blow, their led horse against its lone tracks, their
+  fight against the laid coat). Not in the data because already caught: the poisoner who asks a witness to pass the
+  poison (the paper's link lapses), Simpson's admission and Mrs Straker's dress (certain contradictions with
+  their claims). An amber entry can be set aside ("I hold both", undoable).
 
 ### An incremental game about trying every combination
 

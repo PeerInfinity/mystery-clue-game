@@ -21,6 +21,8 @@ const [oldEntities, w, times, facts, accounts, questions, text] = await Promise.
     get(`${CASE}/world/facts.json`), get(`${CASE}/world/accounts.json`), get(`${CASE}/world/questions.json`),
     get(`${CASE}/${main.case.source.text_file}`, 'text'),
 ]);
+// Likely clashes (world/strains.json): optional.
+const strainList = await get(`${CASE}/world/strains.json`).then((x) => x.strains ?? []).catch(() => []);
 const data = {
     entities: [...oldEntities.entities, ...w.entities], moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
     accounts: accounts.accounts, questions: questions.questions,
@@ -88,13 +90,14 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
 try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 state.sel = null;
 state.note = null;
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves })); } catch { /* not saved */ } };
+if (!Array.isArray(state.held)) state.held = [];
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
-const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning })].slice(-50); };
+const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
 const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
 function cycleMark(qid, pick) {
@@ -608,6 +611,8 @@ function render() {
     document.getElementById('clashes').innerHTML = clashes.length
         ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
         : '';
+    const strains = activeStrains();
+    document.getElementById('clashes').innerHTML += strainsHtml(strains);
     document.getElementById('questions').innerHTML = questionsPanel(clashing);
     const ol = document.querySelector('#q-box ol');
     if (ol) ol.scrollTop = qScroll;
@@ -618,7 +623,7 @@ function render() {
     document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
     document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing);
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
-    renderTabs({ questions: listedQuestions().length, clashes: clashes.length });
+    renderTabs({ questions: listedQuestions().length, clashes: clashes.length + strains.filter((s) => !state.held.includes(s.id)).length });
     renderLapseNews();
     renderGate();
     renderAnswers();
@@ -1073,6 +1078,37 @@ function aimPlansHtml(q) {
         return `<h3>If the aim is “${esc(g.value)}”</h3><p class="small">Goal: ${phrase({ ...g.goal, id: '' })}. ${steps.length ? `Linked to it: ${steps.map((e) => phrase(e)).join('; ')}.` : 'Nothing is linked to it yet: on an action of theirs, ask “What is this for?”.'}</p>${planHtml(g)}`;
     }).join('');
 }
+/**
+ * Likely clashes: two entries that can both hold but sit badly together (world/strains.json). In play one is shown only
+ * when one side is the player's own circle and the other is on the timeline too (a reaction to the player's hypothesis,
+ * not a hint); all of a question's are listed at its give-away, as what a careful reader would have noticed.
+ */
+const strainSideIsMark = (x) => typeof x !== 'string';
+function strainSideOn(x) {
+    if (typeof x === 'string') { const f = factById.get(x); return !!f && visible(f) && accepted(f); }
+    const q = qById.get(x.q);
+    return !!q && markOf(q, x.pick) === 'circled' && possShown(q, x.pick) && markLevel(q.id, x.pick) >= state.threshold;
+}
+const activeStrains = () => strainList.filter((s) => s.available <= state.para && (strainSideIsMark(s.a) || strainSideIsMark(s.b)) && strainSideOn(s.a) && strainSideOn(s.b));
+function strainSideHtml(x, inKey = false) {
+    if (inKey && typeof x !== 'string') { const q = qById.get(x.q); return `<b>${pickText(q, x.pick)}</b> for “${esc(q.label)}”`; }
+    if (typeof x === 'string') { const f = factById.get(x); return f ? `<a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a> <span class="para">¶${givenAt(f)}</span>` : esc(x); }
+    const q = qById.get(x.q);
+    return `your circle on “<a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a>”: <b>${pickText(q, x.pick)}</b>`;
+}
+function strainsHtml(strains) {
+    if (!strains.length) return '';
+    const open = strains.filter((s) => !state.held.includes(s.id)), held = strains.filter((s) => state.held.includes(s.id));
+    const li = (s, isHeld) => `<li class="${isHeld ? 'held' : ''}"><b>${esc(s.why)}</b><br>${strainSideHtml(s.a)}<br>with ${strainSideHtml(s.b)}<br>${isHeld ? '<span class="small muted">You hold both.</span> <a class="link" data-unhold="' + esc(s.id) + '">Reconsider</a>' : `<button type="button" class="quiet small" data-hold="${esc(s.id)}">I hold both</button>`}</li>`;
+    return `<details class="strain-box" open><summary>${open.length ? `${open.length} unlikely together` : 'Unlikely together'}${held.length ? ` <span class="small muted">(${held.length} you hold both)</span>` : ''}</summary>
+      <p class="small muted">Not a contradiction: both can hold, but they sit badly together. Your circle is one side.</p><ol>${[...open.map((s) => li(s, false)), ...held.map((s) => li(s, true))].join('')}</ol></details>`;
+}
+/** At a question's give-away: the likely clashes a careful reader would have noticed, whatever the player circled. */
+function keyStrainsHtml(q) {
+    const ss = strainList.filter((s) => s.key === q.id && s.available <= state.para);
+    if (!givenAway(q) || !ss.length) return '';
+    return `<h3>What a careful reader would have noticed</h3><ul class="strains-key small">${ss.map((s) => `<li><b>${esc(s.why)}</b> ${strainSideHtml(s.a, true)} / ${strainSideHtml(s.b, true)}</li>`).join('')}</ul>`;
+}
 function questionDetail(q, clashing) {
     const marked = shownPossibilities(q).filter((p) => markOf(q, p.value));
     const chains = marked.map((p) => hypothesisChain(q.id, p.value));
@@ -1081,7 +1117,7 @@ function questionDetail(q, clashing) {
       ${q.own ? `<p class="small">Raised by your reasoning: <a class="link" data-fact="${esc(q.change)}">${phrase(reasonedById.get(q.change) ?? {})}</a></p>` : `<p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>`}
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}
-      ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>` : ''}
+      ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>${keyStrainsHtml(q)}` : ''}
       ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${actionMovesHtml(q)}${aimPlansHtml(q)}`;
 }
 
@@ -1190,7 +1226,7 @@ document.addEventListener('toggle', (e) => { if (e.target.id === 'q-box') { stat
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));
-    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; } else state.trust = h;
+    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; } else state.trust = h;
     state.history = state.history.slice(0, -1);
     save(); render();
 });
@@ -1219,6 +1255,8 @@ document.addEventListener('click', (e) => {
         addMove({ move: 'c', of: x.id, for: t.id }, x.hyp ? `q:${x.hyp.q}` : x.id);
         return;
     }
+    const hd = e.target.closest('[data-hold], [data-unhold]');
+    if (hd) { remember(); state.held = hd.dataset.hold ? [...state.held, hd.dataset.hold] : state.held.filter((x) => x !== hd.dataset.unhold); save(); render(); return; }
     const sp = e.target.closest('[data-stop]');
     if (sp) { stopChecked.add(sp.dataset.stop); render(); return; }
     const cp = e.target.closest('[data-compare]');

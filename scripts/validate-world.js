@@ -259,6 +259,24 @@ for (const f of facts) if (f.attr === 'believes' && !f.modal && list(f.asserts).
 }
 for (const c of contradictions(world, asserted.filter((x) => x.truth === true))) err(`${c.a.id} / ${c.b.id}`, `true assertions contradict: ${c.why}`);
 
+// Likely clashes: each side a fact, or a possibility of a question; shown no earlier than both sides can be; a key
+// question with an answer; from a thought, a fact or a question.
+const strainsFile = path.join(dir, 'world', 'strains.json');
+const strains = fs.existsSync(strainsFile) ? read('world/strains.json').strains : [];
+for (const s of strains) {
+    const side = (x) => {
+        if (typeof x === 'string') { const f = factById.get(x); if (!f) err(s.id, `no fact ${x}`); return f ? earliest(f) ?? Infinity : Infinity; }
+        const q = qById.get(x?.q), p = q?.possibilities.find((o) => o.value === x?.pick);
+        if (!p) err(s.id, `no possibility ${x?.q} = ${x?.pick}`);
+        return p?.available ?? q?.raised ?? Infinity;
+    };
+    const at = Math.max(side(s.a), side(s.b));
+    if (!s.why) err(s.id, 'a strain needs why');
+    if (!Number.isInteger(s.available) || s.available < at) err(s.id, `available ¶${s.available} before both sides (¶${at})`);
+    if (!qById.get(s.key)?.answer) err(s.id, `key: ${s.key} is not a question with an answer`);
+    if (!s.from || !(refOk(s.from) || qById.has(String(s.from).split(' ')[0]))) err(s.id, `from: ${s.from}`);
+}
+
 for (const e of errors) console.log(e);
 if (!quiet) {
     const count = (xs, key) => Object.entries(xs.reduce((m, x) => ((m[key(x)] = (m[key(x)] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
