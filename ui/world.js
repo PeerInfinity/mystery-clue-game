@@ -690,11 +690,16 @@ function engineCtx(told) {
     const homes = (id) => entityById.get(id)?.kind === 'animal';
     // A circled reason with a need (injuring the horse would be heard in the stable) adds it to that action type.
     const extraNeeds = {};
-    for (const q of baseQuestions) if (qListed(q)) for (const p of q.possibilities) if (p.need && markOf(q, p.value) === 'circled' && possShown(q, p.value)) {
-        const rules = (extraNeeds[p.need.act] ??= []);
-        if (!rules.some((r) => JSON.stringify(r) === JSON.stringify(p.need.rule))) rules.push(p.need.rule);
-    }
+    for (const q of baseQuestions) if (qListed(q)) for (const p of q.possibilities) if (p.need && markOf(q, p.value) === 'circled' && possShown(q, p.value)) addNeeds(extraNeeds, p.need);
     return { joins: data.joins, places: data.places, same, itemKinds, homes, extraNeeds };
+}
+/** Add a possibility's need (`{act, rule}`, or a list of them) to the needs by action type. */
+function addNeeds(extra, need) {
+    for (const n of list(need)) {
+        const rules = (extra[n.act] ??= []);
+        if (!rules.some((r) => JSON.stringify(r) === JSON.stringify(n.rule))) rules.push(n.rule);
+    }
+    return extra;
 }
 const changeText = (f) => `${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${String(nameOf(f.thing)).replace(/^The /, 'the ')}`;
 /** The question whose entry is this change (the same action on the same thing, in a window that can meet it). */
@@ -841,7 +846,24 @@ function lapseWhy(l) {
         const kinds = l.ruledOut.kinds.map((k) => KIND_WORD[k] ?? k).join(' or ');
         return `It would only work if ${val(l.ruledOut.item)} were ${kinds}${q ? `, and your marks on “${esc(q.label)}” rule that out` : ', and that is ruled out'}.`;
     }
-    return esc(l.why);
+    return lostNeedWhy(l) ?? esc(l.why);
+}
+/**
+ * A link that held through a need the player's hypothesis added (injuring needs the horse away from the stable):
+ * which reason, no longer circled, would bring it back.
+ */
+function lostNeedWhy(l) {
+    if (l.move.move !== 'c') return null;
+    const x = factOf(l.move.of), t = factOf(l.move.for);
+    if (!x || !t) return null;
+    const linked = linkedTo(t.id).map((e) => factOf(e.reasoned.premises[0])).filter((s) => s && list(s.act).length);
+    for (const q of baseQuestions) if (qListed(q)) for (const p of q.possibilities) {
+        if (!p.need || markOf(q, p.value) === 'circled' || !possShown(q, p.value)) continue;
+        const ctx = { ...placeCtx, order: data.order, entries: onTimeline(), extraNeeds: addNeeds(structuredClone(placeCtx.extraNeeds ?? {}), p.need) };
+        const r = checkFit(x, t, linked, nameOf, ctx);
+        if (r.fits) return `It served a need of your hypothesis, ${phrase(r.need)}, which came from “${esc(p.value)}” on “${esc(q.label)}”: that is no longer circled.`;
+    }
+    return null;
 }
 /** A lapsed move as a line: what it linked, and why it no longer holds. */
 function lapseText(l) {

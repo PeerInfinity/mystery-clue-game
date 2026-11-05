@@ -611,7 +611,9 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   (`ctx.extraNeeds`; `q.why_out`'s noise and light answers add `{of: '$thing', away: 'stable'}` to `injure`). A need
   `away` is met by a place not within that place. A circled who-answer to a question whose entry is a typed action
   (`q.horse_out_by` is `lead_out` of the horse through the stable door) is that one doing it, an action of the
-  hypothesis. A rule naming a role the action lacks is left out (injuring with no door named needs no door).
+  hypothesis. A rule naming a role the action lacks is left out (injuring with no door named needs no door). A
+  `need` may be a list (the light answer: a light, and away from the stable); the knife's "for delicate work" adds
+  carrying the knife, the match's "to light the candle" a light (`take`, `strike_light`).
 - Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
   animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:

@@ -306,6 +306,13 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   an action the moves can link. Not yet: the match and the candle (the light reason has the same coarse need), the
   knife as what injuring needs, the hoof as why the last step never happened, the lapse's why for a lost
   hypothesis need (it says only "nothing it brings about meets...").
+- **Built (2026-11-05), the knife and a lost need's why:** a lapse that a reason no longer circled would restore says
+  so ("It served a need of your hypothesis, the horse away from the stable, which came from 'to do something that
+  would be heard in the stable' on 'Why take the horse out of the stable?': that is no longer circled"). Straker
+  picking up the knife (¶82) is a typed action (`take`); "for delicate work", circled on "What was Straker's knife
+  for?", adds to injuring the need to carry that knife, so the taking links to his aim. "To light the candle for
+  close work" adds a light; the light answer of `q.why_out` now adds a light and away from the stable. The struck
+  match (`strike_light`) is typed but reaches the timeline only at ¶226 (an inference until then).
 
 ### An incremental game about trying every combination
 

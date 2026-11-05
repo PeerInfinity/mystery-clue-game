@@ -47,6 +47,8 @@ export const ACTIONS = {
     drug: { label: 'drugging', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'drugged' }] },
     strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
     injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
+    take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
+    strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
     hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
 };
 /** What a goal of carrying an item brings with it, by the item's kind (the same rule as `give`'s). */

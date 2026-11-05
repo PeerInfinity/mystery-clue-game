@@ -99,7 +99,7 @@ for (const f of facts) {
     const checkAct = (id, x) => {
         if (!list(x.act).length) err(id, 'a step or typed action needs act');
         for (const t of list(x.act)) if (!ACTIONS[t]) err(id, `act: no action type ${t}`);
-        for (const r of ['thing', 'to', 'via']) if (x[r] != null && !entities.has(x[r])) err(id, `${r}: no entity ${x[r]}`);
+        for (const r of ['thing', 'to', 'via', 'item']) if (x[r] != null && !entities.has(x[r])) err(id, `${r}: no entity ${x[r]}`);
     };
     if (f.act != null || f.thing != null) checkAct(f.id, f);
     if (f.plan) {
@@ -211,7 +211,7 @@ for (const q of questions) {
         if (p.goal && (!entities.has(p.goal.of) || !p.goal.attr || p.goal.value == null)) err(q.id, `${p.value}: a goal is {of: an entity, attr, value}`);
         if (p.step && (!list(p.step.act).length || list(p.step.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via'].some((r) => p.step[r] != null && !entities.has(p.step[r])))) err(q.id, `${p.value}: step is a typed action`);
         if (p.step && !p.goal) err(q.id, `${p.value}: a step belongs to an aim with a goal`);
-        if (p.need && (!ACTIONS[p.need.act] || !p.need.rule?.of || (p.need.rule.away != null && !entities.has(p.need.rule.away)))) err(q.id, `${p.value}: need is {act, rule}`);
+        for (const n of list(p.need)) if (!ACTIONS[n.act] || !n.rule?.of || (n.rule.away != null && !entities.has(n.rule.away)) || (n.rule.carrying != null && !n.rule.carrying.startsWith('$') && !entities.has(n.rule.carrying))) err(q.id, `${p.value}: need is {act, rule}, or a list of them`);
         if (p.via !== 'always') {
             if (!Number.isInteger(p.available)) err(q.id, `${p.value}: no available paragraph`);
             if (!p.from && !p.quote) err(q.id, `${p.value}: needs from (a fact or thought) or a quote`);
