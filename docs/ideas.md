@@ -156,8 +156,12 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   timeline knows; a vehicle whose own place is unknown, a column of its own), at a depth of region, area, place or in
   full (an outermost region holding one place, Devonshire, adds no level); or its source (who first had it, on its
   best chain). One event per row keeps the ruling that no cell holds two events, so the grid is sparse, mostly a
-  diagonal walk across the columns. The user was unsure it would read more easily than the list; it is there to be
-  judged.
+  diagonal walk across the columns. The user was unsure it would read more easily than the list; the list stays the
+  main view, the grid an option.
+- **The grid packed (the user's idea, 2026-11-04):** order is kept if each entry's first line is only lower than the
+  first line of the entry before it, so an entry starts one line below the start of the previous one, or below the end
+  of the entry above it in its own column, whichever is lower; entries in different columns sit side by side. A time
+  point (and a time event) spans the grid and starts below everything before it.
 
 ### An incremental game about trying every combination
 

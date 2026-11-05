@@ -245,13 +245,49 @@ function eventGrid(clashing) {
     const regions = [...new Set(cols.map(region))];
     cols.sort((a, b) => (a === '—') - (b === '—') || regions.indexOf(region(a)) - regions.indexOf(region(b)) || 0);
     const colName = (c) => (c === '—' ? (state.view === 'place' ? 'place not known' : 'not modelled') : c === '?' ? 'unknown' : ent(c));
-    const head = `<tr>${cols.map((c) => `<th>${colName(c)}</th>`).join('')}</tr>`;
+    // Each entry is placed by packGrid once it is drawn: `data-col` its column, or none for one across the grid.
+    const head = `<div class="pack-head" style="--cols:${cols.length}">${cols.map((c) => `<div>${colName(c)}</div>`).join('')}</div>`;
     const body = rows.map((r) => {
-        if (r.head) return `<tr class="grid-time"><th colspan="${cols.length}">${timeLabel(r.head)}</th></tr>`;
-        if (!r.c) return `<tr><td colspan="${cols.length}" class="grid-span">${eventRow(r.f, clashing, 'div')}</td></tr>`;
-        return `<tr>${cols.map((c) => (c === r.c ? `<td>${eventRow(r.f, clashing, 'div')}</td>` : '<td></td>')).join('')}</tr>`;
+        if (r.head) return `<div class="pack-item pack-time">${timeLabel(r.head)}</div>`;
+        if (!r.c) return `<div class="pack-item grid-span">${eventRow(r.f, clashing, 'div')}</div>`;
+        return `<div class="pack-item" data-col="${cols.indexOf(r.c)}">${eventRow(r.f, clashing, 'div')}</div>`;
     }).join('');
-    return `<div class="grid-wrap"><table class="grid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    return `<div class="grid-wrap"><div class="pack" style="--cols:${cols.length}">${head}<div class="pack-body">${body}</div></div></div>`;
+}
+
+/**
+ * Pack the grid: entries keep their order, but an entry only has to start a line below the start of the one before
+ * it (and below the end of the one above it in its own column), so entries in different columns sit side by side.
+ * An entry across the grid (a time point, a time event) starts below everything before it.
+ */
+function packGrid() {
+    const body = document.querySelector('.pack-body');
+    if (!body) return;
+    const ncols = Number(body.parentElement.style.getPropertyValue('--cols'));
+    const colW = body.parentElement.querySelector('.pack-head > div')?.getBoundingClientRect().width ?? 160;
+    const step = parseFloat(getComputedStyle(body).lineHeight) || 17;
+    const GAP = 4;
+    const bottoms = new Array(ncols).fill(0);
+    let lastTop = -step;
+    for (const el of body.children) {
+        const col = el.dataset.col;
+        if (col == null) {
+            el.style.left = '0'; el.style.width = `${ncols * colW}px`;
+            const top = Math.max(lastTop + step, ...bottoms);
+            el.style.top = `${top}px`;
+            const bottom = top + el.offsetHeight + GAP;
+            bottoms.fill(bottom);
+            lastTop = top;
+        } else {
+            const c = Number(col);
+            el.style.left = `${c * colW}px`; el.style.width = `${colW}px`;
+            const top = Math.max(lastTop + step, bottoms[c]);
+            el.style.top = `${top}px`;
+            bottoms[c] = top + el.offsetHeight + GAP;
+            lastTop = top;
+        }
+    }
+    body.style.height = `${Math.max(...bottoms, 0)}px`;
 }
 
 function clashSide(x) {
@@ -298,6 +334,7 @@ function render() {
     document.getElementById('depth-label').hidden = state.view !== 'place';
     document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
     document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(() => true, clashing) : eventGrid(clashing);
+    if (state.view !== 'list') packGrid();
     renderDetail(clashing);
 }
 
