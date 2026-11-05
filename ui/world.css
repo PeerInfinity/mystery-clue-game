@@ -101,3 +101,27 @@ p.bad { color: var(--bad); } p.good { color: var(--good); }
 .moves li { margin: 3px 0; }
 .move { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 4px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
 .note { background: var(--chip); padding: 4px 8px; border-radius: 4px; }
+
+/* The layouts. Three columns: the parts side by side, the page scrolling. With tabs (two panels, or one; a phone
+   always one): the page fills the window like the game's, each panel scrolling on its own. */
+.world-main > div { min-width: 0; }
+body.world-page.tabbed { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+body.world-page.tabbed .top { position: static; }
+.world-tabs { flex: 1; min-height: 0; }
+.world-tabs .panel-body { overflow: auto; padding: 12px 16px 40px; }
+.world-tabs .world-story, .world-tabs .world-detail { position: static; max-height: none; overflow: visible; }
+.world-tabs .q-box ol { max-height: none; }
+.world-tabs .grid-wrap { max-height: calc(100dvh - 200px); }
+.world-tabs .tab .small { color: inherit; }
+.settings-panel .check { display: block; }
+@media (max-width: 699px) {
+  .reading-at input { width: 3.5em; }
+  .world-tabs .panel-body { padding: 10px 12px 40px; }
+}
+/* A layout not in use takes no room (its own display would beat the hidden attribute). */
+.world-page main[hidden], #parked[hidden] { display: none !important; }
+@media (max-width: 600px) {
+  /* The settings button sits at the start of the second header row: its menu opens to the right, within the screen. */
+  .world-page .settings-panel { left: 0; right: auto; }
+}
+.world-tabs .world-story { font-size: 16px; }

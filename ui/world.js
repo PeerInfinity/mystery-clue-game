@@ -59,11 +59,11 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system' };
 try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 state.sel = null;
 state.note = null;
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, layout: state.layout, panels: state.panels, theme: state.theme })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -444,8 +444,87 @@ function clashTitle(c) {
 const clashKey = (c) => `clash:${c.a.id}|${c.b.id}`;
 let current = [];
 
+// --- The layout: three columns side by side, or panels with tabs (two, or one; a phone always one). The page's parts
+// (world.html) are moved where the layout puts them, the rest parked; each is drawn by render() wherever it is.
+const PARTS = [['story', 'Story'], ['timeline', 'Timeline'], ['questions', 'Questions'], ['clashes', 'Contradictions'], ['detail', 'Detail']];
+if (!Array.isArray(state.panels) || state.panels.length !== 2 || state.panels.some((t) => !PARTS.some(([x]) => x === t)) || state.panels[0] === state.panels[1]) state.panels = ['story', 'timeline'];
+if (!['three', 'two', 'one'].includes(state.layout)) state.layout = 'three';
+const partEl = (id) => document.querySelector(`.part[data-part="${id}"]`);
+const phone = matchMedia('(max-width: 699px)');
+const layoutNow = () => (phone.matches ? 'one' : state.layout);
+const panelCount = () => (layoutNow() === 'two' ? 2 : 1);
+let backs = [];    // one column: the tabs a link replaced, for "back"
+/** Put each part where the layout shows it; only a part that has to move is moved (a move loses its scroll). */
+function mountLayout() {
+    const L = layoutNow();
+    const three = document.getElementById('three'), tabbed = document.getElementById('tabbed'), parked = document.getElementById('parked');
+    document.body.classList.toggle('tabbed', L !== 'three');
+    three.hidden = L !== 'three';
+    tabbed.hidden = L === 'three';
+    tabbed.classList.toggle('one', L === 'one');
+    const put = (el, where) => { if (el.parentElement !== where) where.appendChild(el); };
+    if (L === 'three') {
+        if (!three.children.length) three.innerHTML = '<div class="col-story"></div><div class="col-main"></div><div class="col-detail"></div>';
+        put(partEl('story'), three.children[0]);
+        for (const id of ['clashes', 'questions', 'timeline']) put(partEl(id), three.children[1]);
+        put(partEl('detail'), three.children[2]);
+        return;
+    }
+    const shown = state.panels.slice(0, panelCount());
+    for (const [id] of PARTS) if (!shown.includes(id)) put(partEl(id), parked);
+    shown.forEach((id, i) => put(partEl(id), document.getElementById(`panel-${i}`)));
+}
+function tabsHtml(i, counts) {
+    return PARTS.map(([t, name]) => `<button type="button" data-tab="${t}" class="tab${state.panels[i] === t ? ' on' : ''}">${name}${counts[t] ? ` <span class="small">(${counts[t]})</span>` : ''}</button>`).join('');
+}
+function renderTabs(counts) {
+    if (layoutNow() === 'three') return;
+    document.querySelectorAll('#tabbed .panel').forEach((el, i) => {
+        el.querySelector('.tabs').innerHTML = tabsHtml(i, counts);
+        const back = el.querySelector('.back-row');
+        const b = i === 0 && panelCount() === 1 ? backs.at(-1) : null;
+        back.hidden = !b;
+        back.innerHTML = b ? `<a class="link" data-back>← Back to ${PARTS.find(([t]) => t === b)[1]}</a>` : '';
+    });
+}
+/** Choose a tab in a panel; if the other panel shows it, the two swap. */
+function chooseTab(i, tab) {
+    if (state.panels[1 - i] === tab) state.panels[1 - i] = state.panels[i];
+    state.panels[i] = tab;
+}
+/**
+ * Show a part where a link opens it: where it is shown already; else, in two columns, in the other panel than the one
+ * clicked in; in one column, in place, with a way back.
+ */
+function reveal(tab, from) {
+    if (layoutNow() === 'three') return;
+    const n = panelCount();
+    if (state.panels.slice(0, n).includes(tab)) return;
+    if (n === 1) { backs = [...backs, state.panels[0]].slice(-20); chooseTab(0, tab); }
+    else chooseTab(from == null ? 1 : 1 - from, tab);
+    save();
+}
+const panelFrom = (e) => { const p = e.target.closest('#tabbed .panel'); return p ? Number(p.dataset.panel) : null; };
+/** Select an event, a name, a question or a contradiction: its detail, revealed. */
+function select(id, e) {
+    state.sel = id;
+    state.note = null;
+    reveal('detail', panelFrom(e));
+    render();
+}
+const visibleEl = (el) => !!el && el.offsetParent !== null;
+function applyTheme() {
+    if (state.theme === 'system') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.dataset.theme = state.theme;
+}
+phone.addEventListener('change', () => render());
+
 let shownPara = null;
 function render() {
+    mountLayout();
+    applyTheme();
+    document.getElementById('layout').value = state.layout;
+    document.getElementById('theme').value = state.theme;
     reasoned = [];
     reasonedById = new Map();
     const told = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
@@ -467,7 +546,7 @@ function render() {
     const st = document.getElementById('story');
     st.innerHTML = story.slice(1, state.para + 1).map((p, i) => `<p class="${i + 1 === state.para ? 'now' : ''}"><span class="para">¶${i + 1}</span> ${esc(p).replace(/_([^_]+)_/g, '<em>$1</em>')}</p>`).join('');
     // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
-    if (shownPara !== state.para) { shownPara = state.para; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
+    if (shownPara !== state.para && visibleEl(st)) { shownPara = state.para; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
 
     const clashes = contradictions(data, acceptedAssertions());
     const clashing = new Set(clashes.flatMap((c) => [c.a, c.b]).flatMap((x) => (x.mark ? [x.id, `q:${x.q}`] : [x.fact])));
@@ -484,7 +563,8 @@ function render() {
     document.getElementById('depth-label').hidden = state.view !== 'place';
     document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
     document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(() => true, clashing) : eventGrid(clashing);
-    if (state.view !== 'list') packGrid();
+    if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
+    renderTabs({ questions: listedQuestions().length, clashes: clashes.length });
     renderDetail(clashing);
 }
 
@@ -827,7 +907,14 @@ document.getElementById('undo').addEventListener('click', () => {
     state.history = state.history.slice(0, -1);
     save(); render();
 });
+document.getElementById('layout').addEventListener('change', (e) => { state.layout = e.target.value; backs = []; save(); render(); });
+document.getElementById('theme').addEventListener('change', (e) => { state.theme = e.target.value; save(); render(); });
+// The settings menu closes on a click outside it.
+document.addEventListener('click', (e) => { const st = document.getElementById('settings'); if (st.open && !e.target.closest('#settings')) st.open = false; });
 document.addEventListener('click', (e) => {
+    const tb = e.target.closest('[data-tab]');
+    if (tb) { chooseTab(panelFrom(e) ?? 0, tb.dataset.tab); backs = []; save(); render(); return; }
+    if (e.target.closest('[data-back]')) { chooseTab(0, backs.at(-1)); backs = backs.slice(0, -1); save(); render(); return; }
     const ma = e.target.closest('[data-move-a]');
     if (ma) {
         const a = factOf(ma.dataset.moveA), b = factOf(ma.dataset.with);
@@ -876,29 +963,34 @@ document.addEventListener('click', (e) => {
         const inPanel = !!m.closest('#q-box'), top = m.getBoundingClientRect().top;
         cycleMark(m.dataset.markQ, m.dataset.markPick);
         const again = [...document.querySelectorAll(`[data-mark-q="${CSS.escape(m.dataset.markQ)}"][data-mark-pick="${CSS.escape(m.dataset.markPick)}"]`)].find((x) => !!x.closest('#q-box') === inPanel);
-        if (again) window.scrollBy(0, again.getBoundingClientRect().top - top);
+        // What scrolls: a tabbed panel, or the page.
+        if (again) (again.closest('#tabbed .panel-body') ?? window).scrollBy(0, again.getBoundingClientRect().top - top);
         return;
     }
     const pa = e.target.closest('.para');
     if (pa && !e.target.closest('#story')) {
         // A paragraph number scrolls the story to that paragraph.
         const n = Number(pa.textContent.match(/\d+/)?.[0]);
+        reveal('story', panelFrom(e));
+        render();
         const p = document.querySelectorAll('#story p')[n - 1];
         if (p) {
-            const box = document.querySelector('.world-story');
-            box.scrollTop += p.getBoundingClientRect().top - box.getBoundingClientRect().top - 30;
+            if (layoutNow() === 'three') {
+                const box = document.querySelector('.world-story');
+                box.scrollTop += p.getBoundingClientRect().top - box.getBoundingClientRect().top - 30;
+            } else p.scrollIntoView({ block: 'start' });
             p.classList.remove('flash'); void p.offsetWidth; p.classList.add('flash');
         }
         return;
     }
     const q = e.target.closest('[data-q]');
-    if (q && !e.target.closest('select, [data-ent]')) { state.sel = `q:${q.dataset.q}`; render(); return; }
+    if (q && !e.target.closest('select, [data-ent]')) { select(`q:${q.dataset.q}`, e); return; }
     const t = e.target.closest('[data-clash]');
-    if (t) { state.sel = t.dataset.clash; render(); return; }
+    if (t) { select(t.dataset.clash, e); return; }
     const a = e.target.closest('[data-ent]');
-    if (a) { state.sel = a.dataset.ent; render(); return; }
+    if (a) { select(a.dataset.ent, e); return; }
     const f = e.target.closest('[data-fact]');
-    if (f && !e.target.closest('select')) { state.sel = f.dataset.fact; state.note = null; render(); }
+    if (f && !e.target.closest('select')) select(f.dataset.fact, e);
 });
 document.addEventListener('change', (e) => {
     if (e.target.matches('.link-trust')) {

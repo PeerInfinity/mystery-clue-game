@@ -253,6 +253,11 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   (¶57), found at ¶46. Not yet: "why take the horse out, why not injure it in the stable" (a goal of injuring, and
   a plan that needs fewer steps), "what of the paper"; Straker's plan; a link that stops fitting disappears without
   a word; likely clashes (the "lost" stranger who knows the routine) remain for later.
+- **Built (2026-11-05), the layouts:** the three-column page was practically unplayable on a phone (the user). Now a
+  choice in Settings, as in the game: three columns (kept for a laptop), or panels with tabs, two or one; a phone
+  always one. The page's parts are moved where the layout puts them, so each is drawn the same in every layout. The
+  threshold, "show the rest" and reset moved into a Settings menu like the game's; reading on and undo stay in the
+  header.
 
 ### An incremental game about trying every combination
 
