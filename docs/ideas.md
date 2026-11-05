@@ -320,6 +320,14 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   Straker's plan has leading out, taking the knife and striking a light, each meeting a need of the intended
   injuring; only the door (open, Straker at it) stays unmet. Uncircling the answer announces the lapse ("It came
   from your answer to ..., which presupposes it").
+- **Built (2026-11-05), the commitment gate (step 4):** the 26 questions the story raises and a reader could answer
+  before it gives the answer away (`answer_inferable_at` before `answer_given_at`; latent ones, never raised, are
+  not gated) hold the reading: Read on, or a later ¶ typed in, stops before the first paragraph whose give-aways do
+  not each have exactly one circle. Any answer passes, "something else" included, so nobody is stuck; reading back
+  is free. A notice (with Hide; Read on shows it again) lists the questions, each linked, with how many are circled.
+  Reading a give-away shows the answer with the player's circle, right or not; the questions' own lists mark right
+  and wrong as before. Gates by paragraph (questions answered there): ¶40, ¶58, ¶181, ¶212, ¶223, ¶224, ¶228 one each;
+  ¶202, ¶218, ¶221 two; ¶146, ¶220, ¶229 three; ¶226 four.
 
 ### An incremental game about trying every combination
 

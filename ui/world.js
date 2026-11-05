@@ -617,6 +617,8 @@ function render() {
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
     renderTabs({ questions: listedQuestions().length, clashes: clashes.length });
     renderLapseNews();
+    renderGate();
+    renderAnswers();
     renderDetail(clashing);
 }
 
@@ -1078,8 +1080,54 @@ function renderDetail(clashing) {
 }
 
 // --- Events.
-const setPara = (n) => { state.para = Math.max(1, Math.min(LAST, n | 0)); save(); render(); };
-document.getElementById('next').addEventListener('click', () => setPara(state.para + 1));
+/**
+ * The gate: before the story gives away the answer to a question a reader could have reached earlier (raised, not
+ * latent, inferable before it is given), the player commits: exactly one possibility circled. Any answer passes, so
+ * nobody is stuck. Reading stops before the first paragraph whose give-aways are not committed; reading back is free.
+ */
+const GATED = data.questions.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && q.answer_inferable_at < q.answer_given_at);
+const atPara = (p, fn) => { const was = state.para; state.para = p; try { return fn(); } finally { state.para = was; } };
+const circledCount = (q) => shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled').length;
+/** The gated questions given away at ¶p and not committed to just before it. */
+const gateAt = (p) => atPara(p - 1, () => GATED.filter((q) => q.answer_given_at === p && qListed(q) && circledCount(q) !== 1));
+let gateHidden = null;    // the gate's key while its notice is hidden
+let answerNews = [];      // the answers just given: {q, mark}
+const setPara = (n) => {
+    const want = Math.max(1, Math.min(LAST, n | 0)), from = state.para;
+    let to = want;
+    for (let p = from + 1; p <= want; p++) if (gateAt(p).length) { to = p - 1; gateHidden = null; flashGate = true; break; }
+    // The answers given on the way, with how the player's marks fare.
+    if (to > from) answerNews = GATED.filter((q) => q.answer_given_at > from && q.answer_given_at <= to).map((q) => ({ q, picks: atPara(q.answer_given_at - 1, () => shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled').map((o) => o.value)) }));
+    else answerNews = [];
+    state.para = to;
+    save(); render();
+};
+let flashGate = false;
+function renderGate() {
+    const el = document.getElementById('gate-news');
+    const qs = gateAt(state.para + 1);
+    const key = qs.map((q) => q.id).join('|');
+    el.hidden = !qs.length || gateHidden === key;
+    document.getElementById('next').title = qs.length ? `Before ¶${state.para + 1}: commit to an answer first` : 'Read the next paragraph';
+    if (!qs.length) return;
+    const count = (q) => { const n = circledCount(q); return n === 0 ? 'nothing circled yet' : `${n} circled`; };
+    el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. Commit first: circle exactly one answer${qs.length === 1 ? '' : ' for each'}. Any answer will do; the key shows at ¶${state.para + 1}.</p>
+      <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
+      <p><button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
+    if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
+}
+function renderAnswers() {
+    const el = document.getElementById('answer-news');
+    el.hidden = !answerNews.length;
+    if (!answerNews.length) return;
+    const line = ({ q, picks }) => {
+        const right = picks.length === 1 && picks[0] === q.answer;
+        const yours = picks.length ? picks.map((v) => pickText(q, v)).join(', ') : 'nothing';
+        return `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a>: <b>${pickText(q, q.answer)}</b> <span class="small ${right ? 'good' : 'bad'}">(you circled ${yours}${right ? ': right' : ''})</span></li>`;
+    };
+    el.innerHTML = `<p><b>The story has answered:</b></p><ul>${answerNews.map(line).join('')}</ul><p><button type="button" class="quiet" data-answers-close>Dismiss</button></p>`;
+}
+document.getElementById('next').addEventListener('click', () => { if (gateAt(state.para + 1).length) { gateHidden = null; flashGate = true; render(); return; } setPara(state.para + 1); });
 document.getElementById('back').addEventListener('click', () => setPara(state.para - 1));
 document.getElementById('para').addEventListener('change', (e) => setPara(Number(e.target.value)));
 document.getElementById('threshold').addEventListener('change', (e) => { state.threshold = Number(e.target.value); save(); render(); });
@@ -1142,6 +1190,8 @@ document.addEventListener('click', (e) => {
     const ls = e.target.closest('[data-lapse-show]');
     if (ls) { const id = ls.dataset.lapseShow, q = qOfHyp(id); lapseNews = []; select(q ? `q:${q.id}` : id, e); return; }
     if (e.target.closest('[data-lapse-close]')) { lapseNews = []; renderLapseNews(); return; }
+    if (e.target.closest('[data-gate-hide]')) { gateHidden = gateAt(state.para + 1).map((q) => q.id).join('|'); renderGate(); return; }
+    if (e.target.closest('[data-answers-close]')) { answerNews = []; renderAnswers(); return; }
     const wd = e.target.closest('[data-withdraw]');
     if (wd) {
         // Withdraw the move that gave this entry; what was reasoned from it goes with it.
