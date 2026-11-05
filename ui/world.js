@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds } from '../engine/actions.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -37,7 +37,19 @@ const factById = new Map(data.facts.map((f) => [f.id, f]));
 // The entries the player's moves give (Watson's reasoning), worked out afresh at each drawing.
 let reasoned = [];
 let reasonedById = new Map();
-const factOf = (id) => factById.get(id) ?? reasonedById.get(id);
+const factOf = (id) => factById.get(id) ?? reasonedById.get(id) ?? hypIntention(id);
+/**
+ * A circled aim with a goal (the stranger's "get information to bet on") as an intention: Watson's hypothesis, so
+ * the player's plan can be built on it. Its id is the mark's key.
+ */
+function hypIntention(id) {
+    const m = /^hyp:(.+)=(.+)$/.exec(id ?? '');
+    if (!m) return null;
+    const q = qById.get(m[1]);
+    const p = q?.possibilities.find((x) => x.value === m[2]);
+    if (!p?.goal || markOf(q, p.value) !== 'circled' || !possShown(q, p.value)) return null;
+    return { id, of: q.entry.of, attr: 'intends', value: p.value, goal: p.goal, time: q.entry.time && typeof q.entry.time === 'object' ? q.entry.time : {}, hyp: { q: q.id, pick: p.value }, given_at: q.raised };
+}
 const allFacts = () => [...data.facts, ...reasoned];
 const qById = new Map(data.questions.map((q) => [q.id, q]));
 const accountById = new Map(data.accounts.map((a) => [a.id, a]));
@@ -129,6 +141,13 @@ const qAnchor = (q) => {
 const markLevel = (q, pick) => levelOf([hypothesisChain(q, pick)], state.trust);
 const pickText = (q, pick) => (entityById.has(pick) ? ent(pick) : esc(pick));
 
+const KIND_WORD = { money: 'money', message: 'a message', drug: 'a drug' };
+/** A typed action or an intention as a short phrase: who, doing what, to whom, with what. */
+function stepText(x) {
+    if (!list(x.act).length) return x.hyp ? `${ent(x.of)}, aiming to ${esc(x.value)}` : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
+    const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && `with ${val(x.item)}`, x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
+    return `${x.of === '?' ? 'Someone' : ent(x.of)}: ${list(x.act).map((t) => ACTIONS[t].label).join(' and ')} ${roles}`;
+}
 /** A fact as a short sentence. */
 function phrase(f) {
     const E = f.of === '?' ? 'Someone' : ent(f.of);
@@ -144,6 +163,13 @@ function phrase(f) {
         case 'owner': return f.neg ? `${E} is <b>not</b> ${v}'s${d}` : `${E} belongs to ${v}${d}`;
         case 'identity': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
         case 'door': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
+        case 'willing': return `${E} willing to help ${v}`;
+        case 'held_by': return `${E} in the hands of ${v}`;
+        case 'purpose': {
+            const x = factOf(f.reasoned?.premises[0]);
+            const cond = f.cond ? ` <span class="small">(if ${val(f.cond.item)} is ${f.cond.kinds.map((k) => KIND_WORD[k] ?? k).join(' or ')})</span>` : '';
+            return `${x ? stepText(x) : E} <b>in order that</b> ${f.serves ? phrase(f.serves) : esc(f.value)}${cond}`;
+        }
         case 'name': return `${E} is called ${v}`;
         case 'says': return `${E}${f.to ? ` to ${ent(f.to)}` : ''}: <span class="said">${v}</span>`;
         case 'believes': return `${E} believes ${v}`;
@@ -172,6 +198,7 @@ const isTimeEvent = (f) => TIME_ATTRS.has(f.attr) || ['calendar', 'clock', 'weat
 const chainsOf = (f) => (f.attr === 'tells' ? [] : prov.factChains(f.id));
 /** A fact's level: a telling to Watson he witnesses (certain), any other telling as the story reports it (uncertain). */
 function levelOfFact(f) {
+    if (f.hyp) return markLevel(f.hyp.q, f.hyp.pick);
     if (f.reasoned) {
         // Watson's reasoning: as trusted as its weakest premise, and no more than the player trusts his reasoning.
         const ls = f.reasoned.premises.map((id) => { const p = factOf(id); return p ? levelOfFact(p) : null; });
@@ -422,7 +449,8 @@ function render() {
     reasoned = [];
     reasonedById = new Map();
     const told = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
-    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told });
+    placeCtx = engineCtx(told);
+    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told });
     reasonedById = new Map(reasoned.map((f) => [f.id, f]));
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
@@ -516,7 +544,31 @@ function sideHtml(x, label) {
 }
 
 // --- The player's moves on the timeline (engine/actions.js), and what they give.
-const placeCtx = { joins: data.joins, places: data.places };
+let placeCtx = { joins: data.joins, places: data.places };
+/**
+ * What the engine needs of the timeline beyond its entries: two names of one person (an identity on the timeline, or
+ * one the player has circled: the stranger and Simpson), the kinds an item may still be (the paper: what the player
+ * has not crossed out, or what is circled), and which things are where they live unless moved (animals).
+ */
+function engineCtx(told) {
+    const root = new Map();
+    const find = (x) => { while (root.has(x) && root.get(x) !== x) x = root.get(x); return x; };
+    const join = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) root.set(ra, rb); };
+    for (const f of told) if (f.attr === 'identity' && !f.neg && entityById.has(f.of) && entityById.has(f.value)) join(f.of, f.value);
+    for (const q of baseQuestions) if (q.entry?.attr === 'identity' && entityById.has(q.entry.of) && qListed(q)) {
+        for (const [v, m] of Object.entries(state.marks[q.id] ?? {})) if (m === 'circled' && entityById.has(v)) join(q.entry.of, v);
+    }
+    const same = (a, b) => a === b || (a != null && b != null && find(a) === find(b));
+    const itemKinds = (item) => {
+        const q = baseQuestions.find((x) => x.entry?.of === item && x.entry?.attr === 'contents' && qListed(x));
+        if (!q) return null;
+        const ps = shownPossibilities(q).map((o) => q.possibilities.find((p) => p.value === o.value)).filter((p) => p?.kind);
+        const circled = ps.filter((p) => markOf(q, p.value) === 'circled');
+        return (circled.length ? circled : ps.filter((p) => markOf(q, p.value) !== 'crossed')).map((p) => p.kind);
+    };
+    const homes = (id) => entityById.get(id)?.kind === 'animal';
+    return { joins: data.joins, places: data.places, same, itemKinds, homes };
+}
 const changeText = (f) => `${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${String(nameOf(f.thing)).replace(/^The /, 'the ')}`;
 /** The question whose entry is this change (the same action on the same thing, in a window that can meet it). */
 function questionOfChange(f) {
@@ -600,14 +652,54 @@ function implicationsHtml(f) {
     const needs = entries.filter((e) => e.role === 'requires'), does = entries.filter((e) => e.role === 'effects');
     return `<h3>What it needs</h3><ul class="moves">${needs.map(row).join('')}</ul>${does.length ? `<h3>What it does</h3><ul class="moves">${does.map(row).join('')}</ul>` : ''}`;
 }
+/** The intentions on the timeline an action or intention of this agent could serve (stated, or circled aims). */
+function intentionsOf(agent, except) {
+    const stated = onTimeline().filter((g) => g.goal && g.id !== except && placeCtx.same(g.of, agent));
+    const circled = baseQuestions.filter((q) => qListed(q) && q.entry?.attr === 'intends').flatMap((q) => q.possibilities.map((p) => hypIntention(hypothesisKey(q.id, p.value))))
+        .filter((g) => g && g.id !== except && placeCtx.same(g.of, agent) && markLevel(g.hyp.q, g.hyp.pick) >= state.threshold);
+    return [...stated, ...circled];
+}
+const linkedTo = (tid) => reasoned.filter((e) => e.reasoned.move === 'c' && e.for === tid);
+/** Move (c): "what is this for?", offered on a typed action or an intention with a goal. */
+function purposeHtml(f) {
+    if (!list(f.act).length && !f.goal) return '';
+    if (f.of === '?' || f.reasoned) return '';
+    const targets = intentionsOf(f.of, f.id);
+    const done = (t) => state.reasoning.some((m) => m.move === 'c' && m.of === f.id && m.for === t.id);
+    const items = targets.map((t) => `<li>${done(t) ? '<span class="small muted">linked:</span> ' : `<button type="button" class="move" data-move-c="${esc(f.id)}" data-for="${esc(t.id)}">For this</button> `}${stepText(t)}${t.hyp ? ' <span class="small muted">(your hypothesis)</span>' : ''}</li>`).join('');
+    return `<h3>What is this for?</h3>${targets.length ? `<p class="small">Point out the intention it serves: the engine checks that what it brings about meets the goal, or a need of a step already linked to it.</p><ul class="moves">${items}</ul>`
+        : `<p class="small muted">No intention of ${ent(f.of)} with a goal is on the timeline: circle an aim, or read on.</p>`}`;
+}
+/** Move (d): "what would this need?", on a plan: a claim's, or the steps the player has linked to an intention. */
+const planOpen = new Set();
+function planOf(f) {
+    if (f.plan) return { id: f.id, ...f.plan };
+    if (!f.goal) return null;
+    const steps = linkedTo(f.id).map((e) => factOf(e.reasoned.premises[0])).filter((x) => x && list(x.act).length)
+        .sort((a, b) => rankOf(anchorOf(a.time ?? {})) - rankOf(anchorOf(b.time ?? {})));
+    return steps.length ? { id: f.id, agent: f.of, goal: f.goal, steps } : null;
+}
+function planHtml(f) {
+    const plan = planOf(f);
+    if (!plan) return '';
+    const head = f.plan ? 'The plan it describes' : 'Your plan for it';
+    if (!planOpen.has(f.id)) return `<h3>${head}</h3><p><button type="button" class="move" data-move-d="${esc(f.id)}">What would this need?</button></p>`;
+    const r = checkPlan(plan, onTimeline(), nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
+    const need = (n) => `<li>${phrase(n.req)} ${n.by ? `<span class="good small">met by step ${n.by.step + 1}</span>` : statusHtml(n)}</li>`;
+    const steps = r.steps.map((s) => `<li>${stepText(s.step)}<ul class="moves">${s.needs.map(need).join('')}</ul></li>`).join('');
+    const goal = plan.goal ? `<p class="small">Goal: ${phrase({ ...plan.goal, id: '' })}: <b>${r.goal === 'reached' ? 'the steps reach it' : 'the steps do not reach it'}</b>.</p>` : '';
+    const open = r.open.length ? `<p class="small bad">Needed, and nothing on the timeline meets it: ${[...new Set(r.open.map((n) => phrase(n.req)))].join('; ')}.</p>` : '<p class="small good">Every need is met.</p>';
+    return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
+}
 function movesHtml(f) {
     const q = f.reasoned?.move === 'a' && f.of === '?' ? (questionOfChange(f) ?? qById.get(`who:${f.id}`)) : null;
     const who = q ? `<h3>Who did it? <span class="small muted">(your hypothesis)</span></h3>
       <p class="small">${q.own ? 'Your own question' : 'The question'}: <a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a></p>${chipsHtml(q)}${candidatesHtml(q)}` : '';
-    return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}`;
+    return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${planHtml(f)}`;
 }
 function reasonedDetail(f) {
     const how = f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
+        : f.reasoned.move === 'c' ? 'What it brings about meets the goal of an intention, or a need of a step toward it.'
         : f.reasoned.role === 'requires' ? 'What an action needs just before it.' : 'What an action does.';
     const premises = f.reasoned.premises.map((id) => factOf(id)).filter(Boolean);
     const cap = { origin: REASONING, links: [{ from: REASONING, to: 'watson', how: 'reasoning' }] };
@@ -654,6 +746,13 @@ function questionsPanel(clashing) {
       ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></div>` : ''}</li>`).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
+function aimPlansHtml(q) {
+    const aims = q.possibilities.map((p) => hypIntention(hypothesisKey(q.id, p.value))).filter(Boolean);
+    return aims.map((g) => {
+        const steps = linkedTo(g.id);
+        return `<h3>If the aim is “${esc(g.value)}”</h3><p class="small">Goal: ${phrase({ ...g.goal, id: '' })}. ${steps.length ? `Linked to it: ${steps.map((e) => phrase(e)).join('; ')}.` : 'Nothing is linked to it yet: on an action of theirs, ask “What is this for?”.'}</p>${planHtml(g)}`;
+    }).join('');
+}
 function questionDetail(q, clashing) {
     const marked = shownPossibilities(q).filter((p) => markOf(q, p.value));
     const chains = marked.map((p) => hypothesisChain(q.id, p.value));
@@ -663,7 +762,7 @@ function questionDetail(q, clashing) {
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}
       ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>` : ''}
-      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}`;
+      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${aimPlansHtml(q)}`;
 }
 
 function renderDetail(clashing) {
@@ -737,6 +836,17 @@ document.addEventListener('click', (e) => {
         addMove({ move: 'a', a: a.id, b: b.id }, r.entry.id);
         return;
     }
+    const mc = e.target.closest('[data-move-c]');
+    if (mc) {
+        const x = factOf(mc.dataset.moveC), t = factOf(mc.dataset.for);
+        const linked = linkedTo(t.id).map((l) => factOf(l.reasoned.premises[0])).filter((s) => s && list(s.act).length);
+        const r = checkFit(x, t, linked, nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
+        if (!r.fits) { state.note = `It does not serve that. ${r.why}`; render(); return; }
+        addMove({ move: 'c', of: x.id, for: t.id }, x.id);
+        return;
+    }
+    const md = e.target.closest('[data-move-d]');
+    if (md) { const id = md.dataset.moveD; if (planOpen.has(id)) planOpen.delete(id); else planOpen.add(id); render(); return; }
     const mb = e.target.closest('[data-move-b]');
     if (mb) {
         const r = pointImplications(factOf(mb.dataset.moveB), nameOf);
@@ -749,6 +859,7 @@ document.addEventListener('click', (e) => {
         // Withdraw the move that gave this entry; what was reasoned from it goes with it.
         const f = reasonedById.get(wd.dataset.withdraw);
         const m = f.reasoned.move === 'a' ? (x) => x.move === 'a' && x.a === f.reasoned.premises[0] && x.b === f.reasoned.premises[1] || x.move === 'a' && x.b === f.reasoned.premises[0] && x.a === f.reasoned.premises[1]
+            : f.reasoned.move === 'c' ? (x) => x.move === 'c' && x.of === f.reasoned.premises[0] && x.for === f.reasoned.premises[1]
             : (x) => x.move === 'b' && x.of === f.reasoned.premises[0];
         remember();
         state.reasoning = state.reasoning.filter((x) => !m(x));

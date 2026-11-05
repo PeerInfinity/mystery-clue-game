@@ -241,6 +241,18 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   their needs and what the timeline says (Hunter, before he went out: in the stable, met; a key, nothing says so;
   Simpson and Straker at night: nothing says either). Straker's opening (¶220) is typed (unlocking and opening): the
   key is never mentioned, so his key stays unsaid too. Only the pairs the engine would accept are offered for (a).
+- **Built (2026-11-04), intentions and moves (c)–(d) (step 3):** the action table extended by roles (give, ask,
+  drug, strike, hide, lead_out); goals on the stranger's aims and on his wish that the boy has the paper; the
+  paper's possible contents by kind; the police theory as Simpson's plan. Played at ¶46: the stranger's asking for
+  the tip serves "get information to bet on", not "find the way"; his wish that the boy has the paper serves it only
+  through the asking (which needs Hunter willing), and only "if the paper is money or a message": circling "a drug"
+  takes the link off (the reader's "a poisoner would not ask a witness to pass the poison", with no rule written for
+  it). "What would this need?" on the police theory: the steps reach the goal, the door open by the step before, the
+  horse in its stall, the stick his own; nothing on the timeline meets Simpson having opium, a key, being at the
+  door, or knowing a hiding-place: Holmes's "who sold the opium, where is the key, where could he hide the horse"
+  (¶57), found at ¶46. Not yet: "why take the horse out, why not injure it in the stable" (a goal of injuring, and
+  a plan that needs fewer steps), "what of the paper"; Straker's plan; a link that stops fitting disappears without
+  a word; likely clashes (the "lost" stranger who knows the routine) remain for later.
 
 ### An incremental game about trying every combination
 

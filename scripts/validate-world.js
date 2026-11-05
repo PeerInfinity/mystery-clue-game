@@ -95,10 +95,19 @@ for (const f of facts) {
     if (f.attr === 'member_of') for (const v of list(f.value)) if (!groups.has(v)) err(f.id, `member_of: ${v} is not a group`);
     // A typed state takes one of its values; a typed action names a known action type and the thing it acts on.
     if (STATES[f.attr] && !STATES[f.attr].includes(f.value)) err(f.id, `${f.attr}: ${f.value} is not one of ${STATES[f.attr].join(', ')}`);
-    if (f.act != null || f.thing != null) {
-        for (const t of list(f.act)) if (!ACTIONS[t]) err(f.id, `act: no action type ${t}`);
-        if (!entities.has(f.thing)) err(f.id, `thing: no entity ${f.thing}`);
+    // A typed action's roles (thing, to, via) are entities; a plan's steps are typed actions; a goal is of an entity.
+    const checkAct = (id, x) => {
+        if (!list(x.act).length) err(id, 'a step or typed action needs act');
+        for (const t of list(x.act)) if (!ACTIONS[t]) err(id, `act: no action type ${t}`);
+        for (const r of ['thing', 'to', 'via']) if (x[r] != null && !entities.has(x[r])) err(id, `${r}: no entity ${x[r]}`);
+    };
+    if (f.act != null || f.thing != null) checkAct(f.id, f);
+    if (f.plan) {
+        if (!entities.has(f.plan.agent)) err(f.id, `plan.agent: no entity ${f.plan.agent}`);
+        list(f.plan.steps).forEach((x, i) => checkAct(`${f.id} step ${i}`, x));
+        for (const x of list(f.plan.steps)) for (const k of ['after', 'before', 'at']) if (x.time?.[k] && !timeIds.has(x.time[k])) err(f.id, `plan time.${k}: no time ${x.time[k]}`);
     }
+    for (const g of [f.goal, f.plan?.goal].filter(Boolean)) if (!entities.has(g.of) || !g.attr || g.value == null) err(f.id, 'a goal is {of: an entity, attr, value}');
     for (const k of ['at', 'from', 'to', 'after', 'before']) if (f.time?.[k] && !timeIds.has(f.time[k])) err(f.id, `time.${k}: no time ${f.time[k]}`);
     if (!f.time || !Object.keys(f.time).length) err(f.id, 'no time');
     const basis = f.basis ?? 'stated';

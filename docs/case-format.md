@@ -562,7 +562,18 @@ the other side of the door from where it was). A door's sides are in `world/enti
 outside]}`; a place within the inside counts as inside, only the outside itself as outside). Where a thing is at a
 time (`placeAt`): a location covering it, or the latest one with no end (a place lasts until something moves it).
 Only the actions that matter are typed (Hunter going out through the stable door and locking it, Straker's
-unlocking and opening it at ¶220); the validator checks `act`, `thing` and a typed state's value. A question's entry may carry `act` and `thing` too, so a
+unlocking and opening it at ¶220, the stranger's asking Hunter for the tip); the validator checks `act`, the roles,
+a typed state's value, plans and goals. The rules name their subjects by role: `agent` (the fact's `of`), `thing`,
+`to`, `item`, `about`, `via` (the action table: lock, unlock, open, close, go_through, lead_out, give, ask, drug,
+strike, hide). Two names of one person count as one once an identity is on the timeline or circled (the stranger
+and Simpson); an animal is where it lives unless something moves it; over a night, a place seen only at a point
+before it does not count.
+
+**Intentions.** An intention is a goal, a state in the world model's shape (`goal: {of, attr, value}`), and a plan,
+typed steps whose effects feed the next step's needs. A fact may carry a goal (the stranger wants the boy to have
+the paper); a question's possibilities may (the stranger's aims: to know the tip, to know the way, Hunter drugged,
+the horse in his hands), so a circled aim is an intention of the player's hypothesis; a claim may carry a plan
+(`plan: {agent, goal, steps}`, each step a typed action with its own time: the police theory is Simpson's). A question's entry may carry `act` and `thing` too, so a
 change the player points out can be recognised as its entry (who opened the stable door). Persistence
 (`holdsBefore`): a state lasts until something specific changes it; events the story never tells are not invented.
 The player's moves, each checked by these rules, give entries with the source *Watson's reasoning*, as trusted as
@@ -574,6 +585,16 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   it); a change from (a) gives only its other needs (the key), its states being its premises. Each requirement is
   shown met, against (persistence gives another value) or with nothing on the timeline saying so
   (`requirementStatus`).
+- (c) `checkFit`, "what is this for?": an action or an intention serves an intention if something it brings about
+  (`productsOf`: an action's effects; an intention's goal, and what that goal brings with it) meets the goal or a
+  need of a step already linked to it, so a plan is built one link at a time from the goal back. An effect that
+  holds only for some kinds of an item fits on that condition ("if the paper is money or a message"); the kinds
+  still open are those of the item's contents question (`kind` on its possibilities) that the player has not
+  crossed out, or the circled ones. A link is an entry `{attr: 'purpose', for, serves}` from Watson's reasoning, and
+  disappears when it no longer fits (the paper circled as a drug).
+- (d) `checkPlan`, "what would this need?": a plan's steps in order, each need met by an earlier step's effect, by
+  the timeline, or by nothing (`open`), and whether the steps reach the goal. On a claim's plan (the police theory)
+  or on the steps the player has linked to an intention.
 - Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
   animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:

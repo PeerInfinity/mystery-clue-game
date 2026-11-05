@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds } from './actions.js';
+import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan } from './actions.js';
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -105,4 +105,57 @@ test('a hypothesis about who made a change: their needs, checked against the tim
     assert.deepEqual(man.map((n) => n.status), ['unknown', 'unknown'], 'on the moor at nine: over a window, it could still be');
     const keyed = agentNeeds(order, [{ id: 'k', of: 'man', attr: 'carrying', value: 'a duplicate key', time: { after: 'tout', before: 'tmorn' } }], change, 'man', nameOf, ctx);
     assert.equal(keyed[0].status, 'met');
+});
+
+// The stranger in small: he asks the boy for the tip; he wants the boy to have the paper.
+const asks = { id: 'f.asks', of: 'man', attr: 'says', act: 'ask', to: 'boy', about: 'the tip', time: { at: 'tout' } };
+const wantsPaper = { id: 'f.wants', of: 'man', attr: 'intends', goal: { of: 'boy', attr: 'carrying', value: 'paper' }, time: { at: 't9' } };
+const aimTip = { id: 'aim.tip', of: 'man', attr: 'intends', goal: { of: 'man', attr: 'knows', value: 'the tip' } };
+const aimWay = { id: 'aim.way', of: 'man', attr: 'intends', goal: { of: 'man', attr: 'knows', value: 'the way' } };
+const kinds = (ks) => ({ itemKinds: (item) => (item === 'paper' ? ks : null), order });
+
+test('move (c): an action serves an intention when what it brings about meets the goal', () => {
+    assert.equal(checkFit(asks, aimTip, [], nameOf, kinds(null)).fits, true, 'asking for the tip: to know the tip');
+    assert.equal(checkFit(asks, aimWay, [], nameOf, kinds(null)).fits, false, 'not to find the way');
+    assert.match(checkFit(asks, { id: 'x', of: 'man' }).why, /no goal/);
+});
+
+test('move (c) along a chain: the paper serves the tip only through a linked step, and only if it makes the boy willing', () => {
+    assert.equal(checkFit(wantsPaper, aimTip, [], nameOf, kinds(['money', 'message', 'drug'])).fits, false, 'nothing linked yet: no need it meets');
+    const open = checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['money', 'message', 'drug']));
+    assert.deepEqual([open.fits, open.cond.kinds, open.need.attr], ['if', ['money', 'message'], 'willing'], 'money or a message would make him willing to tell');
+    assert.equal(checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['money'])).fits, true);
+    assert.equal(checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['drug'])).fits, false, 'a drug would not: a poisoner does not ask the boy for a tip');
+});
+
+test('move (d): a plan, each need met by an earlier step, the timeline, or nothing', () => {
+    const plan = {
+        id: 'plan.police', agent: 'man', time: { after: 't9', before: 'tmorn' }, goal: { of: 'horse', attr: 'held_by', value: 'man' },
+        steps: [
+            { act: 'drug', to: 'boy', item: 'opium' }, { act: ['unlock', 'open'], thing: 'door' },
+            { act: 'lead_out', thing: 'horse', via: 'door' }, { act: 'hide', thing: 'horse' },
+        ],
+    };
+    const entries = [locked9, { id: 'f.horse', of: 'horse', attr: 'lives_at', value: 'stall', time: { from: 't9' } }, { id: 'f.stick', of: 'stick', attr: 'owner', value: 'man', time: { from: 't9' } },
+        { id: 'f.seen', of: 'man', attr: 'location', value: 'yard', time: { at: 't9' } }];
+    const r = checkPlan(plan, entries, nameOf, { ...ctx, order, homes: (id) => id === 'horse' });
+    assert.equal(r.goal, 'reached', 'the steps reach the goal');
+    const status = (i, attr) => r.steps[i].needs.find((n) => n.req.attr === attr)?.status;
+    assert.equal(status(1, 'door'), 'met', 'locked since nine, as unlocking needs');
+    assert.equal(r.steps[2].needs.find((n) => n.req.attr === 'door').by.step, 1, 'the door open: by the step before');
+    assert.equal(r.steps[2].needs.find((n) => n.req.of === 'horse').status, 'met', 'the horse lives in its stall, inside the door');
+    assert.equal(r.steps[1].needs.find((n) => n.req.attr === 'location').status, 'unknown', 'seen in the yard at nine: not there all night');
+    assert.deepEqual(r.open.map((n) => `${n.req.of} ${n.req.attr} ${n.req.value}`), [
+        'man carrying opium', 'man carrying a key to the stable door', 'man location door', 'man location door', 'man knows a hiding-place',
+    ], 'who sold the opium, where is the key, where could he hide the horse');
+    const armed = checkPlan({ ...plan, steps: [{ act: 'strike', to: 'boy', item: 'stick' }] }, entries, nameOf, { ...ctx, order });
+    assert.equal(armed.open.length, 0, 'his own stick: owning it will do');
+});
+
+test('two names of one person: a need of one is met by an entry of the other', () => {
+    const same = (a, b) => a === b || (new Set([a, b]).size === 2 && [a, b].every((x) => ['man', 'stranger'].includes(x)));
+    const req = pointImplications({ id: 's', of: 'man', act: 'strike', to: 'boy', item: 'stick', time: { at: 'tout' } }).entries[0];
+    const e = [{ id: 'c', of: 'stranger', attr: 'carrying', value: 'stick', time: { at: 't9' } }];
+    assert.equal(requirementStatus(order, e, req).status, 'unknown');
+    assert.equal(requirementStatus(order, e, req, { same }).status, 'met');
 });
