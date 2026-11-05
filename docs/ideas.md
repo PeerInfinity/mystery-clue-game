@@ -162,6 +162,49 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   first line of the entry before it, so an entry starts one line below the start of the previous one, or below the end
   of the entry above it in its own column, whichever is lower; entries in different columns sit side by side. A time
   point (and a time event) spans the grid and starts below everything before it.
+- **The player's moves (the user's rulings, 2026-11-04), not yet built.** Settled by discussing three topics (marks
+  on questions, entries added by hand, inferences) and working two examples on paper.
+  - *Marks on questions.* Each possibility is uncertain (the default), circled or crossed out; several may be
+    circled. A question with a place in time is shown there on the timeline, marked as a question, and all are in a
+    Questions panel. A circled possibility is an entry on the timeline (several for one question if so circled); a
+    crossed-out one is the player's denial of it. Both take part in contradictions as far as the data can recognise
+    them (a crossed-out pick against a claim asserting it), except two circles of one question, which are an open
+    choice and not reported. Their source is *Watson's hypothesis*. No hints beyond tracking contradictions.
+  - *The stable door (¶20–33), worked on paper.* At ¶30 the story's Watson makes the move himself ("Did the
+    stable-boy … leave the door unlocked behind him?"). It needs states with exclusive values (locked / shut / open),
+    a **generic action table** (an action type's requirements and effects: unlocking needs that door's key and
+    leaves it unlocked; going through needs it open), persistence and "a change needs an action". Run over the story:
+    Hunter going out through a locked door carried a key (no line says so, and it makes him a real candidate for
+    opening it); locked at night and open at seven means an opening between, by "?", needing a key: the question's
+    entry, and Holmes's "where is the key?" (¶57) is that requirement unmet. Rulings: the action table is generic
+    where possible, the case types only the actions that matter; **the engine itself runs persistence** (a state
+    lasts until something specific changes it); events the story never tells (Hunter going back in, which would
+    leave the door unlocked) are left out unless the player points them out. The player's "point out" moves, each
+    checked by the generic rules: (a) two states of one thing differ, so an action of change took place between;
+    (b) an action, so what it requires and what it effects.
+  - *The stranger's intention (¶22–28), worked on paper.* An intention is a goal (a state in the world model's own
+    shape: the tout wants a `knows`, Straker later a lame horse) and a plan (typed actions whose effects feed the
+    next step's requirements), with "in order to" between goals. The plan's fit closes only if the paper makes Hunter
+    willing: money or a message fit, a drug does not (the reader's "a poisoner would not ask a witness to pass the
+    poison", reached without an authored rule). The police theory is Simpson's plan, and Holmes's objections at ¶57
+    are its requirements nothing on the timeline meets; Straker's plan, with every requirement met, is most of
+    Holmes's explanation. Moves: (c) "what is this for?" (an action as a step of an intention: the engine checks the
+    fit) and (d) "what would this need?" (the requirements of a plan, the player's or a claim's, that nothing on the
+    timeline meets), on request; this counts as tracking, like contradictions, not a hint. The goal and its motive
+    as a move of their own: later, only if the logic needs it. Clashes that are only likely (the stranger "lost"
+    while knowing the stable's night routine): wanted eventually, out of the first version if hard.
+  - *Sources.* An entry the player adds and the engine verifies (moves a–d) has the source *Watson's reasoning*; its
+    chains run through its premises, so it is as trusted as its weakest premise. Arbitrary entries added by hand
+    (a form over entities, attributes, values and times) are undecided and not in the first version: it starts
+    with direct implications the engine can verify.
+  - *The gate.* Before the story gives away the answer to a question a reader could have reached earlier, the player
+    must commit: exactly one possibility circled, any answer passing (a gate opening only on the right answer would
+    be an oracle to guess against). At the give-away the answer key shows, with wrong circles and crossings marked.
+    Latent questions are not gated. The pile-up (19 give-aways in ¶212–229, five at ¶226) is to be seen in play
+    before it is designed around.
+  - *Order of work:* questions and marks; typed states, the action table, persistence and moves (a)–(b), tried on
+    the door; intentions and moves (c)–(d), tried on the stranger and the police theory; the gate. Later: likely
+    clashes, named scenarios (sets of hypotheses switched on and off together), entries by hand.
 
 ### An incremental game about trying every combination
 
