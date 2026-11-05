@@ -258,6 +258,13 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   always one. The page's parts are moved where the layout puts them, so each is drawn the same in every layout. The
   threshold, "show the rest" and reset moved into a Settings menu like the game's; reading on and undo stay in the
   header.
+- **Built (2026-11-05), the ⚙ mark and the filter:** an entry the player can reason from (a typed state, a typed
+  action, an intention with a goal, a claim with a plan, a circled aim with a goal) is marked ⚙, and the timeline
+  can show only those ("Show: only entries with moves"; at ¶46, 8 of 271 entries). Known problem: since only the
+  actions that matter are typed, the mark, and the filter more so, point at what matters (Hunter going out, at
+  ¶29, before the reader has a reason to think of the door). **The user's ruling:** distracting data (typing the
+  ordinary actions and states too, so the mark stops singling any out) is for later; when it is added, it is
+  flagged as distracting (e.g. `distractor: true` on the fact's typing), so an option can turn the distractions off.
 
 ### An incremental game about trying every combination
 

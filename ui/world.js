@@ -59,11 +59,11 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system' };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false };
 try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 state.sel = null;
 state.note = null;
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, layout: state.layout, panels: state.panels, theme: state.theme })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -290,6 +290,12 @@ function questionRows(q, clashing, tag = 'li') {
 }
 
 /** The events (all, or one entity's) in time order, under the time points they start at, with the questions. */
+/**
+ * The timeline's filter "only entries with moves": an entry marked ⚙, and a question only where a circled answer of
+ * it is (a circled aim with a goal). Elsewhere (an entity's own timeline in the detail) everything shows.
+ */
+const movesOnly = (f) => !state.onlyMoves || canReason(f);
+const movesOnlyQ = (q) => !state.onlyMoves || q.possibilities.some((p) => p.goal && markOf(q, p.value) === 'circled');
 function eventList(filter, clashing, qFilter = () => true) {
     const shown = allFacts().filter((f) => visible(f) && filter(f) && (state.showBelow || accepted(f)));
     const at = new Map();
@@ -358,12 +364,12 @@ function sourceOf(f) {
     return best.origin ?? '?';
 }
 function eventGrid(clashing) {
-    const shown = allFacts().filter((f) => visible(f) && (state.showBelow || accepted(f)));
+    const shown = allFacts().filter((f) => visible(f) && movesOnly(f) && (state.showBelow || accepted(f)));
     const colOf = (f) => (state.view === 'source' ? sourceOf(f) : placeColumn(placeOf(f))) ?? '—';
     const at = new Map();
     for (const f of shown) { const a = anchorOf(f.time ?? {}); at.set(a, [...(at.get(a) ?? []), f]); }
     const qs = new Map();
-    for (const q of listedQuestions()) { const a = qAnchor(q); if (a) qs.set(a, [...(qs.get(a) ?? []), q]); }
+    for (const q of listedQuestions()) { const a = qAnchor(q); if (a && movesOnlyQ(q)) qs.set(a, [...(qs.get(a) ?? []), q]); }
     const rows = [];
     const cols = [];
     for (const id of data.order.sorted) {
@@ -566,10 +572,11 @@ function render() {
     const ol = document.querySelector('#q-box ol');
     if (ol) ol.scrollTop = qScroll;
     document.getElementById('view').value = state.view;
+    document.getElementById('only-moves').value = state.onlyMoves ? 'moves' : 'all';
     document.getElementById('depth').value = String(state.depth);
     document.getElementById('depth-label').hidden = state.view !== 'place';
     document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
-    document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(() => true, clashing) : eventGrid(clashing);
+    document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing);
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
     renderTabs({ questions: listedQuestions().length, clashes: clashes.length });
     renderDetail(clashing);
@@ -899,6 +906,7 @@ document.getElementById('next').addEventListener('click', () => setPara(state.pa
 document.getElementById('back').addEventListener('click', () => setPara(state.para - 1));
 document.getElementById('para').addEventListener('change', (e) => setPara(Number(e.target.value)));
 document.getElementById('threshold').addEventListener('change', (e) => { state.threshold = Number(e.target.value); save(); render(); });
+document.getElementById('only-moves').addEventListener('change', (e) => { state.onlyMoves = e.target.value === 'moves'; save(); render(); });
 document.getElementById('view').addEventListener('change', (e) => { state.view = e.target.value; save(); render(); });
 document.getElementById('depth').addEventListener('change', (e) => { state.depth = Number(e.target.value); save(); render(); });
 document.getElementById('show-below').addEventListener('change', (e) => { state.showBelow = e.target.checked; save(); render(); });
