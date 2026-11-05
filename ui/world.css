@@ -63,6 +63,28 @@ p.bad { color: var(--bad); } p.good { color: var(--good); }
 .pack-item .event { padding: 1px 3px; background: var(--bg); }
 .pack-time { font-family: var(--serif); font-size: 13px; color: var(--accent); background: var(--bg); padding: 4px 6px 1px; border-top: 1px solid var(--line); font-weight: 600; }
 .grid-span { color: var(--accent); }
+/* Questions: the panel, their place on the timeline, the player's marks. */
+.q-box { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 13px; background: var(--panel); }
+.q-box summary { cursor: pointer; font-weight: 600; }
+.q-box ol { margin: 6px 0; padding-left: 20px; max-height: 45vh; overflow: auto; }
+.q-box li { margin: 6px 0; }
+.q-box li.sel { outline: 1px solid var(--accent); border-radius: 4px; padding: 2px 4px; }
+.q-box li.clash > a { color: var(--bad); }
+.poss-row { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0; }
+.poss { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 12px; border: 1px dashed var(--muted); background: transparent; color: var(--ink); cursor: pointer; }
+.poss.circled { border: 2px solid var(--accent); font-weight: 600; }
+.poss.crossed { text-decoration: line-through; color: var(--muted); border-style: solid; border-color: var(--line); }
+.poss.right { box-shadow: 0 0 0 2px var(--good); }
+.poss.wrong { box-shadow: 0 0 0 2px var(--bad); }
+.q-mark { display: inline-block; width: 1.2em; text-align: center; border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 11px; margin-right: 4px; }
+.events .question, .grid-span .question { cursor: pointer; border: 1px dashed var(--accent); border-radius: 6px; margin: 2px 0; color: var(--accent); }
+.question.sel { outline: 1px solid var(--accent); }
+.question.clash { background: var(--bad-soft); }
+.event.hyp { border-left: 3px dashed var(--accent); margin-left: 14px; font-style: italic; }
+.event.hyp.right { border-left-color: var(--good); }
+.event.hyp.wrong { border-left-color: var(--bad); text-decoration: line-through; }
+.marks { list-style: none; padding: 0; font-size: 13px; }
+
 @media (max-width: 1000px) {
   .world-main { grid-template-columns: 1fr; }
   .world-story, .world-detail { position: static; max-height: 40vh; }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -102,4 +102,26 @@ test('the links whose distrust alone takes a fact off the timeline: those every 
     assert.deepEqual(r.people, ['edith', 'police', 'papers']);
     assert.deepEqual(resolvingLinks([{ links: [] }]).links, [], "Watson's own: nothing takes it off");
     assert.deepEqual(resolvingLinks([a], {}, 0).links, [], 'threshold distrusted: nothing is below it');
+});
+
+test("the player's marks: circled asserts, crossed out denies; two circles of one question are no contradiction", () => {
+    const questions = [{ id: 'q.who', answer: 'man', possibilities: [{ value: 'man' }, { value: 'horse' }, { value: 'something else' }] }];
+    const claim = { id: 's1', of: 'man', attr: 'says', value: 'x', time: { at: 't2' }, para: 2, quote: 'x', asserts: [{ q: 'q.who', pick: 'horse' }] };
+    const w = world([claim], questions);
+    const marks = { 'q.who': { man: 'circled', horse: 'circled', 'something else': 'crossed', nobody: 'circled' } };
+    const ms = markAssertions(w, marks);
+    assert.deepEqual(ms.map((x) => [x.pick, x.neg, x.truth]), [['man', false, true], ['horse', false, false], ['something else', true, true]], 'an unknown possibility is ignored');
+    assert.ok(ms.every((x) => x.by === HYPOTHESIS && x.fact === null));
+    const clash = (acc) => contradictions(w, acc).map((c) => c.why).sort();
+    assert.deepEqual(clash([...assertions(w), ...ms]), ['q.who: horse or man'], 'the claim against the circled man; the two circles not');
+    assert.deepEqual(clash([...assertions(w), ...markAssertions(w, { 'q.who': { horse: 'crossed' } })]), ['q.who: horse, asserted and denied'], 'crossed out against the claim');
+    assert.deepEqual(markAssertions(w, marks, (q, pick) => pick !== 'man').map((x) => x.pick), ['horse', 'something else'], 'only what is shown');
+});
+
+test("a mark's chain: one link from Watson's hypothesis, starting uncertain, capped like a person", () => {
+    const c = hypothesisChain('q.who', 'man');
+    assert.equal(linkKey(c.links[0]), hypothesisKey('q.who', 'man'));
+    assert.equal(LEVELS[chainLevel(c)], 'uncertain');
+    assert.equal(LEVELS[chainLevel(c, { links: { [hypothesisKey('q.who', 'man')]: 2 } })], 'trusted');
+    assert.equal(LEVELS[chainLevel(c, { links: { [hypothesisKey('q.who', 'man')]: 2 }, people: { [HYPOTHESIS]: 0 } })], 'distrusted');
 });

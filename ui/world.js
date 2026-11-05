@@ -3,7 +3,7 @@
 // trusted as far as the player says (engine/world.js). Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS } from '../engine/world.js';
+import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS } from '../engine/world.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -37,18 +37,29 @@ const qById = new Map(data.questions.map((q) => [q.id, q]));
 const accountById = new Map(data.accounts.map((a) => [a.id, a]));
 const LAST = story.length - 1;
 
-// --- State: how far the story is read, and the player's trust. Saved in this browser only.
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, history: [], view: 'list', depth: 2, sel: null };
+// --- State: how far the story is read, the player's trust and marks on questions. Saved in this browser only.
+// `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, history: [], view: 'list', depth: 2, sel: null, qOpen: true };
 try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 state.sel = null;
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, history: state.history, view: state.view, depth: state.depth })); } catch { /* not saved */ } };
-// Every change of trust can be undone: the trust before it is kept (the last 50).
-const changeTrust = (fn) => { state.history = [...state.history, JSON.stringify(state.trust)].slice(-50); fn(state.trust); save(); render(); };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen })); } catch { /* not saved */ } };
+// Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
+const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks })].slice(-50); };
+const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
+const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
+function cycleMark(qid, pick) {
+    remember();
+    const m = { ...(state.marks[qid] ?? {}) };
+    const next = MARK_NEXT[m[pick]];
+    if (next) m[pick] = next; else delete m[pick];
+    state.marks = { ...state.marks, [qid]: m };
+    save(); render();
+}
 
 // --- Words.
 const DAYS = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
-const nameOf = (id) => (id === '?' ? 'someone' : entityById.get(id)?.name ?? id);
-const ent = (id) => (id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ?? ''));
+const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'Watson’s hypothesis' : entityById.get(id)?.name ?? id);
+const ent = (id) => (id === HYPOTHESIS ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ?? ''));
 // A value: an entity id becomes its name; a text that starts with one ("silver_blaze (in his keeping)") too.
 const val = (v) => list(v).map((x) => {
     if (x == null) return '<span class="muted">unknown</span>';
@@ -66,6 +77,20 @@ const timeLabel = (id) => {
     return esc([DAYS[t.day], t.clock].filter(Boolean).join(', ') || 'a time not yet told');
 };
 const qVisible = (q) => q && ((q.raised != null && q.raised <= state.para) || (q.answer_given_at != null && q.answer_given_at <= state.para));
+// The player's questions: raised (or answered) so far; a question about provenance only if the story raises it.
+const qListed = (q) => qVisible(q) && (q.kind !== 'provenance' || (q.raised != null && q.raised <= state.para));
+const listedQuestions = () => data.questions.filter(qListed).sort((a, b) => (a.raised ?? a.answer_given_at) - (b.raised ?? b.answer_given_at));
+const possShown = (q, pick) => qListed(q) && q.possibilities.some((p) => p.value === pick && p.available <= state.para);
+const shownPossibilities = (q) => q.possibilities.filter((p) => p.available <= state.para);
+const markOf = (q, pick) => state.marks[q.id]?.[pick];
+const givenAway = (q) => q.answer != null && q.answer_given_at != null && q.answer_given_at <= state.para;
+// The time point a question sits at on the timeline, if its entry has one.
+const qAnchor = (q) => {
+    const t = q.entry?.time;
+    const id = typeof t === 'string' ? t : t ? (t.at ?? t.from ?? t.after ?? t.before ?? t.to) : null;
+    return id && timeById.has(id) ? id : null;
+};
+const markLevel = (q, pick) => levelOf([hypothesisChain(q, pick)], state.trust);
 const pickText = (q, pick) => (entityById.has(pick) ? ent(pick) : esc(pick));
 
 /** A fact as a short sentence. */
@@ -113,19 +138,20 @@ function levelOfFact(f) {
     return levelOf(chainsOf(f), state.trust);
 }
 /** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
-const chainsOfAssertion = (x) => (x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factById.get(x.fact)));
+const chainsOfAssertion = (x) => (x.mark ? [hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factById.get(x.fact)));
 /** Told by the paragraph read to, and modelled (a chain reaches Watson, or a telling). */
 const visible = (f) => { const g = givenAt(f); return g != null && g <= state.para && levelOfFact(f) != null; };
 const accepted = (f) => levelOfFact(f) >= state.threshold;
 
-/** The assertions on the timeline: told so far, and trusted at least to the threshold. */
+/** The assertions on the timeline: told so far, and trusted at least to the threshold; and the player's marks. */
 function acceptedAssertions() {
-    return allAssertions.filter((x) => {
+    const marks = markAssertions(data, state.marks, possShown).filter((x) => markLevel(x.q, x.pick) >= state.threshold);
+    return [...marks, ...allAssertions.filter((x) => {
         const f = factById.get(x.fact);
         if (!visible(f)) return false;
         if (x.claim && x.claim === x.fact) return levelOf(prov.claimChains(x.claim), state.trust) >= state.threshold;
         return accepted(f);
-    });
+    })];
 }
 
 // --- Rendering.
@@ -160,20 +186,48 @@ function eventRow(f, clashing, tag = 'li') {
     return `<${tag} class="${cls}" data-fact="${esc(f.id)}">${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span> <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
 }
 
-/** The events (all, or one entity's) in time order, under the time points they start at. */
-function eventList(filter, clashing) {
+/** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
+function hypPhrase(q, pick) {
+    const e = q.entry ?? {};
+    if (pick === 'something else') return `${esc(q.label)} <b>Something else</b>`;
+    if (e.of === '?') return `${pickText(q, pick)}: ${esc(e.value ?? q.label)}`;
+    if (e.value == null && ['location', 'identity', 'intends', 'contents', 'carrying', 'owner'].includes(e.attr)) return phrase({ of: e.of, attr: e.attr, value: pick });
+    return `${esc(q.label)} <b>${pickText(q, pick)}</b>`;
+}
+/** A question at its place on the timeline, with its circled possibilities as entries under it. */
+function questionRows(q, clashing, tag = 'li') {
+    const sel = state.sel === `q:${q.id}` ? ' sel' : '';
+    const crossed = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'crossed').map((p) => pickText(q, p.value));
+    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(q.label)} <span class="para">¶${q.raised ?? q.answer_given_at}</span>${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></span>` : ''}</${tag}>`;
+    const circles = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'circled').map((p) => {
+        const lvl = markLevel(q, p.value);
+        if (lvl < state.threshold && !state.showBelow) return '';
+        const cls = ['event', 'hyp', lvl < state.threshold ? 'below' : '', clashing.has(hypothesisKey(q.id, p.value)) ? 'clash' : '', givenAway(q) ? (p.value === q.answer ? 'right' : 'wrong') : ''].filter(Boolean).join(' ');
+        return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span></${tag}>`;
+    });
+    return [head, ...circles];
+}
+
+/** The events (all, or one entity's) in time order, under the time points they start at, with the questions. */
+function eventList(filter, clashing, qFilter = () => true) {
     const shown = data.facts.filter((f) => visible(f) && filter(f) && (state.showBelow || accepted(f)));
     const at = new Map();
     for (const f of shown) {
         const a = anchorOf(f.time ?? {});
         at.set(a, [...(at.get(a) ?? []), f]);
     }
+    const qs = new Map();
+    for (const q of listedQuestions()) {
+        const a = qAnchor(q);
+        if (a && qFilter(q)) qs.set(a, [...(qs.get(a) ?? []), q]);
+    }
     const out = [];
     for (const id of data.order.sorted) {
-        const fs = at.get(id);
-        if (!fs) continue;
+        const fs = at.get(id) ?? [];
+        const qq = qs.get(id) ?? [];
+        if (!fs.length && !qq.length) continue;
         fs.sort((a, b) => givenAt(a) - givenAt(b));
-        out.push(`<li class="time-head">${timeLabel(id)}</li>`, ...fs.map((f) => eventRow(f, clashing)));
+        out.push(`<li class="time-head">${timeLabel(id)}</li>`, ...fs.map((f) => eventRow(f, clashing)), ...qq.flatMap((q) => questionRows(q, clashing)));
     }
     return out.length ? `<ol class="events">${out.join('')}</ol>` : '<p class="muted">Nothing yet.</p>';
 }
@@ -226,11 +280,14 @@ function eventGrid(clashing) {
     const colOf = (f) => (state.view === 'source' ? sourceOf(f) : placeColumn(placeOf(f))) ?? '—';
     const at = new Map();
     for (const f of shown) { const a = anchorOf(f.time ?? {}); at.set(a, [...(at.get(a) ?? []), f]); }
+    const qs = new Map();
+    for (const q of listedQuestions()) { const a = qAnchor(q); if (a) qs.set(a, [...(qs.get(a) ?? []), q]); }
     const rows = [];
     const cols = [];
     for (const id of data.order.sorted) {
-        const fs = at.get(id);
-        if (!fs) continue;
+        const fs = at.get(id) ?? [];
+        const qq = qs.get(id) ?? [];
+        if (!fs.length && !qq.length) continue;
         fs.sort((a, b) => givenAt(a) - givenAt(b));
         rows.push({ head: id });
         for (const f of fs) {
@@ -238,6 +295,7 @@ function eventGrid(clashing) {
             if (c && !cols.includes(c)) cols.push(c);
             rows.push({ f, c });
         }
+        for (const q of qq) for (const html of questionRows(q, clashing, 'div')) if (html) rows.push({ html });
     }
     if (!rows.length) return '<p class="muted">Nothing yet.</p>';
     // Columns in order of first appearance, those of one region together; "—" (no place known) last.
@@ -249,6 +307,7 @@ function eventGrid(clashing) {
     const head = `<div class="pack-head" style="--cols:${cols.length}">${cols.map((c) => `<div>${colName(c)}</div>`).join('')}</div>`;
     const body = rows.map((r) => {
         if (r.head) return `<div class="pack-item pack-time">${timeLabel(r.head)}</div>`;
+        if (r.html) return `<div class="pack-item grid-span">${r.html}</div>`;
         if (!r.c) return `<div class="pack-item grid-span">${eventRow(r.f, clashing, 'div')}</div>`;
         return `<div class="pack-item" data-col="${cols.indexOf(r.c)}">${eventRow(r.f, clashing, 'div')}</div>`;
     }).join('');
@@ -290,7 +349,9 @@ function packGrid() {
     body.style.height = `${Math.max(...bottoms, 0)}px`;
 }
 
+const markText = (x) => `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}`;
 function clashSide(x) {
+    if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${markText(x)}</a>`;
     const f = factById.get(x.fact);
     if (x.kind === 'pick') {
         const q = qById.get(x.q);
@@ -323,12 +384,13 @@ function render() {
     st.lastElementChild?.scrollIntoView({ block: 'nearest' });
 
     const clashes = contradictions(data, acceptedAssertions());
-    const clashing = new Set(clashes.flatMap((c) => [c.a.fact, c.b.fact]));
+    const clashing = new Set(clashes.flatMap((c) => [c.a, c.b]).flatMap((x) => (x.mark ? [x.id, `q:${x.q}`] : [x.fact])));
     current = clashes;
     document.getElementById('undo').disabled = !state.history.length;
     document.getElementById('clashes').innerHTML = clashes.length
         ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
         : '';
+    document.getElementById('questions').innerHTML = questionsPanel(clashing);
     document.getElementById('view').value = state.view;
     document.getElementById('depth').value = String(state.depth);
     document.getElementById('depth-label').hidden = state.view !== 'place';
@@ -371,9 +433,14 @@ function dropCounts(chains) {
 const dropChip = (n) => (!n ? '' : ` <span class="drop" title="Distrusting it takes ${n} event${n === 1 ? '' : 's'} now on the timeline off it">−${n}</span>`);
 
 function sideHtml(x, label) {
-    const f = factById.get(x.fact);
     const chains = chainsOfAssertion(x);
     const r = { ...resolvingLinks(chains, state.trust, state.threshold), drop: dropCounts(chains) };
+    if (x.mark) {
+        return `<div class="side"><h3>${label}</h3><p><a class="link" data-q="${esc(x.q)}">${markText(x)}</a></p>
+      <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>. Change the mark, or lower your trust in it.</p>
+      <ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
+    }
+    const f = factById.get(x.fact);
     const what = x.kind === 'pick'
         ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : ''}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
         : phrase(f);
@@ -381,6 +448,32 @@ function sideHtml(x, label) {
       <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>${r.links.length || r.people.length ? '; <span class="resolving">marked</span>: distrusting it alone takes this side off the timeline' : '; no single link takes it off: it has independent chains'}.</p>
       <ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
+}
+
+// --- Questions: the panel, and one question in the detail.
+const MARK_TITLE = { undefined: 'Uncertain: click to circle', circled: 'Circled: click to cross out', crossed: 'Crossed out: click to make uncertain again' };
+function chip(q, p) {
+    const m = markOf(q, p.value);
+    const judged = givenAway(q) && m ? ((m === 'circled') === (p.value === q.answer) ? ' right' : ' wrong') : '';
+    return `<button type="button" class="poss ${m ?? 'open'}${judged}" data-mark-q="${esc(q.id)}" data-mark-pick="${esc(p.value)}" title="${MARK_TITLE[m]}">${pickText(q, p.value)}</button>`;
+}
+function questionsPanel(clashing) {
+    const qs = listedQuestions();
+    if (!qs.length) return '';
+    const items = qs.map((q) => `<li class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
+      <div class="poss-row">${shownPossibilities(q).map((p) => chip(q, p)).join('')}</div>${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></div>` : ''}</li>`).join('');
+    return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">Click a possibility to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
+}
+function questionDetail(q, clashing) {
+    const marked = shownPossibilities(q).filter((p) => markOf(q, p.value));
+    const chains = marked.map((p) => hypothesisChain(q.id, p.value));
+    const markLi = marked.map((p) => `<li>${markOf(q, p.value) === 'circled' ? 'Circled' : 'Crossed out'}: ${pickText(q, p.value)}${clashing.has(hypothesisKey(q.id, p.value)) ? ' <span class="bad small">in a contradiction</span>' : ''}<ul class="chains">${chainHtml(hypothesisChain(q.id, p.value))}</ul></li>`).join('');
+    return `<h2><span class="q-mark">?</span> ${esc(q.label)}</h2>
+      <p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>
+      ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
+      <div class="poss-row">${shownPossibilities(q).map((p) => chip(q, p)).join('')}</div>
+      ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>` : ''}
+      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}`;
 }
 
 function renderDetail(clashing) {
@@ -408,8 +501,12 @@ function renderDetail(clashing) {
           ${peopleHtml([...chains, ...content])}`;
         return;
     }
+    if (sel?.startsWith('q:') && qById.has(sel.slice(2)) && qListed(qById.get(sel.slice(2)))) {
+        el.innerHTML = questionDetail(qById.get(sel.slice(2)), clashing);
+        return;
+    }
     if (sel && entityById.has(sel)) {
-        el.innerHTML = `<h2>${esc(nameOf(sel))}</h2><h3>Its timeline</h3>${eventList((f) => f.of === sel, clashing)}`;
+        el.innerHTML = `<h2>${esc(nameOf(sel))}</h2><h3>Its timeline</h3>${eventList((f) => f.of === sel, clashing, (q) => q.entry?.of === sel)}`;
         return;
     }
     el.innerHTML = '<p class="muted">Click an event for where it comes from, or a name for its own timeline.</p>';
@@ -428,13 +525,19 @@ document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Put every link and person back to uncertain?')) return;
     changeTrust((tr) => { tr.links = {}; tr.people = {}; });
 });
+document.addEventListener('toggle', (e) => { if (e.target.id === 'q-box') { state.qOpen = e.target.open; save(); } }, true);
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
-    state.trust = JSON.parse(state.history.at(-1));
+    const h = JSON.parse(state.history.at(-1));
+    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; } else state.trust = h;
     state.history = state.history.slice(0, -1);
     save(); render();
 });
 document.addEventListener('click', (e) => {
+    const m = e.target.closest('[data-mark-q]');
+    if (m) { cycleMark(m.dataset.markQ, m.dataset.markPick); return; }
+    const q = e.target.closest('[data-q]');
+    if (q && !e.target.closest('select, [data-ent]')) { state.sel = `q:${q.dataset.q}`; render(); return; }
     const t = e.target.closest('[data-clash]');
     if (t) { state.sel = t.dataset.clash; render(); return; }
     const a = e.target.closest('[data-ent]');

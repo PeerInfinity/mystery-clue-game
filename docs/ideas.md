@@ -205,6 +205,19 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   - *Order of work:* questions and marks; typed states, the action table, persistence and moves (a)–(b), tried on
     the door; intentions and moves (c)–(d), tried on the stranger and the police theory; the gate. Later: likely
     clashes, named scenarios (sets of hypotheses switched on and off together), entries by hand.
+- **Built (2026-11-04), questions and marks (step 1):** a Questions panel (the questions raised so far, in the order
+  raised, each with its possibilities available so far as chips: click to circle, again to cross out, again to leave
+  uncertain) and each question with a time in its entry shown at that time point on the timeline, marked "?", with
+  what is crossed out beside it and each circle as an entry under it (the question's entry with the possibility
+  filled in). A question's detail shows its marks, each on its own link from Watson's hypothesis with a trust select
+  (starting uncertain) and a cap for Watson's hypothesis as a person. Marks take part in contradictions (a crossed-out
+  possibility against every claim asserting it; a circle against a claim of another), two circles of one question
+  excepted; a contradiction's side that is a mark leads to its question. Once the story gives the answer away, the
+  answer shows with its quote and each mark is judged (right or wrong). Undo covers marks as well as trust. Questions
+  whose entry has no time (who the man by the tracks is, the two Derbyshires, the bay, who drugged the supper, where
+  the opium went in) are in the panel only. Seen in play: at ¶37 the panel already offers Silver Blaze as a candidate
+  for the blow (an indirect possibility from the horse being in the hollow): the data's availability rulings now
+  decide what the menu shows, and so what it hints.
 
 ### An incremental game about trying every combination
 

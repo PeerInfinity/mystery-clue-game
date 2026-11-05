@@ -540,6 +540,13 @@ contradiction written by hand:
   So a move needs its own time point (the horse near Mapleton at dawn, led into Mapleton after: `t.tue_into_mapleton`).
 - Claims with `modal: possible` take no part.
 
+**The player's marks** (`markAssertions`). Each possibility of a question is uncertain (unmarked), circled or crossed
+out; several may be circled. A circle asserts the possibility and a crossing denies it, as picks with `mark` set and
+no fact, so they meet the claims' picks in the contradictions above; two circles of one question are an open choice
+and are not reported. Each mark comes on its own link from *Watson's hypothesis* (`hypothesisChain`, keyed
+`hyp:<question>=<possibility>`), which starts uncertain like any other link; Watson's hypothesis is a person of its
+own, so one cap covers every mark. Only marks on questions raised so far and on possibilities available so far count.
+
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
 chain with no links is Watson's own and certain; every link starts uncertain, and the player may set it lower or
 higher (never certain). A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words

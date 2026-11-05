@@ -20,7 +20,7 @@
       <select id="threshold"></select>
     </label>
     <label title="Show the facts below the threshold too, faded."><input type="checkbox" id="show-below"> show the rest</label>
-    <button type="button" id="undo" class="quiet" title="Undo the last change of trust">Undo</button>
+    <button type="button" id="undo" class="quiet" title="Undo the last change of trust or of a mark">Undo</button>
     <button type="button" id="reset" class="quiet" title="Every link back to uncertain">Reset trust</button>
     <a href="./" class="small">The game</a>
   </div>
@@ -29,6 +29,7 @@
   <section class="world-story" aria-label="The story so far"><h2>The story</h2><div id="story"></div></section>
   <section class="world-timeline" aria-label="The timeline">
     <div id="clashes"></div>
+    <div id="questions"></div>
     <div class="view-bar"><h2>The timeline</h2>
       <span class="small"><label>View <select id="view"><option value="list">List</option><option value="place">Grid by place</option><option value="source">Grid by source</option></select></label>
       <label id="depth-label">Places <select id="depth"><option value="1">by region</option><option value="2">by area</option><option value="3">by place</option><option value="9">in full</option></select></label></span>

@@ -158,6 +158,32 @@ export function assertions(data) {
     return out;
 }
 
+/**
+ * The player's marks on questions as assertions: a circled possibility asserts it, a crossed-out one denies it, each
+ * on its own link from Watson's hypothesis (`hypothesisChain`). `marks`: `{q: {pick: 'circled' | 'crossed'}}`; only
+ * the questions and possibilities in `shown` (a function (q, pick) → bool), if given, count. Truth by the answer key.
+ */
+export function markAssertions(data, marks = {}, shown = null) {
+    const qById = new Map(data.questions.map((q) => [q.id, q]));
+    const out = [];
+    for (const [qid, picks] of Object.entries(marks)) {
+        const q = qById.get(qid);
+        if (!q) continue;
+        for (const [pick, mark] of Object.entries(picks)) {
+            if (mark !== 'circled' && mark !== 'crossed') continue;
+            if (!q.possibilities.some((p) => p.value === pick) || (shown && !shown(q, pick))) continue;
+            const neg = mark === 'crossed';
+            out.push({ id: hypothesisKey(qid, pick), fact: null, kind: 'pick', q: qid, pick, neg, mark, by: HYPOTHESIS, truth: q.answer == null ? null : (pick === q.answer) !== neg });
+        }
+    }
+    return out;
+}
+/** Watson's hypothesis: the source of the player's marks, a person of its own so that one cap covers them all. */
+export const HYPOTHESIS = 'watsons_hypothesis';
+export const hypothesisKey = (q, pick) => `hyp:${q}=${pick}`;
+/** The one chain of a mark: a single link from Watson's hypothesis, keyed by the mark, starting uncertain. */
+export const hypothesisChain = (q, pick) => ({ account: null, origin: HYPOTHESIS, links: [{ from: HYPOTHESIS, to: 'watson', how: 'hypothesis', hyp: hypothesisKey(q, pick), uncertain: false }] });
+
 /** Places: what each is within, and which move (vehicles, and any thing that is not a place). */
 export function places(data) {
     const byId = new Map(data.entities.map((e) => [e.id, e]));
@@ -179,7 +205,7 @@ export function places(data) {
  *   whose values cannot both hold: two places neither within the other (a thing that moves, or a person carrying
  *   it, is placed through its own location at that time where that is certain), different identities, or a place
  *   and its denial (`neg`) of the same place or one containing it.
- * Claims with `modal: 'possible'` take no part.
+ * Claims with `modal: 'possible'` take no part. Two circled marks of one question are an open choice, not reported.
  */
 export function contradictions(data, accepted = null) {
     const order = data.order ?? timeOrder(data.times);
@@ -191,7 +217,8 @@ export function contradictions(data, accepted = null) {
     for (const x of all) if (x.kind === 'pick') byQ.set(x.q, [...(byQ.get(x.q) ?? []), x]);
     for (const [q, xs] of byQ) for (let i = 0; i < xs.length; i++) for (let j = i + 1; j < xs.length; j++) {
         const a = xs[i], b = xs[j];
-        if (a.fact === b.fact) continue;
+        if (a.fact != null && a.fact === b.fact) continue;
+        if (a.mark === 'circled' && b.mark === 'circled') continue;
         if (!a.neg && !b.neg && a.pick !== b.pick) out.push({ a, b, why: `${q}: ${a.pick} or ${b.pick}` });
         else if (a.neg !== b.neg && a.pick === b.pick) out.push({ a, b, why: `${q}: ${a.pick}, asserted and denied` });
     }
@@ -249,9 +276,10 @@ export const DEFAULT_LEVEL = 1;
 
 /**
  * The key of a link the player can trust: a telling by its fact id; a speech (a claim's or a word's link) by
- * speaker and hearer, so all of one person's words to another share it; a member's link by member and group.
+ * speaker and hearer, so all of one person's words to another share it; a member's link by member and group; a
+ * mark's link (Watson's hypothesis) by question and possibility.
  */
-export const linkKey = (l) => (l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
+export const linkKey = (l) => (l.hyp ? l.hyp : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
 
 /**
  * How far the player trusts a chain: its weakest link, a link's level being the player's choice for it (default
