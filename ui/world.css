@@ -79,6 +79,8 @@ p.bad { color: var(--bad); } p.good { color: var(--good); }
 .poss.crossed { text-decoration: line-through; color: var(--muted); border-style: solid; border-color: var(--line); }
 .poss.right { box-shadow: 0 0 0 2px var(--good); }
 .poss.wrong { box-shadow: 0 0 0 2px var(--bad); }
+.more { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--chip); color: var(--muted); cursor: pointer; }
+.poss-group { margin: 2px 0 0 10px; }
 .q-mark { display: inline-block; width: 1.2em; text-align: center; border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 11px; margin-right: 4px; }
 .events .question, .grid-span .question { cursor: pointer; border: 1px dashed var(--accent); border-radius: 6px; margin: 2px 0; color: var(--accent); }
 .question.sel { outline: 1px solid var(--accent); }

@@ -3,7 +3,7 @@
 // trusted as far as the player says (engine/world.js). Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS } from '../engine/world.js';
+import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -80,8 +80,35 @@ const qVisible = (q) => q && ((q.raised != null && q.raised <= state.para) || (q
 // The player's questions: raised (or answered) so far; a question about provenance only if the story raises it.
 const qListed = (q) => qVisible(q) && (q.kind !== 'provenance' || (q.raised != null && q.raised <= state.para));
 const listedQuestions = () => data.questions.filter(qListed).sort((a, b) => (a.raised ?? a.answer_given_at) - (b.raised ?? b.answer_given_at));
-const possShown = (q, pick) => qListed(q) && q.possibilities.some((p) => p.value === pick && p.available <= state.para);
-const shownPossibilities = (q) => q.possibilities.filter((p) => p.available <= state.para);
+// When each entity is first met: the earliest paragraph a fact naming it is given at.
+const kindOf = entityKinds(data);
+const firstMet = new Map();
+for (const f of data.facts) {
+    const g = givenAt(f);
+    if (g == null) continue;
+    for (const id of [f.of, f.to, ...list(f.value)]) if (typeof id === 'string' && entityById.has(id) && !(firstMet.get(id) <= g)) firstMet.set(id, g);
+}
+const OTHER_IDEAS = 'Other ideas';
+const KIND_GROUP = { person: 'People and animals met so far', animal: 'People and animals met so far', place: 'Places met so far' };
+/**
+ * Every answer the player may mark on a question now. `proposed`: put forward by someone in the story (`via: direct`),
+ * or "something else"; the rest are behind "More": the reader's other ideas (`via: indirect`) and, for a "who"
+ * question, every person and animal met so far, for a "where" question every place, so that no list points at one.
+ */
+function questionOptions(q) {
+    // An idea that is itself a person, animal or place goes in among all the others met so far, not on its own.
+    const kinds = answerKinds(q, kindOf);
+    const isKind = (v) => kinds.includes(kindOf(v));
+    const listed = q.possibilities.filter((p) => p.available <= state.para);
+    const out = listed.filter((p) => p.via !== 'indirect' || !isKind(p.value)).map((p) => ({ value: p.value, proposed: p.via !== 'indirect', group: OTHER_IDEAS }));
+    if (!kinds.length) return out;
+    const met = data.entities.filter((e) => isKind(e.id) && e.id !== q.entry?.of && !out.some((o) => o.value === e.id)
+        && (firstMet.get(e.id) <= state.para || listed.some((p) => p.value === e.id)));
+    met.sort((a, b) => nameOf(a.id).localeCompare(nameOf(b.id)));
+    return [...out, ...met.map((e) => ({ value: e.id, proposed: false, group: KIND_GROUP[e.kind] }))];
+}
+const possShown = (q, pick) => qListed(q) && questionOptions(q).some((o) => o.value === pick);
+const shownPossibilities = questionOptions;
 const markOf = (q, pick) => state.marks[q.id]?.[pick];
 const givenAway = (q) => q.answer != null && q.answer_given_at != null && q.answer_given_at <= state.para;
 // The time point a question sits at on the timeline, if its entry has one.
@@ -463,12 +490,32 @@ function chip(q, p) {
     const judged = givenAway(q) && m ? ((m === 'circled') === (p.value === q.answer) ? ' right' : ' wrong') : '';
     return `<button type="button" class="poss ${m ?? 'open'}${judged}" data-mark-q="${esc(q.id)}" data-mark-pick="${esc(p.value)}" title="${MARK_TITLE[m]}">${pickText(q, p.value)}</button>`;
 }
+// The questions whose "More" list is open (not saved).
+const moreOpen = new Set();
+/**
+ * A question's chips: the story's own proposals, then those of the rest the player has marked; with "More" open, the
+ * rest in their groups instead (a chip never moves when it is clicked).
+ */
+function chipsHtml(q) {
+    const opts = questionOptions(q);
+    const rest = opts.filter((o) => !o.proposed);
+    const open = moreOpen.has(q.id);
+    const main = opts.filter((o) => o.proposed || (!open && markOf(q, o.value)));
+    const more = rest.length ? `<button type="button" class="more" data-more-q="${esc(q.id)}" title="${open ? 'Hide the other answers' : 'Other answers: anyone or anything else it could be'}">${open ? 'Fewer' : `More (${rest.length})`}</button>` : '';
+    let html = `<div class="poss-row">${main.map((o) => chip(q, o)).join('')}${more}</div>`;
+    if (open) {
+        for (const g of [...new Set(rest.map((o) => o.group))]) {
+            html += `<div class="poss-group"><span class="small muted">${g}</span><div class="poss-row">${rest.filter((o) => o.group === g).map((o) => chip(q, o)).join('')}</div></div>`;
+        }
+    }
+    return html;
+}
 function questionsPanel(clashing) {
     const qs = listedQuestions();
     if (!qs.length) return '';
     const items = qs.map((q) => `<li class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
-      <div class="poss-row">${shownPossibilities(q).map((p) => chip(q, p)).join('')}</div>${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></div>` : ''}</li>`).join('');
-    return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">Click a possibility to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
+      ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></div>` : ''}</li>`).join('');
+    return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
 function questionDetail(q, clashing) {
     const marked = shownPossibilities(q).filter((p) => markOf(q, p.value));
@@ -477,7 +524,7 @@ function questionDetail(q, clashing) {
     return `<h2><span class="q-mark">?</span> ${esc(q.label)}</h2>
       <p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
-      <div class="poss-row">${shownPossibilities(q).map((p) => chip(q, p)).join('')}</div>
+      ${chipsHtml(q)}
       ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>` : ''}
       ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}`;
 }
@@ -540,6 +587,8 @@ document.getElementById('undo').addEventListener('click', () => {
     save(); render();
 });
 document.addEventListener('click', (e) => {
+    const mo = e.target.closest('[data-more-q]');
+    if (mo) { const id = mo.dataset.moreQ; if (moreOpen.has(id)) moreOpen.delete(id); else moreOpen.add(id); render(); return; }
     const m = e.target.closest('[data-mark-q]');
     if (m) {
         // The page is drawn afresh, and a contradiction box may open or close above: keep the clicked chip under the

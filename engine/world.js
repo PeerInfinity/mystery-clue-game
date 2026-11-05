@@ -165,18 +165,39 @@ export function assertions(data) {
  */
 export function markAssertions(data, marks = {}, shown = null) {
     const qById = new Map(data.questions.map((q) => [q.id, q]));
+    const kindOf = entityKinds(data);
     const out = [];
     for (const [qid, picks] of Object.entries(marks)) {
         const q = qById.get(qid);
         if (!q) continue;
         for (const [pick, mark] of Object.entries(picks)) {
             if (mark !== 'circled' && mark !== 'crossed') continue;
-            if (!q.possibilities.some((p) => p.value === pick) || (shown && !shown(q, pick))) continue;
+            if (!isOption(q, pick, kindOf) || (shown && !shown(q, pick))) continue;
             const neg = mark === 'crossed';
             out.push({ id: hypothesisKey(qid, pick), fact: null, kind: 'pick', q: qid, pick, neg, mark, by: HYPOTHESIS, truth: q.answer == null ? null : (pick === q.answer) !== neg });
         }
     }
     return out;
+}
+/**
+ * The kinds of entity any of which may answer a question, beyond its listed possibilities: a "who" question (one whose
+ * possibilities include a person or an animal) takes any person or animal, a "where" question (one with a place
+ * among them) any place. A question about provenance takes only its own. `kindOf`: entity id → kind.
+ */
+export const WHO = ['person', 'animal'];
+export const WHERE = ['place'];
+export function answerKinds(q, kindOf) {
+    if (q.kind === 'provenance') return [];
+    const kinds = new Set((q.possibilities ?? []).map((p) => kindOf(p.value)));
+    if (WHO.some((k) => kinds.has(k))) return WHO;
+    if (WHERE.some((k) => kinds.has(k))) return WHERE;
+    return [];
+}
+export const entityKinds = (data) => { const m = new Map((data.entities ?? []).map((e) => [e.id, e.kind])); return (id) => m.get(id); };
+/** A value the player may mark on a question: a listed possibility, or an entity of a kind it takes (not its subject). */
+export function isOption(q, pick, kindOf) {
+    if ((q.possibilities ?? []).some((p) => p.value === pick)) return true;
+    return pick !== q.entry?.of && answerKinds(q, kindOf).includes(kindOf(pick));
 }
 /** Watson's hypothesis: the source of the player's marks, a person of its own so that one cap covers them all. */
 export const HYPOTHESIS = 'watsons_hypothesis';

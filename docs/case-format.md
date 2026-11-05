@@ -546,6 +546,11 @@ no fact, so they meet the claims' picks in the contradictions above; two circles
 and are not reported. Each mark comes on its own link from *Watson's hypothesis* (`hypothesisChain`, keyed
 `hyp:<question>=<possibility>`), which starts uncertain like any other link; Watson's hypothesis is a person of its
 own, so one cap covers every mark. Only marks on questions raised so far and on possibilities available so far count.
+A "who" question (one with a person or an animal among its possibilities) may also be answered by any person or
+animal, a "where" question (a place among them) by any place, its own subject excepted (`answerKinds`, `isOption`);
+the page offers those met so far (named by a fact given so far). The page shows first only what someone in the story
+puts forward (`via: direct`) and "something else"; the rest (`via: indirect`, and the people, animals or places, an
+indirect possibility among them in its place) sit behind a "More" button, so that no list points at the answer.
 
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
 chain with no links is Watson's own and certain; every link starts uncertain, and the player may set it lower or

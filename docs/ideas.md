@@ -217,10 +217,12 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   whose entry has no time (who the man by the tracks is, the two Derbyshires, the bay, who drugged the supper, where
   the opium went in) are in the panel only. Seen in play: at ¶37 the panel already offers Silver Blaze as a candidate
   for the blow (an indirect possibility from the horse being in the hollow): the data's availability rulings now
-  decide what the menu shows, and so what it hints. The user's idea against it (not yet ruled): a "who" question
-  offers every person met so far and a "where" question every place, so the true answer hides among many; a "why"
-  question may get a bigger list later; the possibilities the story itself proposes come first, the rest from a
-  drop-down or behind "something else".
+  decide what the menu shows, and so what it hints. Ruled and built against it: only what someone in the story puts
+  forward (`via: direct`) and "something else" are shown; a "More" button opens the rest: the reader's other ideas
+  (`via: indirect`), and for a "who" question every person and animal met so far (animals included: the horse struck
+  the blow), for a "where" question every place, alphabetically, an indirect possibility of that kind among them
+  rather than on its own. A "why" question may get a bigger list later. Left: the places list holds every room
+  and path met (long), and the reader's text ideas behind "More" still name the answer for some questions (the hoof).
 
 ### An incremental game about trying every combination
 

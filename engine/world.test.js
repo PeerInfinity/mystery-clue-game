@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -116,6 +116,23 @@ test("the player's marks: circled asserts, crossed out denies; two circles of on
     assert.deepEqual(clash([...assertions(w), ...ms]), ['q.who: horse or man'], 'the claim against the circled man; the two circles not');
     assert.deepEqual(clash([...assertions(w), ...markAssertions(w, { 'q.who': { horse: 'crossed' } })]), ['q.who: horse, asserted and denied'], 'crossed out against the claim');
     assert.deepEqual(markAssertions(w, marks, (q, pick) => pick !== 'man').map((x) => x.pick), ['horse', 'something else'], 'only what is shown');
+});
+
+test('who and where questions take any person or animal, or any place, beyond their listed possibilities', () => {
+    const kindOf = entityKinds({ entities });
+    const who = { id: 'q.who', entry: { of: 'man', attr: 'identity' }, possibilities: [{ value: 'horse' }, { value: 'a friend' }] };
+    const where = { id: 'q.where', possibilities: [{ value: 'stable' }] };
+    const what = { id: 'q.what', possibilities: [{ value: 'a drug' }, { value: 'box' }] };
+    assert.equal(answerKinds(who, kindOf), WHO);
+    assert.equal(answerKinds(where, kindOf), WHERE);
+    assert.deepEqual(answerKinds(what, kindOf), []);
+    assert.deepEqual(answerKinds({ ...where, kind: 'provenance' }, kindOf), [], 'provenance: only its own');
+    assert.ok(isOption(who, 'watson', kindOf) && isOption(who, 'a friend', kindOf));
+    assert.ok(!isOption(who, 'man', kindOf), 'not its own subject');
+    assert.ok(!isOption(who, 'moor', kindOf) && !isOption(who, 'box', kindOf));
+    assert.ok(isOption(where, 'hollow', kindOf) && !isOption(where, 'horse', kindOf));
+    const w = world([], [{ ...who, answer: 'watson' }]);
+    assert.deepEqual(markAssertions(w, { 'q.who': { watson: 'circled', moor: 'circled' } }).map((x) => [x.pick, x.truth]), [['watson', true]]);
 });
 
 test("a mark's chain: one link from Watson's hypothesis, starting uncertain, capped like a person", () => {
