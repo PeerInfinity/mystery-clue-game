@@ -125,6 +125,7 @@ function pathRules(types) {
 const kindsOf = (ctx, item) => ctx.itemKinds?.(item) ?? null;
 /** An effect that depends on the item's kind: `true` (it holds), `false`, or the kinds it holds for. */
 function kindHolds(ctx, item, kinds) {
+    if (ctx.anyKind) return kinds;
     const ks = kindsOf(ctx, item);
     if (!ks) return false;
     const fit = ks.filter((k) => kinds.includes(k));
@@ -322,7 +323,13 @@ export function checkFit(x, target, linked = [], nameOf = (id) => id, ctx = {}) 
         if (!p.cond) return { fits: true, product: p, need: n };
         conditional ??= { fits: 'if', product: p, need: n, cond: p.cond };
     }
-    return conditional ?? { fits: false, why: 'Nothing it brings about meets the goal, or a need of a step already linked to it.' };
+    if (conditional) return conditional;
+    // Would it fit if the item could be any kind? Then what rules it out is the kind the player has it as.
+    if (!ctx.anyKind) {
+        const any = checkFit(x, target, linked, nameOf, { ...ctx, anyKind: true });
+        if (any.fits) return { fits: false, ruledOut: any.cond, why: `It would fit only if ${nameOf(any.cond.item)} were one of: ${any.cond.kinds.join(', ')}; you have ruled that out.` };
+    }
+    return { fits: false, why: 'Nothing it brings about meets the goal, or a need of a step already linked to it.' };
 }
 
 /**
@@ -347,7 +354,10 @@ export function checkPlan(plan, entries, nameOf = (id) => id, ctx = {}) {
 }
 
 /**
- * The entries the player's moves give, in the order made; a move whose premises are gone gives nothing. `moves`:
+ * The entries the player's moves give, in the order made; a move whose premises are gone, or that no longer holds,
+ * gives nothing, and is listed in `ctx.lapsed` (if given) as `{move, why, gone?, ruledOut?}`: `gone`, the premise no
+ * longer there (a hypothesis no longer circled). A move whose premises are not yet told is not listed. The moves that
+ * hold are listed in `ctx.held`, if given. `moves`:
  * `[{move: 'a', a, b} | {move: 'b', of} | {move: 'c', of, for}]`; `lookup`: id → a fact or an earlier entry;
  * `givenAt`: when an entry is told. A move (c) gives the link "this, in order that that": `{attr: 'purpose', for,
  * serves}`, at the time of what it links.
@@ -359,7 +369,9 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
     for (const m of moves) {
         const premises = m.move === 'a' ? [m.a, m.b] : m.move === 'c' ? [m.of, m.for] : [m.of];
         const ps = premises.map(find);
-        if (ps.some((p) => !p)) continue;
+        const lapse = (x) => ctx.lapsed?.push({ move: m, ...x });
+        const gone = premises.find((id, i) => !ps[i]);
+        if (gone) { lapse({ gone, why: 'What it was reasoned from is no longer there.' }); continue; }
         const given = Math.max(...ps.map((p) => givenAt(p) ?? Infinity));
         if (!Number.isFinite(given)) continue;
         const c = { ...ctx, order };
@@ -368,10 +380,13 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
         else if (m.move === 'b') r = pointImplications(ps[0], nameOf, c);
         else {
             const fit = checkFit(ps[0], ps[1], linkedTo(ps[1].id), nameOf, c);
-            if (!fit.fits) continue;
+            if (!fit.fits) { lapse({ why: fit.why, ...(fit.ruledOut ? { ruledOut: fit.ruledOut } : {}) }); continue; }
             r = { entry: { id: `r:c:${ps[0].id}>${ps[1].id}`, of: ps[0].of, attr: 'purpose', for: ps[1].id, serves: fit.need, ...(fit.cond ? { cond: fit.cond } : {}), value: `in order that ${fit.need.of} ${fit.need.attr} ${fit.need.value}`, time: ps[0].time, reasoned: { move: 'c', premises } } };
         }
-        for (const e of r.entry ? [r.entry] : r.entries ?? []) out.set(e.id, { ...e, given_at: given });
+        if (r.why && !r.entry && !r.entries?.length) lapse({ why: r.why });
+        const es = r.entry ? [r.entry] : r.entries ?? [];
+        if (es.length) ctx.held?.push(m);
+        for (const e of es) out.set(e.id, { ...e, given_at: given });
     }
     return [...out.values()];
 }

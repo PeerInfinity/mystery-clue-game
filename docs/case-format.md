@@ -591,7 +591,9 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   holds only for some kinds of an item fits on that condition ("if the paper is money or a message"); the kinds
   still open are those of the item's contents question (`kind` on its possibilities) that the player has not
   crossed out, or the circled ones. A link is an entry `{attr: 'purpose', for, serves}` from Watson's reasoning, and
-  disappears when it no longer fits (the paper circled as a drug).
+  disappears when it no longer fits (the paper circled as a drug). `reasonedEntries` lists such moves in
+  `ctx.lapsed` with why (`ruledOut`: the item's kinds that would make it fit; `gone`: a premise no longer there) and
+  the moves that hold in `ctx.held`; the page announces a move that held and no longer does.
 - (d) `checkPlan`, "what would this need?": a plan's steps in order, each need met by an earlier step's effect, by
   the timeline, or by nothing (`open`), and whether the steps reach the goal. On a claim's plan (the police theory)
   or on the steps the player has linked to an intention.

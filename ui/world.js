@@ -37,17 +37,20 @@ const factById = new Map(data.facts.map((f) => [f.id, f]));
 // The entries the player's moves give (Watson's reasoning), worked out afresh at each drawing.
 let reasoned = [];
 let reasonedById = new Map();
+let lapsed = [];          // the player's moves that no longer hold, each with why (engine/actions.js reasonedEntries)
+let heldKeys = null;      // the moves that held at the last drawing (null before the first): one that lapses is announced
+let lapseNews = [];       // the lapses announced, until dismissed or no longer lapsed
 const factOf = (id) => factById.get(id) ?? reasonedById.get(id) ?? hypIntention(id);
 /**
  * A circled aim with a goal (the stranger's "get information to bet on") as an intention: Watson's hypothesis, so
  * the player's plan can be built on it. Its id is the mark's key.
  */
-function hypIntention(id) {
+function hypIntention(id, anyMark = false) {
     const m = /^hyp:(.+)=(.+)$/.exec(id ?? '');
     if (!m) return null;
     const q = qById.get(m[1]);
     const p = q?.possibilities.find((x) => x.value === m[2]);
-    if (!p?.goal || markOf(q, p.value) !== 'circled' || !possShown(q, p.value)) return null;
+    if (!p?.goal || (!anyMark && markOf(q, p.value) !== 'circled') || !possShown(q, p.value)) return null;
     return { id, of: q.entry.of, attr: 'intends', value: p.value, goal: p.goal, time: q.entry.time && typeof q.entry.time === 'object' ? q.entry.time : {}, hyp: { q: q.id, pick: p.value }, given_at: q.raised };
 }
 const allFacts = () => [...data.facts, ...reasoned];
@@ -542,8 +545,15 @@ function render() {
     reasonedById = new Map();
     const told = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
     placeCtx = engineCtx(told);
-    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told });
+    const lapses = [], held = [];
+    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held });
     reasonedById = new Map(reasoned.map((f) => [f.id, f]));
+    // An aim still circled but not yet told (read back) is not a lapse: the link returns on reading on.
+    lapsed = lapses.filter((l) => !(l.gone && hypIntention(l.gone, true) === null && /^hyp:/.test(l.gone)));
+    // Announced: a move that held at the last drawing and no longer does (not one read back past and read on to again).
+    const keys = new Set(lapsed.map((l) => moveKey(l.move)));
+    lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
+    heldKeys = new Set(held.map(moveKey));
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
@@ -579,6 +589,7 @@ function render() {
     document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing);
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
     renderTabs({ questions: listedQuestions().length, clashes: clashes.length });
+    renderLapseNews();
     renderDetail(clashing);
 }
 
@@ -785,11 +796,52 @@ function planHtml(f) {
     const open = r.open.length ? `<p class="small bad">Needed, and nothing on the timeline meets it: ${[...new Set(r.open.map((n) => phrase(n.req)))].join('; ')}.</p>` : '<p class="small good">Every need is met.</p>';
     return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
 }
+/** A move's key, to find it again in `state.reasoning`. */
+const moveKey = (m) => [m.move, m.a ?? m.of, m.b ?? m.for ?? ''].join('|');
+/** An entry a move was reasoned from, though it may no longer be there (an aim no longer circled). */
+const premiseText = (id) => {
+    const f = factOf(id) ?? hypIntention(id, true);
+    return f ? (f.hyp ? `${stepText(f)} <span class="small muted">(your hypothesis)</span>` : list(f.act).length || f.goal ? stepText(f) : phrase(f)) : esc(id);
+};
+/** Why a move no longer holds, in the page's words. */
+function lapseWhy(l) {
+    if (l.gone) {
+        const h = hypIntention(l.gone, true);
+        return h ? `You no longer have “${esc(h.value)}” circled for “${esc(qById.get(h.hyp.q).label)}”.` : 'What it was reasoned from is no longer there.';
+    }
+    if (l.ruledOut) {
+        const q = baseQuestions.find((x) => x.entry?.of === l.ruledOut.item && x.entry?.attr === 'contents');
+        const kinds = l.ruledOut.kinds.map((k) => KIND_WORD[k] ?? k).join(' or ');
+        return `It would only work if ${val(l.ruledOut.item)} were ${kinds}${q ? `, and your marks on “${esc(q.label)}” rule that out` : ', and that is ruled out'}.`;
+    }
+    return esc(l.why);
+}
+/** A lapsed move as a line: what it linked, and why it no longer holds. */
+function lapseText(l) {
+    const m = l.move;
+    const what = m.move === 'c' ? `${premiseText(m.of)} <b>for</b> ${premiseText(m.for)}`
+        : m.move === 'a' ? `a change between ${premiseText(m.a)} and ${premiseText(m.b)}` : `what ${premiseText(m.of)} needs and does`;
+    return `${what}. ${lapseWhy(l)}`;
+}
+/** On an entry's detail: the player's moves from it that no longer hold. */
+function lapsedHtml(f) {
+    const mine = lapsed.filter((l) => [l.move.a, l.move.b, l.move.of, l.move.for].includes(f.id));
+    if (!mine.length) return '';
+    return `<h3>No longer fits</h3><p class="small">Your reasoning from this that no longer holds. It comes back if what changed changes back.</p>
+      <ul class="moves">${mine.map((l) => `<li>${lapseText(l)} <button type="button" class="move quiet" data-drop="${esc(moveKey(l.move))}">Withdraw</button></li>`).join('')}</ul>`;
+}
+/** The announcement of a lapse just made, wherever the player is looking. */
+function renderLapseNews() {
+    const el = document.getElementById('lapse-news');
+    el.hidden = !lapseNews.length;
+    el.innerHTML = lapseNews.length ? `<p><b>No longer fits:</b> ${lapseText(lapseNews.at(-1))}${lapseNews.length > 1 ? ` <span class="small muted">(and ${lapseNews.length - 1} more)</span>` : ''}</p>
+      <p><button type="button" data-lapse-show="${esc(lapseNews.at(-1).move.of ?? lapseNews.at(-1).move.a)}">Show</button> <button type="button" class="quiet" data-lapse-close>Dismiss</button></p>` : '';
+}
 function movesHtml(f) {
     const q = f.reasoned?.move === 'a' && f.of === '?' ? (questionOfChange(f) ?? qById.get(`who:${f.id}`)) : null;
     const who = q ? `<h3>Who did it? <span class="small muted">(your hypothesis)</span></h3>
       <p class="small">${q.own ? 'Your own question' : 'The question'}: <a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a></p>${chipsHtml(q)}${candidatesHtml(q)}` : '';
-    return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${planHtml(f)}`;
+    return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${lapsedHtml(f)}${planHtml(f)}`;
 }
 function reasonedDetail(f) {
     const how = f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
@@ -956,6 +1008,11 @@ document.addEventListener('click', (e) => {
         addMove({ move: 'b', of: mb.dataset.moveB }, mb.dataset.moveB);
         return;
     }
+    const dr = e.target.closest('[data-drop]');
+    if (dr) { remember(); state.reasoning = state.reasoning.filter((x) => moveKey(x) !== dr.dataset.drop); save(); render(); return; }
+    const ls = e.target.closest('[data-lapse-show]');
+    if (ls) { lapseNews = []; select(ls.dataset.lapseShow, e); return; }
+    if (e.target.closest('[data-lapse-close]')) { lapseNews = []; renderLapseNews(); return; }
     const wd = e.target.closest('[data-withdraw]');
     if (wd) {
         // Withdraw the move that gave this entry; what was reasoned from it goes with it.

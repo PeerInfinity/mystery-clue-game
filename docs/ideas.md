@@ -265,6 +265,18 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   ¶29, before the reader has a reason to think of the door). **The user's ruling:** distracting data (typing the
   ordinary actions and states too, so the mark stops singling any out) is for later; when it is added, it is
   flagged as distracting (e.g. `distractor: true` on the fact's typing), so an option can turn the distractions off.
+- **Order of what step 3 left (the user agreed, 2026-11-05):** (1) say when a link stops fitting; (2) Holmes's two
+  objections, "why take the horse out?" (a goal of injuring; two plans for one goal compared) and "what of the
+  paper?" (does a plan account for a fact), as step 3c; (3) Straker's plan, built from the player's own circles
+  and links (the tin box typed only where a move needs it); (4) step 4, the commitment gate, after it, so the key
+  at the give-away comes when the player could have reasoned to it; (5) distracting data, once the true path
+  exists; (6) likely clashes last, to be discussed first: pointing out a likely clash is close to a hint.
+- **Built (2026-11-05), a link that stops fitting:** a move that held and no longer does (a circle changed, an aim
+  no longer circled, a premise's trust lowered) is announced in a corner notice, wherever the player is looking,
+  with why in the page's words ("It would only work if the paper were money or a message, and your marks on 'What
+  was in the stranger's paper?' rule that out"), Show (the entry's detail) and Dismiss; the entry's detail lists it
+  under "No longer fits", with Withdraw. The move stays, so it comes back if what changed changes back (Undo).
+  Reading back past a premise and on again is not a lapse.
 
 ### An incremental game about trying every combination
 

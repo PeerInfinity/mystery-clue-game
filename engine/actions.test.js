@@ -126,6 +126,21 @@ test('move (c) along a chain: the paper serves the tip only through a linked ste
     assert.deepEqual([open.fits, open.cond.kinds, open.need.attr], ['if', ['money', 'message'], 'willing'], 'money or a message would make him willing to tell');
     assert.equal(checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['money'])).fits, true);
     assert.equal(checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['drug'])).fits, false, 'a drug would not: a poisoner does not ask the boy for a tip');
+    assert.deepEqual(checkFit(wantsPaper, aimTip, [asks], nameOf, kinds(['drug'])).ruledOut, { item: 'paper', kinds: ['money', 'message'] }, 'what rules it out: the kind');
+    assert.equal(checkFit(asks, aimWay, [], nameOf, kinds(['drug'])).ruledOut, undefined, 'no kind would make it fit');
+});
+
+test('a link that stops fitting is listed with why; one not yet told is not', () => {
+    const tip = { ...aimTip, para: 1 }, facts = new Map([asks, wantsPaper, tip].map((f) => [f.id, { para: 1, ...f }]));
+    const moves = [{ move: 'c', of: asks.id, for: tip.id }, { move: 'c', of: wantsPaper.id, for: tip.id }, { move: 'c', of: asks.id, for: 'hyp:gone' }];
+    const run = (ks, given = (f) => f.para) => { const lapsed = []; const es = reasonedEntries(moves, (id) => facts.get(id), order, nameOf, given, { ...kinds(ks), lapsed }); return { es, lapsed }; };
+    const ok = run(['money', 'drug']);
+    assert.equal(ok.es.length, 2);
+    assert.deepEqual(ok.lapsed.map((l) => l.gone), ['hyp:gone'], 'an aim no longer circled');
+    const drug = run(['drug']);
+    assert.equal(drug.es.length, 1);
+    assert.deepEqual(drug.lapsed.map((l) => [l.move.of, l.ruledOut?.kinds]), [[wantsPaper.id, ['money', 'message']], [asks.id, undefined]]);
+    assert.deepEqual(run(['drug'], () => undefined).lapsed.map((l) => l.gone), ['hyp:gone'], 'not yet told: not listed');
 });
 
 test('move (d): a plan, each need met by an earlier step, the timeline, or nothing', () => {
