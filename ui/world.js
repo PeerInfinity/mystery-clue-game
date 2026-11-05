@@ -253,11 +253,17 @@ function assertsHtml(f) {
     return `<ul class="asserts" title="What this asserts">${li}</ul>`;
 }
 
+/**
+ * An entry the player can reason from (its detail offers moves): a typed state, a typed action, an intention with a
+ * goal, a claim with a plan. Marked on the timeline so the moves can be found.
+ */
+const canReason = (f) => (STATES[f.attr] && f.value != null && !f.neg) || list(f.act).length > 0 || !!f.goal || !!f.plan;
+const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need)">⚙</span>';
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
     const cls = ['event', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Watson’s reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span> <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Watson’s reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -277,7 +283,8 @@ function questionRows(q, clashing, tag = 'li') {
         const lvl = markLevel(q, p.value);
         if (lvl < state.threshold && !state.showBelow) return '';
         const cls = ['event', 'hyp', lvl < state.threshold ? 'below' : '', clashing.has(hypothesisKey(q.id, p.value)) ? 'clash' : '', givenAway(q) ? (p.value === q.answer ? 'right' : 'wrong') : ''].filter(Boolean).join(' ');
-        return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span></${tag}>`;
+        const goal = q.possibilities.find((x) => x.value === p.value)?.goal;
+        return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span>${goal ? ` ${REASON_MARK}` : ''}</${tag}>`;
     });
     return [head, ...circles];
 }

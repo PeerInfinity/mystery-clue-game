@@ -125,3 +125,5 @@ body.world-page.tabbed .top { position: static; }
   .world-page .settings-panel { left: 0; right: auto; }
 }
 .world-tabs .world-story { font-size: 16px; }
+/* The mark of an entry the player can reason from. */
+.can-reason { font-size: 11px; color: var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 0 4px; font-style: normal; cursor: pointer; }
