@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor } from './actions.js';
+import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans } from './actions.js';
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -138,6 +138,17 @@ test('does a plan account for this? only if it brings about the goal or a need o
     const sells = { id: 'f.sells', of: 'chemist', act: 'give', to: 'man', item: 'opium', time: { at: 't9' } };
     const r = accountsFor(plan, sells, nameOf, k);
     assert.deepEqual([r.fits, r.need.attr, r.need.value], [true, 'carrying', 'opium'], 'opium sold to him: the drugging needs it');
+});
+
+test('two plans compared: the steps and the unmet needs in one and not the other', () => {
+    const steal = { id: 'p1', agent: 'man', time: { after: 't9', before: 'tmorn' }, goal: { of: 'horse', attr: 'held_by', value: 'man' }, steps: [{ act: 'drug', to: 'boy', item: 'opium' }, { act: ['unlock', 'open'], thing: 'door' }, { act: 'lead_out', thing: 'horse', via: 'door' }, { act: 'hide', thing: 'horse' }] };
+    const injure = { id: 'p2', agent: 'man', time: { after: 't9', before: 'tmorn' }, goal: { of: 'horse', attr: 'condition', value: 'injured' }, steps: [{ act: 'drug', to: 'boy', item: 'opium' }, { act: ['unlock', 'open'], thing: 'door' }, { act: 'injure', thing: 'horse', via: 'door' }] };
+    const r = comparePlans(steal, injure, [locked9], nameOf, { ...ctx, order });
+    assert.deepEqual([r.a.reached, r.b.reached, r.shared], ['reached', 'reached', 2], 'each reaches its own goal; drugging and the door in both');
+    assert.deepEqual(r.a.only.map((s) => s.act), ['lead_out', 'hide']);
+    assert.deepEqual(r.b.only.map((s) => s.act), ['injure']);
+    assert.deepEqual(r.a.open.map((n) => [n.req.of, n.req.value]), [['horse', 'door'], ['man', 'a hiding-place']], 'only the theft needs the horse at the door and a hiding-place');
+    assert.deepEqual(r.b.open, []);
 });
 
 test('a link that stops fitting is listed with why; one not yet told is not', () => {

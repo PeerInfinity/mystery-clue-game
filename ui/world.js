@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor } from '../engine/actions.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -794,7 +794,7 @@ function planHtml(f) {
     const steps = r.steps.map((s) => `<li>${stepText(s.step)}<ul class="moves">${s.needs.map(need).join('')}</ul></li>`).join('');
     const goal = plan.goal ? `<p class="small">Goal: ${phrase({ ...plan.goal, id: '' })}: <b>${r.goal === 'reached' ? 'the steps reach it' : 'the steps do not reach it'}</b>.</p>` : '';
     const open = r.open.length ? `<p class="small bad">Needed, and nothing on the timeline meets it: ${[...new Set(r.open.map((n) => phrase(n.req)))].join('; ')}.</p>` : '<p class="small good">Every need is met.</p>';
-    return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}${accountHtml(f, plan)}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
+    return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}${compareHtml(f, plan)}${accountHtml(f, plan)}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
 }
 /** A move's key, to find it again in `state.reasoning`. */
 const moveKey = (m) => [m.move, m.a ?? m.of, m.b ?? m.for ?? ''].join('|');
@@ -843,6 +843,33 @@ function renderLapseNews() {
  * out again at each drawing (it changes with the marks).
  */
 const accountChecked = new Set();
+/**
+ * "Compare with another plan", on an open plan: the other plans of its agent on the timeline (one proposed in the
+ * story: Holmes's "if he wished to injure it, why not there?"); a compared one shows each plan's goal, the steps in
+ * one and not the other, and the needs nothing on the timeline meets in one and not the other.
+ */
+const compared = new Set();
+function compareHtml(f, plan) {
+    const others = onTimeline().filter((x) => x.id !== f.id && x.plan && placeCtx.same(x.plan.agent, plan.agent));
+    if (!others.length) return '';
+    const on = onTimeline();
+    const steps = (ss) => (ss.length ? ss.map((s) => stepText(s)).join('; ') : 'none');
+    const needs = (ns) => (ns.length ? ns.map((n) => phrase(n.req)).join('; ') : 'none');
+    const goal = (g, reached) => (g ? `${phrase({ ...g, id: '' })} (${reached === 'reached' ? 'its steps reach it' : 'its steps do not reach it'})` : 'none the engine can read');
+    const item = (x) => {
+        const key = `${f.id}|${x.id}`;
+        if (!compared.has(key)) return `<li><button type="button" class="move" data-compare="${esc(key)}">Compare</button> ${phrase(x)} <span class="para">¶${givenAt(x)}</span></li>`;
+        const r = comparePlans(plan, { id: x.id, ...x.plan }, on, nameOf, { ...placeCtx, order: data.order, entries: on });
+        return `<li>${phrase(x)} <span class="para">¶${givenAt(x)}</span>
+          <table class="compare small"><tr><th></th><th>This plan</th><th>That plan</th></tr>
+          <tr><th>Goal</th><td>${goal(r.a.goal, r.a.reached)}</td><td>${goal(r.b.goal, r.b.reached)}</td></tr>
+          <tr><th>Steps</th><td>${r.a.steps}</td><td>${r.b.steps}</td></tr>
+          <tr><th>Steps only in it</th><td>${steps(r.a.only)}</td><td>${steps(r.b.only)}</td></tr>
+          <tr><th>Unmet needs only in it</th><td>${needs(r.a.open)}</td><td>${needs(r.b.open)}</td></tr></table>
+          <p class="small muted">${r.shared} step${r.shared === 1 ? '' : 's'} in both.</p></li>`;
+    };
+    return `<h3>Compare with another plan</h3><p class="small">Another plan for ${ent(plan.agent)} on the timeline: what one has that the other does not.</p><ul class="moves">${others.map(item).join('')}</ul>`;
+}
 function accountHtml(f, plan) {
     const own = new Set(plan.steps.map((s) => s.id).filter(Boolean));
     const xs = onTimeline().filter((x) => x.id !== f.id && !own.has(x.id) && !x.plan && (list(x.act).length || x.goal) && !x.reasoned && placeCtx.same(x.of, plan.agent));
@@ -1019,6 +1046,8 @@ document.addEventListener('click', (e) => {
         addMove({ move: 'c', of: x.id, for: t.id }, x.id);
         return;
     }
+    const cp = e.target.closest('[data-compare]');
+    if (cp) { compared.add(cp.dataset.compare); render(); return; }
     const ac = e.target.closest('[data-account]');
     if (ac) { accountChecked.add(ac.dataset.account); render(); return; }
     const md = e.target.closest('[data-move-d]');

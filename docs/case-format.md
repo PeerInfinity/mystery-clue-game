@@ -600,6 +600,10 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
 - "Does this plan account for this?" (`accountsFor`): as (c), with a plan's own steps as the steps linked to its
   goal: an action or intention outside the plan accounts for nothing unless it brings about the goal or a need of a
   step (the paper, on the police theory).
+- "Compare with another plan" (`comparePlans`): two plans of one agent (the police theory and Holmes's supposition
+  that Simpson could have injured the horse in the stable, `f.h_injure_there`): each goal and whether it is
+  reached, the steps in one and not the other, the needs nothing meets in one and not the other. A plan the story
+  proposes, even as a supposition, is data (a claim with a `plan` and no `asserts`).
 - Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
   animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:

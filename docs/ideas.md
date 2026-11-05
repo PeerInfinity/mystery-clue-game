@@ -282,6 +282,15 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   click (the user's choice over checking every fact at once): does it bring about the plan's goal or a need of a
   step? On the police theory at ¶46, neither the stranger's wish that the boy has the paper nor his asking for the
   tip serves it, whatever the paper's marks: "the plan leaves it unexplained".
+- **Built (2026-11-05), "why take the horse out?" (step 3c, the rest):** **the user's ruling:** a plan the story
+  proposes, even as a supposition (Holmes's "If he wished to injure it why could he not do it there?", ¶57), is a
+  plan in the data and a selectable option, not something the player builds from scratch. It is
+  `f.h_injure_there` (Simpson drugs the boy, unlocks and opens the door, injures the horse where it stands; a new
+  typed action, `injure`). On an open plan, "Compare with another plan" lists the agent's other plans on the
+  timeline; a compared pair shows each goal and whether its steps reach it, the step counts (5 and 3), the steps in
+  one and not the other (leading out, striking, hiding against injuring), and the unmet needs in one and not the
+  other (only the theft needs a hiding-place). Not built: that both goals serve one wish (Simpson stands to lose if
+  the horse wins), so the comparison does not itself say the shorter plan would do.
 
 ### An incremental game about trying every combination
 

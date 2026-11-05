@@ -46,6 +46,7 @@ export const ACTIONS = {
     ask: { label: 'asking', requires: [{ of: '$to', attr: 'willing', value: '$agent' }], effects: [{ of: '$agent', attr: 'knows', value: '$about' }] },
     drug: { label: 'drugging', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'drugged' }] },
     strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
+    injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
     hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
 };
 /** What a goal of carrying an item brings with it, by the item's kind (the same rule as `give`'s). */
@@ -363,6 +364,26 @@ export function checkPlan(plan, entries, nameOf = (id) => id, ctx = {}) {
 export function accountsFor(plan, x, nameOf = (id) => id, ctx = {}) {
     if (!plan.goal) return { fits: false, why: 'The plan has no goal the engine can read.' };
     return checkFit(x, { goal: plan.goal }, planSteps(plan), nameOf, ctx);
+}
+
+/**
+ * Two plans compared (the police theory and Holmes's "why not injure it there?"): each one's goal and whether its
+ * steps reach it, the steps in one and not the other (the same action on the same things), and the needs nothing on
+ * the timeline meets, in one and not the other. `{a: {goal, reached, only, open}, b: {...}, shared}`.
+ */
+export function comparePlans(pa, pb, entries, nameOf = (id) => id, ctx = {}) {
+    const sig = (s) => JSON.stringify([[...list(s.act)].sort(), s.of ?? null, s.thing ?? null, s.to ?? null, s.item ?? null, s.via ?? null]);
+    const needSig = (n) => JSON.stringify([n.req.of, n.req.attr, n.req.value, !!n.req.neg]);
+    const [ra, rb] = [pa, pb].map((p) => checkPlan(p, entries, nameOf, ctx));
+    const [sa, sb] = [ra, rb].map((r) => r.steps.map((s) => ({ ...s.step, of: s.step.of })));
+    const ka = new Set(sa.map(sig)), kb = new Set(sb.map(sig));
+    const [na, nb] = [ra, rb].map((r) => new Set(r.open.map(needSig)));
+    const side = (p, r, steps, other, mine, theirs) => ({
+        goal: p.goal ?? null, reached: r.goal, steps: steps.length,
+        only: steps.filter((s) => !other.has(sig(s))),
+        open: [...new Map(r.open.filter((n) => !theirs.has(needSig(n))).map((n) => [needSig(n), n])).values()],
+    });
+    return { a: side(pa, ra, sa, kb, na, nb), b: side(pb, rb, sb, ka, nb, na), shared: sa.filter((s) => kb.has(sig(s))).length };
 }
 
 /**
