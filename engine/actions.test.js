@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps } from './actions.js';
+import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops } from './actions.js';
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -170,6 +170,14 @@ test("Straker's plan in small: an aim's intended last step, and a need the playe
     assert.equal(d.goal, 'intended', 'only the intended step would injure it');
     assert.equal(d.steps[1].needs.find((n) => n.req.away).by.step, 0, 'away from the stable: met by leading out');
     assert.ok(!d.steps[1].needs.some((n) => n.req.attr === 'location' && !n.req.away), 'no door named for the injuring: no need to be at one');
+});
+
+test('what stopped an intended step: an action that left its agent unable to act, in time', () => {
+    const step = { id: 's', of: 'trainer', act: 'injure', thing: 'horse', intended: true, time: { after: 't9', before: 'tmorn' } };
+    const kick = { id: 'k', of: 'horse', act: 'strike', to: 'trainer', time: { at: 'tout' } };
+    assert.deepEqual([stops(kick, step, nameOf, { order }).stops, stops(kick, step, nameOf, { order }).effect.value], [true, 'struck down']);
+    assert.equal(stops({ ...kick, to: 'boy' }, step, nameOf, { order }).stops, false, 'someone else struck down');
+    assert.equal(stops({ ...kick, time: { at: 'tlater' } }, step, nameOf, { order: timeOrder([...times, { id: 'tlater', after: 'tmorn' }]) }).stops, false, 'too late');
 });
 
 test('a link that stops fitting is listed with why; one not yet told is not', () => {

@@ -328,6 +328,15 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   Reading a give-away shows the answer with the player's circle, right or not; the questions' own lists mark right
   and wrong as before. Gates by paragraph (questions answered there): ¶40, ¶58, ¶181, ¶212, ¶223, ¶224, ¶228 one each;
   ¶202, ¶218, ¶221 two; ¶146, ¶220, ¶229 three; ¶226 four.
+- **Built (2026-11-05), the hoof and the thigh cut (the user's choices):** "Who struck the blow that killed Straker?"
+  has a typed entry (striking Straker), so a circled answer (Silver Blaze, Simpson) is an action of the hypothesis
+  that strikes him down. On a plan with an intended step, "What stopped it?" lists the known actions (typed ones on
+  the timeline, the player's hypotheses), each checked at a click (`stops`): did it leave the step's agent unable to
+  act (struck down, drugged, dead) before the step's time was over? Straker's injuring now has a window (one to
+  seven); at ¶102, with the horse circled, the horse's kick is the one that stops it. "Straker's own knife" on the
+  thigh cut is an answer that is itself an action (`action` on a possibility): cut, as he fell, by his knife; its
+  needs (carrying the knife, struck down) are met by his taking it up and by the kick, shown on the question's
+  detail. A circled Simpson would stop it too: the marks, and the key at ¶212 and ¶226, decide between them.
 
 ### An incremental game about trying every combination
 

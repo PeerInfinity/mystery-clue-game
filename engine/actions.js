@@ -49,6 +49,7 @@ export const ACTIONS = {
     injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
     take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
+    cut_self: { label: 'cut, as he fell,', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', attr: 'condition', value: 'struck down' }], effects: [{ of: '$agent', attr: 'condition', value: 'cut' }] },
     hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
 };
 /** What a goal of carrying an item brings with it, by the item's kind (the same rule as `give`'s). */
@@ -410,6 +411,23 @@ export function comparePlans(pa, pb, entries, nameOf = (id) => id, ctx = {}) {
         open: [...new Map(r.open.filter((n) => !theirs.has(needSig(n))).map((n) => [needSig(n), n])).values()],
     });
     return { a: side(pa, ra, sa, kb, na, nb), b: side(pb, rb, sb, ka, nb, na), shared: sa.filter((s) => kb.has(sig(s))).length };
+}
+
+/** The conditions that leave someone unable to act. */
+export const DISABLED = new Set(['struck down', 'dead', 'drugged']);
+/**
+ * "What stopped it?", on an intended step that never happened (Straker's injuring the horse): whether an action `x`
+ * left the step's agent unable to act (struck down, drugged) before the step's time was over. `{stops: true, effect}`
+ * or `{stops: false, why}`.
+ */
+export function stops(x, step, nameOf = (id) => id, ctx = {}) {
+    const same = eq(ctx);
+    const effect = productsOf(x, nameOf, ctx).find((e) => same(e.of, step.of) && e.attr === 'condition' && DISABLED.has(e.value) && !e.cond);
+    if (!effect) return { stops: false, why: `Nothing it brings about leaves ${nameOf(step.of)} unable to act.` };
+    const end = step.time ? (step.time.at ?? step.time.before ?? step.time.to) : null;
+    const start = x.time ? (x.time.at ?? x.time.after ?? x.time.from) : null;
+    if (end && start && ctx.order?.lt(end, start)) return { stops: false, why: 'It comes too late: after the step was to be done.' };
+    return { stops: true, effect };
 }
 
 /**

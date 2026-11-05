@@ -212,6 +212,7 @@ for (const q of questions) {
         if (p.goal && (!entities.has(p.goal.of) || !p.goal.attr || p.goal.value == null)) err(q.id, `${p.value}: a goal is {of: an entity, attr, value}`);
         if (p.step && (!list(p.step.act).length || list(p.step.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via'].some((r) => p.step[r] != null && !entities.has(p.step[r])))) err(q.id, `${p.value}: step is a typed action`);
         if (p.step && !p.goal) err(q.id, `${p.value}: a step belongs to an aim with a goal`);
+        if (p.action && (!entities.has(p.action.of) || !list(p.action.act).length || list(p.action.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via', 'item'].some((r) => p.action[r] != null && !entities.has(p.action[r])))) err(q.id, `${p.value}: action is a typed action of an entity`);
         for (const n of list(p.need)) if (!ACTIONS[n.act] || !n.rule?.of || (n.rule.away != null && !entities.has(n.rule.away)) || (n.rule.carrying != null && !n.rule.carrying.startsWith('$') && !entities.has(n.rule.carrying))) err(q.id, `${p.value}: need is {act, rule}, or a list of them`);
         if (p.via !== 'always') {
             if (!Number.isInteger(p.available)) err(q.id, `${p.value}: no available paragraph`);

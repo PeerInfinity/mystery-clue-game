@@ -615,7 +615,10 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   `need` may be a list (the light answer: a light, and away from the stable); the knife's "for delicate work" adds
   carrying the knife, the match's "to light the candle" a light (`take`, `strike_light`). A why-question may carry
   `presupposes`, a typed action of its entry's entity (`q.why_light`: Straker striking a light): with any of its
-  answers circled, that action is the player's hypothesis (`pre:<question>`), linkable like any other.
+  answers circled, that action is the player's hypothesis (`pre:<question>`), linkable like any other. A possibility
+  may carry `action`, the answer as an action of an entity (`q.thigh_cut`'s "Straker's own knife": `cut_self`), a
+  hypothesis when circled. "What stopped it?" (`stops`): an action stops an intended step if one of its effects leaves
+  the step's agent unable to act (`DISABLED`: struck down, dead, drugged) no later than the step's window ends.
 - Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
   animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:

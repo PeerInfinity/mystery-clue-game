@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps } from '../engine/actions.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -72,6 +72,9 @@ function hypAction(id) {
     const m = /^hyp:(.+)=(.+)$/.exec(id ?? '');
     if (!m) return null;
     const q = qById.get(m[1]);
+    // An answer that is itself an action ("Straker's own knife": cut by it as he fell).
+    const own = q?.possibilities.find((p) => p.value === m[2])?.action;
+    if (own && markOf(q, m[2]) === 'circled' && possShown(q, m[2])) return { id, attr: 'action', ...own, time: own.time ?? hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
     if (!q?.entry?.act || !entityById.has(m[2]) || markOf(q, m[2]) !== 'circled' || !possShown(q, m[2])) return null;
     const { act, thing, to, item, via } = q.entry;
     return { id, of: m[2], attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), time: hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
@@ -171,7 +174,7 @@ const KIND_WORD = { money: 'money', message: 'a message', drug: 'a drug' };
 /** A typed action or an intention as a short phrase: who, doing what, to whom, with what. */
 function stepText(x) {
     if (!list(x.act).length) return x.hyp ? `${ent(x.of)}, aiming ${/^to /.test(x.value) ? '' : 'to '}${esc(x.value)}` : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
-    const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && (list(x.act).includes('take') ? val(x.item) : `with ${val(x.item)}`), x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
+    const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && (list(x.act).includes('take') ? val(x.item) : list(x.act).includes('cut_self') ? `by ${val(x.item)}` : `with ${val(x.item)}`), x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
     const note = x.intended ? ' <span class="small muted">(intended)</span>' : x.hyp ? ' <span class="small muted">(your hypothesis)</span>' : '';
     return `${x.of === '?' ? 'Someone' : ent(x.of)}: ${list(x.act).map((t) => ACTIONS[t].label).join(' and ')} ${roles}${note}`;
 }
@@ -834,7 +837,7 @@ function planHtml(f) {
     const steps = r.steps.map((s) => `<li>${stepText(s.step)}<ul class="moves">${s.needs.map(need).join('')}</ul></li>`).join('');
     const goal = plan.goal ? `<p class="small">Goal: ${phrase({ ...plan.goal, id: '' })}: <b>${r.goal === 'reached' ? 'the steps reach it' : r.goal === 'intended' ? 'only the intended last step would reach it, and nothing on the timeline says it was done' : 'the steps do not reach it'}</b>.</p>` : '';
     const open = r.open.length ? `<p class="small bad">Needed, and nothing on the timeline meets it: ${[...new Set(r.open.map((n) => phrase(n.req)))].join('; ')}.</p>` : '<p class="small good">Every need is met.</p>';
-    return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}${compareHtml(f, plan)}${accountHtml(f, plan)}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
+    return `<h3>${head}: what it would need</h3>${goal}<ol class="plan">${steps}</ol>${open}${stoppedHtml(f, r)}${compareHtml(f, plan)}${accountHtml(f, plan)}<p><button type="button" class="move" data-move-d="${esc(f.id)}">Hide</button></p>`;
 }
 /** Whether a hypothesis id's possibility (or a presupposing question) is told so far, circled or not. */
 const hypShown = (id) => {
@@ -855,7 +858,10 @@ const premiseText = (id) => {
 const hypGhost = (id) => {
     const p = /^pre:(.+)$/.exec(id);
     if (p) { const q = qById.get(p[1]); return q?.presupposes ? { id, of: q.entry.of, ...q.presupposes, hyp: { q: q.id, pre: true } } : null; }
-    const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return q?.entry?.act && entityById.has(m[2]) ? { id, of: m[2], act: q.entry.act, thing: q.entry.thing, via: q.entry.via, hyp: { q: q.id, pick: m[2] } } : null; };
+    const m = /^hyp:(.+)=(.+)$/.exec(id);
+    const own = m && qById.get(m[1])?.possibilities.find((p) => p.value === m[2])?.action;
+    if (own) return { id, ...own, hyp: { q: m[1], pick: m[2] } };
+    const q = m && qById.get(m[1]); return q?.entry?.act && entityById.has(m[2]) ? { id, of: m[2], act: q.entry.act, thing: q.entry.thing, via: q.entry.via, hyp: { q: q.id, pick: m[2] } } : null; };
 /** Why a move no longer holds, in the page's words. */
 function lapseWhy(l) {
     if (l.gone) {
@@ -915,6 +921,24 @@ function renderLapseNews() {
  * out again at each drawing (it changes with the marks).
  */
 const accountChecked = new Set();
+/**
+ * "What stopped it?", on a plan's intended step (never on the timeline): the known actions, each to check, one at a
+ * time, for whether it left the step's agent unable to act in time (the horse's kick, struck down Straker).
+ */
+const stopChecked = new Set();
+function stoppedHtml(f, r) {
+    const step = r.steps.map((s) => s.step).find((s) => s.intended);
+    if (!step) return '';
+    const own = new Set(r.steps.map((s) => s.step.id));
+    const xs = knownActions().filter((x) => !own.has(x.id) && !(planOf(f)?.steps ?? []).some((s) => s.id === x.id));
+    const key = (x) => `${f.id}|${x.id}`;
+    const answer = (x) => {
+        const s = stops(x, step, nameOf, { ...placeCtx, order: data.order });
+        return s.stops ? `<span class="good small">yes: ${phrase({ ...s.effect, id: '' })}, so the step was never done</span>` : `<span class="bad small">no: ${esc(s.why)}</span>`;
+    };
+    const items = xs.map((x) => `<li>${stopChecked.has(key(x)) ? '' : `<button type="button" class="move" data-stop="${esc(key(x))}">Check</button> `}${stepText(x)}${stopChecked.has(key(x)) ? ` ${answer(x)}` : ''}</li>`).join('');
+    return `<h3>What stopped it?</h3><p class="small">${stepText(step)} never happened. An action that left ${ent(step.of)} unable to act in time would explain it.</p>${xs.length ? `<ul class="moves">${items}</ul>` : '<p class="small muted">No action on the timeline or in your hypotheses yet.</p>'}`;
+}
 /**
  * "Compare with another plan", on an open plan: the other plans of its agent on the timeline (one proposed in the
  * story: Holmes's "if he wished to injure it, why not there?"); a compared one shows each plan's goal, the steps in
@@ -1011,11 +1035,34 @@ function questionsPanel(clashing) {
       ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></div>` : ''}</li>`).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
+/** The typed actions on the timeline and those of the player's hypotheses (circled answers, presuppositions). */
+function knownActions() {
+    const hyps = baseQuestions.filter(qListed).flatMap((q) => [presupposed(`pre:${q.id}`), ...shownPossibilities(q).map((p) => hypAction(hypothesisKey(q.id, p.value)))]).filter(Boolean);
+    return [...onTimeline().filter((f) => list(f.act).length && !f.reasoned), ...hyps];
+}
+/** What an action needs, each met by another known action's effect (not after it), by the timeline, or by nothing. */
+function needsHtml(a) {
+    const ctx = { ...placeCtx, order: data.order, entries: onTimeline() };
+    const { entries = [] } = pointImplications(a, nameOf, ctx);
+    const t = anchorOf(a.time ?? {});
+    const others = knownActions().filter((x) => x.id !== a.id);
+    const row = (req) => {
+        for (const x of others) {
+            const s = anchorOf(x.time ?? {});
+            if (t && s && data.order.lt(t, s)) continue;
+            const eff = (pointImplications(x, nameOf, ctx).entries ?? []).find((e) => e.role === 'effects' && !e.cond && meets(e, req, placeCtx));
+            if (eff) return `<li>${phrase(req)} <span class="good small">met by ${stepText(x)}</span></li>`;
+        }
+        return `<li>${phrase(req)} ${statusHtml(requirementStatus(data.order, onTimeline(), req, placeCtx))}</li>`;
+    };
+    const needs = entries.filter((e) => e.role === 'requires');
+    return needs.length ? `<p class="small">What it needs:</p><ul class="moves">${needs.map(row).join('')}</ul>` : '';
+}
 /** On a who-question whose entry is a typed action: each circled one doing it, with "what is this for?". */
 function actionMovesHtml(q) {
     const pre = presupposed(`pre:${q.id}`);
     return shownPossibilities(q).map((p) => hypAction(hypothesisKey(q.id, p.value))).filter(Boolean)
-        .map((a) => `<h3>If ${ent(a.of)} did it</h3><p class="small">${stepText(a)}</p>${purposeHtml(a)}${lapsedHtml(a)}`).join('')
+        .map((a) => `<h3>${q.possibilities.find((p) => p.value === a.hyp.pick)?.action ? 'Your answer, as an action' : `If ${ent(a.of)} did it`}</h3><p class="small">${stepText(a)}</p>${needsHtml(a)}${purposeHtml(a)}${lapsedHtml(a)}`).join('')
         + (pre ? `<h3>What your answer takes for granted</h3><p class="small">${stepText(pre)}</p>${purposeHtml(pre)}${lapsedHtml(pre)}`
             : q.presupposes ? `<p class="small muted">Circle an answer, and what the question takes for granted (${stepText({ of: q.entry.of, ...q.presupposes })}) goes on the timeline as your hypothesis.</p>` : '');
 }
@@ -1172,6 +1219,8 @@ document.addEventListener('click', (e) => {
         addMove({ move: 'c', of: x.id, for: t.id }, x.hyp ? `q:${x.hyp.q}` : x.id);
         return;
     }
+    const sp = e.target.closest('[data-stop]');
+    if (sp) { stopChecked.add(sp.dataset.stop); render(); return; }
     const cp = e.target.closest('[data-compare]');
     if (cp) { compared.add(cp.dataset.compare); render(); return; }
     const ac = e.target.closest('[data-account]');
