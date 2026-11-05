@@ -431,8 +431,9 @@ order, assertions and contradictions, below); no page uses it yet. `npm run vali
 
 - **`entities.json`**: entities the old `entities.json` lacks (the kitchen, the train, the Wessex Cup, the two
   unnamed lads, the searchers…), plus three state entities: `calendar` (weekday), `clock` (hour) and `weather`. Ids
-  share the old file's namespace, and `of` may name either. `moves` (a list beside `entities`) names the places that
-  move (the carriage, the landau, the Pullman car); a thing that is not a place moves too (the train, a purse, a person).
+  share the old file's namespace, and `of` may name either. `moves` (a list beside `entities`) names the vehicles
+  (the carriage, the landau, the Pullman car, the two trains); a place in it moves, and a thing that is not a place moves
+  too (a purse, a person). The grid gives a vehicle a column of its own while its own place is not known.
 - **Groups.** A group (`kind: group`) is an entity like any other; who is in it is the `member_of` attribute of each
   member, with its own time, so membership changes like any attribute (the two lads join `searchers` at the stable
   on Tuesday morning and leave it at the finding). A fact on a group holds for every member at that time.

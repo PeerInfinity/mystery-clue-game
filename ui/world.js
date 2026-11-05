@@ -38,10 +38,10 @@ const accountById = new Map(data.accounts.map((a) => [a.id, a]));
 const LAST = story.length - 1;
 
 // --- State: how far the story is read, and the player's trust. Saved in this browser only.
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, history: [], sel: null };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, history: [], view: 'list', depth: 2, sel: null };
 try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 state.sel = null;
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, history: state.history })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, history: state.history, view: state.view, depth: state.depth })); } catch { /* not saved */ } };
 // Every change of trust can be undone: the trust before it is kept (the last 50).
 const changeTrust = (fn) => { state.history = [...state.history, JSON.stringify(state.trust)].slice(-50); fn(state.trust); save(); render(); };
 
@@ -153,11 +153,11 @@ function assertsHtml(f) {
     return `<ul class="asserts" title="What this asserts">${li}</ul>`;
 }
 
-function eventRow(f, clashing) {
+function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
     const cls = ['event', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<li class="${cls}" data-fact="${esc(f.id)}">${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span> <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</li>`;
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}">${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span> <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
 }
 
 /** The events (all, or one entity's) in time order, under the time points they start at. */
@@ -176,6 +176,82 @@ function eventList(filter, clashing) {
         out.push(`<li class="time-head">${timeLabel(id)}</li>`, ...fs.map((f) => eventRow(f, clashing)));
     }
     return out.length ? `<ol class="events">${out.join('')}</ol>` : '<p class="muted">Nothing yet.</p>';
+}
+
+// --- The grid: the same events, one per row, each in a column (its place, or its source).
+const rankOf = (t) => data.order.rank.get(t) ?? -1;
+/** Where an entity is at time t, as far as the timeline knows: its latest location on the timeline up to t. */
+function locAt(id, t, depth = 0) {
+    if (depth > 3) return null;
+    let best = null;
+    for (const f of data.facts) {
+        if (f.of !== id || f.attr !== 'location' || f.neg || f.value == null || !visible(f) || !accepted(f)) continue;
+        const r = rankOf(anchorOf(f.time ?? {}));
+        if (r <= rankOf(t) && (!best || r >= best.r)) best = { r, f };
+    }
+    return best ? resolvePlace(best.f.value, t, depth + 1) : null;
+}
+/** A place that stays put is itself; a thing that moves (a vehicle, a purse, a person) is where it is at t. */
+// A vehicle whose own place is not known is a column of its own (the train west of Reading); any other thing, none.
+const movers = new Set(data.moves);
+const resolvePlace = (v, t, depth = 0) => (data.places.fixed(v) ? v : locAt(v, t, depth) ?? (movers.has(v) ? v : null));
+function placeOf(f) {
+    const t = anchorOf(f.time ?? {});
+    if (f.attr === 'location' && f.value != null) return f.neg ? f.value : resolvePlace(f.value, t);
+    if (data.places.fixed(f.of)) return f.of;
+    return f.of === '?' ? null : locAt(f.of, t);
+}
+// An outermost region with only one place inside it adds no level of its own (Devonshire holds only the moor).
+const childCount = new Map();
+for (const e of data.entities) if (e.within) childCount.set(e.within, (childCount.get(e.within) ?? 0) + 1);
+const onlyChild = new Set([...childCount].filter(([, n]) => n === 1).map(([id]) => id));
+/** A place's column at the chosen depth: its ancestor that many steps below the outermost region. */
+function placeColumn(p) {
+    if (!p) return null;
+    const top = data.places.chain(p).reverse();
+    while (top.length > 1 && onlyChild.has(top[0])) top.shift();
+    return top[Math.min(state.depth - 1, top.length - 1)];
+}
+/** A fact's source: who first had it, on its best chain. */
+function sourceOf(f) {
+    if (f.attr === 'tells') return f.of;
+    const cs = chainsOf(f);
+    if (!cs.length) return null;
+    let best = cs[0], bl = -1;
+    for (const c of cs) { const l = levelOf([c], state.trust); if (l > bl) { bl = l; best = c; } }
+    return best.origin ?? '?';
+}
+function eventGrid(clashing) {
+    const shown = data.facts.filter((f) => visible(f) && (state.showBelow || accepted(f)));
+    const colOf = (f) => (state.view === 'source' ? sourceOf(f) : placeColumn(placeOf(f))) ?? '—';
+    const at = new Map();
+    for (const f of shown) { const a = anchorOf(f.time ?? {}); at.set(a, [...(at.get(a) ?? []), f]); }
+    const rows = [];
+    const cols = [];
+    for (const id of data.order.sorted) {
+        const fs = at.get(id);
+        if (!fs) continue;
+        fs.sort((a, b) => givenAt(a) - givenAt(b));
+        rows.push({ head: id });
+        for (const f of fs) {
+            const c = isTimeEvent(f) ? null : colOf(f);
+            if (c && !cols.includes(c)) cols.push(c);
+            rows.push({ f, c });
+        }
+    }
+    if (!rows.length) return '<p class="muted">Nothing yet.</p>';
+    // Columns in order of first appearance, those of one region together; "—" (no place known) last.
+    const region = (c) => (state.view === 'place' && entityById.has(c) ? data.places.chain(c).at(-1) : c);
+    const regions = [...new Set(cols.map(region))];
+    cols.sort((a, b) => (a === '—') - (b === '—') || regions.indexOf(region(a)) - regions.indexOf(region(b)) || 0);
+    const colName = (c) => (c === '—' ? (state.view === 'place' ? 'place not known' : 'not modelled') : c === '?' ? 'unknown' : ent(c));
+    const head = `<tr>${cols.map((c) => `<th>${colName(c)}</th>`).join('')}</tr>`;
+    const body = rows.map((r) => {
+        if (r.head) return `<tr class="grid-time"><th colspan="${cols.length}">${timeLabel(r.head)}</th></tr>`;
+        if (!r.c) return `<tr><td colspan="${cols.length}" class="grid-span">${eventRow(r.f, clashing, 'div')}</td></tr>`;
+        return `<tr>${cols.map((c) => (c === r.c ? `<td>${eventRow(r.f, clashing, 'div')}</td>` : '<td></td>')).join('')}</tr>`;
+    }).join('');
+    return `<div class="grid-wrap"><table class="grid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
 }
 
 function clashSide(x) {
@@ -217,7 +293,11 @@ function render() {
     document.getElementById('clashes').innerHTML = clashes.length
         ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
         : '';
-    document.getElementById('timeline').innerHTML = eventList(() => true, clashing);
+    document.getElementById('view').value = state.view;
+    document.getElementById('depth').value = String(state.depth);
+    document.getElementById('depth-label').hidden = state.view !== 'place';
+    document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
+    document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(() => true, clashing) : eventGrid(clashing);
     renderDetail(clashing);
 }
 
@@ -304,6 +384,8 @@ document.getElementById('next').addEventListener('click', () => setPara(state.pa
 document.getElementById('back').addEventListener('click', () => setPara(state.para - 1));
 document.getElementById('para').addEventListener('change', (e) => setPara(Number(e.target.value)));
 document.getElementById('threshold').addEventListener('change', (e) => { state.threshold = Number(e.target.value); save(); render(); });
+document.getElementById('view').addEventListener('change', (e) => { state.view = e.target.value; save(); render(); });
+document.getElementById('depth').addEventListener('change', (e) => { state.depth = Number(e.target.value); save(); render(); });
 document.getElementById('show-below').addEventListener('change', (e) => { state.showBelow = e.target.checked; save(); render(); });
 document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Put every link and person back to uncertain?')) return;

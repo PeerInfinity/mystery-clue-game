@@ -150,7 +150,14 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   quote, its trust and all its chains with their trust selects; the links and people whose distrust alone would take
   that side off the timeline are marked, and each shows how many events now on the timeline distrusting it would
   take off (at ¶58, the stranger's word to Edith 2, the police's report to the papers 151); a resolved contradiction
-  says so. Every change of trust can be undone. Next: the grid view (times as rows, places as columns).
+  says so. Every change of trust can be undone.
+- **Built (2026-11-04), the grid, to try against the list:** the same events, one per row under their time points,
+  each in a column: its place (a location's place; any other event, where its entity is at that time as far as the
+  timeline knows; a vehicle whose own place is unknown, a column of its own), at a depth of region, area, place or in
+  full (an outermost region holding one place, Devonshire, adds no level); or its source (who first had it, on its
+  best chain). One event per row keeps the ruling that no cell holds two events, so the grid is sparse, mostly a
+  diagonal walk across the columns. The user was unsure it would read more easily than the list; it is there to be
+  judged.
 
 ### An incremental game about trying every combination
 

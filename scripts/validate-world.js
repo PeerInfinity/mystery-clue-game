@@ -225,7 +225,7 @@ for (const q of questions) {
 }
 
 // Moving places, and the true story is consistent: no contradiction among the assertions the answer key holds true.
-for (const m of world.moves) if (!allEntities.some((e) => e.id === m && e.kind === 'place')) err(m, 'moves: not a place');
+for (const m of world.moves) if (!entities.has(m)) err(m, 'moves: no entity');
 const asserted = assertions(world);
 // A belief's `truth` is the truth of what it holds: false when something it asserts is false, and only then.
 for (const f of facts) if (f.attr === 'believes' && !f.modal && list(f.asserts).length) {
