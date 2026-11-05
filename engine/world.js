@@ -9,6 +9,8 @@ const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 export const CLAIM_ATTRS = new Set(['says', 'believes']);
 /** Attributes with one value at a time: two values at a time both certainly cover contradict each other. */
 export const SINGLE_ATTRS = new Set(['location', 'identity']);
+/** Typed states: attributes whose values exclude each other (a door is open, shut or locked). See engine/actions.js. */
+export const STATES = { door: ['open', 'shut', 'locked'] };
 
 /** Provenance: the accounts holding each fact, and the chains of tellings that carry an account to a holder. */
 export function provenance(data) {
@@ -244,7 +246,7 @@ export function contradictions(data, accepted = null) {
         else if (a.neg !== b.neg && a.pick === b.pick) out.push({ a, b, why: `${q}: ${a.pick}, asserted and denied` });
     }
 
-    const states = all.filter((x) => x.kind === 'state' && SINGLE_ATTRS.has(x.attr) && x.value != null);
+    const states = all.filter((x) => x.kind === 'state' && (SINGLE_ATTRS.has(x.attr) || STATES[x.attr]) && x.value != null);
     const locs = states.filter((x) => x.attr === 'location');
     // Where a thing that moves certainly is over a cover: a fixed place, through at most a few hops.
     const fixedAt = (value, cover, depth = 0) => {
@@ -268,7 +270,7 @@ export function contradictions(data, accepted = null) {
         if (a.fact === b.fact) continue;
         const ca = coverOf(a.time), cb = coverOf(b.time);
         if (!overlaps(order, ca, cb)) continue;
-        if (a.attr === 'identity') {
+        if (a.attr === 'identity' || STATES[a.attr]) {
             if (!a.neg && !b.neg && a.value !== b.value) out.push({ a, b, why: `${a.of}: ${a.value} or ${b.value}` });
             else if (a.neg !== b.neg && a.value === b.value) out.push({ a, b, why: `${a.of}: ${a.value}, asserted and denied` });
             continue;

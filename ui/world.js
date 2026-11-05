@@ -4,6 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -33,18 +34,26 @@ const story = text.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).fi
 const entityById = new Map(data.entities.map((e) => [e.id, e]));
 const timeById = new Map(data.times.map((t) => [t.id, t]));
 const factById = new Map(data.facts.map((f) => [f.id, f]));
+// The entries the player's moves give (Watson's reasoning), worked out afresh at each drawing.
+let reasoned = [];
+let reasonedById = new Map();
+const factOf = (id) => factById.get(id) ?? reasonedById.get(id);
+const allFacts = () => [...data.facts, ...reasoned];
 const qById = new Map(data.questions.map((q) => [q.id, q]));
 const accountById = new Map(data.accounts.map((a) => [a.id, a]));
 const LAST = story.length - 1;
 
 // --- State: how far the story is read, the player's trust and marks on questions. Saved in this browser only.
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, history: [], view: 'list', depth: 2, sel: null, qOpen: true };
+// `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
+// {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null };
 try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 state.sel = null;
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen })); } catch { /* not saved */ } };
+state.note = null;
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
-const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks })].slice(-50); };
+const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
 const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
 function cycleMark(qid, pick) {
@@ -58,8 +67,8 @@ function cycleMark(qid, pick) {
 
 // --- Words.
 const DAYS = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
-const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'Watson’s hypothesis' : entityById.get(id)?.name ?? id);
-const ent = (id) => (id === HYPOTHESIS ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ?? ''));
+const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'Watson’s hypothesis' : id === REASONING ? 'Watson’s reasoning' : entityById.get(id)?.name ?? id);
+const ent = (id) => (id === HYPOTHESIS || id === REASONING ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ?? ''));
 // A value: an entity id becomes its name; a text that starts with one ("silver_blaze (in his keeping)") too.
 const val = (v) => list(v).map((x) => {
     if (x == null) return '<span class="muted">unknown</span>';
@@ -123,6 +132,7 @@ const pickText = (q, pick) => (entityById.has(pick) ? ent(pick) : esc(pick));
 /** A fact as a short sentence. */
 function phrase(f) {
     const E = f.of === '?' ? 'Someone' : ent(f.of);
+    if (f.reasoned && f.attr === 'action' && f.act) return `${E}: ${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${ent(f.thing)}`;
     const v = val(f.value);
     const d = f.detail ? ` <span class="muted">(${esc(f.detail)})</span>` : '';
     switch (f.attr) {
@@ -133,6 +143,7 @@ function phrase(f) {
         case 'wearing': return `${E} wears ${v}${d}`;
         case 'owner': return f.neg ? `${E} is <b>not</b> ${v}'s${d}` : `${E} belongs to ${v}${d}`;
         case 'identity': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
+        case 'door': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
         case 'name': return `${E} is called ${v}`;
         case 'says': return `${E}${f.to ? ` to ${ent(f.to)}` : ''}: <span class="said">${v}</span>`;
         case 'believes': return `${E} believes ${v}`;
@@ -161,11 +172,18 @@ const isTimeEvent = (f) => TIME_ATTRS.has(f.attr) || ['calendar', 'clock', 'weat
 const chainsOf = (f) => (f.attr === 'tells' ? [] : prov.factChains(f.id));
 /** A fact's level: a telling to Watson he witnesses (certain), any other telling as the story reports it (uncertain). */
 function levelOfFact(f) {
+    if (f.reasoned) {
+        // Watson's reasoning: as trusted as its weakest premise, and no more than the player trusts his reasoning.
+        const ls = f.reasoned.premises.map((id) => { const p = factOf(id); return p ? levelOfFact(p) : null; });
+        if (ls.some((l) => l == null)) return null;
+        const cap = state.trust.people[REASONING];
+        return Math.min(...ls, cap ?? LEVELS.length - 1);
+    }
     if (f.attr === 'tells') return f.to === 'watson' ? LEVELS.length - 1 : DEFAULT_LEVEL;
     return levelOf(chainsOf(f), state.trust);
 }
 /** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
-const chainsOfAssertion = (x) => (x.mark ? [hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factById.get(x.fact)));
+const chainsOfAssertion = (x) => (x.mark ? [hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factOf(x.fact)));
 /** Told by the paragraph read to, and modelled (a chain reaches Watson, or a telling). */
 const visible = (f) => { const g = givenAt(f); return g != null && g <= state.para && levelOfFact(f) != null; };
 const accepted = (f) => levelOfFact(f) >= state.threshold;
@@ -173,7 +191,9 @@ const accepted = (f) => levelOfFact(f) >= state.threshold;
 /** The assertions on the timeline: told so far, and trusted at least to the threshold; and the player's marks. */
 function acceptedAssertions() {
     const marks = markAssertions(data, state.marks, possShown).filter((x) => markLevel(x.q, x.pick) >= state.threshold);
-    return [...marks, ...allAssertions.filter((x) => {
+    const mine = reasoned.filter((f) => visible(f) && accepted(f))
+        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at }));
+    return [...marks, ...mine, ...allAssertions.filter((x) => {
         const f = factById.get(x.fact);
         if (!visible(f)) return false;
         if (x.claim && x.claim === x.fact) return levelOf(prov.claimChains(x.claim), state.trust) >= state.threshold;
@@ -209,8 +229,8 @@ function assertsHtml(f) {
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
-    const cls = ['event', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}">${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span> <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
+    const cls = ['event', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Watson’s reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span> <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -237,7 +257,7 @@ function questionRows(q, clashing, tag = 'li') {
 
 /** The events (all, or one entity's) in time order, under the time points they start at, with the questions. */
 function eventList(filter, clashing, qFilter = () => true) {
-    const shown = data.facts.filter((f) => visible(f) && filter(f) && (state.showBelow || accepted(f)));
+    const shown = allFacts().filter((f) => visible(f) && filter(f) && (state.showBelow || accepted(f)));
     const at = new Map();
     for (const f of shown) {
         const a = anchorOf(f.time ?? {});
@@ -295,6 +315,7 @@ function placeColumn(p) {
 }
 /** A fact's source: who first had it, on its best chain. */
 function sourceOf(f) {
+    if (f.reasoned) return REASONING;
     if (f.attr === 'tells') return f.of;
     const cs = chainsOf(f);
     if (!cs.length) return null;
@@ -303,7 +324,7 @@ function sourceOf(f) {
     return best.origin ?? '?';
 }
 function eventGrid(clashing) {
-    const shown = data.facts.filter((f) => visible(f) && (state.showBelow || accepted(f)));
+    const shown = allFacts().filter((f) => visible(f) && (state.showBelow || accepted(f)));
     const colOf = (f) => (state.view === 'source' ? sourceOf(f) : placeColumn(placeOf(f))) ?? '—';
     const at = new Map();
     for (const f of shown) { const a = anchorOf(f.time ?? {}); at.set(a, [...(at.get(a) ?? []), f]); }
@@ -379,7 +400,7 @@ function packGrid() {
 const markText = (x) => `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}`;
 function clashSide(x) {
     if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${markText(x)}</a>`;
-    const f = factById.get(x.fact);
+    const f = factOf(x.fact);
     if (x.kind === 'pick') {
         const q = qById.get(x.q);
         const who = x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : '';
@@ -389,8 +410,8 @@ function clashSide(x) {
 }
 function clashTitle(c) {
     if (c.a.kind === 'pick') return esc(qById.get(c.a.q)?.label ?? c.a.q);
-    const f = factById.get(c.a.fact);
-    return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : 'two identities?'}`;
+    const f = factOf(c.a.fact);
+    return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : 'two identities?'}`;
 }
 
 const clashKey = (c) => `clash:${c.a.id}|${c.b.id}`;
@@ -398,6 +419,8 @@ let current = [];
 
 let shownPara = null;
 function render() {
+    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id), data.order, nameOf, givenAt);
+    reasonedById = new Map(reasoned.map((f) => [f.id, f]));
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
     document.getElementById('para').value = state.para;
@@ -473,7 +496,12 @@ function sideHtml(x, label) {
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>. Change the mark, or lower your trust in it.</p>
       <ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
     }
-    const f = factById.get(x.fact);
+    const f = factOf(x.fact);
+    if (f.reasoned) {
+        return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a></p>
+      <p class="small">From Watson’s reasoning. Trusted: <b>${levelName(levelOfFact(f))}</b>, as its weakest premise. Lower your trust in a premise, or withdraw it.</p>
+      <ul class="events">${f.reasoned.premises.map((id) => factOf(id)).filter(Boolean).map((p) => eventRow(p, new Set())).join('')}</ul></div>`;
+    }
     const what = x.kind === 'pick'
         ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : ''}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
         : phrase(f);
@@ -481,6 +509,73 @@ function sideHtml(x, label) {
       <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>${r.links.length || r.people.length ? '; <span class="resolving">marked</span>: distrusting it alone takes this side off the timeline' : '; no single link takes it off: it has independent chains'}.</p>
       <ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
+}
+
+// --- The player's moves on the timeline (engine/actions.js), and what they give.
+/** What is on the timeline now: told so far and trusted to the threshold, with the player's own entries. */
+const onTimeline = () => allFacts().filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
+const isTypedState = (f) => STATES[f.attr] && f.value != null && !f.neg;
+const madeB = (id) => state.reasoning.some((m) => m.move === 'b' && m.of === id);
+const noteHtml = () => (state.note ? `<p class="note small">${esc(state.note)}</p>` : '');
+function addMove(m, select) {
+    remember();
+    state.reasoning = [...state.reasoning, m];
+    state.note = null;
+    state.sel = select;
+    save(); render();
+}
+/** Move (a) on a typed state: the other states of the same thing on the timeline to compare it with. */
+function changeMoveHtml(f) {
+    if (!isTypedState(f)) return '';
+    const on = onTimeline();
+    const others = on.filter((o) => o.id !== f.id && isTypedState(o) && o.of === f.of && o.attr === f.attr && o.value !== f.value);
+    const next = on.filter((o) => o.id !== f.id && isTypedState(o) && o.of === f.of && o.attr === f.attr && (o.time?.at ?? o.time?.from ?? o.time?.to) && f.time && data.order.lt(anchorOf(f.time), anchorOf(o.time)))
+        .sort((a, b) => rankOf(anchorOf(a.time)) - rankOf(anchorOf(b.time)))[0];
+    const lasts = `<p class="small">It lasts until something changes it${next ? `: next on the timeline, ${phrase(next)} (${timeLabel(anchorOf(next.time))}).` : '; nothing on the timeline does yet.'}</p>`;
+    const done = (o) => state.reasoning.some((m) => m.move === 'a' && [m.a, m.b].includes(f.id) && [m.a, m.b].includes(o.id));
+    const items = others.map((o) => `<li>${done(o) ? '<span class="small muted">pointed out:</span> ' : `<button type="button" class="move" data-move-a="${esc(f.id)}" data-with="${esc(o.id)}">It changed</button> `}${phrase(o)} <span class="small muted">${timeLabel(anchorOf(o.time))}</span></li>`).join('');
+    return `<h3>A state</h3>${lasts}${others.length ? `<p class="small">Point out a change: it differs from another state of ${ent(f.of)} on the timeline, so something changed it between them.</p><ul class="moves">${items}</ul>` : ''}`;
+}
+/** Move (b) on a typed action: what it needs just before and does just after, each with what the timeline says. */
+function implicationsHtml(f) {
+    if (!list(f.act).length) return '';
+    if (!madeB(f.id)) {
+        return `<h3>An action</h3><p><button type="button" class="move" data-move-b="${esc(f.id)}">Point out what it needs and what it does</button></p>`;
+    }
+    const on = onTimeline();
+    const { entries = [] } = pointImplications(f, nameOf);
+    const row = (e) => {
+        const mine = reasonedById.get(e.id);
+        let st = '';
+        if (e.role === 'requires') {
+            const r = requirementStatus(data.order, on, e);
+            st = r.status === 'met' ? `<span class="good small">met${r.entry && r.entry.id !== e.id ? `: ${phrase(r.entry)}` : ''}</span>`
+                : r.status === 'against' ? `<span class="bad small">the timeline has ${phrase(r.entry)}${r.persisting ? `, since ${timeLabel(anchorOf(r.entry.time))}, and nothing changes it` : ''}</span>`
+                : '<span class="muted small">nothing on the timeline says so</span>';
+        }
+        return `<li>${mine ? eventRow(mine, new Set(), 'span') : phrase(e)} ${st}</li>`;
+    };
+    const needs = entries.filter((e) => e.role === 'requires'), does = entries.filter((e) => e.role === 'effects');
+    return `<h3>What it needs</h3><ul class="moves">${needs.map(row).join('')}</ul>${does.length ? `<h3>What it does</h3><ul class="moves">${does.map(row).join('')}</ul>` : ''}`;
+}
+function movesHtml(f) {
+    // A change pointed out that is a question's entry: the same action on the same thing, in a window that can meet it.
+    const meets = (t, w) => !(w?.from && t.before && data.order.le(t.before, w.from)) && !(w?.to && t.after && data.order.le(w.to, t.after));
+    const q = f.reasoned && f.act ? data.questions.find((x) => x.entry?.act && list(f.act).includes(x.entry.act) && x.entry.thing === f.thing && meets(f.time ?? {}, x.entry.time) && qListed(x)) : null;
+    return `${changeMoveHtml(f)}${implicationsHtml(f)}${q ? `<p class="small">This is the question <a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a></p>` : ''}`;
+}
+function reasonedDetail(f) {
+    const how = f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
+        : f.reasoned.role === 'requires' ? 'What an action needs just before it.' : 'What an action does.';
+    const premises = f.reasoned.premises.map((id) => factOf(id)).filter(Boolean);
+    const cap = { origin: REASONING, links: [{ from: REASONING, to: 'watson', how: 'reasoning' }] };
+    return `<h2>${phrase(f)}</h2>
+      <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. From <span class="hyp-name">Watson’s reasoning</span>: ${how}
+        Trusted: <b>${levelName(levelOfFact(f))}</b>, as its weakest premise.</p>
+      <h3>From</h3><ul class="events">${premises.map((p) => eventRow(p, new Set())).join('')}</ul>
+      ${peopleHtml([cap])}
+      ${movesHtml(f)}
+      <p><button type="button" class="move" data-withdraw="${esc(f.id)}">Withdraw this reasoning</button></p>`;
 }
 
 // --- Questions: the panel, and one question in the detail.
@@ -541,6 +636,10 @@ function renderDetail(clashing) {
           ${sideHtml(c.a, 'One side')}${sideHtml(c.b, 'Against')}`;
         return;
     }
+    if (sel && reasonedById.has(sel)) {
+        el.innerHTML = noteHtml() + reasonedDetail(reasonedById.get(sel), clashing);
+        return;
+    }
     if (sel && factById.has(sel)) {
         const f = factById.get(sel);
         const chains = chainsOf(f);
@@ -551,7 +650,8 @@ function renderDetail(clashing) {
           ${f.attr === 'tells' ? '<p class="small muted">A telling: how an account passed from one person to another.</p>'
             : `<h3>How Watson has it</h3><ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches him</h3><ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
-          ${peopleHtml([...chains, ...content])}`;
+          ${peopleHtml([...chains, ...content])}${movesHtml(f)}`;
+        el.insertAdjacentHTML('afterbegin', noteHtml());
         return;
     }
     if (sel?.startsWith('q:') && qById.has(sel.slice(2)) && qListed(qById.get(sel.slice(2)))) {
@@ -582,11 +682,38 @@ document.addEventListener('toggle', (e) => { if (e.target.id === 'q-box') { stat
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));
-    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; } else state.trust = h;
+    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; } else state.trust = h;
     state.history = state.history.slice(0, -1);
     save(); render();
 });
 document.addEventListener('click', (e) => {
+    const ma = e.target.closest('[data-move-a]');
+    if (ma) {
+        const a = factOf(ma.dataset.moveA), b = factOf(ma.dataset.with);
+        const r = pointChange(data.order, a, b, onTimeline());
+        if (r.why) { state.note = r.why; render(); return; }
+        addMove({ move: 'a', a: a.id, b: b.id }, r.entry.id);
+        return;
+    }
+    const mb = e.target.closest('[data-move-b]');
+    if (mb) {
+        const r = pointImplications(factOf(mb.dataset.moveB), nameOf);
+        if (r.why) { state.note = r.why; render(); return; }
+        addMove({ move: 'b', of: mb.dataset.moveB }, mb.dataset.moveB);
+        return;
+    }
+    const wd = e.target.closest('[data-withdraw]');
+    if (wd) {
+        // Withdraw the move that gave this entry; what was reasoned from it goes with it.
+        const f = reasonedById.get(wd.dataset.withdraw);
+        const m = f.reasoned.move === 'a' ? (x) => x.move === 'a' && x.a === f.reasoned.premises[0] && x.b === f.reasoned.premises[1] || x.move === 'a' && x.b === f.reasoned.premises[0] && x.a === f.reasoned.premises[1]
+            : (x) => x.move === 'b' && x.of === f.reasoned.premises[0];
+        remember();
+        state.reasoning = state.reasoning.filter((x) => !m(x));
+        state.sel = f.reasoned.premises[0];
+        save(); render();
+        return;
+    }
     const mo = e.target.closest('[data-more-q]');
     if (mo) { const id = mo.dataset.moreQ; if (moreOpen.has(id)) moreOpen.delete(id); else moreOpen.add(id); render(); return; }
     const m = e.target.closest('[data-mark-q]');
@@ -618,7 +745,7 @@ document.addEventListener('click', (e) => {
     const a = e.target.closest('[data-ent]');
     if (a) { state.sel = a.dataset.ent; render(); return; }
     const f = e.target.closest('[data-fact]');
-    if (f && !e.target.closest('select')) { state.sel = f.dataset.fact; render(); }
+    if (f && !e.target.closest('select')) { state.sel = f.dataset.fact; state.note = null; render(); }
 });
 document.addEventListener('change', (e) => {
     if (e.target.matches('.link-trust')) {

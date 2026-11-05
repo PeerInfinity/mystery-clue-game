@@ -552,6 +552,25 @@ the page offers those met so far (named by a fact given so far). The page shows 
 puts forward (`via: direct`) and "something else"; the rest (`via: indirect`, and the people, animals or places, an
 indirect possibility among them in its place) sit behind a "More" button, so that no list points at the answer.
 
+**Typed states and actions** (`engine/actions.js`). A typed state is an attribute whose values exclude each other
+(`STATES`; for now `door`: `open`, `shut`, `locked`): two of them at a time both certainly cover contradict, like two
+identities. A fact is a typed action when it has `act` (an action type of the generic table `ACTIONS`: `lock`,
+`unlock`, `open`, `close`, `go_through`) and `thing` (what it acts on); its agent is its `of`. The table gives each
+type its requirements just before (a state of the thing, or `carrying: 'key'`, a key to the thing) and its effects
+just after. Only the actions that matter are typed (Hunter going out through the stable door and locking it); the
+validator checks `act`, `thing` and a typed state's value. A question's entry may carry `act` and `thing` too, so a
+change the player points out can be recognised as its entry (who opened the stable door). Persistence
+(`holdsBefore`): a state lasts until something specific changes it; events the story never tells are not invented.
+The player's moves, each checked by these rules, give entries with the source *Watson's reasoning*, as trusted as
+their weakest premise (and no more than the player's cap on Watson's reasoning):
+- (a) `pointChange`: two states of one thing on the timeline differ, so something changed it between them: an action
+  by "?" (the shortest run of action types, `changePath`: locked to open is unlocking and opening), in the window
+  between. Refused when nothing differs, the order is not certain, or a state or a change of the thing lies between.
+- (b) `pointImplications`: an action's requirements (time `{to}` the action: holding up to it) and effects (`{from}`
+  it); a change from (a) gives only its other needs (the key), its states being its premises. Each requirement is
+  shown met, against (persistence gives another value) or with nothing on the timeline saying so
+  (`requirementStatus`).
+
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
 chain with no links is Watson's own and certain; every link starts uncertain, and the player may set it lower or
 higher (never certain). A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words

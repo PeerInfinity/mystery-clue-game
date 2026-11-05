@@ -94,3 +94,10 @@ p.bad { color: var(--bad); } p.good { color: var(--good); }
   .world-main { grid-template-columns: 1fr; }
   .world-story, .world-detail { position: static; max-height: 40vh; }
 }
+
+/* Watson's reasoning: the player's own entries, and the moves that make them. */
+.event.reasoned { border-left: 3px double var(--accent); padding-left: 6px; font-style: italic; }
+.moves { list-style: none; padding-left: 0; margin: 4px 0; }
+.moves li { margin: 3px 0; }
+.move { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 4px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+.note { background: var(--chip); padding: 4px 8px; border-radius: 4px; }

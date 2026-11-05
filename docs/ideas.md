@@ -223,6 +223,18 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   the blow), for a "where" question every place, alphabetically, an indirect possibility of that kind among them
   rather than on its own. A "why" question may get a bigger list later. Left: the places list holds every room
   and path met (long), and the reader's text ideas behind "More" still name the answer for some questions (the hoof).
+- **Built (2026-11-04), typed states, the action table, persistence and moves (a)–(b) (step 2):** `engine/actions.js`
+  and the detail of a typed state or action in `world.html`. Played on the door at ¶33: Hunter going out needs the
+  door open (b), but it has been locked since nine, nothing changing it ("the timeline has it locked … and nothing
+  changes it"); pointing out the change (a) gives "someone unlocking and opening the stable door" before he went out;
+  his locking it (b) needs a key ("nothing on the timeline says so": no line says he carried one) and leaves it
+  locked; locked then and open in the morning (a) gives a second unlocking and opening, recognised as the entry of
+  "Who opened the stable door in the night?", whose need (b) is "someone has a key to the stable door": Holmes's
+  "where is the key?" (¶57). None of it adds a contradiction, as the true story should not. Typed so far: the three
+  door states and Hunter's two actions; Straker's opening (¶220, untyped) and the tin box are not. Left for later:
+  the agent "?" of a change cannot yet be filled in by a move (Hunter, inside, is the obvious candidate for the first
+  change); an action's effect on its agent's place (going through) is not modelled; a pair refused (a state between)
+  is still offered as a button, refused with the reason.
 
 ### An incremental game about trying every combination
 

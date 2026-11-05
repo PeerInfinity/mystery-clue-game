@@ -22,6 +22,7 @@ import path from 'node:path';
 import { normalize } from '../engine/story.js';
 import { provenance, loadWorld } from './world-provenance.js';
 import { assertions, contradictions, CLAIM_ATTRS } from '../engine/world.js';
+import { ACTIONS, STATES } from '../engine/actions.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -92,6 +93,12 @@ for (const f of facts) {
         if (/^[a-z][a-z0-9_]*$/.test(head) && (head.includes('_') || f.attr === 'location' || f.attr === 'lives_at') && !entities.has(head)) err(f.id, `value: no entity ${head}`);
     }
     if (f.attr === 'member_of') for (const v of list(f.value)) if (!groups.has(v)) err(f.id, `member_of: ${v} is not a group`);
+    // A typed state takes one of its values; a typed action names a known action type and the thing it acts on.
+    if (STATES[f.attr] && !STATES[f.attr].includes(f.value)) err(f.id, `${f.attr}: ${f.value} is not one of ${STATES[f.attr].join(', ')}`);
+    if (f.act != null || f.thing != null) {
+        for (const t of list(f.act)) if (!ACTIONS[t]) err(f.id, `act: no action type ${t}`);
+        if (!entities.has(f.thing)) err(f.id, `thing: no entity ${f.thing}`);
+    }
     for (const k of ['at', 'from', 'to', 'after', 'before']) if (f.time?.[k] && !timeIds.has(f.time[k])) err(f.id, `time.${k}: no time ${f.time[k]}`);
     if (!f.time || !Object.keys(f.time).length) err(f.id, 'no time');
     const basis = f.basis ?? 'stated';
