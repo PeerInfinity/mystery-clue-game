@@ -24,6 +24,7 @@ See `docs/technical.md`. The ones used most:
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Serve the game | `node scripts/serve.js` → http://localhost:8321/ |
 | Validate the case | `npm run validate`, `npm run validate-thoughts` |
+| Play the true path through Watson's timeline (about a minute; port 9333) | `node scripts/path-check.mjs` |
 | Play the action table through the real page (about 12–13 min; port 9333, one script at a time) | `node scripts/ui-run.mjs` |
 
 ## Conventions

@@ -677,6 +677,16 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   "he intended to walk down to the stables"), reaching Watson through Mrs Straker's account; being at a door over a
   `{from, to}` window, like an `{after, before}` one, is met by a place reached inside it. His plan's one unmet need
   is now the opium, which the story never accounts for (¶218 leaves it open).
+- The true path (`world/path.json`): the moves a careful reader makes on Watson's timeline, in order, each at the
+  paragraph `at` where the page first allows it, to the end of the story: `circle` and `cross` (a wrong answer is
+  tried, its clash seen with `see`, then crossed out), `trust` (a `link` or `person` set to `level` on the detail of
+  `on`; the path distrusts only false statements, by their statement link), `a`, `b`, `c` (the moves), `plan` (open
+  "What would this need?"), `stop`, `compare`, `account` (a check `key` on an open plan) and `hold` (a likely clash set
+  aside). `see`: a pattern the page must show after the move; `for_q`: the gated questions the move serves (so a
+  just-in-time path can be derived); `why`: the reader's thought in plain words (for hints and the autoplay later).
+  `scripts/path-check.mjs` plays it through the page: Read on to each move's paragraph (the gate met for real), each
+  move's control offered and its result in the save, every answer given found right, and at the end no contradiction
+  open and no likely clash unheld.
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's
@@ -692,7 +702,13 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
 chain with no links is Watson's own and certain; every link starts uncertain, and the player may set it lower or
 higher (never certain). A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words
-to Watson are one link), or for a member by member and group (`linkKey`). A person's level, when set, caps every link
+to Watson are one link), or for a member by member and group (`linkKey`). Every chain that reaches Watson through
+someone also starts with the **statement's own link** (`stmt:<id>`, the user's choice, 2026-11-05): a relayed fact's
+own, what a claim asserts by the claim's, a fact of a claim's content (`claim`) by that fact's. Distrusting it takes off
+that one statement and nothing else that came along the same links: the stranger's "lost" without his wish that the boy
+gets the paper, Straker's "to see that all was well" without his walk to the stables, Gregory's theories without what
+he found in Straker's pockets. A says or believes fact is itself an event (the speech, the belief) and has none: its
+statement link is on what it asserts. The page draws it once, above the chains, as "This statement itself". A person's level, when set, caps every link
 from that person. A chain is as strong as its weakest link, a fact as its best chain; a fact with no chain (the
 reader's own inference) is not modelled and not shown. A telling is shown as an event: certain when it is to Watson,
 uncertain otherwise. `resolvingLinks` gives the links and people whose distrust alone would take a fact below the

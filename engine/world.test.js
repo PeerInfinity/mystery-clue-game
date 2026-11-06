@@ -74,9 +74,28 @@ test("a claim's content and a word heard reach Watson through the speaker", () =
         { id: 'w', of: 'horse', attr: 'condition', value: 'fit', time: { at: 't2' }, para: 2, quote: 'x', word: 'man' },
     ];
     const p = provenance(world(facts, [], [{ id: 'acct.w', origin: 'watson', how: 'saw', facts: ['s'] }]));
-    assert.deepEqual(p.factChains('c').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>watson:said']]]);
-    assert.deepEqual(p.factChains('w').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>watson:said']]]);
+    assert.deepEqual(p.factChains('c').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>man:statement', 'man>watson:said']]]);
+    assert.deepEqual(p.factChains('w').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>man:statement', 'man>watson:said']]]);
     assert.deepEqual(p.factChains('s').map((c) => c.links.length), [0], 'the saying: Watson heard it');
+    assert.equal(linkKey(p.factChains('c')[0].links[0]), 'stmt:c', 'a fact of a claim\'s content: its own statement link');
+    assert.equal(linkKey(p.claimChains('s')[0].links[0]), 'stmt:s', 'what the claim itself asserts');
+    assert.equal(linkKey(p.factChains('w')[0].links[0]), 'stmt:w');
+});
+
+test('one statement can be distrusted without the rest of what came along the same links', () => {
+    const facts = [
+        { id: 'lie', of: 'man', attr: 'says', value: 'lost', to: 'maid', time: { at: 't2' }, para: 2, quote: 'x' },
+        { id: 'ask', of: 'man', attr: 'says', value: 'take this', to: 'maid', time: { at: 't2' }, para: 2, quote: 'x' },
+        { id: 'saw', of: 'man', attr: 'carrying', value: 'paper', time: { at: 't2' }, para: 2, quote: 'x' },
+    ];
+    const tells = [{ id: 'f.t', of: 'maid', attr: 'tells', value: 'acct.m', to: 'watson', how: 'told', time: { at: 't2' }, para: 2, quote: 'x' }];
+    const p = provenance(world([...facts, ...tells], [], [{ id: 'acct.m', origin: 'maid', how: 'saw', facts: ['lie', 'ask', 'saw'] }]));
+    const trust = { links: { 'stmt:lie': 0 } };
+    assert.equal(LEVELS[levelOf(p.claimChains('lie'), trust)], 'distrusted', 'what the lie asserts');
+    assert.equal(LEVELS[levelOf(p.claimChains('ask'), trust)], 'uncertain', 'his other words to her stand');
+    assert.equal(LEVELS[levelOf(p.factChains('lie'), trust)], 'uncertain', 'that he said it stands');
+    assert.equal(LEVELS[levelOf(p.factChains('saw'), { links: { 'stmt:saw': 0 } })], 'distrusted', 'a relayed fact has its own statement link');
+    assert.equal(LEVELS[levelOf(p.factChains('ask'), { links: { 'stmt:saw': 0 } })], 'uncertain');
 });
 
 test('trust: a chain is as strong as its weakest link, a fact as its best chain; Watson’s own is certain', () => {

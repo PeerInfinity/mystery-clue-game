@@ -640,15 +640,22 @@ function render() {
     renderDetail(clashing);
 }
 
+function linkStep(l, body, title, resolving) {
+    const key = linkKey(l);
+    const mark = resolving?.links.includes(key) ? ' resolving' : '';
+    const level = state.trust.links[key] ?? DEFAULT_LEVEL;
+    const opts = LEVELS.slice(0, -1).map((n, i) => `<option value="${i}"${i === level ? ' selected' : ''}>${n}</option>`).join('');
+    return `<span class="link-step${mark}"${mark ? ' title="Distrusting this link alone takes this side off the timeline"' : ''}>${body} <select class="link-trust" data-key="${esc(key)}" title="${title}">${opts}</select>${dropChip(resolving?.drop?.links.get(key))}</span>`;
+}
+/** A chain's links, but its statement's own link, which is drawn once above the chains (stmtHtml). */
 function chainHtml(c, resolving = null) {
-    const links = c.links.map((l) => {
-        const key = linkKey(l);
-        const mark = resolving?.links.includes(key) ? ' resolving' : '';
-        const level = state.trust.links[key] ?? DEFAULT_LEVEL;
-        const opts = LEVELS.slice(0, -1).map((n, i) => `<option value="${i}"${i === level ? ' selected' : ''}>${n}</option>`).join('');
-        return `<span class="link-step${mark}"${mark ? ' title="Distrusting this link alone takes this side off the timeline"' : ''}>→ <span class="how">${esc(l.how)}${l.uncertain ? '?' : ''}</span> → ${ent(l.to)} <select class="link-trust" data-key="${esc(key)}" title="How far you trust this link">${opts}</select>${dropChip(resolving?.drop?.links.get(key))}</span>`;
-    }).join(' ');
+    const links = c.links.filter((l) => !l.stmt).map((l) => linkStep(l, `→ <span class="how">${esc(l.how)}${l.uncertain ? '?' : ''}</span> → ${ent(l.to)}`, 'How far you trust this link', resolving)).join(' ');
     return `<li>${dot(levelOf([c], state.trust))}${ent(c.origin ?? '?')}${c.links.length ? ' ' + links : ' <span class="muted">(Watson’s own)</span>'}</li>`;
+}
+/** The statement's own link: how far the player trusts this one claim or fact, apart from the rest that came the same way. */
+function stmtHtml(chains, resolving = null) {
+    const own = [...new Map(chains.flatMap((c) => c.links.filter((l) => l.stmt)).map((l) => [l.stmt, l])).values()];
+    return own.map((l) => `<p class="small stmt-line">${linkStep(l, 'This statement itself:', 'How far you trust this one statement, apart from the rest that came the same way', resolving)}</p>`).join('');
 }
 function peopleHtml(chains, resolving = null) {
     const people = [...new Set(chains.flatMap((c) => c.links.map((l) => l.from)))].filter((p) => p && p !== '?' && p !== 'watson');
@@ -678,7 +685,7 @@ function sideHtml(x, label) {
     if (x.mark) {
         return `<div class="side"><h3>${label}</h3><p><a class="link" data-q="${esc(x.q)}">${markText(x)}</a></p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>. Change the mark, or lower your trust in it.</p>
-      <ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
+      ${stmtHtml(chains, r)}<ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
     }
     const f = factOf(x.fact);
     if (f.reasoned) {
@@ -692,7 +699,7 @@ function sideHtml(x, label) {
     return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${what}</a></p>
       <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>${r.links.length || r.people.length ? '; <span class="resolving">marked</span>: distrusting it alone takes this side off the timeline' : '; no single link takes it off: it has independent chains'}.</p>
-      <ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
+      ${stmtHtml(chains, r)}<ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
 }
 
 // --- The player's moves on the timeline (engine/actions.js), and what they give.
@@ -1177,8 +1184,8 @@ function renderDetail(clashing) {
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.</p>
           ${f.attr === 'tells' ? '<p class="small muted">A telling: how an account passed from one person to another.</p>'
-            : `<h3>How Watson has it</h3><ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
-          ${content.length ? `<h3>What it asserts reaches him</h3><ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
+            : `<h3>How Watson has it</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
+          ${content.length ? `<h3>What it asserts reaches him</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
           ${peopleHtml([...chains, ...content])}${movesHtml(f)}`;
         el.insertAdjacentHTML('afterbegin', noteHtml());
         return;

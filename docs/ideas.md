@@ -402,6 +402,25 @@ came from builds, checks, leads, drops and the absence, never from elimination.
 - **Built (2026-11-05), two loose ends (the user's choice before the next session):** the motive no longer offers
   "What is this for?" toward the aim (`end: true`); Straker at the stable after one comes from his own word at ¶32,
   so his plan's needs are all met but the opium.
+- **Features of the old game for the new page (the user's choices, 2026-11-05):** the priorities are links in the
+  story panel, a Cards panel, hints and autoplay. Agreed order: the true path as data and a check that plays it
+  through the page first, then the autoplay (which plays the path), then story links (names to their entity, from
+  `mentions.json`; links on each fact's quote only after measuring how evenly facts cover the text, since uneven
+  cover points at what matters) and a Cards tab, then hints. Cards: a tab holding only the list of the people,
+  animals, places and things met so far, by kind (not the model's own entities before the story names them); a
+  name opens its card in Detail, which gains the quotes that mention it and its questions. Hints: as in the old game
+  (a Hint button with a cooldown, rungs), ideally working after the player leaves the path; details to be discussed.
+- **Built (2026-11-05), the true path:** `world/path.json`, 112 moves from ¶24 to ¶216, and `scripts/path-check.mjs`,
+  which plays them through the page in under a minute. Every gated question is answered right through the real page
+  and every move is offered at its paragraph, so the audit's routes hold end to end. Writing it found that trust per
+  link could not set a lie aside: a false claim shares its link with that speaker's true words (the stranger's "lost"
+  with his wish that the boy gets the paper; Straker's "to see that all was well" with his walk to the stables;
+  Gregory's theories with the contents of Straker's pockets; Ross's "not my horse" with Bayard scratched), and "Straker
+  had defended himself" had no link of its own at all: 58 contradictions stayed open at the end. **The user's choice**
+  among trust per statement, beliefs on a link of their own, a "false" mark on a contradiction's side, or tolerating
+  them: **trust per statement** (each statement's own link, `stmt:<id>`, drawn once above its chains). The path now
+  distrusts 18 false statements and ends with no contradiction open and no likely clash unheld. Not yet checked: that
+  no move is offered before its paragraph.
 
 ### An incremental game about trying every combination
 

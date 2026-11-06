@@ -69,16 +69,32 @@ export function provenance(data) {
     // What a claim asserts reaches Watson as the claim did, with one link more at its head: the claimant's word
     // (said, or believed) to whoever first held the claim. A fact with `word` is what that person said in Watson's
     // hearing; a fact with `claim` is what that claim (a says or believes fact) asserts.
-    const claimChains = (cid) => {
+    //
+    // Every chain that reaches Watson through someone starts with the statement's own link (`stmt`: the fact, or the
+    // claim whose content it is), so the player can distrust one statement without the rest of what came along the
+    // same links (the stranger's "lost" without his wish that the boy gets the paper). Watson's own observations have
+    // no links, and stay certain.
+    const stmtLink = (id, from) => ({ from, to: from, how: 'statement', stmt: id, uncertain: false });
+    const withStmt = (id, ch) => (ch.links.length ? { ...ch, links: [stmtLink(id, ch.origin ?? '?'), ...ch.links] } : ch);
+    // `own`: the statement the link is for: the claim's own assertions by default, or one fact of its content (his walk
+    // to the stables stands when "to see that all was well" is distrusted).
+    const claimChains = (cid, own = cid) => {
         const c = factById.get(cid);
         const how = c.attr === 'believes' ? 'believes' : 'said';
-        return factChains(cid).map((ch) => ({ account: ch.account, claim: cid, origin: c.of, links: [{ from: c.of, to: ch.origin ?? '?', how, claim: cid, uncertain: false }, ...ch.links] }));
+        return plainChains(cid).map((ch) => ({ account: ch.account, claim: cid, origin: c.of, links: [stmtLink(own, c.of), { from: c.of, to: ch.origin ?? '?', how, claim: cid, uncertain: false }, ...ch.links] }));
     };
-    const factChains = (fid) => {
+    const plainChains = (fid) => {
         const f = factById.get(fid);
         if (f?.claim) return claimChains(f.claim);
         if (f?.word) return [{ account: null, origin: f.word, links: [{ from: f.word, to: 'watson', how: 'said', uncertain: false }] }];
         return holdersOf.get(fid).flatMap((aid) => chains(aid, 'watson').map((links) => ({ account: aid, origin: byId.get(aid).origin, links })));
+    };
+    // A says or believes fact is itself an event (the speech, the belief), carried by the links that told it; its own
+    // statement link is on what it asserts (claimChains), so distrusting it takes off the content, not the speech.
+    const factChains = (fid) => {
+        const f = factById.get(fid);
+        if (f?.claim) return claimChains(f.claim, fid);
+        return CLAIM_ATTRS.has(f?.attr) ? plainChains(fid) : plainChains(fid).map((ch) => withStmt(fid, ch));
     };
     return { accounts, byId, facts, tellings, ancestors, chains, holdersOf, factChains, claimChains };
 }
@@ -318,11 +334,11 @@ export const LEVELS = ['distrusted', 'uncertain', 'trusted', 'certain'];
 export const DEFAULT_LEVEL = 1;
 
 /**
- * The key of a link the player can trust: a telling by its fact id; a speech (a claim's or a word's link) by
+ * The key of a link the player can trust: a statement's own link by its fact (`stmt:<id>`); a telling by its fact id; a speech (a claim's or a word's link) by
  * speaker and hearer, so all of one person's words to another share it; a member's link by member and group; a
  * mark's link (Watson's hypothesis) by question and possibility.
  */
-export const linkKey = (l) => (l.hyp ? l.hyp : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
+export const linkKey = (l) => (l.hyp ? l.hyp : l.stmt ? `stmt:${l.stmt}` : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
 
 /**
  * How far the player trusts a chain: its weakest link, a link's level being the player's choice for it (default
