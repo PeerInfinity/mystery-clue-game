@@ -9,6 +9,8 @@
 - `docs/ideas.md` — why the game falls short (measured), directions that might make it playable (an incremental
   game, Archipelago integration and what the DepGraph exports showed), ideas not built, known limitations, lessons
   of method.
+- `docs/logic-audit.md` — for each gated answer of Watson's timeline, which links of the reader's reasoning the page
+  supports, which are partial or missing, grouped by kind, with a proposed order of work (spoilers).
 - `docs/reading-annotated.md` — a careful reader's thoughts through the whole story: the spec for the player's
   moves, mirrored field by field in `cases/silver-blaze/thoughts.json`.
 - `guide.html` — the player's guide, linked from the game; keep it in step with the UI and free of spoilers.
