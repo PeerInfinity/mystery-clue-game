@@ -1025,6 +1025,28 @@ From the redesign discussion and the later papers; any of them may be worth revi
   a rule `category` to sort the hand; the case loaded off the main thread; a faster `explainConflict`; cancelling a
   running check.
 - **Freestyle formulas** for power users, run without comparing to an authored one.
+- **Viewpoint and narration (Watson's timeline; the viewpoint discussion, 2026-11-06).** Agreed and built
+  the same day (`docs/case-format.md`, "The reader and the narrators"): every provenance chain ends at the reader;
+  each narrator's account reaches the reader by one `narrates` link, certain by default and adjustable by the player
+  (Settings); an impersonal third-person narrator is a pseudo-entity `narrator`; the page's words are neutral (your
+  hypothesis, your reasoning, how it reaches you), with the narrator's name and the page's subtitle from the case
+  header. Silver Blaze's data changed only by its header (`narrators`, `subtitle`): every level, and the validator's
+  output, are as before. Kept for later:
+  - *Viewpoint by paragraph.* The case lists ranges `{narrator, paras: [from, to]}` and the validator checks that an
+    observation is in the account of whoever is the viewpoint at its paragraph (it would catch a fact filed under
+    one character in a chapter that follows another). Needed only once a story changes viewpoint; whose eyes a scene
+    is seen through matters for that character's `knows` facts, not for the reader's trust.
+  - *The narrator's hindsight.* Watson writes after the events and sometimes tells what his younger self did not
+    know. Facts are already dated by the paragraph that tells them (the reader's time), so nothing is needed now; a
+    `hindsight: true` mark would let the page say "Watson, writing later" if a story leans on it.
+  - *A third-person test.* All four stories planned (Silver Blaze, The Speckled Band, The Boscombe Valley Mystery,
+    The Blue Carbuncle) are Watson's, so third-person narration and several viewpoints go untried by them. Either
+    a small hand-built case of a few paragraphs (the opening of Chesterton's "The Blue Cross", which follows
+    Valentin through London) to check the shape, or the pipeline's third story a third-person one in place of
+    Boscombe Valley (the recommendation agreed for the pipeline).
+  - Alternatives not taken: a configurable viewpoint entity in place of the reader (one viewpoint per story, the
+    narrator beyond doubt); narration trust fixed by the case, not the player; an impersonal narrator as an account
+    with no origin, certain by rule.
 
 ## 4. Known limitations
 

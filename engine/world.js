@@ -2,8 +2,9 @@
 // each claim asserts, and the contradictions among a set of accepted assertions. Pure: the caller loads the files
 // (scripts/world-provenance.js and scripts/validate-world.js in node; the page by fetch).
 //
-// `data`: { entities: [...the case's and the world's entities], moves: [place ids that move], times, facts,
-// accounts, questions }.
+// `data`: { entities, moves: [place ids that move], times, facts, accounts, questions, narrators }. `narrators`
+// (world/case.json): who narrates the story to the reader, `{id, name?, trust?}`; every provenance chain ends at the
+// reader, through one narrator's `narrates` link.
 
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 export const CLAIM_ATTRS = new Set(['says', 'believes']);
@@ -17,9 +18,25 @@ export const STATES = { door: ['open', 'shut', 'locked'] };
  */
 export const OPEN_STATES = new Set(['heading']);
 
-/** Provenance: the accounts holding each fact, and the chains of tellings that carry an account to a holder. */
+/** The end of every provenance chain: the reader, to whom each narrator tells the story. Not an entity of the story. */
+export const READER = 'reader';
+/**
+ * A narrator's one link to the reader: keyed by the narrator, its level by default the narrator's `trust` (default
+ * certain: the fair-play contract, a first-person narrator's own observations and an impersonal narrator's report);
+ * the player may change it. An impersonal third-person narrator is the pseudo-entity `narrator`.
+ */
+export const narrationLink = (n) => ({ from: n.id, to: READER, how: 'narrates', narrator: n.id, base: LEVELS.indexOf(n.trust ?? 'certain'), uncertain: false });
+/** The narrators of a case, `{id, name?, trust?}` (world/case.json). */
+const narratorsOf = (data) => {
+    if (!data.narrators?.length) throw new Error('a case needs narrators (world/case.json)');
+    return data.narrators;
+};
+
+/** Provenance: the accounts holding each fact, and the chains of tellings that carry an account to the reader. */
 export function provenance(data) {
     const { accounts, facts } = data;
+    const narrators = narratorsOf(data);
+    const narratorIds = new Set(narrators.map((n) => n.id));
     const byId = new Map(accounts.map((a) => [a.id, a]));
     const tellings = facts.filter((f) => f.attr === 'tells');
 
@@ -66,16 +83,19 @@ export function provenance(data) {
     const holdersOf = new Map(facts.map((f) => [f.id, []]));
     for (const a of accounts) for (const f of list(a.facts)) holdersOf.get(f)?.push(a.id);
     const factById = new Map(facts.map((f) => [f.id, f]));
-    // What a claim asserts reaches Watson as the claim did, with one link more at its head: the claimant's word
-    // (said, or believed) to whoever first held the claim. A fact with `word` is what that person said in Watson's
-    // hearing; a fact with `claim` is what that claim (a says or believes fact) asserts.
+    // What a claim asserts reaches the reader as the claim did, with one link more at its head: the claimant's word
+    // (said, or believed) to whoever first held the claim. A fact with `word` is what that person said in a
+    // narrator's hearing (`heard_by`, default the first narrator); a fact with `claim` is what that claim (a says or
+    // believes fact) asserts.
     //
-    // Every chain that reaches Watson through someone starts with the statement's own link (`stmt`: the fact, or the
-    // claim whose content it is), so the player can distrust one statement without the rest of what came along the
-    // same links (the stranger's "lost" without his wish that the boy gets the paper). Watson's own observations have
-    // no links, and stay certain.
+    // Every chain that reaches a narrator through someone starts with the statement's own link (`stmt`: the fact, or
+    // the claim whose content it is), so the player can distrust one statement without the rest of what came along
+    // the same links (the stranger's "lost" without his wish that the boy gets the paper). A narrator's own
+    // observations have only the narration link.
     const stmtLink = (id, from) => ({ from, to: from, how: 'statement', stmt: id, uncertain: false });
-    const withStmt = (id, ch) => (ch.links.length ? { ...ch, links: [stmtLink(id, ch.origin ?? '?'), ...ch.links] } : ch);
+    const withStmt = (id, ch) => (ch.links.some((l) => !l.narrator) ? { ...ch, links: [stmtLink(id, ch.origin ?? '?'), ...ch.links] } : ch);
+    // The chains carrying an account to the reader: to a narrator, then that narrator's narration.
+    const toReader = (aid) => narrators.flatMap((n) => chains(aid, n.id).map((links) => [...links, narrationLink(n)]));
     // `own`: the statement the link is for: the claim's own assertions by default, or one fact of its content (his walk
     // to the stables stands when "to see that all was well" is distrusted).
     const claimChains = (cid, own = cid) => {
@@ -86,8 +106,11 @@ export function provenance(data) {
     const plainChains = (fid) => {
         const f = factById.get(fid);
         if (f?.claim) return claimChains(f.claim);
-        if (f?.word) return [{ account: null, origin: f.word, links: [{ from: f.word, to: 'watson', how: 'said', uncertain: false }] }];
-        return holdersOf.get(fid).flatMap((aid) => chains(aid, 'watson').map((links) => ({ account: aid, origin: byId.get(aid).origin, links })));
+        if (f?.word) {
+            const n = narrators.find((x) => x.id === (f.heard_by ?? narrators[0].id));
+            return n ? [{ account: null, origin: f.word, links: [{ from: f.word, to: n.id, how: 'said', uncertain: false }, narrationLink(n)] }] : [];
+        }
+        return holdersOf.get(fid).flatMap((aid) => toReader(aid).map((links) => ({ account: aid, origin: byId.get(aid).origin, links })));
     };
     // A says or believes fact is itself an event (the speech, the belief), carried by the links that told it; its own
     // statement link is on what it asserts (claimChains), so distrusting it takes off the content, not the speech.
@@ -96,7 +119,7 @@ export function provenance(data) {
         if (f?.claim) return claimChains(f.claim, fid);
         return CLAIM_ATTRS.has(f?.attr) ? plainChains(fid) : plainChains(fid).map((ch) => withStmt(fid, ch));
     };
-    return { accounts, byId, facts, tellings, ancestors, chains, holdersOf, factChains, claimChains };
+    return { accounts, byId, facts, tellings, ancestors, chains, holdersOf, factChains, claimChains, narrators, narratorIds };
 }
 
 export const showChain = (c) => [c.origin ?? '?', ...c.links.map((l) => `${l.uncertain ? '?' : ''}${l.how}→ ${l.to}`)].join(' ');
@@ -183,7 +206,7 @@ export function assertions(data) {
 
 /**
  * The player's marks on questions as assertions: a circled possibility asserts it, a crossed-out one denies it, each
- * on its own link from Watson's hypothesis (`hypothesisChain`). `marks`: `{q: {pick: 'circled' | 'crossed'}}`; only
+ * on its own link from the reader's hypothesis (`hypothesisChain`). `marks`: `{q: {pick: 'circled' | 'crossed'}}`; only
  * the questions and possibilities in `shown` (a function (q, pick) → bool), if given, count. Truth by the answer key.
  */
 export function markAssertions(data, marks = {}, shown = null) {
@@ -227,11 +250,11 @@ export function isOption(q, pick, kindOf) {
     if ((q.possibilities ?? []).some((p) => p.value === pick)) return true;
     return pick !== q.entry?.of && answerKinds(q, kindOf).includes(kindOf(pick));
 }
-/** Watson's hypothesis: the source of the player's marks, a person of its own so that one cap covers them all. */
-export const HYPOTHESIS = 'watsons_hypothesis';
+/** The reader's hypothesis: the source of the player's marks, a person of its own so that one cap covers them all. */
+export const HYPOTHESIS = 'hypothesis';
 export const hypothesisKey = (q, pick) => `hyp:${q}=${pick}`;
-/** The one chain of a mark: a single link from Watson's hypothesis, keyed by the mark, starting uncertain. */
-export const hypothesisChain = (q, pick) => ({ account: null, origin: HYPOTHESIS, links: [{ from: HYPOTHESIS, to: 'watson', how: 'hypothesis', hyp: hypothesisKey(q, pick), uncertain: false }] });
+/** The one chain of a mark: a single link from the reader's hypothesis to the reader, keyed by the mark, starting uncertain. */
+export const hypothesisChain = (q, pick) => ({ account: null, origin: HYPOTHESIS, links: [{ from: HYPOTHESIS, to: READER, how: 'hypothesis', hyp: hypothesisKey(q, pick), uncertain: false }] });
 
 /** Places: what each is within, and which move (vehicles, and any thing that is not a place). */
 export function places(data) {
@@ -329,27 +352,28 @@ export const compatible = (q, a, b) => a !== b && isRight(q, a) && isRight(q, b)
 
 export const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
 
-/** Trust levels, lowest first. `certain` is Watson's own observation, fixed; every other link starts `uncertain`. */
+/** Trust levels, lowest first. A narration link starts at its narrator's trust (certain by default); every other link starts `uncertain`. */
 export const LEVELS = ['distrusted', 'uncertain', 'trusted', 'certain'];
 export const DEFAULT_LEVEL = 1;
 
 /**
  * The key of a link the player can trust: a statement's own link by its fact (`stmt:<id>`); a telling by its fact id; a speech (a claim's or a word's link) by
  * speaker and hearer, so all of one person's words to another share it; a member's link by member and group; a
- * mark's link (Watson's hypothesis) by question and possibility.
+ * mark's link (the reader's hypothesis) by question and possibility; a narration by its narrator (`narrates:<id>`).
  */
-export const linkKey = (l) => (l.hyp ? l.hyp : l.stmt ? `stmt:${l.stmt}` : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
+export const linkKey = (l) => (l.hyp ? l.hyp : l.narrator ? `narrates:${l.narrator}` : l.stmt ? `stmt:${l.stmt}` : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
 
 /**
  * How far the player trusts a chain: its weakest link, a link's level being the player's choice for it (default
- * uncertain), lowered by the level set for the person it comes from, if any. A chain with no links is Watson's own:
- * certain. `trust`: `{links: {key: level}, people: {id: level}}`.
+ * uncertain; a narration link's its narrator's trust), lowered by the level set for the person it comes from, if any
+ * (not a narration link: the narrator's trust as narrator is that link's own). `trust`: `{links: {key: level},
+ * people: {id: level}}`.
  */
 export function chainLevel(chain, trust = {}) {
     let level = LEVELS.length - 1;
     for (const l of chain.links) {
-        let x = trust.links?.[linkKey(l)] ?? DEFAULT_LEVEL;
-        const p = trust.people?.[l.from];
+        let x = trust.links?.[linkKey(l)] ?? l.base ?? DEFAULT_LEVEL;
+        const p = l.narrator ? null : trust.people?.[l.from];
         if (p != null) x = Math.min(x, p);
         level = Math.min(level, x);
     }
@@ -365,13 +389,14 @@ export function levelOf(chains, trust = {}) {
 /**
  * The links, and the people, whose distrust alone would take a fact below the threshold: every chain of it passes
  * through them (and the fact is now at or above it). `chains`: the fact's chains; returns `{links: [key], people: [id]}`.
+ * A narration link is the frame every fact comes in, not a source to weigh against another: it is never listed.
  */
 export function resolvingLinks(chains, trust = {}, threshold = DEFAULT_LEVEL) {
     const out = { links: [], people: [] };
     if (!chains.length || threshold <= 0 || levelOf(chains, trust) < threshold) return out;
-    const keys = [...new Set(chains.flatMap((c) => c.links.map(linkKey)))];
+    const keys = [...new Set(chains.flatMap((c) => c.links.filter((l) => !l.narrator).map(linkKey)))];
     for (const k of keys) if (levelOf(chains, { ...trust, links: { ...trust.links, [k]: 0 } }) < threshold) out.links.push(k);
-    const people = [...new Set(chains.flatMap((c) => c.links.map((l) => l.from)))].filter((p) => p && p !== '?');
+    const people = [...new Set(chains.flatMap((c) => c.links.filter((l) => !l.narrator).map((l) => l.from)))].filter((p) => p && p !== '?');
     for (const p of people) if (levelOf(chains, { ...trust, people: { ...trust.people, [p]: 0 } }) < threshold) out.people.push(p);
     return out;
 }

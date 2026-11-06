@@ -11,9 +11,10 @@ format (`docs/case-format.md`), the annotated reading (`docs/reading-annotated.m
 
 The world model (`cases/silver-blaze/world/`) holds the whole story as **facts**: typed states and actions (where
 someone is, who holds what, what a door is, who did what), each at a **time point** of a partial order, each with the
-paragraph and quote that give it. Every fact reached Watson through **accounts** passed on by **tellings**, so each
-has one or more provenance chains from its origin to Watson. The player sets a **trust** level per link, per
-statement and per person; a fact is as trusted as its best chain, a chain as its weakest link, and what reaches the
+paragraph and quote that give it. Every fact reached the reader through **accounts** passed on by **tellings** to a
+**narrator** (Watson), who tells the reader, so each has one or more provenance chains from its origin to the
+reader; the player is the reader. The player sets a **trust** level per link, per statement, per person and per
+narrator (a narrator's own observations certain by default); a fact is as trusted as its best chain, a chain as its weakest link, and what reaches the
 threshold is on the timeline. **Contradictions** among what is on the timeline are found automatically (two places,
 two states or two identities at once). **Questions** list possibilities; a circled one is the player's hypothesis, an
 entry like any other. The player's **moves** (a change, what an action needs and does, what it is for, what a plan
@@ -57,7 +58,7 @@ is the earlier game's, for its JSON Schema.
 | Check the world model (`cases/silver-blaze/world/`), including that the true story has no contradiction, and print its counts and the contradictions a reader trusting every source meets | `npm run validate-world` |
 | Collect the live site into `_site/` (or a directory given) | `npm run build-site` |
 | The earlier game's checks and generators (from `v1/`: `npm run v1:validate`, `v1:validate-thoughts`, `v1:reveal-log`, `v1:foreshadow-log`, `v1:clash-log`; the rest as `node scripts/…` in `v1/`) | see `v1/docs/technical.md` |
-| How each fact of the world model reached Watson (`--accounts`: per account, and who holds it when) | `node scripts/world-provenance.js cases/silver-blaze` |
+| How each fact of the world model reached the reader (`--accounts`: per account, and who holds it when) | `node scripts/world-provenance.js cases/silver-blaze` |
 | Every check of Watson's timeline that plays the page, one after another (the path, the autoplay in each layout and on a phone, the hints); starts the server and a headless Chrome of its own if they are not running, and stops only those (about 6 minutes) | `npm run page-checks` |
 | Play the true path (`world/path.json`) through Watson's timeline in headless Chrome: each move offered and taken, none possible before its paragraph, every answer right, no contradiction open at the end (about a minute; `STOP=<para>`, `SAVE=<file>` for the state there) | `node scripts/path-check.mjs` |
 | The autoplay of Watson's timeline to the end (`?autoplay=fast`), its save against the path's, the player's own save untouched (under a minute; a layout: `three`, `two`, `one`; `PHONE=1`) | `node scripts/world-autoplay-check.mjs [layout]` |

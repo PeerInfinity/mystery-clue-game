@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-// Provenance in the world model (world/), derived by engine/world.js: how each fact reached Watson, through the
+// Provenance in the world model (world/), derived by engine/world.js: how each fact reached the reader: through the
 // accounts that hold it (world/accounts.json) and the `tells` facts that pass an account, or a bundle containing
 // it, from one holder to the next. A link whose telling has `truth: null` (told by the story as possible, never
 // settled), is `partial` (it carried some of the account, the story does not say which) or whose sender is "?" is
-// uncertain; its question (kind provenance) says what else it could have been.
+// uncertain; its question (kind provenance) says what else it could have been. Every chain ends with a narrator's
+// `narrates` link to the reader (world/case.json `narrators`).
 //
 //   node scripts/world-provenance.js cases/silver-blaze            every fact's chains
 //   node scripts/world-provenance.js cases/silver-blaze --accounts each account's chains and who holds it when
@@ -28,6 +29,7 @@ export function loadWorld(dir) {
         facts: read('world/facts.json').facts,
         accounts: read('world/accounts.json').accounts,
         questions: read('world/questions.json').questions,
+        narrators: read('world/case.json').narrators,
     };
 }
 
@@ -40,7 +42,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (process.argv.includes('--accounts')) {
         for (const a of p.accounts) {
             console.log(`\n${a.id}: ${a.label} (origin ${a.origin ?? '?'}, ${a.how})`);
-            for (const links of p.chains(a.id, 'watson')) console.log(`  ${showChain({ origin: a.origin, links })}`);
+            for (const n of p.narrators) for (const links of p.chains(a.id, n.id)) console.log(`  ${showChain({ origin: a.origin, links })} narrates→ reader`);
             const held = p.tellings.filter((t) => [a.id, ...p.ancestors(a.id)].some((x) => list(t.value).includes(x)));
             for (const t of held) console.log(`  held by ${t.to} from ${t.time.at ?? t.time.after ?? t.time.from}${t.truth === null || t.of === '?' || t.partial ? ' (uncertain)' : ''}`);
         }

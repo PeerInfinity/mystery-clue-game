@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE, isRight, compatible } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE, isRight, compatible, narrationLink } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -11,7 +11,7 @@ const entities = [
     { id: 'horse', kind: 'animal' }, { id: 'man', kind: 'person' }, { id: 'watson', kind: 'person' }, { id: 'box', kind: 'object' },
 ];
 const world = (facts, questions = [], accounts = [{ id: 'acct.w', origin: 'watson', how: 'saw', facts: facts.map((f) => f.id) }]) =>
-    ({ entities, moves: ['cart'], times, facts, accounts, questions });
+    ({ entities, moves: ['cart'], times, facts, accounts, questions, narrators: [{ id: 'watson', name: 'Watson' }] });
 const loc = (id, of, value, time, extra = {}) => ({ id, of, attr: 'location', value, time, para: 1, quote: 'x', ...extra });
 const why = (w) => contradictions(w).map((c) => c.why);
 
@@ -67,19 +67,41 @@ test('picks of one question: two possibilities, or one asserted and denied; a mo
     assert.equal(xs.find((x) => x.id === 's1').truth, true, 'the saying itself is true');
 });
 
-test("a claim's content and a word heard reach Watson through the speaker", () => {
+test("a claim's content and a word heard reach the reader through the speaker and the narrator", () => {
     const facts = [
         { id: 's', of: 'man', attr: 'says', value: 'x', to: 'watson', time: { at: 't2' }, para: 2, quote: 'x' },
         { id: 'c', of: 'horse', attr: 'condition', value: 'lame', time: { at: 't2' }, para: 2, quote: 'x', claim: 's' },
         { id: 'w', of: 'horse', attr: 'condition', value: 'fit', time: { at: 't2' }, para: 2, quote: 'x', word: 'man' },
     ];
     const p = provenance(world(facts, [], [{ id: 'acct.w', origin: 'watson', how: 'saw', facts: ['s'] }]));
-    assert.deepEqual(p.factChains('c').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>man:statement', 'man>watson:said']]]);
-    assert.deepEqual(p.factChains('w').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>man:statement', 'man>watson:said']]]);
-    assert.deepEqual(p.factChains('s').map((c) => c.links.length), [0], 'the saying: Watson heard it');
+    assert.deepEqual(p.factChains('c').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>man:statement', 'man>watson:said', 'watson>reader:narrates']]]);
+    assert.deepEqual(p.factChains('w').map((c) => [c.origin, c.links.map((l) => `${l.from}>${l.to}:${l.how}`)]), [['man', ['man>man:statement', 'man>watson:said', 'watson>reader:narrates']]]);
+    assert.deepEqual(p.factChains('s').map((c) => c.links.map(linkKey)), [['narrates:watson']], 'the saying: Watson heard it, and narrates it');
     assert.equal(linkKey(p.factChains('c')[0].links[0]), 'stmt:c', 'a fact of a claim\'s content: its own statement link');
     assert.equal(linkKey(p.claimChains('s')[0].links[0]), 'stmt:s', 'what the claim itself asserts');
     assert.equal(linkKey(p.factChains('w')[0].links[0]), 'stmt:w');
+});
+
+test('every chain ends at the reader through a narrator, whose trust the case sets and the player may change', () => {
+    const facts = [
+        loc('own', 'horse', 'moor', { at: 't1' }),
+        { id: 'told', of: 'man', attr: 'carrying', value: 'box', time: { at: 't1' }, para: 1, quote: 'x' },
+        { id: 'f.t', of: 'man', attr: 'tells', value: 'acct.m', to: 'watson', how: 'told', time: { at: 't2' }, para: 2, quote: 'x' },
+    ];
+    const accounts = [{ id: 'acct.w', origin: 'watson', how: 'saw', facts: ['own'] }, { id: 'acct.m', origin: 'man', how: 'saw', facts: ['told'] }];
+    const p = provenance(world(facts, [], accounts));
+    const own = p.factChains('own');
+    assert.deepEqual(own.map((c) => c.links.map(linkKey)), [['narrates:watson']], 'a narrator’s own observation: only the narration, no statement link');
+    assert.equal(LEVELS[levelOf(own)], 'certain');
+    assert.equal(LEVELS[levelOf(own, { links: { 'narrates:watson': 1 } })], 'uncertain', 'the player may doubt the narrator');
+    assert.equal(LEVELS[levelOf(own, { people: { watson: 0 } })], 'certain', 'a person’s cap is not on the narration');
+    assert.deepEqual(p.factChains('told')[0].links.map(linkKey), ['stmt:told', 'f.t', 'narrates:watson']);
+    assert.deepEqual(resolvingLinks(own, {}, 1), { links: [], people: [] }, 'the narration is never a resolving link');
+    const doubted = provenance({ ...world(facts, [], accounts), narrators: [{ id: 'watson', trust: 'trusted' }] });
+    assert.equal(LEVELS[levelOf(doubted.factChains('own'))], 'trusted', 'the case sets a narrator’s trust');
+    const two = provenance({ ...world(facts, [], [{ id: 'acct.w', origin: 'watson', how: 'saw', facts: ['own'] }, { id: 'acct.m', origin: 'man', how: 'saw', facts: ['told'] }]), narrators: [{ id: 'watson' }, { id: 'man' }] });
+    assert.deepEqual(two.factChains('told').map((c) => c.links.map(linkKey)), [['stmt:told', 'f.t', 'narrates:watson'], ['narrates:man']], 'two narrators: one chain through each');
+    assert.throws(() => provenance({ ...world(facts), narrators: [] }), /narrators/);
 });
 
 test('one statement can be distrusted without the rest of what came along the same links', () => {
@@ -98,10 +120,10 @@ test('one statement can be distrusted without the rest of what came along the sa
     assert.equal(LEVELS[levelOf(p.factChains('ask'), { links: { 'stmt:saw': 0 } })], 'uncertain');
 });
 
-test('trust: a chain is as strong as its weakest link, a fact as its best chain; Watson’s own is certain', () => {
+test('trust: a chain is as strong as its weakest link, a fact as its best chain; a narrator’s own is certain', () => {
     const told = { links: [{ from: 'edith', to: 'police', how: 'sworn statement', telling: 'f.tell' }, { from: 'police', to: 'watson', how: 'report', telling: 'f.rep' }] };
     const heard = { links: [{ from: 'holmes', to: 'watson', how: 'said' }] };
-    assert.equal(LEVELS[chainLevel({ links: [] })], 'certain');
+    assert.equal(LEVELS[chainLevel({ links: [narrationLink({ id: 'watson' })] })], 'certain');
     assert.equal(LEVELS[chainLevel(told)], 'uncertain', 'every link starts uncertain');
     assert.equal(LEVELS[chainLevel(told, { links: { 'f.tell': 2, 'f.rep': 2 } })], 'trusted');
     assert.equal(LEVELS[chainLevel(told, { links: { 'f.tell': 2 } })], 'uncertain', 'the weakest link');
@@ -182,7 +204,7 @@ test('who and where questions take any person or animal, or any place, beyond th
     assert.deepEqual(markAssertions(w, { 'q.who': { watson: 'circled', moor: 'circled' } }).map((x) => [x.pick, x.truth]), [['watson', true]]);
 });
 
-test("a mark's chain: one link from Watson's hypothesis, starting uncertain, capped like a person", () => {
+test("a mark's chain: one link from the reader's hypothesis, starting uncertain, capped like a person", () => {
     const c = hypothesisChain('q.who', 'man');
     assert.equal(linkKey(c.links[0]), hypothesisKey('q.who', 'man'));
     assert.equal(LEVELS[chainLevel(c)], 'uncertain');

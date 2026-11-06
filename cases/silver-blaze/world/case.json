@@ -3,6 +3,15 @@
   "title": "Silver Blaze",
   "author": "Arthur Conan Doyle",
   "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "watson",
+      "name": "Watson",
+      "kind": "first-person",
+      "trust": "certain"
+    }
+  ],
+  "subtitle": "Watson's timeline",
   "source": {
     "gutenberg_id": 834,
     "collection": "The Memoirs of Sherlock Holmes",

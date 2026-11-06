@@ -98,8 +98,8 @@ dd { margin: 2px 0 0 1.2em; }
 
 <main class="wrap">
 
-<p class="lead">You read a Sherlock Holmes story as Dr Watson, and keep an ordered list of what happened: who was where,
-who did what, and when.</p>
+<p class="lead">You read a Sherlock Holmes story, told by Dr Watson, and keep an ordered list of what happened: who was
+where, who did what, and when.</p>
 
 <p>This guide gives nothing away. Its examples come from the story's first pages, where you learn that a famous
 racehorse has disappeared and its trainer has been found dead, or they are made up.</p>
@@ -111,7 +111,7 @@ racehorse has disappeared and its trainer has been found dead, or they are made 
     <li><a href="#screen">The screen</a></li>
     <li><a href="#reading">Reading on, and the gate</a></li>
     <li><a href="#timeline">The timeline</a></li>
-    <li><a href="#trust">Trust: how Watson knows it</a></li>
+    <li><a href="#trust">Trust: how it reached you</a></li>
     <li><a href="#clashes">Contradictions and likely clashes</a></li>
     <li><a href="#questions">Questions and your marks</a></li>
     <li><a href="#moves">Reasoning: the moves</a></li>
@@ -129,8 +129,8 @@ racehorse has disappeared and its trainer has been found dead, or they are made 
 <section id="what">
 <h2>1. What it is</h2>
 <p>The page is built on <i>Silver Blaze</i>, a Sherlock Holmes story by Arthur Conan Doyle, first published in 1892.
-You read it a paragraph at a time, as Watson reads it: over Holmes's shoulder, in the papers, from the people he
-meets.</p>
+Watson tells it, and you read it a paragraph at a time: what he sees over Holmes's shoulder, reads in the papers, hears
+from the people he meets.</p>
 <p>Everything the story tells goes onto <b>the timeline</b>, an ordered list of events. What Watson sees for himself
 is certain. Everything else reached him through someone: a witness, the police, a newspaper, Holmes. You decide how
 far to trust each of them, and the page shows the <b>contradictions</b> among what you accept.</p>
@@ -184,8 +184,7 @@ The question itself keeps the answer, with the words that gave it away.</p>
 <h2>4. The timeline</h2>
 <p>Each event is one line: who, what, and where, under a heading for its point in time ("Monday evening",
 "Monday, nine o'clock"), with the paragraph it came from. A dot in front shows how far you trust it (see <a href="#trust">Trust</a>).
-Click an event for its detail: the words of the story it comes from, when it happened, and how Watson came to know
-it.</p>
+Click an event for its detail: the words of the story it comes from, when it happened, and how it reached you.</p>
 <p>The bar above the timeline changes how it is shown:</p>
 <dl>
   <dt>View</dt>
@@ -198,20 +197,23 @@ it.</p>
   <a href="#moves">the moves</a>).</dd>
 </dl>
 <p>Some lines are not the story's but yours: your circled answers (your hypotheses) and the conclusions of your
-reasoning (Watson's reasoning), each at its point in time.</p>
+reasoning (your reasoning), each at its point in time.</p>
 </section>
 
 <!-- ------------------------------------------------------------------ -->
 <section id="trust">
-<h2>5. Trust: how Watson knows it</h2>
-<p>Every event came to Watson along a <b>chain</b>: someone saw it, told someone else, who told the papers, which
-Watson read. The detail of an event shows each of its chains, link by link, for example:</p>
+<h2>5. Trust: how it reached you</h2>
+<p>Every event came to you along a <b>chain</b>: someone saw it, told someone else, who told the papers, which
+Watson read, and Watson tells you. The detail of an event shows each of its chains, link by link, up to Watson, for
+example:</p>
 <div class="demo"><span class="dot trusted"></span>the stable lad → <i>told</i> → the police → <i>told</i> → the
 newspapers → <i>printed</i> → Watson</div>
 <p>Each link has its own setting, and so does the statement itself (<i>This statement itself:</i>), apart from the
 rest that came the same way. There are four levels:</p>
 <ul>
-  <li><span class="dot certain"></span><b>certain</b>: Watson saw it himself. Only his own eyes are certain.</li>
+  <li><span class="dot certain"></span><b>certain</b>: Watson saw it himself. Only his own eyes are certain.
+  (Watson is a careful narrator: what he tells you he saw, you can take as certain. Settings has <i>Trust in Watson
+  as narrator</i> if you would rather not.)</li>
   <li><span class="dot trusted"></span><b>trusted</b>: you believe this link.</li>
   <li><span class="dot uncertain"></span><b>uncertain</b>: you have not decided. Every link starts here.</li>
   <li><span class="dot distrusted"></span><b>distrusted</b>: you do not believe it.</li>
@@ -263,7 +265,7 @@ takes for granted, and, once the story has answered, the answer.</p>
 <section id="moves">
 <h2>8. Reasoning: the moves</h2>
 <p>An event marked <b>⚙</b> on the timeline is one you can reason from. Open it, and its detail offers the moves that
-fit it. Each move puts a new entry on the timeline, marked as Watson's reasoning, trusted as far as its weakest
+fit it. Each move puts a new entry on the timeline, marked as your reasoning, trusted as far as its weakest
 premise. The page checks every move against the timeline, and offers only those that hold.</p>
 <dl>
   <dt>(a) It changed</dt>
@@ -355,6 +357,9 @@ speed it takes about a quarter of an hour.</p>
   <dd>How far you must trust an event for it to be on the timeline (see <a href="#trust">Trust</a>).</dd>
   <dt>Show the rest, faded</dt>
   <dd>Keep what falls below that in view, greyed.</dd>
+  <dt>Trust in Watson as narrator</dt>
+  <dd>How far you trust what Watson tells you. Everything in the story comes to you through him, so lowering it
+  lowers everything; by default it is <i>certain</i>.</dd>
 </dl>
 <h3>The page</h3>
 <dl>
@@ -367,7 +372,8 @@ speed it takes about a quarter of an hour.</p>
 </dl>
 <h3>Saving and starting over</h3>
 <p>Your timeline saves itself in this browser as you play: close the page and come back, and you are where you left
-off. <span class="btn quiet">Reset trust…</span> puts every link and person back to uncertain and keeps the rest.
+off. <span class="btn quiet">Reset trust…</span> puts every link and person back to uncertain (and Watson as narrator back
+to certain) and keeps the rest.
 <span class="btn quiet">Start over…</span> asks first, then clears everything (your place in the story, your trust,
 marks and reasoning) and starts again from the first paragraph. It keeps the layout, the theme and the wait between
 hints.</p>

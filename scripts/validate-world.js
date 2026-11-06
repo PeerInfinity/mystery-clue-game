@@ -10,8 +10,9 @@
 // facts that exist and are told no later than its `inferable_at`; an `observes` value names facts; `q`/`pick` name
 // a question and one of its possibilities; a `member_of` value is a group; `reasoning` (a reader's step not
 // modelled as facts: {para, text}) is dated no later than what it supports. Provenance: a `tells` fact passes accounts that exist; accounts' parts and facts
-// exist and no bundle contains itself; every told fact is in an account and a chain of tellings carries it to
-// Watson (scripts/world-provenance.js). Questions: `from` names a fact (or `reasoning` gives the step)
+// exist and no bundle contains itself; every told fact is in an account and a chain of tellings carries it to a
+// narrator, and so to the reader (scripts/world-provenance.js). The case header names the story and its narrators
+// (`{id, name?, kind?, trust?}`; an id is an entity, or `narrator` for an impersonal one). Questions: `from` names a fact (or `reasoning` gives the step)
 // told no later than the possibility is available (or a `quote` in that paragraph names it); exactly one
 // "something else", available from where the question is raised; the answer is one of the possibilities (or null).
 // Dates: `given_at` (with `given_quote` in that paragraph) and `inferable_at` (with `from`, each premise inferable
@@ -22,7 +23,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { normalize } from '../engine/story.js';
 import { provenance, loadWorld } from './world-provenance.js';
-import { assertions, contradictions, CLAIM_ATTRS } from '../engine/world.js';
+import { assertions, contradictions, CLAIM_ATTRS, LEVELS } from '../engine/world.js';
 import { ACTIONS, STATES } from '../engine/actions.js';
 
 const dir = process.argv[2];
@@ -34,6 +35,14 @@ const caseData = read('world/case.json');
 const story = fs.readFileSync(path.join(dir, 'world', caseData.story), 'utf8')
     .split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean).map(normalize);
 const allEntities = read('world/entities.json').entities;
+// The narrators: each an entity of the case, or `narrator` (an impersonal third-person narrator); trust a level.
+const errors0 = [];
+const narratorIds = new Set((caseData.narrators ?? []).map((n) => n.id));
+if (!narratorIds.size) errors0.push('case.json: no narrators');
+for (const n of caseData.narrators ?? []) {
+    if (n.id !== 'narrator' && !allEntities.some((e) => e.id === n.id)) errors0.push(`case.json: narrator ${n.id} is no entity`);
+    if (n.trust != null && !LEVELS.includes(n.trust)) errors0.push(`case.json: narrator ${n.id}: trust ${n.trust}`);
+}
 const entities = new Set(allEntities.map((e) => e.id));
 const groups = new Set(allEntities.filter((e) => e.kind === 'group').map((e) => e.id));
 const times = read('world/times.json').times;
@@ -50,7 +59,7 @@ const earliest = (f) => f.inferable_at ?? givenAt(f);
 const TELL_HOWS = new Set(['told', 'overheard', 'statement', 'sworn statement', 'report', 'newspaper', 'telegram', 'analysis', 'letter']);
 const ACCOUNT_HOWS = new Set(['saw', 'did', 'said', 'examination', 'analysis', 'inference', 'own', 'report', 'bundle']);
 
-const errors = [];
+const errors = [...errors0];
 const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const timeIds = new Set(times.map((t) => t.id));
 const factById = new Map(facts.map((f) => [f.id, f]));
@@ -102,8 +111,8 @@ for (const f of facts) {
     const isPlace = (id) => allEntities.find((e) => e.id === id)?.kind === 'place';
     if (f.attr === 'heading' && !isPlace(f.value)) err(f.id, `heading: ${f.value} is not a place`);
     if (f.charge != null && !isPlace(f.charge)) err(f.id, `charge: ${f.charge} is not a place`);
-    // Read from a track Watson sees: in his own account, told where he sees it.
-    if (f.read_from_track && !accounts.find((x) => x.id === 'acct.watson')?.facts?.includes(f.id)) err(f.id, 'read_from_track: not in acct.watson');
+    // Read from a track a narrator sees: in that narrator's own account, told where it is seen.
+    if (f.read_from_track && !accounts.some((x) => narratorIds.has(x.origin) && x.how === 'saw' && x.facts?.includes(f.id))) err(f.id, 'read_from_track: in no narrator\'s own account');
     // A guard (the lad on watch) guards a place behind a door: the place inside it.
     if (f.guards != null && !Object.values(world.joins ?? {}).some((sides) => sides[0] === f.guards)) err(f.id, `guards: ${f.guards} is not the inside of a door (joins)`);
     if (f.plan) {
@@ -142,7 +151,7 @@ for (const f of facts) {
         if (!TELL_HOWS.has(f.how)) err(f.id, `tells: how ${f.how}`);
         if (f.of === '?' && !f.q) err(f.id, 'a telling from "?" needs its question (q)');
     }
-    // What a claim asserts, and the facts that are a claim's content (`claim`) or a person's word in Watson's hearing (`word`).
+    // What a claim asserts, and the facts that are a claim's content (`claim`) or a person's word in a narrator's hearing (`word`, `heard_by`).
     if (f.asserts != null || f.modal != null) {
         if (!CLAIM_ATTRS.has(f.attr)) err(f.id, 'asserts and modal belong on a says or believes fact');
         if (f.modal != null && f.modal !== 'possible') err(f.id, `modal ${f.modal}`);
@@ -161,6 +170,7 @@ for (const f of facts) {
         else if (c.para > (f.given_at ?? f.para)) err(f.id, `claim: ${f.claim} is told after it (¶${c.para})`);
     }
     if (f.word && !entities.has(f.word)) err(f.id, `word: no entity ${f.word}`);
+    if (f.heard_by && (!f.word || !narratorIds.has(f.heard_by))) err(f.id, `heard_by: ${f.heard_by} is no narrator, or the fact has no word`);
     if (f.claim && f.word) err(f.id, 'claim or word, not both');
     if ('neg' in f && f.neg !== true) err(f.id, 'neg is true or absent');
     if (f.attr === 'location' && f.value != null && typeof f.value === 'string' && !entities.has(f.value)) err(f.id, `location: no entity ${f.value} (put the rest in detail)`);
@@ -171,7 +181,7 @@ for (const f of facts) {
     } else if (f.pick) err(f.id, 'pick without q');
 }
 
-// Accounts: parts and facts exist, no bundle contains itself, every told fact reaches Watson.
+// Accounts: parts and facts exist, no bundle contains itself, every told fact reaches the reader.
 for (const a of accounts) {
     if (a.origin != null && !entities.has(a.origin)) err(a.id, `origin: no entity ${a.origin}`);
     if (!ACCOUNT_HOWS.has(a.how)) err(a.id, `how ${a.how}`);
@@ -183,10 +193,10 @@ for (const a of accounts) {
 for (const f of facts) {
     if (f.attr === 'tells') continue;
     const held = prov.holdersOf.get(f.id);
-    if ((f.claim || f.word) && held.length) err(f.id, `a claim's content or a word heard reaches Watson through its speaker, in no account (${held.join(', ')})`);
+    if ((f.claim || f.word) && held.length) err(f.id, `a claim's content or a word heard reaches the reader through its speaker, in no account (${held.join(', ')})`);
     if (f.claim || f.word) continue;
     if (!held.length && (f.basis ?? 'stated') !== 'inferable') err(f.id, 'a told fact in no account');
-    if (held.length && !prov.factChains(f.id).length) err(f.id, `no chain reaches Watson from ${held.join(', ')}`);
+    if (held.length && !prov.factChains(f.id).length) err(f.id, `no chain reaches the reader from ${held.join(', ')}`);
 }
 
 // Questions.

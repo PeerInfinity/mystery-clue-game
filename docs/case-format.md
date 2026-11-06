@@ -16,7 +16,7 @@ else. Every JSON file is one object per line inside its list.
 | File | Required | What |
 |---|---|---|
 | `story.txt` | yes | The story's text, paragraphs separated by blank lines. Paragraphs are numbered from 0 as `engine/story.js` splits the text (¶0 the title); every `para` in the data is that number, and every `quote` is found in its paragraph (curly quotes and dashes normalised). |
-| `world/case.json` | yes | The case header: `{id, title, author, story, source}`. `story` is the story file, relative to `world/` (`../story.txt`); `source` says where the text comes from (Gutenberg id, collection, first published, word count, public-domain status). |
+| `world/case.json` | yes | The case header: `{id, title, author, story, narrators, subtitle?, source}`. `story` is the story file, relative to `world/` (`../story.txt`); `narrators` who tells the story to the reader (see "The reader and the narrators" below); `subtitle` the page's name beside the title ("Watson's timeline"; default "the timeline"); `source` says where the text comes from (Gutenberg id, collection, first published, word count, public-domain status). |
 | `world/entities.json` | yes | Every entity, with `moves` (what travels) and `joins` (a door's two sides). |
 | `world/mentions.json` | yes | How the story names each entity: `{entities: {id: [phrase, …]}}`, a phrase a string or `{text, paras: [from, to]}` to limit it to some paragraphs (inclusive). Matched exactly on word boundaries, the longest winning where two overlap (`engine/story.js`). The story's names are links to their cards; an entity's card appears at its first mention (or at its `source` quote). |
 | `world/times.json` | yes | The time points and their partial order. |
@@ -99,12 +99,27 @@ is `index.html` (`ui/world.js`). `npm run validate-world` checks it and prints i
   report). A `bundle` is made of `parts` (everything the police hold; what the papers print; Holmes's account in
   the train). A fact may be in several accounts: the talk at the window is in both Edith's and Hunter's.
 - **Provenance is derived, not written on facts.** `scripts/world-provenance.js` follows the tellings that carry an
-  account (or a bundle containing it) from its origin to Watson, and gives each fact its chains, for example
-  `edith_baxter sworn statement→ police ?report→ newspapers ?newspaper→ holmes told→ watson`, with `?` on uncertain
-  links. A claim's content (by `claim`, or a claim's `asserts`) has the claim's chains with one link more at the
-  head, the claimant's word: `straker said→ mrs_straker statement→ police …`; a `word` fact the one link
-  `gregory said→ watson`. It also gives who holds each account from when. Every told fact must be in an account that reaches Watson;
-  the facts in none are the reader's own inferences.
+  account (or a bundle containing it) from its origin to a narrator, and on to the reader, and gives each fact its
+  chains, for example `edith_baxter sworn statement→ police ?report→ newspapers ?newspaper→ holmes told→ watson
+  narrates→ reader`, with `?` on uncertain links. A claim's content (by `claim`, or a claim's `asserts`) has the
+  claim's chains with one link more at the head, the claimant's word: `straker said→ mrs_straker statement→ police
+  …`; a `word` fact the link `gregory said→ watson` (to the narrator in `heard_by`, by default the first) and the
+  narration. It also gives who holds each account from when. Every told fact must be in an account that reaches the
+  reader; the facts in none are the reader's own inferences.
+
+**The reader and the narrators** (2026-11-06; the options and what was kept for later are in `docs/ideas.md` §3,
+"Viewpoint and narration"). Every chain ends at **the reader** (`READER`, not an entity of the story), whom the player
+plays. Each narrator in `world/case.json` (`narrators: [{id, name?, kind?, trust?}]`) tells the reader the story by
+one **narration link** (`narrates`, keyed `narrates:<id>`), the last link of every chain through that narrator: a
+narrator's own observations (an account with the narrator as origin, `how: saw`; Watson's is `acct.watson`) have
+only that link; what others told the narrator has the tellings first. `id` is an entity (a first-person narrator,
+`kind: first-person`) or `narrator`, the pseudo-entity of an impersonal third-person narrator (`kind: third-person`).
+`trust` is the narration's default level, `certain` if absent (the fair-play contract); the player may change it in
+Settings (*Trust in Watson as narrator*), and it caps every chain through that narrator, the tellings to the narrator
+included. A narration link is never listed among the links whose distrust alone takes a fact off (`resolvingLinks`),
+and a person's cap does not apply to it. `name` is the narrator's name in the page's words ("Watson's own"). Several
+narrators give a fact one chain through each who has it. The player's marks and moves are the reader's own: *your
+hypothesis*, *your reasoning*.
 - **`questions.json`**: an uncertain entry `{id, label, entry, raised, quote, possibilities, answer, kind?, latent?,
   settled?, note?}`. `label` is the question as the player reads it ("Who drugged Hunter's supper?"), shown only
   once the story raises the question or gives its answer, so that a latent one (Straker's honesty) is not flagged early. `kind: provenance` marks a question about how something was passed on (who answered
@@ -160,9 +175,9 @@ contradiction written by hand:
 **The player's marks** (`markAssertions`). Each possibility of a question is uncertain (unmarked), circled or crossed
 out; several may be circled. A circle asserts the possibility and a crossing denies it, as picks with `mark` set and
 no fact, so they meet the claims' picks in the contradictions above; two circles of one question are an open choice
-and are not reported. Each mark comes on its own link from *Watson's hypothesis* (`hypothesisChain`, keyed
-`hyp:<question>=<possibility>`), which starts uncertain like any other link; Watson's hypothesis is a person of its
-own, so one cap covers every mark. Only marks on questions raised so far and on possibilities available so far count.
+and are not reported. Each mark comes on its own link from *the reader's hypothesis* (`hypothesisChain`, keyed
+`hyp:<question>=<possibility>`, `HYPOTHESIS` = `hypothesis`), which starts uncertain like any other link; the
+hypothesis is a person of its own, so one cap covers every mark. Only marks on questions raised so far and on possibilities available so far count.
 A "who" question (one with a person or an animal among its possibilities) may also be answered by any person or
 animal, a "where" question (a place among them) by any place, its own subject excepted (`answerKinds`, `isOption`);
 the page offers those met so far (named by a fact given so far). The page shows first only what someone in the story
@@ -193,8 +208,8 @@ the horse in his hands), so a circled aim is an intention of the player's hypoth
 (`plan: {agent, goal, steps}`, each step a typed action with its own time: the police theory is Simpson's). A question's entry may carry `act` and `thing` too, so a
 change the player points out can be recognised as its entry (who opened the stable door). Persistence
 (`holdsBefore`): a state lasts until something specific changes it; events the story never tells are not invented.
-The player's moves, each checked by these rules, give entries with the source *Watson's reasoning*, as trusted as
-their weakest premise (and no more than the player's cap on Watson's reasoning):
+The player's moves, each checked by these rules, give entries with the source *the reader's reasoning* (`REASONING`
+= `reasoning`), as trusted as their weakest premise (and no more than the player's cap on that reasoning):
 - (a) `pointChange`: two states of one thing on the timeline differ, so something changed it between them: an action
   by "?" (the shortest run of action types, `changePath`: locked to open is unlocking and opening), in the window
   between. Refused when nothing differs, the order is not certain, or a state or a change of the thing lies between.
@@ -207,7 +222,7 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   need of a step already linked to it, so a plan is built one link at a time from the goal back. An effect that
   holds only for some kinds of an item fits on that condition ("if the paper is money or a message"); the kinds
   still open are those of the item's contents question (`kind` on its possibilities) that the player has not
-  crossed out, or the circled ones. A link is an entry `{attr: 'purpose', for, serves}` from Watson's reasoning, and
+  crossed out, or the circled ones. A link is an entry `{attr: 'purpose', for, serves}` from the reader's reasoning, and
   disappears when it no longer fits (the paper circled as a drug). `reasonedEntries` lists such moves in
   `ctx.lapsed` with why (`ruledOut`: the item's kinds that would make it fit; `gone`: a premise no longer there) and
   the moves that hold in `ctx.held`; the page announces a move that held and no longer does.
@@ -321,9 +336,9 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   at the door, a key) and what the timeline says of it.
 
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
-chain with no links is Watson's own and certain; every link starts uncertain, and the player may set it lower or
-higher (never certain). A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words
-to Watson are one link), or for a member by member and group (`linkKey`). Every chain that reaches Watson through
+narration link starts at its narrator's trust (certain by default), so a narrator's own observation is certain; every
+other link starts uncertain, and the player may set it lower or higher (never certain). A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words
+to Watson are one link), or for a member by member and group (`linkKey`). Every chain that reaches a narrator through
 someone also starts with the **statement's own link** (`stmt:<id>`, the user's choice, 2026-11-05): a relayed fact's
 own, what a claim asserts by the claim's, a fact of a claim's content (`claim`) by that fact's. Distrusting it takes off
 that one statement and nothing else that came along the same links: the stranger's "lost" without his wish that the boy
@@ -331,8 +346,8 @@ gets the paper, Straker's "to see that all was well" without his walk to the sta
 he found in Straker's pockets. A says or believes fact is itself an event (the speech, the belief) and has none: its
 statement link is on what it asserts. The page draws it once, above the chains, as "This statement itself". A person's level, when set, caps every link
 from that person. A chain is as strong as its weakest link, a fact as its best chain; a fact with no chain (the
-reader's own inference) is not modelled and not shown. A telling is shown as an event: certain when it is to Watson,
-uncertain otherwise. `resolvingLinks` gives the links and people whose distrust alone would take a fact below the
+reader's own inference) is not modelled and not shown. A telling is shown as an event: as trusted as the narration when it is to a
+narrator (who witnesses it), uncertain otherwise (and no more than the narration). `resolvingLinks` gives the links and people whose distrust alone would take a fact below the
 threshold (those every chain of it passes through): the page marks them when it traces a contradiction.
 
 The validator requires the true story to be consistent (no contradiction among the assertions the answer key holds

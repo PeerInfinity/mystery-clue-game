@@ -18,7 +18,7 @@
 //   the goal or a need of a step already linked to it.
 // - (d) `checkPlan`: "what would this need?": a plan's steps in order, each need met by an earlier step, by the
 //   timeline, or by nothing.
-// What the player points out is an entry of the world model with the source *Watson's reasoning* (`REASONING`), as
+// What the player points out is an entry of the world model with the source *the reader's reasoning* (`REASONING`), as
 // trusted as its weakest premise.
 
 import { coverOf, STATES, OPEN_STATES } from './world.js';
@@ -71,7 +71,7 @@ const CARRY_RAMIFIES = { attr: 'willing', kinds: ['money', 'message'] };
  */
 export const GOAL_RAMIFIES = [{ if: { attr: 'condition', value: 'injured' }, then: { attr: 'condition', value: 'loses the race' } }];
 
-export const REASONING = 'watsons_reasoning';
+export const REASONING = 'reasoning';
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const anchorOf = (t) => (t ? (t.at ?? t.from ?? t.after ?? t.before ?? t.to) : null);
 const startOf = (t) => (t ? (t.at ?? t.from ?? t.after ?? null) : null);

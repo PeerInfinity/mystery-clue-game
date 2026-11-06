@@ -1,9 +1,10 @@
-// Watson's timeline (index.html): the world model shown as it is, an ordered list of events, filled in as the story
-// is read. What Watson observes himself is certain; everything else comes through a chain of tellings, each link
-// trusted as far as the player says (engine/world.js). Facts at or above the threshold are on the timeline; the
+// The timeline (index.html; for Silver Blaze, "Watson's timeline"): the world model shown as it is, an ordered list of
+// events, filled in as the story is read. Every fact reaches the reader through a narrator (what a first-person
+// narrator observes is certain by default); the rest comes through a chain of tellings, each link trusted as far as
+// the player says (engine/world.js). The player is the reader: the marks and moves are the reader's own. Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { ACTIONS, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
@@ -31,8 +32,14 @@ const [w, times, facts, accounts, questions, text, mentions] = await Promise.all
 const strainList = await get(`${W}/strains.json`).then((x) => x.strains ?? []).catch(() => []);
 const data = {
     entities: w.entities, moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
-    accounts: accounts.accounts, questions: questions.questions,
+    accounts: accounts.accounts, questions: questions.questions, narrators: header.narrators,
 };
+// The narrators (world/case.json): each by name, and its narration link, which the player may trust less.
+const narratorIds = new Set(data.narrators.map((n) => n.id));
+const narratorName = (id) => data.narrators.find((n) => n.id === id)?.name ?? (id === 'narrator' ? 'the narrator' : null);
+document.title = `${header.title}: ${header.subtitle ?? 'the timeline'}`;
+document.querySelector('.case-title').textContent = header.title;
+document.querySelector('h1 .subtitle').textContent = header.subtitle ?? 'the timeline';
 data.order = timeOrder(data.times);
 data.places = places(data);
 const prov = provenance(data);
@@ -45,7 +52,7 @@ const named = new Story(text, { mentions: { entities: mentions.entities }, entit
 const entityById = new Map(data.entities.map((e) => [e.id, e]));
 const timeById = new Map(data.times.map((t) => [t.id, t]));
 const factById = new Map(data.facts.map((f) => [f.id, f]));
-// The entries the player's moves give (Watson's reasoning), worked out afresh at each drawing.
+// The entries the player's moves give (the reader's reasoning), worked out afresh at each drawing.
 let reasoned = [];
 let reasonedById = new Map();
 let lapsed = [];          // the player's moves that no longer hold, each with why (engine/actions.js reasonedEntries)
@@ -53,7 +60,7 @@ let heldKeys = null;      // the moves that held at the last drawing (null befor
 let lapseNews = [];       // the lapses announced, until dismissed or no longer lapsed
 const factOf = (id) => factById.get(id) ?? reasonedById.get(id) ?? hypIntention(id) ?? hypAction(id) ?? presupposed(id);
 /**
- * A circled aim with a goal (the stranger's "get information to bet on") as an intention: Watson's hypothesis, so
+ * A circled aim with a goal (the stranger's "get information to bet on") as an intention: the reader's hypothesis, so
  * the player's plan can be built on it. Its id is the mark's key.
  */
 function hypIntention(id, anyMark = false) {
@@ -67,7 +74,7 @@ function hypIntention(id, anyMark = false) {
 const hypTime = (q) => (q.entry.time && typeof q.entry.time === 'object' ? q.entry.time : typeof q.entry.time === 'string' ? { at: q.entry.time } : {});
 /**
  * A circled answer to a who-question whose entry is a typed action (who led the horse out?): that one doing it, as an
- * action of Watson's hypothesis, which the moves can link like any other.
+ * action of the reader's hypothesis, which the moves can link like any other.
  */
 /**
  * A why-question presupposes its action ("Why was a match struck in the hollow?": Straker struck a light): with any of
@@ -101,6 +108,8 @@ const LAST = story.length - 1;
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
 const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
+// Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
+for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
 else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); for (const k of ['layout', 'panels', 'theme']) if (own[k] != null) state[k] = own[k]; } catch { /* the defaults */ }
 state.sel = null;
 state.note = null;
@@ -121,8 +130,10 @@ function cycleMark(qid, pick) {
 
 // --- Words.
 const DAYS = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
-const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'Watson’s hypothesis' : id === REASONING ? 'Watson’s reasoning' : entityById.get(id)?.name ?? id);
-const ent = (id) => (id === HYPOTHESIS || id === REASONING ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ?? ''));
+const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'your hypothesis' : id === REASONING ? 'your reasoning' : id === READER ? 'you' : entityById.get(id)?.name ?? narratorName(id) ?? id);
+const ent = (id) => (id === HYPOTHESIS || id === REASONING ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ? nameOf(id) : ''));
+/** An entity at the head of a line: its name capitalised (the reader's hypothesis: "Your hypothesis"). */
+const entHead = (id) => ent(id).replace(/>([a-z])/, (m, c) => `>${c.toUpperCase()}`).replace(/^([a-z])/, (m, c) => c.toUpperCase());
 // A value: an entity id becomes its name; a text that starts with one ("silver_blaze (in his keeping)") too.
 const val = (v) => list(v).map((x) => {
     if (x == null) return '<span class="muted">unknown</span>';
@@ -247,22 +258,24 @@ const isTimeEvent = (f) => TIME_ATTRS.has(f.attr) || ['calendar', 'clock', 'weat
 
 // --- What is known, and how far it is trusted.
 const chainsOf = (f) => (f.attr === 'tells' ? [] : prov.factChains(f.id));
-/** A fact's level: a telling to Watson he witnesses (certain), any other telling as the story reports it (uncertain). */
+/** A fact's level: a telling to a narrator, who witnesses it, as far as that narration is trusted; any other telling as the story reports it (uncertain, and no more than the narration). */
 function levelOfFact(f) {
     if (f.hyp) return markLevel(f.hyp.q, f.hyp.pick);
     if (f.reasoned) {
-        // Watson's reasoning: as trusted as its weakest premise, and no more than the player trusts his reasoning.
+        // The reader's reasoning: as trusted as its weakest premise, and no more than the player trusts it.
         const ls = f.reasoned.premises.map((id) => { const p = factOf(id); return p ? levelOfFact(p) : null; });
         if (ls.some((l) => l == null)) return null;
         const cap = state.trust.people[REASONING];
         return Math.min(...ls, cap ?? LEVELS.length - 1);
     }
-    if (f.attr === 'tells') return f.to === 'watson' ? LEVELS.length - 1 : DEFAULT_LEVEL;
+    if (f.attr === 'tells') return narratorIds.has(f.to) ? narrationLevel(f.to) : Math.min(DEFAULT_LEVEL, Math.max(...data.narrators.map((n) => narrationLevel(n.id))));
     return levelOf(chainsOf(f), state.trust);
 }
 /** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
 const chainsOfAssertion = (x) => (x.mark ? [x.from ? hypothesisChain(...x.from.slice(4).split('=')) : hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factOf(x.fact)));
-/** Told by the paragraph read to, and modelled (a chain reaches Watson, or a telling). */
+/** How far the player trusts a narrator's narration (by default the case's trust, certain unless it says otherwise). */
+const narrationLevel = (id) => { const n = data.narrators.find((x) => x.id === id); return n ? state.trust.links[linkKey(narrationLink(n))] ?? narrationLink(n).base : DEFAULT_LEVEL; };
+/** Told by the paragraph read to, and modelled (a chain reaches the reader, or a telling). */
 const visible = (f) => { const g = givenAt(f); return g != null && g <= state.para && levelOfFact(f) != null; };
 const accepted = (f) => levelOfFact(f) >= state.threshold;
 
@@ -316,7 +329,7 @@ function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
     const cls = ['event', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Watson’s reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -620,6 +633,8 @@ function render() {
     document.getElementById('show-below').checked = state.showBelow;
     const th = document.getElementById('threshold');
     th.innerHTML = LEVELS.slice(0, -1).map((l, i) => `<option value="${i}"${i === state.threshold ? ' selected' : ''}>${l}</option>`).join('');
+    document.getElementById('narrator-trust').innerHTML = data.narrators.map((n) => `<label title="How far you trust what ${esc(n.name ?? 'the narrator')} tells you: everything in the story comes through this narration">Trust in ${esc(n.name ?? 'the narrator')} as narrator
+          <select class="narration-trust" data-key="${esc(linkKey(narrationLink(n)))}" data-base="${narrationLink(n).base}">${LEVELS.map((l, i) => `<option value="${i}"${i === narrationLevel(n.id) ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`).join('');
 
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
@@ -662,10 +677,15 @@ function linkStep(l, body, title, resolving) {
     const opts = LEVELS.slice(0, -1).map((n, i) => `<option value="${i}"${i === level ? ' selected' : ''}>${n}</option>`).join('');
     return `<span class="link-step${mark}"${mark ? ' title="Distrusting this link alone takes this side off the timeline"' : ''}>${body} <select class="link-trust" data-key="${esc(key)}" title="${title}">${opts}</select>${dropChip(resolving?.drop?.links.get(key))}</span>`;
 }
-/** A chain's links, but its statement's own link, which is drawn once above the chains (stmtHtml). */
+/**
+ * A chain's links, but its statement's own link, which is drawn once above the chains (stmtHtml), and the narration
+ * link at its end, the frame of the whole story (its trust is in Settings): a chain is drawn up to the narrator.
+ */
 function chainHtml(c, resolving = null) {
-    const links = c.links.filter((l) => !l.stmt).map((l) => linkStep(l, `→ <span class="how">${esc(l.how)}${l.uncertain ? '?' : ''}</span> → ${ent(l.to)}`, 'How far you trust this link', resolving)).join(' ');
-    return `<li>${dot(levelOf([c], state.trust))}${ent(c.origin ?? '?')}${c.links.length ? ' ' + links : ' <span class="muted">(Watson’s own)</span>'}</li>`;
+    const steps = c.links.filter((l) => !l.stmt && !l.narrator);
+    const links = steps.map((l) => linkStep(l, `→ <span class="how">${esc(l.how)}${l.uncertain ? '?' : ''}</span> → ${ent(l.to)}`, 'How far you trust this link', resolving)).join(' ');
+    const own = !steps.length && c.links.some((l) => l.narrator) ? ` <span class="muted">(${esc(narratorName(c.origin) ?? nameOf(c.origin))}’s own)</span>` : '';
+    return `<li>${dot(levelOf([c], state.trust))}${entHead(c.origin ?? '?')}${steps.length ? ' ' + links : own}</li>`;
 }
 /** The statement's own link: how far the player trusts this one claim or fact, apart from the rest that came the same way. */
 function stmtHtml(chains, resolving = null) {
@@ -673,7 +693,7 @@ function stmtHtml(chains, resolving = null) {
     return own.map((l) => `<p class="small stmt-line">${linkStep(l, 'This statement itself:', 'How far you trust this one statement, apart from the rest that came the same way', resolving)}</p>`).join('');
 }
 function peopleHtml(chains, resolving = null) {
-    const people = [...new Set(chains.flatMap((c) => c.links.map((l) => l.from)))].filter((p) => p && p !== '?' && p !== 'watson');
+    const people = [...new Set(chains.flatMap((c) => c.links.filter((l) => !l.narrator).map((l) => l.from)))].filter((p) => p && p !== '?' && !narratorIds.has(p));
     if (!people.length) return '';
     return `<h3>People</h3><ul class="people">${people.map((p) => {
         const v = state.trust.people[p];
@@ -688,7 +708,7 @@ function dropCounts(chains) {
     const on = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
     const count = (trust) => on.filter((f) => levelOf(chainsOf(f), trust) < state.threshold).length;
     const links = new Map(), people = new Map();
-    for (const k of new Set(chains.flatMap((c) => c.links.map(linkKey)))) links.set(k, count({ ...state.trust, links: { ...state.trust.links, [k]: 0 } }));
+    for (const k of new Set(chains.flatMap((c) => c.links.filter((l) => !l.narrator).map(linkKey)))) links.set(k, count({ ...state.trust, links: { ...state.trust.links, [k]: 0 } }));
     for (const p of new Set(chains.flatMap((c) => c.links.map((l) => l.from)))) people.set(p, count({ ...state.trust, people: { ...state.trust.people, [p]: 0 } }));
     return { links, people };
 }
@@ -705,7 +725,7 @@ function sideHtml(x, label) {
     const f = factOf(x.fact);
     if (f.reasoned) {
         return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a></p>
-      <p class="small">From Watson’s reasoning. Trusted: <b>${levelName(levelOfFact(f))}</b>, as its weakest premise. Lower your trust in a premise, or withdraw it.</p>
+      <p class="small">From your reasoning. Trusted: <b>${levelName(levelOfFact(f))}</b>, as its weakest premise. Lower your trust in a premise, or withdraw it.</p>
       <ul class="events">${f.reasoned.premises.map((id) => factOf(id)).filter(Boolean).map((p) => eventRow(p, new Set())).join('')}</ul></div>`;
     }
     const what = x.kind === 'pick'
@@ -1033,9 +1053,9 @@ function reasonedDetail(f) {
         : f.reasoned.move === 'c' ? 'What it brings about meets the goal of an intention, or a need of a step toward it.'
         : f.reasoned.role === 'requires' ? 'What an action needs just before it.' : 'What an action does.';
     const premises = f.reasoned.premises.map((id) => factOf(id)).filter(Boolean);
-    const cap = { origin: REASONING, links: [{ from: REASONING, to: 'watson', how: 'reasoning' }] };
+    const cap = { origin: REASONING, links: [{ from: REASONING, to: READER, how: 'reasoning' }] };
     return `<h2>${phrase(f)}</h2>
-      <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. From <span class="hyp-name">Watson’s reasoning</span>: ${how}
+      <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. From <span class="hyp-name">your reasoning</span>: ${how}
         Trusted: <b>${levelName(levelOfFact(f))}</b>, as its weakest premise.</p>
       <h3>From</h3><ul class="events">${premises.map((p) => eventRow(p, new Set())).join('')}</ul>
       ${peopleHtml([cap])}
@@ -1228,7 +1248,7 @@ function questionDetail(q, clashing) {
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}
       ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>${keyStrainsHtml(q)}` : ''}
-      ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${actionMovesHtml(q)}${aimPlansHtml(q)}`;
+      ${marked.length ? `<h3>Your marks, your hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${actionMovesHtml(q)}${aimPlansHtml(q)}`;
 }
 
 function renderDetail(clashing) {
@@ -1255,8 +1275,8 @@ function renderDetail(clashing) {
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.</p>
           ${f.attr === 'tells' ? '<p class="small muted">A telling: how an account passed from one person to another.</p>'
-            : `<h3>How Watson has it</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
-          ${content.length ? `<h3>What it asserts reaches him</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
+            : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
+          ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
           ${peopleHtml([...chains, ...content])}${movesHtml(f)}`;
         el.insertAdjacentHTML('afterbegin', noteHtml());
         return;
@@ -1329,7 +1349,7 @@ document.getElementById('view').addEventListener('change', (e) => { state.view =
 document.getElementById('depth').addEventListener('change', (e) => { state.depth = Number(e.target.value); save(); render(); });
 document.getElementById('show-below').addEventListener('change', (e) => { state.showBelow = e.target.checked; save(); render(); });
 document.getElementById('reset').addEventListener('click', () => {
-    if (!confirm('Put every link and person back to uncertain?')) return;
+    if (!confirm('Put every link and person back to uncertain (and each narrator to the story\'s default)?')) return;
     changeTrust((tr) => { tr.links = {}; tr.people = {}; });
 });
 // Start over: the saved timeline (and the autoplay's) cleared; what is the page's, not the reading's, is kept.
@@ -1458,6 +1478,9 @@ document.addEventListener('change', (e) => {
     if (e.target.matches('.link-trust')) {
         const v = Number(e.target.value), k = e.target.dataset.key;
         changeTrust((tr) => { if (v === DEFAULT_LEVEL) delete tr.links[k]; else tr.links[k] = v; });
+    } else if (e.target.matches('.narration-trust')) {
+        const v = Number(e.target.value), k = e.target.dataset.key, base = Number(e.target.dataset.base);
+        changeTrust((tr) => { if (v === base) delete tr.links[k]; else tr.links[k] = v; });
     } else if (e.target.matches('.person-trust')) {
         const p = e.target.dataset.person, v = e.target.value;
         changeTrust((tr) => { if (v === '') delete tr.people[p]; else tr.people[p] = Number(v); });
