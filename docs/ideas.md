@@ -457,8 +457,8 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   notice); each press goes a rung further on the same thing: (1) where to look, (2) the reasoning, the path's `why`, (3)
   the move, with Do it. After a press the button waits (Settings: none, 10, 30 or 60 seconds; 30 by default); reading on
   is shown whole and starts no wait. What a hint is about, from wherever the player is: (a) a wrong mark on a question
-  the path settles, once the path has its reason at or before the paragraph read to (Simpson circled at ¶30 is let be;
-  at ¶41 the hint says to look again), and only on an answer the page lists now; (b) a distrust the path does not make
+  the path settles, once the path has its reason at or before the paragraph read to (Simpson circled for the blow is let be at ¶30;
+  from ¶37, where the path circles the horse, the hint says to look again, from ¶41 to cross him out), and only on an answer the page lists now; (b) a distrust the path does not make
   (a false statement's own is let be); (c) the next move of the path not made that the page allows now, tried and taken
   back at once, the soonest answer given away first; a circle or crossing counts as done once the question has any
   right answer circled; views (plans, checks) are not hinted; (d) **the user's addition:** when nothing is possible,
