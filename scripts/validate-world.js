@@ -102,6 +102,12 @@ for (const f of facts) {
         for (const r of ['thing', 'to', 'via', 'item']) if (x[r] != null && !entities.has(x[r])) err(id, `${r}: no entity ${x[r]}`);
     };
     if (f.act != null || f.thing != null) checkAct(f.id, f);
+    // A heading (where someone is making for, read from a track) and a charge (a place one is in charge at) are places.
+    const isPlace = (id) => allEntities.find((e) => e.id === id)?.kind === 'place';
+    if (f.attr === 'heading' && !isPlace(f.value)) err(f.id, `heading: ${f.value} is not a place`);
+    if (f.charge != null && !isPlace(f.charge)) err(f.id, `charge: ${f.charge} is not a place`);
+    // Read from a track Watson sees: in his own account, told where he sees it.
+    if (f.read_from_track && !accounts.find((x) => x.id === 'acct.watson')?.facts?.includes(f.id)) err(f.id, 'read_from_track: not in acct.watson');
     // A guard (the lad on watch) guards a place behind a door: the place inside it.
     if (f.guards != null && !Object.values(world.joins ?? {}).some((sides) => sides[0] === f.guards)) err(f.id, `guards: ${f.guards} is not the inside of a door (joins)`);
     if (f.plan) {

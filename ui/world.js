@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
+import { ACTIONS, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -201,6 +201,7 @@ function phrase(f) {
         case 'door': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
         case 'willing': return `${E} willing to help ${v}`;
         case 'held_by': return `${E} in the hands of ${v}`;
+        case 'heading': return `${E} making for ${v}${d}`;
         case 'purpose': {
             const x = factOf(f.reasoned?.premises[0]);
             const cond = f.cond ? ` <span class="small">(if ${val(f.cond.item)} is ${f.cond.kinds.map((k) => KIND_WORD[k] ?? k).join(' or ')})</span>` : '';
@@ -211,7 +212,7 @@ function phrase(f) {
         case 'believes': return `${E} believes ${v}`;
         case 'knows': return `${E} knows ${v}`;
         case 'lit': return `${E} has ${v}${f.hyp === true ? ' <span class="small muted">(your hypothesis)</span>' : ''}`;
-        case 'intends': return `${E} means ${v}`;
+        case 'intends': return f.aimChange ? `${E} changes his mind: making for ${ent(f.aimChange.from)}, then for ${ent(f.aimChange.to)}` : `${E} means ${v}`;
         case 'observes': {
             const seen = list(f.value).map((x) => factById.get(x)).filter((o) => o && visible(o));
             return seen.length ? `${E} sees: ${seen.map(phrase).join('; ')}` : `${E} notices something`;
@@ -296,7 +297,7 @@ function assertsHtml(f) {
  * An entry the player can reason from (its detail offers moves): a typed state, a typed action, an intention with a
  * goal, a claim with a plan. Marked on the timeline so the moves can be found.
  */
-const canReason = (f) => (STATES[f.attr] && f.value != null && !f.neg) || list(f.act).length > 0 || !!f.goal || !!f.plan;
+const canReason = (f) => ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || list(f.act).length > 0 || !!f.goal || !!f.plan;
 const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need)">⚙</span>';
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
@@ -773,7 +774,7 @@ function statusHtml(r) {
 }
 /** What is on the timeline now: told so far and trusted to the threshold, with the player's own entries. */
 const onTimeline = () => allFacts().filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
-const isTypedState = (f) => STATES[f.attr] && f.value != null && !f.neg;
+const isTypedState = (f) => (STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg;
 const madeB = (id) => state.reasoning.some((m) => m.move === 'b' && m.of === id);
 const noteHtml = () => (state.note ? `<p class="note small">${esc(state.note)}</p>` : '');
 function addMove(m, select) {
@@ -841,7 +842,8 @@ function planOf(f) {
     if (!f.goal) return null;
     const linked = linkedTo(f.id).map((e) => factOf(e.reasoned.premises[0])).filter((x) => x && list(x.act).length);
     const steps = orderSteps(linked, (x) => rankOf(anchorOf(x.time ?? {})), nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
-    return steps.length ? { id: f.id, agent: f.of, goal: f.goal, steps: [...steps, ...impliedSteps(f)] } : null;
+    // An aim with an implied last step has a plan even before anything is linked to it (what hiding him would need).
+    return steps.length || f.step ? { id: f.id, agent: f.of, goal: f.goal, steps: [...steps, ...impliedSteps(f)] } : null;
 }
 function planHtml(f) {
     const plan = planOf(f);
@@ -953,7 +955,7 @@ function stoppedHtml(f, r) {
         return s.stops ? `<span class="good small">yes: ${phrase({ ...s.effect, id: '' })}, so the step was never done</span>` : `<span class="bad small">no: ${esc(s.why)}</span>`;
     };
     const items = xs.map((x) => `<li>${stopChecked.has(key(x)) ? '' : `<button type="button" class="move" data-stop="${esc(key(x))}">Check</button> `}${stepText(x)}${stopChecked.has(key(x)) ? ` ${answer(x)}` : ''}</li>`).join('');
-    return `<h3>What stopped it?</h3><p class="small">${stepText(step)} never happened. An action that left ${ent(step.of)} unable to act in time would explain it.</p>${xs.length ? `<ul class="moves">${items}</ul>` : '<p class="small muted">No action on the timeline or in your hypotheses yet.</p>'}`;
+    return `<h3>What stopped it?</h3><p class="small">${stepText(step)} is not on the timeline as done. An action that left ${ent(step.of)} unable to act in time would explain it.</p>${xs.length ? `<ul class="moves">${items}</ul>` : '<p class="small muted">No action on the timeline or in your hypotheses yet.</p>'}`;
 }
 /**
  * "Compare with another plan", on an open plan: the other plans of its agent on the timeline (one proposed in the

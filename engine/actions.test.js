@@ -230,6 +230,25 @@ test("goals serving goals: injuring the horse serves a motive through what the i
     assert.equal(checkFit({ ...aim, goal: { of: 'horse', attr: 'condition', value: 'exercised' } }, debts, [], nameOf, {}).fits, false);
 });
 
+test("tracks: two headings of one walker give a change of aim; hiding at a stable needs one in charge there", () => {
+    const toKp = { id: 'f.toKp', of: 'man', attr: 'heading', value: 'home', time: { at: 'tout' } };
+    const back = { id: 'f.back', of: 'man', attr: 'heading', value: 'yard', time: { at: 'tmorn' } };
+    const r = pointChange(order, back, toKp, [toKp, back], (id) => ({ home: 'King\'s Pyland', yard: 'Mapleton' })[id] ?? id);
+    assert.deepEqual([r.entry.of, r.entry.attr, r.entry.aimChange, r.entry.time], ['man', 'intends', { from: 'home', to: 'yard' }, { after: 'tout', before: 'tmorn' }], 'his own change of mind, not an action by someone');
+    assert.match(r.entry.value, /King's Pyland, then for Mapleton/);
+    assert.match(pointChange(order, toKp, { ...back, value: 'home' }).why, /same/);
+    const pl = places({ entities: yard.entities });
+    const hides = (who) => ({ id: `h.${who}`, of: who, act: 'hide', thing: 'horse', where: 'yard', time: { after: 'tout', before: 'tmorn' } });
+    const needs = pointImplications(hides('master'), nameOf, { places: pl }).entries.filter((e) => e.role === 'requires');
+    assert.deepEqual(needs.map((e) => [e.attr, e.charge ?? null]), [['role', 'yard']], 'no hiding-place to know: the stable is named');
+    const manages = { id: 'f.manages', of: 'master', attr: 'role', value: 'manager', charge: 'yard', time: { from: 't9' } };
+    const groom = { id: 'f.groom', of: 'groom', attr: 'role', value: 'a groom there', time: { from: 't9' } };
+    assert.equal(requirementStatus(order, [manages, groom], needs[0], { places: pl }).status, 'met');
+    const gneed = pointImplications(hides('groom'), nameOf, { places: pl }).entries.find((e) => e.charge);
+    assert.equal(requirementStatus(order, [manages, groom], gneed, { places: pl }).status, 'unknown', 'a groom is in charge of nothing');
+    assert.equal(pointImplications({ ...hides('master'), where: undefined }, nameOf, {}).entries.filter((e) => e.role === 'requires')[0].value, 'a hiding-place', 'no stable named: he must know a hiding-place');
+});
+
 test('what stopped an intended step: an action that left its agent unable to act, in time', () => {
     const step = { id: 's', of: 'trainer', act: 'injure', thing: 'horse', intended: true, time: { after: 't9', before: 'tmorn' } };
     const kick = { id: 'k', of: 'horse', act: 'strike', to: 'trainer', time: { at: 'tout' } };

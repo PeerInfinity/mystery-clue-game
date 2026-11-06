@@ -11,6 +11,11 @@ export const CLAIM_ATTRS = new Set(['says', 'believes']);
 export const SINGLE_ATTRS = new Set(['location', 'identity']);
 /** Typed states: attributes whose values exclude each other (a door is open, shut or locked). See engine/actions.js. */
 export const STATES = { door: ['open', 'shut', 'locked'] };
+/**
+ * States whose values are open (any place), not a fixed list: `heading`, where someone leading a horse is making for,
+ * read from his track. Two of them that differ point to a change of aim (move (a)), not an action.
+ */
+export const OPEN_STATES = new Set(['heading']);
 
 /** Provenance: the accounts holding each fact, and the chains of tellings that carry an account to a holder. */
 export function provenance(data) {

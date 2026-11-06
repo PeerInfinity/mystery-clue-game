@@ -21,9 +21,9 @@
 // What the player points out is an entry of the world model with the source *Watson's reasoning* (`REASONING`), as
 // trusted as its weakest premise.
 
-import { coverOf, STATES } from './world.js';
+import { coverOf, STATES, OPEN_STATES } from './world.js';
 
-export { STATES };
+export { STATES, OPEN_STATES };
 
 /**
  * The generic action table. A rule names its subject by role (`of: '$agent'`) and is one of:
@@ -33,6 +33,9 @@ export { STATES };
  * - `{of, at: door}`: on one of a door's two sides (`joins` in the data);
  * - effects only: `{of, through: door}`: on the other side of the door from where it was just before; `{of, key:
  *   role}`: carrying a key to it (keeping one);
+ * - any rule with `unless: role` is left out when the action has that role (a hiding-place to know, when where is named);
+ * - `{of, charge: role}`: in charge at that place (a role with `charge: <place>`: hiding a horse at a stable needs
+ *   its master, not a groom);
  * - `{of, place: role}`: at that place at the time (`where`: the place of the deed; the striker in the hollow);
  * - `{guard: door}`: every guard of the place inside the door (an entry with `guards: <place>`, the lad on watch)
  *   unable to act (`DISABLED`: drugged, struck down) unless the guard is the agent himself: one need per guard;
@@ -58,7 +61,7 @@ export const ACTIONS = {
     take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
     cut_self: { label: 'cut, as he fell,', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', attr: 'condition', value: 'struck down' }], effects: [{ of: '$agent', attr: 'condition', value: 'cut' }] },
-    hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
+    hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place', unless: '$where' }, { of: '$agent', charge: '$where' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
 };
 /** What a goal of carrying an item brings with it, by the item's kind (the same rule as `give`'s). */
 const CARRY_RAMIFIES = { attr: 'willing', kinds: ['money', 'message'] };
@@ -72,7 +75,7 @@ export const REASONING = 'watsons_reasoning';
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const anchorOf = (t) => (t ? (t.at ?? t.from ?? t.after ?? t.before ?? t.to) : null);
 const startOf = (t) => (t ? (t.at ?? t.from ?? t.after ?? null) : null);
-const isTyped = (f) => f && STATES[f.attr] && f.value != null;
+const isTyped = (f) => f && (STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null;
 const eq = (ctx) => ctx.same ?? ((a, b) => a === b);
 
 /** A role of an action: `$agent` is its `of`; any other `$name` its field of that name; anything else a literal. */
@@ -182,6 +185,8 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
             return;
         }
         if (base.of == null) return;
+        // A need the action makes moot when it names that role (hiding him at a stable named: no hiding-place to know).
+        if (r.unless && R(r.unless) != null) return;
         if (r.knows) {
             const door = R(r.among), at = ctx.joins?.[door]?.[1];
             if (R(r.knows) == null || f.of === '?') return;
@@ -189,10 +194,11 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
             return;
         }
         // A rule about a role the action does not have (injuring with no door named) is left out.
-        if ([r.at, r.key, r.carrying, r.away, r.place].some((x) => typeof x === 'string' && x.startsWith('$') && R(x) == null)) return;
+        if ([r.at, r.key, r.carrying, r.away, r.place, r.charge].some((x) => typeof x === 'string' && x.startsWith('$') && R(x) == null)) return;
         if (r.state) { if (!change) out.push({ ...base, attr: r.state, value: r.value, neg: !!r.neg }); }
         else if (r.key) out.push({ ...base, attr: 'carrying', value: `a key to ${String(nameOf(R(r.key))).replace(/^The /, 'the ')}`, key: R(r.key), time: during });
         else if (r.at) { if (base.of !== '?') out.push({ ...base, attr: 'location', value: R(r.at), at: R(r.at), time: during }); }
+        else if (r.charge) out.push({ ...base, attr: 'role', value: `in charge at ${String(nameOf(R(r.charge))).replace(/^The /, 'the ')}`, charge: R(r.charge), time: during });
         else if (r.place) out.push({ ...base, attr: 'location', value: R(r.place), place: R(r.place), time: during });
         else if (r.away) out.push({ ...base, attr: 'location', value: `away from ${String(nameOf(R(r.away))).replace(/^The /, 'the ')}`, away: R(r.away), time: during });
         else if (r.carrying) out.push({ ...base, attr: 'carrying', value: R(r.carrying), item: R(r.carrying), time: during });
@@ -226,7 +232,7 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
  * order); `known`: the entries on the timeline (to refuse a pair with a state or a change between). Returns the
  * change as an action entry by someone ("?"), between the two, or `why` it is refused.
  */
-export function pointChange(order, a, b, known = []) {
+export function pointChange(order, a, b, known = [], nameOf = (id) => id) {
     if (!isTyped(a) || !isTyped(b) || a.of !== b.of || a.attr !== b.attr) return { why: 'Two states of the same thing, please.' };
     if (a.neg || b.neg) return { why: 'A state that says what something is not does not say what it changed from.' };
     if (a.value === b.value) return { why: 'They are the same: nothing changed.' };
@@ -240,6 +246,15 @@ export function pointChange(order, a, b, known = []) {
     const between = (e) => e !== x && e !== y && startOf(e.time) && order.lt(from, startOf(e.time)) && order.lt(startOf(e.time), to);
     const mid = known.find((e) => between(e) && ((isTyped(e) && !e.neg && e.of === x.of && e.attr === x.attr) || ((e.thing === x.of || e.via === x.of) && list(e.act).length)));
     if (mid) return { why: 'Something on the timeline lies between them: point out the change from the nearer one.', mid };
+    if (OPEN_STATES.has(x.attr)) {
+        // Making for one place, then for another: he changed his mind between (the track that turns back).
+        return {
+            entry: {
+                id: `r:a:${x.id}|${y.id}`, of: x.of, attr: 'intends', value: `changing his mind: making for ${nameOf(x.value)}, then for ${nameOf(y.value)}`,
+                aimChange: { from: x.value, to: y.value }, time: { after: from, before: to }, reasoned: { move: 'a', premises: [x.id, y.id] },
+            },
+        };
+    }
     const path = changePath(x.attr, x.value, y.value);
     if (!path) return { why: 'No action the engine knows changes one into the other.' };
     const label = path.map((t) => ACTIONS[t].label).join(' and ');
@@ -292,6 +307,11 @@ export function requirementStatus(order, entries, req, ctx = {}) {
             return { status: 'unknown', entry: p ?? undefined };
         }
         return p ? { status: 'against', entry: p } : { status: 'unknown' };
+    }
+    if (req.charge) {
+        // In charge at the place: a role there with `charge` (Silas Brown manages Mapleton).
+        const has = others.find((e) => same(e.of, req.of) && e.attr === 'role' && e.charge && (ctx.places?.chain(req.charge) ?? [req.charge]).includes(e.charge) && notAfter(e));
+        return has ? { status: 'met', entry: has } : { status: 'unknown' };
     }
     if (req.place) {
         // At the place of the deed then: where the timeline has it at that time (the horse in the hollow).
@@ -358,6 +378,7 @@ export function meets(eff, req, ctx = {}) {
     const same = eq(ctx);
     if (!same(eff.of, req.of)) return false;
     if (req.at) return eff.attr === 'location' && sideOf(ctx, req.at, eff.value) >= 0;
+    if (req.charge) return false;
     if (req.place) return eff.attr === 'location' && (ctx.places?.chain(eff.value) ?? [eff.value]).includes(req.place);
     if (req.away) return eff.attr === 'location' && !(ctx.places?.chain(eff.value) ?? [eff.value]).includes(req.away);
     if (req.key) return eff.attr === 'carrying' && (eff.key === req.key || /\bkey\b/.test(String(eff.value)));
@@ -535,7 +556,7 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
         if (!Number.isFinite(given)) continue;
         const c = { ...ctx, order };
         let r;
-        if (m.move === 'a') r = pointChange(order, ps[0], ps[1]);
+        if (m.move === 'a') r = pointChange(order, ps[0], ps[1], [], nameOf);
         else if (m.move === 'b') r = pointImplications(ps[0], nameOf, c);
         else {
             const fit = checkFit(ps[0], ps[1], linkedTo(ps[1].id), nameOf, c);

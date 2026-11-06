@@ -659,6 +659,18 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   possibility may carry `rests_on`, states it takes for granted, shown with what the timeline says ("What it rests
   on": the debts rest on Straker owing an account, met by the milliner's account to William Derbyshire once Derbyshire
   is circled as Straker, and not when he is circled as a friend).
+- Tracks (the audit's step 5; the user chose reading tracks by themselves, a change of heading as a change of aim, and
+  hiding needing someone in charge, with likely clashes for the rest). A fact with `read_from_track: true` is what a
+  track Watson sees himself shows (the horse in the long hollow, ¶117; near Mapleton with a man beside him, ¶119; the
+  turn, ¶122; both at the Mapleton gates, ¶124): it is in Watson's own account and told where he sees the track, with
+  no move. `heading` (an open state, `OPEN_STATES`: any place) is where someone is making for; move (a) on two headings
+  of one walker gives his own change of aim between them (`aimChange`), not an action by "?". `hide` needs its agent in
+  charge at the place where it is done (`{charge: '$where'}`, met by a role with `charge`: Silas Brown manages
+  Mapleton, ¶19), and a hiding-place to know only when no place is named (`unless: '$where'`). "What did the man with
+  the horse mean to do?" has its two answers as aims with the hiding as their last step; leading him home first rests
+  on the heading for King's Pyland. Likely clashes: the pit, far away or a secret place against the tracks to the
+  Mapleton gates; hiding from the start against the turn toward King's Pyland; the groom against "no groom would dare".
+  An aim with an implied last step shows its plan before anything is linked to it.
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's

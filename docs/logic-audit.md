@@ -28,7 +28,13 @@ the question's possibilities and their `from`/`out`/`by`), and marks each link a
   the stick implying a striker the player has crossed or the single blow against it).
 - **Step 6 built (2026-11-05):** goals serving goals; the motive's two answers with goals, the debts resting on the
   milliner's account through the Derbyshire identity. motive has a route from ¶214 (raised there), resting on
-  derbyshire (a likely clash from ¶84). Left: step 5 (traces: horse_where before ¶114, track_man, track_man_aim).
+  derbyshire (a likely clash from ¶84).
+- **Step 5 built (2026-11-05):** tracks read where Watson sees them, a change of heading as a change of aim, hiding
+  needing one in charge, five likely clashes. horse_where has its wrong answers strained from ¶124 (the moor and the
+  gypsies from ¶114 as before); track_man_aim from ¶122; track_man from ¶127. Every one of the 27 gated questions now
+  has a route before its give-away, counting likely clashes. Still not modelled: the careful reader's early reaches
+  that come before the gate needs them (horse_where at ¶40 from motive, means and distance; the blaze dyed at ¶64;
+  practice on the sheep at ¶92).
 
 ## Summary
 

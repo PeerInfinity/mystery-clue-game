@@ -390,6 +390,15 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   met by the milliner's account once William Derbyshire is circled as Straker. Played at ¶214: injuring links to
   either motive "in order that Silver Blaze: loses the race". The user does not want distracting data yet; step 5
   (traces) is under discussion.
+- **The audit's step 5, options (2026-11-05):** a "What made this?" move on a track (the open topic of player-added
+  inferences); tracks read by themselves (Watson sees them); questions and likely clashes only; a change of heading as
+  a change of aim; hiding needing someone in charge. The user saw valid reasons for each and chose the recommended
+  mix for now: tracks read by themselves, the heading change, hiding needs charge, clashes for the gaps.
+- **Built (2026-11-05), the audit's step 5 (tracks):** what the tracks show is on the timeline where Watson sees them
+  (¶117–124); "It changed" on the man's two headings gives "changes his mind: making for King's Pyland, then for
+  Mapleton"; hiding the horse at Mapleton needs its master (met once the man is circled as Silas Brown; a groom has
+  "nothing says" and the clash "no groom would dare"); five likely clashes (the pit, far away, a secret place, hiding
+  from the start, the groom). Played at ¶127.
 
 ### An incremental game about trying every combination
 
