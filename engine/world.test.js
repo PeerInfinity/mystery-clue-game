@@ -133,6 +133,19 @@ test('other right answers (also_right): judged right, and no contradiction with 
     assert.equal(markAssertions(w, { 'q.why': { light: 'circled' } })[0].truth, true, 'a circle on it is right');
 });
 
+test('an answer that implies another question\'s answer asserts it too (the hoof: the horse struck)', () => {
+    const questions = [
+        { id: 'q.who', answer: 'horse', possibilities: [{ value: 'horse' }, { value: 'man' }, { value: 'something else' }] },
+        { id: 'q.weapon', answer: 'hoof', possibilities: [{ value: 'hoof', implies: { q: 'q.who', pick: 'horse' } }, { value: 'stick', implies: { q: 'q.who', pick: 'man' } }, { value: 'something else' }] },
+    ];
+    const w = world([], questions);
+    const ms = markAssertions(w, { 'q.who': { horse: 'circled' }, 'q.weapon': { stick: 'circled' } });
+    const imp = ms.find((x) => x.mark === 'implied');
+    assert.deepEqual([imp.q, imp.pick, imp.from, imp.truth], ['q.who', 'man', 'hyp:q.weapon=stick', false]);
+    assert.deepEqual(contradictions(w, ms).map((c) => c.why), ['q.who: horse or man'], 'the stick implies the man, against the horse circled');
+    assert.equal(markAssertions(w, { 'q.weapon': { stick: 'crossed' } }).length, 1, 'a crossing implies nothing');
+});
+
 test('who and where questions take any person or animal, or any place, beyond their listed possibilities', () => {
     const kindOf = entityKinds({ entities });
     const who = { id: 'q.who', entry: { of: 'man', attr: 'identity' }, possibilities: [{ value: 'horse' }, { value: 'a friend' }] };

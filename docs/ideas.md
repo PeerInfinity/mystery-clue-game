@@ -379,6 +379,11 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   the noise reason and "did not bark": his plan's steps run key, drugging, unlocking and opening, leading out,
   injuring (intended), every need met but the opium and his being at the door, which the story never tells either.
   The gate gains the question at ¶220 (27 gated).
+- **Built (2026-11-05), the audit's step 4 (presence and the instrument):** striking needs the striker in the hollow
+  (met for the horse from ¶37, nothing for Simpson); each weapon implies its striker (the hoof the horse, the stick
+  Simpson), so the stick against a circled horse is a contradiction, its side saying which circle implies it, and
+  it goes when that circle is distrusted. With the clashes of step 1 (no wound on Simpson, the single blow), who
+  struck the blow and with what now have a route from ¶41.
 
 ### An incremental game about trying every combination
 

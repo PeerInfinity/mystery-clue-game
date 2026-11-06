@@ -644,6 +644,12 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   of a plan, linked by "What is this for?" through the unlocking. Straker is the key's answer, Hunter also right (he
   locked the door, ¶31). A plan's steps at the same time are ordered by what they need (`orderSteps`: unlocking and
   opening before leading the horse through the door).
+- Presence and the instrument (the audit's step 4). A strike needs its striker at the place of the deed (`where` on
+  the action: "Who struck the blow?" names the hollow), so a circled horse is met (in the hollow at the time, ¶37) and
+  a circled Simpson has "nothing on the timeline says so". A possibility may carry `implies` (`{q, pick}`): circled,
+  it asserts that answer of the other question too, as a mark of its own (`mark: 'implied'`, `from` the circle),
+  with the circle's trust: the hoof implies the horse struck, the stick Simpson, so a weapon circled against another
+  striker meets an ordinary contradiction.
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's

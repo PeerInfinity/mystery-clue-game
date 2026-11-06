@@ -23,6 +23,9 @@ the question's possibilities and their `from`/`out`/`by`), and marks each link a
 - **Step 3 built (2026-11-05):** "Who had a key to the stable door?" (raised ¶57; Straker, Hunter also right), a
   circled holder meeting the key need; plan steps ordered by need at equal times. door_opened_by has its route from
   ¶57. The gate now holds 27 questions.
+- **Step 4 built (2026-11-05):** a strike needs the striker at the place of the deed; `implies` ties each weapon to
+  its striker. who_killed and weapon have a route from ¶41 (the horse present, Simpson not shown there and unwounded;
+  the stick implying a striker the player has crossed or the single blow against it).
 
 ## Summary
 

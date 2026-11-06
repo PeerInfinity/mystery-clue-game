@@ -177,6 +177,10 @@ export function markAssertions(data, marks = {}, shown = null) {
             if (!isOption(q, pick, kindOf) || (shown && !shown(q, pick))) continue;
             const neg = mark === 'crossed';
             out.push({ id: hypothesisKey(qid, pick), fact: null, kind: 'pick', q: qid, pick, neg, mark, by: HYPOTHESIS, truth: q.answer == null ? null : isRight(q, pick) !== neg });
+            // A circled answer that implies another question's answer asserts that too (the hoof: the horse struck).
+            const imp = !neg && q.possibilities?.find((p) => p.value === pick)?.implies;
+            const iq = imp && qById.get(imp.q);
+            if (iq && (!shown || shown(iq, imp.pick))) out.push({ id: `${hypothesisKey(qid, pick)}>${imp.q}`, fact: null, kind: 'pick', q: imp.q, pick: imp.pick, neg: false, mark: 'implied', from: hypothesisKey(qid, pick), by: HYPOTHESIS, truth: iq.answer == null ? null : isRight(iq, imp.pick) });
         }
     }
     return out;

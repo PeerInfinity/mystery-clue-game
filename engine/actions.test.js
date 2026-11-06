@@ -207,6 +207,19 @@ test('a key kept meets the key need of unlocking; steps at one time are ordered 
     assert.deepEqual(orderSteps([leads, opens, keeps], rank, nameOf, {}).map((x) => x.id), ['h.keeps', 'h.opens', 'h.leads'], 'the door opened before the horse is led through it');
 });
 
+test('a strike needs the striker at the place of the deed', () => {
+    const pl = places({ entities: [...yard.entities, { id: 'hollow', kind: 'place', within: 'moor' }] });
+    const c = { places: pl, order };
+    const kick = (who) => ({ id: `h.kick.${who}`, of: who, act: 'strike', to: 'trainer', where: 'hollow', time: { at: 'tnight' } });
+    const [need] = pointImplications(kick('horse'), nameOf, c).entries.filter((e) => e.role === 'requires');
+    assert.deepEqual([need.of, need.attr, need.place], ['horse', 'location', 'hollow']);
+    const there = { id: 'f.there', of: 'horse', attr: 'location', value: 'hollow', time: { at: 'tnight' } };
+    assert.equal(requirementStatus(order, [there], need, c).status, 'met', 'the horse was in the hollow then');
+    const [other] = pointImplications(kick('man'), nameOf, c).entries.filter((e) => e.role === 'requires');
+    assert.equal(requirementStatus(order, [there, { id: 'f.moor', of: 'man', attr: 'location', value: 'moor', time: { at: 't9' } }], other, c).status, 'unknown', 'out on the moor earlier: nothing says he was in the hollow');
+    assert.equal(pointImplications({ ...kick('horse'), where: undefined }, nameOf, c).entries.filter((e) => e.role === 'requires').length, 0, 'no place named: no need');
+});
+
 test('what stopped an intended step: an action that left its agent unable to act, in time', () => {
     const step = { id: 's', of: 'trainer', act: 'injure', thing: 'horse', intended: true, time: { after: 't9', before: 'tmorn' } };
     const kick = { id: 'k', of: 'horse', act: 'strike', to: 'trainer', time: { at: 'tout' } };

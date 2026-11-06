@@ -78,8 +78,8 @@ function hypAction(id) {
     const own = q?.possibilities.find((p) => p.value === m[2])?.action;
     if (own && markOf(q, m[2]) === 'circled' && possShown(q, m[2])) return { id, attr: 'action', ...own, time: own.time ?? hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
     if (!q?.entry?.act || !entityById.has(m[2]) || markOf(q, m[2]) !== 'circled' || !possShown(q, m[2])) return null;
-    const { act, thing, to, item, via } = q.entry;
-    return { id, of: m[2], attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), time: hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
+    const { act, thing, to, item, via, where } = q.entry;
+    return { id, of: m[2], attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), ...(where ? { where } : {}), time: hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
 }
 const allFacts = () => [...data.facts, ...reasoned];
 const qById = new Map(data.questions.map((q) => [q.id, q]));
@@ -247,14 +247,16 @@ function levelOfFact(f) {
     return levelOf(chainsOf(f), state.trust);
 }
 /** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
-const chainsOfAssertion = (x) => (x.mark ? [hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factOf(x.fact)));
+const chainsOfAssertion = (x) => (x.mark ? [x.from ? hypothesisChain(...x.from.slice(4).split('=')) : hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factOf(x.fact)));
 /** Told by the paragraph read to, and modelled (a chain reaches Watson, or a telling). */
 const visible = (f) => { const g = givenAt(f); return g != null && g <= state.para && levelOfFact(f) != null; };
 const accepted = (f) => levelOfFact(f) >= state.threshold;
 
 /** The assertions on the timeline: told so far, and trusted at least to the threshold; and the player's marks. */
 function acceptedAssertions() {
-    const marks = markAssertions(data, state.marks, possShown).filter((x) => markLevel(x.q, x.pick) >= state.threshold);
+    // An implied answer is as trusted as the circle that implies it.
+    const lvlOf = (x) => { const m = x.from && /^hyp:(.+)=(.+)$/.exec(x.from); return m ? markLevel(m[1], m[2]) : markLevel(x.q, x.pick); };
+    const marks = markAssertions(data, state.marks, possShown).filter((x) => lvlOf(x) >= state.threshold);
     const mine = reasoned.filter((f) => visible(f) && accepted(f))
         .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at }));
     return [...marks, ...mine, ...allAssertions.filter((x) => {
@@ -475,7 +477,12 @@ function packGrid() {
     body.style.height = `${Math.max(...bottoms, 0)}px`;
 }
 
-const markText = (x) => `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}`;
+const markText = (x) => {
+    // An answer implied by another circle (the stick: Simpson struck the blow) says which circle implies it.
+    const m = x.from && /^hyp:(.+)=(.+)$/.exec(x.from);
+    const via = m ? ` (implied by your answer to “${esc(qById.get(m[1])?.label ?? m[1])}”: ${pickText(qById.get(m[1]), m[2])})` : '';
+    return `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}${via}`;
+};
 function clashSide(x) {
     if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${markText(x)}</a>`;
     const f = factOf(x.fact);

@@ -3,8 +3,8 @@
 // A typed state is an attribute with exclusive values (`STATES`): a door is open, shut or locked, never two at once.
 // An action is an event that changes a state: the generic table (`ACTIONS`) gives each action type what it requires
 // just before and what it effects just after, in terms of its roles: `agent` (the fact's `of`), `thing` (what it acts
-// on), `to` (the one it is done to), `item` (what is given, used or carried), `about` (what is asked) and `via` (the
-// door gone through). A fact is a typed action when it has `act`; its roles are fields of the same names.
+// on), `to` (the one it is done to), `item` (what is given, used or carried), `about` (what is asked), `via` (the
+// door gone through) and `where` (the place of the deed). A fact is a typed action when it has `act`; its roles are fields of the same names.
 //
 // An intention is a goal (a state in the world model's own shape, `goal: {of, attr, value}`) and a plan (typed
 // actions whose effects feed the next step's requirements). A claim may carry a plan (`plan: {agent, goal, time,
@@ -33,6 +33,7 @@ export { STATES };
  * - `{of, at: door}`: on one of a door's two sides (`joins` in the data);
  * - effects only: `{of, through: door}`: on the other side of the door from where it was just before; `{of, key:
  *   role}`: carrying a key to it (keeping one);
+ * - `{of, place: role}`: at that place at the time (`where`: the place of the deed; the striker in the hollow);
  * - `{guard: door}`: every guard of the place inside the door (an entry with `guards: <place>`, the lad on watch)
  *   unable to act (`DISABLED`: drugged, struck down) unless the guard is the agent himself: one need per guard;
  * - `{of, knows: role, among: door}`: an animal kept behind the door knows the agent, as it knows the people who live
@@ -50,7 +51,7 @@ export const ACTIONS = {
     give: { label: 'giving', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'carrying', value: '$item' }, { of: '$to', attr: 'willing', value: '$agent', kinds: ['money', 'message'] }] },
     ask: { label: 'asking', requires: [{ of: '$to', attr: 'willing', value: '$agent' }], effects: [{ of: '$agent', attr: 'knows', value: '$about' }] },
     drug: { label: 'drugging', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'drugged' }] },
-    strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
+    strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', place: '$where' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
     injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }, { guard: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
     keep_key: { label: 'keeping a key to', requires: [], effects: [{ of: '$agent', key: '$thing' }] },
     take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
@@ -182,10 +183,11 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
             return;
         }
         // A rule about a role the action does not have (injuring with no door named) is left out.
-        if ([r.at, r.key, r.carrying, r.away].some((x) => typeof x === 'string' && x.startsWith('$') && R(x) == null)) return;
+        if ([r.at, r.key, r.carrying, r.away, r.place].some((x) => typeof x === 'string' && x.startsWith('$') && R(x) == null)) return;
         if (r.state) { if (!change) out.push({ ...base, attr: r.state, value: r.value, neg: !!r.neg }); }
         else if (r.key) out.push({ ...base, attr: 'carrying', value: `a key to ${String(nameOf(R(r.key))).replace(/^The /, 'the ')}`, key: R(r.key), time: during });
         else if (r.at) { if (base.of !== '?') out.push({ ...base, attr: 'location', value: R(r.at), at: R(r.at), time: during }); }
+        else if (r.place) out.push({ ...base, attr: 'location', value: R(r.place), place: R(r.place), time: during });
         else if (r.away) out.push({ ...base, attr: 'location', value: `away from ${String(nameOf(R(r.away))).replace(/^The /, 'the ')}`, away: R(r.away), time: during });
         else if (r.carrying) out.push({ ...base, attr: 'carrying', value: R(r.carrying), item: R(r.carrying), time: during });
         else out.push({ ...base, attr: r.attr, value: R(r.value), neg: !!r.neg, time: during });
@@ -285,6 +287,12 @@ export function requirementStatus(order, entries, req, ctx = {}) {
         }
         return p ? { status: 'against', entry: p } : { status: 'unknown' };
     }
+    if (req.place) {
+        // At the place of the deed then: where the timeline has it at that time (the horse in the hollow).
+        const p = placeAt(order, others, req.of, t, false, same, ctx.homes);
+        if (p && (ctx.places?.chain(p.value) ?? [p.value]).includes(req.place)) return { status: 'met', entry: p };
+        return { status: 'unknown', ...(p ? { entry: p } : {}) };
+    }
     if (req.away) {
         // Away from a place: where it is then, not within that place.
         const p = placeAt(order, others, req.of, t, !!req.time?.at, same, ctx.homes);
@@ -344,6 +352,7 @@ export function meets(eff, req, ctx = {}) {
     const same = eq(ctx);
     if (!same(eff.of, req.of)) return false;
     if (req.at) return eff.attr === 'location' && sideOf(ctx, req.at, eff.value) >= 0;
+    if (req.place) return eff.attr === 'location' && (ctx.places?.chain(eff.value) ?? [eff.value]).includes(req.place);
     if (req.away) return eff.attr === 'location' && !(ctx.places?.chain(eff.value) ?? [eff.value]).includes(req.away);
     if (req.key) return eff.attr === 'carrying' && (eff.key === req.key || /\bkey\b/.test(String(eff.value)));
     if (req.guard) return eff.attr === 'condition' && DISABLED.has(eff.value) && !eff.cond;
