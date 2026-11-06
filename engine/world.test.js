@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE, isRight, compatible } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -116,6 +116,21 @@ test("the player's marks: circled asserts, crossed out denies; two circles of on
     assert.deepEqual(clash([...assertions(w), ...ms]), ['q.who: horse or man'], 'the claim against the circled man; the two circles not');
     assert.deepEqual(clash([...assertions(w), ...markAssertions(w, { 'q.who': { horse: 'crossed' } })]), ['q.who: horse, asserted and denied'], 'crossed out against the claim');
     assert.deepEqual(markAssertions(w, marks, (q, pick) => pick !== 'man').map((x) => x.pick), ['horse', 'something else'], 'only what is shown');
+});
+
+test('other right answers (also_right): judged right, and no contradiction with the answer', () => {
+    const questions = [{ id: 'q.why', answer: 'noise', also_right: ['light'], possibilities: [{ value: 'noise' }, { value: 'light' }, { value: 'exercise' }, { value: 'something else' }] }];
+    const q = questions[0];
+    assert.deepEqual(['noise', 'light', 'exercise'].map((p) => isRight(q, p)), [true, true, false]);
+    assert.equal(compatible(q, 'noise', 'light'), true);
+    assert.equal(compatible(q, 'noise', 'exercise'), false);
+    const claim = { id: 's1', of: 'man', attr: 'says', value: 'x', time: { at: 't2' }, para: 2, quote: 'x', asserts: [{ q: 'q.why', pick: 'light' }] };
+    const w = world([claim], questions);
+    assert.equal(assertions(w).find((x) => x.kind === 'pick').truth, true, 'a claim of the other right answer is true');
+    const clash = (marks) => contradictions(w, [...assertions(w), ...markAssertions(w, marks)]).map((c) => c.why);
+    assert.deepEqual(clash({ 'q.why': { noise: 'circled' } }), [], 'the light and the noise can both hold');
+    assert.deepEqual(clash({ 'q.why': { exercise: 'circled' } }), ['q.why: light or exercise']);
+    assert.equal(markAssertions(w, { 'q.why': { light: 'circled' } })[0].truth, true, 'a circle on it is right');
 });
 
 test('who and where questions take any person or animal, or any place, beyond their listed possibilities', () => {

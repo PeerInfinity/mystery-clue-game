@@ -231,6 +231,14 @@ for (const q of questions) {
         if (!p) err(q.id, `answer "${q.answer}" is not a possibility`);
         else if (p.out != null) err(q.id, `the answer is ruled out at ¶${p.out}`);
     }
+    // Other right answers: possibilities just as true as the key's, not ruled out, and only with an answer.
+    for (const v of q.also_right ?? []) {
+        const p = ps.find((x) => x.value === v);
+        if (q.answer == null) err(q.id, 'also_right without an answer');
+        if (!p) err(q.id, `also_right "${v}" is not a possibility`);
+        else if (p.out != null) err(q.id, `also_right "${v}" is ruled out at ¶${p.out}`);
+        if (v === q.answer || v === 'something else') err(q.id, `also_right "${v}": not the answer, not "something else"`);
+    }
     if (q.answer != null) {
         if (!Number.isInteger(q.answer_given_at) || !q.answer_given_quote) err(q.id, 'an answer needs answer_given_at and its quote');
         else quoteIn(`${q.id} answer given`, q.answer_given_quote, q.answer_given_at);

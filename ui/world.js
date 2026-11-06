@@ -3,7 +3,7 @@
 // trusted as far as the player says (engine/world.js). Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds } from '../engine/world.js';
+import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
@@ -172,6 +172,8 @@ const qAnchor = (q) => {
 };
 const markLevel = (q, pick) => levelOf([hypothesisChain(q, pick)], state.trust);
 const pickText = (q, pick) => (entityById.has(pick) ? ent(pick) : esc(pick));
+/** The key's answer, with any other right answers (`also_right`): "noise, or light". */
+const answerText = (q) => [q.answer, ...(q.also_right ?? [])].map((p) => pickText(q, p)).join(', or ');
 
 const KIND_WORD = { money: 'money', message: 'a message', drug: 'a drug' };
 /** A typed action or an intention as a short phrase: who, doing what, to whom, with what. */
@@ -313,11 +315,11 @@ function hypPhrase(q, pick) {
 function questionRows(q, clashing, tag = 'li') {
     const sel = state.sel === `q:${q.id}` ? ' sel' : '';
     const crossed = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'crossed').map((p) => pickText(q, p.value));
-    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(q.label)} <span class="para">¶${q.raised ?? q.answer_given_at}</span>${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></span>` : ''}</${tag}>`;
+    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(q.label)} <span class="para">¶${q.raised ?? q.answer_given_at}</span>${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ¶${q.answer_given_at}: <b>${answerText(q)}</b></span>` : ''}</${tag}>`;
     const circles = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'circled').map((p) => {
         const lvl = markLevel(q, p.value);
         if (lvl < state.threshold && !state.showBelow) return '';
-        const cls = ['event', 'hyp', lvl < state.threshold ? 'below' : '', clashing.has(hypothesisKey(q.id, p.value)) ? 'clash' : '', givenAway(q) ? (p.value === q.answer ? 'right' : 'wrong') : ''].filter(Boolean).join(' ');
+        const cls = ['event', 'hyp', lvl < state.threshold ? 'below' : '', clashing.has(hypothesisKey(q.id, p.value)) ? 'clash' : '', givenAway(q) ? (isRight(q, p.value) ? 'right' : 'wrong') : ''].filter(Boolean).join(' ');
         const pp = q.possibilities.find((x) => x.value === p.value);
         const can = pp?.goal || pp?.need || q.presupposes || hypAction(hypothesisKey(q.id, p.value));
         return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span>${can ? ` ${REASON_MARK}` : ''}</${tag}>`;
@@ -1010,7 +1012,7 @@ function reasonedDetail(f) {
 const MARK_TITLE = { undefined: 'Uncertain: click to circle', circled: 'Circled: click to cross out', crossed: 'Crossed out: click to make uncertain again' };
 function chip(q, p) {
     const m = markOf(q, p.value);
-    const judged = givenAway(q) && m ? ((m === 'circled') === (p.value === q.answer) ? ' right' : ' wrong') : '';
+    const judged = givenAway(q) && m ? ((m === 'circled') === isRight(q, p.value) ? ' right' : ' wrong') : '';
     return `<button type="button" class="poss ${m ?? 'open'}${judged}" data-mark-q="${esc(q.id)}" data-mark-pick="${esc(p.value)}" title="${MARK_TITLE[m]}">${pickText(q, p.value)}</button>`;
 }
 // The questions whose "More" list is open (not saved).
@@ -1037,7 +1039,7 @@ function questionsPanel(clashing) {
     const qs = listedQuestions();
     if (!qs.length) return '';
     const items = qs.map((q) => `<li class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
-      ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b></div>` : ''}</li>`).join('');
+      ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b></div>` : ''}</li>`).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
 /** The typed actions on the timeline and those of the player's hypotheses (circled answers, presuppositions). */
@@ -1117,7 +1119,7 @@ function questionDetail(q, clashing) {
       ${q.own ? `<p class="small">Raised by your reasoning: <a class="link" data-fact="${esc(q.change)}">${phrase(reasonedById.get(q.change) ?? {})}</a></p>` : `<p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>`}
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}
-      ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${pickText(q, q.answer)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>${keyStrainsHtml(q)}` : ''}
+      ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>${keyStrainsHtml(q)}` : ''}
       ${marked.length ? `<h3>Your marks, from Watson’s hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${actionMovesHtml(q)}${aimPlansHtml(q)}`;
 }
 
@@ -1204,9 +1206,9 @@ function renderAnswers() {
     el.hidden = !answerNews.length;
     if (!answerNews.length) return;
     const line = ({ q, picks }) => {
-        const right = picks.length === 1 && picks[0] === q.answer;
+        const right = picks.length === 1 && isRight(q, picks[0]);
         const yours = picks.length ? picks.map((v) => pickText(q, v)).join(', ') : 'nothing';
-        return `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a>: <b>${pickText(q, q.answer)}</b> <span class="small ${right ? 'good' : 'bad'}">(you circled ${yours}${right ? ': right' : ''})</span></li>`;
+        return `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a>: <b>${answerText(q)}</b> <span class="small ${right ? 'good' : 'bad'}">(you circled ${yours}${right ? ': right' : ''})</span></li>`;
     };
     el.innerHTML = `<p><b>The story has answered:</b></p><ul>${answerNews.map(line).join('')}</ul><p><button type="button" class="quiet" data-answers-close>Dismiss</button></p>`;
 }

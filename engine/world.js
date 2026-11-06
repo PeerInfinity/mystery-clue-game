@@ -141,9 +141,9 @@ export function overlaps(order, a, b) {
 export function assertions(data) {
     const qById = new Map(data.questions.map((q) => [q.id, q]));
     const pickTruth = (q, pick, neg) => {
-        const answer = qById.get(q)?.answer;
-        if (answer == null) return null;
-        return (pick === answer) !== !!neg;
+        const qq = qById.get(q);
+        if (qq?.answer == null) return null;
+        return isRight(qq, pick) !== !!neg;
     };
     const out = [];
     for (const f of data.facts) {
@@ -176,7 +176,7 @@ export function markAssertions(data, marks = {}, shown = null) {
             if (mark !== 'circled' && mark !== 'crossed') continue;
             if (!isOption(q, pick, kindOf) || (shown && !shown(q, pick))) continue;
             const neg = mark === 'crossed';
-            out.push({ id: hypothesisKey(qid, pick), fact: null, kind: 'pick', q: qid, pick, neg, mark, by: HYPOTHESIS, truth: q.answer == null ? null : (pick === q.answer) !== neg });
+            out.push({ id: hypothesisKey(qid, pick), fact: null, kind: 'pick', q: qid, pick, neg, mark, by: HYPOTHESIS, truth: q.answer == null ? null : isRight(q, pick) !== neg });
         }
     }
     return out;
@@ -238,11 +238,13 @@ export function contradictions(data, accepted = null) {
     const out = [];
 
     const byQ = new Map();
+    const qById = new Map((data.questions ?? []).map((q) => [q.id, q]));
     for (const x of all) if (x.kind === 'pick') byQ.set(x.q, [...(byQ.get(x.q) ?? []), x]);
     for (const [q, xs] of byQ) for (let i = 0; i < xs.length; i++) for (let j = i + 1; j < xs.length; j++) {
         const a = xs[i], b = xs[j];
         if (a.fact != null && a.fact === b.fact) continue;
         if (a.mark === 'circled' && b.mark === 'circled') continue;
+        if (compatible(qById.get(q), a.pick, b.pick)) continue;
         if (!a.neg && !b.neg && a.pick !== b.pick) out.push({ a, b, why: `${q}: ${a.pick} or ${b.pick}` });
         else if (a.neg !== b.neg && a.pick === b.pick) out.push({ a, b, why: `${q}: ${a.pick}, asserted and denied` });
     }
@@ -292,6 +294,14 @@ export function contradictions(data, accepted = null) {
 }
 
 /** Where the story states a fact: `given_at`, else its paragraph; an inferable fact only by `given_at` (else null). */
+/**
+ * The answers that are right: the key's `answer`, and `also_right`, other possibilities that are just as true (the
+ * light as well as the noise; the bets as well as the debts). Right answers do not exclude each other.
+ */
+export const isRight = (q, pick) => q?.answer != null && (pick === q.answer || (q.also_right ?? []).includes(pick));
+/** Two possibilities of one question that can both hold: both right by the key. */
+export const compatible = (q, a, b) => a !== b && isRight(q, a) && isRight(q, b);
+
 export const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
 
 /** Trust levels, lowest first. `certain` is Watson's own observation, fixed; every other link starts `uncertain`. */

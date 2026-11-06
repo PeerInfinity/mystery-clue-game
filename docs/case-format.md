@@ -511,6 +511,10 @@ order, assertions and contradictions, below); no page uses it yet. `npm run vali
   - Every question has exactly one `something else` (`via: always`), available from the paragraph it is raised.
   - `answer` is always one of the possibilities (null where the story never settles it), even when it is
     available only late: what Straker meant at one in the morning is available indirectly at ¶46 and named at ¶57.
+  - `also_right`: other possibilities just as true as `answer` (`q.why_out`: the light as well as the noise;
+    `q.motive`: laying against his own horse as well as the debts). They are judged right at the give-away, a
+    claim or circle of one is true, and they do not contradict the answer or each other (`isRight`, `compatible` in
+    `engine/world.js`). Where several answers are valid, the game accepts any of them (the user's ruling).
   - The answer's two dates: `answer_given_at` and `answer_given_quote`, where the story gives it away (often in
     Holmes's explanation, ¶212–229), and `answer_inferable_at`, the earliest paragraph a reader can reach it, with
     `answer_from` (a fact, or the careful reader's thought from the audit in `docs/reading-annotated.md`) and
@@ -622,7 +626,9 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's
-  and both sides are on the timeline; all a question's pairs show at its give-away. The validator checks the sides,
+  and both sides are on the timeline; all a question's pairs show at its give-away. A pair between two story facts would
+  show only at the give-away, so where one side is a reading of a question it is written as that question's
+  possibility (the police's repeated blows: the stick on `q.weapon`, against the single blow). The validator checks the sides,
   that `available` is no earlier than both, and the key.
 - Who made a change from (a) is the player's hypothesis: the story's question when the change is its entry, otherwise
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or

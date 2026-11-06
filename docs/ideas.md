@@ -350,6 +350,19 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   fight against the laid coat). Not in the data because already caught: the poisoner who asks a witness to pass the
   poison (the paper's link lapses), Simpson's admission and Mrs Straker's dress (certain contradictions with
   their claims). An amber entry can be set aside ("I hold both", undoable).
+- **The logic audit (2026-11-05):** `docs/logic-audit.md` measured, for the 26 gated questions, which links of the
+  careful reader's chain the page supports: 8 by reasoning, 3 only told early, 7 partial, 8 missing; the largest gap
+  the night at the stable (one culprit, the key, the dog, the alarm). The user agreed to its recommendations (a
+  guard rule for the stable, data for the judgement questions) and ruled: **where several answers are valid, the game
+  accepts any of them**. Order left to the session: the audit's.
+- **Built (2026-11-05), the audit's step 1 (small data and likely clashes):** `also_right` on a question (the light as
+  well as the noise for "why take the horse out?"; laying against his own horse as well as the debts for the motive):
+  right at the give-away, never contradicting the answer. Six likely clashes, each shown on the player's circle: the
+  stick as weapon against the single blow (s.blows, moved off two story facts so it shows in play), a message in the
+  paper against "you won't be a loser", "to see that all was well" against the lads sleeping till morning, Simpson as
+  the striker against his having no wound, Derbyshire as a friend against the bill in Straker's pocket, the bay as
+  another Ross horse against Bayard scratched. The police's suspicion (¶39) asserts that the stranger is Simpson, so
+  a wrong circle meets a contradiction there.
 
 ### An incremental game about trying every combination
 

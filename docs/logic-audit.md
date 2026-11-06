@@ -8,6 +8,14 @@ reasoning before distracting data is added. This audit follows, for each gated q
 uses (`answer_from` and its `from` chain in `cases/silver-blaze/thoughts.json` / `docs/reading-annotated.md`, plus
 the question's possibilities and their `from`/`out`/`by`), and marks each link against what the page has now.
 
+## Progress
+
+- **Step 1 built (2026-11-05):** `also_right` (any valid answer is accepted: q.why_out's light, q.motive's bets) and
+  the six likely clashes and the ¶39 assertion below. With them stranger_identity is told at ¶39; paper_contents,
+  weapon (the stick), derbyshire and bay have a likely clash against their wrong answer; straker_aim has one against
+  "to see that all was well" from ¶34; who_killed one against Simpson from ¶41. The table below is the measurement
+  before any of it.
+
 ## Summary
 
 The gate holds **26 questions** (`GATED` in `ui/world.js`: an answer, raised, not latent, `answer_inferable_at` before
