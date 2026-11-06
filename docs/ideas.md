@@ -439,7 +439,7 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   caption says each move in plain words with the reader's `why` (a wrong answer circled reads "Trying"); what a move
   shows (`see`) is highlighted for a moment, its tab chosen first in tabbed layouts. It plays in the viewer's layout,
   choosing tabs as a player would; on a phone the header moves below the strip. It starts paused, so a speed can be
-  chosen first. About 8–10 minutes at 1×. `scripts/world-autoplay-check.mjs` plays it with no pauses in each layout.
+  chosen first. About a quarter of an hour at 1× (two seconds a paragraph, about five a move). `scripts/world-autoplay-check.mjs` plays it with no pauses in each layout.
 
 ### An incremental game about trying every combination
 
