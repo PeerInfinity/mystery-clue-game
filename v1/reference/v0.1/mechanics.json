@@ -1,0 +1,40 @@
+{
+  "description": "Connection rules for the clue graph: which node kinds may fill which premise role of an inference, and which kinds a relation may join. A first proposal, meant to become the game's edge-type rules (a clue's type decides what it can connect to). Enforced by scripts/validate_case.py.",
+  "version": "0.1",
+
+  "node_kinds": {
+    "physical":    { "group": "evidence",  "card": "An object or body: something you can pick up or look at." },
+    "trace":       { "group": "evidence",  "card": "A mark left behind: tracks, prints, mud, stains." },
+    "document":    { "group": "evidence",  "card": "Something written: a bill, a betting book, a lab report." },
+    "testimony":   { "group": "evidence",  "card": "What someone says. Carries a speaker and a reliability." },
+    "observation": { "group": "evidence",  "card": "What the investigator notices first-hand: weather, a reaction, a state of affairs." },
+    "absence":     { "group": "evidence",  "card": "Something that did NOT happen or is NOT there. The dog that did nothing." },
+    "background":  { "group": "knowledge", "card": "General knowledge about how the world works. Never about this case; used as a rule." },
+    "inference":   { "group": "reasoning", "card": "A conclusion drawn from other nodes. Exists only as the conclusion of an inference." },
+    "hypothesis":  { "group": "reasoning", "card": "A theory someone holds. May be false. Can be supported, refuted, or tested." }
+  },
+
+  "premise_roles": {
+    "fact":       { "kinds": ["physical", "trace", "document", "testimony", "observation", "absence", "inference"], "card": "Something taken as true about the case." },
+    "rule":       { "kinds": ["background"], "card": "A general truth the step applies." },
+    "assumption": { "kinds": ["hypothesis"], "card": "A theory adopted for the sake of the step (a working hypothesis)." }
+  },
+
+  "conclusion_kinds": ["inference", "hypothesis"],
+
+  "relation_types": {
+    "supports":        { "from": ["evidence", "reasoning"], "to": ["hypothesis"] },
+    "refutes":         { "from": ["evidence", "reasoning"], "to": ["hypothesis", "inference"] },
+    "corroborates":    { "from": ["evidence", "reasoning"], "to": ["evidence", "reasoning"] },
+    "contradicts":     { "from": ["evidence", "reasoning"], "to": ["evidence", "reasoning"] },
+    "explains":        { "from": ["reasoning"],             "to": ["evidence"] },
+    "misleads_toward": { "from": ["evidence"],              "to": ["hypothesis"] }
+  },
+
+  "pattern_hints": {
+    "elimination":          "Usually has an absence premise, or concludes 'not X' / 'therefore the remaining option'.",
+    "identification":       "Needs at least two fact premises that describe the same thing from different sides.",
+    "prediction_confirmed": "Has an assumption (the hypothesis) plus the fact that was found because it was looked for.",
+    "abduction":            "The conclusion explains its premises; strength is rarely 'certain'."
+  }
+}

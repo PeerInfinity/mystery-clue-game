@@ -1,0 +1,885 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mystery-case.schema.json",
+  "title": "Mystery case (clue-graph extraction)",
+  "description": "One detective story, extracted as: the world (entities, places), two timelines (what really happened = events; how it was found out = actions), the clue graph (nodes + inference hyperedges + pairwise relations), the questions the case answers, and text anchors back into the story. Draft v0.1 -- the format is still under design; see ../README.md. Rules a JSON Schema cannot state (cross references, which node kinds may fill which premise role, acyclicity, quote lookup, fair-play report) are checked by ../scripts/validate_case.py, using ./mechanics.json.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "case",
+    "time_model",
+    "entities",
+    "scenes",
+    "events",
+    "nodes",
+    "inferences",
+    "actions",
+    "questions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1"
+    },
+    "case": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "author",
+        "source",
+        "protagonists",
+        "summary",
+        "solution_summary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "text_file"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "text_file": {
+              "type": "string",
+              "description": "Path (relative to the experiment root) of the plain-text story the quotes are checked against."
+            },
+            "gutenberg_id": {
+              "type": "integer"
+            },
+            "collection": {
+              "type": "string"
+            },
+            "first_published": {
+              "type": "integer"
+            },
+            "word_count": {
+              "type": "integer"
+            },
+            "public_domain": {
+              "type": "string"
+            }
+          }
+        },
+        "setting": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "region": {
+              "type": "string"
+            },
+            "period": {
+              "type": "string"
+            }
+          }
+        },
+        "protagonists": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "minItems": 1,
+          "description": "Entity ids of the investigating party. Actions by these entities form the playable investigation."
+        },
+        "narrator": {
+          "$ref": "#/$defs/ref"
+        },
+        "challenge_scene": {
+          "$ref": "#/$defs/ref",
+          "description": "The last scene before the solution is explained. Used by the fair-play report: a premise the reader first meets after this scene was not available to a reader solving along."
+        },
+        "summary": {
+          "type": "string",
+          "description": "The setup, as the reader meets it. No spoilers."
+        },
+        "solution_summary": {
+          "type": "string"
+        },
+        "starting_items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "description": "Entities the protagonists carry from the start (Watson's field-glass)."
+        }
+      }
+    },
+    "time_model": {
+      "type": "object",
+      "required": [
+        "day_zero",
+        "days"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "day_zero": {
+          "type": "string",
+          "description": "What day 0 is. Every `when.day` counts from it."
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "day",
+              "label"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "day": {
+                "type": "integer"
+              },
+              "weekday": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "name"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "animal",
+              "group",
+              "object",
+              "document",
+              "place"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "detective",
+                "narrator",
+                "assistant",
+                "client",
+                "official",
+                "victim",
+                "culprit",
+                "accomplice",
+                "suspect",
+                "witness",
+                "red_herring",
+                "informant",
+                "bystander",
+                "weapon",
+                "stolen_object",
+                "evidence",
+                "tool",
+                "crime_scene",
+                "location"
+              ]
+            }
+          },
+          "located_at": {
+            "$ref": "#/$defs/ref",
+            "description": "For a place: the place that contains it. For an object: where it starts."
+          },
+          "description": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string",
+            "description": "What this entity hides, as revealed by the solution."
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "description": "Discourse order: the order the reader meets things in. `order` is the scene's position in the text.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "order",
+          "title",
+          "when",
+          "location",
+          "summary"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "order": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "when": {
+            "$ref": "#/$defs/when"
+          },
+          "location": {
+            "$ref": "#/$defs/ref"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/source",
+            "description": "First quote = where the scene starts."
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "description": "The fabula: what really happened, in true chronological order (`fabula_order`). Includes events nobody saw, which the solution reconstructs.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "fabula_order",
+          "when",
+          "summary",
+          "participants",
+          "basis"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "fabula_order": {
+            "type": "integer"
+          },
+          "when": {
+            "$ref": "#/$defs/when"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ref"
+            }
+          },
+          "location": {
+            "$ref": "#/$defs/ref"
+          },
+          "category": {
+            "enum": [
+              "backstory",
+              "crime",
+              "cover_up",
+              "discovery",
+              "investigation",
+              "resolution",
+              "background"
+            ]
+          },
+          "basis": {
+            "enum": [
+              "narrated",
+              "testified",
+              "reconstructed",
+              "implied"
+            ],
+            "description": "How the story establishes it: narrated on the page, told by a witness, reconstructed by the detective in the solution, or only implied."
+          },
+          "first_told_in": {
+            "$ref": "#/$defs/ref",
+            "description": "Scene where the reader first learns this happened."
+          },
+          "truth_revealed_in": {
+            "$ref": "#/$defs/ref",
+            "description": "Scene where the reader learns its true nature, when that is later than first_told_in."
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "description": "The clue graph's nodes. Evidence kinds are collected; reasoning kinds (inference, hypothesis) are produced by inferences. See mechanics.json for what each kind may connect to.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "statement",
+          "truth",
+          "relevance",
+          "reader_learns_in"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "kind": {
+            "enum": [
+              "physical",
+              "trace",
+              "document",
+              "testimony",
+              "observation",
+              "absence",
+              "background",
+              "inference",
+              "hypothesis"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "Short name for a card / graph node."
+          },
+          "statement": {
+            "type": "string",
+            "description": "The clue, phrased as a proposition."
+          },
+          "truth": {
+            "enum": [
+              "true",
+              "false",
+              "partly_true",
+              "unverified"
+            ]
+          },
+          "relevance": {
+            "enum": [
+              "key",
+              "supporting",
+              "red_herring",
+              "flavour"
+            ],
+            "description": "key = on the path to an answer; supporting = corroborates; red_herring = points at a false answer; flavour = colour only."
+          },
+          "about_events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ref"
+            },
+            "description": "The fabula events this clue is evidence of."
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ref"
+            }
+          },
+          "testimony": {
+            "type": "object",
+            "description": "For kind=testimony: who said it, and how far to trust them.",
+            "required": [
+              "speaker",
+              "reliability"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "speaker": {
+                "$ref": "#/$defs/ref"
+              },
+              "reported_by": {
+                "$ref": "#/$defs/ref",
+                "description": "When the reader gets it second-hand."
+              },
+              "reliability": {
+                "enum": [
+                  "reliable",
+                  "honest_but_mistaken",
+                  "self_interested",
+                  "lying",
+                  "unknown"
+                ]
+              }
+            }
+          },
+          "discovery": {
+            "type": "object",
+            "description": "In-world: who first found it, and how the protagonists came to have it.",
+            "additionalProperties": false,
+            "properties": {
+              "first_by_action": {
+                "$ref": "#/$defs/ref"
+              },
+              "protagonists_by_action": {
+                "$ref": "#/$defs/ref",
+                "description": "The action that puts this clue in the protagonists' hands. Omitted for background knowledge they already have."
+              },
+              "known_to_protagonists_from_start": {
+                "type": "boolean"
+              }
+            }
+          },
+          "reader_learns_in": {
+            "$ref": "#/$defs/ref",
+            "description": "Scene where the reader first meets this clue."
+          },
+          "significance_explained_in": {
+            "$ref": "#/$defs/ref",
+            "description": "Scene where its meaning is spelled out."
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "inferences": {
+      "type": "array",
+      "description": "Hyperedges of the clue graph: premises -> one conclusion node. Each premise fills a role (fact / rule / assumption); mechanics.json says which node kinds may fill which role. Like a MetaMath step: the conclusion's `ports` are its premises.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "conclusion",
+          "premises",
+          "pattern",
+          "strength"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "conclusion": {
+            "$ref": "#/$defs/ref"
+          },
+          "premises": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "node",
+                "role"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "node": {
+                  "$ref": "#/$defs/ref"
+                },
+                "role": {
+                  "enum": [
+                    "fact",
+                    "rule",
+                    "assumption"
+                  ]
+                },
+                "note": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "pattern": {
+            "enum": [
+              "deduction",
+              "elimination",
+              "abduction",
+              "identification",
+              "corroboration",
+              "prediction_confirmed"
+            ],
+            "description": "deduction: follows necessarily. elimination: rules an option out, or picks the one left. abduction: best explanation. identification: two things are the same. corroboration: independent evidence agrees. prediction_confirmed: a hypothesis predicted something, then it was found."
+          },
+          "strength": {
+            "enum": [
+              "certain",
+              "probable",
+              "speculative"
+            ]
+          },
+          "reasoner": {
+            "$ref": "#/$defs/ref"
+          },
+          "explained_in": {
+            "$ref": "#/$defs/ref",
+            "description": "Scene where the reasoning is spelled out to the reader."
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "description": "Pairwise, non-derivational links between nodes (a clue counts for or against a theory, two testimonies agree, ...).",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "from",
+          "to"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": [
+              "supports",
+              "refutes",
+              "corroborates",
+              "contradicts",
+              "explains",
+              "misleads_toward"
+            ]
+          },
+          "from": {
+            "$ref": "#/$defs/ref"
+          },
+          "to": {
+            "$ref": "#/$defs/ref"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "description": "The investigation: things characters did that produced clues (or conclusions). `order` is the in-world order of the investigation. requires/yields form the action dependency graph, and link it to the clue graph.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "order",
+          "actor",
+          "verb",
+          "summary",
+          "when",
+          "requires",
+          "yields"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "order": {
+            "type": "integer"
+          },
+          "actor": {
+            "$ref": "#/$defs/ref"
+          },
+          "with": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ref"
+            }
+          },
+          "verb": {
+            "enum": [
+              "read",
+              "travel",
+              "examine",
+              "search",
+              "question",
+              "trick",
+              "send_message",
+              "follow_tracks",
+              "confront",
+              "reason",
+              "obtain_item",
+              "arrange",
+              "reveal",
+              "test",
+              "observe",
+              "arrest",
+              "report"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "when": {
+            "$ref": "#/$defs/when"
+          },
+          "location": {
+            "$ref": "#/$defs/ref"
+          },
+          "target": {
+            "$ref": "#/$defs/ref",
+            "description": "Entity acted on (the person questioned, the object examined)."
+          },
+          "during_scene": {
+            "$ref": "#/$defs/ref",
+            "description": "The scene the action takes place in, if it is inside one."
+          },
+          "narrated_in": {
+            "$ref": "#/$defs/ref",
+            "description": "Scene where the reader learns the action happened -- later than during_scene when the detective keeps it back."
+          },
+          "offstage": {
+            "type": "boolean",
+            "description": "The text says it happened but does not show it."
+          },
+          "requires": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "nodes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ref"
+                },
+                "description": "Clues or conclusions that motivate or enable the action."
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ref"
+                }
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ref"
+                },
+                "description": "Entities the actor must be carrying."
+              },
+              "access": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ref"
+                },
+                "description": "Places or people the actor must be able to reach."
+              }
+            }
+          },
+          "yields": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "nodes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ref"
+                }
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ref"
+                }
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ref"
+                },
+                "description": "Fabula events the action causes (an arrest, a deal)."
+              },
+              "unknown": {
+                "type": "string",
+                "description": "The action yields something the text never states."
+              }
+            }
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "description": "What the case asks. A game's win conditions.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "answer",
+          "answered_by"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "text": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "answered_by": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ref"
+            },
+            "minItems": 1,
+            "description": "Node(s) whose truth settles the question."
+          },
+          "false_answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "answer"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "answer": {
+                  "type": "string"
+                },
+                "held_by": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ref"
+                  }
+                },
+                "node": {
+                  "$ref": "#/$defs/ref"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "inconsistencies": {
+      "type": "array",
+      "description": "Places where the text contradicts itself. Recorded, not fixed.",
+      "items": {
+        "type": "object",
+        "required": [
+          "summary",
+          "source"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "resolution_used": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.]*$"
+    },
+    "ref": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.]*$"
+    },
+    "source": {
+      "type": "array",
+      "description": "Verbatim quotes from the story text. Whitespace and curly/straight quotes are normalised when matching; the validator reports each quote's line number.",
+      "items": {
+        "type": "string",
+        "minLength": 8
+      }
+    },
+    "when": {
+      "type": "object",
+      "required": [
+        "precision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Days after day 0 (time_model.day_zero). Negative = before."
+        },
+        "clock": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "precision": {
+          "enum": [
+            "exact",
+            "approximate",
+            "day",
+            "range",
+            "before_story",
+            "unknown"
+          ]
+        },
+        "latest_day": {
+          "type": "integer",
+          "description": "For precision=range: the last day it could be."
+        },
+        "text": {
+          "type": "string",
+          "description": "How the story words the time."
+        }
+      }
+    }
+  }
+}
