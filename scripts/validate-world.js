@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Validate the world model as data (<case>/world/: entities, times, facts, accounts, questions) and print its counts.
+// Validate the world model as data (<case>/world/: the case header, entities, mentions, times, facts, accounts,
+// questions, strains) and print its counts. A case is its story text and these files; nothing else is read.
 //
 //   node scripts/validate-world.js cases/silver-blaze [--quiet]
 //
@@ -7,15 +8,15 @@
 // underscore) names an entity (the case's or the world's own); every time reference names a time point and `after`
 // has no cycle; every quote is found in its paragraph; a stated or implied fact has a quote; an inferable fact names
 // facts that exist and are told no later than its `inferable_at`; an `observes` value names facts; `q`/`pick` name
-// a question and one of its possibilities; `old` names a claim, event, slot or question of the old game; a
-// `member_of` value is a group. Provenance: a `tells` fact passes accounts that exist; accounts' parts and facts
+// a question and one of its possibilities; a `member_of` value is a group; `reasoning` (a reader's step not
+// modelled as facts: {para, text}) is dated no later than what it supports. Provenance: a `tells` fact passes accounts that exist; accounts' parts and facts
 // exist and no bundle contains itself; every told fact is in an account and a chain of tellings carries it to
-// Watson (scripts/world-provenance.js). Questions: `from`/`by` name facts (or a reader's thought, "thought t<id>")
+// Watson (scripts/world-provenance.js). Questions: `from` names a fact (or `reasoning` gives the step)
 // told no later than the possibility is available (or a `quote` in that paragraph names it); exactly one
 // "something else", available from where the question is raised; the answer is one of the possibilities (or null).
 // Dates: `given_at` (with `given_quote` in that paragraph) and `inferable_at` (with `from`, each premise inferable
 // no later) agree, the inferable date no later than the given one; an answer has its give-away (paragraph and quote)
-// and its earliest inferable paragraph (null: only the give-away), its `answer_from` no later.
+// and its earliest inferable paragraph (null: only the give-away), its `answer_from` (or `answer_reasoning`) no later.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,19 +30,12 @@ const quiet = process.argv.includes('--quiet');
 if (!dir) { console.error('usage: validate-world.js <case dir> [--quiet]'); process.exit(2); }
 const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
 
-const caseData = read('case.json');
-const story = fs.readFileSync(path.join(dir, caseData.case.source.text_file), 'utf8')
+const caseData = read('world/case.json');
+const story = fs.readFileSync(path.join(dir, 'world', caseData.story), 'utf8')
     .split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean).map(normalize);
-const allEntities = [...read('entities.json').entities, ...read('world/entities.json').entities];
+const allEntities = read('world/entities.json').entities;
 const entities = new Set(allEntities.map((e) => e.id));
 const groups = new Set(allEntities.filter((e) => e.kind === 'group').map((e) => e.id));
-const oldIds = new Set([
-    ...read('claims.json').claims.map((c) => c.id), ...read('events.json').events.map((e) => e.id),
-    ...read('slots.json').slots.map((s) => s.id), ...caseData.questions.map((q) => q.id),
-]);
-for (const e of read('events.json').events) for (const f of Object.keys(e.facets ?? {})) oldIds.add(`${e.id}.${f}`);
-for (const e of read('entities.json').entities) for (const f of Object.keys(e.facets ?? {})) oldIds.add(`${e.id}.${f}`);
-const thoughts = new Set((read('thoughts.json').thoughts ?? []).map((t) => t.id));
 const times = read('world/times.json').times;
 const facts = read('world/facts.json').facts;
 const questions = read('world/questions.json').questions;
@@ -68,6 +62,8 @@ for (const x of [...times, ...facts, ...questions, ...accounts]) {
     seen.add(x.id);
 }
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+// A reader's step the facts do not model, in words, with the paragraph a reader could take it: {para, text}.
+const reasoningBad = (r, by) => (!Number.isInteger(r?.para) || !r.text ? 'is {para, text}' : by != null && r.para > by ? `¶${r.para} is after ¶${by}` : null);
 const quoteIn = (id, quote, para) => {
     if (!Number.isInteger(para) || !story[para]) return err(id, `no paragraph ${para}`);
     if (!story[para].includes(normalize(quote))) err(id, `quote not in ¶${para}: "${quote.slice(0, 60)}"`);
@@ -125,14 +121,11 @@ for (const f of facts) {
     // The two dates: given (where the story states it) and inferable (the earliest it follows from what came before).
     if (f.given_quote) quoteIn(`${f.id} given`, f.given_quote, f.given_at);
     else if (f.given_at != null && f.given_at !== f.para) err(f.id, 'given_at without given_quote');
-    if (basis === 'inferable' && !list(f.from).length) err(f.id, 'inferable without from');
-    if ((list(f.from).length > 0) !== Number.isInteger(f.inferable_at)) err(f.id, 'from and inferable_at go together');
+    const premises = list(f.from).length + list(f.reasoning).length;
+    if (basis === 'inferable' && !premises) err(f.id, 'inferable without from or reasoning');
+    if ((premises > 0) !== Number.isInteger(f.inferable_at)) err(f.id, 'from (or reasoning) and inferable_at go together');
+    for (const r of list(f.reasoning)) if (reasoningBad(r, f.inferable_at)) err(f.id, `reasoning: ${reasoningBad(r, f.inferable_at)}`);
     for (const p of list(f.from)) {
-        if (p.startsWith('thought ')) {
-            if (!thoughts.has(p.slice(8))) err(f.id, `from: no ${p}`);
-            else if (Number(p.slice(9).split('.')[0]) > f.inferable_at) err(f.id, `from: ${p} is after inferable_at ¶${f.inferable_at}`);
-            continue;
-        }
         const pf = factById.get(p);
         if (!pf) err(f.id, `from: no fact ${p}`);
         else if (earliest(pf) > f.inferable_at) err(f.id, `from: ${p} is not inferable before ¶${earliest(pf)}, after inferable_at ¶${f.inferable_at}`);
@@ -171,7 +164,6 @@ for (const f of facts) {
     if (f.claim && f.word) err(f.id, 'claim or word, not both');
     if ('neg' in f && f.neg !== true) err(f.id, 'neg is true or absent');
     if (f.attr === 'location' && f.value != null && typeof f.value === 'string' && !entities.has(f.value)) err(f.id, `location: no entity ${f.value} (put the rest in detail)`);
-    for (const o of list(f.old)) if (!oldIds.has(o)) err(f.id, `old: no ${o}`);
     if (f.q) {
         const q = qById.get(f.q);
         if (!q) err(f.id, `q: no question ${f.q}`);
@@ -199,7 +191,6 @@ for (const f of facts) {
 
 // Questions.
 const VIAS = new Set(['direct', 'indirect', 'always']);
-const refOk = (r) => factById.has(r) || (/^thought /.test(r) && thoughts.has(r.slice(8)));
 for (const q of questions) {
     if (q.entry?.of && q.entry.of !== '?' && !entities.has(q.entry.of)) err(q.id, `entry.of: no entity ${q.entry.of}`);
     for (const t of [q.entry?.time, q.entry?.time?.from, q.entry?.time?.to]) if (typeof t === 'string' && t.startsWith('t.') && !timeIds.has(t)) err(q.id, `entry.time: no time ${t}`);
@@ -228,11 +219,11 @@ for (const q of questions) {
         for (const n of list(p.need)) if (!ACTIONS[n.act] || !n.rule?.of || (n.rule.away != null && !entities.has(n.rule.away)) || (n.rule.carrying != null && !n.rule.carrying.startsWith('$') && !entities.has(n.rule.carrying))) err(q.id, `${p.value}: need is {act, rule}, or a list of them`);
         if (p.via !== 'always') {
             if (!Number.isInteger(p.available)) err(q.id, `${p.value}: no available paragraph`);
-            if (!p.from && !p.quote) err(q.id, `${p.value}: needs from (a fact or thought) or a quote`);
+            if (!p.from && !p.reasoning && !p.quote) err(q.id, `${p.value}: needs from (a fact), reasoning or a quote`);
         }
-        if (p.from && !refOk(p.from)) err(q.id, `${p.value}: from: no fact or thought ${p.from}`);
+        if (p.from && !factById.has(p.from)) err(q.id, `${p.value}: from: no fact ${p.from}`);
+        if (p.reasoning && reasoningBad(p.reasoning, p.available)) err(q.id, `${p.value}: reasoning: ${reasoningBad(p.reasoning, p.available)}`);
         if (p.from && factById.has(p.from) && earliest(factById.get(p.from)) > p.available) err(q.id, `${p.value}: available ¶${p.available} before its fact ${p.from} (¶${earliest(factById.get(p.from))})`);
-        if (p.from?.startsWith('thought ') && Number(p.from.slice(9).split('.')[0]) > p.available) err(q.id, `${p.value}: available ¶${p.available} before its ${p.from}`);
         if (p.quote) quoteIn(`${q.id} ${p.value}`, p.quote, p.available);
         if (p.by && !factById.has(p.by)) err(q.id, `${p.value}: by: no fact ${p.by}`);
         if (p.out != null && p.out < p.available) err(q.id, `${p.value}: out ¶${p.out} before available ¶${p.available}`);
@@ -258,13 +249,12 @@ for (const q of questions) {
         const ia = q.answer_inferable_at;
         if (ia != null) {
             if (ia > q.answer_given_at) err(q.id, `answer inferable ¶${ia} after given ¶${q.answer_given_at}`);
-            if (!q.answer_from || !refOk(q.answer_from)) err(q.id, `answer_from: no fact or thought ${q.answer_from}`);
-            else if (factById.has(q.answer_from) && earliest(factById.get(q.answer_from)) > ia) err(q.id, `answer_from ${q.answer_from} is later than ¶${ia}`);
-            else if (q.answer_from.startsWith('thought ') && Number(q.answer_from.slice(9).split('.')[0]) > ia) err(q.id, `answer_from ${q.answer_from} is later than ¶${ia}`);
+            if (q.answer_reasoning) { if (reasoningBad(q.answer_reasoning, ia)) err(q.id, `answer_reasoning: ${reasoningBad(q.answer_reasoning, ia)}`); }
+            else if (!q.answer_from || !factById.has(q.answer_from)) err(q.id, `answer_from: no fact ${q.answer_from} (or give answer_reasoning)`);
+            else if (earliest(factById.get(q.answer_from)) > ia) err(q.id, `answer_from ${q.answer_from} is later than ¶${ia}`);
         }
         if (q.answer_strength && !STRENGTHS.has(q.answer_strength)) err(q.id, `answer_strength ${q.answer_strength}`);
     }
-    if (q.old && !oldIds.has(q.old)) err(q.id, `old: no ${q.old}`);
 }
 
 // Moving places, and the true story is consistent: no contradiction among the assertions the answer key holds true.
@@ -280,7 +270,7 @@ for (const f of facts) if (f.attr === 'believes' && !f.modal && list(f.asserts).
 for (const c of contradictions(world, asserted.filter((x) => x.truth === true))) err(`${c.a.id} / ${c.b.id}`, `true assertions contradict: ${c.why}`);
 
 // Likely clashes: each side a fact, or a possibility of a question; shown no earlier than both sides can be; a key
-// question with an answer; from a thought, a fact or a question.
+// question with an answer; `from` (optional) a fact or a question.
 const strainsFile = path.join(dir, 'world', 'strains.json');
 const strains = fs.existsSync(strainsFile) ? read('world/strains.json').strains : [];
 for (const s of strains) {
@@ -294,7 +284,7 @@ for (const s of strains) {
     if (!s.why) err(s.id, 'a strain needs why');
     if (!Number.isInteger(s.available) || s.available < at) err(s.id, `available ¶${s.available} before both sides (¶${at})`);
     if (!qById.get(s.key)?.answer) err(s.id, `key: ${s.key} is not a question with an answer`);
-    if (!s.from || !(refOk(s.from) || qById.has(String(s.from).split(' ')[0]))) err(s.id, `from: ${s.from}`);
+    if (s.from && !(factById.has(s.from) || qById.has(String(s.from).split(' ')[0]))) err(s.id, `from: ${s.from}`);
 }
 
 for (const e of errors) console.log(e);

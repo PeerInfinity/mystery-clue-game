@@ -5,7 +5,8 @@
 
 The aim, the user's: every gated answer of Watson's timeline (`index.html`, formerly `world.html`) should be reachable by the player's own
 reasoning before distracting data is added. This audit follows, for each gated question, the chain a careful reader
-uses (`answer_from` and its `from` chain in `cases/silver-blaze/thoughts.json` / `docs/reading-annotated.md`, plus
+uses (`answer_from` and its `from` chain in the annotated reading's thoughts, `docs/reading-annotated.md`, now copied
+into the world model as `answer_reasoning` and `reasoning`, plus
 the question's possibilities and their `from`/`out`/`by`), and marks each link against what the page has now.
 
 ## Progress

@@ -20,16 +20,17 @@ const get = (url, as = 'json') => fetch(url, { cache: 'no-cache' }).then((r) => 
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-const main = await get(`${CASE}/case.json`);
-const [oldEntities, w, times, facts, accounts, questions, text, mentions] = await Promise.all([
-    get(`${CASE}/entities.json`), get(`${CASE}/world/entities.json`), get(`${CASE}/world/times.json`),
-    get(`${CASE}/world/facts.json`), get(`${CASE}/world/accounts.json`), get(`${CASE}/world/questions.json`),
-    get(`${CASE}/${main.case.source.text_file}`, 'text'), get(`${CASE}/mentions.json`),
+// A case is its story and the files in world/ (docs/case-format.md, "A case"); world/case.json names the story file.
+const W = `${CASE}/world`;
+const header = await get(`${W}/case.json`);
+const [w, times, facts, accounts, questions, text, mentions] = await Promise.all([
+    get(`${W}/entities.json`), get(`${W}/times.json`), get(`${W}/facts.json`), get(`${W}/accounts.json`),
+    get(`${W}/questions.json`), get(`${W}/${header.story}`, 'text'), get(`${W}/mentions.json`),
 ]);
 // Likely clashes (world/strains.json): optional.
-const strainList = await get(`${CASE}/world/strains.json`).then((x) => x.strains ?? []).catch(() => []);
+const strainList = await get(`${W}/strains.json`).then((x) => x.strains ?? []).catch(() => []);
 const data = {
-    entities: [...oldEntities.entities, ...w.entities], moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
+    entities: w.entities, moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
     accounts: accounts.accounts, questions: questions.questions,
 };
 data.order = timeOrder(data.times);
@@ -38,9 +39,9 @@ const prov = provenance(data);
 const allAssertions = assertions(data);
 const assertionById = new Map(allAssertions.map((x) => [x.id, x]));
 const story = text.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
-// Where the story names each entity (the old game's mentions.json, matched as the game matches it, engine/story.js):
-// the story's names are links to their card, every one alike.
-const named = new Story(text, { mentions: { entities: mentions.entities }, entities: oldEntities.entities });
+// Where the story names each entity (world/mentions.json, matched by engine/story.js): the story's names are links to
+// their card, every one alike. An entity the story never names by a phrase is placed by its `source` quote.
+const named = new Story(text, { mentions: { entities: mentions.entities }, entities: w.entities });
 const entityById = new Map(data.entities.map((e) => [e.id, e]));
 const timeById = new Map(data.times.map((t) => [t.id, t]));
 const factById = new Map(data.facts.map((f) => [f.id, f]));

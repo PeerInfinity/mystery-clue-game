@@ -16,12 +16,12 @@ import { provenance as derive, showChain } from '../engine/world.js';
 export { showChain };
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 
-/** Load a case's world model: the world files, with the case's and the world's entities together. */
+/** Load a case's world model: the files in <case>/world/. */
 export function loadWorld(dir) {
     const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
     const w = read('world/entities.json');
     return {
-        entities: [...read('entities.json').entities, ...w.entities],
+        entities: w.entities,
         moves: w.moves ?? [],
         joins: w.joins ?? {},
         times: read('world/times.json').times,

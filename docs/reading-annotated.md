@@ -4,10 +4,11 @@ Status: COMPLETE, ¶0–¶231. Written 2026-10-15: the pilot (¶0–¶92) first,
 ids, premises and two dates, then the rest of the story in the same format. Not yet machine-readable; not yet
 compared with the case format (that is the gap analysis, next).
 
-**Data:** the thoughts and background cards are mirrored, one per line, in `cases/silver-blaze/thoughts.json`
-(generated once from this document), which also maps each thought to the case cards that hold it.
-From now on the JSON is the data and this document the prose: change both together; `npm test` checks that the
-ids and tags agree, and `npm run validate-thoughts` checks the rest and writes `thoughts-report.md`.
+**Data:** the thoughts and background cards are mirrored, one per line, in the earlier game's
+`v1/cases/silver-blaze/thoughts.json` (generated once from this document), which also maps each thought to the case
+cards that hold it. Since 2026-11-06 the earlier game keeps its own copy of this document (`v1/docs/`), which `npm
+test` checks against the JSON (`npm run v1:validate-thoughts` checks the rest); this copy is the reading itself, for
+Watson's timeline, whose world model has the steps it uses written out (`reasoning`).
 
 ## What this is
 

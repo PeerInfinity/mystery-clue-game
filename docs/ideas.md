@@ -19,6 +19,18 @@ redirects there), with its own guide; the earlier game, its guide and the logic 
 `v1/`, with a separate link (Settings → The earlier game…), and may be removed later. The timeline's design and what
 has been built of it are in §2, "The chosen direction".
 
+**The case stands alone (2026-11-06).** For the pipeline that will set up new stories (memory and kickoff: a process
+run step by step on Silver Blaze, then "The Speckled Band"), the timeline was cut from the earlier game's files. The
+user's rulings: `v1/` gets its own copy of everything the earlier game uses, so the main tree owes it no backward
+compatibility (the main tree's copies of the earlier game's engine, scripts, checker, schema and case files were
+removed); and the world model migrates away from back-references. A case is now `story.txt` plus `world/` (a case
+header, entities, mentions, times, facts, accounts, questions, and optionally strains and the true path;
+`docs/case-format.md`, "A case"). 171 of the 175 old entities (four unused background topics dropped) were merged
+into `world/entities.json` with only the fields the page reads, beside its own 16; the
+entity phrases of the old `mentions.json` copied (its time windows were never used by the timeline); `old` (95) and
+the time points' `window` (56) dropped; the 88 references to the annotated reading's thoughts replaced by the
+reader's step written out (`reasoning: {para, text}`), the strains' by nothing (their `why` already says it).
+
 The rest of this section, and §2 after the chosen direction, are about the earlier game.
 
 ### The earlier game

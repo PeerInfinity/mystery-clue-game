@@ -1,0 +1,13 @@
+{
+  "id": "silver_blaze",
+  "title": "Silver Blaze",
+  "author": "Arthur Conan Doyle",
+  "story": "../story.txt",
+  "source": {
+    "gutenberg_id": 834,
+    "collection": "The Memoirs of Sherlock Holmes",
+    "first_published": 1892,
+    "word_count": 9574,
+    "public_domain": "US and life+70 countries (Doyle died 1930)"
+  }
+}

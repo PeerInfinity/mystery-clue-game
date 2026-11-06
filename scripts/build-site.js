@@ -1,5 +1,6 @@
 // Collects the files the live site loads into _site/, for GitHub Pages: the pages (Watson's timeline at the root, with
-// its guide and the old address world.html; the first game in v1/, with its guide and the logic viewer), their
+// its guide and the old address world.html; the first game in v1/, with its guide, the logic viewer and its own copy
+// of everything it loads), their
 // stylesheets, the modules they import (followed), and each case's runtime files. Nothing else is published — not the docs,
 // the tests, the reports or the reference material.
 //   node scripts/build-site.js [outDir=_site]
@@ -16,8 +17,8 @@ const files = new Set(PAGES);
 const version = (process.env.GITHUB_SHA ?? execSync('git rev-parse HEAD', { cwd: root }).toString()).trim().slice(0, 10);
 const stamp = (ref) => `${ref}?v=${version}`;
 
-// Stylesheets, scripts and pages the page names, from its own directory or from its <base> (v1/'s pages address
-// the site root); a directory (./, v1/) is a page already listed.
+// Stylesheets, scripts and pages the page names, from its own directory (or its <base>, if it has one); a directory
+// (./, v1/) is a page already listed.
 for (const page of PAGES) {
     const html = fs.readFileSync(path.join(root, page), 'utf8');
     const from = path.join(path.dirname(page), html.match(/<base href="([^"]+)"/)?.[1] ?? '.');
@@ -40,15 +41,22 @@ while (todo.length) {
     }
 }
 
-// Cases: what loadCase reads, the action tables the autoplay plays (ui/autoplay.js: the reader's and the minimal one),
-// the hints' data and incremental mode's waits (without them the page offers no Hint button and no incremental pace).
+// Cases. Watson's timeline's (cases/<case>/): world/*.json and the story its case.json names. The earlier game's
+// (v1/cases/<case>/): what loadCase reads, the action tables the autoplay plays (v1/ui/autoplay.js: the reader's and
+// the minimal one), the hints' data and incremental mode's waits (without them the page offers no Hint button and no
+// incremental pace).
 for (const dir of fs.readdirSync(path.join(root, 'cases'))) {
-    const base = path.join('cases', dir);
+    const world = path.join('cases', dir, 'world');
+    if (!fs.existsSync(path.join(root, world, 'case.json'))) continue;
+    const header = JSON.parse(fs.readFileSync(path.join(root, world, 'case.json'), 'utf8'));
+    for (const f of fs.readdirSync(path.join(root, world))) if (f.endsWith('.json')) files.add(path.join(world, f));
+    files.add(path.normalize(path.join(world, header.story)));
+}
+for (const dir of fs.readdirSync(path.join(root, 'v1', 'cases'))) {
+    const base = path.join('v1', 'cases', dir);
     const main = JSON.parse(fs.readFileSync(path.join(root, base, 'case.json'), 'utf8'));
     for (const f of ['case.json', ...(main.parts ?? []), main.mentions_file, main.thoughts_file, main.case?.source?.text_file].filter(Boolean)) files.add(path.join(base, f));
     for (const f of ['action-table.json', 'action-table-minimal.json', 'hints.json', 'incremental.json']) if (fs.existsSync(path.join(root, base, f))) files.add(path.join(base, f));
-    // The world model, for Watson's timeline (index.html).
-    for (const f of ['entities.json', 'times.json', 'facts.json', 'accounts.json', 'questions.json', 'strains.json', 'path.json']) if (fs.existsSync(path.join(root, base, 'world', f))) files.add(path.join(base, 'world', f));
 }
 
 fs.rmSync(out, { recursive: true, force: true });

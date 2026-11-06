@@ -5,20 +5,14 @@
   "description": "A deduction game built from fair-play mystery stories: collect clues, connect them, eliminate what does not fit.",
   "scripts": {
     "test": "node --test",
-    "validate": "node scripts/validate-case.js cases/silver-blaze",
-    "reveal-log": "node scripts/reveal-log.js cases/silver-blaze > .cache/reveal-log.txt",
-    "foreshadow-log": "node scripts/foreshadow-log.js cases/silver-blaze > .cache/foreshadow-log.txt",
-    "clash-log": "node scripts/clash-log.js cases/silver-blaze > .cache/clash-log.txt",
-    "validate-thoughts": "node scripts/validate-thoughts.js cases/silver-blaze",
     "validate-world": "node scripts/validate-world.js cases/silver-blaze",
-    "action-table": "node scripts/action-table.js",
-    "minimal-table": "node scripts/minimal-table.js",
-    "stats": "node scripts/stats.js",
-    "hints": "node scripts/hints.js",
-    "incremental": "node scripts/incremental.js",
-    "search-cost": "node scripts/search-cost.js",
-    "depgraph": "node scripts/depgraph.js",
-    "page-checks": "node scripts/page-checks.mjs"
+    "page-checks": "node scripts/page-checks.mjs",
+    "build-site": "node scripts/build-site.js",
+    "v1:validate": "cd v1 && node scripts/validate-case.js cases/silver-blaze",
+    "v1:validate-thoughts": "cd v1 && node scripts/validate-thoughts.js cases/silver-blaze",
+    "v1:reveal-log": "cd v1 && mkdir -p .cache && node scripts/reveal-log.js cases/silver-blaze > .cache/reveal-log.txt",
+    "v1:foreshadow-log": "cd v1 && mkdir -p .cache && node scripts/foreshadow-log.js cases/silver-blaze > .cache/foreshadow-log.txt",
+    "v1:clash-log": "cd v1 && mkdir -p .cache && node scripts/clash-log.js cases/silver-blaze > .cache/clash-log.txt"
   },
   "devDependencies": {
     "ajv": "^8.17.1"
