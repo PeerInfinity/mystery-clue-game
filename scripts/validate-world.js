@@ -215,6 +215,8 @@ for (const q of questions) {
         if (p.step && (!list(p.step.act).length || list(p.step.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via'].some((r) => p.step[r] != null && !entities.has(p.step[r])))) err(q.id, `${p.value}: step is a typed action`);
         if (p.step && !p.goal) err(q.id, `${p.value}: a step belongs to an aim with a goal`);
         if (p.action && (!entities.has(p.action.of) || !list(p.action.act).length || list(p.action.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via', 'item'].some((r) => p.action[r] != null && !entities.has(p.action[r])))) err(q.id, `${p.value}: action is a typed action of an entity`);
+        // What an answer rests on: states of an entity (or of the entry's agent), checked against the timeline.
+        for (const x of p.rests_on ?? []) if (!x.attr || x.value == null || !(x.of === '$agent' || entities.has(x.of))) err(q.id, `${p.value}: rests_on is a list of {of, attr, value}`);
         // A possibility that implies another question's answer (the hoof: the horse struck the blow).
         if (p.implies && !qById.get(p.implies.q)?.possibilities.some((o) => o.value === p.implies.pick) && !entities.has(p.implies.pick)) err(q.id, `${p.value}: implies no possibility ${p.implies.q} = ${p.implies.pick}`);
         for (const n of list(p.need)) if (!ACTIONS[n.act] || !n.rule?.of || (n.rule.away != null && !entities.has(n.rule.away)) || (n.rule.carrying != null && !n.rule.carrying.startsWith('$') && !entities.has(n.rule.carrying))) err(q.id, `${p.value}: need is {act, rule}, or a list of them`);

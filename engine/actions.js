@@ -54,6 +54,7 @@ export const ACTIONS = {
     strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', place: '$where' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
     injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }, { guard: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
     keep_key: { label: 'keeping a key to', requires: [], effects: [{ of: '$agent', key: '$thing' }] },
+    lay_against: { label: 'laying against', requires: [{ of: '$thing', attr: 'condition', value: 'loses the race' }], effects: [{ of: '$agent', attr: 'condition', value: 'in funds' }] },
     take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
     cut_self: { label: 'cut, as he fell,', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', attr: 'condition', value: 'struck down' }], effects: [{ of: '$agent', attr: 'condition', value: 'cut' }] },
@@ -61,6 +62,11 @@ export const ACTIONS = {
 };
 /** What a goal of carrying an item brings with it, by the item's kind (the same rule as `give`'s). */
 const CARRY_RAMIFIES = { attr: 'willing', kinds: ['money', 'message'] };
+/**
+ * What a goal's state brings with it, for a goal serving a further goal ("in order to"): a horse injured before its
+ * race loses it. Each `{attr, value}` → `{attr, value}` of the same thing.
+ */
+export const GOAL_RAMIFIES = [{ if: { attr: 'condition', value: 'injured' }, then: { attr: 'condition', value: 'loses the race' } }];
 
 export const REASONING = 'watsons_reasoning';
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
@@ -370,6 +376,7 @@ export function productsOf(x, nameOf, ctx = {}) {
     if (!x.goal) return [];
     const g = { id: `${x.id}:goal`, of: x.goal.of, attr: x.goal.attr, value: x.goal.value, neg: false, time: x.time };
     const out = [g];
+    for (const rm of GOAL_RAMIFIES) if (g.attr === rm.if.attr && g.value === rm.if.value) out.push({ id: `${x.id}:goal+`, of: g.of, attr: rm.then.attr, value: rm.then.value, neg: false, time: x.time });
     if (g.attr === 'carrying' && x.of) {
         const holds = kindHolds(ctx, g.value, CARRY_RAMIFIES.kinds);
         if (holds !== false) out.push({ id: `${x.id}:goal1`, of: g.of, attr: CARRY_RAMIFIES.attr, value: x.of, neg: false, time: x.time, ...(holds === true ? {} : { cond: { item: g.value, kinds: holds } }) });

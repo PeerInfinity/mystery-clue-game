@@ -178,7 +178,7 @@ const answerText = (q) => [q.answer, ...(q.also_right ?? [])].map((p) => pickTex
 const KIND_WORD = { money: 'money', message: 'a message', drug: 'a drug' };
 /** A typed action or an intention as a short phrase: who, doing what, to whom, with what. */
 function stepText(x) {
-    if (!list(x.act).length) return x.hyp ? `${ent(x.of)}, aiming ${/^to /.test(x.value) ? '' : 'to '}${esc(x.value)}` : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
+    if (!list(x.act).length) return x.hyp ? (/^to /.test(x.value) ? `${ent(x.of)}, aiming ${esc(x.value)}` : `${ent(x.of)}, driven by ${esc(x.value)}`) : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
     const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && (list(x.act).includes('take') ? val(x.item) : list(x.act).includes('cut_self') ? `by ${val(x.item)}` : `with ${val(x.item)}`), x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
     const note = x.intended ? ' <span class="small muted">(intended)</span>' : x.hyp ? ' <span class="small muted">(your hypothesis)</span>' : '';
     return `${x.of === '?' ? 'Someone' : ent(x.of)}: ${list(x.act).map((t) => ACTIONS[t].label).join(' and ')} ${roles}${note}`;
@@ -1092,8 +1092,19 @@ function aimPlansHtml(q) {
     const aims = q.possibilities.map((p) => hypIntention(hypothesisKey(q.id, p.value))).filter(Boolean);
     return aims.map((g) => {
         const steps = linkedTo(g.id);
-        return `<h3>If the aim is “${esc(g.value)}”</h3><p class="small">Goal: ${phrase({ ...g.goal, id: '' })}. ${steps.length ? `Linked to it: ${steps.map((e) => phrase(e)).join('; ')}.` : 'Nothing is linked to it yet: on an action of theirs, ask “What is this for?”.'}</p>${planHtml(g)}`;
+        return `<h3>${/^to /.test(g.value) ? 'If the aim is' : 'If it was'} “${esc(g.value)}”</h3><p class="small">Goal: ${phrase({ ...g.goal, id: '' })}. ${steps.length ? `Linked to it: ${steps.map((e) => phrase(e)).join('; ')}.` : 'Nothing is linked to it yet: on an action of theirs, ask “What is this for?”.'}</p>${restsHtml(q, g)}${planHtml(g)}${purposeHtml(g)}${lapsedHtml(g)}`;
     }).join('');
+}
+/**
+ * What an answer rests on (`rests_on` on a possibility: the debts motive, that Straker owed money): each state with
+ * what the timeline says, two names of one person counting as one (William Derbyshire, once circled as Straker).
+ */
+function restsHtml(q, g) {
+    const rs = q.possibilities.find((p) => p.value === g.hyp.pick)?.rests_on ?? [];
+    if (!rs.length) return '';
+    const on = onTimeline();
+    const row = (x) => { const req = { id: `rest:${q.id}`, ...x, of: x.of === '$agent' ? g.of : x.of, neg: false, time: g.time }; return `<li>${phrase(req)} ${statusHtml(requirementStatus(data.order, on, req, placeCtx))}</li>`; };
+    return `<p class="small">What it rests on:</p><ul class="moves">${rs.map(row).join('')}</ul>`;
 }
 /**
  * Likely clashes: two entries that can both hold but sit badly together (world/strains.json). In play one is shown only

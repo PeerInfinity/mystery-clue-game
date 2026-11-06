@@ -26,6 +26,9 @@ the question's possibilities and their `from`/`out`/`by`), and marks each link a
 - **Step 4 built (2026-11-05):** a strike needs the striker at the place of the deed; `implies` ties each weapon to
   its striker. who_killed and weapon have a route from ¶41 (the horse present, Simpson not shown there and unwounded;
   the stick implying a striker the player has crossed or the single blow against it).
+- **Step 6 built (2026-11-05):** goals serving goals; the motive's two answers with goals, the debts resting on the
+  milliner's account through the Derbyshire identity. motive has a route from ¶214 (raised there), resting on
+  derbyshire (a likely clash from ¶84). Left: step 5 (traces: horse_where before ¶114, track_man, track_man_aim).
 
 ## Summary
 

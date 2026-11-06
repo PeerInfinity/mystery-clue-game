@@ -384,6 +384,12 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   Simpson), so the stick against a circled horse is a contradiction, its side saying which circle implies it, and
   it goes when that circle is distrusted. With the clashes of step 1 (no wound on Simpson, the single blow), who
   struck the blow and with what now have a route from ¶41.
+- **Built (2026-11-05), the audit's step 6 (the motive, on the user's go-ahead):** an aim can serve a motive ("What is
+  this for?" on a circled aim); an injured horse loses the race (`GOAL_RAMIFIES`); the bets motive wants that, the
+  debts motive wants Straker in funds through laying against his horse; the debts rest on Straker owing an account,
+  met by the milliner's account once William Derbyshire is circled as Straker. Played at ¶214: injuring links to
+  either motive "in order that Silver Blaze: loses the race". The user does not want distracting data yet; step 5
+  (traces) is under discussion.
 
 ### An incremental game about trying every combination
 

@@ -650,6 +650,15 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   it asserts that answer of the other question too, as a mark of its own (`mark: 'implied'`, `from` the circle),
   with the circle's trust: the hoof implies the horse struck, the stick Simpson, so a weapon circled against another
   striker meets an ordinary contradiction.
+- Goals serving goals (the audit's step 6, the motive; the user's go-ahead for "the goal and its motive as a move,
+  only if the logic needs it"). "What is this for?" is offered on a circled aim too, so an aim can serve a motive: an
+  intention serves another when what its goal brings with it meets the other's goal or a need of its implied step.
+  `GOAL_RAMIFIES` says what a goal's state brings: a horse injured loses the race. "What drove Straker to it?" has
+  goals on its answers: laying against his own horse wants the horse to lose; the debts want Straker in funds, through
+  an implied step, laying against his horse (`lay_against`: needs the horse to lose, leaves him in funds). A
+  possibility may carry `rests_on`, states it takes for granted, shown with what the timeline says ("What it rests
+  on": the debts rest on Straker owing an account, met by the milliner's account to William Derbyshire once Derbyshire
+  is circled as Straker, and not when he is circled as a friend).
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's

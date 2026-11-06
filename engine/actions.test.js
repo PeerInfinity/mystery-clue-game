@@ -220,6 +220,16 @@ test('a strike needs the striker at the place of the deed', () => {
     assert.equal(pointImplications({ ...kick('horse'), where: undefined }, nameOf, c).entries.filter((e) => e.role === 'requires').length, 0, 'no place named: no need');
 });
 
+test("goals serving goals: injuring the horse serves a motive through what the injury brings (it loses the race)", () => {
+    const aim = { id: 'h.aim', of: 'trainer', attr: 'intends', goal: { of: 'horse', attr: 'condition', value: 'injured' }, time: { at: 'tout' } };
+    const bets = { id: 'h.bets', of: 'trainer', attr: 'intends', goal: { of: 'horse', attr: 'condition', value: 'loses the race' }, time: { at: 't9' } };
+    const debts = { id: 'h.debts', of: 'trainer', attr: 'intends', goal: { of: 'trainer', attr: 'condition', value: 'in funds' }, step: { act: 'lay_against', thing: 'horse' }, time: { at: 't9' } };
+    assert.equal(checkFit(aim, bets, [], nameOf, {}).need.value, 'loses the race', 'an injured horse loses the race');
+    const d = checkFit(aim, debts, [], nameOf, {});
+    assert.deepEqual([d.fits, d.need.value], [true, 'loses the race'], 'the debts: through laying against him, which needs him to lose');
+    assert.equal(checkFit({ ...aim, goal: { of: 'horse', attr: 'condition', value: 'exercised' } }, debts, [], nameOf, {}).fits, false);
+});
+
 test('what stopped an intended step: an action that left its agent unable to act, in time', () => {
     const step = { id: 's', of: 'trainer', act: 'injure', thing: 'horse', intended: true, time: { after: 't9', before: 'tmorn' } };
     const kick = { id: 'k', of: 'horse', act: 'strike', to: 'trainer', time: { at: 'tout' } };
