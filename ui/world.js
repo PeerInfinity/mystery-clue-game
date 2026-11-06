@@ -1,4 +1,4 @@
-// Watson's timeline (world.html): the world model shown as it is, an ordered list of events, filled in as the story
+// Watson's timeline (index.html): the world model shown as it is, an ordered list of events, filled in as the story
 // is read. What Watson observes himself is certain; everything else comes through a chain of tellings, each link
 // trusted as far as the player says (engine/world.js). Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
@@ -516,7 +516,7 @@ const clashKey = (c) => `clash:${c.a.id}|${c.b.id}`;
 let current = [];
 
 // --- The layout: three columns side by side, or panels with tabs (two, or one; a phone always one). The page's parts
-// (world.html) are moved where the layout puts them, the rest parked; each is drawn by render() wherever it is.
+// (index.html) are moved where the layout puts them, the rest parked; each is drawn by render() wherever it is.
 const PARTS = [['story', 'Story'], ['timeline', 'Timeline'], ['questions', 'Questions'], ['clashes', 'Contradictions'], ['cards', 'Cards'], ['detail', 'Detail']];
 if (!Array.isArray(state.panels) || state.panels.length !== 2 || state.panels.some((t) => !PARTS.some(([x]) => x === t)) || state.panels[0] === state.panels[1]) state.panels = ['story', 'timeline'];
 if (!['three', 'two', 'one'].includes(state.layout)) state.layout = 'three';
@@ -615,7 +615,7 @@ function render() {
     document.getElementById('para').value = state.para;
     document.getElementById('para').max = LAST;
     document.getElementById('next').disabled = state.para >= LAST;
-    document.getElementById('back').disabled = state.para <= 1;
+    document.getElementById('para').min = state.para;
     document.getElementById('show-below').checked = state.showBelow;
     const th = document.getElementById('threshold');
     th.innerHTML = LEVELS.slice(0, -1).map((l, i) => `<option value="${i}"${i === state.threshold ? ' selected' : ''}>${l}</option>`).join('');
@@ -1275,7 +1275,8 @@ function renderDetail(clashing) {
 /**
  * The gate: before the story gives away the answer to a question a reader could have reached earlier (raised, not
  * latent, inferable before it is given), the player commits: exactly one possibility circled. Any answer passes, so
- * nobody is stuck. Reading stops before the first paragraph whose give-aways are not committed; reading back is free.
+ * nobody is stuck. Reading stops before the first paragraph whose give-aways are not committed. Reading only goes forward: the
+ * story so far stays on the page to scroll back through.
  */
 const GATED = data.questions.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && q.answer_inferable_at < q.answer_given_at);
 const atPara = (p, fn) => { const was = state.para; state.para = p; try { return fn(); } finally { state.para = was; } };
@@ -1285,7 +1286,7 @@ const gateAt = (p) => atPara(p - 1, () => GATED.filter((q) => q.answer_given_at 
 let gateHidden = null;    // the gate's key while its notice is hidden
 let answerNews = [];      // the answers just given: {q, mark}
 const setPara = (n) => {
-    const want = Math.max(1, Math.min(LAST, n | 0)), from = state.para;
+    const from = state.para, want = Math.max(from, Math.min(LAST, n | 0));
     let to = want;
     for (let p = from + 1; p <= want; p++) if (gateAt(p).length) { to = p - 1; gateHidden = null; flashGate = true; break; }
     // The answers given on the way, with how the player's marks fare.
@@ -1320,7 +1321,6 @@ function renderAnswers() {
     el.innerHTML = `<p><b>The story has answered:</b></p><ul>${answerNews.map(line).join('')}</ul><p><button type="button" class="quiet" data-answers-close>Dismiss</button></p>`;
 }
 document.getElementById('next').addEventListener('click', () => { if (gateAt(state.para + 1).length) { gateHidden = null; flashGate = true; render(); return; } setPara(state.para + 1); });
-document.getElementById('back').addEventListener('click', () => setPara(state.para - 1));
 document.getElementById('para').addEventListener('change', (e) => setPara(Number(e.target.value)));
 document.getElementById('threshold').addEventListener('change', (e) => { state.threshold = Number(e.target.value); save(); render(); });
 document.getElementById('only-moves').addEventListener('change', (e) => { state.onlyMoves = e.target.value === 'moves'; save(); render(); });
@@ -1330,6 +1330,16 @@ document.getElementById('show-below').addEventListener('change', (e) => { state.
 document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Put every link and person back to uncertain?')) return;
     changeTrust((tr) => { tr.links = {}; tr.people = {}; });
+});
+// Start over: the saved timeline (and the autoplay's) cleared; what is the page's, not the reading's, is kept.
+document.getElementById('start-over').addEventListener('click', () => {
+    if (!confirm('Start over from the first paragraph? Your trust, marks and reasoning on this device are cleared (layout, theme and the hint wait are kept). This cannot be undone.')) return;
+    try {
+        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
+        localStorage.setItem(PLAYER_STORE, JSON.stringify(keep));
+        localStorage.removeItem('silver-blaze-world-autoplay');
+    } catch { /* nothing saved to clear */ }
+    location.reload();
 });
 document.addEventListener('toggle', (e) => {
     if (e.target.id === 'q-box') { state.qOpen = e.target.open; save(); }

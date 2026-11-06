@@ -1,4 +1,4 @@
-// The autoplay of Watson's timeline played to the end in headless Chrome (`world.html?autoplay=fast`: no pauses, no
+// The autoplay of Watson's timeline played to the end in headless Chrome (`?autoplay=fast`: no pauses, no
 // cursor): it must finish without stopping or a page error, at the last paragraph, with its save holding what the true
 // path leaves (every mark, the reasoning moves, the trust set), and the player's own save untouched.
 //   node scripts/world-autoplay-check.mjs [layout]      layout: three (default), two or one; PHONE=1 a phone's width
@@ -29,12 +29,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 const phone = !!process.env.PHONE;
 await send('Emulation.setDeviceMetricsOverride', phone ? { width: 390, height: 844, deviceScaleFactor: 1, mobile: true } : { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
-await send('Page.navigate', { url: `${BASE}world.html` }); await sleep(1500);
+await send('Page.navigate', { url: BASE }); await sleep(1500);
 // The player's own timeline, which the autoplay must leave alone: a mark, a paragraph, the layout to play in.
 const mine = { para: 3, layout: LAYOUT, marks: { 'q.who_killed': { simpson: 'circled' } } };
 await ev(`localStorage.setItem('silver-blaze-world-v1', ${J(J(mine))}); localStorage.removeItem('silver-blaze-world-autoplay'); 1`);
 const t0 = Date.now();
-await send('Page.navigate', { url: `${BASE}world.html?autoplay=fast` });
+await send('Page.navigate', { url: `${BASE}?autoplay=fast` });
 let st = null;
 while (Date.now() - t0 < 15 * 60000) {
     await sleep(2000);

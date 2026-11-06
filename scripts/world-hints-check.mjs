@@ -29,7 +29,7 @@ await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, dev
 let failures = 0;
 const fail = (why) => { failures++; console.log(`FAIL ${why}`); };
 async function run(name, start, expect = []) {
-    await send('Page.navigate', { url: `${BASE}world.html` }); await sleep(1200);
+    await send('Page.navigate', { url: BASE }); await sleep(1200);
     await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three', hintWait: 0, ...start }))}); 1`);
     await send('Page.reload'); await sleep(800);
     for (let i = 0; i < 100 && !(await ev(`!!window.__hint`).catch(() => false)); i++) await sleep(200);

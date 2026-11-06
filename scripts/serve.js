@@ -12,7 +12,11 @@ http.createServer((req, res) => {
     const url = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     let file = path.join(root, url);
     if (!file.startsWith(root)) { res.writeHead(403); return res.end(); }
-    if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
+    // A directory without its slash is redirected, as GitHub Pages does (v1/'s page addresses its files from "../").
+    if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
+        if (!url.endsWith('/')) { res.writeHead(301, { location: `${url}/${new URL(req.url, 'http://x').search}` }); return res.end(); }
+        file = path.join(file, 'index.html');
+    }
     fs.readFile(file, (err, body) => {
         if (err) { res.writeHead(404); return res.end('not found'); }
         res.writeHead(200, { 'content-type': types[path.extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' });

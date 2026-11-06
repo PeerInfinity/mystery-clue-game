@@ -15,9 +15,9 @@ const up = (url) => fetch(url).then((r) => r.ok, () => false);
 
 const started = [];
 let profile = null;
-if (!process.env.URL && !(await up('http://localhost:8321/world.html'))) {
+if (!process.env.URL && !(await up('http://localhost:8321/'))) {
     started.push(spawn(process.execPath, [path.join(ROOT, 'scripts/serve.js')], { stdio: 'ignore' }));
-    for (let i = 0; i < 50 && !(await up('http://localhost:8321/world.html')); i++) await sleep(100);
+    for (let i = 0; i < 50 && !(await up('http://localhost:8321/')); i++) await sleep(100);
 }
 if (!(await up('http://127.0.0.1:9333/json/version'))) {
     profile = fs.mkdtempSync(path.join(os.tmpdir(), 'page-checks-chrome-'));

@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import { open } from './cdp.mjs';
 const SHOTS = process.argv[2] ?? null;
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
-const p = await open({ url: process.env.URL ?? 'http://localhost:8321/' });
+const p = await open({ url: process.env.URL ?? 'http://localhost:8321/v1/' });
 await p.send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
 const fails = [];
 const check = (ok, what) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${what}`); if (!ok) fails.push(what); };

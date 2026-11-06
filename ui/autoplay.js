@@ -91,7 +91,7 @@ export async function start({ store, fast, playthrough = 'reader', story, valueN
     const ending = (text) => {
         $('#ap-caption').textContent = text;
         $('#ap-para').textContent = '';
-        strip.querySelector('.ap-tools').innerHTML = '<a class="button" href="./">Back to your game</a>';
+        strip.querySelector('.ap-tools').innerHTML = '<a class="button" href="v1/">Back to your game</a>';
         cursor.remove();
         document.body.classList.remove('autoplaying');
         window.__autoplay = { ...status(), done: true };

@@ -3,92 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Casebook: Silver Blaze</title>
+<title>Silver Blaze: Watson's Timeline</title>
 <link rel="stylesheet" href="ui/style.css">
+<link rel="stylesheet" href="ui/world.css">
 </head>
-<body>
+<body class="world-page">
 <header class="top">
-  <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">a casebook</span></h1>
+  <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">Watson's timeline</span></h1>
   <div class="controls">
-    <span id="progress" class="progress"></span>
-    <details class="settings">
-      <summary title="Settings: the game's, and the page's"><span class="gear" aria-hidden="true">⚙</span> <span id="settings-summary" class="long">Settings</span><span id="settings-short" class="short">Settings</span></summary>
+    <span class="reading-at">
+      <label title="Read on to this paragraph (the story so far stays above: scroll up to re-read it)">Read to ¶<input type="number" id="para" min="1" size="4"></label>
+      <button type="button" id="next" title="Read the next paragraph">Read on ▶</button>
+    </span>
+    <button type="button" id="undo" class="quiet" title="Undo the last change of trust, of a mark, or of your reasoning">Undo</button>
+    <button type="button" id="hint" class="quiet" title="What a careful reader would do next: each press a step further">Hint</button>
+    <details class="settings" id="settings">
+      <summary title="Settings: what is on the timeline, and the page's layout"><span class="gear" aria-hidden="true">⚙</span> <span class="long">Settings</span><span class="short">Settings</span></summary>
       <div class="settings-panel">
-      <div class="small muted opt-group-title">The game</div>
-      <label title="Each difficulty is a preset of the options below. Change any option and the difficulty reads Custom.">
-        Difficulty
-        <select id="difficulty"><option value="trivial">Trivial</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option><option value="custom" disabled>Custom</option></select>
-      </label>
-      <label title="Free: read on whenever you like. Wait for deductions: when Holmes acts on a deduction, the story waits until you have made it too. Incremental: on Hard, the story waits before everything Holmes does, and an automated search tries every combination for you (the Search tab).">
-        Pace
-        <select id="pace"><option value="free">Free</option><option value="wait">Wait for deductions</option><option value="incremental">Incremental (automated search)</option></select>
-      </label>
-      <label id="autopace-label" title="When the game works out the answers. Keep pace with Holmes: an answer settles when Holmes reaches it in the story. As soon as the clues allow: an answer settles the moment the clues you hold decide it, which can be long before Holmes says so.">
-        The game settles answers
-        <select id="autopace"><option value="holmes">Keeping pace with Holmes</option><option value="logic">As soon as the clues allow</option></select>
-      </label>
-      <details class="difficulty-options" id="difficulty-options">
-        <summary>Difficulty options</summary>
-        <div id="options" class="options-grid"></div>
-      </details>
-      <div class="small muted opt-group-title settings-rule" title="Yours, kept on this device apart from the game">The page</div>
-      <label id="layout-label" title="One panel the full width, or two side by side (a phone always shows one)">
-        Layout
-        <select id="layout-cols"><option value="2">Two columns</option><option value="1">One column</option></select>
-      </label>
-      <label title="Light or dark, or as this device is set">
-        Theme
-        <select id="theme"><option value="system">As the system</option><option value="light">Light</option><option value="dark">Dark</option></select>
-      </label>
-      <label title="Your notes written into the story, or only listed in the Notes tab (the words they mark stay highlighted)">
-        Notes in the story
-        <select id="notes-shown"><option value="story">Shown</option><option value="tab">Only in the Notes tab</option></select>
-      </label>
-      <label title="The face your notes are written in">
-        Notes written in
-        <select id="notes-hand"><option value="hand">Handwriting</option><option value="page">The page's own face</option></select>
-      </label>
-      <label title="How the words a note speaks of are marked">
-        Highlights
-        <select id="highlight"><option value="marker">A yellow marker</option><option value="underline">A blue underline</option><option value="wash">A pale blue wash</option></select>
-      </label>
-      <label title="How long to wait after each press of Hint or More before the next (0: no wait)">
-        Hint cooldown
-        <span class="cooldown"><input type="number" id="hint-cooldown" min="0" step="5" value="30"> seconds</span>
-      </label>
-      <label title="Incremental mode: how long the search takes over each check (0: as fast as it can)">
-        Time per check
-        <span class="cooldown"><input type="number" id="search-delay" min="0" step="0.1" value="1"> seconds</span>
-      </label>
-      <label title="Incremental mode: how long each investigation of a lead takes (0: at once)">
-        Time per investigation
-        <span class="cooldown"><input type="number" id="lead-delay" min="0" step="5" value="60"> seconds</span>
-      </label>
-      <a class="settings-link" href="guide.html" target="_blank" rel="noopener">How to play (the guide)…</a>
-      <button id="autoplay-open" class="quiet" title="Watch the game played to the end on Hard, by a careful reader (its thoughts written in as notes) or by the fewest moves; your game is kept aside">Watch the autoplay…</button>
-      <button id="reset" class="quiet settings-rule">Start over…</button>
+        <div class="small muted opt-group-title">The timeline</div>
+        <label title="Facts whose best chain you trust at least this far are on the timeline.">On the timeline from
+          <select id="threshold"></select>
+        </label>
+        <label class="check" title="Show the facts below the threshold too, faded."><span><input type="checkbox" id="show-below"> Show the rest, faded</span></label>
+        <div class="small muted opt-group-title settings-rule" title="Kept on this device">The page</div>
+        <label id="layout-label" title="Three columns side by side (a wide screen), or panels with tabs: two side by side, or one (a phone always shows one)">Layout
+          <select id="layout"><option value="three">Three columns</option><option value="two">Two columns, with tabs</option><option value="one">One column, with tabs</option></select>
+        </label>
+        <label title="Light or dark, or as this device is set">Theme
+          <select id="theme"><option value="system">As the system</option><option value="light">Light</option><option value="dark">Dark</option></select>
+        </label>
+        <label title="How long the Hint button waits after each press">Wait between hints
+          <select id="hint-wait"><option value="0">none</option><option value="10">10 seconds</option><option value="30">30 seconds</option><option value="60">a minute</option></select>
+        </label>
+        <button type="button" id="reset" class="quiet settings-rule" title="Every link and person back to uncertain">Reset trust…</button>
+        <button type="button" id="start-over" class="quiet" title="Clear your timeline on this device: trust, marks, reasoning, back to ¶1 (the page's layout, theme and hint wait are kept)">Start over…</button>
+        <button type="button" id="autoplay-open" class="quiet settings-rule" title="A careful reader plays the whole story through this page; your timeline is kept aside">Watch the autoplay…</button>
+        <a class="settings-link settings-rule" href="guide.html" target="_blank" rel="noopener">How to play (the guide)…</a>
+        <a class="settings-link" href="v1/">The earlier game…</a>
       </div>
     </details>
-    <button id="notes-mode" class="quiet notes-toggle">✎ Notes</button>
     <a id="guide-link" class="guide-link" href="guide.html" target="_blank" rel="noopener" title="How to play: the guide, in a new tab">?</a>
   </div>
 </header>
-<div id="reader" class="reader"></div>
-<main class="layout">
-  <section class="panel" data-panel="0">
-    <div class="tabs" role="tablist"></div>
-    <div class="back-row small" hidden></div>
-    <div id="panel-0" class="panel-body"><p class="muted">Loading the case…</p></div>
-  </section>
-  <section class="panel" data-panel="1">
-    <div class="tabs" role="tablist"></div>
-    <div class="back-row small" hidden></div>
-    <div id="panel-1" class="panel-body"></div>
-  </section>
+
+<!-- The page's parts. The layout (ui/world.js, mountLayout) puts each into a column, or into a tabbed panel; the
+     parts not shown wait in #parked. -->
+<main class="world-main" id="three"></main>
+<main class="layout world-tabs" id="tabbed" hidden>
+  <section class="panel" data-panel="0"><div class="tabs" role="tablist"></div><div class="back-row small" hidden></div><div class="panel-body tool-body" id="panel-0"></div></section>
+  <section class="panel" data-panel="1"><div class="tabs" role="tablist"></div><div class="back-row small" hidden></div><div class="panel-body tool-body" id="panel-1"></div></section>
 </main>
-<div id="pop" class="pop" hidden></div>
-<div id="toast" class="toast" hidden></div>
-<div id="busy" class="busy" hidden><div class="busy-box"><div>Working it out…</div><div class="busy-track"><div id="busy-bar" class="busy-bar"></div></div><div id="busy-detail" class="small muted"></div></div></div>
-<script type="module" src="ui/app.js"></script>
+<div class="notices"><div id="gate-news" class="notice gate-news" role="status" hidden></div><div id="answer-news" class="notice answer-news" role="status" hidden></div><div id="lapse-news" class="notice lapse-news" role="status" hidden></div><div id="hint-news" class="notice hint-news" role="status" hidden></div></div>
+<div id="parked" hidden>
+  <section class="part world-story" data-part="story" aria-label="The story so far"><h2>The story</h2><div id="story"></div></section>
+  <section class="part" data-part="clashes" aria-label="Contradictions"><div id="clashes"></div></section>
+  <section class="part" data-part="questions" aria-label="Questions"><div id="questions"></div></section>
+  <section class="part" data-part="cards" aria-label="Cards"><div id="cards"></div></section>
+  <section class="part world-timeline" data-part="timeline" aria-label="The timeline">
+    <div class="view-bar"><h2>The timeline</h2>
+      <span class="small"><label>View <select id="view"><option value="list">List</option><option value="place">Grid by place</option><option value="source">Grid by source</option></select></label>
+      <label title="Every entry, or only those you can reason from (marked ⚙)">Show <select id="only-moves"><option value="all">Everything</option><option value="moves">Only entries with moves ⚙</option></select></label>
+      <label id="depth-label">Places <select id="depth"><option value="1">by region</option><option value="2">by area</option><option value="3">by place</option><option value="9">in full</option></select></label></span>
+    </div>
+    <div id="timeline"><p class="muted">Reading the case…</p></div>
+  </section>
+  <aside class="part world-detail" data-part="detail" id="detail" aria-label="Details"><p class="muted">Click an event for where it comes from, or a name for its own timeline.</p></aside>
+</div>
+<script type="module" src="ui/world.js"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ const ALL = process.argv[2] === 'all';
 const DIFFICULTY = process.env.DIFFICULTY ?? 'hard';
 const SHOTS = process.argv[ALL ? 3 : 2] ?? null;
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
-const base = process.env.URL ?? 'http://localhost:8321/';
+const base = process.env.URL ?? 'http://localhost:8321/v1/';
 const p = await open({ url: ALL ? `${base}?hintfast` : base });
 await p.send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
 const fails = [];

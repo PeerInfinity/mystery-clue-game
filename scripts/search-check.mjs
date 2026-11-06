@@ -3,7 +3,7 @@
 // counted; the page does not jump, the log, the table's sideways scroll and the tab bars keep their place; Pause; at 0 s a
 // check the search lifts the wait and the player reads on; reading by itself it goes on; a reload keeps the counts; no
 // console error (about 5 minutes).
-//   node scripts/search-check.mjs [shots dir]   (the game served at URL, default http://localhost:8321/; Chrome on 9333)
+//   node scripts/search-check.mjs [shots dir]   (the game served at URL, default http://localhost:8321/v1/; Chrome on 9333)
 // Only one script may drive that Chrome at a time.
 import fs from 'node:fs';
 import { open } from './cdp.mjs';

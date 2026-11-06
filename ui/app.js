@@ -787,7 +787,7 @@ function intro() {
 <li>When one answer is left, or you prove it outright, the question is settled.</li>
 <li>Your own notes: turn on <b>✎ Notes</b> in the header, then click in the story where a note goes, or drag over words to mark them. The Notes tab lists them; the game never reads them.</li>
 <li>To watch the game played to the end by a careful reader, its thoughts written in as notes, or by the fewest moves that reach the best score: <b>Settings → Watch the autoplay…</b> Your game is kept aside meanwhile.</li>
-<li>Everything else is in the guide: <a href="guide.html" target="_blank" rel="noopener">How to play</a>.</li>
+<li>Everything else is in the guide: <a href="v1/guide.html" target="_blank" rel="noopener">How to play</a>.</li>
 <li>${game.background === BG_START ? 'Background facts — what a reader of the time knew — are all in the Background tab from the start.' : game.background === BG_ASK ? 'Background facts — what a reader of the time knew — come when you ask: open a card and ask what you know about it.' : 'Background facts — what a reader of the time knew — appear as the story reaches their subject.'}</li>
 </ul>`;
 }

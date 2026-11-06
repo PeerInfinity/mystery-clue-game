@@ -1,5 +1,6 @@
-// Collects the files the live game loads into _site/, for GitHub Pages: the pages (the game, the guide, the logic viewer and Watson's timeline), their stylesheets, the modules
-// it imports (followed from ui/app.js), and each case's runtime files. Nothing else is published — not the docs,
+// Collects the files the live site loads into _site/, for GitHub Pages: the pages (Watson's timeline at the root, with
+// its guide and the old address world.html; the first game in v1/, with its guide and the logic viewer), their
+// stylesheets, the modules they import (followed), and each case's runtime files. Nothing else is published — not the docs,
 // the tests, the reports or the reference material.
 //   node scripts/build-site.js [outDir=_site]
 import fs from 'node:fs';
@@ -8,17 +9,19 @@ import { execSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const out = path.resolve(root, process.argv[2] ?? '_site');
-const PAGES = ['index.html', 'logic.html', 'guide.html', 'world.html'];
+const PAGES = ['index.html', 'guide.html', 'world.html', 'v1/index.html', 'v1/logic.html', 'v1/guide.html'];
 const files = new Set(PAGES);
 // Every reference to a page file carries the build's version (?v=<commit>), so a browser that caches files for a
 // while (GitHub Pages allows 10 minutes) never pairs a new page with an old stylesheet or module.
 const version = (process.env.GITHUB_SHA ?? execSync('git rev-parse HEAD', { cwd: root }).toString()).trim().slice(0, 10);
 const stamp = (ref) => `${ref}?v=${version}`;
 
-// Stylesheets and scripts the page names.
+// Stylesheets, scripts and pages the page names, from its own directory or from its <base> (v1/'s pages address
+// the site root); a directory (./, v1/) is a page already listed.
 for (const page of PAGES) {
     const html = fs.readFileSync(path.join(root, page), 'utf8');
-    for (const [, ref] of html.matchAll(/(?:href|src)="([^"#?:]+)"/g)) if (ref !== './') files.add(path.normalize(ref));
+    const from = path.join(path.dirname(page), html.match(/<base href="([^"]+)"/)?.[1] ?? '.');
+    for (const [, ref] of html.matchAll(/(?:href|src)="([^"#?:]+)"/g)) if (!ref.endsWith('/')) files.add(path.normalize(path.join(from, ref)));
 }
 
 // ES modules, followed through their relative imports, and stylesheets through their url()s (the notes' font).
@@ -44,7 +47,7 @@ for (const dir of fs.readdirSync(path.join(root, 'cases'))) {
     const main = JSON.parse(fs.readFileSync(path.join(root, base, 'case.json'), 'utf8'));
     for (const f of ['case.json', ...(main.parts ?? []), main.mentions_file, main.thoughts_file, main.case?.source?.text_file].filter(Boolean)) files.add(path.join(base, f));
     for (const f of ['action-table.json', 'action-table-minimal.json', 'hints.json', 'incremental.json']) if (fs.existsSync(path.join(root, base, f))) files.add(path.join(base, f));
-    // The world model, for Watson's timeline (world.html).
+    // The world model, for Watson's timeline (index.html).
     for (const f of ['entities.json', 'times.json', 'facts.json', 'accounts.json', 'questions.json', 'strains.json', 'path.json']) if (fs.existsSync(path.join(root, base, 'world', f))) files.add(path.join(base, 'world', f));
 }
 

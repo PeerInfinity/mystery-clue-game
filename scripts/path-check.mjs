@@ -1,17 +1,17 @@
-// Play the true path (cases/silver-blaze/world/path.json) through Watson's timeline (world.html) in headless Chrome:
+// Play the true path (cases/silver-blaze/world/path.json) through Watson's timeline (index.html) in headless Chrome:
 // a fresh page, "Read on" to each move's paragraph (so the commitment gate is met for real), then the move's clicks,
 // each checked: its control is offered, the save shows the move, `see` (a pattern) is on the page after it, and the
 // page throws nothing. Every answer the story gives on the way must find the player's one circle right; at the end of
 // the story no contradiction may be open and no likely clash unheld.
 //   node scripts/path-check.mjs [path.json]      STOP=<para> stops after that paragraph's moves (and keeps the page)
-// Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/world.html) and the headless Chrome
+// Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
 const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 const FILE = process.argv[2] ?? path.join(ROOT, 'cases/silver-blaze/world/path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
-const URL_ = process.env.URL ?? 'http://localhost:8321/world.html';
+const URL_ = process.env.URL ?? 'http://localhost:8321/';
 const STOP = +(process.env.STOP ?? 1e9);
 const STORE = 'silver-blaze-world-v1';
 

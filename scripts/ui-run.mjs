@@ -2,7 +2,7 @@
 // Hard chosen in the settings, "Next paragraph" until each move's paragraph, then the move's clicks and fields; after
 // each move the saved game is read to check that the engine took it. At the end, the record against Holmes.
 //   node scripts/ui-run.mjs [table.json] [out.json]   (default: cases/silver-blaze/action-table.json → .cache/ui-run.json)
-// Needs the game served (node scripts/serve.js → URL, default http://localhost:8321/) and the headless Chrome on port
+// Needs the game served (node scripts/serve.js → URL, default http://localhost:8321/v1/) and the headless Chrome on port
 // 9333. Only one script may drive that Chrome at a time: two clients on its one page spoil each other's runs.
 // STOP=<para> stops after that paragraph's moves; COLS=1 plays it in one column (Layout, in the settings). About 12–13 minutes for the whole game on a loaded machine.
 import fs from 'node:fs';
@@ -17,7 +17,7 @@ fs.mkdirSync(path.join(ROOT, '.cache'), { recursive: true });
 const OUT = process.argv[3] ?? path.join(ROOT, '.cache/ui-run.json');
 const moves = table.thoughts.flatMap((t) => t.moves.map((m) => ({ ...m, thought: t.id }))).sort((a, b) => a.seq - b.seq);
 const STOP = +(process.env.STOP ?? 1e9);
-const p = await open({ url: process.env.URL ?? 'http://localhost:8321/' });
+const p = await open({ url: process.env.URL ?? 'http://localhost:8321/v1/' });
 // A fresh game on Hard: clear the save, reload, choose Hard in the settings.
 await p.ev(`localStorage.clear(); 1`); await p.send('Page.reload'); await p.sleep(1500); await p.idle();
 await p.ev(`document.querySelector('.settings').open = true; 1`);

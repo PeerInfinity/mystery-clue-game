@@ -47,10 +47,10 @@ export async function start({ store, fast = false }) {
     $('#ap-pause').addEventListener('click', () => { s.stepping = false; setPaused(!s.paused); });
     $('#ap-step').addEventListener('click', () => { s.stepping = true; if (s.paused) setPaused(false); });
     const stepped = () => { if (s.stepping) { s.stepping = false; setPaused(true, `${s.lastCaption} · paused`); } };
-    $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; location.href = 'world.html'; });
+    $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; location.href = './'; });
     const ending = (text) => {
         $('#ap-caption').textContent = text;
-        strip.querySelector('.ap-tools').innerHTML = '<a class="button" href="world.html">Back to your timeline</a>';
+        strip.querySelector('.ap-tools').innerHTML = '<a class="button" href="./">Back to your timeline</a>';
         cursor.remove();
         document.body.classList.remove('autoplaying');
         window.__autoplay = status();

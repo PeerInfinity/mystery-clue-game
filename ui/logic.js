@@ -352,7 +352,7 @@ function render() {
     document.documentElement.style.setProperty('--head', `${document.querySelector('header.top').offsetHeight}px`);
     document.documentElement.style.setProperty('--tabs', `${$('#views').offsetHeight}px`);
     const hash = `#${state.view}${state.id ? `/${encodeURIComponent(state.id)}` : ''}`;
-    if (location.hash !== hash) history.replaceState(null, '', hash);
+    if (location.hash !== hash) history.replaceState(null, '', location.pathname + location.search + hash);   // not against the <base> (v1/logic.html sets one)
 }
 function select(id, keepView = false) {
     state.id = id;

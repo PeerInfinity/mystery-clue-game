@@ -2,7 +2,7 @@
 // veil, not a timer), click, choose, read the saved game, take a screenshot. The cache is off, so the page is always the
 // served tree as it is now. Used by scripts/ui-run.mjs.
 import fs from 'node:fs';
-export async function open({ save = null, url = process.env.URL ?? 'http://localhost:8321/' } = {}) {
+export async function open({ save = null, url = process.env.URL ?? 'http://localhost:8321/v1/' } = {}) {
     const list = await (await fetch('http://127.0.0.1:9333/json')).json();
     const page = list.find((t) => t.type === 'page');
     const ws = new WebSocket(page.webSocketDebuggerUrl);

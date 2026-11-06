@@ -4,7 +4,7 @@
 //   node scripts/autoplay-check.mjs [minimal] [shots dir]
 // `minimal`: the fewest moves (`?autoplay=minimal-fast`): the record as its table says, no
 // notes written, and its clicks counted by kind (→ .cache/autoplay-check-minimal.json).
-// Needs the game served (node scripts/serve.js → URL, default http://localhost:8321/). Only one script may drive that
+// Needs the game served (node scripts/serve.js → URL, default http://localhost:8321/v1/). Only one script may drive that
 // Chrome at a time. About the runner's time (scripts/ui-run.mjs).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,7 +15,7 @@ const table = JSON.parse(fs.readFileSync(path.join(ROOT, `cases/silver-blaze/${M
 const thoughts = JSON.parse(fs.readFileSync(path.join(ROOT, 'cases/silver-blaze/thoughts.json'), 'utf8')).thoughts;
 const shots = process.argv[MINIMAL ? 3 : 2] ?? null;
 if (shots) fs.mkdirSync(shots, { recursive: true });
-const base = process.env.URL ?? 'http://localhost:8321/';
+const base = process.env.URL ?? 'http://localhost:8321/v1/';
 const p = await open({ url: base });
 // The player's game, kept aside: a save under the player's key must come back untouched.
 const PLAYER = 'mystery-clue-game:silver-blaze:v2';
