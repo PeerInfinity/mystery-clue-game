@@ -24,6 +24,7 @@ See `docs/technical.md`. The ones used most:
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Serve the game | `node scripts/serve.js` → http://localhost:8321/ |
 | Validate the case | `npm run validate`, `npm run validate-thoughts` |
+| Every page check of Watson's timeline (about 6 min; starts the server and its own Chrome if needed) | `npm run page-checks` |
 | Play the true path through Watson's timeline (about a minute; port 9333) | `node scripts/path-check.mjs` |
 | Watson's timeline's autoplay to the end (under a minute; port 9333; a layout argument) | `node scripts/world-autoplay-check.mjs` |
 | Watson's timeline's hints, a hint-only player to the end (about 3 min; port 9333) | `node scripts/world-hints-check.mjs` |

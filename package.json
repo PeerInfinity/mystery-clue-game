@@ -17,7 +17,8 @@
     "hints": "node scripts/hints.js",
     "incremental": "node scripts/incremental.js",
     "search-cost": "node scripts/search-cost.js",
-    "depgraph": "node scripts/depgraph.js"
+    "depgraph": "node scripts/depgraph.js",
+    "page-checks": "node scripts/page-checks.mjs"
   },
   "devDependencies": {
     "ajv": "^8.17.1"

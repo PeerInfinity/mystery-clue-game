@@ -84,6 +84,7 @@ scripts need a local Chrome.
 | What a blind search costs at each wait in incremental mode, over random orders (a measurement, about 2 min) | `npm run search-cost [seeds]` (→ `.cache/search-cost.md`) |
 | The statistics, `cases/silver-blaze/stats.md` (about 1½ min) | `npm run stats` |
 | The DepGraph exports (about 5 min; `-- --prune` about 2 hours) | `npm run depgraph` |
+| Every check of Watson's timeline that plays the page, one after another (the path, the autoplay in each layout and on a phone, the hints); starts the server and a headless Chrome of its own if they are not running, and stops only those (about 6 minutes) | `npm run page-checks` |
 | Play the true path (`world/path.json`) through Watson's timeline in headless Chrome: each move offered and taken, none possible before its paragraph, every answer right, no contradiction open at the end (about a minute; `STOP=<para>`, `SAVE=<file>` for the state there) | `node scripts/path-check.mjs` |
 | The autoplay of Watson's timeline to the end (`?autoplay=fast`), its save against the path's, the player's own save untouched (under a minute; a layout: `three`, `two`, `one`; `PHONE=1`) | `node scripts/world-autoplay-check.mjs [layout]` |
 | The hints of Watson's timeline: a player who only takes hints, from a fresh page and from one with mistakes in it, must reach the end with every answer right (about 3 minutes; `fresh` or `mistakes` for one) | `node scripts/world-hints-check.mjs` |
