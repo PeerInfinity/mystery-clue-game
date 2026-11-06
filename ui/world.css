@@ -167,3 +167,6 @@ body.world-page.tabbed .top { position: static; }
 .said { padding-left: 18px; }
 .said li { margin: 4px 0; }
 #story a.ent { color: inherit; }
+/* A hint: its rungs so far, More, Do it. */
+.hint-news .hint-rungs { margin: 4px 0 6px; padding-left: 20px; }
+.hint-news .hint-rungs li { margin: 3px 0; }

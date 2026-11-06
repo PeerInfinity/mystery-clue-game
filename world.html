@@ -17,6 +17,7 @@
       <button type="button" id="next" title="Read the next paragraph">Read on ▶</button>
     </span>
     <button type="button" id="undo" class="quiet" title="Undo the last change of trust, of a mark, or of your reasoning">Undo</button>
+    <button type="button" id="hint" class="quiet" title="What a careful reader would do next: each press a step further">Hint</button>
     <details class="settings" id="settings">
       <summary title="Settings: what is on the timeline, and the page's layout"><span class="gear" aria-hidden="true">⚙</span> <span class="long">Settings</span><span class="short">Settings</span></summary>
       <div class="settings-panel">
@@ -31,6 +32,9 @@
         </label>
         <label title="Light or dark, or as this device is set">Theme
           <select id="theme"><option value="system">As the system</option><option value="light">Light</option><option value="dark">Dark</option></select>
+        </label>
+        <label title="How long the Hint button waits after each press">Wait between hints
+          <select id="hint-wait"><option value="0">none</option><option value="10">10 seconds</option><option value="30">30 seconds</option><option value="60">a minute</option></select>
         </label>
         <button type="button" id="reset" class="quiet settings-rule" title="Every link and person back to uncertain">Reset trust…</button>
         <button type="button" id="autoplay-open" class="quiet settings-rule" title="A careful reader plays the whole story through this page; your timeline is kept aside">Watch the autoplay…</button>
@@ -47,7 +51,7 @@
   <section class="panel" data-panel="0"><div class="tabs" role="tablist"></div><div class="back-row small" hidden></div><div class="panel-body tool-body" id="panel-0"></div></section>
   <section class="panel" data-panel="1"><div class="tabs" role="tablist"></div><div class="back-row small" hidden></div><div class="panel-body tool-body" id="panel-1"></div></section>
 </main>
-<div class="notices"><div id="gate-news" class="notice gate-news" role="status" hidden></div><div id="answer-news" class="notice answer-news" role="status" hidden></div><div id="lapse-news" class="notice lapse-news" role="status" hidden></div></div>
+<div class="notices"><div id="gate-news" class="notice gate-news" role="status" hidden></div><div id="answer-news" class="notice answer-news" role="status" hidden></div><div id="lapse-news" class="notice lapse-news" role="status" hidden></div><div id="hint-news" class="notice hint-news" role="status" hidden></div></div>
 <div id="parked" hidden>
   <section class="part world-story" data-part="story" aria-label="The story so far"><h2>The story</h2><div id="story"></div></section>
   <section class="part" data-part="clashes" aria-label="Contradictions"><div id="clashes"></div></section>

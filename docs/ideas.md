@@ -452,6 +452,23 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   the race), 77 more than three quarters. Paragraphs with typed facts are covered no more than the rest (54% against
   56%). So cover would not point at the paragraphs that matter; within a paragraph it would still mark which sentences
   are facts, about half of every paragraph's text.
+- **Built (2026-11-05), hints (the user's choices among the options put):** `ui/world-hints.js`, with the moves made
+  through the page shared with the autoplay (`ui/world-moves.js`). A Hint button in the header (and on the gate's
+  notice); each press goes a rung further on the same thing: (1) where to look, (2) the reasoning, the path's `why`, (3)
+  the move, with Do it. After a press the button waits (Settings: none, 10, 30 or 60 seconds; 30 by default); reading on
+  is shown whole and starts no wait. What a hint is about, from wherever the player is: (a) a wrong mark on a question
+  the path settles, once the path has its reason at or before the paragraph read to (Simpson circled at ¶30 is let be;
+  at ¶41 the hint says to look again), and only on an answer the page lists now; (b) a distrust the path does not make
+  (a false statement's own is let be); (c) the next move of the path not made that the page allows now, tried and taken
+  back at once, the soonest answer given away first; a circle or crossing counts as done once the question has any
+  right answer circled; views (plans, checks) are not hinted; (d) **the user's addition:** when nothing is possible,
+  read on. A move is offered from its `hint_at` if it has one (Mapleton from ¶114, **the user's ruling**: a hint points
+  only at what the page supports). `scripts/world-hints-check.mjs`: a player who only takes hints reaches the end with
+  every answer right, no contradiction open, no likely clash unheld, in 66 hints from a fresh page; from a page with
+  mistakes (Simpson and the stick circled at ¶20, the house crossed out, Holmes's recital distrusted) in 67, each mistake
+  found and undone. Found on the way: an answer behind "More" goes back behind it when its mark passes through
+  uncertain (crossed out → circled), and a mark can sit on an answer not yet listed (reading back), which no click
+  reaches.
 
 ### An incremental game about trying every combination
 

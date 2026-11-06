@@ -26,6 +26,7 @@ See `docs/technical.md`. The ones used most:
 | Validate the case | `npm run validate`, `npm run validate-thoughts` |
 | Play the true path through Watson's timeline (about a minute; port 9333) | `node scripts/path-check.mjs` |
 | Watson's timeline's autoplay to the end (under a minute; port 9333; a layout argument) | `node scripts/world-autoplay-check.mjs` |
+| Watson's timeline's hints, a hint-only player to the end (about 3 min; port 9333) | `node scripts/world-hints-check.mjs` |
 | Play the action table through the real page (about 12–13 min; port 9333, one script at a time) | `node scripts/ui-run.mjs` |
 
 ## Conventions

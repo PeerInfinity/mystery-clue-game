@@ -6,14 +6,10 @@
 // the viewer's layout, choosing tabs as a player would. `?autoplay=fast` plays with no pauses and no cursor (the check,
 // scripts/world-autoplay-check.mjs). The same moves are checked by scripts/path-check.mjs from outside the page.
 
+import { $, sleep, esc, Stopped, Failed, makeMover } from './world-moves.js';
+
 const CASE = 'cases/silver-blaze';
 const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], ['4', '4×']];
-const $ = (sel) => document.querySelector(sel);
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const esc = (s) => String(s).replace(/["\\]/g, '\\$&');
-const LEVELS = { distrusted: 0, uncertain: 1, trusted: 2 };
-class Stopped extends Error {}
-class Failed extends Error {}
 
 export async function start({ store, fast = false }) {
     const path = await fetch(`${CASE}/world/path.json`, { cache: 'no-cache' }).then((r) => r.json());
@@ -60,56 +56,9 @@ export async function start({ store, fast = false }) {
         window.__autoplay = status();
     };
 
-    // ---------- moving through the page ----------
-    // Every drawing replaces the page's parts, so an element is always looked up afresh by its selector.
-    const shown = (el) => !!el && el.offsetParent !== null;
-    const tabbed = () => document.body.classList.contains('tabbed');
-    const twoCols = () => tabbed() && !$('#tabbed').classList.contains('one');
-    async function glide(el) {
-        el.scrollIntoView({ block: 'center', inline: 'nearest' });
-        if (!factor()) return;
-        const r = el.getBoundingClientRect();
-        const ms = 1000 / factor();
-        cursor.style.transition = `transform ${ms}ms ease-in-out`;
-        cursor.style.transform = `translate(${r.left + Math.min(r.width / 2, 40)}px, ${r.top + r.height / 2}px)`;
-        await sleep(ms + 30);
-        cursor.classList.remove('click'); void cursor.offsetWidth; cursor.classList.add('click');
-    }
-    /** Bring a part into view, as a player would: its tab, in the panel that does not hold the detail. */
-    async function showPart(el) {
-        if (shown(el) || !tabbed()) return;
-        const part = el.closest('.part')?.dataset.part;
-        if (!part) return;
-        const panel = twoCols() && part === 'detail' ? 1 : 0;
-        await press(`#tabbed .panel[data-panel="${panel}"] [data-tab="${part}"]`);
-    }
-    async function press(sel) {
-        await gate();
-        let el = $(sel);
-        if (!el) return false;
-        if (!shown(el)) { await showPart(el); el = $(sel); }
-        if (!shown(el)) return false;
-        await glide(el);
-        el.click();
-        await sleep(fast ? 0 : 60);
-        return true;
-    }
-    async function choose(sel, value) {
-        await gate();
-        let el = $(sel);
-        if (!el) return false;
-        if (!shown(el)) { await showPart(el); el = $(sel); }
-        await glide(el);
-        el.value = String(value);
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-        return true;
-    }
-    /** What a move works on, opened in the detail: a fact on the timeline, or a question. */
-    async function openOn(on) {
-        if (/^(hyp|pre):/.test(on)) on = `q:${on.slice(4).split('=')[0]}`;
-        if (on.startsWith('q:')) return press(`#q-box a.link[data-q="${esc(on.slice(2))}"]`);
-        return (await press(`#timeline [data-fact="${esc(on)}"] .ph`)) || press(`#timeline [data-fact="${esc(on)}"]`);
-    }
+    // ---------- moving through the page (ui/world-moves.js) ----------
+    const { shown, showPart, press, play: make } = makeMover({ store, fast, factor, gate, cursor: fast ? null : cursor });
+
     /** Highlight for a moment the smallest part of the page that shows what the move was for. */
     async function seen(pattern) {
         const re = new RegExp(pattern);
@@ -139,53 +88,16 @@ export async function start({ store, fast = false }) {
     };
     async function words(m) {
         if (m.do === 'circle' || m.do === 'cross') {
-            const pick = $(chipSel(m))?.innerText ?? m.pick;
+            const pick = $(chipSel(m))?.innerText ?? $(`a.ent[data-ent="${esc(m.pick)}"]`)?.innerText ?? m.pick;
             return `${m.do === 'cross' ? 'Crossing out' : isRight(m) ? 'Circling' : 'Trying'} “${pick}” on “${qLabel(m.q)}”`;
         }
-        if (m.do === 'trust') return `Distrusting this statement: ${$('#detail h2')?.innerText ?? m.on}`;
+        if (m.do === 'trust') return `Distrusting this statement: ${($(`#timeline [data-fact="${esc(m.on)}"]`)?.innerText ?? $('#detail h2')?.innerText ?? m.on).replace(/\s*¶\d+\s*$/, '')}`;
         return WORDS[m.do] ?? 'A move';
     }
 
     async function play(m) {
-        const on = m.on ?? (['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
-        if (on && !(await openOn(on))) throw new Failed(`cannot open ${on}`);
         caption(`${await words(m)}${m.why ? ` — ${m.why}` : ''}`);
-        const before = saved();
-        switch (m.do) {
-            case 'circle': case 'cross': {
-                if (!$(chipSel(m))) await press(`#q-box [data-more-q="${esc(m.q)}"]`);
-                const want = m.do === 'circle' ? 'circled' : 'crossed';
-                for (let i = 0; i < 3 && saved().marks?.[m.q]?.[m.pick] !== want; i++) if (!(await press(chipSel(m)))) break;
-                if (saved().marks?.[m.q]?.[m.pick] !== want) throw new Failed('the mark did not take');
-                break;
-            }
-            case 'trust': {
-                const sel = m.link ? `#detail .link-trust[data-key="${esc(m.link)}"]` : `#detail .person-trust[data-person="${esc(m.person)}"]`;
-                if (!(await choose(sel, LEVELS[m.level]))) throw new Failed('no trust control');
-                break;
-            }
-            case 'a': case 'b': case 'c': {
-                const sel = m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
-                if (!(await press(sel)) || (saved().reasoning?.length ?? 0) !== (before.reasoning?.length ?? 0) + 1) throw new Failed('the move did not take');
-                break;
-            }
-            case 'plan': {
-                const sel = `#detail [data-move-d="${esc(m.of)}"]`;
-                if (!$(sel)) throw new Failed('no "What would this need?"');
-                if ($(sel).innerText !== 'Hide') await press(sel);
-                break;
-            }
-            case 'stop': case 'compare': case 'account': {
-                const sel = `#detail [data-${m.do}="${esc(m.key)}"]`, d = `#detail [data-move-d="${esc(m.key.split('|')[0])}"]`;
-                if (!$(sel) && $(d) && $(d).innerText !== 'Hide') await press(d);
-                if (!(await press(sel))) throw new Failed('the check is not offered');
-                break;
-            }
-            case 'hold':
-                if (!(await press(`[data-hold="${esc(m.strain)}"]`))) throw new Failed('the likely clash is not shown');
-                break;
-            default: throw new Failed(`unknown move ${m.do}`);
-        }
+        await make(m);
         if (m.see && !(await seen(m.see))) throw new Failed(`not on the page: ${m.see}`);
         s.moves++;
         window.__autoplay = status();

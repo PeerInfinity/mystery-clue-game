@@ -98,13 +98,13 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); for (const k of ['layout', 'panels', 'theme']) if (own[k] != null) state[k] = own[k]; } catch { /* the defaults */ }
 state.sel = null;
 state.note = null;
 if (!Array.isArray(state.held)) state.held = [];
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -1305,7 +1305,7 @@ function renderGate() {
     const count = (q) => { const n = circledCount(q); return n === 0 ? 'nothing circled yet' : `${n} circled`; };
     el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. Commit first: circle exactly one answer${qs.length === 1 ? '' : ' for each'}. Any answer will do; the key shows at ¶${state.para + 1}.</p>
       <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
-      <p><button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
+      <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
 }
 function renderAnswers() {
@@ -1453,6 +1453,28 @@ document.addEventListener('change', (e) => {
     }
 });
 render();
+// Hints (ui/world-hints.js): what they need of the page, the page's own functions.
+const hintApi = {
+    para: () => state.para, last: LAST, wait: () => state.hintWait,
+    question: (id) => qById.get(id), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
+    name: (id) => (entityById.has(id) ? nameOf(id) : null),
+    // A link of a chain in words: a telling as the timeline says it, a speech as who said it to whom.
+    linkName: (key) => {
+        const f = factById.get(key);
+        if (f) return `“${phrase(f).replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim()}”`;
+        const m = key.match(/^(said|member):([^>]+)>(.+)$/);
+        return m ? (m[1] === 'said' ? `what ${nameOf(m[2])} says to ${nameOf(m[3])}` : `${nameOf(m[2])} as one of ${nameOf(m[3])}`) : key;
+    },
+    // A statement is false when its fact is, or (a claim) when anything it asserts is.
+    statementFalse: (id) => { const f = factById.get(id); return !!f && (CLAIM_ATTRS.has(f.attr) ? allAssertions.some((x) => x.claim === id && x.truth === false) : f.truth === false); },
+    setTrust: ({ link, person }, level) => changeTrust((tr) => { if (link) { if (level === DEFAULT_LEVEL) delete tr.links[link]; else tr.links[link] = level; } else delete tr.people[person]; }),
+    view: () => ({ sel: state.sel, panels: [...state.panels], backs: [...backs], note: state.note }),
+    restore: (v) => { state.sel = v.sel; state.panels = v.panels; backs = v.backs; state.note = v.note; save(); render(); },
+};
+document.getElementById('hint-wait').value = String(state.hintWait);
+document.getElementById('hint-wait').addEventListener('change', (e) => { state.hintWait = Number(e.target.value); save(); });
+if (AUTOPLAY === null) import('./world-hints.js').then((m) => m.makeHints({ store: STORE, api: hintApi }));
+else document.getElementById('hint').hidden = true;
 if (AUTOPLAY !== null) { save(); import('./world-autoplay.js').then((m) => m.start({ store: STORE, fast: AUTOPLAY === 'fast' })); }
 document.getElementById('autoplay-open')?.addEventListener('click', () => {
     if (confirm('Watch a careful reader fill in the timeline, from the first paragraph to the last? Your own timeline is kept aside and comes back when you stop.')) location.search = '?autoplay';

@@ -684,7 +684,9 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   "What would this need?"), `stop`, `compare`, `account` (a check `key` on an open plan) and `hold` (a likely clash set
   aside). `see`: a pattern the page must show after the move; `for_q`: the gated questions the move serves (so a
   just-in-time path can be derived); `why`: the reader's thought in plain words (the autoplay's caption; hints later);
-  `late`: why a move comes after the first paragraph the page allows it (none at present).
+  `late`: why a move comes after the first paragraph the page allows it (none at present); `hint_at`: the paragraph
+  from which a hint may offer the move, when later than `at` (Mapleton, the reader's own reach at ¶40, is hinted only
+  from ¶114, where the page supports it: the user's ruling).
   `scripts/path-check.mjs` plays it through the page: Read on to each move's paragraph (the gate met for real), each
   move's control offered and its result in the save, every answer given found right, and at the end no contradiction
   open and no likely clash unheld. It also fails a move found possible earlier than its `at` (unless `late`): before
