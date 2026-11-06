@@ -102,6 +102,8 @@ for (const f of facts) {
         for (const r of ['thing', 'to', 'via', 'item']) if (x[r] != null && !entities.has(x[r])) err(id, `${r}: no entity ${x[r]}`);
     };
     if (f.act != null || f.thing != null) checkAct(f.id, f);
+    // A guard (the lad on watch) guards a place behind a door: the place inside it.
+    if (f.guards != null && !Object.values(world.joins ?? {}).some((sides) => sides[0] === f.guards)) err(f.id, `guards: ${f.guards} is not the inside of a door (joins)`);
     if (f.plan) {
         if (!entities.has(f.plan.agent)) err(f.id, `plan.agent: no entity ${f.plan.agent}`);
         list(f.plan.steps).forEach((x, i) => checkAct(`${f.id} step ${i}`, x));

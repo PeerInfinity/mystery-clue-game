@@ -172,6 +172,29 @@ test("Straker's plan in small: an aim's intended last step, and a need the playe
     assert.ok(!d.steps[1].needs.some((n) => n.req.attr === 'location' && !n.req.away), 'no door named for the injuring: no need to be at one');
 });
 
+test('the guard: leading out needs the lad on watch unable to act; the dog, if it was quiet, to know the agent', () => {
+    const pl = places({ entities: [...yard.entities, { id: 'horse', kind: 'animal' }, { id: 'dog', kind: 'animal' }, { id: 'villa', kind: 'place', within: 'yard' }, { id: 'town', kind: 'place' }] });
+    const watch = { id: 'f.watch', of: 'boy', attr: 'role', value: 'on guard', guards: 'stable', time: { from: 't9', to: 'tmorn' } };
+    const home = { id: 'f.home', of: 'trainer', attr: 'lives_at', value: 'villa', time: { from: 't9' } };
+    const away = { id: 'f.away', of: 'tout', attr: 'lives_at', value: 'town', time: { from: 't9' } };
+    const c = { joins: { door: ['stable', 'yard'] }, places: pl, order, entries: [watch, home, away], extraNeeds: { lead_out: [{ of: 'dog', knows: '$agent', among: '$via' }] } };
+    const leads = (who) => ({ id: `h.leads.${who}`, of: who, act: 'lead_out', thing: 'horse', via: 'door', time: { from: 'tout', to: 'tmorn' } });
+    const needs = (who) => pointImplications(leads(who), nameOf, c).entries.filter((e) => e.role === 'requires');
+    const guard = needs('trainer').find((e) => e.guard);
+    assert.deepEqual([guard.of, guard.value, guard.by], ['boy', 'unable to act', 'f.watch'], 'one need per guard on watch');
+    assert.ok(!needs('boy').some((e) => e.guard), 'the guard himself needs no guard out of the way');
+    assert.equal(requirementStatus(order, c.entries, guard, c).status, 'unknown', 'nothing says the boy was drugged');
+    const drugs = { id: 'h.drugs', of: 'trainer', act: 'drug', to: 'boy', item: 'opium', time: { after: 't9', before: 'tout' } };
+    const aim = { id: 'h.aim', of: 'trainer', attr: 'intends', goal: { of: 'horse', attr: 'condition', value: 'injured' }, step: { act: 'injure', thing: 'horse' }, time: { at: 'tout' } };
+    const fit = checkFit(drugs, aim, [leads('trainer')], nameOf, c);
+    assert.deepEqual([fit.fits, fit.need.guard], [true, 'stable'], 'the guard drugged so that the horse could be taken: the drugging serves the plan');
+    assert.equal(checkFit({ ...drugs, of: 'wife' }, aim, [leads('trainer')], nameOf, c).other, true, "one culprit: the wife's drugging is not the trainer's doing");
+    const dog = (who) => needs(who).find((e) => e.knows);
+    assert.equal(requirementStatus(order, c.entries, dog('trainer'), c).status, 'met', 'the dog knows those who live at the yard');
+    assert.equal(requirementStatus(order, c.entries, dog('tout'), c).status, 'unknown', 'a stranger from town: nothing says it knew him');
+    assert.ok(!pointImplications({ ...leads('trainer'), via: undefined }, nameOf, c).entries.some((e) => e.guard), 'no door: no guard');
+});
+
 test('what stopped an intended step: an action that left its agent unable to act, in time', () => {
     const step = { id: 's', of: 'trainer', act: 'injure', thing: 'horse', intended: true, time: { after: 't9', before: 'tmorn' } };
     const kick = { id: 'k', of: 'horse', act: 'strike', to: 'trainer', time: { at: 'tout' } };

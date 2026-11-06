@@ -31,7 +31,11 @@ export { STATES };
  *   or a literal);
  * - `{of, key: role}`: carrying a key to it; `{of, carrying: role}`: carrying it (owning it will do);
  * - `{of, at: door}`: on one of a door's two sides (`joins` in the data);
- * - effects only: `{of, through: door}`: on the other side of the door from where it was just before.
+ * - effects only: `{of, through: door}`: on the other side of the door from where it was just before;
+ * - `{guard: door}`: every guard of the place inside the door (an entry with `guards: <place>`, the lad on watch)
+ *   unable to act (`DISABLED`: drugged, struck down) unless the guard is the agent himself: one need per guard;
+ * - `{of, knows: role, among: door}`: an animal kept behind the door knows the agent, as it knows the people who live
+ *   at the place the door's outer side is (a stable dog knows the people of King's Pyland, not a stranger).
  * An effect with `kinds` holds only if the item is of one of those kinds (a paper of money makes its taker willing; a
  * paper of opium does not).
  */
@@ -41,12 +45,12 @@ export const ACTIONS = {
     open: { label: 'opening', requires: [{ of: '$thing', state: 'door', value: 'shut' }, { of: '$agent', at: '$thing' }], effects: [{ of: '$thing', state: 'door', value: 'open' }] },
     close: { label: 'shutting', requires: [{ of: '$thing', state: 'door', value: 'open' }, { of: '$agent', at: '$thing' }], effects: [{ of: '$thing', state: 'door', value: 'shut' }] },
     go_through: { label: 'going through', requires: [{ of: '$thing', state: 'door', value: 'open' }, { of: '$agent', at: '$thing' }], effects: [{ of: '$agent', through: '$thing' }] },
-    lead_out: { label: 'leading out', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }, { of: '$thing', at: '$via' }], effects: [{ of: '$thing', through: '$via' }, { of: '$agent', through: '$via' }] },
+    lead_out: { label: 'leading out', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }, { of: '$thing', at: '$via' }, { guard: '$via' }], effects: [{ of: '$thing', through: '$via' }, { of: '$agent', through: '$via' }] },
     give: { label: 'giving', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'carrying', value: '$item' }, { of: '$to', attr: 'willing', value: '$agent', kinds: ['money', 'message'] }] },
     ask: { label: 'asking', requires: [{ of: '$to', attr: 'willing', value: '$agent' }], effects: [{ of: '$agent', attr: 'knows', value: '$about' }] },
     drug: { label: 'drugging', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'drugged' }] },
     strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
-    injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
+    injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }, { guard: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
     take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
     cut_self: { label: 'cut, as he fell,', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', attr: 'condition', value: 'struck down' }], effects: [{ of: '$agent', attr: 'condition', value: 'cut' }] },
@@ -161,7 +165,20 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
     const out = [];
     requires.forEach((r, i) => {
         const base = { id: `r:b:${f.id}:needs${i}`, role: 'requires', time: before, of: R(r.of), ...(r.hyp ? { hyp: true } : {}) };
+        if (r.guard) {
+            // The guards of the place inside the door, on watch at the time: each unable to act (the agent excepted).
+            const door = R(r.guard), inside = ctx.joins?.[door]?.[0];
+            if (!inside) return;
+            guardsOf(ctx, inside, anchorOf(t)).filter((g) => !eq(ctx)(g.of, f.of)).forEach((g, j) => out.push({ ...base, id: `${base.id}.${j}`, of: g.of, attr: 'condition', value: 'unable to act', guard: inside, by: g.id, time: during }));
+            return;
+        }
         if (base.of == null) return;
+        if (r.knows) {
+            const door = R(r.among), at = ctx.joins?.[door]?.[1];
+            if (R(r.knows) == null || f.of === '?') return;
+            out.push({ ...base, attr: 'knows', value: R(r.knows), knows: R(r.knows), ...(at ? { among: at } : {}), time: during });
+            return;
+        }
         // A rule about a role the action does not have (injuring with no door named) is left out.
         if ([r.at, r.key, r.carrying, r.away].some((x) => typeof x === 'string' && x.startsWith('$') && R(x) == null)) return;
         if (r.state) { if (!change) out.push({ ...base, attr: r.state, value: r.value, neg: !!r.neg }); }
@@ -271,6 +288,18 @@ export function requirementStatus(order, entries, req, ctx = {}) {
         if (!p) return { status: 'unknown' };
         return { status: (ctx.places?.chain(p.value) ?? [p.value]).includes(req.away) ? 'against' : 'met', entry: p };
     }
+    if (req.guard) {
+        // A guard unable to act: drugged or struck down by then (the morning's "under a powerful drug" is too late).
+        const has = others.find((e) => same(e.of, req.of) && e.attr === 'condition' && DISABLED.has(e.value) && !e.neg && startOf(e.time) && notAfter(e));
+        return has ? { status: 'met', entry: has } : { status: 'unknown' };
+    }
+    if (req.knows && req.among) {
+        // An animal knows the people who live at the place: the agent's home within it (a dog knows the trainer).
+        const home = others.find((e) => e.attr === 'lives_at' && same(e.of, req.knows) && !e.neg && typeof e.value === 'string' && (ctx.places?.chain(e.value) ?? [e.value]).includes(req.among));
+        if (home) return { status: 'met', entry: home };
+        const has = others.find((e) => same(e.of, req.of) && e.attr === 'knows' && same(e.value, req.knows) && !e.neg && notAfter(e));
+        return has ? { status: 'met', entry: has } : { status: 'unknown' };
+    }
     if (req.key) {
         const c = coverOf(req.time);
         const has = others.find((e) => e.attr === 'carrying' && same(e.of, req.of) && (e.key === req.key || /\bkey\b/.test(String(e.value))) && (!c || anchorOf(e.time) === t));
@@ -295,6 +324,18 @@ export function requirementStatus(order, entries, req, ctx = {}) {
     return has ? { status: 'met', entry: has } : { status: 'unknown' };
 }
 
+/** The guards of a place at an action's time `t` (entries with `guards: <place>`, on watch then): the lad on guard. */
+function guardsOf(ctx, place, t) {
+    const order = ctx.order;
+    const on = (e) => {
+        const s = startOf(e.time), c = coverOf(e.time);
+        if (!order || !t) return true;
+        if (s && order.lt(t, s)) return false;
+        return !(c?.end && order.lt(c.end, t));
+    };
+    return (ctx.entries ?? []).filter((e) => e.guards === place && !e.neg && on(e));
+}
+
 /** Whether an effect (or a goal) meets a need: the same state of the same thing (a door not locked: open or shut). */
 export function meets(eff, req, ctx = {}) {
     const same = eq(ctx);
@@ -302,6 +343,7 @@ export function meets(eff, req, ctx = {}) {
     if (req.at) return eff.attr === 'location' && sideOf(ctx, req.at, eff.value) >= 0;
     if (req.away) return eff.attr === 'location' && !(ctx.places?.chain(eff.value) ?? [eff.value]).includes(req.away);
     if (req.key) return eff.attr === 'carrying' && (eff.key === req.key || /\bkey\b/.test(String(eff.value)));
+    if (req.guard) return eff.attr === 'condition' && DISABLED.has(eff.value) && !eff.cond;
     if (eff.attr !== req.attr) return false;
     if (STATES[req.attr]) return req.neg ? eff.value !== req.value : eff.value === req.value;
     return same(eff.value, req.value) && !!eff.neg === !!req.neg;
@@ -331,6 +373,8 @@ export function productsOf(x, nameOf, ctx = {}) {
  */
 export function checkFit(x, target, linked = [], nameOf = (id) => id, ctx = {}) {
     if (!target.goal) return { fits: false, why: 'That intention has no goal the engine can read.' };
+    // One culprit: an intention is served by its own agent's actions (someone else's would make an accomplice).
+    if (x.of && target.of && x.of !== '?' && target.of !== '?' && !eq(ctx)(x.of, target.of)) return { fits: false, other: true, why: `That is ${nameOf(x.of)}'s doing, not ${nameOf(target.of)}'s: a plan is carried out by the one who intends it (an accomplice would be another story).` };
     const products = productsOf(x, nameOf, ctx);
     if (!products.length) return { fits: false, why: 'The engine does not know what this brings about.' };
     const goal = { of: target.goal.of, attr: target.goal.attr, value: target.goal.value, neg: false };

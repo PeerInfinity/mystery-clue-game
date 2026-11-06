@@ -363,6 +363,15 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   the striker against his having no wound, Derbyshire as a friend against the bill in Straker's pocket, the bay as
   another Ross horse against Bayard scratched. The police's suspicion (¶39) asserts that the stranger is Simpson, so
   a wrong circle meets a contradiction there.
+- **Built (2026-11-05), the audit's step 2 (the night at the stable, the guard rule the user agreed to):** the drugging
+  is a typed action of whoever is circled for it; a guard on watch (Hunter, `guards: stable`) must be unable to act
+  for anyone else to lead the horse out or injure it there; "did not bark" adds that the dog knew the agent, met for
+  the people who live at King's Pyland. Played at ¶57: with Straker circled for the drugging, the leading out and his
+  aim, "What is this for?" links the drugging to his aim ("in order that Ned Hunter: unable to act"); his plan's dog
+  need is met (he lives at the villa), while the police theory's is not ("The stable dog knows Fitzroy Simpson:
+  nothing on the timeline says so", beside the opium, the key and the hiding-place). An action serves only its own
+  agent's intention (one culprit). Four more likely clashes (the dog barking unheard; the opium at the window or on
+  the path; exercise against Straker's own drugging). Left for step 3: who holds a key.
 
 ### An incremental game about trying every combination
 

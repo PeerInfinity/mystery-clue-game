@@ -15,6 +15,11 @@ the question's possibilities and their `from`/`out`/`by`), and marks each link a
   weapon (the stick), derbyshire and bay have a likely clash against their wrong answer; straker_aim has one against
   "to see that all was well" from ¶34; who_killed one against Simpson from ¶41. The table below is the measurement
   before any of it.
+- **Step 2 built (2026-11-05):** the drugging typed, the guard need (Hunter on watch), the dog's need from "did not
+  bark", one culprit in "What is this for?", and four likely clashes (barking unheard, the opium at the window or on
+  the path, exercise against Straker's drugging). who_drugged, horse_out_by and dog_barked now have a route from ¶46
+  (the drugging serves Straker's plan; the dog knows him and not Simpson); drug_where has its wrong answers strained;
+  straker_aim's ¶46 link is a likely clash. door_opened_by waits for step 3 (the key).
 
 ## Summary
 

@@ -623,6 +623,20 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   may carry `action`, the answer as an action of an entity (`q.thigh_cut`'s "Straker's own knife": `cut_self`), a
   hypothesis when circled. "What stopped it?" (`stops`): an action stops an intended step if one of its effects leaves
   the step's agent unable to act (`DISABLED`: struck down, dead, drugged) no later than the step's window ends.
+- The night at the stable (the logic audit's step 2). "Who drugged Hunter's supper?" has a typed entry (`drug`, to
+  Hunter, the opium, between nine and the lads' return), so a circled answer is a drugging of the hypothesis. A
+  guard: a fact with `guards: <place>` (Hunter on watch that night guards the stable, ¶20) makes leading the horse
+  out, or injuring it there, need that guard *unable to act* (`DISABLED`: drugged, struck down) unless the guard is the
+  agent (`{guard: '$via'}` in the action table, one need per guard on watch). So "What is this for?" links a drugging
+  to the plan that leads the horse out (the reader's "he was drugged so the horse could be taken", t37.16, with no rule
+  written for it), and the police theory's drugging meets the same need. One culprit: an action serves only its own
+  agent's intention (`checkFit`, as the page's own offer already was); an accomplice's drugging still meets the need
+  on the timeline (the story's open exception, ¶218). The dog comes in from the player's circle: "did not bark" on
+  "Did the dog bark in the night?" adds to leading out the need that the dog knew the agent (`{of, knows: '$agent',
+  among: '$via'}`), met when the agent lives at the place the door opens onto (King's Pyland: Straker's villa, the
+  lads' loft; not Simpson's villa on the moor). Likely clashes for the rest: barking unheard (the loft is over the
+  harness-room), the drug put in at the window (the stranger could not know the dish) or on the path (the maid ran
+  from him), exercise against Straker's own drugging.
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's
