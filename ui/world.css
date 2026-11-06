@@ -153,3 +153,7 @@ body.world-page.tabbed .top { position: static; }
 .strain-box li { margin: 6px 0; }
 .strain-box li.held { opacity: .6; }
 .strains-key li { margin: 4px 0; }
+/* The autoplay (ui/world-autoplay.js): what a move shows the reader, highlighted for a moment. */
+.ap-seen { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 12%, transparent); transition: background .3s; }
+/* On a phone the autoplay's strip sits at the top: the header goes below it, so its Read on stays in view. */
+@media (max-width: 699px) { body.world-page.autoplaying { padding-top: 112px; } }

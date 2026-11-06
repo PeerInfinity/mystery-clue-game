@@ -683,7 +683,7 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   `on`; the path distrusts only false statements, by their statement link), `a`, `b`, `c` (the moves), `plan` (open
   "What would this need?"), `stop`, `compare`, `account` (a check `key` on an open plan) and `hold` (a likely clash set
   aside). `see`: a pattern the page must show after the move; `for_q`: the gated questions the move serves (so a
-  just-in-time path can be derived); `why`: the reader's thought in plain words (for hints and the autoplay later);
+  just-in-time path can be derived); `why`: the reader's thought in plain words (the autoplay's caption; hints later);
   `late`: why a move comes after the first paragraph the page allows it (none at present).
   `scripts/path-check.mjs` plays it through the page: Read on to each move's paragraph (the gate met for real), each
   move's control offered and its result in the save, every answer given found right, and at the end no contradiction

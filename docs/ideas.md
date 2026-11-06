@@ -431,6 +431,15 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   cross out the drug at ¶36 without trying it; the rule is covered by `engine/actions.test.js`. No move is late. Note:
   Mapleton at ¶40 is the reader's own reach (who gains, means, distance), which the page does not support until the
   likely clashes of ¶114–124; the data's `answer_inferable_at` times it, not the page.
+- **Built (2026-11-05), the autoplay (the user agreed to the proposal):** `ui/world-autoplay.js`, from Settings → Watch the
+  autoplay… (`world.html?autoplay`), as the old game's: a save of its own (the player's timeline kept aside, only its
+  layout and theme borrowed), fresh each time; a strip with the paragraph, the caption, Pause, Step, speeds ¼×–4× and
+  Stop; a cursor gliding to each control, the page's own events; Read on with the real button, so the gate is met as a
+  player meets it. One playthrough, the careful reader's path (a just-in-time one from `for_q` could come later). The
+  caption says each move in plain words with the reader's `why` (a wrong answer circled reads "Trying"); what a move
+  shows (`see`) is highlighted for a moment, its tab chosen first in tabbed layouts. It plays in the viewer's layout,
+  choosing tabs as a player would; on a phone the header moves below the strip. It starts paused, so a speed can be
+  chosen first. About 8–10 minutes at 1×. `scripts/world-autoplay-check.mjs` plays it with no pauses in each layout.
 
 ### An incremental game about trying every combination
 

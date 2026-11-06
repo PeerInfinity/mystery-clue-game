@@ -7,7 +7,11 @@ import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEV
 import { ACTIONS, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
-const STORE = 'silver-blaze-world-v1';
+// `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
+// the player's timeline is kept aside, only its layout and theme borrowed. `?autoplay=fast`: no pauses (the check).
+const AUTOPLAY = new URLSearchParams(location.search).get('autoplay');
+const PLAYER_STORE = 'silver-blaze-world-v1';
+const STORE = AUTOPLAY === null ? PLAYER_STORE : 'silver-blaze-world-autoplay';
 const get = (url, as = 'json') => fetch(url, { cache: 'no-cache' }).then((r) => {
     if (!r.ok) throw new Error(`${url}: ${r.status}`);
     return as === 'json' ? r.json() : r.text();
@@ -91,7 +95,8 @@ const LAST = story.length - 1;
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
 const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
-try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
+if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
+else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); for (const k of ['layout', 'panels', 'theme']) if (own[k] != null) state[k] = own[k]; } catch { /* the defaults */ }
 state.sel = null;
 state.note = null;
 if (!Array.isArray(state.held)) state.held = [];
@@ -1379,3 +1384,7 @@ document.addEventListener('change', (e) => {
     }
 });
 render();
+if (AUTOPLAY !== null) { save(); import('./world-autoplay.js').then((m) => m.start({ store: STORE, fast: AUTOPLAY === 'fast' })); }
+document.getElementById('autoplay-open')?.addEventListener('click', () => {
+    if (confirm('Watch a careful reader fill in the timeline, from the first paragraph to the last? Your own timeline is kept aside and comes back when you stop.')) location.search = '?autoplay';
+});

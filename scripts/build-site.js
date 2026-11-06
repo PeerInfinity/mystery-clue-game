@@ -45,7 +45,7 @@ for (const dir of fs.readdirSync(path.join(root, 'cases'))) {
     for (const f of ['case.json', ...(main.parts ?? []), main.mentions_file, main.thoughts_file, main.case?.source?.text_file].filter(Boolean)) files.add(path.join(base, f));
     for (const f of ['action-table.json', 'action-table-minimal.json', 'hints.json', 'incremental.json']) if (fs.existsSync(path.join(root, base, f))) files.add(path.join(base, f));
     // The world model, for Watson's timeline (world.html).
-    for (const f of ['entities.json', 'times.json', 'facts.json', 'accounts.json', 'questions.json', 'strains.json']) if (fs.existsSync(path.join(root, base, 'world', f))) files.add(path.join(base, 'world', f));
+    for (const f of ['entities.json', 'times.json', 'facts.json', 'accounts.json', 'questions.json', 'strains.json', 'path.json']) if (fs.existsSync(path.join(root, base, 'world', f))) files.add(path.join(base, 'world', f));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
