@@ -39,6 +39,7 @@ await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three' }))}); 1`);
 await send('Page.reload'); await sleep(800); await ready();
 errors.length = 0;
 
+const reload = async () => { await send('Page.reload'); await sleep(500); await ready(); };
 const save = () => ev(`JSON.parse(localStorage.getItem(${J(STORE)}) ?? '{}')`);
 const exists = (sel) => ev(`!!document.querySelector(${J(sel)})`);
 const click = async (sel) => { const ok = await ev(`(() => { const e = document.querySelector(${J(sel)}); if (!e) return false; e.click(); return true; })()`); await sleep(30); return ok; };
@@ -59,10 +60,64 @@ async function openOn(on) {
 }
 const defaultOn = (m) => m.on ?? (['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
 
+// --- Earliest. The data's earliest paragraph for a circle; the page's, for the reasoning moves, found in play.
+const W = path.join(ROOT, 'cases/silver-blaze/world');
+const qs = new Map(JSON.parse(fs.readFileSync(path.join(W, 'questions.json'), 'utf8')).questions.map((q) => [q.id, q]));
+const strains = JSON.parse(fs.readFileSync(path.join(W, 'strains.json'), 'utf8')).strains;
+const label = (m) => `${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`;
+const early = [];
+const report = (m, at, why) => { early.push({ m, at }); failures++; console.log(`FAIL EARLY ¶${m.at} → ¶${at} ${label(m)}${why ? ` (${why})` : ''}`); };
+for (const m of moves.filter((x) => x.do === 'circle' && !x.late)) {
+    const q = qs.get(m.q), o = q?.possibilities.find((x) => x.value === m.pick);
+    if (!o) continue;
+    const right = q.answer === m.pick || (q.also_right ?? []).includes(m.pick);
+    const strain = strains.find((x) => [x.a, x.b].some((y) => y?.q === m.q && y.pick === m.pick));
+    const at = right ? Math.max(q.raised ?? 0, o.available, q.answer_inferable_at ?? 0) : m.see && strain ? Math.max(q.raised ?? 0, o.available, strain.available) : null;
+    if (at != null && at < m.at) report(m, at, right ? 'the answer is inferable there' : `its likely clash ${strain.id} shows there`);
+}
+const REASON = new Set(['a', 'b', 'c', 'plan', 'stop', 'compare', 'account']);
+/** Does the page allow move m now? Nothing is left behind: a move taken is undone, a plan opened is closed. */
+async function allowed(m) {
+    const on = defaultOn(m);
+    if (on && !(await openOn(on))) return false;
+    if (['a', 'b', 'c'].includes(m.do)) {
+        const sel = m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
+        if (!(await exists(sel))) return false;
+        const n = (await save()).reasoning?.length ?? 0;
+        await click(sel);
+        const took = ((await save()).reasoning?.length ?? 0) === n + 1;
+        if (took) await click('#undo');
+        return took;
+    }
+    // A plan or a check is a view: allowed once it shows what the move is for (`see`), or, without one, once offered.
+    // A check clicked can only be taken back by reloading the page (its result is not saved).
+    const plan = m.do === 'plan' ? m.of : m.key.split('|')[0], d = `#detail [data-move-d="${esc(plan)}"]`;
+    if (!(await exists(d))) return false;
+    const shut = await ev(`document.querySelector(${J(d)}).innerText !== 'Hide'`);
+    if (shut) await click(d);
+    let ok = true, clicked = false;
+    if (m.do !== 'plan') {
+        const sel = `#detail [data-${m.do}="${esc(m.key)}"]`;
+        ok = await exists(sel);
+        if (ok && m.see) { await click(sel); clicked = true; }
+    }
+    if (ok && m.see) ok = new RegExp(m.see).test(await ev(`document.querySelector('#detail').innerText`));
+    if (clicked) await reload();
+    else if (shut && (await exists(d))) await click(d);
+    return ok;
+}
+let probing = [];   // the next paragraph's reasoning moves not yet found allowed earlier
+async function probe(now) {
+    for (const m of probing) if (await allowed(m)) { report(m, now, 'the page allows it'); probing = probing.filter((x) => x !== m); }
+    if (errors.length) { failures++; console.log(`FAIL ¶${now} page error while trying moves early: ${errors.splice(0).join(' | ')}`); }
+}
+
 async function readTo(p) {
+    probing = moves.filter((m) => m.at === p && REASON.has(m.do) && !m.late);
     while (true) {
         const now = (await save()).para ?? 1;
         if (now >= p) return true;
+        if (probing.length) await probe(now);
         await click('#next');
         const after = (await save()).para ?? 1;
         const news = await ev(`(() => { const e = document.querySelector('#answer-news'); return e && !e.hidden ? [...e.querySelectorAll('li')].map((li) => ({ text: li.innerText, bad: !!li.querySelector('.bad') })) : []; })()`);
@@ -116,6 +171,8 @@ async function play(m) {
         }
         case 'stop': case 'compare': case 'account': {
             const sel = `#detail [data-${m.do}="${esc(m.key)}"]`;
+            const d = `#detail [data-move-d="${esc(m.key.split('|')[0])}"]`;
+            if (!(await exists(sel)) && (await exists(d)) && (await ev(`document.querySelector(${J(d)}).innerText !== 'Hide'`))) await click(d);
             if (!(await exists(sel))) return fail(m, 'check not offered');
             await click(sel);
             break;
@@ -154,6 +211,7 @@ if (STOP >= 1e9 && !failures) {
     for (const s of unheld) { failures++; console.log(`FAIL at the end, a likely clash not held: ${s}`); }
 }
 await dump();
+if (early.length) console.log(`${early.length} move(s) allowed before their paragraph`);
 console.log(`${failures ? `${failures} failure(s)` : 'all moves played'} in ${Math.round((Date.now() - t0) / 1000)} s`);
 ws.close();
 process.exit(failures ? 1 : 0);

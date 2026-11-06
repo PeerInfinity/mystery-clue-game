@@ -683,10 +683,17 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   `on`; the path distrusts only false statements, by their statement link), `a`, `b`, `c` (the moves), `plan` (open
   "What would this need?"), `stop`, `compare`, `account` (a check `key` on an open plan) and `hold` (a likely clash set
   aside). `see`: a pattern the page must show after the move; `for_q`: the gated questions the move serves (so a
-  just-in-time path can be derived); `why`: the reader's thought in plain words (for hints and the autoplay later).
+  just-in-time path can be derived); `why`: the reader's thought in plain words (for hints and the autoplay later);
+  `late`: why a move comes after the first paragraph the page allows it (one: money in the paper waits until the drug
+  is tried, since with money circled the drug's lapse would not show).
   `scripts/path-check.mjs` plays it through the page: Read on to each move's paragraph (the gate met for real), each
   move's control offered and its result in the save, every answer given found right, and at the end no contradiction
-  open and no likely clash unheld.
+  open and no likely clash unheld. It also fails a move found possible earlier than its `at` (unless `late`): before
+  each paragraph it tries the next paragraph's reasoning moves (a–c taken and undone; a plan or a check counts once it
+  shows its `see`), and it sets each circle of a right answer against the question's earliest paragraph in the data
+  (raised, the possibility available, `answer_inferable_at`), and each wrong answer tried against its likely clash's
+  `available`. Crossings and trust are judgement and not timed. A move found early is either the path being late
+  (move it) or the page running ahead of the story (a leak to fix).
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's

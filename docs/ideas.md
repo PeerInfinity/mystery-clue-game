@@ -419,8 +419,16 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   had defended himself" had no link of its own at all: 58 contradictions stayed open at the end. **The user's choice**
   among trust per statement, beliefs on a link of their own, a "false" mark on a contradiction's side, or tolerating
   them: **trust per statement** (each statement's own link, `stmt:<id>`, drawn once above its chains). The path now
-  distrusts 18 false statements and ends with no contradiction open and no likely clash unheld. Not yet checked: that
-  no move is offered before its paragraph.
+  distrusts 18 false statements and ends with no contradiction open and no likely clash unheld.
+- **Built (2026-11-05), the earliest check (the user agreed to do it before the autoplay):** the path check now fails a
+  move the page allows before its paragraph. The first run found 11, all the path being late, none the page running
+  ahead of the story: seven circles (the hoof and the horse as striker at ¶37, Mapleton at ¶40 by the data's
+  `answer_inferable_at`, the knife's delicate work at ¶81, the sheep at ¶173, the bay at ¶197, money in the paper at ¶24)
+  and the police plan's unmet needs and "What stopped it?" (both at ¶46, not ¶57). A plan or a check counts only once
+  it shows what the move is for (the man's plan offered at ¶126 meets its need only with Silas Brown circled at ¶127).
+  One move stays late on purpose (`late`): money in the paper, so that the drug's lapse can be seen at ¶36. Note:
+  Mapleton at ¶40 is the reader's own reach (who gains, means, distance), which the page does not support until the
+  likely clashes of ¶114–124; the data's `answer_inferable_at` times it, not the page.
 
 ### An incremental game about trying every combination
 
