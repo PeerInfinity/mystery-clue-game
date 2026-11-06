@@ -4,6 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { Story } from '../engine/story.js';
 import { ACTIONS, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
@@ -20,10 +21,10 @@ const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 const main = await get(`${CASE}/case.json`);
-const [oldEntities, w, times, facts, accounts, questions, text] = await Promise.all([
+const [oldEntities, w, times, facts, accounts, questions, text, mentions] = await Promise.all([
     get(`${CASE}/entities.json`), get(`${CASE}/world/entities.json`), get(`${CASE}/world/times.json`),
     get(`${CASE}/world/facts.json`), get(`${CASE}/world/accounts.json`), get(`${CASE}/world/questions.json`),
-    get(`${CASE}/${main.case.source.text_file}`, 'text'),
+    get(`${CASE}/${main.case.source.text_file}`, 'text'), get(`${CASE}/mentions.json`),
 ]);
 // Likely clashes (world/strains.json): optional.
 const strainList = await get(`${CASE}/world/strains.json`).then((x) => x.strains ?? []).catch(() => []);
@@ -37,6 +38,9 @@ const prov = provenance(data);
 const allAssertions = assertions(data);
 const assertionById = new Map(allAssertions.map((x) => [x.id, x]));
 const story = text.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
+// Where the story names each entity (the old game's mentions.json, matched as the game matches it, engine/story.js):
+// the story's names are links to their card, every one alike.
+const named = new Story(text, { mentions: { entities: mentions.entities }, entities: oldEntities.entities });
 const entityById = new Map(data.entities.map((e) => [e.id, e]));
 const timeById = new Map(data.times.map((t) => [t.id, t]));
 const factById = new Map(data.facts.map((f) => [f.id, f]));
@@ -94,13 +98,13 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); for (const k of ['layout', 'panels', 'theme']) if (own[k] != null) state[k] = own[k]; } catch { /* the defaults */ }
 state.sel = null;
 state.note = null;
 if (!Array.isArray(state.held)) state.held = [];
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -146,6 +150,9 @@ for (const f of data.facts) {
     if (g == null) continue;
     for (const id of [f.of, f.to, ...list(f.value)]) if (typeof id === 'string' && entityById.has(id) && !(firstMet.get(id) <= g)) firstMet.set(id, g);
 }
+// Met: first named in the story, or first on the timeline, whichever is earlier (an entity of the world model alone
+// has no mention, and is met where a fact first names it).
+const firstSeen = (id) => Math.min(named.firstAt.get(id) ?? Infinity, firstMet.get(id) ?? Infinity);
 const OTHER_IDEAS = 'Other ideas';
 const KIND_GROUP = { person: 'People and animals met so far', animal: 'People and animals met so far', place: 'Places met so far' };
 /**
@@ -510,7 +517,7 @@ let current = [];
 
 // --- The layout: three columns side by side, or panels with tabs (two, or one; a phone always one). The page's parts
 // (world.html) are moved where the layout puts them, the rest parked; each is drawn by render() wherever it is.
-const PARTS = [['story', 'Story'], ['timeline', 'Timeline'], ['questions', 'Questions'], ['clashes', 'Contradictions'], ['detail', 'Detail']];
+const PARTS = [['story', 'Story'], ['timeline', 'Timeline'], ['questions', 'Questions'], ['clashes', 'Contradictions'], ['cards', 'Cards'], ['detail', 'Detail']];
 if (!Array.isArray(state.panels) || state.panels.length !== 2 || state.panels.some((t) => !PARTS.some(([x]) => x === t)) || state.panels[0] === state.panels[1]) state.panels = ['story', 'timeline'];
 if (!['three', 'two', 'one'].includes(state.layout)) state.layout = 'three';
 const partEl = (id) => document.querySelector(`.part[data-part="${id}"]`);
@@ -530,7 +537,7 @@ function mountLayout() {
     if (L === 'three') {
         if (!three.children.length) three.innerHTML = '<div class="col-story"></div><div class="col-main"></div><div class="col-detail"></div>';
         put(partEl('story'), three.children[0]);
-        for (const id of ['clashes', 'questions', 'timeline']) put(partEl(id), three.children[1]);
+        for (const id of ['clashes', 'questions', 'cards', 'timeline']) put(partEl(id), three.children[1]);
         put(partEl('detail'), three.children[2]);
         return;
     }
@@ -615,7 +622,7 @@ function render() {
 
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
-    st.innerHTML = story.slice(1, state.para + 1).map((p, i) => `<p class="${i + 1 === state.para ? 'now' : ''}"><span class="para">¶${i + 1}</span> ${esc(p).replace(/_([^_]+)_/g, '<em>$1</em>')}</p>`).join('');
+    st.innerHTML = story.slice(1, state.para + 1).map((p, i) => `<p class="${i + 1 === state.para ? 'now' : ''}"><span class="para">¶${i + 1}</span> ${paraHtml(i + 1)}</p>`).join('');
     // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
     if (shownPara !== state.para && visibleEl(st)) { shownPara = state.para; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
 
@@ -629,6 +636,8 @@ function render() {
     const strains = activeStrains();
     document.getElementById('clashes').innerHTML += strainsHtml(strains);
     document.getElementById('questions').innerHTML = questionsPanel(clashing);
+    const cards = cardsPanel();
+    document.getElementById('cards').innerHTML = cards.html;
     const ol = document.querySelector('#q-box ol');
     if (ol) ol.scrollTop = qScroll;
     document.getElementById('view').value = state.view;
@@ -638,7 +647,7 @@ function render() {
     document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
     document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing);
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
-    renderTabs({ questions: listedQuestions().length, clashes: clashes.length + strains.filter((s) => !state.held.includes(s.id)).length });
+    renderTabs({ cards: cards.count, questions: listedQuestions().length, clashes: clashes.length + strains.filter((s) => !state.held.includes(s.id)).length });
     renderLapseNews();
     renderGate();
     renderAnswers();
@@ -1060,6 +1069,62 @@ function chipsHtml(q) {
     }
     return html;
 }
+// --- The story's names, and the Cards.
+/** A paragraph of the story: its text, its names linked to their cards, its _italics_ as such. */
+function paraHtml(i) {
+    const p = story[i];
+    const links = named.spans[i].filter((x) => x.kind === 'entity' && entityById.has(x.ids[0])).sort((a, b) => a.start - b.start);
+    const italic = [];
+    for (const m of p.matchAll(/_([^_]+)_/g)) italic.push([m.index, m.index + m[0].length]);
+    const cuts = new Set([0, p.length, ...links.flatMap((x) => [x.start, x.end]), ...italic.flat()]);
+    const at = [...cuts].sort((a, b) => a - b);
+    let out = '';
+    for (let k = 0; k + 1 < at.length; k++) {
+        const [a, b] = [at[k], at[k + 1]];
+        let seg = esc(p.slice(a, b).replace(/_/g, ''));
+        if (!seg) continue;
+        if (italic.some(([x, y]) => a >= x && b <= y)) seg = `<em>${seg}</em>`;
+        const link = links.find((x) => a >= x.start && b <= x.end);
+        if (link) seg = `<a class="ent" data-ent="${esc(link.ids[0])}">${seg}</a>`;
+        out += seg;
+    }
+    return out;
+}
+const CARD_GROUPS = [['People', ['person']], ['Animals', ['animal']], ['Places', ['place']], ['Things', ['object', 'document', 'race']], ['Groups', ['group']]];
+/** The people, animals, places, things and groups met so far, by kind, in the order met: each opens its card. */
+function cardsPanel() {
+    const met = data.entities.filter((e) => firstSeen(e.id) <= state.para);
+    let count = 0;
+    const groups = CARD_GROUPS.map(([name, kinds]) => {
+        const xs = met.filter((e) => kinds.includes(e.kind)).sort((a, b) => firstSeen(a.id) - firstSeen(b.id));
+        count += xs.length;
+        return xs.length ? `<h3>${name} <span class="small muted">(${xs.length})</span></h3><ul class="cards-list">${xs.map((e) => `<li class="${state.sel === e.id ? 'sel' : ''}">${ent(e.id)} <span class="para">¶${firstSeen(e.id)}</span></li>`).join('')}</ul>` : '';
+    }).join('');
+    if (!count) return { html: '', count };
+    return { count, html: `<details class="cards-box" id="cards-box"${state.cardsOpen || layoutNow() !== 'three' ? ' open' : ''}><summary>Cards (${count})</summary>${groups}<p class="small muted">Everyone and everything met so far, in the order met. A name opens its card: its own timeline, the questions about it, and where the story mentions it.</p></details>` };
+}
+/** The sentence of a paragraph around a span, the span itself in bold. */
+function sentenceAt(i, span) {
+    const p = story[i];
+    const before = p.slice(0, span.start), after = p.slice(span.end);
+    const start = Math.max(0, ...[...before.matchAll(/[.!?][’”"]?\s/g)].map((m) => m.index + m[0].length));
+    const stop = after.search(/[.!?][’”"]?(\s|$)/);
+    const tail = stop < 0 ? after : after.slice(0, stop + 1);
+    const clean = (t) => esc(t.replace(/_/g, ''));
+    return `${start > 0 ? '… ' : ''}${clean(before.slice(start))}<b>${clean(p.slice(span.start, span.end))}</b>${clean(tail)}${stop >= 0 && span.end + stop + 1 < p.length ? ' …' : ''}`;
+}
+/** An entity's card: its own timeline, the questions about it, and where the story has named it so far. */
+function entityDetail(id, clashing) {
+    const qs = listedQuestions().filter((q) => q.entry?.of === id);
+    const spots = [];
+    for (let i = 1; i <= state.para; i++) for (const x of named.spans[i]) if (x.kind === 'entity' && x.ids[0] === id) spots.push([i, x]);
+    const said = spots.map(([i, x]) => `<li>${sentenceAt(i, x)} <span class="para">¶${i}</span></li>`).join('');
+    return `<h2>${esc(nameOf(id))}</h2>
+      ${qs.length ? `<h3>Questions about it</h3><ul class="card-qs">${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span></li>`).join('')}</ul>` : ''}
+      ${spots.length ? `<details class="mentions" id="mentions-box"${state.mentionsOpen ? ' open' : ''}><summary>Where the story mentions it (${spots.length})</summary><ul class="said">${said}</ul></details>` : ''}
+      <h3>Its timeline</h3>${eventList((f) => f.of === id, clashing, (q) => q.entry?.of === id)}`;
+}
+
 function questionsPanel(clashing) {
     const qs = listedQuestions();
     if (!qs.length) return '';
@@ -1200,7 +1265,7 @@ function renderDetail(clashing) {
         return;
     }
     if (sel && entityById.has(sel)) {
-        el.innerHTML = `<h2>${esc(nameOf(sel))}</h2><h3>Its timeline</h3>${eventList((f) => f.of === sel, clashing, (q) => q.entry?.of === sel)}`;
+        el.innerHTML = entityDetail(sel, clashing);
         return;
     }
     el.innerHTML = '<p class="muted">Click an event for where it comes from, or a name for its own timeline.</p>';
@@ -1266,7 +1331,11 @@ document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Put every link and person back to uncertain?')) return;
     changeTrust((tr) => { tr.links = {}; tr.people = {}; });
 });
-document.addEventListener('toggle', (e) => { if (e.target.id === 'q-box') { state.qOpen = e.target.open; save(); } }, true);
+document.addEventListener('toggle', (e) => {
+    if (e.target.id === 'q-box') { state.qOpen = e.target.open; save(); }
+    if (e.target.id === 'cards-box') { state.cardsOpen = e.target.open; save(); }
+    if (e.target.id === 'mentions-box') state.mentionsOpen = e.target.open;   // for this visit only
+}, true);
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));

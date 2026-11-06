@@ -440,6 +440,18 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   shows (`see`) is highlighted for a moment, its tab chosen first in tabbed layouts. It plays in the viewer's layout,
   choosing tabs as a player would; on a phone the header moves below the strip. It starts paused, so a speed can be
   chosen first. About a quarter of an hour at 1× (two seconds a paragraph, about five a move). `scripts/world-autoplay-check.mjs` plays it with no pauses in each layout.
+- **Built (2026-11-05), story links and the Cards (option A, the user's choice):** every name in the story is a link
+  to its card, every one alike (the old game's `mentions.json`, matched by `engine/story.js` as the game matches it;
+  233 links by ¶46). A Cards tab (in three columns a folded box under Questions) lists the people, animals, places,
+  things and groups met so far, by kind, in the order met: first named in the story, or first on the timeline for the
+  world model's own entities, which have no mention (the two other lads, the analyst); the calendar, clock and weather
+  and the old game's topics are not cards. A name opens its card in Detail: the questions about it (whose entry is
+  about it, raised so far), the sentences of the story that mention it (folded), and its own timeline.
+- **Measured (2026-11-05), for links on each fact's quote (option ii, not built):** the 681 quoted facts cover 56% of
+  the story's text; the median paragraph is 56% covered, 24 of 231 not at all (12 of them in ¶161–211, the Colonel and
+  the race), 77 more than three quarters. Paragraphs with typed facts are covered no more than the rest (54% against
+  56%). So cover would not point at the paragraphs that matter; within a paragraph it would still mark which sentences
+  are facts, about half of every paragraph's text.
 
 ### An incremental game about trying every combination
 
