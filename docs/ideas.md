@@ -426,7 +426,9 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   `answer_inferable_at`, the knife's delicate work at ¶81, the sheep at ¶173, the bay at ¶197, money in the paper at ¶24)
   and the police plan's unmet needs and "What stopped it?" (both at ¶46, not ¶57). A plan or a check counts only once
   it shows what the move is for (the man's plan offered at ¶126 meets its need only with Silas Brown circled at ¶127).
-  One move stays late on purpose (`late`): money in the paper, so that the drug's lapse can be seen at ¶36. Note:
+  Money in the paper had been held back to ¶36 so that trying the drug would show its lapse (with money circled the
+  link holds through money); **the user's choice:** circle money at ¶24 (the data's `answer_inferable_at`, kept) and
+  cross out the drug at ¶36 without trying it; the rule is covered by `engine/actions.test.js`. No move is late. Note:
   Mapleton at ¶40 is the reader's own reach (who gains, means, distance), which the page does not support until the
   likely clashes of ¶114–124; the data's `answer_inferable_at` times it, not the page.
 
