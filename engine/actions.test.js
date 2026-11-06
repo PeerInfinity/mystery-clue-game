@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops } from './actions.js';
+import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, orderSteps } from './actions.js';
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -193,6 +193,18 @@ test('the guard: leading out needs the lad on watch unable to act; the dog, if i
     assert.equal(requirementStatus(order, c.entries, dog('trainer'), c).status, 'met', 'the dog knows those who live at the yard');
     assert.equal(requirementStatus(order, c.entries, dog('tout'), c).status, 'unknown', 'a stranger from town: nothing says it knew him');
     assert.ok(!pointImplications({ ...leads('trainer'), via: undefined }, nameOf, c).entries.some((e) => e.guard), 'no door: no guard');
+});
+
+test('a key kept meets the key need of unlocking; steps at one time are ordered by what they need', () => {
+    const keeps = { id: 'h.keeps', of: 'trainer', act: 'keep_key', thing: 'door', time: { after: 't9', before: 'tout' } };
+    const [eff] = pointImplications(keeps, nameOf).entries;
+    assert.deepEqual([eff.role, eff.of, eff.attr, eff.key, eff.value], ['effects', 'trainer', 'carrying', 'door', 'a key to the stable door']);
+    const opens = { id: 'h.opens', of: 'trainer', act: ['unlock', 'open'], thing: 'door', time: { from: 'tout', to: 'tmorn' } };
+    const leads = { id: 'h.leads', of: 'trainer', act: 'lead_out', thing: 'horse', via: 'door', time: { from: 'tout', to: 'tmorn' } };
+    const aim = { id: 'h.aim', of: 'trainer', attr: 'intends', goal: { of: 'horse', attr: 'condition', value: 'injured' }, step: { act: 'injure', thing: 'horse' }, time: { at: 'tout' } };
+    assert.equal(checkFit(keeps, aim, [opens], nameOf, {}).need.key, 'door', 'the key serves the plan through the unlocking');
+    const rank = (x) => ({ 'h.keeps': 0 })[x.id] ?? 1;
+    assert.deepEqual(orderSteps([leads, opens, keeps], rank, nameOf, {}).map((x) => x.id), ['h.keeps', 'h.opens', 'h.leads'], 'the door opened before the horse is led through it');
 });
 
 test('what stopped an intended step: an action that left its agent unable to act, in time', () => {

@@ -637,6 +637,13 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   lads' loft; not Simpson's villa on the moor). Likely clashes for the rest: barking unheard (the loft is over the
   harness-room), the drug put in at the window (the stranger could not know the dish) or on the path (the maid ran
   from him), exercise against Straker's own drugging.
+- Who held a key (the audit's step 3): "Who had a key to the stable door?" (`q.key_holder`, raised by Holmes's
+  "Has a duplicate key been found in his possession?", ¶57) has a typed entry, `keep_key` (its effect: carrying a key
+  to the door), so a circled holder is a hypothesis action whose effect meets the key need of unlocking: on "Who
+  opened the stable door?" (its entry now unlocking and opening, as the police plan and ¶220 have it), and as a step
+  of a plan, linked by "What is this for?" through the unlocking. Straker is the key's answer, Hunter also right (he
+  locked the door, ¶31). A plan's steps at the same time are ordered by what they need (`orderSteps`: unlocking and
+  opening before leading the horse through the door).
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's

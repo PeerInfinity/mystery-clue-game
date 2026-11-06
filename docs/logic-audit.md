@@ -20,6 +20,9 @@ the question's possibilities and their `from`/`out`/`by`), and marks each link a
   the path, exercise against Straker's drugging). who_drugged, horse_out_by and dog_barked now have a route from ¶46
   (the drugging serves Straker's plan; the dog knows him and not Simpson); drug_where has its wrong answers strained;
   straker_aim's ¶46 link is a likely clash. door_opened_by waits for step 3 (the key).
+- **Step 3 built (2026-11-05):** "Who had a key to the stable door?" (raised ¶57; Straker, Hunter also right), a
+  circled holder meeting the key need; plan steps ordered by need at equal times. door_opened_by has its route from
+  ¶57. The gate now holds 27 questions.
 
 ## Summary
 

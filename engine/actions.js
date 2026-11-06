@@ -31,7 +31,8 @@ export { STATES };
  *   or a literal);
  * - `{of, key: role}`: carrying a key to it; `{of, carrying: role}`: carrying it (owning it will do);
  * - `{of, at: door}`: on one of a door's two sides (`joins` in the data);
- * - effects only: `{of, through: door}`: on the other side of the door from where it was just before;
+ * - effects only: `{of, through: door}`: on the other side of the door from where it was just before; `{of, key:
+ *   role}`: carrying a key to it (keeping one);
  * - `{guard: door}`: every guard of the place inside the door (an entry with `guards: <place>`, the lad on watch)
  *   unable to act (`DISABLED`: drugged, struck down) unless the guard is the agent himself: one need per guard;
  * - `{of, knows: role, among: door}`: an animal kept behind the door knows the agent, as it knows the people who live
@@ -51,6 +52,7 @@ export const ACTIONS = {
     drug: { label: 'drugging', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'drugged' }] },
     strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
     injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }, { guard: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
+    keep_key: { label: 'keeping a key to', requires: [], effects: [{ of: '$agent', key: '$thing' }] },
     take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
     cut_self: { label: 'cut, as he fell,', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', attr: 'condition', value: 'struck down' }], effects: [{ of: '$agent', attr: 'condition', value: 'cut' }] },
@@ -193,6 +195,7 @@ export function pointImplications(f, nameOf = (id) => id, ctx = {}) {
         const of = R(e.of);
         if (of == null) return;
         if (e.state) out.push({ id, role: 'effects', time: after, of, attr: e.state, value: e.value, neg: false });
+        else if (e.key) out.push({ id, role: 'effects', time: after, of, attr: 'carrying', value: `a key to ${String(nameOf(R(e.key))).replace(/^The /, 'the ')}`, key: R(e.key), neg: false });
         else if (e.through) {
             // Through the door: on the other side from where it was just before (if the timeline says).
             const ref = point ?? t.after ?? t.from;
@@ -408,6 +411,25 @@ export const impliedSteps = (target) => (target.step ? [{ ...target.step, id: `$
 
 /** A plan's steps as actions: each with an id, its agent (its own or the plan's) and its time (its own or the plan's). */
 const planSteps = (plan) => (plan.steps ?? []).map((s, i) => ({ ...s, id: s.id ?? `${plan.id}#${i}`, of: s.of ?? plan.agent, time: s.time ?? plan.time }));
+
+/**
+ * A plan's steps in time order (`rank`: a step's place in time, a number), ties broken by needs: a step whose effect
+ * meets a need of another at the same time goes before it (unlocking and opening the door before leading out).
+ */
+export function orderSteps(steps, rank, nameOf = (id) => id, ctx = {}) {
+    const sorted = [...steps].sort((a, b) => rank(a) - rank(b));
+    const out = [];
+    const serves = (x, y) => {
+        const eff = (pointImplications(x, nameOf, ctx).entries ?? []).filter((e) => e.role === 'effects');
+        const needs = (pointImplications(y, nameOf, ctx).entries ?? []).filter((e) => e.role === 'requires');
+        return eff.some((e) => needs.some((n) => meets(e, n, ctx)));
+    };
+    for (const x of sorted) {
+        const i = out.findIndex((y) => rank(y) === rank(x) && serves(x, y) && !serves(y, x));
+        if (i < 0) out.push(x); else out.splice(i, 0, x);
+    }
+    return out;
+}
 
 export function checkPlan(plan, entries, nameOf = (id) => id, ctx = {}) {
     const produced = [];

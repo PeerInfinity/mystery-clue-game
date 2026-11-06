@@ -4,7 +4,7 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
-import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets } from '../engine/actions.js';
+import { ACTIONS, STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
 const STORE = 'silver-blaze-world-v1';
@@ -728,7 +728,7 @@ const changeText = (f) => `${list(f.act).map((t) => ACTIONS[t].label).join(' and
 /** The question whose entry is this change (the same action on the same thing, in a window that can meet it). */
 function questionOfChange(f) {
     const meets = (t, w) => !(w?.from && t.before && data.order.le(t.before, w.from)) && !(w?.to && t.after && data.order.le(w.to, t.after));
-    return baseQuestions.find((x) => x.entry?.act && list(f.act).includes(x.entry.act) && x.entry.thing === f.thing && meets(f.time ?? {}, x.entry.time) && qListed(x)) ?? null;
+    return baseQuestions.find((x) => x.entry?.act && list(x.entry.act).every((t) => list(f.act).includes(t)) && x.entry.thing === f.thing && meets(f.time ?? {}, x.entry.time) && qListed(x)) ?? null;
 }
 /**
  * Who made a change the player pointed out is the player's hypothesis: the story's own question when the change is
@@ -755,7 +755,9 @@ function candidatesHtml(q) {
     const picks = Object.entries(state.marks[q.id] ?? {}).filter(([v, m]) => m === 'circled' && entityById.has(v)).map(([v]) => v);
     if (!picks.length) return `<p class="small muted">Circle who you think it was, and what they would have needed shows here.</p>`;
     const on = onTimeline();
-    return picks.map((v) => `<h3>If it was ${ent(v)}</h3><ul class="moves">${agentNeeds(data.order, on, f, v, nameOf, placeCtx).map((n) => `<li>${phrase(n.req)} ${statusHtml(n)}</li>`).join('')}</ul>`).join('');
+    const t = anchorOf(f.time ?? {});
+    const row = (n) => { const x = n.status !== 'met' && metByKnown(n.req, t, f.id); return `<li>${phrase(n.req)} ${x ? `<span class="good small">met by ${stepText(x)}</span>` : statusHtml(n)}</li>`; };
+    return picks.map((v) => `<h3>If it was ${ent(v)}</h3><ul class="moves">${agentNeeds(data.order, on, f, v, nameOf, placeCtx).map(row).join('')}</ul>`).join('');
 }
 function statusHtml(r) {
     if (r.status === 'met') return `<span class="good small">met${r.entry ? `: ${phrase(r.entry)}` : ''}</span>`;
@@ -830,8 +832,8 @@ const planOpen = new Set();
 function planOf(f) {
     if (f.plan) return { id: f.id, ...f.plan };
     if (!f.goal) return null;
-    const steps = linkedTo(f.id).map((e) => factOf(e.reasoned.premises[0])).filter((x) => x && list(x.act).length)
-        .sort((a, b) => rankOf(anchorOf(a.time ?? {})) - rankOf(anchorOf(b.time ?? {})));
+    const linked = linkedTo(f.id).map((e) => factOf(e.reasoned.premises[0])).filter((x) => x && list(x.act).length);
+    const steps = orderSteps(linked, (x) => rankOf(anchorOf(x.time ?? {})), nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
     return steps.length ? { id: f.id, agent: f.of, goal: f.goal, steps: [...steps, ...impliedSteps(f)] } : null;
 }
 function planHtml(f) {
@@ -1047,19 +1049,25 @@ function knownActions() {
     const hyps = baseQuestions.filter(qListed).flatMap((q) => [presupposed(`pre:${q.id}`), ...shownPossibilities(q).map((p) => hypAction(hypothesisKey(q.id, p.value)))]).filter(Boolean);
     return [...onTimeline().filter((f) => list(f.act).length && !f.reasoned), ...hyps];
 }
+/** A known action (typed, or the player's hypothesis) not after time `t` whose effect meets a need (a key kept). */
+function metByKnown(req, t, except = null) {
+    const ctx = { ...placeCtx, order: data.order, entries: onTimeline() };
+    for (const x of knownActions()) {
+        if (x.id === except) continue;
+        const s = anchorOf(x.time ?? {});
+        if (t && s && data.order.lt(t, s)) continue;
+        if ((pointImplications(x, nameOf, ctx).entries ?? []).some((e) => e.role === 'effects' && !e.cond && meets(e, req, placeCtx))) return x;
+    }
+    return null;
+}
 /** What an action needs, each met by another known action's effect (not after it), by the timeline, or by nothing. */
 function needsHtml(a) {
     const ctx = { ...placeCtx, order: data.order, entries: onTimeline() };
     const { entries = [] } = pointImplications(a, nameOf, ctx);
     const t = anchorOf(a.time ?? {});
-    const others = knownActions().filter((x) => x.id !== a.id);
     const row = (req) => {
-        for (const x of others) {
-            const s = anchorOf(x.time ?? {});
-            if (t && s && data.order.lt(t, s)) continue;
-            const eff = (pointImplications(x, nameOf, ctx).entries ?? []).find((e) => e.role === 'effects' && !e.cond && meets(e, req, placeCtx));
-            if (eff) return `<li>${phrase(req)} <span class="good small">met by ${stepText(x)}</span></li>`;
-        }
+        const x = metByKnown(req, t, a.id);
+        if (x) return `<li>${phrase(req)} <span class="good small">met by ${stepText(x)}</span></li>`;
         return `<li>${phrase(req)} ${statusHtml(requirementStatus(data.order, onTimeline(), req, placeCtx))}</li>`;
     };
     const needs = entries.filter((e) => e.role === 'requires');

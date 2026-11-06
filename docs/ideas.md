@@ -372,6 +372,13 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   nothing on the timeline says so", beside the opium, the key and the hiding-place). An action serves only its own
   agent's intention (one culprit). Four more likely clashes (the dog barking unheard; the opium at the window or on
   the path; exercise against Straker's own drugging). Left for step 3: who holds a key.
+- **Built (2026-11-05), the audit's step 3 (who held a key):** a question raised by Holmes's "Has a duplicate key been
+  found in his possession?" (¶57), whose circled holder keeps a key (a hypothesis action): it meets the key need on
+  "Who opened the stable door?" and links into a plan through the unlocking. Straker is the answer, Hunter also
+  right. Played at ¶57, with Straker circled for the drugging, the door, the leading out, the key and his aim, and
+  the noise reason and "did not bark": his plan's steps run key, drugging, unlocking and opening, leading out,
+  injuring (intended), every need met but the opium and his being at the door, which the story never tells either.
+  The gate gains the question at ¶220 (27 gated).
 
 ### An incremental game about trying every combination
 
