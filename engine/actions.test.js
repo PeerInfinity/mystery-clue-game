@@ -249,6 +249,19 @@ test("tracks: two headings of one walker give a change of aim; hiding at a stabl
     assert.equal(pointImplications({ ...hides('master'), where: undefined }, nameOf, {}).entries.filter((e) => e.role === 'requires')[0].value, 'a hiding-place', 'no stable named: he must know a hiding-place');
 });
 
+test('at the door over a from–to window: a place reached inside the window will do', () => {
+    const pl = places({ entities: [...yard.entities, { id: 'villa', kind: 'place', within: 'yard' }] });
+    const c = { joins: { door: ['stable', 'yard'] }, places: pl, order };
+    const leads = { id: 'h.leads', of: 'trainer', act: 'lead_out', thing: 'horse', via: 'door', time: { from: 'tout', to: 'tmorn' } };
+    const at = pointImplications(leads, nameOf, c).entries.find((e) => e.role === 'requires' && e.at && e.of === 'trainer');
+    const home = { id: 'f.home', of: 'trainer', attr: 'location', value: 'yard', time: { from: 'tout', to: 'tnight' } };
+    const went = { id: 'f.went', of: 'trainer', attr: 'location', value: 'stable', time: { after: 'tnight', before: 'tmorn' } };
+    assert.equal(requirementStatus(order, [home], at, c).status, 'met', 'in the yard: the outer side of the door');
+    const far = { ...home, value: 'moor' };
+    assert.equal(requirementStatus(order, [far], at, c).status, 'against', 'on the moor, and nothing puts him at the door');
+    assert.equal(requirementStatus(order, [far, went], at, c).status, 'met', 'gone down to the stable within the window');
+});
+
 test('what stopped an intended step: an action that left its agent unable to act, in time', () => {
     const step = { id: 's', of: 'trainer', act: 'injure', thing: 'horse', intended: true, time: { after: 't9', before: 'tmorn' } };
     const kick = { id: 'k', of: 'horse', act: 'strike', to: 'trainer', time: { at: 'tout' } };

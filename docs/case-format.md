@@ -671,6 +671,12 @@ their weakest premise (and no more than the player's cap on Watson's reasoning):
   on the heading for King's Pyland. Likely clashes: the pit, far away or a secret place against the tracks to the
   Mapleton gates; hiding from the start against the turn toward King's Pyland; the groom against "no groom would dare".
   An aim with an implied last step shows its plan before anything is linked to it.
+- Two loose ends tied (2026-11-05). A question with `end: true` (the motive) is what the rest is for: its circled
+  answers serve nothing further, so "What is this for?" is not offered on them (it was offered toward the aim, the
+  wrong way round). Straker at the stable after one is the content of his own word at ¶32 (`f.straker_to_stables`,
+  "he intended to walk down to the stables"), reaching Watson through Mrs Straker's account; being at a door over a
+  `{from, to}` window, like an `{after, before}` one, is met by a place reached inside it. His plan's one unmet need
+  is now the opium, which the story never accounts for (¶218 leaves it open).
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why`, `available`, `from` (a thought, a fact, a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's

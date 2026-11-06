@@ -829,6 +829,8 @@ const linkedTo = (tid) => reasoned.filter((e) => e.reasoned.move === 'c' && e.fo
 function purposeHtml(f) {
     if (!list(f.act).length && !f.goal) return '';
     if (f.of === '?' || f.reasoned) return '';
+    // A motive (`end` on its question) is what the rest is for: it serves nothing further.
+    if (f.hyp && qById.get(f.hyp.q)?.end) return '';
     const targets = intentionsOf(f.of, f.id);
     const done = (t) => state.reasoning.some((m) => m.move === 'c' && m.of === f.id && m.for === t.id);
     const items = targets.map((t) => `<li>${done(t) ? '<span class="small muted">linked:</span> ' : `<button type="button" class="move" data-move-c="${esc(f.id)}" data-for="${esc(t.id)}">For this</button> `}${stepText(t)}${t.hyp ? ' <span class="small muted">(your hypothesis)</span>' : ''}</li>`).join('');

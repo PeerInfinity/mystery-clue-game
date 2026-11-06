@@ -399,6 +399,9 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   Mapleton"; hiding the horse at Mapleton needs its master (met once the man is circled as Silas Brown; a groom has
   "nothing says" and the clash "no groom would dare"); five likely clashes (the pit, far away, a secret place, hiding
   from the start, the groom). Played at ¶127.
+- **Built (2026-11-05), two loose ends (the user's choice before the next session):** the motive no longer offers
+  "What is this for?" toward the aim (`end: true`); Straker at the stable after one comes from his own word at ¶32,
+  so his plan's needs are all met but the opium.
 
 ### An incremental game about trying every combination
 

@@ -299,11 +299,14 @@ export function requirementStatus(order, entries, req, ctx = {}) {
         // Just before the action: a place starting at its own point (going through puts him outside) does not count.
         const p = placeAt(order, others, req.of, t, !!req.time?.at, same, ctx.homes);
         // Over a window, a place seen only at a point before it does not last the night (a stranger seen at nine).
-        const window = req.time?.after && req.time?.before;
-        if (p && sideOf(ctx, req.at, p.value) >= 0 && !(window && p.time?.at)) return { status: 'met', entry: p };
+        // A window is {after, before} or {from, to}: a place reached inside it will do (Straker at the stable after one).
+        const w0 = req.time?.after ?? (req.time?.to ? req.time?.from : null), w1 = req.time?.before ?? (req.time?.from ? req.time?.to : null);
+        const window = w0 && w1;
+        if (p && sideOf(ctx, req.at, p.value) >= 0 && !(req.time?.after && req.time?.before && p.time?.at)) return { status: 'met', entry: p };
         if (window) {
-            const inside = others.find((e) => e.attr === 'location' && same(e.of, req.of) && !e.neg && startOf(e.time) && order.lt(req.time.after, startOf(e.time)) && order.lt(startOf(e.time), req.time.before) && sideOf(ctx, req.at, e.value) >= 0);
+            const inside = others.find((e) => e.attr === 'location' && same(e.of, req.of) && !e.neg && startOf(e.time) && order.lt(w0, startOf(e.time)) && order.lt(startOf(e.time), w1) && sideOf(ctx, req.at, e.value) >= 0);
             if (inside) return { status: 'met', entry: inside };
+            if (!(req.time?.after && req.time?.before)) return p ? { status: 'against', entry: p } : { status: 'unknown' };
             return { status: 'unknown', entry: p ?? undefined };
         }
         return p ? { status: 'against', entry: p } : { status: 'unknown' };
