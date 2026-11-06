@@ -7,6 +7,11 @@ The case format (version 0.3) as it stands, and the engine behaviour it drives. 
 `scripts/validate-case.js`. Commands, the source layout and the tests are in `docs/technical.md`; the annotated
 reading the thoughts mirror is `docs/reading-annotated.md`.
 
+**Which page each section is for.** The main page, Watson's timeline (`index.html`), reads "The world model as data
+(`world/`)" and its subsections, plus the story (`story.txt`) and `mentions.json` for the story's links and cards.
+Everything else here (the model of cards and slots, the other case files, formulas, slots, Holmes's steps and the
+paces, and every section from "The world model" (tracks) to the end) describes the earlier game, kept at `v1/`.
+
 ## The model
 
 - **Cards** are what the player sees, holds and connects: entities, events, claims (clues), rules (background
@@ -425,9 +430,10 @@ All three are false outside incremental mode.
 
 ## The world model as data (`world/`)
 
-The new direction (`docs/ideas.md` §2, "Watson fills in the world model") is built beside the old game. It covers
-the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. `engine/world.js` reads it (provenance, the time
-order, assertions and contradictions, below); no page uses it yet. `npm run validate-world` checks it and prints its counts. Every file has one object per line.
+The chosen direction (`docs/ideas.md` §2, "Watson fills in the world model"), Watson's timeline, the main page. It
+covers the whole story in `cases/silver-blaze/world/`, shaped first on ¶1–46. `engine/world.js` reads it (provenance,
+the time order, assertions and contradictions, below) and `engine/actions.js` the typed states and actions; the page
+is `index.html` (`ui/world.js`). `npm run validate-world` checks it and prints its counts. Every file has one object per line.
 
 - **`entities.json`**: entities the old `entities.json` lacks (the kitchen, the train, the Wessex Cup, the two
   unnamed lads, the searchers…), plus three state entities: `calendar` (weekday), `clock` (hour) and `weather`. Ids

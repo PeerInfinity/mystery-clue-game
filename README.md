@@ -3,55 +3,52 @@
 **[Play it in your browser](https://peerinfinity.github.io/mystery-clue-game/)** ·
 [How to play](https://peerinfinity.github.io/mystery-clue-game/guide.html)
 
-A deduction game built on a fair-play detective story. You read the story a paragraph at a time; the people,
-places, things, events and clues it mentions become cards; every card raises questions (who did it, where,
-when, whose is it, is it true?) with candidate answers, like pencil marks in sudoku. You rule answers out and draw
-conclusions, citing the cards that justify them, and the game checks your reasons. Your record is kept against
-the detective's: a step counts when you make it before he does.
+**Watson's timeline**: you read a fair-play detective story as Dr Watson, and keep an ordered list of what happened,
+who was where, who did what, and when. What Watson sees himself is certain; everything else reached him through a
+chain of people (a witness, the police, the papers, Holmes), and you choose how far to trust each link. The page
+lists the contradictions among what you accept. The story raises questions as it goes; you circle the answer you
+believe and cross out the ones you have ruled out, and before the story gives an answer away you commit to one.
 
 The first and only case is Arthur Conan Doyle's "Silver Blaze" (1892, public domain).
 
-## Status: an unfinished experiment
+## Status: a working foundation
 
-The aim was to analyse the reasoning Sherlock Holmes uses to solve the case and turn it into game mechanics, so
-that solving the case would feel like solving a sudoku: any sufficient set of reasons accepted, not just the
-detective's.
-
-The modelling works. The whole case is in the game, it checks every step, and it never shows a clue before the
-story tells it. A player can beat Holmes to almost every one of his deductions.
-
-As a game, it falls short. It runs into the old adventure-game problem: even a player who has worked out the
-solution must then guess how to express it in the game's moves, and ends up trying combinations of cards until
-one is accepted. The size of the game (hundreds of cards and questions) makes that worse, and the play is not
-much like sudoku. Turning it into multiple choice would remove the guessing but make it too easy.
-
-Directions that might still make it playable, such as an incremental game about automating the search (now in the
-game as an experimental pace, *Incremental*), or an [Archipelago](https://archipelago.gg/) randomizer integration in
-which clues arrive as items, are collected in [`docs/ideas.md`](docs/ideas.md) (which contains spoilers).
-
-A new direction is being tried beside the game, as a draft page:
-**[Watson's timeline](https://peerinfinity.github.io/mystery-clue-game/world.html)**. You read the story as Watson;
-what happens fills in an ordered list of events. What Watson sees himself is certain; everything else reached him
-through a chain of people (a witness, the police, the papers, Holmes), and you choose how far to trust each link.
-The page lists the contradictions among what you accept.
+The whole story is modelled: every event, where each one came from and through whom, and the questions it raises.
+Nothing on the page runs ahead of the paragraph you have read. It can be played to the end, with hints from wherever
+you are, and a careful reader's playthrough can be watched. It is a foundation more than a finished game: the
+directions it might grow in are collected in [`docs/ideas.md`](docs/ideas.md) (which contains spoilers).
 
 ## What is in it
 
-- **Four difficulties** (Trivial, Easy, Medium, Hard) and a custom mix, and a pace that can wait for you at each
-  of the detective's deductions.
-- **Theories and checks**: weigh the possible stories of the crime, and seal a prediction before the detective acts.
-- **Your own marks and notes**: mark a card important or unimportant, and write a note on any card.
-- **The record**: how many of the detective's steps you made first, shown as the story reaches each one.
-- **Hints** on request, in four steps from a nudge to making the move for you.
-- **Notes and highlights** written into the story.
-- **An autoplay** that plays the whole case to the maximum score.
+- **The timeline**, as a list or as a grid by place or by source, filled in as you read.
+- **Trust** per link of each chain and per statement, and a cap per person; what you trust decides what is on the
+  timeline.
+- **Contradictions**, found automatically among what you accept, each traced to both sides' chains, and **likely
+  clashes**, two things that can both hold but sit badly together.
+- **Questions** to answer by circling and crossing out, and a gate before each answer the story gives away.
+- **Reasoning moves**: point out a change, what an action needs and does, what it is for, and what a plan would
+  need, each checked against the timeline.
+- **Cards** for everyone and everything met so far; every name in the story is a link.
+- **Hints** on request, in three steps from where to look to making the move for you.
+- **An autoplay**: a careful reader fills in the whole timeline through the page.
+- **Three layouts** (three columns, or panels with tabs, two or one), a light and a dark theme.
 
-See the [user guide](https://peerinfinity.github.io/mystery-clue-game/guide.html) for how to play.
+## The earlier game
+
+Watson's timeline grew out of an earlier game on the same story,
+**[kept at `v1/`](https://peerinfinity.github.io/mystery-clue-game/v1/)** with
+[its own guide](https://peerinfinity.github.io/mystery-clue-game/v1/guide.html). Its people, places, things and
+clues become cards; every card raises questions with candidate answers, like pencil marks in sudoku; you rule
+answers out and build inferences, citing the cards that justify them, against Holmes's record. It was an experiment
+in turning Holmes's reasoning into game mechanics, and it showed the limits of that approach: even a player who has
+worked out the solution must then guess how to express it in the game's moves (the old adventure-game problem), and
+the size of the case makes that worse. It has four difficulties, theories and checks, notes, hints and an autoplay
+of its own. It may be removed later.
 
 ## Run it locally
 
 ```
-node scripts/serve.js            # http://localhost:8321/
+node scripts/serve.js            # http://localhost:8321/ (the earlier game: http://localhost:8321/v1/)
 npm test                         # engine tests and full case validation (about 7–8 minutes)
 ```
 
@@ -62,5 +59,8 @@ No build step and no runtime dependencies (`npm install` fetches only the schema
 - [`docs/technical.md`](docs/technical.md): how it is built, the commands, the checks. No spoilers.
 - [`docs/case-format.md`](docs/case-format.md): the case format and the engine behaviour it drives. Spoilers.
 - [`docs/reading-annotated.md`](docs/reading-annotated.md): a careful reader's thoughts through the whole story,
-  the specification the game's moves were built from. Spoilers.
-- [`docs/ideas.md`](docs/ideas.md): why the game falls short, ideas not built, known limitations. Spoilers.
+  the specification the moves were built from. Spoilers.
+- [`docs/logic-audit.md`](docs/logic-audit.md): for each answer the gate asks for, which links of the reader's
+  reasoning the page supports. Spoilers.
+- [`docs/ideas.md`](docs/ideas.md): where the project stands, why the earlier game fell short, ideas not built,
+  known limitations. Spoilers.

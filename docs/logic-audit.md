@@ -3,7 +3,7 @@
 *2026-11-05. Spoilers throughout (like `case-format.md`). Measured on the data and code as of commit `d96df5b`
 (likely clashes built). Nothing was changed for it.*
 
-The aim, the user's: every gated answer of Watson's timeline (`world.html`) should be reachable by the player's own
+The aim, the user's: every gated answer of Watson's timeline (`index.html`, formerly `world.html`) should be reachable by the player's own
 reasoning before distracting data is added. This audit follows, for each gated question, the chain a careful reader
 uses (`answer_from` and its `from` chain in `cases/silver-blaze/thoughts.json` / `docs/reading-annotated.md`, plus
 the question's possibilities and their `from`/`out`/`by`), and marks each link against what the page has now.

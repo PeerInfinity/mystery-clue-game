@@ -3,15 +3,25 @@
 **Spoilers:** this document gives away the solution of "Silver Blaze".
 
 The planning documents of the project (design papers, reviews, session handoffs and the round-by-round design log)
-were retired once the game reached its present state. This page keeps what is still relevant from them: why the
-game falls short of its aim, the directions that might still make it playable, the ideas never built, and the
-known limitations. How the game works now is in `docs/technical.md` and `docs/case-format.md`; the git history
+were retired once the earlier game reached its final state. This page keeps what is still relevant from them: where
+the project stands, why the earlier game falls short of its aim, the directions tried since (the chosen one, Watson's
+timeline, now the main page), the ideas never built, and the known limitations. How the game works now is in `docs/technical.md` and `docs/case-format.md`; the git history
 keeps the retired documents.
 
 Thought ids (`t92.13`) are those of the annotated reading, `docs/reading-annotated.md`; rule and inference ids
 (`r.…`, `k.…`) are the case's.
 
-## 1. Where the experiment stands
+## 1. Where the project stands
+
+**Watson's timeline is the main page (2026-11-06).** The user: the earlier game was a failed experiment; Watson's
+timeline is a success, or at least a solid foundation. It is at the site's base URL (`index.html`; `world.html`
+redirects there), with its own guide; the earlier game, its guide and the logic viewer are kept as they were under
+`v1/`, with a separate link (Settings → The earlier game…), and may be removed later. The timeline's design and what
+has been built of it are in §2, "The chosen direction".
+
+The rest of this section, and §2 after the chosen direction, are about the earlier game.
+
+### The earlier game
 
 The aim was to analyse the reasoning Holmes uses to solve the case and turn it into game mechanics, so that a
 player could solve the case "like sudoku": rule out answers with reasons the game checks, and accept any
@@ -78,7 +88,7 @@ game too easy. And the play is not like sudoku.
 - **Fixes trade fairness for discoverability.** Dealing the dog's silence as a clue made it easy; leaving it to the
   player makes it arrive, unfiled, only at ¶181.
 
-## 2. Directions that might make it playable
+## 2. Directions
 
 ### The chosen direction: Watson fills in the world model (2026-11-04)
 
@@ -324,7 +334,7 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   before it gives the answer away (`answer_inferable_at` before `answer_given_at`; latent ones, never raised, are
   not gated) hold the reading: Read on, or a later ¶ typed in, stops before the first paragraph whose give-aways do
   not each have exactly one circle. Any answer passes, "something else" included, so nobody is stuck; reading back
-  is free. A notice (with Hide; Read on shows it again) lists the questions, each linked, with how many are circled.
+  was free (since 2026-11-06 reading only goes forward: see "the main page"). A notice (with Hide; Read on shows it again) lists the questions, each linked, with how many are circled.
   Reading a give-away shows the answer with the player's circle, right or not; the questions' own lists mark right
   and wrong as before. Gates by paragraph (questions answered there): ¶40, ¶58, ¶181, ¶212, ¶223, ¶224, ¶228 one each;
   ¶202, ¶218, ¶221 two; ¶146, ¶220, ¶229 three; ¶226 four.
@@ -469,6 +479,16 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   found and undone. Found on the way: an answer behind "More" goes back behind it when its mark passes through
   uncertain (crossed out → circled), and a mark can sit on an answer not yet listed (reading back), which no click
   reaches.
+- **Built (2026-11-06), the main page (the user's decisions):** Watson's timeline moved to the base URL
+  (`world.html` → `index.html`; the old address is a redirect to `./`, and the old saves need no support), the earlier
+  game to `v1/` (the user chose the name over `classic/`), its pages addressing `ui/`, `engine/` and `cases/` from the
+  site root by `<base href="../">` (its guide and "Back to your game" links name `v1/`; the logic viewer keeps its
+  path when it writes its `#view/id`). The page's own guide (`guide.html`, spoiler-free, in the order a player meets
+  things); "(a draft)" dropped from the title; Settings gains **Start over…** (clears the save and the autoplay's,
+  keeps the layout, theme and hint wait) and links "The earlier game…". **Reading only goes forward** (the user: the
+  ◀ button added complications and did nothing that scrolling the story up does not; the ¶ box ignores a lower
+  number, the user's choice), so the read-back cases above (a mark on an answer not yet listed, a circled aim not yet
+  told) no longer arise from the player, though the code still handles them.
 
 ### An incremental game about trying every combination
 
@@ -996,6 +1016,9 @@ From the redesign discussion and the later papers; any of them may be worth revi
 
 ## 4. Known limitations
 
+- **The logic viewer does not load** (`v1/logic.html`, found 2026-11-06 and the same before the move): its reading of
+  the case's formulas (`engine/logic.js` `opOf`) throws on an `only` operator a later formula uses. It is the earlier
+  game's, linked only from its guide; left as it is.
 
 - **Two rows can never score**, so the Hard maximum is 70 of 72: `t127.4` (the square toes are disclosed only at
   Holmes's own ¶146) and `t36.2` (its background fact is offered only at ¶218). `t212.1` and `t214.1` are never

@@ -1,10 +1,27 @@
 # Technical overview
 
-How the game is built, how to run and check it, and where things live. This page has no spoilers; the case
+How the pages are built, how to run and check them, and where things live. The main page is Watson's timeline
+(`index.html`); the earlier game is kept at `v1/`. This page has no spoilers; the case
 format (`docs/case-format.md`), the annotated reading (`docs/reading-annotated.md`), the ideas page
 (`docs/ideas.md`) and everything under `cases/` do.
 
 ## The model
+
+### Watson's timeline
+
+The world model (`cases/silver-blaze/world/`) holds the whole story as **facts**: typed states and actions (where
+someone is, who holds what, what a door is, who did what), each at a **time point** of a partial order, each with the
+paragraph and quote that give it. Every fact reached Watson through **accounts** passed on by **tellings**, so each
+has one or more provenance chains from its origin to Watson. The player sets a **trust** level per link, per
+statement and per person; a fact is as trusted as its best chain, a chain as its weakest link, and what reaches the
+threshold is on the timeline. **Contradictions** among what is on the timeline are found automatically (two places,
+two states or two identities at once). **Questions** list possibilities; a circled one is the player's hypothesis, an
+entry like any other. The player's **moves** (a change, what an action needs and does, what it is for, what a plan
+would need, and the plan checks) are checked by a generic action table (`engine/actions.js`). The true path through
+the page (`world/path.json`) is played by the checks, the autoplay and the hints. `docs/case-format.md` "The world
+model as data" describes the files.
+
+### The earlier game (`v1/`)
 
 The story's events (who did what, where, when, with what), the owners of things, the true identities of
 placeholder characters ("the stranger") and whether each piece of testimony is true are **slots**. The solution
@@ -31,9 +48,16 @@ the reader's own background, and the record against Holmes. `docs/case-format.md
 
 | Path | What |
 |---|---|
-| `index.html`, `ui/app.js`, `ui/style.css` | The game page: the story, cards, questions, theories, checks, timelines, notes, hints, the record. |
-| `guide.html` | The player's guide, linked from the game. |
-| `logic.html`, `ui/logic.js` | The case's logic laid open (every inference, clue and step). Not part of the game: it shows every answer. |
+| `index.html`, `ui/world.js`, `ui/world.css` (over `ui/style.css`) | Watson's timeline, the main page: the story read so far, every name in it a link to its card (the old game's `mentions.json`, matched by `engine/story.js`), the world model as an ordered list of events with time points as headings (or the same events as a packed grid, with a column per place or per source: each entry starts a line below the start of the one before), trust controls on each link of a fact's chains and on the statement itself (with undo), an entity's card (its questions, the sentences of the story that mention it, its own event list), a Cards list of everyone and everything met so far by kind, the contradictions among what is on the timeline, each traced to both sides' chains, and the questions (a Questions panel, and each question at its time point on the timeline) whose possibilities the player circles or crosses out (those someone in the story puts forward first, the rest, with every person and animal or place met so far for a who or where question, behind "More"); a circle is an entry on the timeline, and both take part in contradictions. Its layout (Settings): three columns side by side (story, timeline with contradictions and questions, detail), or panels with tabs like the game's (Story, Timeline, Questions, Contradictions, Cards, Detail), two side by side or one; a phone always one. A link opens its tab in the other panel (in one column in place, with a way back). A paragraph number (¶) anywhere scrolls the story to that paragraph. The detail of a typed state or action offers the player's moves (a) and (b) (an entry with moves is marked ⚙ on the timeline, and the timeline can show only those); their entries (Watson's reasoning) go on the timeline, as trusted as their weakest premise, and can be withdrawn; a move that stops holding (a circle changed) is announced in a corner notice and listed on its entry's detail. Reading only goes forward (Read on, or a later ¶ typed in; the story so far stays on the page to scroll back through), and stops before a give-away until each question it answers has exactly one circle (the commitment gate); the answers given show with the player's circle. Settings: what is on the timeline, the layout, the theme, the wait between hints, Reset trust…, Start over… (clears its save, `silver-blaze-world-v1`, but the layout, theme and hint wait, and the autoplay's, `silver-blaze-world-autoplay`), Watch the autoplay…, and the earlier game. Likely clashes (`world/strains.json`) show in amber when one side is the player's circle, and at the give-away as what a careful reader would have noticed. |
+| `guide.html` | The player's guide to Watson's timeline, linked from its header and Settings; no spoilers. |
+| `world.html` | The page's old address: a redirect to `./`, so links to it still work. |
+| `ui/world-autoplay.js` | The autoplay of Watson's timeline: the true path (`world/path.json`) played through the page (Settings → Watch the autoplay…, `?autoplay`), in a save of its own, in the viewer's layout; the caption says each move in plain words and the reader's `why`, and what a move shows (`see`) is highlighted for a moment. It starts paused; speeds ¼× to 4×, Pause, Step, Stop. |
+| `ui/world-moves.js`, `ui/world-hints.js` | The moves of Watson's timeline made through the page (shared by the autoplay and Do it), and the hints: on request (Hint, in the header and on the gate's notice), what a careful reader would do next from wherever the player is: a wrong mark on a question the path settles, a distrust the path does not make, else the next move of the path the page allows now (the soonest answer given away first), else "read on"; three rungs (where, the reasoning, the move with Do it), and a wait after each press (Settings, 30 seconds by default). |
+| `engine/world.js` | The world model as data, read: provenance chains, the time order, what each fact and claim asserts, the player's marks on questions as assertions, the contradictions among accepted assertions (typed states such as a door's included), and the player's trust in links and people. |
+| `engine/actions.js` | Typed states and actions for the world model: the generic action table (each action type's requirements just before and effects just after), persistence (a state lasts until something changes it), and the player's moves (a) a change between two differing states and (b) what an action needs and does, as entries from *Watson's reasoning*; where a thing is (`placeAt`), a door's sides, and a named agent's needs (`agentNeeds`); intentions (a goal and a plan) and the moves (c) "what is this for?" (`checkFit`), (d) "what would this need?" (`checkPlan`) and "does it account for this?" (`accountsFor`), and two plans compared (`comparePlans`); an aim's implied last step (`impliedSteps`) and needs a circled reason adds (`ctx.extraNeeds`); what stopped an intended step (`stops`). |
+| `v1/index.html`, `ui/app.js`, `ui/style.css` | The earlier game, kept at `v1/` (its `<base href="../">` addresses `ui/`, `engine/` and `cases/` from the site root): the story, cards, questions, theories, checks, timelines, notes, hints, the record. The rows from here to `engine/stats.js` are the earlier game's (`engine/story.js` serves both pages). |
+| `v1/guide.html` | The earlier game's guide, linked from it. |
+| `v1/logic.html`, `ui/logic.js` | The earlier case's logic laid open (every inference, clue and step). Linked only from the earlier game's guide: it shows every answer. At present it does not load (a formula operator, `only`, that its reading does not know; see `docs/ideas.md`, known limitations). |
 | `ui/autoplay.js` | The autoplay: plays an action table through the page. |
 | `ui/readings.js` | Formulas and clashes read back as plain sentences. |
 | `engine/loadCase.js` | Loads a case directory (node or browser). |
@@ -48,14 +72,9 @@ the reader's own background, and the record against Holmes. `docs/case-format.md
 | `engine/actionTable.js`, `engine/minimalTable.js` | The annotated reader's moves as a script for the page, and the fewest of them that reach the maximum. |
 | `engine/hints.js`, `engine/hintData.js`, `engine/hintPlayer.js` | Hints: which row to hint, its rungs, and a player that only takes hints. |
 | `engine/incremental.js`, `engine/searchCost.js`, `engine/automation.js`, `ui/search.js` | Incremental mode (an experiment): its waits, a player that moves only when the story waits, a blind search's cost at each wait, and the automation (the searches a check at a time, steered by the player's marks, with the counts per category; a check planned before it is made), and its page (the Search tab and the clock). |
-| `engine/world.js` | The world model as data, read (the new direction): provenance chains, the time order, what each fact and claim asserts, the player's marks on questions as assertions, the contradictions among accepted assertions (typed states such as a door's included), and the player's trust in links and people. |
-| `engine/actions.js` | Typed states and actions for the world model: the generic action table (each action type's requirements just before and effects just after), persistence (a state lasts until something changes it), and the player's moves (a) a change between two differing states and (b) what an action needs and does, as entries from *Watson's reasoning*; where a thing is (`placeAt`), a door's sides, and a named agent's needs (`agentNeeds`); intentions (a goal and a plan) and the moves (c) "what is this for?" (`checkFit`), (d) "what would this need?" (`checkPlan`) and "does it account for this?" (`accountsFor`), and two plans compared (`comparePlans`); an aim's implied last step (`impliedSteps`) and needs a circled reason adds (`ctx.extraNeeds`); what stopped an intended step (`stops`). |
-| `ui/world-moves.js`, `ui/world-hints.js` | The moves of Watson's timeline made through the page (shared by the autoplay and Do it), and the hints: on request (Hint, in the header and on the gate's notice), what a careful reader would do next from wherever the player is: a wrong mark on a question the path settles, a distrust the path does not make, else the next move of the path the page allows now (the soonest answer given away first), else "read on"; three rungs (where, the reasoning, the move with Do it), and a wait after each press (Settings, 30 seconds by default). |
-| `ui/world-autoplay.js` | The autoplay of Watson's timeline: the true path (`world/path.json`) played through the page (Settings → Watch the autoplay…, `world.html?autoplay`), in a save of its own, in the viewer's layout; the caption says each move in plain words and the reader's `why`, and what a move shows (`see`) is highlighted for a moment. It starts paused; speeds ¼× to 4×, Pause, Step, Stop. |
-| `world.html`, `ui/world.js`, `ui/world.css` | Watson's timeline, a draft page beside the game (not linked from it): the story read so far, every name in it a link to its card (the old game's `mentions.json`, matched by `engine/story.js`), the world model as an ordered list of events with time points as headings (or the same events as a packed grid, with a column per place or per source: each entry starts a line below the start of the one before), trust controls on each link of a fact's chains and on the statement itself (with undo), an entity's card (its questions, the sentences of the story that mention it, its own event list), a Cards list of everyone and everything met so far by kind, the contradictions among what is on the timeline, each traced to both sides' chains, and the questions (a Questions panel, and each question at its time point on the timeline) whose possibilities the player circles or crosses out (those someone in the story puts forward first, the rest, with every person and animal or place met so far for a who or where question, behind "More"); a circle is an entry on the timeline, and both take part in contradictions. Its layout (Settings): three columns side by side (story, timeline with contradictions and questions, detail), or panels with tabs like the game's (Story, Timeline, Questions, Contradictions, Cards, Detail), two side by side or one; a phone always one. A link opens its tab in the other panel (in one column in place, with a way back). A paragraph number (¶) anywhere scrolls the story to that paragraph. The detail of a typed state or action offers the player's moves (a) and (b) (an entry with moves is marked ⚙ on the timeline, and the timeline can show only those); their entries (Watson's reasoning) go on the timeline, as trusted as their weakest premise, and can be withdrawn; a move that stops holding (a circle changed) is announced in a corner notice and listed on its entry's detail. Reading stops before a give-away until each question it answers has exactly one circle (the commitment gate), and the answers given show with the player's circle. Likely clashes (`world/strains.json`) show in amber when one side is the player's circle, and at the give-away as what a careful reader would have noticed. |
 | `engine/stats.js`, `engine/depgraph.js` | The statistics page and the DepGraph exports. |
 | `cases/silver-blaze/` | The case: `story.txt`, `case.json` and its parts (entities, events, claims, relations, propositions, constraints, knowledge, states, actions, mentions, thoughts) and the generated files. |
-| `cases/silver-blaze/world/` | The world model as data, the whole story (the new direction; read by `engine/world.js` and `world.html`): its own entities, time points, facts, accounts and questions, the likely clashes, and the true path through Watson's timeline (`path.json`). See `docs/case-format.md` "The world model as data". |
+| `cases/silver-blaze/world/` | The world model as data, the whole story (read by `engine/world.js` and Watson's timeline): its own entities, time points, facts, accounts and questions, the likely clashes, and the true path through Watson's timeline (`path.json`). See `docs/case-format.md` "The world model as data". |
 | `schema/case.schema.json` | JSON Schema for the case format. |
 | `scripts/` | Validation, generators, logs, the local server, the site build and the headless-Chrome checks. |
 | `checker/` | The LLM leak checker over card texts and the autoplay's notes. |
@@ -68,7 +87,7 @@ scripts need a local Chrome.
 
 | Task | Command |
 |---|---|
-| Serve the game | `node scripts/serve.js` → http://localhost:8321/ (Watson's timeline: http://localhost:8321/world.html) |
+| Serve the pages | `node scripts/serve.js` → http://localhost:8321/ (Watson's timeline; the earlier game: http://localhost:8321/v1/) |
 | All tests (engine and full case validation, about 7–8 min) | `npm test` |
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Validate the case and rewrite `cases/silver-blaze/report.md` | `npm run validate` |
@@ -96,7 +115,11 @@ scripts need a local Chrome.
 | LLM leak checker over every card text (costs money; cached) | `node checker/check.js cases/silver-blaze --all --runs 2` |
 | LLM leak checker over the notes the autoplay types | `node checker/check.js cases/silver-blaze --notes --runs 2` |
 
-The headless-Chrome scripts share port 9333: run one at a time.
+The headless-Chrome scripts share port 9333: run one at a time. Watson's timeline's checks (`page-checks`,
+`path-check`, `world-autoplay-check`, `world-hints-check`) default to `http://localhost:8321/`; the earlier game's
+(`ui-run`, `notes-check`, `autoplay-check`, `search-check`, `hints-check`) to `http://localhost:8321/v1/`. The action
+table, the minimal playthrough, the hints' data, incremental mode, the search cost, the statistics and the DepGraph
+exports are the earlier game's.
 
 ### Generated files
 
@@ -107,9 +130,10 @@ The generated files depend on each other. After a change to the case or to `thou
 ### Tests that matter most
 
 Node tests check the engine on saves built in node, but the page can refuse moves the engine accepts. Only the
-headless-Chrome runs (`ui-run.mjs`, `hints-check.mjs all`, `autoplay-check.mjs`; for Watson's timeline
-`path-check.mjs`, `world-autoplay-check.mjs`, `world-hints-check.mjs`) play the real page; run them after
-any change to the UI or to what a move needs, and check every difficulty, not only Hard.
+headless-Chrome runs play the real page: for Watson's timeline `npm run page-checks` (`path-check.mjs`,
+`world-autoplay-check.mjs`, `world-hints-check.mjs`); for the earlier game `ui-run.mjs`, `hints-check.mjs all`,
+`autoplay-check.mjs`. Run them after any change to the UI or to what a move needs (for the earlier game, check every
+difficulty, not only Hard).
 
 ## Conventions
 
@@ -122,9 +146,13 @@ any change to the UI or to what a move needs, and check every difficulty, not on
 
 ## The live site
 
-`.github/workflows/pages.yml` publishes the game to GitHub Pages on every push to `main`. `scripts/build-site.js`
-collects what the pages load (following `import()`, CSS `url()` and the case's data files) into `_site/`. A case's
+`.github/workflows/pages.yml` publishes the site to GitHub Pages on every push to `main`: Watson's timeline at the
+base URL, its guide beside it, `world.html` redirecting there, and the earlier game with its guide and logic viewer
+under `v1/`. `scripts/build-site.js` collects what the pages load (their links and scripts, resolved from each page's
+own directory or its `<base>`, then `import()`, CSS `url()` and the case's data files) into `_site/`. A case's
 data files the page fetches itself are listed there by name (the action tables, `hints.json`, `incremental.json`): a
 new one must be added, or the live page quietly goes without it (incremental mode was missing from the live site for
 that reason). A page check can run against the built site: `node scripts/build-site.js <dir>`, serve `<dir>`, and run
-the check with `URL=http://localhost:<port>/`.
+the check with `URL=http://localhost:<port>/` (the page checks: `URL=… npm run page-checks`; the earlier game's
+checks take `URL=http://localhost:<port>/v1/`, their default being `http://localhost:8321/v1/`). The local server
+redirects a directory without its slash (`/v1` → `/v1/`), as GitHub Pages does: `v1/`'s `<base>` needs it.
