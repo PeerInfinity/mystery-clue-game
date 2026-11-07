@@ -9,6 +9,17 @@ uses (`answer_from` and its `from` chain in the annotated reading's thoughts, `d
 into the world model as `answer_reasoning` and `reasoning`, plus
 the question's possibilities and their `from`/`out`/`by`), and marks each link against what the page has now.
 
+**Later (2026-11-07): five possibilities moved where the story first suggests them**, after the leak check found
+them offered too early (the user's ruling; `pipeline/README.md`, "The current page's leaks, fixed"). The dates in the
+tables below are this audit's, from before the move. Now: `q.horse_where` "dead, in a pit or mine" from ¶58
+(Gregory says it); `q.straker_aim` "to injure the horse" from ¶175 (the knife, the candle, the match, then the lame
+sheep); `q.why_light` "to light the candle for close work" from ¶214 (the horse struck in self-defence);
+`q.why_out` "heard in the stable" from ¶219, its "by a light" answer removed (the story never suggests it);
+`q.sheep_lame` "someone practised on them" from ¶221. Each answer's earliest inferable paragraph moved with it, and
+the true path with them: the reader's links of Straker's night (the drugging, the door, the key, leading the horse
+out, the knife and the candle to the injury, and its plan) now come between ¶175 and ¶219, where before they came
+from ¶46 to ¶102. The window for beating Holmes on Straker's night is that much shorter.
+
 ## Progress
 
 - **Step 1 built (2026-11-05):** `also_right` (any valid answer is accepted: q.why_out's light, q.motive's bets) and

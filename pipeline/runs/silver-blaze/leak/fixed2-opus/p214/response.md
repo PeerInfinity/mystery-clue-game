@@ -1,9 +1,10 @@
 ```jsonl
-{"i": 1, "verdict": "supported", "why": "Holmes says 'there goes the bell' in this paragraph."}
-{"i": 2, "verdict": "supported", "why": "Holmes says Straker was 'entirely unworthy of your confidence', and earlier he was called an honest servant, so the question is plainly raised."}
-{"i": 3, "verdict": "supported", "why": "Earlier text calls Straker a zealous and honest servant, so this is a possibility the reader has been given."}
-{"i": 4, "verdict": "supported", "why": "Holmes's statement that Straker was unworthy of confidence directly suggests this."}
-{"i": 5, "verdict": "supported", "why": "The horse killed him in self-defence and Straker was unworthy of confidence, so Straker clearly did something wrong; asking his motive is natural."}
-{"i": 6, "verdict": "supported", "why": "The story already gives reason to consider this: the costly milliner's bill made out to 'Derbyshire' and found on Straker, and Mrs. Straker denying she owned such a dress."}
-{"i": 7, "verdict": "supported", "why": "Heavy betting on the race is stressed throughout, so a betting motive for a trainer harming the favourite is a reasonable possibility."}
+{"i": 1, "verdict": "supported", "why": "Holmes says in ¶214 'there goes the bell'."}
+{"i": 2, "verdict": "supported", "why": "Straker was earlier called 'zealous and honest', and Holmes now calls him 'entirely unworthy of your confidence'. That makes his honesty a natural question."}
+{"i": 3, "verdict": "supported", "why": "The story described him as an honest servant, so a reader has reason to consider this."}
+{"i": 4, "verdict": "supported", "why": "Holmes's statement in ¶214 directly suggests this."}
+{"i": 5, "verdict": "supported", "why": "The story gives the clues: a half-burned vesta Holmes expected to find, a candle and vestas in Straker's pockets, and a knife 'devised for very delicate work'. Holmes now implies Straker was the wrongdoer, so a reader could consider this."}
+{"i": 6, "verdict": "supported", "why": "Holmes implies Straker did something wrong to the horse, so asking his motive is a natural question."}
+{"i": 7, "verdict": "supported", "why": "This is a reasonable inference from the clues so far, not a revealed fact. The clues are the expensive milliner's bill made out to 'Derbyshire', Mrs. Straker denying she owned such a dress, and Holmes asking for Straker's photograph."}
+{"i": 8, "verdict": "supported", "why": "Betting on the race is central to the story, and the trainer is now implied to be acting against his own horse. That makes betting against it a natural possibility."}
 ```

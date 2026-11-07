@@ -458,8 +458,9 @@ THE LABELS that first appear at paragraph 214:
 2. (question) Was Straker honest?
 3. (possibility) Was Straker honest? — true
 4. (possibility) Was Straker honest? — false
-5. (question) What drove Straker to it?
-6. (possibility) What drove Straker to it? — debts of a second household
-7. (possibility) What drove Straker to it? — to win his bets by laying against his own horse
+5. (possibility) Why was a match struck in the hollow? — to light the candle for close work
+6. (question) What drove Straker to it?
+7. (possibility) What drove Straker to it? — debts of a second household
+8. (possibility) What drove Straker to it? — to win his bets by laying against his own horse
 
 Judge every label.

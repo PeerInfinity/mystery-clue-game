@@ -188,7 +188,11 @@ earliest inferable paragraph with them, and the true path's circles (with the li
 the reason the horse went out, now at ¶102). The path check and every page check pass. Opus accepts the first three;
 it still flags the last two (at ¶57 it reads "injure" as said of the police's suspect, Straker still an honest
 servant; at ¶102 nothing yet says why a light mattered), and, this time, "to light the candle for close work" at
-¶102, which it passed before.
+¶102, which it passed before. Probing each at candidate paragraphs (`leak/probe-2026-11-07/`), the checker first accepts "to
+injure the horse" at ¶175, "to light the candle for close work" at ¶214, and "by a light that would be seen from
+the stable" nowhere (¶102 to ¶223). The user: apply what the probes found. So the injury moved to ¶175, the candle
+to ¶214, and the light answer was removed; the true path's moves with them (`docs/logic-audit.md`, the note at its
+top). After it, the leak check flags none of the 358 labels; the path check and every page check pass.
 
 ## The second run on Silver Blaze (2026-11-06): steps 5–12 (`runs/silver-blaze-r2/`)
 
