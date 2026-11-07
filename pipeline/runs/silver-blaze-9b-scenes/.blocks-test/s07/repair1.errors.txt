@@ -1,0 +1,4 @@
+f.inf_brown_disguised_horse: time.to: no time t.weighing_enclosure_visit
+f.inf_straker_practises_sheep: time.at: no time t.straker_practice
+f.inf_straker_drugged: time.at: no time t.opium_added
+f.brown_thinks_watched: truth false, but what it asserts is true

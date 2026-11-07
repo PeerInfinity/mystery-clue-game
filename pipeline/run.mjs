@@ -32,7 +32,14 @@ const ctx = { name, conf: CASES[name], model, dry, stepDir };
 fs.mkdirSync(stepDir, { recursive: true });
 
 // The calls of this step: one, or one per scene (from --from, or only --scene).
-let units = step.perScene ? scenesOf(name) : [null];
+let units = step.perScene ? scenesOf(name).map((s, index) => ({ ...s, index })) : [null];
+// A step may take scenes in groups (step.group, or --group n): one call for several scenes, its own part their facts.
+const group = Number(opt('group', step.group ?? 1));
+if (step.perScene && group > 1) {
+    const g = [];
+    for (let i = 0; i < units.length; i += group) { const xs = units.slice(i, i + group); g.push({ id: xs.length > 1 ? `${xs[0].id}-${xs.at(-1).id}` : xs[0].id, title: xs.map((x) => x.title).join('; '), from: xs[0].from, to: xs.at(-1).to, index: xs.at(-1).index, scenes: xs.map((x) => x.id) }); }
+    units = g;
+}
 if (opt('scene')) units = units.filter((s) => s?.id === opt('scene'));
 if (opt('from')) units = units.slice(units.findIndex((s) => s?.id === opt('from')));
 
@@ -43,7 +50,7 @@ for (const scene of units) {
     // --recheck: check the output already recorded again (after a fix to the checks), repairing only if it fails.
     const recheck = args.includes('--recheck') && fs.existsSync(path.join(dir, 'items.json'));
     let res = recheck ? { text: '```jsonl\n' + JSON.parse(fs.readFileSync(path.join(dir, 'items.json'), 'utf8')).map((x) => JSON.stringify(x)).join('\n') + '\n```' } : await call({ dir, prompt: task, system: template('system', {}), model, dry });
-    if (dry) { console.log(`${dir}: prompt written (${task.length} chars)`); continue; }
+    if (dry) { console.log(`${dir}: prompt written (${[].concat(task).join('').length} chars)`); continue; }
     let { items, bad } = jsonLines(res.text);
     if (step.normalize) items = step.normalize(ctx, scene, items);
     let errors = [...bad.map((b) => `not a JSON object: ${b.slice(0, 120)}`), ...step.check(ctx, scene, items)];

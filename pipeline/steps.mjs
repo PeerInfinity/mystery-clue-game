@@ -11,7 +11,7 @@ import { normalize } from '../engine/story.js';
 
 const storyOf = (name) => paragraphs(fs.readFileSync(path.join(caseDir(name), 'story.txt'), 'utf8'));
 const inPara = (paras, para, quote) => Number.isInteger(para) && paras[para] != null && typeof quote === 'string' && normalize(paras[para]).includes(normalize(quote));
-const sceneIndex = (name, scene) => scenesOf(name).findIndex((s) => s.id === scene.id);
+const sceneIndex = (name, scene) => (Number.isInteger(scene.index) ? scene.index : scenesOf(name).findIndex((s) => s.id === scene.id));
 // The data a per-scene step may see, and its parts as prompt text.
 const seen = (ctx, step, scene) => collect(ctx.name, { step, scene: scene ? sceneIndex(ctx.name, scene) : Infinity });
 const narratorsText = (d) => JSON.stringify(d.header?.narrators ?? []);
@@ -41,6 +41,19 @@ function validated(ctx, step, scene, items, { ignore = [], also = [] } = {}) {
     });
 }
 // What a later step settles: the answer key (step 9) and the questions (step 8: an unknown teller's question).
+/**
+ * Step 9b's shared part: the spec and the whole case as step 9b found it, the same for every scene. Compact (a
+ * prompt is mostly its facts): every fact by what it says, when it is told and how it is reasoned (COMPACT_KEEP;
+ * the scene's own facts come in full in the scene's part), and the reading without the annotations that only
+ * restate the text (RECORD, SET ASIDE).
+ */
+const COMPACT_KEEP = new Set(['id', 'of', 'attr', 'value', 'to', 'neg', 'para', 'basis', 'truth', 'claim', 'word', 'given_at', 'inferable_at', 'q', 'pick', 'modal']);
+const compactFact = (f) => Object.fromEntries(Object.entries(f).filter(([k]) => COMPACT_KEEP.has(k)));
+function datesShared(ctx) {
+    const base = collect(ctx.name, { step: 9.2, own: false });
+    const reading = { ...base, thoughts: base.thoughts.filter((t) => !['RECORD', 'SET ASIDE'].includes(t.tag)) };
+    return template('09b-shared', { ...common(ctx, base, null), facts: lines(base.facts.map(compactFact)), reading: readingText(reading), story: numbered(storyOf(ctx.name)) });
+}
 /** Every message of the validator on the whole case (with `items` added). */
 function allProblems(ctx, step, items) {
     const d = collect(ctx.name, { step, extra: items });
@@ -241,18 +254,34 @@ export const STEPS = [
         },
     },
     {
-        n: 9.2, name: 'dates', dir: '09b-dates', perScene: true,
+        n: 9.2, name: 'dates', dir: '09b-dates', perScene: true, group: 3,   // three scenes a call (README, "Step 9b's cost")
+        // The shared part (the data as step 9b found it, compact: datesShared) and then the scene's own task, with
+        // its facts in full. A scene does not see the patches of the scenes before it; 9c reconciles.
         prompt: (ctx, scene) => {
-            const d = seen(ctx, 9.2, scene);
-            const all = collect(ctx.name, { step: 9.2 });
+            const base = collect(ctx.name, { step: 9.2, own: false });
             const SCENE_TAGS = new Set(['INFER', 'DEFAULT', 'IDENTIFY', 'HYPOTHESIS']);
-            return template('09b-dates', { ...common(ctx, all, scene), scene_facts: lines(all.facts.filter((f) => f.para >= scene.from && f.para <= scene.to)), scene_reading: lines(sceneThoughts(all, scene).filter((t) => SCENE_TAGS.has(t.tag))), reading: readingText(all), story: numbered(storyOf(ctx.name)) });
+            return datesShared(ctx) + '\n\n' + template('09b-scene', { scene_id: scene.id, from: scene.from, to: scene.to, scene_facts: lines(base.facts.filter((f) => f.para >= scene.from && f.para <= scene.to)), scene_reading: lines(sceneThoughts(base, scene).filter((t) => SCENE_TAGS.has(t.tag))) });
         },
         check: (ctx, scene, items) => {
             const all = collect(ctx.name, { step: 9.2 });
             const mineIds = all.facts.filter((f) => f.para >= scene.from && f.para <= scene.to).map((f) => f.id);
             const kinds = items.filter((x) => !['patch', 'facts', 'possibility'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is a patch, a fact or a possibility`);
             return [...kinds, ...validated(ctx, 9.2, scene, items, { also: mineIds })];
+        },
+    },
+    {
+        // Step 9b in one call for the whole story (an experiment, 2026-11-07): the per-scene prompt's shared part and
+        // its task, for every scene's facts at once.
+        n: 9.2, name: 'dates-whole', dir: '09b-dates-whole',
+        prompt: (ctx) => {
+            const all = collect(ctx.name, { step: 9.2, own: false });
+            const SCENE_TAGS = new Set(['INFER', 'DEFAULT', 'IDENTIFY', 'HYPOTHESIS']);
+            const task = template('09b-scene', { scene_id: 'all', from: 1, to: storyOf(ctx.name).length - 1, scene_facts: '(all the facts above)', scene_reading: '(below)' });
+            return datesShared(ctx) + '\n\n' + task + '\n\n' + template('09b-dates-whole', { shared: '', candidates: lines(all.thoughts.filter((t) => SCENE_TAGS.has(t.tag))) }).trim();
+        },
+        check: (ctx, scene, items) => {
+            const kinds = items.filter((x) => !['patch', 'facts', 'possibility'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is a patch, a fact or a possibility`);
+            return [...kinds, ...allProblems(ctx, 9.2, items)];
         },
     },
     {

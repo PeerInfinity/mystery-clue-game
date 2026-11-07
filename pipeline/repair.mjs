@@ -20,7 +20,10 @@ export const patching = (step) => step.n >= 4;
 export function repairPrompt(step, { task, items, text, errors }) {
     const p = patching(step);
     const previous = p ? '```jsonl\n' + items.map((x) => JSON.stringify(x)).join('\n') + '\n```' : text;
-    return template(p ? 'repair-patch' : 'repair', { errors: errors.slice(0, 80).map((e) => `- ${e}`).join('\n'), previous, task });
+    const vars = { errors: errors.slice(0, 80).map((e) => `- ${e}`).join('\n'), previous };
+    // A task in blocks: the repair is one block more after them (the earlier blocks then come from the cache).
+    if (Array.isArray(task)) return [...task, template(p ? 'repair-patch' : 'repair', { ...vars, task: '' }).replace(/^\s*---\s*/, '')];
+    return template(p ? 'repair-patch' : 'repair', { ...vars, task });
 }
 /** The items after a repair's response. */
 export function afterRepair(step, ctx, scene, items, text) {

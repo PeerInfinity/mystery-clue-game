@@ -1,0 +1,9 @@
+f.inf_self_cut: pick: q.thigh_cut has no possibility "his own knife, as he fell"
+q.paper_packet: a drug for the boy's supper: by: no fact f.holmes_simpson_eliminated
+q.dog_silent: the dog had been shut away or silenced: by: no fact f.holmes_visitor_known
+q.thigh_cut: answer "his own knife, as he fell" is not a possibility
+q.thigh_cut: answer inferable at ¶54, but no right possibility is available before ¶Infinity
+q.knife_blood: an assailant's: by: no fact f.knife_gashes
+q.gypsies_part: they received the horse from Simpson by arrangement: by: no fact f.holmes_not_gypsies
+q.gypsies_part: they took the horse on their own account: by: no fact f.holmes_not_gypsies
+f.holmes_believed_found: truth false, but what it asserts is true

@@ -65,7 +65,10 @@ export async function call({ dir, prompt, system, model = 'opus', dry = false, t
     // share it); with no tools, a call can neither read nor write it.
     const blind = path.join(os.tmpdir(), 'pipeline-blind');
     fs.mkdirSync(blind, { recursive: true });
-    const args = ['-p', '--model', model, '--tools', '', '--strict-mcp-config', '--setting-sources', '', '--no-session-persistence', '--system-prompt', system, '--output-format', 'json'];
+    // A prompt is one text, or a list of blocks: sent as separate content blocks (stream-json), so that a later call
+    // starting with the same blocks reads them from the prompt cache at a block's boundary.
+    const blocks = Array.isArray(prompt);
+    const args = ['-p', '--model', model, '--tools', '', '--strict-mcp-config', '--setting-sources', '', '--no-session-persistence', '--system-prompt', system, ...(blocks ? ['--input-format', 'stream-json', '--output-format', 'stream-json', '--verbose'] : ['--output-format', 'json'])];
     const started = Date.now();
     const out = await new Promise((resolve, reject) => {
         const child = spawn('claude', args, { cwd: blind, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -74,9 +77,11 @@ export async function call({ dir, prompt, system, model = 'opus', dry = false, t
         child.stderr.on('data', (d) => { se += d; });
         child.on('error', reject);
         child.on('close', (code) => (so.trim().startsWith('{') ? resolve(so) : reject(new Error(`claude exited ${code}: ${se.slice(0, 500)} ${so.slice(0, 500)}`))));
-        child.stdin.end(prompt);
+        child.stdin.end(blocks ? JSON.stringify({ type: 'user', message: { role: 'user', content: prompt.map((text) => ({ type: 'text', text })) } }) + '\n' : prompt);
     });
-    const r = JSON.parse(out);
+    // stream-json: the last line of type result holds what --output-format json gives.
+    const r = blocks ? out.split('\n').filter((l) => l.trim().startsWith('{')).map((l) => JSON.parse(l)).filter((o) => o.type === 'result').at(-1) : JSON.parse(out);
+    if (!r) throw new Error(`no result from claude: ${out.slice(-400)}`);
     const text = r.result ?? '';
     fs.writeFileSync(path.join(dir, `${base}response.md`), text);
     const meta = {
@@ -91,7 +96,7 @@ export async function call({ dir, prompt, system, model = 'opus', dry = false, t
 }
 
 /** A prompt as recorded (prompt.md): the system prompt and the user's message. Its SHA-256 is in meta.json. */
-export const promptRecord = (system, prompt) => `<!-- system -->\n${system}\n\n<!-- user -->\n${prompt}\n`;
+export const promptRecord = (system, prompt) => `<!-- system -->\n${system}\n\n<!-- user -->\n${[].concat(prompt).join('\n\n<!-- block -->\n\n')}\n`;
 export const sha256 = (text) => crypto.createHash('sha256').update(text).digest('hex');
 
 /** The total cost of a run's records under `dir`. */

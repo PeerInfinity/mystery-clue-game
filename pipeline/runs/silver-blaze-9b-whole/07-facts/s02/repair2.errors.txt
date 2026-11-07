@@ -1,0 +1,6 @@
+f.simpson_came_info: no chain reaches the reader from acct.simpson
+f.simpson_came: no chain reaches the reader from acct.simpson
+f.simpson_admits: no chain reaches the reader from acct.simpson
+f.stranger_is_simpson: no chain reaches the reader from acct.simpson
+f.simpson_no_designs: no chain reaches the reader from acct.simpson
+f.simpson_cannot_account: no chain reaches the reader from acct.simpson

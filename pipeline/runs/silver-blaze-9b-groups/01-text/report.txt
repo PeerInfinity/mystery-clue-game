@@ -1,0 +1,6 @@
+source: pipeline/sources/doyle-silver-blaze.txt
+paragraphs: 232 (¶0 to ¶231)
+¶0: I. Silver Blaze
+¶1: I am afraid, Watson, that I shall have to go,” said Holmes, as we sat down together to our breakfast one morning.…
+last: “Ah, it bolted, and was cared for by one of your neighbours. We must have an amnesty in that direction, I think. This is…
+words: 9574

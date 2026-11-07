@@ -33,12 +33,13 @@ const strip = (x) => Object.fromEntries(Object.entries(x).filter(([k]) => !k.sta
 
 /**
  * The data as seen from step `step` working on scene index `scene` (default: everything), plus `extra` items (a
- * call's new output, not yet accepted) at the end.
+ * call's new output, not yet accepted) at the end. `own: false`: none of the step's own output (the data as the
+ * step found it).
  */
-export function collect(name, { step = Infinity, scene = Infinity, extra = [] } = {}) {
+export function collect(name, { step = Infinity, scene = Infinity, extra = [], own = true } = {}) {
     // The same step's own output only from its earlier scenes: a step run once (scene -1) never sees its own last
     // output, which a rerun or a recheck replaces.
-    const all = [...itemsOf(name).filter((x) => x._n < step ? x._s <= scene : x._n === step && x._s >= 0 && x._s < scene), ...extra.map((x) => ({ ...x, _n: step, _s: scene }))];
+    const all = [...itemsOf(name).filter((x) => x._n < step ? x._s <= scene : own && x._n === step && x._s >= 0 && x._s < scene), ...extra.map((x) => ({ ...x, _n: step, _s: scene }))];
     const d = { entities: [], mentions: {}, moves: [], joins: {}, times: [], facts: [], accounts: [], questions: [], strains: [], path: [], thoughts: [], cards: [], header: null, scenes: [] };
     const byId = (arr, x) => { const i = arr.findIndex((y) => y.id === x.id); if (i >= 0) arr[i] = { ...arr[i], ...x }; else arr.push(x); };
     for (const x of all) {

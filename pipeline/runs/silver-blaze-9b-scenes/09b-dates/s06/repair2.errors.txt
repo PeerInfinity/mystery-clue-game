@@ -1,0 +1,10 @@
+q.horse_where: strayed loose on the moor: by: no fact f.horse_at_mapleton
+q.horse_where: dead, the body not yet found: by: no fact f.horse_at_mapleton
+q.horse_where: taken a long way off: by: no fact f.horse_at_mapleton
+q.horse_where: at the bottom of a pit or old mine on the moor: by: no fact f.horse_at_mapleton
+q.brown_part: no part in it: by: no fact f.brown_conceals
+q.brown_part: Brown killed Straker: by: no fact f.holmes_yes_horse
+q.man_near_mapleton: the man who struck Straker down, following the horse: by: no fact f.man_is_brown
+q.man_near_mapleton: simpson: by: no fact f.man_is_brown
+q.turned_back: he went that way for some other reason, such as to keep out of sight: by: no fact f.brown_first_impulse
+q.brown_there: back at King's Pyland: by: no fact f.bay_is_blaze

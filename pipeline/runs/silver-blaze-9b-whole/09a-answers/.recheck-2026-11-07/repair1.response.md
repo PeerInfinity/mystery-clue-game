@@ -1,0 +1,4 @@
+```jsonl
+{"file":"patch","id":"q.why_taken","set":{"answer":"nobody meant to carry him off: he was led out to be harmed and got loose","answer_given_at":223,"answer_given_quote":"It was absolutely necessary to do it in the open air.","answer_inferable_at":214,"answer_reasoning":{"para":214,"text":"The horse killed Straker in self-defence, so Straker had led it out to harm it, with the cataract knife and a light, after practising on the sheep. The horse then ran off loose by itself and was taken up later at Mapleton."},"answer_strength":"likely"}}
+{"file":"possibility","q":"q.thigh_cut","value":"his own knife, as he fell","available":54,"via":"direct","quote":"he wounded himself in his fall"}
+```

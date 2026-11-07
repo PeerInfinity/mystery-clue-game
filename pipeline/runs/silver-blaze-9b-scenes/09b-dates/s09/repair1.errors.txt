@@ -1,0 +1,2 @@
+f.simpson_drops_cravat: inferable_at ¶182 after given ¶60
+f.holmes_conviction_simpson: truth false, but what it asserts is true

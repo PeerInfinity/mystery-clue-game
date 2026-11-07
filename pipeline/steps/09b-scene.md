@@ -1,29 +1,7 @@
-# Step: truth and dates of the facts of one scene, with the whole story
-
-{{spec}}
-
-## All facts
-
-
-{{facts}}
-
-## Questions
-
-{{questions}}
-
-## The annotated reading
-
-{{reading}}
-
-## The story
-
-{{story}}
-
 ## Your task
 
-
-The whole story is below, with all its facts and questions (answers included). For the facts told in scene
-{{scene_id}} (¶{{from}}–¶{{to}}), listed separately, give what only the whole story settles, as patches
+The whole story is above, with all its facts and questions (answers included). For the facts told in
+{{scene_id}} (¶{{from}}–¶{{to}}), listed separately in full, give what only the whole story settles, as patches
 `{"file": "patch", "id": <fact id>, "set": {...}}`, only where something applies:
 
 - `truth`: `false` for a fact the story shows to be untrue (a lie, a mistaken belief's content stated as a fact);

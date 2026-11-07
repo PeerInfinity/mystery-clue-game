@@ -35,5 +35,44 @@
       "public_domain": "US and life+70 countries (Doyle died 1930)"
     },
     "note": "The second run on Silver Blaze: steps 1-4 copied from the first, 5-9 rerun with the instructions fixed after it."
+  },
+  "silver-blaze-9b-scenes": {
+    "source": "pipeline/sources/doyle-silver-blaze.txt",
+    "target": "cases/silver-blaze",
+    "title": "Silver Blaze",
+    "author": "Arthur Conan Doyle",
+    "source_info": {
+      "gutenberg_id": 834,
+      "collection": "The Memoirs of Sherlock Holmes",
+      "first_published": 1892,
+      "public_domain": "US and life+70 countries (Doyle died 1930)"
+    },
+    "note": "An experiment (2026-11-07): run 2 up to step 9a, then step 9b compact, per scene (earlier tries kept in .before-blocks/ and .blocks-test/)."
+  },
+  "silver-blaze-9b-whole": {
+    "source": "pipeline/sources/doyle-silver-blaze.txt",
+    "target": "cases/silver-blaze",
+    "title": "Silver Blaze",
+    "author": "Arthur Conan Doyle",
+    "source_info": {
+      "gutenberg_id": 834,
+      "collection": "The Memoirs of Sherlock Holmes",
+      "first_published": 1892,
+      "public_domain": "US and life+70 countries (Doyle died 1930)"
+    },
+    "note": "An experiment (2026-11-07): run 2 up to step 9a, then step 9b in one call for the whole story."
+  },
+  "silver-blaze-9b-groups": {
+    "source": "pipeline/sources/doyle-silver-blaze.txt",
+    "target": "cases/silver-blaze",
+    "title": "Silver Blaze",
+    "author": "Arthur Conan Doyle",
+    "source_info": {
+      "gutenberg_id": 834,
+      "collection": "The Memoirs of Sherlock Holmes",
+      "first_published": 1892,
+      "public_domain": "US and life+70 countries (Doyle died 1930)"
+    },
+    "note": "An experiment (2026-11-07): run 2 up to step 9a, then step 9b compact, three scenes per call."
   }
 }

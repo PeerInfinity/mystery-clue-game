@@ -1,0 +1,3 @@
+f.lady_expensive: inferable_at ¶92 after given ¶85
+f.horse_bolted: from: f.holmes_quite_so is not inferable before ¶121, after inferable_at ¶120
+f.holmes_conviction_simpson: truth false, but what it asserts is true

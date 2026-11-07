@@ -55,7 +55,7 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 7 | Facts and accounts | the scene, the story so far, entities, times, facts and accounts so far | `facts.json`, `accounts.json` (and new entities and times) | model, per scene; the validator after each |
 | 8 | Questions | the story so far, the reading so far, entities, facts, questions so far | `questions.json` (no answers), the facts' picks | model, per scene |
 | 9a | Answers | everything, the whole story | each question's answer and its two dates | model, one call |
-| 9b | Truth and dates | everything, the whole story, this scene's facts and annotations | truth, `given_at`, `inferable_at`, inferable facts | model, per scene (the shared part first, for the cache) |
+| 9b | Truth and dates | everything (compact), the whole story, these scenes' facts in full and their annotations | truth, `given_at`, `inferable_at`, inferable facts | model, three scenes a call (`--group 1`: per scene) |
 | 9c | Consistency | everything, the validator's messages | patches | model, until the whole case validates |
 | 10 | Likely clashes | everything | `strains.json` | model, one call |
 | 11 | Leak check, and its fixes | each label with the story up to where it shows | `leak/opus`, `leak/haiku` (reports); 11b, 11c: patches (label steps, plainer names, later possibilities) | `leak.mjs`, blind, per paragraph (Opus judges, Haiku compared); model for the fixes, the leak check again where labels changed |
@@ -207,7 +207,7 @@ from the leak work, 9b's shared part first and the reading's steps as candidates
 | 7 facts | 14 | $15.60 | 1,111 | 91% of the current found (86%), 80% from the same origin (76%); missing tellings 12 → 5 |
 | 8 questions | 10 | $10.73 | 50 | 20 matched; no longer about Holmes's behaviour |
 | 9a answers | 1 | $2.01 | | |
-| 9b truth, dates | 21 | $37.65 | 19 inferable facts | still thin (current 33); the cache did not work yet (below) |
+| 9b truth, dates | 21 | $37.65 | 19 inferable facts, 35 earlier inferable dates | not thin after all: 54 dated steps against the current 60 ("Step 9b's cost") |
 | 9c consistency | 5 | $7.27 | 0 validator errors | a first attempt kept in `.09c-first/` |
 | 10 strains | 1 | $1.95 | 37 likely clashes | current 27; the first is the current's "a lost man who knows the night arrangements" |
 | 11 leak check | 130 + 130 | $11.67 + $0.33 | Opus 37 → 9 → 0 flagged of 526 after two fix rounds ($0.68) | Haiku 40 at the end, all of them false alarms by Opus's judgement |
@@ -218,7 +218,7 @@ A reader trusting every source meets 44 contradictions in the run's data (the cu
 
 Lessons of the second run:
 
-- **The cache needs a fixed working directory.** The model's environment block holds its working directory: a fresh
+- **The cache needs a fixed working directory** (and even then helps only an exactly repeated prompt: "Step 9b's cost"). The model's environment block holds its working directory: a fresh
   random one per call made every prompt differ at the start, so nothing was cached (9b's calls cost the same with
   the shared part first). `lib.mjs` now uses one fixed empty directory, and repairs put the task first, so a
   repair shares its prefix with its call; the cache tokens are recorded in each `meta.json`.
@@ -239,11 +239,37 @@ Lessons of the second run:
 
 What is next:
 
-- **Step 9b is still the dearest step and gives the fewest inferable facts** (19 against 33): test whether the cache
-  now works (`cache_read_tokens` in its `meta.json`), and try one call for the whole story.
+- ~~Step 9b's cost~~: done (2026-11-07), below.
 - **The typed data for the reasoning moves** (a step between 10 and 12), so that the pipeline's true path can use
   the moves (a)–(d) as the hand-made one does.
 - ~~The autoplay and hint checks for a pipeline case~~: done (2026-11-07). `CASE=<dir>` for every page check; on run
   2's case the autoplay plays its 94 moves to the end and the hints reach the end from a fresh page (83 hints) and
   with mistakes made from its data (85, the three mistakes found and undone).
 - **The Speckled Band** (`cases.json` has it; no target to compare with): steps 1–12.
+
+## Step 9b's cost (2026-11-07)
+
+Step 9b was the dearest step (run 2: $37.65 in 21 calls of about 220,000 input tokens each). Two findings and four
+trials, each on a copy of run 2 up to step 9a (`runs/silver-blaze-9b-*`, experiments, not runs):
+
+- **It was not thin.** Run 2's 9b gave 19 inferable facts against the current data's 33, but also an earlier
+  inferable paragraph on 35 stated facts (the current data: 27): 54 dated steps against 60. Its dates are later
+  than the current data's where they differ (Straker took the horse out: ¶182, from the dog's silence, against
+  ¶46), which is the stricter reading, not a gap.
+- **The prompt cache does not help across calls.** Through `claude -p`, Opus reads the cache only for a prompt
+  repeated exactly (a repair round identical to the one before: $0.06 against $1.80); a prompt sent as separate
+  content blocks after a call that cached the first block alone reads nothing (tested on a small text: Haiku did
+  read it, Opus did not). `lib.mjs` can still send blocks (`call` with a list), for whatever it is worth later.
+
+| 9b as | Lines | New inferable | Earlier inferable | given_at | Truth false | Claims' parts | Cost |
+|---|---|---|---|---|---|---|---|
+| run 2, per scene | 121 | 19 | 35 | 19 | 19 | 33 | $37.65 |
+| compact, per scene (`runs/silver-blaze-9b-scenes`) | 135 | 32 | 32 | 22 | 16 | 34 | $24.43 |
+| compact, three scenes a call (`runs/silver-blaze-9b-groups`) | 110 | 20 | 33 | 19 | 13 | 29 | $11.57 |
+| the whole story in one call (`runs/silver-blaze-9b-whole`) | 69 | 4 | 25 | 3 | 13 | 29 | $7.80 |
+
+Compact: the facts outside the scene in brief (what each says, where told, how reasoned; `steps.mjs`
+`COMPACT_KEEP`), the reading without RECORD and SET ASIDE: a scene's prompt 27% smaller. Three scenes a call is now
+the default: about the same as run 2 for a third of the cost, with fewer facts found false, which step 9c's
+consistency catches; `--group 1` gives the most thorough (per scene, about twice the cost). A call no longer sees
+the patches of the calls before it in the same step (each starts from the data as 9b found it); 9c reconciles.

@@ -1,0 +1,10 @@
+q.why_taken: answer inferable at ¶175, but no right possibility is available before ¶214
+q.thigh_cut: answer inferable at ¶54, but no right possibility is available before ¶226
+f.holmes_believed_found: truth false, but what it asserts is true
+f.brown_thinks_watched: truth false, but what it asserts is true
+f.holmes_conviction_simpson: truth false, but what it asserts is true
+f.ross_considers_scratch#pick / f.holmes_let_stand#0: true assertions contradict: q.horse_runs: no: he will not be found in time and is withdrawn or yes: he will be found fit and run on Tuesday
+f.ross_considers_scratch#pick / f.holmes_horse_will_start#1: true assertions contradict: q.horse_runs: no: he will not be found in time and is withdrawn or yes: he will be found fit and run on Tuesday
+f.ross_considers_scratch#pick / f.ross_horse_running#2: true assertions contradict: q.horse_runs: no: he will not be found in time and is withdrawn or yes: he will be found fit and run on Tuesday
+f.ross_considers_scratch#pick / f.holmes_here_he_is#4: true assertions contradict: q.horse_runs: no: he will not be found in time and is withdrawn or yes: he will be found fit and run on Tuesday
+f.holmes_stays_landau / f.holmes_out_villa: true assertions contradict: holmes in two places: road and front_door_villa

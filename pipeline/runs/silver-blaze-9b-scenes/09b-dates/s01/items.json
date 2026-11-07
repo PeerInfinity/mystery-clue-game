@@ -1,0 +1,6 @@
+[{"file":"patch","id":"f.holmes_believed_found","set":{"truth":true,"asserts":[{"of":"silver_blaze","attr":"condition","value":"found","time":{"before":"t.thu_breakfast"}}]}},
+{"file":"patch","id":"f.holmes_expected_abductor","set":{"truth":false,"asserts":[{"q":"q.who_killed","pick":"the one who took the horse","truth":false},
+{"q":"q.who_took","pick":"the murderer of the trainer","truth":false},
+{"q":"q.connection","pick":"one person took the horse and killed the trainer who got in the way","truth":false}]}},
+{"file":"patch","id":"f.straker_murdered","set":{"truth":false}},
+{"file":"facts","id":"f.horse_kept_hidden","of":"silver_blaze","attr":"condition","value":"being kept out of sight by someone","time":{"at":"t.thu_breakfast"},"para":14,"quote":"I could not believe it possible that the most remarkable horse in England could long remain concealed","basis":"inferable","from":["f.horse_remarkable","f.dartmoor_sparse","f.horse_not_found"],"inferable_at":14,"reasoning":[{"para":14,"text":"Holmes reasoned as anyone would: a famous horse on an empty moor gets found quickly. It has not turned up in two days, so someone is keeping it out of sight."}],"strength":"likely","given_at":146,"given_quote":"concealed it at Mapleton"}]
