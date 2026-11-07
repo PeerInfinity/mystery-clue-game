@@ -1,0 +1,3 @@
+f.straker_dishonest: from: f.straker_took_horse_inferred is not inferable before ¶182, after inferable_at ¶175
+f.knife_no_weapon: inferable_at ¶175 after given ¶81
+f.holmes_convinced_simpson: truth false, but what it asserts is true

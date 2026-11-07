@@ -1,0 +1,13 @@
+[{"file":"patch","id":"f.holmes_says_daydreaming","set":{"asserts":[{"of":"holmes","attr":"action","value":"was day-dreaming","truth":false}]}},
+{"file":"patch","id":"f.gregory_says_poor_weapon","set":{"asserts":[{"of":"straker","attr":"intends","value":"to use the knife as a weapon of defence","modal":"possible","time":{"at":"t.straker_takes_knife"},"truth":false},
+{"q":"q.knife_why","pick":"for defence, being uneasy after the stranger's visit","truth":false}]}},
+{"file":"patch","id":"f.mrs_straker_says_derbyshire","set":{"asserts":[{"of":"derbyshire","attr":"role","value":"a friend of John Straker","truth":false},
+{"of":"derbyshire","attr":"action","value":"has letters addressed to Straker's house","time":{"at":"t.derbyshire_letters"}},
+{"q":"q.who_derbyshire","pick":"a friend of Straker's","truth":false}]}},
+{"file":"patch","id":"f.holmes_says_plymouth","set":{"asserts":[{"of":"mrs_straker","attr":"location","value":"plymouth","detail":"at a garden-party","time":{"at":"t.plymouth_party"},"truth":false},
+{"of":"holmes","attr":"location","value":"plymouth","detail":"at a garden-party","time":{"at":"t.plymouth_party"},"truth":false},
+{"q":"q.plymouth_meeting","pick":"yes, and she denies it","truth":false}]}},
+{"file":"patch","id":"f.mrs_straker_says_mistaken","set":{"asserts":[{"of":"mrs_straker","attr":"location","value":"plymouth","detail":"at the garden-party","neg":true,"time":{"at":"t.plymouth_party"}},
+{"q":"q.plymouth_meeting","pick":"no: Holmes mistook her for someone else","truth":false}]}},
+{"file":"patch","id":"f.holmes_says_dove_dress","set":{"asserts":[{"of":"mrs_straker","attr":"wearing","value":"dove_dress","time":{"at":"t.plymouth_party"},"truth":false}]}},
+{"file":"facts","id":"f.madam_not_mrs_straker","of":"madam_derbyshire","attr":"identity","value":"mrs_straker","neg":true,"time":{"at":"t.milliner_account_made"},"para":92,"quote":"I never had such a dress, sir","basis":"inferable","from":["f.mrs_straker_no_dress","f.holmes_says_dove_dress","f.papers_milliner","f.holmes_says_expensive"],"inferable_at":92,"reasoning":[{"para":92,"text":"Holmes describes an expensive costume just after reading a costly dress bill. Mrs. Straker says she never had such a dress, so the clothes on the bill in her husband's pocket went to some other woman."}],"strength":"likely","given_at":225,"given_quote":"having satisfied myself that it had never reached her"}]

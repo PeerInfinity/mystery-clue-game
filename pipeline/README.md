@@ -100,3 +100,38 @@ the timeline never had checked: names shown before the text uses them ("Sherlock
 early ("Tuesday, between one and seven: in the hollow, at the time of the struggle" at ¶4), and account labels
 that describe their whole account where its first fact shows. These are for the user to decide on; the pipeline's
 own data gets the same check at step 12.
+
+## The first run on Silver Blaze (2026-11-06): steps 1–9
+
+| Step | Calls | Cost | Result | Against the current data (`compare.mjs`) |
+|---|---|---|---|---|
+| 1 text | – | – | 232 paragraphs | the same text |
+| 2 header | 1 | $0.02 | Watson, first person | the same |
+| 3 scenes | 1 | $0.18 | 9 scenes | the earlier game's 10, one of its splits merged; starts within a few paragraphs |
+| 4 reading | 12 | $5.04 | 253 annotations, 9 wrong turns, 11 hindsight marks | 297, 4, 18; 40% matched by words (a rough measure: two honest readings word things differently) |
+| 5 entities | 11 | $3.06 | 204 | 83% of the current 187 found |
+| 6 times | 9 | $2.42 | 133 | 98% of the current 56 matched |
+| 7 facts | 15 | $14.22 | 960 facts in their accounts | 66% of the current 681 by shape, 86% with the same quote in another shape; 76% of the matched from the same origin |
+| 8 questions | 11 | $10.52 | 58 | 19 of the current 33 matched; most of the rest are fair questions the current data does not ask |
+| 9a answers | 1 | $1.97 | 49 answered | the same answer, in other words, on every matched question |
+| 9b truth, dates | 16 | $28.77 | 15 inferable facts, 11 false | the current has 33 and 28; two validator errors left |
+| | 77 | $66.20 | | |
+
+Besides: the stopped first attempt at step 7's scene s02 (about $2.65) and the refused reading call (about $0.12)
+are not in the records; the leak checks of the current data cost $8.45.
+
+What to fix next (the fix-and-rerun loop):
+
+- **Step 9b is the dearest and gives the least.** Each call sends the whole story and every fact, and each repair
+  sends it again: put the per-scene part last so the shared part is cached across calls, or make it one call; and
+  it adds few inferable facts (15 against 33), so its instructions need the reading's INFER and HYPOTHESIS
+  annotations put to it as candidates.
+- **Provenance.** The commonest repair in step 7 was a told account no chain carried to the narrator; `spec.md`
+  should show a whole chain (witness → police → newspaper → detective → narrator) in the example.
+- **Questions.** The run asks more questions than the current data, many about what Holmes means or does
+  (`q.whisper`, `q.photo_why`): fair, but many are not about the events. The prompt should say a question is about
+  the events of the case, not the detective's behaviour.
+- **The facts the run lacks** (14% of the current): `compare/facts.md` lists them; the classes to trace are the
+  `implied` facts, the tellings between third parties and the `observes` facts.
+- **The comparison itself** is rough for the reading and the questions (word overlap); read `compare/*.md` rather
+  than trusting the percentages.

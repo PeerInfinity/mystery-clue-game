@@ -122,11 +122,17 @@ function facts() {
         const c = cands.map((o) => ({ o, s: (JSON.stringify(val(f, neu)) === JSON.stringify(o.value) ? 1 : 0) + jacc(`${o.value} ${o.detail ?? ''} ${o.quote}`, `${f.value} ${f.detail ?? ''} ${f.quote}`) + (o.para === f.para ? 0.2 : 0) })).sort((a, b) => b.s - a.s)[0];
         if (c && c.s >= 0.3) { used.add(c.o.id); pairs.push([f, c.o]); }
     }
+    // A second pass: the same paragraph and much the same quote, whatever the shape (another attribute or subject).
+    const loose = [];
+    for (const f of neu.facts.filter((x) => !pairs.some(([y]) => y === x))) {
+        const c = old.facts.filter((o) => !used.has(o.id) && o.para === f.para).map((o) => ({ o, s: jacc(o.quote, f.quote) })).sort((a, b) => b.s - a.s)[0];
+        if (c && c.s >= 0.5) { used.add(c.o.id); loose.push([f, c.o]); }
+    }
     const byAttr = {};
     for (const o of old.facts) { byAttr[o.attr] = byAttr[o.attr] ?? [0, 0, 0]; byAttr[o.attr][1]++; if (used.has(o.id)) byAttr[o.attr][0]++; }
     for (const f of neu.facts) { byAttr[f.attr] = byAttr[f.attr] ?? [0, 0, 0]; byAttr[f.attr][2]++; }
-    const L = [`Run ${neu.facts.length}, current ${old.facts.length}; matched ${pairs.length}: ${pct(pairs.length, old.facts.length)} of the current, ${pct(pairs.length, neu.facts.length)} of the run's.`, '', '| attr | current | matched | run |', '|---|---|---|---|', ...Object.entries(byAttr).sort((a, b) => b[1][1] - a[1][1]).map(([k, [a, b, c]]) => `| ${k} | ${b} | ${a} | ${c} |`)];
-    const mp = new Set(pairs.map(([f]) => f.id));
+    const L = [`Run ${neu.facts.length}, current ${old.facts.length}; matched ${pairs.length} by shape (entity, attribute, paragraph): ${pct(pairs.length, old.facts.length)} of the current, ${pct(pairs.length, neu.facts.length)} of the run's; ${loose.length} more by the same quote in another shape: ${pct(pairs.length + loose.length, old.facts.length)} of the current in all.`, '', '| attr | current | matched | run |', '|---|---|---|---|', ...Object.entries(byAttr).sort((a, b) => b[1][1] - a[1][1]).map(([k, [a, b, c]]) => `| ${k} | ${b} | ${a} | ${c} |`)];
+    const mp = new Set([...pairs, ...loose].map(([f]) => f.id));
     L.push('', '## Current facts the run lacks', '', ...old.facts.filter((o) => !used.has(o.id)).map((o) => `- ¶${o.para} ${o.id}: ${o.of} ${o.attr} ${JSON.stringify(o.value)} — “${o.quote}”`));
     L.push('', '## Run facts with no match', '', ...neu.facts.filter((f) => !mp.has(f.id)).map((f) => `- ¶${f.para} ${f.id}: ${f.of} ${f.attr} ${JSON.stringify(f.value)} — “${f.quote}”`));
     // Provenance: whose account each matched fact is in.
@@ -134,7 +140,8 @@ function facts() {
     let same = 0; for (const [f, o] of pairs) { const a = acctOf(neu, f.id).map((x) => m.get(x) ?? x), b = acctOf(old, o.id); if (a.some((x) => b.includes(x)) || (!a.length && !b.length)) same++; }
     L.splice(1, 0, `Of the matched, ${same} (${pct(same, pairs.length)}) are in an account of the same origin (or in none in both).`);
     write('facts', 'Facts', L);
-    report.facts = `run ${neu.facts.length}, current ${old.facts.length}; ${pct(pairs.length, old.facts.length)} of the current matched, ${pct(pairs.length, neu.facts.length)} of the run's; same origin ${pct(same, pairs.length)}`;
+    L.push('', '## Matched by quote in another shape', '', ...loose.map(([f, o]) => `- ¶${f.para} run ${f.of} ${f.attr} ${JSON.stringify(f.value)} — current ${o.of} ${o.attr} ${JSON.stringify(o.value)}`));
+    report.facts = `run ${neu.facts.length}, current ${old.facts.length}; ${pct(pairs.length, old.facts.length)} of the current matched by shape, ${pct(pairs.length + loose.length, old.facts.length)} with the same quote in another shape; same origin ${pct(same, pairs.length)}`;
 }
 
 // --- Questions: by label words and shared possibilities.
@@ -144,7 +151,7 @@ function questions() {
     const used = new Set();
     const pairs = [];
     for (const q of neu.questions) {
-        const c = old.questions.filter((o) => !used.has(o.id)).map((o) => { const a = pv(q, neu), b = pv(o, old); const share = a.filter((v) => b.includes(v) || b.some((x) => jacc(x, v) >= 0.5)).length; return { o, s: jacc(o.label, q.label) + (share ? 0.2 * share : 0) }; }).sort((a, b) => b.s - a.s)[0];
+        const c = old.questions.filter((o) => !used.has(o.id)).map((o) => { const a = pv(q, neu), b = pv(o, old); const share = a.filter((v) => b.includes(v) || b.some((x) => jacc(x, v) >= 0.5)).length; return { o, s: (o.id === q.id ? 0.5 : 0) + jacc(o.label, q.label) + (share ? 0.2 * share : 0) }; }).sort((a, b) => b.s - a.s)[0];
         if (c && c.s >= 0.35) { used.add(c.o.id); pairs.push([q, c.o]); }
     }
     const ans = pairs.filter(([q, o]) => q.answer != null && (m.get(q.answer) ?? q.answer) === o.answer).length;

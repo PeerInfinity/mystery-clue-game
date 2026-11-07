@@ -21,6 +21,9 @@ read further, and nobody knows the answers yet.
 - Facts that bear on a question: `{"file": "patch", "id": <fact id>, "set": {"q", "pick"}}` for a fact that states
   an answer, or `{"file": "patch", "id": <claim fact id>, "set": {"asserts": [...]}}` to give a says or believes
   fact the picks it asserts (`{"q", "pick", "neg"?}`, beside the states it already asserts: give the whole list).
+- A telling whose teller the story does not give (`of: "?"`), or that the story leaves uncertain, needs a question
+  of `kind: "provenance"` (who sent the reply; whether the papers had it from the police or the witnesses), and the
+  telling a patch with its `q`.
 - A question's label must not hint at its answer, and nothing may run ahead of the story.
 
 ## Entities

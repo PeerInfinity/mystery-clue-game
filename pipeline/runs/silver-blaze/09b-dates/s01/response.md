@@ -1,0 +1,15 @@
+The patches for scene s01 are below.
+
+- **Mistaken beliefs:** Holmes's two beliefs in ¶14 are marked `false`. The horse was in fact concealed, at Mapleton. Straker was not killed by an abductor.
+- **"Murdered" in ¶4:** this is marked `false` because the horse killed Straker in self-defence. This one is a judgment call, since ¶4 is the public's framing.
+- **Earlier statements:** Holmes's intention to go is already stated in brief at ¶1, so two facts get an earlier `given_at`.
+- **New inferable fact:** by ¶14 a careful reader can reach that the horse is being kept hidden, at likely strength. The story states it at ¶146.
+
+```jsonl
+{"file": "patch", "id": "f.holmes_believed_not_concealed", "set": {"truth": false, "asserts": [{"of": "silver_blaze", "attr": "condition", "value": "concealed", "neg": true, "time": {"at": "t.wed"}, "truth": false}]}}
+{"file": "patch", "id": "f.holmes_expected_found", "set": {"truth": false, "asserts": [{"q": "q.who_killed_straker", "pick": "whoever took Silver Blaze", "truth": false}, {"q": "q.connection", "pick": "the horse's abductor killed Straker", "truth": false}, {"q": "q.what_became_of_horse", "pick": "stolen and hidden", "truth": false}]}}
+{"file": "patch", "id": "f.straker_murdered", "set": {"truth": false}}
+{"file": "patch", "id": "f.holmes_announces", "set": {"given_at": 1, "given_quote": "I am afraid, Watson, that I shall have to go"}}
+{"file": "patch", "id": "f.holmes_decides_act", "set": {"given_at": 1, "given_quote": "I am afraid, Watson, that I shall have to go"}}
+{"file": "facts", "id": "f.horse_kept_hidden", "of": "silver_blaze", "attr": "condition", "value": "being kept out of sight by someone (not merely strayed)", "time": {"at": "t.wed"}, "para": 14, "quote": "could long remain concealed", "basis": "inferable", "from": ["f.horse_not_found", "f.horse_reputed", "f.north_dartmoor_sparse", "f.horse_disappears"], "inferable_at": 14, "reasoning": [{"para": 14, "text": "A famous horse loose on a thinly peopled moor would have been found within two days; since it has not, someone is keeping it hidden."}], "strength": "likely", "given_at": 146, "given_quote": "how he had led it back and concealed it at Mapleton"}
+```

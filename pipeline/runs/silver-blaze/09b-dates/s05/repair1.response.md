@@ -1,0 +1,5 @@
+The fact referred to a time point that does not exist, so I moved it to `t.vesta_dropped`, the existing point for when the burnt match was left in the mud.
+
+```jsonl
+{"file":"facts","id":"f.straker_lit_hollow_inferred","of":"straker","attr":"action","value":"strikes a light in the hollow, where he died","time":{"at":"t.vesta_dropped"},"para":104,"quote":"I only saw it because I was looking for it.","basis":"inferable","from":["f.holmes_finds_vesta","f.vesta_in_mud","f.straker_had_vestas","f.straker_had_candle","f.holmes_looking_vesta"],"inferable_at":104,"reasoning":[{"para":104,"text":"Holmes went looking for a burnt match in the hollow and found one. Straker died there on a dark, wet night with a box of vestas and a candle-end in his pockets, so the match was most likely his, struck to make a light down in the hollow."}],"strength":"likely","given_at":226,"given_quote":"he had got behind the horse and had struck a light"}
+```

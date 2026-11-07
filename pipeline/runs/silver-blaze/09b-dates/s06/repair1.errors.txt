@@ -1,0 +1,2 @@
+f.sb_strayed_unled: from: f.holmes_agrees_alone is not inferable before ¶121, after inferable_at ¶120
+f.brown_holds_horse_inferred: time.from: no time t.brown_conceals

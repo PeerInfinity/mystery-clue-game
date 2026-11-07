@@ -1,0 +1,4 @@
+f.sb_disguised_inferred: time.to: no time t.race_weighing
+f.straker_practised_sheep_inferred: time.at: no time t.straker_practises
+f.brown_believes_watched: truth false, but what it asserts is true
+f.watson_thunderstruck: truth false, but what it asserts is true

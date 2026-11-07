@@ -1,0 +1,2 @@
+f.holmes_believed_not_concealed: truth false, but what it asserts is true
+f.holmes_at_paddington / f.holmes_in_carriage: true assertions contradict: holmes in two places: paddington and carriage

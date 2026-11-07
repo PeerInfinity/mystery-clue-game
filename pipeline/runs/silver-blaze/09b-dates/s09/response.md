@@ -1,0 +1,44 @@
+Patches for the s09 facts: truth values, earlier statements, and earlier inference points.
+
+```jsonl
+{"file":"patch","id":"f.holmes_convinced_simpson","set":{"truth":false,"asserts":[{"of":"simpson","attr":"action","act":"strike","thing":"straker","value":"kills Straker","time":{"at":"t.crime"},"truth":false}]}}
+{"file":"patch","id":"f.straker_cravat_purpose","set":{"asserts":[{"of":"straker","attr":"intends","value":"to use the cravat in securing the horse's leg","time":{"at":"t.straker_picks_cravat"},"truth":null},{"q":"q.cravat_purpose","pick":"to use it in securing the horse's leg","truth":null}]}}
+{"file":"patch","id":"f.holmes_says_debt","set":{"asserts":[{"of":"straker","attr":"condition","value":"over head and ears in debt through the woman","time":{"at":"t.straker_double_life"},"truth":null},{"of":"straker","attr":"intends","value":"to lame his horse because of his debts","time":{"at":"t.horse_leaves_stall"},"truth":null}]}}
+{"file":"patch","id":"f.holmes_says_simpson_out","set":{"asserts":[{"of":"simpson","attr":"action","act":"drug","thing":"curried_mutton","value":"drugs Hunter's supper","neg":true,"time":{"at":"t.opium_added"}},{"q":"q.who_drugged","pick":"the_stranger","neg":true},{"q":"q.who_drugged","pick":"mrs_straker","truth":null},{"q":"q.who_drugged","pick":"straker"}]}}
+{"file":"patch","id":"f.knife_no_weapon","set":{"given_at":81,"given_quote":"A very delicate blade devised for very delicate work.","inferable_at":175,"from":["f.straker_practised_sheep_inferred","f.cork_beside_body"],"strength":"likely"}}
+{"file":"patch","id":"f.lady_expensive","set":{"given_at":85,"given_quote":"Madam Derbyshire had somewhat expensive tastes"}}
+{"file":"patch","id":"f.dog_silent","set":{"given_at":181,"given_quote":"The dog did nothing in the night-time."}}
+{"file":"patch","id":"f.someone_fetched_horse","set":{"given_at":33,"given_quote":"the favourite’s stall was empty"}}
+{"file":"patch","id":"f.holmes_grasped_dog","set":{"given_at":180,"given_quote":"To the curious incident of the dog in the night-time."}}
+{"file":"patch","id":"f.neighbour_cares","set":{"given_at":146,"given_quote":"how he had led it back and concealed it at Mapleton"}}
+{"file":"patch","id":"f.dog_knew_visitor","set":{"inferable_at":182,"from":["f.dog_knew_visitor_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_at_stables_night","set":{"inferable_at":182,"from":["f.straker_took_horse_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_takes_horse","set":{"inferable_at":182,"from":["f.straker_took_horse_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_leads_hollow","set":{"inferable_at":182,"from":["f.straker_took_horse_inferred","f.horse_in_hollow","f.straker_lit_hollow_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_drugs_lad","set":{"inferable_at":218,"reasoning":[{"para":218,"text":"Only Straker or his wife could have chosen a curry to hide the opium. Straker is the one who took the horse out and needed the lad asleep."}],"strength":"likely"}}
+{"file":"patch","id":"f.straker_dishonest","set":{"inferable_at":175,"from":["f.straker_practised_sheep_inferred","f.straker_took_horse_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_intends_operation","set":{"inferable_at":175,"from":["f.straker_practised_sheep_inferred","f.cork_beside_body","f.straker_lit_hollow_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_wished_out","set":{"inferable_at":175,"from":["f.straker_practised_sheep_inferred","f.lads_routine"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_strikes_light","set":{"inferable_at":104,"from":["f.straker_lit_hollow_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_in_hollow","set":{"inferable_at":104,"from":["f.straker_lit_hollow_inferred","f.body_in_hollow"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_coat_off","set":{"inferable_at":175,"from":["f.coat_laid","f.straker_practised_sheep_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.straker_coatless","set":{"inferable_at":175,"from":["f.coat_laid","f.straker_practised_sheep_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.sb_lashes_out","set":{"inferable_at":212,"from":["f.sb_kills_straker","f.head_shattered"],"strength":"likely"}}
+{"file":"patch","id":"f.knife_gashes","set":{"inferable_at":44,"reasoning":[{"para":44,"text":"Simpson has no wound, and Holmes calls it probable that the thigh cut came from Straker's own knife as he fell after the blow."}],"strength":"likely"}}
+{"file":"patch","id":"f.straker_picks_cravat","set":{"inferable_at":214,"reasoning":[{"para":214,"text":"The horse struck Straker and no man fought him in the hollow, so the cravat was not torn from an attacker. Simpson said he had lost it, and Straker must have picked it up."}],"strength":"likely"}}
+{"file":"patch","id":"f.simpson_drops_cravat","set":{"inferable_at":214,"reasoning":[{"para":214,"text":"No man fought Straker in the hollow, so Simpson's claim that he lost the cravat that evening is the likeliest account."}],"strength":"likely"}}
+{"file":"patch","id":"f.opium_in_dish","set":{"inferable_at":37,"from":["f.opium_in_hunters_portion"]}}
+{"file":"patch","id":"f.dish_set_aside","set":{"inferable_at":37,"from":["f.household_ate","f.analysis_opium"]}}
+{"file":"patch","id":"f.straker_practises","set":{"inferable_at":175,"from":["f.straker_practised_sheep_inferred"],"strength":"likely"}}
+{"file":"patch","id":"f.holmes_surmise_confirmed","set":{"inferable_at":174,"from":["f.holmes_pleased","f.lad_says_lame"],"strength":"likely"}}
+{"file":"patch","id":"f.dress_not_hers","set":{"inferable_at":92,"from":["f.madam_not_mrs_straker"],"strength":"likely"}}
+{"file":"patch","id":"f.holmes_questions_mrs_straker","set":{"inferable_at":93,"reasoning":[{"para":93,"text":"On her denial Holmes says 'that quite settles it' and leaves at once, so the garden-party remark was a test about the dress."}],"strength":"likely"}}
+{"file":"patch","id":"f.straker_double_life","set":{"inferable_at":92,"from":["f.madam_not_mrs_straker","f.mrs_straker_says_derbyshire","f.papers_milliner"],"strength":"likely"}}
+{"file":"patch","id":"f.madam_dashing_wife","set":{"inferable_at":92,"from":["f.madam_not_mrs_straker","f.mrs_straker_says_derbyshire"],"strength":"likely"}}
+{"file":"patch","id":"f.derbyshire_is_straker","set":{"inferable_at":161,"reasoning":[{"para":161,"text":"Derbyshire's letters came to Straker's house and his bill was in Straker's pocket. Mrs. Straker never had the dress, and Holmes asks for Straker's photograph before going to London, where the milliner is."}],"strength":"likely"}}
+{"file":"patch","id":"f.derbyshire_mythical","set":{"inferable_at":161,"reasoning":[{"para":161,"text":"Derbyshire's letters came to Straker's house and his bill was in Straker's pocket. Holmes asks for Straker's photograph before going to London, as if to show it to the milliner."}],"strength":"likely"}}
+{"file":"patch","id":"f.straker_customer","set":{"inferable_at":161,"reasoning":[{"para":161,"text":"The bill to 'Derbyshire' from the Bond Street milliner was in Straker's own pocket, and Holmes takes Straker's photograph to London."}],"strength":"likely"}}
+{"file":"patch","id":"f.holmes_intends_milliner","set":{"inferable_at":161,"reasoning":[{"para":161,"text":"He asks for Straker's photograph just before leaving for London, where the milliner who billed 'Derbyshire' has her shop."}],"strength":"likely"}}
+{"file":"patch","id":"f.holmes_calls_milliner","set":{"inferable_at":161,"reasoning":[{"para":161,"text":"He takes Straker's photograph to London, where the Bond Street milliner on Derbyshire's bill keeps her shop."}],"strength":"likely"}}
+{"file":"patch","id":"f.sb_bolts","set":{"inferable_at":120,"from":["f.sb_strayed_unled"],"strength":"likely"}}
+```

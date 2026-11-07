@@ -1,0 +1,5 @@
+q.who_killed_straker: simpson: from: no fact f.simpson_arrested
+q.who_took_horse: simpson: from: no fact f.simpson_arrested
+q.why_horse_taken: to stop the favourite running in the Wessex Cup: from: no fact f.horse_favourite
+q.why_horse_taken: for the horse's own value: from: no fact f.horse_reputed
+q.simpson_why_arrested: he took the horse and killed Straker: from: no fact f.simpson_arrested

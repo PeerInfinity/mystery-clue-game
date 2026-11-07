@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { CASES, runDir, caseDir, writeLines, writeAtomic, readJson, list, paragraphs } from './lib.mjs';
 
-const stepDirs = (name) => (fs.existsSync(runDir(name)) ? fs.readdirSync(runDir(name)).filter((d) => /^\d\d-/.test(d)).sort() : []);
+const stepDirs = (name) => (fs.existsSync(runDir(name)) ? fs.readdirSync(runDir(name)).filter((d) => /^\d\d[a-z]?-/.test(d)).sort() : []);
 export const scenesOf = (name) => readJson(path.join(caseDir(name), 'scenes.json'), { scenes: [] }).scenes;
 
 /** Every step's items in order, each tagged with its step number and scene index (`_n`, `_s`). */
