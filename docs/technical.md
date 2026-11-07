@@ -63,6 +63,7 @@ is the earlier game's, for its JSON Schema.
 | The earlier game's checks and generators (from `v1/`: `npm run v1:validate`, `v1:validate-thoughts`, `v1:reveal-log`, `v1:foreshadow-log`, `v1:clash-log`; the rest as `node scripts/…` in `v1/`) | see `v1/docs/technical.md` |
 | Run one step of the new-story pipeline on a case (blind model calls, recorded with their cost; `--scene`, `--from`, `--dry`) | `node pipeline/run.mjs <case> <step>` |
 | Compare a pipeline run's data with the case's current data, by content | `node pipeline/compare.mjs <case> [part]` |
+| Rebuild a pipeline run's prompts (not committed), checked against their recorded hashes; rebuild its assembled case | `node pipeline/prompts.mjs <case> [step] [--write]`; `node pipeline/assemble.mjs <case>` |
 | How each fact of the world model reached the reader (`--accounts`: per account, and who holds it when) | `node scripts/world-provenance.js cases/silver-blaze` |
 | Every check of Watson's timeline that plays the page, one after another (the path, the autoplay in each layout and on a phone, the hints); starts the server and a headless Chrome of its own if they are not running, and stops only those (about 6 minutes) | `npm run page-checks` |
 | Play the true path (`world/path.json`) through Watson's timeline in headless Chrome (`CASE=<dir>` for another case): each move offered and taken, none possible before its paragraph, every answer right, no contradiction open at the end (about a minute; `STOP=<para>`, `SAVE=<file>` for the state there) | `node scripts/path-check.mjs` |

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import crypto from 'node:crypto';
 
 export const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 export const PIPE = path.join(ROOT, 'pipeline');
@@ -48,14 +49,16 @@ export function jsonLines(text) {
 
 /**
  * One blind call: `claude -p` from a fresh empty directory, no tools, no settings, memory or MCP servers, its own
- * system prompt. Records prompt.md, response.md and meta.json (model, tokens, cost, time) in `dir`; returns the text.
+ * system prompt. Records prompt.md, response.md and meta.json (model, the prompt's SHA-256, tokens, cost, time) in
+ * `dir`; returns the text. prompt.md is not committed (pipeline/prompts.mjs rebuilds it and checks the hash).
  * `dry`: write the prompt only.
  */
 export async function call({ dir, prompt, system, model = 'opus', dry = false, tag = '' }) {
     fs.mkdirSync(dir, { recursive: true });
     // A dry run writes dry.prompt.md: it must never overwrite the record of a prompt as sent.
     const base = dry ? 'dry.' : tag ? `${tag}.` : '';
-    fs.writeFileSync(path.join(dir, `${base}prompt.md`), `<!-- system -->\n${system}\n\n<!-- user -->\n${prompt}\n`);
+    const record = promptRecord(system, prompt);
+    fs.writeFileSync(path.join(dir, `${base}prompt.md`), record);
     if (dry) return null;
     // A fixed empty directory: the working directory is in the model's environment block, so a fresh random one per
     // call would make every prompt's prefix differ and defeat prompt caching. It is never emptied (calls run at once
@@ -77,7 +80,7 @@ export async function call({ dir, prompt, system, model = 'opus', dry = false, t
     const text = r.result ?? '';
     fs.writeFileSync(path.join(dir, `${base}response.md`), text);
     const meta = {
-        model: Object.keys(r.modelUsage ?? {})[0] ?? model, cost_usd: r.total_cost_usd, duration_s: Math.round((Date.now() - started) / 1000),
+        model: Object.keys(r.modelUsage ?? {})[0] ?? model, prompt_sha256: sha256(record), cost_usd: r.total_cost_usd, duration_s: Math.round((Date.now() - started) / 1000),
         input_tokens: (r.usage?.input_tokens ?? 0) + (r.usage?.cache_creation_input_tokens ?? 0) + (r.usage?.cache_read_input_tokens ?? 0),
         cache_read_tokens: r.usage?.cache_read_input_tokens, cache_write_tokens: r.usage?.cache_creation_input_tokens,
         output_tokens: r.usage?.output_tokens, stop_reason: r.stop_reason, error: r.is_error ? text.slice(0, 400) : undefined, date: new Date().toISOString(),
@@ -86,6 +89,10 @@ export async function call({ dir, prompt, system, model = 'opus', dry = false, t
     if (r.is_error) throw new Error(`model error: ${text.slice(0, 300)}`);
     return { text, meta };
 }
+
+/** A prompt as recorded (prompt.md): the system prompt and the user's message. Its SHA-256 is in meta.json. */
+export const promptRecord = (system, prompt) => `<!-- system -->\n${system}\n\n<!-- user -->\n${prompt}\n`;
+export const sha256 = (text) => crypto.createHash('sha256').update(text).digest('hex');
 
 /** The total cost of a run's records under `dir`. */
 export function costOf(dir) {

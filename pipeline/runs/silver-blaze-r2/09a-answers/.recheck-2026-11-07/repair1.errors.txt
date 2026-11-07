@@ -1,0 +1,2 @@
+q.why_taken: answer inferable at ¶175, but no right possibility is available before ¶214
+q.thigh_cut: answer inferable at ¶54, but no right possibility is available before ¶226

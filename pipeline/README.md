@@ -19,13 +19,28 @@ Adventure of the Speckled Band".
 - **The format spec has no real case in it** (`spec.md`: an invented story's examples). `docs/case-format.md` is
   never sent: its examples are one case's answers.
 - **Everything is recorded.** Each call keeps the prompt as sent, the response, the model, the tokens, the cost and
-  the time (`runs/<case>/NN-<step>/…`). The runs are committed.
+  the time (`runs/<case>/NN-<step>/…`). See "Records" for what is committed.
 - **Checks after every step**, and up to three repair rounds when a check fails: the step's own prompt, its own
   previous output and the check's messages, nothing else.
 - **What compensated for knowing the ending** in the hand-made data is kept as steps or checks: the reading's honesty
   rules and ⚠ marks (step 4), the reading written from the story alone (step 4 sees nothing else), redating once the
   whole story is in (step 9), the validator's rule that the true story has no contradiction (step 9), the earliest
   check of the true path (step 11), and a blind leak check of every label (step 12).
+
+## Records
+
+Each call's directory holds `prompt.md` (the system prompt and the message as sent), `response.md`, `meta.json`
+(the model, the prompt's SHA-256, the tokens, the cache tokens, the cost, the time), the checks' messages
+(`repairN.errors.txt`, `errors.txt`) and the step's accepted `items.json`; a repair round has its own
+`repairN.prompt.md`, `.response.md` and `.meta.json`. The responses, items, metadata and messages are committed.
+The prompts are not (the user's ruling, 2026-11-07: no large files a script already generates): they are mostly
+copies of the story and the data so far, and `node pipeline/prompts.mjs <case> [step] [--write]` rebuilds them,
+repairs included, and checks each against its recorded hash. Nor is a run's assembled case (`runs/<case>/case/`),
+which `node pipeline/assemble.mjs <case>` rebuilds from the items. A prompt rebuilt at a later commit differs from
+the one sent wherever the code or the spec has changed since: check out the run's commit to rebuild it exactly.
+The two runs of 2026-11-06 committed their prompts and cases, which stay in the repository; they have no hashes, and
+`prompts.mjs` compares with the committed prompt instead (at the current commit, 289 of their 347 prompts rebuild
+exactly; the rest differ only by the spec and the repair template changed since).
 
 ## The steps
 
@@ -67,6 +82,8 @@ first. What the new data lacks is traced to the step's instructions, which are f
 ```
 node pipeline/run.mjs <case> <step> [--model opus] [--scene <id>] [--from <scene id>] [--dry] [--recheck]
 node pipeline/compare.mjs <case> [step]
+node pipeline/prompts.mjs <case> [step] [--write]     rebuild the prompts, checked against their hashes
+node pipeline/assemble.mjs <case>                     rebuild the run's case from its items
 ```
 
 `<case>` is the run's name (`silver-blaze`); the source text and the target case come from
@@ -199,6 +216,9 @@ Lessons of the second run:
 - **A dry run wrote over a recorded prompt** (`--dry` wrote `prompt.md`): step 12's prompt was recovered from its
   first repair's record, which begins with the task; step 11b's was lost (a note in its place). `--dry` now writes
   `dry.prompt.md`.
+- **A recheck of an earlier step repairs again** what a later step already fixed (step 9a, after a validator rule
+  added later: one call, $1.74, kept in `09a-answers/.recheck-2026-11-07/`, the record restored). `--recheck` now
+  refuses a step that later steps have built on.
 - **A step run once never sees its own last output**, so a rerun replaces it (the first rerun of step 11 played both
   the old and the new move).
 

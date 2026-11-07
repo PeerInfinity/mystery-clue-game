@@ -21,7 +21,7 @@ import { shownNames, timeSteps, questionSteps } from '../engine/shown.js';
 const args = process.argv.slice(2);
 const opt = (k, d = null) => { const i = args.indexOf(`--${k}`); return i < 0 ? d : args[i + 1]; };
 
-const SYSTEM = `You check a reading game for spoilers. The player reads a detective story one paragraph at a time.
+export const SYSTEM = `You check a reading game for spoilers. The player reads a detective story one paragraph at a time.
 Beside the story, the page shows labels: the names of people, places and things, the questions the story raises,
 the possible answers to them, the points in time of the events, and short statements of facts. A label may only
 tell the player what the story has already told them.
@@ -88,6 +88,17 @@ export function labels(dir) {
     return { text, items: out.sort((a, b) => a.para - b.para) };
 }
 
+/** The prompt for the labels `xs` that first show at paragraph `p`. */
+export const leakPrompt = (paras, p, xs) => `THE STORY SO FAR (paragraphs 1 to ${p}):\n\n${numbered(paras, 1, p)}\n\n---\n\nTHE LABELS that first appear at paragraph ${p}:\n\n${xs.map((x, i) => `${i + 1}. (${x.kind}) ${x.text}`).join('\n')}\n\nJudge every label.`;
+/** Every paragraph's prompt for a case: {para: prompt}. */
+export function leakPrompts(dir) {
+    const { text, items } = labels(dir);
+    const paras = paragraphs(text);
+    const byPara = new Map();
+    for (const x of items) byPara.set(x.para, [...(byPara.get(x.para) ?? []), x]);
+    return new Map([...byPara.entries()].map(([p, xs]) => [p, leakPrompt(paras, p, xs)]));
+}
+
 async function run(dir, outDir) {
     const model = opt('model', 'haiku');
     const conc = Number(opt('concurrency', 4));
@@ -105,7 +116,7 @@ async function run(dir, outDir) {
             const d = path.join(outDir, `p${String(p).padStart(3, '0')}`);
             const done = readJson(path.join(d, 'items.json'));
             if (done && JSON.stringify(done.map((x) => `${x.kind}|${x.text}`)) === JSON.stringify(xs.map((x) => `${x.kind}|${x.text}`))) continue;
-            const prompt = `THE STORY SO FAR (paragraphs 1 to ${p}):\n\n${numbered(paras, 1, p)}\n\n---\n\nTHE LABELS that first appear at paragraph ${p}:\n\n${xs.map((x, i) => `${i + 1}. (${x.kind}) ${x.text}`).join('\n')}\n\nJudge every label.`;
+            const prompt = leakPrompt(paras, p, xs);
             const res = await call({ dir: d, prompt, system: SYSTEM, model, dry: args.includes('--dry') });
             if (!res) continue;
             const got = jsonLines(res.text).items;

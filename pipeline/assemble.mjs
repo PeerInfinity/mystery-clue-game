@@ -104,3 +104,12 @@ export function forScene(name, i) {
     const scene = scenesOf(name)[i];
     return { paras, scene };
 }
+
+// node pipeline/assemble.mjs <case>: rebuild a run's case (runs/<case>/case/) from its steps' items.
+import { fileURLToPath } from 'node:url';
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
+    const name = process.argv[2];
+    if (!CASES[name]) { console.error('usage: assemble.mjs <case>'); process.exit(2); }
+    const d = assemble(name);
+    console.log(`${caseDir(name)}: ${d.entities.length} entities, ${d.times.length} times, ${d.facts.length} facts, ${d.questions.length} questions, ${d.strains.length} strains, ${d.path.length} moves`);
+}

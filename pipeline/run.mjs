@@ -11,6 +11,7 @@ import path from 'node:path';
 import { CASES, PIPE, ROOT, runDir, caseDir, paragraphs, numbered, call, jsonLines, template, SPEC, readJson, costOf, list } from './lib.mjs';
 import { assemble, itemsOf, scenesOf, forScene } from './assemble.mjs';
 import { STEPS } from './steps.mjs';
+import { MAX_REPAIRS, repairPrompt, afterRepair } from './repair.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k, d = null) => { const i = args.indexOf(`--${k}`); return i < 0 ? d : args[i + 1]; };
@@ -21,16 +22,12 @@ if (!step) { console.error(`no step ${stepArg}`); process.exit(2); }
 const dry = args.includes('--dry');
 const model = opt('model', step.model ?? 'opus');
 const stepDir = path.join(runDir(name), step.dir ?? `${String(step.n).padStart(2, '0')}-${step.name}`);
-const MAX_REPAIRS = 3;
-/** A line's key: its file and id (a possibility by question and value, a door by itself, a card by its bk). */
-const keyOf = (x) => `${x.file ?? ''}|${x.bk ?? (x.file === 'possibility' ? `${x.q}=${x.value}` : x.file === 'joins' ? x.door : x.file === 'path' ? `${x.do}:${x.q ?? x.on ?? ''}=${x.pick ?? x.link ?? ''}` : x.id)}`;
-/** Earlier lines with a repair's lines merged in: a line with the same key replaces, `delete: true` removes, the rest are added. */
-function mergeLines(prev, fix) {
-    const out = new Map(prev.map((x) => [keyOf(x), x]));
-    for (const x of fix) { if (x.delete) out.delete(keyOf(x)); else out.set(keyOf(x), x); }
-    return [...out.values()];
+// --recheck rewrites a step's recorded output if its check now fails: refuse it on a step that later steps have
+// built on (they may have fixed what the check finds, and their record would no longer follow from this one).
+if (args.includes('--recheck')) {
+    const later = STEPS.filter((s) => s.n > step.n && !s.script).map((s) => path.join(runDir(name), s.dir ?? `${String(s.n).padStart(2, '0')}-${s.name}`)).filter((d) => fs.existsSync(d) && fs.readdirSync(d, { recursive: true }).some((f) => String(f).endsWith('items.json')));
+    if (later.length) { console.error(`--recheck: later steps have output (${later.map((d) => path.basename(d)).join(', ')}); recheck only the last step run`); process.exit(2); }
 }
-
 const ctx = { name, conf: CASES[name], model, dry, stepDir };
 fs.mkdirSync(stepDir, { recursive: true });
 
@@ -50,22 +47,16 @@ for (const scene of units) {
     let { items, bad } = jsonLines(res.text);
     if (step.normalize) items = step.normalize(ctx, scene, items);
     let errors = [...bad.map((b) => `not a JSON object: ${b.slice(0, 120)}`), ...step.check(ctx, scene, items)];
-    // A repair: the whole output again (the small steps), or only the lines that change, merged by key (the data
-    // steps, whose outputs are long: asked for everything again, a model shortens it and loses lines).
-    const patching = step.n >= 4;
+    // Repairs (repair.mjs): the whole output again (the small steps), or only the lines that change (the data steps).
     for (let round = 1; errors.length && round <= MAX_REPAIRS; round++) {
         console.log(`${scene?.id ?? step.name}: ${errors.length} problem(s), repair ${round}`);
         fs.writeFileSync(path.join(dir, `repair${round}.errors.txt`), errors.join('\n') + '\n');
-        const previous = patching ? items.map((x) => JSON.stringify(x)).join('\n') : res.text;
-        const prompt = template(patching ? 'repair-patch' : 'repair', { errors: errors.slice(0, 80).map((e) => `- ${e}`).join('\n'), previous: patching ? '```jsonl\n' + previous + '\n```' : previous, task });
+        const prompt = repairPrompt(step, { task, items, text: res.text, errors });
         // A rerun or a recheck keeps the earlier records: the first unused tag (repair1, repair1b, repair1c, …).
         let tag = `repair${round}`;
         for (let k = 1; fs.existsSync(path.join(dir, `${tag}.meta.json`)); k++) tag = `repair${round}${String.fromCharCode(97 + k)}`;
         res = await call({ dir, prompt, system: template('system', {}), model, tag });
-        const got = jsonLines(res.text);
-        items = patching ? mergeLines(items, got.items) : got.items;
-        if (step.normalize) items = step.normalize(ctx, scene, items);
-        bad = got.bad;
+        ({ items, bad } = afterRepair(step, ctx, scene, items, res.text));
         errors = [...bad.map((b) => `not a JSON object: ${b.slice(0, 120)}`), ...step.check(ctx, scene, items)];
     }
     if (errors.length) fs.writeFileSync(path.join(dir, 'errors.txt'), errors.join('\n') + '\n');
