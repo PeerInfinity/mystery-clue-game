@@ -1,3 +1,5 @@
+The one flagged move is redated to ¶78, the earliest paragraph the page allows it.
+
 ```jsonl
-{"file":"path","do":"circle","q":"q.horse_tracks","pick":"towards Mapleton","at":117,"why":"Silver Blaze's own shoe fits a fresh print in the wet hollow on the line towards Mapleton, so the horse left the scene going that way.","for_q":["q.horse_tracks"]}
+{"file":"path","do":"c","of":"f.stranger_asks_bayard","for":"hyp:q.simpson_intent=only to get first-hand information","at":78,"why":"His question about Bayard's form is just the information a tout came for, and his bribe was a ten-pound note.","for_q":["q.simpson_intent"]}
 ```

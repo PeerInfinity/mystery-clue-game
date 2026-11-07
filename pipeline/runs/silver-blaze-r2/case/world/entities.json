@@ -1,6 +1,6 @@
 {
   "moves": ["train","landau","night_train","winchester_train","ross_drag","pullman_car"],
-  "joins": {"stable_door":["stables","kings_pyland"],"mapleton_gates":["mapleton","mapleton_paving"]},
+  "joins": {"stable_door":["stables","path"],"mapleton_gates":["mapleton","mapleton_paving"]},
   "entities": [
     {"id":"watson","kind":"person","name":"Watson"},
     {"id":"holmes","kind":"person","name":"Sherlock Holmes"},

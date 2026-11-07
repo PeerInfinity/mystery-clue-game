@@ -58,12 +58,14 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 9b | Truth and dates | everything (compact), the whole story, these scenes' facts in full and their annotations | truth, `given_at`, `inferable_at`, inferable facts | model, three scenes a call (`--group 1`: per scene) |
 | 9c | Consistency | everything, the validator's messages | patches | model, until the whole case validates |
 | 10 | Likely clashes | everything | `strains.json` | model, one call |
+| 10b | Typed data | everything, the generic action types | typed actions, doors, guards, goals, implied steps, needs, plans, a case's own action types (`actions.json`) | model, one call |
+| 10c | Reasoning routes | the route check's report | more typed data, or why the story reaches an answer another way (`noroute`) | `scripts/route-check.mjs` on the real page; model fills what is missing, until each question the moves could reach has a route or a reason |
 | 11 | Leak check, and its fixes | each label with the story up to where it shows | `leak/opus`, `leak/haiku` (reports); 11b, 11c: patches (label steps, plainer names, later possibilities) | `leak.mjs`, blind, per paragraph (Opus judges, Haiku compared); model for the fixes, the leak check again where labels changed |
 | 12 | The true path | everything (with the leak fixes) | `path.json` | model writes the moves, a script dates each right answer's circle at its earliest; `scripts/path-check.mjs` plays it through the real page (`?case=`). Then `CASE=<the run's case> npm run page-checks`: the autoplay in every layout and the hints, from a fresh page and with mistakes |
 
-Not yet produced: the typed data the reader's reasoning moves need (actions with `act` and `thing`, goals, needs:
-`docs/case-format.md`, "Typed states and actions"), so the pipeline's true path is circles, crossings and trust
-only; the hand-made one also has the moves (a)–(d), plans and checks (`docs/logic-audit.md`).
+The reasoning moves, in stages (the user, 2026-11-07: all kinds eventually, in more than one task): stage 1,
+built, gives "What is this for?" and plan checks (steps 10b, 10c, and step 12 writing those moves); stage 2 will add
+"It changed", "What stopped it?" and "Compare two plans" (states over time, disabling effects, rival plans).
 
 Step 11 comes before the true path so that the path is played on the data as it will be published. `run.mjs
 --recheck` checks a step's recorded output again (after a fix to its checks), calling the model only to repair.
@@ -273,3 +275,36 @@ Compact: the facts outside the scene in brief (what each says, where told, how r
 the default: about the same as run 2 for a third of the cost, with fewer facts found false, which step 9c's
 consistency catches; `--group 1` gives the most thorough (per scene, about twice the cost). A call no longer sees
 the patches of the calls before it in the same step (each starts from the data as 9b found it); 9c reconciles.
+
+## The reasoning moves, stage 1 (2026-11-07)
+
+The user agreed: a generic core of action types in the engine and each story's own as data (`world/actions.json`;
+`docs/case-format.md`, "Typed states and actions"); a typed-data step, a route check by script with a fix call, and
+the true path with the reasoning moves; first "What is this for?" and plan checks. A case's own type that a second
+story needs too is a candidate for the generic table.
+
+- **The route check** (`scripts/route-check.mjs`, `window.__routes` in the page): just before each gated question's
+  give-away, with the right answers circled a careful reader could have by then, every link the page offers and the
+  engine accepts, made until nothing new fits. On the hand-made Silver Blaze it finds the true path's nine links and
+  routes for 8 of 27 gated questions (the rest come by what is told, clashes, and the moves of stage 2).
+- **Run 2 with steps 10b–10c**: 10b ($3.83) typed 47 things, with a case action of its own (nicking a tendon) and its
+  ramification (a lame horse loses the race); routes for 4 of 37 gated questions. 10c ($7.53, after a first attempt
+  kept in `.10c-first/`) gave the tendon-nicking the needs the story supports (practice, a light, the horse away
+  from the stables, out of the lads' hearing), the practice on the sheep as an action of its own, and for five
+  questions a reason why the story reaches them otherwise (the turn back is a change of course, the horse's blow
+  served no aim, the drugger is found by elimination): 8 of 37.
+- **Step 12 with the reasoning moves** ($6.38 after a first try kept in `.12-path-try1/`; the circles-only path
+  in `.12-path-circles-only/`): the route check's links as candidates; 121 moves, 11 "What is this for?" (the
+  knife, the candle and the match, taking the horse out and opening the door serve the harm to the horse; the
+  practice on the sheep leads to it; the harm serves his dishonest purpose) and 4 plan checks, against the
+  hand-made path's 9 and 3. It plays through the real page to the end, and every page check passes on it
+  (`CASE=pipeline/runs/silver-blaze-r2/case npm run page-checks`: the autoplay in every layout, the hints from a
+  fresh page and with mistakes). A link's paragraph is the latest of what it rests on (the circles it names, the
+  fact's paragraph); one the page allows earlier is moved down by script from what `path-check.mjs` reports,
+  which comes a stop of the path at a time (slow: a run of the step took about an hour of page play). Only the
+  statements the page can distrust are listed as false (a narrator's own observation and a claim asserting
+  nothing have no trust control).
+- **Lessons:** the repairs' merge key must name what a line is about (a `noroute` line by its question, a reasoning
+  move by what it links: two such slips collapsed several lines into one); a prompt must carry the action table it
+  asks the model to use; a patch's target is checked (`patchShape`); the route check prefers the answer itself to an
+  also-right (Hunter also had a key, but the reasoning runs through Straker's).

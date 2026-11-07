@@ -1,0 +1,6 @@
+q.turned_back: still no route (Nothing it brings about meets the goal, or a need of a step already linked to it.); add the data, or a noroute line with how the reader reaches it
+q.who_killed: still no route (no link tried); add the data, or a noroute line with how the reader reaches it
+q.who_drugged: still no route (Nothing it brings about meets the goal, or a need of a step already linked to it.); add the data, or a noroute line with how the reader reaches it
+q.why_taken: still no route (no link tried); add the data, or a noroute line with how the reader reaches it
+q.why_led_out: still no route (no link tried); add the data, or a noroute line with how the reader reaches it
+q.who_lamed_sheep: still no route (Nothing it brings about meets the goal, or a need of a step already linked to it.); add the data, or a noroute line with how the reader reaches it

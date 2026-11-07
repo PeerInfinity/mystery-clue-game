@@ -1,2 +1,2 @@
-FAIL ¶216 trust : no trust control for stmt:f.holmes_paper_theories on f.holmes_paper_theories
-FAIL gate before ¶226: Before ¶226, the story gives away the answer to this question. Commit first: circle exactly one answer. Any answer will do; the key shows at ¶226. What made the cut on Straker's thigh? (nothing circled yet) Hint Hide
+FAIL EARLY ¶114 → ¶111 c f.stranger_asks_bayard → hyp:q.simpson_intent=only to get first-hand information (the page allows it)
+FAIL EARLY ¶124 → ¶120 c hyp:q.vesta=straker → hyp:q.candle=to have a small light somewhere out on the moor (the page allows it)

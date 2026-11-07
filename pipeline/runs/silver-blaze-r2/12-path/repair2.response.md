@@ -1,4 +1,6 @@
+Both "What is this for?" links move to the earlier paragraphs the page allows.
+
 ```jsonl
-{"file":"path","do":"circle","q":"q.horse_tracks","pick":"towards Mapleton","at":117,"why":"Silver Blaze's own shoe fits a fresh print in the wet hollow on the line towards Mapleton, so the horse left the scene going that way.","for_q":["q.horse_tracks"]}
-{"file":"path","do":"circle","q":"q.horse_tracks","pick":"loose across the moor, alone","delete":true}
+{"file":"path","do":"c","of":"f.stranger_asks_bayard","for":"hyp:q.simpson_intent=only to get first-hand information","at":111,"why":"His question about Bayard's form is just the information a tout came for.","for_q":["q.simpson_intent"]}
+{"file":"path","do":"c","of":"hyp:q.vesta=straker","for":"hyp:q.candle=to have a small light somewhere out on the moor","at":120,"why":"The match lit the light he had brought the candle for.","for_q":["q.vesta","q.candle"]}
 ```

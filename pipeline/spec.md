@@ -238,11 +238,65 @@ line already says it in brief (until `para`, the page shows only those brief wor
 came before, with `from` (facts) or `reasoning` (`{para, text}`, a step in words), and `strength: "likely"` when it
 would be held but does not strictly follow. These are written once the whole story is in, by the step that sees it.
 
-## Typed actions (optional, for doors and keys)
+## Typed data: what the reader's reasoning moves work on
 
-A fact may be a typed action: `act` (`lock`, `unlock`, `open`, `close`, `go_through`, `lead_out`, `give`, `ask`,
-`drug`, `strike`, `hide`) and `thing` (what it acts on), its agent the fact's `of`. A door's state is `attr: "door"`,
-`value` one of `open`, `shut`, `locked`. Write these only where the text makes them matter.
+The page lets the reader point out what an action or an intention is *for* ("What is this for?") and what a plan
+*would need* ("What would this need?"); the engine checks each against the rules of an action table. These moves
+work on typed data, written only where the story's reasoning runs through it.
+
+**Typed actions.** A fact of an action the reasoning needs carries `act` (an action type, or a list for several in
+a row: `["unlock", "open"]`) and its roles: `thing` (what it acts on), `to` (the one it is done to), `item` (what is
+given, used or carried), `about` (what is asked), `via` (the door gone through), `where` (the place of the deed). Its
+agent is the fact's `of`. A door (or a lid, a gate: anything that opens, shuts and locks) has states `{"attr":
+"door", "value": "open" | "shut" | "locked"}`, and its two sides in entities.json `joins` (`{"desk": ["desk_inside",
+"mill_house"]}`, inside first). Someone keeping watch over a place carries `"guards": <place>` on the fact of their
+role.
+
+```json
+{"id": "f.crane_locks", "of": "crane", "attr": "action", "act": "lock", "thing": "desk", "value": "locks the purse in his desk", "time": {"at": "t.mon_ten"}, "para": 6, "quote": "I locked it in the desk at ten"},
+{"id": "f.desk_locked", "of": "desk", "attr": "door", "value": "locked", "time": {"from": "t.mon_ten"}, "para": 6, "quote": "I locked it in the desk"},
+{"id": "f.dobbs_role", "of": "dobbs", "attr": "role", "value": "sleeps in the stable loft over the yard", "guards": "yard", "time": {"from": "t.before"}, "para": 8, "quote": "he slept in the stable loft"}
+```
+
+**The action table.** Each type gives what it requires just before and what it effects just after, in rules naming
+roles (`$agent`, `$thing`, `$to`, `$item`, `$about`, `$via`, `$where`): `{of, state, value, neg?}` a door's state;
+`{of, attr, value, neg?}` any other state; `{of, key: role}` carrying a key to it; `{of, carrying: role}`; `{of, at:
+door}` at one of its sides; `{of, through: door}` (an effect) on its other side; `{of, place: role}` at that place;
+`{guard: door}` every guard of the place inside the door unable to act; `{of, charge: role}` in charge there; a rule
+with `unless: role` is left out when the action has that role. The generic types are listed with your task. A type
+the story needs that is not there is the case's own: `{"file": "actions", "id", "label", "requires", "effects"}`
+(`label` as the page says it: "copying a key to"). Prefer the generic types; add one of the case's own only where
+the story's reasoning needs what no generic type gives. What a goal's state brings with it (a horse injured before
+its race loses it) is `{"file": "ramifies", "if": {"attr", "value"}, "then": {"attr", "value"}}`.
+
+```json
+{"file": "actions", "id": "copy_key", "label": "copying a key to", "requires": [{"of": "$agent", "carrying": "$item"}], "effects": [{"of": "$agent", "key": "$thing"}]}
+```
+
+**Intentions.** An intention is a goal (a state: `"goal": {"of", "attr", "value"}`) and, through the moves, a plan.
+A fact of what someone means to do carries its `goal`; so does each possibility of a question about why someone
+acted (`entry.attr: "intends"`) that names an aim. Such a possibility may carry `step`, the last action the aim
+implies (`{"act", "thing"?, "item"?, …, "time"}`: to take the purse implies taking it), which the reader's links lead
+to. A possibility that is a reason why something was done in a certain way may carry `need`: `{"act", "rule"}` (or a
+list), a rule the answer adds to that action type's needs when circled (to do it where nobody hears: `{"act":
+"take", "rule": {"of": "$agent", "away": "mill_house"}}`). A question whose answer is the end of the chain (a motive)
+carries `"end": true`. A possibility may carry `rests_on` (states it takes for granted) or `implies` (`{"q", "pick"}`:
+circled, it asserts that answer of another question too).
+
+**Who did it, and why it was done.** A question about who did an action carries the action in its entry (`{"of":
+"?", "attr": "action", "act", "thing", …}`): a circled who-answer is then that one doing it, which the moves can link
+like any action. A question about why an action was done that the story tells (`entry.attr: "intends"`) carries
+`presupposes`, the action (`{"act", "item"?}`): with an answer circled, the action is the reader's to link.
+
+**Plans.** A claim that tells how something was done carries `plan`: `{"agent", "goal", "steps": [{"act", …,
+"time"}]}` (the constable's theory: the pedlar came over the wall, opened the desk and took the purse), so that the
+reader can ask what it would need.
+
+```json
+{"id": "q.who_took", "label": "Who took the purse?", "entry": {"of": "?", "attr": "action", "act": ["unlock", "take"], "thing": "desk", "item": "purse", "time": {"after": "t.mon_ten", "before": "t.tue_breakfast"}}, …},
+{"q": "q.why_dobbs", "value": "to have money for the fair", "goal": {"of": "dobbs", "attr": "condition", "value": "in funds"}, "step": {"act": "take", "item": "purse", "time": {"after": "t.mon_ten", "before": "t.tue_breakfast"}}},
+{"id": "f.pryor_believes", "of": "pryor", "attr": "believes", "plan": {"agent": "the_pedlar", "goal": {"of": "purse", "attr": "held_by", "value": "the_pedlar"}, "steps": [{"act": "go_through", "thing": "yard_gate", "time": {"at": "t.mon_midnight"}}, {"act": ["unlock", "open"], "thing": "desk", "time": {"at": "t.mon_midnight"}}, {"act": "take", "item": "purse", "time": {"at": "t.mon_midnight"}}]}, …}
+```
 
 ## strains.json (likely clashes)
 
@@ -269,5 +323,8 @@ one circle, so the path circles every answered question's answer before its give
 - `{"do": "trust", "on": <fact id>, "link": "stmt:<fact id>", "level": "distrusted"}`: distrust one statement
   (a lie, a mistaken belief, a false report). By the end of the story nothing may contradict: every false
   statement the reader has on the timeline must be distrusted.
+- `{"do": "c", "of", "for"}`: "What is this for?": the action or intention `of` serves the intention `for` (a fact
+  id, or a circled answer `hyp:<question>=<pick>`, or `pre:<question>` for the action a why-question presupposes).
+  `{"do": "plan", "of", "on"}`: "What would this need?", opened on an intention.
 - `at`: the paragraph of the move; `why`: the reader's reason, in plain words, as the reader would say it then;
   `for_q`: the questions the move serves.

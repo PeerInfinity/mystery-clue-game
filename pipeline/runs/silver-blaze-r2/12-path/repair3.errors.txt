@@ -1,2 +1,1 @@
-FAIL ¶217 trust : no trust control for stmt:f.holmes_paper_theories on f.holmes_paper_theories
-FAIL ¶226 answer: What made the cut on Straker's thigh?: his own knife, as he fell (you circled his own knife, in convulsions after the blow)
+FAIL EARLY ¶82 → ¶78 c f.stranger_asks_bayard → hyp:q.simpson_intent=only to get first-hand information (the page allows it)

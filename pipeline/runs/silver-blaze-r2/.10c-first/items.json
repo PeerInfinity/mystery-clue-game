@@ -1,0 +1,9 @@
+[{"file":"noroute","q":"q.why_led_out","why":"The reader reaches this through Holmes's own objection at ¶57: why not injure the horse in the stall? It is answered by what the cut needed. The fine cut needed a light and freedom to work, out of hearing of the lads in the loft above the stable (¶19, ¶34). ¶223 states it: a pricked horse would have roused the soundest sleepers, so it had to be done in the open air."},
+{"file":"possibility","q":"q.straker_reason","value":"to do something to the horse himself","need":{"act":"nick_tendon","rule":{"of":"$thing","away":"stables"}},"note":"¶223: a pricked horse would wake the lads in the loft, so the cut had to be done in the open air, away from the stables."},
+{"file":"possibility","q":"q.why_led_out","value":"to do something to him that could not be done in the stall","need":[{"act":"nick_tendon","rule":{"of":"$thing","away":"stables"}}],"note":"¶223: the horse would have roused the soundest sleepers when it felt the knife, so the cut had to be done in the open air."},
+{"file":"patch","target":"q.who_lamed_sheep","set":{"entry":{"of":"?","attr":"action","act":"practise_nick","thing":"lame_sheep","time":{"before":"t.carriage_sheep"}}}},
+{"file":"actions","id":"practise_nick","label":"practising the tendon-nick on","requires":[{"of":"$agent","carrying":"$item"}],"effects":[{"of":"$thing","attr":"condition","value":"lame"},
+{"of":"$agent","attr":"skill","value":"practised at tendon-nicking"}]},
+{"file":"actions","id":"nick_tendon","label":"nicking the leg tendons of","requires":[{"of":"$agent","carrying":"$item"},
+{"of":"$agent","attr":"lit","value":"a light"},
+{"of":"$agent","attr":"skill","value":"practised at tendon-nicking"}],"effects":[{"of":"$thing","attr":"condition","value":"lame"}]}]

@@ -8,6 +8,8 @@ import { ROOT, PIPE, caseDir, paragraphs, numbered, template, SPEC, list, readJs
 import os from 'node:os';
 import { collect, scenesOf, writeWorld } from './assemble.mjs';
 import { normalize } from '../engine/story.js';
+import { GENERIC_ACTIONS } from '../engine/actions.js';
+import { provenance, CLAIM_ATTRS } from '../engine/world.js';
 
 const storyOf = (name) => paragraphs(fs.readFileSync(path.join(caseDir(name), 'story.txt'), 'utf8'));
 const inPara = (paras, para, quote) => Number.isInteger(para) && paras[para] != null && typeof quote === 'string' && normalize(paras[para]).includes(normalize(quote));
@@ -302,23 +304,75 @@ export const STEPS = [
         prompt: (ctx) => {
             const d = seen(ctx, 12, null);
             const circles = gatedOf(d).map((q) => `${q.id} "${q.label}": ${[q.answer, ...(q.also_right ?? [])].map((v) => `${JSON.stringify(v)} from ¶${earliestCircle(q, v)}`).join(', or ')}; given away at ¶${q.answer_given_at} (circle one before it)`).join('\n') || '(none)';
-            return template('12-path', { ...common(ctx, d, null), strains: lines(d.strains), reading: readingText(d), story: numbered(storyOf(ctx.name)), circles, false_statements: falseOf(d).map((f) => `${f.id} (¶${f.given_at ?? f.para}): ${f.of} ${f.attr} ${JSON.stringify(f.value)}`).join('\n') || '(none)' });
+            // The links "What is this for?" the real page accepts (the route check), each with the first paragraph
+            // it was found at, and the intentions a plan check is offered on: the reasoning moves' candidates.
+            const routes = routeReport(ctx, 12, []);
+            const seenLink = new Map();
+            for (const g of routes) for (const l of g.links) { const k = `${l.of}|${l.for}`; if (!seenLink.has(k)) seenLink.set(k, { ...l, at: g.at }); }
+            const plans = [...new Set(routes.filter((g) => g.plan).map((g) => g.q))];
+            const candidates = [...seenLink.values()].map((l) => `{"do": "c", "of": ${JSON.stringify(l.of)}, "for": ${JSON.stringify(l.for)}} (found at ¶${l.at}; it meets: ${l.need ?? 'the goal'})`).join('\n') || '(none)';
+            return template('12-path', { ...common(ctx, d, null), strains: lines(d.strains), reading: readingText(d), story: numbered(storyOf(ctx.name)), circles, false_statements: falseOf(d).map((f) => `${f.id} (¶${f.given_at ?? f.para}): ${f.of} ${f.attr} ${JSON.stringify(f.value)}`).join('\n') || '(none)', candidates, plans: plans.join(', ') || '(none)' });
         },
         // A right answer's circle at the earliest paragraph the data allows (scripts/path-check.mjs's earliest
         // check); every move in paragraph order, the order given kept within a paragraph.
         normalize: (ctx, scene, items) => {
             const d = seen(ctx, 12, null);
             const qs = new Map(d.questions.map((q) => [q.id, q]));
-            return items.map((m, i) => {
+            const out = items.map((m, i) => {
                 const q = qs.get(m.q);
                 if (m.do === 'circle' && q && isRightPick(q, m.pick) && Number.isInteger(earliestCircle(q, m.pick))) return { ...m, at: earliestCircle(q, m.pick), _i: i };
                 return { ...m, _i: i };
-            }).sort((a, b) => (a.at - b.at) || (a._i - b._i)).map(({ _i, ...m }) => m);
+            });
+            // A link "What is this for?": at the latest of what it rests on (the circles of the answers it names, the
+            // first circle on a question whose action it presupposes, the paragraph that tells a fact), where the
+            // page first allows it, unless the model put it later still for a reason of its own (then path-check
+            // finds it early and moves it).
+            const facts = new Map(d.facts.map((f) => [f.id, f]));
+            const restsAt = (id) => {
+                const h = /^hyp:(.+?)=(.+)$/.exec(id); if (h) return out.find((x) => x.do === 'circle' && x.q === h[1] && x.pick === h[2])?.at ?? null;
+                const pre = /^pre:(.+)$/.exec(id); if (pre) return Math.min(...out.filter((x) => x.do === 'circle' && x.q === pre[1]).map((x) => x.at)) || null;
+                const f = facts.get(id); return f ? f.given_at ?? f.para : null;
+            };
+            for (const m of out) if (m.do === 'c') { const ats = [m.of, m.for].map(restsAt); if (ats.every((x) => Number.isInteger(x) && Number.isFinite(x))) m.at = Math.max(...ats); }
+            // Within a paragraph: the marks and trust first, then the links that rest on them, then the plan checks.
+            const rank = (m) => (m.do === 'c' ? 1 : m.do === 'plan' ? 2 : 0);
+            return out.sort((a, b) => (a.at - b.at) || (rank(a) - rank(b)) || (a._i - b._i)).map(({ _i, ...m }) => m);
         },
         check: (ctx, scene, items) => {
-            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross or trust, with its at`);
+            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust', 'c', 'plan'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross, trust, c or plan, with its at`);
             if (bad.length) return bad;
             return playPath(ctx, items);
+        },
+    },
+    {
+        // The typed data the reasoning moves need (spec.md, "Typed data"), for the whole story in one call.
+        n: 10.2, name: 'typed', dir: '10b-typed',
+        prompt: (ctx) => {
+            const d = seen(ctx, 10.2, null);
+            return template('10b-typed', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)), generic_actions: genericActionsText() });
+        },
+        check: (ctx, scene, items) => {
+            const kinds = items.filter((x) => !['patch', 'possibility', 'joins', 'actions', 'ramifies'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is a patch, a possibility, joins, actions or ramifies`);
+            return [...kinds, ...patchShape(items), ...allProblems(ctx, 10.2, items)];
+        },
+    },
+    {
+        // The route check (scripts/route-check.mjs on the real page) and its fix: every gated question the moves
+        // "What is this for?" and "What would this need?" could reach gets a route, or a reason why the story reaches
+        // it another way (a noroute line, kept in the step's items).
+        n: 10.3, name: 'routes', dir: '10c-routes',
+        prompt: (ctx) => {
+            const d = seen(ctx, 10.3, null);
+            const missing = routeReport(ctx, 10.3, []).filter((g) => routable(g) && !g.links.length);
+            const report = missing.map((g) => `${g.q} "${g.label}" (answer ${JSON.stringify(g.answer)}; tried at ¶${g.at}; entry ${JSON.stringify(g.entry)})\n` + (g.misses.length ? g.misses.slice(0, 8).map((m) => `  - ${m.ofText} → for: ${m.forText}: ${m.why}`).join('\n') : `  - no link was tried: ${g.present.map((x) => `${x.id} ${x.on ? 'is' : 'is not'} on the timeline`).join('; ')}`)).join('\n\n') || '(none)';
+            return template('10c-routes', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)), case_actions: lines(d.actions), generic_actions: genericActionsText(), report });
+        },
+        check: (ctx, scene, items) => {
+            const kinds = [...items.filter((x) => !['patch', 'possibility', 'joins', 'actions', 'ramifies', 'noroute'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is a patch, a possibility, joins, actions, ramifies or noroute`), ...patchShape(items)];
+            const problems = allProblems(ctx, 10.3, items);
+            if (kinds.length || problems.length) return [...kinds, ...problems];
+            const excused = new Set(items.filter((x) => x.file === 'noroute' && x.why).map((x) => x.q));
+            return routeReport(ctx, 10.3, items).filter((g) => routable(g) && !g.links.length && !excused.has(g.q)).map((g) => `${g.q}: still no route (${g.misses[0]?.why ?? 'no link tried'}); add the data, or a noroute line with how the reader reaches it`);
         },
     },
     {
@@ -350,6 +404,26 @@ export const STEPS = [
 // A second round of the leak fix, after the leak check has run again (each round sees the rounds before it).
 { const f = STEPS.find((x) => x.name === 'leakfix'); STEPS.push({ ...f, n: 11.3, name: 'leakfix2', dir: '11c-leakfix', prompt: (ctx) => f.prompt({ ...ctx, step: 11.3 }), check: (ctx, scene, items) => f.check({ ...ctx, step: 11.3 }, scene, items) }); }
 
+const genericActionsText = () => Object.entries(GENERIC_ACTIONS).map(([id, a]) => JSON.stringify({ id, ...a })).join('\n');
+/** A patch names what it changes by `id`, and what it sets. */
+const patchShape = (items) => items.filter((x) => x.file === 'patch' && (!x.id || !x.set)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a patch is {"file": "patch", "id", "set": {...}}`);
+/** A gated question the moves "What is this for?" and plan checks could reach: an aim, who did an action, why an action was done. */
+const routable = (g) => g.entry?.attr === 'intends' || (g.entry?.of === '?' && g.entry?.act) || g.presupposes;
+/** The route check (scripts/route-check.mjs) on a trial case: the case so far with `items`; its report per gated question. */
+function routeReport(ctx, step, items) {
+    const d = collect(ctx.name, { step, extra: items });
+    const trial = path.join(ROOT, 'pipeline', 'runs', ctx.name, 'trial');
+    fs.rmSync(trial, { recursive: true, force: true });
+    writeWorld(ctx.name, d, trial);
+    const json = path.join(os.tmpdir(), `routes-${process.pid}.json`);
+    let out;
+    try { out = execFileSync('node', [path.join(ROOT, 'scripts/route-check.mjs'), '--json', json], { encoding: 'utf8', env: { ...process.env, CASE: path.relative(ROOT, trial) }, timeout: 900000 }); } catch (e) { out = `${e.stdout ?? ''}`; }
+    fs.writeFileSync(path.join(ctx.stepDir, 'route-check.txt'), out);
+    const qs = new Map(d.questions.map((q) => [q.id, q]));
+    const r = readJson(json, { gated: [] });
+    return r.gated.map((g) => ({ ...g, presupposes: qs.get(g.q)?.presupposes }));
+}
+
 /** The labels the Opus leak check flagged (runs/<case>/leak/opus). */
 function leakFlags(ctx) {
     const dir = path.join(PIPE, 'runs', ctx.name, 'leak', 'opus');
@@ -367,11 +441,38 @@ const earliestCircle = (q, pick = null) => {
     const avail = right.length ? Math.min(...right.map((p) => p.available ?? Infinity)) : Infinity;
     return Math.max(q.raised ?? 0, avail, q.answer_inferable_at ?? 0);
 };
-// What the answer key makes false: facts with truth false, and claims that assert something false.
-const falseOf = (d) => d.facts.filter((f) => f.truth === false || list(f.asserts).some((a) => a.truth === false || (a.q && (() => { const q = d.questions.find((x) => x.id === a.q); return q?.answer != null && (isRightPick(q, a.pick) === !!a.neg); })())));
+// What the answer key makes false: facts with truth false, and claims that assert something false; only those the
+// page has a trust control for (a statement's own link on one of its chains: not a narrator's own observation, not a
+// claim that asserts nothing), since a trust move on any other cannot be made.
+function falseOf(d) {
+    const prov = provenance({ ...d, narrators: d.header?.narrators ?? [] });
+    const distrustable = (f) => (CLAIM_ATTRS.has(f.attr) ? prov.claimChains(f.id) : prov.factChains(f.id)).some((c) => c.links.some((l) => l.stmt));
+    return d.facts.filter((f) => (f.truth === false || list(f.asserts).some((a) => a.truth === false || (a.q && (() => { const q = d.questions.find((x) => x.id === a.q); return q?.answer != null && (isRightPick(q, a.pick) === !!a.neg); })()))) && distrustable(f));
+}
 
 /** Play a trial path through the real page (scripts/path-check.mjs, CASE=<trial case>); its failures as messages. */
 function playPath(ctx, items) {
+    // A move the page allows earlier than its paragraph (the check's FAIL EARLY ¶at → ¶earliest): moved there by
+    // script, not by the model, and the path played again (up to eight times: the check finds the earliest among the
+    // paragraphs the path stops at, so a move may come down in several steps).
+    for (let round = 0; round < 8; round++) {
+        const fails = playOnce(ctx, items);
+        const early = fails.map((l) => /^FAIL EARLY ¶(\d+) → ¶(\d+) (.*?)(?: \((?:the answer is inferable there|its likely clash \S+ shows there|the page allows it)\))?$/.exec(l)).filter(Boolean);
+        if (!early.length || early.length !== fails.filter((l) => l.startsWith('FAIL EARLY')).length) return fails;
+        let moved = 0;
+        for (const [, from, to, label] of early) {
+            const m = items.find((x) => x.at === Number(from) && moveLabel(x) === label.trim());
+            if (m) { m.at = Number(to); moved++; }
+        }
+        if (!moved) return fails;
+        items.sort((a, b) => a.at - b.at);
+        if (fails.length === early.length) { const again = playOnce(ctx, items); if (!again.length) return again; }
+    }
+    return playOnce(ctx, items);
+}
+/** A move as scripts/path-check.mjs names it in its messages. */
+const moveLabel = (m) => `${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`;
+function playOnce(ctx, items) {
     const d = collect(ctx.name, { step: 12, extra: items });
     const trial = path.join(ROOT, 'pipeline', 'runs', ctx.name, 'trial');
     fs.rmSync(trial, { recursive: true, force: true });

@@ -4,7 +4,7 @@ import { template, jsonLines } from './lib.mjs';
 
 export const MAX_REPAIRS = 3;
 /** A line's key: its file and id (a possibility by question and value, a door by itself, a card by its bk, a move by what it does). */
-export const keyOf = (x) => `${x.file ?? ''}|${x.bk ?? (x.file === 'possibility' ? `${x.q}=${x.value}` : x.file === 'joins' ? x.door : x.file === 'path' ? `${x.do}:${x.q ?? x.on ?? ''}=${x.pick ?? x.link ?? ''}` : x.id)}`;
+export const keyOf = (x) => `${x.file ?? ''}|${x.bk ?? (x.file === 'possibility' ? `${x.q}=${x.value}` : x.file === 'joins' ? x.door : x.file === 'noroute' ? x.q : x.file === 'ramifies' ? JSON.stringify(x.if) : x.file === 'path' ? `${x.do}:${x.q ?? x.of ?? x.on ?? ''}=${x.pick ?? x.link ?? x.for ?? ''}` : x.id)}`;
 /** Earlier lines with a repair's lines merged in: a line with the same key replaces, `delete: true` removes, the rest are added. */
 export function mergeLines(prev, fix) {
     const out = new Map(prev.map((x) => [keyOf(x), x]));
