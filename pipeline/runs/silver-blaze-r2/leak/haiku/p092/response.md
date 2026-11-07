@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The question of who wore the costumes is fair, since Holmes raised the expensive tastes on the account. But the label's answer, a woman Straker kept without his wife's knowledge, is not in the story so far. Nothing says Straker had a mistress, and the story only shows Mrs. Straker denying she owned the dove-coloured dress."}
+```

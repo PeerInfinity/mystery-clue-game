@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes has his finger and thumb in his waistcoat pocket, and the groom refuses to be seen touching 'your money', so Holmes is plainly offering him money."}
+```

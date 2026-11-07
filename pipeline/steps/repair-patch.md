@@ -1,6 +1,10 @@
+{{task}}
+
+---
+
 # Repair
 
-Your output for the task below did not pass the checks. Here is the task, your output, and the problems found.
+Your output for the task above did not pass the checks; your output and the problems found are below.
 Give only the lines that fix the problems, in the same format:
 
 - a corrected line replaces your earlier line with the same `file` and `id` (for a possibility, the same `q` and
@@ -10,14 +14,12 @@ Give only the lines that fix the problems, in the same format:
 
 Everything you do not mention stays as it was. Do not repeat lines that need no change.
 
-## The problems
-
-{{errors}}
-
 ## Your previous output
+
 
 {{previous}}
 
-## The task
+## The problems
 
-{{task}}
+
+{{errors}}

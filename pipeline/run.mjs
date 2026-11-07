@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // The pipeline's driver: one step of the process in pipeline/README.md, for one case.
 //
-//   node pipeline/run.mjs <case> <step> [--model opus] [--scene s03] [--from s03] [--dry]
+//   node pipeline/run.mjs <case> <step> [--model opus] [--scene s03] [--from s03] [--dry] [--recheck]
 //
 // Each model call runs blind (lib.mjs `call`) and is recorded in runs/<case>/NN-<step>/[<scene>/]; what a call
 // returns, once checked (up to three repair rounds), is kept as its items.json. The run's assembled case
@@ -23,7 +23,7 @@ const model = opt('model', step.model ?? 'opus');
 const stepDir = path.join(runDir(name), step.dir ?? `${String(step.n).padStart(2, '0')}-${step.name}`);
 const MAX_REPAIRS = 3;
 /** A line's key: its file and id (a possibility by question and value, a door by itself, a card by its bk). */
-const keyOf = (x) => `${x.file ?? ''}|${x.bk ?? (x.file === 'possibility' ? `${x.q}=${x.value}` : x.file === 'joins' ? x.door : x.id)}`;
+const keyOf = (x) => `${x.file ?? ''}|${x.bk ?? (x.file === 'possibility' ? `${x.q}=${x.value}` : x.file === 'joins' ? x.door : x.file === 'path' ? `${x.do}:${x.q ?? x.on ?? ''}=${x.pick ?? x.link ?? ''}` : x.id)}`;
 /** Earlier lines with a repair's lines merged in: a line with the same key replaces, `delete: true` removes, the rest are added. */
 function mergeLines(prev, fix) {
     const out = new Map(prev.map((x) => [keyOf(x), x]));
@@ -43,9 +43,12 @@ for (const scene of units) {
     const dir = scene ? path.join(stepDir, scene.id) : stepDir;
     if (step.script) { step.script(ctx); continue; }
     const task = step.prompt(ctx, scene);
-    let res = await call({ dir, prompt: task, system: template('system', {}), model, dry });
+    // --recheck: check the output already recorded again (after a fix to the checks), repairing only if it fails.
+    const recheck = args.includes('--recheck') && fs.existsSync(path.join(dir, 'items.json'));
+    let res = recheck ? { text: '```jsonl\n' + JSON.parse(fs.readFileSync(path.join(dir, 'items.json'), 'utf8')).map((x) => JSON.stringify(x)).join('\n') + '\n```' } : await call({ dir, prompt: task, system: template('system', {}), model, dry });
     if (dry) { console.log(`${dir}: prompt written (${task.length} chars)`); continue; }
     let { items, bad } = jsonLines(res.text);
+    if (step.normalize) items = step.normalize(ctx, scene, items);
     let errors = [...bad.map((b) => `not a JSON object: ${b.slice(0, 120)}`), ...step.check(ctx, scene, items)];
     // A repair: the whole output again (the small steps), or only the lines that change, merged by key (the data
     // steps, whose outputs are long: asked for everything again, a model shortens it and loses lines).
@@ -55,13 +58,18 @@ for (const scene of units) {
         fs.writeFileSync(path.join(dir, `repair${round}.errors.txt`), errors.join('\n') + '\n');
         const previous = patching ? items.map((x) => JSON.stringify(x)).join('\n') : res.text;
         const prompt = template(patching ? 'repair-patch' : 'repair', { errors: errors.slice(0, 80).map((e) => `- ${e}`).join('\n'), previous: patching ? '```jsonl\n' + previous + '\n```' : previous, task });
-        res = await call({ dir, prompt, system: template('system', {}), model, tag: `repair${round}` });
+        // A rerun or a recheck keeps the earlier records: the first unused tag (repair1, repair1b, repair1c, …).
+        let tag = `repair${round}`;
+        for (let k = 1; fs.existsSync(path.join(dir, `${tag}.meta.json`)); k++) tag = `repair${round}${String.fromCharCode(97 + k)}`;
+        res = await call({ dir, prompt, system: template('system', {}), model, tag });
         const got = jsonLines(res.text);
         items = patching ? mergeLines(items, got.items) : got.items;
+        if (step.normalize) items = step.normalize(ctx, scene, items);
         bad = got.bad;
         errors = [...bad.map((b) => `not a JSON object: ${b.slice(0, 120)}`), ...step.check(ctx, scene, items)];
     }
     if (errors.length) fs.writeFileSync(path.join(dir, 'errors.txt'), errors.join('\n') + '\n');
+    else fs.rmSync(path.join(dir, 'errors.txt'), { force: true });
     fs.writeFileSync(path.join(dir, 'items.json'), JSON.stringify(items, null, 0).replace(/\},\{/g, '},\n{') + '\n');
     assemble(name);
     const c = costOf(dir);

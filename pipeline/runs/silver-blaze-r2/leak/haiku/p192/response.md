@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "At ¶192 the Colonel says 'We scratched our other one, and put all hopes on your word,' so the scratching has already happened, after Holmes advised keeping Silver Blaze's name (¶111) and before the race."}
+```

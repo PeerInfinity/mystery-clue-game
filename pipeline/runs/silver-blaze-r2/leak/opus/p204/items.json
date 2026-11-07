@@ -1,0 +1,3 @@
+[{"para":204,"kind":"time","text":"When the favourite was sent over to the race just as Holmes found him","id":"t.horse_sent_over","i":1,"verdict":"supported","why":"Holmes says in ¶204 that he ran the horse just as it was sent over to him from the faker."},
+{"para":204,"kind":"account","text":"Holmes's account at the racecourse","id":"acct.holmes_race","i":2,"verdict":"supported","why":"Holmes begins explaining to the Colonel at the racecourse (¶202–204)."},
+{"para":204,"kind":"question","text":"Who is the faker in whose hands Holmes found the horse?","id":"q.faker_who","i":3,"verdict":"supported","why":"Holmes mentions a faker in ¶204, so asking who it is is a plain question. Silas Brown was already called a horse-faker in ¶148."}]

@@ -1,0 +1,3 @@
+[{"para":26,"kind":"time","text":"When the witnesses' statements were taken","id":"t.statements","i":1,"verdict":"supported","why":"'The girl has sworn' shows statements were taken from witnesses at some point after the events, so this time point follows from the text."},
+{"para":26,"kind":"account","text":"Edith Baxter's sworn account","id":"acct.edith#1","i":2,"verdict":"supported","why":"The story says Edith Baxter has sworn to what she saw, so her sworn account is stated."},
+{"para":26,"kind":"question","text":"Who was the stranger at the stable window?","id":"q.stranger_who#1","i":3,"verdict":"supported","why":"The stranger is unnamed and approaches the window, so a reader would naturally ask who he is. The question does not point at an answer."}]

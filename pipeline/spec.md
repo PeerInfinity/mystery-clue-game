@@ -57,7 +57,11 @@ third-person narrator is the id `narrator` (`kind: third-person`), which is no e
 ## entities.json
 
 `{"id", "kind", "name", "within"?, "source"?, "summary"?}`, with `moves` (entities that travel: a cart, a train) and
-`joins` (a door's two sides, inside first) beside the list:
+`joins` (a door's two sides, inside first) beside the list. `name` is the fullest name the story gives the entity
+(`"Joseph Crane"`): the page shows, at each paragraph, only a name or phrase the story has used by then (from
+mentions.json), so the name may be one the story gives later. A description for someone the story never names
+(`"The pedlar on the road"`) must hold from the first mention. Optional `names: [{"from", "name"}]` sets which
+name the page shows from which paragraph, where the automatic choice would be wrong:
 
 ```json
 {"moves": ["cart"], "joins": {"yard_gate": ["yard", "lane"]}, "entities": [
@@ -94,6 +98,11 @@ entity, as it appears in the text (`"Crane"`, `"Joseph Crane"`, `"the miller"`).
 {"id": "t.mon_midnight", "label": "Monday, about midnight", "after": "t.mon_ten", "para": 7, "quote": "about midnight"},
 {"id": "t.tue_breakfast", "label": "Tuesday, at breakfast", "after": "t.mon_midnight", "para": 1, "quote": "at breakfast"}
 ```
+
+The `label` shows from the time point's `para`, so it must say only what the story has told by then: "One
+morning, at breakfast" at ¶1, not "Tuesday, at breakfast" when the day is told at ¶5. Where a later paragraph
+tells more, give the label in steps: `"labels": [{"from": 1, "label": "One morning, at breakfast"}, {"from": 5,
+"label": "Tuesday, at breakfast"}]`. A label never names a place or person the story has not yet given for it.
 
 `after` (one id or a list) is the partial order: a point is certainly later than every point it is after. Order
 only what the text orders. Two points not ordered by `after` may be either way. A thing that moves needs a point of
@@ -145,9 +154,33 @@ list, `to` the hearer, `how` (told, statement, sworn statement, report, newspape
 {"id": "f.crane_tells", "of": "crane", "attr": "tells", "value": "acct.crane", "to": "hale", "how": "told", "time": {"at": "t.tue_mill"}, "para": 6, "quote": "Crane told us"}
 ```
 
+**A whole chain.** Every account must reach a narrator through tellings, one `tells` fact per step, even where the
+story only implies a step (`basis: "implied"`, with the words that imply it). Suppose ¶4 is the newspaper report
+Ashdown reads out to Hale: Ruth told the constable what she heard, the constable reported to the paper, the paper
+printed it, and Ashdown read it to Hale. That is four tellings:
+
+```json
+{"id": "f.ruth_tells_pryor", "of": "ruth", "attr": "tells", "value": "acct.ruth", "to": "pryor", "how": "statement", "basis": "implied", "time": {"after": "t.mon_midnight", "before": "t.tue_breakfast"}, "para": 4, "quote": "the miller's daughter told the constable"},
+{"id": "f.pryor_tells_paper", "of": "pryor", "attr": "tells", "value": "acct.police", "to": "the_paper", "how": "report", "basis": "implied", "time": {"before": "t.tue_breakfast"}, "para": 4, "quote": "the constable's report"},
+{"id": "f.paper_tells_ashdown", "of": "the_paper", "attr": "tells", "value": "acct.paper", "to": "ashdown", "how": "newspaper", "time": {"at": "t.tue_breakfast"}, "para": 4, "quote": "Ashdown read from the paper"},
+{"id": "f.ashdown_tells_hale", "of": "ashdown", "attr": "tells", "value": "acct.paper", "to": "hale", "how": "told", "time": {"at": "t.tue_breakfast"}, "para": 4, "quote": "Ashdown read from the paper"}
+```
+
+with `acct.police` a bundle whose `parts` include `acct.ruth`, and `acct.paper` a bundle whose `parts` include
+`acct.police`. A witness who sees something has an `observes` fact (its `value` the fact ids seen), in that
+witness's own account.
+
+**What is easy to leave out.** Who belongs to a group (`member_of`, one fact per member: the two lads among the
+searchers); where people and animals live or are kept (`lives_at`, implied where the text takes it for granted);
+the tellings the story implies (each witness's account reaching the police); what someone sees (`observes`) and
+knows (`knows`) when it matters to what they do.
+
 ## accounts.json
 
-What one source tells, as a bundle of facts: `{"id", "label", "origin", "how", "facts"?, "parts"?}`. `origin` is who
+What one source tells, as a bundle of facts: `{"id", "label", "origin", "how", "facts"?, "parts"?}`. The
+`label` names only the source ("Ruth's account", "What the constable holds"), never what is in it: the page shows
+it with the first telling that passes it, which may come before its contents are told; give `labels` steps where
+even the source is not yet named there. `origin` is who
 first had it (null when not said); `how` how they had it (saw, did, said, examination, analysis, inference, own,
 report; `bundle` for an account made of other accounts, `parts`). Every narrator has an account of what they see and
 hear themselves (`acct.hale`, origin `hale`, how `saw`). A fact may be in several accounts (two witnesses of one
@@ -169,7 +202,9 @@ only heard about: that would make it read as seen.
 
 An uncertain entry: `{"id", "label", "entry", "raised", "quote", "possibilities", "answer", "kind"?, "note"?}`.
 
-- `label`: the question as a reader would ask it ("Who took the purse?").
+- `label`: the question as a reader would ask it ("Who took the purse?"), in the words the story has used by
+  `raised`; `labels` steps where it is raised before a name in it is told ("Who killed the miller?", then "Who
+  killed Joseph Crane?").
 - `entry`: the fact it leaves open, `{of, attr, time}`, with `of: "?"` when the question is who.
 - `raised`: the paragraph where the story opens the question, with `quote` there (null when the story never
   doubts it: a latent question).
@@ -199,7 +234,7 @@ picks (`{"q": "q.who_took", "pick": "the_pedlar"}`: the constable's belief).
 ## The two dates of a fact
 
 `given_at` is where the story states the fact (default: `para`); it is earlier, with `given_quote`, when an earlier
-line already says it in brief. `inferable_at` is the earliest paragraph a careful reader can reach the fact from what
+line already says it in brief (until `para`, the page shows only those brief words). `inferable_at` is the earliest paragraph a careful reader can reach the fact from what
 came before, with `from` (facts) or `reasoning` (`{para, text}`, a step in words), and `strength: "likely"` when it
 would be held but does not strictly follow. These are written once the whole story is in, by the step that sees it.
 
@@ -208,3 +243,31 @@ would be held but does not strictly follow. These are written once the whole sto
 A fact may be a typed action: `act` (`lock`, `unlock`, `open`, `close`, `go_through`, `lead_out`, `give`, `ask`,
 `drug`, `strike`, `hide`) and `thing` (what it acts on), its agent the fact's `of`. A door's state is `attr: "door"`,
 `value` one of `open`, `shut`, `locked`. Write these only where the text makes them matter.
+
+## strains.json (likely clashes)
+
+Two entries that can both hold but sit badly together, which a careful reader would notice: `{"id", "a", "b",
+"why", "available", "key", "from"?}`. Each side is a fact id or a question's possibility `{"q", "pick"}`; `why` says
+in plain words why they sit badly ("A man who has lost his way would not know the yard's night arrangements");
+`available`, the paragraph from which both sides are told (no earlier than either); `key`, the question at whose
+give-away the clash is listed as what a careful reader would have noticed. The page shows a clash only when one side
+is the player's own circle and the other is on the timeline, so a side is usually a wrong possibility the player
+might circle, and the other a fact that tells against it.
+
+```json
+{"id": "s.pedlar_gate", "a": {"q": "q.who_took", "pick": "the_pedlar"}, "b": "f.dobbs_heard_nothing", "why": "A stranger at the gate would have woken the dog in the yard, and Dobbs sleeps over it.", "available": 9, "key": "q.who_took"}
+```
+
+## path.json (the true path)
+
+The moves a careful reader makes through the page, in order, to the end of the story: `{"at", "do", …, "why",
+"for_q"}`. The page stops before a paragraph that gives an answer away until each question it answers has exactly
+one circle, so the path circles every answered question's answer before its give-away.
+
+- `{"do": "circle", "q", "pick"}`: circle a possibility (the reader's hypothesis). A wrong turn the reader would
+  take is a circle of a wrong possibility, then `{"do": "cross", "q", "pick"}` once the story rules it out.
+- `{"do": "trust", "on": <fact id>, "link": "stmt:<fact id>", "level": "distrusted"}`: distrust one statement
+  (a lie, a mistaken belief, a false report). By the end of the story nothing may contradict: every false
+  statement the reader has on the timeline must be distrusted.
+- `at`: the paragraph of the move; `why`: the reader's reason, in plain words, as the reader would say it then;
+  `for_q`: the questions the move serves.

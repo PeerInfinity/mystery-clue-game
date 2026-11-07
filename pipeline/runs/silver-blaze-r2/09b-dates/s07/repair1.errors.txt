@@ -1,0 +1,3 @@
+f.inf_blaze_disguised: time.to: no time t.weighing_enclosure_visit
+f.inf_sheep_by_household: time.at: no time t.straker_practice
+f.brown_thinks_watched: truth false, but what it asserts is true

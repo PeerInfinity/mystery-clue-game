@@ -1,0 +1,8 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶214 says 'there goes the bell', and ¶156-157 show the 'four days later' train trip to Winchester for the race."}
+{"i": 2, "verdict": "unsupported", "why": "The 'ran loose' part conflicts with the story so far: ¶204 says Holmes found the horse in a faker's hands, and ¶214 names the horse as the killer, not a loose animal. The claim that the trainer was harming the horse is also not stated."}
+{"i": 3, "verdict": "supported", "why": "¶214 says Straker was 'entirely unworthy of your confidence', so the question follows from the story and does not point to a particular answer."}
+{"i": 4, "verdict": "unsupported", "why": "Nothing so far suggests Straker planned to harm or lame the horse. Lameness appears only in the sheep (¶173), and Straker is described as zealous and honest (¶19, ¶75)."}
+{"i": 5, "verdict": "supported", "why": "The milliner's bill to 'William Derbyshire', a friend whose letters went to Straker's house, and Holmes's remark on 'Madam Derbyshire's expensive tastes' (¶84-85), give the reader reason to consider a hidden second life. The story has not confirmed it."}
+{"i": 6, "verdict": "supported", "why": "The story has built up heavy betting on the race (Simpson's book, Brown's large bets, the favourite's odds), so a trainer betting against his own horse is a possibility the reader has reason to consider. It is not confirmed."}
+```

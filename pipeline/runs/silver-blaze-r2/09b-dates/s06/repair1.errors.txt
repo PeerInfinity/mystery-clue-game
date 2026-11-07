@@ -1,0 +1,1 @@
+f.inf_horse_left_alone: from: f.holmes_quite_so is not inferable before ¶121, after inferable_at ¶120

@@ -1,0 +1,13 @@
+{
+  "scenes": [
+    {"id":"s01","title":"Breakfast at Baker Street and the train to Dartmoor","from":1,"to":16,"place":"Baker Street, then a train from Paddington","present":["Sherlock Holmes","Dr. Watson"]},
+    {"id":"s02","title":"On the train, Holmes lays out the facts of the case","from":17,"to":46,"place":"First-class railway carriage en route for Exeter","present":["Sherlock Holmes","Dr. Watson"]},
+    {"id":"s03","title":"Met at Tavistock and the drive with the Inspector","from":47,"to":68,"place":"Tavistock station and a landau on the road","present":["Sherlock Holmes","Dr. Watson","Colonel Ross","Inspector Gregory"]},
+    {"id":"s04","title":"At the trainer's house: the dead man's pockets and Mrs. Straker","from":69,"to":92,"place":"Straker's villa at King's Pyland","present":["Sherlock Holmes","Dr. Watson","Colonel Ross","Inspector Gregory","Mrs. Straker"]},
+    {"id":"s05","title":"Examining the hollow where the body was found","from":93,"to":112,"place":"The hollow on the moor near King's Pyland","present":["Sherlock Holmes","Dr. Watson","Colonel Ross","Inspector Gregory"]},
+    {"id":"s06","title":"Following tracks across the moor to Mapleton and a talk with Silas Brown","from":113,"to":143,"place":"The moor and the gates of the Mapleton stables","present":["Sherlock Holmes","Dr. Watson","Dawson","Silas Brown"]},
+    {"id":"s07","title":"Walking back, Holmes announces his return to London; the sheep and the dog","from":144,"to":182,"place":"The moor, Straker's house and the carriage at King's Pyland","present":["Sherlock Holmes","Dr. Watson","Colonel Ross","Inspector Gregory","stable-lad"]},
+    {"id":"s08","title":"The Wessex Cup race at Winchester","from":183,"to":214,"place":"Winchester racecourse","present":["Sherlock Holmes","Dr. Watson","Colonel Ross"]},
+    {"id":"s09","title":"Holmes explains on the train back to London","from":215,"to":231,"place":"A Pullman car on the train to London","present":["Sherlock Holmes","Dr. Watson","Colonel Ross"]}
+  ]
+}

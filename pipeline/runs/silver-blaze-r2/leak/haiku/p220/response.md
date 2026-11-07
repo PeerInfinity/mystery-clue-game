@@ -1,0 +1,7 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story has just described cases where trainers laid bets against their own horses and then stopped them by fraud, so this name for that practice is already in the text."}
+{"i": 2, "verdict": "supported", "why": "This matches ¶220 almost word for word: 'There have been cases before now where trainers have made sure of great sums of money by laying against their own horses.'"}
+{"i": 3, "verdict": "supported", "why": "Holmes has raised this motive in ¶220 as the likely explanation for why Straker took the horse out, so it is a plain question the story has given reason to consider."}
+{"i": 4, "verdict": "supported", "why": "The 'through agents' mechanism is stated for the general cases in ¶220, and Holmes now suspects Straker, so 'yes, through agents' is a possibility the reader has reason to consider. It is not confirmed, but the label does not claim it is."}
+{"i": 5, "verdict": "unsupported", "why": "The story has not raised the idea that someone else paid Straker to stop the horse. Brown's large bets and dislike of Straker hint at a rival's interest, but nothing so far suggests a payment to Straker, so this answer points to a possibility the reader has no reason yet to consider."}
+```

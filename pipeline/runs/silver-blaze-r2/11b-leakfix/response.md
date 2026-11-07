@@ -1,0 +1,25 @@
+Notes on the changes:
+- **Possibilities left as they were:** the ¶35 and ¶82 `q.straker_reason` ones, the ¶82 `q.knife` one, `q.change_it` at ¶140 and `q.sheep_lame` at ¶175. In each, the text already gives a reader a reason: he was found out on the moor with a knife, or the uncorked cataract knife and candle, or "change it" after a stable that was searched, or Holmes's "singular epidemic". I think the check is wrong on these.
+- **`milliner_account` at ¶32:** this probably comes from a mention phrase "account" matching "hearing the account" in ¶32. The name steps below help, but the phrase in mentions.json should be limited to ¶84 onward.
+
+```jsonl
+{"file": "patch", "id": "t.paddington", "set": {"labels": [{"from": 7, "label": "One morning, at Paddington"}, {"from": 13, "label": "Thursday morning, at Paddington"}]}}
+{"file": "patch", "id": "t.train_out", "set": {"labels": [{"from": 7, "label": "One morning, in the train from Paddington"}, {"from": 13, "label": "Thursday morning, in the train from Paddington"}]}}
+{"file": "patch", "id": "t.train_reading", "set": {"labels": [{"from": 7, "label": "One morning, the train passing Reading"}, {"from": 13, "label": "Thursday morning, the train passing Reading"}]}}
+{"file": "patch", "id": "t.train_beyond_reading", "set": {"labels": [{"from": 7, "label": "One morning, in the train well past Reading"}, {"from": 13, "label": "Thursday morning, in the train well past Reading"}]}}
+{"file": "patch", "id": "t.morning_search", "set": {"labels": [{"from": 34, "label": "The next morning, the search from the knoll"}, {"from": 35, "label": "The next morning, the search from the knoll and the finding of the body"}]}}
+{"file": "patch", "id": "t.passage_mrs_straker", "set": {"labels": [{"from": 86, "label": "Thursday evening, a woman in the passage"}, {"from": 88, "label": "Thursday evening, Mrs. Straker in the passage"}]}}
+{"file": "patch", "id": "t.mrs_straker_tells", "set": {"labels": [{"from": 82, "label": "When Mrs. Straker told the Inspector of the knife"}, {"from": 84, "label": "When Mrs. Straker told the Inspector of the knife and of Derbyshire"}]}}
+{"file": "patch", "id": "t.tracks_back", "set": {"labels": [{"from": 122, "label": "When the same tracks came back the other way"}, {"from": 124, "label": "When the same tracks came back to the Mapleton gates"}]}}
+{"file": "patch", "id": "t.carriage_sheep", "set": {"labels": [{"from": 169, "label": "Thursday evening, stepping into the carriage, Holmes turns to a stable-lad"}, {"from": 170, "label": "Thursday evening, stepping into the carriage, Holmes asks the stable-lad about the sheep"}]}}
+{"file": "patch", "id": "landau", "set": {"names": [{"from": 50, "name": "The open carriage"}, {"from": 51, "name": "The open carriage, a comfortable landau"}]}}
+{"file": "patch", "id": "milliner_account", "set": {"name": "The milliner's account", "names": [{"from": 84, "name": "The milliner's account made out to William Derbyshire"}]}}
+{"file": "patch", "id": "horse_track", "set": {"names": [{"from": 116, "name": "The tracks Holmes means to look for in the hollow"}, {"from": 117, "name": "The track of a horse in the soft earth"}]}}
+{"file": "patch", "id": "half_crown", "set": {"names": [{"from": 126, "name": "Holmes's money"}, {"from": 128, "name": "Holmes's half-crown"}]}}
+{"file": "patch", "id": "sheep_lad", "set": {"names": [{"from": 169, "name": "The stable-lad at the carriage door"}, {"from": 171, "name": "The stable-lad who looks after the sheep"}]}}
+{"file": "patch", "id": "the_bay_horse", "set": {"names": [{"from": 196, "name": "The runner that has not yet passed"}, {"from": 197, "name": "The powerful bay horse in the Colonel's colours"}]}}
+{"file": "patch", "id": "acct.edith", "set": {"labels": [{"from": 25, "label": "Edith Baxter's account"}, {"from": 26, "label": "Edith Baxter's sworn account"}]}}
+{"file": "patch", "id": "acct.lesurier", "set": {"labels": [{"from": 215, "label": "Madame Lesurier, the milliner"}, {"from": 229, "label": "What the milliner told Holmes"}]}}
+{"file": "possibility", "q": "q.connection", "value": "the trainer was himself mixed up in what happened to the horse", "available": 33}
+{"file": "possibility", "q": "q.horse_where", "value": "in a stable nearby, changed so as not to be known", "available": 140}
+```

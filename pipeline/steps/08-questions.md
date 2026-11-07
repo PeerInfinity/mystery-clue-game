@@ -8,8 +8,11 @@ Write the questions that scene {{scene_id}} ({{scene_title}}, ¶{{from}}–¶{{t
 opens, for questions new and old. You have the story up to the end of this scene and the data so far; you have not
 read further, and nobody knows the answers yet.
 
-- A question is what the story makes a careful reader wonder about the events: who did it, where something is,
-  what something was for, why someone acted, whether a statement is true. Take the reader's QUESTION and HYPOTHESIS
+- A question is what the story makes a careful reader wonder about the events of the case: who did it, where
+  something or someone is or was, what something was for, why someone acted, whether a statement is true. Not about
+  the detective's or the narrator's behaviour (what he whispered, why he asks for a photograph, why he leaves): those
+  are what a reader notices, and the questions they point to are about the events (what the photograph would
+  show is a question about the person in it). Take the reader's QUESTION and HYPOTHESIS
   notes as a guide; add the questions the story itself asks.
 - A new question: `{"file": "questions", "id", "label", "entry", "raised", "quote", "possibilities"}` with
   `"answer": null`. Its possibilities: exactly one `{"value": "something else", "available": <raised>, "via":

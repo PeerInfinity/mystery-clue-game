@@ -1,0 +1,5 @@
+[{"para":39,"kind":"name","text":"Simpson's villa","id":"simpson_villa","i":1,"verdict":"supported","why":"Paragraph 39 says Simpson lived in one of the villas mentioned earlier."},
+{"para":39,"kind":"name","text":"Simpson's betting-book","id":"betting_book","i":2,"verdict":"supported","why":"Paragraph 39 mentions an examination of his betting-book."},
+{"para":39,"kind":"name","text":"The sporting clubs of London","id":"sporting_clubs","i":3,"verdict":"supported","why":"Paragraph 39 says he made books in the sporting clubs of London."},
+{"para":39,"kind":"time","text":"When Fitzroy Simpson registered his bets against the favourite","id":"t.simpson_bets","i":4,"verdict":"supported","why":"Paragraph 39 says bets against the favourite were registered by him; the label names that event's time without saying when it was."},
+{"para":39,"kind":"time","text":"When Inspector Gregory arrived","id":"t.gregory_arrives","i":5,"verdict":"supported","why":"Paragraph 39 says 'On his arrival he promptly found and arrested' Simpson."}]

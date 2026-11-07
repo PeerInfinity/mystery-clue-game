@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story says it was Thursday morning when they left and evening when they reached Tavistock. The reds fading into greys marks dusk, when Holmes and Brown reappear."}
+```

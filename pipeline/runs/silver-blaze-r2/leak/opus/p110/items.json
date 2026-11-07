@@ -1,0 +1,5 @@
+[{"para":110,"kind":"name","text":"Colonel Ross's watch","id":"ross_watch","i":1,"verdict":"supported","why":"Colonel Ross glances at his watch in this paragraph."},
+{"para":110,"kind":"name","text":"The entries for the Wessex Cup","id":"cup_entries","i":2,"verdict":"supported","why":"The Colonel speaks of removing the horse's name from the entries for the Cup."},
+{"para":110,"kind":"name","text":"The public","id":"the_public","i":3,"verdict":"supported","why":"The Colonel asks whether they owe it to the public to withdraw the horse."},
+{"para":110,"kind":"question","text":"Will Silver Blaze run in the Wessex Cup?","id":"q.horse_runs","i":4,"verdict":"supported","why":"The Colonel's talk of withdrawing the horse plainly raises whether Silver Blaze will run."},
+{"para":110,"kind":"possibility","text":"Will Silver Blaze run in the Wessex Cup? — no: he will not be found in time and is withdrawn","id":"q.horse_runs=no: he will not be found in time and is withdrawn","i":5,"verdict":"supported","why":"The Colonel is already considering withdrawal and the horse is still missing, so this outcome is an obvious one to consider."}]

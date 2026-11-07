@@ -1,0 +1,8 @@
+[{"para":58,"kind":"name","text":"London","id":"london","i":1,"verdict":"supported","why":"London is named in the story (¶39, ¶58)."},
+{"para":58,"kind":"name","text":"The ten-pound note found in Simpson's purse","id":"ten_pound_note","i":2,"verdict":"supported","why":"¶58 says a ten-pound note was found in his purse."},
+{"para":58,"kind":"name","text":"Simpson's purse","id":"simpson_purse","i":3,"verdict":"supported","why":"¶58 mentions his purse."},
+{"para":58,"kind":"name","text":"The pits and old mines upon the moor","id":"pits_mines","i":4,"verdict":"supported","why":"¶58 mentions the pits and old mines upon the moor."},
+{"para":58,"kind":"time","text":"Two summers when Fitzroy Simpson lodged at Tavistock","id":"t.simpson_summers","i":5,"verdict":"supported","why":"¶58 says he twice lodged at Tavistock in the summer."},
+{"para":58,"kind":"possibility","text":"What has become of the favourite? — at the bottom of a pit or old mine on the moor","id":"q.horse_where=at the bottom of a pit or old mine on the moor","i":6,"verdict":"supported","why":"Gregory suggests this in ¶58."},
+{"para":58,"kind":"possibility","text":"What was in the stranger's folded paper? — a ten-pound note","id":"q.paper_packet=a ten-pound note","i":7,"verdict":"supported","why":"Simpson's own claim, reported in ¶58."},
+{"para":58,"kind":"possibility","text":"Where did the powdered opium come from? — brought from London","id":"q.opium_source=brought from London","i":8,"verdict":"supported","why":"Gregory suggests this in ¶58."}]

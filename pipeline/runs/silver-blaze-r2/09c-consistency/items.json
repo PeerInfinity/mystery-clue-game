@@ -1,0 +1,5 @@
+[{"file":"possibility","q":"q.why_taken","value":"nobody meant to carry him off: he was led out to be harmed and got loose","available":175,"via":"indirect","reasoning":{"para":175,"text":"Straker carried a cataract knife for fine cuts and struck a light in the hollow, and the paddock sheep have gone lame as if from practice. The horse may have been led out to be lamed, not carried off, and then run off loose."}},
+{"file":"possibility","q":"q.thigh_cut","value":"his own knife, as he fell","available":54,"via":"direct","quote":"he wounded himself in his fall"},
+{"file":"patch","id":"f.holmes_believed_found","set":{},"unset":["truth"]},
+{"file":"patch","id":"f.brown_thinks_watched","set":{},"unset":["truth"]},
+{"file":"patch","id":"f.ross_considers_scratch","set":{},"unset":["q","pick"]}]

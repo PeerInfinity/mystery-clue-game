@@ -1,0 +1,4 @@
+[{"file":"patch","id":"f.holmes_believed_found","set":{},"unset":["truth"]},
+{"file":"patch","id":"f.brown_thinks_watched","set":{},"unset":["truth"]},
+{"file":"patch","id":"f.ross_considers_scratch","set":{},"unset":["q","pick"]},
+{"file":"possibility","q":"q.vesta","value":"someone there before or after that night, unconnected with the crime","available":102,"via":"indirect","reasoning":{"para":102,"text":"A spent match on the open moor may have been dropped by anyone passing, at any time."},"out":224,"by":"f.ross_blind"}]

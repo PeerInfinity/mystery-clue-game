@@ -1,0 +1,4 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story has already shown the price shortening from fifteen to one to under three to one (¶188), and Holmes remarks that somebody knows something (¶189). The question is plain and the reader has reason to ask it."}
+{"i": 2, "verdict": "unsupported", "why": "The story never says the horse has been found or that anyone has heard so. Colonel Ross says he has seen nothing of his horse (¶184), and the only route to the horse is Holmes's private deduction, which no character has shared. Nobody in the story gives a reader reason to consider this possibility."}
+```

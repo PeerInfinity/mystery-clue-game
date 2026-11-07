@@ -8,8 +8,9 @@ List the entities that scene {{scene_id}} ({{scene_title}}, ¶{{from}}–¶{{to}
 phrase by which the story names each, as far as the story has gone. You have the story up to the end of this scene
 and the entities found so far; you have not read further.
 
-- A new entity: `{"file": "entities", "id", "kind", "name", "within"?}`. Name an unknown person by how the story
-  presents them so far. Include every person, group, animal, place, object and document the facts of the story so
+- A new entity: `{"file": "entities", "id", "kind", "name", "within"?}`. `name`: the fullest name the story has
+  given so far (the page shows, at each paragraph, only a phrase the story has used by then); an unknown person by
+  how the story presents them, never by who they may turn out to be. Include every person, group, animal, place, object and document the facts of the story so
   far would need: who is where, who has what, what is done to what. Places nest with `within` (a room within a house
   within an estate). In the first scene, also the state entities `calendar`, `clock` and, if the weather matters,
   `weather`. The narrators ({{narrators}}) are entities too.

@@ -1,0 +1,3 @@
+q.coat_on_bush: someone else put it there: by: no fact f.straker_coat_off
+q.vesta: the man who struck Straker down: by: no fact f.holmes_yes_horse
+q.vesta: someone there before or after that night, unconnected with the crime: by: no fact f.ross_blind

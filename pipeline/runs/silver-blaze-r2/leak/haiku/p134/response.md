@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Silas Brown is named as the trainer at the Mapleton stables (¶66, ¶128), and at ¶134 Holmes offers to talk 'in your parlour' to the trainer, so a parlour belonging to Silas Brown follows directly from the text."}
+```

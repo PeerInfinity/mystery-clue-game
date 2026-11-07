@@ -1,0 +1,3 @@
+[{"para":73,"kind":"name","text":"The room upstairs where Straker lies","id":"upstairs_room","i":1,"verdict":"supported","why":"At ¶73 Gregory confirms Straker's body 'lies upstairs' at the house. The label's 'room' is a reasonable reading of 'upstairs'."},
+{"para":73,"kind":"time","text":"The next day, the inquest","id":"t.inquest","i":2,"verdict":"supported","why":"At ¶73 Gregory says 'The inquest is to-morrow,' which is the stated time of the inquest."},
+{"para":73,"kind":"time","text":"When Straker's body was brought back to his house","id":"t.body_brought_back","i":3,"verdict":"supported","why":"At ¶72 Holmes asks whether Straker was brought back to the house, and ¶73 confirms it."}]

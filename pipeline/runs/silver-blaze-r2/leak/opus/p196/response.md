@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story says only five horses have passed and 'This must be he', so a sixth runner that has not yet passed is plainly referenced. The label names it neutrally and does not say who it really is."}
+```

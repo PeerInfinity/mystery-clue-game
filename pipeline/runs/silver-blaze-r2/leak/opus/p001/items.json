@@ -1,0 +1,3 @@
+[{"para":1,"kind":"name","text":"Watson","id":"watson","i":1,"verdict":"supported","why":"Holmes speaks to Watson by name in the paragraph."},
+{"para":1,"kind":"name","text":"Holmes","id":"holmes","i":2,"verdict":"supported","why":"The paragraph names Holmes as the speaker."},
+{"para":1,"kind":"time","text":"One morning, at breakfast","id":"t.thu_breakfast","i":3,"verdict":"supported","why":"The paragraph says they sat down to breakfast one morning."}]

@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The costume appears only in Holmes's own unverified recollection at ¶91, and Mrs. Straker flatly denies having met him, so the story has not established that this costume exists or that anyone wore it. The label presents it as a named object in the case, which the story so far does not support."}
+```

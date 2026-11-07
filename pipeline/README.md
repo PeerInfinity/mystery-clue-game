@@ -39,13 +39,19 @@ Adventure of the Speckled Band".
 | 6 | Time points | the story so far, entities, times so far | `times.json` | model, per scene |
 | 7 | Facts and accounts | the scene, the story so far, entities, times, facts and accounts so far | `facts.json`, `accounts.json` (and new entities and times) | model, per scene; the validator after each |
 | 8 | Questions | the story so far, the reading so far, entities, facts, questions so far | `questions.json` (no answers), the facts' picks | model, per scene |
-| 9 | The whole story | everything, the whole story | answers, truth, the two dates of each fact and answer | model, per part of the data; the validator, no contradiction in the true story |
-| 10 | Logic audit and likely clashes | everything | `strains.json`, data for missing links | model and the page |
-| 11 | The true path | everything | `path.json` | model drafts, `scripts/path-check.mjs` plays it; the earliest check |
-| 12 | Leak check | each label with the story up to where it shows | a report | model, blind, per paragraph; Opus and Haiku compared |
+| 9a | Answers | everything, the whole story | each question's answer and its two dates | model, one call |
+| 9b | Truth and dates | everything, the whole story, this scene's facts and annotations | truth, `given_at`, `inferable_at`, inferable facts | model, per scene (the shared part first, for the cache) |
+| 9c | Consistency | everything, the validator's messages | patches | model, until the whole case validates |
+| 10 | Likely clashes | everything | `strains.json` | model, one call |
+| 11 | Leak check, and its fixes | each label with the story up to where it shows | `leak/opus`, `leak/haiku` (reports); 11b, 11c: patches (label steps, plainer names, later possibilities) | `leak.mjs`, blind, per paragraph (Opus judges, Haiku compared); model for the fixes, the leak check again where labels changed |
+| 12 | The true path | everything (with the leak fixes) | `path.json` | model writes the moves, a script dates each right answer's circle at its earliest; `scripts/path-check.mjs` plays it through the real page (`?case=`) |
 
-The first run goes to step 9, then the comparison and the fix-and-rerun loop; steps 10–12 follow once the facts are
-good.
+Not yet produced: the typed data the reader's reasoning moves need (actions with `act` and `thing`, goals, needs:
+`docs/case-format.md`, "Typed states and actions"), so the pipeline's true path is circles, crossings and trust
+only; the hand-made one also has the moves (a)–(d), plans and checks (`docs/logic-audit.md`).
+
+Step 11 comes before the true path so that the path is played on the data as it will be published. `run.mjs
+--recheck` checks a step's recorded output again (after a fix to its checks), calling the model only to repair.
 
 ## The comparison
 
@@ -59,13 +65,16 @@ first. What the new data lacks is traced to the step's instructions, which are f
 ## Running
 
 ```
-node pipeline/run.mjs <case> <step> [--model opus] [--scene <id>] [--from <scene id>] [--dry]
+node pipeline/run.mjs <case> <step> [--model opus] [--scene <id>] [--from <scene id>] [--dry] [--recheck]
 node pipeline/compare.mjs <case> [step]
 ```
 
 `<case>` is the run's name (`silver-blaze`); the source text and the target case come from
 `pipeline/cases.json`. A run's assembled data is `runs/<case>/case/` (`story.txt`, `world/`), rebuilt from the
-steps' outputs; `--dry` writes the prompts without calling the model.
+steps' outputs; `--dry` writes the prompts (`dry.prompt.md`) without calling the model; `--recheck` checks a
+step's recorded output again, calling the model only to repair it. Step names: `text`, `header`, `scenes`, `reading`,
+`entities`, `times`, `facts`, `questions`, `answers`, `dates`, `consistency`, `strains`, `leak`, `leakfix`,
+`leakfix2`, `path`.
 
 ## Lessons of the runs
 
@@ -101,7 +110,7 @@ early ("Tuesday, between one and seven: in the hollow, at the time of the strugg
 that describe their whole account where its first fact shows. These are for the user to decide on; the pipeline's
 own data gets the same check at step 12.
 
-## The first run on Silver Blaze (2026-11-06): steps 1–9
+## The first run on Silver Blaze (2026-11-06): steps 1–9 (`runs/silver-blaze/`)
 
 | Step | Calls | Cost | Result | Against the current data (`compare.mjs`) |
 |---|---|---|---|---|
@@ -120,7 +129,7 @@ own data gets the same check at step 12.
 Besides: the stopped first attempt at step 7's scene s02 (about $2.65) and the refused reading call (about $0.12)
 are not in the records; the leak checks of the current data cost $8.45.
 
-What to fix next (the fix-and-rerun loop):
+What to fix next (the fix-and-rerun loop; all taken up in the second run, below):
 
 - **Step 9b is the dearest and gives the least.** Each call sends the whole story and every fact, and each repair
   sends it again: put the per-scene part last so the shared part is cached across calls, or make it one call; and
@@ -152,3 +161,53 @@ audit (`q.horse_where` "dead, in a pit or mine" at ¶14, `q.straker_aim` "to inj
 answers of `q.why_out` at ¶57, `q.sheep_lame` "someone practised on them" at ¶173); the checker says nothing yet
 gives a reason to consider them. That is a judgement on the data's dates, left for the user. The page checks pass
 with the fix.
+
+## The second run on Silver Blaze (2026-11-06): steps 5–12 (`runs/silver-blaze-r2/`)
+
+Steps 1–4 copied from the first run (the reading is the same), steps 5–9 rerun with the fixes the first run asked
+for (a whole chain of tellings and the facts easy to leave out in `spec.md`, questions about the events, label rules
+from the leak work, 9b's shared part first and the reading's steps as candidates), then steps 9c–12.
+
+| Step | Calls | Cost | Result | Against the current data, or the first run |
+|---|---|---|---|---|
+| 5 entities | 10 | $2.84 | 207 | 83% of the current found (the same) |
+| 6 times | 9 | $2.47 | 114 | 89% matched (98%: labels now in steps read less like the current ones) |
+| 7 facts | 14 | $15.60 | 1,111 | 91% of the current found (86%), 80% from the same origin (76%); missing tellings 12 → 5 |
+| 8 questions | 10 | $10.73 | 50 | 20 matched; no longer about Holmes's behaviour |
+| 9a answers | 1 | $2.01 | | |
+| 9b truth, dates | 21 | $37.65 | 19 inferable facts | still thin (current 33); the cache did not work yet (below) |
+| 9c consistency | 5 | $7.27 | 0 validator errors | a first attempt kept in `.09c-first/` |
+| 10 strains | 1 | $1.95 | 37 likely clashes | current 27; the first is the current's "a lost man who knows the night arrangements" |
+| 11 leak check | 130 + 130 | $11.67 + $0.33 | Opus 37 → 9 → 0 flagged of 526 after two fix rounds ($0.68) | Haiku 40 at the end, all of them false alarms by Opus's judgement |
+| 12 path | 8 | $13.73 | 94 moves (48 circles, 11 crossings, 35 trust) | played through the real page to the end: every answer right, no contradiction open, no likely clash unheld |
+| | | $112.17 in all, with the copied steps 1–4 ($5.24) and the leak checks | | |
+
+A reader trusting every source meets 44 contradictions in the run's data (the current data: 41; the first run: 98).
+
+Lessons of the second run:
+
+- **The cache needs a fixed working directory.** The model's environment block holds its working directory: a fresh
+  random one per call made every prompt differ at the start, so nothing was cached (9b's calls cost the same with
+  the shared part first). `lib.mjs` now uses one fixed empty directory, and repairs put the task first, so a
+  repair shares its prefix with its call; the cache tokens are recorded in each `meta.json`.
+- **A source quote as a string** (the pipeline's) where the hand-made data has a list made `engine/story.js` find
+  an entity at ¶1 by its first letter; it takes both now.
+- **Data errors the validator now catches:** an answer that can be inferred before any right possibility is
+  available (the gate could not be met); a line of the wrong kind from a whole-story step.
+- **A label naming what the story has not given** (a day, a place, a person) is caught without a model, by its
+  capitalised words (`steps.mjs` `aheadWords`, in steps 6, 8 and 11b).
+- **A dry run wrote over a recorded prompt** (`--dry` wrote `prompt.md`): step 12's prompt was recovered from its
+  first repair's record, which begins with the task; step 11b's was lost (a note in its place). `--dry` now writes
+  `dry.prompt.md`.
+- **A step run once never sees its own last output**, so a rerun replaces it (the first rerun of step 11 played both
+  the old and the new move).
+
+What is next:
+
+- **Step 9b is still the dearest step and gives the fewest inferable facts** (19 against 33): test whether the cache
+  now works (`cache_read_tokens` in its `meta.json`), and try one call for the whole story.
+- **The typed data for the reasoning moves** (a step between 10 and 12), so that the pipeline's true path can use
+  the moves (a)–(d) as the hand-made one does.
+- **The autoplay and hint checks** (`world-autoplay-check.mjs`, `world-hints-check.mjs`) are Silver Blaze's only;
+  given `CASE` like `path-check.mjs`, they would test a pipeline case's hints.
+- **The Speckled Band** (`cases.json` has it; no target to compare with): steps 1–12.

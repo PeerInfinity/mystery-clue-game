@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "In ¶126 Holmes has his finger and thumb in his waistcoat pocket, and in ¶127 the groom refuses to 'touch your money' and says he'll take it afterwards. The story has already shown Holmes offering money, so the label names something the story has presented."}
+```

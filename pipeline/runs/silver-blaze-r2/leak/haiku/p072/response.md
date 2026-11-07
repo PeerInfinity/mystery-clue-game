@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The time is supported: it is Thursday, and they reached Tavistock in the evening. But the story never identifies the red-brick villa where the landau stops as Straker's. It is only described as a villa by the road, and Holmes's next question, asking whether Straker was 'brought back here', treats the house as unconfirmed. The label asserts an identity the story has not yet given."}
+```

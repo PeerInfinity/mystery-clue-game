@@ -1,0 +1,8 @@
+[{"para":183,"kind":"name","text":"Winchester","id":"winchester","i":1,"verdict":"supported","why":"¶183 says Holmes and Watson are bound for Winchester to see the Wessex Cup race."},
+{"para":183,"kind":"name","text":"The train to Winchester","id":"winchester_train","i":2,"verdict":"supported","why":"¶183 says they are again in the train, bound for Winchester."},
+{"para":183,"kind":"name","text":"The station at Winchester","id":"winchester_station","i":3,"verdict":"supported","why":"¶183 says Colonel Ross met them outside the station, which follows from the train arriving at Winchester."},
+{"para":183,"kind":"name","text":"Colonel Ross's drag","id":"ross_drag","i":4,"verdict":"supported","why":"¶183 says they drove in the Colonel's drag."},
+{"para":183,"kind":"name","text":"The course beyond the town","id":"course","i":5,"verdict":"supported","why":"¶183 says they drove in the drag to the course beyond the town."},
+{"para":183,"kind":"time","text":"Four days later, in the train to Winchester","id":"t.winchester_train","i":6,"verdict":"supported","why":"¶183 opens with 'Four days later' and places them in the train bound for Winchester."},
+{"para":183,"kind":"time","text":"Four days later, Colonel Ross meets them outside the station at Winchester","id":"t.winchester_station","i":7,"verdict":"supported","why":"¶183 says Colonel Ross met them by appointment outside the station, after 'Four days later'."},
+{"para":183,"kind":"time","text":"Four days later, driving in the Colonel's drag to the course","id":"t.drag_to_course","i":8,"verdict":"supported","why":"¶183 says they drove in the Colonel's drag to the course, after 'Four days later'."}]

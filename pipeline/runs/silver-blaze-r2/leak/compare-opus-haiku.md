@@ -1,0 +1,132 @@
+# Leak check compared: opus and haiku
+
+526 labels. Flagged by both 0, only by opus 0, only by haiku 40. Cost: opus $11.67 (130 calls), haiku $0.33 (130 calls).
+
+## Flagged by both
+
+
+## Only by opus
+
+
+## Only by haiku
+
+- ¶4 possibility `q.horse_where=dead, the body not yet found`: What has become of the favourite? — dead, the body not yet found
+  - opus: supported: Death is a reasonable possibility given the murder.
+  - haiku: unsupported: The story never suggests the horse is dead or that a body is hidden; this detail is not raised.
+- ¶4 possibility `q.who_took=someone with money riding against the favourite`: Who took the favourite? — someone with money riding against the favourite
+  - opus: supported: Being the race favourite makes a betting motive a natural guess.
+  - haiku: unsupported: Betting and money riding against the favourite are never mentioned, so this motive is not raised.
+- ¶4 possibility `q.connection=one person took the horse and killed the trainer who got in the way`: How are the trainer's murder and the favourite's disappearance connected? — one person took the horse and killed the trainer who got in the way
+  - opus: supported: This is an obvious hypothesis; a trainer and a cup favourite imply a horse.
+  - haiku: unsupported: The specific idea that one person did both, with the trainer 'getting in the way', is not raised by the story so far.
+- ¶10 time `t.crime#1`: When Silver Blaze vanished and John Straker was murdered
+  - opus: supported: The story has told us of the horse's disappearance and the trainer's murder, so their timing is a natural point in time.
+  - haiku: unsupported: The story never gives a time or date for the disappearance or the murder, and it does not say the two happened at the same moment.
+- ¶14 possibility `q.horse_where=taken a long way off`: What has become of the favourite? — taken a long way off
+  - opus: supported: Holmes expected the horse to be found quickly in sparsely inhabited north Dartmoor, but it has not been, so a reader may reasonably consider that it was taken far away.
+  - haiku: unsupported: The story says Holmes expected the horse to be found nearby on sparsely inhabited northern Dartmoor and that it could not long stay concealed. It does not say the horse was taken a long way off.
+- ¶14 possibility `q.why_taken=to sell it or hold it for ransom`: Why was the favourite made away with? — to sell it or hold it for ransom
+  - opus: supported: The story calls the horse the most remarkable in England and speaks of an abductor, so selling it or holding it for ransom is a natural motive to consider; the label offers it only as a possibility.
+  - haiku: unsupported: Nothing so far suggests a motive of sale or ransom. The story has only raised the horse's disappearance and the trainer's murder, so a reader has no reason yet to consider these motives.
+- ¶24 possibility `q.paper_packet=money for the boy`: What was in the stranger's folded paper? — money for the boy
+  - opus: supported: He is offering bribes, so money folded in the paper is a plausible guess.
+  - haiku: unsupported: The story says the reward of money is for the maid, Edith, not the boy. Nothing so far suggests the boy receives money in the paper.
+- ¶26 time `t.statements`: When the witnesses' statements were taken
+  - opus: supported: 'The girl has sworn' shows statements were taken from witnesses at some point after the events, so this time point follows from the text.
+  - haiku: unsupported: The story so far never says when the witnesses' statements were taken. The only hint is the passing remark that the girl 'has sworn', which gives no time, so the label supplies a detail the story has not yet given.
+- ¶37 possibility `q.who_drugged=someone at the trainer's house`: Who drugged Ned Hunter? — someone at the trainer's house
+  - opus: supported: The supper was prepared at the house and only the lad's portion was drugged, so a reader has reason to consider someone at the house. The label names no one and gives no answer.
+  - haiku: unsupported: The story attributes the drugging to the stranger at the window (¶36, Hunter's account) and gives no reason to suspect anyone at the trainer's house. The label raises an alternative answer the story has not put in play.
+- ¶66 time `t.brown_bets`: When Silas Brown laid his bets upon the Wessex Cup
+  - opus: supported: The story says Silas Brown is known to have had large bets on the event.
+  - haiku: unsupported: The story says Brown is known to have had large bets on the event but never gives when he placed them.
+- ¶69 name `road`: The road by Straker's villa
+  - opus: supported: The villa 'stood by the road'. The party has come to see the scene, and Straker lived in a small villa near the stables, so this villa is plainly his.
+  - haiku: unsupported: The text says only that the red-brick villa 'stood by the road'. It never identifies this villa as Straker's, which would need the reader to infer it from the stables' location.
+- ¶69 name `paddock`: The paddock by Straker's villa
+  - opus: supported: ¶69 mentions the paddock beside the villa. Calling it Straker's villa follows obviously from the context.
+  - haiku: unsupported: The paddock is described (¶69), but the label depends on the villa being Straker's, which the story has not stated.
+- ¶69 name `front_door_villa`: Outside Straker's villa
+  - opus: supported: The party gets out at the villa, which is clearly the trainer's house at the scene they came to see.
+  - haiku: unsupported: Same issue as label 2: the story has not yet said that this red-brick villa is Straker's.
+- ¶72 time `t.villa_arrival#1`: Thursday evening, the landau pulls up at Straker's villa
+  - opus: supported: It was Thursday morning when they left (¶13) and evening when they reached Tavistock (¶47). The villa by the stables, where Holmes asks if Straker was 'brought back here', is plainly Straker's house.
+  - haiku: unsupported: The time is supported: it is Thursday, and they reached Tavistock in the evening. But the story never identifies the red-brick villa where the landau stops as Straker's. It is only described as a villa by the road, and Holmes's next question, asking whether Straker was 'brought back here', treats the house as unconfirmed. The label asserts an identity the story has not yet given.
+- ¶81 possibility `q.straker_reason=a purpose of his own that he kept from his wife`: Why did Straker go out to the stables at one in the morning? — a purpose of his own that he kept from his wife
+  - opus: supported: Holmes calls the delicate cataract knife a strange thing to carry on a rough night outing. That gives a reader reason to doubt Straker's stated reason, merely checking on the horses, and to consider an undisclosed purpose.
+  - haiku: unsupported: The question is fair, since Straker went out at night, but the answer 'a purpose of his own kept from his wife' goes beyond the story. Straker gave his wife a reason (anxiety about the horses), and nothing so far suggests that reason was false or that he had a hidden purpose.
+- ¶85 name `madam_derbyshire`: Madam Derbyshire
+  - opus: supported: Holmes uses this name in this paragraph, inferring a wife of William Derbyshire from the milliner's account.
+  - haiku: unsupported: The story so far names the account's addressee as William Derbyshire, a friend of Straker's. The 'Madam' form appears only as Holmes's remark, and nothing establishes a woman by that name.
+- ¶91 name `dove_dress`: A costume of dove-coloured silk with ostrich-feather trimming
+  - opus: supported: Holmes names this costume in ¶91, saying Mrs. Straker wore it. The label only names the costume and implies no link to the milliner's account.
+  - haiku: unsupported: The costume appears only in Holmes's own unverified recollection at ¶91, and Mrs. Straker flatly denies having met him, so the story has not established that this costume exists or that anyone wore it. The label presents it as a named object in the case, which the story so far does not support.
+- ¶92 possibility `q.dress_wearer=a woman Straker kept without his wife's knowledge`: Who wore the costly costumes on the milliner's account? — a woman Straker kept without his wife's knowledge
+  - opus: supported: A reader has clear reason to consider this. The milliner's bill was in Straker's pocket under another man's name, Holmes notes how costly the costume was, and Mrs. Straker has just denied owning such a dress.
+  - haiku: unsupported: The question of who wore the costumes is fair, since Holmes raised the expensive tastes on the account. But the label's answer, a woman Straker kept without his wife's knowledge, is not in the story so far. Nothing says Straker had a mistress, and the story only shows Mrs. Straker denying she owned the dove-coloured dress.
+- ¶95 account `acct.gregory_hollow`: What Inspector Gregory reports at the hollow
+  - opus: supported: Holmes followed the Inspector to the hollow, and the reply about no wind but heavy rain is plainly the Inspector's report there.
+  - haiku: unsupported: The story so far ends at ¶95 with Holmes asking about the weather. Gregory has not yet reported anything at the hollow, and the label presupposes a specific account that only later paragraphs supply.
+- ¶97 possibility `q.coat_on_bush=he took it off for some task`: How did Straker's overcoat come to be on the furze-bush? — he took it off for some task
+  - opus: supported: Since the coat was placed rather than blown there, a reader can reasonably consider that Straker took it off himself; the wording stays general and states nothing the story hasn't said.
+  - haiku: unsupported: The question is fair to ask, but the proposed answer, that Straker took the coat off for some task, is a specific explanation the story has never raised. Nothing so far suggests a task, and the text has only said he left the house in his mackintosh to check on the horses.
+- ¶101 name `gregory_bag`: The Inspector's bag
+  - opus: supported: The Inspector speaks of 'this bag' he is carrying in ¶101.
+  - haiku: unsupported: The story never says whose bag this is. Holmes, not the Inspector, is the one who says 'In this bag I have...', so the 'Inspector's' attribution is not established.
+- ¶101 time `t.shoe_cast`: When Silver Blaze cast the horseshoe in the Inspector's bag
+  - opus: supported: The shoe is described as cast, so a time of casting exists; the label gives no date.
+  - haiku: unsupported: The story gives no time for when the horseshoe was cast. The label supplies a point in time the story has not yet provided.
+- ¶110 name `ross_watch`: Colonel Ross's watch
+  - opus: supported: Colonel Ross glances at his watch in this paragraph.
+  - haiku: unsupported: The story mentions Straker's silver watch among his effects, but never mentions a watch belonging to Colonel Ross.
+- ¶110 possibility `q.horse_runs=no: he will not be found in time and is withdrawn`: Will Silver Blaze run in the Wessex Cup? — no: he will not be found in time and is withdrawn
+  - opus: supported: The Colonel is already considering withdrawal and the horse is still missing, so this outcome is an obvious one to consider.
+  - haiku: unsupported: The label asserts an outcome (the horse will not be found in time and is withdrawn), which the story has not stated or implied; Colonel Ross only raises withdrawal as an open question.
+- ¶111 possibility `q.horse_runs=yes: he will be found fit and run on Tuesday`: Will Silver Blaze run in the Wessex Cup? — yes: he will be found fit and run on Tuesday
+  - opus: supported: Holmes firmly says to keep the horse's name in the entries, and the story has said the race is next Tuesday. That gives the reader reason to consider that the horse will be found and run, so this is a fair possibility.
+  - haiku: unsupported: The question is fair, since the Colonel raises withdrawing the horse and Holmes says to let the name stand. But the answer given, that Silver Blaze will be found fit and run on Tuesday, is not stated or implied anywhere in the story so far. The horse is still missing, and the story offers no reason to expect he will be found in time.
+- ¶119 possibility `q.man_near_mapleton=the man who struck Straker down, following the horse`: Who was the man whose track joined the horse's near Mapleton? — the man who struck Straker down, following the horse
+  - opus: supported: Holmes and the police theory both treat the horse's abductor as Straker's killer, so a reader has reason to consider this.
+  - haiku: unsupported: Asserts that the track-maker struck Straker down and was following the horse. The story only shows a man's track beside the horse's, not following it, and nothing so far establishes that this man is the killer.
+- ¶120 possibility `q.horse_tracks=loose across the moor, alone`: Which way did the horse go from the hollow? — loose across the moor, alone
+  - opus: supported: The tracks followed from the hollow show the horse travelling across the moor alone, as Watson notes in ¶120.
+  - haiku: unsupported: The story has just shown a man's track beside the horse's (¶119), so the answer 'alone' is contradicted by the text so far. Holmes's 'alone' idea was also set aside as unlikely, not confirmed.
+- ¶122 possibility `q.turned_back=he meant to return the horse, then decided to keep it`: Why did the man with the horse set off towards King's Pyland and then turn back? — he meant to return the horse, then decided to keep it
+  - opus: supported: The tracks heading towards the horse's home stable make it reasonable to wonder whether the man meant to return the horse and then changed his mind.
+  - haiku: unsupported: Nothing so far suggests the man meant to return the horse or changed his mind about keeping it; this specific intent is not yet a reasonable consideration for the reader.
+- ¶124 possibility `q.brown_part=he found the horse loose and took it in`: Did Silas Brown and the Mapleton people have a hand in the affair? — he found the horse loose and took it in
+  - opus: supported: The horse's lone track, then a man's track beside it, ending at Mapleton, gives a reader reason to suspect that Mapleton's trainer took in the loose horse. Brown has already been named as a suspect.
+  - haiku: unsupported: The question of Mapleton involvement is fair (¶66-67 raise Brown's bets and his hostility to Straker), but the answer 'he found the horse loose and took it in' is a specific mechanism the story has not suggested, and it presumes the Mapleton people hold the horse.
+- ¶140 possibility `q.change_it=put its appearance back as it was, after it had been altered`: What would Silas Brown change before it is there? — put its appearance back as it was, after it had been altered
+  - opus: supported: 'Change it first' plausibly means undoing an alteration, so this is a reasonable reading of Brown's own words.
+  - haiku: unsupported: Presupposes an earlier alteration of the horse that the story has not yet described, and a restoration of it; Brown only proposes changing it before delivery, so no reader has reason to consider reverting a prior change.
+- ¶175 possibility `q.straker_reason=to do something to the horse himself`: Why did Straker go out to the stables at one in the morning? — to do something to the horse himself
+  - opus: supported: The story gives reasons to suspect Straker: the delicate cataract knife, the odd milliner's bill, Mrs. Straker's denial of the dress, Holmes asking for his photograph, and the lame sheep.
+  - haiku: unsupported: Straker's stated reason for going out is to check on the horses (¶32). Nothing so far suggests he meant to harm the horse himself.
+- ¶175 possibility `q.knife=to make some fine cut on the horse`: Why did Straker have the small knife with him? — to make some fine cut on the horse
+  - opus: supported: Holmes stresses the knife is meant for very delicate work and is strange to carry on a rough errand. That invites this guess.
+  - haiku: unsupported: The story notes the knife is odd for rough work (¶81) but never suggests a purpose involving a cut on the horse. That specific answer is new.
+- ¶175 possibility `q.sheep_lame=someone cut their legs on purpose, practising for the horse`: What has lamed three of the sheep in the paddock? — someone cut their legs on purpose, practising for the horse
+  - opus: supported: Holmes eagerly ties the lame sheep at King's Pyland to the case, and a delicate knife has already been found. Deliberate harm as practice is a guess a reader could fairly make.
+  - haiku: unsupported: The story reports three lame sheep (¶173) and Holmes's delight, but never suggests deliberate cutting or any practice for the horse.
+- ¶189 possibility `q.odds_who=someone else who has heard that the horse is found`: Who has been backing Silver Blaze, so that his price has shortened? — someone else who has heard that the horse is found
+  - opus: supported: The reader knows Holmes found the horse at Mapleton with Silas Brown, so others learning the horse is safe is a reasonable possibility. It reveals nothing new.
+  - haiku: unsupported: The story never says the horse has been found or that anyone has heard so. Colonel Ross says he has seen nothing of his horse (¶184), and the only route to the horse is Holmes's private deduction, which no character has shared. Nobody in the story gives a reader reason to consider this possibility.
+- ¶214 possibility `q.connection=the horse killed the trainer, who was harming it, and then ran loose`: How are the trainer's murder and the favourite's disappearance connected? — the horse killed the trainer, who was harming it, and then ran loose
+  - opus: supported: Holmes says the horse is the murderer and acted in self-defence, which implies Straker was threatening it. The horse was later found wandering on the moor (¶146).
+  - haiku: unsupported: The 'ran loose' part conflicts with the story so far: ¶204 says Holmes found the horse in a faker's hands, and ¶214 names the horse as the killer, not a loose animal. The claim that the trainer was harming the horse is also not stated.
+- ¶214 possibility `q.straker_unworthy=he meant to lame the favourite himself`: In what way was John Straker unworthy of the Colonel's confidence? — he meant to lame the favourite himself
+  - opus: supported: The cataract knife, the lame sheep and the self-defence remark give a reader reason to consider this; it is offered only as a possibility.
+  - haiku: unsupported: Nothing so far suggests Straker planned to harm or lame the horse. Lameness appears only in the sheep (¶173), and Straker is described as zealous and honest (¶19, ¶75).
+- ¶215 account `acct.lesurier`: Madame Lesurier's account
+  - opus: supported: ¶84 already mentions the milliner's account made out by Madame Lesurier of Bond Street.
+  - haiku: unsupported: Madame Lesurier appears only as the issuer of a milliner's bill (¶84). The story never gives her any account or statement of events, so this label implies testimony the story has not supplied.
+- ¶220 possibility `q.straker_bets=no: someone else paid him to stop the horse`: Had Straker laid money against his own horse? — no: someone else paid him to stop the horse
+  - opus: supported: Straker's dishonest motive is still unknown ('I was at a loss to know why'), so a bribe from someone else is a fair alternative to consider.
+  - haiku: unsupported: The story has not raised the idea that someone else paid Straker to stop the horse. Brown's large bets and dislike of Straker hint at a rival's interest, but nothing so far suggests a payment to Straker, so this answer points to a possibility the reader has no reason yet to consider.
+- ¶225 time `t.double_life`: The time when Straker led a double life as Derbyshire, with a second establishment
+  - opus: supported: Holmes calls Derbyshire 'mythical' and plans to identify him with Straker's photograph, which plainly means Straker was Derbyshire; the double life is stated.
+  - haiku: unsupported: The story has not confirmed that Straker was Derbyshire or pinned down when any double life occurred. At ¶225 Holmes only plans to test the identity by showing Straker's photograph at the milliner's, so the label asserts an unrevealed identity and an unestablished time.
+- ¶226 possibility `q.cravat_why=to leave it where it would throw suspicion on the tout`: Why did Straker pick up Simpson's cravat? — to leave it where it would throw suspicion on the tout
+  - opus: supported: Holmes's 'perhaps' leaves room for other reasons, and Straker was a schemer with the tout as a ready suspect, so a reader has cause to consider framing.
+  - haiku: unsupported: Nothing so far suggests Straker meant to frame Simpson or the stranger; ¶226 offers only the securing explanation, so this possibility was not raised.

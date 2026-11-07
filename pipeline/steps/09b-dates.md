@@ -2,7 +2,25 @@
 
 {{spec}}
 
+## All facts
+
+
+{{facts}}
+
+## Questions
+
+{{questions}}
+
+## The annotated reading
+
+{{reading}}
+
+## The story
+
+{{story}}
+
 ## Your task
+
 
 The whole story is below, with all its facts and questions (answers included). For the facts told in scene
 {{scene_id}} (¶{{from}}–¶{{to}}), listed separately, give what only the whole story settles, as patches
@@ -19,23 +37,15 @@ The whole story is below, with all its facts and questions (answers included). F
   first-time reader would take; knowing the ending makes things look obvious early: be strict.
 - `inferable_at` on a stated fact when a reader could have reached it earlier than the story states it, with `from`
   or `reasoning`.
+- Candidates for inferable facts: the annotated reading's INFER, DEFAULT, IDENTIFY and HYPOTHESIS annotations in
+  this scene (listed below) are a careful reader's steps; where one concludes a fact of the events that a reader
+  could hold, add it (its `reasoning` the annotation's words, `strength: "likely"` unless it strictly follows).
+
+## This scene's annotations
+
+{{scene_reading}}
 
 ## This scene's facts
 
+
 {{scene_facts}}
-
-## All facts
-
-{{facts}}
-
-## Questions
-
-{{questions}}
-
-## The annotated reading
-
-{{reading}}
-
-## The story
-
-{{story}}

@@ -1,0 +1,4 @@
+[{"para":46,"kind":"name","text":"The stable door","id":"stable_door#1","i":1,"verdict":"supported","why":"The stable door is mentioned throughout, and in ¶46 the police theory has it opened and left open."},
+{"para":46,"kind":"name","text":"Silver Blaze's bridle","id":"bridle","i":2,"verdict":"supported","why":"¶46 says the horse's bridle is missing."},
+{"para":46,"kind":"name","text":"A duplicate key to the stable door","id":"duplicate_key","i":3,"verdict":"supported","why":"¶46 has the police theory supposing Simpson somehow obtained a duplicate key."},
+{"para":46,"kind":"possibility","text":"Did Simpson come only to get information? — to drug the lad and take the horse","id":"q.simpson_intent=to drug the lad and take the horse","i":4,"verdict":"supported","why":"Simpson claimed he came only for information, and the police theory in ¶46 is that he drugged the lad and took the horse."}]

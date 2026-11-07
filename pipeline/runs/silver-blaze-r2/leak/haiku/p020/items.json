@@ -1,0 +1,10 @@
+[{"para":20,"kind":"name","text":"The water-tap in the stables","id":"water_tap","i":1,"verdict":"supported","why":"¶20 states there was a water-tap in the stables."},
+{"para":20,"kind":"name","text":"Ned Hunter","id":"hunter","i":2,"verdict":"supported","why":"¶20 names Ned Hunter as the lad who remained on guard."},
+{"para":20,"kind":"name","text":"The kitchen of the trainer's house","id":"kitchen","i":3,"verdict":"supported","why":"¶20 says the two lads had supper in the kitchen of the trainer's house."},
+{"para":20,"kind":"name","text":"The path across the moor to the stables","id":"path","i":4,"verdict":"supported","why":"¶20 says the path to the stables ran across the open moor."},
+{"para":20,"kind":"name","text":"Edith Baxter","id":"edith_baxter#1","i":5,"verdict":"supported","why":"¶20 names the maid, Edith Baxter."},
+{"para":20,"kind":"name","text":"The maid's lantern","id":"lantern","i":6,"verdict":"supported","why":"¶20 says the maid carried a lantern with her."},
+{"para":20,"kind":"name","text":"Hunter's supper of curried mutton","id":"hunter_supper","i":7,"verdict":"supported","why":"¶20 says Hunter's supper consisted of a dish of curried mutton."},
+{"para":20,"kind":"time","text":"Monday evening, before nine","id":"t.mon_evening","i":8,"verdict":"supported","why":"¶20 describes the horses being exercised and watered before the stables were locked at nine."},
+{"para":20,"kind":"time","text":"Monday evening, nine o'clock","id":"t.mon_nine","i":9,"verdict":"supported","why":"¶20 states the stables were locked up at nine o'clock on Monday."},
+{"para":20,"kind":"time","text":"Monday evening, a few minutes after nine, the maid on the path","id":"t.mon_maid_path","i":10,"verdict":"supported","why":"¶20 says that a few minutes after nine the maid carried the supper down to the stables by the moor path with a lantern."}]

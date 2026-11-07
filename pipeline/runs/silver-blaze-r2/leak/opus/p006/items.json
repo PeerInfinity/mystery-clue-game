@@ -1,0 +1,3 @@
+[{"para":6,"kind":"name","text":"Paddington","id":"paddington","i":1,"verdict":"supported","why":"Holmes says in ¶6 that they must catch their train at Paddington."},
+{"para":6,"kind":"name","text":"The train from Paddington","id":"train","i":2,"verdict":"supported","why":"¶6 mentions catching their train at Paddington."},
+{"para":6,"kind":"name","text":"Watson's field-glass","id":"field_glass","i":3,"verdict":"supported","why":"Holmes asks Watson in ¶6 to bring his very excellent field-glass."}]

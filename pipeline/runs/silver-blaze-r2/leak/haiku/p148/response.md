@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story names Silas Brown, trainer at Mapleton, and Holmes calls him 'an old horse-faker' (¶148). Holmes's account of the morning and Brown's collapse (¶146) establishes that Brown concealed the horse at Mapleton, so Brown is the one holding the horse. The label's 'found' is a mild extrapolation, since the horse is not physically seen, but it follows directly from the text."}
+```

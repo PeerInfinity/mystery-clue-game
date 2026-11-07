@@ -266,6 +266,11 @@ for (const q of questions) {
         const ia = q.answer_inferable_at;
         if (ia != null) {
             if (ia > q.answer_given_at) err(q.id, `answer inferable ¶${ia} after given ¶${q.answer_given_at}`);
+            // A reader who can reach the answer at ¶ia (or where the question is raised, if later) must be able to
+            // circle it there: the page's gate asks for a circle before the give-away.
+            const rightAt = Math.min(...q.possibilities.filter((p) => p.value === q.answer || (q.also_right ?? []).includes(p.value)).map((p) => p.available ?? Infinity));
+            const from = Math.max(ia, q.raised ?? 0);
+            if (rightAt > from) err(q.id, `answer inferable at ¶${from}${from > ia ? ' (where it is raised)' : ''}, but no right possibility is available before ¶${rightAt}`);
             if (q.answer_reasoning) { if (reasoningBad(q.answer_reasoning, ia)) err(q.id, `answer_reasoning: ${reasoningBad(q.answer_reasoning, ia)}`); }
             else if (!q.answer_from || !factById.has(q.answer_from)) err(q.id, `answer_from: no fact ${q.answer_from} (or give answer_reasoning)`);
             else if (earliest(factById.get(q.answer_from)) > ia) err(q.id, `answer_from ${q.answer_from} is later than ¶${ia}`);

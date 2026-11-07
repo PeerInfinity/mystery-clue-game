@@ -1,0 +1,70 @@
+```jsonl
+{"file": "entities", "id": "watson", "kind": "person", "name": "Watson"}
+{"file": "entities", "id": "holmes", "kind": "person", "name": "Sherlock Holmes"}
+{"file": "entities", "id": "calendar", "kind": "state", "name": "The day of the week"}
+{"file": "entities", "id": "clock", "kind": "state", "name": "The time of day"}
+{"file": "entities", "id": "england", "kind": "place", "name": "England"}
+{"file": "entities", "id": "holmes_rooms", "kind": "place", "name": "Holmes and Watson's rooms", "within": "england", "source": "my companion had rambled about the room"}
+{"file": "entities", "id": "dartmoor", "kind": "place", "name": "Dartmoor", "within": "england"}
+{"file": "entities", "id": "kings_pyland", "kind": "place", "name": "King's Pyland", "within": "dartmoor"}
+{"file": "entities", "id": "paddington", "kind": "place", "name": "Paddington", "within": "england"}
+{"file": "entities", "id": "reading", "kind": "place", "name": "Reading", "within": "england"}
+{"file": "entities", "id": "exeter", "kind": "place", "name": "Exeter", "within": "england"}
+{"file": "entities", "id": "train", "kind": "object", "name": "The train from Paddington"}
+{"file": "entities", "id": "carriage", "kind": "place", "name": "A first-class carriage", "within": "train"}
+{"file": "moves", "id": "train"}
+{"file": "entities", "id": "silver_blaze", "kind": "animal", "name": "Silver Blaze"}
+{"file": "entities", "id": "straker", "kind": "person", "name": "John Straker"}
+{"file": "entities", "id": "ross", "kind": "person", "name": "Colonel Ross"}
+{"file": "entities", "id": "gregory", "kind": "person", "name": "Inspector Gregory"}
+{"file": "entities", "id": "simpson", "kind": "person", "name": "Fitzroy Simpson"}
+{"file": "entities", "id": "wessex_cup", "kind": "topic", "name": "The Wessex Cup"}
+{"file": "entities", "id": "news_agent", "kind": "person", "name": "Holmes and Watson's news agent"}
+{"file": "entities", "id": "fresh_editions", "kind": "document", "name": "Fresh editions of every paper"}
+{"file": "entities", "id": "bundle_of_papers", "kind": "document", "name": "The bundle of fresh papers from Paddington"}
+{"file": "entities", "id": "the_telegraph", "kind": "document", "name": "The Telegraph"}
+{"file": "entities", "id": "the_chronicle", "kind": "document", "name": "The Chronicle"}
+{"file": "entities", "id": "ross_telegram", "kind": "document", "name": "Colonel Ross's telegram"}
+{"file": "entities", "id": "gregory_telegram", "kind": "document", "name": "Inspector Gregory's telegram"}
+{"file": "entities", "id": "field_glass", "kind": "object", "name": "Watson's field-glass"}
+{"file": "entities", "id": "holmes_pipe", "kind": "object", "name": "Holmes's pipe"}
+{"file": "entities", "id": "cigar_case", "kind": "object", "name": "Holmes's cigar-case"}
+{"file": "entities", "id": "holmes_watch", "kind": "object", "name": "Holmes's watch"}
+{"file": "entities", "id": "travelling_cap", "kind": "object", "name": "Holmes's ear-flapped travelling-cap"}
+{"file": "entities", "id": "telegraph_posts", "kind": "object", "name": "The telegraph posts upon the line"}
+{"file": "entities", "id": "quarter_mile_posts", "kind": "object", "name": "The quarter-mile posts"}
+```
+
+```jsonl
+{"file": "mentions", "id": "watson", "phrases": ["Watson"]}
+{"file": "mentions", "id": "holmes", "phrases": ["Holmes", "Sherlock Holmes", "my companion"]}
+{"file": "mentions", "id": "england", "phrases": ["England"]}
+{"file": "mentions", "id": "holmes_rooms", "phrases": [{"text": "the room", "paras": [4, 4]}]}
+{"file": "mentions", "id": "dartmoor", "phrases": ["Dartmoor", "the north of Dartmoor"]}
+{"file": "mentions", "id": "kings_pyland", "phrases": ["King’s Pyland", {"text": "the scene of the drama", "paras": [4, 4]}]}
+{"file": "mentions", "id": "paddington", "phrases": ["Paddington"]}
+{"file": "mentions", "id": "reading", "phrases": ["Reading"]}
+{"file": "mentions", "id": "exeter", "phrases": ["Exeter"]}
+{"file": "mentions", "id": "train", "phrases": ["our train"]}
+{"file": "mentions", "id": "carriage", "phrases": ["a first-class carriage"]}
+{"file": "mentions", "id": "silver_blaze", "phrases": ["Silver Blaze", "the favourite for the Wessex Cup", {"text": "the horse", "paras": [12, 12]}, "the most remarkable horse in England"]}
+{"file": "mentions", "id": "straker", "phrases": ["John Straker", {"text": "its trainer", "paras": [4, 4]}]}
+{"file": "mentions", "id": "ross", "phrases": ["Colonel Ross", "the owner of the horse"]}
+{"file": "mentions", "id": "gregory", "phrases": ["Inspector Gregory"]}
+{"file": "mentions", "id": "simpson", "phrases": ["Fitzroy Simpson", "young Fitzroy Simpson"]}
+{"file": "mentions", "id": "wessex_cup", "phrases": ["Wessex Cup"]}
+{"file": "mentions", "id": "news_agent", "phrases": ["our news agent"]}
+{"file": "mentions", "id": "fresh_editions", "phrases": ["Fresh editions of every paper"]}
+{"file": "mentions", "id": "bundle_of_papers", "phrases": ["the bundle of fresh papers"]}
+{"file": "mentions", "id": "the_telegraph", "phrases": [{"text": "Telegraph", "paras": [11, 11]}]}
+{"file": "mentions", "id": "the_chronicle", "phrases": [{"text": "Chronicle", "paras": [11, 11]}]}
+{"file": "mentions", "id": "ross_telegram", "phrases": [{"text": "telegrams", "paras": [12, 12]}]}
+{"file": "mentions", "id": "gregory_telegram", "phrases": [{"text": "telegrams", "paras": [12, 12]}]}
+{"file": "mentions", "id": "field_glass", "phrases": ["very excellent field-glass"]}
+{"file": "mentions", "id": "holmes_pipe", "phrases": ["his pipe"]}
+{"file": "mentions", "id": "cigar_case", "phrases": ["his cigar-case"]}
+{"file": "mentions", "id": "holmes_watch", "phrases": ["his watch"]}
+{"file": "mentions", "id": "travelling_cap", "phrases": ["ear-flapped travelling-cap"]}
+{"file": "mentions", "id": "telegraph_posts", "phrases": ["the telegraph posts upon this line"]}
+{"file": "mentions", "id": "quarter_mile_posts", "phrases": ["the quarter-mile posts"]}
+```

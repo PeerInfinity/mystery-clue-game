@@ -1,0 +1,3 @@
+[{"para":11,"kind":"name","text":"The Telegraph","id":"the_telegraph","i":1,"verdict":"supported","why":"¶11 names the _Telegraph_ as a paper Watson has seen."},
+{"para":11,"kind":"name","text":"The Chronicle","id":"the_chronicle","i":2,"verdict":"supported","why":"¶11 names the _Chronicle_ as a paper Watson has seen."},
+{"para":11,"kind":"time","text":"When Watson read the Telegraph and the Chronicle","id":"t.watson_reads_papers","i":3,"verdict":"supported","why":"¶11 has Watson say he has already seen what the Telegraph and Chronicle report, so the reading happened before this point in the story."}]

@@ -1,0 +1,250 @@
+# Entities
+
+Run 207, current 187; run entities matched 176 (85%); current entities found 156 (83%).
+
+## Current entities the run lacks
+
+- midnight_visitor (person): The midnight visitor
+- the_neighbour (person): The faker
+- chemist (person): A chemist
+- clever_counsel (person): A clever counsel
+- invalids (group): Invalids at the villas
+- jury (group): A jury
+- kp_other_horses (animal): The other King's Pyland horses
+- mapleton_dog (animal): A dog at Mapleton
+- parlour (place): The parlour
+- hard_moor (place): The hard, dry moor
+- near_mapleton (place): The moor close to Mapleton
+- racecourse (place): The course
+- hunter_portion (object): Hunter's portion
+- hunter_chair (object): The chair
+- stable_key (object): The stable key
+- new_dress (object): The promised dress
+- pocket_contents (object): Straker's pocket contents
+- reward (object): The reward
+- number_board (object): The numbers board
+- spirits_of_wine (object): Spirits of wine
+- disguise_dye (object): The disguise on the horse
+- race_bell (object): The bell
+- cigars (object): Cigars
+- topic_racing (topic): The turf and betting
+- the_train (object): The train to Exeter
+- household (group): The people at the trainer's house
+- kp_lads (group): The three King's Pyland lads
+- lad_2 (person): A King's Pyland lad
+- lad_3 (person): Another King's Pyland lad
+- analyst (person): Whoever analysed the supper
+- hollow_mud (object): The mud at the bottom of the hollow
+
+## Run entities with no match
+
+- england (place): England
+- train (object): The train from Paddington
+- bundle_of_papers (document): The bundle of fresh papers from Paddington
+- simpson_villa (place): Simpson's villa
+- stranger_cap (object): The stranger's cloth cap
+- stranger_gaiters (object): The stranger's gaiters
+- heavy_weapon (object): The heavy weapon that struck Straker
+- watson_cigar (object): Watson's cigar
+- ross_frock_coat (object): Colonel Ross's frock-coat
+- ross_gaiters (object): Colonel Ross's gaiters
+- ross_eye_glass (object): Colonel Ross's eye-glass
+- ross_hat (object): Colonel Ross's hat
+- detective_service (group): The English detective service
+- central_table (object): The central table in the sitting-room
+- cavendish (object): Half an ounce of long-cut Cavendish
+- pocket_papers (document): The papers in Straker's pockets
+- weiss_co (group): Weiss & Co., London
+- cup_entries (document): The entries for the Wessex Cup
+- horse_track (object): The track of a horse in the soft earth
+- return_track (object): The same tracks coming back in the opposite direction
+- brown_charge (object): What Silas Brown promises shall be there
+- night_train (object): The night train to London
+- course (place): The course beyond the town
+- six_horses (group): The six horses in the race
+- mapleton_colours (object): The yellow of the Mapleton stable
+- out_building (place): The long grey-tiled out-building across the paddock
+- tavistock_steeples (object): The steeples of Tavistock
+- ross_parlour_sneer (state): unused
+- the_faker (person): The faker in whose hands Holmes found the horse
+- turf_frauds (topic): Trainers' frauds against their own horses
+- bills_topic (topic): Bills carried in a man's pockets
+
+## Matches
+
+- watson → watson
+- holmes → holmes
+- calendar → calendar
+- clock → clock
+- holmes_rooms → baker_street
+- dartmoor → moor
+- kings_pyland → kings_pyland
+- paddington → paddington
+- reading → reading
+- exeter → exeter
+- carriage → first_class_carriage
+- silver_blaze → silver_blaze
+- straker → straker
+- ross → colonel_ross
+- gregory → gregory
+- simpson → simpson
+- wessex_cup → wessex_cup
+- news_agent → news_agent
+- fresh_editions → newspapers
+- the_telegraph → newspapers
+- the_chronicle → newspapers
+- ross_telegram → telegrams
+- gregory_telegram → telegrams
+- field_glass → field_glass
+- holmes_pipe → holmes_pipe
+- cigar_case → cigar_case
+- holmes_watch → holmes_watch
+- travelling_cap → travelling_cap
+- telegraph_posts → telegraph_posts
+- quarter_mile_posts → quarter_mile_posts
+- weather → weather
+- isonomy → isonomy
+- racing_public → racing_public
+- stables → stable
+- stall → favourite_stall
+- harness_room → harness_room
+- loft → loft
+- stable_door → stable_door
+- stable_window → stable_window
+- small_table → small_table
+- water_tap → water_tap
+- kings_pyland_stable → stable
+- stable_lads → other_lads
+- two_lads → other_lads
+- hunter → ned_hunter
+- kings_pyland_horses → topic_horses
+- bayard → bayard
+- straker_villa → straker_villa
+- kitchen → kitchen
+- path → moor_path
+- knoll → knoll
+- mrs_straker → mrs_straker
+- edith_baxter → edith_baxter
+- two_women → searchers
+- villas → invalid_villas
+- tavistock_contractor → tavistock_contractor
+- tavistock → tavistock
+- mapleton → mapleton
+- backwater → lord_backwater
+- silas_brown → silas_brown
+- desborough → desborough
+- gypsies → gypsies
+- the_stranger → the_stranger
+- stranger_suit → simpson_clothes
+- stranger_stick → penang_lawyer
+- paper_packet → paper_packet
+- lantern → lantern
+- hunter_supper → curried_mutton
+- house_supper → curried_mutton
+- opium → opium
+- dog → stable_dog
+- straker_coat → overcoat
+- furze_bush → furze_bush
+- hollow → fatal_hollow
+- sharp_instrument → assailant_blade
+- straker_knife → cataract_knife
+- cravat → cravat
+- bridle → bridle
+- duplicate_key → duplicate_key
+- special_wire → special_wire
+- police → police
+- betting_book → betting_book
+- simpson_stick → penang_lawyer
+- london → london
+- sporting_clubs → london_clubs
+- devonshire → devonshire
+- tavistock_station → tavistock_station
+- landau → landau
+- ten_pound_note → ten_pound_note
+- simpson_purse → simpson_purse
+- pits_mines → pits_and_mines
+- gypsy_party → gypsies
+- gypsy_camp → gypsy_camp
+- tavistock_stables → tavistock_stables
+- driver → coachman
+- road → straker_villa
+- paddock → paddock
+- upstairs_room → upstairs_room
+- sitting_room → sitting_room
+- passage → passage
+- straker_bedroom → straker_bedroom
+- dressing_table → dressing_table
+- tin_box → tin_box
+- vestas → vesta_box
+- tallow_candle → tallow_candle
+- straker_pipe → briar_pipe
+- tobacco_pouch → tobacco_pouch
+- straker_watch → silver_watch
+- sovereigns → sovereigns
+- pencil_case → pencil_case
+- cork_disk → cork_disk
+- hay_accounts → hay_accounts
+- ross_letter → ross_letter
+- milliner_account → milliner_bill
+- lesurier → madame_lesurier
+- bond_street → bond_street_shop
+- derbyshire → william_derbyshire
+- madam_derbyshire → mrs_derbyshire
+- account_costume → billed_costume
+- plymouth → plymouth_garden_party
+- garden_party → plymouth_garden_party
+- dove_dress → dove_silk_costume
+- matting → matting
+- gregory_bag → evidence_bag
+- straker_boot → straker_boot
+- simpson_shoe → simpson_shoe
+- horseshoe → horseshoe
+- wax_vesta → wax_vesta
+- ross_watch → holmes_watch
+- the_public → public
+- long_hollow → wet_hollow
+- man_track → track_man
+- mapleton_paving → mapleton_gates
+- mapleton_gates → mapleton_gates
+- brown_parlour → mapleton_parlour
+- dawson → dawson
+- hunting_crop → hunting_crop
+- half_crown → half_crown
+- brown_boots → brown_boots
+- ross_jockey → ross_jockey
+- straker_photo → photograph
+- photo_envelope → envelope
+- sheep_lad → sheep_lad
+- sheep → sheep
+- lame_sheep → lame_sheep
+- winchester → winchester
+- winchester_train → race_train
+- winchester_station → winchester_station
+- ross_drag → drag
+- enclosure → enclosure
+- grand_stand → enclosure
+- weighing_enclosure → weighing_enclosure
+- race_card → race_card
+- the_ring → the_ring
+- heath_newton → heath_newton
+- the_negro → the_negro
+- wardlaw → colonel_wardlaw
+- pugilist → pugilist
+- balmoral → duke_balmoral
+- iris → iris
+- singleford → lord_singleford
+- rasper → rasper
+- the_bay_horse → the_bay
+- ross_colours → ross_colours
+- pullman_car → pullman_car
+- clapham_junction → clapham_junction
+- victoria → victoria
+- second_establishment → derbyshire_household
+- milliner_shop → bond_street_shop
+- steel_shoe → steel_shoe
+- newspaper_reports → newspapers
+- the_press → newspapers
+- front_door_villa → straker_villa
+- horses_topic → topic_horses
+- the_man_near_mapleton → track_man
+- villa_parlour → kitchen

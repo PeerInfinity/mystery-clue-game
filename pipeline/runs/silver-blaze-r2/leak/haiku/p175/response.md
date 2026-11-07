@@ -1,0 +1,10 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Paragraph 13 places the visit on Thursday, the story ends in the evening at Tavistock, and the drive into town follows the visit."}
+{"i": 2, "verdict": "supported", "why": "Holmes and the police both discuss the horse bolting or being led out and harmed (¶46, ¶57), so this alternative to a deliberate theft has been raised."}
+{"i": 3, "verdict": "unsupported", "why": "Straker's stated reason for going out is to check on the horses (¶32). Nothing so far suggests he meant to harm the horse himself."}
+{"i": 4, "verdict": "unsupported", "why": "The story notes the knife is odd for rough work (¶81) but never suggests a purpose involving a cut on the horse. That specific answer is new."}
+{"i": 5, "verdict": "unsupported", "why": "The story reports three lame sheep (¶173) and Holmes's delight, but never suggests deliberate cutting or any practice for the horse."}
+{"i": 6, "verdict": "supported", "why": "The lad reports the sheep are lame and Holmes shows interest in them, so asking who lamed them is a plain question the story invites."}
+{"i": 7, "verdict": "supported", "why": "A natural cause is an obvious alternative to human interference, and the lad's remark that it is 'not of much account' makes it a reasonable possibility to consider."}
+{"i": 8, "verdict": "supported", "why": "The sheep are in the King's Pyland paddock and the story has focused on people at King's Pyland, so a local culprit is a possibility the reader has reason to weigh."}
+```

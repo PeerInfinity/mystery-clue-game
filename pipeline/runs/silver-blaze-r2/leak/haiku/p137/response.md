@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes says it is Thursday morning on the train (¶13), they reach Tavistock in the evening (¶47), and the sun is setting as they walk the moor (¶113). Paragraph 137 says the reds had faded to greys before Holmes and Brown reappeared, which fits dusk."}
+```

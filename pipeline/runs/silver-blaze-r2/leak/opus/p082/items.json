@@ -1,0 +1,6 @@
+[{"para":82,"kind":"name","text":"The room Straker left that night","id":"straker_bedroom","i":1,"verdict":"supported","why":"¶82 says Straker picked up the knife 'as he left the room', and ¶32 has him dressing at night before leaving the house."},
+{"para":82,"kind":"name","text":"The dressing-table","id":"dressing_table","i":2,"verdict":"supported","why":"¶82 says the knife had lain upon the dressing-table."},
+{"para":82,"kind":"name","text":"The disk of cork that guarded the knife's tip","id":"cork_disk","i":3,"verdict":"supported","why":"¶82 says the tip was guarded by a disk of cork found beside the body."},
+{"para":82,"kind":"time","text":"When Mrs. Straker told the Inspector of the knife","id":"t.mrs_straker_tells","i":4,"verdict":"supported","why":"¶82 shows Mrs. Straker told the Inspector at some point during the investigation, before this evening; the label adds no new detail."},
+{"para":82,"kind":"account","text":"What Inspector Gregory reports at the house","id":"acct.gregory_house","i":5,"verdict":"supported","why":"Gregory reports these facts about the knife and the cork in ¶82."},
+{"para":82,"kind":"account","text":"What Mrs. Straker told the Inspector","id":"acct.mrs_straker_inspector","i":6,"verdict":"supported","why":"¶82 relays her statement that the knife lay on the dressing-table and Straker took it as he left."}]

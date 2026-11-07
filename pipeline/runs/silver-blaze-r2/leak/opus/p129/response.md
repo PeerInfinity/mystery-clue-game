@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "In ¶129 the man calls the groom 'Dawson', so the story itself gives this name for the groom."}
+```

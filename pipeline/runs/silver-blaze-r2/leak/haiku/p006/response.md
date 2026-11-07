@@ -1,0 +1,5 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Paragraph 6 says \"We have, I think, just time to catch our train at Paddington,\" so Paddington is named as the departure station."}
+{"i": 2, "verdict": "supported", "why": "Paragraph 6 mentions \"our train at Paddington,\" which establishes a train departing from Paddington."}
+{"i": 3, "verdict": "supported", "why": "Paragraph 6 asks Watson to bring \"your very excellent field-glass,\" so the field-glass is named and attributed to him."}
+```

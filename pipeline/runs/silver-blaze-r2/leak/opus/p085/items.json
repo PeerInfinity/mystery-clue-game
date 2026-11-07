@@ -1,0 +1,3 @@
+[{"para":85,"kind":"name","text":"Madam Derbyshire","id":"madam_derbyshire","i":1,"verdict":"supported","why":"Holmes uses this name in this paragraph, inferring a wife of William Derbyshire from the milliner's account."},
+{"para":85,"kind":"name","text":"The costume on the milliner's account","id":"account_costume","i":2,"verdict":"supported","why":"Holmes mentions a single costume costing twenty-two guineas on the account."},
+{"para":85,"kind":"question","text":"Who wore the costly costumes on the milliner's account?","id":"q.dress_wearer","i":3,"verdict":"supported","why":"This is a natural open question after Holmes's remark about the expensive costumes, and its wording does not point to an answer."}]

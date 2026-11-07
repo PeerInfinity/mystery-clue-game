@@ -1,0 +1,617 @@
+# Facts
+
+Run 1130, current 681; matched 446 by shape (entity, attribute, paragraph): 65% of the current, 39% of the run's; 171 more by the same quote in another shape: 91% of the current in all.
+Of the matched, 359 (80%) are in an account of the same origin (or in none in both).
+
+| attr | current | matched | run |
+|---|---|---|---|
+| says | 120 | 119 | 214 |
+| location | 107 | 96 | 139 |
+| condition | 106 | 101 | 146 |
+| action | 97 | 92 | 239 |
+| believes | 36 | 32 | 34 |
+| intends | 26 | 21 | 46 |
+| tells | 25 | 20 | 39 |
+| carrying | 21 | 20 | 32 |
+| member_of | 16 | 8 | 17 |
+| lives_at | 14 | 8 | 12 |
+| knows | 14 | 12 | 16 |
+| owner | 13 | 13 | 29 |
+| role | 13 | 11 | 20 |
+| observes | 12 | 10 | 32 |
+| position | 10 | 10 | 31 |
+| wearing | 8 | 7 | 11 |
+| contents | 8 | 7 | 16 |
+| weekday | 7 | 4 | 5 |
+| rule | 7 | 6 | 12 |
+| hour | 5 | 5 | 8 |
+| identity | 4 | 4 | 9 |
+| reputed | 3 | 3 | 10 |
+| door | 3 | 3 | 3 |
+| name | 2 | 2 | 8 |
+| heading | 2 | 1 | 0 |
+| speed | 1 | 1 | 0 |
+| time | 1 | 1 | 2 |
+
+## Current facts the run lacks
+
+- ¶1 f.h_lives: holmes lives_at "baker_street" — “our breakfast”
+- ¶1 f.w_lives: watson lives_at "baker_street" — “our breakfast”
+- ¶4 f.h_intends_go: holmes intends "to go to King's Pyland, the scene of the drama" — “he suddenly announced his intention of setting out for the scene of the drama”
+- ¶7 f.carriage_in_train: first_class_carriage location "the_train" — “a first-class carriage flying along en route for Exeter”
+- ¶10 f.h_counts_posts: holmes action "timing the telegraph posts by his watch" — “the calculation is a simple one”
+- ¶14 f.cal_wed: calendar weekday "Wednesday" — “yesterday”
+- ¶19 f.straker_trainer: straker role "Colonel Ross's trainer at King's Pyland" — “for seven as trainer”
+- ¶19 f.member_lads_3: lad_3 member_of "kp_lads" — “Under him were three lads”
+- ¶19 f.lads_live: kp_lads lives_at "loft" — “while the others slept in the loft”
+- ¶19 f.mrs_lives: mrs_straker lives_at "straker_villa" — “John Straker, who is a married man, lived in a small villa”
+- ¶20 f.member_other_2: lad_2 member_of "other_lads" — “Two of the lads walked up to the trainer’s house”
+- ¶20 f.member_other_3: lad_3 member_of "other_lads" — “Two of the lads walked up to the trainer’s house”
+- ¶20 f.edith_on_path: edith_baxter location "moor_path" — “the path ran across the open moor”
+- ¶21 f.edith_sees_stranger: edith_baxter observes "f.stranger_dress" — “As he stepped into the circle of yellow light thrown by the lantern she saw”
+- ¶24 f.stranger_knows_lad: the_stranger knows "a stable-boy sleeps alone at the stable every night" — “I understand that a stable-boy sleeps there alone every night”
+- ¶24 f.paper_in_pocket: paper_packet location "the_stranger" — “out of his waistcoat pocket”
+- ¶24 f.stranger_wants_paper_to_boy: the_stranger intends "that the stable-boy gets the paper tonight" — “See that the boy has this to-night”
+- ¶25 f.window_habit: stable_window rule "the meals are handed in through it" — “the window through which she was accustomed to hand the meals”
+- ¶25 f.edith_tells: edith_baxter action "beginning to tell Hunter what had happened" — “She had begun to tell him of what had happened”
+- ¶29 f.hunter_tout: ned_hunter believes "the stranger is a racing tout" — “So, you’re one of those damned touts!”
+- ¶29 f.dog_tied: stable_dog condition "tied up" — “to unloose the dog”
+- ¶29 f.edith_at_house: edith_baxter location "straker_villa" — “The girl fled away to the house”
+- ¶29 f.dog_out: stable_dog location "kings_pyland" — “Hunter rushed out with the hound”
+- ¶32 f.cal_tue: calendar weekday "Tuesday" — “one in the morning”
+- ¶32 f.straker_to_stables: straker location "stable" — “he intended to walk down to the stables to see that all was well”
+- ¶32 f.straker_intends: straker intends "to walk down to the stables" — “he intended to walk down to the stables to see that all was well”
+- ¶33 f.mrs_finds_absent: mrs_straker observes "f.straker_not_back" — “to find that her husband had not yet returned”
+- ¶34 f.member_searchers_lad_3: lad_3 member_of "searchers" — “the two lads and the two women ran out in search of the absentees”
+- ¶36 f.hunter_ate: ned_hunter action "eating the curried mutton" — “drugged his curried mutton, and so deprived the stables of their watchman”
+- ¶37 f.dish_inside: hunter_portion location "stable" — “the remains of his supper left by the stable-lad”
+- ¶37 f.mud_proofs: hollow_mud condition "marked with abundant proofs of the horse" — “there were abundant proofs in the mud”
+- ¶37 f.member_household_mrs_straker: mrs_straker member_of "household" — “the people at the house partook of the same dish”
+- ¶37 f.member_household_edith_baxter: edith_baxter member_of "household" — “the people at the house partook of the same dish”
+- ¶37 f.member_household_lad_2: lad_2 member_of "household" — “the people at the house partook of the same dish”
+- ¶37 f.member_household_lad_3: lad_3 member_of "household" — “the people at the house partook of the same dish”
+- ¶37 f.dish_drugged_after_parting: hunter_portion contents "opium added after it was parted from the rest of the dish" — “the people at the house partook of the same dish on the same night without any ill effect”
+- ¶39 f.gregory_charge: gregory role "the officer the case is committed to" — “Inspector Gregory, to whom the case has been committed”
+- ¶39 f.police_suspect: police believes "suspicion rests on Fitzroy Simpson" — “the man upon whom suspicion naturally rested”
+- ¶40 f.desborough: desborough condition "second favourite, in Silas Brown's charge at Mapleton" — “Desborough, the second favourite, which was in charge of Silas Brown at the Mapleton stables”
+- ¶40 f.stranger_stick_is_lawyer: the_stranger carrying "penang_lawyer" — “his stick, which was a Penang-lawyer weighted with lead”
+- ¶46 f.horse_bridled: silver_blaze wearing "bridle" — “His bridle is missing, so that Simpson must have put this on”
+- ¶34 f.tell_search: searchers tells "acct.search" — “they perceived something which warned them”
+- ¶37 f.tell_household: household tells "acct.household" — “the people at the house partook of the same dish”
+- ¶10 f.tell_train: holmes tells "acct.holmes_train" — “the calculation is a simple one”
+- ¶52 f.gregory_circumstantial: gregory believes "the evidence is purely circumstantial and a new development may upset it" — “I recognise that the evidence is purely circumstantial”
+- ¶57 f.h_injure_there: holmes says "if Simpson wished to injure the horse, he could have done it in the stable, without taking it out" — “If he wished to injure it why could he not do it there?”
+- ¶62 f.gregory_gypsy_theory: gregory believes "Simpson, in league with the gypsies, was leading the horse to them when overtaken, and they have him now" — “might he not have been leading the horse to them when he was overtaken, and may they not have him now?”
+- ¶51 f.tell_drive_watson: gregory tells "acct.drive" — “I listened with interest to the dialogue of the two detectives”
+- ¶84 f.hay_accounts: hay_accounts condition "three receipted hay-dealers' accounts" — “Three of them are receipted hay-dealers’ accounts”
+- ¶85 f.madam_tastes: mrs_derbyshire condition "expensive tastes in dress" — “Madam Derbyshire had somewhat expensive tastes”
+- ¶77 f.tell_sitting: gregory tells "acct.sitting" — “I have the things themselves in the sitting-room”
+- ¶116 f.not_at_kp: silver_blaze location "kings_pyland" — “He is not at King’s Pyland”
+- ¶122 f.man_heads_kp: track_man heading "kings_pyland" — “The double track turned sharp off and took the direction of King’s Pyland”
+- ¶124 f.man_to_gates: track_man location "mapleton_gates" — “It ended at the paving of asphalt which led up to the gates of the Mapleton stables”
+- ¶124 f.horse_into_mapleton: silver_blaze location "mapleton" — “It ended at the paving of asphalt which led up to the gates of the Mapleton stables”
+- ¶131 f.mapleton_dog_kept: mapleton_dog lives_at "mapleton" — “you may find a dog at your heels”
+- ¶150 f.brown_knows_mercy: silas_brown knows "his only hope of mercy is to produce the horse safe" — “He knows that his only hope of mercy is to produce it safe”
+- ¶150 f.brown_keeps_safe: silas_brown intends "to keep the horse safe" — “he will guard it as the apple of his eye”
+- ¶161 f.h_photo_purpose: holmes intends "to show Straker's photograph at the milliner's" — “Might I ask for a photograph of Mr. John Straker?”
+- ¶170 f.sheep_in_paddock: sheep location "paddock" — “You have a few sheep in the paddock”
+- ¶183 f.cal_race_monday: calendar weekday "Monday" — “Four days later”
+- ¶200 f.race_close: the_bay action "running in the pack up the straight; Mapleton's yellow in front halfway; then coming away with a rush" — “the Colonel’s horse, coming away with a rush”
+- ¶215 f.w_listens_home: watson action "listening with Ross to Holmes's account of Monday night and how he unravelled it" — “as we listened to our companion’s narrative”
+- ¶219 f.dog_kept: stable_dog lives_at "stable" — “a dog was kept in the stables”
+
+## Run facts with no match
+
+- ¶1 f.holmes_must_go: holmes intends "to go" — “I am afraid, Watson, that I shall have to go”
+- ¶4 f.holmes_pipe: holmes action "charges and recharges his pipe with the strongest black tobacco" — “charging and recharging his pipe with the strongest black tobacco”
+- ¶4 f.holmes_carries_pipe: holmes carrying "holmes_pipe" — “charging and recharging his pipe”
+- ¶4 f.holmes_deaf: holmes condition "deaf to Watson's questions and remarks" — “absolutely deaf to any of my questions or remarks”
+- ¶4 f.papers_in_corner: fresh_editions location "holmes_rooms" — “tossed down into a corner”
+- ¶4 f.horse_favourite: silver_blaze role "favourite for the Wessex Cup" — “the favourite for the Wessex Cup”
+- ¶4 f.horse_vanishes: silver_blaze action "disappears" — “the singular disappearance of the favourite for the Wessex Cup”
+- ¶4 f.straker_trainer: straker role "trainer of the favourite" — “the tragic murder of its trainer”
+- ¶4 f.straker_murdered: straker condition "murdered" — “the tragic murder of its trainer”
+- ¶6 f.holmes_intends_train: holmes intends "to catch their train at Paddington" — “just time to catch our train at Paddington”
+- ¶6 f.glass_owner: field_glass owner "watson" — “your very excellent field-glass”
+- ¶7 f.watson_paddington: watson location "paddington" — “which he had procured at Paddington”
+- ¶7 f.holmes_reads_papers: holmes action "dips rapidly into the bundle of fresh papers" — “dipped rapidly into the bundle of fresh papers”
+- ¶8 f.holmes_has_watch: holmes carrying "holmes_watch" — “glancing at his watch”
+- ¶10 f.holmes_asks_matter: holmes action "asks whether Watson has looked into the murder of John Straker and the disappearance of Silver Blaze" — “I presume that you have looked into this matter of the murder of John Straker and the disappearance of Silver Blaze?”
+- ¶10 f.horse_name: silver_blaze name "Silver Blaze" — “the disappearance of Silver Blaze”
+- ¶10 f.straker_name: straker name "John Straker" — “the murder of John Straker”
+- ¶12 f.holmes_surmise: holmes says "the case is beset by a plethora of surmise, conjecture and hypothesis" — “we are suffering from a plethora of surmise, conjecture, and hypothesis”
+- ¶12 f.gregory_sends: gregory action "telegraphs Holmes inviting his co-operation" — “and from Inspector Gregory, who is looking after the case, inviting my co-operation”
+- ¶12 f.holmes_receives: holmes action "receives telegrams from Colonel Ross and Inspector Gregory" — “On Tuesday evening I received telegrams”
+- ¶13 f.watson_asks_why: watson action "asks why Holmes did not go down the day before" — “Why didn’t you go down yesterday?”
+- ¶14 f.holmes_blunder: holmes says "he made a blunder" — “Because I made a blunder”
+- ¶14 f.holmes_believed_found: holmes believes "the most remarkable horse in England could not long remain concealed in the sparsely inhabited north of Dartmoor" — “I could not believe it possible that the most remarkable horse in England could long remain concealed”
+- ¶14 f.horse_remarkable: silver_blaze reputed "the most remarkable horse in England" — “the most remarkable horse in England”
+- ¶14 f.dartmoor_sparse: dartmoor condition "the north of Dartmoor is sparsely inhabited" — “so sparsely inhabited a place as the north of Dartmoor”
+- ¶14 f.simpson_young: simpson condition "young" — “young Fitzroy Simpson”
+- ¶14 f.horse_not_found: silver_blaze condition "found" — “beyond the arrest of young Fitzroy Simpson nothing had been done”
+- ¶14 f.holmes_not_wasted: holmes believes "the day of waiting was not wasted" — “Yet in some ways I feel that yesterday has not been wasted.”
+- ¶15 f.watson_asks_theory: watson action "asks whether Holmes has formed a theory" — “You have formed a theory, then?”
+- ¶16 f.holmes_will_enumerate: holmes intends "to enumerate the facts of the case to Watson" — “I shall enumerate them to you”
+- ¶11 f.chronicle_to_watson: the_chronicle tells "acct.press" — “I have seen what the _Telegraph_ and the _Chronicle_ have to say”
+- ¶12 f.ross_tells_holmes: ross tells "acct.ross" — “I received telegrams from both Colonel Ross”
+- ¶12 f.gregory_tells_holmes: gregory tells "acct.gregory" — “and from Inspector Gregory”
+- ¶12 f.holmes_tells_watson: holmes tells ["acct.holmes","acct.ross","acct.gregory","acct.press"] — “On Tuesday evening I received telegrams”
+- ¶17 f.watson_smokes: watson carrying "watson_cigar" — “puffing at my cigar”
+- ¶18 f.isonomy_famous: isonomy reputed "Silver Blaze's famous ancestor" — “his famous ancestor”
+- ¶18 f.horse_record: silver_blaze reputed "holds as brilliant a record as his famous ancestor" — “holds as brilliant a record as his famous ancestor”
+- ¶18 f.horse_public_favourite: silver_blaze reputed "a prime favourite with the racing public, who has never yet disappointed them" — “has always, however, been a prime favourite with the racing public”
+- ¶19 f.kp_aware: kings_pyland_stable knows "many people had an interest in stopping the favourite" — “The fact was, of course, appreciated at King's Pyland”
+- ¶19 f.straker_heavy: straker condition "became too heavy for the weighing-chair" — “before he became too heavy for the weighing-chair”
+- ¶19 f.straker_served: straker action "serves the Colonel five years as jockey and seven as trainer" — “He has served the Colonel for five years as jockey and for seven as trainer”
+- ¶19 f.horses_kept: kings_pyland_horses lives_at "stables" — “containing only four horses in all”
+- ¶19 f.straker_childless: straker condition "has no children" — “He has no children”
+- ¶19 f.straker_keeps_maid: straker condition "keeps one maid-servant" — “keeps one maid-servant”
+- ¶19 f.straker_comfortable: straker condition "comfortably off" — “is comfortably off”
+- ¶19 f.country_lonely: kings_pyland condition "the country round is very lonely" — “The country round is very lonely”
+- ¶19 f.villas_built: tavistock_contractor action "builds the villas for invalids and others who wish to enjoy the Dartmoor air" — “which have been built by a Tavistock contractor for the use of invalids”
+- ¶19 f.mapleton_larger: mapleton condition "a larger training establishment" — “is the larger training establishment of Mapleton”
+- ¶19 f.moor_wild: dartmoor condition "in every other direction the moor is a complete wilderness" — “In every other direction the moor is a complete wilderness”
+- ¶20 f.two_lads_member: two_lads member_of "stable_lads" — “Two of the lads”
+- ¶20 f.hunter_guard: hunter action "remains on guard in the stables" — “remained on guard”
+- ¶20 f.edith_name: edith_baxter name "Edith Baxter" — “the maid, Edith Baxter”
+- ¶20 f.edith_carries_supper: edith_baxter action "carries Hunter's supper down to the stables" — “carried down to the stables his supper”
+- ¶21 f.stranger_capw: the_stranger wearing "stranger_cap" — “with a cloth cap”
+- ¶21 f.stranger_gaitersw: the_stranger wearing "stranger_gaiters" — “He wore gaiters”
+- ¶21 f.stranger_nervous: the_stranger condition "nervous in manner" — “the nervousness of his manner”
+- ¶21 f.edith_sees_stranger: edith_baxter observes ["f.stranger_bearing","f.stranger_suit","f.stranger_capw","f.stranger_gaitersw","f.stranger_has_stick","f.stranger_pale","f.stranger_nervous"] — “she saw that he was a person of gentlemanly bearing”
+- ¶22 f.stranger_asks_where: the_stranger action "asks the maid where he is" — “Can you tell me where I am?”
+- ¶24 f.stranger_luck: the_stranger says "it is a stroke of luck" — “Oh, indeed! What a stroke of luck!”
+- ¶24 f.stranger_guess_supper: the_stranger says "perhaps she is carrying the boy's supper" — “Perhaps that is his supper which you are carrying to him.”
+- ¶24 f.stranger_bribe_dress: the_stranger says "she would not be too proud to earn the price of a new dress" — “you would not be too proud to earn the price of a new dress”
+- ¶24 f.stranger_takes_paper: the_stranger action "takes a folded piece of white paper out of his waistcoat pocket" — “He took a piece of white paper folded up out of his waistcoat pocket.”
+- ¶26 f.stranger_looks_through: the_stranger action "looks through the window" — “looking through the window”
+- ¶26 f.edith_sees_packet: edith_baxter observes ["f.stranger_packet_hand"] — “she noticed the corner of the little paper packet protruding from his closed hand”
+- ¶28 f.bayard_member: bayard member_of "kings_pyland_horses" — “You've two horses in for the Wessex Cup”
+- ¶28 f.stranger_asks_tip: the_stranger says "asks Hunter for the straight tip, and he won't be a loser" — “Let me have the straight tip and you won't be a loser.”
+- ¶28 f.stranger_asks_bayard: the_stranger action "asks whether at the weights Bayard could give Silver Blaze a hundred yards in five furlongs, and whether the stable has put its money on him" — “Is it a fact that at the weights Bayard could give the other a hundred yards in five furlongs”
+- ¶29 f.stranger_gone: the_stranger location "stable_window" — “he was gone”
+- ¶29 f.no_trace: hunter observes "any trace of the stranger" — “he failed to find any trace of him”
+- ¶31 f.holmes_praises: holmes says "Watson's question is excellent" — “Excellent, Watson, excellent!”
+- ¶31 f.holmes_door_important: holmes believes "the point of the door is of great importance" — “The importance of the point struck me so forcibly”
+- ¶32 f.lads_back: two_lads location "stables" — “until his fellow-grooms had returned”
+- ¶32 f.straker_uneasy: straker condition "vaguely uneasy" — “It left him, however, vaguely uneasy”
+- ¶32 f.mrs_straker_lives: mrs_straker lives_at "straker_villa" — “Mrs. Straker, waking at one in the morning”
+- ¶32 f.mrs_straker_wakes: mrs_straker action "wakes at one in the morning" — “Mrs. Straker, waking at one in the morning”
+- ¶32 f.mrs_straker_asks: mrs_straker action "asks her husband what he is doing" — “In reply to her inquiries”
+- ¶32 f.mrs_straker_hears_rain: mrs_straker observes ["f.rain"] — “she could hear the rain pattering against the window”
+- ¶33 f.mrs_straker_wakes_seven: mrs_straker action "wakes at seven in the morning" — “Mrs. Straker awoke at seven in the morning”
+- ¶33 f.mrs_straker_calls_maid: mrs_straker action "calls the maid" — “called the maid”
+- ¶33 f.mrs_straker_sets_off: mrs_straker action "sets off for the stables with the maid" — “set off for the stables”
+- ¶34 f.hunter_no_sense: hunter condition "no sense can be got out of him" — “as no sense could be got out of him”
+- ¶34 f.lads_hope: two_lads believes "the trainer may have taken out the horse for early exercise" — “They still had hopes that the trainer had for some reason taken out the horse for early exercise”
+- ¶34 f.lads_knoll: two_lads location "knoll" — “on ascending the knoll near the house”
+- ¶34 f.knoll_position: knoll position "near the house" — “the knoll near the house”
+- ¶35 f.bush_position: furze_bush position "about a quarter of a mile from the stables" — “About a quarter of a mile from the stables”
+- ¶37 f.mud_proofs: hollow condition "abundant proofs in the mud at the bottom that the horse was there" — “there were abundant proofs in the mud which lay at the bottom of the fatal hollow”
+- ¶37 f.house_no_effect: house_supper condition "eaten at the house without any ill effect" — “without any ill effect”
+- ¶38 f.holmes_will_recap: holmes intends "to recapitulate what the police have done" — “I shall now recapitulate what the police have done in the matter.”
+- ¶39 f.holmes_gregory_imagination: holmes says "Gregory lacks imagination, without which he cannot rise to great heights" — “Were he but gifted with imagination he might rise to great heights in his profession.”
+- ¶39 f.gregory_arrives: gregory action "arrives at King's Pyland" — “On his arrival”
+- ¶39 f.simpson_birth: simpson condition "of excellent birth and education" — “He was a man of excellent birth and education”
+- ¶39 f.betting_book_owner: betting_book owner "simpson" — “his betting-book”
+- ¶39 f.betting_examined: police action "examines Simpson's betting-book" — “An examination of his betting-book”
+- ¶39 f.simpson_bets: simpson action "registers bets of five thousand pounds against the favourite" — “bets to the amount of five thousand pounds had been registered by him against the favourite”
+- ¶40 f.desborough_second: desborough role "second favourite for the Wessex Cup" — “Desborough, the second favourite”
+- ¶40 f.brown_charge: silas_brown role "in charge of Desborough" — “which was in charge of Silas Brown”
+- ¶40 f.cravat_confronted: police action "confront Simpson with his cravat" — “When confronted with his cravat”
+- ¶40 f.simpson_cannot_account: simpson says "he cannot account for the cravat's presence in the murdered man's hand" — “was utterly unable to account for its presence in the hand of the murdered man”
+- ¶40 f.simpson_wet: simpson condition "his clothing wet" — “His wet clothing”
+- ¶40 f.straker_succumbed: straker condition "died of terrible injuries" — “the terrible injuries to which the trainer had succumbed”
+- ¶41 f.knife_owner: straker_knife owner "straker" — “the state of Straker's knife”
+- ¶41 f.holmes_asks_light: holmes action "asks Watson for any light he can give" — “if you can give me any light I shall be infinitely obliged to you”
+- ¶42 f.watson_listened: watson action "listens with the greatest interest to Holmes's statement" — “I had listened with the greatest interest”
+- ¶42 f.watson_not_appreciated: watson knows "the relative importance of the facts and their connection to each other" — “I had not sufficiently appreciated their relative importance, nor their connection to each other”
+- ¶45 f.watson_fails: watson says "he still fails to understand what the theory of the police can be" — “even now I fail to understand what the theory of the police can be”
+- ¶46 f.holmes_objections: holmes says "whatever theory is stated has very grave objections" — “I am afraid that whatever theory we state has very grave objections to it”
+- ¶46 f.holmes_police_theory: holmes says "the police imagine that Simpson drugged the lad, opened the stable door with a duplicate key, bridled and led out the horse, killed the trainer who met him on the moor, and hid the horse or lost it" — “The police imagine, I take it, that this Fitzroy Simpson, having drugged the lad”
+- ¶46 f.holmes_stuck: holmes believes "they cannot get much further until he is on the spot" — “I cannot really see how we can get much further than our present position”
+- ¶35 f.searchers_tell_police: two_women tells "acct.searchers" — “at the bottom of this was found the dead body of the unfortunate trainer”
+- ¶38 f.police_tells_press: police tells "acct.police" — “what the police have done in the matter”
+- ¶11 f.press_to_telegraph: the_press tells "acct.press" — “I have seen what the _Telegraph_ and the _Chronicle_ have to say”
+- ¶11 f.press_to_chronicle: the_press tells "acct.press" — “I have seen what the _Telegraph_ and the _Chronicle_ have to say”
+- ¶31 f.police_to_holmes: police tells "acct.police" — “I sent a special wire to Dartmoor yesterday to clear the matter up”
+- ¶40 f.gregory_reports_simpson: gregory tells "acct.simpson" — “On being arrested he volunteered the statement”
+- ¶47 f.tavistock_small: tavistock condition "a little town" — “the little town of Tavistock”
+- ¶47 f.ross_gaiters_w: ross wearing "ross_gaiters" — “in a frock-coat and gaiters”
+- ¶47 f.ross_glass_w: ross wearing "ross_eye_glass" — “with trim little side-whiskers and an eye-glass”
+- ¶47 f.gregory_detective_member: gregory member_of "detective_service" — “rapidly making his name in the English detective service”
+- ¶47 f.watson_sees_pair: watson observes ["f.gregory_looks","f.ross_looks","f.ross_frock","f.ross_gaiters_w","f.ross_glass_w"] — “Two gentlemen were awaiting us in the station”
+- ¶48 f.ross_delighted: ross says "he is delighted Holmes has come down" — “I am delighted that you have come down, Mr. Holmes”
+- ¶50 f.landau_outside: landau location "tavistock_station" — “We have an open carriage outside”
+- ¶50 f.gregory_intends_drive: gregory intends "to see the place before the light fails and talk the case over on the drive" — “we might talk it over as we drive”
+- ¶51 f.gregory_pours_out: gregory action "is full of his case and pours out a stream of remarks" — “Inspector Gregory was full of his case, and poured out a stream of remarks”
+- ¶51 f.holmes_interjects: holmes action "throws in an occasional question or interjection" — “while Holmes threw in an occasional question or interjection”
+- ¶51 f.ross_hat_w: ross wearing "ross_hat" — “his hat tilted over his eyes”
+- ¶52 f.gregory_net: gregory says "the net is drawn pretty close round Fitzroy Simpson" — “The net is drawn pretty close round Fitzroy Simpson”
+- ¶52 f.gregory_circumstantial: gregory says "the evidence is purely circumstantial and some new development may upset it" — “I recognise that the evidence is purely circumstantial, and that some new development may upset it”
+- ¶54 f.gregory_self_wound: gregory says "the police have concluded that Straker wounded himself in his fall" — “We have quite come to the conclusion that he wounded himself in his fall.”
+- ¶55 f.holmes_tells_against: holmes says "if so, it would tell against Simpson" — “If so, it would tell against this man Simpson.”
+- ¶56 f.simpson_suspected_poison: simpson condition "under suspicion of having poisoned the stable-boy" — “He lies under suspicion of having poisoned the stable-boy”
+- ¶56 f.gregory_jury: gregory believes "there is enough to go before a jury" — “I really think we have enough to go before a jury.”
+- ¶57 f.holmes_shakes_head: holmes action "shakes his head" — “Holmes shook his head.”
+- ¶57 f.holmes_why_out: holmes action "asks why Simpson should take the horse out of the stable, when he could injure it there" — “Why should he take the horse out of the stable? If he wished to injure it why could he not do it there?”
+- ¶57 f.holmes_asks_key: holmes action "asks whether a duplicate key has been found in Simpson's possession" — “Has a duplicate key been found in his possession?”
+- ¶57 f.holmes_asks_chemist: holmes action "asks what chemist sold Simpson the powdered opium" — “What chemist sold him the powdered opium?”
+- ¶57 f.holmes_asks_hide: holmes action "asks where Simpson, a stranger to the district, could hide such a horse" — “where could he, a stranger to the district, hide a horse, and such a horse as this?”
+- ¶57 f.holmes_asks_paper: holmes action "asks Simpson's own explanation of the paper he wished the maid to give the stable-boy" — “What is his own explanation as to the paper which he wished the maid to give to the stable-boy?”
+- ¶58 f.purse_owner: simpson_purse owner "simpson" — “One was found in his purse.”
+- ¶58 f.gregory_not_formidable: gregory says "Holmes's other difficulties are not so formidable as they seem" — “your other difficulties are not so formidable as they seem”
+- ¶60 f.simpson_says_lost: simpson says "he had lost the cravat" — “declares that he had lost it”
+- ¶60 f.gregory_new_element: gregory says "a new element has been introduced which may account for Simpson leading the horse from the stable" — “a new element has been introduced into the case which may account for his leading the horse from the stable”
+- ¶61 f.holmes_pricks_ears: holmes action "pricks up his ears" — “Holmes pricked up his ears.”
+- ¶62 f.traces_found: police action "find traces of a gypsy encampment" — “We have found traces which show that a party of gypsies encamped on Monday night”
+- ¶62 f.camp_position: gypsy_camp position "within a mile of the spot where the murder took place" — “within a mile of the spot where the murder took place”
+- ¶62 f.gypsy_party_member: gypsy_party member_of "gypsies" — “a party of gypsies”
+- ¶62 f.cal_tue_gypsies: calendar weekday "Tuesday" — “On Tuesday they were gone.”
+- ¶62 f.gregory_gypsy_theory: gregory says "if Simpson had an understanding with the gypsies, he may have been leading the horse to them when overtaken, and they may have him now" — “presuming that there was some understanding between Simpson and these gypsies, might he not have been leading the horse to them when he was overtaken, and may they not have him now?”
+- ¶64 f.stables_no_horse: silver_blaze location "tavistock_stables" — “I have also examined every stable and out-house in Tavistock, and for a radius of ten miles.”
+- ¶66 f.gregory_not_neglect: gregory says "Mapleton is a factor that must certainly not be neglected" — “that is a factor which we must certainly not neglect”
+- ¶66 f.brown_trainer: silas_brown role "trainer at Mapleton" — “Silas Brown, the trainer”
+- ¶67 f.holmes_asks_link: holmes action "asks whether anything connects Simpson with the interests of the Mapleton stables" — “And nothing to connect this man Simpson with the interests of the Mapleton stables?”
+- ¶69 f.talk_ceases: gregory action "stops talking: the conversation ceases" — “the conversation ceased”
+- ¶69 f.driver_pulls_up: driver action "pulls up at a neat little red-brick villa with overhanging eaves" — “our driver pulled up at a neat little red-brick villa with overhanging eaves”
+- ¶69 f.villa_by_road: straker_villa position "by the road" — “which stood by the road”
+- ¶69 f.steeples_visible: tavistock_steeples position "on the sky-line, visible from the villa" — “broken only by the steeples of Tavistock”
+- ¶69 f.gregory_springs_out: gregory location "front_door_villa" — “We all sprang out with the exception of Holmes”
+- ¶69 f.ross_springs_out: ross location "front_door_villa" — “We all sprang out with the exception of Holmes”
+- ¶69 f.holmes_absorbed: holmes condition "entirely absorbed in his own thoughts" — “entirely absorbed in his own thoughts”
+- ¶69 f.holmes_starts_out: holmes action "rouses himself with a violent start and steps out of the carriage" — “he roused himself with a violent start and stepped out of the carriage”
+- ¶69 f.holmes_out_villa: holmes location "front_door_villa" — “stepped out of the carriage”
+- ¶70 f.watson_sees_gleam: watson observes ["f.holmes_gleam"] — “There was a gleam in his eyes and a suppressed excitement in his manner which convinced me”
+- ¶70 f.watson_no_idea_clue: watson knows "where Holmes found the clue" — “though I could not imagine where he had found it”
+- ¶73 f.straker_upstairs: straker location "upstairs_room" — “he lies upstairs”
+- ¶78 f.holmes_glad_see: holmes intends "to see the things from Straker's pockets" — “I should be very glad.”
+- ¶78 f.gregory_sitting_room: gregory location "sitting_room" — “We all filed into the front room and sat round the central table”
+- ¶78 f.ross_sitting_room: ross location "sitting_room" — “We all filed into the front room and sat round the central table”
+- ¶78 f.box_location: tin_box location "sitting_room" — “the Inspector unlocked a square tin box”
+- ¶78 f.things_on_table: tin_box contents "vestas, a candle-end, a briar pipe, a pouch of Cavendish, a silver watch and chain, five sovereigns, a pencil-case, a few papers and an ivory-handled knife" — “There was a box of vestas, two inches of tallow candle, an A.D.P. briar-root pipe”
+- ¶78 f.straker_had_candle: straker carrying "tallow_candle" — “two inches of tallow candle”
+- ¶78 f.straker_had_pipe: straker carrying "straker_pipe" — “an A.D.P. briar-root pipe”
+- ¶78 f.straker_had_pouch: straker carrying "tobacco_pouch" — “a pouch of seal-skin with half an ounce of long-cut Cavendish”
+- ¶78 f.straker_had_watch: straker carrying "straker_watch" — “a silver watch with a gold chain”
+- ¶78 f.straker_had_sovereigns: straker carrying "sovereigns" — “five sovereigns in gold”
+- ¶78 f.straker_had_pencil: straker carrying "pencil_case" — “an aluminium pencil-case”
+- ¶78 f.straker_had_papers: straker carrying "pocket_papers" — “a few papers”
+- ¶78 f.knife_marked: straker_knife condition "marked Weiss & Co., London" — “marked Weiss & Co., London”
+- ¶78 f.knife_maker: weiss_co action "made the knife" — “marked Weiss & Co., London”
+- ¶79 f.holmes_examines_knife: holmes action "lifts the knife and examines it minutely" — “lifting it up and examining it minutely”
+- ¶79 f.holmes_singular_knife: holmes says "this is a very singular knife" — “This is a very singular knife”
+- ¶79 f.knife_stained: straker_knife condition "blood-stained" — “as I see blood-stains upon it”
+- ¶79 f.holmes_asks_watson_knife: holmes action "asks Watson whether the knife is in his line" — “Watson, this knife is surely in your line?”
+- ¶81 f.holmes_strange_carry: holmes says "it is a strange thing for a man to carry on a rough expedition, especially as it would not shut in his pocket" — “A strange thing for a man to carry with him upon a rough expedition, especially as it would not shut in his pocket.”
+- ¶82 f.cork_guarded: cork_disk action "guarded the tip of the knife" — “The tip was guarded by a disk of cork”
+- ¶82 f.police_find_cork: police action "find the disk of cork beside the body" — “which we found beside his body”
+- ¶82 f.straker_carries_knife_leaving: straker carrying "straker_knife" — “he had picked it up as he left the room”
+- ¶82 f.straker_in_bedroom: straker location "straker_bedroom" — “as he left the room”
+- ¶83 f.holmes_asks_papers: holmes action "asks about the papers" — “How about these papers?”
+- ¶84 f.ross_wrote_letter: ross action "writes Straker a letter of instructions" — “a letter of instructions from Colonel Ross”
+- ¶84 f.papers_milliner: pocket_papers contents "milliner_account" — “This other is a milliner’s account”
+- ¶84 f.account_sum: milliner_account contents "a milliner's bill for thirty-seven pounds fifteen" — “a milliner’s account for thirty-seven pounds fifteen”
+- ¶84 f.account_to_derbyshire: milliner_account owner "derbyshire" — “to William Derbyshire”
+- ¶84 f.derbyshire_name: derbyshire name "William Derbyshire" — “William Derbyshire”
+- ¶84 f.straker_had_account: straker carrying "milliner_account" — “This other is a milliner’s account”
+- ¶84 f.mrs_tells_gregory_derbyshire: mrs_straker tells "acct.mrs_straker_inspector" — “Mrs. Straker tells us that Derbyshire was a friend of her husband’s”
+- ¶82 f.gregory_tells_house: gregory tells ["acct.gregory_house","acct.mrs_straker_inspector"] — “The tip was guarded by a disk of cork which we found beside his body”
+- ¶85 f.holmes_glances_account: holmes action "glances down the milliner's account" — “glancing down the account”
+- ¶85 f.holmes_22_guineas: holmes says "twenty-two guineas is rather heavy for a single costume" — “Twenty-two guineas is rather heavy for a single costume.”
+- ¶85 f.holmes_intends_scene: holmes intends "to go down to the scene of the crime" — “we may now go down to the scene of the crime”
+- ¶86 f.holmes_passage: holmes location "passage" — “As we emerged from the sitting-room”
+- ¶86 f.gregory_passage: gregory location "passage" — “As we emerged from the sitting-room”
+- ¶86 f.watson_sees_mrs: watson observes ["f.mrs_hand_sleeve","f.mrs_haggard"] — “Her face was haggard and thin and eager”
+- ¶88 f.mrs_straker_named: mrs_straker name "Mrs. Straker" — “No, Mrs. Straker.”
+- ¶91 f.holmes_sworn: holmes says "he could have sworn to it" — “Dear me! Why, I could have sworn to it.”
+- ¶93 f.holmes_apologises: holmes action "apologises and follows the Inspector outside" — “with an apology he followed the Inspector outside”
+- ¶93 f.party_walk: watson action "walks a short way across the moor with the others to the hollow where the body was found" — “A short walk across the moor took us to the hollow in which the body had been found”
+- ¶93 f.gregory_hollow: gregory location "hollow" — “A short walk across the moor took us to the hollow”
+- ¶110 f.ross_hollow: ross location "hollow" — “Colonel Ross, who had shown some signs of impatience at my companion’s quiet and systematic method of work”
+- ¶93 f.watson_sees_bush: watson observes ["f.bush_at_brink"] — “At the brink of it was the furze-bush”
+- ¶95 f.gregory_no_wind: gregory says "there was no wind, but very heavy rain" — “None; but very heavy rain.”
+- ¶95 f.heavy_rain: weather condition "very heavy rain" — “but very heavy rain”
+- ¶97 f.coat_laid: ? action "lays the overcoat across the furze-bush" — “it was laid across the bush”
+- ¶97 f.coat_laid_loc: straker_coat location "furze_bush" — “it was laid across the bush”
+- ¶98 f.holmes_interest: holmes says "Gregory fills him with interest" — “You fill me with interest”
+- ¶99 f.gregory_matting: gregory says "a piece of matting has been laid at the side and they have all stood upon it" — “A piece of matting has been laid here at the side, and we have all stood upon that.”
+- ¶99 f.police_stood_matting: police action "all stand upon the matting at the side of the hollow" — “we have all stood upon that”
+- ¶100 f.holmes_excellent: holmes says "excellent" — “Excellent.”
+- ¶101 f.gregory_bag_says: gregory says "in his bag he has one of Straker's boots, one of Fitzroy Simpson's shoes and a cast horseshoe of Silver Blaze" — “In this bag I have one of the boots which Straker wore”
+- ¶101 f.gregory_has_bag: gregory carrying "gregory_bag" — “In this bag I have”
+- ¶101 f.bag_shoe: gregory_bag contents "simpson_shoe" — “one of Fitzroy Simpson’s shoes”
+- ¶101 f.bag_horseshoe: gregory_bag contents "horseshoe" — “a cast horseshoe of Silver Blaze”
+- ¶101 f.boot_owner: straker_boot owner "straker" — “one of the boots which Straker wore”
+- ¶101 f.straker_wore_boots: straker wearing "straker_boot" — “one of the boots which Straker wore”
+- ¶101 f.shoe_owner: simpson_shoe owner "simpson" — “one of Fitzroy Simpson’s shoes”
+- ¶101 f.horseshoe_owner: horseshoe owner "silver_blaze" — “a cast horseshoe of Silver Blaze”
+- ¶101 f.shoe_cast: silver_blaze action "casts a horseshoe" — “a cast horseshoe of Silver Blaze”
+- ¶102 f.holmes_surpass: holmes says "the Inspector surpasses himself" — “My dear Inspector, you surpass yourself!”
+- ¶102 f.holmes_takes_bag: holmes action "takes the bag from the Inspector" — “Holmes took the bag”
+- ¶102 f.holmes_descends: holmes location "hollow" — “descending into the hollow”
+- ¶102 f.holmes_moves_matting: holmes action "pushes the matting into a more central position" — “he pushed the matting into a more central position”
+- ¶102 f.matting_central: matting location "hollow" — “he pushed the matting into a more central position”
+- ¶102 f.holmes_finds_vesta: holmes action "finds a half-burned wax vesta in the mud" — “It was a wax vesta half burned”
+- ¶102 f.vesta_muddy: wax_vesta condition "so coated with mud it looked at first like a little chip of wood" — “so coated with mud that it looked at first like a little chip of wood”
+- ¶102 f.watson_sees_vesta: watson observes ["f.holmes_finds_vesta","f.vesta_half_burned","f.vesta_muddy"] — “it looked at first like a little chip of wood”
+- ¶103 f.gregory_overlooked: gregory says "he cannot think how he came to overlook it" — “I cannot think how I came to overlook it”
+- ¶103 f.gregory_missed_vesta: gregory observes ["f.vesta_in_mud"] — “I cannot think how I came to overlook it”
+- ¶104 f.vesta_buried: wax_vesta condition "invisible, buried in the mud" — “It was invisible, buried in the mud.”
+- ¶104 f.holmes_looking: holmes intends "to look for a burnt vesta in the hollow" — “I only saw it because I was looking for it.”
+- ¶105 f.gregory_asks_expected: gregory action "asks whether Holmes expected to find it" — “What! You expected to find it?”
+- ¶107 f.holmes_rim: holmes location "hollow" — “he clambered up to the rim of the hollow”
+- ¶108 f.gregory_no_tracks: gregory says "there are no more tracks; he examined the ground very carefully for a hundred yards in each direction" — “I am afraid that there are no more tracks”
+- ¶109 f.holmes_rises: holmes action "rises" — “said Holmes, rising”
+- ¶109 f.holmes_impertinence: holmes says "he would not have the impertinence to search again after what the Inspector says" — “I should not have the impertinence to do it again after what you say.”
+- ¶109 f.clock_before_dark: clock hour "evening, before dark" — “before it grows dark”
+- ¶109 f.holmes_horseshoe_luck: holmes says "he will put the horseshoe into his pocket for luck" — “I think that I shall put this horseshoe into my pocket for luck”
+- ¶110 f.ross_glances_watch: ross action "glances at his watch" — “glanced at his watch”
+- ¶110 f.ross_has_watch: ross carrying "ross_watch" — “glanced at his watch”
+- ¶110 f.ross_asks_inspector: ross says "he wishes the Inspector would come back with him, for advice on several points, especially whether they owe it to the public to remove the horse's name from the entries for the Cup" — “I wish you would come back with me, Inspector”
+- ¶110 f.horse_entered: cup_entries contents "silver_blaze" — “to remove our horse’s name from the entries for the Cup”
+- ¶112 f.ross_bows: ross action "bows" — “The Colonel bowed.”
+- ¶112 f.ross_glad_opinion: ross says "he is very glad to have had Holmes's opinion" — “I am very glad to have had your opinion, sir”
+- ¶112 f.ross_intends_house: ross intends "to go back to Straker's house with the Inspector" — “You will find us at poor Straker’s house”
+- ¶112 f.ross_intends_drive: ross intends "to drive together into Tavistock after Holmes's walk" — “we can drive together into Tavistock”
+- ¶113 f.plain_gold: dartmoor condition "the long sloping plain tinged with gold and ruddy browns in the evening light" — “the long, sloping plain in front of us was tinged with gold”
+- ¶114 f.holmes_leave_murder: holmes says "they may leave the question of who killed Straker for the moment and confine themselves to finding out what has become of the horse" — “We may leave the question of who killed John Straker for the instant, and confine ourselves to finding out what has become of the horse.”
+- ¶114 f.holmes_intends_horse: holmes intends "to find out what has become of the horse" — “confine ourselves to finding out what has become of the horse”
+- ¶114 f.holmes_supposing_broke: holmes says "supposing the horse broke away during or after the tragedy, the question is where he could have gone" — “supposing that he broke away during or after the tragedy, where could he have gone to?”
+- ¶114 f.holmes_not_wild: holmes says "the horse would not run wild on the moor; he would surely have been seen by now" — “Why should he run wild upon the moor? He would surely have been seen by now.”
+- ¶114 f.holmes_not_gypsies: holmes says "gypsies would not kidnap him: they clear out at any trouble, could not sell such a horse, and would run a great risk for nothing" — “They would run a great risk and gain nothing by taking him.”
+- ¶114 f.gypsies_clear_out: gypsies rule "they always clear out when they hear of trouble, not wishing to be pestered by the police" — “These people always clear out when they hear of trouble, for they do not wish to be pestered by the police.”
+- ¶114 f.gypsies_cannot_sell: gypsies condition "could not hope to sell such a horse" — “They could not hope to sell such a horse.”
+- ¶115 f.watson_asks_where: watson action "asks where the horse is, then" — “Where is he, then?”
+- ¶116 f.holmes_working_hyp: holmes intends "to take the horse being at Mapleton as a working hypothesis and see what it leads to" — “Let us take that as a working hypothesis and see what it leads us to.”
+- ¶116 f.long_hollow_position: long_hollow position "over yonder, where the moor falls away towards Mapleton" — “But it falls away towards Mapleton, and you can see from here that there is a long hollow over yonder”
+- ¶116 f.holmes_look_tracks: holmes says "if the supposition is right the horse must have crossed the long hollow, and that is where to look for his tracks" — “If our supposition is correct, then the horse must have crossed that, and there is the point where we should look for his tracks.”
+- ¶116 f.holmes_intends_tracks: holmes intends "to look for the horse's tracks in the long hollow" — “there is the point where we should look for his tracks”
+- ¶117 f.walk_briskly: watson action "walks briskly with Holmes to the long hollow" — “We had been walking briskly during this conversation”
+- ¶117 f.holmes_asks_split: holmes action "asks Watson to walk down the bank to the right while he takes the left" — “At Holmes’ request I walked down the bank to the right, and he to the left”
+- ¶117 f.holmes_shouts: holmes action "gives a shout and waves his hand to Watson" — “I heard him give a shout, and saw him waving his hand to me”
+- ¶117 f.shoe_fits_track: horseshoe condition "exactly fits the impression in the long hollow" — “the shoe which he took from his pocket exactly fitted the impression”
+- ¶117 f.watson_sees_track: watson observes ["f.horse_track_outlined","f.shoe_fits_track"] — “The track of a horse was plainly outlined in the soft earth”
+- ¶118 f.holmes_proceed: holmes intends "to proceed along the track" — “Let us proceed.”
+- ¶119 f.tracks_again: watson observes "the horse's tracks again where the ground slopes" — “Again the ground sloped, and again we came on the tracks.”
+- ¶119 f.watson_near_mapleton: watson location "dartmoor" — “quite close to Mapleton”
+- ¶119 f.holmes_near_mapleton: holmes location "dartmoor" — “quite close to Mapleton”
+- ¶119 f.holmes_sees_first: holmes observes ["f.man_track_beside"] — “It was Holmes who saw them first”
+- ¶119 f.holmes_triumph: holmes condition "stands pointing with a look of triumph" — “he stood pointing with a look of triumph upon his face”
+- ¶119 f.watson_sees_man_track: watson observes ["f.man_track_beside"] — “A man’s track was visible beside the horse’s.”
+- ¶121 f.holmes_quite_so: holmes says "quite so: the horse was alone before" — “Quite so. It was alone before.”
+- ¶121 f.holmes_hullo_track: holmes says "Hullo, what is this?" — “Hullo, what is this?”
+- ¶122 f.holmes_whistles: holmes action "whistles" — “Holmes whistled”
+- ¶122 f.follow_double: watson action "follows the double track with Holmes" — “we both followed along after it”
+- ¶122 f.holmes_eyes_trail: holmes action "keeps his eyes on the trail" — “His eyes were on the trail”
+- ¶122 f.man_comes_back: the_man_near_mapleton action "comes back with the horse in the opposite direction" — “the same tracks coming back again in the opposite direction”
+- ¶122 f.watson_surprised: watson condition "surprised" — “saw to my surprise”
+- ¶123 f.watson_points_out: watson action "points out the return track to Holmes" — “when I pointed it out”
+- ¶123 f.holmes_follow_return: holmes intends "to follow the return track" — “Let us follow the return track.”
+- ¶124 f.not_far: watson action "follows the return track a short way with Holmes" — “We had not to go far.”
+- ¶124 f.dawson_runs_out: dawson action "runs out from the gates" — “a groom ran out from them”
+- ¶124 f.dawson_role: dawson role "a groom at the Mapleton stables" — “a groom ran out from them”
+- ¶126 f.holmes_finger_pocket: holmes position "with his finger and thumb in his waistcoat pocket" — “with his finger and thumb in his waistcoat pocket”
+- ¶127 f.dawson_here_he_is: dawson says "here is Brown to answer Holmes's questions himself" — “But here he is, sir, to answer your questions for himself.”
+- ¶127 f.holmes_offers_coin: holmes action "offers the groom a half-crown" — “it is as much as my place is worth to let him see me touch your money”
+- ¶128 f.holmes_replaces_coin: holmes action "puts back the half-crown he had drawn from his pocket" — “As Sherlock Holmes replaced the half-crown which he had drawn from his pocket”
+- ¶128 f.brown_strides_out: silas_brown action "strides out from the gate" — “a fierce-looking elderly man strode out from the gate”
+- ¶128 f.watson_sees_brown: watson observes ["f.brown_strides_out","f.brown_looks","f.brown_crop"] — “a fierce-looking elderly man strode out from the gate”
+- ¶129 f.brown_scolds_dawson: silas_brown says "no gossiping; Dawson is to go about his business" — “No gossiping! Go about your business!”
+- ¶129 f.brown_asks_want: silas_brown action "asks what the devil Holmes wants there" — “And you, what the devil do you want here?”
+- ¶130 f.holmes_ten_minutes: holmes says "he wants ten minutes' talk with Brown" — “Ten minutes’ talk with you, my good sir”
+- ¶131 f.brown_no_time: silas_brown says "he has no time for every gadabout; they want no strangers there" — “I’ve no time to talk to every gadabout. We want no strangers here.”
+- ¶132 f.watson_sees_start: watson observes ["f.holmes_whispers","f.brown_starts"] — “He started violently and flushed to the temples.”
+- ¶134 f.holmes_public_or_parlour: holmes action "asks whether they shall argue it in public or talk it over in Brown's parlour" — “Shall we argue about it here in public or talk it over in your parlour?”
+- ¶136 f.holmes_smiles: holmes action "smiles" — “Holmes smiled.”
+- ¶136 f.holmes_few_minutes: holmes says "he will not keep Watson more than a few minutes" — “I shall not keep you more than a few minutes, Watson”
+- ¶136 f.holmes_disposal: holmes says "he is quite at Brown's disposal" — “Now, Mr. Brown, I am quite at your disposal.”
+- ¶137 f.twenty_minutes: holmes time "twenty minutes with Brown in the parlour" — “It was twenty minutes”
+- ¶137 f.holmes_reappears: holmes location "mapleton_paving" — “before Holmes and the trainer reappeared”
+- ¶137 f.brown_reappears_loc: silas_brown location "mapleton_paving" — “before Holmes and the trainer reappeared”
+- ¶137 f.brown_changed: silas_brown condition "greatly changed in that short time" — “Never have I seen such a change as had been brought about in Silas Brown in that short time.”
+- ¶137 f.brown_sweat: silas_brown condition "beads of perspiration upon his brow" — “beads of perspiration shone upon his brow”
+- ¶137 f.brown_shaking: silas_brown condition "hands shaking until the hunting-crop wags like a branch in the wind" — “his hands shook until the hunting-crop wagged like a branch in the wind”
+- ¶137 f.brown_manner_gone: silas_brown condition "his bullying, overbearing manner all gone" — “His bullying, overbearing manner was all gone too”
+- ¶137 f.brown_cringes: silas_brown position "cringing along at Holmes's side like a dog with its master" — “he cringed along at my companion’s side like a dog with its master”
+- ¶137 f.watson_sees_change: watson observes ["f.brown_changed","f.brown_ashy","f.brown_sweat","f.brown_shaking","f.brown_manner_gone","f.brown_cringes"] — “Never have I seen such a change”
+- ¶138 f.holmes_gave_instructions: holmes action "gives Silas Brown instructions" — “Your instructions will be done.”
+- ¶139 f.holmes_no_mistake: holmes says "there must be no mistake" — “There must be no mistake”
+- ¶139 f.holmes_menace: holmes condition "menace in his eyes" — “the menace in his eyes”
+- ¶139 f.brown_winces: silas_brown action "winces as he reads the menace in Holmes's eyes" — “The other winced as he read the menace in his eyes.”
+- ¶139 f.brown_reads_menace: silas_brown observes ["f.holmes_menace"] — “as he read the menace in his eyes”
+- ¶140 f.brown_asks_change: silas_brown action "asks whether he should change it first or not" — “Should I change it first or not?”
+- ¶141 f.holmes_laughs: holmes action "thinks a little and then bursts out laughing" — “Holmes thought a little and then burst out laughing.”
+- ¶141 f.holmes_intends_write: holmes intends "to write to Brown about whether to change it" — “I shall write to you about it.”
+- ¶141 f.holmes_no_tricks: holmes says "no tricks, or else (a threat left unfinished)" — “No tricks, now, or—”
+- ¶143 f.holmes_hear_tomorrow: holmes says "Brown shall hear from him to-morrow" — “you shall hear from me to-morrow”
+- ¶143 f.holmes_intends_tomorrow: holmes intends "to send word to Brown to-morrow" — “you shall hear from me to-morrow”
+- ¶143 f.brown_holds_hand: silas_brown action "holds out a trembling hand to Holmes" — “the trembling hand which the other held out to him”
+- ¶143 f.holmes_turns_heel: holmes action "turns on his heel, disregarding Brown's hand" — “He turned upon his heel, disregarding the trembling hand”
+- ¶143 f.holmes_sets_off: holmes action "sets off with Watson for King's Pyland" — “we set off for King’s Pyland”
+- ¶144 f.holmes_trudge: holmes location "dartmoor" — “as we trudged along together”
+- ¶146 f.brown_blusters: silas_brown action "tries to bluster out of it" — “He tried to bluster out of it”
+- ¶146 f.holmes_describes_brown: holmes action "describes to Brown exactly what his actions had been upon that morning" — “I described to him so exactly what his actions had been upon that morning”
+- ¶146 f.brown_thinks_watched: silas_brown believes "Holmes was watching him that morning" — “he is convinced that I was watching him”
+- ¶146 f.brown_boots_owner: brown_boots owner "silas_brown" — “his own boots exactly corresponded to them”
+- ¶146 f.brown_boots_match: brown_boots condition "exactly correspond to the square-toed impressions beside the horse's track" — “his own boots exactly corresponded to them”
+- ¶146 f.holmes_no_subordinate: holmes believes "no subordinate would have dared to do such a thing" — “no subordinate would have dared to do such a thing”
+- ¶146 f.brown_lives_mapleton: silas_brown lives_at "mapleton" — “according to his custom he was the first down”
+- ¶146 f.horse_wandering: silver_blaze location "dartmoor" — “he perceived a strange horse wandering over the moor”
+- ¶146 f.brown_sees_horse: silas_brown observes ["f.horse_wandering"] — “he perceived a strange horse wandering over the moor”
+- ¶146 f.brown_leads_toward: silas_brown action "leads the horse towards King's Pyland" — “his first impulse had been to lead him back to King’s Pyland”
+- ¶146 f.brown_conceals: silas_brown action "leads the horse back and conceals it at Mapleton" — “how he had led it back and concealed it at Mapleton”
+- ¶146 f.horse_at_mapleton: silver_blaze location "mapleton" — “concealed it at Mapleton”
+- ¶146 f.brown_save_skin: silas_brown intends "only to save his own skin" — “thought only of saving his own skin”
+- ¶146 f.holmes_tells_watson_brown: holmes tells "acct.holmes_brown" — “I described to him how, when according to his custom he was the first down”
+- ¶152 f.holmes_say_nothing: holmes action "asks Watson to say nothing to the Colonel about the horse" — “Say nothing to him about the horse.”
+- ¶155 f.watson_asks_devote: watson action "asks whether Holmes will devote himself to the murder" — “And you will devote yourself to that?”
+- ¶156 f.holmes_says_night_train: holmes says "on the contrary, they both go back to London by the night train" — “On the contrary, we both go back to London by the night train.”
+- ¶157 f.watson_incomprehensible: watson believes "that Holmes should give up an investigation begun so brilliantly, after only a few hours in Devonshire, is quite incomprehensible" — “that he should give up an investigation which he had begun so brilliantly was quite incomprehensible to me”
+- ¶157 f.holmes_silent_walk: holmes action "will say not a word more until they are back at the trainer's house" — “Not a word more could I draw from him until we were back at the trainer’s house.”
+- ¶159 f.gregory_opens_eyes: gregory action "opens his eyes in surprise" — “The Inspector opened his eyes”
+- ¶161 f.holmes_shrugs: holmes action "shrugs his shoulders" — “Holmes shrugged his shoulders.”
+- ¶161 f.holmes_horse_will_start: holmes says "he has every hope the horse will start on Tuesday, and begs the Colonel to have his jockey in readiness" — “I have every hope, however, that your horse will start upon Tuesday, and I beg that you will have your jockey in readiness.”
+- ¶161 f.jockey_role: ross_jockey role "Colonel Ross's jockey" — “have your jockey in readiness”
+- ¶162 f.envelope_owner: photo_envelope owner "gregory" — “The Inspector took one from an envelope”
+- ¶162 f.gregory_hands_photo: gregory action "takes a photograph of Straker from an envelope and hands it to Holmes" — “The Inspector took one from an envelope and handed it to him.”
+- ¶163 f.holmes_anticipate: holmes says "Gregory anticipates all his wants" — “My dear Gregory, you anticipate all my wants.”
+- ¶163 f.holmes_intends_maid: holmes intends "to put a question to the maid" — “I have a question which I should like to put to the maid”
+- ¶164 f.holmes_leaves_room: holmes location "villa_parlour" — “as my friend left the room”
+- ¶163 f.holmes_asks_edith: holmes action "puts a question to the maid" — “I have a question which I should like to put to the maid”
+- ¶166 f.ross_shrug: ross action "shrugs his shoulders" — “said the Colonel, with a shrug of his shoulders”
+- ¶167 f.watson_defend: watson intends "to reply in defence of Holmes" — “I was about to make some reply in defence of my friend”
+- ¶167 f.holmes_reenters: holmes location "villa_parlour" — “when he entered the room again”
+- ¶169 f.watson_steps_in: watson location "landau" — “As we stepped into the carriage”
+- ¶169 f.holmes_steps_in: holmes location "landau" — “As we stepped into the carriage”
+- ¶169 f.ross_steps_in: ross location "landau" — “As we stepped into the carriage”
+- ¶169 f.gregory_steps_in: gregory location "landau" — “As we stepped into the carriage”
+- ¶169 f.landau_at_villa_again: landau location "road" — “As we stepped into the carriage”
+- ¶169 f.lad_at_carriage: sheep_lad location "road" — “one of the stable-lads held the door open for us”
+- ¶169 f.holmes_idea: holmes condition "a sudden idea seems to occur to him" — “A sudden idea seemed to occur to Holmes”
+- ¶170 f.holmes_asks_attends: holmes action "asks who attends to the sheep in the paddock" — “Who attends to them?”
+- ¶172 f.holmes_asks_amiss: holmes action "asks whether he has noticed anything amiss with the sheep of late" — “Have you noticed anything amiss with them of late?”
+- ¶173 f.lame_member: lame_sheep member_of "sheep" — “three of them have gone lame”
+- ¶173 f.lad_tells_holmes: sheep_lad tells "acct.sheep_lad" — “three of them have gone lame, sir”
+- ¶173 f.lad_tells_watson: sheep_lad tells "acct.sheep_lad" — “three of them have gone lame, sir”
+- ¶174 f.watson_sees_pleased: watson observes ["f.holmes_pleased"] — “I could see that Holmes was extremely pleased”
+- ¶175 f.holmes_pinches: holmes action "pinches Watson's arm" — “pinching my arm”
+- ¶175 f.holmes_recommends_sheep: holmes says "he recommends to Gregory's attention this singular epidemic among the sheep" — “Gregory, let me recommend to your attention this singular epidemic among the sheep.”
+- ¶175 f.holmes_drive_on: holmes says "drive on, coachman" — “Drive on, coachman!”
+- ¶175 f.driver_drives_on: driver action "drives on towards Tavistock" — “Drive on, coachman!”
+- ¶175 f.landau_drives: landau location "dartmoor" — “Drive on, coachman!”
+- ¶176 f.watson_sees_faces: watson observes ["f.gregory_aroused"] — “I saw by the Inspector’s face”
+- ¶177 f.gregory_asks_important: gregory action "asks whether Holmes considers the sheep important" — “You consider that to be important?”
+- ¶178 f.holmes_exceedingly: holmes says "the lame sheep are exceedingly important" — “Exceedingly so.”
+- ¶179 f.gregory_asks_point: gregory action "asks whether there is any point to which Holmes would draw his attention" — “Is there any point to which you would wish to draw my attention?”
+- ¶180 f.holmes_curious_dog: holmes says "he draws attention to the curious incident of the dog in the night-time" — “To the curious incident of the dog in the night-time.”
+- ¶183 f.holmes_win_train: holmes location "winchester_train" — “Four days later Holmes and I were again in the train, bound for Winchester”
+- ¶183 f.train_bound_winchester: winchester_train action "travels to Winchester" — “bound for Winchester”
+- ¶183 f.holmes_intends_race: holmes intends "to see the race for the Wessex Cup" — “bound for Winchester to see the race for the Wessex Cup”
+- ¶183 f.watson_intends_race: watson intends "to see the race for the Wessex Cup" — “bound for Winchester to see the race for the Wessex Cup”
+- ¶183 f.ross_meets_station: ross action "meets Holmes and Watson by appointment outside the station" — “Colonel Ross met us by appointment outside the station”
+- ¶183 f.watson_win_station: watson location "winchester_station" — “met us by appointment outside the station”
+- ¶183 f.holmes_win_station: holmes location "winchester_station" — “met us by appointment outside the station”
+- ¶183 f.watson_drag: watson location "ross_drag" — “we drove in his drag to the course beyond the town”
+- ¶183 f.holmes_drag: holmes location "ross_drag" — “we drove in his drag to the course beyond the town”
+- ¶183 f.ross_drag_loc: ross location "ross_drag" — “we drove in his drag to the course beyond the town”
+- ¶183 f.course_position: course position "beyond the town" — “the course beyond the town”
+- ¶183 f.watson_sees_ross_cold: watson observes ["f.ross_grave_cold"] — “His face was grave, and his manner was cold in the extreme.”
+- ¶186 f.ross_very_angry: ross condition "very angry" — “The Colonel was very angry.”
+- ¶186 f.ross_child_know: ross says "a child would know Silver Blaze, with his white forehead and mottled off-foreleg" — “A child would know Silver Blaze, with his white forehead and his mottled off-foreleg.”
+- ¶187 f.holmes_asks_betting: holmes action "asks how the betting is" — “How is the betting?”
+- ¶188 f.ross_betting_curious: ross says "the betting is the curious part: fifteen to one yesterday, the price shortening until hardly three to one now" — “Well, that is the curious part of it.”
+- ¶190 f.enclosure_near_stand: enclosure position "near the grand stand" — “the enclosure near the grand stand”
+- ¶190 f.card_to_watson: race_card tells "acct.card" — “I glanced at the card to see the entries. It ran:—”
+- ¶191 f.ross_colours_owner: ross_colours owner "ross" — “Colonel Ross’s Silver Blaze (black cap, red jacket)”
+- ¶191 f.negro_member: the_negro member_of "six_horses" — “Mr. Heath Newton’s The Negro”
+- ¶191 f.pugilist_member: pugilist member_of "six_horses" — “Colonel Wardlaw’s Pugilist”
+- ¶191 f.desborough_member: desborough member_of "six_horses" — “Lord Backwater’s Desborough”
+- ¶191 f.blaze_six_member: silver_blaze member_of "six_horses" — “Colonel Ross’s Silver Blaze”
+- ¶191 f.iris_member: iris member_of "six_horses" — “Duke of Balmoral’s Iris”
+- ¶191 f.rasper_member: rasper member_of "six_horses" — “Lord Singleford’s Rasper”
+- ¶192 f.ross_hopes_word: ross believes "puts all his hopes on Holmes's word that the horse will start" — “put all hopes on your word”
+- ¶192 f.ross_asks_favourite: ross action "asks in surprise whether Silver Blaze is favourite" — “Why, what is that? Silver Blaze favourite?”
+- ¶193 f.desborough_odds_race: desborough condition "five to fifteen against in the betting" — “Five to fifteen against Desborough!”
+- ¶194 f.numbers_up: six_horses condition "numbers up: all six running" — “They are all six there.”
+- ¶195 f.ross_agitation: ross condition "in great agitation" — “cried the Colonel in great agitation”
+- ¶197 f.bay_passes_loc: the_bay_horse location "enclosure" — “cantered past us”
+- ¶197 f.bay_powerful: the_bay_horse condition "a powerful bay" — “a powerful bay horse”
+- ¶197 f.watson_sees_bay: watson observes ["f.bay_sweeps_out","f.bay_passes_loc","f.bay_powerful","f.bay_colours"] — “As I spoke a powerful bay horse swept out”
+- ¶198 f.ross_asks_done: ross action "asks what Holmes has done" — “What is this that you have done, Mr. Holmes?”
+- ¶199 f.holmes_see_gets_on: holmes says "let us see how he gets on" — “Well, well, let us see how he gets on”
+- ¶199 f.holmes_gazes_glass: holmes action "gazes through Watson's field-glass for a few minutes" — “For a few minutes he gazed through my field-glass.”
+- ¶199 f.race_start: six_horses action "start well and come round the curve" — “There they are, coming round the curve!”
+- ¶200 f.view_from_drag: watson observes ["f.horses_close","f.mapleton_front","f.desborough_bolt","f.bay_wins","f.desborough_second_place","f.iris_third"] — “From our drag we had a superb view as they came up the straight.”
+- ¶200 f.horses_close: six_horses condition "so close together that a carpet could have covered them" — “The six horses were so close together that a carpet could have covered them”
+- ¶200 f.mapleton_front: desborough position "to the front half way up the straight, in the yellow of the Mapleton stable" — “half way up the yellow of the Mapleton stable showed to the front”
+- ¶200 f.desborough_second_place: desborough position "second, six lengths behind the winner" — “a good six lengths before its rival”
+- ¶201 f.ross_hand_eyes: ross action "gasps, passing his hand over his eyes" — “gasped the Colonel, passing his hand over his eyes”
+- ¶201 f.ross_no_head_tail: ross knows "what has happened" — “I confess that I can make neither head nor tail of it.”
+- ¶201 f.ross_asks_mystery: ross action "asks whether Holmes has not kept up his mystery long enough" — “Don’t you think that you have kept up your mystery long enough, Mr. Holmes?”
+- ¶202 f.holmes_weighing: holmes location "weighing_enclosure" — “as we made our way into the weighing enclosure”
+- ¶202 f.bay_weighing: the_bay_horse location "weighing_enclosure" — “Here he is,”
+- ¶202 f.holmes_here_he_is: holmes says "here is the horse: wash his face and leg in spirits of wine and he is the same old Silver Blaze" — “You have only to wash his face and his leg in spirits of wine, and you will find that he is the same old Silver Blaze as ever.”
+- ¶203 f.ross_breath: ross says "Holmes takes his breath away" — “You take my breath away!”
+- ¶204 f.holmes_tells_watson_faker: holmes tells "acct.holmes_race" — “I found him in the hands of a faker”
+- ¶204 f.faker_has_horse: the_faker carrying "silver_blaze" — “in the hands of a faker”
+- ¶204 f.holmes_found_horse: holmes action "finds the horse in the hands of a faker" — “I found him in the hands of a faker”
+- ¶204 f.horse_sent_over: silver_blaze action "is sent over to the race as the faker had him" — “just as he was sent over”
+- ¶205 f.ross_asks_murderer: ross says "Holmes would do him a greater service if he could lay hands on the murderer of John Straker" — “You would do me a greater still if you could lay your hands on the murderer of John Straker.”
+- ¶206 f.holmes_done_so: holmes says "he has laid hands on the murderer" — “I have done so,”
+- ¶207 f.ross_watson_stare: ross action "stares at Holmes in amazement, with Watson" — “The Colonel and I stared at him in amazement.”
+- ¶207 f.ross_asks_where_murderer: ross action "asks where the murderer is" — “You have got him! Where is he, then?”
+- ¶208 f.holmes_he_is_here: holmes says "the murderer is here, in his company at the present moment" — “He is here.”
+- ¶209 f.ross_asks_here_where: ross action "asks where" — “Here! Where?”
+- ¶211 f.ross_flushes: ross condition "flushes angrily" — “The Colonel flushed angrily.”
+- ¶211 f.ross_believes_accused: ross believes "Holmes's remark points at himself" — “either a very bad joke or an insult”
+- ¶212 f.holmes_laughs_race: holmes action "laughs" — “Sherlock Holmes laughed.”
+- ¶212 f.holmes_not_ross_crime: holmes says "he has not associated the Colonel with the crime; the real murderer is standing immediately behind him" — “I assure you that I have not associated you with the crime, Colonel,”
+- ¶212 f.bay_behind_ross: the_bay_horse position "standing immediately behind the Colonel" — “standing immediately behind you”
+- ¶212 f.bay_glossy: the_bay_horse condition "a thoroughbred with a glossy neck" — “the glossy neck of the thoroughbred”
+- ¶213 f.watson_cries_horse: watson says "the horse!" — “cried both the Colonel and myself”
+- ¶214 f.holmes_yes_horse: holmes says "yes, the horse killed John Straker" — “Yes, the horse.”
+- ¶214 f.holmes_self_defence: holmes says "it may lessen the horse's guilt that it was done in self-defence" — “it may lessen his guilt if I say that it was done in self-defence”
+- ¶214 f.bell_next_race: course condition "the bell goes for the next race" — “But there goes the bell”
+- ¶215 f.pullman_to_london: pullman_car action "whirls back to London" — “as we whirled back to London”
+- ¶215 f.watson_journey_short: watson believes "the journey was a short one to Colonel Ross as well as to himself" — “I fancy that the journey was a short one to Colonel Ross as well as to myself”
+- ¶215 f.holmes_tells_watson_explain: holmes tells ["acct.holmes_explains","acct.holmes","acct.lesurier"] — “as we listened to our companion’s narrative of the events which had occurred at the Dartmoor training-stables upon the Monday night”
+- ¶215 f.holmes_tells_ross_explain: holmes tells ["acct.holmes_explains","acct.holmes","acct.lesurier"] — “and the means by which he had unravelled them”
+- ¶216 f.holmes_saw_incomplete: holmes knows "the evidence against Simpson was by no means complete" — “I saw that the evidence against him was by no means complete”
+- ¶216 f.holmes_marvelling: holmes condition "distrait, marvelling how he could have overlooked so obvious a clue" — “I was marvelling in my own mind how I could possibly have overlooked so obvious a clue”
+- ¶218 f.holmes_first_link: holmes says "the curried mutton was the first link in his chain of reasoning" — “It was the first link in my chain of reasoning.”
+- ¶218 f.opium_detected: opium rule "mixed with any ordinary dish, the eater would detect it and probably eat no more" — “Were it mixed with any ordinary dish the eater would undoubtedly detect it, and would probably eat no more.”
+- ¶218 f.curry_chosen: ? action "chooses curried mutton for supper that night" — “the only two people who could have chosen curried mutton for supper that night”
+- ¶218 f.dish_set_aside: hunter_supper condition "set aside for the stable-boy" — “after the dish was set aside for the stable-boy”
+- ¶218 f.opium_added: ? action "adds the opium to the stable-boy's dish after it was set aside" — “The opium was added after the dish was set aside for the stable-boy”
+- ¶219 f.holmes_grasped_dog: holmes knows "the significance of the silence of the dog" — “I had grasped the significance of the silence of the dog”
+- ¶219 f.someone_fetched_horse: ? action "comes into the stable and fetches out a horse" — “some one had been in and had fetched out a horse”
+- ¶219 f.holmes_visitor_known: holmes says "the midnight visitor was obviously someone whom the dog knew well" — “Obviously the midnight visitor was some one whom the dog knew well.”
+- ¶220 f.straker_at_stables: straker location "stables" — “John Straker went down to the stables in the dead of the night”
+- ¶220 f.holmes_at_loss: holmes knows "why Straker took out the horse" — “And yet I was at a loss to know why.”
+- ¶220 f.fraud_means: turf_frauds rule "sometimes it is a pulling jockey, sometimes some surer and subtler means" — “Sometimes it is a pulling jockey. Sometimes it is some surer and subtler means.”
+- ¶220 f.holmes_hoped_pockets: holmes believes "the contents of Straker's pockets might help him form a conclusion" — “I hoped that the contents of his pockets might help me to form a conclusion.”
+- ¶221 f.holmes_pockets_did: holmes says "the contents of the pockets did help him" — “And they did so.”
+- ¶221 f.knife_no_weapon: straker_knife condition "a knife no sane man would choose for a weapon, used for the most delicate operations in surgery" — “a knife which certainly no sane man would choose for a weapon”
+- ¶221 f.lameness_rule: horses_topic rule "a horse so treated develops a slight lameness put down to a strain or rheumatism, never to foul play" — “A horse so treated would develop a slight lameness, which would be put down to a strain in exercise or a touch of rheumatism, but never to foul play.”
+- ¶223 f.straker_wished_out: straker intends "to take the horse out on to the moor" — “why John Straker wished to take the horse out on to the moor”
+- ¶223 f.horse_would_rouse: silver_blaze condition "so spirited he would have roused the soundest sleepers at the prick of the knife" — “So spirited a creature would have certainly roused the soundest of sleepers when it felt the prick of the knife.”
+- ¶225 f.holmes_undoubtedly: holmes says "undoubtedly" — “Undoubtedly.”
+- ¶225 f.holmes_method_motive: holmes says "in Straker's belongings he found not only the method of the crime but its motives" — “I was fortunate enough to discover not only the method of the crime, but even its motives”
+- ¶225 f.holmes_concluded_double: holmes believes "Straker was leading a double life and keeping a second establishment" — “I at once concluded that Straker was leading a double life”
+- ¶225 f.second_est_owner: second_establishment owner "straker" — “keeping a second establishment”
+- ¶225 f.lady_expensive: madam_derbyshire condition "a lady with expensive tastes, for whom the bill was" — “The nature of the bill showed that there was a lady in the case, and one who had expensive tastes.”
+- ¶225 f.holmes_servants: holmes says "however liberal the Colonel is, his servants can hardly buy twenty-guinea walking dresses for their ladies" — “one can hardly expect that they can buy twenty-guinea walking dresses for their ladies”
+- ¶225 f.holmes_questions_mrs: holmes action "questions Mrs. Straker about the dress without her knowing it" — “I questioned Mrs. Straker as to the dress without her knowing it”
+- ¶225 f.mrs_unknowing: mrs_straker knows "that Holmes was questioning her about the dress" — “without her knowing it”
+- ¶225 f.holmes_satisfied_dress: holmes knows "the dress had never reached Mrs. Straker" — “having satisfied myself that it had never reached her”
+- ¶225 f.holmes_intends_milliner: holmes intends "to call at the milliner's with Straker's photograph and dispose of the mythical Derbyshire" — “felt that by calling there with Straker’s photograph I could easily dispose of the mythical Derbyshire”
+- ¶226 f.holmes_all_plain: holmes says "from that time on all was plain" — “From that time on all was plain.”
+- ¶226 f.blaze_led_hollow: silver_blaze location "hollow" — “Straker had led out the horse to a hollow”
+- ¶226 f.hollow_hides_light: hollow condition "a light in it would be invisible" — “a hollow where his light would be invisible”
+- ¶226 f.straker_has_cravat: straker carrying "cravat" — “Straker had picked it up”
+- ¶226 f.straker_strikes_light: straker action "strikes a light" — “had struck a light”
+- ¶226 f.horse_frightened: silver_blaze condition "frightened at the sudden glare, feeling by animal instinct that some mischief was intended" — “the creature frightened at the sudden glare, and with the strange instinct of animals feeling that some mischief was intended”
+- ¶226 f.weapon_is_shoe: heavy_weapon identity "steel_shoe" — “the steel shoe had struck Straker full on the forehead”
+- ¶226 f.straker_falls: straker action "falls" — “as he fell”
+- ¶226 f.instrument_is_knife: sharp_instrument identity "straker_knife" — “his knife gashed his thigh”
+- ¶228 f.holmes_final_shot: holmes says "his final shot was a very long one" — “My final shot was, I confess a very long one.”
+- ¶228 f.holmes_surmise_practice: holmes believes "so astute a man as Straker would not undertake the tendon-nicking without a little practice" — “so astute a man as Straker would not undertake this delicate tendon-nicking without a little practice”
+- ¶228 f.holmes_eyes_sheep: holmes action "his eyes fall upon the sheep and he asks the lad a question" — “My eyes fell upon the sheep, and I asked a question”
+- ¶228 f.holmes_surmise_correct: holmes knows "his surmise that Straker practised on the sheep was correct" — “rather to my surprise, showed that my surmise was correct”
+- ¶229 f.holmes_calls_milliner: holmes action "calls upon the milliner with Straker's photograph" — “When I returned to London I called upon the milliner”
+- ¶229 f.lesurier_recognises: lesurier observes ["f.derbyshire_is_straker"] — “who had recognised Straker”
+- ¶229 f.madam_wife: madam_derbyshire role "Derbyshire's wife, as the milliner knew her" — “who had a very dashing wife”
+- ¶231 f.horse_bolted: silver_blaze action "bolts" — “Ah, it bolted”
+- ¶231 f.neighbour_cares: silas_brown action "cares for the horse, as one of the Colonel's neighbours" — “was cared for by one of your neighbours”
+- ¶231 f.holmes_intends_amnesty: holmes intends "that the neighbour who cared for the horse be left unpunished and unnamed" — “We must have an amnesty in that direction”
+- ¶231 f.pullman_clapham: pullman_car location "clapham_junction" — “This is Clapham Junction”
+- ¶231 f.holmes_intends_details: holmes intends "to give the Colonel any other details over a cigar in their rooms" — “I shall be happy to give you any other details which might interest you”
+- ¶13 f.crime_before_tue_evening: straker condition "already dead, and the horse already gone, by Tuesday evening" — “And this is Thursday morning.”
+- ¶58 f.packet_was_note: paper_packet identity "ten_pound_note" — “He says that it was a ten-pound note. One was found in his purse.”
+- ¶97 f.inf_straker_coat_off: straker action "takes off his overcoat himself and lays it across the bush, to have his arms free for some work" — “Yes, it was laid across the bush.”
+- ¶140 f.inf_brown_charge_horse: brown_charge identity "silver_blaze" — “It shall be there.”
+- ¶148 f.inf_blaze_disguised: silver_blaze condition "his white forehead covered or dyed at Mapleton, so that searchers did not know him" — “an old horse-faker like him has many a dodge”
+- ¶175 f.inf_sheep_practice: lame_sheep condition "lamed on purpose by a fine cut, as a rehearsal for laming the horse" — “let me recommend to your attention this singular epidemic among the sheep”
+- ¶175 f.inf_sheep_by_household: straker action "practises the laming cut on the paddock sheep beside his villa" — “this singular epidemic among the sheep”
+- ¶204 f.inf_holmes_kept_disguise: holmes intends "to leave the horse's disguise on so that its return surprises the Colonel" — “took the liberty of running him just as he was sent over”

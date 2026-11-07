@@ -1,0 +1,1 @@
+f.ross_considers_scratch: asserts and modal belong on a says or believes fact

@@ -114,7 +114,7 @@ export class Story {
         }
         // Entities never mentioned by phrase appear with their own quote.
         for (const e of data.entities ?? []) {
-            if (!this.firstAt.has(e.id)) for (const q of e.source ?? []) this.#quoteSpan(e.id, q, 'entity');
+            if (!this.firstAt.has(e.id)) for (const q of [].concat(e.source ?? [])) this.#quoteSpan(e.id, q, 'entity');
         }
         // Claims: every attestation quote is a span; the claim appears at the earliest. An absence the player files
         // (`via: absence` with `files`) is no span: its line is where it can first be filed (`absenceAt`).
@@ -133,7 +133,7 @@ export class Story {
             }
         }
         // Events told directly have their quote; implied ones also appear through claims (see Game).
-        for (const e of data.events ?? []) for (const q of e.source ?? []) this.#quoteSpan(e.id, q, 'event');
+        for (const e of data.events ?? []) for (const q of [].concat(e.source ?? [])) this.#quoteSpan(e.id, q, 'event');
         // A proposition with lines of its own is raised there (what Hunter saw, the gypsies' habit).
         for (const p of data.propositions ?? []) for (const q of p.source ?? []) this.#quoteSpan(p.id, q, 'proposition');
         for (const q of data.questions ?? []) {

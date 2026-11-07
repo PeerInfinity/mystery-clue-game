@@ -1,0 +1,6 @@
+[{"para":231,"kind":"name","text":"Clapham Junction","id":"clapham_junction","i":1,"verdict":"supported","why":"Holmes names Clapham Junction in the last paragraph."},
+{"para":231,"kind":"name","text":"Victoria","id":"victoria","i":2,"verdict":"supported","why":"Holmes says they will be in Victoria in less than ten minutes."},
+{"para":231,"kind":"time","text":"Monday night, when the horse bolted","id":"t.horse_bolts","i":3,"verdict":"supported","why":"The narrative places the events on the Monday night, and Holmes says the horse bolted."},
+{"para":231,"kind":"time","text":"The evening of the race, passing Clapham Junction","id":"t.clapham","i":4,"verdict":"supported","why":"They are on the train back to London that evening and Holmes notes they are at Clapham Junction."},
+{"para":231,"kind":"time","text":"The evening of the race, a cigar in Holmes and Watson's rooms","id":"t.rooms_cigar","i":5,"verdict":"supported","why":"Holmes invites the Colonel to smoke a cigar in 'our rooms', so it is a proposed point later that evening."},
+{"para":231,"kind":"question","text":"Which of the Colonel's neighbours cared for the horse?","id":"q.neighbour","i":6,"verdict":"supported","why":"Holmes says one of the Colonel's neighbours cared for the horse, which plainly raises the question; its wording gives nothing away."}]

@@ -1,0 +1,11 @@
+[{"para":7,"kind":"name","text":"Sherlock Holmes","id":"holmes#1","i":1,"verdict":"supported","why":"Named as 'Sherlock Holmes' in ¶7 and referred to as Holmes throughout."},
+{"para":7,"kind":"name","text":"Reading","id":"reading","i":2,"verdict":"supported","why":"¶7 says 'We had left Reading far behind us.'"},
+{"para":7,"kind":"name","text":"Exeter","id":"exeter","i":3,"verdict":"supported","why":"¶7 says the train was flying 'en route for Exeter.'"},
+{"para":7,"kind":"name","text":"A first-class carriage","id":"carriage","i":4,"verdict":"supported","why":"¶7 places the narrator 'in the corner of a first-class carriage.'"},
+{"para":7,"kind":"name","text":"The bundle of fresh papers from Paddington","id":"bundle_of_papers","i":5,"verdict":"supported","why":"¶7 mentions 'the bundle of fresh papers which he had procured at Paddington.'"},
+{"para":7,"kind":"name","text":"Holmes's cigar-case","id":"cigar_case","i":6,"verdict":"supported","why":"¶7 says Holmes 'offered me his cigar-case.'"},
+{"para":7,"kind":"name","text":"Holmes's ear-flapped travelling-cap","id":"travelling_cap","i":7,"verdict":"supported","why":"¶7 describes Holmes 'framed in his ear-flapped travelling-cap.'"},
+{"para":7,"kind":"time","text":"One morning, at Paddington","id":"t.paddington","i":8,"verdict":"supported","why":"¶6 mentions catching the train at Paddington, and ¶7 says Holmes procured the papers there."},
+{"para":7,"kind":"time","text":"One morning, in the train from Paddington","id":"t.train_out","i":9,"verdict":"supported","why":"¶7 describes the journey 'flying along en route for Exeter' after leaving Paddington."},
+{"para":7,"kind":"time","text":"One morning, the train passing Reading","id":"t.train_reading","i":10,"verdict":"supported","why":"¶7 states 'We had left Reading far behind us,' so the passing of Reading has already happened."},
+{"para":7,"kind":"time","text":"One morning, in the train well past Reading","id":"t.train_beyond_reading","i":11,"verdict":"supported","why":"¶7's 'far behind us' shows the train is well past Reading when the papers are put away and the cigar-case offered."}]

@@ -1,0 +1,4 @@
+[{"para":215,"kind":"name","text":"The Pullman car back to London","id":"pullman_car","i":1,"verdict":"supported","why":"¶215 says they had the corner of a Pullman car to themselves as they went back to London."},
+{"para":215,"kind":"time","text":"The evening of the race, in a Pullman car back to London","id":"t.pullman","i":2,"verdict":"supported","why":"¶215 places it 'that evening', after the race, in a Pullman car bound for London."},
+{"para":215,"kind":"account","text":"Holmes's account of the Monday night","id":"acct.holmes_explains","i":3,"verdict":"supported","why":"¶215 says they listened to Holmes's narrative of the events at the stables on the Monday night."},
+{"para":215,"kind":"account","text":"Madame Lesurier's account","id":"acct.lesurier","i":4,"verdict":"supported","why":"¶84 already mentions the milliner's account made out by Madame Lesurier of Bond Street."}]

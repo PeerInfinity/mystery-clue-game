@@ -1,0 +1,7 @@
+[{"para":12,"kind":"name","text":"Colonel Ross","id":"ross","i":1,"verdict":"supported","why":"Named in ¶12 as the owner of the horse who telegraphed Holmes."},
+{"para":12,"kind":"name","text":"Inspector Gregory","id":"gregory","i":2,"verdict":"supported","why":"Named in ¶12 as the officer looking after the case."},
+{"para":12,"kind":"name","text":"Colonel Ross's telegram","id":"ross_telegram","i":3,"verdict":"supported","why":"¶12 says Holmes received a telegram from Colonel Ross."},
+{"para":12,"kind":"time","text":"Tuesday evening","id":"t.tue_evening","i":4,"verdict":"supported","why":"¶12 says the telegrams arrived on Tuesday evening."},
+{"para":12,"kind":"account","text":"Colonel Ross's telegram","id":"acct.ross","i":5,"verdict":"supported","why":"¶12 says Ross's telegram invited Holmes's co-operation."},
+{"para":12,"kind":"account","text":"Inspector Gregory's telegram","id":"acct.gregory","i":6,"verdict":"supported","why":"¶12 says Gregory's telegram invited Holmes's co-operation."},
+{"para":12,"kind":"account","text":"Holmes's account of his own doings","id":"acct.holmes","i":7,"verdict":"supported","why":"Holmes tells what he did: he received the telegrams, was invited to help, and is travelling down."}]

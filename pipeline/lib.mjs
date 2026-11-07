@@ -53,10 +53,15 @@ export function jsonLines(text) {
  */
 export async function call({ dir, prompt, system, model = 'opus', dry = false, tag = '' }) {
     fs.mkdirSync(dir, { recursive: true });
-    const base = tag ? `${tag}.` : '';
+    // A dry run writes dry.prompt.md: it must never overwrite the record of a prompt as sent.
+    const base = dry ? 'dry.' : tag ? `${tag}.` : '';
     fs.writeFileSync(path.join(dir, `${base}prompt.md`), `<!-- system -->\n${system}\n\n<!-- user -->\n${prompt}\n`);
     if (dry) return null;
-    const blind = fs.mkdtempSync(path.join(os.tmpdir(), 'pipeline-blind-'));
+    // A fixed empty directory: the working directory is in the model's environment block, so a fresh random one per
+    // call would make every prompt's prefix differ and defeat prompt caching. It is never emptied (calls run at once
+    // share it); with no tools, a call can neither read nor write it.
+    const blind = path.join(os.tmpdir(), 'pipeline-blind');
+    fs.mkdirSync(blind, { recursive: true });
     const args = ['-p', '--model', model, '--tools', '', '--strict-mcp-config', '--setting-sources', '', '--no-session-persistence', '--system-prompt', system, '--output-format', 'json'];
     const started = Date.now();
     const out = await new Promise((resolve, reject) => {
@@ -68,13 +73,13 @@ export async function call({ dir, prompt, system, model = 'opus', dry = false, t
         child.on('close', (code) => (so.trim().startsWith('{') ? resolve(so) : reject(new Error(`claude exited ${code}: ${se.slice(0, 500)} ${so.slice(0, 500)}`))));
         child.stdin.end(prompt);
     });
-    fs.rmSync(blind, { recursive: true, force: true });
     const r = JSON.parse(out);
     const text = r.result ?? '';
     fs.writeFileSync(path.join(dir, `${base}response.md`), text);
     const meta = {
         model: Object.keys(r.modelUsage ?? {})[0] ?? model, cost_usd: r.total_cost_usd, duration_s: Math.round((Date.now() - started) / 1000),
         input_tokens: (r.usage?.input_tokens ?? 0) + (r.usage?.cache_creation_input_tokens ?? 0) + (r.usage?.cache_read_input_tokens ?? 0),
+        cache_read_tokens: r.usage?.cache_read_input_tokens, cache_write_tokens: r.usage?.cache_creation_input_tokens,
         output_tokens: r.usage?.output_tokens, stop_reason: r.stop_reason, error: r.is_error ? text.slice(0, 400) : undefined, date: new Date().toISOString(),
     };
     fs.writeFileSync(path.join(dir, `${base}meta.json`), JSON.stringify(meta, null, 2) + '\n');

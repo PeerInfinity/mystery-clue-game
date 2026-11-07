@@ -1,0 +1,6 @@
+[{"para":21,"kind":"name","text":"The stranger who stopped the maid near the stables","id":"the_stranger","i":1,"verdict":"supported","why":"¶21 says a man appeared out of the darkness near the stables and called to the maid to stop."},
+{"para":21,"kind":"name","text":"The stranger's grey suit of tweeds","id":"stranger_suit","i":2,"verdict":"supported","why":"¶21 says he was dressed in a grey suit of tweeds."},
+{"para":21,"kind":"name","text":"The stranger's cloth cap","id":"stranger_cap","i":3,"verdict":"supported","why":"¶21 says he wore a cloth cap."},
+{"para":21,"kind":"name","text":"The stranger's gaiters","id":"stranger_gaiters","i":4,"verdict":"supported","why":"¶21 says he wore gaiters."},
+{"para":21,"kind":"name","text":"The stranger's heavy stick with a knob","id":"stranger_stick","i":5,"verdict":"supported","why":"¶21 says he carried a heavy stick with a knob to it."},
+{"para":21,"kind":"question","text":"Who was the man who stopped Edith Baxter on the path?","id":"q.stranger_who","i":6,"verdict":"supported","why":"The man is unidentified so far, so this is a plain question, and its wording does not point at an answer."}]

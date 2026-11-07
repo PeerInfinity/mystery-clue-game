@@ -1,0 +1,5 @@
+[{"para":173,"kind":"name","text":"The three lame sheep","id":"lame_sheep","i":1,"verdict":"supported","why":"The lad says three of the sheep have gone lame."},
+{"para":173,"kind":"time","text":"Of late, when three of the sheep in the paddock went lame","id":"t.sheep_lame","i":2,"verdict":"supported","why":"Holmes asks about 'of late' and the lad answers that three have gone lame."},
+{"para":173,"kind":"account","text":"The stable-lad's account of the sheep","id":"acct.sheep_lad","i":3,"verdict":"supported","why":"The stable-lad gives this account in ¶171–173."},
+{"para":173,"kind":"question","text":"What has lamed three of the sheep in the paddock?","id":"q.sheep_lame","i":4,"verdict":"supported","why":"A plain, neutral question raised by the lad's answer."},
+{"para":173,"kind":"possibility","text":"What has lamed three of the sheep in the paddock? — an ordinary ailment, of no account","id":"q.sheep_lame=an ordinary ailment, of no account","i":5,"verdict":"supported","why":"The lad himself calls it 'not of much account', so an ordinary ailment is a natural reading."}]
