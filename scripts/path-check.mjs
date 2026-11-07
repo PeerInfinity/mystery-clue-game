@@ -9,14 +9,11 @@
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
-const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
-const CASE = (process.env.CASE ?? 'cases/silver-blaze').replace(/\/+$/, '');
-const FILE = process.argv[2] ?? path.join(ROOT, CASE, 'world/path.json');
+import { CASE, WORLD, STORE, pageUrl } from './case-env.mjs';
+const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
-const URL_ = (process.env.URL ?? 'http://localhost:8321/') + (CASE === 'cases/silver-blaze' ? '' : `?case=${encodeURIComponent(CASE)}`);
+const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/');
 const STOP = +(process.env.STOP ?? 1e9);
-// The page's save for this case (ui/world-case.js).
-const STORE = `${CASE === 'cases/silver-blaze' ? 'silver-blaze' : CASE.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '')}-world-v1`;
 
 const list = await (await fetch('http://127.0.0.1:9333/json')).json();
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
@@ -64,7 +61,7 @@ async function openOn(on) {
 const defaultOn = (m) => m.on ?? (['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
 
 // --- Earliest. The data's earliest paragraph for a circle; the page's, for the reasoning moves, found in play.
-const W = path.join(ROOT, CASE, 'world');
+const W = WORLD;
 const qs = new Map(JSON.parse(fs.readFileSync(path.join(W, 'questions.json'), 'utf8')).questions.map((q) => [q.id, q]));
 const strains = fs.existsSync(path.join(W, 'strains.json')) ? JSON.parse(fs.readFileSync(path.join(W, 'strains.json'), 'utf8')).strains : [];
 const label = (m) => `${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`;

@@ -1,7 +1,8 @@
 // Every check of Watson's timeline that plays the real page, one after another: the true path (path-check.mjs), the
 // autoplay in three, two and one columns and at a phone's width (world-autoplay-check.mjs), the hints from a fresh page
 // and from one with mistakes (world-hints-check.mjs). About 7 minutes.
-//   npm run page-checks          (URL=… to check another server, for example the built site)
+//   npm run page-checks          (URL=… to check another server, for example the built site; CASE=<dir> another
+//                                case, the page's ?case=: scripts/case-env.mjs)
 // Starts what is missing and stops only what it started: the local server (scripts/serve.js, port 8321) and a headless
 // Chrome on port 9333 with a profile of its own (CHROME: the browser to run; default google-chrome). Exits 1 if any
 // check fails.

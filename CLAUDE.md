@@ -29,7 +29,7 @@ See `docs/technical.md`. The ones used most:
 | One test file | `node --test engine/world.test.js` (a directory argument does not work) |
 | Serve the pages | `node scripts/serve.js` → http://localhost:8321/ (the earlier game: `/v1/`) |
 | Validate the case (the world model) | `npm run validate-world` |
-| Every page check of Watson's timeline (about 6 min; starts the server and its own Chrome if needed) | `npm run page-checks` |
+| Every page check of Watson's timeline (about 6 min; starts the server and its own Chrome if needed; `CASE=<dir>` another case) | `npm run page-checks` |
 | Play the true path through Watson's timeline (about a minute; port 9333) | `node scripts/path-check.mjs` |
 | Watson's timeline's autoplay to the end (under a minute; port 9333; a layout argument) | `node scripts/world-autoplay-check.mjs` |
 | Watson's timeline's hints, a hint-only player to the end (about 3 min; port 9333) | `node scripts/world-hints-check.mjs` |

@@ -59,7 +59,7 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 9c | Consistency | everything, the validator's messages | patches | model, until the whole case validates |
 | 10 | Likely clashes | everything | `strains.json` | model, one call |
 | 11 | Leak check, and its fixes | each label with the story up to where it shows | `leak/opus`, `leak/haiku` (reports); 11b, 11c: patches (label steps, plainer names, later possibilities) | `leak.mjs`, blind, per paragraph (Opus judges, Haiku compared); model for the fixes, the leak check again where labels changed |
-| 12 | The true path | everything (with the leak fixes) | `path.json` | model writes the moves, a script dates each right answer's circle at its earliest; `scripts/path-check.mjs` plays it through the real page (`?case=`) |
+| 12 | The true path | everything (with the leak fixes) | `path.json` | model writes the moves, a script dates each right answer's circle at its earliest; `scripts/path-check.mjs` plays it through the real page (`?case=`). Then `CASE=<the run's case> npm run page-checks`: the autoplay in every layout and the hints, from a fresh page and with mistakes |
 
 Not yet produced: the typed data the reader's reasoning moves need (actions with `act` and `thing`, goals, needs:
 `docs/case-format.md`, "Typed states and actions"), so the pipeline's true path is circles, crossings and trust
@@ -243,6 +243,7 @@ What is next:
   now works (`cache_read_tokens` in its `meta.json`), and try one call for the whole story.
 - **The typed data for the reasoning moves** (a step between 10 and 12), so that the pipeline's true path can use
   the moves (a)–(d) as the hand-made one does.
-- **The autoplay and hint checks** (`world-autoplay-check.mjs`, `world-hints-check.mjs`) are Silver Blaze's only;
-  given `CASE` like `path-check.mjs`, they would test a pipeline case's hints.
+- ~~The autoplay and hint checks for a pipeline case~~: done (2026-11-07). `CASE=<dir>` for every page check; on run
+  2's case the autoplay plays its 94 moves to the end and the hints reach the end from a fresh page (83 hints) and
+  with mistakes made from its data (85, the three mistakes found and undone).
 - **The Speckled Band** (`cases.json` has it; no target to compare with): steps 1–12.

@@ -4,11 +4,14 @@
 // mistakes in it (a wrong answer circled early, a true account distrusted, a right answer crossed out), which the hints
 // must find and undo. The wait between hints is set to none.
 //   node scripts/world-hints-check.mjs [fresh|mistakes]      (default: both)
+//   CASE=<dir> …    another case (the page's ?case=): its mistakes are made from its own data (see `mistakesOf`)
 // Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome on port
 // 9333 (one script at a time). Exits 1 on any failure.
+import fs from 'node:fs';
+import path from 'node:path';
+import { WORLD, STORE, IS_DEFAULT, pageUrl } from './case-env.mjs';
 const BASE = process.env.URL ?? 'http://localhost:8321/';
 const J = JSON.stringify;
-const STORE = 'silver-blaze-world-v1';
 
 const list = await (await fetch('http://127.0.0.1:9333/json')).json();
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
@@ -29,7 +32,7 @@ await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, dev
 let failures = 0;
 const fail = (why) => { failures++; console.log(`FAIL ${why}`); };
 async function run(name, start, expect = []) {
-    await send('Page.navigate', { url: BASE }); await sleep(1200);
+    await send('Page.navigate', { url: pageUrl(BASE) }); await sleep(1200);
     await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three', hintWait: 0, ...start }))}); 1`);
     await send('Page.reload'); await sleep(800);
     for (let i = 0; i < 100 && !(await ev(`!!window.__hint`).catch(() => false)); i++) await sleep(200);
@@ -67,9 +70,40 @@ async function run(name, start, expect = []) {
 }
 const which = process.argv[2];
 if (!which || which === 'fresh') await run('fresh', { para: 1 }, ['move']);
-// Mistakes: Simpson circled for the blow and the stick for the weapon at ¶20 (before any reason is told), the true
-// account of Holmes's recital distrusted, a right answer (the house) crossed out before it is raised.
-if (!which || which === 'mistakes') await run('mistakes', { para: 20, marks: { 'q.who_killed': { simpson: 'circled' }, 'q.weapon': { "Simpson's Penang-lawyer": 'circled' }, 'q.drug_where': { 'at the house, after his portion was set apart': 'crossed' } }, trust: { links: { 'f.tell_recital': 0 }, people: {} } }, ['move', 'unmark', 'uncross', 'trust']);
+// Mistakes. Silver Blaze's: Simpson circled for the blow and the stick for the weapon at ¶20 (before any reason is
+// told), the true account of Holmes's recital distrusted, a right answer (the house) crossed out before it is raised.
+// Another case's, from its own data (mistakesOf).
+const READ = (f) => JSON.parse(fs.readFileSync(path.join(WORLD, f), 'utf8'));
+/**
+ * Mistakes of the same three kinds for any case: a wrong answer circled on the first question the gate asks about,
+ * where it becomes a possibility; the answer of a question not raised yet crossed out; a telling told by then that
+ * the true path never distrusts, distrusted.
+ */
+function mistakesOf() {
+    const qs = READ('questions.json').questions, facts = READ('facts.json').facts, moves = READ('path.json').moves;
+    const isRight = (q, v) => v === q.answer || (q.also_right ?? []).includes(v);
+    const gated = qs.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && q.answer_inferable_at < q.answer_given_at).sort((a, b) => a.raised - b.raised);
+    const marks = {}, expect = ['move'];
+    let para = 1;
+    const wrongQ = gated.find((q) => q.possibilities.some((p) => p.via !== 'always' && !isRight(q, p.value)));
+    if (wrongQ) {
+        const w = wrongQ.possibilities.find((p) => p.via !== 'always' && !isRight(wrongQ, p.value));
+        para = Math.max(wrongQ.raised, w.available);
+        marks[wrongQ.id] = { [w.value]: 'circled' };
+        expect.push('unmark');
+    }
+    const later = gated.find((q) => q.raised > para && q.possibilities.some((p) => p.value === q.answer));
+    if (later) { marks[later.id] = { [later.answer]: 'crossed' }; expect.push('uncross'); }
+    const distrusted = new Set(moves.filter((m) => m.do === 'trust').map((m) => m.link));
+    const tell = facts.find((f) => f.attr === 'tells' && (f.given_at ?? f.para) <= para && f.truth !== false && f.truth !== null && !distrusted.has(f.id));
+    const links = {};
+    if (tell) { links[tell.id] = 0; expect.push('trust'); }
+    return { start: { para, marks, trust: { links, people: {} } }, expect };
+}
+if (!which || which === 'mistakes') {
+    if (IS_DEFAULT) await run('mistakes', { para: 20, marks: { 'q.who_killed': { simpson: 'circled' }, 'q.weapon': { "Simpson's Penang-lawyer": 'circled' }, 'q.drug_where': { 'at the house, after his portion was set apart': 'crossed' } }, trust: { links: { 'f.tell_recital': 0 }, people: {} } }, ['move', 'unmark', 'uncross', 'trust']);
+    else { const m = mistakesOf(); console.log(`mistakes: ${J(m.start)}`); await run('mistakes', m.start, m.expect); }
+}
 console.log(failures ? `${failures} failure(s)` : 'the hints reach the end');
 ws.close();
 process.exit(failures ? 1 : 0);
