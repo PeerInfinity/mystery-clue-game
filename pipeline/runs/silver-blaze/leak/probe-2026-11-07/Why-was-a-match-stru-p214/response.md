@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story has given the reader reason to consider this. A half-burned vesta was found in the hollow. Straker carried vestas, a tallow candle and a delicate cataract knife. At this paragraph Holmes says the horse killed Straker in self-defence and that Straker was untrustworthy. Lighting a candle to do delicate work in the dark is a reasonable possibility to raise from those facts."}
+```
