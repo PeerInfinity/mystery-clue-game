@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story has already identified Silas Brown as the person who hid the horse (¶146, ¶150), called him 'an old horse-faker' (¶148), and at ¶204 Holmes says he 'found him in the hands of a faker,' so the label follows from the text."}
+```

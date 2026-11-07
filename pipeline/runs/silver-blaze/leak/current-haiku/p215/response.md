@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶215 states that the group had the corner of a Pullman car to themselves on the journey back to London, so the name and the thing it names are both in the story so far."}
+```

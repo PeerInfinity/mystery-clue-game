@@ -1,0 +1,53 @@
+Notes on two overlapping phrases:
+- In ¶66, "the trainer" names Silas Brown. Straker's existing unrestricted "the trainer" should ideally be limited to ¶19–46.
+- In ¶47, "gaiters" are Colonel Ross's. The stranger's existing "gaiters" should ideally be limited to ¶21.
+
+```jsonl
+{"file":"entities","id":"tavistock_station","kind":"place","name":"Tavistock station","within":"tavistock"}
+{"file":"entities","id":"landau","kind":"object","name":"The landau"}
+{"file":"moves","id":"landau"}
+{"file":"entities","id":"detective_service","kind":"group","name":"The English detective service"}
+{"file":"entities","id":"ross_frock_coat","kind":"object","name":"Colonel Ross's frock-coat"}
+{"file":"entities","id":"ross_gaiters","kind":"object","name":"Colonel Ross's gaiters"}
+{"file":"entities","id":"ross_eyeglass","kind":"object","name":"Colonel Ross's eye-glass"}
+{"file":"entities","id":"ross_hat","kind":"object","name":"Colonel Ross's hat"}
+{"file":"entities","id":"ten_pound_note","kind":"object","name":"The ten-pound note in Simpson's purse"}
+{"file":"entities","id":"simpson_purse","kind":"object","name":"Simpson's purse"}
+{"file":"entities","id":"the_chemist","kind":"person","name":"The chemist who sold the opium"}
+{"file":"entities","id":"moor_pits","kind":"place","name":"The pits and old mines upon the moor","within":"moor"}
+{"file":"entities","id":"gypsy_party","kind":"group","name":"The party of gypsies camped near the spot"}
+{"file":"entities","id":"gypsy_camp","kind":"place","name":"The gypsies' camp within a mile of the murder","within":"moor","source":"a party of gypsies encamped on Monday night within a mile of the spot where the murder took place"}
+{"file":"entities","id":"tavistock_outhouses","kind":"place","name":"The stables and out-houses in and around Tavistock","within":"dartmoor","source":"I have also examined every stable and out-house in Tavistock, and for a radius of ten miles."}
+```
+
+```jsonl
+{"file":"mentions","id":"tavistock_station","phrases":["the station"]}
+{"file":"mentions","id":"landau","phrases":["an open carriage","a comfortable landau"]}
+{"file":"mentions","id":"detective_service","phrases":["the English detective service"]}
+{"file":"mentions","id":"ross_frock_coat","phrases":["a frock-coat"]}
+{"file":"mentions","id":"ross_gaiters","phrases":[{"text":"gaiters","paras":[47,47]}]}
+{"file":"mentions","id":"ross_eyeglass","phrases":["an eye-glass"]}
+{"file":"mentions","id":"ross_hat","phrases":["his hat"]}
+{"file":"mentions","id":"ten_pound_note","phrases":["a ten-pound note"]}
+{"file":"mentions","id":"simpson_purse","phrases":["his purse"]}
+{"file":"mentions","id":"the_chemist","phrases":["What chemist"]}
+{"file":"mentions","id":"moor_pits","phrases":["one of the pits or old mines upon the moor"]}
+{"file":"mentions","id":"gypsy_party","phrases":["a party of gypsies","these gypsies"]}
+{"file":"mentions","id":"tavistock","phrases":["the little town of Tavistock","the quaint old Devonshire city"]}
+{"file":"mentions","id":"dartmoor","phrases":["the huge circle of Dartmoor"]}
+{"file":"mentions","id":"holmes","phrases":["Mr. Holmes"]}
+{"file":"mentions","id":"watson","phrases":["Dr. Watson","My friend Dr. Watson"]}
+{"file":"mentions","id":"ross","phrases":["a small, alert person","Colonel Ross, the well-known sportsman","The latter"]}
+{"file":"mentions","id":"gregory","phrases":["a tall, fair man with lion-like hair and beard","the Inspector","The Inspector here","Gregory"]}
+{"file":"mentions","id":"simpson","phrases":["this man Simpson","our man"]}
+{"file":"mentions","id":"simpson_stick","phrases":[{"text":"a heavy stick","paras":[56,56]}]}
+{"file":"mentions","id":"straker","phrases":["poor Straker","the dead man’s hand"]}
+{"file":"mentions","id":"silver_blaze","phrases":["my horse","such a horse as this"]}
+{"file":"mentions","id":"silas_brown","phrases":[{"text":"the trainer","paras":[66,66]}]}
+{"file":"mentions","id":"mapleton","phrases":["another training-stable"]}
+{"file":"mentions","id":"desborough","phrases":["their horse"]}
+{"file":"mentions","id":"opium","phrases":["the powdered opium","The opium"]}
+{"file":"mentions","id":"paper_packet","phrases":["the paper which he wished the maid to give to the stable-boy"]}
+{"file":"mentions","id":"duplicate_key","phrases":["The key"]}
+{"file":"mentions","id":"hollow","phrases":["the spot where the murder took place"]}
+```

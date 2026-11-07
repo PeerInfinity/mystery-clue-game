@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story has just raised the inventory of Straker's pockets at ¶76, so the label names something the reader has reason to consider. It states no contents, so it reveals nothing the story hasn't yet given."}
+```

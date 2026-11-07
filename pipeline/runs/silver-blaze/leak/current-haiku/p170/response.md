@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes himself refers to 'a few sheep in the paddock' in ¶170, so the sheep and their location are already established by the story, and the label only uses that description."}
+```

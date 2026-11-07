@@ -1,0 +1,58 @@
+# Leak check: current-opus
+
+351 labels, 54 flagged; 96 calls, $8.22.
+
+- ¶1 name `holmes`: Sherlock Holmes — unsupported: The story so far uses only 'Holmes'; the first name 'Sherlock' has not appeared.
+- ¶1 name `watson`: Dr. Watson — unsupported: The story uses only 'Watson'; the title 'Dr.' has not been given.
+- ¶1 name `baker_street`: Holmes's rooms — unsupported: The story does not say where they are having breakfast; nothing names Holmes's rooms.
+- ¶1 time `t.thu_breakfast`: Thursday, breakfast at Baker Street — unsupported: The story says only 'one morning' at breakfast; neither Thursday nor Baker Street is mentioned.
+- ¶4 fact `f.sb_favourite`: Silver Blaze: condition "first favourite for the Wessex Cup, at three to one on" — unsupported: The story has not yet given the horse's name or the three-to-one-on odds, only that it was the favourite.
+- ¶4 fact `f.straker_dead`: John Straker: condition "dead" — unsupported: The trainer's murder is stated, but the name John Straker has not been used yet.
+- ¶4 fact `f.horse_gone`: Silver Blaze: location null (unknown: not found) — unsupported: The disappearance is stated, but the name Silver Blaze has not been used yet.
+- ¶4 account `acct.background`: The horse, the stable, its people and the country round — unsupported: No account of the horse, the stable, its people or the country has been given yet.
+- ¶4 account `acct.search`: The searchers' account: the lads roused, the knoll, the coat, the body — unsupported: The lads, the knoll and the coat are details the story has not supplied yet.
+- ¶4 account `acct.police_findings`: What the police found: the wounds, the hands, the hollow, the hunt for the horse — unsupported: The wounds, the hands and the hollow are not mentioned, and the police are not mentioned at all.
+- ¶4 name `straker`: John Straker — unsupported: This name has not appeared in the story yet.
+- ¶4 name `police`: The police — unsupported: The police are not mentioned in the story so far.
+- ¶4 name `silver_blaze`: Silver Blaze — unsupported: The horse has not been named yet.
+- ¶4 time `t.tue_struggle`: Tuesday, between one and seven: in the hollow, at the time of the struggle — unsupported: No days, times, hollow or struggle have been mentioned yet.
+- ¶4 time `t.tue_0700`: Tuesday, seven in the morning — unsupported: No day or time has been mentioned yet.
+- ¶4 time `t.tue_found`: Tuesday morning, the body found — unsupported: Neither the finding of the body nor its timing has been described yet.
+- ¶4 time `t.tue_after`: Tuesday, after the finding: the cravat recognised, Hunter recovers — unsupported: The cravat and Hunter have not been mentioned yet.
+- ¶4 time `t.tue_evening`: Tuesday evening: the telegrams — unsupported: No telegrams or Tuesday evening have been mentioned yet.
+- ¶4 time `t.wed`: Wednesday, a whole day at Baker Street — unsupported: A 'whole day' is mentioned, but not Wednesday or Baker Street.
+- ¶4 time `t.thu_past_reading`: Thursday, past Reading — unsupported: Neither Thursday nor Reading has been mentioned yet.
+- ¶4 question `q.who_killed`: Who struck the blow that killed Straker? — unsupported: It uses the name Straker, which the story has not given, and 'struck the blow' hints at how he died.
+- ¶6 time `t.thu_train`: Thursday, an hour later: in the train — unsupported: The story has not named the day as Thursday or said the train scene comes an hour later.
+- ¶6 time `t.thu_recital`: Thursday, Holmes's account in the train — unsupported: Holmes promises to explain on the journey, but the day 'Thursday' is never stated in the text so far.
+- ¶12 account `acct.holmes_own`: Holmes's own part: the telegrams, his waiting, his wire, his judgements — unsupported: Only the telegrams he received are mentioned; his deliberate waiting, a wire he sent, and his judgements about the case have not been told yet.
+- ¶12 time `t.arrest`: Gregory arrives and arrests Simpson — unsupported: No one named Simpson and no arrest has appeared in the story so far.
+- ¶14 possibility `q.horse_where=dead, in a pit or mine`: Where is Silver Blaze? — dead, in a pit or mine — unsupported: Nothing so far mentions pits or mines, or suggests the horse is dead; this detail is too specific.
+- ¶19 name `edith_baxter`: Edith Baxter — unsupported: No one named Edith Baxter has appeared. The maid-servant is mentioned but not named.
+- ¶19 name `ned_hunter`: Ned Hunter — unsupported: No one named Ned Hunter has appeared. The lads are not named.
+- ¶19 time `t.mon_late`: Monday, later: the lads come back — unsupported: Nothing so far says the lads went anywhere or came back on Monday.
+- ¶20 account `acct.edith`: Edith Baxter's account: the supper, the stranger, the window, the cravat — unsupported: No stranger, window or cravat has appeared yet; the story only shows the maid carrying the supper.
+- ¶20 account `acct.hunter`: Ned Hunter's account: the window, the dog, the search, the message, the drugging — unsupported: The window, a dog, a search, a message and a drugging have not been mentioned yet.
+- ¶20 time `t.mon_meet`: The stranger stops the maid — unsupported: No stranger has been introduced, let alone one who stops the maid.
+- ¶20 time `t.mon_window`: At the stable window — unsupported: A stable window has not been mentioned; this anticipates later events.
+- ¶20 time `t.mon_dog`: Hunter goes for the dog; the maid flees — unsupported: Neither a dog nor the maid fleeing has appeared in the story.
+- ¶32 account `acct.mrs_straker`: Mrs. Straker's account: one o'clock and seven o'clock — unsupported: Mrs. Straker's account so far mentions only one in the morning; nothing about seven o'clock has been told yet.
+- ¶46 possibility `q.straker_aim=to injure the horse`: Why did Straker go out at one in the morning? — to injure the horse — unsupported: Nothing so far suggests Straker meant to harm the horse; he said he went out from anxiety about the horses.
+- ¶50 name `landau`: The landau — unsupported: The story so far only calls it 'an open carriage'. The specific name 'landau' has not been used yet.
+- ¶57 possibility `q.why_out=to do something that would be heard in the stable`: Why take the horse out of the stable? — to do something that would be heard in the stable — unsupported: Nothing so far suggests the horse was taken out to avoid noise heard in the stable; this hints at a later explanation.
+- ¶57 possibility `q.why_out=to do something by a light that would be seen from the stable`: Why take the horse out of the stable? — to do something by a light that would be seen from the stable — unsupported: Nothing so far suggests a light that would be seen from the stable; this points toward a later solution.
+- ¶58 account `acct.simpson_more`: Simpson's further statements: the paper, the cravat — unsupported: Simpson has only explained the paper (a ten-pound note). On the cravat he was earlier 'utterly unable to account' for it, so no further statement about it has been given yet.
+- ¶73 account `acct.villa_police`: The police's part shown and told in the sitting-room: the body, the pockets, the cork — unsupported: The story so far mentions no sitting-room, pocket contents or cork; these details come from later in the story.
+- ¶77 name `tin_box`: The square tin box — unsupported: The story has not yet mentioned any square tin box; it is a detail from a later paragraph.
+- ¶78 name `hay_accounts`: Three hay-dealers' accounts — unsupported: The story only mentions 'a few papers'; it says nothing about hay-dealers' accounts.
+- ¶78 name `ross_letter`: A letter of instructions from Colonel Ross — unsupported: The papers are not described; no letter from Colonel Ross has been mentioned.
+- ¶78 name `milliner_bill`: The milliner's account — unsupported: No milliner's account has been mentioned; this detail comes later.
+- ¶82 account `acct.mrs_straker_more`: Mrs. Straker's further statements: the knife, Derbyshire — unsupported: The story has not mentioned 'Derbyshire' at all. So far Mrs. Straker has said only that the knife lay on the dressing-table.
+- ¶86 time `t.thu_passage`: Thursday evening: Mrs. Straker in the passage — unsupported: It is Thursday evening, but the story has not yet said who the woman in the passage is; calling her Mrs. Straker reveals an identity the text has not given.
+- ¶95 account `acct.hollow_police`: The police's part in the hollow: the weather, the coat, the matting, the bag, the tracks — unsupported: The story so far covers only the weather (no wind, heavy rain) and the coat on the furze-bush. The matting, the bag and the police's tracks in the hollow have not yet been mentioned, so the label previews later details.
+- ¶102 possibility `q.why_light=to light the candle for close work`: Why was a match struck in the hollow? — to light the candle for close work — unsupported: Saying the candle was lit for 'close work' in the hollow implies a delicate task was done there, which points toward a purpose the story has not yet revealed.
+- ¶122 time `t.tue_into_mapleton`: Tuesday, early morning: the horse led into Mapleton — unsupported: The story has only shown tracks near Mapleton turning toward King's Pyland and coming back. It has not said the horse was led into Mapleton, or when.
+- ¶136 time `t.thu_parlour`: Thursday dusk: Holmes with Brown, twenty minutes — unsupported: Thursday dusk follows from the text, but the twenty-minute length of the talk with Brown is not given yet. Holmes only says he will not be more than a few minutes.
+- ¶173 time `t.weeks_before`: In the weeks before the crime — unsupported: The lad only says 'of late'. Nothing places the laming in the weeks before the crime.
+- ¶173 possibility `q.sheep_lame=someone practised on them`: What lamed the sheep? — someone practised on them — unsupported: Nothing yet suggests anyone deliberately practised on the sheep. This points at an unrevealed solution.
+- ¶214 time `t.home_train`: Race day evening: the Pullman car back to London — unsupported: The story has not yet mentioned a journey back to London that evening or a Pullman car.

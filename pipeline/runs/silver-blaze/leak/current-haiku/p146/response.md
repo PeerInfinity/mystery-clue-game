@@ -1,0 +1,4 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Paragraph 146 gives Holmes's full account of Brown's morning, and the text says that when Holmes told him every detail, Brown 'gave it up' and thought only of saving his own skin."}
+{"i": 2, "verdict": "supported", "why": "Paragraph 146 says Brown's own boots exactly corresponded to the square-toed impressions on the moor, so the story has already linked Brown with these boots."}
+```

@@ -1,0 +1,223 @@
+// The pipeline's steps (pipeline/README.md): for each, its prompt (from pipeline/steps/NN-*.md), its checks and,
+// for a script step, the script. A step that works per scene sees only the story up to its scene's end and the data
+// collected up to that scene (assemble.mjs `collect`).
+import fs from 'node:fs';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { ROOT, PIPE, caseDir, paragraphs, numbered, template, SPEC, list, readJson, writeLines } from './lib.mjs';
+import os from 'node:os';
+import { collect, scenesOf, writeWorld } from './assemble.mjs';
+import { normalize } from '../engine/story.js';
+
+const storyOf = (name) => paragraphs(fs.readFileSync(path.join(caseDir(name), 'story.txt'), 'utf8'));
+const inPara = (paras, para, quote) => Number.isInteger(para) && paras[para] != null && typeof quote === 'string' && normalize(paras[para]).includes(normalize(quote));
+const sceneIndex = (name, scene) => scenesOf(name).findIndex((s) => s.id === scene.id);
+// The data a per-scene step may see, and its parts as prompt text.
+const seen = (ctx, step, scene) => collect(ctx.name, { step, scene: scene ? sceneIndex(ctx.name, scene) : Infinity });
+const narratorsText = (d) => JSON.stringify(d.header?.narrators ?? []);
+const mentionsText = (d) => (Object.keys(d.mentions).length ? Object.entries(d.mentions).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join('\n') : '(none yet)');
+const entitiesText = (d) => [d.moves.length ? `moves: ${JSON.stringify(d.moves)}` : '', Object.keys(d.joins).length ? `joins: ${JSON.stringify(d.joins)}` : '', lines(d.entities)].filter(Boolean).join('\n');
+const sceneThoughts = (d, scene) => d.thoughts.filter((t) => t.para >= scene.from && t.para <= scene.to);
+const readingText = (d, upTo = Infinity) => lines([...d.cards, ...d.thoughts.filter((t) => t.para <= upTo)]);
+const common = (ctx, d, scene) => ({ spec: SPEC(), scene_id: scene?.id ?? '', scene_title: scene?.title ?? '', from: scene?.from ?? '', to: scene?.to ?? '', narrators: narratorsText(d), entities: entitiesText(d), mentions: mentionsText(d), times: lines(d.times), accounts: lines(d.accounts), facts: lines(d.facts), questions: lines(d.questions) });
+
+/**
+ * The validator (scripts/validate-world.js) on the data seen so far plus a call's new items, in a trial case of its
+ * own; only the messages about the ids the call wrote (or `also` names), and not those `ignore` matches.
+ */
+function validated(ctx, step, scene, items, { ignore = [], also = [] } = {}) {
+    const d = collect(ctx.name, { step, scene: scene ? sceneIndex(ctx.name, scene) : Infinity, extra: items });
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pipeline-check-'));
+    writeWorld(ctx.name, d, tmp);
+    let out;
+    try { out = execFileSync('node', [path.join(ROOT, 'scripts/validate-world.js'), tmp, '--quiet'], { encoding: 'utf8' }); } catch (e) { out = `${e.stdout ?? ''}\n${e.stderr ?? e.message}`; }
+    fs.rmSync(tmp, { recursive: true, force: true });
+    const mine = new Set([...items.flatMap((x) => [x.id, x.q, x.door]).filter(Boolean), ...also]);
+    const msgs = out.split('\n').filter((l) => l.trim() && !/^\d+ error\(s\)/.test(l));
+    if (/Error|at file:/.test(out) && !msgs.some((l) => /^\S+: /.test(l))) return [`the validator failed: ${out.slice(0, 400)}`];
+    return msgs.filter((l) => {
+        const head = l.split(': ')[0];
+        return [...mine].some((id) => head.split(/[ /]+/).includes(id)) && !ignore.some((re) => re.test(l));
+    });
+}
+// What a later step settles: the answer key (step 9) and the questions (step 8: an unknown teller's question).
+const LATER = [/true assertions contradict/, /answer/, /truth/, /needs its question/];
+
+const lines = (xs) => (xs.length ? xs.map((x) => JSON.stringify(x)).join('\n') : '(none yet)');
+const TAGS = new Set(['RECORD', 'NOTICE', 'ABSENCE', 'QUESTION', 'HYPOTHESIS', 'INFER', 'DEFAULT', 'AGENT', 'PHYSICAL', 'IDENTIFY', 'WEIGH', 'SOURCE', 'TEST', 'RESIDUE', 'PREDICT', 'TEST PLAN', 'GENRE', 'SET ASIDE', 'DROP', 'REVISE']);
+
+export const STEPS = [
+    {
+        n: 1, name: 'text', script(ctx) {
+            const src = fs.readFileSync(path.join(ROOT, ctx.conf.source), 'utf8');
+            const paras = paragraphs(src);
+            fs.mkdirSync(caseDir(ctx.name), { recursive: true });
+            fs.writeFileSync(path.join(caseDir(ctx.name), 'story.txt'), src);
+            const report = [`source: ${ctx.conf.source}`, `paragraphs: ${paras.length} (¶0 to ¶${paras.length - 1})`, `¶0: ${paras[0]}`, `¶1: ${paras[1].slice(0, 120)}…`, `last: ${paras.at(-1).slice(0, 120)}…`, `words: ${src.split(/\s+/).filter(Boolean).length}`];
+            fs.writeFileSync(path.join(ctx.stepDir, 'report.txt'), report.join('\n') + '\n');
+            console.log(report.join('\n'));
+        },
+    },
+    {
+        n: 2, name: 'header',
+        prompt: (ctx) => template('02-header', { opening: numbered(storyOf(ctx.name), 0, 12) }),
+        check: (ctx, s, items) => {
+            const h = items[0];
+            if (items.length !== 1) return [`expected one line, got ${items.length}`];
+            if (!Array.isArray(h.narrators) || !h.narrators.length) return ['no narrators'];
+            return h.narrators.flatMap((n) => (!n.id || !/^[a-z_]+$/.test(n.id) ? [`narrator id ${n.id}`] : !['first-person', 'third-person'].includes(n.kind) ? [`narrator kind ${n.kind}`] : []));
+        },
+    },
+    {
+        n: 3, name: 'scenes',
+        prompt: (ctx) => template('03-scenes', { story: numbered(storyOf(ctx.name)) }),
+        check: (ctx, s, items) => {
+            const paras = storyOf(ctx.name);
+            const errs = [];
+            let next = 1;
+            items.forEach((x, i) => {
+                if (!/^s\d\d$/.test(x.id ?? '')) errs.push(`scene ${i}: id ${x.id} (s01, s02, …)`);
+                if (x.from !== next) errs.push(`${x.id}: starts at ¶${x.from}, expected ¶${next}`);
+                if (!(x.to >= x.from)) errs.push(`${x.id}: ends at ¶${x.to}, before it starts`);
+                next = x.to + 1;
+            });
+            if (next !== paras.length) errs.push(`the scenes end at ¶${next - 1}; the story's last paragraph is ¶${paras.length - 1}`);
+            return errs;
+        },
+    },
+    {
+        n: 4, name: 'reading', perScene: true,
+        prompt: (ctx, scene) => {
+            const i = sceneIndex(ctx.name, scene);
+            const d = collect(ctx.name, { step: 4, scene: i });
+            return template('04-reading', {
+                reading_spec: fs.readFileSync(path.join(PIPE, 'reading-spec.md'), 'utf8'), scene_id: scene.id, scene_title: scene.title, from: scene.from, to: scene.to,
+                cards: lines(d.cards), reading: lines(d.thoughts), story: numbered(storyOf(ctx.name), 0, scene.to),
+            });
+        },
+        check: (ctx, scene, items) => {
+            const paras = storyOf(ctx.name);
+            const d = collect(ctx.name, { step: 4, scene: sceneIndex(ctx.name, scene) });
+            const known = new Set([...d.thoughts.map((t) => t.id), ...d.cards.map((c) => c.bk)]);
+            const errs = [];
+            for (const x of items) if (x.bk) { if (!/^bk\.[a-z0-9_]+$/.test(x.bk) || !x.text) errs.push(`card ${x.bk}: needs bk.<name> and text`); known.add(x.bk); }
+            const ids = new Set();
+            for (const t of items.filter((x) => !x.bk)) {
+                const at = `${t.id ?? '?'}`;
+                if (!/^t\d+\.\d+$/.test(t.id ?? '')) errs.push(`${at}: id is t<para>.<n>`);
+                else if (Number(t.id.slice(1).split('.')[0]) !== t.para) errs.push(`${at}: its id's paragraph is not its para ${t.para}`);
+                if (ids.has(t.id) || d.thoughts.some((o) => o.id === t.id)) errs.push(`${at}: duplicate id`);
+                ids.add(t.id);
+                if (!(t.para >= scene.from && t.para <= scene.to)) errs.push(`${at}: para ${t.para} is outside this scene (¶${scene.from}–¶${scene.to})`);
+                if (!TAGS.has(t.tag)) errs.push(`${at}: tag ${t.tag}`);
+                if (!['typical', 'careful', 'expert'].includes(t.profile)) errs.push(`${at}: profile ${t.profile}`);
+                if (!['RECORD', 'SET ASIDE'].includes(t.tag) && !['weak', 'fair', 'strong'].includes(t.confidence)) errs.push(`${at}: confidence ${t.confidence}`);
+                if (!t.text) errs.push(`${at}: no text`);
+                if (t.reads != null && !inPara(paras, t.para, t.reads)) errs.push(`${at}: reads "${String(t.reads).slice(0, 60)}" is not in ¶${t.para}`);
+                for (const f of list(t.from)) if (!known.has(f) && !ids.has(f)) errs.push(`${at}: from ${f}: no earlier thought or card`);
+                for (const r of list(t.relations)) if (!known.has(r.target) && !ids.has(r.target)) errs.push(`${at}: relation to ${r.target}: no such thought`);
+            }
+            return errs;
+        },
+    },
+    {
+        n: 5, name: 'entities', perScene: true,
+        prompt: (ctx, scene) => { const d = seen(ctx, 5, scene); return template('05-entities', { ...common(ctx, d, scene), story: numbered(storyOf(ctx.name), 0, scene.to) }); },
+        check: (ctx, scene, items) => {
+            const paras = storyOf(ctx.name).map(normalize);
+            const d = collect(ctx.name, { step: 5, scene: sceneIndex(ctx.name, scene), extra: items });
+            const ids = new Set(d.entities.map((e) => e.id));
+            const errs = [];
+            const found = (text, from = 0, to = scene.to) => { const t = normalize(text); const re = new RegExp(`(^|[^A-Za-z0-9])${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^A-Za-z0-9]|$)`); return paras.slice(from, Math.min(to, scene.to) + 1).some((p) => re.test(p)); };
+            for (const x of items) {
+                if (!['entities', 'mentions', 'moves', 'joins'].includes(x.file)) errs.push(`${x.id ?? '?'}: file ${x.file}`);
+                if (x.file === 'entities') {
+                    if (!/^[a-z][a-z0-9_]*$/.test(x.id ?? '')) errs.push(`${x.id}: an id is snake case`);
+                    if (x.within && !ids.has(x.within)) errs.push(`${x.id}: within ${x.within}: no such entity`);
+                    if (x.source && !found(x.source)) errs.push(`${x.id}: source "${x.source.slice(0, 50)}" is not in the story so far`);
+                }
+                if (x.file === 'mentions') {
+                    if (!ids.has(x.id)) errs.push(`mentions for ${x.id}: no such entity`);
+                    for (const p of list(x.phrases)) {
+                        const text = typeof p === 'string' ? p : p.text;
+                        if (typeof p !== 'string' && !(Array.isArray(p.paras) && p.paras.length === 2)) errs.push(`${x.id}: phrase "${text}": paras is [from, to]`);
+                        else if (!found(text, typeof p === 'string' ? 0 : p.paras[0], typeof p === 'string' ? scene.to : p.paras[1])) errs.push(`${x.id}: phrase "${text}" is not in the story so far${typeof p === 'string' ? '' : ` (¶${p.paras[0]}–¶${p.paras[1]})`}`);
+                    }
+                }
+                if (x.file === 'moves' && !ids.has(x.id)) errs.push(`moves: no entity ${x.id}`);
+                if (x.file === 'joins' && (!ids.has(x.door) || !list(x.sides).every((y) => ids.has(y)))) errs.push(`joins ${x.door}: the door and its sides must be entities`);
+            }
+            for (const e of d.entities) if (e.within && !ids.has(e.within)) errs.push(`${e.id}: within ${e.within}: no such entity`);
+            for (const e of items.filter((x) => x.file === 'entities' && !d.mentions[x.id]?.length && !x.source && !d.entities.find((y) => y.id === x.id)?.source && x.kind !== 'state')) errs.push(`${e.id}: no phrase in mentions and no source quote`);
+            if (sceneIndex(ctx.name, scene) === 0) for (const n of d.header?.narrators ?? []) if (n.id !== 'narrator' && !ids.has(n.id)) errs.push(`the narrator ${n.id} is not an entity`);
+            return errs;
+        },
+    },
+    {
+        n: 6, name: 'times', perScene: true,
+        prompt: (ctx, scene) => { const d = seen(ctx, 6, scene); return template('06-times', { ...common(ctx, d, scene), entities: d.entities.map((e) => `${e.id}: ${e.name}`).join('\n'), story: numbered(storyOf(ctx.name), 0, scene.to) }); },
+        check: (ctx, scene, items) => {
+            const paras = storyOf(ctx.name);
+            const d = collect(ctx.name, { step: 6, scene: sceneIndex(ctx.name, scene), extra: items });
+            const ids = new Set(d.times.map((t) => t.id));
+            const errs = [];
+            for (const x of items) {
+                if (x.file !== 'times') { errs.push(`${x.id}: file ${x.file}`); continue; }
+                if (!/^t\.[a-z0-9_]+$/.test(x.id ?? '')) errs.push(`${x.id}: a time id is t.<name>`);
+                for (const a of list(x.after)) if (!ids.has(a)) errs.push(`${x.id}: after ${a}: no such time`);
+                if (x.quote != null && !inPara(paras, x.para, x.quote)) errs.push(`${x.id}: quote "${String(x.quote).slice(0, 50)}" is not in ¶${x.para}`);
+                if (x.para > scene.to) errs.push(`${x.id}: para ${x.para} is beyond this scene`);
+            }
+            // No cycle in `after`.
+            const after = new Map(d.times.map((t) => [t.id, list(t.after)]));
+            const state = new Map();
+            const visit = (id) => { if (state.get(id) === 1) return true; if (state.get(id) === 2) return false; state.set(id, 1); const c = (after.get(id) ?? []).some(visit); state.set(id, 2); return c; };
+            for (const t of d.times) if (visit(t.id)) { errs.push(`${t.id}: its after order has a cycle`); break; }
+            return errs;
+        },
+    },
+    {
+        n: 7, name: 'facts', perScene: true,
+        prompt: (ctx, scene) => {
+            const d = seen(ctx, 7, scene);
+            const n = d.header?.narrators?.[0];
+            return template('07-facts', { ...common(ctx, d, scene), narrator_account: n ? `acct.${n.id}` : 'acct.narrator', reading: lines(sceneThoughts(d, scene)), story: numbered(storyOf(ctx.name), 0, scene.to) });
+        },
+        check: (ctx, scene, items) => {
+            const bad = items.filter((x) => !['facts', 'accounts', 'account_add', 'entities', 'times', 'mentions'].includes(x.file)).map((x) => `${x.id ?? '?'}: file ${x.file}`);
+            const beyond = items.filter((x) => x.file === 'facts' && x.para > scene.to).map((x) => `${x.id}: para ${x.para} is beyond this scene`);
+            return [...bad, ...beyond, ...validated(ctx, 7, scene, items, { ignore: LATER })];
+        },
+    },
+    {
+        n: 8, name: 'questions', perScene: true,
+        prompt: (ctx, scene) => { const d = seen(ctx, 8, scene); return template('08-questions', { ...common(ctx, d, scene), reading: readingText(d, scene.to), story: numbered(storyOf(ctx.name), 0, scene.to) }); },
+        check: (ctx, scene, items) => {
+            const bad = items.filter((x) => !['questions', 'possibility', 'patch'].includes(x.file)).map((x) => `${x.id ?? '?'}: file ${x.file}`);
+            const early = items.filter((x) => x.file === 'questions' && x.answer != null).map((x) => `${x.id}: no answers yet (answer null)`);
+            return [...bad, ...early, ...validated(ctx, 8, scene, items, { ignore: [/true assertions contradict/, /an answer needs/, /answer_/] })];
+        },
+    },
+    {
+        n: 9.1, name: 'answers', dir: '09a-answers',
+        prompt: (ctx) => { const d = seen(ctx, 9.1, null); return template('09a-answers', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
+        check: (ctx, scene, items) => {
+            const d = seen(ctx, 9.1, null);
+            const missing = d.questions.filter((q) => !items.some((x) => x.file === 'patch' && x.id === q.id)).map((q) => `${q.id}: no answer patch`);
+            return [...missing, ...validated(ctx, 9.1, null, items, { ignore: [/true assertions contradict/], also: d.questions.map((q) => q.id) })];
+        },
+    },
+    {
+        n: 9.2, name: 'dates', dir: '09b-dates', perScene: true,
+        prompt: (ctx, scene) => {
+            const d = seen(ctx, 9.2, scene);
+            const all = collect(ctx.name, { step: 9.2 });
+            return template('09b-dates', { ...common(ctx, all, scene), scene_facts: lines(all.facts.filter((f) => f.para >= scene.from && f.para <= scene.to)), reading: readingText(all), story: numbered(storyOf(ctx.name)) });
+        },
+        check: (ctx, scene, items) => {
+            const all = collect(ctx.name, { step: 9.2 });
+            const mineIds = all.facts.filter((f) => f.para >= scene.from && f.para <= scene.to).map((f) => f.id);
+            return validated(ctx, 9.2, scene, items, { also: mineIds });
+        },
+    },
+];

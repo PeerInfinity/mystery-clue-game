@@ -1,0 +1,2 @@
+[{"para":31,"kind":"account","text":"The answer to Holmes's wire: the door was locked","id":"acct.wire","i":1,"verdict":"supported","why":"Holmes says he sent a special wire to clear up whether the door was left unlocked, and states that the boy locked the door before leaving, so the wire's answer is given in the text."},
+{"para":31,"kind":"name","text":"Holmes's special wire","id":"special_wire","i":2,"verdict":"supported","why":"Paragraph 31 explicitly states that Holmes sent a special wire to Dartmoor the previous day."}]

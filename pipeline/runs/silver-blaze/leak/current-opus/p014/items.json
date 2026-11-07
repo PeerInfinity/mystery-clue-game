@@ -1,0 +1,6 @@
+[{"para":14,"kind":"fact","text":"Fitzroy Simpson: name \"Fitzroy Simpson\"","id":"f.simpson_name","i":1,"verdict":"supported","why":"The name Fitzroy Simpson is stated in ¶14."},
+{"para":14,"kind":"account","text":"Gregory's case against Simpson","id":"acct.gregory","i":2,"verdict":"supported","why":"Simpson has been arrested and Inspector Gregory is in charge of the case, so a case against him follows directly."},
+{"para":14,"kind":"name","text":"Fitzroy Simpson","id":"simpson","i":3,"verdict":"supported","why":"The name appears in ¶14."},
+{"para":14,"kind":"question","text":"Where is Silver Blaze?","id":"q.horse_where","i":4,"verdict":"supported","why":"The horse's disappearance is central, and Holmes expected it to be found."},
+{"para":14,"kind":"possibility","text":"Where is Silver Blaze? — dead, in a pit or mine","id":"q.horse_where=dead, in a pit or mine","i":5,"verdict":"unsupported","why":"Nothing so far mentions pits or mines, or suggests the horse is dead; this detail is too specific."},
+{"para":14,"kind":"possibility","text":"Where is Silver Blaze? — taken far away","id":"q.horse_where=taken far away","i":6,"verdict":"supported","why":"Holmes doubts the horse could stay hidden locally, which makes removal far away a reasonable possibility."}]

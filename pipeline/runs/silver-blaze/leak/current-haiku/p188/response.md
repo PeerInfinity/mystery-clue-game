@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The story frames this moment as the race itself: Holmes and the narrator have travelled to Winchester to see the Wessex Cup, and the betting remark refers to 'yesterday' as a past day. Nothing so far places the present scene on the day before the race."}
+```

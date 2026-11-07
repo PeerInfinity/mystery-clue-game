@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "At ¶162 the Inspector takes a photograph 'from an envelope', so the envelope is in Inspector Gregory's possession and the label follows directly from the text."}
+```

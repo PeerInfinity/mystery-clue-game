@@ -1,0 +1,6 @@
+[{"para":183,"kind":"name","text":"Winchester","id":"winchester","i":1,"verdict":"supported","why":"Paragraph 183 names Winchester as the destination of the trip."},
+{"para":183,"kind":"name","text":"Winchester station","id":"winchester_station","i":2,"verdict":"supported","why":"Paragraph 183 mentions the train and Colonel Ross meeting them outside the station."},
+{"para":183,"kind":"name","text":"The course","id":"racecourse","i":3,"verdict":"supported","why":"Paragraph 183 says they drove 'to the course beyond the town'."},
+{"para":183,"kind":"name","text":"Ross's drag","id":"drag","i":4,"verdict":"supported","why":"Paragraph 183 says they drove 'in his drag', meaning Colonel Ross's carriage."},
+{"para":183,"kind":"name","text":"The train to Winchester","id":"race_train","i":5,"verdict":"supported","why":"Paragraph 183 says Holmes and Watson were 'again in the train, bound for Winchester'."},
+{"para":183,"kind":"time","text":"Race day: the train to Winchester, the drag to the course","id":"t.race_train","i":6,"verdict":"unsupported","why":"The story says they travel 'to see the race' but never states that the race is held that day. The timing points the other way: 'four days later' from Thursday is Monday, while Holmes earlier said the race was 'next Tuesday'."}]

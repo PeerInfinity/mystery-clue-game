@@ -1,0 +1,4 @@
+[{"para":6,"kind":"name","text":"Paddington station","id":"paddington","i":1,"verdict":"supported","why":"Holmes says they must catch their train at Paddington, so calling it a station is obvious."},
+{"para":6,"kind":"name","text":"Watson's field-glass","id":"field_glass","i":2,"verdict":"supported","why":"Holmes asks Watson to bring 'your very excellent field-glass'."},
+{"para":6,"kind":"time","text":"Thursday, an hour later: in the train","id":"t.thu_train","i":3,"verdict":"unsupported","why":"The story has not named the day as Thursday or said the train scene comes an hour later."},
+{"para":6,"kind":"time","text":"Thursday, Holmes's account in the train","id":"t.thu_recital","i":4,"verdict":"unsupported","why":"Holmes promises to explain on the journey, but the day 'Thursday' is never stated in the text so far."}]

@@ -15,6 +15,8 @@
   supports, which are partial or missing, grouped by kind, with a proposed order of work (spoilers).
 - `docs/reading-annotated.md` — a careful reader's thoughts through the whole story: the spec for the player's
   moves (the earlier game mirrors it in `v1/cases/silver-blaze/thoughts.json`).
+- `pipeline/README.md` — the process for setting up a new story, step by step, its blind runs and the comparison
+  with the current data.
 - `guide.html` — the player's guide to Watson's timeline, linked from its header and Settings; keep it in step with
   the UI and free of spoilers. The earlier game's guide is `v1/guide.html`.
 
@@ -31,6 +33,8 @@ See `docs/technical.md`. The ones used most:
 | Play the true path through Watson's timeline (about a minute; port 9333) | `node scripts/path-check.mjs` |
 | Watson's timeline's autoplay to the end (under a minute; port 9333; a layout argument) | `node scripts/world-autoplay-check.mjs` |
 | Watson's timeline's hints, a hint-only player to the end (about 3 min; port 9333) | `node scripts/world-hints-check.mjs` |
+| One step of the new-story pipeline (blind model calls; costs money; recorded in `pipeline/runs/`) | `node pipeline/run.mjs <case> <step>` |
+| Compare a pipeline run with the current data | `node pipeline/compare.mjs <case>` |
 | The earlier game: its autoplay through the real page (about 6–8 min; port 9333, one script at a time; `/v1/`) | `node v1/scripts/autoplay-check.mjs` |
 
 ## Conventions

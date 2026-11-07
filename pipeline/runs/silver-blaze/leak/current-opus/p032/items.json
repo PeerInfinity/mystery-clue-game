@@ -1,0 +1,5 @@
+[{"para":32,"kind":"account","text":"Mrs. Straker's account: one o'clock and seven o'clock","id":"acct.mrs_straker","i":1,"verdict":"unsupported","why":"Mrs. Straker's account so far mentions only one in the morning; nothing about seven o'clock has been told yet."},
+{"para":32,"kind":"name","text":"Straker's mackintosh","id":"overcoat","i":2,"verdict":"supported","why":"The story says Straker pulled on his large mackintosh before leaving."},
+{"para":32,"kind":"time","text":"Tuesday, one in the morning","id":"t.tue_0100","i":3,"verdict":"supported","why":"The catastrophe happened on Monday night, so one in the morning that night is plainly early Tuesday."},
+{"para":32,"kind":"question","text":"Why did Straker go out at one in the morning?","id":"q.straker_aim","i":4,"verdict":"supported","why":"A plain question raised by Straker leaving the house at one in the morning."},
+{"para":32,"kind":"possibility","text":"Why did Straker go out at one in the morning? — to see that all was well","id":"q.straker_aim=to see that all was well","i":5,"verdict":"supported","why":"Straker himself said he meant to walk down to the stables to see that all was well."}]

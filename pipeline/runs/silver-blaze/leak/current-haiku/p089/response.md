@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes himself mentions meeting Mrs. Straker at a garden-party in Plymouth in ¶89, so the event is named in the story so far. The label only names it and does not add details beyond Holmes's remark."}
+```

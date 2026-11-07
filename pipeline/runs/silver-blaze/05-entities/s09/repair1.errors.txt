@@ -1,0 +1,1 @@
+straker_knife: phrase "The singular knife" is not in the story so far

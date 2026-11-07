@@ -1,0 +1,3 @@
+[{"para":73,"kind":"account","text":"The police's part shown and told in the sitting-room: the body, the pockets, the cork","id":"acct.villa_police","i":1,"verdict":"unsupported","why":"The story so far never mentions a sitting-room, the pockets, or a cork. It only says the body lies upstairs; the police's examination of these details has not been told yet."},
+{"para":73,"kind":"name","text":"Upstairs","id":"upstairs_room","i":2,"verdict":"supported","why":"Paragraph 73 states that Straker's body 'lies upstairs' in the house where the party is."},
+{"para":73,"kind":"time","text":"Friday: the inquest","id":"t.fri","i":3,"verdict":"supported","why":"Paragraph 73 says 'The inquest is to-morrow,' and paragraph 13 places the current day on Thursday, so tomorrow is Friday."}]

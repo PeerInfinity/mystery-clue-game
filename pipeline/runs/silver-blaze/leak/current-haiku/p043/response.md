@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story states the thigh wound was a clean cut from a very sharp instrument (¶35), and Watson's suggestion in ¶43 that Straker's own knife caused it is the possibility the story has just raised. The question and the answer are both things the reader has reason to consider."}
+```

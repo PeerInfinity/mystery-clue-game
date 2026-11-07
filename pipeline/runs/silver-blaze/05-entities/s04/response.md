@@ -1,0 +1,69 @@
+```jsonl
+{"file": "entities", "id": "driver", "kind": "person", "name": "The landau's driver"}
+{"file": "entities", "id": "road", "kind": "place", "name": "The road by Straker's villa", "within": "kings_pyland"}
+{"file": "entities", "id": "paddock", "kind": "place", "name": "The paddock between the villa and the out-building", "within": "kings_pyland"}
+{"file": "entities", "id": "upstairs_room", "kind": "place", "name": "The upstairs room where Straker's body lies", "within": "straker_villa", "source": "Yes; he lies upstairs."}
+{"file": "entities", "id": "sitting_room", "kind": "place", "name": "The sitting-room of Straker's villa", "within": "straker_villa"}
+{"file": "entities", "id": "passage", "kind": "place", "name": "The passage of Straker's villa", "within": "straker_villa"}
+{"file": "entities", "id": "straker_bedroom", "kind": "place", "name": "The Strakers' bedroom", "within": "straker_villa"}
+{"file": "entities", "id": "dressing_table", "kind": "object", "name": "The dressing-table", "within": "straker_bedroom"}
+{"file": "entities", "id": "central_table", "kind": "object", "name": "The central table in the sitting-room", "within": "sitting_room"}
+{"file": "entities", "id": "tin_box", "kind": "object", "name": "The Inspector's square tin box", "within": "sitting_room"}
+{"file": "entities", "id": "vestas", "kind": "object", "name": "Straker's box of vestas"}
+{"file": "entities", "id": "candle", "kind": "object", "name": "Straker's two inches of tallow candle"}
+{"file": "entities", "id": "briar_pipe", "kind": "object", "name": "Straker's briar-root pipe"}
+{"file": "entities", "id": "tobacco_pouch", "kind": "object", "name": "Straker's seal-skin tobacco pouch"}
+{"file": "entities", "id": "silver_watch", "kind": "object", "name": "Straker's silver watch"}
+{"file": "entities", "id": "sovereigns", "kind": "object", "name": "Five sovereigns in gold"}
+{"file": "entities", "id": "pencil_case", "kind": "object", "name": "Straker's aluminium pencil-case"}
+{"file": "entities", "id": "pocket_papers", "kind": "document", "name": "The papers in Straker's pockets"}
+{"file": "entities", "id": "hay_accounts", "kind": "document", "name": "The receipted hay-dealers' accounts"}
+{"file": "entities", "id": "ross_letter", "kind": "document", "name": "Colonel Ross's letter of instructions"}
+{"file": "entities", "id": "milliner_account", "kind": "document", "name": "The milliner's account made out to William Derbyshire"}
+{"file": "entities", "id": "billed_costume", "kind": "object", "name": "The costume on the milliner's account", "source": "Twenty-two guineas is rather heavy for a single costume."}
+{"file": "entities", "id": "cork_disk", "kind": "object", "name": "The disk of cork guarding the knife's tip"}
+{"file": "entities", "id": "weiss_co", "kind": "group", "name": "Weiss & Co., London"}
+{"file": "entities", "id": "lesurier", "kind": "person", "name": "Madame Lesurier"}
+{"file": "entities", "id": "bond_street", "kind": "place", "name": "Bond Street", "within": "london"}
+{"file": "entities", "id": "derbyshire", "kind": "person", "name": "William Derbyshire"}
+{"file": "entities", "id": "madam_derbyshire", "kind": "person", "name": "Madam Derbyshire"}
+{"file": "entities", "id": "plymouth", "kind": "place", "name": "Plymouth", "within": "england"}
+{"file": "entities", "id": "dove_dress", "kind": "object", "name": "The dove-coloured silk costume Holmes describes"}
+{"file": "mentions", "id": "driver", "phrases": ["our driver"]}
+{"file": "mentions", "id": "road", "phrases": ["the road"]}
+{"file": "mentions", "id": "paddock", "phrases": ["a paddock"]}
+{"file": "mentions", "id": "sitting_room", "phrases": ["the sitting-room", "the front room"]}
+{"file": "mentions", "id": "passage", "phrases": ["the passage"]}
+{"file": "mentions", "id": "straker_bedroom", "phrases": [{"text": "the room", "paras": [82, 82]}]}
+{"file": "mentions", "id": "dressing_table", "phrases": ["the dressing-table"]}
+{"file": "mentions", "id": "central_table", "phrases": ["the central table"]}
+{"file": "mentions", "id": "tin_box", "phrases": ["a square tin box"]}
+{"file": "mentions", "id": "vestas", "phrases": ["a box of vestas"]}
+{"file": "mentions", "id": "candle", "phrases": ["two inches of tallow candle"]}
+{"file": "mentions", "id": "briar_pipe", "phrases": ["an A.D.P. briar-root pipe"]}
+{"file": "mentions", "id": "tobacco_pouch", "phrases": ["a pouch of seal-skin with half an ounce of long-cut Cavendish"]}
+{"file": "mentions", "id": "silver_watch", "phrases": ["a silver watch with a gold chain"]}
+{"file": "mentions", "id": "sovereigns", "phrases": ["five sovereigns in gold"]}
+{"file": "mentions", "id": "pencil_case", "phrases": ["an aluminium pencil-case"]}
+{"file": "mentions", "id": "pocket_papers", "phrases": ["a few papers", "these papers"]}
+{"file": "mentions", "id": "hay_accounts", "phrases": ["receipted hay-dealers’ accounts"]}
+{"file": "mentions", "id": "ross_letter", "phrases": ["a letter of instructions from Colonel Ross"]}
+{"file": "mentions", "id": "milliner_account", "phrases": ["a milliner’s account", "the account"]}
+{"file": "mentions", "id": "billed_costume", "phrases": ["a single costume"]}
+{"file": "mentions", "id": "cork_disk", "phrases": ["a disk of cork"]}
+{"file": "mentions", "id": "weiss_co", "phrases": ["Weiss & Co."]}
+{"file": "mentions", "id": "lesurier", "phrases": ["Madame Lesurier"]}
+{"file": "mentions", "id": "bond_street", "phrases": ["Bond Street"]}
+{"file": "mentions", "id": "derbyshire", "phrases": ["William Derbyshire", "Derbyshire"]}
+{"file": "mentions", "id": "madam_derbyshire", "phrases": ["Madam Derbyshire"]}
+{"file": "mentions", "id": "plymouth", "phrases": ["Plymouth"]}
+{"file": "mentions", "id": "dove_dress", "phrases": ["a costume of dove-coloured silk with ostrich-feather trimming", "such a dress"]}
+{"file": "mentions", "id": "straker_villa", "phrases": ["a neat little red-brick villa with overhanging eaves"]}
+{"file": "mentions", "id": "stables", "phrases": ["a long grey-tiled out-building"]}
+{"file": "mentions", "id": "mapleton", "phrases": ["a cluster of houses away to the westward"]}
+{"file": "mentions", "id": "hollow", "phrases": ["the scene of the crime"]}
+{"file": "mentions", "id": "landau", "phrases": [{"text": "the carriage", "paras": [69, 69]}]}
+{"file": "mentions", "id": "straker_knife", "phrases": ["an ivory-handled knife with a very delicate, inflexible blade", "a very singular knife", "this knife", "a cataract knife", {"text": "the knife", "paras": [82, 82]}]}
+{"file": "mentions", "id": "straker", "phrases": ["the dead man"]}
+{"file": "mentions", "id": "mrs_straker", "phrases": ["His wife", {"text": "a woman", "paras": [86, 86]}, "the lady"]}
+```

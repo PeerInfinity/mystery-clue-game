@@ -1,0 +1,5 @@
+[{"para":173,"kind":"name","text":"Three lame sheep","id":"lame_sheep","i":1,"verdict":"supported","why":"The stable-lad says three of the sheep have gone lame."},
+{"para":173,"kind":"time","text":"In the weeks before the crime","id":"t.weeks_before","i":2,"verdict":"unsupported","why":"The lad only says 'of late'. Nothing places the laming in the weeks before the crime."},
+{"para":173,"kind":"question","text":"What lamed the sheep?","id":"q.sheep_lame","i":3,"verdict":"supported","why":"Holmes's pointed question and the lad's answer naturally raise this question."},
+{"para":173,"kind":"possibility","text":"What lamed the sheep? — an epidemic or chance","id":"q.sheep_lame=an epidemic or chance","i":4,"verdict":"supported","why":"Ordinary illness or accident is a plain, neutral explanation any reader could consider."},
+{"para":173,"kind":"possibility","text":"What lamed the sheep? — someone practised on them","id":"q.sheep_lame=someone practised on them","i":5,"verdict":"unsupported","why":"Nothing yet suggests anyone deliberately practised on the sheep. This points at an unrevealed solution."}]

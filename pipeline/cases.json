@@ -1,0 +1,14 @@
+{
+  "silver-blaze": {
+    "source": "pipeline/sources/doyle-silver-blaze.txt",
+    "target": "cases/silver-blaze",
+    "title": "Silver Blaze", "author": "Arthur Conan Doyle",
+    "source_info": {"gutenberg_id": 834, "collection": "The Memoirs of Sherlock Holmes", "first_published": 1892, "public_domain": "US and life+70 countries (Doyle died 1930)"}
+  },
+  "speckled-band": {
+    "source": "pipeline/sources/doyle-speckled-band.txt",
+    "target": null,
+    "title": "The Adventure of the Speckled Band", "author": "Arthur Conan Doyle",
+    "source_info": {"gutenberg_id": 1661, "collection": "The Adventures of Sherlock Holmes", "first_published": 1892, "public_domain": "US and life+70 countries (Doyle died 1930)"}
+  }
+}

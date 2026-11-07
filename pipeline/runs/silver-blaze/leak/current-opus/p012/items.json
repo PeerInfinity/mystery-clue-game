@@ -1,0 +1,5 @@
+[{"para":12,"kind":"account","text":"Holmes's own part: the telegrams, his waiting, his wire, his judgements","id":"acct.holmes_own","i":1,"verdict":"unsupported","why":"Only the telegrams he received are mentioned; his deliberate waiting, a wire he sent, and his judgements about the case have not been told yet."},
+{"para":12,"kind":"name","text":"Colonel Ross","id":"colonel_ross","i":2,"verdict":"supported","why":"Named in ¶12 as the owner of the horse who telegraphed Holmes."},
+{"para":12,"kind":"name","text":"Inspector Gregory","id":"gregory","i":3,"verdict":"supported","why":"Named in ¶12 as the inspector looking after the case."},
+{"para":12,"kind":"name","text":"The telegrams","id":"telegrams","i":4,"verdict":"supported","why":"¶12 says Holmes received telegrams from Ross and Gregory on Tuesday evening."},
+{"para":12,"kind":"time","text":"Gregory arrives and arrests Simpson","id":"t.arrest","i":5,"verdict":"unsupported","why":"No one named Simpson and no arrest has appeared in the story so far."}]

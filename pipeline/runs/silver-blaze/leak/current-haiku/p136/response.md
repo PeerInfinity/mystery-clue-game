@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The 'Thursday dusk' part is supported: it is Thursday, the sun is setting as they walk back, and Holmes goes into Brown's parlour while Watson waits outside. The 'twenty minutes' duration is not supported. Holmes only says he will not keep Watson more than 'a few minutes', and no duration is given."}
+```

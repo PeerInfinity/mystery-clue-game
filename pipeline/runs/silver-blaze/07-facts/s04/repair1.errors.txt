@@ -1,0 +1,3 @@
+f.knife_on_dressing_table: no chain reaches the reader from acct.mrs_straker_knife
+f.straker_picks_knife: no chain reaches the reader from acct.mrs_straker_knife
+f.straker_carries_knife_out: no chain reaches the reader from acct.mrs_straker_knife

@@ -1,0 +1,6 @@
+[{"para":1,"kind":"account","text":"What Watson sees and hears himself","id":"acct.watson","i":1,"verdict":"supported","why":"The narrator is the one Holmes addresses as 'Watson' and who says 'we sat down together', so the narrator is Watson and sees and hears the scene himself."},
+{"para":1,"kind":"name","text":"Sherlock Holmes","id":"holmes","i":2,"verdict":"unsupported","why":"The story so far calls him only 'Holmes'; the full name 'Sherlock Holmes' has not been given."},
+{"para":1,"kind":"name","text":"Dr. Watson","id":"watson","i":3,"verdict":"unsupported","why":"The story so far calls him only 'Watson'; the title 'Dr.' has not been given."},
+{"para":1,"kind":"name","text":"Holmes's rooms","id":"baker_street","i":4,"verdict":"unsupported","why":"No rooms or home belonging to Holmes are named; the story only shows the two men at breakfast together."},
+{"para":1,"kind":"time","text":"Before the story, undated","id":"t.before","i":5,"verdict":"supported","why":"The story gives no date, and this paragraph is the opening, so the label simply marks that no date is given."},
+{"para":1,"kind":"time","text":"Thursday, breakfast at Baker Street","id":"t.thu_breakfast","i":6,"verdict":"unsupported","why":"Neither the weekday 'Thursday' nor the location 'Baker Street' appears in the story so far; only 'breakfast one morning' is stated."}]

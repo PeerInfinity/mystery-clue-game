@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story is set on Thursday (¶13), and ¶137 places the end of Holmes's talk with Brown at dusk, as the reds fade to greys. Holmes earlier arranged to meet the others at Straker's house, which is at King's Pyland (¶112), so heading there from Mapleton is a reasonable next step, though the story does not state the departure outright."}
+```

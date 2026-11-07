@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "In the carriage, Gregory is questioning Holmes, so the reply in ¶181 that the dog did nothing in the night-time is his account of the dog."}
+```

@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶226 says the horse lashed out and the steel shoe struck Straker; the horse is Silver Blaze."}
+```

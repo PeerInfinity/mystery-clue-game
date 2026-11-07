@@ -44,6 +44,7 @@ compatibility. Its model, layout and commands are in `v1/docs/technical.md`, its
 | `cases/silver-blaze/` | The case: `story.txt` and the world model in `world/` (the case header, entities, mentions, time points, facts, accounts, questions, the likely clashes, and the true path through the page, `path.json`). See `docs/case-format.md`, "A case". |
 | `scripts/` | The world model's validator and provenance, the local server, the site build and the headless-Chrome checks. |
 | `v1/` | The earlier game, with its own copy of everything it uses (`v1/docs/technical.md`). |
+| `pipeline/` | The process that sets up a new story (`pipeline/README.md`): the format spec sent to the model (`spec.md`, `reading-spec.md`: invented examples only), the step prompts (`steps/`), the driver (`run.mjs`: blind `claude -p` calls, checks, repair rounds), the run's assembled case (`assemble.mjs`), the comparison with a case's current data (`compare.mjs`), the source texts (`sources/`) and every run's records (`runs/<case>/`, spoilers). |
 
 ## Running and checking
 
@@ -58,6 +59,8 @@ is the earlier game's, for its JSON Schema.
 | Check the world model (`cases/silver-blaze/world/`), including that the true story has no contradiction, and print its counts and the contradictions a reader trusting every source meets | `npm run validate-world` |
 | Collect the live site into `_site/` (or a directory given) | `npm run build-site` |
 | The earlier game's checks and generators (from `v1/`: `npm run v1:validate`, `v1:validate-thoughts`, `v1:reveal-log`, `v1:foreshadow-log`, `v1:clash-log`; the rest as `node scripts/…` in `v1/`) | see `v1/docs/technical.md` |
+| Run one step of the new-story pipeline on a case (blind model calls, recorded with their cost; `--scene`, `--from`, `--dry`) | `node pipeline/run.mjs <case> <step>` |
+| Compare a pipeline run's data with the case's current data, by content | `node pipeline/compare.mjs <case> [part]` |
 | How each fact of the world model reached the reader (`--accounts`: per account, and who holds it when) | `node scripts/world-provenance.js cases/silver-blaze` |
 | Every check of Watson's timeline that plays the page, one after another (the path, the autoplay in each layout and on a phone, the hints); starts the server and a headless Chrome of its own if they are not running, and stops only those (about 6 minutes) | `npm run page-checks` |
 | Play the true path (`world/path.json`) through Watson's timeline in headless Chrome: each move offered and taken, none possible before its paragraph, every answer right, no contradiction open at the end (about a minute; `STOP=<para>`, `SAVE=<file>` for the state there) | `node scripts/path-check.mjs` |

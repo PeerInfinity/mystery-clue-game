@@ -1,0 +1,870 @@
+<!-- system -->
+You are one step of a pipeline that turns a detective story into structured data for a reading game. You see only
+what this message gives you. Use only the text given, read as a first-time reader would read it: if you recognise
+the story, do not use what you remember of it, its characters' secrets or its ending. Follow the format exactly.
+Put your output in one or more ```jsonl fenced blocks, one JSON object per line; anything outside the blocks is
+ignored, so keep remarks short.
+
+
+<!-- user -->
+# Repair
+
+Your output for the task below did not pass the checks. Here is the task, your output, and the problems found. Give
+the whole output again, corrected (all of it, not only the changed lines), in the same format.
+
+## The problems
+
+- t220.1: from t220.2: no earlier thought or card
+
+## Your previous output
+
+```jsonl
+{"id":"t215.1","para":215,"tag":"SOURCE","confidence":"fair","profile":"careful","from":["t214.4"],"reads":"as we listened to our companion’s narrative of the events which had occurred at the Dartmoor training-stables upon the Monday night","text":"What follows is Holmes's reconstruction, told after the fact. Some of it rests on things found (prints, match, sheep, the milliner). Some of it is inference about a moment nobody saw. Each part should be weighed by what it rests on."}
+{"id":"t216.1","para":216,"tag":"REVISE","confidence":"strong","profile":"typical","from":["t70.2","t70.1","t37.6"],"reads":"the immense significance of the curried mutton occurred to me","relations":[{"type":"revises","target":"t70.2"}],"text":"This answers t70.2. The clue that struck Holmes in the carriage was the curry, one of the 'original facts' options and not Gregory's talk. A careful reader had the same material from Holmes's own summary on the train."}
+{"id":"t216.2","para":216,"tag":"RECORD","profile":"typical","from":["t14.6"],"reads":"I went to Devonshire with the conviction that Fitzroy Simpson was the true culprit","text":"Holmes admits he went down believing Simpson guilty. The reader's early wrong turn (t14.6) was also the detective's."}
+{"id":"t218.1","para":218,"tag":"TEST","confidence":"strong","profile":"typical","from":["t37.6","t182.2","bk.drug_taste"],"reads":"Powdered opium is by no means tasteless.","relations":[{"type":"supports","target":"t37.6"},{"type":"supports","target":"t182.2"}],"text":"This confirms the taste argument of t37.6. A plain dish would have given the opium away and a curry hid it. A passer-by could not have counted on the curry, so the drugger had to be someone who chose the menu."}
+{"id":"t218.2","para":218,"tag":"DROP","confidence":"strong","profile":"typical","from":["t218.1","t36.1","t58.2"],"reads":"Therefore Simpson becomes eliminated from the case","relations":[{"type":"drops","target":"t36.1"},{"type":"drops","target":"t46.2"}],"text":"Simpson did not drug the curry. Hunter's belief (t36.1) was a mistaken conclusion, and the paper was only the ten-pound bribe (t58.2)."}
+{"id":"t218.3","para":218,"tag":"QUESTION","subtype":"opportunity","confidence":"fair","profile":"careful","from":["t218.1","t37.4"],"reads":"Which of them, then, had access to that dish without the maid seeing them?","text":"Holmes narrows the drugger to Straker or his wife, the only two who could choose curry, and asks which of them could reach Hunter's portion unseen by the maid. He poses the question and, in what follows, never states the answer outright.","options":["Straker himself","Mrs Straker, knowingly or not"]}
+{"id":"t219.1","para":219,"tag":"TEST","confidence":"strong","profile":"typical","from":["t182.1","t34.2","bk.guard_dog"],"reads":"Obviously the midnight visitor was some one whom the dog knew well.","relations":[{"type":"supports","target":"t182.1"}],"text":"This confirms t182.1. The dog's silence means the visitor was familiar. Simpson, a stranger the dog had just been set on, is ruled out as the man in the stable."}
+{"id":"t220.1","para":220,"tag":"INFER","confidence":"fair","profile":"careful","from":["t218.3","t219.1","t220.2"],"reads":"For a dishonest one, obviously, or why should he drug his own stable-boy?","relations":[{"type":"supports","target":"t182.2"}],"text":"Holmes answers t218.3 only in passing: he takes Straker as the one who drugged the lad. Nothing given clears or implicates Mrs Straker beyond her apparent ignorance of the dress."}
+{"id":"t220.2","para":220,"tag":"TEST","confidence":"strong","profile":"typical","from":["t46.4","t182.1","t33.2"],"reads":"John Straker went down to the stables in the dead of the night and took out Silver Blaze","relations":[{"type":"supports","target":"t46.4"},{"type":"refutes","target":"t46.2"}],"text":"This confirms the alternative of t46.4. Straker opened the locked door with his own key and led the horse out. It answers t33.2."}
+{"id":"t220.3","para":220,"tag":"TEST","confidence":"fair","profile":"typical","from":["t92.3","bk.favourite_motive"],"reads":"trainers have made sure of great sums of money by laying against their own horses, through agents","relations":[{"type":"supports","target":"t92.3"}],"text":"This supports the motive guessed at t92.3. A trainer bets against his own favourite through agents and then makes sure it loses."}
+{"id":"t221.1","para":221,"tag":"TEST","confidence":"strong","profile":"typical","from":["t175.1","t82.3","t81.1","bk.subtle_laming"],"reads":"it is possible to make a slight nick upon the tendons of a horse’s ham","relations":[{"type":"supports","target":"t175.1"},{"type":"refutes","target":"t82.1"}],"text":"The cataract knife was for a subcutaneous nick to the tendon, causing a lameness that would pass for a strain. It was not a weapon, and Gregory's 'best he could lay his hands on' (t82.1) is refuted."}
+{"id":"t223.1","para":223,"tag":"TEST","confidence":"strong","profile":"typical","from":["t57.1","t175.2"],"reads":"It was absolutely necessary to do it in the open air.","relations":[{"type":"supports","target":"t175.2"}],"text":"This answers Holmes's own early question (t57.1) of why the horse was taken out. A pricked horse would have woken the lads in the loft."}
+{"id":"t224.1","para":224,"tag":"TEST","confidence":"strong","profile":"typical","from":["t102.2","t104.2"],"reads":"Of course that was why he needed the candle, and struck the match.","relations":[{"type":"supports","target":"t102.2"}],"text":"This confirms that the candle and the vesta in the hollow were Straker's light for the operation."}
+{"id":"t225.1","para":225,"tag":"TEST","confidence":"strong","profile":"typical","from":["t92.2","t92.1","t89.1","bk.alias_mail","bk.second_household"],"reads":"men do not carry other people’s bills about in their pockets","relations":[{"type":"supports","target":"t92.2"},{"type":"supports","target":"t89.1"}],"text":"This confirms the reading of the bill as Straker's own, and the garden-party remark as a deliberate test of whether the dress reached his wife (t89.1). 'Derbyshire' is called 'mythical'."}
+{"id":"t226.1","para":226,"tag":"TEST","confidence":"fair","profile":"typical","from":["t60.2","bk.lost_item"],"reads":"Simpson in his flight had dropped his cravat, and Straker had picked it up","relations":[{"type":"supports","target":"t60.2"}],"text":"The cravat is explained as lost and picked up, the second option of t60.2. Simpson's denial was true. Holmes offers the purpose ('perhaps' to bind the leg) only as a guess."}
+{"id":"t226.2","para":226,"tag":"TEST","confidence":"strong","profile":"typical","from":["t182.3","t213.1","bk.horse_kick"],"reads":"the steel shoe had struck Straker full on the forehead","relations":[{"type":"supports","target":"t182.3"}],"text":"The 'heavy weapon' of ¶35 was the horse's shod hoof, kicking out at the sudden light. This confirms t182.3."}
+{"id":"t226.3","para":226,"tag":"TEST","confidence":"strong","profile":"typical","from":["t43.1","t54.1","t97.1","bk.coat_off"],"reads":"and so, as he fell, his knife gashed his thigh","relations":[{"type":"supports","target":"t43.1"},{"type":"supports","target":"t97.1"}],"text":"Watson's self-wound idea is confirmed, though the cause was the fall rather than convulsions. The coat had been laid aside to free his arms for the task, as t97.1 read it."}
+{"id":"t226.4","para":226,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t215.1","t226.2"],"reads":"the creature frightened at the sudden glare","text":"The moment of the kick is pure reconstruction, fitted to the match, the shoe and the wounds. Nobody saw it. It is the only account that fits all the traces, but it is not testimony."}
+{"id":"t228.1","para":228,"tag":"TEST","confidence":"strong","profile":"typical","from":["t175.1","t175.3","bk.practise_first"],"reads":"What could he practice on?","relations":[{"type":"supports","target":"t175.3"}],"text":"This confirms that the lame sheep were Straker's practice. Holmes calls it his 'very long shot': predicted from the practise-first rule, then checked with the lad."}
+{"id":"t229.1","para":229,"tag":"TEST","confidence":"strong","profile":"typical","from":["t161.2","t156.1","t92.2"],"reads":"who had recognised Straker as an excellent customer of the name of Derbyshire","relations":[{"type":"supports","target":"t92.2"}],"text":"This was the London errand of t156.1 and the use of the photograph. The milliner identifies Straker as Derbyshire, so the merge is confirmed by a witness."}
+{"id":"t229.2","para":229,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t229.1","bk.second_household"],"reads":"I have no doubt that this woman had plunged him over head and ears in debt","text":"The 'dashing wife' is the second household. That the debt drove the plot is Holmes's inference ('I have no doubt'). Straker's bets against the horse are not shown as found, though t220.3 makes them the natural motive."}
+{"id":"t231.1","para":231,"tag":"TEST","confidence":"strong","profile":"typical","from":["t146.1","t150.1"],"reads":"We must have an amnesty in that direction, I think.","text":"The horse is confirmed as bolting and taken in by Silas Brown, who is left unnamed to Ross and unpunished. This is the price of producing the horse safe (t150.1)."}
+{"id":"t231.2","para":231,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t218.3","t220.1","t189.1","t199.1","t163.1","t226.1"],"text":"Left unstated at the story's end: exactly how Straker got the opium into Hunter's portion unseen, and what Holmes asked the maid (likely the curry or the handling of the dish). Who shortened the odds before the race. Why Straker took the cravat, which is a guess. The field-glass turned out to be for watching the race only. Mrs Straker is treated, without comment, as having known nothing."}
+{"id":"t231.3","para":231,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"strong","profile":"typical","from":["t214.5","t218.1","t219.1","t220.2","t221.1","t226.2","t229.1","t231.1"],"relations":[{"type":"supports","target":"t214.5"}],"text":"Final picture. Straker, deep in debt as 'Derbyshire', meant to lame his own favourite with a tendon nick after laying against it. He practised on the sheep, chose a curry to hide the opium given to Hunter, and passed the dog, which knew him. He picked up Simpson's lost cravat and led the horse to the hollow. There he struck a light, and the frightened horse kicked him dead; his knife cut his thigh as he fell. The horse ran towards Mapleton, where Brown hid and dyed it. Simpson was only a tout."}
+```
+
+## The task
+
+# Step: the annotated reading, one scene
+
+# The annotated reading: a reader's notes, paragraph by paragraph
+
+A reading guide for a detective story: the annotations a careful first-time reader would write in the margin while
+trying to make each deduction before the detective announces it. Each annotation is tied to the earliest paragraph
+that makes it possible. It describes the story's puzzle as a reader meets it, not any data format.
+
+## Fair play
+
+The story may be a well-known one. The annotations are a first-time reader's, so:
+
+- An annotation may use only what the text has disclosed up to its paragraph, plus background knowledge, which is
+  always named as a card (below).
+- Every annotation carries a **confidence** a reader could justify at that point: *weak* (a flag, an itch), *fair* (a
+  live hypothesis worth acting on), *strong* (would bet on it).
+- Where knowing the ending would probably make an annotation easier than it is on a first reading, mark it with a
+  `hindsight` note saying what a first-time reader would need in order to make it. Do not leave such an annotation
+  out: mark it.
+- Record the wrong turns a first-time reader would take: a HYPOTHESIS the reader takes up, then a DROP that cites
+  the reason. A reading with no wrong turns is not honest.
+- Leave out any annotation that only someone who knows the ending would make.
+
+## An annotation
+
+One JSON object per line:
+
+```json
+{"id": "t7.2", "para": 7, "tag": "NOTICE", "confidence": "weak", "profile": "careful", "from": ["t6.1"], "reads": "I heard the yard gate creak", "text": "Ruth heard the gate from the house; Dobbs, nearer, says he heard nothing."}
+```
+
+| Field | Meaning |
+|---|---|
+| `id` | `t<para>.<n>`, n counting from 1 within the paragraph. |
+| `para` | The annotation's earliest date: the first paragraph at which every premise is available. |
+| `tag` | The kind of move (table below); `subtype` where useful. |
+| `confidence` | `weak`, `fair`, `strong` (not for RECORD, SET ASIDE). |
+| `profile` | `typical` (a first-time reader paying normal attention), `careful` (a reader playing it as a puzzle), `expert` (needs specialist knowledge, or a leap almost nobody makes). |
+| `from` | The premises: annotation ids and background cards (`bk.*`), all needed. Earlier or same paragraph only. |
+| `reads` | When the annotation reads the text: the clause it reads, copied exactly from its paragraph. |
+| `text` | The note itself, as written in the margin at this paragraph. It cites nothing later. |
+| `relations` | Optional: `[{"type", "target"}]`, type one of `supports`, `strains` (makes the target less likely), `refutes`, `undercuts` (attacks the step from the target's premises to its conclusion), `revises`, `drops`. |
+| `options` | For a QUESTION or HYPOTHESIS: the candidate answers the reader holds open, as a list of short texts. |
+| `hindsight` | Optional: the note on what a first-time reader would need (see Honesty). |
+
+## Tags
+
+| Tag | Subtypes | What the reader is doing |
+|---|---|---|
+| RECORD | | Putting a fact from the text into the picture of what happened. One fact per record, quoted at clause level. Record what matters for the puzzle, not every sentence. |
+| NOTICE | calculate | Flagging a detail that an ordinary version of this story would not contain. `calculate`: the oddity shows only after arithmetic on stated figures. |
+| ABSENCE | | Expecting something the text does not report. |
+| QUESTION | opportunity, motive, turn-around | Naming a blank. `turn-around`: inverting a question to make it productive. |
+| HYPOTHESIS | opportunity, motive, scenario | Proposing candidate explanations, held open. `scenario`: a whole story of the events. |
+| INFER | opportunity | A step as good as certain given its premises. |
+| DEFAULT | period | A step through background knowledge that usually holds, with named exceptions. `period`: a belief of the story's time, presented in its terms without endorsing it. |
+| AGENT | | Reasoning about what a person in that position would do or would have done. |
+| PHYSICAL | | Reasoning about what could physically happen. |
+| IDENTIFY | merge, split | Two names or descriptions are one thing, or one thing is really two. |
+| WEIGH | | Treating testimony as speech: saw versus concluded, could they know, would they lie. |
+| SOURCE | | Tracing a "fact" back along its chain of reporting. |
+| TEST | | Checking new information against a live hypothesis. |
+| RESIDUE | | Listing what a theory leaves unexplained. |
+| PREDICT | | Saying what a hypothesis implies we will find. |
+| TEST PLAN | | Choosing a check that would tell two hypotheses apart. |
+| GENRE | re-read, watch-detective | Reading the narrator's or the detective's behaviour as a signal. `re-read`: going back to earlier text with a new question. `watch-detective`: inferring from what the detective looks at. |
+| SET ASIDE | | Marking a detail as scenery. |
+| DROP | | Abandoning a hypothesis, citing why. |
+| REVISE | | An earlier item changes meaning. |
+
+## Background cards
+
+General knowledge a reader brings: `{"bk": "bk.<name>", "text", "exceptions"?, "reader"?}`, one per line, written
+the first time an annotation uses one. `reader` says who has it: `all`, `period` (a reader of the story's time), or
+`specialist`. A card states a general rule, never the case's answer ("A guard dog barks at strangers at night"; not
+"the dog knew the thief").
+
+The invented example, *The Miller's Purse* (spec.md), might give at ¶8: `{"bk": "bk.sound_carries", "text": "A
+creaking gate is heard first by whoever sleeps nearest it.", "reader": "all"}` and an annotation
+`{"id": "t8.1", "para": 8, "tag": "WEIGH", "confidence": "fair", "profile": "careful", "from": ["t7.1", "bk.sound_carries"], "reads": "I heard nothing", "text": "Dobbs sleeps over the yard. Either the gate did not creak, or he is not telling the truth, or he was not in the loft."}`.
+
+
+## Your task
+
+Write the reading guide's annotations for scene s09 (Holmes explains on the train back to London), ¶215–¶231, paragraph by
+paragraph. The story is given up to the end of this scene, with the annotations so far; the rest of the story is not
+given. Continue the guide: new annotations for this scene's paragraphs only, ids continuing the numbering, `from`
+citing earlier annotations and cards where they are premises; each uses only the paragraphs up to its own.
+Background cards already introduced are listed; add new ones as lines `{"bk": ...}` when an annotation first needs
+them. At the end of the scene, add a summary annotation or two where useful (what is open, what is suspected),
+dated to the scene's last paragraph.
+
+## Background cards so far
+
+{"bk":"bk.favourite_motive","text":"When a horse is favourite for a big race, people who have bet against it, or who stand to lose if it wins, have a reason to stop it running.","exceptions":"The owner or backers of the favourite normally want it to run.","reader":"all"}
+{"bk":"bk.horse_conspicuous","text":"A famous racehorse is large, valuable and recognisable, and it is hard to hide or move unseen in open, thinly settled country.","exceptions":"It can be hidden if it is disguised, kept in a building, or killed.","reader":"all"}
+{"bk":"bk.genre_detective_signals","text":"In detective stories, what the detective asks for, looks at, or finds odd usually matters later.","reader":"all"}
+{"bk":"bk.period_gypsies","text":"Readers of the period readily suspected roaming gypsies of horse-stealing.","exceptions":"It is a prejudice of the time, not evidence, and a large reward puts the same people on the side of finding the horse.","reader":"period"}
+{"bk":"bk.drug_taste","text":"A drug mixed into food is easier to give unnoticed in a strongly flavoured dish than in a plain one, because most drugs have a taste or smell of their own.","exceptions":"Tasteless drugs; a very small dose; a careless or very hungry eater.","reader":"specialist"}
+{"bk":"bk.keyholder","text":"The master of a stable or house normally keeps a key to it.","exceptions":"Keys may be held only by the servant on duty, or kept at a separate office.","reader":"all"}
+{"bk":"bk.guard_dog","text":"A guard dog kept in a building gives the alarm when strangers come at night.","exceptions":"It is drugged, removed, or out of earshot, or it knows the visitor.","reader":"all"}
+{"bk":"bk.self_wound","text":"A man struck hard on the head can thrash about convulsively and may hurt himself with anything he is holding.","reader":"specialist"}
+{"bk":"bk.lost_item","text":"Something lost out of doors can be picked up and carried off by anyone who comes across it, so where it turns up later does not prove where its owner went.","exceptions":"It was lost only moments before, or in a place nobody else could reach.","reader":"all"}
+{"bk":"bk.search_by_description","text":"Searchers look for what they have been told to look for, so a search finds a thing only if it still looks the way it was described.","exceptions":"Searchers who know the object closely, or who check it in ways that do not depend on appearance.","reader":"all"}
+{"bk":"bk.tout_bribe","text":"Racing touts commonly paid stable-lads money for inside information on how the horses were running.","reader":"period"}
+{"bk":"bk.cataract_knife","text":"A cataract knife is an eye-surgeon's instrument: a very thin, rigid, extremely sharp blade made for tiny, precise cuts, not for fighting.","reader":"specialist"}
+{"bk":"bk.alias_mail","text":"When a man has letters for a 'friend' sent to his own house, the friend may be the man himself under another name.","exceptions":"A genuine friend who has no fixed address, or who has a real reason to receive post elsewhere.","reader":"all"}
+{"bk":"bk.second_household","text":"A man secretly paying for costly women's clothes, under a name not his own, is often keeping a woman his wife does not know about, and such a life needs more money than his wages.","exceptions":"Gifts to a relative; a debt he is settling for someone else.","reader":"period"}
+{"bk":"bk.light_outdoors","text":"Someone who carries a candle and matches at night means to need a small light somewhere, usually out of the wind and away from other lamps.","exceptions":"He carries them by habit, or to light a pipe.","reader":"all"}
+{"bk":"bk.detective_feint","text":"A detective may make a false remark on purpose so that the answer reveals something the person would not volunteer.","reader":"all"}
+{"bk":"bk.no_wind","text":"On a still night a garment does not end up on a bush by itself. If it is found draped there, someone put it there.","exceptions":"It was caught and dragged during a struggle, or thrown and snagged by chance.","reader":"all"}
+{"bk":"bk.coat_off","text":"A man takes off a heavy coat in bad weather when he needs his arms free for close work or for exertion.","exceptions":"It is torn off him, or he is too hot from running.","reader":"all"}
+{"bk":"bk.hoofprints","text":"A shod horse moving over soft, wet ground leaves hoof-prints that a careful searcher can follow, and a cast shoe can be matched against them.","exceptions":"Hard or stony ground, heavy trampling, or ground searched too narrowly.","reader":"all"}
+{"bk":"bk.scratch_race","text":"An owner withdraws a horse from a race when he believes it cannot run. Someone who advises keeping the entry expects the horse to be back and fit in time.","exceptions":"Keeping the entry as a bluff, or to avoid losing a forfeit.","reader":"all"}
+{"bk":"bk.horse_herd","text":"A horse is a herd animal. Left loose, it tends to make for its own stable or for other horses nearby rather than roam alone.","exceptions":"It is badly frightened, injured, shut in, or caught by someone.","reader":"all"}
+{"bk":"bk.horse_markings_dyed","text":"A horse's distinctive markings, such as a white blaze, can be dyed or painted over so that it passes for another horse, and later washed back.","exceptions":"Searchers who know the horse closely by build, gait or temperament.","reader":"period"}
+{"bk":"bk.photo_identify","text":"A detective who asks for someone's photograph usually means to show it to a witness who may recognise that person, perhaps under another name.","reader":"all"}
+{"bk":"bk.practise_first","text":"Someone who must perform a delicate operation he has never done before tends to practise it first on something less valuable.","exceptions":"A practised hand; no time or opportunity to rehearse.","reader":"all"}
+{"bk":"bk.subtle_laming","text":"A small cut to a horse's leg tendon can make it go slightly lame, so that it runs badly without any obvious wound.","reader":"specialist"}
+{"bk":"bk.horse_kick","text":"A horse that is hurt or frightened at close quarters can kick with enough force to kill a man.","reader":"all"}
+{"bk":"bk.odds_shorten","text":"When a horse's price shortens sharply just before a race, with nothing announced, it usually means that people with inside knowledge are backing it heavily.","exceptions":"A rumour that turns out false; general public enthusiasm; a bookmaker cutting his exposure.","reader":"period"}
+
+## The annotations so far
+
+{"id":"t4.1","para":4,"tag":"RECORD","profile":"typical","from":[],"reads":"the singular disappearance of the favourite for the Wessex Cup, and the tragic murder of its trainer","text":"Two events: the favourite for the Wessex Cup has vanished, and its trainer has been murdered."}
+{"id":"t4.2","para":4,"tag":"QUESTION","confidence":"fair","profile":"typical","from":["t4.1"],"text":"How are the disappearance and the murder connected?","options":["A thief came for the horse and killed the trainer who got in the way","The two are separate, or only linked by coincidence","The trainer was mixed up in what happened to the horse"]}
+{"id":"t4.3","para":4,"tag":"HYPOTHESIS","confidence":"weak","profile":"typical","from":["t4.1"],"text":"What does 'disappearance' mean for the horse?","options":["Stolen and hidden","Strayed loose in the confusion","Killed or maimed and the body not yet found"]}
+{"id":"t4.4","para":4,"tag":"QUESTION","subtype":"motive","confidence":"fair","profile":"typical","from":["t4.1","bk.favourite_motive"],"text":"Who gains if the favourite does not run? Bookmakers, people who bet against it, rival owners. Who would want the trainer dead?","options":["Someone with money riding against the favourite","A rival stable","Someone with a private grudge against the trainer"]}
+{"id":"t6.1","para":6,"tag":"GENRE","subtype":"watch-detective","confidence":"weak","profile":"careful","from":["bk.genre_detective_signals"],"reads":"You would oblige me by bringing with you your very excellent field-glass.","text":"Holmes wants a field-glass before he has seen the ground. He expects to look at something at a distance: open moor, a racecourse, figures far off. Keep it in mind."}
+{"id":"t6.2","para":6,"tag":"GENRE","confidence":"weak","profile":"typical","from":[],"reads":"there are points about the case which promise to make it an absolutely unique one","text":"Holmes already sees particular 'points', apparently from the newspaper reports alone. The clues may be in the facts he is about to list."}
+{"id":"t8.1","para":8,"tag":"SET ASIDE","profile":"typical","from":[],"reads":"Our rate at present is fifty-three and a half miles an hour.","text":"The speed calculation from the telegraph posts shows off Holmes's method. It has no bearing on the case."}
+{"id":"t10.1","para":10,"tag":"RECORD","profile":"typical","from":["t4.1"],"reads":"this matter of the murder of John Straker and the disappearance of Silver Blaze","text":"Names: the trainer is John Straker, and the horse is Silver Blaze."}
+{"id":"t12.1","para":12,"tag":"GENRE","confidence":"fair","profile":"careful","from":[],"reads":"the art of the reasoner should be used rather for the sifting of details than for the acquiring of fresh evidence","text":"Holmes says the answer lies in the facts already known, once they are cleared of journalists' theorising. So the reader should treat his coming summary as the evidence to sift, and distrust press 'conjecture'."}
+{"id":"t12.2","para":12,"tag":"RECORD","profile":"typical","from":[],"reads":"I received telegrams from both Colonel Ross, the owner of the horse, and from Inspector Gregory, who is looking after the case, inviting my co-operation","text":"Colonel Ross owns the horse, and Inspector Gregory leads the police case. Both called Holmes in on Tuesday evening."}
+{"id":"t13.1","para":13,"tag":"INFER","confidence":"strong","profile":"careful","from":["t12.2"],"reads":"And this is Thursday morning.","text":"The telegrams came Tuesday evening, so the crime happened no later than Tuesday, probably Monday night or Tuesday. Two days have now passed."}
+{"id":"t14.1","para":14,"tag":"DEFAULT","confidence":"fair","profile":"typical","from":["t4.3","bk.horse_conspicuous"],"reads":"I could not believe it possible that the most remarkable horse in England could long remain concealed, especially in so sparsely inhabited a place as the north of Dartmoor","text":"Holmes reasoned as anyone would: a famous horse on an empty moor gets found quickly."}
+{"id":"t14.2","para":14,"tag":"DROP","confidence":"fair","profile":"typical","from":["t4.3","t13.1","t14.1"],"relations":[{"type":"drops","target":"t4.3"}],"text":"The horse cannot have simply strayed. A loose favourite on a thinly peopled moor would have turned up within two days. Someone is keeping it out of sight, or it is dead."}
+{"id":"t14.3","para":14,"tag":"QUESTION","confidence":"fair","profile":"careful","from":["t14.1","t14.2","bk.horse_conspicuous"],"text":"How can so conspicuous a horse stay unfound? Turn it around: what would make the usual rule fail here?","options":["Shut in a building nearby","Changed in appearance so that nobody recognises it","Taken a long way off very quickly","Dead, and the body hidden"]}
+{"id":"t14.4","para":14,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"fair","profile":"typical","from":["t4.2","t14.1"],"reads":"I expected to hear that he had been found, and that his abductor was the murderer of John Straker","text":"Working theory, Holmes's own until now: one person took the horse and killed Straker."}
+{"id":"t14.5","para":14,"tag":"RECORD","profile":"typical","from":[],"reads":"beyond the arrest of young Fitzroy Simpson nothing had been done","text":"The police have arrested a young man, Fitzroy Simpson."}
+{"id":"t14.6","para":14,"tag":"HYPOTHESIS","confidence":"weak","profile":"typical","from":["t14.5","t14.4"],"text":"Simpson is the abductor and murderer.","options":["Simpson did both","Simpson did one or the other","Simpson is innocent and was arrested on suspicion"]}
+{"id":"t14.7","para":14,"tag":"WEIGH","confidence":"weak","profile":"careful","from":["t14.5","t14.6"],"relations":[{"type":"strains","target":"t14.6"}],"text":"Holmes treats the arrest as 'nothing having been done'. To him an arrest does not settle the case, especially with the horse still missing. If Simpson knew where the horse was, one might expect it to have been found by now."}
+{"id":"t14.8","para":14,"tag":"GENRE","subtype":"watch-detective","confidence":"weak","profile":"careful","from":[],"reads":"Yet in some ways I feel that yesterday has not been wasted.","text":"The fact that the horse was not found is itself information to Holmes. Its continued absence is a clue to how it is being hidden."}
+{"id":"t16.1","para":16,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t4.2","t4.4","t14.3","t14.4","t14.6","t6.1"],"text":"Open at the end of the scene: how the murder and the disappearance connect; where an unfindable famous horse can be; who profits if the favourite does not run; whether Simpson is more than a convenient arrest; and what Holmes means to look at with the field-glass. The details have not been given yet. Holmes's list of facts comes next and should be read closely."}
+{"id":"t16.2","para":16,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"typical","from":["t14.4","t14.2","t4.4"],"text":"Leading picture so far: someone with an interest against the favourite stole or harmed Silver Blaze, killed Straker in the process, and has hidden the horse well. Simpson is the police's candidate. It is held loosely, because Holmes's own version of it has already failed once."}
+{"id":"t18.1","para":18,"tag":"RECORD","profile":"typical","from":["t4.1"],"reads":"the betting being three to one on him","text":"Silver Blaze is heavily odds-on for the Wessex Cup."}
+{"id":"t18.2","para":18,"tag":"RECORD","profile":"typical","from":[],"reads":"preventing Silver Blaze from being there at the fall of the flag next Tuesday","text":"The race is next Tuesday, about five days off. Whoever has the horse needs to keep it out of sight only until then."}
+{"id":"t18.3","para":18,"tag":"INFER","subtype":"motive","confidence":"strong","profile":"typical","from":["t18.1","bk.favourite_motive"],"reads":"so that even at those odds enormous sums of money have been laid upon him","text":"Huge sums are bet on him, so the bookmakers who took those bets stand to lose heavily if he wins. Layers against the favourite are the obvious class of suspect."}
+{"id":"t19.1","para":19,"tag":"RECORD","profile":"typical","from":["t10.1"],"reads":"has always shown himself to be a zealous and honest servant","text":"Straker is a former jockey with twelve years' good service to the Colonel. His character is reported as excellent."}
+{"id":"t19.2","para":19,"tag":"RECORD","profile":"typical","from":[],"reads":"One of these lads sat up each night in the stable, while the others slept in the loft","text":"Routine: one lad sits up in the stable each night and the other two sleep in the loft above."}
+{"id":"t19.3","para":19,"tag":"RECORD","profile":"typical","from":[],"reads":"lived in a small villa about two hundred yards from the stables","text":"Map: Straker's house is 200 yards from the stables and a cluster of villas lies half a mile north. Tavistock is two miles west, and Mapleton is two miles across the moor. Everything else is empty moor."}
+{"id":"t19.4","para":19,"tag":"HYPOTHESIS","subtype":"opportunity","confidence":"weak","profile":"careful","from":["t19.3","t14.3"],"reads":"the larger training establishment of Mapleton, which belongs to Lord Backwater, and is managed by Silas Brown","text":"A rival training stable two miles off is one place where a horse could stand unnoticed among other horses, under cover. It answers the 'shut in a building' option of t14.3.","options":["Mapleton is hiding the horse","Mapleton is mere geography"]}
+{"id":"t19.5","para":19,"tag":"DEFAULT","subtype":"period","confidence":"weak","profile":"typical","from":["bk.period_gypsies","t14.3"],"reads":"inhabited only by a few roaming gypsies","text":"A reader of the time would think at once of the gypsies as horse-thieves. That is a candidate the story itself puts on the map."}
+{"id":"t20.1","para":20,"tag":"RECORD","profile":"typical","from":[],"reads":"the stables were locked up at nine o’clock","text":"The stables were locked at nine. Ned Hunter stayed inside on guard, and the other two lads went up to the house for supper."}
+{"id":"t20.2","para":20,"tag":"RECORD","profile":"typical","from":[],"reads":"which consisted of a dish of curried mutton","text":"Edith Baxter, the maid, carried Hunter's supper down to the stables. It was curried mutton."}
+{"id":"t20.3","para":20,"tag":"NOTICE","confidence":"weak","profile":"careful","from":["t20.2"],"reads":"it was the rule that the lad on duty should drink nothing else","text":"The duty lad drinks only tap water. So if anyone wanted to dose him, the food is the only channel. The menu is told in unusual detail."}
+{"id":"t21.1","para":21,"tag":"RECORD","profile":"typical","from":[],"reads":"carried a heavy stick with a knob to it","text":"The stranger is gentlemanly, wears a grey tweed suit and cloth cap with gaiters, and carries a heavy knobbed stick. He is pale and nervous, and a little over thirty."}
+{"id":"t24.1","para":24,"tag":"WEIGH","confidence":"fair","profile":"typical","from":["t19.2"],"reads":"I understand that a stable-boy sleeps there alone every night.","text":"He claimed to be lost (¶22), yet he knows the stable routine. The 'lost' story is a pretext, and he came to this stable on purpose."}
+{"id":"t24.2","para":24,"tag":"HYPOTHESIS","confidence":"fair","profile":"typical","from":["t24.1"],"reads":"He took a piece of white paper folded up out of his waistcoat pocket.","text":"What is in the folded paper?","options":["A drug for the boy's supper","A note or bribe-offer for the boy","Money"]}
+{"id":"t25.1","para":25,"tag":"RECORD","profile":"typical","from":[],"reads":"It was already opened, and Hunter was seated at the small table inside.","text":"Meals are handed in through a window that was already open, with Hunter at a table just inside."}
+{"id":"t26.1","para":26,"tag":"WEIGH","confidence":"weak","profile":"careful","from":["t24.2"],"reads":"The girl has sworn that as he spoke she noticed the corner of the little paper packet protruding from his closed hand.","text":"This is sworn, but it comes from a frightened girl by lantern light, and it fits what everyone later came to believe. It shows the packet was still in his hand. It does not show what was done with it."}
+{"id":"t28.1","para":28,"tag":"RECORD","profile":"typical","from":[],"reads":"You’ve two horses in for the Wessex Cup—Silver Blaze and Bayard.","text":"King's Pyland has two runners. The stranger asks whether the stable secretly prefers Bayard. That is a tout's question."}
+{"id":"t29.1","para":29,"tag":"RECORD","profile":"typical","from":[],"reads":"rushed across the stable to unloose the dog","text":"There is a guard dog kept in the stable."}
+{"id":"t29.2","para":29,"tag":"INFER","subtype":"opportunity","confidence":"fair","profile":"typical","from":["t25.1","t26.1"],"reads":"as she ran she looked back and saw that the stranger was leaning through the window","text":"While Hunter crossed the stable for the dog, the stranger was alone at the open window with the supper on the table inside. He had the chance to put something in it."}
+{"id":"t30.1","para":30,"tag":"HYPOTHESIS","subtype":"opportunity","confidence":"weak","profile":"typical","from":["t29.1","t20.1"],"reads":"Did the stable-boy, when he ran out with the dog, leave the door unlocked behind him?","text":"Watson's idea: the stranger doubled back and slipped in, or someone else did, while Hunter was out with the dog and the door stood open."}
+{"id":"t31.1","para":31,"tag":"DROP","confidence":"strong","profile":"typical","from":["t30.1"],"reads":"The boy locked the door before he left it.","relations":[{"type":"drops","target":"t30.1"}],"text":"The door was locked and the window is too small for a man to get through. The stranger did not get in that evening."}
+{"id":"t31.2","para":31,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t31.1","bk.genre_detective_signals"],"text":"Holmes wired specially about the door. Access to the stable is a key point for him: whoever took the horse later had to get through a locked door."}
+{"id":"t32.1","para":32,"tag":"RECORD","profile":"typical","from":[],"reads":"he pulled on his large mackintosh and left the house","text":"Straker went out at about 1 a.m. in the rain to check the stables, wearing a large mackintosh."}
+{"id":"t32.2","para":32,"tag":"AGENT","confidence":"weak","profile":"careful","from":["t32.1"],"reads":"although he does not seem to have quite realized its true significance","text":"He is said not to have grasped the significance, yet he was uneasy enough to go out alone at one in the rain without waking the lads. Mrs Straker reports only the reason he gave her."}
+{"id":"t33.1","para":33,"tag":"RECORD","profile":"typical","from":[],"reads":"Hunter was sunk in a state of absolute stupor","text":"At 7 a.m.: the stable door is open, Hunter is stupefied, the stall is empty and Straker is missing."}
+{"id":"t33.2","para":33,"tag":"QUESTION","subtype":"opportunity","confidence":"strong","profile":"typical","from":["t31.1","t33.1","bk.keyholder"],"reads":"The door was open","text":"Locked at nine and open at seven: who opened it?","options":["Someone with a duplicate or stolen key","Straker, who would have a key as master of the stable","Hunter, before the drug took hold"]}
+{"id":"t34.1","para":34,"tag":"RECORD","profile":"typical","from":[],"reads":"They had heard nothing during the night, for they are both sound sleepers.","text":"The lads in the loft heard nothing."}
+{"id":"t34.2","para":34,"tag":"ABSENCE","confidence":"weak","profile":"careful","from":["t29.1","t34.1","bk.guard_dog"],"text":"A guard dog is kept in the stable, yet nothing woke the lads overhead. Did the dog make no noise while the horse was taken? The account does not say.","hindsight":"A first-time reader must connect the dog of ¶29 with the silence of ¶34. They are five paragraphs apart and the dog is never mentioned again."}
+{"id":"t35.1","para":35,"tag":"RECORD","profile":"typical","from":[],"reads":"John Straker’s overcoat was flapping from a furze-bush","text":"Straker's coat was hanging on a furze-bush a quarter-mile from the stables. His body lay in a hollow just beyond."}
+{"id":"t35.2","para":35,"tag":"AGENT","confidence":"fair","profile":"careful","from":["t32.1","t35.1"],"text":"It was a rainy night, yet his coat is off and hung on a bush. Why would he take it off?","options":["It was torn off in the struggle","He threw it aside to fight","He took it off for some task","Someone else put it there"]}
+{"id":"t35.3","para":35,"tag":"RECORD","profile":"typical","from":[],"reads":"there was a long, clean cut, inflicted evidently by some very sharp instrument","text":"Wounds: his head was smashed by a heavy weapon, and he has a long clean cut on the thigh from a very sharp blade."}
+{"id":"t35.4","para":35,"tag":"RECORD","profile":"typical","from":[],"reads":"in his right hand he held a small knife, which was clotted with blood up to the handle","text":"Straker held a small, bloodied knife in his right hand."}
+{"id":"t35.5","para":35,"tag":"NOTICE","confidence":"weak","profile":"careful","from":["t35.4","t32.1"],"text":"Straker went out to check on horses carrying a knife. What kind of knife, and why did he have it? It is described only as 'small'."}
+{"id":"t35.6","para":35,"tag":"RECORD","profile":"typical","from":["t21.1"],"reads":"in his left he clasped a red and black silk cravat","text":"In his left hand was a cravat that the maid identifies as the stranger's."}
+{"id":"t36.1","para":36,"tag":"WEIGH","confidence":"strong","profile":"careful","from":["t29.2","t26.1"],"reads":"He was equally certain that the same stranger had, while standing at the window, drugged his curried mutton","text":"Hunter did not see the drugging. He concluded it. He was across the stable fetching the dog. It is a reasonable guess, but it is not observation."}
+{"id":"t37.1","para":37,"tag":"RECORD","profile":"typical","from":[],"reads":"there were abundant proofs in the mud which lay at the bottom of the fatal hollow that he had been there at the time of the struggle","text":"The horse was in the hollow where Straker died, at the time of the struggle."}
+{"id":"t37.2","para":37,"tag":"TEST","confidence":"weak","profile":"careful","from":["t19.5","t14.2"],"reads":"all the gypsies of Dartmoor are on the alert","relations":[{"type":"strains","target":"t19.5"}],"text":"With a large reward and the gypsies themselves searching, a gypsy theft looks less likely. So does a horse that is merely loose. The horse is hidden well, or in a place nobody searches."}
+{"id":"t37.3","para":37,"tag":"RECORD","profile":"typical","from":["t20.2"],"reads":"contain an appreciable quantity of powdered opium","text":"Hunter's leftover curry contains powdered opium."}
+{"id":"t37.4","para":37,"tag":"INFER","subtype":"opportunity","confidence":"strong","profile":"typical","from":["t37.3"],"reads":"the people at the house partook of the same dish on the same night without any ill effect","text":"The household ate the same dish unharmed, so the opium went into Hunter's portion only. It was added after his share was set apart: in the kitchen, on the path, at the window, or by Hunter himself."}
+{"id":"t37.5","para":37,"tag":"DROP","confidence":"fair","profile":"typical","from":["t37.3","t33.2"],"relations":[{"type":"strains","target":"t33.2"}],"text":"The analysis confirms that Hunter really was drugged. That makes him an unlikely accomplice who opened the door."}
+{"id":"t37.6","para":37,"tag":"PHYSICAL","confidence":"weak","profile":"expert","from":["t37.3","t20.2","bk.drug_taste"],"text":"Powdered opium has a taste of its own, and a curry would hide it. A stranger who met the maid by chance on the path could not have known the supper would be curry. Would a plain dish have given the drug away?","hindsight":"A first-time reader needs to know that opium has a noticeable taste, and to ask whether the poisoner chose the dish or was merely lucky. Few readers make this step unprompted."}
+{"id":"t39.1","para":39,"tag":"GENRE","confidence":"fair","profile":"typical","from":["t12.1"],"reads":"Were he but gifted with imagination he might rise to great heights in his profession.","text":"Holmes calls Gregory competent but unimaginative. The 'natural' suspect the police chose may be the wrong one."}
+{"id":"t39.2","para":39,"tag":"RECORD","profile":"typical","from":["t14.5","t19.3"],"reads":"he inhabited one of those villas which I have mentioned","text":"Simpson was lodging in the villas half a mile north and was found there easily."}
+{"id":"t39.3","para":39,"tag":"INFER","subtype":"motive","confidence":"strong","profile":"typical","from":["t18.3","t39.2"],"reads":"bets to the amount of five thousand pounds had been registered by him against the favourite","text":"Simpson is a ruined gentleman who now makes a book, and he stands to lose £5,000 if Silver Blaze wins. He has a strong motive."}
+{"id":"t40.1","para":40,"tag":"IDENTIFY","subtype":"merge","confidence":"strong","profile":"typical","from":["t21.1","t39.2"],"reads":"He did not attempt to deny that he had acted as described upon the evening before","text":"The stranger at the window is Simpson. He admits it."}
+{"id":"t40.2","para":40,"tag":"RECORD","profile":"typical","from":["t19.3"],"reads":"Desborough, the second favourite, which was in charge of Silas Brown at the Mapleton stables","text":"Mapleton, two miles off and run by Silas Brown, has Desborough, the second favourite."}
+{"id":"t40.3","para":40,"tag":"HYPOTHESIS","subtype":"motive","confidence":"weak","profile":"typical","from":["t40.2","t19.4","bk.favourite_motive"],"text":"Mapleton gains directly if Silver Blaze is out of the race. Silas Brown has both motive and a nearby stable to hide a horse in.","options":["Mapleton people took the horse","Mapleton is only a rival, not involved"]}
+{"id":"t40.4","para":40,"tag":"WEIGH","confidence":"weak","profile":"careful","from":["t35.6","t40.1"],"reads":"he turned very pale, and was utterly unable to account for its presence in the hand of the murdered man","text":"Simpson does not deny the cravat is his. Turning pale fits guilt, and it also fits a man who sees he is in serious trouble. He did not deny being at the stable either, so where did he lose the cravat?"}
+{"id":"t40.5","para":40,"tag":"RECORD","profile":"typical","from":["t21.1","t35.3"],"reads":"his stick, which was a Penang-lawyer weighted with lead","text":"Simpson's clothes were wet from the night's storm. His knobbed stick is lead-weighted and could have caused the head wound."}
+{"id":"t41.1","para":41,"tag":"INFER","confidence":"fair","profile":"typical","from":["t35.4","t35.3"],"reads":"there was no wound upon his person","text":"Simpson is unwounded, though Straker's knife is bloody to the handle. Whose blood is on it? Either another assailant is wounded, or the blood came from somewhere else."}
+{"id":"t41.2","para":41,"tag":"NOTICE","confidence":"weak","profile":"careful","from":["t41.1"],"reads":"one at least of his assailants must bear his mark upon him","text":"The account speaks of 'assailants', plural. It is unclear whether that is evidence or reporters' framing. Nothing shown so far requires more than one."}
+{"id":"t43.1","para":43,"tag":"HYPOTHESIS","confidence":"fair","profile":"typical","from":["t41.1","t35.3","bk.self_wound"],"reads":"the incised wound upon Straker may have been caused by his own knife in the convulsive struggles which follow any brain injury","text":"Watson's idea: Straker cut his own thigh in convulsions after the blow. The blood on the knife would then be his own."}
+{"id":"t44.1","para":44,"tag":"REVISE","confidence":"fair","profile":"typical","from":["t43.1","t41.1"],"reads":"It is more than possible; it is probable","relations":[{"type":"undercuts","target":"t41.1"}],"text":"If the cut is self-inflicted, Simpson's lack of a wound proves nothing, and the case against him gets stronger."}
+{"id":"t46.1","para":46,"tag":"RECORD","profile":"typical","from":[],"reads":"His bridle is missing, so that Simpson must have put this on.","text":"The horse's bridle is missing. Someone led him out bridled."}
+{"id":"t46.2","para":46,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"typical","from":["t29.2","t39.3","t40.5","t46.1"],"reads":"having in some way obtained a duplicate key","text":"Police theory: Simpson drugged Hunter, used a duplicate key, bridled and led off the horse, met Straker, killed him with the stick, and then either hid the horse or lost it when it bolted."}
+{"id":"t46.3","para":46,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t46.2","t33.2","t14.2","t35.2","t24.2","t37.6"],"reads":"I am afraid that whatever theory we state has very grave objections to it","relations":[{"type":"strains","target":"t46.2"}],"text":"The police theory leaves gaps. Where did Simpson get a duplicate key? Why would a man betting against the horse lead it away rather than just harm it in the stall? Where is it now, with Simpson under arrest? The 'bolted' branch conflicts with t14.2, since a loose horse would have been found. It does not explain Straker's coat on the bush, or why Simpson stayed at his lodging to be arrested."}
+{"id":"t46.4","para":46,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"careful","from":["t33.2","t32.1","t37.1","t35.2","t35.5","bk.keyholder"],"text":"Another reading of the same facts: Straker himself opened the stable and took the horse out. He had a key, went out alone at one, died beside the horse, had his coat off and a knife in hand. If so, why, and who killed him?","options":["Straker took the horse out for an innocent reason and met the thief","Straker was himself acting against the horse","Straker followed someone who had taken it"],"hindsight":"A first-time reader must set aside Straker's reported good character and the account's framing of him as victim. They must then join the locked door, his key and his solitary night walk."}
+{"id":"t46.5","para":46,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t46.3","t40.3","t34.2","t6.1","t36.1"],"text":"Open at the scene's end: who opened the locked door, and where the horse is hidden. Whether the stranger really drugged the curry or Hunter only assumed it, and how a passer-by could rely on a dish that hides opium. Why the coat was off, what the knife was for, and whether the dog was silent. What part Mapleton and Silas Brown play. What Holmes wants the field-glass for. Simpson remains the police's suspect, and the theory is admitted to be improbable."}
+{"id":"t47.1","para":47,"tag":"RECORD","profile":"typical","from":["t12.2"],"reads":"The latter was Colonel Ross, the well-known sportsman; the other, Inspector Gregory","text":"Ross and Gregory meet Holmes and Watson at Tavistock station. Gregory is the tall, fair man and Ross is the small, dapper one with an eye-glass."}
+{"id":"t48.1","para":48,"tag":"RECORD","profile":"typical","from":["t47.1"],"reads":"I wish to leave no stone unturned in trying to avenge poor Straker and in recovering my horse","text":"Ross wants Straker avenged and the horse recovered. As owner of the favourite, he is someone who wants it to run."}
+{"id":"t50.1","para":50,"tag":"RECORD","profile":"typical","from":[],"reads":"I am sorry to say that we have made very little progress","text":"Nothing new since Holmes's summary. The horse is still missing."}
+{"id":"t51.1","para":51,"tag":"NOTICE","confidence":"weak","profile":"typical","from":["t48.1"],"reads":"Colonel Ross leaned back with his arms folded and his hat tilted over his eyes","text":"The owner takes no part in the talk about his own horse. He may doubt the detectives, or he may simply be a cold man. It is probably manner rather than clue."}
+{"id":"t52.1","para":52,"tag":"RECORD","profile":"typical","from":["t46.2"],"reads":"I recognise that the evidence is purely circumstantial","text":"Gregory is sure Simpson is the man, and he admits the case is circumstantial. His theory matches the one Holmes predicted (t46.2)."}
+{"id":"t54.1","para":54,"tag":"RECORD","profile":"typical","from":["t43.1"],"reads":"We have quite come to the conclusion that he wounded himself in his fall.","relations":[{"type":"supports","target":"t43.1"}],"text":"The police independently reached Watson's idea that the cut on Straker's thigh came from his own knife."}
+{"id":"t56.1","para":56,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t36.1","t26.1"],"reads":"He lies under suspicion of having poisoned the stable-boy","text":"Even Gregory puts this only as 'suspicion'. It rests on Hunter's conclusion, not on anyone seeing it done: the maid saw a packet in his hand and then saw him lean through the window."}
+{"id":"t57.1","para":57,"tag":"QUESTION","subtype":"turn-around","confidence":"fair","profile":"careful","from":["t46.3","t39.3"],"reads":"Why should he take the horse out of the stable? If he wished to injure it why could he not do it there?","text":"Holmes's objection, turned around: who would need the horse out on the open moor rather than in the stall? Someone who had to do something to it that could not be done inside, or someone who meant to take it away.","options":["A thief meaning to hide or sell it","Someone who needed it out of the stable for a reason not yet known","Someone leading it to a confederate"]}
+{"id":"t57.2","para":57,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t37.6","bk.genre_detective_signals"],"reads":"What chemist sold him the powdered opium?","text":"Holmes asks where the opium came from. He treats it as something that can be traced. The opium links to the curry question (t37.6)."}
+{"id":"t57.3","para":57,"tag":"QUESTION","confidence":"fair","profile":"typical","from":["t24.2"],"reads":"What is his own explanation as to the paper which he wished the maid to give to the stable-boy?","text":"The folded paper is still unexplained. Holmes wants Simpson's account of it."}
+{"id":"t58.1","para":58,"tag":"RECORD","profile":"typical","from":["t24.2"],"reads":"He says that it was a ten-pound note. One was found in his purse.","text":"Simpson says the paper was a ten-pound note, and one was found in his purse."}
+{"id":"t58.2","para":58,"tag":"TEST","confidence":"fair","profile":"careful","from":["t58.1","t24.2","t28.1","bk.tout_bribe"],"relations":[{"type":"strains","target":"t46.2"},{"type":"strains","target":"t36.1"}],"text":"A ten-pound note is exactly what a tout would offer a lad for a tip, and the note was still in his purse. That fits 'bribe for information' better than 'drug'. If the packet was money, the only evidence that he drugged the curry gets weaker. Hunter's belief in t36.1 was only a conclusion."}
+{"id":"t58.3","para":58,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t57.1","t57.2"],"reads":"The opium was probably brought from London. The key, having served its purpose, would be hurled away.","text":"Gregory answers Holmes's points with guesses ('probably', 'would be', 'may be'), not with findings. No chemist, no key and no horse have been found. He has not answered the question of why the horse was taken out at all."}
+{"id":"t58.4","para":58,"tag":"RECORD","profile":"typical","from":["t46.3"],"reads":"He has twice lodged at Tavistock in the summer.","relations":[{"type":"undercuts","target":"t46.3"}],"text":"Simpson has stayed in the district before. That weakens the 'stranger with nowhere to hide a horse' objection, though only a little."}
+{"id":"t58.5","para":58,"tag":"HYPOTHESIS","confidence":"weak","profile":"typical","from":["t14.3","t58.3"],"reads":"The horse may be at the bottom of one of the pits or old mines upon the moor.","relations":[{"type":"strains","target":"t57.1"}],"text":"Gregory's fallback: the horse is dead in a mine-shaft. That would explain why it has not been found. But a man who wanted it dead could have done it in the stall, so it does not answer why it was led out.","options":["The horse is dead in a pit","The horse is alive and hidden"]}
+{"id":"t60.1","para":60,"tag":"RECORD","profile":"typical","from":["t40.4"],"reads":"He acknowledges that it is his, and declares that he had lost it.","text":"Simpson admits the cravat is his and says he lost it."}
+{"id":"t60.2","para":60,"tag":"HYPOTHESIS","confidence":"weak","profile":"careful","from":["t60.1","t35.6","t29.2","bk.lost_item"],"text":"If he lost it that evening near the stable, someone else could have had it. Its presence in Straker's hand would then not place Simpson at the hollow.","options":["Simpson lies, and Straker tore it from him in the fight","It was lost near the stable or on the moor, and Straker or someone else picked it up","Someone used it deliberately to point at Simpson"]}
+{"id":"t62.1","para":62,"tag":"RECORD","profile":"typical","from":[],"reads":"a party of gypsies encamped on Monday night within a mile of the spot where the murder took place. On Tuesday they were gone.","text":"Gypsies camped within a mile on the night of the murder and had left by Tuesday."}
+{"id":"t62.2","para":62,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"typical","from":["t62.1","t19.5","t46.2","bk.period_gypsies"],"reads":"might he not have been leading the horse to them when he was overtaken, and may they not have him now?","text":"Gregory's new theory: Simpson led the horse out to hand it to the gypsies, who have it now. That would explain both why it was taken out and where it went.","options":["Gypsies have the horse with Simpson's connivance","Gypsies took it on their own","The gypsies are unconnected"]}
+{"id":"t62.3","para":62,"tag":"WEIGH","confidence":"weak","profile":"careful","from":["t62.1","t37.2","bk.period_gypsies"],"relations":[{"type":"strains","target":"t62.2"}],"text":"Their leaving proves little. A camp near a murder, with gypsies the first to be suspected, has every reason to move on. Nothing yet links them to Simpson or to the horse, and the reward argues against their hiding it."}
+{"id":"t63.1","para":63,"tag":"GENRE","subtype":"watch-detective","confidence":"weak","profile":"careful","from":["t62.2"],"reads":"It is certainly possible.","text":"Holmes 'pricked up his ears' at the new element and then answers flatly. The gypsy theory does not seem to engage him."}
+{"id":"t64.1","para":64,"tag":"TEST","confidence":"weak","profile":"careful","from":["t14.3","t19.4","bk.search_by_description","bk.horse_conspicuous"],"reads":"I have also examined every stable and out-house in Tavistock, and for a radius of ten miles.","relations":[{"type":"strains","target":"t19.4"}],"text":"Every stable within ten miles has been searched. That counts against 'shut in a building nearby', unless the searchers were looking for a horse that no longer looks like Silver Blaze. The disguise option in t14.3 survives a search of this kind."}
+{"id":"t65.1","para":65,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t40.3","t19.4","bk.genre_detective_signals"],"reads":"There is another training-stable quite close, I understand?","text":"Holmes brings up Mapleton himself, straight after the stable search. A stable two miles off is on his mind."}
+{"id":"t66.1","para":66,"tag":"RECORD","profile":"typical","from":["t40.2","t40.3"],"reads":"Silas Brown, the trainer, is known to have had large bets upon the event, and he was no friend to poor Straker.","relations":[{"type":"supports","target":"t40.3"}],"text":"Silas Brown has large bets on the race and was on bad terms with Straker. He has motive against both the horse and the man."}
+{"id":"t66.2","para":66,"tag":"WEIGH","confidence":"weak","profile":"careful","from":["t66.1","t64.1","bk.search_by_description"],"reads":"We have, however, examined the stables, and there is nothing to connect him with the affair.","text":"'Examined' and found nothing: but the police were looking for Silver Blaze as described, in a yard full of horses. The negative result is only as good as the search.","hindsight":"A first-time reader must apply the disguise option of t14.3 to Mapleton in particular, rather than accept the police's negative result."}
+{"id":"t67.1","para":67,"tag":"GENRE","subtype":"watch-detective","confidence":"weak","profile":"careful","from":["t65.1","t39.3","t66.1"],"reads":"And nothing to connect this man Simpson with the interests of the Mapleton stables?","text":"Holmes checks whether the police's suspect and the rival stable are linked. He is considering more than one hand in the affair, or a different hand altogether."}
+{"id":"t68.1","para":68,"tag":"INFER","confidence":"fair","profile":"careful","from":["t67.1"],"reads":"Nothing at all.","text":"The two motive-holders, Simpson and Brown, are not known to be connected. If both are involved, it is through some link not yet found. If only one is, the other's motive is a coincidence of the betting."}
+{"id":"t68.2","para":68,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t57.1","t58.2","t58.3","t60.2","t62.3","t64.1","t66.2","t46.4","t34.2","t6.1"],"text":"Open at the end of the drive: why the horse was led out rather than harmed in the stall. Whether Simpson drugged anything, now that the paper may have been a ten-pound note. Where the opium was bought, and how a passer-by could count on a dish that hides it. Who opened the locked door, since no duplicate key has been found and Straker had his own. How the cravat reached Straker's hand. Whether the gypsies matter. Whether the searches, Mapleton's included, would recognise the horse if it had been altered. Also still open: Straker's coat and knife, the dog's silence, and the field-glass."}
+{"id":"t68.3","para":68,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"typical","from":["t46.2","t62.2","t40.3","t46.4","t58.5"],"text":"Standing pictures: (a) the police's, Simpson alone or with gypsies, with the horse hidden or dead in a pit; (b) Mapleton, where Silas Brown has the motive and a yard to hide a horse in, though nothing ties him to the night; (c) Straker himself took the horse out, and someone else killed him. None explains everything yet. (a) is the official theory and the weakest on why the horse left the stall.","options":["Simpson, with or without gypsies","Mapleton and Silas Brown","Straker's own errand, and an unknown killer"]}
+{"id":"t69.1","para":69,"tag":"RECORD","profile":"typical","from":["t19.3"],"reads":"by a cluster of houses away to the westward which marked the Mapleton stables","text":"From Straker's villa, the stable out-building lies across a paddock and Mapleton can be seen on the skyline. The rival stable is in plain view across open moor."}
+{"id":"t70.1","para":70,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"typical","from":["bk.genre_detective_signals","t68.2"],"reads":"his hand was upon a clue, though I could not imagine where he had found it","text":"Holmes has his clue during the drive, before he has seen any physical evidence. So it comes from facts already told: Holmes's summary or Gregory's talk in the carriage. The reader has the same material and should re-read it."}
+{"id":"t70.2","para":70,"tag":"GENRE","subtype":"re-read","confidence":"weak","profile":"careful","from":["t70.1","t68.2"],"text":"Which fact set him off? The last topics were the gypsies, the stable searches, Mapleton, and the lack of any link to Simpson. Earlier ones were the curry and the opium, the dog, and the locked door. Nothing yet tells which.","options":["Something in Gregory's conversation (gypsies, Mapleton, the searches)","A point from the original facts (curry, opium, dog, door)","The view of the moor and Mapleton itself"]}
+{"id":"t74.1","para":74,"tag":"GENRE","subtype":"watch-detective","confidence":"weak","profile":"careful","from":["t19.1","t46.4"],"reads":"He has been in your service some years, Colonel Ross?","text":"Holmes's first questions at the house are about Straker himself: his body and his record of service. He is not asking about Simpson. The victim's character seems to be in question."}
+{"id":"t75.1","para":75,"tag":"WEIGH","confidence":"weak","profile":"careful","from":["t74.1","t19.1"],"reads":"I have always found him an excellent servant.","text":"Ross can only vouch for what he saw at work. It is the same testimony as ¶19 and adds nothing about Straker's private life."}
+{"id":"t78.1","para":78,"tag":"RECORD","profile":"typical","from":[],"reads":"There was a box of vestas, two inches of tallow candle","text":"Straker's pockets: matches, a candle stub, pipe and tobacco, watch, five sovereigns, a pencil-case, some papers, and an ivory-handled knife by Weiss & Co., London."}
+{"id":"t78.2","para":78,"tag":"NOTICE","confidence":"weak","profile":"careful","from":["t78.1","t32.1","bk.light_outdoors"],"reads":"two inches of tallow candle","text":"A candle and matches, on a rainy night walk to a stable where the lad on duty would have a light. Did he expect to need a small light somewhere else, out on the moor? It may only be habit: he also carries a pipe, and the matches would serve that.","options":["He meant to need a light out of doors","Ordinary pocket contents of a pipe-smoker"]}
+{"id":"t80.1","para":80,"tag":"RECORD","profile":"typical","from":["t35.4","bk.cataract_knife"],"reads":"It is what we call a cataract knife","text":"The bloodied knife from Straker's hand is a surgeon's cataract knife."}
+{"id":"t81.1","para":81,"tag":"REVISE","confidence":"fair","profile":"careful","from":["t35.5","t80.1","bk.cataract_knife"],"reads":"A strange thing for a man to carry with him upon a rough expedition, especially as it would not shut in his pocket","relations":[{"type":"revises","target":"t35.5"}],"text":"The 'small knife' is a delicate surgical blade that cannot be folded. It is useless as a weapon and awkward to carry. Why would a trainer own it, and why take it out at one in the morning?"}
+{"id":"t82.1","para":82,"tag":"HYPOTHESIS","confidence":"weak","profile":"typical","from":["t81.1"],"reads":"It was a poor weapon, but perhaps the best that he could lay his hands on at the moment.","text":"Gregory's and Mrs Straker's account: uneasy about touts, Straker grabbed the nearest blade from the dressing-table to defend himself.","options":["A hasty choice of weapon","He took it for some purpose he had in mind"]}
+{"id":"t82.2","para":82,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t82.1","t81.1"],"reads":"The tip was guarded by a disk of cork which we found beside his body","relations":[{"type":"strains","target":"t82.1"}],"text":"A man snatching up a weapon in a hurry does not fit a cork over its tip. And a man in a sudden fight does not stop to take the cork off. The cork lying by the body suggests he had uncovered the blade on purpose, with time to spare. That fits use for a task better than self-defence. The dressing-table detail comes from the wife, who reports what she saw, not why he took it."}
+{"id":"t82.3","para":82,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"careful","from":["t81.1","t82.2","t78.2","t35.2","t57.1","t46.4"],"text":"Put these together: a blade for a fine cut, a candle for a small light, the coat taken off, and the horse led out to a hollow rather than harmed in its stall. Was Straker meaning to do some delicate cutting to the horse himself, out of sight of the stable? It is only a pattern, and it is far from proved.","options":["Straker meant to injure the horse in some subtle way","Straker carried the knife for defence after all","The knife belongs to some other part of his private life"],"relations":[{"type":"supports","target":"t46.4"}],"hindsight":"A first-time reader must join four details spread across the story: the coat, the candle, the cork, and Holmes's question of why the horse was taken out. They must then imagine the trainer as the one who meant to harm the horse, against everything said of his character."}
+{"id":"t84.1","para":84,"tag":"RECORD","profile":"typical","from":[],"reads":"a milliner’s account for thirty-seven pounds fifteen made out by Madame Lesurier, of Bond Street, to William Derbyshire","text":"In Straker's pocket is a Bond Street milliner's bill for £37 15s, made out to a William Derbyshire."}
+{"id":"t84.2","para":84,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t84.1","bk.alias_mail"],"reads":"Derbyshire was a friend of her husband’s and that occasionally his letters were addressed here","text":"This is Mrs Straker's explanation, and it is what her husband told her. Letters for a 'friend' coming to Straker's own house, and a bill for that friend in Straker's own pocket, raise the question of whether 'William Derbyshire' is Straker himself.","options":["Derbyshire is a real friend","Derbyshire is Straker under another name"]}
+{"id":"t85.1","para":85,"tag":"NOTICE","subtype":"calculate","confidence":"fair","profile":"careful","from":["t84.1","t19.3"],"reads":"Twenty-two guineas is rather heavy for a single costume.","text":"One dress at 22 guineas (£23 2s) makes up most of a £37 bill. That is a huge sum next to a trainer's wages. Straker is described as 'comfortably off' (¶19), yet these clothes belong to a much richer world."}
+{"id":"t85.2","para":85,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t85.1","bk.genre_detective_signals"],"reads":"However there appears to be nothing more to learn","text":"Holmes reads the bill closely, item by item, then says there is 'nothing more to learn'. He also says 'Madam Derbyshire', supposing a woman behind the name. The offhand dismissal is itself a signal."}
+{"id":"t87.1","para":87,"tag":"SET ASIDE","profile":"typical","from":[],"reads":"Have you got them? Have you found them?","text":"Mrs Straker's grief and her 'them' (the killers, or the horse as well) reflect the general belief in several attackers. It is no evidence of who they were."}
+{"id":"t89.1","para":89,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t85.2","bk.detective_feint"],"reads":"Surely I met you in Plymouth at a garden-party some little time ago, Mrs. Straker?","text":"Holmes has just come down from London. A claimed meeting at a Plymouth garden-party, straight after he studied a dress bill, looks like a feint rather than a real memory."}
+{"id":"t91.1","para":91,"tag":"INFER","confidence":"fair","profile":"careful","from":["t89.1","t84.1"],"reads":"You wore a costume of dove-coloured silk with ostrich-feather trimming.","text":"He describes an expensive costume, very likely the one on the bill. The question is really: does Mrs Straker own the dresses Straker was paying for?"}
+{"id":"t92.1","para":92,"tag":"TEST","confidence":"fair","profile":"careful","from":["t91.1","t84.2","bk.second_household"],"reads":"I never had such a dress, sir","relations":[{"type":"strains","target":"t84.2"}],"text":"She has never had such a dress. So the costly clothes on the bill in her husband's pocket went to some other woman. This is a test of whether she owns them, not proof of the alias, but the innocent 'friend' story is now harder to keep. Possible reading: Straker, as 'William Derbyshire', was paying for a second woman and needed more money than his wages.","options":["The friend is real and Straker only carried the bill","Straker kept a woman under the name Derbyshire","Mrs Straker is lying about the dress"]}
+{"id":"t92.2","para":92,"tag":"IDENTIFY","subtype":"merge","confidence":"weak","profile":"careful","from":["t92.1","t84.2","bk.alias_mail"],"text":"Working identification: William Derbyshire = John Straker. Holmes's questions seem to point this way, but no handwriting, address or witness has yet confirmed it.","hindsight":"A first-time reader must link the bill, the 'friend' whose letters come to the house, and Holmes's garden-party feint. They must take the feint as a test rather than a social slip."}
+{"id":"t92.3","para":92,"tag":"HYPOTHESIS","subtype":"motive","confidence":"weak","profile":"careful","from":["t92.1","t92.2","bk.favourite_motive","t82.3"],"relations":[{"type":"supports","target":"t46.4"}],"text":"If Straker led a costly double life, he had a reason to want money from the race. He could get it by betting against his own favourite and making sure it lost. That would supply the missing motive for picture (c) in t68.3. The case against Simpson does not require any of this."}
+{"id":"t92.4","para":92,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t70.2","t82.3","t92.3","t68.2","t66.2","t34.2","t6.1","t60.2"],"text":"Open at the end of the scene: what clue struck Holmes in the carriage. Why Straker carried a cork-guarded cataract knife and a candle, and took the cork off. Whether Derbyshire is Straker and who wears the dresses. If Straker was working against the horse, who killed him and where the horse is now. Still carried over: the cravat in his hand, the curry and the opium, the dog's silence, the locked door, Mapleton, and the field-glass."}
+{"id":"t92.5","para":92,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"careful","from":["t68.3","t82.3","t92.3","t62.2","t66.1"],"text":"Standing pictures after the house: (a) the police's, Simpson alone or with the gypsies. It is now further strained because the knife looks like a tool rather than a weapon. (b) Mapleton and Silas Brown, with the motive but nothing to tie them to the night. (c) Straker, in debt through a second household, took the horse out himself to injure it quietly, and met his death in the hollow. (c) has gained the most in this scene, but it does not yet say who struck the blow.","options":["Simpson, with or without gypsies","Mapleton and Silas Brown","Straker's own scheme, with the killer unknown"]}
+{"id":"t93.1","para":93,"tag":"INFER","confidence":"fair","profile":"careful","from":["t92.1","t89.1"],"reads":"Ah, that quite settles it","relations":[{"type":"supports","target":"t92.2"}],"text":"Holmes treats her denial as settling something. That confirms the garden-party remark was a test, and that the dress on Derbyshire's bill was not his wife's."}
+{"id":"t93.2","para":93,"tag":"RECORD","profile":"typical","from":["t35.1"],"reads":"At the brink of it was the furze-bush upon which the coat had been hung.","text":"The furze-bush with the coat stands right at the rim of the hollow where the body lay."}
+{"id":"t96.1","para":96,"tag":"INFER","confidence":"strong","profile":"typical","from":["t93.2","bk.no_wind"],"reads":"In that case the overcoat was not blown against the furze-bush, but placed there.","text":"There was no wind, so the coat did not blow there. Someone put it on the bush."}
+{"id":"t97.1","para":97,"tag":"REVISE","confidence":"fair","profile":"careful","from":["t96.1","t35.2","bk.coat_off"],"reads":"Yes, it was laid across the bush.","relations":[{"type":"revises","target":"t35.2"},{"type":"supports","target":"t82.3"}],"text":"'Laid across' sounds calm and deliberate, not torn off in a fight. The likeliest options in t35.2 are now that Straker took it off himself to have his arms free, or that someone else arranged it. A man in heavy rain who removes his coat at the edge of a hollow meant to do something there. That fits the 'task' reading of the cork-guarded knife."}
+{"id":"t99.1","para":99,"tag":"RECORD","profile":"typical","from":[],"reads":"A piece of matting has been laid here at the side, and we have all stood upon that.","text":"The hollow has been trampled since Monday, but the searchers kept to a mat at the side. Some original marks may survive."}
+{"id":"t101.1","para":101,"tag":"RECORD","profile":"typical","from":[],"reads":"one of the boots which Straker wore, one of Fitzroy Simpson’s shoes, and a cast horseshoe of Silver Blaze","text":"Gregory has brought footwear for comparison: Straker's boot, Simpson's shoe and a shoe of Silver Blaze's."}
+{"id":"t101.2","para":101,"tag":"TEST PLAN","confidence":"fair","profile":"careful","from":["t101.1","t46.2","t68.3"],"text":"The prints in the hollow can tell the pictures apart. Simpson's shoe there supports the police theory. Only Straker and the horse would fit Straker's own errand. A set of prints matching none of them would point to a third person."}
+{"id":"t102.1","para":102,"tag":"RECORD","profile":"typical","from":[],"reads":"It was a wax vesta half burned","text":"In the mud of the hollow Holmes finds a half-burned wax vesta."}
+{"id":"t102.2","para":102,"tag":"INFER","confidence":"fair","profile":"careful","from":["t102.1","t78.1","t78.2"],"relations":[{"type":"supports","target":"t82.3"}],"text":"Straker's pockets held a box of vestas and a candle stub. A match struck in the hollow most likely came from him. So he wanted a light down there, out of sight of the stable on a dark, wet night. That fits the idea of fine work with a small light, the cataract knife and the candle together.","options":["Straker struck a light in the hollow for some task","Someone else, such as the killer, struck it","It is an old match, unrelated"]}
+{"id":"t104.1","para":104,"tag":"GENRE","subtype":"watch-detective","confidence":"strong","profile":"typical","from":["t102.2","bk.genre_detective_signals"],"reads":"I only saw it because I was looking for it.","text":"Holmes expected to find a burnt match. He reasoned to it beforehand, apparently from the candle and vestas in Straker's pockets. So he already believes someone needed a light in the hollow, and the candle was not mere pipe-smoker's habit (t78.2)."}
+{"id":"t104.2","para":104,"tag":"DROP","confidence":"fair","profile":"careful","from":["t104.1","t78.2"],"relations":[{"type":"drops","target":"t78.2"}],"text":"Drop the reading of the candle and matches as ordinary pocket contents. Holmes's prediction came true, so a light was used out on the moor."}
+{"id":"t107.1","para":107,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t101.2","bk.hoofprints"],"reads":"he clambered up to the rim of the hollow, and crawled about among the ferns and bushes","text":"Holmes says nothing about what the prints showed. He then searches the rim, which is where tracks leaving the hollow would be. He is looking for the way out: most likely the horse's."}
+{"id":"t108.1","para":108,"tag":"QUESTION","confidence":"fair","profile":"typical","from":["t37.1","bk.hoofprints"],"reads":"I have examined the ground very carefully for a hundred yards in each direction.","text":"The horse was in the hollow, yet Gregory found no tracks leading away within a hundred yards. How did a shod horse leave soft wet ground without a trace?","options":["The tracks are there beyond a hundred yards, or the search missed them","The ground near the hollow does not take prints","The horse was led off along some harder path"]}
+{"id":"t109.1","para":109,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t108.1","t64.1","t66.2"],"reads":"I should not have the impertinence to do it again after what you say.","text":"Holmes's politeness is ironic. He means to walk the moor himself, and this is the third police search whose negative result he does not take at face value (stables, Mapleton, tracks)."}
+{"id":"t109.2","para":109,"tag":"PREDICT","confidence":"fair","profile":"careful","from":["t109.1","t101.1","bk.hoofprints","t6.1"],"reads":"I think that I shall put this horseshoe into my pocket for luck","text":"The horseshoe is not taken 'for luck'. Holmes will try to track Silver Blaze across the moor and match the shoe against hoof-prints. The field-glass may be meant for this open ground."}
+{"id":"t110.1","para":110,"tag":"RECORD","profile":"typical","from":["t48.1","t18.2"],"reads":"whether we do not owe it to the public to remove our horse’s name from the entries for the Cup","text":"Ross is thinking of scratching Silver Blaze from Tuesday's race. He is also impatient with Holmes's methods."}
+{"id":"t111.1","para":111,"tag":"INFER","confidence":"fair","profile":"typical","from":["t110.1","bk.scratch_race","t104.1"],"reads":"I should let the name stand.","relations":[{"type":"strains","target":"t58.5"},{"type":"strains","target":"t4.3"}],"text":"Holmes firmly advises keeping the horse entered. He expects Silver Blaze to be alive, found, and fit to run by Tuesday. Gregory's dead-in-a-mine-shaft idea and any 'killed' reading lose ground."}
+{"id":"t111.2","para":111,"tag":"HYPOTHESIS","confidence":"weak","profile":"careful","from":["t111.1","t14.3","t64.1","t66.2","t40.3"],"text":"If the horse is alive and close but unfound after searches of every stable for ten miles, the disguise or 'search by description' option of t14.3 looks stronger. Mapleton, in sight across the moor, is the obvious yard where an altered horse could stand among others.","options":["Alive and hidden in a stable, perhaps altered","Alive and loose somewhere on the moor","Alive with the gypsies"],"hindsight":"A first-time reader must join Holmes's confidence about the race with the failed stable searches and the Mapleton motive, and not just take him to be optimistic."}
+{"id":"t112.1","para":112,"tag":"SET ASIDE","profile":"typical","from":["t51.1"],"reads":"I am very glad to have had your opinion, sir","text":"Ross's stiff courtesy shows his low opinion of Holmes. It is manner, not evidence."}
+{"id":"t112.2","para":112,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t97.1","t102.2","t101.2","t108.1","t109.2","t111.2","t70.2","t60.2","t34.2","t33.2","t92.2"],"text":"Open at the end of the scene: what the footprint comparison showed, since Holmes did not say. Who laid the coat on the bush and struck the match, with Straker the likelier. Where the horse went from the hollow without tracks, and where it is if it is alive for Tuesday. What clue struck Holmes in the carriage. Carried over: the cravat in Straker's hand, the curry and the opium, the dog's silence, who opened the locked door, whether Derbyshire is Straker, and Mapleton."}
+{"id":"t112.3","para":112,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"careful","from":["t92.5","t97.1","t102.2","t111.1","t111.2"],"relations":[{"type":"supports","target":"t46.4"},{"type":"strains","target":"t46.2"}],"text":"Standing pictures after the hollow. (c) gains again: Straker led the horse to the hollow, took off his coat, lit a match and uncorked a fine blade to do something to the horse unseen, then was struck down. The horse got away alive. (a) Simpson, with or without gypsies, explains neither the laid coat nor the match. (b) Mapleton is now a candidate for where the living horse ended up, more than for who killed Straker. Who struck the fatal blow is still unexplained in every picture.","options":["Straker's own scheme; killer unknown; horse alive somewhere such as Mapleton","Simpson, with or without gypsies","Mapleton people as thieves and killers"]}
+{"id":"t114.1","para":114,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"typical","from":["t112.2"],"reads":"We may leave the question of who killed John Straker for the instant","text":"Holmes separates the two problems and works on the horse first. He thinks the horse's fate can be settled without knowing who the killer is, so he may believe they are less tightly linked than the police assume (t4.2)."}
+{"id":"t114.2","para":114,"tag":"DEFAULT","confidence":"fair","profile":"typical","from":["bk.horse_herd","t37.1","t112.3"],"reads":"The horse is a very gregarious creature.","text":"A horse that broke loose in the hollow would make for horses: home to King's Pyland or over to Mapleton. It would not run wild, and on the open moor it would have been seen by now."}
+{"id":"t114.3","para":114,"tag":"DROP","confidence":"fair","profile":"typical","from":["t62.2","t62.3","t37.2","t114.2"],"reads":"They could not hope to sell such a horse.","relations":[{"type":"drops","target":"t62.2"}],"text":"Drop the gypsy theory. They move off whenever there is trouble, they could not sell so famous a horse, and the reward makes theft pointless for them. Their leaving on Tuesday is explained without any guilt."}
+{"id":"t114.4","para":114,"tag":"DROP","confidence":"fair","profile":"typical","from":["t114.2","t14.2","t111.2"],"reads":"Why should he run wild upon the moor? He would surely have been seen by now.","relations":[{"type":"drops","target":"t46.2"}],"text":"The 'bolted and wandering on the moor' branch of the police theory goes too. It already conflicted with t14.2."}
+{"id":"t116.1","para":116,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t114.2","t66.2","t111.2"],"reads":"He is not at King’s Pyland. Therefore he is at Mapleton.","text":"The argument is only as good as its premise that the horse went off loose to one stable or the other. Holmes calls it a 'working hypothesis'. If the horse is at Mapleton, the police search there (t66.2) failed to recognise him, and that points back to the altered-appearance option of t14.3."}
+{"id":"t116.2","para":116,"tag":"PHYSICAL","confidence":"fair","profile":"typical","from":["t108.1","bk.hoofprints"],"reads":"This part of the moor, as the Inspector remarked, is very hard and dry.","relations":[{"type":"supports","target":"t108.1"}],"text":"This answers t108.1. Near the hollow the ground is hard and takes no prints, so Gregory's empty hundred yards proves nothing. Prints should show again in the wet low ground towards Mapleton."}
+{"id":"t117.1","para":117,"tag":"TEST","confidence":"strong","profile":"typical","from":["t116.1","t116.2","t109.2"],"reads":"the shoe which he took from his pocket exactly fitted the impression","relations":[{"type":"supports","target":"t116.1"},{"type":"supports","target":"t111.1"}],"text":"Silver Blaze's own shoe matches a fresh track in the wet hollow on the line to Mapleton. The horse left the scene alive, heading that way. The pocketed horseshoe of t109.2 was for exactly this."}
+{"id":"t118.1","para":118,"tag":"GENRE","confidence":"weak","profile":"typical","from":["t39.1"],"reads":"It is the one quality which Gregory lacks.","text":"This repeats Holmes's verdict on Gregory (t39.1). The police searched by rule and missed what a guess about the horse's behaviour found. Their other negative results (stables, Mapleton) are also open to doubt."}
+{"id":"t119.1","para":119,"tag":"RECORD","profile":"typical","from":["t117.1"],"reads":"A man’s track was visible beside the horse’s.","text":"Close to Mapleton a man's footprints join the horse's track."}
+{"id":"t120.1","para":120,"tag":"INFER","confidence":"strong","profile":"typical","from":["t117.1","t119.1"],"reads":"The horse was alone before","relations":[{"type":"strains","target":"t46.2"}],"text":"The horse crossed the moor from the hollow on its own. Nobody led it away from the scene of the murder. A man met it only near Mapleton. Whoever was with Straker in the hollow did not take the horse, and that is a blow to the police picture of Simpson leading it off."}
+{"id":"t120.2","para":120,"tag":"HYPOTHESIS","confidence":"fair","profile":"typical","from":["t119.1","t120.1","t40.3","t66.1"],"text":"Who is the man who caught the horse near Mapleton?","options":["Someone from Mapleton, perhaps Silas Brown","Straker's killer, who followed the horse","Simpson"]}
+{"id":"t122.1","para":122,"tag":"HYPOTHESIS","confidence":"weak","profile":"typical","from":["t120.2"],"reads":"The double track turned sharp off and took the direction of King’s Pyland.","text":"The man first led the horse towards King's Pyland. That looks like an honest finder taking a stray back to its stable.","options":["An honest finder returning the horse","A man who set out to return it and then changed his mind"]}
+{"id":"t122.2","para":122,"tag":"AGENT","confidence":"fair","profile":"careful","from":["t122.1","bk.favourite_motive","t66.1"],"reads":"saw to my surprise the same tracks coming back again in the opposite direction","relations":[{"type":"strains","target":"t122.1"}],"text":"He turned back with the horse. A man who sets out to return a stray and then reverses has changed his mind, most likely because he saw what he could gain by keeping the favourite out of the race."}
+{"id":"t124.1","para":124,"tag":"INFER","confidence":"strong","profile":"typical","from":["t122.2","t116.1"],"reads":"It ended at the paving of asphalt which led up to the gates of the Mapleton stables.","relations":[{"type":"drops","target":"t122.1"},{"type":"supports","target":"t40.3"}],"text":"The track goes in at Mapleton's gates. The horse was taken into the rival stable and kept, not returned. Drop the 'honest finder' reading."}
+{"id":"t124.2","para":124,"tag":"REVISE","confidence":"fair","profile":"careful","from":["t124.1","t66.2","t64.1","t14.3","bk.search_by_description"],"relations":[{"type":"revises","target":"t66.2"}],"text":"The police 'examined' Mapleton and found nothing, yet the horse went in there. Either it was hidden from the searchers or it stood among the other horses unrecognised. The disguise option of t14.3 now looks strong.","hindsight":"A first-time reader must hold onto the doubt about searching by description from t64.1 and t66.2, and not assume the horse was moved out again after the police visit."}
+{"id":"t126.1","para":126,"tag":"GENRE","subtype":"watch-detective","confidence":"weak","profile":"careful","from":["t124.1","bk.genre_detective_signals"],"reads":"if I were to call at five o’clock to-morrow morning","text":"Holmes asks a pointed question about who is up at dawn. A stray that reached Mapleton early on Tuesday would be met by whoever was stirring first."}
+{"id":"t127.1","para":127,"tag":"INFER","confidence":"fair","profile":"careful","from":["t126.1","t119.1","t120.2"],"reads":"he is always the first stirring","relations":[{"type":"supports","target":"t120.2"}],"text":"Silas Brown is always the first one up. So he is the likeliest man to have met the loose horse at dawn and led it about. He fits the man's track in t119.1."}
+{"id":"t131.1","para":131,"tag":"SET ASIDE","profile":"typical","from":[],"reads":"Be off, or you may find a dog at your heels.","text":"Brown's bluster and his threat of a dog are manner. They also show how Mapleton keeps strangers away."}
+{"id":"t132.1","para":132,"tag":"WEIGH","confidence":"fair","profile":"typical","from":["t127.1","t124.1"],"reads":"He started violently and flushed to the temples.","text":"Holmes whispered a specific charge, most likely an account of the tracks and of Brown taking the horse in. Brown's violent start and his denial ('a lie') show it hit home. His agreeing to talk in private gives more away than the denial does."}
+{"id":"t137.1","para":137,"tag":"INFER","confidence":"strong","profile":"typical","from":["t132.1"],"reads":"he cringed along at my companion’s side like a dog with its master","text":"After twenty minutes Brown is broken and obedient. Holmes's charge was true, and Brown has the horse, or knows where it is, and has given in."}
+{"id":"t140.1","para":140,"tag":"INFER","confidence":"fair","profile":"typical","from":["t137.1","t111.1","t18.2"],"reads":"It shall be there.","relations":[{"type":"supports","target":"t111.1"}],"text":"'It' is very probably Silver Blaze, and 'there' probably the racecourse on Tuesday. This explains why Holmes told Ross to let the name stand: he expected the horse to be alive and available."}
+{"id":"t140.2","para":140,"tag":"INFER","confidence":"fair","profile":"careful","from":["t140.1","t124.2","t14.3"],"reads":"Should I change it first or not?","relations":[{"type":"supports","target":"t124.2"}],"text":"Brown asks whether to 'change' the horse first. That suggests its appearance has been altered, or can be put back, which is how it stood in the yard unrecognised by the police search.","options":["Restore the horse's original appearance","Alter it in some way before handing it over"]}
+{"id":"t141.1","para":141,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t140.2","t110.1","t112.1"],"reads":"I shall write to you about it.","text":"Holmes laughs at the question and tells Brown not to change it yet. He is not recovering the horse openly or telling the police. It looks as if he means to stage its return in his own way, perhaps with the slighted Colonel Ross in mind."}
+{"id":"t143.1","para":143,"tag":"AGENT","confidence":"weak","profile":"careful","from":["t141.1","t137.1"],"reads":"disregarding the trembling hand which the other held out to him","text":"Holmes refuses Brown's hand. He holds him in contempt and keeps him under threat ('No tricks'). He is not treating him as Straker's murderer, which fits t120.1: Brown only took in a horse that came to him alone."}
+{"id":"t143.2","para":143,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t120.1","t114.1","t112.2","t92.2","t82.3","t60.2","t34.2","t33.2","t70.2","t6.1"],"text":"Open at the end of the scene: the horse seems settled, alive at Mapleton and perhaps altered. The murder is untouched. Who struck Straker in the hollow, since the horse left alone and nobody led it? The rest is carried over: whether Straker was working against the horse (knife, candle, match, laid coat), whether Derbyshire is Straker, how the cravat got into his hand, who drugged the curry and how a passer-by could rely on it, the dog's silence, the opened door, the clue Holmes had in the carriage, and the field-glass."}
+{"id":"t143.3","para":143,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"careful","from":["t112.3","t120.1","t124.1","t127.1","t140.2","t114.3"],"relations":[{"type":"supports","target":"t46.4"},{"type":"strains","target":"t46.2"}],"text":"Standing pictures. The horse: it got loose from the hollow, wandered towards Mapleton, and Silas Brown took it in at dawn, nearly returned it, then kept and probably disguised it. Brown is a profiteer, not the killer. The gypsies are out. The murder: picture (c) still leads, with Straker leading the horse out to do it some delicate harm and being struck down. The police's Simpson theory has lost the 'led the horse away' step. The killer is unknown in every picture.","options":["Straker's own scheme, with an unknown killer","Simpson killed Straker but never had the horse","Someone not yet named"]}
+{"id":"t144.1","para":144,"tag":"SET ASIDE","profile":"typical","from":["t137.1"],"reads":"A more perfect compound of the bully, coward, and sneak than Master Silas Brown I have seldom met with","text":"This is Holmes's contempt for Brown. It is a verdict on his character, not new evidence."}
+{"id":"t146.1","para":146,"tag":"RECORD","profile":"typical","from":["t127.1","t122.2","t124.1"],"reads":"he perceived a strange horse wandering over the moor","text":"Holmes's reconstruction, which Brown accepted: Brown was first up at dawn and saw a loose horse on the moor. He recognised Silver Blaze, started to lead him back to King's Pyland, then changed his mind and hid him at Mapleton until after the race."}
+{"id":"t146.2","para":146,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t146.1","t132.1","t137.1"],"reads":"I described to him so exactly what his actions had been upon that morning that he is convinced that I was watching him","text":"The account is Holmes's inference from the tracks, matched to Brown's square-toed boots. It is not a confession in Brown's own words. Brown's collapse is what confirms it."}
+{"id":"t146.3","para":146,"tag":"INFER","confidence":"strong","profile":"typical","from":["t146.1","t120.1","t143.1"],"reads":"he perceived a strange horse wandering over the moor","relations":[{"type":"supports","target":"t143.1"}],"text":"Brown came on the horse loose and by chance. He did not take it from the hollow and had no part in Straker's death, so far as this account goes. The horse question and the murder question really are separate."}
+{"id":"t146.4","para":146,"tag":"INFER","confidence":"fair","profile":"careful","from":["t146.1","t140.2","t124.2","bk.horse_markings_dyed"],"reads":"from the white forehead which has given the favourite its name","relations":[{"type":"supports","target":"t124.2"}],"text":"The white blaze is what identifies the horse. Brown's question 'Should I change it first?' and the failed police search fit together if the blaze has been covered or dyed. Silver Blaze then stood in Mapleton's yard looking like an ordinary horse."}
+{"id":"t148.1","para":148,"tag":"TEST","confidence":"fair","profile":"typical","from":["t146.4","t66.2","bk.search_by_description"],"reads":"an old horse-faker like him has many a dodge","relations":[{"type":"supports","target":"t146.4"}],"text":"'Horse-faker' confirms that the horse was disguised rather than hidden in a cupboard. The police searched by description and missed it, as t66.2 suspected."}
+{"id":"t150.1","para":150,"tag":"AGENT","confidence":"fair","profile":"typical","from":["t146.1","t137.1"],"reads":"He knows that his only hope of mercy is to produce it safe.","text":"Brown's motive has been reversed. Now that he is exposed, harming the horse would ruin him, and producing it safe is his only way out. The horse is in no danger."}
+{"id":"t152.1","para":152,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"typical","from":["t141.1","t112.1"],"reads":"I am inclined now to have a little amusement at his expense. Say nothing to him about the horse.","relations":[{"type":"supports","target":"t141.1"}],"text":"Holmes means to keep the horse's recovery secret and stage its return to surprise the sneering Colonel. That explains 'don't change it yet': the disguise may be part of the joke."}
+{"id":"t154.1","para":154,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"typical","from":["t146.3","t114.1"],"reads":"this is all quite a minor point compared to the question of who killed John Straker","text":"Holmes treats the horse as the lesser problem. The murder is still unsolved, and Brown is not the answer to it."}
+{"id":"t156.1","para":156,"tag":"QUESTION","confidence":"fair","profile":"careful","from":["t154.1","t84.1","t78.1","t92.2","bk.genre_detective_signals"],"reads":"we both go back to London by the night train","text":"Why leave the scene of a murder at once for London? The London leads in the case are the Bond Street milliner, Madame Lesurier, on the Derbyshire bill, and Weiss & Co., the makers of the cataract knife. Holmes apparently thinks the murder will be explained there, through Straker's private life, rather than on the moor.","options":["To trace 'William Derbyshire' through the Bond Street milliner","To trace the cataract knife through Weiss & Co.","He thinks the murder needs no more work on the spot"]}
+{"id":"t161.1","para":161,"tag":"INFER","confidence":"strong","profile":"typical","from":["t150.1","t111.1"],"reads":"I have every hope, however, that your horse will start upon Tuesday","relations":[{"type":"supports","target":"t111.1"}],"text":"This is consistent with Mapleton: Holmes knows where the horse is and expects it to run. His 'grave difficulties' about the murderer is said to Ross, and it may not be his real view."}
+{"id":"t161.2","para":161,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"careful","from":["t156.1","t92.2","bk.photo_identify"],"reads":"Might I ask for a photograph of Mr. John Straker?","relations":[{"type":"supports","target":"t92.2"}],"text":"A photograph of Straker to take to London. The obvious use is to show it at the Bond Street milliner and ask whether this is 'William Derbyshire'. It strengthens the working identification Derbyshire = Straker."}
+{"id":"t163.1","para":163,"tag":"QUESTION","confidence":"weak","profile":"careful","from":["t37.4","t20.2","t92.1"],"reads":"I have a question which I should like to put to the maid","text":"What does Holmes want from Edith Baxter? He does not say.","options":["Something about the curry: who chose it, or who handled Hunter's portion","Something about Straker's habits, the knife or the dresses","Something about the dog or the stable that night"]}
+{"id":"t166.1","para":166,"tag":"SET ASIDE","profile":"typical","from":["t152.1"],"reads":"I should prefer to have the horse.","text":"Ross's scorn is what Holmes plans to play on. It is manner, not evidence."}
+{"id":"t170.1","para":170,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"typical","from":["bk.genre_detective_signals"],"reads":"You have a few sheep in the paddock","text":"A sudden question about sheep, on the way out. Holmes is checking a prediction he had already formed."}
+{"id":"t173.1","para":173,"tag":"RECORD","profile":"typical","from":["t170.1"],"reads":"three of them have gone lame, sir","text":"Three of the sheep in the King's Pyland paddock have recently gone lame."}
+{"id":"t175.1","para":175,"tag":"HYPOTHESIS","confidence":"fair","profile":"careful","from":["t173.1","t82.3","t81.1","bk.practise_first","bk.subtle_laming"],"reads":"let me recommend to your attention this singular epidemic among the sheep","relations":[{"type":"supports","target":"t82.3"}],"text":"Holmes expected lame sheep. That fits the delicate-cut idea: someone with access to the paddock practised a fine cut on the sheep's legs before trying it on the horse. So the harm meant for Silver Blaze was a subtle laming, a small cut to the leg that makes him run badly and leaves no obvious sign of interference.","options":["Someone practised laming on the sheep, and the horse was the real target","The lameness is an ordinary ailment and has nothing to do with the case"],"hindsight":"A first-time reader must link the cataract knife, the cork, the candle and match in the hollow and the horse led out, and then see lame sheep as a rehearsal. It also helps to know that a tendon can be nicked to lame a horse."}
+{"id":"t175.2","para":175,"tag":"INFER","confidence":"fair","profile":"careful","from":["t175.1","t92.3","t57.1"],"relations":[{"type":"supports","target":"t92.3"}],"text":"This answers Holmes's old question of why the horse was taken out of the stable (t57.1). The cutting needed a light, free arms and privacy, away from the lad and the loft. A slightly lame favourite would lose, and that profits whoever bet against him, Straker included if he was in need of money."}
+{"id":"t175.3","para":175,"tag":"INFER","subtype":"opportunity","confidence":"fair","profile":"careful","from":["t175.1","t19.3","t173.1"],"text":"The sheep are in the King's Pyland paddock beside Straker's villa. Practising on them over several days needs someone who belongs there and can come and go unnoticed, not a stranger who arrived on Monday. That points at the household, and above all at Straker."}
+{"id":"t180.1","para":180,"tag":"REVISE","confidence":"fair","profile":"typical","from":["t34.2","t29.1","bk.guard_dog"],"reads":"To the curious incident of the dog in the night-time.","relations":[{"type":"revises","target":"t34.2"}],"text":"Holmes confirms the absence flagged at ¶34. The stable dog made no noise while the horse was taken out."}
+{"id":"t182.1","para":182,"tag":"INFER","subtype":"opportunity","confidence":"fair","profile":"careful","from":["t180.1","t29.1","t33.2","bk.guard_dog","bk.keyholder"],"reads":"That was the curious incident","relations":[{"type":"strains","target":"t46.2"},{"type":"supports","target":"t46.4"}],"text":"The dog did not bark, so the man who came at night was someone it knew. Simpson was a stranger whom the dog had been set on that very evening. Put together with the door locked at nine and open at seven, the dog's silence points to a familiar person with a key, most plausibly Straker himself. This answers t33.2: Straker opened the door."}
+{"id":"t182.2","para":182,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"weak","profile":"careful","from":["t182.1","t175.1","t37.4","t37.6","bk.drug_taste"],"text":"If Straker took the horse out, he needed the duty lad asleep. The opium went into Hunter's portion only, and a curry hides its taste, which a stranger meeting the maid by chance could not have known about. That suggests it was added at the house, by someone who knew the menu. Simpson's paper was then only the ten-pound note.","options":["Straker, or someone at the house, put the opium in Hunter's curry","Simpson drugged it at the window after all"],"hindsight":"A first-time reader must turn the opium-and-curry problem around, from who had access at the window to who could choose the dish."}
+{"id":"t182.3","para":182,"tag":"HYPOTHESIS","confidence":"weak","profile":"expert","from":["t175.1","t120.1","t35.3","t146.3","bk.horse_kick"],"text":"Who struck Straker? Nobody led the horse away (t120.1), and Brown only found it loose afterwards. If Straker was in the hollow cutting at the horse's leg by candle and match, the horse itself could have lashed out. A hoof would serve as the 'heavy weapon' that smashed his skull. His knife would then have cut his own thigh as he fell.","options":["The horse kicked him while he was cutting","Simpson, or some other man, came on him in the hollow","An unknown third party"],"hindsight":"A first-time reader must give up looking for a human killer and imagine the horse's reaction to being cut. The text has not yet pointed at this."}
+{"id":"t182.4","para":182,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t182.3","t60.2","t161.2","t163.1","t156.1","t6.1","t70.2","t182.2"],"text":"Open at the scene's end: who or what struck Straker. How Simpson's cravat got into his hand, perhaps picked up after Simpson lost it. Whether the London trip and the photograph will prove Derbyshire = Straker. What Holmes asked the maid. Who put the opium in the curry. What Holmes saw in the carriage, and why he wanted the field-glass. The horse itself is settled: alive at Mapleton, disguised, and to run on Tuesday."}
+{"id":"t182.5","para":182,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"fair","profile":"careful","from":["t143.3","t175.1","t182.1","t182.2","t182.3","t92.3"],"relations":[{"type":"supports","target":"t46.4"},{"type":"strains","target":"t46.2"}],"text":"Leading picture: Straker, living beyond his means as 'Derbyshire', planned to lame his own favourite. He practised on the paddock sheep, had the lad drugged, let himself in past a dog that knew him, and led the horse to the hollow. There he took off his coat, struck a light and uncorked the cataract knife, and died in the attempt, perhaps from the horse's kick. The horse ran loose to Mapleton, where Brown hid and disguised it. Simpson looks like a tout who was in the wrong place. The police theory survives only if Simpson came on Straker in the hollow, and the dog's silence counts against him having been in the stable.","options":["Straker's own laming scheme, ended by the horse or an accident","Straker's scheme, ended by Simpson or some other man","The police's Simpson theory"]}
+{"id":"t183.1","para":183,"tag":"RECORD","profile":"typical","from":["t18.2","t152.1"],"reads":"bound for Winchester to see the race for the Wessex Cup","text":"It is race day, the Tuesday. Holmes has kept the recovery secret, so Ross is cold and still believes his horse is lost."}
+{"id":"t184.1","para":184,"tag":"RECORD","profile":"typical","from":["t183.1","t152.1"],"reads":"I have seen nothing of my horse","text":"Ross has not seen Silver Blaze. Holmes has not told him that the horse is at Mapleton."}
+{"id":"t185.1","para":185,"tag":"GENRE","subtype":"watch-detective","confidence":"strong","profile":"careful","from":["t146.4","t141.1","t148.1"],"reads":"I suppose that you would know him when you saw him?","text":"Holmes knows the horse was disguised at Mapleton and told Brown not to change it back. His question warns that Ross will not recognise his own horse."}
+{"id":"t186.1","para":186,"tag":"RECORD","profile":"typical","from":["t146.4"],"reads":"with his white forehead and his mottled off-foreleg","text":"Silver Blaze has two identifying marks: the white blaze and a mottled off-foreleg. A faker would have to cover both."}
+{"id":"t188.1","para":188,"tag":"NOTICE","subtype":"calculate","confidence":"fair","profile":"careful","from":["t184.1"],"reads":"You could have got fifteen to one yesterday, but the price has become shorter and shorter, until you can hardly get three to one now","text":"At 15 to 1 the market rated Silver Blaze at about a one-in-sixteen chance of winning. At 3 to 1 it rates him at about one in four. That is a large move overnight for a horse that has not been seen."}
+{"id":"t189.1","para":189,"tag":"HYPOTHESIS","confidence":"weak","profile":"careful","from":["t188.1","bk.odds_shorten","t150.1","t161.1"],"reads":"Somebody knows something, that is clear.","text":"Somebody knows the horse will run and is backing him. Only a few people are in on the secret.","options":["Silas Brown or Mapleton people, who know the horse will run and are hedging their bets","Holmes himself or his agents","A leak from someone else who has heard the horse is found"]}
+{"id":"t191.1","para":191,"tag":"RECORD","profile":"typical","from":["t40.2"],"reads":"4. Colonel Ross’s Silver Blaze (black cap, red jacket)","text":"Both Silver Blaze and Mapleton's Desborough are on the card."}
+{"id":"t192.1","para":192,"tag":"RECORD","profile":"typical","from":["t28.1","t111.1"],"reads":"We scratched our other one, and put all hopes on your word","text":"Ross scratched Bayard and is relying entirely on Holmes's assurance."}
+{"id":"t193.1","para":193,"tag":"RECORD","profile":"typical","from":["t188.1"],"reads":"Five to four against Silver Blaze!","text":"Silver Blaze is now favourite again. The backing has continued up to the race."}
+{"id":"t197.1","para":197,"tag":"RECORD","profile":"typical","from":[],"reads":"a powerful bay horse swept out from the weighing enclosure","text":"A bay horse comes out in Ross's colours."}
+{"id":"t198.1","para":198,"tag":"INFER","confidence":"strong","profile":"typical","from":["t197.1","t186.1","t146.4","t140.2","t141.1","t185.1"],"reads":"That beast has not a white hair upon its body.","relations":[{"type":"supports","target":"t146.4"}],"text":"The bay with no white hair, running in Ross's colours, is Silver Blaze with his blaze and leg dyed. This is the 'change' Brown offered to undo and Holmes told him to leave."}
+{"id":"t199.1","para":199,"tag":"TEST","confidence":"fair","profile":"typical","from":["t6.1"],"reads":"For a few minutes he gazed through my field-glass.","relations":[{"type":"supports","target":"t6.1"}],"text":"The field-glass is used on the racecourse, to follow the race at a distance. That is one of the uses guessed at ¶6. It was not, so far as we have seen, a tool of the investigation."}
+{"id":"t200.1","para":200,"tag":"RECORD","profile":"typical","from":["t191.1"],"reads":"passed the post a good six lengths before its rival","text":"Silver Blaze wins easily, with Desborough second. The horse is plainly unharmed and fit."}
+{"id":"t202.1","para":202,"tag":"TEST","confidence":"strong","profile":"typical","from":["t198.1","t186.1","bk.horse_markings_dyed"],"reads":"You have only to wash his face and his leg in spirits of wine","relations":[{"type":"supports","target":"t148.1"}],"text":"This confirms the disguise: both the face and the mottled leg were dyed. It also confirms how the police search of Mapleton missed him (t66.2, t124.2)."}
+{"id":"t204.1","para":204,"tag":"INFER","confidence":"strong","profile":"typical","from":["t141.1","t152.1"],"reads":"took the liberty of running him just as he was sent over","relations":[{"type":"supports","target":"t152.1"}],"text":"'Don't change it' is now explained. Holmes left the disguise on so that the return would surprise the Colonel who had slighted him."}
+{"id":"t206.1","para":206,"tag":"GENRE","subtype":"watch-detective","confidence":"fair","profile":"typical","from":["t154.1","t156.1"],"reads":"I have done so","text":"Holmes claims to have the murderer, although he left Dartmoor without arresting anyone. The answer must already be within his reach."}
+{"id":"t210.1","para":210,"tag":"HYPOTHESIS","confidence":"fair","profile":"careful","from":["t206.1","t182.3"],"reads":"In my company at the present moment.","text":"Who is 'in his company' in the owners' enclosure? Only Watson, the Colonel and the horse are there. A reader who considered t182.3 will expect Holmes to mean the horse.","options":["The horse","Colonel Ross","Watson"]}
+{"id":"t211.1","para":211,"tag":"HYPOTHESIS","confidence":"weak","profile":"typical","from":["t210.1","t48.1"],"reads":"either a very bad joke or an insult","text":"Ross takes the remark as pointing at himself. A typical reader may briefly wonder too: he was the trainer's master, and he has been cold all along. But nothing in the case links him to the night.","options":["Ross is accused","Holmes means someone or something else present"]}
+{"id":"t212.1","para":212,"tag":"DROP","confidence":"strong","profile":"typical","from":["t211.1"],"reads":"I assure you that I have not associated you with the crime, Colonel","relations":[{"type":"drops","target":"t211.1"}],"text":"Ross is explicitly cleared. Holmes puts his hand on the horse."}
+{"id":"t213.1","para":213,"tag":"IDENTIFY","confidence":"strong","profile":"typical","from":["t212.1","t182.3","bk.horse_kick"],"reads":"The horse!","relations":[{"type":"supports","target":"t182.3"},{"type":"revises","target":"t4.2"}],"text":"Silver Blaze struck the fatal blow, most likely with a hoof. The 'murder' and the 'disappearance' are one event: the horse killed Straker in the hollow and then ran loose."}
+{"id":"t214.1","para":214,"tag":"INFER","confidence":"strong","profile":"typical","from":["t213.1","t175.1","t182.5"],"reads":"it was done in self-defence","relations":[{"type":"supports","target":"t175.1"},{"type":"supports","target":"t182.5"}],"text":"If the horse acted in self-defence, Straker was attacking it. That fits his laming plan with the cataract knife, by candle and match, with his coat laid aside."}
+{"id":"t214.2","para":214,"tag":"INFER","confidence":"fair","profile":"typical","from":["t214.1","t92.3","t92.2"],"reads":"John Straker was a man who was entirely unworthy of your confidence","relations":[{"type":"supports","target":"t92.3"},{"type":"supports","target":"t46.4"}],"text":"Holmes confirms that Straker was working against his employer. The Derbyshire double life is not yet stated outright, but it now looks very probable as the motive."}
+{"id":"t214.3","para":214,"tag":"DROP","confidence":"strong","profile":"typical","from":["t213.1","t120.1"],"relations":[{"type":"drops","target":"t46.2"},{"type":"drops","target":"t68.3"}],"text":"The police theory goes. Simpson killed nobody and never led the horse anywhere. Mapleton only found it afterwards. Simpson was a tout in the wrong place."}
+{"id":"t214.4","para":214,"tag":"RESIDUE","confidence":"fair","profile":"careful","from":["t214.1","t60.2","t182.2","t161.2","t156.1","t163.1","t70.2","t189.1","t43.1"],"reads":"I shall defer a lengthy explanation until a more fitting time","text":"Settled: the horse is found and the killer was the horse. Still open, with the explanation deferred: how Simpson's cravat got into Straker's hand. Who put the opium in Hunter's curry, and how the dish was chosen. Whether the London trip with the photograph proved Derbyshire = Straker. What Holmes asked the maid. What struck Holmes in the carriage. Who shortened the odds. Whether the thigh cut came from Straker's own knife as he fell."}
+{"id":"t214.5","para":214,"tag":"HYPOTHESIS","subtype":"scenario","confidence":"strong","profile":"careful","from":["t182.5","t213.1","t214.1","t214.2","t202.1"],"relations":[{"type":"supports","target":"t182.5"}],"text":"Leading picture, now largely confirmed. Straker, untrustworthy and probably funding a second household as Derbyshire, meant to lame his own favourite. He drugged or had drugged the lad, passed the silent dog and led the horse to the hollow. There, by match-light, he uncorked the cataract knife, and the horse kicked him dead. The horse ran towards Mapleton, where Brown hid it under dye. The details of the drugging and the cravat remain for Holmes's explanation."}
+
+## The story so far (this scene is ¶215–¶231)
+
+¶0 I. Silver Blaze
+
+¶1 I am afraid, Watson, that I shall have to go,” said Holmes, as we sat down together to our breakfast one morning.
+
+¶2 “Go! Where to?”
+
+¶3 “To Dartmoor; to King’s Pyland.”
+
+¶4 I was not surprised. Indeed, my only wonder was that he had not already been mixed up in this extraordinary case, which was the one topic of conversation through the length and breadth of England. For a whole day my companion had rambled about the room with his chin upon his chest and his brows knitted, charging and recharging his pipe with the strongest black tobacco, and absolutely deaf to any of my questions or remarks. Fresh editions of every paper had been sent up by our news agent, only to be glanced over and tossed down into a corner. Yet, silent as he was, I knew perfectly well what it was over which he was brooding. There was but one problem before the public which could challenge his powers of analysis, and that was the singular disappearance of the favourite for the Wessex Cup, and the tragic murder of its trainer. When, therefore, he suddenly announced his intention of setting out for the scene of the drama it was only what I had both expected and hoped for.
+
+¶5 “I should be most happy to go down with you if I should not be in the way,” said I.
+
+¶6 “My dear Watson, you would confer a great favour upon me by coming. And I think that your time will not be misspent, for there are points about the case which promise to make it an absolutely unique one. We have, I think, just time to catch our train at Paddington, and I will go further into the matter upon our journey. You would oblige me by bringing with you your very excellent field-glass.”
+
+¶7 And so it happened that an hour or so later I found myself in the corner of a first-class carriage flying along en route for Exeter, while Sherlock Holmes, with his sharp, eager face framed in his ear-flapped travelling-cap, dipped rapidly into the bundle of fresh papers which he had procured at Paddington. We had left Reading far behind us before he thrust the last one of them under the seat, and offered me his cigar-case.
+
+¶8 “We are going well,” said he, looking out the window and glancing at his watch. “Our rate at present is fifty-three and a half miles an hour.”
+
+¶9 “I have not observed the quarter-mile posts,” said I.
+
+¶10 “Nor have I. But the telegraph posts upon this line are sixty yards apart, and the calculation is a simple one. I presume that you have looked into this matter of the murder of John Straker and the disappearance of Silver Blaze?”
+
+¶11 “I have seen what the _Telegraph_ and the _Chronicle_ have to say.”
+
+¶12 “It is one of those cases where the art of the reasoner should be used rather for the sifting of details than for the acquiring of fresh evidence. The tragedy has been so uncommon, so complete and of such personal importance to so many people, that we are suffering from a plethora of surmise, conjecture, and hypothesis. The difficulty is to detach the framework of fact—of absolute undeniable fact—from the embellishments of theorists and reporters. Then, having established ourselves upon this sound basis, it is our duty to see what inferences may be drawn and what are the special points upon which the whole mystery turns. On Tuesday evening I received telegrams from both Colonel Ross, the owner of the horse, and from Inspector Gregory, who is looking after the case, inviting my co-operation.”
+
+¶13 “Tuesday evening!” I exclaimed. “And this is Thursday morning. Why didn’t you go down yesterday?”
+
+¶14 “Because I made a blunder, my dear Watson—which is, I am afraid, a more common occurrence than any one would think who only knew me through your memoirs. The fact is that I could not believe it possible that the most remarkable horse in England could long remain concealed, especially in so sparsely inhabited a place as the north of Dartmoor. From hour to hour yesterday I expected to hear that he had been found, and that his abductor was the murderer of John Straker. When, however, another morning had come, and I found that beyond the arrest of young Fitzroy Simpson nothing had been done, I felt that it was time for me to take action. Yet in some ways I feel that yesterday has not been wasted.”
+
+¶15 “You have formed a theory, then?”
+
+¶16 “At least I have got a grip of the essential facts of the case. I shall enumerate them to you, for nothing clears up a case so much as stating it to another person, and I can hardly expect your co-operation if I do not show you the position from which we start.”
+
+¶17 I lay back against the cushions, puffing at my cigar, while Holmes, leaning forward, with his long, thin forefinger checking off the points upon the palm of his left hand, gave me a sketch of the events which had led to our journey.
+
+¶18 “Silver Blaze,” said he, “is from the Isonomy stock, and holds as brilliant a record as his famous ancestor. He is now in his fifth year, and has brought in turn each of the prizes of the turf to Colonel Ross, his fortunate owner. Up to the time of the catastrophe he was the first favourite for the Wessex Cup, the betting being three to one on him. He has always, however, been a prime favourite with the racing public, and has never yet disappointed them, so that even at those odds enormous sums of money have been laid upon him. It is obvious, therefore, that there were many people who had the strongest interest in preventing Silver Blaze from being there at the fall of the flag next Tuesday.
+
+¶19 “The fact was, of course, appreciated at King’s Pyland, where the Colonel’s training-stable is situated. Every precaution was taken to guard the favourite. The trainer, John Straker, is a retired jockey who rode in Colonel Ross’s colours before he became too heavy for the weighing-chair. He has served the Colonel for five years as jockey and for seven as trainer, and has always shown himself to be a zealous and honest servant. Under him were three lads; for the establishment was a small one, containing only four horses in all. One of these lads sat up each night in the stable, while the others slept in the loft. All three bore excellent characters. John Straker, who is a married man, lived in a small villa about two hundred yards from the stables. He has no children, keeps one maid-servant, and is comfortably off. The country round is very lonely, but about half a mile to the north there is a small cluster of villas which have been built by a Tavistock contractor for the use of invalids and others who may wish to enjoy the pure Dartmoor air. Tavistock itself lies two miles to the west, while across the moor, also about two miles distant, is the larger training establishment of Mapleton, which belongs to Lord Backwater, and is managed by Silas Brown. In every other direction the moor is a complete wilderness, inhabited only by a few roaming gypsies. Such was the general situation last Monday night when the catastrophe occurred.
+
+¶20 “On that evening the horses had been exercised and watered as usual, and the stables were locked up at nine o’clock. Two of the lads walked up to the trainer’s house, where they had supper in the kitchen, while the third, Ned Hunter, remained on guard. At a few minutes after nine the maid, Edith Baxter, carried down to the stables his supper, which consisted of a dish of curried mutton. She took no liquid, as there was a water-tap in the stables, and it was the rule that the lad on duty should drink nothing else. The maid carried a lantern with her, as it was very dark and the path ran across the open moor.
+
+¶21 “Edith Baxter was within thirty yards of the stables, when a man appeared out of the darkness and called to her to stop. As he stepped into the circle of yellow light thrown by the lantern she saw that he was a person of gentlemanly bearing, dressed in a grey suit of tweeds, with a cloth cap. He wore gaiters, and carried a heavy stick with a knob to it. She was most impressed, however, by the extreme pallor of his face and by the nervousness of his manner. His age, she thought, would be rather over thirty than under it.
+
+¶22 “‘Can you tell me where I am?’ he asked. ‘I had almost made up my mind to sleep on the moor, when I saw the light of your lantern.’
+
+¶23 “‘You are close to the King’s Pyland training-stables,’ said she.
+
+¶24 “‘Oh, indeed! What a stroke of luck!’ he cried. ‘I understand that a stable-boy sleeps there alone every night. Perhaps that is his supper which you are carrying to him. Now I am sure that you would not be too proud to earn the price of a new dress, would you?’ He took a piece of white paper folded up out of his waistcoat pocket. ‘See that the boy has this to-night, and you shall have the prettiest frock that money can buy.’
+
+¶25 “She was frightened by the earnestness of his manner, and ran past him to the window through which she was accustomed to hand the meals. It was already opened, and Hunter was seated at the small table inside. She had begun to tell him of what had happened, when the stranger came up again.
+
+¶26 “‘Good-evening,’ said he, looking through the window. ‘I wanted to have a word with you.’ The girl has sworn that as he spoke she noticed the corner of the little paper packet protruding from his closed hand.
+
+¶27 “‘What business have you here?’ asked the lad.
+
+¶28 “‘It’s business that may put something into your pocket,’ said the other. ‘You’ve two horses in for the Wessex Cup—Silver Blaze and Bayard. Let me have the straight tip and you won’t be a loser. Is it a fact that at the weights Bayard could give the other a hundred yards in five furlongs, and that the stable have put their money on him?’
+
+¶29 “‘So, you’re one of those damned touts!’ cried the lad. ‘I’ll show you how we serve them in King’s Pyland.’ He sprang up and rushed across the stable to unloose the dog. The girl fled away to the house, but as she ran she looked back and saw that the stranger was leaning through the window. A minute later, however, when Hunter rushed out with the hound he was gone, and though he ran all round the buildings he failed to find any trace of him.”
+
+¶30 “One moment,” I asked. “Did the stable-boy, when he ran out with the dog, leave the door unlocked behind him?”
+
+¶31 “Excellent, Watson, excellent!” murmured my companion. “The importance of the point struck me so forcibly that I sent a special wire to Dartmoor yesterday to clear the matter up. The boy locked the door before he left it. The window, I may add, was not large enough for a man to get through.
+
+¶32 “Hunter waited until his fellow-grooms had returned, when he sent a message to the trainer and told him what had occurred. Straker was excited at hearing the account, although he does not seem to have quite realized its true significance. It left him, however, vaguely uneasy, and Mrs. Straker, waking at one in the morning, found that he was dressing. In reply to her inquiries, he said that he could not sleep on account of his anxiety about the horses, and that he intended to walk down to the stables to see that all was well. She begged him to remain at home, as she could hear the rain pattering against the window, but in spite of her entreaties he pulled on his large mackintosh and left the house.
+
+¶33 “Mrs. Straker awoke at seven in the morning, to find that her husband had not yet returned. She dressed herself hastily, called the maid, and set off for the stables. The door was open; inside, huddled together upon a chair, Hunter was sunk in a state of absolute stupor, the favourite’s stall was empty, and there were no signs of his trainer.
+
+¶34 “The two lads who slept in the chaff-cutting loft above the harness-room were quickly aroused. They had heard nothing during the night, for they are both sound sleepers. Hunter was obviously under the influence of some powerful drug, and as no sense could be got out of him, he was left to sleep it off while the two lads and the two women ran out in search of the absentees. They still had hopes that the trainer had for some reason taken out the horse for early exercise, but on ascending the knoll near the house, from which all the neighbouring moors were visible, they not only could see no signs of the missing favourite, but they perceived something which warned them that they were in the presence of a tragedy.
+
+¶35 “About a quarter of a mile from the stables John Straker’s overcoat was flapping from a furze-bush. Immediately beyond there was a bowl-shaped depression in the moor, and at the bottom of this was found the dead body of the unfortunate trainer. His head had been shattered by a savage blow from some heavy weapon, and he was wounded on the thigh, where there was a long, clean cut, inflicted evidently by some very sharp instrument. It was clear, however, that Straker had defended himself vigorously against his assailants, for in his right hand he held a small knife, which was clotted with blood up to the handle, while in his left he clasped a red and black silk cravat, which was recognised by the maid as having been worn on the preceding evening by the stranger who had visited the stables.
+
+¶36 “Hunter, on recovering from his stupor, was also quite positive as to the ownership of the cravat. He was equally certain that the same stranger had, while standing at the window, drugged his curried mutton, and so deprived the stables of their watchman.
+
+¶37 “As to the missing horse, there were abundant proofs in the mud which lay at the bottom of the fatal hollow that he had been there at the time of the struggle. But from that morning he has disappeared, and although a large reward has been offered, and all the gypsies of Dartmoor are on the alert, no news has come of him. Finally, an analysis has shown that the remains of his supper left by the stable-lad contain an appreciable quantity of powdered opium, while the people at the house partook of the same dish on the same night without any ill effect.
+
+¶38 “Those are the main facts of the case, stripped of all surmise, and stated as baldly as possible. I shall now recapitulate what the police have done in the matter.
+
+¶39 “Inspector Gregory, to whom the case has been committed, is an extremely competent officer. Were he but gifted with imagination he might rise to great heights in his profession. On his arrival he promptly found and arrested the man upon whom suspicion naturally rested. There was little difficulty in finding him, for he inhabited one of those villas which I have mentioned. His name, it appears, was Fitzroy Simpson. He was a man of excellent birth and education, who had squandered a fortune upon the turf, and who lived now by doing a little quiet and genteel book-making in the sporting clubs of London. An examination of his betting-book shows that bets to the amount of five thousand pounds had been registered by him against the favourite.
+
+¶40 “On being arrested he volunteered the statement that he had come down to Dartmoor in the hope of getting some information about the King’s Pyland horses, and also about Desborough, the second favourite, which was in charge of Silas Brown at the Mapleton stables. He did not attempt to deny that he had acted as described upon the evening before, but declared that he had no sinister designs, and had simply wished to obtain first-hand information. When confronted with his cravat, he turned very pale, and was utterly unable to account for its presence in the hand of the murdered man. His wet clothing showed that he had been out in the storm of the night before, and his stick, which was a Penang-lawyer weighted with lead, was just such a weapon as might, by repeated blows, have inflicted the terrible injuries to which the trainer had succumbed.
+
+¶41 “On the other hand, there was no wound upon his person, while the state of Straker’s knife would show that one at least of his assailants must bear his mark upon him. There you have it all in a nutshell, Watson, and if you can give me any light I shall be infinitely obliged to you.”
+
+¶42 I had listened with the greatest interest to the statement which Holmes, with characteristic clearness, had laid before me. Though most of the facts were familiar to me, I had not sufficiently appreciated their relative importance, nor their connection to each other.
+
+¶43 “Is it not possible,” I suggested, “that the incised wound upon Straker may have been caused by his own knife in the convulsive struggles which follow any brain injury?”
+
+¶44 “It is more than possible; it is probable,” said Holmes. “In that case one of the main points in favour of the accused disappears.”
+
+¶45 “And yet,” said I, “even now I fail to understand what the theory of the police can be.”
+
+¶46 “I am afraid that whatever theory we state has very grave objections to it,” returned my companion. “The police imagine, I take it, that this Fitzroy Simpson, having drugged the lad, and having in some way obtained a duplicate key, opened the stable door and took out the horse, with the intention, apparently, of kidnapping him altogether. His bridle is missing, so that Simpson must have put this on. Then, having left the door open behind him, he was leading the horse away over the moor, when he was either met or overtaken by the trainer. A row naturally ensued. Simpson beat out the trainer’s brains with his heavy stick without receiving any injury from the small knife which Straker used in self-defence, and then the thief either led the horse on to some secret hiding-place, or else it may have bolted during the struggle, and be now wandering out on the moors. That is the case as it appears to the police, and improbable as it is, all other explanations are more improbable still. However, I shall very quickly test the matter when I am once upon the spot, and until then I cannot really see how we can get much further than our present position.”
+
+¶47 It was evening before we reached the little town of Tavistock, which lies, like the boss of a shield, in the middle of the huge circle of Dartmoor. Two gentlemen were awaiting us in the station—the one a tall, fair man with lion-like hair and beard and curiously penetrating light blue eyes; the other a small, alert person, very neat and dapper, in a frock-coat and gaiters, with trim little side-whiskers and an eye-glass. The latter was Colonel Ross, the well-known sportsman; the other, Inspector Gregory, a man who was rapidly making his name in the English detective service.
+
+¶48 “I am delighted that you have come down, Mr. Holmes,” said the Colonel. “The Inspector here has done all that could possibly be suggested, but I wish to leave no stone unturned in trying to avenge poor Straker and in recovering my horse.”
+
+¶49 “Have there been any fresh developments?” asked Holmes.
+
+¶50 “I am sorry to say that we have made very little progress,” said the Inspector. “We have an open carriage outside, and as you would no doubt like to see the place before the light fails, we might talk it over as we drive.”
+
+¶51 A minute later we were all seated in a comfortable landau, and were rattling through the quaint old Devonshire city. Inspector Gregory was full of his case, and poured out a stream of remarks, while Holmes threw in an occasional question or interjection. Colonel Ross leaned back with his arms folded and his hat tilted over his eyes, while I listened with interest to the dialogue of the two detectives. Gregory was formulating his theory, which was almost exactly what Holmes had foretold in the train.
+
+¶52 “The net is drawn pretty close round Fitzroy Simpson,” he remarked, “and I believe myself that he is our man. At the same time I recognise that the evidence is purely circumstantial, and that some new development may upset it.”
+
+¶53 “How about Straker’s knife?”
+
+¶54 “We have quite come to the conclusion that he wounded himself in his fall.”
+
+¶55 “My friend Dr. Watson made that suggestion to me as we came down. If so, it would tell against this man Simpson.”
+
+¶56 “Undoubtedly. He has neither a knife nor any sign of a wound. The evidence against him is certainly very strong. He had a great interest in the disappearance of the favourite. He lies under suspicion of having poisoned the stable-boy, he was undoubtedly out in the storm, he was armed with a heavy stick, and his cravat was found in the dead man’s hand. I really think we have enough to go before a jury.”
+
+¶57 Holmes shook his head. “A clever counsel would tear it all to rags,” said he. “Why should he take the horse out of the stable? If he wished to injure it why could he not do it there? Has a duplicate key been found in his possession? What chemist sold him the powdered opium? Above all, where could he, a stranger to the district, hide a horse, and such a horse as this? What is his own explanation as to the paper which he wished the maid to give to the stable-boy?”
+
+¶58 “He says that it was a ten-pound note. One was found in his purse. But your other difficulties are not so formidable as they seem. He is not a stranger to the district. He has twice lodged at Tavistock in the summer. The opium was probably brought from London. The key, having served its purpose, would be hurled away. The horse may be at the bottom of one of the pits or old mines upon the moor.”
+
+¶59 “What does he say about the cravat?”
+
+¶60 “He acknowledges that it is his, and declares that he had lost it. But a new element has been introduced into the case which may account for his leading the horse from the stable.”
+
+¶61 Holmes pricked up his ears.
+
+¶62 “We have found traces which show that a party of gypsies encamped on Monday night within a mile of the spot where the murder took place. On Tuesday they were gone. Now, presuming that there was some understanding between Simpson and these gypsies, might he not have been leading the horse to them when he was overtaken, and may they not have him now?”
+
+¶63 “It is certainly possible.”
+
+¶64 “The moor is being scoured for these gypsies. I have also examined every stable and out-house in Tavistock, and for a radius of ten miles.”
+
+¶65 “There is another training-stable quite close, I understand?”
+
+¶66 “Yes, and that is a factor which we must certainly not neglect. As Desborough, their horse, was second in the betting, they had an interest in the disappearance of the favourite. Silas Brown, the trainer, is known to have had large bets upon the event, and he was no friend to poor Straker. We have, however, examined the stables, and there is nothing to connect him with the affair.”
+
+¶67 “And nothing to connect this man Simpson with the interests of the Mapleton stables?”
+
+¶68 “Nothing at all.”
+
+¶69 Holmes leaned back in the carriage, and the conversation ceased. A few minutes later our driver pulled up at a neat little red-brick villa with overhanging eaves which stood by the road. Some distance off, across a paddock, lay a long grey-tiled out-building. In every other direction the low curves of the moor, bronze-coloured from the fading ferns, stretched away to the sky-line, broken only by the steeples of Tavistock, and by a cluster of houses away to the westward which marked the Mapleton stables. We all sprang out with the exception of Holmes, who continued to lean back with his eyes fixed upon the sky in front of him, entirely absorbed in his own thoughts. It was only when I touched his arm that he roused himself with a violent start and stepped out of the carriage.
+
+¶70 “Excuse me,” said he, turning to Colonel Ross, who had looked at him in some surprise. “I was day-dreaming.” There was a gleam in his eyes and a suppressed excitement in his manner which convinced me, used as I was to his ways, that his hand was upon a clue, though I could not imagine where he had found it.
+
+¶71 “Perhaps you would prefer at once to go on to the scene of the crime, Mr. Holmes?” said Gregory.
+
+¶72 “I think that I should prefer to stay here a little and go into one or two questions of detail. Straker was brought back here, I presume?”
+
+¶73 “Yes; he lies upstairs. The inquest is to-morrow.”
+
+¶74 “He has been in your service some years, Colonel Ross?”
+
+¶75 “I have always found him an excellent servant.”
+
+¶76 “I presume that you made an inventory of what he had in his pockets at the time of his death, Inspector?”
+
+¶77 “I have the things themselves in the sitting-room, if you would care to see them.”
+
+¶78 “I should be very glad.” We all filed into the front room and sat round the central table while the Inspector unlocked a square tin box and laid a small heap of things before us. There was a box of vestas, two inches of tallow candle, an A.D.P. briar-root pipe, a pouch of seal-skin with half an ounce of long-cut Cavendish, a silver watch with a gold chain, five sovereigns in gold, an aluminium pencil-case, a few papers, and an ivory-handled knife with a very delicate, inflexible blade marked Weiss & Co., London.
+
+¶79 “This is a very singular knife,” said Holmes, lifting it up and examining it minutely. “I presume, as I see blood-stains upon it, that it is the one which was found in the dead man’s grasp. Watson, this knife is surely in your line?”
+
+¶80 “It is what we call a cataract knife,” said I.
+
+¶81 “I thought so. A very delicate blade devised for very delicate work. A strange thing for a man to carry with him upon a rough expedition, especially as it would not shut in his pocket.”
+
+¶82 “The tip was guarded by a disk of cork which we found beside his body,” said the Inspector. “His wife tells us that the knife had lain upon the dressing-table, and that he had picked it up as he left the room. It was a poor weapon, but perhaps the best that he could lay his hands on at the moment.”
+
+¶83 “Very possible. How about these papers?”
+
+¶84 “Three of them are receipted hay-dealers’ accounts. One of them is a letter of instructions from Colonel Ross. This other is a milliner’s account for thirty-seven pounds fifteen made out by Madame Lesurier, of Bond Street, to William Derbyshire. Mrs. Straker tells us that Derbyshire was a friend of her husband’s and that occasionally his letters were addressed here.”
+
+¶85 “Madam Derbyshire had somewhat expensive tastes,” remarked Holmes, glancing down the account. “Twenty-two guineas is rather heavy for a single costume. However there appears to be nothing more to learn, and we may now go down to the scene of the crime.”
+
+¶86 As we emerged from the sitting-room a woman, who had been waiting in the passage, took a step forward and laid her hand upon the Inspector’s sleeve. Her face was haggard and thin and eager, stamped with the print of a recent horror.
+
+¶87 “Have you got them? Have you found them?” she panted.
+
+¶88 “No, Mrs. Straker. But Mr. Holmes here has come from London to help us, and we shall do all that is possible.”
+
+¶89 “Surely I met you in Plymouth at a garden-party some little time ago, Mrs. Straker?” said Holmes.
+
+¶90 “No, sir; you are mistaken.”
+
+¶91 “Dear me! Why, I could have sworn to it. You wore a costume of dove-coloured silk with ostrich-feather trimming.”
+
+¶92 “I never had such a dress, sir,” answered the lady.
+
+¶93 “Ah, that quite settles it,” said Holmes. And with an apology he followed the Inspector outside. A short walk across the moor took us to the hollow in which the body had been found. At the brink of it was the furze-bush upon which the coat had been hung.
+
+¶94 “There was no wind that night, I understand,” said Holmes.
+
+¶95 “None; but very heavy rain.”
+
+¶96 “In that case the overcoat was not blown against the furze-bush, but placed there.”
+
+¶97 “Yes, it was laid across the bush.”
+
+¶98 “You fill me with interest, I perceive that the ground has been trampled up a good deal. No doubt many feet have been here since Monday night.”
+
+¶99 “A piece of matting has been laid here at the side, and we have all stood upon that.”
+
+¶100 “Excellent.”
+
+¶101 “In this bag I have one of the boots which Straker wore, one of Fitzroy Simpson’s shoes, and a cast horseshoe of Silver Blaze.”
+
+¶102 “My dear Inspector, you surpass yourself!” Holmes took the bag, and, descending into the hollow, he pushed the matting into a more central position. Then stretching himself upon his face and leaning his chin upon his hands, he made a careful study of the trampled mud in front of him. “Hullo!” said he, suddenly. “What’s this?” It was a wax vesta half burned, which was so coated with mud that it looked at first like a little chip of wood.
+
+¶103 “I cannot think how I came to overlook it,” said the Inspector, with an expression of annoyance.
+
+¶104 “It was invisible, buried in the mud. I only saw it because I was looking for it.”
+
+¶105 “What! You expected to find it?”
+
+¶106 “I thought it not unlikely.”
+
+¶107 He took the boots from the bag, and compared the impressions of each of them with marks upon the ground. Then he clambered up to the rim of the hollow, and crawled about among the ferns and bushes.
+
+¶108 “I am afraid that there are no more tracks,” said the Inspector. “I have examined the ground very carefully for a hundred yards in each direction.”
+
+¶109 “Indeed!” said Holmes, rising. “I should not have the impertinence to do it again after what you say. But I should like to take a little walk over the moor before it grows dark, that I may know my ground to-morrow, and I think that I shall put this horseshoe into my pocket for luck.”
+
+¶110 Colonel Ross, who had shown some signs of impatience at my companion’s quiet and systematic method of work, glanced at his watch. “I wish you would come back with me, Inspector,” said he. “There are several points on which I should like your advice, and especially as to whether we do not owe it to the public to remove our horse’s name from the entries for the Cup.”
+
+¶111 “Certainly not,” cried Holmes, with decision. “I should let the name stand.”
+
+¶112 The Colonel bowed. “I am very glad to have had your opinion, sir,” said he. “You will find us at poor Straker’s house when you have finished your walk, and we can drive together into Tavistock.”
+
+¶113 He turned back with the Inspector, while Holmes and I walked slowly across the moor. The sun was beginning to sink behind the stables of Mapleton, and the long, sloping plain in front of us was tinged with gold, deepening into rich, ruddy browns where the faded ferns and brambles caught the evening light. But the glories of the landscape were all wasted upon my companion, who was sunk in the deepest thought.
+
+¶114 “It’s this way, Watson,” said he at last. “We may leave the question of who killed John Straker for the instant, and confine ourselves to finding out what has become of the horse. Now, supposing that he broke away during or after the tragedy, where could he have gone to? The horse is a very gregarious creature. If left to himself his instincts would have been either to return to King’s Pyland or go over to Mapleton. Why should he run wild upon the moor? He would surely have been seen by now. And why should gypsies kidnap him? These people always clear out when they hear of trouble, for they do not wish to be pestered by the police. They could not hope to sell such a horse. They would run a great risk and gain nothing by taking him. Surely that is clear.”
+
+¶115 “Where is he, then?”
+
+¶116 “I have already said that he must have gone to King’s Pyland or to Mapleton. He is not at King’s Pyland. Therefore he is at Mapleton. Let us take that as a working hypothesis and see what it leads us to. This part of the moor, as the Inspector remarked, is very hard and dry. But it falls away towards Mapleton, and you can see from here that there is a long hollow over yonder, which must have been very wet on Monday night. If our supposition is correct, then the horse must have crossed that, and there is the point where we should look for his tracks.”
+
+¶117 We had been walking briskly during this conversation, and a few more minutes brought us to the hollow in question. At Holmes’ request I walked down the bank to the right, and he to the left, but I had not taken fifty paces before I heard him give a shout, and saw him waving his hand to me. The track of a horse was plainly outlined in the soft earth in front of him, and the shoe which he took from his pocket exactly fitted the impression.
+
+¶118 “See the value of imagination,” said Holmes. “It is the one quality which Gregory lacks. We imagined what might have happened, acted upon the supposition, and find ourselves justified. Let us proceed.”
+
+¶119 We crossed the marshy bottom and passed over a quarter of a mile of dry, hard turf. Again the ground sloped, and again we came on the tracks. Then we lost them for half a mile, but only to pick them up once more quite close to Mapleton. It was Holmes who saw them first, and he stood pointing with a look of triumph upon his face. A man’s track was visible beside the horse’s.
+
+¶120 “The horse was alone before,” I cried.
+
+¶121 “Quite so. It was alone before. Hullo, what is this?”
+
+¶122 The double track turned sharp off and took the direction of King’s Pyland. Holmes whistled, and we both followed along after it. His eyes were on the trail, but I happened to look a little to one side, and saw to my surprise the same tracks coming back again in the opposite direction.
+
+¶123 “One for you, Watson,” said Holmes, when I pointed it out. “You have saved us a long walk, which would have brought us back on our own traces. Let us follow the return track.”
+
+¶124 We had not to go far. It ended at the paving of asphalt which led up to the gates of the Mapleton stables. As we approached, a groom ran out from them.
+
+¶125 “We don’t want any loiterers about here,” said he.
+
+¶126 “I only wished to ask a question,” said Holmes, with his finger and thumb in his waistcoat pocket. “Should I be too early to see your master, Mr. Silas Brown, if I were to call at five o’clock to-morrow morning?”
+
+¶127 “Bless you, sir, if any one is about he will be, for he is always the first stirring. But here he is, sir, to answer your questions for himself. No, sir, no; it is as much as my place is worth to let him see me touch your money. Afterwards, if you like.”
+
+¶128 As Sherlock Holmes replaced the half-crown which he had drawn from his pocket, a fierce-looking elderly man strode out from the gate with a hunting-crop swinging in his hand.
+
+¶129 “What’s this, Dawson!” he cried. “No gossiping! Go about your business! And you, what the devil do you want here?”
+
+¶130 “Ten minutes’ talk with you, my good sir,” said Holmes in the sweetest of voices.
+
+¶131 “I’ve no time to talk to every gadabout. We want no strangers here. Be off, or you may find a dog at your heels.”
+
+¶132 Holmes leaned forward and whispered something in the trainer’s ear. He started violently and flushed to the temples.
+
+¶133 “It’s a lie!” he shouted, “an infernal lie!”
+
+¶134 “Very good. Shall we argue about it here in public or talk it over in your parlour?”
+
+¶135 “Oh, come in if you wish to.”
+
+¶136 Holmes smiled. “I shall not keep you more than a few minutes, Watson,” said he. “Now, Mr. Brown, I am quite at your disposal.”
+
+¶137 It was twenty minutes, and the reds had all faded into greys before Holmes and the trainer reappeared. Never have I seen such a change as had been brought about in Silas Brown in that short time. His face was ashy pale, beads of perspiration shone upon his brow, and his hands shook until the hunting-crop wagged like a branch in the wind. His bullying, overbearing manner was all gone too, and he cringed along at my companion’s side like a dog with its master.
+
+¶138 “Your instructions will be done. It shall all be done,” said he.
+
+¶139 “There must be no mistake,” said Holmes, looking round at him. The other winced as he read the menace in his eyes.
+
+¶140 “Oh no, there shall be no mistake. It shall be there. Should I change it first or not?”
+
+¶141 Holmes thought a little and then burst out laughing. “No, don’t,” said he; “I shall write to you about it. No tricks, now, or—”
+
+¶142 “Oh, you can trust me, you can trust me!”
+
+¶143 “Yes, I think I can. Well, you shall hear from me to-morrow.” He turned upon his heel, disregarding the trembling hand which the other held out to him, and we set off for King’s Pyland.
+
+¶144 “A more perfect compound of the bully, coward, and sneak than Master Silas Brown I have seldom met with,” remarked Holmes as we trudged along together.
+
+¶145 “He has the horse, then?”
+
+¶146 “He tried to bluster out of it, but I described to him so exactly what his actions had been upon that morning that he is convinced that I was watching him. Of course you observed the peculiarly square toes in the impressions, and that his own boots exactly corresponded to them. Again, of course no subordinate would have dared to do such a thing. I described to him how, when according to his custom he was the first down, he perceived a strange horse wandering over the moor. How he went out to it, and his astonishment at recognising, from the white forehead which has given the favourite its name, that chance had put in his power the only horse which could beat the one upon which he had put his money. Then I described how his first impulse had been to lead him back to King’s Pyland, and how the devil had shown him how he could hide the horse until the race was over, and how he had led it back and concealed it at Mapleton. When I told him every detail he gave it up and thought only of saving his own skin.”
+
+¶147 “But his stables had been searched?”
+
+¶148 “Oh, an old horse-faker like him has many a dodge.”
+
+¶149 “But are you not afraid to leave the horse in his power now, since he has every interest in injuring it?”
+
+¶150 “My dear fellow, he will guard it as the apple of his eye. He knows that his only hope of mercy is to produce it safe.”
+
+¶151 “Colonel Ross did not impress me as a man who would be likely to show much mercy in any case.”
+
+¶152 “The matter does not rest with Colonel Ross. I follow my own methods, and tell as much or as little as I choose. That is the advantage of being unofficial. I don’t know whether you observed it, Watson, but the Colonel’s manner has been just a trifle cavalier to me. I am inclined now to have a little amusement at his expense. Say nothing to him about the horse.”
+
+¶153 “Certainly not without your permission.”
+
+¶154 “And of course this is all quite a minor point compared to the question of who killed John Straker.”
+
+¶155 “And you will devote yourself to that?”
+
+¶156 “On the contrary, we both go back to London by the night train.”
+
+¶157 I was thunderstruck by my friend’s words. We had only been a few hours in Devonshire, and that he should give up an investigation which he had begun so brilliantly was quite incomprehensible to me. Not a word more could I draw from him until we were back at the trainer’s house. The Colonel and the Inspector were awaiting us in the parlour.
+
+¶158 “My friend and I return to town by the night-express,” said Holmes. “We have had a charming little breath of your beautiful Dartmoor air.”
+
+¶159 The Inspector opened his eyes, and the Colonel’s lip curled in a sneer.
+
+¶160 “So you despair of arresting the murderer of poor Straker,” said he.
+
+¶161 Holmes shrugged his shoulders. “There are certainly grave difficulties in the way,” said he. “I have every hope, however, that your horse will start upon Tuesday, and I beg that you will have your jockey in readiness. Might I ask for a photograph of Mr. John Straker?”
+
+¶162 The Inspector took one from an envelope and handed it to him.
+
+¶163 “My dear Gregory, you anticipate all my wants. If I might ask you to wait here for an instant, I have a question which I should like to put to the maid.”
+
+¶164 “I must say that I am rather disappointed in our London consultant,” said Colonel Ross, bluntly, as my friend left the room. “I do not see that we are any further than when he came.”
+
+¶165 “At least you have his assurance that your horse will run,” said I.
+
+¶166 “Yes, I have his assurance,” said the Colonel, with a shrug of his shoulders. “I should prefer to have the horse.”
+
+¶167 I was about to make some reply in defence of my friend when he entered the room again.
+
+¶168 “Now, gentlemen,” said he, “I am quite ready for Tavistock.”
+
+¶169 As we stepped into the carriage one of the stable-lads held the door open for us. A sudden idea seemed to occur to Holmes, for he leaned forward and touched the lad upon the sleeve.
+
+¶170 “You have a few sheep in the paddock,” he said. “Who attends to them?”
+
+¶171 “I do, sir.”
+
+¶172 “Have you noticed anything amiss with them of late?”
+
+¶173 “Well, sir, not of much account; but three of them have gone lame, sir.”
+
+¶174 I could see that Holmes was extremely pleased, for he chuckled and rubbed his hands together.
+
+¶175 “A long shot, Watson; a very long shot,” said he, pinching my arm. “Gregory, let me recommend to your attention this singular epidemic among the sheep. Drive on, coachman!”
+
+¶176 Colonel Ross still wore an expression which showed the poor opinion which he had formed of my companion’s ability, but I saw by the Inspector’s face that his attention had been keenly aroused.
+
+¶177 “You consider that to be important?” he asked.
+
+¶178 “Exceedingly so.”
+
+¶179 “Is there any point to which you would wish to draw my attention?”
+
+¶180 “To the curious incident of the dog in the night-time.”
+
+¶181 “The dog did nothing in the night-time.”
+
+¶182 “That was the curious incident,” remarked Sherlock Holmes.
+
+¶183 Four days later Holmes and I were again in the train, bound for Winchester to see the race for the Wessex Cup. Colonel Ross met us by appointment outside the station, and we drove in his drag to the course beyond the town. His face was grave, and his manner was cold in the extreme.
+
+¶184 “I have seen nothing of my horse,” said he.
+
+¶185 “I suppose that you would know him when you saw him?” asked Holmes.
+
+¶186 The Colonel was very angry. “I have been on the turf for twenty years, and never was asked such a question as that before,” said he. “A child would know Silver Blaze, with his white forehead and his mottled off-foreleg.”
+
+¶187 “How is the betting?”
+
+¶188 “Well, that is the curious part of it. You could have got fifteen to one yesterday, but the price has become shorter and shorter, until you can hardly get three to one now.”
+
+¶189 “Hum!” said Holmes. “Somebody knows something, that is clear.”
+
+¶190 As the drag drew up in the enclosure near the grand stand I glanced at the card to see the entries. It ran:—
+
+¶191 Wessex Plate. 50 sovs each h ft with 1000 sovs added for four and five year olds. Second, £300. Third, £200. New course (one mile and five furlongs). 1. Mr. Heath Newton’s The Negro (red cap, cinnamon jacket). 2. Colonel Wardlaw’s Pugilist (pink cap, blue and black jacket). 3. Lord Backwater’s Desborough (yellow cap and sleeves). 4. Colonel Ross’s Silver Blaze (black cap, red jacket). 5. Duke of Balmoral’s Iris (yellow and black stripes). 6. Lord Singleford’s Rasper (purple cap, black sleeves).
+
+¶192 “We scratched our other one, and put all hopes on your word,” said the Colonel. “Why, what is that? Silver Blaze favourite?”
+
+¶193 “Five to four against Silver Blaze!” roared the ring. “Five to four against Silver Blaze! Five to fifteen against Desborough! Five to four on the field!”
+
+¶194 “There are the numbers up,” I cried. “They are all six there.”
+
+¶195 “All six there? Then my horse is running,” cried the Colonel in great agitation. “But I don’t see him. My colours have not passed.”
+
+¶196 “Only five have passed. This must be he.”
+
+¶197 As I spoke a powerful bay horse swept out from the weighing enclosure and cantered past us, bearing on its back the well-known black and red of the Colonel.
+
+¶198 “That’s not my horse,” cried the owner. “That beast has not a white hair upon its body. What is this that you have done, Mr. Holmes?”
+
+¶199 “Well, well, let us see how he gets on,” said my friend, imperturbably. For a few minutes he gazed through my field-glass. “Capital! An excellent start!” he cried suddenly. “There they are, coming round the curve!”
+
+¶200 From our drag we had a superb view as they came up the straight. The six horses were so close together that a carpet could have covered them, but half way up the yellow of the Mapleton stable showed to the front. Before they reached us, however, Desborough’s bolt was shot, and the Colonel’s horse, coming away with a rush, passed the post a good six lengths before its rival, the Duke of Balmoral’s Iris making a bad third.
+
+¶201 “It’s my race, anyhow,” gasped the Colonel, passing his hand over his eyes. “I confess that I can make neither head nor tail of it. Don’t you think that you have kept up your mystery long enough, Mr. Holmes?”
+
+¶202 “Certainly, Colonel, you shall know everything. Let us all go round and have a look at the horse together. Here he is,” he continued, as we made our way into the weighing enclosure, where only owners and their friends find admittance. “You have only to wash his face and his leg in spirits of wine, and you will find that he is the same old Silver Blaze as ever.”
+
+¶203 “You take my breath away!”
+
+¶204 “I found him in the hands of a faker, and took the liberty of running him just as he was sent over.”
+
+¶205 “My dear sir, you have done wonders. The horse looks very fit and well. It never went better in its life. I owe you a thousand apologies for having doubted your ability. You have done me a great service by recovering my horse. You would do me a greater still if you could lay your hands on the murderer of John Straker.”
+
+¶206 “I have done so,” said Holmes quietly.
+
+¶207 The Colonel and I stared at him in amazement. “You have got him! Where is he, then?”
+
+¶208 “He is here.”
+
+¶209 “Here! Where?”
+
+¶210 “In my company at the present moment.”
+
+¶211 The Colonel flushed angrily. “I quite recognise that I am under obligations to you, Mr. Holmes,” said he, “but I must regard what you have just said as either a very bad joke or an insult.”
+
+¶212 Sherlock Holmes laughed. “I assure you that I have not associated you with the crime, Colonel,” said he. “The real murderer is standing immediately behind you.” He stepped past and laid his hand upon the glossy neck of the thoroughbred.
+
+¶213 “The horse!” cried both the Colonel and myself.
+
+¶214 “Yes, the horse. And it may lessen his guilt if I say that it was done in self-defence, and that John Straker was a man who was entirely unworthy of your confidence. But there goes the bell, and as I stand to win a little on this next race, I shall defer a lengthy explanation until a more fitting time.”
+
+¶215 We had the corner of a Pullman car to ourselves that evening as we whirled back to London, and I fancy that the journey was a short one to Colonel Ross as well as to myself, as we listened to our companion’s narrative of the events which had occurred at the Dartmoor training-stables upon the Monday night, and the means by which he had unravelled them.
+
+¶216 “I confess,” said he, “that any theories which I had formed from the newspaper reports were entirely erroneous. And yet there were indications there, had they not been overlaid by other details which concealed their true import. I went to Devonshire with the conviction that Fitzroy Simpson was the true culprit, although, of course, I saw that the evidence against him was by no means complete. It was while I was in the carriage, just as we reached the trainer’s house, that the immense significance of the curried mutton occurred to me. You may remember that I was distrait, and remained sitting after you had all alighted. I was marvelling in my own mind how I could possibly have overlooked so obvious a clue.”
+
+¶217 “I confess,” said the Colonel, “that even now I cannot see how it helps us.”
+
+¶218 “It was the first link in my chain of reasoning. Powdered opium is by no means tasteless. The flavour is not disagreeable, but it is perceptible. Were it mixed with any ordinary dish the eater would undoubtedly detect it, and would probably eat no more. A curry was exactly the medium which would disguise this taste. By no possible supposition could this stranger, Fitzroy Simpson, have caused curry to be served in the trainer’s family that night, and it is surely too monstrous a coincidence to suppose that he happened to come along with powdered opium upon the very night when a dish happened to be served which would disguise the flavour. That is unthinkable. Therefore Simpson becomes eliminated from the case, and our attention centres upon Straker and his wife, the only two people who could have chosen curried mutton for supper that night. The opium was added after the dish was set aside for the stable-boy, for the others had the same for supper with no ill effects. Which of them, then, had access to that dish without the maid seeing them?
+
+¶219 “Before deciding that question I had grasped the significance of the silence of the dog, for one true inference invariably suggests others. The Simpson incident had shown me that a dog was kept in the stables, and yet, though some one had been in and had fetched out a horse, he had not barked enough to arouse the two lads in the loft. Obviously the midnight visitor was some one whom the dog knew well.
+
+¶220 “I was already convinced, or almost convinced, that John Straker went down to the stables in the dead of the night and took out Silver Blaze. For what purpose? For a dishonest one, obviously, or why should he drug his own stable-boy? And yet I was at a loss to know why. There have been cases before now where trainers have made sure of great sums of money by laying against their own horses, through agents, and then preventing them from winning by fraud. Sometimes it is a pulling jockey. Sometimes it is some surer and subtler means. What was it here? I hoped that the contents of his pockets might help me to form a conclusion.
+
+¶221 “And they did so. You cannot have forgotten the singular knife which was found in the dead man’s hand, a knife which certainly no sane man would choose for a weapon. It was, as Dr. Watson told us, a form of knife which is used for the most delicate operations known in surgery. And it was to be used for a delicate operation that night. You must know, with your wide experience of turf matters, Colonel Ross, that it is possible to make a slight nick upon the tendons of a horse’s ham, and to do it subcutaneously, so as to leave absolutely no trace. A horse so treated would develop a slight lameness, which would be put down to a strain in exercise or a touch of rheumatism, but never to foul play.”
+
+¶222 “Villain! Scoundrel!” cried the Colonel.
+
+¶223 “We have here the explanation of why John Straker wished to take the horse out on to the moor. So spirited a creature would have certainly roused the soundest of sleepers when it felt the prick of the knife. It was absolutely necessary to do it in the open air.”
+
+¶224 “I have been blind!” cried the Colonel. “Of course that was why he needed the candle, and struck the match.”
+
+¶225 “Undoubtedly. But in examining his belongings I was fortunate enough to discover not only the method of the crime, but even its motives. As a man of the world, Colonel, you know that men do not carry other people’s bills about in their pockets. We have most of us quite enough to do to settle our own. I at once concluded that Straker was leading a double life, and keeping a second establishment. The nature of the bill showed that there was a lady in the case, and one who had expensive tastes. Liberal as you are with your servants, one can hardly expect that they can buy twenty-guinea walking dresses for their ladies. I questioned Mrs. Straker as to the dress without her knowing it, and having satisfied myself that it had never reached her, I made a note of the milliner’s address, and felt that by calling there with Straker’s photograph I could easily dispose of the mythical Derbyshire.
+
+¶226 “From that time on all was plain. Straker had led out the horse to a hollow where his light would be invisible. Simpson in his flight had dropped his cravat, and Straker had picked it up—with some idea, perhaps, that he might use it in securing the horse’s leg. Once in the hollow, he had got behind the horse and had struck a light; but the creature frightened at the sudden glare, and with the strange instinct of animals feeling that some mischief was intended, had lashed out, and the steel shoe had struck Straker full on the forehead. He had already, in spite of the rain, taken off his overcoat in order to do his delicate task, and so, as he fell, his knife gashed his thigh. Do I make it clear?”
+
+¶227 “Wonderful!” cried the Colonel. “Wonderful! You might have been there!”
+
+¶228 “My final shot was, I confess a very long one. It struck me that so astute a man as Straker would not undertake this delicate tendon-nicking without a little practice. What could he practice on? My eyes fell upon the sheep, and I asked a question which, rather to my surprise, showed that my surmise was correct.
+
+¶229 “When I returned to London I called upon the milliner, who had recognised Straker as an excellent customer of the name of Derbyshire, who had a very dashing wife, with a strong partiality for expensive dresses. I have no doubt that this woman had plunged him over head and ears in debt, and so led him into this miserable plot.”
+
+¶230 “You have explained all but one thing,” cried the Colonel. “Where was the horse?”
+
+¶231 “Ah, it bolted, and was cared for by one of your neighbours. We must have an amnesty in that direction, I think. This is Clapham Junction, if I am not mistaken, and we shall be in Victoria in less than ten minutes. If you care to smoke a cigar in our rooms, Colonel, I shall be happy to give you any other details which might interest you.”
+
+

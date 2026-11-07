@@ -1,0 +1,32 @@
+```jsonl
+{"file": "entities", "id": "matting", "kind": "object", "name": "The piece of matting at the side of the hollow", "within": "hollow"}
+{"file": "entities", "id": "inspector_bag", "kind": "object", "name": "The Inspector's bag"}
+{"file": "entities", "id": "straker_boot", "kind": "object", "name": "One of Straker's boots"}
+{"file": "entities", "id": "simpson_shoe", "kind": "object", "name": "One of Fitzroy Simpson's shoes"}
+{"file": "entities", "id": "horseshoe", "kind": "object", "name": "A cast horseshoe of Silver Blaze"}
+{"file": "entities", "id": "wax_vesta", "kind": "object", "name": "The half-burned wax vesta in the mud", "within": "hollow"}
+{"file": "entities", "id": "hollow_mud", "kind": "object", "name": "The trampled mud of the hollow", "within": "hollow"}
+{"file": "entities", "id": "hollow_rim", "kind": "place", "name": "The rim of the hollow", "within": "moor"}
+{"file": "entities", "id": "ross_watch", "kind": "object", "name": "Colonel Ross's watch"}
+{"file": "entities", "id": "cup_entries", "kind": "document", "name": "The entries for the Wessex Cup"}
+{"file": "mentions", "id": "matting", "phrases": ["A piece of matting", "the matting"]}
+{"file": "mentions", "id": "inspector_bag", "phrases": ["this bag", "the bag"]}
+{"file": "mentions", "id": "straker_boot", "phrases": ["one of the boots which Straker wore"]}
+{"file": "mentions", "id": "simpson_shoe", "phrases": ["one of Fitzroy Simpson’s shoes"]}
+{"file": "mentions", "id": "horseshoe", "phrases": ["a cast horseshoe of Silver Blaze", "this horseshoe"]}
+{"file": "mentions", "id": "wax_vesta", "phrases": ["a wax vesta half burned", "a little chip of wood"]}
+{"file": "mentions", "id": "hollow_mud", "phrases": ["the trampled mud", "the mud which lay at the bottom of the fatal hollow"]}
+{"file": "mentions", "id": "hollow_rim", "phrases": ["the rim of the hollow", "the brink of it"]}
+{"file": "mentions", "id": "ross_watch", "phrases": [{"text": "his watch", "paras": [110, 110]}]}
+{"file": "mentions", "id": "cup_entries", "phrases": ["the entries for the Cup"]}
+{"file": "mentions", "id": "hollow", "phrases": ["the hollow in which the body had been found", "the hollow"]}
+{"file": "mentions", "id": "furze_bush", "phrases": ["the furze-bush", "the bush"]}
+{"file": "mentions", "id": "straker_coat", "phrases": ["the coat", "the overcoat"]}
+{"file": "mentions", "id": "straker_villa", "phrases": ["poor Straker’s house"]}
+{"file": "mentions", "id": "silver_blaze", "phrases": ["our horse’s name", "our horse"]}
+{"file": "mentions", "id": "wessex_cup", "phrases": ["the Cup"]}
+{"file": "mentions", "id": "ross", "phrases": ["The Colonel"]}
+{"file": "mentions", "id": "racing_public", "phrases": [{"text": "the public", "paras": [110, 110]}]}
+```
+
+Note: the existing unrestricted "his watch" for `holmes_watch` should be limited to ¶8, because in ¶110 the same words refer to Ross's watch.

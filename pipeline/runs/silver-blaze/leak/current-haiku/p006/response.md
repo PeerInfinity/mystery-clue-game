@@ -1,0 +1,6 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶6 has Holmes say they must catch their train at Paddington, so the station is named in the story."}
+{"i": 2, "verdict": "supported", "why": "¶6 has Holmes ask Watson to bring his very excellent field-glass."}
+{"i": 3, "verdict": "unsupported", "why": "The story so far says they are catching a train but never gives a day of the week or says the train ride begins an hour after breakfast."}
+{"i": 4, "verdict": "unsupported", "why": "Holmes says he will explain the matter on the journey, which supports an account in the train, but the story never says the day is Thursday."}
+```

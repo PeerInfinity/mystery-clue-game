@@ -1,0 +1,4 @@
+[{"para":202,"kind":"account","text":"What Holmes tells in the weighing enclosure","id":"acct.holmes_race","i":1,"verdict":"supported","why":"In ¶202 Holmes speaks in the weighing enclosure and begins explaining about the horse."},
+{"para":202,"kind":"name","text":"Spirits of wine","id":"spirits_of_wine","i":2,"verdict":"supported","why":"Holmes names spirits of wine in ¶202 as the thing to wash the horse's face and leg with."},
+{"para":202,"kind":"name","text":"The disguise on the horse","id":"disguise_dye","i":3,"verdict":"supported","why":"If washing the face and leg reveals Silver Blaze, those markings were plainly covered; this follows directly from ¶198 and ¶202."},
+{"para":202,"kind":"time","text":"Race day: in the weighing enclosure, after the race","id":"t.race_enclosure","i":4,"verdict":"supported","why":"¶202 takes place in the weighing enclosure right after the Wessex Cup race."}]

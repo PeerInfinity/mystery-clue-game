@@ -1,0 +1,6 @@
+[{"para":1,"kind":"account","text":"What Watson sees and hears himself","id":"acct.watson","i":1,"verdict":"supported","why":"The narrator says 'we sat down together' and Holmes speaks to Watson, so this is Watson's own first-person account."},
+{"para":1,"kind":"name","text":"Sherlock Holmes","id":"holmes","i":2,"verdict":"unsupported","why":"The story so far uses only 'Holmes'; the first name 'Sherlock' has not appeared."},
+{"para":1,"kind":"name","text":"Dr. Watson","id":"watson","i":3,"verdict":"unsupported","why":"The story uses only 'Watson'; the title 'Dr.' has not been given."},
+{"para":1,"kind":"name","text":"Holmes's rooms","id":"baker_street","i":4,"verdict":"unsupported","why":"The story does not say where they are having breakfast; nothing names Holmes's rooms."},
+{"para":1,"kind":"time","text":"Before the story, undated","id":"t.before","i":5,"verdict":"supported","why":"This is a generic, undated time slot for earlier events and reveals nothing specific."},
+{"para":1,"kind":"time","text":"Thursday, breakfast at Baker Street","id":"t.thu_breakfast","i":6,"verdict":"unsupported","why":"The story says only 'one morning' at breakfast; neither Thursday nor Baker Street is mentioned."}]

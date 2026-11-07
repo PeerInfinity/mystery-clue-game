@@ -1,0 +1,5 @@
+[{"para":84,"kind":"name","text":"Madame Lesurier","id":"madame_lesurier","i":1,"verdict":"supported","why":"Named in ¶84 as the milliner who made out the account."},
+{"para":84,"kind":"name","text":"William Derbyshire","id":"william_derbyshire","i":2,"verdict":"supported","why":"Named in ¶84 as the person the account was made out to."},
+{"para":84,"kind":"name","text":"Madame Lesurier's, Bond Street","id":"bond_street_shop","i":3,"verdict":"supported","why":"¶84 gives Madame Lesurier as being of Bond Street."},
+{"para":84,"kind":"question","text":"Who is William Derbyshire?","id":"q.derbyshire","i":4,"verdict":"supported","why":"The story gives a reader reason to ask: an unfamiliar name on a bill found in Straker's pocket."},
+{"para":84,"kind":"possibility","text":"Who is William Derbyshire? — a friend of Straker's","id":"q.derbyshire=a friend of Straker's","i":5,"verdict":"supported","why":"Mrs. Straker states this explanation in ¶84."}]

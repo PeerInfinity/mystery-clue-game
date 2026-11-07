@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The phrase 'a costume of dove-coloured silk with ostrich-feather trimming' appears in the story so far, in Holmes's remark to Mrs. Straker at ¶91. The label names that item without linking it to any person, so it adds nothing the text lacks. The story presents the costume only as Holmes's claim, which Mrs. Straker denies, but the label does not assert otherwise."}
+```

@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "In ¶64, Gregory says he has examined every stable and out-house in Tavistock and for a radius of ten miles."}
+```

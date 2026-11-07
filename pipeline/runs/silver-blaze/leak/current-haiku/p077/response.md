@@ -1,0 +1,5 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "At ¶77 the Inspector says he has the items from Straker's pockets 'in the sitting-room', so the place is already named in the story."}
+{"i": 2, "verdict": "unsupported", "why": "No square tin box appears anywhere in the story so far; the label introduces an object the text has not yet mentioned."}
+{"i": 3, "verdict": "supported", "why": "It is evening (¶47), the Inspector has just offered to show the inventory of Straker's pockets kept in the sitting-room (¶76-77), so the label restates the current moment and place."}
+```

@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story is set on Thursday (¶13). The sun was setting during the walk on the moor (¶113), and by the end of the Mapleton visit the reds had faded to greys (¶137). Holmes and Watson then set off for King's Pyland (¶143), so the walk back at dusk on Thursday is already stated."}
+```

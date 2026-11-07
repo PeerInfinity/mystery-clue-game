@@ -1,0 +1,4 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶157 says the Colonel and the Inspector were waiting in the parlour of the trainer's house."}
+{"i": 2, "verdict": "supported", "why": "The journey began Thursday morning (¶13) and they reached Tavistock that evening (¶47). The return to the trainer's villa, where they are awaited in the parlour, follows the walk at dusk the same day."}
+```

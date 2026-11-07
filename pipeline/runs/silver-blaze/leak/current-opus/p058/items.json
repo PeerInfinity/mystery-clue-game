@@ -1,0 +1,5 @@
+[{"para":58,"kind":"account","text":"Simpson's further statements: the paper, the cravat","id":"acct.simpson_more","i":1,"verdict":"unsupported","why":"Simpson has only explained the paper (a ten-pound note). On the cravat he was earlier 'utterly unable to account' for it, so no further statement about it has been given yet."},
+{"para":58,"kind":"name","text":"London","id":"london","i":2,"verdict":"supported","why":"Gregory says the opium was probably brought from London."},
+{"para":58,"kind":"name","text":"The pits and old mines","id":"pits_and_mines","i":3,"verdict":"supported","why":"Gregory suggests the horse may be at the bottom of one of the pits or old mines on the moor."},
+{"para":58,"kind":"name","text":"A ten-pound note","id":"ten_pound_note","i":4,"verdict":"supported","why":"Simpson says the paper was a ten-pound note."},
+{"para":58,"kind":"name","text":"Simpson's purse","id":"simpson_purse","i":5,"verdict":"supported","why":"A ten-pound note was found in his purse."}]
