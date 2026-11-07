@@ -24,6 +24,7 @@ else. Every JSON file is one object per line inside its list.
 | `world/accounts.json` | yes | The accounts the facts travel in, and who holds them. |
 | `world/questions.json` | yes | The questions, their possibilities and answers. |
 | `world/strains.json` | no | Likely clashes; without it the page shows none. |
+| `world/actions.json` | no | The case's own action types, `{id, label, requires, effects}` in the action table's rule shape, and `ramifies` (what a goal's state brings with it); the generic ones are the engine's (see "Typed states and actions"). |
 | `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`; `CASE=<dir> node scripts/path-check.mjs` for another case). |
 
 The world model was first written beside the earlier game's data and pointed into it (`old`, references to the
@@ -202,7 +203,13 @@ the page offers those met so far (named by a fact given so far). The page shows 
 puts forward (`via: direct`) and "something else"; the rest (`via: indirect`, and the people, animals or places, an
 indirect possibility among them in its place) sit behind a "More" button, so that no list points at the answer.
 
-**Typed states and actions** (`engine/actions.js`). A typed state is an attribute whose values exclude each other
+**Typed states and actions** (`engine/actions.js`; the case's own types in `world/actions.json`).
+The action types are the engine's generic ones (`GENERIC_ACTIONS`: lock, unlock, open, close, go through, lead out,
+give, ask, drug, strike, keep a key, take, strike a light, hide) and the case's own, set by `setCaseActions` from
+`world/actions.json` (2026-11-07, the user's ruling: a generic core and each story's own as data). Silver Blaze's own
+are injuring (its needs, the stable door open and the guard unable to act, are the story's), laying against, and
+being cut as one falls, with the ramification that a horse injured before its race loses it. A case's type that a
+second story needs too is a candidate for the generic table. A typed state is an attribute whose values exclude each other
 (`STATES`; for now `door`: `open`, `shut`, `locked`): two of them at a time both certainly cover contradict, like two
 identities. A fact is a typed action when it has `act` (an action type of the generic table `ACTIONS`: `lock`,
 `unlock`, `open`, `close`, `go_through`) and `thing` (what it acts on); its agent is its `of`. The table gives each

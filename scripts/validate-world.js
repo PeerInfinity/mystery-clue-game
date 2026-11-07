@@ -24,7 +24,7 @@ import path from 'node:path';
 import { normalize } from '../engine/story.js';
 import { provenance, loadWorld } from './world-provenance.js';
 import { assertions, contradictions, CLAIM_ATTRS, LEVELS } from '../engine/world.js';
-import { ACTIONS, STATES } from '../engine/actions.js';
+import { ACTIONS, GENERIC_ACTIONS, STATES, setCaseActions } from '../engine/actions.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -35,6 +35,17 @@ const caseData = read('world/case.json');
 const story = fs.readFileSync(path.join(dir, 'world', caseData.story), 'utf8')
     .split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean).map(normalize);
 const allEntities = read('world/entities.json').entities;
+// The case's own action types (world/actions.json, optional): each `{id, label, requires, effects}`, an id the
+// generic table does not have, every rule naming a role or a thing; `ramifies` each `{if, then}` of {attr, value}.
+const caseActions = fs.existsSync(path.join(dir, 'world', 'actions.json')) ? read('world/actions.json') : {};
+const actionErrors = [];
+for (const a of caseActions.actions ?? []) {
+    if (!a.id || GENERIC_ACTIONS[a.id]) actionErrors.push(`actions.json: ${a.id}: needs an id the generic table does not have`);
+    if (!a.label) actionErrors.push(`actions.json: ${a.id}: no label`);
+    for (const r of [...(a.requires ?? []), ...(a.effects ?? [])]) if (!r || typeof r !== 'object' || !(r.of || r.guard)) actionErrors.push(`actions.json: ${a.id}: a rule names its subject (of, or guard): ${JSON.stringify(r)}`);
+}
+for (const r of caseActions.ramifies ?? []) if (!r.if?.attr || !r.then?.attr) actionErrors.push(`actions.json: ramifies: {if: {attr, value}, then: {attr, value}}: ${JSON.stringify(r)}`);
+setCaseActions(caseActions);
 // The narrators: each an entity of the case, or `narrator` (an impersonal third-person narrator); trust a level.
 const errors0 = [];
 const narratorIds = new Set((caseData.narrators ?? []).map((n) => n.id));
@@ -59,7 +70,7 @@ const earliest = (f) => f.inferable_at ?? givenAt(f);
 const TELL_HOWS = new Set(['told', 'overheard', 'statement', 'sworn statement', 'report', 'newspaper', 'telegram', 'analysis', 'letter']);
 const ACCOUNT_HOWS = new Set(['saw', 'did', 'said', 'examination', 'analysis', 'inference', 'own', 'report', 'bundle']);
 
-const errors = [...errors0];
+const errors = [...errors0, ...actionErrors];
 const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const timeIds = new Set(times.map((t) => t.id));
 const factById = new Map(facts.map((f) => [f.id, f]));

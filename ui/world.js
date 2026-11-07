@@ -7,7 +7,7 @@
 import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
-import { ACTIONS, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
+import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
@@ -28,6 +28,8 @@ const [w, times, facts, accounts, questions, text, mentions] = await Promise.all
     get(`${W}/entities.json`), get(`${W}/times.json`), get(`${W}/facts.json`), get(`${W}/accounts.json`),
     get(`${W}/questions.json`), get(`${W}/${header.story}`, 'text'), get(`${W}/mentions.json`),
 ]);
+// The case's own action types (world/actions.json): optional; the generic ones are the engine's.
+setCaseActions(await get(`${W}/actions.json`).catch(() => ({})));
 // Likely clashes (world/strains.json): optional.
 const strainList = await get(`${W}/strains.json`).then((x) => x.strains ?? []).catch(() => []);
 const data = {

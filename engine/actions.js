@@ -26,7 +26,7 @@ import { coverOf, STATES, OPEN_STATES } from './world.js';
 export { STATES, OPEN_STATES };
 
 /**
- * The generic action table. A rule names its subject by role (`of: '$agent'`) and is one of:
+ * The generic action table (a case adds its own: `setCaseActions`). A rule names its subject by role (`of: '$agent'`) and is one of:
  * - `{of, state, value, neg?}`: a typed state (a door's); `{of, attr, value, neg?}`: any other state (`value` a role
  *   or a literal);
  * - `{of, key: role}`: carrying a key to it; `{of, carrying: role}`: carrying it (owning it will do);
@@ -44,7 +44,7 @@ export { STATES, OPEN_STATES };
  * An effect with `kinds` holds only if the item is of one of those kinds (a paper of money makes its taker willing; a
  * paper of opium does not).
  */
-export const ACTIONS = {
+const GENERIC = {
     lock: { label: 'locking', requires: [{ of: '$thing', state: 'door', value: 'locked', neg: true }, { of: '$agent', key: '$thing' }, { of: '$agent', at: '$thing' }], effects: [{ of: '$thing', state: 'door', value: 'locked' }] },
     unlock: { label: 'unlocking', requires: [{ of: '$thing', state: 'door', value: 'locked' }, { of: '$agent', key: '$thing' }, { of: '$agent', at: '$thing' }], effects: [{ of: '$thing', state: 'door', value: 'shut' }] },
     open: { label: 'opening', requires: [{ of: '$thing', state: 'door', value: 'shut' }, { of: '$agent', at: '$thing' }], effects: [{ of: '$thing', state: 'door', value: 'open' }] },
@@ -55,21 +55,34 @@ export const ACTIONS = {
     ask: { label: 'asking', requires: [{ of: '$to', attr: 'willing', value: '$agent' }], effects: [{ of: '$agent', attr: 'knows', value: '$about' }] },
     drug: { label: 'drugging', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'drugged' }] },
     strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', place: '$where' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
-    injure: { label: 'injuring', requires: [{ of: '$via', state: 'door', value: 'open' }, { of: '$agent', at: '$via' }, { guard: '$via' }], effects: [{ of: '$thing', attr: 'condition', value: 'injured' }] },
     keep_key: { label: 'keeping a key to', requires: [], effects: [{ of: '$agent', key: '$thing' }] },
-    lay_against: { label: 'laying against', requires: [{ of: '$thing', attr: 'condition', value: 'loses the race' }], effects: [{ of: '$agent', attr: 'condition', value: 'in funds' }] },
     take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
-    cut_self: { label: 'cut, as he fell,', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', attr: 'condition', value: 'struck down' }], effects: [{ of: '$agent', attr: 'condition', value: 'cut' }] },
     hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place', unless: '$where' }, { of: '$agent', charge: '$where' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
 };
+/** The generic action types, the same for every case. */
+export const GENERIC_ACTIONS = Object.freeze({ ...GENERIC });
+/**
+ * The action types in play: the generic ones and the case's own (world/actions.json: a story's own actions, such as
+ * injuring the horse in "Silver Blaze", whose needs are that story's). `setCaseActions` sets the case's; a case's
+ * type that a second story needs too is a candidate for the generic table.
+ */
+export const ACTIONS = { ...GENERIC };
+/**
+ * What a goal's state brings with it, for a goal serving a further goal ("in order to"), from the case
+ * (world/actions.json `ramifies`; Silver Blaze: a horse injured before its race loses it). Each `{if: {attr, value},
+ * then: {attr, value}}` of the same thing.
+ */
+export const GOAL_RAMIFIES = [];
+/** Set the case's own action types and ramifications (world/actions.json), over the generic ones. */
+export function setCaseActions({ actions = [], ramifies = [] } = {}) {
+    for (const k of Object.keys(ACTIONS)) if (!(k in GENERIC)) delete ACTIONS[k];
+    for (const a of actions) ACTIONS[a.id] = { label: a.label, requires: a.requires ?? [], effects: a.effects ?? [] };
+    GOAL_RAMIFIES.length = 0;
+    GOAL_RAMIFIES.push(...ramifies);
+}
 /** What a goal of carrying an item brings with it, by the item's kind (the same rule as `give`'s). */
 const CARRY_RAMIFIES = { attr: 'willing', kinds: ['money', 'message'] };
-/**
- * What a goal's state brings with it, for a goal serving a further goal ("in order to"): a horse injured before its
- * race loses it. Each `{attr, value}` → `{attr, value}` of the same thing.
- */
-export const GOAL_RAMIFIES = [{ if: { attr: 'condition', value: 'injured' }, then: { attr: 'condition', value: 'loses the race' } }];
 
 export const REASONING = 'reasoning';
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);

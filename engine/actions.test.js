@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
-import { ACTIONS, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, orderSteps } from './actions.js';
+import fs from 'node:fs';
+import { ACTIONS, GENERIC_ACTIONS, setCaseActions, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, orderSteps } from './actions.js';
+// The tests are Silver Blaze's: its own action types (injuring, laying against) come from its case file.
+setCaseActions(JSON.parse(fs.readFileSync(new URL('../cases/silver-blaze/world/actions.json', import.meta.url), 'utf8')));
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -313,4 +316,11 @@ test('two names of one person: a need of one is met by an entry of the other', (
     const e = [{ id: 'c', of: 'stranger', attr: 'carrying', value: 'stick', time: { at: 't9' } }];
     assert.equal(requirementStatus(order, e, req).status, 'unknown');
     assert.equal(requirementStatus(order, e, req, { same }).status, 'met');
+});
+
+test("a case's own action types come over the generic ones, and go with the next case", () => {
+    assert.ok(ACTIONS.injure && !GENERIC_ACTIONS.injure, 'injuring is Silver Blaze\'s own');
+    setCaseActions({ actions: [{ id: 'whistle', label: 'whistling', requires: [], effects: [{ of: '$to', attr: 'condition', value: 'called back' }] }] });
+    assert.ok(ACTIONS.whistle && !ACTIONS.injure && ACTIONS.lock, 'another case: its own, the generic, not the last case\'s');
+    setCaseActions(JSON.parse(fs.readFileSync(new URL('../cases/silver-blaze/world/actions.json', import.meta.url), 'utf8')));
 });
