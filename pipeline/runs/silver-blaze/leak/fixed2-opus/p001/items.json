@@ -1,0 +1,4 @@
+[{"para":1,"kind":"name","text":"Holmes","id":"holmes","i":1,"verdict":"supported","why":"Holmes is named as the speaker in paragraph 1."},
+{"para":1,"kind":"name","text":"Watson","id":"watson","i":2,"verdict":"supported","why":"Holmes addresses Watson by name in paragraph 1."},
+{"para":1,"kind":"time","text":"Before the story, undated","id":"t.before","i":3,"verdict":"supported","why":"A generic, undated marker for earlier background; it reveals nothing specific, and Holmes's need to go implies something happened beforehand."},
+{"para":1,"kind":"time","text":"One morning, at breakfast","id":"t.thu_breakfast","i":4,"verdict":"supported","why":"The story states they sat down to breakfast one morning."}]

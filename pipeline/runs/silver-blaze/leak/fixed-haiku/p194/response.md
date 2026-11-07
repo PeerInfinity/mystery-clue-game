@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶194 has the narrator say 'There are the numbers up,' referring to the runners' numbers displayed at the course, which the story has just described. Calling that display a 'numbers board' is an ordinary paraphrase of what is already on the page."}
+```

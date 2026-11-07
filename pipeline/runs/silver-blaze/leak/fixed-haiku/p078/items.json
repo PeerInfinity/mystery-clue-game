@@ -1,0 +1,9 @@
+[{"para":78,"kind":"name","text":"The square tin box","id":"tin_box","i":1,"verdict":"supported","why":"Paragraph 78 says the Inspector 'unlocked a square tin box'."},
+{"para":78,"kind":"name","text":"A box of vestas","id":"vesta_box","i":2,"verdict":"supported","why":"Paragraph 78 lists 'a box of vestas' among the items laid out."},
+{"para":78,"kind":"name","text":"Two inches of tallow candle","id":"tallow_candle","i":3,"verdict":"supported","why":"Paragraph 78 lists 'two inches of tallow candle'."},
+{"para":78,"kind":"name","text":"An A.D.P. briar-root pipe","id":"briar_pipe","i":4,"verdict":"supported","why":"Paragraph 78 lists 'an A.D.P. briar-root pipe'."},
+{"para":78,"kind":"name","text":"A seal-skin pouch","id":"tobacco_pouch","i":5,"verdict":"supported","why":"Paragraph 78 lists 'a pouch of seal-skin'."},
+{"para":78,"kind":"name","text":"A silver watch with a gold chain","id":"silver_watch","i":6,"verdict":"supported","why":"Paragraph 78 lists 'a silver watch with a gold chain'."},
+{"para":78,"kind":"name","text":"Five sovereigns","id":"sovereigns","i":7,"verdict":"supported","why":"Paragraph 78 lists 'five sovereigns in gold'."},
+{"para":78,"kind":"name","text":"An aluminium pencil-case","id":"pencil_case","i":8,"verdict":"supported","why":"Paragraph 78 lists 'an aluminium pencil-case'."},
+{"para":78,"kind":"time","text":"Thursday evening: the sitting-room, Straker's pockets","id":"t.thu_sitting","i":9,"verdict":"supported","why":"The party left Paddington on Thursday morning and reached Tavistock 'evening' (¶47). Holmes asked for the inventory of Straker's pockets (¶76), and the items are laid out in the front room (¶77-78)."}]

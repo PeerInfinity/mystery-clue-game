@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The story has so far named only William Derbyshire, as the addressee of a milliner's account, and Holmes calls him 'mythical' in the same paragraph. Nothing establishes a real 'Derbyshire household'. The label presumes an actual household, which the story only hints is a cover for Straker's second establishment, and that identity is not yet revealed."}
+```

@@ -1,0 +1,9 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The bell is named in ¶214 (\"there goes the bell\") as the start signal for the next race."}
+{"i": 2, "verdict": "supported", "why": "Holmes's ¶214 remark that Straker was \"entirely unworthy of your confidence\" makes the question of his honesty a plain question the reader has reason to ask."}
+{"i": 3, "verdict": "supported", "why": "Ross's account in ¶19 calls Straker \"a zealous and honest servant\", so honesty is a live possibility. The story has not yet settled the question, and Holmes has deferred his explanation."}
+{"i": 4, "verdict": "supported", "why": "Holmes's ¶214 claim that Straker was unworthy of confidence gives the reader reason to consider dishonesty. The question is still open, so this is a possibility, not a settled fact."}
+{"i": 5, "verdict": "supported", "why": "A plain question prompted by Holmes's claim that Straker was unworthy of confidence. The wording \"to it\" presupposes wrongdoing, which the story has hinted at but not stated, so this is only a mild presupposition."}
+{"i": 6, "verdict": "unsupported", "why": "The story never mentions a second household or any debts of Straker's. He is described as comfortably off (¶19). The Derbyshire milliner's account (¶84-85) is only a hint, and it does not establish a second household or debts."}
+{"i": 7, "verdict": "unsupported", "why": "The story attributes betting against the favourite only to Fitzroy Simpson and Silas Brown. It never mentions Straker betting or laying against his own horse, so this specific mechanism is not yet supplied."}
+```

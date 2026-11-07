@@ -1,0 +1,5 @@
+[{"para":12,"kind":"account","text":"Holmes's own part","id":"acct.holmes_own","i":1,"verdict":"supported","why":"Holmes says he is going to King's Pyland at the invitation in the telegrams, and he is set to investigate the case, so his involvement is stated."},
+{"para":12,"kind":"name","text":"Colonel Ross","id":"colonel_ross","i":2,"verdict":"supported","why":"Paragraph 12 names Colonel Ross as the owner of the horse and a sender of one of the telegrams."},
+{"para":12,"kind":"name","text":"Inspector Gregory","id":"gregory","i":3,"verdict":"supported","why":"Paragraph 12 names Inspector Gregory as the officer looking after the case and a sender of one of the telegrams."},
+{"para":12,"kind":"name","text":"The telegrams","id":"telegrams","i":4,"verdict":"supported","why":"Paragraph 12 states that Holmes received telegrams from Colonel Ross and Inspector Gregory inviting his co-operation."},
+{"para":12,"kind":"time","text":"Tuesday evening: the telegrams","id":"t.tue_evening","i":5,"verdict":"supported","why":"Paragraph 12 states that the telegrams arrived on Tuesday evening."}]

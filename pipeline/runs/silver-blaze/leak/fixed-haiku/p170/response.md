@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes himself says 'You have a few sheep in the paddock' in ¶170, and the paddock was already mentioned in ¶69. The label only names what the story has just stated, with no added identity or detail."}
+```

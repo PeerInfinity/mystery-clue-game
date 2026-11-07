@@ -1,0 +1,10 @@
+[{"para":4,"kind":"name","text":"The trainer","id":"straker","i":1,"verdict":"supported","why":"The paragraph mentions the tragic murder of the favourite's trainer."},
+{"para":4,"kind":"name","text":"The news agent","id":"news_agent","i":2,"verdict":"supported","why":"The paragraph says fresh editions were sent up by 'our news agent'."},
+{"para":4,"kind":"name","text":"The favourite","id":"silver_blaze","i":3,"verdict":"supported","why":"The paragraph mentions the disappearance of the favourite for the Wessex Cup."},
+{"para":4,"kind":"name","text":"Holmes's rooms","id":"baker_street","i":4,"verdict":"supported","why":"Holmes rambled about 'the room' while he and Watson sat at breakfast, so these are his rooms."},
+{"para":4,"kind":"name","text":"Holmes's pipe","id":"holmes_pipe","i":5,"verdict":"supported","why":"Holmes is described charging and recharging his pipe."},
+{"para":4,"kind":"name","text":"The newspapers","id":"newspapers","i":6,"verdict":"supported","why":"Fresh editions of every paper were sent up and tossed into a corner."},
+{"para":4,"kind":"name","text":"The public","id":"public","i":7,"verdict":"supported","why":"The case is described as the one problem before the public."},
+{"para":4,"kind":"account","text":"A report on the case","id":"acct.police_case","i":8,"verdict":"supported","why":"This is a generic label for reports on the case, which the papers clearly carry."},
+{"para":4,"kind":"account","text":"What the papers print","id":"acct.papers","i":9,"verdict":"supported","why":"The newspapers are covering the case, which is the talk of England."},
+{"para":4,"kind":"question","text":"Who killed the trainer?","id":"q.who_killed","i":10,"verdict":"supported","why":"The trainer's murder is stated, so asking who killed him is natural and points to no answer."}]

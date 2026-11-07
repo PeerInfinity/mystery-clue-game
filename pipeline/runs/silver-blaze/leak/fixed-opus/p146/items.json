@@ -1,0 +1,4 @@
+[{"para":146,"kind":"account","text":"Holmes's account of Brown's morning, which Brown admitted","id":"acct.holmes_brown","i":1,"verdict":"supported","why":"Holmes says he described Brown's actions that morning, and Brown 'gave it up', which is an admission."},
+{"para":146,"kind":"name","text":"Silas Brown's boots","id":"brown_boots","i":2,"verdict":"supported","why":"Holmes says Brown's own boots exactly matched the square-toed impressions."},
+{"para":146,"kind":"time","text":"Tuesday, early morning: the horse near Mapleton","id":"t.tue_dawn","i":3,"verdict":"supported","why":"The crime was Monday night, with Straker leaving at 1 a.m. 'That morning', when Brown was first down and saw the horse, is therefore early Tuesday."},
+{"para":146,"kind":"time","text":"Tuesday, early morning: the horse led into Mapleton","id":"t.tue_into_mapleton","i":4,"verdict":"supported","why":"Holmes describes Brown leading the horse back and hiding it at Mapleton that same morning."}]

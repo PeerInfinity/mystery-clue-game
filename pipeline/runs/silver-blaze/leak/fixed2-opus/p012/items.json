@@ -1,0 +1,4 @@
+[{"para":12,"kind":"name","text":"Colonel Ross","id":"colonel_ross","i":1,"verdict":"supported","why":"Paragraph 12 names Colonel Ross as the owner of the horse."},
+{"para":12,"kind":"name","text":"Inspector Gregory","id":"gregory","i":2,"verdict":"supported","why":"Paragraph 12 names Inspector Gregory as the officer looking after the case."},
+{"para":12,"kind":"name","text":"The telegrams","id":"telegrams","i":3,"verdict":"supported","why":"Holmes says he received telegrams from Ross and Gregory inviting his co-operation."},
+{"para":12,"kind":"time","text":"Tuesday evening: the telegrams","id":"t.tue_evening","i":4,"verdict":"supported","why":"Holmes says he received the telegrams on Tuesday evening."}]

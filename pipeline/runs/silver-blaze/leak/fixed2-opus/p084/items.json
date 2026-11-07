@@ -1,0 +1,8 @@
+[{"para":84,"kind":"name","text":"Madame Lesurier","id":"madame_lesurier","i":1,"verdict":"supported","why":"Named in ¶84 as the maker of the milliner's account."},
+{"para":84,"kind":"name","text":"William Derbyshire","id":"william_derbyshire","i":2,"verdict":"supported","why":"Named in ¶84 as the person the account is made out to."},
+{"para":84,"kind":"name","text":"Madame Lesurier's, Bond Street","id":"bond_street_shop","i":3,"verdict":"supported","why":"¶84 places Madame Lesurier in Bond Street."},
+{"para":84,"kind":"name","text":"Three hay-dealers' accounts","id":"hay_accounts","i":4,"verdict":"supported","why":"¶84 lists three receipted hay-dealers' accounts among the papers."},
+{"para":84,"kind":"name","text":"A letter of instructions from Colonel Ross","id":"ross_letter","i":5,"verdict":"supported","why":"¶84 lists a letter of instructions from Colonel Ross among the papers."},
+{"para":84,"kind":"name","text":"The milliner's account","id":"milliner_bill","i":6,"verdict":"supported","why":"¶84 describes the milliner's account for thirty-seven pounds fifteen."},
+{"para":84,"kind":"question","text":"Who is William Derbyshire?","id":"q.derbyshire","i":7,"verdict":"supported","why":"A neutral question. The reader has reason to ask, since the account is addressed to Derbyshire but found in Straker's pocket."},
+{"para":84,"kind":"possibility","text":"Who is William Derbyshire? — a friend of Straker's","id":"q.derbyshire=a friend of Straker's","i":8,"verdict":"supported","why":"Mrs. Straker states in ¶84 that Derbyshire was a friend of her husband's."}]

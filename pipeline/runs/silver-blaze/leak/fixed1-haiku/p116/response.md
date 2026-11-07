@@ -1,0 +1,4 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶116 states that 'This part of the moor, as the Inspector remarked, is very hard and dry,' so the label matches the text."}
+{"i": 2, "verdict": "supported", "why": "¶116 mentions 'a long hollow over yonder' that 'falls away towards Mapleton' and 'must have been very wet on Monday night,' so the label matches the text."}
+```

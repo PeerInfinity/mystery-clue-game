@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The phrase is introduced by Holmes's own inference in ¶219: someone entered the stables during the night, took out the horse without the dog barking, and so was 'some one whom the dog knew well.' The label only names this unidentified visitor and does not reveal who it is, so it adds nothing the story has not already given the reader."}
+```

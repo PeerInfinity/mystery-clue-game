@@ -135,3 +135,20 @@ What to fix next (the fix-and-rerun loop):
   `implied` facts, the tellings between third parties and the `observes` facts.
 - **The comparison itself** is rough for the reading and the questions (word overlap); read `compare/*.md` rather
   than trusting the percentages.
+
+### The current page's leaks, fixed (2026-11-06)
+
+The user asked for the leaks found in the current page to be fixed. The page and the leak check now share one
+module for what may show at a paragraph (`engine/shown.js`; `docs/case-format.md`, "What the page may show at a
+paragraph"): names as the story has used them so far, time-point, question and account labels in steps
+(`labels`), no day or hour before a time is told, and a fact told early in brief shown only in its brief words. The
+data: 8 time labels, 15 account labels, one question label and two names changed (`world/*.json`). The leak check
+itself was corrected to time an account's label by the telling that shows it, and to check a paragraph again
+only where its labels changed.
+
+Opus, after the fix (`leak/fixed2-opus/report.md`): 5 of 359 labels flagged, against 54 before. All five are
+possibilities a careful reader is meant to be able to consider before the story names them, dated by the logic
+audit (`q.horse_where` "dead, in a pit or mine" at ¶14, `q.straker_aim` "to injure the horse" at ¶46, the two
+answers of `q.why_out` at ¶57, `q.sheep_lame` "someone practised on them" at ¶173); the checker says nothing yet
+gives a reason to consider them. That is a judgement on the data's dates, left for the user. The page checks pass
+with the fix.

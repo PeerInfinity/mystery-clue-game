@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story establishes that it is Thursday (\"this is Thursday morning\"), that the journey ends in the evening, and that the sun is sinking as Holmes and Watson walk across the moor. The hollow is described as very wet on Monday night and the tracks are found in its soft earth, so the label's time and setting follow from the text."}
+```

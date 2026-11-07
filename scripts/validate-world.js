@@ -65,6 +65,13 @@ const timeIds = new Set(times.map((t) => t.id));
 const factById = new Map(facts.map((f) => [f.id, f]));
 const qById = new Map(questions.map((q) => [q.id, q]));
 
+// Labels by paragraph (engine/shown.js): `labels` on a time point, a question or an account, `names` on an entity.
+for (const x of [...times, ...questions, ...accounts, ...allEntities]) {
+    for (const [k, f] of [['labels', 'label'], ['names', 'name']]) {
+        if (x[k] == null) continue;
+        if (!Array.isArray(x[k]) || !x[k].length || x[k].some((l) => !Number.isInteger(l.from) || typeof l[f] !== 'string' || !l[f])) errors0.push(`${x.id}: ${k} is a list of {from, ${f}}`);
+    }
+}
 const seen = new Set();
 for (const x of [...times, ...facts, ...questions, ...accounts]) {
     if (seen.has(x.id)) err(x.id, 'duplicate id');

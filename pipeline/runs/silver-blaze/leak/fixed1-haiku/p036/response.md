@@ -1,0 +1,5 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Monday night's catastrophe is followed by Mrs. Straker waking at 1am and finding the stable and body at 7am, so the finding is Tuesday morning. Hunter's recovery and his positive identification of the cravat are both stated in ¶33–36."}
+{"i": 2, "verdict": "supported", "why": "Hunter states in ¶36 that the stranger drugged the curried mutton and so deprived the stables of their watchman. The question is one the story has given reason to ask, since the stranger asked about the boy and tried to bribe the maid."}
+{"i": 3, "verdict": "supported", "why": "The story shows the stranger holding a folded paper packet at the window, then the watchman drugged through his supper. The drug as the packet's contents is strongly implied but not explicitly stated, so this is a close call."}
+```

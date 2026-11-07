@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The Inspector's line in ¶50 states that 'We have an open carriage outside,' so the name matches the story so far."}
+```

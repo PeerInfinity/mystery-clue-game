@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "In ¶77 the Inspector says the dead man's belongings are 'in the sitting-room', so the label names a place the story has already mentioned."}
+```

@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The story names 'William Derbyshire' only as the addressee of a milliner's bill and, through Holmes's 'mythical Derbyshire', suggests the name is a fiction. It never establishes a household under that name. The quoted label presents as a real named household what the story so far has only hinted is a false alias for a possible second establishment."}
+```

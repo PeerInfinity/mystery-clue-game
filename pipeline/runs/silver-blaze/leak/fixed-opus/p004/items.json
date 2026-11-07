@@ -1,0 +1,11 @@
+[{"para":4,"kind":"account","text":"The background","id":"acct.background","i":1,"verdict":"supported","why":"A neutral heading for the background of the case, which ¶4 begins to set out."},
+{"para":4,"kind":"account","text":"The searchers' account","id":"acct.search","i":2,"verdict":"unsupported","why":"No searchers or account from searchers has been mentioned yet."},
+{"para":4,"kind":"account","text":"What the police found","id":"acct.police_findings","i":3,"verdict":"unsupported","why":"The police and any findings of theirs have not been mentioned yet."},
+{"para":4,"kind":"name","text":"The trainer","id":"straker","i":4,"verdict":"supported","why":"¶4 mentions the murder of the horse's trainer."},
+{"para":4,"kind":"name","text":"The news agent","id":"news_agent","i":5,"verdict":"supported","why":"¶4 says papers were sent up by our news agent."},
+{"para":4,"kind":"name","text":"The favourite","id":"silver_blaze","i":6,"verdict":"supported","why":"¶4 mentions the disappearance of the favourite for the Wessex Cup."},
+{"para":4,"kind":"name","text":"Holmes's rooms","id":"baker_street","i":7,"verdict":"supported","why":"¶4 says Holmes rambled about the room."},
+{"para":4,"kind":"name","text":"Holmes's pipe","id":"holmes_pipe","i":8,"verdict":"supported","why":"¶4 says he was charging and recharging his pipe."},
+{"para":4,"kind":"name","text":"The newspapers","id":"newspapers","i":9,"verdict":"supported","why":"¶4 mentions fresh editions of every paper."},
+{"para":4,"kind":"name","text":"The public","id":"public","i":10,"verdict":"supported","why":"¶4 calls it the one problem before the public."},
+{"para":4,"kind":"question","text":"Who struck the blow that killed Straker?","id":"q.who_killed","i":11,"verdict":"unsupported","why":"The trainer has not yet been named Straker, and no blow has been described."}]

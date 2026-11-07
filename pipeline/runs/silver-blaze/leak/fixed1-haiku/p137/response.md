@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Paragraph 13 establishes that it is Thursday. The walk ends with the sun setting and the light fading, and paragraph 137 says the conversation with Brown lasted twenty minutes, ending as the reds faded to greys."}
+```

@@ -1,0 +1,5 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶190 says the drag 'drew up in the enclosure near the grand stand,' so the label matches the story."}
+{"i": 2, "verdict": "supported", "why": "¶190 says the narrator 'glanced at the card to see the entries,' so the race card is already in the story."}
+{"i": 3, "verdict": "supported", "why": "¶183 says the race is for the Wessex Cup and they drove there in Ross's drag; ¶190 places them in the enclosure by the grand stand as they arrive, before the race."}
+```

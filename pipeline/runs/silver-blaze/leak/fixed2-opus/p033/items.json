@@ -1,0 +1,7 @@
+[{"para":33,"kind":"name","text":"The favourite's stall","id":"favourite_stall","i":1,"verdict":"supported","why":"The paragraph says the favourite's stall was empty."},
+{"para":33,"kind":"name","text":"The chair","id":"hunter_chair","i":2,"verdict":"supported","why":"The paragraph says Hunter was huddled upon a chair."},
+{"para":33,"kind":"time","text":"Tuesday, seven in the morning","id":"t.tue_0700","i":3,"verdict":"supported","why":"The catastrophe happened on Monday night, so Mrs. Straker waking at seven the next morning is Tuesday."},
+{"para":33,"kind":"time","text":"Tuesday morning, at the stable","id":"t.tue_stable","i":4,"verdict":"supported","why":"Mrs. Straker went to the stables on the morning after Monday night, which is Tuesday."},
+{"para":33,"kind":"question","text":"Who opened the stable door in the night?","id":"q.door_opened_by","i":5,"verdict":"supported","why":"The door had been locked and was found open, so a reader would naturally ask who opened it."},
+{"para":33,"kind":"question","text":"Who led Silver Blaze out of the stable?","id":"q.horse_out_by","i":6,"verdict":"supported","why":"The stall is empty and abduction is already being discussed, so asking who took the horse out is natural."},
+{"para":33,"kind":"possibility","text":"Who led Silver Blaze out of the stable? — nobody","id":"q.horse_out_by=nobody","i":7,"verdict":"supported","why":"The door was found open, so the horse could have wandered out by itself; a reader has reason to consider this."}]

@@ -1,0 +1,7 @@
+[{"para":32,"kind":"account","text":"Mrs. Straker's account","id":"acct.mrs_straker","i":1,"verdict":"supported","why":"Mrs. Straker wakes, questions her husband and begs him to stay, so this paragraph gives her account of his leaving."},
+{"para":32,"kind":"name","text":"Mrs. Straker","id":"mrs_straker","i":2,"verdict":"supported","why":"Mrs. Straker is named in this paragraph."},
+{"para":32,"kind":"name","text":"Straker's mackintosh","id":"overcoat","i":3,"verdict":"supported","why":"The story says he pulled on his large mackintosh before leaving."},
+{"para":32,"kind":"time","text":"Monday, later: the lads come back","id":"t.mon_late","i":4,"verdict":"supported","why":"Hunter waited until his fellow-grooms returned that Monday evening."},
+{"para":32,"kind":"time","text":"Tuesday, one in the morning","id":"t.tue_0100","i":5,"verdict":"supported","why":"The events began Monday night, so one in the morning falls on Tuesday."},
+{"para":32,"kind":"question","text":"Why did Straker go out at one in the morning?","id":"q.straker_aim","i":6,"verdict":"supported","why":"The story raises this question directly when he dresses and goes out at one."},
+{"para":32,"kind":"possibility","text":"Why did Straker go out at one in the morning? — to see that all was well","id":"q.straker_aim=to see that all was well","i":7,"verdict":"supported","why":"Straker himself gives this reason to his wife."}]

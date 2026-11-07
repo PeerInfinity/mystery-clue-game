@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The name is used in the story so far: at ¶55 Holmes says \"My friend Dr. Watson made that suggestion,\" and Holmes addresses the narrator as \"Watson\" throughout."}
+```

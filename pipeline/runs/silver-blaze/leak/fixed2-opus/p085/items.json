@@ -1,0 +1,4 @@
+[{"para":85,"kind":"name","text":"'Madam Derbyshire'","id":"mrs_derbyshire","i":1,"verdict":"supported","why":"Holmes himself uses the name 'Madam Derbyshire' in this paragraph."},
+{"para":85,"kind":"name","text":"The twenty-two-guinea costume","id":"billed_costume","i":2,"verdict":"supported","why":"Holmes says twenty-two guineas is heavy for a single costume on the bill."},
+{"para":85,"kind":"question","text":"Who is the Madam Derbyshire of the bill?","id":"q.madam_derbyshire","i":3,"verdict":"supported","why":"The bill is made out to William Derbyshire, and Holmes's remark about 'Madam Derbyshire' invites the question of who she is."},
+{"para":85,"kind":"possibility","text":"Who is the Madam Derbyshire of the bill? — another woman","id":"q.madam_derbyshire=another woman","i":4,"verdict":"supported","why":"A plain possibility: by Mrs. Straker's account, the bill concerns a friend's household, so the costume's wearer would be some woman other than Mrs. Straker."}]

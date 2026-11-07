@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The last paragraph asks whether the stable-boy left the door unlocked, so the door is a thing the story has raised. The label only names it and adds no detail beyond that."}
+```

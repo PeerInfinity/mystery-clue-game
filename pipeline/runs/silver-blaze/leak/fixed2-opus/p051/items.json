@@ -1,0 +1,4 @@
+[{"para":51,"kind":"name","text":"Devonshire","id":"devonshire","i":1,"verdict":"supported","why":"Paragraph 51 names the 'quaint old Devonshire city' they drive through."},
+{"para":51,"kind":"name","text":"The landau","id":"landau#1","i":2,"verdict":"supported","why":"Paragraph 51 seats them in a comfortable landau."},
+{"para":51,"kind":"time","text":"Thursday evening: the drive in the landau","id":"t.thu_drive","i":3,"verdict":"supported","why":"Paragraph 13 makes it Thursday morning and paragraph 47 has them arrive in the evening, so the drive is Thursday evening."},
+{"para":51,"kind":"account","text":"What Gregory tells on the drive","id":"acct.drive","i":4,"verdict":"supported","why":"Paragraph 51 says Gregory poured out his remarks and theory during the drive."}]

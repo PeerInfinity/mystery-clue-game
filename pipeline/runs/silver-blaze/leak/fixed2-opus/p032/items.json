@@ -1,0 +1,7 @@
+[{"para":32,"kind":"name","text":"Mrs. Straker","id":"mrs_straker","i":1,"verdict":"supported","why":"Mrs. Straker is named in ¶32."},
+{"para":32,"kind":"name","text":"Straker's mackintosh","id":"overcoat","i":2,"verdict":"supported","why":"¶32 says he pulled on his large mackintosh."},
+{"para":32,"kind":"time","text":"Monday, later: the lads come back","id":"t.mon_late","i":3,"verdict":"supported","why":"¶32 says Hunter waited until the other grooms returned, which was later on Monday evening."},
+{"para":32,"kind":"time","text":"Tuesday, one in the morning","id":"t.tue_0100","i":4,"verdict":"supported","why":"The catastrophe was Monday night, so one in the morning is early Tuesday."},
+{"para":32,"kind":"account","text":"Mrs. Straker's account","id":"acct.mrs_straker","i":5,"verdict":"supported","why":"¶32 gives what Mrs. Straker saw and was told when she woke."},
+{"para":32,"kind":"question","text":"Why did Straker go out at one in the morning?","id":"q.straker_aim","i":6,"verdict":"supported","why":"A plain question raised by his going out in the night."},
+{"para":32,"kind":"possibility","text":"Why did Straker go out at one in the morning? — to see that all was well","id":"q.straker_aim=to see that all was well","i":7,"verdict":"supported","why":"This is the reason Straker gave his wife in ¶32."}]

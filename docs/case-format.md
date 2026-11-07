@@ -145,6 +145,24 @@ hypothesis*, *your reasoning*.
     `answer_from` (a fact) or `answer_reasoning` (a careful reader's step) and
     `answer_strength: likely`; null when only the give-away brings it (how the cravat came into Straker's hand).
 
+**What the page may show at a paragraph** (`engine/shown.js`, shared with the leak check, `pipeline/leak.mjs`;
+2026-11-06, after the first leak check of the timeline found names and labels shown before the story gave them):
+
+- An entity's **name**: its `name` from the first paragraph whose text uses it (from ¶1: the title does not
+  count), and before that the first phrase the story used for it (`mentions.json`), as a name ("its trainer" →
+  "The trainer"); a name the text never uses verbatim (a description, "The stranger at the stable") from the first
+  mention; optional `names: [{from, name}]` to set the steps by hand. Before any, a word for its kind ("someone").
+- A time point's **label**: from its `para`; optional `labels: [{from, label}]` where a later paragraph tells more
+  ("One morning, at breakfast" at ¶1, "Thursday morning, at breakfast" from ¶13). Before the first, "a time not yet
+  told" (no day or hour: those are the story's to tell too).
+- A question's or an account's **label**: optional `labels` steps in the same way (`q.who_killed`: "Who killed the
+  trainer?" at ¶4, "Who struck the blow that killed Straker?" from ¶35). An account's label shows in the telling
+  that passes it, so it names only the source ("Edith Baxter's account"), not its contents.
+- A fact told early in brief (`given_at` before `para`, with `given_quote`): until `para`, only those brief words.
+
+The validator checks the shape of `names` and `labels`; whether a label runs ahead is the leak check's to judge
+(`pipeline/README.md`, "The leak check").
+
 **Reasoning.** Where a careful reader reaches a fact, a possibility or an answer by a step the facts do not model,
 the step is written out: `reasoning` (on a fact, a list) is `{para, text}`, the paragraph a reader could take it and
 the step in plain words. The validator checks that it is no later than what it supports. Most of what Holmes's

@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story so far names the narrator as 'Watson' (¶6, ¶13, ¶31, ¶41) and ¶55 calls him 'my friend Dr. Watson,' so the full name and title are stated."}
+```

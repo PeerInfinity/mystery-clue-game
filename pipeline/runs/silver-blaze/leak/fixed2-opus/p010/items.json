@@ -1,0 +1,4 @@
+[{"para":10,"kind":"name","text":"John Straker","id":"straker#1","i":1,"verdict":"supported","why":"Holmes names John Straker in ¶10 as the murder victim (the trainer from ¶4)."},
+{"para":10,"kind":"name","text":"Silver Blaze","id":"silver_blaze#1","i":2,"verdict":"supported","why":"Holmes names Silver Blaze in ¶10 as the one that disappeared, matching the missing favourite in ¶4."},
+{"para":10,"kind":"name","text":"The telegraph posts","id":"telegraph_posts","i":3,"verdict":"supported","why":"Holmes mentions in ¶10 that the telegraph posts on this line are sixty yards apart."},
+{"para":10,"kind":"account","text":"Holmes on the train's speed","id":"acct.holmes_train","i":4,"verdict":"supported","why":"In ¶8–10 Holmes gives the speed as fifty-three and a half mph, worked out from the telegraph posts sixty yards apart."}]

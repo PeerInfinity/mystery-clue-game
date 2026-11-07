@@ -1,0 +1,4 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes mentions the police in ¶38, and Inspector Gregory has been named as the officer looking after the case."}
+{"i": 2, "verdict": "supported", "why": "Holmes says in ¶38 that he will now recapitulate what the police have done, so an account of the police position is a natural thing for the reader to expect. The label gives no specific content."}
+```

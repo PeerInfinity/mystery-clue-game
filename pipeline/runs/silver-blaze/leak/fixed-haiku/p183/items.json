@@ -1,0 +1,6 @@
+[{"para":183,"kind":"name","text":"Winchester","id":"winchester","i":1,"verdict":"supported","why":"Paragraph 183 says Holmes and Watson are bound for Winchester, so the place is named in the story."},
+{"para":183,"kind":"name","text":"Winchester station","id":"winchester_station","i":2,"verdict":"supported","why":"Paragraph 183 says Colonel Ross met them outside the station in Winchester, so a Winchester station is implied."},
+{"para":183,"kind":"name","text":"The course","id":"racecourse","i":3,"verdict":"supported","why":"Paragraph 183 says they drove in the drag to the course beyond the town, so the course is named."},
+{"para":183,"kind":"name","text":"Ross's drag","id":"drag","i":4,"verdict":"supported","why":"Paragraph 183 says Colonel Ross's drag took them to the course, so the vehicle is stated."},
+{"para":183,"kind":"name","text":"The train to Winchester","id":"race_train","i":5,"verdict":"supported","why":"Paragraph 183 says Holmes and Watson are again in the train, bound for Winchester."},
+{"para":183,"kind":"time","text":"Race day: the train to Winchester, the drag to the course","id":"t.race_train","i":6,"verdict":"supported","why":"Paragraph 183 says they travelled to Winchester to see the Wessex Cup race and then drove to the course, so the race day and these journeys are stated."}]

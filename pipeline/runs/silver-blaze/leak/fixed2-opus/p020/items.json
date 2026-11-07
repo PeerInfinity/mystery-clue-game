@@ -1,0 +1,12 @@
+[{"para":20,"kind":"name","text":"Edith Baxter","id":"edith_baxter","i":1,"verdict":"supported","why":"The maid is named Edith Baxter in ¶20."},
+{"para":20,"kind":"name","text":"Ned Hunter","id":"ned_hunter","i":2,"verdict":"supported","why":"Ned Hunter is named as the lad who stayed on guard."},
+{"para":20,"kind":"name","text":"The two other stable-lads","id":"other_lads","i":3,"verdict":"supported","why":"Two of the lads walked up to the trainer's house for supper."},
+{"para":20,"kind":"name","text":"The path to the stables","id":"moor_path","i":4,"verdict":"supported","why":"The story says the path ran across the open moor."},
+{"para":20,"kind":"name","text":"The curried mutton","id":"curried_mutton","i":5,"verdict":"supported","why":"His supper was a dish of curried mutton."},
+{"para":20,"kind":"name","text":"Hunter's portion","id":"hunter_portion","i":6,"verdict":"supported","why":"Paraphrases the supper carried to Hunter."},
+{"para":20,"kind":"name","text":"Edith's lantern","id":"lantern","i":7,"verdict":"supported","why":"The maid carried a lantern because it was very dark."},
+{"para":20,"kind":"name","text":"The stable water-tap","id":"water_tap","i":8,"verdict":"supported","why":"There was a water-tap in the stables."},
+{"para":20,"kind":"name","text":"The kitchen of the trainer's house","id":"kitchen","i":9,"verdict":"supported","why":"The two lads had supper in the kitchen of the trainer's house."},
+{"para":20,"kind":"time","text":"Monday evening","id":"t.mon_evening","i":10,"verdict":"supported","why":"'On that evening' refers back to last Monday night."},
+{"para":20,"kind":"time","text":"Monday, nine o'clock","id":"t.mon_2100","i":11,"verdict":"supported","why":"The stables were locked up at nine o'clock on Monday."},
+{"para":20,"kind":"time","text":"A few minutes after nine","id":"t.mon_2105","i":12,"verdict":"supported","why":"The maid carried the supper down at a few minutes after nine."}]

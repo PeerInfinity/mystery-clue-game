@@ -1,0 +1,5 @@
+[{"para":12,"kind":"account","text":"Holmes's own part: the telegrams, his waiting, his wire, his judgements","id":"acct.holmes_own","i":1,"verdict":"unsupported","why":"The story so far says Holmes received telegrams on Tuesday evening, but it does not mention his waiting, any wire or reply he sent, or his judgements on the case."},
+{"para":12,"kind":"name","text":"Colonel Ross","id":"colonel_ross","i":2,"verdict":"supported","why":"Paragraph 12 names Colonel Ross as the owner of the horse who sent a telegram."},
+{"para":12,"kind":"name","text":"Inspector Gregory","id":"gregory","i":3,"verdict":"supported","why":"Paragraph 12 names Inspector Gregory as the officer looking after the case, who sent a telegram."},
+{"para":12,"kind":"name","text":"The telegrams","id":"telegrams","i":4,"verdict":"supported","why":"Paragraph 12 states that Holmes received telegrams from Colonel Ross and Inspector Gregory."},
+{"para":12,"kind":"time","text":"Tuesday evening: the telegrams","id":"t.tue_evening","i":5,"verdict":"supported","why":"Paragraph 12 states that on Tuesday evening Holmes received telegrams from both Colonel Ross and Inspector Gregory."}]

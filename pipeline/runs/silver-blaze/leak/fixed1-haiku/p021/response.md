@@ -1,0 +1,7 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Edith Baxter sees a man appear out of the darkness within thirty yards of the stables. The label names him only by where he was, without giving an identity."}
+{"i": 2, "verdict": "supported", "why": "Paragraph 21 states that the man carried a heavy stick with a knob to it."}
+{"i": 3, "verdict": "supported", "why": "Paragraph 21 describes his grey tweed suit, cloth cap and gaiters."}
+{"i": 4, "verdict": "supported", "why": "Paragraph 21 says he called to the maid to stop, and paragraph 20 places her walk to the stables at a few minutes after nine."}
+{"i": 5, "verdict": "supported", "why": "A plain question the story has clearly raised. Its wording does not point at any particular answer."}
+```

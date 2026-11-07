@@ -1,0 +1,4 @@
+[{"para":62,"kind":"name","text":"A party of gypsies","id":"gypsies#1","i":1,"verdict":"supported","why":"¶62 states that a party of gypsies encamped within a mile of the murder site on Monday night."},
+{"para":62,"kind":"name","text":"The gypsy camp","id":"gypsy_camp","i":2,"verdict":"supported","why":"¶62 describes the gypsies' encampment near the murder site, so the camp is already in the story."},
+{"para":62,"kind":"time","text":"Tuesday, during the day","id":"t.tue_day","i":3,"verdict":"unsupported","why":"¶62 says only that the gypsies were gone on Tuesday. It gives no time of day, so 'during the day' goes beyond the text."},
+{"para":62,"kind":"possibility","text":"Where is Silver Blaze? — with the gypsies","id":"q.horse_where=with the gypsies","i":4,"verdict":"supported","why":"The horse's whereabouts are an open question since ¶37, and Gregory raises the gypsies as a possible holder of the horse in ¶62."}]

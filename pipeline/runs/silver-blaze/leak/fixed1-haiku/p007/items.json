@@ -1,0 +1,9 @@
+[{"para":7,"kind":"name","text":"Sherlock Holmes","id":"holmes#1","i":1,"verdict":"supported","why":"Paragraph 7 says 'Sherlock Holmes, with his sharp, eager face', and the story has called him 'Holmes' throughout."},
+{"para":7,"kind":"name","text":"A first-class carriage","id":"first_class_carriage","i":2,"verdict":"supported","why":"Paragraph 7 says Holmes and Watson are 'in the corner of a first-class carriage'."},
+{"para":7,"kind":"name","text":"Reading","id":"reading","i":3,"verdict":"supported","why":"Paragraph 7 says 'We had left Reading far behind us'."},
+{"para":7,"kind":"name","text":"Exeter","id":"exeter","i":4,"verdict":"supported","why":"Paragraph 7 says the train is 'flying along en route for Exeter'."},
+{"para":7,"kind":"name","text":"Holmes's ear-flapped travelling-cap","id":"travelling_cap","i":5,"verdict":"supported","why":"Paragraph 7 describes Holmes 'framed in his ear-flapped travelling-cap'."},
+{"para":7,"kind":"name","text":"Holmes's cigar-case","id":"cigar_case","i":6,"verdict":"supported","why":"Paragraph 7 says Holmes 'offered me his cigar-case'."},
+{"para":7,"kind":"name","text":"The train to Exeter","id":"the_train","i":7,"verdict":"supported","why":"Paragraph 7 says they are travelling on a train 'en route for Exeter'."},
+{"para":7,"kind":"time","text":"Thursday, an hour later: in the train","id":"t.thu_train","i":8,"verdict":"unsupported","why":"The story so far gives an hour or so after Paddington but never says the day is Thursday."},
+{"para":7,"kind":"time","text":"Thursday, past Reading","id":"t.thu_past_reading","i":9,"verdict":"unsupported","why":"The story never names the day as Thursday, so the day part of this time label is not supported."}]

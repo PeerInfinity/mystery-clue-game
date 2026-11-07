@@ -1,0 +1,5 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The murder happened Monday night (¶20, ¶32-33), so the body is found on Tuesday morning. The maid recognises the cravat (¶35) and Hunter recovers from his stupor (¶36), both stated."}
+{"i": 2, "verdict": "supported", "why": "¶36 states that Hunter was certain the stranger drugged his curried mutton and so deprived the stables of their watchman. The question and its answer are both covered by the text."}
+{"i": 3, "verdict": "supported", "why": "This is a possibility the story has given reason to consider: the stranger offered a folded paper for the boy (¶24), the packet was visible in his hand (¶26), and the watchman was later drugged (¶36). The text never confirms the paper held a drug, but the label presents it only as a possibility."}
+```

@@ -1,0 +1,3 @@
+[{"para":124,"kind":"name","text":"The Mapleton groom","id":"dawson","i":1,"verdict":"supported","why":"¶124 says a groom ran out from the Mapleton stables, and the label only describes that person."},
+{"para":124,"kind":"name","text":"The Mapleton gates","id":"mapleton_gates","i":2,"verdict":"supported","why":"¶124 names the gates of the Mapleton stables as the place where the return track ends."},
+{"para":124,"kind":"time","text":"Thursday dusk: at the Mapleton gates","id":"t.thu_mapleton_gates","i":3,"verdict":"supported","why":"It is Thursday (¶13), the sun is sinking as they walk (¶113), and they are at the Mapleton gates (¶124)."}]

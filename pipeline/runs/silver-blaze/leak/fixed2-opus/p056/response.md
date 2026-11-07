@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Gregory says in ¶56 that he thinks they have enough evidence to go before a jury."}
+```

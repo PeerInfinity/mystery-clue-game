@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The door is already the subject of Watson's question in ¶30, and the story has mentioned the stables being locked. The label names a thing the story has raised and implies nothing further."}
+```

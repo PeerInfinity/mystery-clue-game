@@ -1,0 +1,5 @@
+[{"para":58,"kind":"account","text":"Simpson's further statements: the paper, the cravat","id":"acct.simpson_more","i":1,"verdict":"supported","why":"Paragraph 58 gives Simpson's explanation of the paper (a ten-pound note), and paragraph 40 says he could not account for the cravat."},
+{"para":58,"kind":"name","text":"London","id":"london","i":2,"verdict":"supported","why":"London is already named as where Simpson did his book-making (¶39), and Holmes says the opium was probably brought from London (¶58)."},
+{"para":58,"kind":"name","text":"The pits and old mines","id":"pits_and_mines","i":3,"verdict":"supported","why":"Holmes raises the possibility in ¶58 that the horse may be at the bottom of one of the pits or old mines on the moor."},
+{"para":58,"kind":"name","text":"A ten-pound note","id":"ten_pound_note","i":4,"verdict":"supported","why":"Paragraph 58 states that Simpson says the paper was a ten-pound note."},
+{"para":58,"kind":"name","text":"Simpson's purse","id":"simpson_purse","i":5,"verdict":"supported","why":"Paragraph 58 states that one ten-pound note was found in his purse."}]

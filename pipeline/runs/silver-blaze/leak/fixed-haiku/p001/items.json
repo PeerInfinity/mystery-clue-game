@@ -1,0 +1,5 @@
+[{"para":1,"kind":"account","text":"What Watson sees and hears himself","id":"acct.watson","i":1,"verdict":"supported","why":"The narrator is Watson, who is addressed and hears Holmes speak at the table, so the label describes what he sees and hears."},
+{"para":1,"kind":"name","text":"Holmes","id":"holmes","i":2,"verdict":"supported","why":"Paragraph 1 names Holmes as the speaker."},
+{"para":1,"kind":"name","text":"Watson","id":"watson","i":3,"verdict":"supported","why":"Paragraph 1 addresses Watson directly."},
+{"para":1,"kind":"time","text":"Before the story, undated","id":"t.before","i":4,"verdict":"unsupported","why":"The story so far gives no hint of earlier events; this label points to a prior time the text has not yet raised."},
+{"para":1,"kind":"time","text":"One morning, at breakfast","id":"t.thu_breakfast","i":5,"verdict":"supported","why":"Paragraph 1 says the scene is one morning, over breakfast."}]

@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story says it is Thursday morning when they travel down and evening when they arrive, and Holmes says they take the night train back to London. So Thursday night follows directly, and 'night express' is a fair paraphrase."}
+```

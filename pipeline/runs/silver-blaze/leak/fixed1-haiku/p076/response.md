@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Paragraph 76 has Holmes ask whether an inventory was made of what Straker had in his pockets, so the label names a thing the story has just raised. It does not claim what the pockets contained."}
+```

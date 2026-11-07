@@ -1,0 +1,11 @@
+[{"para":4,"kind":"account","text":"The background","id":"acct.background","i":1,"verdict":"supported","why":"A general heading; the story so far has already given background on the disappearance and the murder."},
+{"para":4,"kind":"account","text":"The searchers' account","id":"acct.search","i":2,"verdict":"unsupported","why":"Implies searchers who gave an account, but no searchers are mentioned so far."},
+{"para":4,"kind":"account","text":"What the police found","id":"acct.police_findings","i":3,"verdict":"unsupported","why":"Implies police findings, but the police are not mentioned so far."},
+{"para":4,"kind":"name","text":"The trainer","id":"straker","i":4,"verdict":"supported","why":"The story says the favourite's trainer was murdered."},
+{"para":4,"kind":"name","text":"The news agent","id":"news_agent","i":5,"verdict":"supported","why":"The story mentions 'our news agent' sending up newspapers."},
+{"para":4,"kind":"name","text":"The favourite","id":"silver_blaze","i":6,"verdict":"supported","why":"The story mentions the favourite for the Wessex Cup disappearing."},
+{"para":4,"kind":"name","text":"Holmes's rooms","id":"baker_street","i":7,"verdict":"supported","why":"The story describes Holmes and Watson in a room together, and the newspapers were sent up to them."},
+{"para":4,"kind":"name","text":"Holmes's pipe","id":"holmes_pipe","i":8,"verdict":"supported","why":"The story says Holmes was charging and recharging his pipe."},
+{"para":4,"kind":"name","text":"The newspapers","id":"newspapers","i":9,"verdict":"supported","why":"The story mentions fresh editions of every paper being sent up and tossed aside."},
+{"para":4,"kind":"name","text":"The public","id":"public","i":10,"verdict":"supported","why":"The story refers to the case as a problem before the public."},
+{"para":4,"kind":"question","text":"Who struck the blow that killed Straker?","id":"q.who_killed","i":11,"verdict":"unsupported","why":"The name Straker has not been given in the story so far, and the question assumes a blow was struck, which the story has not said."}]

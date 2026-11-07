@@ -1,0 +1,4 @@
+[{"para":202,"kind":"account","text":"What Holmes tells in the weighing enclosure","id":"acct.holmes_race","i":1,"verdict":"supported","why":"Holmes speaks in the weighing enclosure and promises to tell everything."},
+{"para":202,"kind":"name","text":"Spirits of wine","id":"spirits_of_wine","i":2,"verdict":"supported","why":"Holmes names spirits of wine as what will wash the horse's face and leg."},
+{"para":202,"kind":"name","text":"The disguise on the horse","id":"disguise_dye","i":3,"verdict":"supported","why":"The bay has no white hair, yet washing its face and leg will reveal Silver Blaze, so it is plainly disguised."},
+{"para":202,"kind":"time","text":"Race day: in the weighing enclosure, after the race","id":"t.race_enclosure","i":4,"verdict":"supported","why":"After the race, the party goes into the weighing enclosure on race day."}]

@@ -1,0 +1,9 @@
+[{"para":7,"kind":"name","text":"Sherlock Holmes","id":"holmes#1","i":1,"verdict":"supported","why":"The full name 'Sherlock Holmes' is used in ¶7."},
+{"para":7,"kind":"name","text":"A first-class carriage","id":"first_class_carriage","i":2,"verdict":"supported","why":"¶7 says Watson sat in the corner of a first-class carriage."},
+{"para":7,"kind":"name","text":"Reading","id":"reading","i":3,"verdict":"supported","why":"¶7 says they had left Reading far behind."},
+{"para":7,"kind":"name","text":"Exeter","id":"exeter","i":4,"verdict":"supported","why":"¶7 says the carriage was flying along en route for Exeter."},
+{"para":7,"kind":"name","text":"Holmes's ear-flapped travelling-cap","id":"travelling_cap","i":5,"verdict":"supported","why":"¶7 describes Holmes's face framed in his ear-flapped travelling-cap."},
+{"para":7,"kind":"name","text":"Holmes's cigar-case","id":"cigar_case","i":6,"verdict":"supported","why":"¶7 says Holmes offered Watson his cigar-case."},
+{"para":7,"kind":"name","text":"The train to Exeter","id":"the_train","i":7,"verdict":"supported","why":"They caught a train at Paddington (¶6) that is en route for Exeter (¶7)."},
+{"para":7,"kind":"time","text":"An hour later: in the train","id":"t.thu_train","i":8,"verdict":"supported","why":"¶7 says 'an hour or so later' Watson was in the carriage."},
+{"para":7,"kind":"time","text":"In the train, past Reading","id":"t.thu_past_reading","i":9,"verdict":"supported","why":"¶7 says they had left Reading far behind before Holmes put the papers away."}]

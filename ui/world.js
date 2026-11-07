@@ -6,6 +6,7 @@
 
 import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { Story } from '../engine/story.js';
+import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
 import { ACTIONS, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
 const CASE = 'cases/silver-blaze';
@@ -50,6 +51,8 @@ const story = text.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).fi
 // their card, every one alike. An entity the story never names by a phrase is placed by its `source` quote.
 const named = new Story(text, { mentions: { entities: mentions.entities }, entities: w.entities });
 const entityById = new Map(data.entities.map((e) => [e.id, e]));
+// The name each entity goes by at the paragraph read to (engine/shown.js): never one the story has not used yet.
+const names = shownNames(data.entities, mentions.entities, story);
 const timeById = new Map(data.times.map((t) => [t.id, t]));
 const factById = new Map(data.facts.map((f) => [f.id, f]));
 // The entries the player's moves give (the reader's reasoning), worked out afresh at each drawing.
@@ -129,8 +132,7 @@ function cycleMark(qid, pick) {
 }
 
 // --- Words.
-const DAYS = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
-const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'your hypothesis' : id === REASONING ? 'your reasoning' : id === READER ? 'you' : entityById.get(id)?.name ?? narratorName(id) ?? id);
+const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'your hypothesis' : id === REASONING ? 'your reasoning' : id === READER ? 'you' : (entityById.has(id) ? names.nameAt(id, state.para) : null) ?? narratorName(id) ?? id);
 const ent = (id) => (id === HYPOTHESIS || id === REASONING ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ? nameOf(id) : ''));
 /** An entity at the head of a line: its name capitalised (the reader's hypothesis: "Your hypothesis"). */
 const entHead = (id) => ent(id).replace(/>([a-z])/, (m, c) => `>${c.toUpperCase()}`).replace(/^([a-z])/, (m, c) => c.toUpperCase());
@@ -143,13 +145,14 @@ const val = (v) => list(v).map((x) => {
     if (m && m[1].includes('_') && entityById.has(m[1])) return ent(m[1]) + esc(m[2]);
     return esc(s);
 }).join(', ');
-// A time point's label, once the story has dated it; before that only its day and hour.
+// A time point's label as the story has dated it by the paragraph read to (engine/shown.js); before that "a time
+// not yet told" (its day and hour too are the story's to tell).
 const timeLabel = (id) => {
     const t = timeById.get(id);
-    if (!t) return esc(id);
-    if (t.para == null || t.para <= state.para) return esc(t.label);
-    return esc([DAYS[t.day], t.clock].filter(Boolean).join(', ') || 'a time not yet told');
+    return t ? esc(timeLabelAt(t, state.para)) : esc(id);
 };
+/** A question's label as the story has asked it by the paragraph read to (engine/shown.js). */
+const qLabel = (q) => questionLabelAt(q, state.para);
 const qVisible = (q) => q && ((q.raised != null && q.raised <= state.para) || (q.answer_given_at != null && q.answer_given_at <= state.para));
 // The player's questions: raised (or answered) so far; a question about provenance only if the story raises it.
 const qListed = (q) => qVisible(q) && (q.kind !== 'provenance' || (q.raised != null && q.raised <= state.para));
@@ -210,6 +213,8 @@ function stepText(x) {
 /** A fact as a short sentence. */
 function phrase(f) {
     const E = f.of === '?' ? 'Someone' : ent(f.of);
+    // Told early in brief (`given_at`): until its own paragraph, only the brief words that told it.
+    if (f.given_quote && f.given_at != null && f.given_at <= state.para && state.para < f.para) return `${E}: <span class="said">“${esc(f.given_quote)}”</span>`;
     if (f.reasoned && f.attr === 'action' && f.act) return `${E}: ${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${ent(f.thing)}`;
     if (f.away) return `${E} away from ${ent(f.away)}${f.hyp === true ? ' <span class="small muted">(your hypothesis)</span>' : ''}`;
     const v = val(f.value);
@@ -247,7 +252,7 @@ function phrase(f) {
         case 'weekday': return `It is ${v}`;
         case 'hour': return `${v}`;
         case 'tells': {
-            const accts = list(f.value).map((a) => esc(accountById.get(a)?.label ?? a)).join(', ');
+            const accts = list(f.value).map((a) => esc(accountById.has(a) ? questionLabelAt(accountById.get(a), state.para) : a)).join(', ');
             return `${E} tells ${ent(f.to)} (${esc(f.how)}${f.partial ? ', in part' : ''}): ${accts}`;
         }
         default: return f.of === 'weather' ? `The weather: ${v}` : `${E}: ${v}${d}`;
@@ -314,7 +319,7 @@ function assertsHtml(f) {
     const lvl = levelOf(prov.claimChains(f.id), state.trust);
     const may = f.modal ? ' <span class="small">(may be)</span>' : '';
     const li = items.map((x) => (x.q
-        ? `<li>${dot(lvl)}${esc(qById.get(x.q).label)} ${x.neg ? '<b>Not</b> ' : ''}${pickText(qById.get(x.q), x.pick)}${may}</li>`
+        ? `<li>${dot(lvl)}${esc(qLabel(qById.get(x.q)))} ${x.neg ? '<b>Not</b> ' : ''}${pickText(qById.get(x.q), x.pick)}${may}</li>`
         : `<li>${dot(lvl)}${phrase({ ...x, id: '' })}${may}</li>`)).join('');
     return `<ul class="asserts" title="What this asserts">${li}</ul>`;
 }
@@ -335,16 +340,16 @@ function eventRow(f, clashing, tag = 'li') {
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
 function hypPhrase(q, pick) {
     const e = q.entry ?? {};
-    if (pick === 'something else') return `${esc(q.label)} <b>Something else</b>`;
-    if (e.of === '?') return `${pickText(q, pick)}: ${esc(e.value ?? q.label)}`;
+    if (pick === 'something else') return `${esc(qLabel(q))} <b>Something else</b>`;
+    if (e.of === '?') return `${pickText(q, pick)}: ${esc(e.value ?? qLabel(q))}`;
     if (e.value == null && ['location', 'identity', 'intends', 'contents', 'carrying', 'owner'].includes(e.attr)) return phrase({ of: e.of, attr: e.attr, value: pick });
-    return `${esc(q.label)} <b>${pickText(q, pick)}</b>`;
+    return `${esc(qLabel(q))} <b>${pickText(q, pick)}</b>`;
 }
 /** A question at its place on the timeline, with its circled possibilities as entries under it. */
 function questionRows(q, clashing, tag = 'li') {
     const sel = state.sel === `q:${q.id}` ? ' sel' : '';
     const crossed = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'crossed').map((p) => pickText(q, p.value));
-    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(q.label)} <span class="para">¶${q.raised ?? q.answer_given_at}</span>${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ¶${q.answer_given_at}: <b>${answerText(q)}</b></span>` : ''}</${tag}>`;
+    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(qLabel(q))} <span class="para">¶${q.raised ?? q.answer_given_at}</span>${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ¶${q.answer_given_at}: <b>${answerText(q)}</b></span>` : ''}</${tag}>`;
     const circles = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'circled').map((p) => {
         const lvl = markLevel(q, p.value);
         if (lvl < state.threshold && !state.showBelow) return '';
@@ -507,7 +512,7 @@ function packGrid() {
 const markText = (x) => {
     // An answer implied by another circle (the stick: Simpson struck the blow) says which circle implies it.
     const m = x.from && /^hyp:(.+)=(.+)$/.exec(x.from);
-    const via = m ? ` (implied by your answer to “${esc(qById.get(m[1])?.label ?? m[1])}”: ${pickText(qById.get(m[1]), m[2])})` : '';
+    const via = m ? ` (implied by your answer to “${esc(qById.has(m[1]) ? qLabel(qById.get(m[1])) : m[1])}”: ${pickText(qById.get(m[1]), m[2])})` : '';
     return `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}${via}`;
 };
 function clashSide(x) {
@@ -521,7 +526,7 @@ function clashSide(x) {
     return `<a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a> <span class="para">¶${givenAt(f)}</span>`;
 }
 function clashTitle(c) {
-    if (c.a.kind === 'pick') return esc(qById.get(c.a.q)?.label ?? c.a.q);
+    if (c.a.kind === 'pick') return esc(qById.has(c.a.q) ? qLabel(qById.get(c.a.q)) : c.a.q);
     const f = factOf(c.a.fact);
     return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : 'two identities?'}`;
 }
@@ -927,15 +932,15 @@ const hypGhost = (id) => {
 /** Why a move no longer holds, in the page's words. */
 function lapseWhy(l) {
     if (l.gone) {
-        if (/^pre:/.test(l.gone)) return `It came from your answer to “${esc(qOfHyp(l.gone)?.label ?? '')}”, which presupposes it: no answer is circled there now.`;
+        if (/^pre:/.test(l.gone)) return `It came from your answer to “${esc(qOfHyp(l.gone) ? qLabel(qOfHyp(l.gone)) : '')}”, which presupposes it: no answer is circled there now.`;
         const m = /^hyp:(.+)=(.+)$/.exec(l.gone);
         const q = m && qById.get(m[1]);
-        return q ? `You no longer have “${esc(entityById.has(m[2]) ? nameOf(m[2]) : m[2])}” circled for “${esc(q.label)}”.` : 'What it was reasoned from is no longer there.';
+        return q ? `You no longer have “${esc(entityById.has(m[2]) ? nameOf(m[2]) : m[2])}” circled for “${esc(qLabel(q))}”.` : 'What it was reasoned from is no longer there.';
     }
     if (l.ruledOut) {
         const q = baseQuestions.find((x) => x.entry?.of === l.ruledOut.item && x.entry?.attr === 'contents');
         const kinds = l.ruledOut.kinds.map((k) => KIND_WORD[k] ?? k).join(' or ');
-        return `It would only work if ${val(l.ruledOut.item)} were ${kinds}${q ? `, and your marks on “${esc(q.label)}” rule that out` : ', and that is ruled out'}.`;
+        return `It would only work if ${val(l.ruledOut.item)} were ${kinds}${q ? `, and your marks on “${esc(qLabel(q))}” rule that out` : ', and that is ruled out'}.`;
     }
     return lostNeedWhy(l) ?? esc(l.why);
 }
@@ -952,7 +957,7 @@ function lostNeedWhy(l) {
         if (!p.need || markOf(q, p.value) === 'circled' || !possShown(q, p.value)) continue;
         const ctx = { ...placeCtx, order: data.order, entries: onTimeline(), extraNeeds: addNeeds(structuredClone(placeCtx.extraNeeds ?? {}), p.need) };
         const r = checkFit(x, t, linked, nameOf, ctx);
-        if (r.fits) return `It served a need of your hypothesis, ${phrase(r.need)}, which came from “${esc(p.value)}” on “${esc(q.label)}”: that is no longer circled.`;
+        if (r.fits) return `It served a need of your hypothesis, ${phrase(r.need)}, which came from “${esc(p.value)}” on “${esc(qLabel(q))}”: that is no longer circled.`;
     }
     return null;
 }
@@ -1045,7 +1050,7 @@ function accountHtml(f, plan) {
 function movesHtml(f) {
     const q = f.reasoned?.move === 'a' && f.of === '?' ? (questionOfChange(f) ?? qById.get(`who:${f.id}`)) : null;
     const who = q ? `<h3>Who did it? <span class="small muted">(your hypothesis)</span></h3>
-      <p class="small">${q.own ? 'Your own question' : 'The question'}: <a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a></p>${chipsHtml(q)}${candidatesHtml(q)}` : '';
+      <p class="small">${q.own ? 'Your own question' : 'The question'}: <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a></p>${chipsHtml(q)}${candidatesHtml(q)}` : '';
     return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${lapsedHtml(f)}${planHtml(f)}`;
 }
 function reasonedDetail(f) {
@@ -1141,7 +1146,7 @@ function entityDetail(id, clashing) {
     for (let i = 1; i <= state.para; i++) for (const x of named.spans[i]) if (x.kind === 'entity' && x.ids[0] === id) spots.push([i, x]);
     const said = spots.map(([i, x]) => `<li>${sentenceAt(i, x)} <span class="para">¶${i}</span></li>`).join('');
     return `<h2>${esc(nameOf(id))}</h2>
-      ${qs.length ? `<h3>Questions about it</h3><ul class="card-qs">${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span></li>`).join('')}</ul>` : ''}
+      ${qs.length ? `<h3>Questions about it</h3><ul class="card-qs">${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span></li>`).join('')}</ul>` : ''}
       ${spots.length ? `<details class="mentions" id="mentions-box"${state.mentionsOpen ? ' open' : ''}><summary>Where the story mentions it (${spots.length})</summary><ul class="said">${said}</ul></details>` : ''}
       <h3>Its timeline</h3>${eventList((f) => f.of === id, clashing, (q) => q.entry?.of === id)}`;
 }
@@ -1149,7 +1154,7 @@ function entityDetail(id, clashing) {
 function questionsPanel(clashing) {
     const qs = listedQuestions();
     if (!qs.length) return '';
-    const items = qs.map((q) => `<li class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
+    const items = qs.map((q) => `<li class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
       ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b></div>` : ''}</li>`).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
@@ -1221,10 +1226,10 @@ function strainSideOn(x) {
 }
 const activeStrains = () => strainList.filter((s) => s.available <= state.para && (strainSideIsMark(s.a) || strainSideIsMark(s.b)) && strainSideOn(s.a) && strainSideOn(s.b));
 function strainSideHtml(x, inKey = false) {
-    if (inKey && typeof x !== 'string') { const q = qById.get(x.q); return `<b>${pickText(q, x.pick)}</b> for “${esc(q.label)}”`; }
+    if (inKey && typeof x !== 'string') { const q = qById.get(x.q); return `<b>${pickText(q, x.pick)}</b> for “${esc(qLabel(q))}”`; }
     if (typeof x === 'string') { const f = factById.get(x); return f ? `<a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a> <span class="para">¶${givenAt(f)}</span>` : esc(x); }
     const q = qById.get(x.q);
-    return `your circle on “<a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a>”: <b>${pickText(q, x.pick)}</b>`;
+    return `your circle on “<a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>”: <b>${pickText(q, x.pick)}</b>`;
 }
 function strainsHtml(strains) {
     if (!strains.length) return '';
@@ -1243,7 +1248,7 @@ function questionDetail(q, clashing) {
     const marked = shownPossibilities(q).filter((p) => markOf(q, p.value));
     const chains = marked.map((p) => hypothesisChain(q.id, p.value));
     const markLi = marked.map((p) => `<li>${markOf(q, p.value) === 'circled' ? 'Circled' : 'Crossed out'}: ${pickText(q, p.value)}${clashing.has(hypothesisKey(q.id, p.value)) ? ' <span class="bad small">in a contradiction</span>' : ''}<ul class="chains">${chainHtml(hypothesisChain(q.id, p.value))}</ul></li>`).join('');
-    return `<h2><span class="q-mark">?</span> ${esc(q.label)}</h2>
+    return `<h2><span class="q-mark">?</span> ${esc(qLabel(q))}</h2>
       ${q.own ? `<p class="small">Raised by your reasoning: <a class="link" data-fact="${esc(q.change)}">${phrase(reasonedById.get(q.change) ?? {})}</a></p>` : `<p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>`}
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}
@@ -1326,7 +1331,7 @@ function renderGate() {
     if (!qs.length) return;
     const count = (q) => { const n = circledCount(q); return n === 0 ? 'nothing circled yet' : `${n} circled`; };
     el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. Commit first: circle exactly one answer${qs.length === 1 ? '' : ' for each'}. Any answer will do; the key shows at ¶${state.para + 1}.</p>
-      <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
+      <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
 }
@@ -1337,7 +1342,7 @@ function renderAnswers() {
     const line = ({ q, picks }) => {
         const right = picks.length === 1 && isRight(q, picks[0]);
         const yours = picks.length ? picks.map((v) => pickText(q, v)).join(', ') : 'nothing';
-        return `<li><a class="link" data-q="${esc(q.id)}">${esc(q.label)}</a>: <b>${answerText(q)}</b> <span class="small ${right ? 'good' : 'bad'}">(you circled ${yours}${right ? ': right' : ''})</span></li>`;
+        return `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>: <b>${answerText(q)}</b> <span class="small ${right ? 'good' : 'bad'}">(you circled ${yours}${right ? ': right' : ''})</span></li>`;
     };
     el.innerHTML = `<p><b>The story has answered:</b></p><ul>${answerNews.map(line).join('')}</ul><p><button type="button" class="quiet" data-answers-close>Dismiss</button></p>`;
 }
@@ -1490,7 +1495,7 @@ render();
 // Hints (ui/world-hints.js): what they need of the page, the page's own functions.
 const hintApi = {
     para: () => state.para, last: LAST, wait: () => state.hintWait,
-    question: (id) => qById.get(id), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
+    question: (id) => (qById.has(id) ? { ...qById.get(id), label: qLabel(qById.get(id)) } : undefined), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
     name: (id) => (entityById.has(id) ? nameOf(id) : null),
     // A link of a chain in words: a telling as the timeline says it, a speech as who said it to whom.
     linkName: (key) => {

@@ -1,0 +1,4 @@
+[{"para":62,"kind":"name","text":"A party of gypsies","id":"gypsies#1","i":1,"verdict":"supported","why":"¶62 says a party of gypsies encamped within a mile of the murder spot."},
+{"para":62,"kind":"name","text":"The gypsy camp","id":"gypsy_camp","i":2,"verdict":"supported","why":"¶62 mentions traces showing the gypsies encamped near the spot on Monday night."},
+{"para":62,"kind":"time","text":"Tuesday","id":"t.tue_day","i":3,"verdict":"supported","why":"¶62 states that on Tuesday the gypsies were gone."},
+{"para":62,"kind":"possibility","text":"Where is Silver Blaze? — with the gypsies","id":"q.horse_where=with the gypsies","i":4,"verdict":"supported","why":"Gregory raises exactly this possibility in ¶62."}]

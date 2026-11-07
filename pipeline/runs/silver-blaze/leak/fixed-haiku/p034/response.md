@@ -1,0 +1,11 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶34 names the chaff-cutting loft 'above the harness-room'."}
+{"i": 2, "verdict": "supported", "why": "¶34 mentions 'the knoll near the house'."}
+{"i": 3, "verdict": "supported", "why": "¶34 says the two lads and the two women ran out in search of the absentees."}
+{"i": 4, "verdict": "supported", "why": "The Monday-night catastrophe is followed by Mrs. Straker's discovery at seven the next morning, and ¶34 has them on the knoll after that. Tuesday follows from Monday night and Holmes's Thursday framing."}
+{"i": 5, "verdict": "supported", "why": "The story has shown Hunter drugged ('under the influence of some powerful drug') after the maid carried his supper and the stranger approached with a folded packet. The question is a plain one the story gives reason to ask."}
+{"i": 6, "verdict": "supported", "why": "The hound was unleashed during the night incident, and the story has not yet said whether it barked later. This is a reasonable plain question about the dog."}
+{"i": 7, "verdict": "supported", "why": "¶34 says the lads 'heard nothing during the night' and are sound sleepers, so 'unheard' is grounded. Barking is an open possibility the dog's presence invites."}
+{"i": 8, "verdict": "supported", "why": "The lads heard nothing in the night and the dog was present, so 'did not bark' is a possibility a reader could reasonably consider. It is stated as an open alternative, not as a fact."}
+{"i": 9, "verdict": "supported", "why": "¶34 states the lads' hope that the trainer 'had for some reason taken out the horse for early exercise', so the possibility is raised in the text. Straker's stated reason in ¶32 was anxiety about the horses."}
+```

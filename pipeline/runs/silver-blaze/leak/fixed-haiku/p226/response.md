@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶101 describes 'a cast horseshoe of Silver Blaze', ¶117 shows the shoe fitting the horse's track, and ¶226 says 'the steel shoe had struck Straker', so the label's name for the object is grounded in the story so far."}
+```

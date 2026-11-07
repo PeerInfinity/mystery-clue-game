@@ -1,0 +1,5 @@
+[{"para":1,"kind":"account","text":"What Watson sees and hears himself","id":"acct.watson","i":1,"verdict":"supported","verdict_note":"","why":"First-person narrator sits at breakfast with Holmes, who addresses him as Watson, so the account is Watson's own."},
+{"para":1,"kind":"name","text":"Holmes","id":"holmes","i":2,"verdict":"supported","why":"Holmes is named in the paragraph."},
+{"para":1,"kind":"name","text":"Watson","id":"watson","i":3,"verdict":"supported","why":"Holmes addresses Watson by name."},
+{"para":1,"kind":"time","text":"Before the story, undated","id":"t.before","i":4,"verdict":"supported","why":"A generic, undated time slot for earlier events; it reveals nothing specific."},
+{"para":1,"kind":"time","text":"One morning, at breakfast","id":"t.thu_breakfast","i":5,"verdict":"supported","why":"The story says they sat down to breakfast one morning."}]

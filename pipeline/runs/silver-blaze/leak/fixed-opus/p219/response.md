@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶219 itself calls the person who fetched out the horse 'the midnight visitor', so the label only uses the story's own wording and does not say who it was."}
+```

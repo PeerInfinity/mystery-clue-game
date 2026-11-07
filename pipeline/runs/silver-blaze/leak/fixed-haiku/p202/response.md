@@ -1,0 +1,6 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes has just promised 'you shall know everything' and invited the Colonel to look at the horse in the enclosure; the label names that promised explanation without giving its content."}
+{"i": 2, "verdict": "supported", "why": "Holmes directly says to wash the horse's face and leg in spirits of wine, so the thing is named in the story."}
+{"i": 3, "verdict": "supported", "why": "The bay horse lacks Silver Blaze's white hair, and Holmes tells the Colonel to wash the face and leg to reveal 'the same old Silver Blaze', so the story already implies a disguise on the horse, though not its method."}
+{"i": 4, "verdict": "supported", "why": "The race at Winchester has just finished (Silver Blaze won), and the party has gone to the weighing enclosure, so the time is stated by the story."}
+```
