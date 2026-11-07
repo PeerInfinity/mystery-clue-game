@@ -4,16 +4,19 @@
 // page throws nothing. Every answer the story gives on the way must find the player's one circle right; at the end of
 // the story no contradiction may be open and no likely clash unheld.
 //   node scripts/path-check.mjs [path.json]      STOP=<para> stops after that paragraph's moves (and keeps the page)
+//   CASE=<dir> node scripts/path-check.mjs       another case (the page's ?case=; default cases/silver-blaze)
 // Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
 const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
-const FILE = process.argv[2] ?? path.join(ROOT, 'cases/silver-blaze/world/path.json');
+const CASE = (process.env.CASE ?? 'cases/silver-blaze').replace(/\/+$/, '');
+const FILE = process.argv[2] ?? path.join(ROOT, CASE, 'world/path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
-const URL_ = process.env.URL ?? 'http://localhost:8321/';
+const URL_ = (process.env.URL ?? 'http://localhost:8321/') + (CASE === 'cases/silver-blaze' ? '' : `?case=${encodeURIComponent(CASE)}`);
 const STOP = +(process.env.STOP ?? 1e9);
-const STORE = 'silver-blaze-world-v1';
+// The page's save for this case (ui/world-case.js).
+const STORE = `${CASE === 'cases/silver-blaze' ? 'silver-blaze' : CASE.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '')}-world-v1`;
 
 const list = await (await fetch('http://127.0.0.1:9333/json')).json();
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
@@ -61,9 +64,9 @@ async function openOn(on) {
 const defaultOn = (m) => m.on ?? (['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
 
 // --- Earliest. The data's earliest paragraph for a circle; the page's, for the reasoning moves, found in play.
-const W = path.join(ROOT, 'cases/silver-blaze/world');
+const W = path.join(ROOT, CASE, 'world');
 const qs = new Map(JSON.parse(fs.readFileSync(path.join(W, 'questions.json'), 'utf8')).questions.map((q) => [q.id, q]));
-const strains = JSON.parse(fs.readFileSync(path.join(W, 'strains.json'), 'utf8')).strains;
+const strains = fs.existsSync(path.join(W, 'strains.json')) ? JSON.parse(fs.readFileSync(path.join(W, 'strains.json'), 'utf8')).strains : [];
 const label = (m) => `${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`;
 const early = [];
 const report = (m, at, why) => { early.push({ m, at }); failures++; console.log(`FAIL EARLY ¶${m.at} → ¶${at} ${label(m)}${why ? ` (${why})` : ''}`); };

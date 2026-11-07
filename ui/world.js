@@ -9,12 +9,11 @@ import { Story } from '../engine/story.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
 import { ACTIONS, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
-const CASE = 'cases/silver-blaze';
+import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
 // the player's timeline is kept aside, only its layout and theme borrowed. `?autoplay=fast`: no pauses (the check).
 const AUTOPLAY = new URLSearchParams(location.search).get('autoplay');
-const PLAYER_STORE = 'silver-blaze-world-v1';
-const STORE = AUTOPLAY === null ? PLAYER_STORE : 'silver-blaze-world-autoplay';
+const STORE = AUTOPLAY === null ? PLAYER_STORE : AUTOPLAY_STORE;
 const get = (url, as = 'json') => fetch(url, { cache: 'no-cache' }).then((r) => {
     if (!r.ok) throw new Error(`${url}: ${r.status}`);
     return as === 'json' ? r.json() : r.text();
@@ -1363,7 +1362,7 @@ document.getElementById('start-over').addEventListener('click', () => {
     try {
         const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
         localStorage.setItem(PLAYER_STORE, JSON.stringify(keep));
-        localStorage.removeItem('silver-blaze-world-autoplay');
+        localStorage.removeItem(AUTOPLAY_STORE);
     } catch { /* nothing saved to clear */ }
     location.reload();
 });
@@ -1516,5 +1515,5 @@ if (AUTOPLAY === null) import('./world-hints.js').then((m) => m.makeHints({ stor
 else document.getElementById('hint').hidden = true;
 if (AUTOPLAY !== null) { save(); import('./world-autoplay.js').then((m) => m.start({ store: STORE, fast: AUTOPLAY === 'fast' })); }
 document.getElementById('autoplay-open')?.addEventListener('click', () => {
-    if (confirm('Watch a careful reader fill in the timeline, from the first paragraph to the last? Your own timeline is kept aside and comes back when you stop.')) location.search = '?autoplay';
+    if (confirm('Watch a careful reader fill in the timeline, from the first paragraph to the last? Your own timeline is kept aside and comes back when you stop.')) location.href = pageUrl('autoplay');
 });

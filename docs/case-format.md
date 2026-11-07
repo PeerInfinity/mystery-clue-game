@@ -24,13 +24,13 @@ else. Every JSON file is one object per line inside its list.
 | `world/accounts.json` | yes | The accounts the facts travel in, and who holds them. |
 | `world/questions.json` | yes | The questions, their possibilities and answers. |
 | `world/strains.json` | no | Likely clashes; without it the page shows none. |
-| `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`). |
+| `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`; `CASE=<dir> node scripts/path-check.mjs` for another case). |
 
 The world model was first written beside the earlier game's data and pointed into it (`old`, references to the
-annotated reading's thoughts, the earlier game's time windows); since 2026-11-06 it stands alone. At present the
-page reads `cases/silver-blaze` (`const CASE` in `ui/world.js`, `ui/world-hints.js`, `ui/world-autoplay.js`) and its
-saves are named after it (`silver-blaze-world-v1`, `silver-blaze-world-autoplay`); a second case needs a case
-parameter.
+annotated reading's thoughts, the earlier game's time windows); since 2026-11-06 it stands alone. The page shows
+`cases/silver-blaze` by default and any other case by `?case=<dir>` (a directory under the site root:
+`?case=pipeline/runs/silver-blaze-r2/case`), with saves of its own (`ui/world-case.js`); without `world/path.json`
+it offers no hints and no autoplay.
 
 ## The world model as data (`world/`)
 

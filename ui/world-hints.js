@@ -15,7 +15,7 @@
 
 import { $, esc, LEVELS, Failed, makeMover, allowedNow, made, onOf, VIEWS } from './world-moves.js';
 
-const CASE = 'cases/silver-blaze';
+import { CASE } from './world-case.js';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
@@ -23,9 +23,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  * setTrust({link | person}, level), view() and restore(view), wait() (seconds between hints).
  */
 export async function makeHints({ store, api }) {
-    const path = await fetch(`${CASE}/world/path.json`, { cache: 'no-cache' }).then((r) => r.json());
-    const moves = path.moves.map((m, i) => ({ ...m, i }));
     const box = $('#hint-news'), button = $('#hint');
+    // A case with no true path (world/path.json is optional) has no hints and no autoplay: their buttons go.
+    const path = await fetch(`${CASE}/world/path.json`, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (!path) { for (const id of ['#hint', '#autoplay-open']) { const el = $(id); if (el) el.hidden = true; } return; }
+    const moves = path.moves.map((m, i) => ({ ...m, i }));
     const h = { key: null, rung: 0, target: null, until: 0, timer: null };
     const saved = () => { try { return JSON.parse(localStorage.getItem(store) ?? '{}'); } catch { return {}; } };
 

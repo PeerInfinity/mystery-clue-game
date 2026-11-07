@@ -8,7 +8,7 @@
 
 import { $, sleep, esc, Stopped, Failed, makeMover } from './world-moves.js';
 
-const CASE = 'cases/silver-blaze';
+import { CASE, pageUrl } from './world-case.js';
 const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], ['4', '4×']];
 
 export async function start({ store, fast = false }) {
@@ -47,10 +47,10 @@ export async function start({ store, fast = false }) {
     $('#ap-pause').addEventListener('click', () => { s.stepping = false; setPaused(!s.paused); });
     $('#ap-step').addEventListener('click', () => { s.stepping = true; if (s.paused) setPaused(false); });
     const stepped = () => { if (s.stepping) { s.stepping = false; setPaused(true, `${s.lastCaption} · paused`); } };
-    $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; location.href = './'; });
+    $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; location.href = pageUrl(); });
     const ending = (text) => {
         $('#ap-caption').textContent = text;
-        strip.querySelector('.ap-tools').innerHTML = '<a class="button" href="./">Back to your timeline</a>';
+        strip.querySelector('.ap-tools').innerHTML = `<a class="button" href="${pageUrl()}">Back to your timeline</a>`;
         cursor.remove();
         document.body.classList.remove('autoplaying');
         window.__autoplay = status();
