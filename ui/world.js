@@ -1494,6 +1494,28 @@ document.addEventListener('change', (e) => {
 });
 render();
 // Hints (ui/world-hints.js): what they need of the page, the page's own functions.
+// The pipeline's route check (scripts/route-check.mjs): every link "What is this for?" the page would offer now and
+// the engine accepts, made one after another until nothing new fits (a link made can make another fit: a need of a
+// step already linked), and the intentions "What would this need?" is offered on. It changes the reasoning: for a
+// check's own page, never a player's.
+window.__routes = () => {
+    const made = [];
+    const hyps = () => baseQuestions.filter(qListed).flatMap((q) => [presupposed(`pre:${q.id}`), ...q.possibilities.flatMap((p) => [hypAction(hypothesisKey(q.id, p.value)), hypIntention(hypothesisKey(q.id, p.value))])]).filter(Boolean);
+    const sources = () => [...onTimeline(), ...hyps()].filter((f) => (list(f.act).length || f.goal) && f.of !== '?' && !f.reasoned && !(f.hyp && qById.get(f.hyp.q)?.end));
+    for (let round = 0; round < 12; round++) {
+        let added = false;
+        for (const x of sources()) for (const t of intentionsOf(x.of, x.id)) {
+            if (state.reasoning.some((m) => m.move === 'c' && m.of === x.id && m.for === t.id)) continue;
+            const linked = linkedTo(t.id).map((l) => factOf(l.reasoned.premises[0])).filter((y) => y && list(y.act).length);
+            const r = checkFit(x, t, linked, nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
+            if (r.fits) { state.reasoning = [...state.reasoning, { move: 'c', of: x.id, for: t.id }]; made.push({ of: x.id, for: t.id, need: r.need ? phrase(r.need).replace(/<[^>]+>/g, '') : null }); added = true; }
+        }
+        if (!added) break;
+        render();
+    }
+    const plans = sources().filter((f) => f.goal || f.plan).filter((f) => planOf(f)).map((f) => f.id);
+    return { para: state.para, links: made, plans };
+};
 const hintApi = {
     para: () => state.para, last: LAST, wait: () => state.hintWait,
     question: (id) => (qById.has(id) ? { ...qById.get(id), label: qLabel(qById.get(id)) } : undefined), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
