@@ -147,5 +147,6 @@ THE LABELS that first appear at paragraph 58:
 3. (name) A ten-pound note
 4. (name) Simpson's purse
 5. (account) Simpson's further statements
+6. (possibility) Where is Silver Blaze? — dead, in a pit or mine
 
 Judge every label.

@@ -465,5 +465,6 @@ THE STORY SO FAR (paragraphs 1 to 219):
 THE LABELS that first appear at paragraph 219:
 
 1. (name) The midnight visitor
+2. (possibility) Why take the horse out of the stable? — to do something that would be heard in the stable
 
 Judge every label.

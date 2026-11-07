@@ -57,7 +57,6 @@ THE LABELS that first appear at paragraph 14:
 1. (name) Fitzroy Simpson
 2. (time) Wednesday: a whole day of waiting
 3. (question) Where is Silver Blaze?
-4. (possibility) Where is Silver Blaze? — dead, in a pit or mine
-5. (possibility) Where is Silver Blaze? — taken far away
+4. (possibility) Where is Silver Blaze? — taken far away
 
 Judge every label.

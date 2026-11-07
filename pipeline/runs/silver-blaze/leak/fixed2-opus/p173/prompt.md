@@ -376,6 +376,5 @@ THE LABELS that first appear at paragraph 173:
 2. (time) Of late
 3. (question) What lamed the sheep?
 4. (possibility) What lamed the sheep? — an epidemic or chance
-5. (possibility) What lamed the sheep? — someone practised on them
 
 Judge every label.

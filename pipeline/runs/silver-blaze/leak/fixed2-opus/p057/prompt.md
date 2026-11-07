@@ -146,7 +146,6 @@ THE LABELS that first appear at paragraph 57:
 4. (question) Why take the horse out of the stable?
 5. (possibility) Why take the horse out of the stable? — to take him for early exercise
 6. (possibility) Why take the horse out of the stable? — to steal him
-7. (possibility) Why take the horse out of the stable? — to do something that would be heard in the stable
-8. (possibility) Why take the horse out of the stable? — to do something by a light that would be seen from the stable
+7. (possibility) Why did Straker go out at one in the morning? — to injure the horse
 
 Judge every label.

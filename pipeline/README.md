@@ -179,6 +179,17 @@ answers of `q.why_out` at ¶57, `q.sheep_lame` "someone practised on them" at ¶
 gives a reason to consider them. That is a judgement on the data's dates, left for the user. The page checks pass
 with the fix.
 
+The user (2026-11-07): move them to where the story first suggests them. Moved: "dead, in a pit or mine" to ¶58
+(Gregory says it), "to do something that would be heard in the stable" to ¶219 (the dog did not bark enough to
+rouse the lads in the loft), "someone practised on them" to ¶221 (the knife was for a delicate operation that
+night), "to injure the horse" to ¶57 (Holmes: "If he wished to injure it why could he not do it there?") and "to do
+something by a light that would be seen from the stable" to ¶102 (the match struck in the hollow); each answer's
+earliest inferable paragraph with them, and the true path's circles (with the links "what is this for?" that need
+the reason the horse went out, now at ¶102). The path check and every page check pass. Opus accepts the first three;
+it still flags the last two (at ¶57 it reads "injure" as said of the police's suspect, Straker still an honest
+servant; at ¶102 nothing yet says why a light mattered), and, this time, "to light the candle for close work" at
+¶102, which it passed before.
+
 ## The second run on Silver Blaze (2026-11-06): steps 5–12 (`runs/silver-blaze-r2/`)
 
 Steps 1–4 copied from the first run (the reading is the same), steps 5–9 rerun with the fixes the first run asked

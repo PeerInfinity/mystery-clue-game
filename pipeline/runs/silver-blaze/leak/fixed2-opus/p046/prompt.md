@@ -122,7 +122,6 @@ THE LABELS that first appear at paragraph 46:
 2. (name) A duplicate key
 3. (name) Silver Blaze's bridle
 4. (possibility) What did the stranger want at the stable? — steal the horse
-5. (possibility) Why did Straker go out at one in the morning? — to injure the horse
-6. (possibility) Where is Silver Blaze? — at a secret hiding-place
+5. (possibility) Where is Silver Blaze? — at a secret hiding-place
 
 Judge every label.

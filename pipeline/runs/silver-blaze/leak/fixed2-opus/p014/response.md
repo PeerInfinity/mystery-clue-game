@@ -1,7 +1,6 @@
 ```jsonl
-{"i": 1, "verdict": "supported", "why": "The name 'young Fitzroy Simpson' is given in ¶14 as the man who has been arrested."}
-{"i": 2, "verdict": "supported", "why": "It is Thursday morning, and Holmes says he spent 'yesterday' hour to hour expecting news that the horse had been found."}
-{"i": 3, "verdict": "supported", "why": "The horse's disappearance is the central mystery, and Holmes notes it remains concealed."}
-{"i": 4, "verdict": "unsupported", "why": "The story has mentioned no pits or mines, and nothing yet suggests the horse is dead; this detail is not drawn from the text."}
-{"i": 5, "verdict": "supported", "why": "Holmes expected the horse could not long stay hidden on the sparse moor, so a reader may reasonably wonder whether it was taken elsewhere."}
+{"i": 1, "verdict": "supported", "why": "The story names young Fitzroy Simpson as the person arrested."}
+{"i": 2, "verdict": "supported", "why": "The telegrams came Tuesday evening and it is now Thursday, so 'yesterday', when Holmes waited hour to hour for news, was Wednesday."}
+{"i": 3, "verdict": "supported", "why": "The horse has disappeared and Holmes expected it to be found, so where it is stands as an open question."}
+{"i": 4, "verdict": "supported", "why": "The horse is missing and Holmes doubted it could stay hidden on the sparsely inhabited moor, which gives reason to consider that it was taken elsewhere."}
 ```

@@ -231,8 +231,9 @@ THE STORY SO FAR (paragraphs 1 to 102):
 THE LABELS that first appear at paragraph 102:
 
 1. (name) A half-burned wax vesta
-2. (question) Why was a match struck in the hollow?
-3. (possibility) Why was a match struck in the hollow? — to light his pipe
-4. (possibility) Why was a match struck in the hollow? — to light the candle for close work
+2. (possibility) Why take the horse out of the stable? — to do something by a light that would be seen from the stable
+3. (question) Why was a match struck in the hollow?
+4. (possibility) Why was a match struck in the hollow? — to light his pipe
+5. (possibility) Why was a match struck in the hollow? — to light the candle for close work
 
 Judge every label.
