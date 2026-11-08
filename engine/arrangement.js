@@ -71,12 +71,12 @@ export function foundBy(entry, known, openings = {}) {
 }
 
 /**
- * Move "Something got through": a fact that something crossed between two places (`attr: 'passed'`, `from`, `to`,
+ * Move "Something got through": a fact that something crossed between two places (`attr: 'passed'`, `between: [from, to]`,
  * `passes`) gives an opening between them, even if none has been found. Refused if a told opening already accounts for it.
  */
 export function pointPassage(f, known = [], openings = {}) {
-    if (f?.attr !== 'passed' || !f.from || !f.to || !SIZES.includes(f.passes)) return { why: 'That is not something crossing from one place to another.' };
-    const entry = { id: `r:g:${f.id}`, of: '?', attr: 'opening', sides: [f.from, f.to], passes: f.passes, para: f.para, reasoned: { move: 'g', premises: [f.id] } };
+    if (f?.attr !== 'passed' || f.between?.length !== 2 || !SIZES.includes(f.passes)) return { why: 'That is not something crossing from one place to another.' };
+    const entry = { id: `r:g:${f.id}`, of: '?', attr: 'opening', sides: f.between, passes: f.passes, para: f.para, reasoned: { move: 'g', premises: [f.id] } };
     if (foundBy(entry, known, openings)) return { why: 'A way between those two places is already on the timeline.' };
     return { entry };
 }
@@ -150,6 +150,12 @@ export function fits(member, req) {
     if (req.trait === 'size') return rank(v) >= rank(req.value) ? 'fits' : 'fails';
     if (req.trait === 'travels') return v ? 'fits' : 'fails';
     return v === req.value ? 'fits' : 'fails';
+}
+
+/** A candidate may be crossed out only for a requirement it fails: the page shows traits, and objects to a crossing they do not support. */
+export function checkCrossing(member, reqs) {
+    const failed = reqs.find((r) => fits(member, r) === 'fails');
+    return failed ? { ok: true, by: failed } : { why: 'Nothing established yet rules that out.' };
 }
 
 /** The candidates against the requirements: each row with one result per requirement, and whether any fails. */

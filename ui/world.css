@@ -170,3 +170,26 @@ body.world-page.tabbed .top { position: static; }
 /* A hint: its rungs so far, More, Do it. */
 .hint-news .hint-rungs { margin: 4px 0 6px; padding-left: 20px; }
 .hint-news .hint-rungs li { margin: 3px 0; }
+
+/* The room panel (ui/world-room.js): only for a case with world/room.json. */
+.room-part { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: var(--shadow); }
+.rm { font-size: 13px; }
+.rm h3 { font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+.rm-q { font-family: var(--serif); font-size: 15px; margin: 0 0 8px; }
+.rm-note { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 4px 8px; margin: 0 0 8px; }
+.rm-table { border-collapse: collapse; width: 100%; }
+.rm-table th { font-weight: 500; color: var(--muted); text-align: left; font-size: 12px; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+.rm-table td { padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.way-pick { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.way-pick button { font-size: 11px; padding: 1px 5px; border: 1px dashed var(--line); border-radius: 4px; background: transparent; color: var(--muted); cursor: pointer; }
+.way-chip { min-width: 54px; font-size: 12px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--line); cursor: pointer; }
+.way-chip.closed { background: var(--chip); color: var(--ink); }
+.way-chip.open { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+.rm-chain { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.rm-node { padding: 3px 8px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 12px; }
+.rm-arrow { color: var(--muted); font-size: 12px; }
+.rm-add { padding: 3px 8px; border-radius: 12px; border: 1px dashed var(--accent); color: var(--accent); font-size: 12px; background: transparent; cursor: pointer; }
+.rm-reqs { margin: 0; padding-left: 16px; }
+.rm-reqs li { margin: 2px 0; }
+.rm-moves { margin: 6px 0 0; }
+.rm-tag { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; margin-left: 4px; white-space: nowrap; font-weight: 400; }

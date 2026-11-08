@@ -24,6 +24,7 @@ else. Every JSON file is one object per line inside its list.
 | `world/accounts.json` | yes | The accounts the facts travel in, and who holds them. |
 | `world/questions.json` | yes | The questions, their possibilities and answers. |
 | `world/strains.json` | no | Likely clashes; without it the page shows none. |
+| `world/room.json` | no | The arrangement of a room and general knowledge: openings, a sealed place, requirements, categories of candidates. Without it the page has no room panel. See "The arrangement of a room". |
 | `world/actions.json` | no | The case's own action types, `{id, label, requires, effects}` in the action table's rule shape, and `ramifies` (what a goal's state brings with it); the generic ones are the engine's (see "Typed states and actions"). |
 | `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`; `CASE=<dir> node scripts/path-check.mjs` for another case). |
 
@@ -359,6 +360,27 @@ The player's moves, each checked by these rules, give entries with the source *t
   a question of the player's own ("Who was unlocking and opening the stable door?", `who: true`, so any person or
   animal met so far may answer it). For each one circled, the page shows what they would have needed (`agentNeeds`:
   at the door, a key) and what the timeline says of it.
+
+**The arrangement of a room** (`world/room.json`, optional; `engine/arrangement.js`, drawn by `ui/world-room.js`). For a
+case that turns on how things are arranged (the design: `docs/ideas.md`, "The arrangement of a room, and general
+knowledge"). An invented example is `scripts/fixtures/sealed-room/`.
+
+- `openings`: `{id: {kind, sides: [place, place]}}`, an entity each, of any kind beside doors. A row of the table only once a
+  fact about it is on the timeline. `sealed`: `{place, surfaces?, time?, question?, unknown?}` switches the table on.
+- Facts: `closed_to` and `passes` take a size, `person`, `small` or `air`. `closed_to: v` stops v and anything larger;
+  `passes: v` lets v and anything smaller through. So "barred to a person" says nothing of something small. `passed`
+  (`between: [place, place]`, `passes`) is something crossing between two places (the move "Something got through").
+  `attached`, `reaches`, `near` and `fixed` have an entity as their value; the first three are the links of a route.
+- The player's moves: a mark on a cell of the table, refused unless a fact supports it; "Something got through", an
+  entry `attr: opening`; the route, link by link, an entry `attr: route` whose requirements are `size` and `travels`.
+- `requirements`: `{id, label, trait, value, from: [facts], filter?}`, shown once a fact in `from` is on the timeline.
+  `filter: false`: evidence only, it tests no kind (where the story's world and the real one disagree).
+- `categories`: `{id, label, on: [facts], q, members: [{value, text, traits}]}`, at least three members, so that a list
+  has distractors. "What else of this kind?" is offered once a fact in `on` is on the timeline; offer it on several
+  categories, so that it does not point at the answer. A question's possibility with `via: knowledge` and `category`
+  is listed only after that move, whatever the paragraph. The page shows a member's `text`, never a verdict; crossing one out
+  is refused unless a requirement established so far fails it (`traits`). This is the exception to "every piece of card
+  text carries a quote": general knowledge comes only by a move, as a source with its own trust setting (`general:<category>`).
 
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
 narration link starts at its narrator's trust (certain by default), so a narrator's own observation is certain; every

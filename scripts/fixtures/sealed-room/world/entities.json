@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {"id": "penn", "name": "Penn", "kind": "person"},
+    {"id": "arkwright", "name": "Mr. Arkwright", "kind": "person"},
+    {"id": "silas", "name": "Old Silas", "kind": "person"},
+    {"id": "strongroom", "name": "the strongroom", "kind": "place"},
+    {"id": "office", "name": "the office", "kind": "place"},
+    {"id": "door", "name": "The door of the strongroom", "kind": "object"},
+    {"id": "chimney", "name": "The chimney of the strongroom", "kind": "object"},
+    {"id": "walls", "name": "The walls of the strongroom", "kind": "object"},
+    {"id": "smoke", "name": "Pipe smoke", "kind": "object"},
+    {"id": "animals", "name": "colonial animals", "kind": "animal"},
+    {"id": "grating", "name": "A small grating", "kind": "object"},
+    {"id": "chain", "name": "A chain", "kind": "object"},
+    {"id": "hook", "name": "a hook", "kind": "object"},
+    {"id": "desk", "name": "the ledger desk", "kind": "object"},
+    {"id": "floor", "name": "the floor", "kind": "object"}
+  ]
+}

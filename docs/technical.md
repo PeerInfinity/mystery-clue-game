@@ -78,7 +78,7 @@ The headless-Chrome scripts share port 9333: run one at a time, the earlier game
 
 Node tests check the engine on data built in node, but the page can refuse moves the engine accepts. Only the
 headless-Chrome runs play the real page: `npm run page-checks` (`path-check.mjs`, `world-autoplay-check.mjs`,
-`world-hints-check.mjs`). Run them after any change to the UI, to the data's format or to what a move needs.
+`world-hints-check.mjs`, `room-check.mjs`: the room panel on the invented `scripts/fixtures/sealed-room`). Run them after any change to the UI, to the data's format or to what a move needs.
 
 ## Conventions
 

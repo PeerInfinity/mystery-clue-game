@@ -30,6 +30,7 @@ const checks = [
     ['world-autoplay-check.mjs', 'three'], ['world-autoplay-check.mjs', 'two'], ['world-autoplay-check.mjs', 'one'],
     ['world-autoplay-check.mjs', 'one', { PHONE: '1' }],
     ['world-hints-check.mjs'],
+    ['room-check.mjs'],
 ];
 const failed = [];
 for (const [script, ...rest] of checks) {

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { waysIn, checkWayMark, sealedFor, pointPassage, foundBy, checkRoute, whatElse, isListed, fits, fitTable, knowledgeChain, knowledgeKey } from './arrangement.js';
+import { waysIn, checkWayMark, sealedFor, pointPassage, foundBy, checkRoute, whatElse, isListed, fits, fitTable, checkCrossing, knowledgeChain, knowledgeKey } from './arrangement.js';
 import { linkKey } from './world.js';
 
 // An invented case: a counting-house strongroom found sealed, with the clerk's office next door. A smell of pipe tobacco
@@ -14,7 +14,7 @@ const sealed = { place: 'strongroom', surfaces: ['walls'] };
 const doorShut = { id: 'f.door', of: 'door', attr: 'closed_to', value: 'small', para: 3 };
 const flueBarred = { id: 'f.flue', of: 'flue', attr: 'closed_to', value: 'person', para: 3 };
 const wallsSound = { id: 'f.walls', of: 'walls', attr: 'closed_to', value: 'small', para: 3 };
-const smell = { id: 'f.smell', of: 'tobacco', attr: 'passed', from: 'office', to: 'strongroom', passes: 'air', para: 2 };
+const smell = { id: 'f.smell', of: 'tobacco', attr: 'passed', between: ['office', 'strongroom'], passes: 'air', para: 2 };
 const gratingOpen = { id: 'f.grating', of: 'grating', attr: 'passes', value: 'small', para: 9 };
 const chain = { id: 'f.chain', of: 'chain', attr: 'attached', value: 'hook', para: 10 };
 const hookNear = { id: 'f.hook', of: 'hook', attr: 'near', value: 'grating', para: 10 };
@@ -92,4 +92,11 @@ test('requirements filter candidates; evidence-only ones do not', () => {
     assert.equal(fits(animals.members[2], { trait: 'marks', value: 'none' }), 'unknown');
     assert.equal(fits(animals.members[0], kept), 'no test');
     assert.deepEqual(fitTable(animals.members, [size, rope, kept]).map((r) => [r.member.id, r.out]), [['ferret', false], ['mastiff', true], ['marmoset', false]]);
+});
+
+test('a candidate is crossed out only for a requirement it fails', () => {
+    const size = { trait: 'size', value: 'small' }, kept = { trait: 'comes when called', filter: false };
+    assert.equal(checkCrossing(animals.members[1], [kept, size]).by, size);
+    assert.match(checkCrossing(animals.members[0], [size, kept]).why, /rules that out/);
+    assert.match(checkCrossing(animals.members[1], []).why, /rules that out/, 'with no requirements yet, nothing can');
 });

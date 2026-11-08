@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.what_came", "label": "What came to Arkwright?", "entry": {"of": "?", "attr": "action", "time": {"at": "t.night"}}, "raised": 1, "quote": "found him dead", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "a ferret", "via": "knowledge", "category": "c.colonial"}, {"value": "a mastiff", "via": "knowledge", "category": "c.colonial"}, {"value": "a marmoset", "via": "knowledge", "category": "c.colonial"}], "answer": "a ferret", "answer_given_at": 10, "answer_given_quote": "it was a ferret", "answer_inferable_at": null}
+  ]
+}

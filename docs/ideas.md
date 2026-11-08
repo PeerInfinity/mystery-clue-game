@@ -526,6 +526,10 @@ list of a kind, requirements first, another sense of a word, a typed guess, or l
 - **Only some requirements filter.** The story's world is not zoology (a snake neither drinks milk nor comes to a
   whistle): those show only that an animal is kept and trained, and the data records that they do not test a species
   (`filter: false`). Size, the ability to travel the route, the kill and the look do.
+- **The panel has its own place** (a Room tab, above the timeline in three columns), chosen by sight from mock-ups: inside
+  Detail, clicking any event would replace it while a route is being built.
+- **Candidates show traits, not verdicts.** The page objects only to a crossing no established requirement supports:
+  ✓ and ✗ would do the last deduction for the player.
 - **The move must not point at the answer:** "What else of this kind?" is offered on several categories, not only the
   one that leads to the solution.
 

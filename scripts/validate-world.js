@@ -60,6 +60,7 @@ const times = read('world/times.json').times;
 const facts = read('world/facts.json').facts;
 const questions = read('world/questions.json').questions;
 const accounts = read('world/accounts.json').accounts;
+const room = fs.existsSync(path.join(dir, 'world', 'room.json')) ? read('world/room.json') : null;
 const accountIds = new Set(accounts.map((a) => a.id));
 const prov = provenance(dir);
 const world = loadWorld(dir);
@@ -218,7 +219,7 @@ for (const f of facts) {
 }
 
 // Questions.
-const VIAS = new Set(['direct', 'indirect', 'always']);
+const VIAS = new Set(['direct', 'indirect', 'always', 'knowledge']);
 for (const q of questions) {
     if (q.entry?.of && q.entry.of !== '?' && !entities.has(q.entry.of)) err(q.id, `entry.of: no entity ${q.entry.of}`);
     for (const t of [q.entry?.time, q.entry?.time?.from, q.entry?.time?.to]) if (typeof t === 'string' && t.startsWith('t.') && !timeIds.has(t)) err(q.id, `entry.time: no time ${t}`);
@@ -245,7 +246,9 @@ for (const q of questions) {
         // A possibility that implies another question's answer (the hoof: the horse struck the blow).
         if (p.implies && !qById.get(p.implies.q)?.possibilities.some((o) => o.value === p.implies.pick) && !entities.has(p.implies.pick)) err(q.id, `${p.value}: implies no possibility ${p.implies.q} = ${p.implies.pick}`);
         for (const n of list(p.need)) if (!ACTIONS[n.act] || !n.rule?.of || (n.rule.away != null && !entities.has(n.rule.away)) || (n.rule.carrying != null && !n.rule.carrying.startsWith('$') && !entities.has(n.rule.carrying))) err(q.id, `${p.value}: need is {act, rule}, or a list of them`);
-        if (p.via !== 'always') {
+        // A possibility general knowledge brings is listed by the player's move, not by a paragraph (world/room.json).
+        if (p.via === 'knowledge' && !room?.categories?.some((c) => c.id === p.category && c.q === q.id && c.members.some((m) => m.value === p.value))) err(q.id, `${p.value}: via knowledge needs a category of room.json on this question listing it`);
+        if (p.via !== 'always' && p.via !== 'knowledge') {
             if (!Number.isInteger(p.available)) err(q.id, `${p.value}: no available paragraph`);
             if (!p.from && !p.reasoning && !p.quote) err(q.id, `${p.value}: needs from (a fact), reasoning or a quote`);
         }
@@ -304,6 +307,24 @@ for (const c of contradictions(world, asserted.filter((x) => x.truth === true)))
 
 // Likely clashes: each side a fact, or a possibility of a question; shown no earlier than both sides can be; a key
 // question with an answer; `from` (optional) a fact or a question.
+// The arrangement of a room and general knowledge (world/room.json, optional).
+if (room) {
+    const S = ['person', 'small', 'air'];
+    for (const [id, o] of Object.entries(room.openings ?? {})) { if (!entities.has(id)) err('room', `opening ${id}: no entity`); for (const s of o.sides ?? []) if (!entities.has(s)) err('room', `opening ${id}: side ${s}: no entity`); if (o.sides?.length !== 2) err('room', `opening ${id}: needs two sides`); }
+    if (room.sealed) { if (!entities.has(room.sealed.place)) err('room', `sealed: no place ${room.sealed.place}`); for (const s of room.sealed.surfaces ?? []) if (!entities.has(s)) err('room', `sealed: no surface ${s}`); if (room.sealed.time && !timeIds.has(room.sealed.time)) err('room', `sealed: no time ${room.sealed.time}`); }
+    for (const c of room.categories ?? []) {
+        if (!c.label || !qById.has(c.q)) err('room', `category ${c.id}: needs a label and a question`);
+        for (const f of list(c.on)) if (!factById.has(f)) err('room', `category ${c.id}: on: no fact ${f}`);
+        for (const m of c.members ?? []) { if (!m.value || !m.text || !m.traits) err('room', `category ${c.id}: a member needs value, text and traits`); if (m.traits?.size && !S.includes(m.traits.size)) err('room', `category ${c.id}: ${m.value}: size ${m.traits.size}`); }
+        if ((c.members ?? []).length < 3) err('room', `category ${c.id}: distractors: at least three members`);
+    }
+    for (const r of room.requirements ?? []) { if (!r.label || !r.trait) err('room', `requirement ${r.id}: needs a label and a trait`); for (const f of list(r.from)) if (!factById.has(f)) err('room', `requirement ${r.id}: from: no fact ${f}`); }
+}
+for (const f of facts) {
+    if (f.attr === 'closed_to' || f.attr === 'passes' || f.attr === 'passed') { const v = f.attr === 'passed' ? f.passes : f.value; if (!['person', 'small', 'air'].includes(v)) err(f.id, `${f.attr}: ${v} is not person, small or air`); }
+    if (f.attr === 'passed' && !(f.between?.length === 2 && f.between.every((x) => entities.has(x)))) err(f.id, 'passed: between is two entities');
+    if (['attached', 'reaches', 'near', 'fixed'].includes(f.attr) && !entities.has(f.value)) err(f.id, `${f.attr}: no entity ${f.value}`);
+}
 const strainsFile = path.join(dir, 'world', 'strains.json');
 const strains = fs.existsSync(strainsFile) ? read('world/strains.json').strains : [];
 for (const s of strains) {

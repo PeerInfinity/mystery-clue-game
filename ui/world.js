@@ -5,10 +5,13 @@
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
 import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
 import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
+import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute, whatElse, isListed, checkCrossing, knowledgeChain } from '../engine/arrangement.js';
+import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
 // the player's timeline is kept aside, only its layout and theme borrowed. `?autoplay=fast`: no pauses (the check).
@@ -32,6 +35,8 @@ const [w, times, facts, accounts, questions, text, mentions] = await Promise.all
 setCaseActions(await get(`${W}/actions.json`).catch(() => ({})));
 // Likely clashes (world/strains.json): optional.
 const strainList = await get(`${W}/strains.json`).then((x) => x.strains ?? []).catch(() => []);
+// The arrangement of a room and the general knowledge the player may bring in (world/room.json): optional.
+const room = await get(`${W}/room.json`).catch(() => null);
 const data = {
     entities: w.entities, moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
     accounts: accounts.accounts, questions: questions.questions, narrators: header.narrators,
@@ -110,7 +115,7 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [] };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
@@ -118,15 +123,20 @@ else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); f
 state.sel = null;
 state.note = null;
 if (!Array.isArray(state.held)) state.held = [];
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const freshRoom = () => ({ ways: {}, got: [], route: [], asked: [] });
+state.room = { ...freshRoom(), ...(state.room ?? {}) };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
-const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held })].slice(-50); };
+const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
 const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
 function cycleMark(qid, pick) {
     remember();
     const m = { ...(state.marks[qid] ?? {}) };
-    const next = MARK_NEXT[m[pick]];
+    let next = MARK_NEXT[m[pick]];
+    // A candidate of general knowledge can be crossed out only for something on the timeline it fails.
+    const refused = next === 'crossed' ? crossingRefused(qid, pick) : null;
+    if (refused) { next = undefined; roomNote = refused; }
     if (next) m[pick] = next; else delete m[pick];
     state.marks = { ...state.marks, [qid]: m };
     save(); render();
@@ -180,7 +190,7 @@ function questionOptions(q) {
     // An idea that is itself a person, animal or place goes in among all the others met so far, not on its own.
     const kinds = answerKinds(q, kindOf);
     const isKind = (v) => kinds.includes(kindOf(v));
-    const listed = q.possibilities.filter((p) => p.available <= state.para);
+    const listed = q.possibilities.filter((p) => isListed(p, state.para, new Set(state.room.asked)));
     const out = listed.filter((p) => p.via !== 'indirect' || !isKind(p.value)).map((p) => ({ value: p.value, proposed: p.via !== 'indirect', group: OTHER_IDEAS }));
     if (!kinds.length) return out;
     const met = data.entities.filter((e) => isKind(e.id) && e.id !== q.entry?.of && !out.some((o) => o.value === e.id)
@@ -213,6 +223,8 @@ function stepText(x) {
 }
 /** A fact as a short sentence. */
 function phrase(f) {
+    if (f.attr === 'opening') return `A way between ${ent(f.sides[0])} and ${ent(f.sides[1])}, not yet found`;
+    if (f.attr === 'route') return `A route: ${f.value.map(ent).join(' → ')}`;
     const E = f.of === '?' ? 'Someone' : ent(f.of);
     // Told early in brief (`given_at`): until its own paragraph, only the brief words that told it.
     if (f.given_quote && f.given_at != null && f.given_at <= state.para && state.para < f.para) return `${E}: <span class="said">“${esc(f.given_quote)}”</span>`;
@@ -238,6 +250,13 @@ function phrase(f) {
             return `${x ? stepText(x) : E} <b>in order that</b> ${f.serves ? phrase(f.serves) : esc(f.value)}${cond}`;
         }
         case 'name': return `${E} is called ${v}`;
+        case 'closed_to': return `${E} closed to ${esc(SIZE_WORD[f.value] ?? f.value)}${d}`;
+        case 'passes': return `${E} lets ${esc(SIZE_WORD[f.value] ?? f.value)} through${d}`;
+        case 'passed': return `${E} crossed from ${ent(f.between[0])} to ${ent(f.between[1])}${d}`;
+        case 'attached': return `${E} fastened to ${v}${d}`;
+        case 'reaches': return `${E} reaches ${v}${d}`;
+        case 'near': return `${E} beside ${v}${d}`;
+        case 'fixed': return `${E} fixed to ${v}${d}`;
         case 'says': return `${E}${f.to ? ` to ${ent(f.to)}` : ''}: <span class="said">${v}</span>`;
         case 'believes': return `${E} believes ${v}`;
         case 'knows': return `${E} knows ${v}`;
@@ -259,6 +278,7 @@ function phrase(f) {
         default: return f.of === 'weather' ? `The weather: ${v}` : `${E}: ${v}${d}`;
     }
 }
+const SIZE_WORD = { person: 'a person', small: 'anything small', air: 'even air' };
 const TIME_ATTRS = new Set(['weekday', 'hour', 'time']);
 const isTimeEvent = (f) => TIME_ATTRS.has(f.attr) || ['calendar', 'clock', 'weather'].includes(f.of);
 
@@ -538,6 +558,12 @@ let current = [];
 // --- The layout: three columns side by side, or panels with tabs (two, or one; a phone always one). The page's parts
 // (index.html) are moved where the layout puts them, the rest parked; each is drawn by render() wherever it is.
 const PARTS = [['story', 'Story'], ['timeline', 'Timeline'], ['questions', 'Questions'], ['clashes', 'Contradictions'], ['cards', 'Cards'], ['detail', 'Detail']];
+if (room) {
+    PARTS.splice(2, 0, ['room', 'Room']);
+    const el = document.createElement('section');
+    el.className = 'part room-part'; el.dataset.part = 'room'; el.setAttribute('aria-label', 'The room'); el.innerHTML = '<div id="room"></div>';
+    document.getElementById('parked').appendChild(el);
+}
 if (!Array.isArray(state.panels) || state.panels.length !== 2 || state.panels.some((t) => !PARTS.some(([x]) => x === t)) || state.panels[0] === state.panels[1]) state.panels = ['story', 'timeline'];
 if (!['three', 'two', 'one'].includes(state.layout)) state.layout = 'three';
 const partEl = (id) => document.querySelector(`.part[data-part="${id}"]`);
@@ -557,7 +583,7 @@ function mountLayout() {
     if (L === 'three') {
         if (!three.children.length) three.innerHTML = '<div class="col-story"></div><div class="col-main"></div><div class="col-detail"></div>';
         put(partEl('story'), three.children[0]);
-        for (const id of ['clashes', 'questions', 'cards', 'timeline']) put(partEl(id), three.children[1]);
+        for (const id of [...(room ? ['room'] : []), 'clashes', 'questions', 'cards', 'timeline']) put(partEl(id), three.children[1]);
         put(partEl('detail'), three.children[2]);
         return;
     }
@@ -610,6 +636,62 @@ function applyTheme() {
 }
 phone.addEventListener('change', () => render());
 
+// --- The room (world/room.json; engine/arrangement.js).
+let roomNote = null;      // why the page last refused a mark on the room panel, shown at its next drawing
+let roomKnown = [];       // what the panel reasons from at the last drawing
+const roomTime = () => (room.sealed?.time ? { at: room.sealed.time } : undefined);
+const roomCtx = { at: (ft, t) => { const c = coverOf(ft); return !c || overlaps(data.order, c, coverOf({ at: t })); } };
+const paraOf = (id) => givenAt(factById.get(id)) ?? 0;
+/** What the player's room moves put on the timeline. */
+function roomEntries(told) {
+    const stamp = (e) => ({ ...e, time: roomTime(), given_at: Math.max(0, ...e.reasoned.premises.map(paraOf)) });
+    const got = state.room.got.map((id) => told.find((f) => f.id === id)).filter(Boolean).map((f) => stamp(pointPassage(f, [], room.openings).entry));
+    const r = checkRoute(state.room.route, [...told, ...got], room.openings);
+    return [...got, ...(r.ok ? [stamp(r.entry)] : [])];
+}
+/** The room panel's view of the timeline. A mark or a link that no longer holds is simply not drawn. */
+function roomView(told) {
+    const entries = reasoned.filter((f) => f.attr === 'opening');
+    const known = [...told, ...entries];
+    roomKnown = known;
+    const rows = waysIn(room.sealed, known, room.openings, roomCtx);
+    const marks = Object.fromEntries(Object.entries(state.room.ways).filter(([k, m]) => { const [row, size] = k.split('|'); return checkWayMark(rows, row, size, m).ok; }));
+    const shownRows = rows.map((r) => ({ ...r, evidence: Object.keys(marks).some((k) => k.startsWith(`${r.id}|`)) ? [...new Set(Object.entries(r.cells).flatMap(([, c]) => c.by).map((f) => [f.detail, f.para != null ? `¶${f.para}` : null].filter(Boolean).join(', ')))].filter(Boolean).join('; ') : '' }));
+    const gotOffers = known.filter((f) => f.attr === 'passed' && !state.room.got.includes(f.id) && !foundBy({ sides: f.between, passes: f.passes }, known, room.openings));
+    // The route as far as it still holds, and the links on from its end.
+    const links = linksOf(known, room.openings);
+    let nodes = state.room.route;
+    let r = checkRoute(nodes, known, room.openings);
+    if (!r.ok && r.failAt != null) { nodes = nodes.slice(0, r.failAt + 1); r = checkRoute(nodes, known, room.openings); }
+    const end = nodes.at(-1);
+    const isPlace = (id) => entityById.get(id)?.kind === 'place';
+    const next = end ? [...new Set(links.flatMap((l) => (l.a === end ? [l.b] : l.b === end ? [l.a] : [])))].filter((n) => !nodes.includes(n))
+        : [...new Set(links.flatMap((l) => [l.a, l.b]))].filter(isPlace);
+    next.sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
+    const routeReqs = (r.requirements ?? []).map((q) => ({ ...q, label: q.trait === 'size' ? `small enough for ${lowerFirst(nameOf(q.by))}` : `able to travel along ${lowerFirst(nameOf(q.value))}`, source: 'from your route' }));
+    const toldReqs = (room.requirements ?? []).filter((q) => list(q.from).some((id) => known.some((f) => f.id === id))).map((q) => ({ ...q, source: `¶${Math.min(...list(q.from).map(paraOf))}` }));
+    const reqs = [...routeReqs, ...toldReqs];
+    roomReqs = reqs;
+    const cats = room.categories ?? [];
+    const asked = new Set(state.room.asked);
+    const level = (c) => levelOf([knowledgeChain(c.id)], state.trust);
+    return {
+        sealed: room.sealed, note: roomNote, rows: shownRows, marks, gotOffers, reqs, levels: LEVELS.slice(0, -1),
+        route: { nodes, next, steady: r.steady ?? [] },
+        asks: cats.filter((c) => !asked.has(c.id) && whatElse(c, known).members),
+        asked: cats.filter((c) => asked.has(c.id) && whatElse(c, known).members).map((c) => ({ ...c, level: level(c), distrusted: level(c) === 0 })),
+        markOf: (c, m) => state.marks[c.q]?.[m.value],
+    };
+}
+let roomReqs = [];
+/** Why a candidate may not be crossed out, or null: only for a candidate of general knowledge. */
+function crossingRefused(qid, pick) {
+    const m = (room?.categories ?? []).filter((c) => c.q === qid).flatMap((c) => c.members).find((x) => x.value === pick);
+    return m ? checkCrossing(m, roomReqs).why ?? null : null;
+}
+const lowerFirst = (t) => t.replace(/^(A|An|The) /, (m) => m.toLowerCase());
+const roomChange = (fn) => { remember(); state.room = fn(state.room); save(); render(); };
+
 let shownPara = null;
 function render() {
     mountLayout();
@@ -622,6 +704,7 @@ function render() {
     placeCtx = engineCtx(told);
     const lapses = [], held = [];
     reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id) ?? hypAction(id) ?? presupposed(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held });
+    if (room) reasoned = [...reasoned, ...roomEntries(told)];
     reasonedById = new Map(reasoned.map((f) => [f.id, f]));
     // An aim still circled but not yet told (read back) is not a lapse: the link returns on reading on.
     lapsed = lapses.filter((l) => !(l.gone && /^(hyp|pre):/.test(l.gone) && !hypShown(l.gone)));
@@ -660,6 +743,7 @@ function render() {
     document.getElementById('questions').innerHTML = questionsPanel(clashing);
     const cards = cardsPanel();
     document.getElementById('cards').innerHTML = cards.html;
+    if (room) { document.getElementById('room').innerHTML = roomHtml(roomView(told), { esc, ent, phrase, nameOf }); roomNote = null; }
     const ol = document.querySelector('#q-box ol');
     if (ol) ol.scrollTop = qScroll;
     document.getElementById('view').value = state.view;
@@ -1055,7 +1139,9 @@ function movesHtml(f) {
     return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${lapsedHtml(f)}${planHtml(f)}`;
 }
 function reasonedDetail(f) {
-    const how = f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
+    const how = f.reasoned.move === 'g' ? 'Something crossed between two places, so there is a way between them.'
+        : f.reasoned.move === 'r' ? 'Each link of the route is on the timeline.'
+        : f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
         : f.reasoned.move === 'c' ? 'What it brings about meets the goal of an intention, or a need of a step toward it.'
         : f.reasoned.role === 'requires' ? 'What an action needs just before it.' : 'What an action does.';
     const premises = f.reasoned.premises.map((id) => factOf(id)).filter(Boolean);
@@ -1376,7 +1462,7 @@ document.addEventListener('toggle', (e) => {
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));
-    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; } else state.trust = h;
+    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); } else state.trust = h;
     state.history = state.history.slice(0, -1);
     save(); render();
 });
@@ -1433,6 +1519,10 @@ document.addEventListener('click', (e) => {
     if (wd) {
         // Withdraw the move that gave this entry; what was reasoned from it goes with it.
         const f = reasonedById.get(wd.dataset.withdraw);
+        if (f.reasoned.move === 'g' || f.reasoned.move === 'r') {
+            roomChange((x) => (f.reasoned.move === 'g' ? { ...x, got: x.got.filter((id) => id !== f.reasoned.premises[0]) } : { ...x, route: [] }));
+            return;
+        }
         const m = f.reasoned.move === 'a' ? (x) => x.move === 'a' && x.a === f.reasoned.premises[0] && x.b === f.reasoned.premises[1] || x.move === 'a' && x.b === f.reasoned.premises[0] && x.a === f.reasoned.premises[1]
             : f.reasoned.move === 'c' ? (x) => x.move === 'c' && x.of === f.reasoned.premises[0] && x.for === f.reasoned.premises[1]
             : (x) => x.move === 'b' && x.of === f.reasoned.premises[0];
@@ -1444,6 +1534,25 @@ document.addEventListener('click', (e) => {
     }
     const mo = e.target.closest('[data-more-q]');
     if (mo) { const id = mo.dataset.moreQ; if (moreOpen.has(id)) moreOpen.delete(id); else moreOpen.add(id); render(); return; }
+    if (room) {
+        const wa = e.target.closest('[data-way]');
+        if (wa) {
+            const [row, size, mark] = wa.dataset.way.split('|');
+            const r = checkWayMark(waysIn(room.sealed, roomKnown, room.openings, roomCtx), row, size, mark);
+            if (r.why) { roomNote = r.why; render(); return; }
+            roomChange((x) => ({ ...x, ways: { ...x.ways, [`${row}|${size}`]: mark } }));
+            return;
+        }
+        const wc = e.target.closest('[data-way-clear]');
+        if (wc) { roomChange((x) => { const ways = { ...x.ways }; delete ways[wc.dataset.wayClear]; return { ...x, ways }; }); return; }
+        const go = e.target.closest('[data-got]');
+        if (go) { roomChange((x) => ({ ...x, got: [...x.got, go.dataset.got] })); return; }
+        const ra = e.target.closest('[data-route-add]');
+        if (ra) { roomChange((x) => ({ ...x, route: [...x.route, ra.dataset.routeAdd] })); return; }
+        if (e.target.closest('[data-route-back]')) { roomChange((x) => ({ ...x, route: x.route.slice(0, -1) })); return; }
+        const as = e.target.closest('[data-ask]');
+        if (as) { roomChange((x) => ({ ...x, asked: [...x.asked, as.dataset.ask] })); return; }
+    }
     const m = e.target.closest('[data-mark-q]');
     if (m) {
         // The page is drawn afresh, and a contradiction box may open or close above: keep the clicked chip under the

@@ -1,0 +1,93 @@
+{
+ "sealed": {
+  "place": "strongroom",
+  "surfaces": [
+   "walls"
+  ],
+  "time": "t.night",
+  "question": "How could anything have reached Arkwright?",
+  "unknown": "What came along it?"
+ },
+ "openings": {
+  "door": {
+   "kind": "door",
+   "sides": [
+    "strongroom",
+    "office"
+   ]
+  },
+  "chimney": {
+   "kind": "chimney",
+   "sides": [
+    "strongroom",
+    "office"
+   ]
+  },
+  "grating": {
+   "kind": "vent",
+   "sides": [
+    "strongroom",
+    "office"
+   ]
+  }
+ },
+ "requirements": [
+  {
+   "id": "r.bite",
+   "label": "leaves a bite",
+   "trait": "bites",
+   "value": true,
+   "from": [
+    "f.dead"
+   ]
+  },
+  {
+   "id": "r.kept",
+   "label": "kept by someone",
+   "trait": "kept",
+   "filter": false,
+   "from": [
+    "f.animals"
+   ]
+  }
+ ],
+ "categories": [
+  {
+   "id": "c.colonial",
+   "label": "Colonial animals",
+   "on": [
+    "f.animals"
+   ],
+   "q": "q.what_came",
+   "members": [
+    {
+     "value": "a ferret",
+     "text": "small, climbs well, bites",
+     "traits": {
+      "size": "small",
+      "travels": true,
+      "bites": true
+     }
+    },
+    {
+     "value": "a mastiff",
+     "text": "a large dog, as big as a man",
+     "traits": {
+      "size": "person",
+      "travels": false,
+      "bites": true
+     }
+    },
+    {
+     "value": "a marmoset",
+     "text": "small, climbs well, does not bite",
+     "traits": {
+      "size": "small",
+      "travels": true,
+      "bites": false
+     }
+    }
+   ]
+  }
+ ]
+}
