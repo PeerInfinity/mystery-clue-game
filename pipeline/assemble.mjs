@@ -44,6 +44,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
     const d = { entities: [], mentions: {}, moves: [], joins: {}, times: [], facts: [], accounts: [], questions: [], strains: [], path: [], actions: [], ramifies: [], thoughts: [], cards: [], header: null, scenes: [], sealed: null, openings: {}, observations: [] };
     const byId = (arr, x) => { const i = arr.findIndex((y) => y.id === x.id); if (i >= 0) arr[i] = { ...arr[i], ...x }; else arr.push(x); };
     const classes = new Map();   // step 6b's sorting of the time points
+    const revived = new Set();   // points a later step wrote again: it needs them, so they stay
     for (const x of all) {
         if (x._n === 2) { d.header = strip(x); continue; }
         if (x._n === 3) { d.scenes.push(strip(x)); continue; }
@@ -54,7 +55,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
             case 'mentions': d.mentions[y.id] = [...new Set([...(d.mentions[y.id] ?? []).map(JSON.stringify), ...list(y.phrases).map(JSON.stringify)])].map((s) => JSON.parse(s)); break;
             case 'moves': if (!d.moves.includes(y.id)) d.moves.push(y.id); break;
             case 'joins': d.joins[y.door] = y.sides; break;
-            case 'times': byId(d.times, y); break;
+            case 'times': byId(d.times, y); if (x._n > 6.2) revived.add(y.id); break;
             case 'facts': byId(d.facts, y); break;
             case 'accounts': byId(d.accounts, y); break;
             case 'account_add': { const a = d.accounts.find((z) => z.id === y.id); if (a) a.facts = [...new Set([...(a.facts ?? []), ...list(y.facts)])]; break; }
@@ -77,7 +78,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
             default: break;
         }
     }
-    filterTimes(d, classes);
+    filterTimes(d, classes, revived);
     return d;
 }
 
@@ -86,8 +87,8 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
  * after what it was after, so the order the text gave survives. The other classes are not copied onto the points: the
  * data must not say which moments the solution depends on.
  */
-function filterTimes(d, classes) {
-    const gone = new Map(d.times.filter((t) => classes.get(t.id) === 'business').map((t) => [t.id, t]));
+function filterTimes(d, classes, revived = new Set()) {
+    const gone = new Map(d.times.filter((t) => classes.get(t.id) === 'business' && !revived.has(t.id)).map((t) => [t.id, t]));
     if (!gone.size) return;
     const resolve = (id, seen = new Set()) => {
         if (!gone.has(id)) return [id];
