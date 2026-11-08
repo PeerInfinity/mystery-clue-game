@@ -49,7 +49,7 @@ of its own. It may be removed later.
 
 ```
 node scripts/serve.js            # http://localhost:8321/ (the earlier game: http://localhost:8321/v1/)
-npm test                         # engine tests and full case validation (about 7–8 minutes)
+npm test                         # engine tests and full case validation (under a second)
 ```
 
 No build step and no runtime dependencies (`npm install` fetches only the schema checker the tests use).

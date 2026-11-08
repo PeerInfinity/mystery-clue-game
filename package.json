@@ -4,7 +4,8 @@
   "type": "module",
   "description": "A deduction game built from fair-play mystery stories: collect clues, connect them, eliminate what does not fit.",
   "scripts": {
-    "test": "node --test",
+    "test": "node --test \"engine/**/*.test.js\" \"scripts/**/*.test.js\"",
+    "v1:test": "cd v1 && node --test",
     "validate-world": "node scripts/validate-world.js cases/silver-blaze",
     "page-checks": "node scripts/page-checks.mjs",
     "build-site": "node scripts/build-site.js",

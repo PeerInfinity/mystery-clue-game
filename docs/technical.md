@@ -27,7 +27,7 @@ model as data" describes the files.
 The earlier game is kept at `v1/` with its own copy of everything it loads and runs (`v1/ui/`, `v1/engine/`,
 `v1/cases/`, `v1/scripts/`, `v1/checker/`, `v1/schema/`, `v1/reference/`), so the main tree owes it no
 compatibility. Its model, layout and commands are in `v1/docs/technical.md`, its case format in
-`v1/docs/case-format.md` (copies of these pages as they stood on 2026-11-06). Its tests run under `npm test`.
+`v1/docs/case-format.md` (copies of these pages as they stood on 2026-11-06). Its tests are manual only, not part of `npm test`: `npm run v1:test` (about 7–8 min).
 
 ## Layout
 
@@ -56,7 +56,7 @@ is the earlier game's, for its JSON Schema.
 | Task | Command |
 |---|---|
 | Serve the pages | `node scripts/serve.js` → http://localhost:8321/ (Watson's timeline; the earlier game: http://localhost:8321/v1/) |
-| All tests (the world model's and the earlier game's, about 7–8 min) | `npm test` |
+| All tests of the main tree (the world model's, under a second; the earlier game's are `npm run v1:test`, manual only, about 7–8 min) | `npm test` |
 | One test file | `node --test engine/world.test.js` (a directory argument does not work) |
 | Check the world model (`cases/silver-blaze/world/`), including that the true story has no contradiction, and print its counts and the contradictions a reader trusting every source meets | `npm run validate-world` |
 | Collect the live site into `_site/` (or a directory given) | `npm run build-site` |

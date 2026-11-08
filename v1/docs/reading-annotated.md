@@ -6,7 +6,7 @@ compared with the case format (that is the gap analysis, next).
 
 **Data:** the thoughts and background cards are mirrored, one per line, in `cases/silver-blaze/thoughts.json`
 (generated once from this document), which also maps each thought to the case cards that hold it.
-From now on the JSON is the data and this document the prose: change both together; `npm test` checks that the
+From now on the JSON is the data and this document the prose: change both together; `npm run v1:test` checks that the
 ids and tags agree, and `npm run validate-thoughts` checks the rest and writes `thoughts-report.md`.
 
 ## What this is

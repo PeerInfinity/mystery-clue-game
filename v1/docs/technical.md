@@ -2,7 +2,7 @@
 
 > **The earlier game's copy.** This page was copied here on 2026-11-06, when `v1/` got its own copy of everything
 > the earlier game uses. Paths in it are relative to `v1/` (`cases/silver-blaze/` is `v1/cases/silver-blaze/`), and
-> its commands run from `v1/` (`cd v1 && node scripts/…`; `npm test` from the root runs its tests too; the root's
+> its commands run from `v1/` (`cd v1 && node scripts/…`; `npm run v1:test` from the root runs its tests, manual only; the root's
 > `npm run v1:validate`, `v1:validate-thoughts`, `v1:reveal-log`, `v1:foreshadow-log`, `v1:clash-log`). What it
 > says of Watson's timeline is out of date: see `docs/technical.md` and `docs/case-format.md` at the root.
 
@@ -94,7 +94,7 @@ scripts need a local Chrome.
 | Task | Command |
 |---|---|
 | Serve the pages | `node scripts/serve.js` → http://localhost:8321/ (Watson's timeline; the earlier game: http://localhost:8321/v1/) |
-| All tests (engine and full case validation, about 7–8 min) | `npm test` |
+| All tests (engine and full case validation, about 7–8 min; manual only) | `npm run v1:test` from the root |
 | One test file | `node --test engine/reasoning.test.js` (a directory argument does not work) |
 | Validate the case and rewrite `cases/silver-blaze/report.md` | `npm run validate` |
 | Check the annotated reading and rewrite `cases/silver-blaze/thoughts-report.md` | `npm run validate-thoughts` |

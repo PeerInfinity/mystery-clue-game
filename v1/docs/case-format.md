@@ -2,7 +2,7 @@
 
 > **The earlier game's copy.** This page was copied here on 2026-11-06, when `v1/` got its own copy of everything
 > the earlier game uses. Paths in it are relative to `v1/` (`cases/silver-blaze/` is `v1/cases/silver-blaze/`), and
-> its commands run from `v1/` (`cd v1 && node scripts/…`; `npm test` from the root runs its tests too; the root's
+> its commands run from `v1/` (`cd v1 && node scripts/…`; `npm run v1:test` from the root runs its tests, manual only; the root's
 > `npm run v1:validate`, `v1:validate-thoughts`, `v1:reveal-log`, `v1:foreshadow-log`, `v1:clash-log`). What it
 > says of Watson's timeline is out of date: see `docs/technical.md` and `docs/case-format.md` at the root.
 

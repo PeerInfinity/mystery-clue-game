@@ -25,7 +25,8 @@ See `docs/technical.md`. The ones used most:
 
 | Task | Command |
 |---|---|
-| All tests (about 7–8 min; run it in the background) | `npm test` |
+| All tests of the main tree (under a second) | `npm test` |
+| The earlier game's tests (manual only, about 7–8 min; run it in the background) | `npm run v1:test` |
 | One test file | `node --test engine/world.test.js` (a directory argument does not work) |
 | Serve the pages | `node scripts/serve.js` → http://localhost:8321/ (the earlier game: `/v1/`) |
 | Validate the case (the world model) | `npm run validate-world` |
