@@ -1497,8 +1497,9 @@ render();
 // The pipeline's route check (scripts/route-check.mjs): every link "What is this for?" the page would offer now and
 // the engine accepts, made one after another until nothing new fits (a link made can make another fit: a need of a
 // step already linked), and the intentions "What would this need?" is offered on. It changes the reasoning: for a
-// check's own page, never a player's.
-window.__routes = () => {
+// check's own page, never a player's. `ids`: hypothesis or fact ids whose links that do not fit are reported with the
+// engine's reason (`misses`), for the fix of a missing route.
+window.__routes = (ids = []) => {
     const made = [];
     const hyps = () => baseQuestions.filter(qListed).flatMap((q) => [presupposed(`pre:${q.id}`), ...q.possibilities.flatMap((p) => [hypAction(hypothesisKey(q.id, p.value)), hypIntention(hypothesisKey(q.id, p.value))])]).filter(Boolean);
     const sources = () => [...onTimeline(), ...hyps()].filter((f) => (list(f.act).length || f.goal) && f.of !== '?' && !f.reasoned && !(f.hyp && qById.get(f.hyp.q)?.end));
@@ -1514,7 +1515,47 @@ window.__routes = () => {
         render();
     }
     const plans = sources().filter((f) => f.goal || f.plan).filter((f) => planOf(f)).map((f) => f.id);
-    return { para: state.para, links: made, plans };
+    const misses = [];
+    const want = new Set(ids);
+    if (want.size) for (const x of sources()) for (const t of intentionsOf(x.of, x.id)) {
+        if (!want.has(x.id) && !want.has(t.id)) continue;
+        if (state.reasoning.some((m) => m.move === 'c' && m.of === x.id && m.for === t.id)) continue;
+        const linked = linkedTo(t.id).map((l) => factOf(l.reasoned.premises[0])).filter((y) => y && list(y.act).length);
+        const r = checkFit(x, t, linked, nameOf, { ...placeCtx, order: data.order, entries: onTimeline() });
+        misses.push({ of: x.id, for: t.id, ofText: (list(x.act).length ? stepText(x) : phrase(x)).replace(/<[^>]+>/g, ''), forText: stepText(t).replace(/<[^>]+>/g, ''), why: r.why });
+    }
+    const present = [...new Set(ids)].map((id) => ({ id, on: !!sources().find((f) => f.id === id) }));
+    // Stage 2: "It changed" on two typed states (the pairs the page offers), "What stopped it?" on a plan's intended
+    // step (the known actions that stop it), "Compare" between two plans of one agent. None changes the reasoning.
+    const on = onTimeline();
+    const typed = on.filter((f) => isTypedState(f) && !f.reasoned);
+    const changes = [];
+    for (let i = 0; i < typed.length; i++) for (let j = i + 1; j < typed.length; j++) {
+        const [x, y] = [typed[i], typed[j]];
+        if (x.of !== y.of || x.attr !== y.attr || x.value === y.value) continue;
+        const r = pointChange(data.order, x, y, on, nameOf);
+        if (r.why) continue;
+        changes.push({ a: x.id, b: y.id, text: (r.entry.aimChange ? r.entry.value : changeText(r.entry)).replace(/<[^>]+>/g, ''), q: questionOfChange(r.entry)?.id ?? null, aim: r.entry.aimChange ? r.entry.of : null });
+    }
+    const stopsFound = [], compares = [];
+    for (const f of [...new Set([...sources().filter((g) => g.goal || g.plan), ...on.filter((g) => g.plan)])]) {
+        const plan = planOf(f);
+        if (!plan) continue;
+        const r = checkPlan(plan, on, nameOf, { ...placeCtx, order: data.order, entries: on });
+        const step = r.steps.map((x) => x.step).find((x) => x.intended);
+        if (step) {
+            const own = new Set(r.steps.map((x) => x.step.id));
+            for (const x of knownActions().filter((y) => !own.has(y.id) && !(plan.steps ?? []).some((z) => z.id === y.id))) {
+                const st = stops(x, step, nameOf, { ...placeCtx, order: data.order });
+                if (st.stops) stopsFound.push({ on: f.id, by: x.id, key: `${f.id}|${x.id}`, text: `${stepText(x)} stops ${stepText(step)}`.replace(/<[^>]+>/g, '') });
+            }
+        }
+        for (const x of on.filter((y) => y.id !== f.id && y.plan && placeCtx.same(y.plan.agent, plan.agent))) {
+            const c = comparePlans(plan, { id: x.id, ...x.plan }, on, nameOf, { ...placeCtx, order: data.order, entries: on });
+            compares.push({ on: f.id, with: x.id, key: `${f.id}|${x.id}`, open: [c.a.open.length, c.b.open.length], only: [c.a.only.length, c.b.only.length] });
+        }
+    }
+    return { para: state.para, links: made, plans, misses, present, changes, stops: stopsFound, compares };
 };
 const hintApi = {
     para: () => state.para, last: LAST, wait: () => state.hintWait,

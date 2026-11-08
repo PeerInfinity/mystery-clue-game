@@ -1,9 +1,8 @@
-Corrected patch lines, each now in the `{"file": "patch", "id", "set": {...}}` form:
+Both `presupposes` patches fail because the two questions' entries have `of: "?"`. Setting the entry to `straker` would give away who led the horse out. So I remove both patches and mark the questions as reached by another route.
 
 ```jsonl
-{"file":"patch","id":"q.why_led_out","set":{"presupposes":{"act":"lead_out","thing":"silver_blaze","via":"stable_door"}}}
-{"file":"patch","id":"q.why_taken","set":{"presupposes":{"act":"lead_out","thing":"silver_blaze","via":"stable_door"}}}
-{"file":"patch","id":"f.straker_practises","set":{"act":"practise_nick"}}
-{"file":"patch","id":"f.inf_sheep_by_household","set":{"act":"practise_nick"}}
-{"file":"patch","id":"q.who_lamed_sheep","set":{"entry":{"of":"?","attr":"action","act":"practise_nick","thing":"lame_sheep","time":{"before":"t.carriage_sheep"}}}}
+{"file":"patch","id":"q.why_led_out","delete":true}
+{"file":"patch","id":"q.why_taken","delete":true}
+{"file":"noroute","q":"q.why_led_out","why":"The question asks why an unknown person led the horse out, so its entry has no agent to presuppose an action of. The reader gets there through Straker's aim. With q.who_took circled as straker, his leading-out is linked to his intention in q.straker_reason or q.knife, which is to lame the horse with the nick. That link fits because the nick needs the horse outside the stable door. The story gives that need: 'So spirited a creature would have certainly roused the soundest of sleepers… It was absolutely necessary to do it in the open air' (¶223). That linked need is exactly this question's answer."}
+{"file":"noroute","q":"q.why_taken","why":"The question asks who made away with the favourite and why, so its entry has no agent. The reader reaches the answer through other questions. They circle q.who_took=straker and link his leading-out to the laming aim of q.straker_reason, using the nick's need that the horse be out of the stable (¶223). Separately, the horse's tracks show it went off alone from the hollow (¶120: 'The horse was alone before'). Together these give 'led out to be harmed and got loose'. The story then states it at ¶223 and ¶231 ('it bolted')."}
 ```

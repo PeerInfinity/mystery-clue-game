@@ -64,8 +64,9 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 12 | The true path | everything (with the leak fixes) | `path.json` | model writes the moves, a script dates each right answer's circle at its earliest; `scripts/path-check.mjs` plays it through the real page (`?case=`). Then `CASE=<the run's case> npm run page-checks`: the autoplay in every layout and the hints, from a fresh page and with mistakes |
 
 The reasoning moves, in stages (the user, 2026-11-07: all kinds eventually, in more than one task): stage 1,
-built, gives "What is this for?" and plan checks (steps 10b, 10c, and step 12 writing those moves); stage 2 will add
-"It changed", "What stopped it?" and "Compare two plans" (states over time, disabling effects, rival plans).
+built, gives "What is this for?" and plan checks (steps 10b, 10c, and step 12 writing those moves); stage 2, built,
+adds "It changed", "What stopped it?" and "Compare two plans" (states over time, disabling effects, rival plans).
+"Does this plan account for this?" is not yet among the candidates.
 
 Step 11 comes before the true path so that the path is played on the data as it will be published. `run.mjs
 --recheck` checks a step's recorded output again (after a fix to its checks), calling the model only to repair.
@@ -308,3 +309,26 @@ story needs too is a candidate for the generic table.
   move by what it links: two such slips collapsed several lines into one); a prompt must carry the action table it
   asks the model to use; a patch's target is checked (`patchShape`); the route check prefers the answer itself to an
   also-right (Hunter also had a key, but the reasoning runs through Straker's).
+
+### Reasoning moves, stage 2: "It changed", "What stopped it?", "Compare two plans"
+
+- **The route check** also lists, just before each gated question's give-away, the changes the page lets the reader
+  point out (two typed states of one thing: a door, a walker's `heading`), the known actions that stop a plan's
+  intended last step (an effect leaving its agent unable to act), and the pairs of plans of one agent to compare. A
+  change counts as a route for the question whose entry it is (who opened the door) or, for a change of heading,
+  for the question of that walker's aim; a stop for the questions of its two sides; a comparison names no answer and
+  is never a route by itself. On the hand-made Silver Blaze it finds the true path's change (the man's turn back),
+  stop (the horse's kick) and comparison (the police theory against "why not in the stable?"): routes for 10 of 27.
+- **Step 10b** asks for changing states, disabling effects and plans the story only proposes; **step 12** gets the
+  changes, stops and comparisons as candidates and dates each at the latest of its two sides (marks, then changes
+  and links, then plan checks, then the checks made on a plan).
+- **Run 2 with them** (stage 1's outputs kept in `.10b-stage1/`, `.10c-stage1/`, `.12-path-stage1/`): 10b $3.86
+  (the man's two headings, two plans); 10c $5.65, routes 9 of 37, now from all the kinds (the turn back and the
+  door's opening by a change, who struck the blow by three stops; who took the horse lost its link and has a
+  noroute reason instead). Step 12's first call came back empty ("stopped partway"; kept in
+  `.12-path-stage2-refused/`): its repair rewrote the whole path and dropped most wrong turns (4 of 17 crosses). An
+  empty answer is now a failure of its own; the step rerun ($2.42, the prompt cached): 120 moves with 8 links, 4 plan
+  checks, the change, 2 stops and the comparison of the police's two theories (the hand-made path: 9, 3, 1, 1, 1).
+  Every page check passes on its case.
+- **Lesson:** a repair that has to write a whole answer loses what the first prompt asked for beyond the errors (the
+  wrong turns); an empty first answer is better rerun than repaired.

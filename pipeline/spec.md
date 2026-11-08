@@ -290,7 +290,21 @@ like any action. A question about why an action was done that the story tells (`
 
 **Plans.** A claim that tells how something was done carries `plan`: `{"agent", "goal", "steps": [{"act", …,
 "time"}]}` (the constable's theory: the pedlar came over the wall, opened the desk and took the purse), so that the
-reader can ask what it would need.
+reader can ask what it would need. A plan the story only proposes, as a supposition ("if he wanted the purse, why
+not take it on Monday?"), is a claim with a `plan` and no `asserts`: the reader can compare it with another plan of
+the same agent ("Compare").
+
+**Changes and what stopped a plan.** A state that changes is written as two states with their times, so the reader
+can point out the change ("It changed"): a door (`door`: open, shut, locked) or where someone is making for
+(`{"attr": "heading", "value": <place>}`, from tracks or a sighting; two headings of one walker give a change of his
+aim). An action whose effect leaves someone unable to act (`condition`: `struck down`, `drugged`, `dead`; the
+generic `strike` and `drug` have it) can stop an aim's implied last step: a who-question with such an action as its
+entry (who struck the blow) lets the reader check whether a circled answer stopped the plan ("What stopped it?").
+
+```json
+{"id": "f.tracks_to_mill", "of": "the_pedlar", "attr": "heading", "value": "mill_house", "time": {"at": "t.mon_dusk"}, "para": 30, "quote": "his tracks led toward the mill"},
+{"id": "q.who_felled", "label": "Who knocked the pedlar down?", "entry": {"of": "?", "attr": "action", "act": "strike", "to": "the_pedlar", "where": "yard", "time": {"at": "t.mon_midnight"}}, …}
+```
 
 ```json
 {"id": "q.who_took", "label": "Who took the purse?", "entry": {"of": "?", "attr": "action", "act": ["unlock", "take"], "thing": "desk", "item": "purse", "time": {"after": "t.mon_ten", "before": "t.tue_breakfast"}}, …},
@@ -326,5 +340,10 @@ one circle, so the path circles every answered question's answer before its give
 - `{"do": "c", "of", "for"}`: "What is this for?": the action or intention `of` serves the intention `for` (a fact
   id, or a circled answer `hyp:<question>=<pick>`, or `pre:<question>` for the action a why-question presupposes).
   `{"do": "plan", "of", "on"}`: "What would this need?", opened on an intention.
+- `{"do": "a", "a", "b"}`: "It changed": two states of one thing differ (a door shut, then open; a walker making for
+  one place, then another), so something changed it between them. `{"do": "stop", "on", "key": "<intention>|<action>"}`:
+  "What stopped it?", on an intention whose plan's last step was never done: that action left its agent unable to
+  act. `{"do": "compare", "on", "key": "<plan>|<other plan>"}`: two plans of one agent compared. `on` opens what the
+  move is made on: a fact id, or `q:<question>` for a circled answer.
 - `at`: the paragraph of the move; `why`: the reader's reason, in plain words, as the reader would say it then;
   `for_q`: the questions the move serves.

@@ -1,5 +1,6 @@
-The check failed because the "why was the horse led out" question has no named agent, so nothing can be presupposed for it. Its entry leaves the agent open (`of: "?"`), so the presupposed leading-out cannot be matched to a typed action of that agent. Naming Straker there would give away the answer at ¶57, so the fix is to drop the patch instead.
+The two `presupposes` patches are removed. Both questions ask "?" as the agent, so no typed action of the entry's entity exists to presuppose. Naming Straker as the agent would give away the answer to who took the horse.
 
 ```jsonl
+{"file":"patch","id":"q.why_taken","delete":true}
 {"file":"patch","id":"q.why_led_out","delete":true}
 ```

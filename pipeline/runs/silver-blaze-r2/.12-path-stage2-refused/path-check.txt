@@ -1,0 +1,117 @@
+ok ¶14 trust stmt:f.holmes_believed_found
+ok ¶24 circle q.stranger_lost = he came to the stables on purpose
+ok ¶24 trust stmt:f.stranger_says_lost
+ok ¶34 circle q.dog_silent = the dog made no noise
+ok ¶35 trust stmt:f.lads_hope
+ok ¶35 trust stmt:f.women_hope
+ok ¶36 circle q.who_drugged = the_stranger
+ok ¶39 circle q.stranger_who = simpson
+  ¶40 answered: Who was the stranger at the stable window?: Fitzroy Simpson (you circled Fitzroy Simpson: right) | Was the stranger really lost on the moor?: he came to the stables on purpose (you circled he came to the stables on purpose: right)
+ok ¶44 circle q.knife_blood = Straker's own
+ok ¶44 trust stmt:f.holmes_mark
+ok ¶46 circle q.who_opened = simpson
+ok ¶54 circle q.thigh_cut = his own knife, as he fell
+ok ¶54 trust stmt:f.watson_self_wound
+ok ¶54 trust stmt:f.holmes_probable
+ok ¶58 circle q.paper_packet = a ten-pound note
+ok ¶58 circle q.simpson_intent = only to get first-hand information
+ok ¶58 c f.stranger_asks_bayard → hyp:q.simpson_intent=only to get first-hand information
+ok ¶62 circle q.horse_where = with the gypsies
+ok ¶62 circle q.why_led_out = to hand him over to the gypsies
+ok ¶62 circle q.gypsies_part = no part; they simply moved on
+ok ¶62 compare f.holmes_police_theory|f.gregory_gypsy_theory
+ok ¶82 trust stmt:f.gregory_poor_weapon
+ok ¶92 circle q.derbyshire_who = straker
+ok ¶92 circle q.dress_wearer = a woman Straker kept without his wife's knowledge
+ok ¶92 trust stmt:f.derbyshire_friend
+ok ¶92 trust stmt:f.straker_comfortable
+ok ¶93 trust stmt:f.holmes_plymouth
+ok ¶93 trust stmt:f.holmes_dove_dress
+ok ¶97 circle q.coat_on_bush = he took it off for some task
+ok ¶97 trust stmt:f.straker_defended
+ok ¶102 circle q.vesta = straker
+ok ¶104 circle q.candle = to have a small light somewhere out on the moor
+ok ¶104 c hyp:q.vesta=straker → hyp:q.candle=to have a small light somewhere out on the moor
+ok ¶104 plan hyp:q.candle=to have a small light somewhere out on the moor
+ok ¶111 trust stmt:f.gregory_pits
+  ¶114 answered: Did the gypsies who camped near the hollow have a hand in the affair?: no part; they simply moved on (you circled no part; they simply moved on: right)
+ok ¶114 cross q.horse_where = with the gypsies
+ok ¶114 cross q.why_led_out = to hand him over to the gypsies
+ok ¶114 trust stmt:f.gregory_gypsy_theory
+ok ¶117 circle q.horse_tracks = towards Mapleton
+ok ¶117 trust stmt:f.gregory_no_tracks
+  ¶120 answered: Which way did the horse go from the hollow?: loose across the moor, alone, or towards Mapleton (you circled towards Mapleton: right)
+ok ¶120 trust stmt:f.holmes_expected_abductor
+ok ¶122 a f.man_toward_pyland ~ f.man_comes_back
+ok ¶124 circle q.horse_where = at Mapleton
+ok ¶124 circle q.turned_back = he meant to return the horse, then decided to keep it
+ok ¶124 trust stmt:f.gregory_nothing_brown
+ok ¶124 plan hyp:q.turned_back=he meant to return the horse, then decided to keep it
+ok ¶127 circle q.man_near_mapleton = silas_brown
+ok ¶127 circle q.brown_part = he found the horse loose and took it in
+ok ¶137 trust stmt:f.brown_lie
+ok ¶140 circle q.horse_runs = yes: he will be found fit and run on Tuesday
+ok ¶140 circle q.brown_charge = silver_blaze
+ok ¶140 circle q.brown_there = at the race for the Wessex Cup on Tuesday
+  ¶146 answered: What has become of Silver Blaze?: at Mapleton, or in a stable nearby, changed so as not to be known (you circled at Mapleton: right) | Did Silas Brown and the Mapleton people have a hand in the affair?: he found the horse loose and took it in, or they took or are hiding the horse (you circled he found the horse loose and took it in: right) | Who was the man whose track joined the horse's near Mapleton?: Silas Brown (you circled Silas Brown: right) | Why did the man with the horse set off towards King's Pyland and then turn back?: he meant to return the horse, then decided to keep it (you circled he meant to return the horse, then decided to keep it: right)
+ok ¶146 trust stmt:f.brown_thinks_watched
+ok ¶148 circle q.change_it = put its appearance back as it was, after it had been altered
+  ¶150 answered: What is it that Silas Brown promises shall be there?: Silver Blaze (you circled Silver Blaze: right)
+  ¶161 answered: Where is it that Silas Brown promises it shall be?: at the race for the Wessex Cup on Tuesday (you circled at the race for the Wessex Cup on Tuesday: right)
+ok ¶175 circle q.why_taken = nobody meant to carry him off: he was led out to be harmed and got loose
+ok ¶175 circle q.straker_reason = to do something to the horse himself
+ok ¶175 circle q.knife = to make some fine cut on the horse
+ok ¶175 circle q.why_led_out = to do something to him that could not be done in the stall
+ok ¶175 circle q.sheep_lame = someone cut their legs on purpose, practising for the horse
+ok ¶175 trust stmt:f.straker_says_anxious
+ok ¶175 trust stmt:f.lad_not_much
+ok ¶175 trust stmt:f.ross_disappointed
+ok ¶175 c hyp:q.knife=to make some fine cut on the horse → hyp:q.straker_reason=to do something to the horse himself
+ok ¶175 c hyp:q.candle=to have a small light somewhere out on the moor → hyp:q.straker_reason=to do something to the horse himself
+ok ¶175 c hyp:q.vesta=straker → hyp:q.straker_reason=to do something to the horse himself
+ok ¶175 plan hyp:q.straker_reason=to do something to the horse himself
+ok ¶175 plan hyp:q.knife=to make some fine cut on the horse
+  ¶181 answered: Did the stable dog give the alarm in the night?: the dog made no noise (you circled the dog made no noise: right)
+ok ¶182 circle q.who_took = straker
+ok ¶182 circle q.dog_why_silent = the man who came in the night was someone the dog knew
+ok ¶182 circle q.who_killed = silver_blaze
+ok ¶182 circle q.connection = the trainer was himself mixed up in what happened to the horse
+ok ¶182 circle q.cravat = Simpson lost it and someone else had it
+ok ¶182 trust stmt:f.gregory_believes_simpson
+ok ¶182 trust stmt:f.holmes_supposing_broke
+ok ¶182 circle q.who_drugged = straker
+ok ¶182 circle q.who_opened = straker
+ok ¶182 stop hyp:q.straker_reason=to do something to the horse himself|hyp:q.who_killed=silver_blaze
+ok ¶182 stop hyp:q.knife=to make some fine cut on the horse|hyp:q.who_killed=silver_blaze
+ok ¶182 stop hyp:q.candle=to have a small light somewhere out on the moor|hyp:q.who_killed=silver_blaze
+ok ¶198 circle q.bay_identity = silver_blaze
+ok ¶198 trust stmt:f.ross_not_my_horse
+  ¶202 answered: Will Silver Blaze run in the Wessex Cup?: yes: he will be found fit and run on Tuesday (you circled yes: he will be found fit and run on Tuesday: right) | What would Silas Brown change before it is there?: put its appearance back as it was, after it had been altered (you circled put its appearance back as it was, after it had been altered: right) | Is the bay horse in the Colonel's colours Silver Blaze?: Silver Blaze (you circled Silver Blaze: right)
+ok ¶206 trust stmt:f.ross_despair
+  ¶212 answered: Who murdered John Straker?: Silver Blaze (you circled Silver Blaze: right)
+ok ¶212 trust stmt:f.straker_murdered
+  ¶214 answered: How are the murder of John Straker and the disappearance of Silver Blaze connected?: the horse killed the trainer, who was harming it, and then ran loose, or the trainer was himself mixed up in what happened to the horse (you circled the trainer was himself mixed up in what happened to the horse: right)
+ok ¶214 circle q.straker_unworthy = he meant to lame the favourite himself
+ok ¶216 trust stmt:f.holmes_conviction_simpson
+  ¶218 answered: What was in the stranger's folded paper?: a ten-pound note, or money for the boy (you circled a ten-pound note: right) | Did Simpson come only to get information?: only to get first-hand information (you circled only to get first-hand information: right)
+ok ¶218 cross q.who_drugged = the_stranger
+ok ¶218 trust stmt:f.hunter_believes_drugged
+ok ¶218 trust stmt:f.gregory_case_strong
+  ¶219 answered: Why did the stable dog make no noise in the night?: the man who came in the night was someone the dog knew (you circled the man who came in the night was someone the dog knew: right)
+ok ¶219 cross q.who_opened = simpson
+ok ¶219 trust stmt:f.holmes_police_theory
+ok ¶219 trust stmt:f.police_theory
+ok ¶219 trust stmt:f.gregory_key_hurled
+  ¶220 answered: Who took Silver Blaze?: John Straker (you circled John Straker: right) | Who drugged Ned Hunter?: John Straker (you circled John Straker: right) | Who opened the stable door in the night?: John Straker (you circled John Straker: right)
+ok ¶220 c hyp:q.straker_reason=to do something to the horse himself → f.straker_dishonest
+ok ¶220 c hyp:q.knife=to make some fine cut on the horse → f.straker_dishonest
+  ¶221 answered: Why did Straker go out to the stables at one in the morning?: to do something to the horse himself, or a purpose of his own that he kept from his wife (you circled to do something to the horse himself: right) | Why did Straker have the small knife with him?: to make some fine cut on the horse, or for some task he meant to do (you circled to make some fine cut on the horse: right) | In what way was John Straker unworthy of the Colonel's confidence?: he meant to lame the favourite himself, or he kept a costly second life under the name of Derbyshire (you circled he meant to lame the favourite himself: right)
+ok ¶221 circle q.who_lamed_sheep = straker
+ok ¶221 c hyp:q.who_lamed_sheep=straker → hyp:q.straker_reason=to do something to the horse himself
+  ¶223 answered: Why was Silver Blaze made away with?: nobody meant to carry him off: he was led out to be harmed and got loose (you circled nobody meant to carry him off: he was led out to be harmed and got loose: right) | Why was the horse led out of the stable instead of being harmed in it?: to do something to him that could not be done in the stall, or whoever led him out was not Simpson but someone who could open the door (you circled to do something to him that could not be done in the stall: right)
+  ¶224 answered: Why did Straker carry a candle and matches on his walk to the stables?: to have a small light somewhere out on the moor (you circled to have a small light somewhere out on the moor: right)
+  ¶225 answered: Who is William Derbyshire?: John Straker (you circled John Straker: right) | Who wore the costly costumes on the milliner's account?: a woman Straker kept without his wife's knowledge, or Madam Derbyshire (you circled a woman Straker kept without his wife's knowledge: right)
+  ¶226 answered: How did Straker's overcoat come to be on the furze-bush?: he took it off for some task (you circled he took it off for some task: right) | What made the cut on Straker's thigh?: his own knife, as he fell (you circled his own knife, as he fell: right) | Whose blood is on Straker's knife?: Straker's own (you circled Straker's own: right) | How did the stranger's cravat come to be in the dead man's hand?: Simpson lost it and someone else had it (you circled Simpson lost it and someone else had it: right) | Who struck the match found in the mud of the hollow?: John Straker (you circled John Straker: right)
+ok ¶226 trust stmt:f.gregory_self_wound
+  ¶228 answered: What has lamed three of the sheep in the paddock?: someone cut their legs on purpose, practising for the horse (you circled someone cut their legs on purpose, practising for the horse: right) | Who lamed the sheep in the paddock?: John Straker (you circled John Straker: right)
+all moves played in 127 s

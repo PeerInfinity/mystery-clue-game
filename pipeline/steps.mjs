@@ -311,7 +311,12 @@ export const STEPS = [
             for (const g of routes) for (const l of g.links) { const k = `${l.of}|${l.for}`; if (!seenLink.has(k)) seenLink.set(k, { ...l, at: g.at }); }
             const plans = [...new Set(routes.filter((g) => g.plan).map((g) => g.q))];
             const candidates = [...seenLink.values()].map((l) => `{"do": "c", "of": ${JSON.stringify(l.of)}, "for": ${JSON.stringify(l.for)}} (found at ¶${l.at}; it meets: ${l.need ?? 'the goal'})`).join('\n') || '(none)';
-            return template('12-path', { ...common(ctx, d, null), strains: lines(d.strains), reading: readingText(d), story: numbered(storyOf(ctx.name)), circles, false_statements: falseOf(d).map((f) => `${f.id} (¶${f.given_at ?? f.para}): ${f.of} ${f.attr} ${JSON.stringify(f.value)}`).join('\n') || '(none)', candidates, plans: plans.join(', ') || '(none)' });
+            // Stage 2: the changes, stops and comparisons the page offered at any gated question, each once.
+            const J = JSON.stringify, first = (xs) => { const m = new Map(); for (const [k, v] of xs) if (!m.has(k)) m.set(k, v); return [...m.values()]; };
+            const onOf = (id) => (/^(hyp|pre):/.test(id) ? `q:${id.slice(4).split('=')[0]}` : id);
+            const changes = first(routes.flatMap((g) => (g.allChanges ?? []).map((c) => [`${c.a}|${c.b}`, `{"do": "a", "a": ${J(c.a)}, "b": ${J(c.b)}} (found at ¶${g.at}: ${c.text})`]))).join('\n') || '(none)';
+            const stops = first(routes.flatMap((g) => [...(g.allStops ?? []).map((x) => [`s|${x.key}`, `{"do": "stop", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}: ${x.text})`]), ...(g.compares ?? []).map((x) => [`c|${x.key}`, `{"do": "compare", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}; unmet needs ${x.open[0]} against ${x.open[1]}, steps only in each ${x.only[0]} and ${x.only[1]})`])])).join('\n') || '(none)';
+            return template('12-path', { ...common(ctx, d, null), strains: lines(d.strains), reading: readingText(d), story: numbered(storyOf(ctx.name)), circles, false_statements: falseOf(d).map((f) => `${f.id} (¶${f.given_at ?? f.para}): ${f.of} ${f.attr} ${JSON.stringify(f.value)}`).join('\n') || '(none)', candidates, plans: plans.join(', ') || '(none)', changes, stops });
         },
         // A right answer's circle at the earliest paragraph the data allows (scripts/path-check.mjs's earliest
         // check); every move in paragraph order, the order given kept within a paragraph.
@@ -333,14 +338,19 @@ export const STEPS = [
                 const pre = /^pre:(.+)$/.exec(id); if (pre) return Math.min(...out.filter((x) => x.do === 'circle' && x.q === pre[1]).map((x) => x.at)) || null;
                 const f = facts.get(id); return f ? f.given_at ?? f.para : null;
             };
-            for (const m of out) if (m.do === 'c') { const ats = [m.of, m.for].map(restsAt); if (ats.every((x) => Number.isInteger(x) && Number.isFinite(x))) m.at = Math.max(...ats); }
-            // Within a paragraph: the marks and trust first, then the links that rest on them, then the plan checks.
-            const rank = (m) => (m.do === 'c' ? 1 : m.do === 'plan' ? 2 : 0);
+            // A change, at the later of its two states; a stop or a comparison, at the latest of its two sides.
+            const sides = (m) => (m.do === 'c' ? [m.of, m.for] : m.do === 'a' ? [m.a, m.b] : ['stop', 'compare'].includes(m.do) ? String(m.key ?? '').split('|') : null);
+            for (const m of out) { const ss = sides(m); if (!ss) continue; const ats = ss.map(restsAt); if (ats.length === 2 && ats.every((x) => Number.isInteger(x) && Number.isFinite(x))) m.at = Math.max(...ats); }
+            // Within a paragraph: the marks and trust first, then the changes and links that rest on them, then the
+            // plan checks, then the checks made on a plan.
+            const rank = (m) => (['c', 'a'].includes(m.do) ? 1 : m.do === 'plan' ? 2 : ['stop', 'compare'].includes(m.do) ? 3 : 0);
             return out.sort((a, b) => (a.at - b.at) || (rank(a) - rank(b)) || (a._i - b._i)).map(({ _i, ...m }) => m);
         },
         check: (ctx, scene, items) => {
-            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust', 'c', 'plan'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross, trust, c or plan, with its at`);
+            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust', 'c', 'plan', 'a', 'stop', 'compare'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross, trust, c, plan, a, stop or compare, with its at`);
             if (bad.length) return bad;
+            // An answer with no moves (a call stopped partway) is a failure of its own, not a page to play.
+            if (!items.some((x) => x.do === 'circle')) return ['no path was written: write the whole path, every move, in one jsonl block'];
             return playPath(ctx, items);
         },
     },
@@ -363,7 +373,7 @@ export const STEPS = [
         n: 10.3, name: 'routes', dir: '10c-routes',
         prompt: (ctx) => {
             const d = seen(ctx, 10.3, null);
-            const missing = routeReport(ctx, 10.3, []).filter((g) => routable(g) && !g.links.length);
+            const missing = routeReport(ctx, 10.3, []).filter((g) => routable(g) && !hasRoute(g));
             const report = missing.map((g) => `${g.q} "${g.label}" (answer ${JSON.stringify(g.answer)}; tried at ¶${g.at}; entry ${JSON.stringify(g.entry)})\n` + (g.misses.length ? g.misses.slice(0, 8).map((m) => `  - ${m.ofText} → for: ${m.forText}: ${m.why}`).join('\n') : `  - no link was tried: ${g.present.map((x) => `${x.id} ${x.on ? 'is' : 'is not'} on the timeline`).join('; ')}`)).join('\n\n') || '(none)';
             return template('10c-routes', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)), case_actions: lines(d.actions), generic_actions: genericActionsText(), report });
         },
@@ -372,7 +382,7 @@ export const STEPS = [
             const problems = allProblems(ctx, 10.3, items);
             if (kinds.length || problems.length) return [...kinds, ...problems];
             const excused = new Set(items.filter((x) => x.file === 'noroute' && x.why).map((x) => x.q));
-            return routeReport(ctx, 10.3, items).filter((g) => routable(g) && !g.links.length && !excused.has(g.q)).map((g) => `${g.q}: still no route (${g.misses[0]?.why ?? 'no link tried'}); add the data, or a noroute line with how the reader reaches it`);
+            return routeReport(ctx, 10.3, items).filter((g) => routable(g) && !hasRoute(g) && !excused.has(g.q)).map((g) => `${g.q}: still no route (${g.misses[0]?.why ?? 'no link tried'}); add the data, or a noroute line with how the reader reaches it`);
         },
     },
     {
@@ -410,6 +420,8 @@ const patchShape = (items) => items.filter((x) => x.file === 'patch' && (!x.id |
 /** A gated question the moves "What is this for?" and plan checks could reach: an aim, who did an action, why an action was done. */
 const routable = (g) => g.entry?.attr === 'intends' || (g.entry?.of === '?' && g.entry?.act) || g.presupposes;
 /** The route check (scripts/route-check.mjs) on a trial case: the case so far with `items`; its report per gated question. */
+/** A gated question has a route: a link, a change or a stop that names its answer. */
+const hasRoute = (g) => g.links.length + (g.changes?.length ?? 0) + (g.stops?.length ?? 0) > 0;
 function routeReport(ctx, step, items) {
     const d = collect(ctx.name, { step, extra: items });
     const trial = path.join(ROOT, 'pipeline', 'runs', ctx.name, 'trial');

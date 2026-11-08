@@ -1,0 +1,6 @@
+FAIL ¶175 trust : no trust control for stmt:f.watson_incomprehensible on f.watson_incomprehensible
+FAIL ¶205 trust : no trust control for stmt:f.ross_poor_opinion on f.ross_poor_opinion
+FAIL ¶212 trust : no trust control for stmt:f.ross_believes_accused on f.ross_believes_accused
+FAIL ¶214 trust : no trust control for stmt:f.holmes_improbable on f.holmes_improbable
+FAIL ¶216 trust : no trust control for stmt:f.holmes_paper_theories on f.holmes_paper_theories
+FAIL ¶219 trust : no trust control for stmt:f.gregory_theory on f.gregory_theory

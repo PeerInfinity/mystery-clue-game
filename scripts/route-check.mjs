@@ -1,6 +1,7 @@
 // The reasoning routes of a case: for each gated question (one the page asks the reader to commit to before its
 // give-away, and inferable earlier), how far the moves "What is this for?" and "What would this need?" reach just
-// before the give-away, with the right answers circled that a careful reader could have circled by then.
+// before the give-away, with the right answers circled that a careful reader could have circled by then, and (stage 2)
+// the changes "It changed" points out, the stops "What stopped it?" finds and the comparisons of two plans.
 // The real page does the reasoning (window.__routes in ui/world.js): every link it would offer and the engine
 // accepts, made until nothing new fits. A question has a route when a link fits that names its answer: its aim
 // served, its who-answer's action serving an aim, or the action its why-question presupposes.
@@ -53,13 +54,19 @@ for (const q of gated) {
     await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three', para: p, marks: marksAt(p) }))}); 1`);
     await send('Page.reload'); await sleep(600);
     for (let i = 0; i < 100 && !(await ev(`typeof window.__routes === 'function'`).catch(() => false)); i++) await sleep(100);
-    const r = await ev(`window.__routes()`);
     const answers = [q.answer, ...(q.also_right ?? [])].map((v) => `hyp:${q.id}=${v}`);
+    const r = await ev(`window.__routes(${J([...answers, `pre:${q.id}`])})`);
     const mine = r.links.filter((l) => answers.includes(l.of) || answers.includes(l.for) || l.of === `pre:${q.id}`);
     const plan = r.plans.some((id) => answers.includes(id));
-    if (!mine.length) none++;
-    report.push({ q: q.id, label: q.label, at: p, answer: q.answer, links: mine, plan, all: r.links.length });
-    console.log(`${mine.length ? 'route' : 'NONE '} ¶${p} ${q.id} (${q.answer}): ${mine.length} link(s)${plan ? ', a plan' : ''}; ${r.links.length} links in all`);
+    // Stage 2's moves: a change whose who-question this is, or a change of aim of its entry's agent; a stop by or of
+    // an answer. A comparison of two plans names no answer: counted in all, never a route by itself.
+    const changes = r.changes.filter((c) => c.q === q.id || (q.entry?.attr === 'intends' && c.aim && c.aim === q.entry.of));
+    const stops = r.stops.filter((x) => answers.includes(x.on) || answers.includes(x.by));
+    const any = mine.length + changes.length + stops.length;
+    if (!any) none++;
+    report.push({ q: q.id, label: q.label, at: p, answer: q.answer, entry: q.entry, links: mine, plan, changes, stops, allChanges: r.changes, allStops: r.stops, all: r.links.length, compares: r.compares, misses: any ? [] : r.misses, present: r.present });
+    const extra = [changes.length && `${changes.length} change(s)`, stops.length && `${stops.length} stop(s)`].filter(Boolean).join(', ');
+    console.log(`${any ? 'route' : 'NONE '} ¶${p} ${q.id} (${q.answer}): ${mine.length} link(s)${plan ? ', a plan' : ''}${extra ? ', ' + extra : ''}; ${r.links.length} links, ${r.compares.length} comparison(s) in all`);
 }
 if (errors.length) console.log(`page errors: ${errors.join(' | ')}`);
 if (out) fs.writeFileSync(out, J({ gated: report }, null, 1) + '\n');

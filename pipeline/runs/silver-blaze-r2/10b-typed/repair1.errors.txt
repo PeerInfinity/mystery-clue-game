@@ -1,1 +1,2 @@
+q.why_taken: presupposes: a typed action of the entry's entity
 q.why_led_out: presupposes: a typed action of the entry's entity

@@ -1,0 +1,38 @@
+NONE  ¶39 q.stranger_who (simpson): 0 link(s); 0 links, 0 comparison(s) in all
+NONE  ¶39 q.stranger_lost (he came to the stables on purpose): 0 link(s); 0 links, 0 comparison(s) in all
+NONE  ¶113 q.gypsies_part (no part; they simply moved on): 0 link(s); 2 links, 2 comparison(s) in all
+NONE  ¶119 q.horse_tracks (loose across the moor, alone): 0 link(s); 2 links, 2 comparison(s) in all
+NONE  ¶145 q.horse_where (at Mapleton): 0 link(s); 2 links, 2 comparison(s) in all
+NONE  ¶145 q.brown_part (he found the horse loose and took it in): 0 link(s); 2 links, 2 comparison(s) in all
+NONE  ¶145 q.man_near_mapleton (silas_brown): 0 link(s); 2 links, 2 comparison(s) in all
+route ¶145 q.turned_back (he meant to return the horse, then decided to keep it): 0 link(s), a plan, 1 change(s); 2 links, 2 comparison(s) in all
+NONE  ¶149 q.brown_charge (silver_blaze): 0 link(s); 4 links, 2 comparison(s) in all
+NONE  ¶160 q.brown_there (at the race for the Wessex Cup on Tuesday): 0 link(s); 4 links, 2 comparison(s) in all
+NONE  ¶180 q.dog_silent (the dog made no noise): 0 link(s); 7 links, 2 comparison(s) in all
+NONE  ¶201 q.horse_runs (yes: he will be found fit and run on Tuesday): 0 link(s); 7 links, 2 comparison(s) in all
+NONE  ¶201 q.change_it (put its appearance back as it was, after it had been altered): 0 link(s); 7 links, 2 comparison(s) in all
+NONE  ¶201 q.bay_identity (silver_blaze): 0 link(s); 7 links, 2 comparison(s) in all
+route ¶211 q.who_killed (silver_blaze): 0 link(s), 3 stop(s); 7 links, 2 comparison(s) in all
+NONE  ¶213 q.connection (the horse killed the trainer, who was harming it, and then ran loose): 0 link(s); 7 links, 2 comparison(s) in all
+NONE  ¶217 q.paper_packet (a ten-pound note): 0 link(s); 7 links, 2 comparison(s) in all
+route ¶217 q.simpson_intent (only to get first-hand information): 1 link(s); 7 links, 2 comparison(s) in all
+NONE  ¶218 q.dog_why_silent (the man who came in the night was someone the dog knew): 0 link(s); 7 links, 2 comparison(s) in all
+NONE  ¶219 q.who_took (straker): 0 link(s); 7 links, 2 comparison(s) in all
+NONE  ¶219 q.who_drugged (straker): 0 link(s); 7 links, 2 comparison(s) in all
+route ¶219 q.who_opened (straker): 0 link(s), 1 change(s); 7 links, 2 comparison(s) in all
+route ¶220 q.straker_reason (to do something to the horse himself): 4 link(s), a plan, 1 stop(s); 9 links, 2 comparison(s) in all
+route ¶220 q.knife (to make some fine cut on the horse): 2 link(s), a plan, 1 stop(s); 9 links, 2 comparison(s) in all
+NONE  ¶220 q.straker_unworthy (he meant to lame the favourite himself): 0 link(s); 9 links, 2 comparison(s) in all
+NONE  ¶222 q.why_taken (nobody meant to carry him off: he was led out to be harmed and got loose): 0 link(s); 20 links, 2 comparison(s) in all
+NONE  ¶222 q.why_led_out (to do something to him that could not be done in the stall): 0 link(s); 20 links, 2 comparison(s) in all
+route ¶223 q.candle (to have a small light somewhere out on the moor): 2 link(s), a plan, 1 stop(s); 20 links, 2 comparison(s) in all
+NONE  ¶224 q.derbyshire_who (straker): 0 link(s); 20 links, 2 comparison(s) in all
+NONE  ¶224 q.dress_wearer (a woman Straker kept without his wife's knowledge): 0 link(s); 20 links, 2 comparison(s) in all
+NONE  ¶225 q.coat_on_bush (he took it off for some task): 0 link(s); 20 links, 2 comparison(s) in all
+NONE  ¶225 q.thigh_cut (his own knife, as he fell): 0 link(s); 20 links, 2 comparison(s) in all
+NONE  ¶225 q.knife_blood (Straker's own): 0 link(s); 20 links, 2 comparison(s) in all
+NONE  ¶225 q.cravat (Simpson lost it and someone else had it): 0 link(s); 20 links, 2 comparison(s) in all
+route ¶225 q.vesta (straker): 2 link(s); 20 links, 2 comparison(s) in all
+NONE  ¶227 q.sheep_lame (someone cut their legs on purpose, practising for the horse): 0 link(s); 20 links, 2 comparison(s) in all
+route ¶227 q.who_lamed_sheep (straker): 1 link(s); 20 links, 2 comparison(s) in all
+9 of 37 gated questions have a reasoning route

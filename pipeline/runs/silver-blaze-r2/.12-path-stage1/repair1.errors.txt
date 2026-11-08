@@ -1,0 +1,12 @@
+FAIL EARLY ¶175 → ¶148 c f.stranger_asks_bayard → hyp:q.simpson_intent=only to get first-hand information (the page allows it)
+FAIL ¶182 trust : no trust control for stmt:f.holmes_improbable on f.holmes_improbable
+FAIL ¶182 trust : no trust control for stmt:f.gregory_theory on f.gregory_theory
+FAIL EARLY ¶198 → ¶182 c hyp:q.who_opened=straker → hyp:q.straker_reason=to do something to the horse himself (the page allows it)
+FAIL EARLY ¶198 → ¶182 c hyp:q.knife=to make some fine cut on the horse → hyp:q.straker_reason=to do something to the horse himself (the page allows it)
+FAIL EARLY ¶198 → ¶182 c hyp:q.candle=to have a small light somewhere out on the moor → hyp:q.straker_reason=to do something to the horse himself (the page allows it)
+FAIL EARLY ¶198 → ¶182 c hyp:q.vesta=straker → hyp:q.straker_reason=to do something to the horse himself (the page allows it)
+FAIL EARLY ¶202 → ¶198 c hyp:q.vesta=straker → hyp:q.candle=to have a small light somewhere out on the moor (the page allows it)
+FAIL ¶202 trust : no trust control for stmt:f.ross_poor_opinion on f.ross_poor_opinion
+FAIL ¶202 trust : no trust control for stmt:f.watson_incomprehensible on f.watson_incomprehensible
+FAIL ¶212 trust : no trust control for stmt:f.ross_believes_accused on f.ross_believes_accused
+FAIL ¶216 trust : no trust control for stmt:f.holmes_paper_theories on f.holmes_paper_theories

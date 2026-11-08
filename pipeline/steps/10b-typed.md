@@ -29,7 +29,9 @@ the data the moves need to check it:
   (possibilities), and an aim's implied last step (`step`);
 - `need` on a reason that adds a need to an action; `end` on a question of motive; `presupposes` on a question
   about why an action told was done; the action in the entry of a question about who did it; `plan` on a claim
-  that tells how something was done;
+  that tells how something was done, or one the story proposes only as a supposition (no `asserts`);
+- states that change where the reasoning notices the change (a door's, a walker's `heading`), and actions whose
+  effect leaves someone unable to act where the reasoning asks what stopped a plan;
 - the case's own action types where no generic one fits, and what a goal's state brings with it (`ramifies`).
 
 Write only what the story's reasoning uses; leave the rest untyped. A who-answer, an aim and a reason must stay

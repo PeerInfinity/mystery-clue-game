@@ -1,5 +1,2 @@
-{"file":"patch","id":"q.why_led_out","presupposes":{"act":"lead_out","thing":"silver_blaze","via":"s: a patch is {"file": "patch", "id", "set": {...}}
-{"file":"patch","id":"q.why_taken","presupposes":{"act":"lead_out","thing":"silver_blaze","via":"sta: a patch is {"file": "patch", "id", "set": {...}}
-{"file":"patch","id":"f.straker_practises","act":"practise_nick"}: a patch is {"file": "patch", "id", "set": {...}}
-{"file":"patch","id":"f.inf_sheep_by_household","act":"practise_nick"}: a patch is {"file": "patch", "id", "set": {...}}
-{"file":"patch","id":"q.who_lamed_sheep","entry":{"of":"?","attr":"action","act":"practise_nick","th: a patch is {"file": "patch", "id", "set": {...}}
+q.why_taken: presupposes: a typed action of the entry's entity
+q.why_led_out: presupposes: a typed action of the entry's entity
