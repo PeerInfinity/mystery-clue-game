@@ -18,9 +18,11 @@ in `docs/interconnected-world.md`.
   answers may come later.
 - **Items: groups of evidence**, by default the witness accounts. Hint tokens are the filler. Reasoning tools as items
   are to be tried, as an option of the APWorld.
-- **The check** fires on choosing an answer after linking all the required evidence. Any answer counts; right or wrong
-  is judged at the give-away, as now.
-- **Reading stops at each give-away** until that question's check has fired, so no check can be read past.
+- **A question is solved** when all its required evidence is linked and the right answer is circled, with no separate
+  commit. Solving it fires the check.
+- **Reading stops at each give-away** until that question is solved, so no check can be read past.
+- **The goal** is every question solved, which comes to the same thing as reaching the end of the story. Silver Blaze
+  has 27: the other 6 are 4 the story never settles, one latent, and one nobody can reach before it is told.
 - **A missing account leaves the story readable.** The story panel marks the sentences that came from it as currently
   unusable.
 
@@ -81,8 +83,7 @@ with two, 4 with three or more. Every fact has its quote.
 Required evidence is the question's `essential` observations (`world/observations.json`, `engine/observations.js`):
 an observation is filled when all its entries are on the timeline and linked to its question.
 
-- **The check:** exactly one answer chosen, and `described(...).done` for that question. Essentials belong to the
-  question and not to an answer, so choosing a wrong answer fires it too, and a check reveals nothing about which is right.
+- **Complete** means `described(...).done` for that question. Essentials belong to the question and not to an answer.
 - **The items a question needs:** for each fact in an essential observation's `from`, any one account that carries
   it. A fact a narrator observes, or hears said, needs none unless Watson's account is split (below).
 - **A withheld account** takes its facts off the timeline, so the observation empties, and it fills again when the
@@ -93,10 +94,54 @@ an observation is filled when all its entries are on the timeline and linked to 
 - **Trying everything:** linking from a question costs one click per entry, so a player can try every link. That was
   accepted for the game (`docs/ideas.md`, "Observations and open questions"), and it stands here.
 
+## Solving a question
+
+The answer is accepted as soon as it is circled, if all the required evidence is already linked. Linking the evidence is
+the commitment, so there is no commit button, and circles stay free until then: 25 of the true path's 52 circles are
+wrong answers tried on purpose, across 18 questions, to see what clashes. This is wanted in the plain game too, not only
+under Archipelago. It replaces "any answer passes" (`docs/ideas.md`, "The gate").
+
+A goal of "all correct" rules out continuing with a wrong answer. If a wrong answer at the give-away were final, one
+mistake would make the goal impossible, and that slot could never finish; if it could be fixed afterwards, being correct
+would mean nothing, since the story has just told the answer. So correctness is required before the reveal.
+
+"Any answer passes" existed to stop players guessing until the gate opens. Requiring the evidence first softens that
+danger, since nobody can guess until the linking is done.
+
+- **A wrong answer can be recovered from.** It starts a growing wait, like the wait between hints, and shows a likely
+  clash where one applies (25 clashes sit on wrong answers to gated questions). The median question lists 3 answers,
+  though 10 "who" questions accept anyone met so far.
+- **A right answer may be confirmed before the story reveals it.** 18 questions can be answered 100 or more paragraphs
+  before their give-away. Beating Holmes is the reward, and the evidence has had to be linked first. Judging only at the
+  gate would avoid that, but every check would wait for its give-away, and 18 of the 27 are in the last scene.
+- **What counts as right has to be audited.** 26 of the 27 answers are marked `likely`, and only 2 questions list an
+  alternative in `also_right`. A reader's well-reasoned alternative being refused would be the earlier game's problem
+  of guessing what the game wants, and a hard gate makes it matter much more.
+- **The hints are what stops anyone being stuck.** The hint check already requires the end to be reached with every
+  answer right, from a fresh page and from one with mistakes in it.
+
+To settle when this is built:
+
+- **Crossing out passes through circling** (one click circles, a second crosses out), so once the evidence is linked,
+  crossing out would judge the answer on the way. The likely fix is a reversed order for those questions: the first
+  click crosses out, the second circles.
+- **Circling first, linking last.** An answer already circled when the last evidence is linked is judged at that
+  moment, but only if exactly one answer is circled. Otherwise a player could circle every answer, make the last link
+  and be accepted for free.
+- **Solved is permanent.** The check cannot be unsent, so Undo does not reverse it, its marks lock, and distrusting an
+  entry of its evidence afterwards does not reopen it.
+- **The response shows the evidence is complete.** While evidence is missing a circle is a pencil mark; once it is
+  complete, a wrong circle gets a reaction. That is accepted. The page still hides which evidence is missing.
+- **A case without `observations.json`** cannot use this. Its questions go on accepting any answer until their
+  observations exist, so the change can land one story at a time.
+
 ## The logic
 
-A question can be answered once the player can read to the paragraph where it is answerable and holds its evidence.
-Reading to a paragraph needs every question given away by then to be answered. So:
+Right or wrong does not enter the logic: the rules look only at items, and the player's part is to solve the question,
+with the hints as the guarantee.
+
+A question can be solved once the player can read to the paragraph where it is answerable and holds its evidence.
+Reading to a paragraph needs every question given away by then to be solved. So:
 
     needs(q) = evidence(q) + needs(every question given away at or before q's earliest paragraph)
 
@@ -154,13 +199,12 @@ follows the page's existing rules for what a name may say at a paragraph.
    `answer_reasoning` is the material.
 3. **The true path and the hints learn linking**: `path.json` gains link moves, and the path check then proves that
    every required link can be made.
-4. **The gate** waits for a question's check, not only one circle, when playing under Archipelago.
-5. **A check must not announce itself early.** `described` is consulted only after the give-away today. The page goes
-   on hiding what is missing, and only fires the check.
-6. **The Archipelago layer**: withheld accounts, the marks in the story panel, a Commit or equivalent if choosing an
-   answer proves too easy to do by accident, and the bridge's piece inside the page.
-
-All of it depends on Archipelago mode being off by default, so that the plain game plays as it does now.
+4. **The audit of `also_right`**, question by question.
+5. **The answer rule** ("Solving a question"), in the plain game and under Archipelago, waiting on 1 to 4. The gate waits
+   for a question to be solved. `described` is consulted only after the give-away today; it will be consulted before
+   it, with what is missing still hidden.
+6. **The Archipelago layer**: withheld accounts, the marks in the story panel, and the bridge's piece inside the page.
+   This part is off in the plain game.
 
 ## The Archipelago side
 
@@ -217,8 +261,9 @@ Once the linking mechanic has settled:
 
 2. Finish the observations format, with "any of these" between facts.
 3. Author `observations.json` for Silver Blaze, then give the true path and the hints their links.
-4. Export Silver Blaze to the structure format, and run it through the validator.
-5. Build the bridge and the marks in the story panel.
+4. Audit `also_right`, then change the answer rule.
+5. Export Silver Blaze to the structure format, and run it through the validator.
+6. Build the bridge and the marks in the story panel.
 
 ## Later
 
@@ -229,4 +274,3 @@ Once the linking mechanic has settled:
 ## Open
 
 - How evidence divides into items (above).
-- The goal: reaching the end of the story, or a number of answers right. Not discussed yet.
