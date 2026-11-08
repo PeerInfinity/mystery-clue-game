@@ -54,6 +54,7 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 6 | Time points | the story so far, entities, times so far | `times.json` | model, per scene |
 | 7 | Facts and accounts | the scene, the story so far, entities, times, facts and accounts so far | `facts.json`, `accounts.json` (and new entities and times) | model, per scene; the validator after each |
 | 8 | Questions | the story so far, the reading so far, entities, facts, questions so far | `questions.json` (no answers), the facts' picks | model, per scene |
+| 8b | A second look at the questions (an experiment, not yet part of a run) | the whole story, the reading, the questions so far | new questions, possibilities | model, one call; `silver-blaze-8b`, see "Follow-up passes" |
 | 9a | Answers | everything, the whole story | each question's answer and its two dates | model, one call |
 | 9b | Truth and dates | everything (compact), the whole story, these scenes' facts in full and their annotations | truth, `given_at`, `inferable_at`, inferable facts | model, three scenes a call (`--group 1`: per scene) |
 | 9c | Consistency | everything, the validator's messages | patches | model, until the whole case validates |
@@ -343,3 +344,27 @@ story needs too is a candidate for the generic table.
   wrong turns); an empty first answer is better rerun than repaired. Step 12 on Silver Blaze now and then trips
   Opus's safeguards partway (a story of drugging and a knife), two of four calls since stage 2: a rerun of the same
   prompt has gone through each time. If it keeps happening, step 12 can be split by paragraph range.
+
+### Follow-up passes: a second look at step 8 (2026-11-08)
+
+The user asked whether a second pass over some steps would find what the first missed. Step 8 had the clearest gap:
+of the 13 hand-made questions the comparison did not match, about nine have a near equivalent in other words, and
+four are real misses (what made the blow, whether Straker fought a man, where the opium was put, Straker's motive).
+Step 8b reads the whole story, the reading and the questions so far, and writes what is missing. It ran on a copy of
+run 2 up to step 8 (`silver-blaze-8b`), so run 2 is untouched. Three attempts, about $2 each:
+
+| Attempt (kept in) | New questions | About the case | Real misses recovered |
+|---|---|---|---|
+| First (`.08b-gaps-first/`) | 11 | 3; 8 about Holmes's behaviour (the prompt lacked step 8's rule against them) | 2 |
+| With a hint list and this story's examples (`.08b-gaps-hinted/`) | 6 | 6 | 4 |
+| Blind: invented examples, no hint list (`08b-gaps/`) | 3 | 3 | 0 |
+
+- The hinted attempt is **not a fair measure**: its list ("a thing that did not happen; a means; a place; a motive")
+  was written after seeing what was missing. The blind attempt is the one to count, and it recovered none of the four,
+  though its three questions and six possibilities are sensible (a duplicate key, the horse's own blood on the knife,
+  how the search of the stables missed the horse), and nothing in it runs ahead of the story.
+- One sample of each cannot separate the effect of the hints from the variation between runs (step 12's paths vary as
+  much). A checklist that holds for any mystery (for each crime: who, with what, where, when, why) might be fair, but
+  Silver Blaze cannot test it now that it suggested it: The Speckled Band would.
+- Step 8's own prompt names examples from this story (what he whispered, a photograph): against the rule of invented
+  examples, to change before the next run.

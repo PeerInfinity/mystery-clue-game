@@ -246,6 +246,26 @@ export const STEPS = [
         },
     },
     {
+        // A second look at the questions, with the whole story (the follow-up pass, 2026-11-08): what the pass scene
+        // by scene missed. Labels and possibilities are held to their own paragraphs, as in step 8.
+        n: 8.2, name: 'gaps', dir: '08b-gaps',
+        prompt: (ctx) => { const d = seen(ctx, 8.2, null); return template('08b-gaps', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
+        check: (ctx, scene, items) => {
+            const bad = items.filter((x) => !['questions', 'possibility'].includes(x.file)).map((x) => `${x.id ?? x.q ?? '?'}: a line here is a question or a possibility`);
+            const early = items.filter((x) => x.file === 'questions' && x.answer != null).map((x) => `${x.id}: no answers yet (answer null)`);
+            const d = seen(ctx, 8.2, null);
+            const dup = items.filter((x) => x.file === 'questions' && d.questions.some((q) => q.id === x.id)).map((x) => `${x.id}: already a question; a new one needs an id of its own`);
+            const paras = storyOf(ctx.name);
+            for (const x of items.filter((y) => y.file === 'questions' && y.label)) early.push(...aheadErrors(paras, x, x.raised, 'label'));
+            for (const x of items) for (const o of x.file === 'questions' ? x.possibilities ?? [] : x.file === 'possibility' ? [x] : []) {
+                if (typeof o.value !== 'string' || o.via === 'always') continue;
+                const w = aheadWords(paras, o.value, o.available ?? 0);
+                if (w.length) early.push(`${x.id ?? x.q}: the possibility "${o.value}" names ${w.join(', ')}, which the story has not given by ¶${o.available}`);
+            }
+            return [...bad, ...early, ...dup, ...validated(ctx, 8.2, null, items, { ignore: [/true assertions contradict/, /an answer needs/, /answer_/] })];
+        },
+    },
+    {
         n: 9.1, name: 'answers', dir: '09a-answers',
         prompt: (ctx) => { const d = seen(ctx, 9.1, null); return template('09a-answers', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
         check: (ctx, scene, items) => {
