@@ -3,6 +3,6 @@
     {"id": "o.size", "q": "q.what_came", "from": ["f.grating"], "says": "small enough for the grating", "essential": true},
     {"id": "o.climb", "q": "q.what_came", "from": [{"route_through": ["grating", "chain"]}], "says": "able to travel down a chain", "essential": true},
     {"id": "o.kept", "q": "q.what_came", "from": ["f.animals", "f.smoke"], "says": "kept near at hand"},
-    {"id": "o.words", "q": "q.what_came", "from": ["f.dead"], "readings": [{"says": "something that bites", "essential": true}, {"says": "a blow from a person"}]}
+    {"id": "o.words", "q": "q.what_came", "from": ["f.dead"], "says": "something that bites", "essential": true, "if": {"q": "q.how", "pick": "a bite"}}
   ]
 }

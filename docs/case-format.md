@@ -379,10 +379,11 @@ knowledge", and "Observations and open questions"). An invented example is `scri
 mechanic for any question. The player points out that a timeline entry is relevant to an open question; an observation the
 data holds for that pair is then filled in, keeping its logic (entries, their chains, its question).
 
-- `{id, q, from: [entry], says | readings, essential?, against?}`. An entry in `from` is a fact's id, or
+- `{id, q, from: [entry], says, essential?, against?, if?}`. An entry in `from` is a fact's id, or
   `{route_through: [things]}` for a route the player built through them. It is filled when every entry is on the timeline
-  and linked to `q`, and goes if one leaves. A link the data does not know stays as the player's note.
-- `readings: [{says, essential?}]`, at least two: only where the story itself puts each forward; the player chooses.
+  and linked to `q`, and goes if one leaves. A link that fills nothing stays as the player's note.
+- `if: {q, pick}`: filled only with that answer of another question circled. A clue the story reads more than one way is an
+  ordinary question with those readings as its possibilities, and what follows from each reading depends on it through `if`.
 - `essential`: needed for the description to count as a solution. The rest add to it. `against`: possibilities it tells against.
 - A question answered by a description (the story names the thing only at the end) has "something else" in `also_right`.
 

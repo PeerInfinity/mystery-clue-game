@@ -70,7 +70,7 @@ ok(/fixed to/.test(await text('#room')), 'the far end held in place', await text
 ok(/A route/.test(await text('#timeline')), 'the route is on the timeline');
 // The link move: from the event (A).
 await click('#timeline [data-fact="f.grating"] .ph');
-ok(await count('#detail [data-link-entry="f.grating"]') === 1, 'an event offers the open questions');
+ok(await count('#detail [data-link-entry="f.grating"]') === 2, 'an event offers every open question');
 ok(!await count('.desc-list'), 'nothing shown before a link');
 await click('#detail [data-link-entry="f.grating"]');
 ok(/small enough for the grating/.test(await text('.desc-list')), 'a known link fills in the observation', await text('#q-box'));
@@ -86,11 +86,12 @@ ok(/Linking to/.test(await text('#timeline')), 'the linking mode shows on the ti
 ok(await click('#timeline [data-fact^="r:r:"] [data-link-entry]'), 'the route can be linked');
 ok(/travel down a chain/.test(await text('.desc-list')), 'a route counts by what it runs through', await text('.desc-list'));
 await click('#timeline [data-fact="f.dead"] [data-link-entry]');
-ok(await count('[data-reading]') === 2, 'two readings to choose between');
+ok(/Your notes/.test(await text('#q-box')) && !/something that bites/.test(await text('.desc-list')), 'an observation that depends on an answer waits for it', await text('#q-box'));
 await click('[data-linking-done]');
 ok(!/Linking to/.test(await text('#timeline')), 'Done leaves the mode');
-await click('[data-reading="o.words"][data-index="0"]');
-ok(/something that bites/.test(await text('.desc-list')), 'the reading is chosen');
+await click('#q-box [data-mark-q="q.how"][data-mark-pick="a bite"]');
+ok(/something that bites/.test(await text('.desc-list')), 'circling the answer fills it in', await text('.desc-list'));
+ok(!/Your notes/.test(await text('#q-box')), 'and the note gives way to it');
 ok(await count('[data-part="timeline"] .link-row') === 0, 'no buttons on the rows outside the mode');
 await ev(`localStorage.setItem(${JSON.stringify(STORE)}, JSON.stringify({ ...JSON.parse(localStorage.getItem(${JSON.stringify(STORE)})), para: 10 }))`);
 await open(url);

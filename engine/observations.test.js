@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fill, described, essentialOf } from './observations.js';
+import { fill, described } from './observations.js';
 
 // An invented case: what came down the chain to the desk?
 const OBS = [
     { id: 'o.size', q: 'q', from: ['f.grating'], says: 'small enough for the grating', essential: true },
     { id: 'o.climb', q: 'q', from: [{ route_through: ['grating', 'chain'] }], says: 'can travel a chain', essential: true },
     { id: 'o.teeth', q: 'q', from: ['f.bite', 'f.doctor'], says: 'bites, and leaves a small wound' },
-    { id: 'o.shape', q: 'q', from: ['f.words'], readings: [{ says: 'a gang of men' }, { says: 'looks like a grey stripe', essential: true }] },
+    { id: 'o.shape', q: 'q', from: ['f.words'], says: 'looks like a grey stripe', essential: true, if: { q: 'q.words', pick: 'a look-alike' } },
     { id: 'o.other', q: 'q2', from: ['f.grating'], says: 'the grating is new' },
 ];
 const known = ['f.grating', 'f.bite', 'f.doctor', 'f.words', 'f.idle'].map((id) => ({ id }));
@@ -48,21 +48,23 @@ test('an entry leaving the timeline takes its observation with it', () => {
     assert.deepEqual([r.filled, r.notes], [[], []]);
 });
 
-test('two readings: chosen by the player', () => {
+test('an observation can depend on an answer of another question', () => {
     const links = [link('f.words')];
-    const open = fill(OBS, links, known).filled[0];
-    assert.deepEqual([open.choose, open.says], [true, null]);
-    const wrong = fill(OBS, links, known, { 'o.shape': 0 }).filled[0];
-    assert.deepEqual([wrong.choose, wrong.says], [false, 'a gang of men']);
+    const none = fill(OBS, links, known);
+    assert.deepEqual([none.filled, none.notes], [[], links], 'until it is circled, the link is a note');
+    assert.deepEqual(fill(OBS, links, known, { 'q.words': { 'a gang': 'circled' } }).filled, [], 'another answer circled: nothing');
+    assert.deepEqual(fill(OBS, links, known, { 'q.words': { 'a look-alike': 'crossed' } }).filled, [], 'crossed out: nothing');
+    const m = { 'q.words': { 'a look-alike': 'circled' } };
+    assert.deepEqual(fill(OBS, links, known, m).filled.map((x) => x.says), ['looks like a grey stripe']);
+    assert.deepEqual(fill(OBS, links, known, m).notes, []);
 });
 
-test('the description: essentials only, and the right reading', () => {
-    assert.equal(essentialOf(OBS[2]), null);
-    assert.equal(essentialOf(OBS[3]), 'looks like a grey stripe');
+test('the description: essentials only', () => {
     const all = [link('f.grating'), link(route.id), link('f.words')];
     const ks = [...known, route];
-    assert.deepEqual(described(OBS, 'q', fill(OBS, all, ks, { 'o.shape': 1 }).filled), { any: true, done: true, missing: [] });
-    assert.deepEqual(described(OBS, 'q', fill(OBS, all, ks, { 'o.shape': 0 }).filled).missing, ['looks like a grey stripe'], 'the false reading does not count');
+    const right = { 'q.words': { 'a look-alike': 'circled' } };
+    assert.deepEqual(described(OBS, 'q', fill(OBS, all, ks, right).filled), { any: true, done: true, missing: [] });
+    assert.deepEqual(described(OBS, 'q', fill(OBS, all, ks, { 'q.words': { 'a gang': 'circled' } }).filled).missing, ['looks like a grey stripe'], 'the other reading does not count');
     assert.deepEqual(described(OBS, 'q', fill(OBS, [link('f.grating')], ks).filled).missing, ['can travel a chain', 'looks like a grey stripe']);
     assert.deepEqual(described(OBS, 'q2', []), { any: false, done: false, missing: [] });
 });

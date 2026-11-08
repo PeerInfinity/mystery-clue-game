@@ -1,5 +1,6 @@
 {
   "questions": [
-    {"id": "q.what_came", "label": "What came to Arkwright?", "entry": {"of": "?", "attr": "action", "time": {"at": "t.night"}}, "raised": 1, "quote": "found him dead", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "a ferret", "available": 10, "via": "direct", "quote": "it was a ferret"}], "answer": "a ferret", "answer_given_at": 10, "answer_given_quote": "it was a ferret", "answer_inferable_at": null, "also_right": ["something else"]}
+    {"id": "q.what_came", "label": "What came to Arkwright?", "entry": {"of": "?", "attr": "action", "time": {"at": "t.night"}}, "raised": 1, "quote": "found him dead", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "a ferret", "available": 10, "via": "direct", "quote": "it was a ferret"}], "answer": "a ferret", "answer_given_at": 10, "answer_given_quote": "it was a ferret", "answer_inferable_at": null, "also_right": ["something else"]},
+    {"id": "q.how", "label": "What killed Arkwright?", "entry": {"of": "arkwright", "attr": "cause", "time": {"at": "t.night"}}, "raised": 1, "quote": "found him dead", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "a blow from a person", "available": 1, "via": "direct", "quote": "found him dead"}, {"value": "a bite", "available": 1, "via": "direct", "quote": "found him dead"}], "answer": "a bite", "answer_given_at": 10, "answer_given_quote": "had been bitten", "answer_inferable_at": null}
   ]
 }

@@ -558,8 +558,12 @@ logic, and the observation stays only as trusted as its entry.
   solution; the story's own animal is a fictional one that drinks milk and comes to a whistle, so those count as attributes.
   This supersedes "only some requirements filter". "What has all of these?" with a table of general knowledge is the fallback
   if a description proves not to be enough.
-- **A link the data does not know** is accepted and stays as the player's note. **Two readings** only where the story itself
-  puts both forward. **Essential** attributes are marked in the data; the rest add to the description.
+- **A link the data does not know** is accepted and stays as the player's note. **Essential** attributes are marked in the
+  data; the rest add to the description.
+- **A clue the story reads more than one way is an ordinary open question**, its readings the possibilities (the story raises
+  it itself: what did she gather from "a band"?, with delirium, a band of people, and something that looks like a band). What
+  follows from a reading depends on that answer being circled, so no special control is needed, and a wrong reading plays
+  through the existing marks and likely clashes.
 - **An attribute is the story's own words.** "Long" was proposed and struck: the story never says it, only "band".
 - **The link starts from the event ("Relevant to…") or from the question ("Link observations…"), both.** Linking from the
   question costs one click per entry, so it does not guard against trying everything; with no scoring that is accepted.

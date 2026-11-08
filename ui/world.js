@@ -118,7 +118,7 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], readings: {} };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [] };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
@@ -128,11 +128,10 @@ state.note = null;
 if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
-if (!state.readings || typeof state.readings !== 'object') state.readings = {};
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, readings: state.readings, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
-const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links, readings: state.readings })].slice(-50); };
+const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
 const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
 function cycleMark(qid, pick) {
@@ -693,7 +692,7 @@ function linkHtml(f) {
     const qs = openQuestions();
     if (!qs.length) return '';
     const shows = observed.filled.filter((x) => x.entries.includes(f) || x.entries.some((e) => e.id === f.id));
-    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${shows.filter((x) => x.says).map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>.</p>`).join('')}`;
+    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>.</p>`).join('')}`;
 }
 /** What the player has shown about a question: its observations, their sources, and any notes. */
 function descriptionHtml(q) {
@@ -701,7 +700,7 @@ function descriptionHtml(q) {
     const mine = observed.filled.filter((x) => x.obs.q === q.id);
     const notes = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
     const from = (x) => x.entries.map((e) => `¶${givenAt(e) ?? '?'}`).join(', ');
-    const items = mine.map((x) => `<li>${x.choose ? x.obs.readings.map((r, i) => `<button type="button" class="move" data-reading="${esc(x.obs.id)}" data-index="${i}">${esc(r.says)}</button>`).join(' or ') : `${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''}`} <span class="para">${from(x)}</span></li>`).join('');
+    const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''} <span class="para">${from(x)}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
     const noteHtml_ = notes.length ? `<div class="small muted">Your notes: ${notes.map((e) => phrase(e)).join('; ')}</div>` : '';
@@ -730,7 +729,7 @@ function render() {
     const keys = new Set(lapsed.map((l) => moveKey(l.move)));
     lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
     heldKeys = new Set(held.map(moveKey));
-    if (observations) observed = fill(observations, state.links, onTimeline(), state.readings);
+    if (observations) observed = fill(observations, state.links, onTimeline(), state.marks);
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
@@ -1481,7 +1480,7 @@ document.addEventListener('toggle', (e) => {
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));
-    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); state.links = h.links ?? []; state.readings = h.readings ?? {}; } else state.trust = h;
+    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); state.links = h.links ?? []; } else state.trust = h;
     state.history = state.history.slice(0, -1);
     save(); render();
 });
@@ -1496,8 +1495,6 @@ document.addEventListener('click', (e) => {
         const st = e.target.closest('[data-linking]');
         if (st) { linkingQ = linkingQ === st.dataset.linking ? null : st.dataset.linking; if (linkingQ) reveal('timeline', panelFrom(e)); render(); return; }
         if (e.target.closest('[data-linking-done]')) { linkingQ = null; render(); return; }
-        const re = e.target.closest('[data-reading]');
-        if (re) { remember(); state.readings = { ...state.readings, [re.dataset.reading]: Number(re.dataset.index) }; save(); render(); return; }
     }
     const tb = e.target.closest('[data-tab]');
     if (tb) { chooseTab(panelFrom(e) ?? 0, tb.dataset.tab); backs = []; save(); render(); return; }

@@ -63,7 +63,7 @@ const accounts = read('world/accounts.json').accounts;
 const room = fs.existsSync(path.join(dir, 'world', 'room.json')) ? read('world/room.json') : null;
 const observationList = fs.existsSync(path.join(dir, 'world', 'observations.json')) ? read('world/observations.json').observations : [];
 // A question answered by a description the player builds: "something else" is right before the story names the thing.
-const byDescription = (q) => observationList.some((o) => o.q === q && (o.essential || o.readings?.some((r) => r.essential)));
+const byDescription = (q) => observationList.some((o) => o.q === q && o.essential);
 const accountIds = new Set(accounts.map((a) => a.id));
 const prov = provenance(dir);
 const world = loadWorld(dir);
@@ -333,8 +333,8 @@ for (const o of observationList) {
     if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);
     if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
     for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
-    if (!o.says === !o.readings) err(o.id, 'says or readings, one of them');
-    if (o.readings && (o.readings.length < 2 || o.readings.some((r) => !r.says))) err(o.id, 'readings: at least two, each with says');
+    if (!o.says) err(o.id, 'no says');
+    if (o.if && !qById.get(o.if.q)?.possibilities.some((x) => x.value === o.if.pick)) err(o.id, `if: no possibility ${o.if.q} = ${o.if.pick}`);
     for (const p of list(o.against)) if (!qById.get(o.q)?.possibilities.some((x) => x.value === p)) err(o.id, `against: no possibility ${p}`);
 }
 const strainsFile = path.join(dir, 'world', 'strains.json');
