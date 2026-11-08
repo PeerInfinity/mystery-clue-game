@@ -1,0 +1,7 @@
+The three `t.writing` errors are fixed by adding that time point, which earlier facts also use. The two claim facts lose their `modal`, which stays on their `says` facts.
+
+```jsonl
+{"file":"times","id":"t.writing","label":"When the narrator writes, after the death of the lady to whom the pledge was given","labels":[{"from":1,"label":"When the narrator writes, after the death of the lady to whom the pledge was given"},{"from":3,"label":"When Watson writes, after the death of the lady to whom the pledge was given"}],"para":1,"quote":"On glancing over my notes","after":["t.pledged_lady_dies","t.official_inquiry_ends","t.travel_back"]}
+{"file":"facts","id":"f.punctures_hard","of":"poison_punctures","attr":"condition","value":"two little dark punctures, hard even for a sharp-eyed coroner to distinguish","claim":"f.holmes_says_punctures","time":{"at":"t.victim_bitten"},"para":248,"quote":"the two little dark punctures which would show where the poison fangs had done their work"}
+{"file":"facts","id":"f.milk_trains","of":"saucer_of_milk","attr":"role","value":"used to train the snake","claim":"f.holmes_says_milk","time":{"at":"t.snake_trained"},"para":248,"quote":"probably by the use of the milk which we saw"}
+```

@@ -1,0 +1,5 @@
+f.holmes_closes_shutters: a step or typed action needs act
+f.holmes_lashes: a step or typed action needs act
+f.holmes_gazes_vent: a step or typed action needs act
+f.holmes_strikes_door: a step or typed action needs act
+f.holmes_closes_safe: a step or typed action needs act

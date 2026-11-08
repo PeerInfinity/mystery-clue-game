@@ -1,0 +1,3 @@
+f.watson_true_facts: time.at: no time t.writing
+f.watson_not_prolong: time.at: no time t.writing
+f.inquiry_tells_watson: time.before: no time t.writing
