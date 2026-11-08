@@ -52,6 +52,9 @@ for (const scene of units) {
     let res = recheck ? { text: '```jsonl\n' + JSON.parse(fs.readFileSync(path.join(dir, 'items.json'), 'utf8')).map((x) => JSON.stringify(x)).join('\n') + '\n```' } : await call({ dir, prompt: task, system: template('system', {}), model, dry });
     if (dry) { console.log(`${dir}: prompt written (${[].concat(task).join('').length} chars)`); continue; }
     let { items, bad } = jsonLines(res.text);
+    // An answer with no data at all (the safeguards withheld it, and the model says so in prose) is not a scene with
+    // nothing to say: stop here, so that the next scene does not read on from a gap. Rerun it; don't repair it.
+    if (!items.length && !bad.length && !/^```/m.test(res.text)) throw new Error(`${scene?.id ?? step.name}: the answer holds no data: ${res.text.slice(0, 200)}`);
     if (step.normalize) items = step.normalize(ctx, scene, items);
     let errors = [...bad.map((b) => `not a JSON object: ${b.slice(0, 120)}`), ...step.check(ctx, scene, items)];
     // Repairs (repair.mjs): the whole output again (the small steps), or only the lines that change (the data steps).
