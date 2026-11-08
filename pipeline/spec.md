@@ -343,7 +343,9 @@ one circle, so the path circles every answered question's answer before its give
 - `{"do": "a", "a", "b"}`: "It changed": two states of one thing differ (a door shut, then open; a walker making for
   one place, then another), so something changed it between them. `{"do": "stop", "on", "key": "<intention>|<action>"}`:
   "What stopped it?", on an intention whose plan's last step was never done: that action left its agent unable to
-  act. `{"do": "compare", "on", "key": "<plan>|<other plan>"}`: two plans of one agent compared. `on` opens what the
+  act. `{"do": "compare", "on", "key": "<plan>|<other plan>"}`: two plans of one agent compared. `{"do": "account",
+  "on", "key": "<plan>|<action or intention>"}`: "Does it account for this?": whether something else the agent did or
+  wanted serves the plan (a "no" leaves it unexplained). `on` opens what the
   move is made on: a fact id, or `q:<question>` for a circled answer.
 - `at`: the paragraph of the move; `why`: the reader's reason, in plain words, as the reader would say it then;
   `for_q`: the questions the move serves.

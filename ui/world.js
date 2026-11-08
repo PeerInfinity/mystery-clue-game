@@ -1537,7 +1537,7 @@ window.__routes = (ids = []) => {
         if (r.why) continue;
         changes.push({ a: x.id, b: y.id, text: (r.entry.aimChange ? r.entry.value : changeText(r.entry)).replace(/<[^>]+>/g, ''), q: questionOfChange(r.entry)?.id ?? null, aim: r.entry.aimChange ? r.entry.of : null });
     }
-    const stopsFound = [], compares = [];
+    const stopsFound = [], compares = [], accounts = [];
     for (const f of [...new Set([...sources().filter((g) => g.goal || g.plan), ...on.filter((g) => g.plan)])]) {
         const plan = planOf(f);
         if (!plan) continue;
@@ -1554,8 +1554,15 @@ window.__routes = (ids = []) => {
             const c = comparePlans(plan, { id: x.id, ...x.plan }, on, nameOf, { ...placeCtx, order: data.order, entries: on });
             compares.push({ on: f.id, with: x.id, key: `${f.id}|${x.id}`, open: [c.a.open.length, c.b.open.length], only: [c.a.only.length, c.b.only.length] });
         }
+        // "Does it account for this?": the agent's other actions and intentions on the timeline (as accountHtml offers
+        // them), each with its answer: a "no" (the plan leaves it unexplained) is as much the reader's point as a yes.
+        const own = new Set(plan.steps.map((x) => x.id).filter(Boolean));
+        for (const x of on.filter((y) => y.id !== f.id && !own.has(y.id) && !y.plan && (list(y.act).length || y.goal) && !y.reasoned && placeCtx.same(y.of, plan.agent))) {
+            const r = accountsFor(plan, x, nameOf, { ...placeCtx, order: data.order });
+            accounts.push({ on: f.id, of: x.id, key: `${f.id}|${x.id}`, fits: r.fits === true ? 'yes' : r.fits === 'if' ? 'only if' : 'no', text: stepText(x).replace(/<[^>]+>/g, '') });
+        }
     }
-    return { para: state.para, links: made, plans, misses, present, changes, stops: stopsFound, compares };
+    return { para: state.para, links: made, plans, misses, present, changes, stops: stopsFound, compares, accounts };
 };
 const hintApi = {
     para: () => state.para, last: LAST, wait: () => state.hintWait,

@@ -64,7 +64,7 @@ for (const q of gated) {
     const stops = r.stops.filter((x) => answers.includes(x.on) || answers.includes(x.by));
     const any = mine.length + changes.length + stops.length;
     if (!any) none++;
-    report.push({ q: q.id, label: q.label, at: p, answer: q.answer, entry: q.entry, links: mine, plan, changes, stops, allChanges: r.changes, allStops: r.stops, all: r.links.length, compares: r.compares, misses: any ? [] : r.misses, present: r.present });
+    report.push({ q: q.id, label: q.label, at: p, answer: q.answer, entry: q.entry, links: mine, plan, changes, stops, allChanges: r.changes, allStops: r.stops, all: r.links.length, compares: r.compares, accounts: r.accounts, misses: any ? [] : r.misses, present: r.present });
     const extra = [changes.length && `${changes.length} change(s)`, stops.length && `${stops.length} stop(s)`].filter(Boolean).join(', ');
     console.log(`${any ? 'route' : 'NONE '} ¶${p} ${q.id} (${q.answer}): ${mine.length} link(s)${plan ? ', a plan' : ''}${extra ? ', ' + extra : ''}; ${r.links.length} links, ${r.compares.length} comparison(s) in all`);
 }

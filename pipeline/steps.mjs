@@ -315,7 +315,7 @@ export const STEPS = [
             const J = JSON.stringify, first = (xs) => { const m = new Map(); for (const [k, v] of xs) if (!m.has(k)) m.set(k, v); return [...m.values()]; };
             const onOf = (id) => (/^(hyp|pre):/.test(id) ? `q:${id.slice(4).split('=')[0]}` : id);
             const changes = first(routes.flatMap((g) => (g.allChanges ?? []).map((c) => [`${c.a}|${c.b}`, `{"do": "a", "a": ${J(c.a)}, "b": ${J(c.b)}} (found at ¶${g.at}: ${c.text})`]))).join('\n') || '(none)';
-            const stops = first(routes.flatMap((g) => [...(g.allStops ?? []).map((x) => [`s|${x.key}`, `{"do": "stop", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}: ${x.text})`]), ...(g.compares ?? []).map((x) => [`c|${x.key}`, `{"do": "compare", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}; unmet needs ${x.open[0]} against ${x.open[1]}, steps only in each ${x.only[0]} and ${x.only[1]})`])])).join('\n') || '(none)';
+            const stops = first(routes.flatMap((g) => [...(g.allStops ?? []).map((x) => [`s|${x.key}`, `{"do": "stop", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}: ${x.text})`]), ...(g.compares ?? []).map((x) => [`c|${x.key}`, `{"do": "compare", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}; unmet needs ${x.open[0]} against ${x.open[1]}, steps only in each ${x.only[0]} and ${x.only[1]})`]), ...(g.accounts ?? []).map((x) => [`a|${x.key}`, `{"do": "account", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}: does the plan account for ${x.text}? ${x.fits})`])])).join('\n') || '(none)';
             return template('12-path', { ...common(ctx, d, null), strains: lines(d.strains), reading: readingText(d), story: numbered(storyOf(ctx.name)), circles, false_statements: falseOf(d).map((f) => `${f.id} (¶${f.given_at ?? f.para}): ${f.of} ${f.attr} ${JSON.stringify(f.value)}`).join('\n') || '(none)', candidates, plans: plans.join(', ') || '(none)', changes, stops });
         },
         // A right answer's circle at the earliest paragraph the data allows (scripts/path-check.mjs's earliest
@@ -339,15 +339,15 @@ export const STEPS = [
                 const f = facts.get(id); return f ? f.given_at ?? f.para : null;
             };
             // A change, at the later of its two states; a stop or a comparison, at the latest of its two sides.
-            const sides = (m) => (m.do === 'c' ? [m.of, m.for] : m.do === 'a' ? [m.a, m.b] : ['stop', 'compare'].includes(m.do) ? String(m.key ?? '').split('|') : null);
+            const sides = (m) => (m.do === 'c' ? [m.of, m.for] : m.do === 'a' ? [m.a, m.b] : ['stop', 'compare', 'account'].includes(m.do) ? String(m.key ?? '').split('|') : null);
             for (const m of out) { const ss = sides(m); if (!ss) continue; const ats = ss.map(restsAt); if (ats.length === 2 && ats.every((x) => Number.isInteger(x) && Number.isFinite(x))) m.at = Math.max(...ats); }
             // Within a paragraph: the marks and trust first, then the changes and links that rest on them, then the
             // plan checks, then the checks made on a plan.
-            const rank = (m) => (['c', 'a'].includes(m.do) ? 1 : m.do === 'plan' ? 2 : ['stop', 'compare'].includes(m.do) ? 3 : 0);
+            const rank = (m) => (['c', 'a'].includes(m.do) ? 1 : m.do === 'plan' ? 2 : ['stop', 'compare', 'account'].includes(m.do) ? 3 : 0);
             return out.sort((a, b) => (a.at - b.at) || (rank(a) - rank(b)) || (a._i - b._i)).map(({ _i, ...m }) => m);
         },
         check: (ctx, scene, items) => {
-            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust', 'c', 'plan', 'a', 'stop', 'compare'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross, trust, c, plan, a, stop or compare, with its at`);
+            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust', 'c', 'plan', 'a', 'stop', 'compare', 'account'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross, trust, c, plan, a, stop, compare or account, with its at`);
             if (bad.length) return bad;
             // An answer with no moves (a call stopped partway) is a failure of its own, not a page to play.
             if (!items.some((x) => x.do === 'circle')) return ['no path was written: write the whole path, every move, in one jsonl block'];

@@ -1,0 +1,1 @@
+no path was written: write the whole path, every move, in one jsonl block

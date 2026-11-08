@@ -65,8 +65,8 @@ exactly; the rest differ only by the spec and the repair template changed since)
 
 The reasoning moves, in stages (the user, 2026-11-07: all kinds eventually, in more than one task): stage 1,
 built, gives "What is this for?" and plan checks (steps 10b, 10c, and step 12 writing those moves); stage 2, built,
-adds "It changed", "What stopped it?" and "Compare two plans" (states over time, disabling effects, rival plans).
-"Does this plan account for this?" is not yet among the candidates.
+adds "It changed", "What stopped it?", "Compare two plans" and "Does it account for this?" (states over time,
+disabling effects, rival plans, what a plan leaves unexplained).
 
 Step 11 comes before the true path so that the path is played on the data as it will be published. `run.mjs
 --recheck` checks a step's recorded output again (after a fix to its checks), calling the model only to repair.
@@ -330,5 +330,16 @@ story needs too is a candidate for the generic table.
   empty answer is now a failure of its own; the step rerun ($2.42, the prompt cached): 120 moves with 8 links, 4 plan
   checks, the change, 2 stops and the comparison of the police's two theories (the hand-made path: 9, 3, 1, 1, 1).
   Every page check passes on its case.
-- **Lesson:** a repair that has to write a whole answer loses what the first prompt asked for beyond the errors (the
-  wrong turns); an empty first answer is better rerun than repaired.
+- **"Does it account for this?"** (`account`): the route check lists, for each plan, the agent's other actions and
+  intentions on the timeline with the page's answer (yes, only if, no: a "no" is the reader's point that the plan
+  leaves it unexplained; on the hand-made data, the paper on the police theory at ¶57). Never a route by itself.
+  Step 12 with them (the stage-2 path kept in `.12-path-stage2/`): the first try was cut off partway (¶58) and its
+  repair refused by Opus's safeguards ("flagged this message"; kept in `.12-path-account-flagged/`); the retry, $2.38:
+  101 moves with 7 links, 1 plan check, the change, 2 stops, the comparison and 3 account checks (the police theory
+  leaves the questions about Bayard unexplained; hiding the horse fits the turn back; the errand serves the nicking).
+  It took fewer wrong turns than the run before (7 crosses against 16) by its own choice: the paths vary from run to
+  run. Every page check passes on its case.
+- **Lessons:** a repair that has to write a whole answer loses what the first prompt asked for beyond the errors (the
+  wrong turns); an empty first answer is better rerun than repaired. Step 12 on Silver Blaze now and then trips
+  Opus's safeguards partway (a story of drugging and a knife), two of four calls since stage 2: a rerun of the same
+  prompt has gone through each time. If it keeps happening, step 12 can be split by paragraph range.

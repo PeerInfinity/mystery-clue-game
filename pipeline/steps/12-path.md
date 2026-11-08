@@ -40,7 +40,8 @@ Changes the page lets the reader point out ("It changed"):
 
 {{changes}}
 
-"What stopped it?" checks that find a stop, and comparisons of two plans:
+"What stopped it?" checks that find a stop, comparisons of two plans, and "Does it account for this?" checks (with
+the page's answer):
 
 {{stops}}
 
@@ -59,8 +60,8 @@ Write the true path (path.json in the format above): lines `{"file": "path", "do
   where the reader would ask what a plan needs, `{"file": "path", "do": "plan", "of": <intention>, "on":
   "q:<its question>", "at", "why", "for_q"}`. A script moves a reasoning move the page allows earlier to that
   paragraph.
-- Of the changes, stops and comparisons above, those the reasoning makes: `{"file": "path", "do": "a", "a", "b",
+- Of the changes, stops, comparisons and account checks above, those the reasoning makes: `{"file": "path", "do": "a", "a", "b",
   "at", "why", "for_q"}`, `{"file": "path", "do": "stop", "on", "key", "at", "why", "for_q"}`, `{"file": "path",
-  "do": "compare", "on", "key", "at", "why", "for_q"}`, as written there (a stop and a comparison open their plan
+  "do": "compare" (or "account"), "on", "key", "at", "why", "for_q"}`, as written there (a stop and a comparison open their plan
   themselves).
 - `why`: the reader's reason at that paragraph, in plain words, using nothing told later.

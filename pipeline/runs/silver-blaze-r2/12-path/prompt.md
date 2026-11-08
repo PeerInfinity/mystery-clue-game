@@ -354,7 +354,9 @@ one circle, so the path circles every answered question's answer before its give
 - `{"do": "a", "a", "b"}`: "It changed": two states of one thing differ (a door shut, then open; a walker making for
   one place, then another), so something changed it between them. `{"do": "stop", "on", "key": "<intention>|<action>"}`:
   "What stopped it?", on an intention whose plan's last step was never done: that action left its agent unable to
-  act. `{"do": "compare", "on", "key": "<plan>|<other plan>"}`: two plans of one agent compared. `on` opens what the
+  act. `{"do": "compare", "on", "key": "<plan>|<other plan>"}`: two plans of one agent compared. `{"do": "account",
+  "on", "key": "<plan>|<action or intention>"}`: "Does it account for this?": whether something else the agent did or
+  wanted serves the plan (a "no" leaves it unexplained). `on` opens what the
   move is made on: a fact id, or `q:<question>` for a circled answer.
 - `at`: the paragraph of the move; `why`: the reader's reason, in plain words, as the reader would say it then;
   `for_q`: the questions the move serves.
@@ -2437,13 +2439,50 @@ Changes the page lets the reader point out ("It changed"):
 {"do": "a", "a": "f.door_locked_after", "b": "f.door_open"} (found at ¶39: unlocking and opening the door)
 {"do": "a", "a": "f.man_toward_pyland", "b": "f.man_comes_back"} (found at ¶145: changing his mind: making for King's Pyland, then for Mapleton)
 
-"What stopped it?" checks that find a stop, and comparisons of two plans:
+"What stopped it?" checks that find a stop, comparisons of two plans, and "Does it account for this?" checks (with
+the page's answer):
 
 {"do": "compare", "on": "f.holmes_police_theory", "key": "f.holmes_police_theory|f.gregory_gypsy_theory"} (found at ¶113; unmet needs 5 against 2, steps only in each 4 and 1)
 {"do": "compare", "on": "f.gregory_gypsy_theory", "key": "f.gregory_gypsy_theory|f.holmes_police_theory"} (found at ¶113; unmet needs 2 against 5, steps only in each 1 and 4)
+{"do": "account", "on": "f.holmes_police_theory", "key": "f.holmes_police_theory|f.stranger_asks_where"} (found at ¶113: does the plan account for The stranger who stopped the maid near the stables: asking Edith Baxter? no)
+{"do": "account", "on": "f.holmes_police_theory", "key": "f.holmes_police_theory|f.stranger_asks_bayard"} (found at ¶113: does the plan account for The stranger who stopped the maid near the stables: asking Ned Hunter for how the stable rates Bayard against Silver Blaze? no)
+{"do": "account", "on": "f.gregory_gypsy_theory", "key": "f.gregory_gypsy_theory|f.stranger_asks_where"} (found at ¶113: does the plan account for The stranger who stopped the maid near the stables: asking Edith Baxter? no)
+{"do": "account", "on": "f.gregory_gypsy_theory", "key": "f.gregory_gypsy_theory|f.stranger_asks_bayard"} (found at ¶113: does the plan account for The stranger who stopped the maid near the stables: asking Ned Hunter for how the stable rates Bayard against Silver Blaze? no)
+{"do": "account", "on": "q:q.turned_back", "key": "hyp:q.turned_back=he meant to return the horse, then decided to keep it|f.brown_asks_want"} (found at ¶145: does the plan account for Silas Brown: asking Sherlock Holmes? no)
+{"do": "account", "on": "q:q.turned_back", "key": "hyp:q.turned_back=he meant to return the horse, then decided to keep it|f.brown_asks_change"} (found at ¶145: does the plan account for Silas Brown: asking Sherlock Holmes? no)
+{"do": "account", "on": "q:q.turned_back", "key": "hyp:q.turned_back=he meant to return the horse, then decided to keep it|f.brown_first_impulse"} (found at ¶149: does the plan account for Silas Brown wants: Silver Blaze at King's Pyland? no)
+{"do": "account", "on": "q:q.turned_back", "key": "hyp:q.turned_back=he meant to return the horse, then decided to keep it|f.brown_intends_hide"} (found at ¶149: does the plan account for Silas Brown wants: Silver Blaze in the hands of Silas Brown? yes)
+{"do": "account", "on": "q:q.turned_back", "key": "hyp:q.turned_back=he meant to return the horse, then decided to keep it|f.brown_conceals"} (found at ¶149: does the plan account for Silas Brown: hiding Silver Blaze? no)
 {"do": "stop", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|hyp:q.who_killed=silver_blaze"} (found at ¶201: Silver Blaze: striking John Straker (your hypothesis) stops John Straker: nicking the tendon of Silver Blaze with Straker's small knife (intended))
 {"do": "stop", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|hyp:q.who_killed=silver_blaze"} (found at ¶201: Silver Blaze: striking John Straker (your hypothesis) stops John Straker: nicking the tendon of Silver Blaze with Straker's small knife (intended))
 {"do": "stop", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|hyp:q.who_killed=silver_blaze"} (found at ¶201: Silver Blaze: striking John Straker (your hypothesis) stops John Straker: striking a light  (intended))
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_takes_horse"} (found at ¶220: does the plan account for John Straker: leading out Silver Blaze through The stable door? no)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_dishonest"} (found at ¶220: does the plan account for John Straker wants: Silver Blaze: loses the Wessex Cup? no)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_drugs_hunter"} (found at ¶220: does the plan account for John Straker: drugging Ned Hunter with Powdered opium? no)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_takes_horse"} (found at ¶220: does the plan account for John Straker: leading out Silver Blaze through The stable door? no)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_dishonest"} (found at ¶220: does the plan account for John Straker wants: Silver Blaze: loses the Wessex Cup? no)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_drugs_hunter"} (found at ¶220: does the plan account for John Straker: drugging Ned Hunter with Powdered opium? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_takes_horse"} (found at ¶220: does the plan account for John Straker: leading out Silver Blaze through The stable door? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_dishonest"} (found at ¶220: does the plan account for John Straker wants: Silver Blaze: loses the Wessex Cup? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_drugs_hunter"} (found at ¶220: does the plan account for John Straker: drugging Ned Hunter with Powdered opium? no)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_intends_operation"} (found at ¶222: does the plan account for John Straker wants: Silver Blaze: lame? yes)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_intends_nick"} (found at ¶222: does the plan account for John Straker wants: Silver Blaze: lame? yes)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_intends_operation"} (found at ¶222: does the plan account for John Straker wants: Silver Blaze: lame? yes)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_intends_nick"} (found at ¶222: does the plan account for John Straker wants: Silver Blaze: lame? yes)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_intends_operation"} (found at ¶222: does the plan account for John Straker wants: Silver Blaze: lame? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_intends_nick"} (found at ¶222: does the plan account for John Straker wants: Silver Blaze: lame? no)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_wished_out"} (found at ¶223: does the plan account for John Straker wants: Silver Blaze at The bowl-shaped depression in the moor? no)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_wished_out"} (found at ¶223: does the plan account for John Straker wants: Silver Blaze at The bowl-shaped depression in the moor? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_wished_out"} (found at ¶223: does the plan account for John Straker wants: Silver Blaze at The bowl-shaped depression in the moor? no)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_leads_hollow"} (found at ¶227: does the plan account for John Straker: leading out Silver Blaze? no)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_picks_cravat"} (found at ¶227: does the plan account for John Straker: taking up The red and black silk cravat? no)
+{"do": "account", "on": "q:q.straker_reason", "key": "hyp:q.straker_reason=to do something to the horse himself|f.straker_strikes_light"} (found at ¶227: does the plan account for John Straker: striking a light ? no)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_leads_hollow"} (found at ¶227: does the plan account for John Straker: leading out Silver Blaze? no)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_picks_cravat"} (found at ¶227: does the plan account for John Straker: taking up The red and black silk cravat? no)
+{"do": "account", "on": "q:q.knife", "key": "hyp:q.knife=to make some fine cut on the horse|f.straker_strikes_light"} (found at ¶227: does the plan account for John Straker: striking a light ? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_leads_hollow"} (found at ¶227: does the plan account for John Straker: leading out Silver Blaze? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_picks_cravat"} (found at ¶227: does the plan account for John Straker: taking up The red and black silk cravat? no)
+{"do": "account", "on": "q:q.candle", "key": "hyp:q.candle=to have a small light somewhere out on the moor|f.straker_strikes_light"} (found at ¶227: does the plan account for John Straker: striking a light ? no)
 
 ## Your task
 
@@ -2460,9 +2499,9 @@ Write the true path (path.json in the format above): lines `{"file": "path", "do
   where the reader would ask what a plan needs, `{"file": "path", "do": "plan", "of": <intention>, "on":
   "q:<its question>", "at", "why", "for_q"}`. A script moves a reasoning move the page allows earlier to that
   paragraph.
-- Of the changes, stops and comparisons above, those the reasoning makes: `{"file": "path", "do": "a", "a", "b",
+- Of the changes, stops, comparisons and account checks above, those the reasoning makes: `{"file": "path", "do": "a", "a", "b",
   "at", "why", "for_q"}`, `{"file": "path", "do": "stop", "on", "key", "at", "why", "for_q"}`, `{"file": "path",
-  "do": "compare", "on", "key", "at", "why", "for_q"}`, as written there (a stop and a comparison open their plan
+  "do": "compare" (or "account"), "on", "key", "at", "why", "for_q"}`, as written there (a stop and a comparison open their plan
   themselves).
 - `why`: the reader's reason at that paragraph, in plain words, using nothing told later.
 
