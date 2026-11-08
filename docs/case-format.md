@@ -24,7 +24,8 @@ else. Every JSON file is one object per line inside its list.
 | `world/accounts.json` | yes | The accounts the facts travel in, and who holds them. |
 | `world/questions.json` | yes | The questions, their possibilities and answers. |
 | `world/strains.json` | no | Likely clashes; without it the page shows none. |
-| `world/room.json` | no | The arrangement of a room and general knowledge: openings, a sealed place, requirements, categories of candidates. Without it the page has no room panel. See "The arrangement of a room". |
+| `world/room.json` | no | The arrangement of a room: openings and a sealed place. Without it the page has no room panel. See "The arrangement of a room". |
+| `world/observations.json` | no | What an entry shows about a question once the player links them. Without it the page offers no links. See "Observations". |
 | `world/actions.json` | no | The case's own action types, `{id, label, requires, effects}` in the action table's rule shape, and `ramifies` (what a goal's state brings with it); the generic ones are the engine's (see "Typed states and actions"). |
 | `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`; `CASE=<dir> node scripts/path-check.mjs` for another case). |
 
@@ -363,7 +364,7 @@ The player's moves, each checked by these rules, give entries with the source *t
 
 **The arrangement of a room** (`world/room.json`, optional; `engine/arrangement.js`, drawn by `ui/world-room.js`). For a
 case that turns on how things are arranged (the design: `docs/ideas.md`, "The arrangement of a room, and general
-knowledge"). An invented example is `scripts/fixtures/sealed-room/`.
+knowledge", and "Observations and open questions"). An invented example is `scripts/fixtures/sealed-room/`.
 
 - `openings`: `{id: {kind, sides: [place, place]}}`, an entity each, of any kind beside doors. A row of the table only once a
   fact about it is on the timeline. `sealed`: `{place, surfaces?, time?, question?, unknown?}` switches the table on.
@@ -372,15 +373,21 @@ knowledge"). An invented example is `scripts/fixtures/sealed-room/`.
   (`between: [place, place]`, `passes`) is something crossing between two places (the move "Something got through").
   `attached`, `reaches`, `near` and `fixed` have an entity as their value; the first three are the links of a route.
 - The player's moves: a mark on a cell of the table, refused unless a fact supports it; "Something got through", an
-  entry `attr: opening`; the route, link by link, an entry `attr: route` whose requirements are `size` and `travels`.
-- `requirements`: `{id, label, trait, value, from: [facts], filter?}`, shown once a fact in `from` is on the timeline.
-  `filter: false`: evidence only, it tests no kind (where the story's world and the real one disagree).
-- `categories`: `{id, label, on: [facts], q, members: [{value, text, traits}]}`, at least three members, so that a list
-  has distractors. "What else of this kind?" is offered once a fact in `on` is on the timeline; offer it on several
-  categories, so that it does not point at the answer. A question's possibility with `via: knowledge` and `category`
-  is listed only after that move, whatever the paragraph. The page shows a member's `text`, never a verdict; crossing one out
-  is refused unless a requirement established so far fails it (`traits`). This is the exception to "every piece of card
-  text carries a quote": general knowledge comes only by a move, as a source with its own trust setting (`general:<category>`).
+  entry `attr: opening`; the route, link by link, an entry `attr: route`.
+
+**Observations** (`world/observations.json`, optional; `engine/observations.js`; the design: `docs/ideas.md`). The general
+mechanic for any question. The player points out that a timeline entry is relevant to an open question; an observation the
+data holds for that pair is then filled in, keeping its logic (entries, their chains, its question).
+
+- `{id, q, from: [entry], says | readings, essential?, against?}`. An entry in `from` is a fact's id, or
+  `{route_through: [things]}` for a route the player built through them. It is filled when every entry is on the timeline
+  and linked to `q`, and goes if one leaves. A link the data does not know stays as the player's note.
+- `readings: [{says, essential?}]`, at least two: only where the story itself puts each forward; the player chooses.
+- `essential`: needed for the description to count as a solution. The rest add to it. `against`: possibilities it tells against.
+- A question answered by a description (the story names the thing only at the end) has "something else" in `also_right`.
+
+The engine also has "What else of this kind?" and the fit check (`whatElse`, `fits`, `checkCrossing`), tested but not used by
+the page: the fallback if a description proves not to be enough.
 
 **Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
 narration link starts at its narrator's trust (certain by default), so a narrator's own observation is certain; every

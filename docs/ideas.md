@@ -545,6 +545,25 @@ route on the page; the knowledge move; the pipeline (step 7 and `spec.md` learn 
 categories and traits, the leak check tests blind whether a list points at its answer); then resume The Speckled Band
 at step 7.
 
+### Observations and open questions (2026-11-08)
+
+A later ruling of the user's, replacing the requirements and the list of candidates in the section above. The player has
+a list of observations and a list of open questions, and points out that an observation is relevant to a specific question:
+logic flows from clues to attributes. The timeline is the list of observations. The game tracks which observations come from
+which timeline entries: once the player connects an entry to a question, it fills in the specific observation and keeps its
+logic, and the observation stays only as trusted as its entry.
+
+- **No alternatives the story does not mention.** The snake's question has the story's own (cat, rat, cheetah, baboon, the
+  gipsies) and "something else". The user: something with these specific attributes in common with a snake is a sufficient
+  solution; the story's own animal is a fictional one that drinks milk and comes to a whistle, so those count as attributes.
+  This supersedes "only some requirements filter". "What has all of these?" with a table of general knowledge is the fallback
+  if a description proves not to be enough.
+- **A link the data does not know** is accepted and stays as the player's note. **Two readings** only where the story itself
+  puts both forward. **Essential** attributes are marked in the data; the rest add to the description.
+- **An attribute is the story's own words.** "Long" was proposed and struck: the story never says it, only "band".
+- **The link starts from the event ("Relevant to…") or from the question ("Link observations…"), both.** Linking from the
+  question costs one click per entry, so it does not guard against trying everything; with no scoring that is accepted.
+
 ### An incremental game about trying every combination
 
 Embrace the absurdity: the combination-trying the game forces on the player becomes the game. The player

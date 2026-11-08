@@ -193,3 +193,15 @@ body.world-page.tabbed .top { position: static; }
 .rm-reqs li { margin: 2px 0; }
 .rm-moves { margin: 6px 0 0; }
 .rm-tag { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; margin-left: 4px; white-space: nowrap; font-weight: 400; }
+
+/* Observations linked to open questions (ui/world.js, linkHtml and descriptionHtml). */
+.link-q { display: block; width: 100%; text-align: left; font-size: 13px; padding: 5px 8px; margin: 3px 0; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+.link-q.on { border-color: var(--accent); background: var(--accent-soft); }
+.link-row { font-size: 11px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 0 7px; background: transparent; cursor: pointer; white-space: nowrap; }
+.link-row.on { border-style: solid; background: var(--accent-soft); }
+.linking-bar { background: var(--accent); color: #fff; padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 8px; }
+.linking-bar button { background: transparent; color: #fff; border: 1px solid #fff; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.desc { margin-top: 4px; }
+.desc-list { margin: 2px 0 4px; padding-left: 16px; }
+.link-start { font-size: 11px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 0 7px; background: transparent; cursor: pointer; }
+.link-start.on { border-style: solid; background: var(--accent-soft); }

@@ -1,7 +1,7 @@
 // The room panel of the timeline (docs/ideas.md, "The arrangement of a room, and general knowledge"): the ways into a
-// sealed place, the route the player builds, what came along it, and the candidates general knowledge brings. Only
+// sealed place, and the route the player builds. Only
 // drawn for a case with world/room.json. The rules are the engine's (engine/arrangement.js); this file only draws.
-import { SIZES, knowledgeKey } from '../engine/arrangement.js';
+import { SIZES } from '../engine/arrangement.js';
 
 const SIZE_LABEL = { person: 'A person', small: 'Something small', air: 'Air, a smell' };
 const COLUMNS = SIZES.filter((s) => s !== 'air');   // a smell is what shows a way, not a column the reader fills in
@@ -14,8 +14,6 @@ ${v.note ? `<p class="rm-note" role="status">${esc(v.note)}</p>` : ''}
 ${v.sealed.question ? `<p class="rm-q">${esc(v.sealed.question)}</p>` : ''}
 ${waysHtml(v, h)}
 ${routeHtml(v, h)}
-${needsHtml(v, h)}
-${candidatesHtml(v, h)}
 </div>`;
 
     function waysHtml() {
@@ -42,20 +40,5 @@ ${got ? `<p class="rm-moves">${got}</p>` : ''}`;
 <div class="rm-chain">${nodes}${nodes && next ? '<span class="rm-arrow">→</span>' : ''}${next}</div>
 ${v.route.nodes.length ? '<p class="rm-moves"><button type="button" class="quiet" data-route-back>Take back the last link</button></p>' : ''}
 ${v.route.steady.length ? `<p class="small muted">${v.route.steady.map((f) => h.phrase(f)).join('; ')}: the far end stays where it is.</p>` : ''}`;
-    }
-    function needsHtml() {
-        if (!v.reqs.length && !v.asks.length) return '';
-        const list = v.reqs.map((r) => `<li>${esc(r.label)}${r.filter === false ? ' <span class="rm-tag">tests no kind</span>' : ''} <span class="rm-tag">${esc(r.source)}</span></li>`).join('');
-        const asks = v.asks.map((c) => `<button type="button" class="move" data-ask="${esc(c.id)}">What else of this kind? ${esc(c.label)}</button>`).join(' ');
-        return `<h3>${esc(v.sealed.unknown ?? 'What came along it?')}</h3>${list ? `<ul class="rm-reqs">${list}</ul>` : ''}${asks ? `<p class="rm-moves">${asks}</p>` : ''}`;
-    }
-    function candidatesHtml() {
-        return v.asked.map((c) => {
-            const key = knowledgeKey(c.id);
-            const trust = `<select class="link-trust" data-key="${esc(key)}" title="How far you trust this general knowledge">${v.levels.map((l, i) => `<option value="${i}"${i === c.level ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
-            const rows = c.members.map((m) => `<tr><td><button type="button" class="poss ${v.markOf(c, m) ?? 'open'}" data-mark-q="${esc(c.q)}" data-mark-pick="${esc(m.value)}">${esc(m.value)}</button></td><td class="small">${esc(m.text)}</td></tr>`).join('');
-            return `<h3>${esc(c.label)} <span class="rm-tag">general knowledge</span> ${trust}</h3>
-${c.distrusted ? '<p class="small muted">You do not trust this.</p>' : `<table class="rm-table"><tbody>${rows}</tbody></table>`}`;
-        }).join('');
     }
 }

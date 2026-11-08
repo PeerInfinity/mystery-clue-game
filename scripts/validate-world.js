@@ -61,6 +61,9 @@ const facts = read('world/facts.json').facts;
 const questions = read('world/questions.json').questions;
 const accounts = read('world/accounts.json').accounts;
 const room = fs.existsSync(path.join(dir, 'world', 'room.json')) ? read('world/room.json') : null;
+const observationList = fs.existsSync(path.join(dir, 'world', 'observations.json')) ? read('world/observations.json').observations : [];
+// A question answered by a description the player builds: "something else" is right before the story names the thing.
+const byDescription = (q) => observationList.some((o) => o.q === q && (o.essential || o.readings?.some((r) => r.essential)));
 const accountIds = new Set(accounts.map((a) => a.id));
 const prov = provenance(dir);
 const world = loadWorld(dir);
@@ -271,7 +274,7 @@ for (const q of questions) {
         if (q.answer == null) err(q.id, 'also_right without an answer');
         if (!p) err(q.id, `also_right "${v}" is not a possibility`);
         else if (p.out != null) err(q.id, `also_right "${v}" is ruled out at ¶${p.out}`);
-        if (v === q.answer || v === 'something else') err(q.id, `also_right "${v}": not the answer, not "something else"`);
+        if (v === q.answer || (v === 'something else' && !byDescription(q.id))) err(q.id, `also_right "${v}": not the answer, not "something else"`);
     }
     if (q.answer != null) {
         if (!Number.isInteger(q.answer_given_at) || !q.answer_given_quote) err(q.id, 'an answer needs answer_given_at and its quote');
@@ -324,6 +327,15 @@ for (const f of facts) {
     if (f.attr === 'closed_to' || f.attr === 'passes' || f.attr === 'passed') { const v = f.attr === 'passed' ? f.passes : f.value; if (!['person', 'small', 'air'].includes(v)) err(f.id, `${f.attr}: ${v} is not person, small or air`); }
     if (f.attr === 'passed' && !(f.between?.length === 2 && f.between.every((x) => entities.has(x)))) err(f.id, 'passed: between is two entities');
     if (['attached', 'reaches', 'near', 'fixed'].includes(f.attr) && !entities.has(f.value)) err(f.id, `${f.attr}: no entity ${f.value}`);
+}
+// What an entry shows about a question once linked (world/observations.json, optional).
+for (const o of observationList) {
+    if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);
+    if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
+    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
+    if (!o.says === !o.readings) err(o.id, 'says or readings, one of them');
+    if (o.readings && (o.readings.length < 2 || o.readings.some((r) => !r.says))) err(o.id, 'readings: at least two, each with says');
+    for (const p of list(o.against)) if (!qById.get(o.q)?.possibilities.some((x) => x.value === p)) err(o.id, `against: no possibility ${p}`);
 }
 const strainsFile = path.join(dir, 'world', 'strains.json');
 const strains = fs.existsSync(strainsFile) ? read('world/strains.json').strains : [];

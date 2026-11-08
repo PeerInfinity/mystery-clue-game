@@ -59,29 +59,46 @@ ok(await count('[data-way-row^="r:g:"]') === 1, '"Something got through" adds a 
 ok(/not yet found/.test(await text('#timeline')), 'and an entry on the timeline', await text('#timeline'));
 ok(await count('[data-got]') === 0, 'and is offered once');
 
-await click('[data-ask="c.colonial"]');
-ok(await count('[data-mark-pick="a mastiff"]') >= 1, 'the move lists the candidates');
-ok(/does not bite/.test(await text('#room')), 'with their traits');
-ok(!/✗|✓/.test(await text('#room')), 'but no verdicts');
-await click('#room [data-mark-pick="a mastiff"]');
-await click('#room [data-mark-pick="a mastiff"]');
-ok(/rules that out/.test(await text('.rm-note')), 'crossing out with nothing against it is refused', await text('.rm-note'));
-ok(!await count('#room .poss.crossed'), 'and leaves the candidate uncrossed');
-
 await ev(`localStorage.setItem(${JSON.stringify(STORE)}, JSON.stringify({ ...JSON.parse(localStorage.getItem(${JSON.stringify(STORE)})), para: 9 }))`);
 await open(url);
 ok(await count('[data-way-row^="r:g:"]') === 0 && await count('[data-way-row="grating"]') === 1, 'the grating takes the place of the way not yet found');
+ok(!/not yet found/.test(await text('#timeline')), 'and the timeline no longer calls it not yet found', await text('#timeline'));
 await click('[data-route-add="office"]');
 for (const n of ['grating', 'hook', 'chain', 'desk']) { const did = await click(`[data-route-add="${n}"]`); ok(did, `the route goes on to ${n}`); }
 ok(await count('.rm-node') === 5, 'five nodes');
 ok(/fixed to/.test(await text('#room')), 'the far end held in place', await text('#room'));
 ok(/A route/.test(await text('#timeline')), 'the route is on the timeline');
-ok(/small enough/.test(await text('.rm-reqs')) && /travel along/.test(await text('.rm-reqs')), 'its requirements are listed', await text('.rm-reqs'));
-await click('#room [data-mark-pick="a mastiff"]');
-await click('#room [data-mark-pick="a mastiff"]');
-ok(await count('#room .poss.crossed') === 1, 'now it fails the route, it can be crossed out', await text('.rm-note'));
+// The link move: from the event (A).
+await click('#timeline [data-fact="f.grating"] .ph');
+ok(await count('#detail [data-link-entry="f.grating"]') === 1, 'an event offers the open questions');
+ok(!await count('.desc-list'), 'nothing shown before a link');
+await click('#detail [data-link-entry="f.grating"]');
+ok(/small enough for the grating/.test(await text('.desc-list')), 'a known link fills in the observation', await text('#q-box'));
+ok(/¶7/.test(await text('.desc-list')), 'with where it came from');
+await click('#timeline [data-fact="f.walls"] .ph');
+await click('#detail [data-link-entry="f.walls"]');
+ok(/Your notes/.test(await text('#q-box')) && (await count('.desc-list li')) === 1, 'an unknown link stays as a note', await text('#q-box'));
+await click('#undo');
+ok(!/Your notes/.test(await text('#q-box')), 'undo takes a link back');
+// From the question (B), and a route as an entry.
+await click('[data-linking="q.what_came"]');
+ok(/Linking to/.test(await text('#timeline')), 'the linking mode shows on the timeline');
+ok(await click('#timeline [data-fact^="r:r:"] [data-link-entry]'), 'the route can be linked');
+ok(/travel down a chain/.test(await text('.desc-list')), 'a route counts by what it runs through', await text('.desc-list'));
+await click('#timeline [data-fact="f.dead"] [data-link-entry]');
+ok(await count('[data-reading]') === 2, 'two readings to choose between');
+await click('[data-linking-done]');
+ok(!/Linking to/.test(await text('#timeline')), 'Done leaves the mode');
+await click('[data-reading="o.words"][data-index="0"]');
+ok(/something that bites/.test(await text('.desc-list')), 'the reading is chosen');
+ok(await count('[data-part="timeline"] .link-row') === 0, 'no buttons on the rows outside the mode');
+await ev(`localStorage.setItem(${JSON.stringify(STORE)}, JSON.stringify({ ...JSON.parse(localStorage.getItem(${JSON.stringify(STORE)})), para: 10 }))`);
+await open(url);
+ok(/had everything it needed/.test(await text('#q-box')), 'at the give-away the description is judged', await text('#q-box'));
+ok(/small enough for the grating/.test(await text('.desc-list')), 'links survive a reload');
 await click('[data-route-back]');
 ok(await count('.rm-node') === 4, 'a link taken back');
+ok(!/travel down a chain/.test(await text('.desc-list')), 'and the observation that rested on the route goes with it');
 ok(problems.length === 0, 'no errors in the page', problems.join(' | ').slice(0, 600));
 
 await ev(`localStorage.removeItem(${JSON.stringify(STORE)})`);

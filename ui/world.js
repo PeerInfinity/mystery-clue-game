@@ -10,7 +10,8 @@ import { Story } from '../engine/story.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
 import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
-import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute, whatElse, isListed, checkCrossing, knowledgeChain } from '../engine/arrangement.js';
+import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
+import { fill, described } from '../engine/observations.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
@@ -37,6 +38,8 @@ setCaseActions(await get(`${W}/actions.json`).catch(() => ({})));
 const strainList = await get(`${W}/strains.json`).then((x) => x.strains ?? []).catch(() => []);
 // The arrangement of a room and the general knowledge the player may bring in (world/room.json): optional.
 const room = await get(`${W}/room.json`).catch(() => null);
+// What an entry shows about a question once the player links them (world/observations.json): optional.
+const observations = await get(`${W}/observations.json`).then((x) => x.observations ?? []).catch(() => null);
 const data = {
     entities: w.entities, moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
     accounts: accounts.accounts, questions: questions.questions, narrators: header.narrators,
@@ -115,7 +118,7 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], readings: {} };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
@@ -123,20 +126,19 @@ else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); f
 state.sel = null;
 state.note = null;
 if (!Array.isArray(state.held)) state.held = [];
-const freshRoom = () => ({ ways: {}, got: [], route: [], asked: [] });
+const freshRoom = () => ({ ways: {}, got: [], route: [] });
+if (!Array.isArray(state.links)) state.links = [];
+if (!state.readings || typeof state.readings !== 'object') state.readings = {};
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, readings: state.readings, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
-const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room })].slice(-50); };
+const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links, readings: state.readings })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
 const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
 function cycleMark(qid, pick) {
     remember();
     const m = { ...(state.marks[qid] ?? {}) };
-    let next = MARK_NEXT[m[pick]];
-    // A candidate of general knowledge can be crossed out only for something on the timeline it fails.
-    const refused = next === 'crossed' ? crossingRefused(qid, pick) : null;
-    if (refused) { next = undefined; roomNote = refused; }
+    const next = MARK_NEXT[m[pick]];
     if (next) m[pick] = next; else delete m[pick];
     state.marks = { ...state.marks, [qid]: m };
     save(); render();
@@ -190,7 +192,7 @@ function questionOptions(q) {
     // An idea that is itself a person, animal or place goes in among all the others met so far, not on its own.
     const kinds = answerKinds(q, kindOf);
     const isKind = (v) => kinds.includes(kindOf(v));
-    const listed = q.possibilities.filter((p) => isListed(p, state.para, new Set(state.room.asked)));
+    const listed = q.possibilities.filter((p) => p.available <= state.para);
     const out = listed.filter((p) => p.via !== 'indirect' || !isKind(p.value)).map((p) => ({ value: p.value, proposed: p.via !== 'indirect', group: OTHER_IDEAS }));
     if (!kinds.length) return out;
     const met = data.entities.filter((e) => isKind(e.id) && e.id !== q.entry?.of && !out.some((o) => o.value === e.id)
@@ -223,7 +225,7 @@ function stepText(x) {
 }
 /** A fact as a short sentence. */
 function phrase(f) {
-    if (f.attr === 'opening') return `A way between ${ent(f.sides[0])} and ${ent(f.sides[1])}, not yet found`;
+    if (f.attr === 'opening') { const by = foundBy(f, roomKnown, room.openings); return `A way between ${ent(f.sides[0])} and ${ent(f.sides[1])}${by ? `: ${ent(by)}` : ', not yet found'}`; }
     if (f.attr === 'route') return `A route: ${f.value.map(ent).join(' → ')}`;
     const E = f.of === '?' ? 'Someone' : ent(f.of);
     // Told early in brief (`given_at`): until its own paragraph, only the brief words that told it.
@@ -355,7 +357,7 @@ function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
     const cls = ['event', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${assertsHtml(f)}</${tag}>`;
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${linkingQ && f.attr !== 'tells' ? ` <button type="button" class="link-row${isLinked(f.id, linkingQ) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(linkingQ)}">${isLinked(f.id, linkingQ) ? 'linked ✓' : '+ relevant'}</button>` : ''}${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -668,29 +670,45 @@ function roomView(told) {
     const next = end ? [...new Set(links.flatMap((l) => (l.a === end ? [l.b] : l.b === end ? [l.a] : [])))].filter((n) => !nodes.includes(n))
         : [...new Set(links.flatMap((l) => [l.a, l.b]))].filter(isPlace);
     next.sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
-    const routeReqs = (r.requirements ?? []).map((q) => ({ ...q, label: q.trait === 'size' ? `small enough for ${lowerFirst(nameOf(q.by))}` : `able to travel along ${lowerFirst(nameOf(q.value))}`, source: 'from your route' }));
-    const toldReqs = (room.requirements ?? []).filter((q) => list(q.from).some((id) => known.some((f) => f.id === id))).map((q) => ({ ...q, source: `¶${Math.min(...list(q.from).map(paraOf))}` }));
-    const reqs = [...routeReqs, ...toldReqs];
-    roomReqs = reqs;
-    const cats = room.categories ?? [];
-    const asked = new Set(state.room.asked);
-    const level = (c) => levelOf([knowledgeChain(c.id)], state.trust);
     return {
-        sealed: room.sealed, note: roomNote, rows: shownRows, marks, gotOffers, reqs, levels: LEVELS.slice(0, -1),
+        sealed: room.sealed, note: roomNote, rows: shownRows, marks, gotOffers,
         route: { nodes, next, steady: r.steady ?? [] },
-        asks: cats.filter((c) => !asked.has(c.id) && whatElse(c, known).members),
-        asked: cats.filter((c) => asked.has(c.id) && whatElse(c, known).members).map((c) => ({ ...c, level: level(c), distrusted: level(c) === 0 })),
-        markOf: (c, m) => state.marks[c.q]?.[m.value],
     };
 }
-let roomReqs = [];
-/** Why a candidate may not be crossed out, or null: only for a candidate of general knowledge. */
-function crossingRefused(qid, pick) {
-    const m = (room?.categories ?? []).filter((c) => c.q === qid).flatMap((c) => c.members).find((x) => x.value === pick);
-    return m ? checkCrossing(m, roomReqs).why ?? null : null;
-}
-const lowerFirst = (t) => t.replace(/^(A|An|The) /, (m) => m.toLowerCase());
 const roomChange = (fn) => { remember(); state.room = fn(state.room); save(); render(); };
+
+// --- Observations (world/observations.json; engine/observations.js): an entry linked to an open question.
+let linkingQ = null;      // the question "Link observations…" is working on (not saved)
+let observed = { filled: [], notes: [] };
+const openQuestions = () => listedQuestions().filter((q) => !givenAway(q));
+const isLinked = (entry, q) => state.links.some((l) => l.entry === entry && l.q === q);
+function toggleLink(entry, q) {
+    remember();
+    state.links = isLinked(entry, q) ? state.links.filter((l) => !(l.entry === entry && l.q === q)) : [...state.links, { entry, q }];
+    save(); render();
+}
+/** "Relevant to…" in an event's detail: every open question, so that the list points at none. */
+function linkHtml(f) {
+    if (!observations || f.attr === 'tells') return '';
+    const qs = openQuestions();
+    if (!qs.length) return '';
+    const shows = observed.filled.filter((x) => x.entries.includes(f) || x.entries.some((e) => e.id === f.id));
+    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${shows.filter((x) => x.says).map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>.</p>`).join('')}`;
+}
+/** What the player has shown about a question: its observations, their sources, and any notes. */
+function descriptionHtml(q) {
+    if (!observations) return '';
+    const mine = observed.filled.filter((x) => x.obs.q === q.id);
+    const notes = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
+    const from = (x) => x.entries.map((e) => `¶${givenAt(e) ?? '?'}`).join(', ');
+    const items = mine.map((x) => `<li>${x.choose ? x.obs.readings.map((r, i) => `<button type="button" class="move" data-reading="${esc(x.obs.id)}" data-index="${i}">${esc(r.says)}</button>`).join(' or ') : `${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''}`} <span class="para">${from(x)}</span></li>`).join('');
+    const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
+    const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
+    const noteHtml_ = notes.length ? `<div class="small muted">Your notes: ${notes.map((e) => phrase(e)).join('; ')}</div>` : '';
+    const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>` : '';
+    return `<div class="desc">${items ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
+}
+const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span><button type="button" data-linking-done>Done</button></div>` : '');
 
 let shownPara = null;
 function render() {
@@ -712,6 +730,7 @@ function render() {
     const keys = new Set(lapsed.map((l) => moveKey(l.move)));
     lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
     heldKeys = new Set(held.map(moveKey));
+    if (observations) observed = fill(observations, state.links, onTimeline(), state.readings);
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
@@ -751,7 +770,7 @@ function render() {
     document.getElementById('depth').value = String(state.depth);
     document.getElementById('depth-label').hidden = state.view !== 'place';
     document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
-    document.getElementById('timeline').innerHTML = state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing);
+    document.getElementById('timeline').innerHTML = linkingBar() + (state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing));
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
     renderTabs({ cards: cards.count, questions: listedQuestions().length, clashes: clashes.length + strains.filter((s) => !state.held.includes(s.id)).length });
     renderLapseNews();
@@ -1242,7 +1261,7 @@ function questionsPanel(clashing) {
     const qs = listedQuestions();
     if (!qs.length) return '';
     const items = qs.map((q) => `<li class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
-      ${chipsHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b></div>` : ''}</li>`).join('');
+      ${chipsHtml(q)}${descriptionHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b></div>` : ''}</li>`).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
 /** The typed actions on the timeline and those of the player's hypotheses (circled answers, presuppositions). */
@@ -1338,7 +1357,7 @@ function questionDetail(q, clashing) {
     return `<h2><span class="q-mark">?</span> ${esc(qLabel(q))}</h2>
       ${q.own ? `<p class="small">Raised by your reasoning: <a class="link" data-fact="${esc(q.change)}">${phrase(reasonedById.get(q.change) ?? {})}</a></p>` : `<p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>`}
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
-      ${chipsHtml(q)}
+      ${chipsHtml(q)}${descriptionHtml(q)}
       ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>${keyStrainsHtml(q)}` : ''}
       ${marked.length ? `<h3>Your marks, your hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${actionMovesHtml(q)}${aimPlansHtml(q)}`;
 }
@@ -1356,7 +1375,7 @@ function renderDetail(clashing) {
         return;
     }
     if (sel && reasonedById.has(sel)) {
-        el.innerHTML = noteHtml() + reasonedDetail(reasonedById.get(sel), clashing);
+        el.innerHTML = noteHtml() + reasonedDetail(reasonedById.get(sel), clashing) + linkHtml(reasonedById.get(sel));
         return;
     }
     if (sel && factById.has(sel)) {
@@ -1369,7 +1388,7 @@ function renderDetail(clashing) {
           ${f.attr === 'tells' ? '<p class="small muted">A telling: how an account passed from one person to another.</p>'
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
-          ${peopleHtml([...chains, ...content])}${movesHtml(f)}`;
+          ${peopleHtml([...chains, ...content])}${movesHtml(f)}${linkHtml(f)}`;
         el.insertAdjacentHTML('afterbegin', noteHtml());
         return;
     }
@@ -1462,7 +1481,7 @@ document.addEventListener('toggle', (e) => {
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));
-    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); } else state.trust = h;
+    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); state.links = h.links ?? []; state.readings = h.readings ?? {}; } else state.trust = h;
     state.history = state.history.slice(0, -1);
     save(); render();
 });
@@ -1471,6 +1490,15 @@ document.getElementById('theme').addEventListener('change', (e) => { state.theme
 // The settings menu closes on a click outside it.
 document.addEventListener('click', (e) => { const st = document.getElementById('settings'); if (st.open && !e.target.closest('#settings')) st.open = false; });
 document.addEventListener('click', (e) => {
+    if (observations) {
+        const li = e.target.closest('[data-link-entry]');
+        if (li) { toggleLink(li.dataset.linkEntry, li.dataset.linkQ); return; }
+        const st = e.target.closest('[data-linking]');
+        if (st) { linkingQ = linkingQ === st.dataset.linking ? null : st.dataset.linking; if (linkingQ) reveal('timeline', panelFrom(e)); render(); return; }
+        if (e.target.closest('[data-linking-done]')) { linkingQ = null; render(); return; }
+        const re = e.target.closest('[data-reading]');
+        if (re) { remember(); state.readings = { ...state.readings, [re.dataset.reading]: Number(re.dataset.index) }; save(); render(); return; }
+    }
     const tb = e.target.closest('[data-tab]');
     if (tb) { chooseTab(panelFrom(e) ?? 0, tb.dataset.tab); backs = []; save(); render(); return; }
     if (e.target.closest('[data-back]')) { chooseTab(0, backs.at(-1)); backs = backs.slice(0, -1); save(); render(); return; }
@@ -1550,8 +1578,6 @@ document.addEventListener('click', (e) => {
         const ra = e.target.closest('[data-route-add]');
         if (ra) { roomChange((x) => ({ ...x, route: [...x.route, ra.dataset.routeAdd] })); return; }
         if (e.target.closest('[data-route-back]')) { roomChange((x) => ({ ...x, route: x.route.slice(0, -1) })); return; }
-        const as = e.target.closest('[data-ask]');
-        if (as) { roomChange((x) => ({ ...x, asked: [...x.asked, as.dataset.ask] })); return; }
     }
     const m = e.target.closest('[data-mark-q]');
     if (m) {
