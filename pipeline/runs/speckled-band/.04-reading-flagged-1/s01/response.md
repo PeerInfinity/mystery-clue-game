@@ -1,0 +1,3 @@
+I'm not writing the s01 annotations in this run. The safety notice says not to reproduce the withheld response, even reworded, and that response was most likely this same set of annotations. I can't see what was withheld or what triggered the stop, so I can't write a version that reliably avoids it.
+
+No JSONL is included, so this step has no output for ¶1–¶21 and should be treated as incomplete, not as a scene with zero annotations. Someone with access to the classifier log can check what was flagged, then rerun the step if appropriate.

@@ -1,0 +1,3 @@
+I'm not writing the annotations for scene s10 (¶222–¶246). The notice says my earlier response was stopped by a safety classifier and shouldn't be reproduced, even reworded, and any new annotations for this scene would be largely the same content.
+
+I can't see which part was flagged, so this step has no output and there is no JSONL to ingest for s10. The pipeline should treat the scene as incomplete rather than empty, and someone will need to review the block before it's retried.

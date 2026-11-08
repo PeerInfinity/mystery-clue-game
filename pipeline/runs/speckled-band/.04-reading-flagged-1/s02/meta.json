@@ -1,0 +1,13 @@
+{
+  "model": "claude-opus-5-5",
+  "prompt_sha256": "fadf98396d41167c09f4081f1f566c796fb01f6c5f6825c9c2f70fcaa37f9211",
+  "cost_usd": 0.425444,
+  "duration_s": 161,
+  "input_tokens": 14395,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 14391,
+  "output_tokens": 15515,
+  "stop_reason": "refusal",
+  "error": "API Error: Opus 5.5's safeguards flagged this message (https://www.anthropic.com/legal/aup). This sometimes happens with safe, normal conversations. Claude Code can't respond to this message with Opus 5.5.\n\nTry rephrasing the request in a new session or change your model.\n\nLearn more: https://support.claude.com/en/articles/8106465\n\nDetails: `[reasoning_extraction]`\n\nRequest ID: req_011CgqmnbstHRof",
+  "date": "2026-11-08T16:27:05.881Z"
+}

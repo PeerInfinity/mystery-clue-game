@@ -1,0 +1,3 @@
+t43.1: its id's paragraph is not its para 43
+t43.1: reads "Ah, but I sleep more heavily than you." is not in ¶43
+t43.2: from t39.1: no earlier thought or card

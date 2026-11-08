@@ -1,0 +1,1 @@
+I'm not writing the s10 annotations (¶222–¶246) because my earlier response to this step was stopped by a safety classifier, and I've been told not to reproduce that content, even reworded. This reply contains no JSONL block, so the pipeline has no output for this scene, and it will need to be rerun or handled separately.

@@ -1,0 +1,5 @@
+```jsonl
+{"id":"t43.1","para":43,"tag":"WEIGH","confidence":"fair","profile":"careful","from":["t40.1","bk.sound_sleepers"],"reads":"I sleep more heavily than you","text":"Helen's not hearing the whistle proves little, since Julia is the light sleeper. Julia's own doubt, that a whistle on the lawn would have woken Helen too, pushes slightly towards a source nearer Julia.","relations":[{"type":"supports","target":"t40.3"}]}
+{"id":"t43.2","para":43,"tag":"INFER","confidence":"weak","profile":"careful","from":["t33.1","t40.2","t40.3","t43.1"],"text":"The 'next room' next to Julia is Roylott's or Helen's, and Helen denies whistling in her sleep. If Julia's guess is right, the whistle came from Roylott's room, which is weak but worth holding."}
+{"id":"t62.1","para":62,"tag":"TEST","confidence":"fair","profile":"careful","from":["t30.14","t61.1"],"reads":"Yes, there are nearly always some there.","text":"The gipsies are always there, so their presence that night proves nothing in particular. No one on the lawn was singled out.","relations":[{"type":"undercuts","target":"t30.14"}]}
+```
