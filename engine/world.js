@@ -361,7 +361,7 @@ export const DEFAULT_LEVEL = 1;
  * speaker and hearer, so all of one person's words to another share it; a member's link by member and group; a
  * mark's link (the reader's hypothesis) by question and possibility; a narration by its narrator (`narrates:<id>`).
  */
-export const linkKey = (l) => (l.hyp ? l.hyp : l.narrator ? `narrates:${l.narrator}` : l.stmt ? `stmt:${l.stmt}` : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
+export const linkKey = (l) => (l.hyp ? l.hyp : l.know ? l.know : l.narrator ? `narrates:${l.narrator}` : l.stmt ? `stmt:${l.stmt}` : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
 
 /**
  * How far the player trusts a chain: its weakest link, a link's level being the player's choice for it (default

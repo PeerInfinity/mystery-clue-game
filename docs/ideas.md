@@ -502,6 +502,45 @@ came from builds, checks, leads, drops and the absence, never from elimination.
   number, the user's choice), so the read-back cases above (a mark on an answer not yet listed, a circled aim not yet
   told) no longer arise from the player, though the code still handles them.
 
+### The arrangement of a room, and general knowledge (2026-11-08)
+
+The second story showed what Silver Blaze had shaped: The Speckled Band turns less on the timeline than on the
+arrangement of things in a room, and its central step, that there is a snake at all, is nowhere in the text until
+the end. Decided with the user, from these alternatives:
+for the room, questions only, a ways-in table, typed arrangement with a route move, or a floor plan; for the snake, a
+list of a kind, requirements first, another sense of a word, a typed guess, or leaving it to the give-away.
+
+**The rulings.**
+
+- **The room: typed arrangement data and a route move, with a ways-in table as its first view.** A floor plan may come
+  later from the same data.
+- **The snake: requirements first, and "What else of this kind?" for the candidates.** "Take a word another way" needs
+  no move: it is an ordinary question (what did she mean by a band?), with the strip-like sense behind "More".
+- **General knowledge** may be introduced as the result of a reasoning step if it is necessary for solving the case.
+  It must require a move by the player and ideally comes with distractors. This is the one exception to "every piece
+  of card text carries a quote". It is a source with its own trust setting, starting uncertain like every other link.
+- **The player fills in the ways-in table**, and the page refuses a mark no fact supports.
+- **"Something got through" is a move:** something crossing between two places (a smell) gives an opening nobody has
+  found, a row of the table until the story shows it.
+- **The route is built link by link.** Picking two ends and letting the engine find the path would skip the deduction.
+- **Only some requirements filter.** The story's world is not zoology (a snake neither drinks milk nor comes to a
+  whistle): those show only that an animal is kept and trained, and the data records that they do not test a species
+  (`filter: false`). Size, the ability to travel the route, the kill and the look do.
+- **The move must not point at the answer:** "What else of this kind?" is offered on several categories, not only the
+  one that leads to the solution.
+
+**The data** (additive; Silver Blaze's is unchanged). Openings of any kind beside doors' `joins`, each with its sides;
+a case may name a sealed place (no sealed place, no table); `closed_to` and `passes` on a scale person, small, air
+(`closed_to: v` stops v and larger, `passes: v` lets v and smaller through, so "barred to a person" says nothing of
+something small: the trap of "she must have been alone"); `attached`, `reaches`, `near`, `fixed`; `passed` for what
+crossed between places; categories with members and traits; a possibility with `via: knowledge` is listed only after
+the move, not by reading on.
+
+**Order of work:** the engine and its tests on an invented fixture (`engine/arrangement.js`); the ways-in table and the
+route on the page; the knowledge move; the pipeline (step 7 and `spec.md` learn the arrangement, a step writes the
+categories and traits, the leak check tests blind whether a list points at its answer); then resume The Speckled Band
+at step 7.
+
 ### An incremental game about trying every combination
 
 Embrace the absurdity: the combination-trying the game forces on the player becomes the game. The player
