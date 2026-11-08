@@ -366,5 +366,8 @@ run 2 up to step 8 (`silver-blaze-8b`), so run 2 is untouched. Three attempts, a
 - One sample of each cannot separate the effect of the hints from the variation between runs (step 12's paths vary as
   much). A checklist that holds for any mystery (for each crime: who, with what, where, when, why) might be fair, but
   Silver Blaze cannot test it now that it suggested it: The Speckled Band would.
-- Step 8's own prompt names examples from this story (what he whispered, a photograph): against the rule of invented
-  examples, to change before the next run.
+- Decided with the user: no follow-up step for now. Step 8's prompt now has invented examples (it had this story's)
+  and a checklist that holds for any mystery (for each crime or strange event: who, with what, where, when, why), to
+  be judged on The Speckled Band, with a third run of Silver Blaze only a secondary check since Silver Blaze suggested
+  the checklist. The follow-up on step 4 waits. Step 8b stays as an experiment. Prompts rebuilt for the earlier runs'
+  step 8 now differ from their recorded hashes (`prompts.mjs` says so), as for any template changed after a run.

@@ -10,10 +10,12 @@ read further, and nobody knows the answers yet.
 
 - A question is what the story makes a careful reader wonder about the events of the case: who did it, where
   something or someone is or was, what something was for, why someone acted, whether a statement is true. Not about
-  the detective's or the narrator's behaviour (what he whispered, why he asks for a photograph, why he leaves): those
-  are what a reader notices, and the questions they point to are about the events (what the photograph would
-  show is a question about the person in it). Take the reader's QUESTION and HYPOTHESIS
+  the detective's or the narrator's behaviour (what he muttered to the porter, why he borrows a ladder, why he takes the night train): those
+  are what a reader notices, and the questions they point to are about the events (what the ladder would reach is a
+  question about the place it is for). Take the reader's QUESTION and HYPOTHESIS
   notes as a guide; add the questions the story itself asks.
+- For each crime or strange event the scene tells, ask of it in turn: who did it, with what, where, when, and why.
+  Write a question for each of these that the story leaves open and a careful reader would want settled.
 - A new question: `{"file": "questions", "id", "label", "entry", "raised", "quote", "possibilities"}` with
   `"answer": null`. Its possibilities: exactly one `{"value": "something else", "available": <raised>, "via":
   "always"}`, and each answer someone in the story puts forward (`via: direct`, `quote` in its `available`
