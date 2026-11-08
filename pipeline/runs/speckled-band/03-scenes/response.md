@@ -1,0 +1,13 @@
+```jsonl
+{"id": "s01", "title": "Baker Street: Holmes wakes Watson to meet a frightened veiled client", "from": 1, "to": 21, "place": "221B Baker Street, sitting-room", "present": ["Sherlock Holmes", "Dr. Watson", "the veiled lady"]}
+{"id": "s02", "title": "Baker Street: the client tells of her family and her stepfather", "from": 22, "to": 32, "place": "Baker Street sitting-room", "present": ["Sherlock Holmes", "Dr. Watson", "Helen Stoner"]}
+{"id": "s03", "title": "Baker Street: Helen Stoner recounts the night her sister died", "from": 33, "to": 66, "place": "Baker Street sitting-room", "present": ["Sherlock Holmes", "Dr. Watson", "Helen Stoner"]}
+{"id": "s04", "title": "Baker Street: Helen's present fears, her departure, and Holmes and Watson confer", "from": 67, "to": 94, "place": "Baker Street sitting-room", "present": ["Sherlock Holmes", "Dr. Watson", "Helen Stoner"]}
+{"id": "s05", "title": "Baker Street: an angry visitor bursts in and threatens Holmes", "from": 95, "to": 113, "place": "Baker Street sitting-room", "present": ["Sherlock Holmes", "Dr. Watson", "Dr. Grimesby Roylott"]}
+{"id": "s06", "title": "Holmes reports on the will; the journey to Stoke Moran", "from": 114, "to": 131, "place": "Baker Street, then the road from Leatherhead to the fields near Stoke Moran", "present": ["Sherlock Holmes", "Dr. Watson", "the driver", "Helen Stoner"]}
+{"id": "s07", "title": "Stoke Moran: examining the outside of the wing and the middle bedroom", "from": 132, "to": 157, "place": "Stoke Moran Manor House, the lawn and the middle bedroom", "present": ["Sherlock Holmes", "Dr. Watson", "Helen Stoner"]}
+{"id": "s08", "title": "Stoke Moran: Dr. Roylott's room, then Holmes's instructions on the lawn", "from": 158, "to": 194, "place": "Stoke Moran Manor House, Dr. Roylott's chamber and the lawn", "present": ["Sherlock Holmes", "Dr. Watson", "Helen Stoner"]}
+{"id": "s09", "title": "The Crown Inn: watching the house and waiting for the signal", "from": 195, "to": 221, "place": "The Crown Inn, upper rooms overlooking Stoke Moran", "present": ["Sherlock Holmes", "Dr. Watson", "Dr. Grimesby Roylott", "the lad driving the trap", "the landlord"]}
+{"id": "s10", "title": "Stoke Moran by night: the vigil in the dark bedroom and what follows", "from": 222, "to": 246, "place": "Stoke Moran Manor House, the grounds, the middle bedroom and Dr. Roylott's chamber", "present": ["Sherlock Holmes", "Dr. Watson", "Dr. Grimesby Roylott"]}
+{"id": "s11", "title": "Travelling back: the aftermath and Holmes's explanation", "from": 247, "to": 251, "place": "On the journey back from Stoke Moran", "present": ["Sherlock Holmes", "Dr. Watson"]}
+```

@@ -1,0 +1,6 @@
+source: pipeline/sources/doyle-speckled-band.txt
+paragraphs: 252 (¶0 to ¶251)
+¶0: VIII. THE ADVENTURE OF THE SPECKLED BAND
+¶1: On glancing over my notes of the seventy odd cases in which I have during the last eight years studied the methods of my…
+last: “And also with the result of causing it to turn upon its master at the other side. Some of the blows of my cane came hom…
+words: 9812
