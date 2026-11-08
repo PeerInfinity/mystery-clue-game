@@ -222,6 +222,25 @@ export const STEPS = [
         },
     },
     {
+        // The time points sorted with the whole story known; `business` leaves the timeline (assemble.mjs `filterTimes`).
+        n: 6.2, name: 'timeclass', dir: '06b-timeclass',
+        prompt: (ctx) => { const d = seen(ctx, 6.2, null); return template('06b-timeclass', { times: d.times.map((t) => JSON.stringify({ id: t.id, label: t.label, para: t.para })).join('\n'), story: numbered(storyOf(ctx.name)) }); },
+        check: (ctx, scene, items) => {
+            const ids = new Set(seen(ctx, 6.2, null).times.map((t) => t.id));
+            const said = new Map();
+            const errs = [];
+            for (const x of items) {
+                if (x.file !== 'timeclass') { errs.push(`${x.id ?? '?'}: file ${x.file}`); continue; }
+                if (!ids.has(x.id)) errs.push(`${x.id}: no such time point`);
+                if (!['case', 'lead', 'business'].includes(x.class)) errs.push(`${x.id}: class ${x.class}`);
+                said.set(x.id, (said.get(x.id) ?? 0) + 1);
+            }
+            for (const id of ids) if (!said.has(id)) errs.push(`${id}: no line for this point`);
+            for (const [id, n] of said) if (n > 1) errs.push(`${id}: ${n} lines`);
+            return errs;
+        },
+    },
+    {
         n: 7, name: 'facts', perScene: true,
         prompt: (ctx, scene) => {
             const d = seen(ctx, 7, scene);

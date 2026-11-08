@@ -52,6 +52,7 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 4 | Annotated reading | the story so far, the reading so far | `reading.json` (thoughts) | model, one call per scene |
 | 5 | Entities and mentions | the story so far, entities so far | `entities.json`, `mentions.json` | model, per scene; every phrase must be found |
 | 6 | Time points | the story so far, entities, times so far | `times.json` | model, per scene |
+| 6b | Sorting the time points | the whole story, the time points | `case`, `lead` or `business` for each point; `business` leaves the timeline, kept in `06b-timeclass/items.json` and `case/times-filtered.json` | model, one call. Added on The Speckled Band; see "The Speckled Band" |
 | 7 | Facts and accounts | the scene, the story so far, entities, times, facts and accounts so far | `facts.json`, `accounts.json` (and new entities and times) | model, per scene; the validator after each |
 | 8 | Questions | the story so far, the reading so far, entities, facts, questions so far | `questions.json` (no answers), the facts' picks | model, per scene |
 | 8b | A second look at the questions (an experiment, not yet part of a run) | the whole story, the reading, the questions so far | new questions, possibilities | model, one call; `silver-blaze-8b`, see "Follow-up passes" |
@@ -94,7 +95,7 @@ node pipeline/assemble.mjs <case>                     rebuild the run's case fro
 `pipeline/cases.json`. A run's assembled data is `runs/<case>/case/` (`story.txt`, `world/`), rebuilt from the
 steps' outputs; `--dry` writes the prompts (`dry.prompt.md`) without calling the model; `--recheck` checks a
 step's recorded output again, calling the model only to repair it. Step names: `text`, `header`, `scenes`, `reading`,
-`entities`, `times`, `facts`, `questions`, `answers`, `dates`, `consistency`, `strains`, `leak`, `leakfix`,
+`entities`, `times`, `timeclass`, `facts`, `questions`, `answers`, `dates`, `consistency`, `strains`, `leak`, `leakfix`,
 `leakfix2`, `path`.
 
 ## Lessons of the runs
@@ -344,6 +345,30 @@ story needs too is a candidate for the generic table.
   wrong turns); an empty first answer is better rerun than repaired. Step 12 on Silver Blaze now and then trips
   Opus's safeguards partway (a story of drugging and a knife), two of four calls since stage 2: a rerun of the same
   prompt has gone through each time. If it keeps happening, step 12 can be split by paragraph range.
+
+## The Speckled Band (2026-11-08, in progress: `runs/speckled-band/`)
+
+| Step | Calls | Cost | Result |
+|---|---|---|---|
+| 1–3 text, header, scenes | 2 | $0.22 | 252 paragraphs, 11 scenes |
+| 4 reading | 25 | $15.01 (about $7 stopped or redone) | 519 lines, s03 and s10 by Sonnet |
+| 5 entities | 11 | $4.19 | 209 |
+| 6 times | 13 | $6.71 | 446 points (Silver Blaze's run 2: 113) |
+| 6b sorting the times | 1 | $0.80 | 81 case, 226 lead, 139 business: 307 kept |
+
+- **The safeguards and the reading.** Opus stopped 7 of the first 15 reading calls (`reasoning_extraction` where tagged;
+  a withheld answer comes back as prose with `stop_reason` `end_turn`, and was at first recorded as an empty scene).
+  s03 and s10 did not go through on reruns; the user's ruling: since the objection is reasoning extraction, try Sonnet
+  for them. Each scene's `meta.json` names its model; every stopped attempt is kept beside the scene (`.sNN-*`). An
+  answer with no fenced block now stops the step.
+- **Step 6b, the sorting (the user's ruling).** Step 6 gave a point to nearly every line of action or speech. Rather
+  than rerun it, the points are annotated for whether they bear on the logic of the case, and the rest kept aside.
+  Three classes, not two, because the page must not reveal what matters: only `business` leaves the timeline, so a
+  point kept may be a false trail as well as a part of the solution, and neither `case` nor `lead` is copied onto the
+  points. What was after a filtered point is after what it was after (`assemble.mjs` `filterTimes`).
+- **The second story needs mechanics of its own** (the user): the case turns on the arrangement of things in a room
+  more than on the timeline, and its central step needs a new kind of move (what other animals might have come from
+  India?). To be designed with the user.
 
 ### Follow-up passes: a second look at step 8 (2026-11-08)
 

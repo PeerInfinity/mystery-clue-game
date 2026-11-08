@@ -43,6 +43,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
     const all = [...itemsOf(name).filter((x) => x._n < step ? x._s <= scene : own && x._n === step && x._s >= 0 && x._s < scene), ...extra.map((x) => ({ ...x, _n: step, _s: scene }))];
     const d = { entities: [], mentions: {}, moves: [], joins: {}, times: [], facts: [], accounts: [], questions: [], strains: [], path: [], actions: [], ramifies: [], thoughts: [], cards: [], header: null, scenes: [] };
     const byId = (arr, x) => { const i = arr.findIndex((y) => y.id === x.id); if (i >= 0) arr[i] = { ...arr[i], ...x }; else arr.push(x); };
+    const classes = new Map();   // step 6b's sorting of the time points
     for (const x of all) {
         if (x._n === 2) { d.header = strip(x); continue; }
         if (x._n === 3) { d.scenes.push(strip(x)); continue; }
@@ -62,6 +63,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
             case 'path': d.path.push(y); break;
             case 'actions': byId(d.actions, y); break;
             case 'ramifies': d.ramifies.push(y); break;
+            case 'timeclass': classes.set(y.id, y.class); break;
             case 'noroute': break;   // the route step's reasons: kept in its items, not in the case
             case 'possibility': { const q = d.questions.find((z) => z.id === y.q); if (q) { const { q: _, ...p } = y; const ps = q.possibilities ?? (q.possibilities = []); const i = ps.findIndex((o) => o.value === p.value); if (i >= 0) ps[i] = { ...ps[i], ...p }; else ps.push(p); } break; }
             case 'patch': {
@@ -72,7 +74,30 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
             default: break;
         }
     }
+    filterTimes(d, classes);
     return d;
+}
+
+/**
+ * Step 6b: the points classed `business` leave the timeline (kept in `d.timesFiltered`). What was after one of them is
+ * after what it was after, so the order the text gave survives. The other classes are not copied onto the points: the
+ * data must not say which moments the solution depends on.
+ */
+function filterTimes(d, classes) {
+    const gone = new Map(d.times.filter((t) => classes.get(t.id) === 'business').map((t) => [t.id, t]));
+    if (!gone.size) return;
+    const resolve = (id, seen = new Set()) => {
+        if (!gone.has(id)) return [id];
+        if (seen.has(id)) return [];
+        seen.add(id);
+        return list(gone.get(id).after).flatMap((a) => resolve(a, seen));
+    };
+    d.timesFiltered = [...gone.values()];
+    d.times = d.times.filter((t) => !gone.has(t.id)).map((t) => {
+        const after = [...new Set(list(t.after).flatMap((a) => resolve(a)))];
+        const { after: _, ...rest } = t;
+        return after.length ? { ...rest, after: after.length === 1 ? after[0] : after } : rest;
+    });
 }
 
 /** Write the run's case: story.txt (step 1), world/*.json, and the pipeline's own scenes.json and reading.json. */
@@ -81,6 +106,7 @@ export function assemble(name) {
     const d = collect(name);
     if (d.scenes.length) writeLines(path.join(out, 'scenes.json'), 'scenes', d.scenes);
     if (d.thoughts.length) { writeLines(path.join(out, 'reading.json'), 'thoughts', d.thoughts, { cards: d.cards }); }
+    if (d.timesFiltered?.length) writeLines(path.join(out, 'times-filtered.json'), 'times', d.timesFiltered);
     if (d.header) writeWorld(name, d, out);
     return d;
 }
