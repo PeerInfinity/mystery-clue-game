@@ -41,7 +41,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
     // The same step's own output only from its earlier scenes: a step run once (scene -1) never sees its own last
     // output, which a rerun or a recheck replaces.
     const all = [...itemsOf(name).filter((x) => x._n < step ? x._s <= scene : own && x._n === step && x._s >= 0 && x._s < scene), ...extra.map((x) => ({ ...x, _n: step, _s: scene }))];
-    const d = { entities: [], mentions: {}, moves: [], joins: {}, times: [], facts: [], accounts: [], questions: [], strains: [], path: [], actions: [], ramifies: [], thoughts: [], cards: [], header: null, scenes: [] };
+    const d = { entities: [], mentions: {}, moves: [], joins: {}, times: [], facts: [], accounts: [], questions: [], strains: [], path: [], actions: [], ramifies: [], thoughts: [], cards: [], header: null, scenes: [], sealed: null, openings: {}, observations: [] };
     const byId = (arr, x) => { const i = arr.findIndex((y) => y.id === x.id); if (i >= 0) arr[i] = { ...arr[i], ...x }; else arr.push(x); };
     const classes = new Map();   // step 6b's sorting of the time points
     for (const x of all) {
@@ -64,6 +64,9 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
             case 'actions': byId(d.actions, y); break;
             case 'ramifies': d.ramifies.push(y); break;
             case 'timeclass': classes.set(y.id, y.class); break;
+            case 'sealed': d.sealed = y; break;
+            case 'openings': { const { id, ...o } = y; d.openings[id] = o; break; }
+            case 'observations': byId(d.observations, y); break;
             case 'noroute': break;   // the route step's reasons: kept in its items, not in the case
             case 'possibility': { const q = d.questions.find((z) => z.id === y.q); if (q) { const { q: _, ...p } = y; const ps = q.possibilities ?? (q.possibilities = []); const i = ps.findIndex((o) => o.value === p.value); if (i >= 0) ps[i] = { ...ps[i], ...p }; else ps.push(p); } break; }
             case 'patch': {
@@ -124,6 +127,8 @@ export function writeWorld(name, d, out) {
     writeLines(path.join(out, 'world', 'facts.json'), 'facts', d.facts);
     writeLines(path.join(out, 'world', 'accounts.json'), 'accounts', d.accounts);
     writeLines(path.join(out, 'world', 'questions.json'), 'questions', d.questions);
+    if (d.sealed) writeAtomic(path.join(out, 'world', 'room.json'), JSON.stringify({ sealed: d.sealed, openings: d.openings }, null, 1) + '\n');
+    if (d.observations.length) writeLines(path.join(out, 'world', 'observations.json'), 'observations', d.observations);
     if (d.strains.length) writeLines(path.join(out, 'world', 'strains.json'), 'strains', d.strains);
     if (d.path.length) writeLines(path.join(out, 'world', 'path.json'), 'moves', d.path);
     if (d.actions.length || d.ramifies.length) writeLines(path.join(out, 'world', 'actions.json'), 'actions', d.actions, { ramifies: d.ramifies });

@@ -10,7 +10,8 @@ in. You have the story up to the end of this scene and the data so far; you have
 - Every fact the scene's paragraphs tell, one per thing told, each with its paragraph and the exact words: where
   everyone and everything is and when, who has or wears what, what is done, what is said (a `says` fact, with what
   it `asserts`), what someone believes, knows or intends, conditions, roles, owners, names, the weekday and the hour
-  (on `calendar`, `clock`). A long speech that reports events is a telling of an account (the speaker's), whose
+  (on `calendar`, `clock`), and how things are arranged (see the format: ways between places, what is fastened to what).
+  A long speech that reports events is a telling of an account (the speaker's), whose
   facts are the events; the speech itself is a `says` fact only where the saying matters (a claim that may be
   false, a theory, an accusation).
 - Lines: `{"file": "facts", …}`; a new account `{"file": "accounts", "id", "label", "origin", "how", "facts"}`;

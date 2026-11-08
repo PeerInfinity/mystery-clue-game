@@ -23,7 +23,8 @@ const opt = (k, d = null) => { const i = args.indexOf(`--${k}`); return i < 0 ? 
 
 export const SYSTEM = `You check a reading game for spoilers. The player reads a detective story one paragraph at a time.
 Beside the story, the page shows labels: the names of people, places and things, the questions the story raises,
-the possible answers to them, the points in time of the events, and short statements of facts. A label may only
+the possible answers to them, the points in time of the events, short statements of facts, and observations (a question,
+then what a fact the player has just pointed out shows about its answer). A label may only
 tell the player what the story has already told them.
 
 You are given THE STORY SO FAR (everything the player has read) and the LABELS that first appear at its last
@@ -85,6 +86,18 @@ export function labels(dir) {
         stepItems(questionSteps(q, p), p, 'question', q.id);
         for (const o of list(q.possibilities)) if (o.via !== 'always' && !d.byId.has(o.value) && o.available != null) out.push({ para: Math.max(o.available, p), kind: 'possibility', text: `${q.label} — ${o.value}`, id: `${q.id}=${o.value}` });
     }
+    // An observation shows once it can be linked: the latest of its facts, and its question raised. A route is dated by
+    // the latest fact about the things it runs through.
+    const byId = new Map(facts.map((f) => [f.id, f]));
+    const fromPara = (x) => (typeof x === 'string' ? given(byId.get(x) ?? {}) : Math.max(...facts.filter((f) => x.route_through.includes(f.of)).map(given).filter((g) => g != null)));
+    for (const o of r('observations.json').observations ?? []) {
+        const q = questions.find((y) => y.id === o.q);
+        const ps = o.from.map(fromPara);
+        if (!q || ps.some((p) => p == null || !Number.isFinite(p))) continue;
+        out.push({ para: Math.max(q.raised ?? q.answer_given_at, ...ps), kind: 'observation', text: `${q.label} — ${o.says}`, id: o.id });
+    }
+    const sealed = r('room.json').sealed;
+    if (sealed?.question) { const ps = facts.filter((f) => [...Object.keys(r('room.json').openings ?? {}), ...(sealed.surfaces ?? [])].includes(f.of)).map(given).filter((g) => g != null); if (ps.length) out.push({ para: Math.min(...ps), kind: 'question', text: sealed.question, id: 'room.question' }); }
     return { text, items: out.sort((a, b) => a.para - b.para) };
 }
 

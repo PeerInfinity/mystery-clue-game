@@ -116,7 +116,8 @@ One fact each: `{"id", "of", "attr", "value", "detail"?, "neg"?, "to"?, "time", 
 - `attr` is one of: `location` (where it is at that time), `lives_at` (where it lives or is kept), `member_of`,
   `carrying`, `wearing`, `action` (something done: "locked the purse in the desk"), `says`, `observes`, `knows`,
   `believes`, `intends`, `condition`, `contents`, `role`, `reputed`, `rule` (a general rule, on a topic), `position`,
-  `owner`, `identity`, `name`, `weekday`, `hour`, `speed`, `time`, `tells`.
+  `owner`, `identity`, `name`, `weekday`, `hour`, `speed`, `time`, `tells`, and for how things are arranged `closed_to`,
+  `passes`, `passed`, `attached`, `reaches`, `near`, `fixed` (below).
 - `value` is an entity id where there is one, otherwise short text. A `location` value is always a place or thing id
   (or null when unknown), with the rest in `detail` ("at the window"), so that places can be compared. `neg: true`
   denies the fact ("not at the mill"; the desk empty).
@@ -169,6 +170,20 @@ printed it, and Ashdown read it to Hale. That is four tellings:
 with `acct.police` a bundle whose `parts` include `acct.ruth`, and `acct.paper` a bundle whose `parts` include
 `acct.police`. A witness who sees something has an `observes` fact (its `value` the fact ids seen), in that
 witness's own account.
+
+**How things are arranged**, where the text tells it. Ways between places and how things hang together are facts like any
+other, one per thing told, each with its words. `closed_to` and `passes` take a size: `person`, `small` or `air`.
+`closed_to: v` stops v and anything larger; `passes: v` lets v and anything smaller through; so write exactly what the text
+says, and do not close a thing to something small because it is barred to a person. `passed` is something crossing
+between two places (`between: [place, place]`, `passes`). `attached`, `reaches`, `near` and `fixed` have an entity as their
+value. For the mill: the office door locked each night (`closed_to: small`), iron bars at its window that a man could not pass
+(`closed_to: person`), the smell of flour from the store-room in the office (`passed`), a hatch letting a sack through
+(`passes: person`), a hoist rope fastened to a beam (`attached`) and reaching the floor (`reaches`), a bin bolted down (`fixed`).
+
+```jsonl
+{"id": "f.bars", "of": "office_window", "attr": "closed_to", "value": "person", "detail": "iron bars", "time": {"from": "t.before"}, "para": 8, "quote": "iron bars across the window"},
+{"id": "f.flour_smell", "of": "flour_smell", "attr": "passed", "value": "office", "between": ["store_room", "office"], "passes": "air", "time": {"at": "t.mon_midnight"}, "para": 8, "quote": "the smell of flour came through from the store"}
+```
 
 **What is easy to leave out.** Who belongs to a group (`member_of`, one fact per member: the two lads among the
 searchers); where people and animals live or are kept (`lives_at`, implied where the text takes it for granted);

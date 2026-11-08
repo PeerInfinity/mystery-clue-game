@@ -334,6 +334,12 @@ export const STEPS = [
         check: (ctx, scene, items) => [...items.filter((x) => !['patch', 'facts', 'possibility'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is a patch, a fact or a possibility`), ...allProblems(ctx, 9.3, items)],
     },
     {
+        // What an entry shows about a question once linked, and the arrangement of a sealed place (docs/ideas.md).
+        n: 9.4, name: 'room', dir: '09d-room',
+        prompt: (ctx) => { const d = seen(ctx, 9.4, null); return template('09d-room', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
+        check: (ctx, scene, items) => [...items.filter((x) => !['sealed', 'openings', 'observations', 'patch', 'possibility', 'facts', 'account_add'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is sealed, openings, observations, patch, possibility, facts or account_add`), ...validated(ctx, 9.4, null, items, { also: ['room'] })],
+    },
+    {
         n: 10, name: 'strains',
         prompt: (ctx) => { const d = seen(ctx, 10, null); return template('10-strains', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
         check: (ctx, scene, items) => [...items.filter((x) => x.file !== 'strains').map((x) => `${x.id ?? '?'}: file ${x.file}`), ...validated(ctx, 10, null, items)],
