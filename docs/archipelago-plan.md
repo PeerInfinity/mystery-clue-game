@@ -8,7 +8,8 @@ mechanic that links evidence to questions to settle. The numbers below were meas
 they will move as the data does, so re-measure before relying on one.
 
 This replaces the idea in `docs/ideas.md`, "Archipelago integration", of converting the earlier game to the DepGraph
-world. What that attempt showed is still recorded there.
+world. What that attempt showed is still recorded there. The further aim of new stories in one interconnected world is
+in `docs/interconnected-world.md`.
 
 ## The design in brief
 
@@ -163,7 +164,7 @@ All of it depends on Archipelago mode being off by default, so that the plain ga
 
 ## The Archipelago side
 
-- **An export from the game**, generated from a case: its items, locations, rules, and the game's commit. The world
+- **An export from the game**, generated from a case in the structure format (below), with the game's commit. The world
   reads only this; Python does not run the engine. Observations naming facts, not moves, is what lets the file survive
   changes to the mechanics.
 - **The world** in `worlds/`, with a case option if more than one story is exported. Fill tests can run on the export
@@ -175,14 +176,49 @@ All of it depends on Archipelago mode being off by default, so that the plain ga
   its data are about 2 MB, against about 85 MB tracked in all, most of it `pipeline/runs/`. The pin keeps the logic and
   the page of one version together while the game is changing, and a check should hold the export's commit to it.
 
+## The structure format and its validator
+
+One small format describes a story's logic: its questions, the clues each needs and the order of its gates. The names
+in this sketch are invented.
+
+```json
+{ "story": "ferryman", "goal": "q.central",
+  "questions": [{ "id": "q.who_signed", "gate": 3,
+                  "needs": [["c.ledger", "c.stamp"], ["c.letter"]] }],
+  "clues": [{ "id": "c.stamp", "for": "ferryman",
+              "found_at": { "story": "clerk", "question": "q.who_paid" } }] }
+```
+
+A question becomes a location and a clue an item. `needs` lists alternative sets of clues; `gate` gives the reading
+order. One world reads these files, the way DepGraph takes a custom `graph_file`. The export of a finished case is in
+the same format, so what is validated is the code that ships. A person or an LLM can also write one by hand before a
+story exists (`docs/interconnected-world.md`, "How a story is written").
+
+A script runs a file through Archipelago's generator. Whether a pass means anything depends on its settings:
+
+- **`found_at` becomes a real placement,** through `plando_items`, which can place an item in another player's world.
+- **Item plando has to be on and strict.** It is not in the default host options (`--plando items`), and its `force`
+  defaults to `"silent"`: it has to be `true`, or a failed placement could be skipped rather than reported.
+- **Accessibility `full`.** With `minimal`, only the goal has to be reachable.
+- **Several seeds**, and each combination of stories meant to be playable together.
+- **Errors in the author's terms.** `FillError` speaks of Archipelago's items and locations; the script translates
+  them back to clue and question ids.
+
+This does not depend on the linking mechanic, which only has to supply the `needs`. How long a run takes has not been
+measured.
+
 ## Order of work
+
+Can start at any time:
+
+1. The structure format, the world that reads it, and the validator, tried on hand-written files.
 
 Once the linking mechanic has settled:
 
-1. Finish the observations format, with "any of these" between facts.
-2. Author `observations.json` for Silver Blaze, then give the true path and the hints their links.
-3. Write the export, and test fill in Archipelago on it.
-4. Build the world, the bridge and the marks in the story panel.
+2. Finish the observations format, with "any of these" between facts.
+3. Author `observations.json` for Silver Blaze, then give the true path and the hints their links.
+4. Export Silver Blaze to the structure format, and run it through the validator.
+5. Build the bridge and the marks in the story panel.
 
 ## Later
 
