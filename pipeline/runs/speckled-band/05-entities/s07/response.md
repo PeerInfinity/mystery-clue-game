@@ -1,0 +1,60 @@
+```jsonl
+{"file":"entities","id":"ruined_wing","kind":"place","name":"The ruined wing","within":"roylott_house"}
+{"file":"entities","id":"scaffolding","kind":"object","name":"The scaffolding against the end wall","within":"inhabited_wing"}
+{"file":"entities","id":"workmen","kind":"group","name":"The workmen"}
+{"file":"entities","id":"roylott_windows","kind":"object","name":"The windows of Dr. Roylott's room","within":"roylott_room","source":"the one next to the main building to Dr. Roylott’s chamber"}
+{"file":"entities","id":"corridor_windows","kind":"object","name":"The small windows of the corridor","within":"corridor"}
+{"file":"entities","id":"side_door","kind":"object","name":"The small side door","within":"inhabited_wing"}
+{"file":"entities","id":"shutter_hinges","kind":"object","name":"The hinges of the shutters","within":"julia_shutters"}
+{"file":"entities","id":"holmes_lens","kind":"object","name":"Holmes's lens"}
+{"file":"entities","id":"julia_fireplace","kind":"object","name":"The fireplace in Julia's room","within":"julia_room"}
+{"file":"entities","id":"chest_of_drawers","kind":"object","name":"The brown chest of drawers","within":"julia_room"}
+{"file":"entities","id":"dressing_table","kind":"object","name":"The dressing-table","within":"julia_room"}
+{"file":"entities","id":"wicker_chairs","kind":"object","name":"The two small wicker-work chairs","within":"julia_room"}
+{"file":"entities","id":"wilton_carpet","kind":"object","name":"The square of Wilton carpet","within":"julia_room"}
+{"file":"entities","id":"pillow","kind":"object","name":"The pillow","within":"julia_bed"}
+{"file":"entities","id":"bell_rope","kind":"object","name":"The bell-rope","within":"julia_room"}
+{"file":"entities","id":"tassel","kind":"object","name":"The tassel of the bell-rope","within":"bell_rope"}
+{"file":"entities","id":"hook","kind":"object","name":"The hook above the ventilator","within":"julia_room"}
+{"file":"entities","id":"ventilator","kind":"object","name":"The ventilator","within":"julia_room"}
+{"file":"entities","id":"housekeeper_room","kind":"place","name":"The housekeeper's room","within":"roylott_house"}
+{"file":"entities","id":"the_builder","kind":"person","name":"The builder"}
+{"file":"joins","door":"side_door","sides":["corridor","lawn"]}
+{"file":"mentions","id":"ruined_wing","phrases":[{"text":"one of these wings","paras":[132,132]}]}
+{"file":"mentions","id":"scaffolding","phrases":["Some scaffolding"]}
+{"file":"mentions","id":"workmen","phrases":["any workmen"]}
+{"file":"mentions","id":"corridor_windows","phrases":[{"text":"windows","paras":[137,137]},"very small ones"]}
+{"file":"mentions","id":"side_door","phrases":["A small side door"]}
+{"file":"mentions","id":"shutter_hinges","phrases":[{"text":"the hinges","paras":[140,140]}]}
+{"file":"mentions","id":"holmes_lens","phrases":["his lens"]}
+{"file":"mentions","id":"julia_fireplace","phrases":["a gaping fireplace"]}
+{"file":"mentions","id":"chest_of_drawers","phrases":["A brown chest of drawers"]}
+{"file":"mentions","id":"dressing_table","phrases":["a dressing-table"]}
+{"file":"mentions","id":"wicker_chairs","phrases":["two small wicker-work chairs","one of the chairs"]}
+{"file":"mentions","id":"wilton_carpet","phrases":["a square of Wilton carpet"]}
+{"file":"mentions","id":"pillow","phrases":["the pillow"]}
+{"file":"mentions","id":"bell_rope","phrases":["a thick bell-rope","the bell-rope","that bell","so nice a bell-pull","dummy bell-ropes",{"text":"a dummy","paras":[149,149]},{"text":"the rope","paras":[153,153]}]}
+{"file":"mentions","id":"tassel","phrases":["the tassel"]}
+{"file":"mentions","id":"hook","phrases":["a hook"]}
+{"file":"mentions","id":"ventilator","phrases":["the little opening for the ventilator","a ventilator","ventilators which do not ventilate"]}
+{"file":"mentions","id":"housekeeper_room","phrases":["the housekeeper’s room"]}
+{"file":"mentions","id":"the_builder","phrases":["a builder"]}
+{"file":"mentions","id":"roylott_house","phrases":[{"text":"The building","paras":[132,132]},{"text":"the house","paras":[141,141]}]}
+{"file":"mentions","id":"roylotts","phrases":[{"text":"the family","paras":[132,132]}]}
+{"file":"mentions","id":"central_block","phrases":["a high central portion","The central portion","the main building"]}
+{"file":"mentions","id":"inhabited_wing","phrases":["the right-hand block","this narrow wing","these three rooms","the three bedrooms"]}
+{"file":"mentions","id":"helen_wall","phrases":["the end wall","that end wall"]}
+{"file":"mentions","id":"lawn","phrases":["the ill-trimmed lawn"]}
+{"file":"mentions","id":"corridor","phrases":["the whitewashed corridor"]}
+{"file":"mentions","id":"helen_room","phrases":["the room in which you used to sleep",{"text":"my room","paras":[136,136]},"the third chamber"]}
+{"file":"mentions","id":"julia_room","phrases":["the centre one",{"text":"your sister’s","paras":[133,133]},"the middle one",{"text":"your room","paras":[139,139]},{"text":"the second","paras":[141,141]},"that in which Miss Stoner was now sleeping","a homely little room",{"text":"the room","paras":[141,141]},{"text":"the apartment","paras":[141,141]},{"text":"the chamber","paras":[148,148]},{"text":"this room","paras":[153,153]}]}
+{"file":"mentions","id":"roylott_room","phrases":["Dr. Roylott’s chamber","the inner apartment"]}
+{"file":"mentions","id":"julia_windows","phrases":["the open window",{"text":"the window","paras":[141,141]}]}
+{"file":"mentions","id":"julia_shutters","phrases":["your shutters",{"text":"the shutter","paras":[140,140]},"these shutters"]}
+{"file":"mentions","id":"shutter_bars","phrases":[{"text":"the bar","paras":[140,140]}]}
+{"file":"mentions","id":"julia_bed","phrases":["a narrow white-counterpaned bed",{"text":"the bed","paras":[142,148]}]}
+{"file":"mentions","id":"julia_walls","phrases":["the panelling of the walls","the wood-work with which the chamber was panelled",{"text":"the wall","paras":[148,148]}]}
+{"file":"mentions","id":"julia_flooring","phrases":[{"text":"The boards round","paras":[141,141]},{"text":"this floor","paras":[148,148]},{"text":"the boards","paras":[148,148]}]}
+{"file":"mentions","id":"the_lady_in_black","phrases":[{"text":"the lady","paras":[154,154]}]}
+{"file":"mentions","id":"julia","phrases":[{"text":"her sister","paras":[141,141]}]}
+```

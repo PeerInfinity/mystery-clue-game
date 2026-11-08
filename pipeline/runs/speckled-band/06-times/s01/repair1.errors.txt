@@ -1,0 +1,5 @@
+t.association_begins: the label "Eight years before Watson writes: he begins to study Holmes's methods" names Watson, which the story has not given by ¶1: give it in steps (labels)
+t.wake: the label "Early April, ’83, a quarter-past seven in the morning: Holmes wakes Watson" names Watson, which the story has not given by ¶2: give it in steps (labels)
+t.pledged_lady_dies: the label "Within the month before Watson writes: the lady to whom the pledge was given dies" names Within, Watson, which the story has not given by ¶1: give it in steps (labels)
+t.roylott_death: the label "Some time before Watson writes: the death of Dr. Grimesby Roylott" names Watson, which the story has not given by ¶1: give it in steps (labels)
+t.writing: the label "When Watson writes, looking over his notes" names Watson, which the story has not given by ¶1: give it in steps (labels)

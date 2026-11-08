@@ -1,0 +1,81 @@
+```jsonl
+{"file":"entities","id":"the_lady_in_black","name":"Helen Stoner"}
+{"file":"entities","id":"julia","kind":"person","name":"Julia"}
+{"file":"entities","id":"mrs_stoner","kind":"person","name":"Mrs. Stoner"}
+{"file":"entities","id":"major_general_stoner","kind":"person","name":"Major-General Stoner"}
+{"file":"entities","id":"honoria_westphail","kind":"person","name":"Miss Honoria Westphail"}
+{"file":"entities","id":"half_pay_major","kind":"person","name":"The half-pay major of marines"}
+{"file":"entities","id":"last_squire","kind":"person","name":"The last squire"}
+{"file":"entities","id":"regency_gambler","kind":"person","name":"The gambler in the days of the Regency"}
+{"file":"entities","id":"the_relative","kind":"person","name":"The relative who made the advance"}
+{"file":"entities","id":"native_butler","kind":"person","name":"Roylott's native butler"}
+{"file":"entities","id":"blacksmith","kind":"person","name":"The local blacksmith"}
+{"file":"entities","id":"the_correspondent","kind":"person","name":"The correspondent who sends the Indian animals"}
+{"file":"entities","id":"four_heirs","kind":"group","name":"The four successive heirs"}
+{"file":"entities","id":"bengal_artillery","kind":"group","name":"The Bengal Artillery"}
+{"file":"entities","id":"neighbours","kind":"group","name":"The neighbours at Stoke Moran"}
+{"file":"entities","id":"villagers","kind":"group","name":"The villagers"}
+{"file":"entities","id":"gipsies","kind":"group","name":"The wandering gipsies"}
+{"file":"entities","id":"cheetah","kind":"animal","name":"The cheetah"}
+{"file":"entities","id":"baboon","kind":"animal","name":"The baboon"}
+{"file":"entities","id":"england","kind":"place","name":"England"}
+{"file":"entities","id":"surrey","within":"england"}
+{"file":"entities","id":"the_metropolis","name":"London","within":"england"}
+{"file":"entities","id":"berkshire","kind":"place","name":"Berkshire","within":"england"}
+{"file":"entities","id":"hampshire","kind":"place","name":"Hampshire","within":"england"}
+{"file":"entities","id":"crewe","kind":"place","name":"Crewe","within":"england"}
+{"file":"entities","id":"harrow","kind":"place","name":"Harrow","within":"england"}
+{"file":"entities","id":"westphail_house","kind":"place","name":"Miss Westphail's house","within":"harrow"}
+{"file":"entities","id":"india","kind":"place","name":"India"}
+{"file":"entities","id":"calcutta","kind":"place","name":"Calcutta","within":"india"}
+{"file":"entities","id":"calcutta_house","kind":"place","name":"Roylott's house in Calcutta","within":"calcutta"}
+{"file":"entities","id":"roylott_estate","kind":"place","name":"The Roylott estate","within":"stoke_moran"}
+{"file":"entities","id":"roylott_house","kind":"place","name":"The old ancestral house at Stoke Moran","within":"roylott_estate"}
+{"file":"entities","id":"gipsy_tents","kind":"place","name":"The gipsies' tents"}
+{"file":"entities","id":"the_village","kind":"place","name":"The village","within":"stoke_moran"}
+{"file":"entities","id":"stream","kind":"place","name":"The stream"}
+{"file":"entities","id":"police_court","kind":"place","name":"The police-court"}
+{"file":"entities","id":"parapet","kind":"object","name":"The parapet"}
+{"file":"entities","id":"holmes_chair","kind":"object","name":"Holmes's chair","within":"sitting_room"}
+{"file":"entities","id":"mothers_money","kind":"object","name":"Mrs. Stoner's money"}
+{"file":"mentions","id":"the_lady_in_black","phrases":["Helen Stoner",{"text":"his visitor","paras":[31,31]}]}
+{"file":"mentions","id":"grimesby_roylott","phrases":["Dr. Roylott","my stepfather","our stepfather",{"text":"his only son","paras":[24,24]},{"text":"a Roylott of Stoke Moran","paras":[26,26]},{"text":"their master","paras":[27,27]}]}
+{"file":"mentions","id":"roylotts","phrases":["the Roylotts of Stoke Moran","one of the oldest Saxon families in England",{"text":"The family","paras":[24,24]},{"text":"the family","paras":[24,26]}]}
+{"file":"mentions","id":"julia","phrases":["Julia","My sister Julia","my poor sister Julia","my sister","Your sister",{"text":"my only companion","paras":[30,30]}]}
+{"file":"mentions","id":"mrs_stoner","phrases":["Mrs. Stoner","my mother"]}
+{"file":"mentions","id":"major_general_stoner","phrases":["Major-General Stoner"]}
+{"file":"mentions","id":"honoria_westphail","phrases":["Miss Honoria Westphail","my mother’s maiden sister",{"text":"an aunt","paras":[30,30]}]}
+{"file":"mentions","id":"half_pay_major","phrases":["a half-pay major of marines"]}
+{"file":"mentions","id":"last_squire","phrases":["The last squire"]}
+{"file":"mentions","id":"regency_gambler","phrases":["a gambler in the days of the Regency"]}
+{"file":"mentions","id":"the_relative","phrases":[{"text":"a relative","paras":[24,24]}]}
+{"file":"mentions","id":"native_butler","phrases":["his native butler"]}
+{"file":"mentions","id":"blacksmith","phrases":["the local blacksmith"]}
+{"file":"mentions","id":"the_correspondent","phrases":[{"text":"a correspondent","paras":[27,27]}]}
+{"file":"mentions","id":"four_heirs","phrases":["four successive heirs"]}
+{"file":"mentions","id":"bengal_artillery","phrases":["the Bengal Artillery"]}
+{"file":"mentions","id":"neighbours","phrases":[{"text":"our neighbours","paras":[26,26]}]}
+{"file":"mentions","id":"villagers","phrases":["the villagers",{"text":"the folks","paras":[26,26]}]}
+{"file":"mentions","id":"gipsies","phrases":["the wandering gipsies",{"text":"these vagabonds","paras":[27,27]}]}
+{"file":"mentions","id":"cheetah","phrases":["a cheetah"]}
+{"file":"mentions","id":"baboon","phrases":["a baboon"]}
+{"file":"mentions","id":"england","phrases":["England"]}
+{"file":"mentions","id":"the_metropolis","phrases":["London"]}
+{"file":"mentions","id":"berkshire","phrases":["Berkshire"]}
+{"file":"mentions","id":"hampshire","phrases":["Hampshire"]}
+{"file":"mentions","id":"crewe","phrases":["Crewe"]}
+{"file":"mentions","id":"harrow","phrases":["Harrow"]}
+{"file":"mentions","id":"westphail_house","phrases":["this lady’s house"]}
+{"file":"mentions","id":"india","phrases":["India",{"text":"the tropics","paras":[26,26]}]}
+{"file":"mentions","id":"calcutta","phrases":["Calcutta"]}
+{"file":"mentions","id":"calcutta_house","phrases":[{"text":"the house","paras":[24,24]}]}
+{"file":"mentions","id":"roylott_estate","phrases":[{"text":"the estates","paras":[24,24]},"a few acres of ground","the few acres of bramble-covered land","the family estate",{"text":"his grounds","paras":[27,27]}]}
+{"file":"mentions","id":"roylott_house","phrases":["the two-hundred-year-old house","the old ancestral house at Stoke Moran","the old family seat",{"text":"his house","paras":[26,26]},{"text":"the house","paras":[28,28]}]}
+{"file":"mentions","id":"gipsy_tents","phrases":[{"text":"their tents","paras":[27,27]}]}
+{"file":"mentions","id":"the_village","phrases":[{"text":"the village","paras":[26,26]}]}
+{"file":"mentions","id":"stream","phrases":[{"text":"a stream","paras":[27,27]}]}
+{"file":"mentions","id":"police_court","phrases":["the police-court"]}
+{"file":"mentions","id":"parapet","phrases":[{"text":"a parapet","paras":[27,27]}]}
+{"file":"mentions","id":"holmes_chair","phrases":[{"text":"his chair","paras":[31,31]}]}
+{"file":"mentions","id":"mothers_money","phrases":["a considerable sum of money","The money which my mother had left"]}
+```

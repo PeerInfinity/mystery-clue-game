@@ -1,0 +1,2 @@
+t.sentenced: the label "In India: Helen's stepfather narrowly escapes a capital sentence" names India, which the story has not given by ¶24: give it in steps (labels)
+t.imprisonment: the label "In India: Helen's stepfather's long term of imprisonment" names India, which the story has not given by ¶24: give it in steps (labels)

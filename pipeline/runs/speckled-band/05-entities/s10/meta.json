@@ -1,0 +1,12 @@
+{
+  "model": "claude-opus-5-5",
+  "prompt_sha256": "3bd76da83ece1b84a122ef7f4e5711e97c05751f2ced32047461d53bbcc3ca4b",
+  "cost_usd": 0.5250239999999999,
+  "duration_s": 78,
+  "input_tokens": 43614,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 43612,
+  "output_tokens": 8806,
+  "stop_reason": "end_turn",
+  "date": "2026-11-08T17:42:17.117Z"
+}
