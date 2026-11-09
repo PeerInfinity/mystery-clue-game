@@ -69,10 +69,17 @@ p.bad { color: var(--bad); } p.good { color: var(--good); }
 /* Questions: the panel, their place on the timeline, the player's marks. */
 .q-box { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 13px; background: var(--panel); }
 .q-box summary { cursor: pointer; font-weight: 600; }
-.q-box ol { margin: 6px 0; padding-left: 20px; max-height: 45vh; overflow: auto; }
+.q-box ol { margin: 6px 0; padding-left: 28px; max-height: 45vh; overflow: auto; }
 .q-box li { margin: 6px 0; }
 .q-box li.sel { outline: 1px solid var(--accent); border-radius: 4px; padding: 2px 4px; }
 .q-box li.clash > a { color: var(--bad); }
+.q-grip { cursor: grab; touch-action: none; user-select: none; opacity: .55; padding: 2px 5px 2px 0; }
+.q-top { border: 0; background: none; color: inherit; opacity: .55; cursor: pointer; font-size: 12px; padding: 0 3px; }
+.q-grip:hover, .q-top:hover, .q-grip:focus-visible { opacity: 1; }
+.q-box li.dragging { background: var(--accent-soft); border-radius: 4px; cursor: grabbing; }
+.q-box li.dragging:not(.q-line) > :not(.q-grip, a, .para) { display: none; }
+.q-box li.q-line { list-style: none; margin-left: -28px; padding-top: 2px; border-top: 2px solid var(--accent); font-size: 11px; color: var(--accent); }
+.link-more { display: block; font-size: 12px; margin: 5px 0; padding: 0; border: 0; background: none; color: var(--accent); cursor: pointer; text-decoration: underline; }
 .poss-row { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0; }
 .poss { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 12px; border: 1px dashed var(--muted); background: transparent; color: var(--ink); cursor: pointer; }
 .poss.circled { border: 2px solid var(--accent); font-weight: 600; }

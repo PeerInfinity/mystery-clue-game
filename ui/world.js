@@ -118,7 +118,7 @@ const LAST = story.length - 1;
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [] };
+const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
@@ -129,7 +129,7 @@ if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -641,7 +641,8 @@ phone.addEventListener('change', () => render());
 let roomNote = null;      // why the page last refused a mark on the room panel, shown at its next drawing
 let roomKnown = [];       // what the panel reasons from at the last drawing
 const roomTime = () => (room.sealed?.time ? { at: room.sealed.time } : undefined);
-const roomCtx = { at: (ft, t) => { const c = coverOf(ft); return !c || overlaps(data.order, c, coverOf({ at: t })); } };
+// A state dated only by its start goes on until told otherwise: it holds at any moment not known to be before it.
+const roomCtx = { at: (ft, t) => { if (ft.from && !ft.to) return !data.order.lt(t, ft.from); const c = coverOf(ft); return !c || overlaps(data.order, c, coverOf({ at: t })); } };
 const paraOf = (id) => givenAt(factById.get(id)) ?? 0;
 /** What the player's room moves put on the timeline. */
 function roomEntries(told) {
@@ -679,20 +680,42 @@ const roomChange = (fn) => { remember(); state.room = fn(state.room); save(); re
 // --- Observations (world/observations.json; engine/observations.js): an entry linked to an open question.
 let linkingQ = null;      // the question "Link observations…" is working on (not saved)
 let observed = { filled: [], notes: [] };
-const openQuestions = () => listedQuestions().filter((q) => !givenAway(q));
+// The player's order of the Questions list and its dividing line. Only what the player has moved is kept: a question not
+// yet placed comes just above the line, so that one newly raised is always offered and disturbs nothing.
+const LINE = '|';
+function arranged() {
+    const listed = new Map(listedQuestions().map((q) => [q.id, q]));
+    const { above = [], below = [] } = state.qOrder ?? {};
+    const placed = new Set([...above, ...below]);
+    const of = (ids) => ids.filter((id) => listed.has(id)).map((id) => listed.get(id));
+    return { above: [...of(above), ...[...listed.values()].filter((q) => !placed.has(q.id))], below: of(below) };
+}
+const rowOrder = () => { const { above, below } = arranged(); return [...above.map((q) => q.id), LINE, ...below.map((q) => q.id)]; };
+/** A new order of the list as shown; what is not listed just now (`LINE` marks the division) keeps its side. */
+function setOrder(row, focus = null) {
+    const cut = row.indexOf(LINE), shown = new Set(row);
+    const { above = [], below = [] } = state.qOrder ?? {};
+    state.qOrder = { above: [...row.slice(0, cut), ...above.filter((id) => !shown.has(id))], below: [...row.slice(cut + 1), ...below.filter((id) => !shown.has(id))] };
+    save(); render();
+    if (focus) document.querySelector(`#q-box [data-q-row="${CSS.escape(focus)}"] .q-grip`)?.focus();
+}
 const isLinked = (entry, q) => state.links.some((l) => l.entry === entry && l.q === q);
 function toggleLink(entry, q) {
     remember();
     state.links = isLinked(entry, q) ? state.links.filter((l) => !(l.entry === entry && l.q === q)) : [...state.links, { entry, q }];
     save(); render();
 }
-/** "Relevant to…" in an event's detail: every open question, so that the list points at none. */
+let linkAllFor = null;   // the event whose "Relevant to…" shows the questions below the line as well
+/** "Relevant to…" in an event's detail: the open questions above the player's line, so that the list points at none. */
 function linkHtml(f) {
     if (!observations || f.attr === 'tells') return '';
-    const qs = openQuestions();
-    if (!qs.length) return '';
+    const { above, below } = arranged();
+    const up = above.filter((q) => !givenAway(q)), down = below.filter((q) => !givenAway(q));
+    if (!up.length && !down.length) return '';
+    const all = linkAllFor === f.id, extra = down.filter((q) => all || isLinked(f.id, q.id)), qs = [...up, ...extra];
+    const more = down.length - extra.length;
     const shows = observed.filled.filter((x) => x.entries.includes(f) || x.entries.some((e) => e.id === f.id));
-    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>.</p>`).join('')}`;
+    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${more ? `<button type="button" class="link-more" data-link-more="${esc(f.id)}">Show the others (${more})</button>` : ''}${shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>.</p>`).join('')}`;
 }
 /** What the player has shown about a question: its observations, their sources, and any notes. */
 function descriptionHtml(q) {
@@ -1257,10 +1280,13 @@ function entityDetail(id, clashing) {
 }
 
 function questionsPanel(clashing) {
-    const qs = listedQuestions();
+    const { above, below } = arranged();
+    const qs = [...above, ...below];
     if (!qs.length) return '';
-    const items = qs.map((q) => `<li class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
-      ${chipsHtml(q)}${descriptionHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b></div>` : ''}</li>`).join('');
+    const item = (q, i) => `<li value="${i + 1}" data-q-row="${esc(q.id)}" class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><span class="q-grip" role="button" tabindex="0" aria-label="Move this question: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span><button type="button" class="q-top" data-q-top="${esc(q.id)}" aria-label="Move to the top" title="To the top">↑</button> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
+      ${chipsHtml(q)}${descriptionHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b></div>` : ''}</li>`;
+    const line = observations ? `<li class="q-line" data-q-row="${LINE}"><span class="q-grip" role="button" tabindex="0" aria-label="Move the dividing line: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span> Questions above this line are offered under “Relevant to…”. Drag it up to shorten that list.</li>` : '';
+    const items = above.map(item).join('') + line + below.map((q, i) => item(q, above.length + i)).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
 }
 /** The typed actions on the timeline and those of the player's hypotheses (circled answers, presuppositions). */
@@ -1462,6 +1488,48 @@ document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Put every link and person back to uncertain (and each narrator to the story\'s default)?')) return;
     changeTrust((tr) => { tr.links = {}; tr.people = {}; });
 });
+// Moving a question or the line: by its grip with mouse or finger (the row follows the pointer; the list scrolls near its
+// edges), or with the arrow keys. Nothing is kept until it is let go; a redrawing meanwhile abandons the move.
+const scrollerOf = (el) => { for (let x = el; x; x = x.parentElement) { const o = getComputedStyle(x).overflowY; if ((o === 'auto' || o === 'scroll') && x.scrollHeight > x.clientHeight + 1) return x; } return null; };
+document.addEventListener('pointerdown', (e) => {
+    const grip = e.target.closest?.('#q-box .q-grip');
+    if (!grip || e.button) return;
+    e.preventDefault();
+    const li = grip.closest('li'), ol = li.parentElement, before = [...ol.children].map((x) => x.dataset.qRow).join('\n');
+    li.classList.add('dragging');
+    let y = e.clientY;
+    const place = () => {
+        const next = [...ol.children].filter((x) => x !== li).find((x) => { const r = x.getBoundingClientRect(); return y < r.top + r.height / 2; });
+        if (next !== li.nextElementSibling && (next ?? null) !== li) ol.insertBefore(li, next ?? null);
+    };
+    const box = scrollerOf(ol), edges = box?.getBoundingClientRect() ?? { top: 0, bottom: window.innerHeight };
+    const scrolling = setInterval(() => {
+        const by = y < edges.top + 40 ? -14 : y > edges.bottom - 40 ? 14 : 0;
+        if (by && li.isConnected) { (box ?? window).scrollBy(0, by); place(); }
+    }, 30);
+    const move = (ev) => { y = ev.clientY; if (li.isConnected) place(); };
+    const end = (ev) => {
+        clearInterval(scrolling);
+        document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', end); document.removeEventListener('pointercancel', end);
+        if (!li.isConnected) return;
+        li.classList.remove('dragging');
+        const row = [...ol.children].map((x) => x.dataset.qRow);
+        if (ev.type === 'pointercancel') { render(); return; }
+        if (row.join('\n') === before) return;
+        setOrder(row.includes(LINE) ? row : [...row, LINE]);
+    };
+    document.addEventListener('pointermove', move); document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+});
+document.addEventListener('keydown', (e) => {
+    const grip = e.target.closest?.('#q-box .q-grip');
+    if (!grip || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    e.preventDefault();
+    const id = grip.closest('li').dataset.qRow, row = rowOrder(), i = row.indexOf(id), j = i + (e.key === 'ArrowUp' ? -1 : 1);
+    if (i < 0 || j < 0 || j >= row.length || (!observations && row[j] === LINE)) return;
+    [row[i], row[j]] = [row[j], row[i]];
+    setOrder(row, id);
+});
+
 // Start over: the saved timeline (and the autoplay's) cleared; what is the page's, not the reading's, is kept.
 document.getElementById('start-over').addEventListener('click', () => {
     if (!confirm('Start over from the first paragraph? Your trust, marks and reasoning on this device are cleared (layout, theme and the hint wait are kept). This cannot be undone.')) return;
@@ -1492,6 +1560,8 @@ document.addEventListener('click', (e) => {
     if (observations) {
         const li = e.target.closest('[data-link-entry]');
         if (li) { toggleLink(li.dataset.linkEntry, li.dataset.linkQ); return; }
+        const lm = e.target.closest('[data-link-more]');
+        if (lm) { linkAllFor = lm.dataset.linkMore; render(); return; }
         const st = e.target.closest('[data-linking]');
         if (st) { linkingQ = linkingQ === st.dataset.linking ? null : st.dataset.linking; if (linkingQ) reveal('timeline', panelFrom(e)); render(); return; }
         if (e.target.closest('[data-linking-done]')) { linkingQ = null; render(); return; }
@@ -1576,6 +1646,8 @@ document.addEventListener('click', (e) => {
         if (ra) { roomChange((x) => ({ ...x, route: [...x.route, ra.dataset.routeAdd] })); return; }
         if (e.target.closest('[data-route-back]')) { roomChange((x) => ({ ...x, route: x.route.slice(0, -1) })); return; }
     }
+    const qt = e.target.closest('[data-q-top]');
+    if (qt) { setOrder([qt.dataset.qTop, ...rowOrder().filter((id) => id !== qt.dataset.qTop)]); return; }
     const m = e.target.closest('[data-mark-q]');
     if (m) {
         // The page is drawn afresh, and a contradiction box may open or close above: keep the clicked chip under the

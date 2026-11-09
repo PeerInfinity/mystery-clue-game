@@ -93,6 +93,36 @@ await click('#q-box [data-mark-q="q.how"][data-mark-pick="a bite"]');
 ok(/something that bites/.test(await text('.desc-list')), 'circling the answer fills it in', await text('.desc-list'));
 ok(!/Your notes/.test(await text('#q-box')), 'and the note gives way to it');
 ok(await count('[data-part="timeline"] .link-row') === 0, 'no buttons on the rows outside the mode');
+// The player's order of the questions, and the line that decides what "Relevant to…" offers. A real drag, by the mouse.
+const rows = () => ev(`[...document.querySelectorAll('#q-box [data-q-row]')].map((x) => x.dataset.qRow).join(' ')`);
+const centre = (sel) => ev(`(() => { const r = document.querySelector(${JSON.stringify(sel)}).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+const mouse = (type, p, extra = {}) => send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', ...extra });
+async function drag(from, to, offset) {
+    const a = await centre(from), b = await centre(to);
+    await mouse('mouseMoved', a, { button: 'none' }); await mouse('mousePressed', a, { buttons: 1, clickCount: 1 });
+    await mouse('mouseMoved', { x: a.x, y: (a.y + b.y) / 2 }, { buttons: 1 }); await mouse('mouseMoved', { x: a.x, y: b.y + offset }, { buttons: 1 });
+    await mouse('mouseReleased', { x: a.x, y: b.y + offset }, { clickCount: 1 }); await sleep(100);
+}
+ok(await rows() === 'q.what_came q.how |' || await rows() === 'q.how q.what_came |', 'the line starts at the bottom', await rows());
+const [first, second] = (await rows()).split(' ');
+await click(`[data-q-top="${second}"]`);
+ok(await rows() === `${second} ${first} |`, 'to the top', await rows());
+await drag('#q-box [data-q-row="|"] .q-grip', `#q-box [data-q-row="${first}"]`, -30);
+ok(await rows() === `${second} | ${first}`, 'the line dragged up', await rows());
+await click('#timeline [data-fact="f.grating"] .ph');
+ok(await count('#detail [data-link-entry="f.grating"]') === 2, 'a question already linked stays offered, below the line or not', String(await count('#detail [data-link-entry="f.grating"]')));
+await click('#timeline [data-fact="f.smoke"] .ph');
+ok(await count('#detail [data-link-entry="f.smoke"]') === 1, 'only what is above the line is offered', String(await count('#detail [data-link-entry="f.smoke"]')));
+ok(/Show the others \(1\)/.test(await text('#detail')), 'with the rest one press away', await text('#detail'));
+await click('[data-link-more]');
+ok(await count('#detail [data-link-entry="f.smoke"]') === 2, 'and they come');
+await drag(`#q-box [data-q-row="${first}"] .q-grip`, `#q-box [data-q-row="${second}"]`, -30);
+ok(await rows() === `${first} ${second} |`, 'a question dragged above the line; the line ends last', await rows());
+await ev(`document.querySelector('#q-box [data-q-row="${first}"] .q-grip').focus()`);
+await send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'ArrowDown', code: 'ArrowDown', windowsVirtualKeyCode: 40 }); await sleep(100);
+ok(await rows() === `${second} ${first} |`, 'moved by the arrow key', await rows());
+await open(url);
+ok(await rows() === `${second} ${first} |`, 'the order survives a reload', await rows());
 await ev(`localStorage.setItem(${JSON.stringify(STORE)}, JSON.stringify({ ...JSON.parse(localStorage.getItem(${JSON.stringify(STORE)})), para: 10 }))`);
 await open(url);
 ok(/had everything it needed/.test(await text('#q-box')), 'at the give-away the description is judged', await text('#q-box'));
