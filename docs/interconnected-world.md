@@ -8,7 +8,8 @@ depends on it for the structure format and its validator ("The structure format 
 
 The game is not only for existing stories. The aim is new stories set in one interconnected world. Each story has its
 own protagonist, with a central mystery of their own to solve. Along the way each protagonist comes across clues to
-the mysteries the other players are trying to solve.
+the mysteries the other players are trying to solve. The players share one set of case files, which is how a clue
+found in one story reaches the player who needs it.
 
 ## How the game's model fits
 
@@ -23,21 +24,42 @@ the mysteries the other players are trying to solve.
 
 ## How stories connect
 
-Archipelago scatters items at random, and that has to go on working in a multiworld with other games. There are three
-levels of connection:
+Archipelago scatters items at random, and that has to go on working in a multiworld with other games. There are two
+kinds of connection:
 
 1. **Random.** Any clue anywhere. It needs nothing beyond the existing plan, but the connection has no meaning in the
    story.
 2. **Authored.** A clue for one story is deliberately placed at a location in another. When the other story is not in
    the seed, the clue goes in the normal pool, so a story still works alone.
-3. **Recognised.** One protagonist's story holds something that means nothing to them, and the player links it to one of
-   another player's open questions. This is the existing "Relevant to…" move, extended across stories, and that
-   link is the location check. It adds locations too, which eases the limit on items.
 
-The third is the heart of the idea, with the other two as fallbacks. **Open:** whether the finder should understand
-what they have found. The third level gives them a real deduction to make; the alternative, where the clue passes
-through them unnoticed, is simpler and keeps their story cleaner. The structure format can represent either, so both can
-be tried.
+In both, the location is the one the existing plan defines: solving one of your own questions. The finder does not have
+to understand a clue meant for someone else, though a partial understanding would sometimes be nice. Understanding is
+therefore presentation only, and the logic never depends on it.
+
+**A possible later addition: recognised clues.** One protagonist's story holds something that means nothing to them, and
+the player links it to one of another player's open questions, the existing "Relevant to…" move extended across
+stories. That link would be a location check, which gives the finder a real deduction and adds locations, easing the
+limit on items. It is not needed for the idea to work, and it brings a constraint of its own (see Constraints).
+
+## The shared case files
+
+The players share one set of case files. Receiving an item adds a file to the set, whichever player's story or
+whichever other game it was found in. No protagonist has to explain how it arrived, and a story's fixed prose never has
+to mention it.
+
+**Partial understanding (proposed, not decided).** A file could show what the reader already knows and blank out the
+rest: "*the clerk* paid an unknown man at an unknown place." With shared people and places, how much of a file makes
+sense would grow with how far the reader has got and whether it touches their own story. The same mechanism keeps a
+clue that arrives early from running ahead of the story, and it needs little extra writing per clue.
+
+**Sorting (later).** Mechanics for going through the files to find what bears on the current player's mystery may come
+later. These fit the existing structure: receiving the item puts the file in the set, and finding it and linking it to
+a question is the linking step that the plan already has. Other players' files would act as natural distractors. The
+hints would have to point at the right file, because a player who holds a file but cannot find it would stall anyone
+waiting on them. This extends the plan's rule that the hints must learn linking.
+
+**Open:** whether stories are meant to be replayed from another seat. Someone who later plays another protagonist's
+story will already have seen its clues, partly blanked out at best.
 
 ## How a story is written
 
@@ -71,18 +93,18 @@ Every combination of stories meant to be playable together needs its own run.
   today, so this is the largest change to the structure.
 - **Arrival as a way of knowing something.** A fact appears today when its paragraph is read. A clue from another story
   appears when it arrives, but must not run ahead of the story it arrives in, so names may have to stay hidden until
-  the reader reaches the right paragraph.
+  the reader reaches the right paragraph (see "Partial understanding" above).
 - **The clue reaches the reader, not the protagonist.** A story's prose is fixed and cannot mention a clue that arrives
-  at an unknown moment. It goes to the reader's case file, which fits, since every chain already ends at the reader.
+  at an unknown moment. It goes into the shared case files, which fits, since every chain already ends at the reader.
 - **An authoring process.** The pipeline analyses existing text; this is the reverse, a world first and then stories,
   with fair play across all of them. This is likely the hardest part: the quality of the mysteries is what the whole
   thing depends on.
 
 ## Constraints
 
-- **A link cannot depend on how far another player has read.** Archipelago's logic knows items, not another player's
-  position in their story. A player has to be able to see another's questions whatever that player has read, so those
-  labels must be safe to show.
+- **Only if recognised clues are added: a link cannot depend on how far another player has read.** Archipelago's logic
+  knows items, not another player's position in their story. A player would have to be able to see another's questions
+  whatever that player has read, so those labels would have to be safe to show.
 - **Waiting on a slow reader.** Hints cannot help when what you need is in someone else's unread story.
 
 ## What to do now
@@ -95,4 +117,5 @@ Very little has to change in the existing plan. Two choices keep this possible:
 ## A first test
 
 When the linking mechanic has settled: two tiny invented cases, like the `sealed-room` fixture, sharing one clue. That
-exercises the shared layer, arrival and linking across stories without a real story having to be written.
+exercises the shared layer, arrival in the shared case files and linking a received clue without a real story having to
+be written.
