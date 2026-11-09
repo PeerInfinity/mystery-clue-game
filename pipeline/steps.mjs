@@ -334,10 +334,29 @@ export const STEPS = [
         check: (ctx, scene, items) => [...items.filter((x) => !['patch', 'facts', 'possibility'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is a patch, a fact or a possibility`), ...allProblems(ctx, 9.3, items)],
     },
     {
+        // The questions sorted with the whole story known; `side` leaves the game (assemble.mjs `filterQuestions`).
+        n: 9.4, name: 'qclass', dir: '09d-qclass',
+        prompt: (ctx) => { const d = seen(ctx, 9.4, null); return template('09d-qclass', { questions: d.questions.map((q) => JSON.stringify({ id: q.id, label: q.label, raised: q.raised, answer: q.answer ?? null })).join('\n'), story: numbered(storyOf(ctx.name)) }); },
+        check: (ctx, scene, items) => {
+            const ids = new Set(seen(ctx, 9.4, null).questions.map((q) => q.id));
+            const said = new Map();
+            const errs = [];
+            for (const x of items) {
+                if (x.file !== 'qclass') { errs.push(`${x.id ?? '?'}: file ${x.file}`); continue; }
+                if (!ids.has(x.id)) errs.push(`${x.id}: no such question`);
+                if (!['case', 'ask', 'side'].includes(x.class)) errs.push(`${x.id}: class ${x.class}`);
+                said.set(x.id, (said.get(x.id) ?? 0) + 1);
+            }
+            for (const id of ids) if (!said.has(id)) errs.push(`${id}: no line for this question`);
+            for (const [id, n] of said) if (n > 1) errs.push(`${id}: ${n} lines`);
+            return errs;
+        },
+    },
+    {
         // What an entry shows about a question once linked, and the arrangement of a sealed place (docs/ideas.md).
-        n: 9.4, name: 'room', dir: '09d-room',
-        prompt: (ctx) => { const d = seen(ctx, 9.4, null); return template('09d-room', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
-        check: (ctx, scene, items) => [...items.filter((x) => !['sealed', 'openings', 'observations', 'patch', 'possibility', 'facts', 'account_add'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is sealed, openings, observations, patch, possibility, facts or account_add`), ...validated(ctx, 9.4, null, items, { also: ['room'] })],
+        n: 9.5, name: 'room', dir: '09e-room',
+        prompt: (ctx) => { const d = seen(ctx, 9.5, null); return template('09e-room', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
+        check: (ctx, scene, items) => [...items.filter((x) => !['sealed', 'openings', 'observations', 'patch', 'possibility', 'facts', 'account_add'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is sealed, openings, observations, patch, possibility, facts or account_add`), ...validated(ctx, 9.5, null, items, { also: ['room'] })],
     },
     {
         n: 10, name: 'strains',

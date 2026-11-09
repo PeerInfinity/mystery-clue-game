@@ -44,6 +44,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
     const d = { entities: [], mentions: {}, moves: [], joins: {}, times: [], facts: [], accounts: [], questions: [], strains: [], path: [], actions: [], ramifies: [], thoughts: [], cards: [], header: null, scenes: [], sealed: null, openings: {}, observations: [] };
     const byId = (arr, x) => { const i = arr.findIndex((y) => y.id === x.id); if (i >= 0) arr[i] = { ...arr[i], ...x }; else arr.push(x); };
     const classes = new Map();   // step 6b's sorting of the time points
+    const qclasses = new Map();  // step 9d's sorting of the questions
     const revived = new Set();   // points a later step wrote again: it needs them, so they stay
     for (const x of all) {
         if (x._n === 2) { d.header = strip(x); continue; }
@@ -65,6 +66,7 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
             case 'actions': byId(d.actions, y); break;
             case 'ramifies': d.ramifies.push(y); break;
             case 'timeclass': classes.set(y.id, y.class); break;
+            case 'qclass': qclasses.set(y.id, y.class); break;
             case 'sealed': d.sealed = y; break;
             case 'openings': { const { id, ...o } = y; d.openings[id] = o; break; }
             case 'observations': byId(d.observations, y); break;
@@ -79,7 +81,28 @@ export function collect(name, { step = Infinity, scene = Infinity, extra = [], o
         }
     }
     filterTimes(d, classes, revived);
+    filterQuestions(d, qclasses);
     return d;
+}
+
+/**
+ * Step 9d: the questions classed `side` leave the game (kept in `d.questionsFiltered`), and with them what the facts and
+ * the other questions say of their answers. The other classes are not copied onto the questions.
+ */
+function filterQuestions(d, classes) {
+    // A telling from an unknown teller needs its question (the validator's rule): that one stays in the data, off the page.
+    const needed = new Set(d.facts.filter((f) => f.attr === 'tells' && f.of === '?').map((f) => f.q));
+    d.questions = d.questions.map((q) => (classes.get(q.id) === 'side' && needed.has(q.id) ? { ...q, hidden: true } : q));
+    const gone = new Set(d.questions.filter((q) => classes.get(q.id) === 'side' && !q.hidden).map((q) => q.id));
+    if (!gone.size) return;
+    d.questionsFiltered = d.questions.filter((q) => gone.has(q.id));
+    d.questions = d.questions.filter((q) => !gone.has(q.id)).map((q) => ({ ...q, possibilities: list(q.possibilities).map((p) => { if (!gone.has(p.implies?.q)) return p; const { implies: _, ...rest } = p; return rest; }) }));
+    d.facts = d.facts.map((f) => {
+        const x = { ...f };
+        if (gone.has(x.q)) { delete x.q; delete x.pick; delete x.neg_pick; }
+        if (x.asserts) { x.asserts = list(x.asserts).filter((a) => !gone.has(a.q)); if (!x.asserts.length) delete x.asserts; }
+        return x;
+    });
 }
 
 /**
@@ -111,6 +134,7 @@ export function assemble(name) {
     if (d.scenes.length) writeLines(path.join(out, 'scenes.json'), 'scenes', d.scenes);
     if (d.thoughts.length) { writeLines(path.join(out, 'reading.json'), 'thoughts', d.thoughts, { cards: d.cards }); }
     if (d.timesFiltered?.length) writeLines(path.join(out, 'times-filtered.json'), 'times', d.timesFiltered);
+    if (d.questionsFiltered?.length) writeLines(path.join(out, 'questions-filtered.json'), 'questions', d.questionsFiltered);
     if (d.header) writeWorld(name, d, out);
     return d;
 }

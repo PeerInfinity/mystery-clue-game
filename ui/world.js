@@ -167,7 +167,7 @@ const timeLabel = (id) => {
 const qLabel = (q) => questionLabelAt(q, state.para);
 const qVisible = (q) => q && ((q.raised != null && q.raised <= state.para) || (q.answer_given_at != null && q.answer_given_at <= state.para));
 // The player's questions: raised (or answered) so far; a question about provenance only if the story raises it.
-const qListed = (q) => qVisible(q) && (q.kind !== 'provenance' || (q.raised != null && q.raised <= state.para));
+const qListed = (q) => !q.hidden && qVisible(q) && (q.kind !== 'provenance' || (q.raised != null && q.raised <= state.para));
 const listedQuestions = () => data.questions.filter(qListed).sort((a, b) => (a.raised ?? a.answer_given_at) - (b.raised ?? b.answer_given_at));
 // When each entity is first met: the earliest paragraph a fact naming it is given at.
 const kindOf = entityKinds(data);

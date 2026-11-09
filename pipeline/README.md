@@ -59,7 +59,8 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 9a | Answers | everything, the whole story | each question's answer and its two dates | model, one call |
 | 9b | Truth and dates | everything (compact), the whole story, these scenes' facts in full and their annotations | truth, `given_at`, `inferable_at`, inferable facts | model, three scenes a call (`--group 1`: per scene) |
 | 9c | Consistency | everything, the validator's messages | patches | model, until the whole case validates |
-| 9d | Observations and the arrangement | everything, the whole story | `observations.json` (what an entry shows about a question once linked, which are essential), `room.json` (a sealed place and its openings, if the case turns on one) | model, one call. Added on The Speckled Band |
+| 9d | Sorting the questions | the whole story, the questions and their answers | `case`, `ask` or `side` for each question; `side` leaves the game, kept in `09d-qclass/items.json` and `case/questions-filtered.json` | model, one call. Added on The Speckled Band |
+| 9e | Observations and the arrangement | everything, the whole story | `observations.json` (what an entry shows about a question once linked, which are essential), `room.json` (a sealed place and its openings, if the case turns on one) | model, one call. Added on The Speckled Band |
 | 10 | Likely clashes | everything | `strains.json` | model, one call |
 | 10b | Typed data | everything, the generic action types | typed actions, doors, guards, goals, implied steps, needs, plans, a case's own action types (`actions.json`) | model, one call |
 | 10c | Reasoning routes | the route check's report | more typed data, or why the story reaches an answer another way (`noroute`) | `scripts/route-check.mjs` on the real page; model fills what is missing, until each question the moves could reach has a route or a reason |
@@ -96,7 +97,7 @@ node pipeline/assemble.mjs <case>                     rebuild the run's case fro
 `pipeline/cases.json`. A run's assembled data is `runs/<case>/case/` (`story.txt`, `world/`), rebuilt from the
 steps' outputs; `--dry` writes the prompts (`dry.prompt.md`) without calling the model; `--recheck` checks a
 step's recorded output again, calling the model only to repair it. Step names: `text`, `header`, `scenes`, `reading`,
-`entities`, `times`, `timeclass`, `facts`, `questions`, `answers`, `dates`, `consistency`, `room`, `strains`, `leak`, `leakfix`,
+`entities`, `times`, `timeclass`, `facts`, `questions`, `answers`, `dates`, `consistency`, `qclass`, `room`, `strains`, `leak`, `leakfix`,
 `leakfix2`, `path`.
 
 ## Lessons of the runs
@@ -374,7 +375,7 @@ story needs too is a candidate for the generic table.
   points. What was after a filtered point is after what it was after (`assemble.mjs` `filterTimes`).
 - **The second story needed mechanics of its own** (the user): the case turns on the arrangement of things in a room
   more than on the timeline. Designed with the user and built: `docs/ideas.md`, "The arrangement of a room, and general
-  knowledge" and "Observations and open questions". Step 7 and `spec.md` learnt the arrangement facts, step 9d writes the
+  knowledge" and "Observations and open questions". Step 7 and `spec.md` learnt the arrangement facts, step 9e writes the
   observations and the room, and the leak check covers observations. **Step 8 is deliberately unchanged**: its checklist is
   what this run tests, for instance whether it asks what the band meant with no hint.
 
