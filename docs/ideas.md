@@ -1000,6 +1000,11 @@ about the wind at ¶94); some leads overlap scored drops and checks.
 
 ### Archipelago integration
 
+**The current plan is [`archipelago-plan.md`](archipelago-plan.md): a new Archipelago world rather than a DepGraph
+conversion.** New stories set in one shared world, with each player finding clues to the others' mysteries, are
+discussed in [`interconnected-world.md`](interconnected-world.md). The rest of this section records the earlier DepGraph
+experiment on the first version of the game.
+
 Clues cannot be used for inference until the player receives their Archipelago item, much like the DepGraph
 world. The three DepGraph exports (`npm run depgraph`) are a first experiment. What they showed:
 
