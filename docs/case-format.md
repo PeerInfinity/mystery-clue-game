@@ -372,6 +372,9 @@ knowledge", and "Observations and open questions"). An invented example is `scri
   `passes: v` lets v and anything smaller through. So "barred to a person" says nothing of something small. `passed`
   (`between: [place, place]`, `passes`) is something crossing between two places (the move "Something got through").
   `attached`, `reaches`, `near` and `fixed` have an entity as their value; the first three are the links of a route.
+  In the ways-in table a state dated only `from` a time goes on until told otherwise. A `closed_to` for a stretch of time
+  (`at`, or `from` and `to`) outweighs a general `passes`: the door that opens onto a corridor says nothing of the night it was
+  locked, for any size.
 - The player's moves: a mark on a cell of the table, refused unless a fact supports it; "Something got through", an
   entry `attr: opening`; the route, link by link, an entry `attr: route`.
 

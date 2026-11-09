@@ -1,0 +1,8 @@
+[
+{"file": "observations", "id": "o.wct_body", "essential": false},
+{"file": "observations", "id": "o.wct_route", "essential": false},
+{"file": "observations", "id": "o.wct_milk", "essential": true},
+{"file": "observations", "id": "o.wct_whistle", "q": "q.what_came_through", "from": ["f.whistle_vigil", "f.holmes_lashes"], "says": "a low, clear whistle sounds at the moment it is on the bell-pull", "essential": true},
+{"file": "facts", "id": "f.vent_passes_rat", "of": "ventilator", "attr": "passes", "value": "small", "detail": "so small that a rat could hardly pass through", "between": ["roylott_room", "julia_room"], "time": {"from": "t.ventilator_made"}, "para": 205, "quote": "It was so small that a rat could hardly pass through."},
+{"file": "account_add", "id": "acct.watson", "facts": ["f.vent_passes_rat"]}
+]

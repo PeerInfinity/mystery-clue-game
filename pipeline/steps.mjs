@@ -27,6 +27,23 @@ const common = (ctx, d, scene) => ({ spec: SPEC(), scene_id: scene?.id ?? '', sc
  * The validator (scripts/validate-world.js) on the data seen so far plus a call's new items, in a trial case of its
  * own; only the messages about the ids the call wrote (or `also` names), and not those `ignore` matches.
  */
+/**
+ * A sealed room's table must be able to complete: every way in needs a `closed_to` or `passes` at the sealed time (a
+ * `condition` such as "solid" marks nothing), and a way that a route observation runs through must let a thing through.
+ */
+function roomGaps(ctx, items) {
+    const d = collect(ctx.name, { step: 9.5, scene: Infinity, extra: items });
+    const sealed = items.find((x) => x.file === 'sealed');
+    if (!sealed) return [];
+    const openings = items.filter((x) => x.file === 'openings');
+    const facts = (id, attrs) => d.facts.filter((f) => f.of === id && attrs.includes(f.attr) && !(f.time?.at && f.time.at !== sealed.time));
+    const ways = [...openings.filter((o) => o.sides.includes(sealed.place)).map((o) => o.id), ...(sealed.surfaces ?? [])];
+    const out = ways.filter((id) => !facts(id, ['closed_to', 'passes']).length).map((id) => `${id}: a way into ${sealed.place} with no \`closed_to\` or \`passes\` fact that holds at ${sealed.time ?? 'that time'} (a \`condition\` marks nothing, and a fact dated \`at\` another moment does not count). Add one in the same output, from the story's words, with a \`time\` that covers it.`);
+    const routed = new Set(d.observations.flatMap((o) => o.from.flatMap((f) => f.route_through ?? [])));
+    for (const o of openings) if (routed.has(o.id) && !d.facts.some((f) => f.of === o.id && f.attr === 'passes' && f.value !== 'air')) out.push(`${o.id}: a route observation runs through it, but no \`passes\` fact lets anything but air through. If the story says what could pass, add it from the story's words.`);
+    return out;
+}
+
 function validated(ctx, step, scene, items, { ignore = [], also = [] } = {}) {
     const d = collect(ctx.name, { step, scene: scene ? sceneIndex(ctx.name, scene) : Infinity, extra: items });
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pipeline-check-'));
@@ -356,7 +373,7 @@ export const STEPS = [
         // What an entry shows about a question once linked, and the arrangement of a sealed place (docs/ideas.md).
         n: 9.5, name: 'room', dir: '09e-room',
         prompt: (ctx) => { const d = seen(ctx, 9.5, null); return template('09e-room', { ...common(ctx, d, null), reading: readingText(d), story: numbered(storyOf(ctx.name)) }); },
-        check: (ctx, scene, items) => [...items.filter((x) => !['sealed', 'openings', 'observations', 'patch', 'possibility', 'facts', 'account_add'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is sealed, openings, observations, patch, possibility, facts or account_add`), ...validated(ctx, 9.5, null, items, { also: ['room'] })],
+        check: (ctx, scene, items) => [...items.filter((x) => !['sealed', 'openings', 'observations', 'patch', 'possibility', 'facts', 'account_add'].includes(x.file)).map((x) => `${JSON.stringify(x).slice(0, 80)}: a line here is sealed, openings, observations, patch, possibility, facts or account_add`), ...validated(ctx, 9.5, null, items, { also: ['room'] }), ...roomGaps(ctx, items)],
     },
     {
         n: 10, name: 'strains',

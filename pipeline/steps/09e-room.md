@@ -43,6 +43,11 @@ do not have the `closed_to`, `passes`, `attached`, `reaches`, `near`, `fixed` or
 `{"file": "facts", "id", "of", "attr", "value", "time", "para", "quote"}` and, in the same output, the narrator's or
 witness's account they travel in, `{"file": "account_add", "id": <account id>, "facts": [<fact id>]}`.
 
+Every way in (each opening of the place and each surface) needs a `closed_to` or `passes` fact holding at the sealed
+time: a `condition` such as "solid" marks nothing in the table. A state that lasts is dated `{"from": <time>}`, not `at`
+the moment someone examined it. A way a route runs through needs a `passes` fact for what could get through it, not
+only air, where the story says so.
+
 Invented example, from a story of a stolen purse in a locked office, answered at the end by naming a trained jackdaw:
 
 ```jsonl

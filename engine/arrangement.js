@@ -38,8 +38,12 @@ function cellOf(row, size, sealed, known, ctx) {
     if (row.kind === 'unfound') return rank(size) >= rank(row.entry.passes) ? { status: 'open', by: [row.entry] } : { status: 'unsaid', by: [] };
     const about = known.filter((f) => f.of === row.id && covers(sealed.time, f, ctx));
     const closed = about.filter((f) => f.attr === 'closed_to' && rank(size) <= rank(f.value));
-    const open = about.filter((f) => f.attr === 'passes' && rank(size) >= rank(f.value));
-    if (open.length) return { status: 'open', by: open };   // what got through outweighs a general "closed"
+    // What holds for a stretch of time outweighs what is true in general: a door that opens onto a corridor says nothing
+    // of the night it was locked. Otherwise what got through outweighs a general "closed".
+    const brief = (f) => f.time?.at || f.time?.to;
+    const barred = about.some((f) => f.attr === 'closed_to' && brief(f));
+    const open = about.filter((f) => f.attr === 'passes' && rank(size) >= rank(f.value) && (!barred || brief(f)));
+    if (open.length) return { status: 'open', by: open };
     if (closed.length) return { status: 'closed', by: closed };
     return { status: 'unsaid', by: [] };
 }

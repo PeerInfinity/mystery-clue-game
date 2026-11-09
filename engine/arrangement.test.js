@@ -100,3 +100,14 @@ test('a candidate is crossed out only for a requirement it fails', () => {
     assert.match(checkCrossing(animals.members[0], [size, kept]).why, /rules that out/);
     assert.match(checkCrossing(animals.members[1], []).why, /rules that out/, 'with no requirements yet, nothing can');
 });
+
+test('a closing for a stretch of time outweighs a general way through, and says nothing of smaller things', () => {
+    const sealed = { place: 'room', time: 't.night' };
+    const known = [
+        { id: 'general', of: 'door', attr: 'passes', value: 'person', time: { from: 't.before' } },
+        { id: 'locked', of: 'door', attr: 'closed_to', value: 'person', time: { from: 't.lock', to: 't.morning' } },
+    ];
+    const [row] = waysIn(sealed, known, { door: { kind: 'door', sides: ['room', 'hall'] } }, { at: () => true });
+    assert.equal(row.cells.person.status, 'closed');
+    assert.equal(row.cells.small.status, 'unsaid');
+});

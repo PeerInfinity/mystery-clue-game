@@ -61,6 +61,7 @@ exactly; the rest differ only by the spec and the repair template changed since)
 | 9c | Consistency | everything, the validator's messages | patches | model, until the whole case validates |
 | 9d | Sorting the questions | the whole story, the questions and their answers | `case`, `ask` or `side` for each question; `side` leaves the game, kept in `09d-qclass/items.json` and `case/questions-filtered.json` | model, one call. Added on The Speckled Band |
 | 9e | Observations and the arrangement | everything, the whole story | `observations.json` (what an entry shows about a question once linked, which are essential), `room.json` (a sealed place and its openings, if the case turns on one) | model, one call. Added on The Speckled Band |
+| 9f | The user's review of 9e | the observations | `09f-review/items.json`, written by hand with what the user ruled: which observations are essential, and anything they added. No model call; skip it if the review changes nothing | by hand. Added on The Speckled Band |
 | 10 | Likely clashes | everything | `strains.json` | model, one call |
 | 10b | Typed data | everything, the generic action types | typed actions, doors, guards, goals, implied steps, needs, plans, a case's own action types (`actions.json`) | model, one call |
 | 10c | Reasoning routes | the route check's report | more typed data, or why the story reaches an answer another way (`noroute`) | `scripts/route-check.mjs` on the real page; model fills what is missing, until each question the moves could reach has a route or a reason |
@@ -363,7 +364,8 @@ story needs too is a candidate for the generic table.
 | 9b truth, dates | 10 | $23.57 | |
 | 9c consistency | 1 | $2.06 | 0 validator errors |
 | 9d sorting the questions | 1 | $0.33 | 54 case, 43 ask, 12 side: 97 on the page, 2 of the side ones hidden in the data |
-| 9e observations, room | 2 | $5.75 | 102 observations on 34 questions, 6 essential; one sealed room, 10 openings |
+| 9e observations, room | 3 | $8.42 | 102 observations on 34 questions; one sealed room, 10 openings. The third call is a repair from the check added after the review ($2.67): three facts, so that the table can complete |
+| 9f the user's review | by hand | $0 | essentials ruled: small enough, down a rope, no marks or poison, could be called a band, whistle, milk (the route and being struck by the cane no longer essential); the rat line as `passes: small` at ¶205, since the repair dated it only at the give-away |
 
 - **The safeguards and the reading.** Opus stopped 7 of the first 15 reading calls (`reasoning_extraction` where tagged;
   a withheld answer comes back as prose with `stop_reason` `end_turn`, and was at first recorded as an empty scene).

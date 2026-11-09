@@ -1,0 +1,3 @@
+julia_walls: a way into julia_room with no `closed_to` or `passes` fact that holds at t.scream (a `condition` marks nothing, and a fact dated `at` another moment does not count). Add one in the same output, from the story's words, with a `time` that covers it.
+julia_flooring: a way into julia_room with no `closed_to` or `passes` fact that holds at t.scream (a `condition` marks nothing, and a fact dated `at` another moment does not count). Add one in the same output, from the story's words, with a `time` that covers it.
+ventilator: a route observation runs through it, but no `passes` fact lets anything but air through. If the story says what could pass, add it from the story's words.
