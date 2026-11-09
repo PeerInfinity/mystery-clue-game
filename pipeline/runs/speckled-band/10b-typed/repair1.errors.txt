@@ -1,0 +1,6 @@
+q.why_julia_died: presupposes: a typed action of the entry's entity
+q.why_repairs: presupposes: a typed action of the entry's entity
+q.why_this_room: presupposes: a typed action of the entry's entity
+q.why_bell_rope: presupposes: a typed action of the entry's entity
+q.why_ventilator: presupposes: a typed action of the entry's entity
+q.why_bed_clamped: presupposes: a typed action of the entry's entity
