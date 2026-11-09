@@ -356,6 +356,11 @@ story needs too is a candidate for the generic table.
 | 5 entities | 11 | $4.19 | 209 |
 | 6 times | 13 | $6.71 | 446 points (Silver Blaze's run 2: 113) |
 | 6b sorting the times | 1 | $0.80 | 81 case, 226 lead, 139 business: 307 kept |
+| 7 facts | 19 | $27.22 | 1,494 facts (Silver Blaze's run 2: 1,111), the arrangement facts among them |
+| 8 questions | 12 | $19.41 | 109 questions (run 2: 50) |
+| 9a answers | 1 | $3.26 | 76 answered, 50 gated (run 2: 37 gated) |
+| 9b truth, dates | 10 | $23.57 | |
+| 9c consistency | 1 | $2.06 | 0 validator errors |
 
 - **The safeguards and the reading.** Opus stopped 7 of the first 15 reading calls (`reasoning_extraction` where tagged;
   a withheld answer comes back as prose with `stop_reason` `end_turn`, and was at first recorded as an empty scene).

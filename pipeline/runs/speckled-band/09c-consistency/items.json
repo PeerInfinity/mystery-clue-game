@@ -1,0 +1,6 @@
+[{"file":"patch","id":"f.helen_fear_belief","set":{"truth":false}},
+{"file":"patch","id":"f.watson_vent_not_unusual","set":{"truth":false}},
+{"file":"patch","id":"f.inquiry_concludes","set":{"truth":false,"asserts":[{"of":"grimesby_roylott","attr":"action","value":"indiscreetly plays with a dangerous pet","time":{"at":"t.roylott_bitten"}},
+{"of":"the_serpent","attr":"role","value":"Dr. Roylott's dangerous pet","time":{"at":"t.roylott_bitten"}},
+{"q":"q.how_roylott_died","pick":"a strange accident that gossip has made into a crime"}]}},
+{"file":"patch","id":"f.sleepers_parsonage","set":{"of":"parsonage","attr":"contents","value":"sleepers in their beds"},"unset":["detail"]}]

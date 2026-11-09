@@ -1,0 +1,2 @@
+q.pledged_lady: the label "Who is the lady to whom Watson gave his promise of secrecy?" names Watson, which the story has not given by ¶1: give it in steps (labels)
+q.why_secrecy: the label "Why was Watson bound to secrecy about these events?" names Watson, which the story has not given by ¶1: give it in steps (labels)

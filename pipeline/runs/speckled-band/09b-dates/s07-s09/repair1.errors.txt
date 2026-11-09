@@ -1,0 +1,3 @@
+f.julia_room_centre: claim: f.holmes_takes_rooms is told after it (¶133)
+f.inf_roylott_clamped: a step or typed action needs act
+q.milk_for: answer "the_serpent" is not a possibility
