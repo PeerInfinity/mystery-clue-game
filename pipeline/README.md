@@ -362,6 +362,8 @@ story needs too is a candidate for the generic table.
 | 9a answers | 1 | $3.26 | 76 answered, 50 gated (run 2: 37 gated) |
 | 9b truth, dates | 10 | $23.57 | |
 | 9c consistency | 1 | $2.06 | 0 validator errors |
+| 9d sorting the questions | 1 | $0.33 | 54 case, 43 ask, 12 side: 97 on the page, 2 of the side ones hidden in the data |
+| 9e observations, room | 2 | $5.75 | 102 observations on 34 questions, 6 essential; one sealed room, 10 openings |
 
 - **The safeguards and the reading.** Opus stopped 7 of the first 15 reading calls (`reasoning_extraction` where tagged;
   a withheld answer comes back as prose with `stop_reason` `end_turn`, and was at first recorded as an empty scene).
