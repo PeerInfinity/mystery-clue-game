@@ -45,6 +45,10 @@ the page's answer):
 
 {{stops}}
 
+## The room and the observations
+
+{{room_moves}}
+
 ## Your task
 
 Write the true path (path.json in the format above): lines `{"file": "path", "do", …, "at", "why", "for_q"}`.
@@ -64,4 +68,12 @@ Write the true path (path.json in the format above): lines `{"file": "path", "do
   "at", "why", "for_q"}`, `{"file": "path", "do": "stop", "on", "key", "at", "why", "for_q"}`, `{"file": "path",
   "do": "compare" (or "account"), "on", "key", "at", "why", "for_q"}`, as written there (a stop and a comparison open their plan
   themselves).
+- If there is a sealed place above: the reader's work on it, as lines with `"file": "path"` and `at`, `why`, `for_q`:
+  `{"do": "way", "way": "<row>|person", "mark": "closed"}` (or `|small`, or `"open"`) for what the facts told so far support
+  in the table of ways in; `{"do": "got", "of": <a "passed" fact>}` where something crossed by a way nobody has named;
+  `{"do": "route", "node": <place or thing>}`, one line for each link of a route, in order, from its first node.
+- For every observation marked essential above: `{"do": "link", "entry": <fact id, or "route" for the route the reader has
+  built>, "q": <its question>, "at", "why", "for_q"}` for each thing it rests on, and the circle its `if` asks for. Link other
+  observations only where the annotated reading turns on them. A script dates each link at the latest of the entry and the
+  question.
 - `why`: the reader's reason at that paragraph, in plain words, using nothing told later.

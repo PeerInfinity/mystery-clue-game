@@ -69,7 +69,10 @@ async function run(name, start, expect = []) {
     console.log(`${name}: ${hints} hints (${Object.entries(kinds).map(([k, v]) => `${k} ${v}`).join(', ')}), ${presses} presses, to ¶${save.para} in ${Math.round((Date.now() - t0) / 1000)} s`);
 }
 const which = process.argv[2];
+const READ_ = (f) => JSON.parse(fs.readFileSync(path.join(WORLD, f), 'utf8'));
 if (!which || which === 'fresh') await run('fresh', { para: 1 }, ['move']);
+// Every question below the player's dividing line: a hint to link one must still reach it.
+if (which === 'below') await run('below the line', { para: 1, qOrder: { above: [], below: READ_('questions.json').questions.map((q) => q.id) } }, ['move']);
 // Mistakes. Silver Blaze's: Simpson circled for the blow and the stick for the weapon at ¶20 (before any reason is
 // told), the true account of Holmes's recital distrusted, a right answer (the house) crossed out before it is raised.
 // Another case's, from its own data (mistakesOf).

@@ -31,11 +31,16 @@ const checks = [
     ['world-autoplay-check.mjs', 'one', { PHONE: '1' }],
     ['world-hints-check.mjs'],
     ['room-check.mjs'],
+    // The room and link moves of the true path, on the invented case that has them.
+    ['path-check.mjs', { CASE: 'scripts/fixtures/sealed-room' }],
+    ['world-autoplay-check.mjs', 'one', { CASE: 'scripts/fixtures/sealed-room' }],
+    ['world-hints-check.mjs', 'fresh', { CASE: 'scripts/fixtures/sealed-room' }],
+    ['world-hints-check.mjs', 'below', { CASE: 'scripts/fixtures/sealed-room' }],
 ];
 const failed = [];
 for (const [script, ...rest] of checks) {
     const env = { ...process.env, ...(typeof rest.at(-1) === 'object' ? rest.pop() : {}) };
-    const label = [script, ...rest, env.PHONE ? '(phone)' : ''].join(' ').trim();
+    const label = [script, ...rest, env.PHONE ? '(phone)' : '', env.CASE && env.CASE !== process.env.CASE ? `(${path.basename(env.CASE)})` : ''].join(' ').trim();
     console.log(`\n== ${label}`);
     const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts', script), ...rest], { env, encoding: 'utf8' });
     // Only what matters: the failures and each check's last line.

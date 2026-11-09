@@ -253,7 +253,7 @@ function phrase(f) {
         case 'name': return `${E} is called ${v}`;
         case 'closed_to': return `${E} closed to ${esc(SIZE_WORD[f.value] ?? f.value)}${d}`;
         case 'passes': return `${E} lets ${esc(SIZE_WORD[f.value] ?? f.value)} through${d}`;
-        case 'passed': return `${E} crossed from ${ent(f.between[0])} to ${ent(f.between[1])}${d}`;
+        case 'passed': return f.between ? `${E} crossed from ${ent(f.between[0])} to ${ent(f.between[1])}${d}` : `${E} crossed into ${v}${d}`;   // what a claim asserts may not say from where
         case 'attached': return `${E} fastened to ${v}${d}`;
         case 'reaches': return `${E} reaches ${v}${d}`;
         case 'near': return `${E} beside ${v}${d}`;

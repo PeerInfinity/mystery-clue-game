@@ -65,7 +65,7 @@ export async function start({ store, fast = false }) {
         // Looked for in every part, shown or not (in tabs, the contradictions may be in a tab not chosen): textContent,
         // since innerText is empty for what is not drawn. Choosing its tab draws the page afresh: looked up again.
         const find = () => {
-            const hits = [...document.querySelectorAll('#detail li, #detail p, #detail td, #clashes li, #lapse-news, .notice p')].filter((e) => re.test(e.textContent.replace(/\s+/g, ' ')));
+            const hits = [...document.querySelectorAll('#detail li, #detail p, #detail td, #clashes li, #lapse-news, .notice p, .rm td, .rm p, .desc-list li')].filter((e) => re.test(e.textContent.replace(/\s+/g, ' ')));
             return hits.find((e) => !hits.some((o) => o !== e && e.contains(o))) ?? hits[0];
         };
         let el = find();
@@ -92,6 +92,10 @@ export async function start({ store, fast = false }) {
             return `${m.do === 'cross' ? 'Crossing out' : isRight(m) ? 'Circling' : 'Trying'} “${pick}” on “${qLabel(m.q)}”`;
         }
         if (m.do === 'trust') return `Distrusting this statement: ${($(`#timeline [data-fact="${esc(m.on)}"]`)?.innerText ?? $('#detail h2')?.innerText ?? m.on).replace(/\s*¶\d+\s*$/, '')}`;
+        if (m.do === 'way') { const [row, size] = m.way.split('|'); return `Marking ${$(`[data-way-row="${esc(row)}"] td`)?.innerText ?? row} ${m.mark} to ${size === 'person' ? 'a person' : 'something small'}`; }
+        if (m.do === 'got') return 'Something got through';
+        if (m.do === 'route') return 'Adding a link to the route';
+        if (m.do === 'link') return `Pointing this out as relevant to “${qLabel(m.q)}”`;
         return WORDS[m.do] ?? 'A move';
     }
 

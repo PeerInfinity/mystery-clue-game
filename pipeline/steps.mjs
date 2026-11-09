@@ -27,6 +27,22 @@ const common = (ctx, d, scene) => ({ spec: SPEC(), scene_id: scene?.id ?? '', sc
  * The validator (scripts/validate-world.js) on the data seen so far plus a call's new items, in a trial case of its
  * own; only the messages about the ids the call wrote (or `also` names), and not those `ignore` matches.
  */
+/** What step 12 is told of the room and of the observations a reader must make. */
+function roomMovesText(d) {
+    const essential = d.observations.filter((o) => o.essential);
+    const room = d.sealed ? [`Sealed place: ${JSON.stringify(d.sealed)}`, `Openings: ${JSON.stringify(d.openings)}`] : [];
+    const said = essential.map((o) => JSON.stringify(o));
+    return [...room, ...(said.length ? ['Essential observations:', ...said] : [])].join('\n') || '(this case has no sealed place and no essential observations: write no such moves)';
+}
+/** The path must make every essential observation: each thing it rests on linked, and the reading it asks for circled. */
+function essentialGaps(d, items) {
+    const linked = (q, e) => items.some((m) => m.do === 'link' && m.q === q && m.entry === e);
+    return d.observations.filter((o) => o.essential).flatMap((o) => [
+        ...o.from.filter((f) => !linked(o.q, typeof f === 'string' ? f : 'route')).map((f) => `${o.id}: no link move of ${typeof f === 'string' ? f : 'the route'} to ${o.q}`),
+        ...(o.if && !items.some((m) => m.do === 'circle' && m.q === o.if.q && m.pick === o.if.pick) ? [`${o.id}: no circle of ${JSON.stringify(o.if.pick)} on ${o.if.q}, which it needs`] : []),
+    ]);
+}
+
 /**
  * A sealed room's table must be able to complete: every way in needs a `closed_to` or `passes` at the sealed time (a
  * `condition` such as "solid" marks nothing), and a way that a route observation runs through must let a thing through.
@@ -397,7 +413,7 @@ export const STEPS = [
             const onOf = (id) => (/^(hyp|pre):/.test(id) ? `q:${id.slice(4).split('=')[0]}` : id);
             const changes = first(routes.flatMap((g) => (g.allChanges ?? []).map((c) => [`${c.a}|${c.b}`, `{"do": "a", "a": ${J(c.a)}, "b": ${J(c.b)}} (found at ¶${g.at}: ${c.text})`]))).join('\n') || '(none)';
             const stops = first(routes.flatMap((g) => [...(g.allStops ?? []).map((x) => [`s|${x.key}`, `{"do": "stop", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}: ${x.text})`]), ...(g.compares ?? []).map((x) => [`c|${x.key}`, `{"do": "compare", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}; unmet needs ${x.open[0]} against ${x.open[1]}, steps only in each ${x.only[0]} and ${x.only[1]})`]), ...(g.accounts ?? []).map((x) => [`a|${x.key}`, `{"do": "account", "on": ${J(onOf(x.on))}, "key": ${J(x.key)}} (found at ¶${g.at}: does the plan account for ${x.text}? ${x.fits})`])])).join('\n') || '(none)';
-            return template('12-path', { ...common(ctx, d, null), strains: lines(d.strains), reading: readingText(d), story: numbered(storyOf(ctx.name)), circles, false_statements: falseOf(d).map((f) => `${f.id} (¶${f.given_at ?? f.para}): ${f.of} ${f.attr} ${JSON.stringify(f.value)}`).join('\n') || '(none)', candidates, plans: plans.join(', ') || '(none)', changes, stops });
+            return template('12-path', { ...common(ctx, d, null), room_moves: roomMovesText(d), strains: lines(d.strains), reading: readingText(d), story: numbered(storyOf(ctx.name)), circles, false_statements: falseOf(d).map((f) => `${f.id} (¶${f.given_at ?? f.para}): ${f.of} ${f.attr} ${JSON.stringify(f.value)}`).join('\n') || '(none)', candidates, plans: plans.join(', ') || '(none)', changes, stops });
         },
         // A right answer's circle at the earliest paragraph the data allows (scripts/path-check.mjs's earliest
         // check); every move in paragraph order, the order given kept within a paragraph.
@@ -421,17 +437,22 @@ export const STEPS = [
             };
             // A change, at the later of its two states; a stop or a comparison, at the latest of its two sides.
             const sides = (m) => (m.do === 'c' ? [m.of, m.for] : m.do === 'a' ? [m.a, m.b] : ['stop', 'compare', 'account'].includes(m.do) ? String(m.key ?? '').split('|') : null);
+            // A link: at the latest of what is linked and the question (the route: its last link, written before it).
+            const routeAt = () => Math.max(...out.filter((x) => x.do === 'route').map((x) => x.at));
+            for (const m of out) if (m.do === 'link') { const at = m.entry === 'route' ? routeAt() : restsAt(m.entry); if (Number.isInteger(at)) m.at = Math.max(at, qs.get(m.q)?.raised ?? 0); }
             for (const m of out) { const ss = sides(m); if (!ss) continue; const ats = ss.map(restsAt); if (ats.length === 2 && ats.every((x) => Number.isInteger(x) && Number.isFinite(x))) m.at = Math.max(...ats); }
             // Within a paragraph: the marks and trust first, then the changes and links that rest on them, then the
             // plan checks, then the checks made on a plan.
-            const rank = (m) => (['c', 'a'].includes(m.do) ? 1 : m.do === 'plan' ? 2 : ['stop', 'compare', 'account'].includes(m.do) ? 3 : 0);
+            const rank = (m) => (['c', 'a'].includes(m.do) ? 1 : m.do === 'plan' ? 2 : ['stop', 'compare', 'account'].includes(m.do) ? 3 : m.do === 'link' ? 4 : 0);
             return out.sort((a, b) => (a.at - b.at) || (rank(a) - rank(b)) || (a._i - b._i)).map(({ _i, ...m }) => m);
         },
         check: (ctx, scene, items) => {
-            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust', 'c', 'plan', 'a', 'stop', 'compare', 'account'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross, trust, c, plan, a, stop, compare or account, with its at`);
+            const bad = items.filter((x) => x.file !== 'path' || !['circle', 'cross', 'trust', 'c', 'plan', 'a', 'stop', 'compare', 'account', 'way', 'got', 'route', 'link'].includes(x.do) || !Number.isInteger(x.at)).map((x) => `${JSON.stringify(x).slice(0, 100)}: a move is circle, cross, trust, c, plan, a, stop, compare or account, with its at`);
             if (bad.length) return bad;
             // An answer with no moves (a call stopped partway) is a failure of its own, not a page to play.
             if (!items.some((x) => x.do === 'circle')) return ['no path was written: write the whole path, every move, in one jsonl block'];
+            const gaps = essentialGaps(seen(ctx, 12, null), items);
+            if (gaps.length) return gaps;
             return playPath(ctx, items);
         },
     },

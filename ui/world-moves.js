@@ -11,9 +11,12 @@ export class Stopped extends Error {}
 export class Failed extends Error {}
 export const VIEWS = new Set(['plan', 'stop', 'compare', 'account']);
 export const REASONING = new Set(['a', 'b', 'c']);
+export const ROOM_MOVES = new Set(['way', 'got', 'route', 'link']);
+/** `entry: "route"` in a link move: the route the player has built, whatever its id. */
+const ROUTE_ENTRY = 'r:r:';
 
 /** What a move works on, opened in the detail first: its `on`, or its own `a`/`of` for a move or a plan. */
-export const onOf = (m) => m.on ?? (['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
+export const onOf = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
 /** The control that makes a move, once what it works on is open. */
 export function controlOf(m) {
     switch (m.do) {
@@ -25,6 +28,10 @@ export function controlOf(m) {
         case 'plan': return `#detail [data-move-d="${esc(m.of)}"]`;
         case 'stop': case 'compare': case 'account': return `#detail [data-${m.do}="${esc(m.key)}"]`;
         case 'hold': return `[data-hold="${esc(m.strain)}"]`;
+        case 'way': return `[data-way="${esc(`${m.way}|${m.mark}`)}"]`;
+        case 'got': return `[data-got="${esc(m.of)}"]`;
+        case 'route': return `[data-route-add="${esc(m.node)}"]`;
+        case 'link': return `#detail [data-link-entry${m.entry === 'route' ? `^="${ROUTE_ENTRY}"` : `="${esc(m.entry)}"`}][data-link-q="${esc(m.q)}"]`;
         default: return null;
     }
 }
@@ -32,6 +39,7 @@ export function controlOf(m) {
 export function openerOf(on) {
     if (/^(hyp|pre):/.test(on)) on = `q:${on.slice(4).split('=')[0]}`;
     if (on.startsWith('q:')) return [`#q-box a.link[data-q="${esc(on.slice(2))}"]`];
+    if (on === 'route') return [`#timeline [data-fact^="${ROUTE_ENTRY}"] .ph`, `#timeline [data-fact^="${ROUTE_ENTRY}"]`];
     return [`#timeline [data-fact="${esc(on)}"] .ph`, `#timeline [data-fact="${esc(on)}"]`];
 }
 export const savedOf = (store) => { try { return JSON.parse(localStorage.getItem(store) ?? '{}'); } catch { return {}; } };
@@ -42,6 +50,10 @@ export function made(m, save) {
     if (m.do === 'trust') return m.link ? (save.trust?.links?.[m.link] ?? LEVELS.uncertain) === LEVELS[m.level] : (save.trust?.people?.[m.person] ?? null) === LEVELS[m.level];
     if (REASONING.has(m.do)) return (save.reasoning ?? []).some((x) => sameMove(x, m));
     if (m.do === 'hold') return (save.held ?? []).includes(m.strain);
+    if (m.do === 'way') return save.room?.ways?.[m.way] === m.mark;
+    if (m.do === 'got') return (save.room?.got ?? []).includes(m.of);
+    if (m.do === 'route') return (save.room?.route ?? []).includes(m.node);
+    if (m.do === 'link') return (save.links ?? []).some((l) => l.q === m.q && (m.entry === 'route' ? l.entry.startsWith(ROUTE_ENTRY) : l.entry === m.entry));
     return false;
 }
 
@@ -132,6 +144,12 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
             case 'hold':
                 if (!(await press(sel))) throw new Failed('the likely clash is not shown');
                 break;
+            case 'link':
+                if (!$(sel)) await press('#detail [data-link-more]');   // a question the player has put below the line
+                // falls through
+            case 'way': case 'got': case 'route':
+                if (!(await press(sel)) || !made(m, saved())) throw new Failed('the page did not take it');
+                break;
             default: throw new Failed(`unknown move ${m.do}`);
         }
     }
@@ -162,6 +180,17 @@ export function allowedNow(m, store) {
         const n = savedOf(store).reasoning?.length ?? 0;
         el.click();
         const took = (savedOf(store).reasoning?.length ?? 0) === n + 1;
+        if (took) $('#undo').click();
+        return took;
+    }
+    if (ROOM_MOVES.has(m.do)) {
+        if (m.do === 'link' && !$(controlOf(m))) $('#detail [data-link-more]')?.click();
+        const el = $(controlOf(m));
+        if (!el) return false;
+        const state = () => { const s = savedOf(store); return JSON.stringify([s.room, s.links]); };
+        const before = state();
+        el.click();
+        const took = state() !== before;
         if (took) $('#undo').click();
         return took;
     }

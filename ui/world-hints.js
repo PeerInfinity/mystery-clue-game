@@ -102,6 +102,9 @@ export async function makeHints({ store, api }) {
                 const m = t.m;
                 const where = m.do === 'circle' || m.do === 'cross' ? `Look at ${qName(m.q)}.`
                     : m.do === 'hold' ? 'Look at the likely clashes.'
+                    : m.do === 'way' || m.do === 'got' ? 'Look at the ways in.'
+                    : m.do === 'route' ? 'Look at the route.'
+                    : m.do === 'link' && m.entry === 'route' ? 'Look at your route.'
                     : `Look at ${entry(onOf(m))}.`;
                 const what = m.do === 'circle' ? `Circle “${pickName(m.q, m.pick)}”.`
                     : m.do === 'cross' ? `Cross out “${pickName(m.q, m.pick)}”.`
@@ -109,7 +112,11 @@ export async function makeHints({ store, api }) {
                     : m.do === 'a' ? `Point out that it changed: against ${entry(m.b)}.`
                     : m.do === 'b' ? 'Point out what it needs and what it does.'
                     : m.do === 'c' ? `Ask “What is this for?”: for ${entry(m.for)}.`
-                    : m.do === 'hold' ? 'You hold both: set it aside.' : 'Make the move.';
+                    : m.do === 'hold' ? 'You hold both: set it aside.'
+                    : m.do === 'way' ? `Mark ${api.name(m.way.split('|')[0]) ?? m.way.split('|')[0]} ${m.mark} to ${m.way.split('|')[1] === 'person' ? 'a person' : 'something small'}.`
+                    : m.do === 'got' ? `Point out that something got through: ${entry(m.of)}.`
+                    : m.do === 'route' ? `Add ${api.name(m.node) ?? m.node} to the route.`
+                    : m.do === 'link' ? `Point it out under “Relevant to…”: ${qName(m.q)}.` : 'Make the move.';
                 return [where, m.why, what];
             }
             default: return [];

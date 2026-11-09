@@ -1,0 +1,20 @@
+{
+  "description": "The true path of the invented case: exercises the room and link moves (docs/case-format.md).",
+  "moves": [
+    {"at": 1, "do": "circle", "q": "q.how", "pick": "a bite", "why": "No wound from a weapon."},
+    {"at": 1, "do": "circle", "q": "q.what_came", "pick": "something else", "why": "Nothing named so far fits: describe it."},
+    {"at": 2, "do": "way", "way": "door|person", "mark": "closed", "why": "Bolted on the inside: no one came by the door."},
+    {"at": 3, "do": "way", "way": "chimney|person", "mark": "closed", "why": "Barred with iron."},
+    {"at": 4, "do": "way", "way": "walls|person", "mark": "closed", "why": "The walls were sound."},
+    {"at": 5, "do": "got", "of": "f.smoke", "why": "Smoke came from the office, so there is a way nobody has mentioned."},
+    {"at": 7, "do": "way", "way": "grating|small", "mark": "open", "why": "The way the smoke came: small."},
+    {"at": 7, "do": "link", "entry": "f.grating", "q": "q.what_came", "see": "small enough for the grating", "why": "Whatever came had to fit that."},
+    {"at": 9, "do": "route", "node": "office", "why": "Start where the smoke came from."},
+    {"at": 9, "do": "route", "node": "grating", "why": "Through the grating."},
+    {"at": 9, "do": "route", "node": "hook", "why": "The hook is beside it."},
+    {"at": 9, "do": "route", "node": "chain", "why": "The chain hangs from the hook."},
+    {"at": 9, "do": "route", "node": "desk", "why": "And it reaches the desk."},
+    {"at": 9, "do": "link", "entry": "route", "q": "q.what_came", "see": "travel down a chain", "why": "It must have come that way."},
+    {"at": 9, "do": "link", "entry": "f.dead", "q": "q.what_came", "see": "something that bites", "why": "If he was bitten, then it bites."}
+  ]
+}

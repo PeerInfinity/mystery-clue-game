@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { CASE, WORLD, STORE, pageUrl } from './case-env.mjs';
+import { controlOf, made } from '../ui/world-moves.js';
 const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
 const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/');
@@ -53,12 +54,13 @@ const fail = (m, why) => { failures++; console.log(`FAIL ¶${m.at} ${m.do} ${m.q
 
 /** Open what a move works on in the detail panel: a fact on the timeline, a question, or a likely clash's side. */
 async function openOn(on) {
+    if (on === 'route') return click(`#timeline [data-fact^="r:r:"] .ph`);
     if (on.startsWith('q:')) return (await click(`#q-box a.link[data-q="${esc(on.slice(2))}"]`)) || click(`#q-box [data-q="${esc(on.slice(2))}"]`);
     if (/^(hyp|pre):/.test(on)) return openOn(`q:${on.slice(4).split('=')[0]}`);
     if (await exists(`#timeline [data-fact="${esc(on)}"]`)) return click(`#timeline [data-fact="${esc(on)}"] .ph`) || click(`#timeline [data-fact="${esc(on)}"]`);
     return false;
 }
-const defaultOn = (m) => m.on ?? (['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
+const defaultOn = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
 
 // --- Earliest. The data's earliest paragraph for a circle; the page's, for the reasoning moves, found in play.
 const W = WORLD;
@@ -184,11 +186,18 @@ async function play(m) {
             if (!(await save()).held?.includes(m.strain)) return fail(m, 'not held');
             break;
         }
+        case 'way': case 'got': case 'route': case 'link': {
+            const sel = controlOf(m);
+            if (!(await exists(sel))) return fail(m, 'not offered');
+            await click(sel);
+            if (!made(m, await save())) return fail(m, `not taken: ${await ev(`document.querySelector('.rm-note')?.innerText ?? ''`)}`);
+            break;
+        }
         default: return fail(m, 'unknown move');
     }
     if (m.see && !new RegExp(m.see).test(await pageText())) return fail(m, `not on the page: /${m.see}/`);
     if (errors.length) { const e = errors.splice(0); return fail(m, `page error: ${e.join(' | ')}`); }
-    console.log(`ok ¶${m.at} ${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? m.strain ?? m.link ?? m.person ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`);
+    console.log(`ok ¶${m.at} ${m.do} ${m.way ?? m.node ?? m.entry ?? m.q ?? m.of ?? m.a ?? m.key ?? m.strain ?? m.link ?? m.person ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.do === 'link' ? ' → ' + m.q : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`);
 }
 
 const t0 = Date.now();
@@ -205,6 +214,8 @@ for (const m of moves) {
 if (STOP >= 1e9 && !failures) {
     const end = await ev(`+document.getElementById('para').max`);
     if (!(await readTo(end))) { console.log(`${failures} failure(s)`); process.exit(1); }
+    const lacked = await ev(`[...document.querySelectorAll('#q-box p')].filter((p) => /^Your description lacked/.test(p.textContent)).map((p) => p.closest('li').querySelector('a.link').textContent + ': ' + p.textContent)`);
+    for (const l of lacked) { failures++; console.log(`FAIL at the end: ${l}`); }
     const open = await ev(`document.querySelector('#clashes .clash-box summary')?.innerText ?? ''`);
     if (open) { failures++; console.log(`FAIL at the end: ${open}\n${await ev(`document.querySelector('#clashes').innerText`)}`); }
     const unheld = await ev(`[...document.querySelectorAll('#clashes [data-hold]')].map((b) => b.closest('li').innerText.replace(/\\s+/g, ' '))`);

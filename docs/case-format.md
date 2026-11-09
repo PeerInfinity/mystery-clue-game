@@ -350,6 +350,9 @@ The player's moves, each checked by these rules, give entries with the source *t
   (raised, the possibility available, `answer_inferable_at`), and each wrong answer tried against its likely clash's
   `available`. Crossings and trust are judgement and not timed. A move found early is either the path being late
   (move it) or the page running ahead of the story (a leak to fix).
+  Four moves for a case with a room or observations: `way` (`way: "<row>|<size>"`, `mark: closed | open`), `got` (`of`: a `passed`
+  fact), `route` (`node`, one per link, in order) and `link` (`entry`: a fact id, or `route` for the route built; `q`). The path
+  check fails if, at the end of the story, a description lacks an essential observation.
 - Likely clashes (`world/strains.json`): pairs that can both hold but sit badly together, each side a fact or a
   question's possibility `{q, pick}`, with `why` (the reasoning in plain words), `available`, `from` (optional: a fact or a question) and `key` (the
   question at whose give-away it is listed). In play a pair shows only when one side is a circle of the player's
