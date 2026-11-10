@@ -552,13 +552,19 @@ function clashSide(x) {
     const f = factOf(x.fact);
     if (x.kind === 'pick') {
         const q = qById.get(x.q);
-        const who = x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : '';
+        const who = x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : wordOf(f);
         return `<a class="link" data-fact="${esc(f.id)}">${who}${x.neg ? 'not ' : ''}${pickText(q, x.pick)}</a> <span class="para">¶${givenAt(f)}</span>`;
     }
     return `<a class="link" data-fact="${esc(f.id)}">${statePhrase(x, f)}</a> <span class="para">¶${givenAt(f)}</span>`;
 }
 /** A state on one side of a contradiction: the fact, or what a claim asserts, with whose word it is. */
-const statePhrase = (x, f) => (x.claim && x.claim === x.fact ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, neg: x.neg, time: x.time, id: '' })}` : phrase(f));
+const statePhrase = (x, f) => (x.claim && x.claim === x.fact ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, neg: x.neg, time: x.time, id: '' })}` : `${wordOf(f)}${phrase(f)}`);
+/** Whose word a fact is, ahead of it on a side of a contradiction: the origins of its chains, unless it is a narrator's own. */
+function wordOf(f) {
+    if (f.reasoned || f.hyp || CLAIM_ATTRS.has(f.attr)) return '';
+    const who = [...new Set(chainsOf(f).map((c) => c.origin))].filter((o) => o && o !== '?' && !narratorIds.has(o));
+    return who.length ? `${who.map((o) => `${ent(o)}’s`).join(' and ')} word: ` : '';
+}
 function clashTitle(c) {
     if (c.a.kind === 'pick') return esc(qById.has(c.a.q) ? qLabel(qById.get(c.a.q)) : c.a.q);
     // What the contradiction is about: the state's own subject (what a claim asserts, not the claim's speaker).
@@ -873,7 +879,7 @@ function sideHtml(x, label) {
       <ul class="events">${f.reasoned.premises.map((id) => factOf(id)).filter(Boolean).map((p) => eventRow(p, new Set())).join('')}</ul></div>`;
     }
     const what = x.kind === 'pick'
-        ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : ''}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
+        ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : wordOf(f)}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
         : statePhrase(x, f);
     return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${what}</a></p>
       <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
