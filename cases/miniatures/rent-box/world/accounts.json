@@ -1,5 +1,7 @@
 {
   "accounts": [
-    {"id": "acct.ada", "label": "What Ada Orme sees and hears herself", "origin": "ada", "how": "saw", "facts": ["f.ada_role", "f.fenn_lodger", "f.rudd_lodger", "f.no_servant", "f.box_place", "f.box_full", "f.box_empty", "f.rudd_in_house", "f.rudd_says_saw", "f.fenn_knocks", "f.fenn_says_reading", "f.fenn_stood_by", "f.fenn_let_out", "f.front_locked", "f.key_pocket", "f.ada_kitchen", "f.back_shut", "f.constable_told", "f.money_found", "f.rudd_owns"]}
+    {"id": "acct.ada", "label": "What Ada Orme sees and hears herself", "origin": "ada", "how": "saw", "facts": ["f.ada_role", "f.fenn_lodger", "f.rudd_lodger", "f.no_servant", "f.box_place", "f.box_full", "f.box_empty", "f.rudd_in_house", "f.rudd_tells", "f.fenn_knocks", "f.fenn_tells", "f.fenn_stood_by", "f.fenn_let_out", "f.front_locked", "f.key_pocket", "f.ada_kitchen", "f.back_shut", "f.constable_told", "f.money_found", "f.rudd_owns"]},
+    {"id": "acct.rudd_saw", "label": "What Captain Rudd says he saw from the back parlour", "origin": "rudd", "how": "saw", "facts": ["f.rudd_fenn_yard", "f.rudd_back_open"]},
+    {"id": "acct.fenn_said", "label": "Where Mr. Fenn says he was", "origin": "fenn", "how": "saw", "facts": ["f.fenn_reading"]}
   ]
 }

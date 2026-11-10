@@ -104,7 +104,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | Miniature | Mechanic | Size |
 |---|---|---|
 | `cases/miniatures/lamp-keepers-word` | A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it. | 8 paragraphs, 25 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
-| `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 20 facts, 1 account, 2 questions, 7 observations (5 essential), 10 moves |
+| `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 23 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (5 essential), 10 moves |
 
 Played at `?case=cases/miniatures/<name>`. `npm test` validates them and checks each `structure.json` against its
 world model.
@@ -170,8 +170,15 @@ question (which clue removes which other answer).
    past two. Writing the content as facts of their own (`claim`) would place and head them rightly, but each then has
    its own statement link, and one lie would take two distrusts.
    **Fixed 2026-11-10, in part:** the contradiction is now headed by what the claim asserts ("Mr. Fenn: in two places
-   at once?") and each side reads "Captain Rudd says: Mr. Fenn at the yard". Still open: the asserted states are not
-   on the timeline at their own time.
+   at once?") and each side reads "Captain Rudd says: Mr. Fenn at the yard".
+   **Ruled by the user 2026-11-10, and the miniature rewritten:** a statement is on the timeline when it is made,
+   what it asserts is on the timeline when it is said to have happened, and the asserted facts are grouped in an
+   account that can be doubted as a group or one by one. The format already had this, and the note above ("one lie
+   would take two distrusts") was wrong: each lodger's statement is now an account of his own (`acct.rudd_saw`,
+   origin the lodger) with a telling to the narrator. The telling is the row at three o'clock, the two facts are rows
+   at half past two, the telling's link takes off both, and each fact's own statement link takes off one. No engine
+   or page change was needed. What is lost: a telling cannot be linked to a question (finding 2), and a side of the
+   contradiction no longer names whose word it is (the chain under it does).
 9. **The prose has to carry more than the frame.** A question needs a quote where it is raised and each proposed
    answer a quote where it becomes available, so the narrator states the contradiction and names the candidates. An
    answer is judged only where the story gives it away, so each miniature ends on a confession, although an authored

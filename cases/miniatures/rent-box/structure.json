@@ -12,8 +12,8 @@
     {"id": "q.who", "asks": "Who emptied the rent box?", "answer": "Captain Rudd", "others": ["Mr. Fenn"], "gate": 6, "needs": [["c.front_door", "c.back_door", "c.fenn_left", "c.rudd_indoors"]], "rules_out": {"Mr. Fenn": "c.fenn_left, c.front_door and c.back_door: he was outside both doors from the moment the box was full", "anyone from outside": "c.front_door and c.back_door"}}
   ],
   "clues": [
-    {"id": "c.rudd_statement", "source": "Captain Rudd, to the narrator at three o'clock: what he says he saw from the back parlour", "says": "At half past two Fenn crossed the yard and came in at the back door.", "facts": ["f.rudd_says_saw"], "false": true},
-    {"id": "c.fenn_statement", "source": "Mr. Fenn, to the narrator at four o'clock, of himself", "says": "At half past two he was at the reading room in Cable Street.", "facts": ["f.fenn_says_reading"]},
+    {"id": "c.rudd_statement", "source": "Captain Rudd, to the narrator at three o'clock: what he says he saw from the back parlour", "says": "At half past two Fenn crossed the yard and came in at the back door.", "facts": ["f.rudd_fenn_yard", "f.rudd_back_open"], "chain": ["f.rudd_tells"], "false": true},
+    {"id": "c.fenn_statement", "source": "Mr. Fenn, to the narrator at four o'clock, of himself", "says": "At half past two he was at the reading room in Cable Street.", "facts": ["f.fenn_reading"], "chain": ["f.fenn_tells"]},
     {"id": "c.back_door", "source": "The narrator's own afternoon", "says": "She was in the kitchen from one until three with the back door at her elbow; it is the only way in from the yard and it did not open.", "facts": ["f.back_shut", "f.ada_kitchen"]},
     {"id": "c.front_door", "source": "The narrator's own afternoon", "says": "The front door was locked from one until four and its key was in her pocket.", "facts": ["f.front_locked", "f.key_pocket"]},
     {"id": "c.fenn_left", "source": "The narrator's own afternoon", "says": "Fenn stood by while the rents were counted and was let out at the front door at one.", "facts": ["f.fenn_stood_by", "f.fenn_let_out"]},

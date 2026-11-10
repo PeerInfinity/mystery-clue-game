@@ -1,7 +1,7 @@
 {
   "observations": [
     {"id": "o.untrue_back", "q": "q.untrue", "from": ["f.back_shut"], "says": "the back door did not open, so nobody came in from the yard", "essential": true, "against": ["fenn"]},
-    {"id": "o.untrue_said", "q": "q.untrue", "from": ["f.rudd_says_saw"], "says": "it was the Captain who said somebody did"},
+    {"id": "o.untrue_said", "q": "q.untrue", "from": ["f.rudd_back_open"], "says": "it was the Captain who said somebody did"},
     {"id": "o.who_front", "q": "q.who", "from": ["f.front_locked"], "says": "nobody came in or went out by the front door after one", "essential": true},
     {"id": "o.who_back", "q": "q.who", "from": ["f.back_shut"], "says": "nobody came in from the yard", "essential": true},
     {"id": "o.who_fenn", "q": "q.who", "from": ["f.fenn_let_out"], "says": "Mr. Fenn was outside from one o'clock, when the box was full", "essential": true, "against": ["fenn"]},
