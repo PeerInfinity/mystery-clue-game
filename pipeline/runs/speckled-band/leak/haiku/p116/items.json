@@ -1,0 +1,10 @@
+[{"para":116,"kind":"name","text":"The train for Leatherhead","id":"leatherhead_train","i":1,"verdict":"supported","why":"¶116: at Waterloo they caught a train for Leatherhead."},
+{"para":116,"kind":"name","text":"The trap","id":"trap","i":2,"verdict":"supported","why":"¶116: at Leatherhead they hired a trap at the station inn."},
+{"para":116,"kind":"name","text":"The station inn","id":"station_inn","i":3,"verdict":"supported","why":"¶116: the trap was hired at the station inn at Leatherhead."},
+{"para":116,"kind":"name","text":"The Surrey lanes","id":"surrey_lanes","i":4,"verdict":"supported","why":"¶116: they drove for four or five miles through the lovely Surrey lanes."},
+{"para":116,"kind":"name","text":"The meadows","id":"meadows","i":5,"verdict":"supported","why":"¶116: Holmes tapped Watson and pointed over the meadows."},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson drive to Waterloo","id":"t.cab_to_waterloo#1","i":6,"verdict":"supported","why":"¶115 sets the plan to call a cab to Waterloo, and ¶116 has them arriving there."},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson at Waterloo","id":"t.holmes_at_waterloo","i":7,"verdict":"supported","why":"¶116: 'At Waterloo we were fortunate in catching a train.'"},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson on the train for Leatherhead","id":"t.train_to_leatherhead","i":8,"verdict":"supported","why":"¶116: they caught a train for Leatherhead from Waterloo."},
+{"para":116,"kind":"time","text":"That day: at Leatherhead, Holmes and Watson hire a trap at the station inn","id":"t.hire_trap","i":9,"verdict":"supported","why":"¶116: at Leatherhead they hired a trap at the station inn."},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson drive four or five miles through the Surrey lanes","id":"t.trap_drive","i":10,"verdict":"supported","why":"¶116: they drove four or five miles through the Surrey lanes."}]

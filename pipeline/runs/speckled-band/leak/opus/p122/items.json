@@ -1,0 +1,4 @@
+[{"para":122,"kind":"name","text":"The fields","id":"fields","i":1,"verdict":"supported","why":"The driver mentions the footpath over the fields in the last paragraph."},
+{"para":122,"kind":"name","text":"The footpath","id":"footpath","i":2,"verdict":"supported","why":"The driver points out the footpath as the shorter way to the house."},
+{"para":122,"kind":"name","text":"The stile","id":"stile","i":3,"verdict":"supported","why":"The driver tells them to get over this stile."},
+{"para":122,"kind":"name","text":"The lady walking on the footpath","id":"the_lady_walking","i":4,"verdict":"supported","why":"The driver says 'There it is, where the lady is walking'; the label does not identify her beyond that."}]

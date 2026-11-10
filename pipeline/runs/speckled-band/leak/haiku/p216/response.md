@@ -1,0 +1,10 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes says at ¶216 that the bed must always stay in the same position relative to the ventilator and rope, and the scene is set at dusk at the Crown Inn."}
+{"i": 2, "verdict": "supported", "why": "The bed is clamped (¶214) and Holmes gives the same reason at ¶216. The explanation is Holmes's inference, but it is a possibility the story gives reason to consider."}
+{"i": 3, "verdict": "supported", "why": "The question is plainly open ('if anything'), and the whistle, the ventilator, and the fixed bed give reason to consider something arriving at a fixed spot. The story never confirms what came through."}
+{"i": 4, "verdict": "supported", "why": "The dummy rope is fixed above the ventilator (¶151), and Holmes says the bed cannot move (¶216). Tying the bed's position to the rope is a possibility the story has raised."}
+{"i": 5, "verdict": "supported", "why": "Holmes says at ¶216 that the rope 'was clearly never meant for a bell-pull', and ¶149–151 establish it is a dummy not attached to any wire."}
+{"i": 6, "verdict": "supported", "why": "Holmes calls the ventilator 'ventilators which do not ventilate' (¶157) and says the bed is fixed relative to it (¶216). The purpose given is a reasonable possibility, though it is only Holmes's theory."}
+{"i": 7, "verdict": "supported", "why": "Helen was moved to the middle room (¶67), and Holmes suspects the move was an excuse (¶136). With the bed fixed relative to the ventilator and rope (¶216), the idea that the sleeper must be brought to it is a possibility the story gives reason to consider, though not confirmed."}
+{"i": 8, "verdict": "supported", "why": "Holmes says at ¶216: 'The lady could not move her bed. It must always be in the same relative position to the ventilator and to the rope.'"}
+```

@@ -1,0 +1,3 @@
+[{"para":18,"kind":"name","text":"Holmes's desk","id":"holmes_desk","i":1,"verdict":"supported","why":"Paragraph 18 states Holmes turned to his desk and unlocked it."},
+{"para":18,"kind":"name","text":"Holmes's small case-book","id":"case_book","i":2,"verdict":"supported","why":"Paragraph 18 states he drew out a small case-book from the desk."},
+{"para":18,"kind":"time","text":"That morning: Holmes consults his case-book","id":"t.holmes_consults","i":3,"verdict":"supported","why":"The scene takes place that same morning, and paragraph 18 states he consulted the case-book."}]

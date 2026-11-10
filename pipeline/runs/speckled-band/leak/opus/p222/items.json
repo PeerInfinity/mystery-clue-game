@@ -1,0 +1,9 @@
+[{"para":222,"kind":"name","text":"The old park wall","id":"park_wall","i":1,"verdict":"supported","why":"The old park wall is named in ¶222."},
+{"para":222,"kind":"name","text":"The clump of laurel bushes","id":"laurel_bushes","i":2,"verdict":"supported","why":"The clump of laurel bushes is named in ¶222."},
+{"para":222,"kind":"name","text":"What seemed to be a hideous and distorted child","id":"the_distorted_child","i":3,"verdict":"supported","why":"Uses the exact wording of ¶222 and does not reveal what the figure really is."},
+{"para":222,"kind":"time","text":"That night: Holmes and Watson enter the grounds through a breach in the old park wall","id":"t.enter_grounds","i":4,"verdict":"supported","why":"¶222 says entry was easy because breaches gaped in the old park wall, so they plainly entered through one."},
+{"para":222,"kind":"time","text":"That night: Holmes and Watson make their way among the trees","id":"t.among_trees","i":5,"verdict":"supported","why":"¶222 states they made their way among the trees."},
+{"para":222,"kind":"time","text":"That night: Holmes and Watson reach the lawn","id":"t.reach_lawn","i":6,"verdict":"supported","why":"¶222 states they reached the lawn."},
+{"para":222,"kind":"time","text":"That night: Holmes and Watson cross the lawn","id":"t.cross_lawn","i":7,"verdict":"supported","why":"¶222 states they crossed the lawn."},
+{"para":222,"kind":"time","text":"That night: Holmes and Watson are about to enter through the window","id":"t.at_window","i":8,"verdict":"supported","why":"¶222 states they were about to enter through the window."},
+{"para":222,"kind":"time","text":"That night: what seems a hideous, distorted child darts out of the laurel bushes","id":"t.baboon_darts","i":9,"verdict":"supported","why":"¶222 states this, keeping the 'seemed to be' hedge."}]

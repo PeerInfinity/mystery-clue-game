@@ -1,0 +1,4 @@
+[{"para":5,"kind":"name","text":"A young lady","id":"the_lady_in_black","i":1,"verdict":"supported","why":"Holmes says in ¶5 that a young lady has arrived; the label gives no name or identity."},
+{"para":5,"kind":"name","text":"The metropolis","id":"the_metropolis","i":2,"verdict":"supported","why":"Holmes uses the phrase 'the metropolis' in ¶5."},
+{"para":5,"kind":"name","text":"The sitting-room","id":"sitting_room","i":3,"verdict":"supported","why":"¶5 states she is waiting in the sitting-room."},
+{"para":5,"kind":"time","text":"That morning, before a quarter-past seven: a young lady arrives","id":"t.lady_arrives","i":4,"verdict":"supported","why":"The clock shows a quarter-past seven when Holmes wakes Watson and says she has already arrived, so her arrival that morning came earlier."}]

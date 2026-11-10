@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Paragraph 98 has the man state \"I am Dr. Grimesby Roylott, of Stoke Moran,\" and the scene is set on the same early morning that the lady's visit began (¶2, ¶5, ¶98)."}
+```

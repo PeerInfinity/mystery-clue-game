@@ -1,0 +1,7 @@
+[{"para":33,"kind":"name","text":"The inhabited wing of the manor-house","id":"inhabited_wing","i":1,"verdict":"supported","why":"Helen says only one wing of the manor-house is now inhabited."},
+{"para":33,"kind":"name","text":"The central block of the buildings","id":"central_block","i":2,"verdict":"supported","why":"Helen mentions the central block of the buildings."},
+{"para":33,"kind":"name","text":"The corridor","id":"corridor","i":3,"verdict":"supported","why":"Helen says the bedrooms all open into the same corridor."},
+{"para":33,"kind":"name","text":"Helen Stoner's bedroom","id":"helen_room","i":4,"verdict":"supported","why":"Helen says the third bedroom is her own."},
+{"para":33,"kind":"name","text":"The sitting-rooms of the manor-house","id":"manor_sitting_rooms","i":5,"verdict":"supported","why":"Helen says the sitting-rooms are in the central block."},
+{"para":33,"kind":"time","text":"That morning: Helen describes the manor-house and its bedrooms","id":"t.helen_on_house","i":6,"verdict":"supported","why":"Helen is giving this description during her early morning visit to Baker Street."},
+{"para":33,"kind":"question","text":"How could anything have got into Julia's bedroom?","id":"room.question","i":7,"verdict":"unsupported","why":"The story has not yet described how Julia died or suggested that anything entered her room; the question hints at an intruder and an apparently inaccessible room."}]

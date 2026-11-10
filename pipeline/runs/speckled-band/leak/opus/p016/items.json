@@ -1,0 +1,3 @@
+[{"para":16,"kind":"name","text":"The lady's jacket","id":"jacket","i":1,"verdict":"supported","why":"¶16 explicitly mentions the left arm of the lady's jacket, spattered with mud."},
+{"para":16,"kind":"name","text":"Mud thrown up by vehicles","id":"vehicle_mud","i":2,"verdict":"supported","why":"¶16 has Holmes explain that a dog-cart throws up mud in that way."},
+{"para":16,"kind":"time","text":"That morning: Holmes reads the lady's journey from her ticket and jacket","id":"t.holmes_reads#1","i":3,"verdict":"supported","why":"¶12-16 show Holmes that morning deducing her train and dog-cart journey from the return ticket and mud on her jacket."}]

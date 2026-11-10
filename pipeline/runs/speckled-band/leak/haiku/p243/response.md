@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "¶243 gives the exact words, and the story has set up the night vigil in the Stoke Moran bedroom that began at eleven and ran through the small hours, so the whisper falls in that same night."}
+```

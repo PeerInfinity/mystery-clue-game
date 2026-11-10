@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Helen reported the whistle and clanging sound in ¶50, and Holmes directly asks in ¶51 whether she is sure and could swear to it, so this is a plain question the story raises."}
+```

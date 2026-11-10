@@ -1,0 +1,4 @@
+[{"para":235,"kind":"name","text":"A night-bird","id":"night_bird","i":1,"verdict":"supported","why":"¶235 mentions the occasional cry of a night-bird from outside."},
+{"para":235,"kind":"name","text":"The parish clock","id":"parish_clock","i":2,"verdict":"supported","why":"¶235 names the parish clock, heard booming every quarter of an hour."},
+{"para":235,"kind":"time","text":"During the vigil: once, a long drawn catlike whine at their very window","id":"t.cheetah_whine","i":3,"verdict":"supported","why":"¶235 states that once, at their very window, there was a long drawn catlike whine during the vigil."},
+{"para":235,"kind":"time","text":"Three o'clock: the parish clock strikes, and they still sit waiting","id":"t.struck_three","i":4,"verdict":"supported","why":"¶235 says twelve, one, two and three struck and they still sat waiting."}]

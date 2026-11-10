@@ -1,0 +1,4 @@
+[{"para":241,"kind":"name","text":"The door of Dr. Roylott's room","id":"roylott_door","i":1,"verdict":"supported","why":"¶240-241 say they will enter Dr. Roylott's room and Holmes strikes at the chamber door."},
+{"para":241,"kind":"time","text":"After the cry: Holmes leads the way down the corridor","id":"t.down_corridor","i":2,"verdict":"supported","why":"¶241 states he led the way down the corridor, following the horrible cry of ¶238."},
+{"para":241,"kind":"time","text":"After the cry: Holmes strikes twice at the chamber door, with no reply from within","id":"t.holmes_knocks","i":3,"verdict":"supported","why":"¶241 states he struck twice at the chamber door without any reply from within."},
+{"para":241,"kind":"time","text":"After the cry: Holmes turns the handle and enters the chamber, Watson at his heels","id":"t.enter_roylott_room","i":4,"verdict":"supported","why":"¶241 states he turned the handle and entered, with Watson at his heels."}]

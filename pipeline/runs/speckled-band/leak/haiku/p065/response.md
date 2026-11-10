@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story establishes that the visitor arrives early in the morning (Holmes wakes Watson at 7:15, and the visitor left home before six), and ¶65 states that Holmes shook his head."}
+```

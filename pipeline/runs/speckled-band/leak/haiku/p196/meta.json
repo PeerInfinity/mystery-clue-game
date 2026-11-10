@@ -1,0 +1,12 @@
+{
+  "model": "claude-haiku-5-5",
+  "prompt_sha256": "a0e36e74ba8d7fb72b1f5dbad23be892f026e8ad417392632d0ad82dfb46fa2c",
+  "cost_usd": 0.0035675000000000004,
+  "duration_s": 8,
+  "input_tokens": 15356,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 15354,
+  "output_tokens": 993,
+  "stop_reason": "end_turn",
+  "date": "2026-11-09T23:58:52.027Z"
+}

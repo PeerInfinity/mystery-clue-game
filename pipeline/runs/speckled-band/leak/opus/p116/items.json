@@ -1,0 +1,10 @@
+[{"para":116,"kind":"name","text":"The train for Leatherhead","id":"leatherhead_train","i":1,"verdict":"supported","why":"¶116 says they caught a train for Leatherhead at Waterloo."},
+{"para":116,"kind":"name","text":"The trap","id":"trap","i":2,"verdict":"supported","why":"¶116 says they hired a trap and Holmes sat in the front of it."},
+{"para":116,"kind":"name","text":"The station inn","id":"station_inn","i":3,"verdict":"supported","why":"¶116 says the trap was hired at the station inn."},
+{"para":116,"kind":"name","text":"The Surrey lanes","id":"surrey_lanes","i":4,"verdict":"supported","why":"¶116 mentions driving through the lovely Surrey lanes."},
+{"para":116,"kind":"name","text":"The meadows","id":"meadows","i":5,"verdict":"supported","why":"¶116 says Holmes pointed over the meadows."},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson drive to Waterloo","id":"t.cab_to_waterloo#1","i":6,"verdict":"supported","why":"¶115 has Holmes propose calling a cab to drive to Waterloo, and ¶116 finds them there the same day."},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson at Waterloo","id":"t.holmes_at_waterloo","i":7,"verdict":"supported","why":"¶116 opens with them at Waterloo, on the day of Helen's visit."},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson on the train for Leatherhead","id":"t.train_to_leatherhead","i":8,"verdict":"supported","why":"¶116 says they caught a train for Leatherhead that day."},
+{"para":116,"kind":"time","text":"That day: at Leatherhead, Holmes and Watson hire a trap at the station inn","id":"t.hire_trap","i":9,"verdict":"supported","why":"¶116 says they hired a trap at the station inn after the train to Leatherhead."},
+{"para":116,"kind":"time","text":"That day: Holmes and Watson drive four or five miles through the Surrey lanes","id":"t.trap_drive","i":10,"verdict":"supported","why":"¶116 says they drove four or five miles through the Surrey lanes."}]

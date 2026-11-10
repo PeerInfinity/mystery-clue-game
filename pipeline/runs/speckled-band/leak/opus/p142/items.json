@@ -1,0 +1,4 @@
+[{"para":142,"kind":"name","text":"The pillow","id":"pillow","i":1,"verdict":"supported","why":"¶142 mentions the pillow on the bed, on which the tassel lies."},
+{"para":142,"kind":"name","text":"The bell-rope","id":"bell_rope","i":2,"verdict":"supported","why":"¶142 names a thick bell-rope hanging beside the bed."},
+{"para":142,"kind":"name","text":"The tassel of the bell-rope","id":"tassel","i":3,"verdict":"supported","why":"¶142 states the tassel of the bell-rope was lying on the pillow."},
+{"para":142,"kind":"time","text":"That afternoon: Holmes asks where the bell communicates with","id":"t.holmes_on_bell","i":4,"verdict":"supported","why":"Holmes asks this in ¶142 during the visit that the story places in the afternoon (¶125 'Good-afternoon', ¶126)."}]

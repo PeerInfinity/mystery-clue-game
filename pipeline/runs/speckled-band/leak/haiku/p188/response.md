@@ -1,0 +1,4 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes says at ¶178 that he and Watson must spend the night in Helen's room (the middle room), and at ¶188 that they will investigate the cause of the noise. The events occur in the afternoon at Stoke Moran (¶126, ¶131, ¶172-188)."}
+{"i": 2, "verdict": "unsupported", "why": "The question's wording ('only the noise... with some harmless cause') points at a benign answer the story has given no reason to expect. Everything so far (Julia's death, the whistle, Roylott's violence, the dummy bell-rope, Holmes's grim mood) suggests danger. Helen's doubt about whether she heard the whistle (¶52) does not make a harmless cause for the night's events a considered possibility."}
+```

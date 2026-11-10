@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "unsupported", "why": "The story so far never establishes a cat anywhere. Holmes only asks in the final paragraph whether there is one in the safe, and the only animals mentioned are the cheetah and baboon. Naming a thing 'A cat' asserts an identity the story has not yet given."}
+```

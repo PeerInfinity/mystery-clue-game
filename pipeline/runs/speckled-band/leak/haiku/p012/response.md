@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "In ¶12 Holmes states that the woman has come in by train this morning, so the story has established a train as the means of her arrival."}
+```

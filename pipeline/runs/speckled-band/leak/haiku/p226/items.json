@@ -1,0 +1,3 @@
+[{"para":226,"kind":"name","text":"Watson's shoes","id":"watson_shoes","i":1,"verdict":"supported","why":"The narrator is named Watson earlier (¶8, ¶78), and ¶226 says he slipped off his shoes."},
+{"para":226,"kind":"time","text":"That night: Holmes and Watson are inside the bedroom","id":"t.enter_bedroom","i":2,"verdict":"supported","why":"¶226 states that Watson found himself inside the bedroom with Holmes, and the night setting follows from the eleven o'clock signal (¶219-226)."},
+{"para":226,"kind":"time","text":"That night: Holmes noiselessly closes the shutters","id":"t.shutters_closed","i":3,"verdict":"supported","why":"¶226 states that Holmes's companion noiselessly closed the shutters, and the time is that night."}]

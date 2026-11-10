@@ -1,0 +1,9 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes tells Helen to lock herself in to-night and asks to be taken at once to the rooms, both stated in ¶131, which is the afternoon trip set up in ¶¶76-82."}
+{"i": 2, "verdict": "supported", "why": "Helen has said she is afraid and that he has followed her (¶128-130), and Holmes says 'If he is violent, we shall take you away to your aunt's at Harrow' (¶131). The label frames this as a possibility, which the story gives reason to consider."}
+{"i": 3, "verdict": "supported", "why": "A plain question. Helen has said she is in danger and Holmes has just advised locking herself in, so the question is one the story gives reason to raise."}
+{"i": 4, "verdict": "supported", "why": "A possibility the story gives reason to consider. Holmes has just advised locking the door, and Julia's locked door is mentioned earlier (¶44), so a locked door being protective is a live possibility."}
+{"i": 5, "verdict": "supported", "why": "A possibility the story gives reason to consider. Julia's death happened behind a door that was fastened on the inner side (¶56), and the mystery of how something reached her in that room is set up, so a reader can consider that a locked door was passed."}
+{"i": 6, "verdict": "supported", "why": "A possibility a reader has reason to consider. Roylott has gone to town and is unlikely back before evening (¶126), so whether anything will be attempted to-night is open."}
+{"i": 7, "verdict": "supported", "why": "Stated in ¶56: 'the door had been fastened upon the inner side', and ¶44 shows Julia's key turning in the lock."}
+```

@@ -1,0 +1,3 @@
+[{"para":226,"kind":"name","text":"Watson's shoes","id":"watson_shoes","i":1,"verdict":"supported","why":"¶226 has Watson (the narrator) slipping off his shoes, following Holmes' example."},
+{"para":226,"kind":"time","text":"That night: Holmes and Watson are inside the bedroom","id":"t.enter_bedroom","i":2,"verdict":"supported","why":"¶226 states the narrator found himself inside the bedroom with his companion, during the night visit that began after the eleven o'clock signal."},
+{"para":226,"kind":"time","text":"That night: Holmes noiselessly closes the shutters","id":"t.shutters_closed","i":3,"verdict":"supported","why":"¶226 states 'My companion noiselessly closed the shutters' that night."}]

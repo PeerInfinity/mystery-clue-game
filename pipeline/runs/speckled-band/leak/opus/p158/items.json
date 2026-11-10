@@ -1,0 +1,10 @@
+[{"para":158,"kind":"name","text":"The camp-bed in Dr. Roylott's room","id":"camp_bed","i":1,"verdict":"supported","why":"¶158 lists a camp-bed in Dr. Roylott's chamber."},
+{"para":158,"kind":"name","text":"The small wooden shelf","id":"book_shelf","i":2,"verdict":"supported","why":"¶158 mentions a small wooden shelf."},
+{"para":158,"kind":"name","text":"The books on the shelf","id":"roylott_books","i":3,"verdict":"supported","why":"¶158 says the shelf is full of books."},
+{"para":158,"kind":"name","text":"The armchair beside the bed","id":"armchair","i":4,"verdict":"supported","why":"¶158 mentions an armchair beside the bed."},
+{"para":158,"kind":"name","text":"The plain wooden chair","id":"wooden_chair","i":5,"verdict":"supported","why":"¶158 mentions a plain wooden chair against the wall."},
+{"para":158,"kind":"name","text":"The round table","id":"round_table","i":6,"verdict":"supported","why":"¶158 mentions a round table."},
+{"para":158,"kind":"name","text":"The large iron safe","id":"iron_safe#1","i":7,"verdict":"supported","why":"¶158 mentions a large iron safe."},
+{"para":158,"kind":"time","text":"That afternoon: they go on into Dr. Roylott's chamber","id":"t.to_inner_room#1","i":8,"verdict":"supported","why":"The visit is in the afternoon (¶125-126), and ¶157-158 move into Roylott's chamber."},
+{"para":158,"kind":"time","text":"That afternoon: Holmes walks slowly round Dr. Roylott's chamber, examining each thing in it","id":"t.holmes_examines_room","i":9,"verdict":"supported","why":"¶158 states Holmes walked slowly round and examined each thing; the afternoon timing is established."},
+{"para":158,"kind":"observation","text":"What made the clanging sound? — a large iron safe stands in Dr. Roylott's room","id":"o.cl_safe","i":10,"verdict":"unsupported","why":"The story has only suggested a shutter bar as the clang's source (¶90); nothing links the safe to the sound, so tying it to the clang hints at an explanation not yet given."}]

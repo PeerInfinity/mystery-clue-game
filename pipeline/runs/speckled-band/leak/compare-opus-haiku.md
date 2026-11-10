@@ -1,0 +1,198 @@
+# Leak check compared: opus and haiku
+
+1046 labels. Flagged by both 3, only by opus 8, only by haiku 51. Cost: opus $15.85 (157 calls), haiku $0.46 (157 calls).
+
+## Flagged by both
+
+- ¶153 observation `o.wct_band`: What, if anything, came through the ventilator into that room? — alive, and marked so that Julia, by the light of a match, could call it a speckled band
+  - opus: unsupported: Nothing establishes that the thing was alive or that 'speckled band' described its markings, which points at the solution.
+  - haiku: unsupported: Asserts as fact that the thing was alive and speckled; the story only has Julia's words 'the speckled band' and never says a creature was present or alive.
+- ¶166 observation `o.wct_milk`: What, if anything, came through the ventilator into that room? — a small creature kept in Dr. Roylott's room and given milk, in a house with no cat
+  - opus: unsupported: The story shows only a saucer of milk on the safe. It never says a small creature is kept in the room or connects one with the ventilator, so the label points ahead to the solution.
+  - haiku: unsupported: The story never shows anything coming through the ventilator and never states that a small creature is kept in Roylott's room. The label asserts that answer, which goes beyond the saucer of milk and the lack of a cat.
+- ¶236 observation `o.ss_rope`: What made the gentle sound like steam escaping from a kettle? — at the instant of the sound Holmes strikes at the bell-pull, so the sound belongs to something on the rope
+  - opus: unsupported: The story never says anything is on the rope or that the sound comes from there; this narrows the answer beyond the text.
+  - haiku: unsupported: Holmes strikes the bell-pull as a reaction; the story never establishes that the sound comes from something on the rope, so this asserts an unstated answer.
+
+## Only by opus
+
+- ¶33 question `room.question`: How could anything have got into Julia's bedroom?
+  - opus: unsupported: The story has not yet described how Julia died or suggested that anything entered her room; the question hints at an intruder and an apparently inaccessible room.
+  - haiku: supported: This is a plain question, not a claim. Paragraph 33 has just set up the layout (bedrooms open onto one corridor, no communication between them), and earlier paragraphs mention a violent stepfather and a cheetah and baboon roaming the grounds, so a reader has reason to ask how anything could have reached Julia's room. The wording presupposes an intrusion the story has not stated, so this is borderline.
+- ¶151 possibility `q.why_bell_rope=to give a reason for having a hook at that spot`: What was the bell-rope put there for? — to give a reason for having a hook at that spot
+  - opus: unsupported: Nothing in the story suggests a hook at that spot needed justifying; the hook is mentioned only as what holds the rope, so a reader has no reason yet to consider this.
+  - haiku: supported: Holmes has just said the bell-pull seemed unnecessary and was recently installed, and the hook sits at the ventilator, so a reader has reason to consider this as a possible purpose.
+- ¶153 observation `o.wct_rope`: What, if anything, came through the ventilator into that room? — able to come down a rope, from just above the opening to the pillow
+  - opus: unsupported: The story never says anything used the rope; treating it as the route down to the pillow is a later deduction.
+  - haiku: supported: The bell-rope is fastened to a hook just above the ventilator opening and its tassel lies on the pillow, as stated in ¶142 and ¶151.
+- ¶153 observation `o.wct_india`: What, if anything, came through the ventilator into that room? — if alive, one of the Indian animals sent over to Dr. Roylott, and not one as large as the cheetah or the baboon
+  - opus: unsupported: The story does not show a living intruder must be one of the doctor's Indian animals; this steers toward an unrevealed smaller creature.
+  - haiku: supported: Conditional on 'if alive'; the story mentions Indian animals and the cheetah and baboon, and a creature small enough to pass the opening follows from the earlier observation.
+- ¶155 possibility `q.why_bell_rope=to give a way from the opening down to the bed`: What was the bell-rope put there for? — to give a way from the opening down to the bed
+  - opus: unsupported: The story so far shows only that the dummy rope hangs from a hook above the ventilator with its tassel on the pillow. Nobody has suggested that it serves as a route or that anything travels through the opening, so this purpose anticipates Holmes's later solution.
+  - haiku: supported: The story has just established that the bell-rope is a dummy, not wired to anything, hung from a hook directly above the ventilator opening, with its tassel lying on the pillow beside the bed. Holmes has also remarked on the odd ventilator. So asking what the rope was for, and considering that it links the ventilator to the bed, is a possibility the text gives the reader reason to consider.
+- ¶158 observation `o.cl_safe`: What made the clanging sound? — a large iron safe stands in Dr. Roylott's room
+  - opus: unsupported: The story has only suggested a shutter bar as the clang's source (¶90); nothing links the safe to the sound, so tying it to the clang hints at an explanation not yet given.
+  - haiku: supported: The safe is stated in ¶158, and Helen heard a metallic clang in ¶50 and ¶52, so the safe as a candidate source is a possibility the story gives reason to consider. The label does not state that the safe made the sound as established fact.
+- ¶195 possibility `q.roylott_day=somewhere near Stoke Moran, waiting until evening`: Where was Dr. Roylott between leaving Baker Street and driving home at dusk? — somewhere near Stoke Moran, waiting until evening
+  - opus: unsupported: Nothing suggests he waited near Stoke Moran; the story has him going to town on business and gives no reason for lying in wait nearby.
+  - haiku: supported: A possibility the reader has reason to consider: Roylott was in London in the morning, his whereabouts before dusk are unaccounted for, and Holmes has warned he may be dangerous. The story does not confirm it, but it is a fair question to raise.
+- ¶216 observation `o.wct_fixed_bed`: What, if anything, came through the ventilator into that room? — it has to arrive at one spot: the bed is kept always in the same position to the ventilator and the rope
+  - opus: unsupported: No one has said anything travels through the ventilator; 'it has to arrive at one spot' asserts a delivery to the bed that goes beyond Holmes's statement and hints at the mechanism.
+  - haiku: supported: The question is plainly open ('if anything'), and the whistle, the ventilator, and the fixed bed give reason to consider something arriving at a fixed spot. The story never confirms what came through.
+
+## Only by haiku
+
+- ¶2 time `t.wake`: Early April, ’83, a quarter-past seven in the morning: Holmes wakes the narrator
+  - opus: supported: Paragraph 2 states early April in ’83, the clock showing a quarter-past seven, and the narrator waking to find Holmes by his bed; that Holmes woke him is a fair paraphrase.
+  - haiku: unsupported: The date, time and Holmes standing by the bed are stated, but the story only says the narrator woke to find Holmes there. It does not say Holmes woke him.
+- ¶3 account `acct.hudson`: What Holmes had from Mrs. Hudson
+  - opus: supported: Neutral label for what passed from Mrs. Hudson to Holmes, which ¶3 reports ('she retorted upon me').
+  - haiku: unsupported: The story does not say Holmes received any account from Mrs. Hudson. ¶3 only says she was knocked up and is a quip; no information from her has been given.
+- ¶14 possibility `q.why_return=she must be back before she is missed`: Why would someone so terrified keep a ticket to go straight back? — she must be back before she is missed
+  - opus: supported: A plain speculative answer, prompted by her early start, veil and return ticket; it asserts no story fact.
+  - haiku: unsupported: Nothing so far suggests anyone is missing her or watching her, so this possibility has no basis in the story yet.
+- ¶17 account `acct.farintosh`: Mrs. Farintosh's account
+  - opus: supported: She reports having heard of Holmes from Mrs. Farintosh.
+  - haiku: unsupported: No account by Mrs. Farintosh has been given; she is only mentioned as the source of the address.
+- ¶17 possibility `q.lady_roylotts=she has no tie to the family`: Does the lady in black belong to the Roylotts of Stoke Moran? — she has no tie to the family
+  - opus: supported: A plain alternative; the story has not stated any tie.
+  - haiku: unsupported: Asserts she has no tie to the Roylotts, which the story never states and no reader could yet rule out.
+- ¶17 possibility `q.roylott_in_trouble=he controls her income and is what she fears`: What has Dr. Grimesby Roylott to do with the lady's trouble? — he controls her income and is what she fears
+  - opus: supported: One open speculation combining her fear, her income remark and the Roylott case; not stated as fact.
+  - haiku: unsupported: Names Roylott as the controller of her income and the one she fears; nothing so far connects him to her or her money.
+- ¶17 possibility `q.roylott_in_trouble=he is threatened alongside her`: What has Dr. Grimesby Roylott to do with the lady's trouble? — he is threatened alongside her
+  - opus: supported: A reasonable possibility given the mention of his death and terrible rumours.
+  - haiku: unsupported: Says Roylott is threatened alongside her; nothing in the story so far hints at any threat to him.
+- ¶24 name `calcutta_house`: Roylott's house in Calcutta
+  - opus: supported: ¶24 refers to robberies in 'the house' during his Calcutta practice.
+  - haiku: unsupported: Story never says he had a house in Calcutta; 'the house' in the robbery sentence has no clear Calcutta referent and earlier refers to the Stoke Moran house.
+- ¶24 possibility `q.how_roylott_died=he was himself the wrongdoer and died as a result of it`: How did Dr. Grimesby Roylott come to die? — he was himself the wrongdoer and died as a result of it
+  - opus: supported: ¶1 raises rumours about his death and ¶24 shows the stepfather's violence, so a reader has reason to consider this possibility.
+  - haiku: unsupported: The story has not said how Roylott died; the label asserts he was the wrongdoer and died because of it, which the story does not supply.
+- ¶25 question `q.mother_death`: Was Mrs. Stoner's death a true accident?
+  - opus: supported: A plain question, given a violent husband who held her money and a sudden death in a detective story.
+  - haiku: unsupported: The story presents the mother's death as a railway accident and gives no hint of doubt; the wording 'true accident' suggests foul play the story hasn't raised.
+- ¶25 possibility `q.mother_death=Dr. Roylott had a hand in it`: Was Mrs. Stoner's death a true accident? — Dr. Roylott had a hand in it
+  - opus: supported: An open possibility given Roylott's violent past and financial interest, and asserted only as a possibility.
+  - haiku: unsupported: Nothing so far gives a reader reason to suspect Roylott in the mother's death; this possibility is not yet raised.
+- ¶26 possibility `q.how_roylott_died=killed in one of his violent quarrels`: How did Dr. Grimesby Roylott come to die? — killed in one of his violent quarrels
+  - opus: supported: ¶1 raises his death and rumours about it; ¶26 describes ferocious quarrels, so this is a reasonable possibility.
+  - haiku: unsupported: The name 'Grimesby' is not used in the story so far, and ¶1 only mentions rumours about his death without saying how he died. The specific answer, killed in a quarrel, is not given.
+- ¶30 possibility `q.why_julia_died=to stop her leaving the house and speaking of what went on there`: What reason could anyone have had for wanting Julia dead? — to stop her leaving the house and speaking of what went on there
+  - opus: supported: Her impending departure and the troubled household make this a plain possibility.
+  - haiku: unsupported: Nothing so far says Julia wanted to leave the house or knew anything to tell; the idea of a secret being silenced has no basis in the story so far.
+- ¶36 question `q.who_whistled`: Who was whistling in the dead of the night?
+  - opus: supported: Julia's question in ¶36 directly raises this, and the wording does not point at an answer.
+  - haiku: unsupported: The wording 'Who was whistling' presupposes that a whistle actually occurred and had a source. The story so far only has Julia asking whether Helen has ever heard whistling, so the question points past what the text establishes.
+- ¶41 possibility `q.whistle_for=it served no purpose in the affair`: What was the whistle for? — it served no purpose in the affair
+  - opus: supported: A plain possibility: the whistle has just been raised and dismissed as the gipsies' doing, so it may mean nothing. It reveals nothing new.
+  - haiku: unsupported: The question is reasonable, but the label's answer, that the whistle 'served no purpose in the affair,' is a claim about the story's outcome that the text so far does not support.
+- ¶41 possibility `q.why_whistle_began=someone new had come to the plantation`: Why was the whistle heard only during the last few nights? — someone new had come to the plantation
+  - opus: supported: Julia says she heard it during the last few nights and Helen links it to gipsies in the plantation, so new arrivals there are a reasonable possibility to consider.
+  - haiku: unsupported: The question is fair, but the answer 'someone new had come to the plantation' introduces an arrival the story has not mentioned; the only people mentioned there are the gipsies who have long camped on the land.
+- ¶50 possibility `q.why_helen_now=she has met the same signs her sister met`: Why has Helen Stoner come to Holmes now, two years after her sister's death? — she has met the same signs her sister met
+  - opus: supported: A fair possibility: she is terrified, soon to marry as Julia was, and is recounting Julia's warning signs.
+  - haiku: unsupported: The story never says Helen has herself met the same signs her sister met; her reason for coming now is only vaguely described as fear and strain.
+- ¶54 possibility `q.who_unlocked=someone who was in the room with her`: Who unlocked Julia's door? — someone who was in the room with her
+  - opus: supported: The locked door was unlocked and swung open as Helen stared, not knowing what would issue from it, so another person inside is a fair possibility to consider.
+  - haiku: unsupported: The story never suggests anyone else was in Julia's room. The label presumes a second person inside, and the story only shows a locked door that is now open.
+- ¶54 possibility `q.why_match=something moved or touched her in the dark`: Why did Julia strike a light? — something moved or touched her in the dark
+  - opus: supported: A generic possibility prompted by her terror and the struck match in the dark; it reveals no specific later detail.
+  - haiku: unsupported: The story never mentions anything moving or touching Julia in the dark. Nothing in the text gives a reader reason to consider physical contact as the cause.
+- ¶60 possibility `q.what_frightened=nothing outside herself: a sudden illness or delusion`: What frightened Julia in her room? — nothing outside herself: a sudden illness or delusion
+  - opus: supported: A plain possibility given reason by the story: Julia was alone behind secured door and windows, had no marks or detected poison, and suffered convulsions.
+  - haiku: unsupported: The story gives no hint of illness or delusion in Julia. Its clues point outward: the whistle, the metallic clang, Julia's cry of 'the speckled band', and her gesture toward the Doctor's room.
+- ¶64 possibility `q.helen_suspects=she suspects him but will not say so`: Does Helen Stoner suspect her stepfather of her sister's death? — she suspects him but will not say so
+  - opus: supported: A reasonable possibility given her unnamed suspicions and her detail about Julia gesturing at the Doctor's room, without naming him as guilty.
+  - haiku: unsupported: The story never says Helen suspects her stepfather or is withholding such a suspicion. She says she cannot imagine what frightened her (¶60), which does not show concealment.
+- ¶67 observation `o.wf_moved`: Where did the whistle come from? — Helen had moved out of the end room when she heard it
+  - opus: supported: ¶33 places her own room third and ¶67 has her moved to the second.
+  - haiku: unsupported: The story never calls any room 'the end room'; it only says she moved out of her own room into Julia's, and that she heard the whistle there.
+- ¶100 possibility `q.how_traced=he already knew of Holmes and guessed where she would go`: How did Dr. Roylott trace his stepdaughter to Baker Street? — he already knew of Holmes and guessed where she would go
+  - opus: supported: A plain possibility: Holmes's reputation has reached others and Roylott asks for him by name.
+  - haiku: unsupported: The story never suggests Roylott knew of Holmes beforehand. Helen got the address from Mrs. Farintosh, and Roylott's 'Which of you is Holmes?' suggests he did not know him.
+- ¶112 possibility `q.how_roylott_died=killed in a struggle with Holmes`: How did Dr. Grimesby Roylott come to die? — killed in a struggle with Holmes
+  - opus: supported: Paragraph 1 mentions Roylott's death and rumours about it, and the grip threats between him and Holmes give a reader reason to consider a fatal struggle; it is offered only as a possibility.
+  - haiku: unsupported: ¶1 does mention Roylott's death, so the question is raised. But the answer, a death in a struggle with Holmes, is not supported. Roylott leaves the room alive at ¶111, and nothing so far gives a reader reason to consider a fatal struggle with Holmes.
+- ¶115 possibility `q.money_if_none_left=it passes elsewhere under the will`: What becomes of the mother's income if no daughter is left? — it passes elsewhere under the will
+  - opus: supported: The money goes to Roylott only while the daughters reside with him, so this is a reasonable open possibility, not asserted as fact.
+  - haiku: unsupported: The story never names any other beneficiary of the income; nothing yet gives a reader reason to think it passes elsewhere.
+- ¶115 observation `o.wjd_sum`: What reason could anyone have had for wanting Julia dead? — each marriage takes £250 from an income now not more than £750
+  - opus: supported: The figures are stated, and Julia's engagement and death make the question natural.
+  - haiku: unsupported: The question presupposes that Julia was killed and that someone wanted her dead, which the story has not established; the coroner found no cause of death.
+- ¶132 possibility `q.no_workmen=the work was never meant to go further than breaking into the wall`: Why is no one at work on the repairs? — the work was never meant to go further than breaking into the wall
+  - opus: supported: Offered only as a possibility: the repairs forced Helen into the death chamber (¶67), Roylott has a motive (¶115), and no work is going on (¶132), giving a reader reason to consider it.
+  - haiku: unsupported: Asserts a hidden intent behind the work (it was never meant to go past the wall), which the story gives no reason to consider.
+- ¶132 possibility `q.no_workmen=Helen kept them away for the visit`: Why is no one at work on the repairs? — Helen kept them away for the visit
+  - opus: supported: Offered only as a possibility: Helen arranged for the visit to be private and offered to get the housekeeper out of the way (¶76-77).
+  - haiku: unsupported: Credits Helen with keeping the workmen away, which the story never says; she only arranged to get the housekeeper out of the way.
+- ¶150 possibility `q.helen_knew_dummy=she did not know`: Did Helen know that the bell-rope was a dummy? — she did not know
+  - opus: supported: Her surprised 'Won't it ring?' and her statement that the rope goes to the housekeeper's room give direct reason to consider this.
+  - haiku: unsupported: Asserts as a fact that Helen did not know. The story never says what she knew about the bell-rope, so this answer is not yet established.
+- ¶153 observation `o.sp_vent`: How did the smell of Dr. Roylott's cigars get into Julia's room? — there is an opening from this room into another, which would carry the smell
+  - opus: supported: The rooms have no stated communication, yet smoke reached Julia, and an opening to another room would obviously carry it.
+  - haiku: unsupported: Asserts that the cigar smell came through the ventilator opening, a causal mechanism the story has not stated and only suggests as a possibility.
+- ¶163 name `a_cat`: A cat
+  - opus: supported: Holmes mentions a cat in ¶163 ('There isn't a cat in it, for example?'); the label only names the thing mentioned and implies nothing further.
+  - haiku: unsupported: The story so far never establishes a cat anywhere. Holmes only asks in the final paragraph whether there is one in the safe, and the only animals mentioned are the cheetah and baboon. Naming a thing 'A cat' asserts an identity the story has not yet given.
+- ¶169 possibility `q.why_lash=a way of hanging it up, or a makeshift repair`: What is the small dog lash tied into a loop for? — a way of hanging it up, or a makeshift repair
+  - opus: supported: An ordinary innocent explanation for a looped lash hung on a bed, which any reader could consider.
+  - haiku: unsupported: Nothing in the story suggests the lash is broken or needs repair, and no earlier detail makes hanging it up or a makeshift repair a live possibility.
+- ¶188 possibility `q.tonight=only the noise that disturbed her, with some harmless cause`: What will happen in the middle room to-night? — only the noise that disturbed her, with some harmless cause
+  - opus: supported: A plain possibility raised by Holmes's talk of investigating 'this noise'; earlier innocent explanations were offered (gipsies, gale, creaking house), and it reveals nothing new.
+  - haiku: unsupported: The question's wording ('only the noise... with some harmless cause') points at a benign answer the story has given no reason to expect. Everything so far (Julia's death, the whistle, Roylott's violence, the dummy bell-rope, Holmes's grim mood) suggests danger. Helen's doubt about whether she heard the whistle (¶52) does not make a harmless cause for the night's events a considered possibility.
+- ¶205 possibility `q.why_ventilator=nothing sinister: a small opening between two rooms is not unusual`: What was the ventilator really put there for? — nothing sinister: a small opening between two rooms is not unusual
+  - opus: supported: This is Watson's stated view in ¶205, offered as a possibility after Holmes called the ventilator singular.
+  - haiku: unsupported: Holmes has openly doubted the ventilator (calling it a fool's construction and 'ventilators which do not ventilate'), so the label's flat assertion that it is 'nothing sinister' goes beyond Watson's dismissive opinion.
+- ¶205 observation `o.wct_rat`: What, if anything, came through the ventilator into that room? — slim enough for an opening so small that a rat could hardly pass through
+  - opus: supported: Holmes has drawn attention to the ventilator as a link between the rooms, and the hedged 'if anything' asserts nothing; that anything passing through must be slim follows directly from the opening's stated size.
+  - haiku: unsupported: The story says only that the opening is too small for a rat to pass easily; the label's 'slim enough' presumes that something slim did come through, which the story has not stated or established.
+- ¶214 possibility `q.why_bed_clamped=a practical reason of the household, with no bearing on the case`: Why was the bed in the middle room clamped to the floor? — a practical reason of the household, with no bearing on the case
+  - opus: supported: A neutral, innocent possibility a reader could consider about a bed fixed to the floor; it reveals nothing.
+  - haiku: unsupported: Asserts the clamping has no bearing on the case, which the story does not establish and which Holmes's framing (¶208-214) cuts against.
+- ¶214 possibility `q.who_clamped=an earlier occupant, for some forgotten reason`: Who had the bed clamped to the floor? — an earlier occupant, for some forgotten reason
+  - opus: supported: The house and furnishings are old, so an earlier occupant is a reasonable possibility to consider, and it reveals nothing.
+  - haiku: unsupported: Suggests an earlier occupant with a forgotten reason; nothing in the story so far mentions earlier occupants or such a reason.
+- ¶229 observation `o.vi_he_sees`: Which room does the ventilator open into? — Holmes says that he, next door, would see a light through it
+  - opus: supported: ¶229 has Holmes say he would see a light through the ventilator, and ¶153 and ¶208 already establish that it links this room to Dr. Roylott's room next door.
+  - haiku: unsupported: The story supports that the ventilator connects Helen's room to the doctor's room (¶208, ¶229), but Holmes does not say that he himself is next door. He says the doctor would see the light through the ventilator, so the label misattributes the speaker and subject.
+- ¶237 observation `o.wct_body`: What, if anything, came through the ventilator into that room? — something on the bell-pull that can be seen and struck with a cane
+  - opus: supported: Holmes lashes with his cane at the bell-pull, which hangs from the ventilator, and yells 'You see it?'. This directly implies a visible, strikable thing there, and the question follows from the story's emphasis on the ventilator; the label does not say what it is.
+  - haiku: unsupported: The story has only shown a gleam of light, a smell and a hissing sound from the ventilator. It never says anything came through, and the answer's claim that it is something on the bell-pull that can be seen and struck is not yet supplied.
+- ¶237 observation `o.wl_see`: What was Holmes lashing at on the bell-pull? — something on the bell-pull that can be seen and struck with a cane
+  - opus: supported: ¶236-237 state that Holmes lashed at the bell-pull with his cane and asked 'You see it?'. The label says only that something visible was there, without identifying it.
+  - haiku: unsupported: The story says Holmes lashed the bell-pull and asks 'You see it?', but it does not say anything is on the bell-pull, let alone something visible and struck. The 'it' stays unidentified, so the answer goes beyond what is stated.
+- ¶238 possibility `q.tonight=harm comes to Dr. Roylott himself`: What will happen in the middle room to-night? — harm comes to Dr. Roylott himself
+  - opus: supported: A possibility the reader has reason to consider, given the cry of pain from the direction of the ventilator and the opening mention of Roylott's death.
+  - haiku: unsupported: The story so far places the danger on Helen, who occupies the middle room; nothing suggests Roylott himself will be harmed there.
+- ¶238 observation `o.wl_horror`: What was Holmes lashing at on the bell-pull? — it made a gentle sound like steam from a kettle, and left Holmes pale with horror and loathing
+  - opus: supported: Holmes lashed at the bell-pull the instant the kettle-like sound was heard, and his face showed horror and loathing.
+  - haiku: unsupported: The hissing sound came before Holmes lashed at the bell-pull, but the story never says the thing he lashed at made that sound; Watson could not see it.
+- ¶238 observation `o.wct_whistle`: What, if anything, came through the ventilator into that room? — a low, clear whistle sounds at the moment it is on the bell-pull
+  - opus: supported: Holmes lashes at something on the bell-pull as the whistle sounds, and the question is left open with 'if anything'.
+  - haiku: unsupported: The story never says anything came through the ventilator or was on the bell-pull at the moment of the whistle; Watson saw nothing.
+- ¶242 possibility `q.chair_use=he sits on it at his post by night`: What has the plain wooden chair in Dr. Roylott's room been used for? — he sits on it at his post by night
+  - opus: supported: He is found sitting on the chair at night, and Holmes had examined it, so this is a fair possibility.
+  - haiku: unsupported: The story shows him sitting on the chair now, but never says he habitually sits there at night as a watch post; the label asserts that habit.
+- ¶242 observation `o.wb_look`: What was the speckled band that Julia cried out about? — a yellow band with brownish speckles, round Dr. Roylott's brow
+  - opus: supported: The yellow speckled band in ¶242 directly echoes Julia's words; the label adds nothing about its true nature.
+  - haiku: unsupported: The story never links Julia's 'speckled band' to the band on Roylott's brow; the identity is not yet revealed.
+- ¶242 observation `o.is_open`: What is really kept in the iron safe in Dr. Roylott's room? — in the night its door stands ajar, with the lantern's beam thrown upon it
+  - opus: supported: The safe's contents were questioned in ¶159-165, and ¶242 states the door is ajar with the beam on it.
+  - haiku: unsupported: The observation's facts (ajar door, lantern beam) are supported, but the word 'really' presupposes the safe holds something other than the papers Roylott claimed, which the story has not established.
+- ¶246 observation `o.cl_den`: What made the clanging sound? — the snake's den is the iron safe, and its door shuts on it
+  - opus: supported: ¶245-246 call the safe the creature's den and show its door closed on it; linking an iron door to the metallic clang of ¶50 is an obvious inference.
+  - haiku: unsupported: The story has not said the clang Helen heard on Julia's night was the safe door; that is a new causal claim about the earlier night. The safe-as-den detail appears only in ¶245-246, and the story's own proposed explanation for the clang is the metal bars (¶90).
+- ¶248 possibility `q.how_snake_worked=the milk or some vibration brought it back, and not the sound of the whistle`: How was the snake got from the safe to the bed and back? — the milk or some vibration brought it back, and not the sound of the whistle
+  - opus: supported: A fair rival possibility given the milk Holmes mentions and general knowledge about snakes; it reveals no story fact.
+  - haiku: unsupported: Vibration is never mentioned, and the story's account has the whistle recalling the snake, so rejecting the whistle is a possibility the story gives no reason to consider.
+- ¶248 possibility `q.julia_lingered=she was bitten somewhere slower to act than the head`: Why did Julia live on after the bite when Dr. Roylott died within seconds? — she was bitten somewhere slower to act than the head
+  - opus: supported: A plausible possibility for the discrepancy the story raises.
+  - haiku: unsupported: The story never says where Julia was bitten, so a bite location slower to act than the head is a detail the story does not supply.
+- ¶249 possibility `q.why_match=she heard the snake hiss in the room`: Why did Julia strike a light? — she heard the snake hiss in the room
+  - opus: supported: A reasonable possibility: Julia struck a light when alarmed (¶55), and Holmes struck his on hearing the hiss (¶236, ¶249).
+  - haiku: unsupported: The story never says Julia heard a hiss; the only hiss is heard by Holmes during his night watch, after Julia's death.
+- ¶251 possibility `q.julia_lingered=the snake that bit him had been roused and struck harder`: Why did Julia live on after the bite when Dr. Roylott died within seconds? — the snake that bit him had been roused and struck harder
+  - opus: supported: The story gives Julia's slow death (¶50) against Roylott's death within ten seconds (¶245), and ¶251 says the snake's temper was roused, so this is a fair possibility to consider.
+  - haiku: unsupported: The story never says Julia was bitten or how long she survived after a bite; it only says she convulsed and slowly died. The 'struck harder' explanation is not in the text, and the question's wording presupposes a bite and an interval the story does not supply.

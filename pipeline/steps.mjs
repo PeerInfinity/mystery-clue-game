@@ -498,7 +498,8 @@ export const STEPS = [
         n: 11.2, name: 'leakfix', dir: '11b-leakfix',
         prompt: (ctx) => {
             const d = seen(ctx, ctx.step ?? 11.2, null);
-            const flagged = leakFlags(ctx);
+            // Observations and the sealed room's question are not the fix's to rewrite (their wording is reviewed by hand).
+            const flagged = leakFlags(ctx).filter((x) => x.kind !== 'observation' && x.id !== 'room.question');
             const ids = new Set(flagged.map((x) => x.id.split('#')[0].split('=')[0]));
             const dataLines = [...d.times, ...d.entities, ...d.questions, ...d.accounts].filter((x) => ids.has(x.id));
             return template('11b-leakfix', { spec: SPEC(), story: numbered(storyOf(ctx.name)), flagged: flagged.map((x) => `¶${x.para} ${x.kind} ${x.id}: ${x.text} — ${x.why ?? ''}`).join('\n') || '(none)', lines: lines(dataLines) });

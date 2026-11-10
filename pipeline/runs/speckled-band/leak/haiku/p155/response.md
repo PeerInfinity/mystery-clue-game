@@ -1,0 +1,3 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "The story has just established that the bell-rope is a dummy, not wired to anything, hung from a hook directly above the ventilator opening, with its tassel lying on the pillow beside the bed. Holmes has also remarked on the odd ventilator. So asking what the rope was for, and considering that it links the ventilator to the bed, is a possibility the text gives the reader reason to consider."}
+```

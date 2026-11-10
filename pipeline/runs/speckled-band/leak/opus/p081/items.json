@@ -1,0 +1,3 @@
+[{"para":81,"kind":"name","text":"The twelve o'clock train","id":"twelve_train","i":1,"verdict":"supported","why":"Helen names the twelve o'clock train in the last paragraph."},
+{"para":81,"kind":"time","text":"That morning: Helen says she will do some things in town and return by the twelve o'clock train","id":"t.helen_plans","i":2,"verdict":"supported","why":"Paraphrases ¶81; it is still morning, as she arrived early and is speaking of things to do in town today."},
+{"para":81,"kind":"time","text":"To-day, twelve o'clock: Helen means to return by train","id":"t.helen_train_home","i":3,"verdict":"supported","why":"Helen says she will return by the twelve o'clock train, in the context of the planned visit to-day."}]

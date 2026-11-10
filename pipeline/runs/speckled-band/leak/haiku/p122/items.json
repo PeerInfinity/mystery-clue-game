@@ -1,0 +1,4 @@
+[{"para":122,"kind":"name","text":"The fields","id":"fields","i":1,"verdict":"supported","why":"The driver directs them 'by the footpath over the fields', so the fields are mentioned in the story."},
+{"para":122,"kind":"name","text":"The footpath","id":"footpath","i":2,"verdict":"supported","why":"The driver says it is shorter 'by the footpath over the fields' after getting over the stile."},
+{"para":122,"kind":"name","text":"The stile","id":"stile","i":3,"verdict":"supported","why":"The driver says 'get over this stile', so the stile is mentioned in the story."},
+{"para":122,"kind":"name","text":"The lady walking on the footpath","id":"the_lady_walking","i":4,"verdict":"supported","why":"The driver points out 'the lady' who is walking there. The label only describes her and does not name her, so it claims nothing beyond the text."}]

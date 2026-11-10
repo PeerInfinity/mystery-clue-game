@@ -1,0 +1,5 @@
+```jsonl
+{"i": 1, "verdict": "supported", "why": "Holmes says the Farintosh case was concerned with an opal tiara in ¶19."}
+{"i": 2, "verdict": "supported", "why": "¶19 states the Farintosh case concerned an opal tiara and was, Holmes thinks, before Watson's time; ¶17 says he helped Mrs. Farintosh."}
+{"i": 3, "verdict": "supported", "why": "The lady arrives that morning and in ¶19 Holmes says he will be happy to devote the same care to her case."}
+```

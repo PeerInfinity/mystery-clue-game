@@ -1,0 +1,4 @@
+[{"para":5,"kind":"name","text":"A young lady","id":"the_lady_in_black","i":1,"verdict":"supported","why":"¶5 states that 'a young lady has arrived' and wants to see Holmes."},
+{"para":5,"kind":"name","text":"The metropolis","id":"the_metropolis","i":2,"verdict":"supported","why":"¶5 mentions young ladies wandering about 'the metropolis' at this hour."},
+{"para":5,"kind":"name","text":"The sitting-room","id":"sitting_room","i":3,"verdict":"supported","why":"¶5 says the young lady 'is waiting now in the sitting-room.'"},
+{"para":5,"kind":"time","text":"That morning, before a quarter-past seven: a young lady arrives","id":"t.lady_arrives","i":4,"verdict":"supported","why":"¶2 gives the clock as a quarter-past seven when Holmes wakes Watson, and ¶5 says the young lady has already arrived, so her arrival came before that time on the same morning."}]
