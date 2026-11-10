@@ -13,6 +13,11 @@ Thought ids (`t92.13`) are those of the annotated reading, `docs/reading-annotat
 
 ## 1. Where the project stands
 
+**The direction is authored stories (2026-11-10).** The user: the two cases, Silver Blaze and The Speckled Band, are
+experiments for bootstrapping the engine and the data format; the plan is new stories written for this system, with
+clues as case files whose origin does not matter and a spine that need not be linear prose. The direction, what is
+already known to change and the order of experiments are in [`authored-stories.md`](authored-stories.md).
+
 **Watson's timeline is the main page (2026-11-06).** The user: the earlier game was a failed experiment; Watson's
 timeline is a success, or at least a solid foundation. It is at the site's base URL (`index.html`; `world.html`
 redirects there), with its own guide; the earlier game, its guide and the logic viewer are kept as they were under

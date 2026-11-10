@@ -11,6 +11,8 @@
 - `docs/ideas.md` — where the project stands, the chosen direction (Watson fills in the world model) and what was
   built of it, why the earlier game falls short (measured), its other directions (an incremental game, Archipelago
   integration and what the DepGraph exports showed), ideas not built, known limitations, lessons of method.
+- `docs/authored-stories.md` — the direction since 2026-11-10: new stories written for this system, clues as case
+  files, a pluggable spine, and the order of experiments (spoilers).
 - `docs/logic-audit.md` — for each gated answer of Watson's timeline, which links of the reader's reasoning the page
   supports, which are partial or missing, grouped by kind, with a proposed order of work (spoilers).
 - `docs/reading-annotated.md` — a careful reader's thoughts through the whole story: the spec for the player's

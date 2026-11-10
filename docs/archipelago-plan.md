@@ -7,6 +7,11 @@ development (a second story, with mechanics that may be ported back to Silver Bl
 mechanic that links evidence to questions to settle. The numbers below were measured at commits `5d6b19e` to `a5fb04e`;
 they will move as the data does, so re-measure before relying on one.
 
+**Partly superseded (2026-11-10)** by `docs/authored-stories.md`: the stories will be written for this system, and the
+item is an authored case file. Accounts as items, reading stopping at give-aways, the marks for a missing account and
+the work listed for Silver Blaze no longer stand. The structure format and its validator, the answer rule, the shape of
+the logic and the bridge do.
+
 This replaces the idea in `docs/ideas.md`, "Archipelago integration", of converting the earlier game to the DepGraph
 world. What that attempt showed is still recorded there. The further aim of new stories in one interconnected world is
 in `docs/interconnected-world.md`.

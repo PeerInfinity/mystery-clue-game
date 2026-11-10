@@ -4,6 +4,9 @@
 are open.** It builds on the plan for connecting the existing game to Archipelago, `docs/archipelago-plan.md`, and
 depends on it for the structure format and its validator ("The structure format and its validator" there).
 
+**Partly superseded (2026-11-10)** by `docs/authored-stories.md`: a clue is a case file complete in itself, whose origin
+does not matter, so blanking and "arrival as a way of knowing something" are no longer needed for a clue to be safe.
+
 ## The idea
 
 The game is not only for existing stories. The aim is new stories set in one interconnected world. Each story has its
