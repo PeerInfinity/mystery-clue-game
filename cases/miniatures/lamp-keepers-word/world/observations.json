@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.word_paper", "q": "q.word", "from": ["f.paper_reads"], "says": "Marta's own hand puts him on the quay", "essential": true, "against": ["chapel"]},
+    {"id": "o.word_pike", "q": "q.word", "from": ["f.wren_quay"], "says": "Pike had the same from her slate"},
+    {"id": "o.changed_kept", "q": "q.changed", "from": ["f.paper_in_basket"], "says": "Marta's paper reached Elsie: it lay in her basket", "essential": true},
+    {"id": "o.changed_paper", "q": "q.changed", "from": ["f.paper_reads"], "says": "what Marta wrote for Elsie to carry was the quay", "essential": true, "against": ["marta"]},
+    {"id": "o.changed_told", "q": "q.changed", "from": ["f.elsie_said"], "says": "what Elsie told was the chapel", "essential": true},
+    {"id": "o.changed_pike", "q": "q.changed", "from": ["f.wren_quay"], "says": "Pike's word agrees with the paper", "against": ["pike"]},
+    {"id": "o.changed_mute", "q": "q.changed", "from": ["f.marta_mute"], "says": "Marta could tell Elsie nothing except on paper"}
+  ]
+}

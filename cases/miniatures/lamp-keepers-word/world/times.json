@@ -1,0 +1,11 @@
+{
+  "times": [
+    {"id": "t.past", "label": "Before"},
+    {"id": "t.tue_ten", "label": "Tuesday night, about ten o'clock", "after": "t.past", "para": 1, "quote": "On Tuesday night, at about ten o'clock"},
+    {"id": "t.wed_first_light", "label": "Wednesday, first light", "after": "t.tue_ten", "para": 3, "quote": "at first light"},
+    {"id": "t.wed_morning", "label": "Wednesday morning", "after": "t.wed_first_light", "para": 1, "quote": "by Wednesday morning"},
+    {"id": "t.wed_noon", "label": "Wednesday, noon", "after": "t.wed_morning", "para": 4, "quote": "At noon"},
+    {"id": "t.thu_morning", "label": "Thursday morning", "after": "t.wed_noon", "para": 7, "quote": "On Thursday morning"},
+    {"id": "t.thu_later", "label": "Thursday, later", "after": "t.thu_morning", "para": 8, "quote": "I laid the paper in front of Elsie"}
+  ]
+}

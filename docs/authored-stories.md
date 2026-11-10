@@ -1,9 +1,10 @@
 # Authored stories, case files and a pluggable spine
 
 **Spoilers:** this page gives numbers from the data of "Silver Blaze" and "The Speckled Band", and names one question of
-the second.
+the second. "What the miniatures showed" gives away both miniatures.
 
-**Status (2026-11-10): a direction set in discussion with the user. Nothing here is built.** It changes parts of
+**Status (2026-11-10): a direction set in discussion with the user. Of the experiments below, the first two mechanic
+miniatures are written (`cases/miniatures/`); nothing else is built.** It changes parts of
 `docs/archipelago-plan.md` and `docs/interconnected-world.md`; what it supersedes is listed below and noted at the top
 of each.
 
@@ -94,6 +95,102 @@ Still needed as planned: "any of these" between facts, hints that make links, na
 5. **A story of 20 to 30 questions**, for real randomisation.
 6. **Two stories** sharing a pool of files.
 7. **A substrate as the spine**, once the concept library can say what content a substrate has to work with.
+
+## What the miniatures showed
+
+Experiment 1, begun 2026-11-10. Two miniatures are written, each an invented story of under 350 words with its world
+model, its true path and its logic (`structure.json`, beside the case):
+
+| Miniature | Mechanic | Size |
+|---|---|---|
+| `cases/miniatures/lamp-keepers-word` | A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it. | 8 paragraphs, 25 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
+| `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 20 facts, 1 account, 2 questions, 7 observations (5 essential), 10 moves |
+
+Played at `?case=cases/miniatures/<name>` on a local server. They are not on the published site: `scripts/build-site.js`
+collects only `cases/<case>/`. `npm test` validates them and checks each `structure.json` against its world model.
+Where they live and whether the site links them is the user's to decide.
+
+**What worked with no change to the engine or the page.** Both were written by hand in the existing format, validated
+and played their true path at the first attempt, and pass every check (`npm test`, the validator, the path check, the
+autoplay in each layout and on a phone, the hints from a fresh page, from mistakes and from below the line, and
+`CASE=<dir> npm run page-checks`). The page shows what each mechanic needs: two chains from one witness with different
+carriers, each link with its own trust; a cap on the shared witness taking both sides off; one statement link taking
+off everything a claim asserts.
+
+**How they were written.** The logic first: the questions, the clues, which clues each question needs and what rules
+out each other answer. Then the prose, one clue to a paragraph, then the data. The structure file was written down
+after the data passed, from the logic already fixed, so it has not yet been tried as an input that something reads.
+Its shape is the sketch in `docs/archipelago-plan.md` with four additions that authoring needed: `frame` (what the
+narrator's prose always carries), a clue's `source` and `says`, the `facts` that realise it, and `rules_out` on a
+question (which clue removes which other answer).
+
+### What the format, the engine or the page could not express
+
+1. **Where a chain went wrong is not data.** Provenance is the chain as claimed. For the carrier's false version to
+   show a chain through the witness, the data has to say that the witness passed that version on: an account whose
+   origin is the witness, and a telling from the witness that never happened as recorded. Writing the truth (the
+   carrier as origin) would show the answer on the page. So nothing checks which link the player distrusts: the
+   statement, either telling, the carrier, or the true side all clear the contradiction alike. "Who changed it" had to
+   be an ordinary question with observations.
+2. **A false statement, once distrusted, cannot be evidence of the lie.** It leaves the timeline, and an observation
+   empties when an entry of it leaves. A telling cannot be linked at all. So the carrier's telling is in the data three
+   times: the telling, the false fact it carried, and the speech as an event the narrator heard (`says`), which is the
+   one that stays and can be linked.
+3. **The hints take a distrust that is not on the true path for a mistake**, and advise setting it back, although in
+   the first miniature several are equally right. Tried on the page: with the telling from the witness to the carrier
+   distrusted in place of the path's choice, the hint is "Set it back to uncertain".
+4. **Where a clue was found can be the evidence.** The paper proves what the carrier was given because it lay in her
+   basket. A case file is meant to be complete without where it was found. The structure keeps this as a clue of its
+   own (`c.paper_found`), which is the narrator's observation and tied to the spine.
+5. **Strict evidence came out as the narrator's own.** Every link from anyone else starts uncertain and can never be
+   certain, so evidence that rules an answer out, and does not merely make it unlikely, was each time something the
+   narrator saw or read: the paper, the doors. In the second miniature four of the six clues are the narrator's own
+   afternoon, which the rule for a prose spine would make fixed prose and not files, leaving only the two statements
+   to deliver. Either the answer rule accepts trusted evidence, or the strict clues are documents and things, or most
+   of a strict case is not randomisable.
+6. **Reasoning by contradiction is not in the required evidence.** "Which lodger told a thing that was not so" needs
+   both statements and the door; its one essential observation is the door, because the statements take part through
+   the automatic contradiction and not through a link. The structure's `needs` and the world model's essentials
+   therefore differ for that question, and an export of essentials alone would miss two clues. The page also does not
+   tie the two together: the question can be answered with the false statement still trusted.
+7. **Elimination is prose.** "Nobody came in, one lodger was out, so only the other could reach the box" is four
+   essential observations whose `says` carry the argument. The engine checks none of it. A general negative has no
+   form: "the back door did not open" is written as a typed state (`door: shut` over the two hours) so that it clashes
+   with a claim that it was open; "nobody came in" could not be written at all. Only a location can be denied, and a
+   fact cannot deny a question's possibility.
+8. **What a claim asserts about another time is shown in the wrong place** (a page defect). With `asserts` on a
+   speech, the contradiction is headed by the speaker and reads "Captain Rudd: two identities?" where it is Mr. Fenn in
+   two places (`clashTitle` in `ui/world.js` takes the speech's subject and attribute), each side shows the whole
+   speech, and the asserted states sit under the speech at three o'clock, so nothing appears on the timeline at half
+   past two. Writing the content as facts of their own (`claim`) would place and head them rightly, but each then has
+   its own statement link, and one lie would take two distrusts.
+9. **The prose has to carry more than the frame.** A question needs a quote where it is raised and each proposed
+   answer a quote where it becomes available, so the narrator states the contradiction and names the candidates. An
+   answer is judged only where the story gives it away, so each miniature ends on a confession, although an authored
+   story was meant not to need one.
+10. **The gate still takes any answer** ("Any answer will do"), and the essentials are reported only after the
+    give-away. This is the planned answer rule (`docs/archipelago-plan.md`, "Solving a question"); both miniatures now
+    have the data to try it on.
+11. **The order of telling is part of the puzzle.** In the second miniature the narrator knew about her doors from
+    the start, and the contradiction between the lodgers stands open for two paragraphs only because she tells it
+    late. If a protagonist's own observations are always available, that order is lost.
+
+12. **A chain shows a telling the story has not told yet** (a leak in the page). The first miniature was first
+    designed with the paper as a third chain for the true version: a telling by letter from the witness to the
+    narrator, told at ¶7. On a trial copy the detail of that fact at ¶4 already lists "Marta Quill → letter → Hale".
+    Chains are derived from every telling in the data, whatever paragraph tells it. The miniature avoids it (what the
+    paper says is the narrator's own observation, a fact of its own), so the same event cannot gain a chain as the
+    story goes on. The two Holmes cases have not been checked for it.
+
+Smaller things: a "who" question offers the narrator herself and the constable under "More"; `how` on a telling has no
+word for a note or a slate ("statement" was used); a typed door state brings the reasoning mark and the move "It
+changed" onto entries where the miniature has no use for them.
+
+### On whether a miniature is any fun (experiment 2, before the user has played)
+
+Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
+when the deciding clue arrives. More than half the moves are links (7 of 11, and 5 of 10). In the first, the reader can
+do nothing useful between meeting the contradiction and finding the paper except distrust a side on a guess.
 
 ## What the game needs from the concept library
 

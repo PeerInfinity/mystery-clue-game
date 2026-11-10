@@ -1,0 +1,11 @@
+{
+  "id": "rent_box",
+  "title": "The Rent Box",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "ada", "name": "Ada Orme", "kind": "first-person"}
+  ],
+  "subtitle": "Ada Orme's timeline",
+  "source": {"written": "2026-11-10", "word_count": 290}
+}

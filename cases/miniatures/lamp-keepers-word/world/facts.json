@@ -1,0 +1,29 @@
+{
+  "facts": [
+    {"id": "f.hale_role", "of": "hale", "attr": "role", "value": "constable at Saltmarsh", "time": {"from": "t.past"}, "para": 1, "quote": "constable at Saltmarsh"},
+    {"id": "f.store_place", "of": "store", "attr": "location", "value": "quay", "time": {"from": "t.past"}, "para": 1, "quote": "the bonded store on the quay"},
+    {"id": "f.store_broken", "of": "store", "attr": "condition", "value": "broken open", "time": {"at": "t.tue_ten"}, "para": 1, "quote": "the bonded store on the quay was broken open"},
+    {"id": "f.wren_role", "of": "wren", "attr": "role", "value": "boatman", "time": {"from": "t.past"}, "para": 1, "quote": "Tobias Wren, the boatman"},
+    {"id": "f.wren_named", "of": "wren", "attr": "reputed", "value": "the man who broke open the store", "detail": "the town's name for it", "time": {"at": "t.wed_morning"}, "para": 1, "quote": "the town had a name ready for me"},
+    {"id": "f.marta_role", "of": "marta", "attr": "role", "value": "keeper of the harbour lamp", "time": {"from": "t.past"}, "para": 1, "quote": "Marta Quill keeps the harbour lamp"},
+    {"id": "f.marta_at_lamp", "of": "marta", "attr": "location", "value": "lamp", "detail": "looking straight down on the quay", "time": {"at": "t.tue_ten"}, "para": 1, "quote": "from the lamp room she looks straight down on it"},
+    {"id": "f.marta_mute", "of": "marta", "attr": "condition", "value": "has no voice: what she has to say she writes", "time": {"from": "t.past"}, "para": 2, "quote": "What she has to say she writes"},
+    {"id": "f.hale_knows_hand", "of": "hale", "attr": "knows", "value": "Marta Quill's handwriting", "time": {"from": "t.past"}, "para": 2, "quote": "I have known her hand these twenty years"},
+    {"id": "f.pike_role", "of": "pike", "attr": "role", "value": "harbourmaster", "time": {"from": "t.past"}, "para": 3, "quote": "Pike, the harbourmaster"},
+    {"id": "f.marta_tells_pike", "of": "marta", "attr": "tells", "value": "acct.marta", "to": "pike", "how": "statement", "detail": "written on her slate", "time": {"at": "t.wed_first_light"}, "para": 3, "quote": "She wrote it on her slate for me"},
+    {"id": "f.pike_tells", "of": "pike", "attr": "tells", "value": "acct.marta", "to": "hale", "how": "report", "time": {"at": "t.wed_morning"}, "para": 3, "quote": "brought me his report"},
+    {"id": "f.wren_quay", "of": "wren", "attr": "location", "value": "quay", "detail": "under the lamp", "time": {"at": "t.tue_ten"}, "para": 3, "quote": "At ten o'clock Wren was on the quay, under her lamp"},
+    {"id": "f.elsie_role", "of": "elsie", "attr": "role", "value": "Marta Quill's niece", "time": {"from": "t.past"}, "para": 4, "quote": "who is Marta's niece"},
+    {"id": "f.elsie_basket", "of": "elsie", "attr": "carrying", "value": "basket", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "with a basket on her arm"},
+    {"id": "f.marta_tells_elsie", "of": "marta", "attr": "tells", "value": "acct.marta_by_elsie", "to": "elsie", "how": "statement", "time": {"after": "t.tue_ten", "before": "t.wed_noon"}, "para": 4, "quote": "she sent me down with her word"},
+    {"id": "f.elsie_tells", "of": "elsie", "attr": "tells", "value": "acct.marta_by_elsie", "to": "hale", "how": "told", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "came to my door"},
+    {"id": "f.elsie_said", "of": "elsie", "attr": "says", "value": "her aunt saw Wren at the chapel door at ten", "to": "hale", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "At ten o'clock she saw Wren at the chapel door"},
+    {"id": "f.wren_chapel", "of": "wren", "attr": "location", "value": "chapel", "detail": "at the door", "time": {"at": "t.tue_ten"}, "para": 4, "quote": "At ten o'clock she saw Wren at the chapel door, up on the hill", "truth": false},
+    {"id": "f.pike_quarrel", "of": "pike", "attr": "action", "value": "came to blows with Wren over the mooring dues", "detail": "in the spring", "time": {"at": "t.past"}, "para": 6, "quote": "Pike and Wren came to blows in the spring over the mooring dues"},
+    {"id": "f.elsie_betrothed", "of": "elsie", "attr": "role", "value": "to be married to Wren at Michaelmas", "time": {"from": "t.past"}, "para": 6, "quote": "Elsie and Wren are to be married at Michaelmas"},
+    {"id": "f.basket_left", "of": "basket", "attr": "location", "value": "hales_door", "detail": "left by Elsie", "time": {"from": "t.wed_noon", "to": "t.thu_later"}, "para": 7, "quote": "which Elsie had left by my door"},
+    {"id": "f.paper_in_basket", "of": "paper", "attr": "location", "value": "basket", "detail": "under the cloth, Elsie's name on the outside", "time": {"at": "t.thu_morning"}, "para": 7, "quote": "Under the cloth lay a folded paper with her name on the outside"},
+    {"id": "f.paper_reads", "of": "paper", "attr": "contents", "value": "in Marta's hand: at ten Wren was on the quay, under her lamp", "time": {"at": "t.thu_morning"}, "para": 7, "quote": "At ten Wren was on the quay, under my lamp"},
+    {"id": "f.elsie_admits", "of": "elsie", "attr": "says", "value": "Wren was on the quay, and she changed her aunt's word herself", "to": "hale", "time": {"at": "t.thu_later"}, "para": 8, "quote": "I changed it", "asserts": [{"q": "q.word", "pick": "quay"}, {"q": "q.changed", "pick": "elsie"}]}
+  ]
+}

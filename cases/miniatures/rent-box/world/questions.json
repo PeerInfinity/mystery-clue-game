@@ -1,0 +1,6 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who emptied the rent box?", "entry": {"of": "?", "attr": "action", "time": {"after": "t.one", "before": "t.three"}}, "raised": 1, "quote": "it was empty", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "fenn", "available": 2, "via": "direct", "quote": "I saw Fenn cross the yard and come in at the back door"}, {"value": "rudd", "available": 2, "via": "indirect", "from": "f.rudd_in_house"}], "answer": "rudd", "answer_given_at": 6, "answer_given_quote": "He found my four pounds in the Captain's sea-chest", "answer_inferable_at": 5, "answer_from": "f.back_shut"},
+    {"id": "q.untrue", "label": "Which lodger told Ada Orme a thing that was not so?", "entry": {"of": "?", "attr": "says", "time": {"after": "t.half_two", "before": "t.later"}}, "raised": 4, "quote": "One of my lodgers was telling me a thing that was not so", "possibilities": [{"value": "something else", "available": 4, "via": "always"}, {"value": "fenn", "available": 4, "via": "direct", "quote": "One of my lodgers"}, {"value": "rudd", "available": 4, "via": "direct", "quote": "One of my lodgers"}], "answer": "rudd", "answer_given_at": 6, "answer_given_quote": "owned that he had seen nobody in the yard at all", "answer_inferable_at": 5, "answer_from": "f.back_shut"}
+  ]
+}

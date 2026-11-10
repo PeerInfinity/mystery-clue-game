@@ -1,0 +1,21 @@
+{
+  "story": "lamp-keepers-word",
+  "mechanic": "A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md (questions[].needs lists alternative sets of clues; here each question has one set). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue; `false_trail` marks a clue put in on purpose to tempt a wrong answer.",
+  "goal": "q.changed",
+  "frame": [
+    {"id": "fr.store", "says": "The bonded store on the quay was broken open on Tuesday night about ten; the town names Tobias Wren.", "facts": ["f.store_broken", "f.wren_named"]},
+    {"id": "fr.marta", "says": "Marta Quill keeps the harbour lamp and looks straight down on the quay. She has no voice and writes whatever she has to say; the narrator knows her hand.", "facts": ["f.marta_role", "f.marta_at_lamp", "f.marta_mute", "f.hale_knows_hand"]}
+  ],
+  "questions": [
+    {"id": "q.word", "asks": "Where did Marta see Wren at ten o'clock?", "answer": "the quay", "others": ["the chapel"], "gate": 8, "needs": [["c.paper"]], "rules_out": {"the chapel": "c.paper: her own hand says the quay"}},
+    {"id": "q.changed", "asks": "Who changed Marta's word?", "answer": "Elsie", "others": ["Pike", "Marta herself"], "gate": 8, "needs": [["c.elsie_word", "c.paper", "c.paper_found"]], "rules_out": {"Pike": "the changed word is the chapel, which only Elsie carried; c.pike_report agrees with c.paper", "Marta herself": "c.paper: what she wrote for Elsie said the quay"}}
+  ],
+  "clues": [
+    {"id": "c.pike_report", "source": "Pike, the harbourmaster, who read it on Marta's slate at first light on Wednesday", "says": "Marta saw Wren on the quay, under her lamp, at ten.", "facts": ["f.wren_quay"], "chain": ["f.marta_tells_pike", "f.pike_tells"]},
+    {"id": "c.elsie_word", "source": "Elsie Quill, Marta's niece, sent down with her aunt's word on Wednesday at noon", "says": "Marta saw Wren at the chapel door at ten.", "facts": ["f.wren_chapel", "f.elsie_said"], "chain": ["f.marta_tells_elsie", "f.elsie_tells"], "false": true},
+    {"id": "c.paper", "source": "A folded paper in Marta's hand, with Elsie's name on the outside", "says": "Take this to the constable. At ten Wren was on the quay, under my lamp.", "facts": ["f.paper_reads"]},
+    {"id": "c.paper_found", "source": "The narrator's own finding", "says": "The paper lay in the basket Elsie left at the narrator's door.", "facts": ["f.paper_in_basket", "f.basket_left", "f.elsie_basket"], "note": "Where the paper was found is itself evidence (it reached Elsie). A case file is meant to be complete without its find-spot: see docs/authored-stories.md, What the miniatures showed."},
+    {"id": "c.reasons", "source": "The narrator's own knowledge", "says": "Pike and Wren came to blows in the spring; Elsie and Wren are to be married.", "facts": ["f.pike_quarrel", "f.elsie_betrothed"], "false_trail": "A reason for each carrier to lie, so that motive decides nothing."}
+  ]
+}

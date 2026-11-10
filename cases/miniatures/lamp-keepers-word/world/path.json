@@ -1,0 +1,16 @@
+{
+  "description": "The true path of the miniature: a contradiction between two chains from one witness, settled by a paper, the lying link distrusted.",
+  "moves": [
+    {"at": 7, "do": "link", "entry": "f.paper_reads", "q": "q.word", "see": "Marta's own hand puts him on the quay", "for_q": ["q.word"], "why": "The paper is in Marta's own hand, and it says the quay."},
+    {"at": 7, "do": "circle", "q": "q.word", "pick": "quay", "for_q": ["q.word"], "why": "Her own writing settles what she saw: the quay."},
+    {"at": 7, "do": "cross", "q": "q.word", "pick": "chapel", "for_q": ["q.word"], "why": "The chapel is in nothing Marta wrote."},
+    {"at": 7, "do": "trust", "on": "f.wren_chapel", "link": "f.elsie_tells", "level": "distrusted", "for_q": ["q.word"], "why": "The chapel came to me only through Elsie's telling, and the paper she carried says otherwise."},
+    {"at": 7, "do": "link", "entry": "f.paper_in_basket", "q": "q.changed", "see": "it lay in her basket", "for_q": ["q.changed"], "why": "The paper has Elsie's name on it and lay in Elsie's basket: Marta's word reached her."},
+    {"at": 7, "do": "link", "entry": "f.paper_reads", "q": "q.changed", "see": "what Marta wrote for Elsie to carry was the quay", "for_q": ["q.changed"], "why": "So what Elsie was given to carry said the quay."},
+    {"at": 7, "do": "link", "entry": "f.elsie_said", "q": "q.changed", "see": "what Elsie told was the chapel", "for_q": ["q.changed"], "why": "And what she told me was the chapel."},
+    {"at": 7, "do": "link", "entry": "f.wren_quay", "q": "q.changed", "see": "Pike's word agrees with the paper", "for_q": ["q.changed"], "why": "Pike's report says what the paper says, so he carried it straight."},
+    {"at": 7, "do": "circle", "q": "q.changed", "pick": "elsie", "for_q": ["q.changed"], "why": "She was given the quay and told the chapel: the change is hers."},
+    {"at": 7, "do": "cross", "q": "q.changed", "pick": "pike", "for_q": ["q.changed"], "why": "His word and Marta's paper agree."},
+    {"at": 7, "do": "cross", "q": "q.changed", "pick": "marta", "for_q": ["q.changed"], "why": "Both things in Marta's hand, the slate and the paper, say the quay."}
+  ]
+}

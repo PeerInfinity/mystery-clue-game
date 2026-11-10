@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.untrue_back", "q": "q.untrue", "from": ["f.back_shut"], "says": "the back door did not open, so nobody came in from the yard", "essential": true, "against": ["fenn"]},
+    {"id": "o.untrue_said", "q": "q.untrue", "from": ["f.rudd_says_saw"], "says": "it was the Captain who said somebody did"},
+    {"id": "o.who_front", "q": "q.who", "from": ["f.front_locked"], "says": "nobody came in or went out by the front door after one", "essential": true},
+    {"id": "o.who_back", "q": "q.who", "from": ["f.back_shut"], "says": "nobody came in from the yard", "essential": true},
+    {"id": "o.who_fenn", "q": "q.who", "from": ["f.fenn_let_out"], "says": "Mr. Fenn was outside from one o'clock, when the box was full", "essential": true, "against": ["fenn"]},
+    {"id": "o.who_rudd", "q": "q.who", "from": ["f.rudd_in_house"], "says": "the Captain was inside the whole time", "essential": true},
+    {"id": "o.who_house", "q": "q.who", "from": ["f.no_servant"], "says": "there was nobody else in the house to do it"}
+  ]
+}

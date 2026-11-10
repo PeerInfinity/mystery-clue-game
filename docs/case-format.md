@@ -28,6 +28,7 @@ else. Every JSON file is one object per line inside its list.
 | `world/observations.json` | no | What an entry shows about a question once the player links them. Without it the page offers no links. See "Observations". |
 | `world/actions.json` | no | The case's own action types, `{id, label, requires, effects}` in the action table's rule shape, and `ramifies` (what a goal's state brings with it); the generic ones are the engine's (see "Typed states and actions"). |
 | `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`; `CASE=<dir> node scripts/path-check.mjs` for another case). |
+| `structure.json` | no | Beside `world/`, for an authored story: the logic it was written from, `{story, mechanic, goal, frame, questions: [{id, asks, answer, others, gate, needs, rules_out}], clues: [{id, source, says, facts, chain?, false?, false_trail?}]}` (`docs/authored-stories.md`; the shape sketched in `docs/archipelago-plan.md`). `needs` lists alternative sets of clues. The page does not read it; `npm test` checks that its clues, facts and questions exist and that every essential observation of a question rests on facts of the clues it needs. So far only the miniatures (`cases/miniatures/`) have one. |
 
 The world model was first written beside the earlier game's data and pointed into it (`old`, references to the
 annotated reading's thoughts, the earlier game's time windows); since 2026-11-06 it stands alone. The page shows

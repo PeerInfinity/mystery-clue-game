@@ -1,0 +1,11 @@
+{
+  "id": "lamp_keepers_word",
+  "title": "The Lamp-Keeper's Word",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "hale", "name": "Hale", "kind": "first-person"}
+  ],
+  "subtitle": "Hale's timeline",
+  "source": {"written": "2026-11-10", "word_count": 330}
+}
