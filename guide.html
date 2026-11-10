@@ -147,8 +147,8 @@ far to trust each of them, and the page shows the <b>contradictions</b> among wh
 you fill in a sudoku: circle the answer you think is right, cross out the ones you have ruled out. You can also
 <b>reason</b> from what is on the timeline: point out that something must have changed, what an action needed, what
 it was for. The page checks each step against the timeline.</p>
-<p>There is no score. Before the story gives an answer away you must commit to one, and when the answer comes you see
-how you did.</p>
+<p>There is no score. Before the story gives an answer away you must commit to one, and where the story has given
+you the evidence for it, you must show the answer first: link the evidence and circle the answer it leaves.</p>
 </section>
 
 <!-- ------------------------------------------------------------------ -->
@@ -178,10 +178,18 @@ paragraph.</p>
 <p><span class="btn">Read on ▶</span> reads one more paragraph. To read further at once, type a later paragraph's
 number in <i>Read to ¶</i>. Reading only goes forward: to look again at something already read, scroll up in the
 story, or click a paragraph number.</p>
-<h3>The gate</h3>
+<h3 id="gate">The gate</h3>
 <p>Sometimes the story is about to give away the answer to a question you could have worked out already. Then
 reading stops just before that paragraph, and a notice says which questions it answers: <b>commit first</b> by
-circling exactly one answer to each. Any answer will do, right or wrong, so you are never stuck. The notice links to
+circling exactly one answer to each.</p>
+<p>Where a question has <b>evidence to link</b> (see <a href="#observations">observations</a>), the story goes on
+only once you have shown its answer: every piece of its evidence linked to it, and the right answer circled. The
+notice says how much of the evidence you have linked; when all of it is linked and the story still waits, the answer
+you circled is not the one it leads to. A statement you have decided is false counts as evidence too: link it to the
+question once you have distrusted it. For a question with no evidence to link, any one answer will do, right or
+wrong. If you would rather never be held up, Settings has <i>To read past an answer</i>: <i>commit to any
+answer</i>.</p>
+<p>The notice links to
 each question and has its own <span class="btn quiet">Hint</span> and <span class="btn quiet">Hide</span> (Read on
 shows it again).</p>
 <p>When you read past it, a notice says what the story has answered, what you circled, and whether you were right.
@@ -403,14 +411,17 @@ speed it takes about a quarter of an hour.</p>
   <dd><i>As the system</i>, <i>Light</i> or <i>Dark</i>. This guide follows the same choice.</dd>
   <dt>Wait between hints</dt>
   <dd>None, 10 or 30 seconds, or a minute.</dd>
+  <dt>To read past an answer</dt>
+  <dd>What <a href="#gate">the gate</a> asks of a question that has evidence to link: <i>show it</i> (the evidence
+  linked and the right answer circled; the default), or <i>commit to any answer</i>.</dd>
 </dl>
 <h3>Saving and starting over</h3>
 <p>Your timeline saves itself in this browser as you play: close the page and come back, and you are where you left
 off. <span class="btn quiet">Reset trust…</span> puts every link and person back to uncertain (and Watson as narrator back
 to certain) and keeps the rest.
 <span class="btn quiet">Start over…</span> asks first, then clears everything (your place in the story, your trust,
-marks and reasoning) and starts again from the first paragraph. It keeps the layout, the theme and the wait between
-hints.</p>
+marks and reasoning) and starts again from the first paragraph. It keeps the layout, the theme, the wait between
+hints and the gate's rule.</p>
 <p>Hover over almost any button or setting for a short explanation.</p>
 </section>
 

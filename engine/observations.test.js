@@ -68,3 +68,13 @@ test('the description: essentials only', () => {
     assert.deepEqual(described(OBS, 'q', fill(OBS, [link('f.grating')], ks).filled).missing, ['can travel a chain', 'looks like a grey stripe']);
     assert.deepEqual(described(OBS, 'q2', []), { any: false, done: false, missing: [] });
 });
+
+test('a lie as evidence: a statement linked counts once the page says it is doubted', () => {
+    const obs = [{ id: 'o.lie', q: 'q', from: [{ doubted: 'f.tells' }], says: 'what he said cannot stand', essential: true }];
+    const links = [{ entry: 'f.tells', q: 'q' }];
+    const known = [{ id: 'f.tells', attr: 'tells' }];
+    assert.equal(fill(obs, links, known).filled.length, 0, 'believed: the link is only a note');
+    assert.equal(fill(obs, links, known).notes.length, 1);
+    assert.equal(fill(obs, links, known, {}, { doubted: (id) => id === 'f.tells' }).filled.length, 1);
+    assert.equal(fill(obs, [], known, {}, { doubted: () => true }).filled.length, 0, 'doubted but not linked');
+});

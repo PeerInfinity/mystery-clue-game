@@ -332,7 +332,7 @@ for (const f of facts) {
 for (const o of observationList) {
     if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);
     if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
-    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
+    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr)) : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
     if (!o.says) err(o.id, 'no says');
     if (o.if && !qById.get(o.if.q)?.possibilities.some((x) => x.value === o.if.pick)) err(o.id, `if: no possibility ${o.if.q} = ${o.if.pick}`);
     for (const p of list(o.against)) if (!qById.get(o.q)?.possibilities.some((x) => x.value === p)) err(o.id, `against: no possibility ${p}`);

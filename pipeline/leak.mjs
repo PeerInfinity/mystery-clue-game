@@ -89,7 +89,7 @@ export function labels(dir) {
     // An observation shows once it can be linked: the latest of its facts, and its question raised. A route is dated by
     // the latest fact about the things it runs through.
     const byId = new Map(facts.map((f) => [f.id, f]));
-    const fromPara = (x) => (typeof x === 'string' ? given(byId.get(x) ?? {}) : Math.max(...facts.filter((f) => x.route_through.includes(f.of)).map(given).filter((g) => g != null)));
+    const fromPara = (x) => (typeof x === 'string' || x.doubted ? given(byId.get(x.doubted ?? x) ?? {}) : Math.max(...facts.filter((f) => x.route_through.includes(f.of)).map(given).filter((g) => g != null)));
     for (const o of r('observations.json').observations ?? []) {
         const q = questions.find((y) => y.id === o.q);
         const ps = o.from.map(fromPara);

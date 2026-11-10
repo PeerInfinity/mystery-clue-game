@@ -6,7 +6,8 @@
 // What a hint is about, in this order:
 //  (a) a mark on a question the path settles, wrong by now: a wrong answer circled, a right one crossed out (only once
 //      the path has its reason: its crossing, or its right circle, at or before the paragraph read to);
-//  (b) a distrust the path does not make: a link or a person set to distrusted, other than a false statement's own;
+//  (b) a distrust the path does not make: a link or a person set to distrusted, unless it keeps only false things off
+//      the timeline (a false statement's own link, or any other link of a false chain: as good as the path's);
 //  (c) the next move of the path not made, that the page allows now (tried and taken back, engine and page alike),
 //      those for the soonest answer given away first; a circle or a crossing counts as done once the question has a
 //      right answer circled (any right one: the light as well as the noise);
@@ -64,12 +65,16 @@ export async function makeHints({ store, api }) {
             if (level !== LEVELS.distrusted || distrustedByPath(key, P)) continue;
             if (key.startsWith('stmt:') && api.statementFalse(key.slice(5))) continue;
             if (key.startsWith('hyp:')) continue;   // a mark's own link: the marks are (a)'s
+            if (api.distrustEffect({ link: key }).harmless) continue;   // it takes off only what is false: as good as the path's
             return { kind: 'trust', link: key };
         }
-        for (const [person, level] of Object.entries(save.trust?.people ?? {})) if (level === LEVELS.distrusted) return { kind: 'trust', person };
+        for (const [person, level] of Object.entries(save.trust?.people ?? {})) if (level === LEVELS.distrusted && !api.distrustEffect({ person }).harmless) return { kind: 'trust', person };
         // (c) the next move of the path that the page allows now.
         const deadline = (m) => Math.min(...(m.for_q ?? []).map((q) => api.question(q)?.answer_given_at).filter((g) => g > P), Infinity);
-        const open = moves.filter((m) => !VIEWS.has(m.do) && from(m) <= P && !tried(m) && !made(m, save)
+        // A distrust of the path counts as made when it would take nothing more off the timeline: the player has
+        // taken the same false things off by another link of the chain.
+        const done = (m) => m.do === 'trust' && m.level === 'distrusted' && api.distrustEffect(m.link ? { link: m.link } : { person: m.person }, false).n === 0;
+        const open = moves.filter((m) => !VIEWS.has(m.do) && from(m) <= P && !tried(m) && !made(m, save) && !done(m)
             && !((m.do === 'circle' || m.do === 'cross') && rightCircled(m.q, save)))
             .sort((a, b) => deadline(a) - deadline(b) || a.i - b.i);
         if (open.length) {
@@ -108,7 +113,7 @@ export async function makeHints({ store, api }) {
                     : `Look at ${entry(onOf(m))}.`;
                 const what = m.do === 'circle' ? `Circle “${pickName(m.q, m.pick)}”.`
                     : m.do === 'cross' ? `Cross out “${pickName(m.q, m.pick)}”.`
-                    : m.do === 'trust' ? 'Distrust this statement itself (its own trust, above its chains).'
+                    : m.do === 'trust' ? (m.person ? `Distrust ${api.name(m.person)}.` : m.link.startsWith('stmt:') ? 'Distrust this statement itself (its own trust, above its chains).' : `Distrust this link of its chain: ${api.linkName(m.link)}.`)
                     : m.do === 'a' ? `Point out that it changed: against ${entry(m.b)}.`
                     : m.do === 'b' ? 'Point out what it needs and what it does.'
                     : m.do === 'c' ? `Ask “What is this for?”: for ${entry(m.for)}.`

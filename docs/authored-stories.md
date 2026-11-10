@@ -150,6 +150,9 @@ question (which clue removes which other answer).
 3. **The hints take a distrust that is not on the true path for a mistake**, and advise setting it back, although in
    the first miniature several are equally right. Tried on the page: with the telling from the witness to the carrier
    distrusted in place of the path's choice, the hint is "Set it back to uncertain".
+   **Fixed 2026-11-10, ruled by the user (any valid option is accepted):** a distrust that keeps only false things
+   off the timeline is no mistake, whichever link or person it is, and a distrust of the path counts as made once it
+   would take nothing more off. Distrusting the true side is still called a mistake.
 4. **Where a clue was found can be the evidence.** The paper proves what the carrier was given because it lay in her
    basket. A case file is meant to be complete without where it was found. The structure keeps this as a clue of its
    own (`c.paper_found`), which is the narrator's observation and tied to the spine.
@@ -164,6 +167,11 @@ question (which clue removes which other answer).
    the automatic contradiction and not through a link. The structure's `needs` and the world model's essentials
    therefore differ for that question, and an export of essentials alone would miss two clues. The page also does not
    tie the two together: the question can be answered with the false statement still trusted.
+   **Fixed 2026-11-10, ruled by the user (a lie is evidence):** an observation can come from `{doubted: <telling or
+   claim>}`: the statement linked to the question, and no longer believed (what it carried that is false is off the
+   timeline). Both miniatures' "who said it" observations are now of this kind and essential, so with the new gate the
+   question cannot be passed with the lie still trusted. Still true: a `needs` clue that acts only by contradicting
+   (the other lodger's statement) is in no essential observation.
 7. **Elimination is prose.** "Nobody came in, one lodger was out, so only the other could reach the box" is four
    essential observations whose `says` carry the argument. The engine checks none of it. A general negative has no
    form: "the back door did not open" is written as a typed state (`door: shut` over the two hours) so that it clashes
@@ -193,6 +201,23 @@ question (which clue removes which other answer).
 10. **The gate still takes any answer** ("Any answer will do"), and the essentials are reported only after the
     give-away. This is the planned answer rule (`docs/archipelago-plan.md`, "Solving a question"); both miniatures now
     have the data to try it on.
+    **Changed 2026-11-10, ruled by the user:** by default the story goes on past a give-away only when a question
+    that has essential observations has them all filled and a right answer circled. The notice counts the evidence
+    linked and judges the answer only once all of it is, so circling each answer in turn tells nothing until the
+    evidence is shown. A question with no essential observations takes any one answer, as before: Silver Blaze has
+    no observations, and The Speckled Band has essentials on one gated question of 49. Settings, "To read past an
+    answer", keeps the old rule ("commit to any answer"); whether that setting stays is undecided.
+
+    The user also wanted contradictions resolved before the story moves on. Measured on the true paths, a
+    contradiction is open when the reader goes to the next paragraph 11 times in Silver Blaze, 56 in The Speckled
+    Band, 3 in the first miniature and 2 in the second (the lodgers contradict each other at ¶3, and the door that
+    settles it is told at ¶5). **Ruled by the user:** not every paragraph. A contradiction has to be resolved only
+    where it is tied to the question being answered, which is what a `{doubted: …}` essential observation does: the
+    question cannot be passed while the lie stands. Where a case has no such data (both Holmes cases), contradictions
+    work as before.
+
+    On most moves falling at the end, the user: not a problem; if it becomes one, stories can be set up with more
+    parts that require moves.
 11. **The order of telling is part of the puzzle.** In the second miniature the narrator knew about her doors from
     the start, and the contradiction between the lodgers stands open for two paragraphs only because she tells it
     late. If a protagonist's own observations are always available, that order is lost.

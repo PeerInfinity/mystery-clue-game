@@ -3,6 +3,7 @@
   "moves": [
     {"at": 5, "do": "link", "entry": "f.back_shut", "q": "q.untrue", "see": "nobody came in from the yard", "for_q": ["q.untrue"], "why": "The back door is the only way in from the yard, and it did not open."},
     {"at": 5, "do": "trust", "on": "f.rudd_back_open", "link": "f.rudd_tells", "level": "distrusted", "for_q": ["q.untrue"], "why": "So nobody came in at the back door at half past two: what the Captain said he saw did not happen."},
+    {"at": 5, "do": "link", "entry": "f.rudd_tells", "q": "q.untrue", "see": "what he said cannot stand", "for_q": ["q.untrue"], "why": "And it was the Captain who told me so: his telling is itself the thing that was not so."},
     {"at": 5, "do": "circle", "q": "q.untrue", "pick": "rudd", "for_q": ["q.untrue"], "why": "The Captain's is the statement my own afternoon contradicts."},
     {"at": 5, "do": "cross", "q": "q.untrue", "pick": "fenn", "for_q": ["q.untrue"], "why": "Nothing I saw myself is against what Mr. Fenn said."},
     {"at": 5, "do": "link", "entry": "f.front_locked", "q": "q.who", "see": "by the front door after one", "for_q": ["q.who"], "why": "The front door was locked from one, and I had the key."},

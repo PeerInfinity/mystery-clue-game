@@ -131,7 +131,7 @@ if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -772,7 +772,7 @@ function render() {
     lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
     heldKeys = new Set(held.map(moveKey));
     // A telling can be linked like any entry: that it was said stands, whatever becomes of what it carried.
-    if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks);
+    if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted });
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
@@ -964,6 +964,20 @@ function statusHtml(r) {
     if (r.status === 'met') return `<span class="good small">met${r.entry ? `: ${phrase(r.entry)}` : ''}</span>`;
     if (r.status === 'against') return `<span class="bad small">the timeline has ${phrase(r.entry)}${r.persisting ? `, since ${timeLabel(anchorOf(r.entry.time))}, and nothing changes it` : ''}</span>`;
     return `<span class="muted small">nothing on the timeline says so${r.entry ? ` (it has ${phrase(r.entry)})` : ''}</span>`;
+}
+/**
+ * A statement the player no longer believes, for a lie as evidence (an observation from `{doubted: id}`): a telling
+ * whose false facts told so far are all off the timeline, or a claim whose false assertions are.
+ */
+function doubted(id) {
+    const f = factById.get(id);
+    if (!f) return false;
+    if (CLAIM_ATTRS.has(f.attr)) return allAssertions.some((x) => x.claim === id && x.truth === false) && levelOf(claimChains(id), state.trust) < state.threshold;
+    if (f.attr !== 'tells') return false;
+    const told = new Set(list(f.value));
+    const lies = data.accounts.filter((a) => told.has(a.id) || [...prov.ancestors(a.id)].some((p) => told.has(p)))
+        .flatMap((a) => list(a.facts)).map((x) => factById.get(x)).filter((x) => x && x.truth === false && givenAt(x) <= state.para);
+    return lies.length > 0 && lies.every((x) => !accepted(x));
 }
 /** What is on the timeline now: told so far and trusted to the threshold, with the player's own entries. */
 const onTimeline = () => allFacts().filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
@@ -1459,7 +1473,20 @@ const GATED = data.questions.filter((q) => q.answer != null && !q.latent && q.ra
 const atPara = (p, fn) => { const was = state.para; state.para = p; try { return fn(); } finally { state.para = was; } };
 const circledCount = (q) => shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled').length;
 /** The gated questions given away at ¶p and not committed to just before it. */
-const gateAt = (p) => atPara(p - 1, () => GATED.filter((q) => q.answer_given_at === p && qListed(q) && circledCount(q) !== 1));
+// The gate before a paragraph that gives an answer away. A question with required evidence (essential observations)
+// lets the story on only with that evidence linked and a right answer circled (Settings: or with any one answer, as
+// every other question does). `gateState`: 'pick' (not one circle), 'evidence', 'wrong', or null (met).
+const strictGate = () => state.gate !== 'any';
+const evidenceOf = (q) => (observations ? described(observations, q.id, observed.filled) : { any: false });
+function gateState(q) {
+    const picks = shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled');
+    if (circledCount(q) !== 1) return 'pick';
+    const d = evidenceOf(q);
+    if (!strictGate() || !d.any) return null;
+    if (!d.done) return 'evidence';
+    return picks.length === 1 && isRight(q, picks[0].value) ? null : 'wrong';
+}
+const gateAt = (p) => atPara(p - 1, () => GATED.filter((q) => q.answer_given_at === p && qListed(q) && gateState(q) !== null));
 let gateHidden = null;    // the gate's key while its notice is hidden
 let answerNews = [];      // the answers just given: {q, mark}
 const setPara = (n) => {
@@ -1480,8 +1507,16 @@ function renderGate() {
     el.hidden = !qs.length || gateHidden === key;
     document.getElementById('next').title = qs.length ? `Before ¶${state.para + 1}: commit to an answer first` : 'Read the next paragraph';
     if (!qs.length) return;
-    const count = (q) => { const n = circledCount(q); return n === 0 ? 'nothing circled yet' : `${n} circled`; };
-    el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. Commit first: circle exactly one answer${qs.length === 1 ? '' : ' for each'}. Any answer will do; the key shows at ¶${state.para + 1}.</p>
+    const count = (q) => {
+        const n = circledCount(q), d = evidenceOf(q), s = gateState(q);
+        if (s === 'pick') return n === 0 ? 'nothing circled yet' : `${n} circled`;
+        if (s === 'evidence') { const all = observations.filter((o) => o.q === q.id && o.essential).length; return `its evidence is not all linked yet: ${all - d.missing.length} of ${all}`; }
+        return 'the evidence is linked, and it does not lead to the answer you circled';
+    };
+    const strict = strictGate() && qs.some((q) => evidenceOf(q).any), loose = qs.some((q) => !strictGate() || !evidenceOf(q).any);
+    const rule = !strict ? `Commit first: circle exactly one answer${qs.length === 1 ? '' : ' for each'}. Any answer will do; the key shows at ¶${state.para + 1}.`
+        : `The story goes on once you have shown the answer: link the evidence for it (“Link observations…”) and circle the one answer the evidence leaves${loose ? '. A question with no evidence to link takes any one answer' : ''}.`;
+    el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. ${rule}</p>
       <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
@@ -1554,7 +1589,7 @@ document.addEventListener('keydown', (e) => {
 document.getElementById('start-over').addEventListener('click', () => {
     if (!confirm('Start over from the first paragraph? Your trust, marks and reasoning on this device are cleared (layout, theme and the hint wait are kept). This cannot be undone.')) return;
     try {
-        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
+        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
         localStorage.setItem(PLAYER_STORE, JSON.stringify(keep));
         localStorage.removeItem(AUTOPLAY_STORE);
     } catch { /* nothing saved to clear */ }
@@ -1799,6 +1834,26 @@ const hintApi = {
         const m = key.match(/^(said|member):([^>]+)>(.+)$/);
         return m ? (m[1] === 'said' ? `what ${nameOf(m[2])} says to ${nameOf(m[3])}` : `${nameOf(m[2])} as one of ${nameOf(m[3])}`) : key;
     },
+    // What distrusting a link or a person keeps off the timeline now (told so far, and on it again with that distrust
+    // lifted): `{n, harmless}`, harmless when all of it is false. A distrust that takes off only what is false is a
+    // valid choice, whichever link of the false chain it is.
+    distrustEffect: ({ link, person }, lifted = true) => {
+        const other = structuredClone(state.trust);
+        if (lifted) { if (link) delete other.links[link]; else delete other.people[person]; }
+        else if (link) other.links[link] = 0; else other.people[person] = 0;
+        const a = lifted ? state.trust : other, b = lifted ? other : state.trust;   // a: with the distrust, b: without
+        const hit = [];
+        for (const f of data.facts) {
+            if (f.attr === 'tells' || !(givenAt(f) <= state.para)) continue;
+            const cs = chainsOf(f);
+            if (cs.length && levelOf(cs, a) < state.threshold && levelOf(cs, b) >= state.threshold) hit.push(f.truth === false);
+            if (CLAIM_ATTRS.has(f.attr) && list(f.asserts).length) {
+                const cc = claimChains(f.id);
+                if (levelOf(cc, a) < state.threshold && levelOf(cc, b) >= state.threshold) hit.push(...allAssertions.filter((x) => x.claim === f.id).map((x) => x.truth === false));
+            }
+        }
+        return { n: hit.length, harmless: hit.every(Boolean) };
+    },
     // A statement is false when its fact is, or (a claim) when anything it asserts is.
     statementFalse: (id) => { const f = factById.get(id); return !!f && (CLAIM_ATTRS.has(f.attr) ? allAssertions.some((x) => x.claim === id && x.truth === false) : f.truth === false); },
     setTrust: ({ link, person }, level) => changeTrust((tr) => { if (link) { if (level === DEFAULT_LEVEL) delete tr.links[link]; else tr.links[link] = level; } else delete tr.people[person]; }),
@@ -1807,6 +1862,8 @@ const hintApi = {
 };
 document.getElementById('hint-wait').value = String(state.hintWait);
 document.getElementById('hint-wait').addEventListener('change', (e) => { state.hintWait = Number(e.target.value); save(); });
+document.getElementById('gate-rule').value = strictGate() ? 'strict' : 'any';
+document.getElementById('gate-rule').addEventListener('change', (e) => { state.gate = e.target.value; save(); render(); });
 if (AUTOPLAY === null) import('./world-hints.js').then((m) => m.makeHints({ store: STORE, api: hintApi }));
 else document.getElementById('hint').hidden = true;
 if (AUTOPLAY !== null) { save(); import('./world-autoplay.js').then((m) => m.start({ store: STORE, fast: AUTOPLAY === 'fast' })); }
