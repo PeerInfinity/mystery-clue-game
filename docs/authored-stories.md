@@ -106,9 +106,14 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/lamp-keepers-word` | A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it. | 8 paragraphs, 25 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
 | `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 20 facts, 1 account, 2 questions, 7 observations (5 essential), 10 moves |
 
-Played at `?case=cases/miniatures/<name>` on a local server. They are not on the published site: `scripts/build-site.js`
-collects only `cases/<case>/`. `npm test` validates them and checks each `structure.json` against its world model.
-Where they live and whether the site links them is the user's to decide.
+Played at `?case=cases/miniatures/<name>`. `npm test` validates them and checks each `structure.json` against its
+world model.
+
+**The user's reaction (2026-11-10), after playing both:** "This is basically what I had in mind for the miniatures."
+Ruled: they stay in `cases/miniatures/`, are published (`scripts/build-site.js` collects them) and are linked from the
+README, since new players are likely to want to start with them; the issues found in these two are to be fixed before
+any more are written. The two page defects (8 and 12 below) were fixed the same day; the rest are design questions,
+still open.
 
 **What worked with no change to the engine or the page.** Both were written by hand in the existing format, validated
 and played their true path at the first attempt, and pass every check (`npm test`, the validator, the path check, the
@@ -164,6 +169,9 @@ question (which clue removes which other answer).
    speech, and the asserted states sit under the speech at three o'clock, so nothing appears on the timeline at half
    past two. Writing the content as facts of their own (`claim`) would place and head them rightly, but each then has
    its own statement link, and one lie would take two distrusts.
+   **Fixed 2026-11-10, in part:** the contradiction is now headed by what the claim asserts ("Mr. Fenn: in two places
+   at once?") and each side reads "Captain Rudd says: Mr. Fenn at the yard". Still open: the asserted states are not
+   on the timeline at their own time.
 9. **The prose has to carry more than the frame.** A question needs a quote where it is raised and each proposed
    answer a quote where it becomes available, so the narrator states the contradiction and names the candidates. An
    answer is judged only where the story gives it away, so each miniature ends on a confession, although an authored
@@ -180,7 +188,13 @@ question (which clue removes which other answer).
     narrator, told at ¶7. On a trial copy the detail of that fact at ¶4 already lists "Marta Quill → letter → Hale".
     Chains are derived from every telling in the data, whatever paragraph tells it. The miniature avoids it (what the
     paper says is the narrator's own observation, a fact of its own), so the same event cannot gain a chain as the
-    story goes on. The two Holmes cases have not been checked for it.
+    story goes on.
+    **Fixed 2026-11-10:** the page keeps only the chains whose tellings the story has told by the paragraph read to
+    (`toldChains` in `ui/world.js`), for display and for trust alike, so a later telling no longer holds a fact up
+    before it is told. The Holmes cases had it: in The Speckled Band 400 facts listed tellings of later paragraphs
+    (one account told in many pieces), in Silver Blaze 12. Where every chain of a fact runs through a telling dated
+    after the fact (60 facts of Silver Blaze: a recital's telling is dated at ¶17 and carries facts from ¶12), the
+    chains are kept as they are.
 
 Smaller things: a "who" question offers the narrator herself and the constable under "More"; `how` on a telling has no
 word for a note or a slate ("statement" was used); a typed door state brings the reasoning mark and the move "It

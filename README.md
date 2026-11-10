@@ -4,18 +4,28 @@
 [The Speckled Band](https://peerinfinity.github.io/mystery-clue-game/?case=cases/speckled-band) ·
 [How to play](https://peerinfinity.github.io/mystery-clue-game/guide.html)
 
+**New here? Start with a two-minute case**, each an invented story of a few paragraphs built around one move of the
+game: [The Lamp-Keeper's Word](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/lamp-keepers-word)
+(one witness's word reaches you by two people) ·
+[The Rent Box](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box)
+(two lodgers' statements that cannot both be true)
+
 **Watson's timeline**: you read a fair-play detective story as Dr Watson, and keep an ordered list of what happened,
 who was where, who did what, and when. What Watson sees himself is certain; everything else reached him through a
 chain of people (a witness, the police, the papers, Holmes), and you choose how far to trust each link. The page
 lists the contradictions among what you accept. The story raises questions as it goes; you circle the answer you
 believe and cross out the ones you have ruled out, and before the story gives an answer away you commit to one.
 
-There are two cases, both by Arthur Conan Doyle (1892, public domain), and both are experimental:
+There are two full cases, both by Arthur Conan Doyle (1892, public domain), and both are experimental:
 
 - **"Silver Blaze"**, the case the game was built on, refined over many rounds of review.
 - **"The Adventure of the Speckled Band"**, the first story set up by the new-story pipeline
   ([`pipeline/README.md`](pipeline/README.md)): a first version, not yet reviewed by hand, so it may still have rough
   edges, such as a label that says more than the story has told.
+
+There are also two **miniatures**, short stories written for the game (linked above), each with just enough in it to
+show one mechanic. They are the first of a new direction, stories written for this system
+([`docs/authored-stories.md`](docs/authored-stories.md), which contains spoilers), and the best place to start.
 
 ## Status: experimental, a working foundation
 

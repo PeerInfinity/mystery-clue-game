@@ -286,7 +286,15 @@ const TIME_ATTRS = new Set(['weekday', 'hour', 'time']);
 const isTimeEvent = (f) => TIME_ATTRS.has(f.attr) || ['calendar', 'clock', 'weather'].includes(f.of);
 
 // --- What is known, and how far it is trusted.
-const chainsOf = (f) => (f.attr === 'tells' ? [] : prov.factChains(f.id));
+// Only the chains told so far: a chain through a telling the story has not reached yet (the same account told again
+// later, by a letter, to someone else) is not shown, and does not hold the fact up. Where a fact's every chain passes
+// through a later telling (a telling's paragraph after the first thing it carries), the chains stand as they are.
+const toldChains = (chains) => {
+    const told = chains.filter((c) => c.links.every((l) => !l.telling || !(givenAt(factById.get(l.telling)) > state.para)));
+    return told.length ? told : chains;
+};
+const claimChains = (id) => toldChains(prov.claimChains(id));
+const chainsOf = (f) => (f.attr === 'tells' ? [] : toldChains(prov.factChains(f.id)));
 /** A fact's level: a telling to a narrator, who witnesses it, as far as that narration is trusted; any other telling as the story reports it (uncertain, and no more than the narration). */
 function levelOfFact(f) {
     if (f.hyp) return markLevel(f.hyp.q, f.hyp.pick);
@@ -301,7 +309,7 @@ function levelOfFact(f) {
     return levelOf(chainsOf(f), state.trust);
 }
 /** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
-const chainsOfAssertion = (x) => (x.mark ? [x.from ? hypothesisChain(...x.from.slice(4).split('=')) : hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? prov.claimChains(x.fact) : chainsOf(factOf(x.fact)));
+const chainsOfAssertion = (x) => (x.mark ? [x.from ? hypothesisChain(...x.from.slice(4).split('=')) : hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? claimChains(x.fact) : chainsOf(factOf(x.fact)));
 /** How far the player trusts a narrator's narration (by default the case's trust, certain unless it says otherwise). */
 const narrationLevel = (id) => { const n = data.narrators.find((x) => x.id === id); return n ? state.trust.links[linkKey(narrationLink(n))] ?? narrationLink(n).base : DEFAULT_LEVEL; };
 /** Told by the paragraph read to, and modelled (a chain reaches the reader, or a telling). */
@@ -318,7 +326,7 @@ function acceptedAssertions() {
     return [...marks, ...mine, ...allAssertions.filter((x) => {
         const f = factById.get(x.fact);
         if (!visible(f)) return false;
-        if (x.claim && x.claim === x.fact) return levelOf(prov.claimChains(x.claim), state.trust) >= state.threshold;
+        if (x.claim && x.claim === x.fact) return levelOf(claimChains(x.claim), state.trust) >= state.threshold;
         return accepted(f);
     })];
 }
@@ -340,7 +348,7 @@ function assertsHtml(f) {
     if (!CLAIM_ATTRS.has(f.attr) || !list(f.asserts).length) return '';
     const items = list(f.asserts).filter((x) => !x.q || qVisible(qById.get(x.q)));
     if (!items.length) return '';
-    const lvl = levelOf(prov.claimChains(f.id), state.trust);
+    const lvl = levelOf(claimChains(f.id), state.trust);
     const may = f.modal ? ' <span class="small">(may be)</span>' : '';
     const li = items.map((x) => (x.q
         ? `<li>${dot(lvl)}${esc(qLabel(qById.get(x.q)))} ${x.neg ? '<b>Not</b> ' : ''}${pickText(qById.get(x.q), x.pick)}${may}</li>`
@@ -547,11 +555,14 @@ function clashSide(x) {
         const who = x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : '';
         return `<a class="link" data-fact="${esc(f.id)}">${who}${x.neg ? 'not ' : ''}${pickText(q, x.pick)}</a> <span class="para">¶${givenAt(f)}</span>`;
     }
-    return `<a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a> <span class="para">¶${givenAt(f)}</span>`;
+    return `<a class="link" data-fact="${esc(f.id)}">${statePhrase(x, f)}</a> <span class="para">¶${givenAt(f)}</span>`;
 }
+/** A state on one side of a contradiction: the fact, or what a claim asserts, with whose word it is. */
+const statePhrase = (x, f) => (x.claim && x.claim === x.fact ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, neg: x.neg, time: x.time, id: '' })}` : phrase(f));
 function clashTitle(c) {
     if (c.a.kind === 'pick') return esc(qById.has(c.a.q) ? qLabel(qById.get(c.a.q)) : c.a.q);
-    const f = factOf(c.a.fact);
+    // What the contradiction is about: the state's own subject (what a claim asserts, not the claim's speaker).
+    const f = c.a.mark || !c.a.attr ? factOf(c.a.fact) : c.a;
     return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : 'two identities?'}`;
 }
 
@@ -863,7 +874,7 @@ function sideHtml(x, label) {
     }
     const what = x.kind === 'pick'
         ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : ''}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
-        : phrase(f);
+        : statePhrase(x, f);
     return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${what}</a></p>
       <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>${r.links.length || r.people.length ? '; <span class="resolving">marked</span>: distrusting it alone takes this side off the timeline' : '; no single link takes it off: it has independent chains'}.</p>
@@ -1408,7 +1419,7 @@ function renderDetail(clashing) {
     if (sel && factById.has(sel)) {
         const f = factById.get(sel);
         const chains = chainsOf(f);
-        const content = CLAIM_ATTRS.has(f.attr) && list(f.asserts).length ? prov.claimChains(f.id) : [];
+        const content = CLAIM_ATTRS.has(f.attr) && list(f.asserts).length ? claimChains(f.id) : [];
         el.innerHTML = `<h2>${phrase(f)}</h2>
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.</p>
