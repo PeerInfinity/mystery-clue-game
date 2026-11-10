@@ -366,7 +366,7 @@ function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
     const cls = ['event', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${linkingQ && f.attr !== 'tells' ? ` <button type="button" class="link-row${isLinked(f.id, linkingQ) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(linkingQ)}">${isLinked(f.id, linkingQ) ? 'linked ✓' : '+ relevant'}</button>` : ''}${assertsHtml(f)}</${tag}>`;
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${linkingQ ? ` <button type="button" class="link-row${isLinked(f.id, linkingQ) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(linkingQ)}">${isLinked(f.id, linkingQ) ? 'linked ✓' : '+ relevant'}</button>` : ''}${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -727,7 +727,7 @@ function toggleLink(entry, q) {
 let linkAllFor = null;   // the event whose "Relevant to…" shows the questions below the line as well
 /** "Relevant to…" in an event's detail: the open questions above the player's line, so that the list points at none. */
 function linkHtml(f) {
-    if (!observations || f.attr === 'tells') return '';
+    if (!observations) return '';
     const { above, below } = arranged();
     const up = above.filter((q) => !givenAway(q)), down = below.filter((q) => !givenAway(q));
     if (!up.length && !down.length) return '';
@@ -771,7 +771,8 @@ function render() {
     const keys = new Set(lapsed.map((l) => moveKey(l.move)));
     lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
     heldKeys = new Set(held.map(moveKey));
-    if (observations) observed = fill(observations, state.links, onTimeline(), state.marks);
+    // A telling can be linked like any entry: that it was said stands, whatever becomes of what it carried.
+    if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks);
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;

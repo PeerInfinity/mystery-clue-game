@@ -1,6 +1,6 @@
 {
   "accounts": [
-    {"id": "acct.hale", "label": "What Hale sees and hears himself", "origin": "hale", "how": "saw", "facts": ["f.hale_role", "f.store_place", "f.store_broken", "f.wren_role", "f.wren_named", "f.marta_role", "f.marta_at_lamp", "f.marta_mute", "f.hale_knows_hand", "f.pike_role", "f.elsie_role", "f.elsie_basket", "f.elsie_said", "f.pike_quarrel", "f.elsie_betrothed", "f.basket_left", "f.paper_in_basket", "f.paper_reads", "f.elsie_admits"]},
+    {"id": "acct.hale", "label": "What Hale sees and hears himself", "origin": "hale", "how": "saw", "facts": ["f.hale_role", "f.store_place", "f.store_broken", "f.wren_role", "f.wren_named", "f.marta_role", "f.marta_at_lamp", "f.marta_mute", "f.hale_knows_hand", "f.pike_role", "f.elsie_role", "f.elsie_basket", "f.pike_quarrel", "f.elsie_betrothed", "f.basket_left", "f.paper_in_basket", "f.paper_reads", "f.elsie_admits"]},
     {"id": "acct.marta", "label": "Marta Quill's word", "origin": "marta", "how": "saw", "facts": ["f.wren_quay"]},
     {"id": "acct.marta_by_elsie", "label": "Marta Quill's word, as Elsie brought it", "origin": "marta", "how": "saw", "facts": ["f.wren_chapel"]}
   ]

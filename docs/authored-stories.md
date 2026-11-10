@@ -103,7 +103,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 
 | Miniature | Mechanic | Size |
 |---|---|---|
-| `cases/miniatures/lamp-keepers-word` | A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it. | 8 paragraphs, 25 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
+| `cases/miniatures/lamp-keepers-word` | A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it. | 8 paragraphs, 24 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
 | `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 23 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (5 essential), 10 moves |
 
 Played at `?case=cases/miniatures/<name>`. `npm test` validates them and checks each `structure.json` against its
@@ -141,6 +141,12 @@ question (which clue removes which other answer).
    empties when an entry of it leaves. A telling cannot be linked at all. So the carrier's telling is in the data three
    times: the telling, the false fact it carried, and the speech as an event the narrator heard (`says`), which is the
    one that stays and can be linked.
+   **Fixed 2026-11-10, ruled by the user:** a telling can be linked to a question like any entry. No reason against it
+   was on record; tellings had been treated as plumbing. That it was said stands whatever becomes of what it carried
+   (a telling the narrator witnessed is as certain as the narration), so it stays as evidence after its link is
+   distrusted. The duplicate speech entry is gone from the first miniature, and both miniatures' "it was X who said
+   it" observations rest on the telling. A telling the narrator did not witness is linkable too, as an uncertain
+   entry; it still cannot be doubted on its own.
 3. **The hints take a distrust that is not on the true path for a mistake**, and advise setting it back, although in
    the first miniature several are equally right. Tried on the page: with the telling from the witness to the carrier
    distrusted in place of the path's choice, the hint is "Set it back to uncertain".
@@ -177,8 +183,9 @@ question (which clue removes which other answer).
    would take two distrusts") was wrong: each lodger's statement is now an account of his own (`acct.rudd_saw`,
    origin the lodger) with a telling to the narrator. The telling is the row at three o'clock, the two facts are rows
    at half past two, the telling's link takes off both, and each fact's own statement link takes off one. No engine
-   or page change was needed. What is lost: a telling cannot be linked to a question (finding 2), and a side of the
-   contradiction no longer names whose word it is (the chain under it does).
+   or page change was needed. What was lost, and then fixed the same day: a telling could not be linked to a
+   question (finding 2), and a side of the contradiction did not name whose word it is; it now reads "Captain Rudd's
+   word: Mr. Fenn at the yard", for any fact that reached the narrator from someone else.
 9. **The prose has to carry more than the frame.** A question needs a quote where it is raised and each proposed
    answer a quote where it becomes available, so the narrator states the contradiction and names the candidates. An
    answer is judged only where the story gives it away, so each miniature ends on a confession, although an authored

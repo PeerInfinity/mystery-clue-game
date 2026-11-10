@@ -17,7 +17,6 @@
     {"id": "f.elsie_basket", "of": "elsie", "attr": "carrying", "value": "basket", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "with a basket on her arm"},
     {"id": "f.marta_tells_elsie", "of": "marta", "attr": "tells", "value": "acct.marta_by_elsie", "to": "elsie", "how": "statement", "time": {"after": "t.tue_ten", "before": "t.wed_noon"}, "para": 4, "quote": "she sent me down with her word"},
     {"id": "f.elsie_tells", "of": "elsie", "attr": "tells", "value": "acct.marta_by_elsie", "to": "hale", "how": "told", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "came to my door"},
-    {"id": "f.elsie_said", "of": "elsie", "attr": "says", "value": "her aunt saw Wren at the chapel door at ten", "to": "hale", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "At ten o'clock she saw Wren at the chapel door"},
     {"id": "f.wren_chapel", "of": "wren", "attr": "location", "value": "chapel", "detail": "at the door", "time": {"at": "t.tue_ten"}, "para": 4, "quote": "At ten o'clock she saw Wren at the chapel door, up on the hill", "truth": false},
     {"id": "f.pike_quarrel", "of": "pike", "attr": "action", "value": "came to blows with Wren over the mooring dues", "detail": "in the spring", "time": {"at": "t.past"}, "para": 6, "quote": "Pike and Wren came to blows in the spring over the mooring dues"},
     {"id": "f.elsie_betrothed", "of": "elsie", "attr": "role", "value": "to be married to Wren at Michaelmas", "time": {"from": "t.past"}, "para": 6, "quote": "Elsie and Wren are to be married at Michaelmas"},
