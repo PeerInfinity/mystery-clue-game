@@ -1,0 +1,21 @@
+{
+  "id": "speckled_band",
+  "title": "The Adventure of the Speckled Band",
+  "author": "Arthur Conan Doyle",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "watson",
+      "name": "Watson",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Watson's timeline",
+  "source": {
+    "gutenberg_id": 1661,
+    "collection": "The Adventures of Sherlock Holmes",
+    "first_published": 1892,
+    "public_domain": "US and life+70 countries (Doyle died 1930)",
+    "word_count": 9812
+  }
+}

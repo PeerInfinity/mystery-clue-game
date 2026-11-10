@@ -1,0 +1,83 @@
+{
+ "sealed": {
+  "place": "julia_room",
+  "surfaces": [
+   "julia_walls",
+   "julia_flooring"
+  ],
+  "time": "t.scream",
+  "question": "How could anything have got into Julia's bedroom?"
+ },
+ "openings": {
+  "julia_door": {
+   "kind": "door",
+   "sides": [
+    "julia_room",
+    "corridor"
+   ]
+  },
+  "julia_windows": {
+   "kind": "window",
+   "sides": [
+    "julia_room",
+    "lawn"
+   ]
+  },
+  "julia_chimney": {
+   "kind": "chimney",
+   "sides": [
+    "julia_room",
+    "roylott_estate"
+   ]
+  },
+  "ventilator": {
+   "kind": "vent",
+   "sides": [
+    "julia_room",
+    "roylott_room"
+   ]
+  },
+  "roylott_door": {
+   "kind": "door",
+   "sides": [
+    "roylott_room",
+    "corridor"
+   ]
+  },
+  "roylott_windows": {
+   "kind": "window",
+   "sides": [
+    "roylott_room",
+    "lawn"
+   ]
+  },
+  "helen_door": {
+   "kind": "door",
+   "sides": [
+    "helen_room",
+    "corridor"
+   ]
+  },
+  "helen_windows": {
+   "kind": "window",
+   "sides": [
+    "helen_room",
+    "lawn"
+   ]
+  },
+  "side_door": {
+   "kind": "door",
+   "sides": [
+    "lawn",
+    "corridor"
+   ]
+  },
+  "corridor_windows": {
+   "kind": "window",
+   "sides": [
+    "corridor",
+    "roylott_estate"
+   ]
+  }
+ }
+}

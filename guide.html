@@ -5,9 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How to play: Watson's Timeline</title>
 <script>
+// The case the guide was opened from (?case=, as the page's), for the theme and the way back.
+const fromCase = new URLSearchParams(location.search).get('case');
+const caseKey = fromCase ? fromCase.replace(/\/+$/, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') : 'silver-blaze';
 // The theme chosen in the page's Settings (kept on this device with the timeline), so the guide matches the page.
 try {
-    const t = JSON.parse(localStorage.getItem('silver-blaze-world-v1') ?? 'null')?.theme;
+    const t = JSON.parse(localStorage.getItem(`${caseKey}-world-v1`) ?? 'null')?.theme;
     if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
 } catch { /* no storage: as the system */ }
 </script>
@@ -92,7 +95,7 @@ dd { margin: 2px 0 0 1.2em; }
 </head>
 <body>
 <header class="top">
-  <h1>Silver Blaze <span class="subtitle">how to play Watson's timeline</span></h1>
+  <h1>Watson's timeline <span class="subtitle">how to play</span></h1>
   <a class="back" href="./">← Back to the timeline</a>
 </header>
 
@@ -130,8 +133,8 @@ racehorse has disappeared and its trainer has been found dead, or they are made 
 <!-- ------------------------------------------------------------------ -->
 <section id="what">
 <h2>1. What it is</h2>
-<p>The page is built on <i>Silver Blaze</i>, a Sherlock Holmes story by Arthur Conan Doyle, first published in 1892.
-Watson tells it, and you read it a paragraph at a time: what he sees over Holmes's shoulder, reads in the papers, hears
+<p>The page is built on Sherlock Holmes stories by Arthur Conan Doyle: <i>Silver Blaze</i> and <i>The Adventure of
+the Speckled Band</i>, both first published in 1892. Both cases are experimental. Watson tells each story, and you read it a paragraph at a time: what he sees over Holmes's shoulder, reads in the papers, hears
 from the people he meets.</p>
 <p>Everything the story tells goes onto <b>the timeline</b>, an ordered list of events. What Watson sees for himself
 is certain. Everything else reached him through someone: a witness, the police, a newspaper, Holmes. You decide how
@@ -410,12 +413,15 @@ hints.</p>
 <!-- ------------------------------------------------------------------ -->
 <section id="earlier">
 <h2>15. The earlier game</h2>
-<p>Watson's timeline grew out of an earlier game on the same story, in which you collect cards and build inferences to
+<p>Watson's timeline grew out of an earlier game on <i>Silver Blaze</i>, in which you collect cards and build inferences to
 beat Holmes to his deductions. It is kept as it was, with its own guide: <a href="v1/">the earlier game</a> (also in
 Settings, <i>The earlier game…</i>). The two keep separate saves.</p>
 <p style="margin-top: 28px"><a href="./">← Back to the timeline</a></p>
 </section>
 
 </main>
+<script>
+if (fromCase) for (const a of document.querySelectorAll('a[href="./"]')) a.href = `./?case=${encodeURIComponent(fromCase)}`;
+</script>
 </body>
 </html>

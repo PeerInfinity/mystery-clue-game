@@ -375,6 +375,10 @@ story needs too is a candidate for the generic table.
 
 Run total: $152.96.
 
+Set up as the second case on 2026-11-10 (the user's ruling, "option A"): the assembled case copied to
+`cases/speckled-band/`, where the review and any later work are done by hand, as for Silver Blaze. The run is
+not rerun into it: it stays the record of what the pipeline made, to compare against.
+
 - **The safeguards and the reading.** Opus stopped 7 of the first 15 reading calls (`reasoning_extraction` where tagged;
   a withheld answer comes back as prose with `stop_reason` `end_turn`, and was at first recorded as an empty scene).
   s03 and s10 did not go through on reruns; the user's ruling: since the objection is reasoning extraction, try Sonnet

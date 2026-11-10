@@ -1,0 +1,21 @@
+{
+  "ramifies": [{"if":{"attr":"condition","value":"struck down"},"then":{"attr":"condition","value":"dead"}},{"if":{"attr":"condition","value":"dead"},"then":{"attr":"condition","value":"kept from the control of her own income"}},{"if":{"attr":"condition","value":"unmarried"},"then":{"attr":"condition","value":"kept from the control of her own income"}},{"if":{"attr":"location","value":"julia_room"},"then":{"attr":"near","value":"roylott_room"}}],
+  "actions": [
+    {"id":"bring_death","label":"bringing about the death of","requires":[],"effects":[{"of":"$to","attr":"condition","value":"dead"},{"of":"$to","attr":"condition","value":"unmarried"}]},
+    {"id":"hold_peace","label":"offering no objection to the marriage of","requires":[],"effects":[{"of":"$to","attr":"condition","value":"off her guard"}]},
+    {"id":"order_repairs","label":"having a way broken through the wall of","requires":[],"effects":[{"of":"$thing","attr":"condition","value":"pierced"},{"of":"$to","attr":"location","value":"$where"}]},
+    {"id":"make_opening","label":"having an opening made for","requires":[],"effects":[{"of":"$thing","attr":"passes","value":"small"}]},
+    {"id":"hang_rope","label":"hanging up","requires":[],"effects":[{"of":"$thing","attr":"reaches","value":"$where"}]},
+    {"id":"clamp_down","label":"clamping down","requires":[],"effects":[{"of":"$thing","attr":"position","value":"always in the same relative position to the ventilator and to the rope"}]},
+    {"id":"stand_on","label":"standing on a chair to reach","requires":[],"effects":[{"of":"$agent","attr":"reaches","value":"$thing"}]},
+    {"id":"send_through","label":"sending something through","requires":[{"of":"$agent","carrying":"$item"},{"of":"$thing","attr":"passes","value":"small"},{"of":"$agent","attr":"reaches","value":"$thing"}],"effects":[{"of":"$to","attr":"condition","value":"dead"}]},
+    {"id":"whistle","label":"whistling","requires":[],"effects":[{"of":"$item","attr":"location","value":"$where"}]},
+    {"id":"set_out","label":"setting out","requires":[],"effects":[{"of":"$item","attr":"location","value":"$where"}]},
+    {"id":"bar","label":"barring","requires":[{"of":"$thing","state":"door","value":"locked","neg":true},{"of":"$agent","at":"$thing"}],"effects":[{"of":"$thing","state":"door","value":"locked"}]},
+    {"id":"unbar","label":"unbarring","requires":[{"of":"$thing","state":"door","value":"locked"},{"of":"$agent","at":"$thing"}],"effects":[{"of":"$thing","state":"door","value":"shut"}]},
+    {"id":"raise_bar","label":"raising from outside the bar of","requires":[{"of":"$thing","state":"door","value":"locked"},{"of":"$thing","attr":"closed_to","value":"small","neg":true},{"of":"$agent","at":"$thing"}],"effects":[{"of":"$thing","state":"door","value":"shut"}]},
+    {"id":"consult","label":"consulting","requires":[],"effects":[{"of":"$agent","attr":"knows","value":"$about"}]},
+    {"id":"give_cover","label":"giving a cover story to","requires":[],"effects":[{"of":"$to","attr":"condition","value":"kept from gossip"}]},
+    {"id":"threaten","label":"threatening","requires":[],"effects":[{"of":"$to","attr":"condition","value":"kept out of Roylott's affairs"}]}
+  ]
+}

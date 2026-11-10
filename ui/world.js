@@ -50,6 +50,8 @@ const narratorName = (id) => data.narrators.find((n) => n.id === id)?.name ?? (i
 document.title = `${header.title}: ${header.subtitle ?? 'the timeline'}`;
 document.querySelector('.case-title').textContent = header.title;
 document.querySelector('h1 .subtitle').textContent = header.subtitle ?? 'the timeline';
+// The guide's links keep the case, so that its "Back to the timeline" comes back to this one.
+for (const a of document.querySelectorAll('a[href="guide.html"]')) a.href = `guide.html${pageUrl().slice(2)}`;
 data.order = timeOrder(data.times);
 data.places = places(data);
 const prov = provenance(data);
