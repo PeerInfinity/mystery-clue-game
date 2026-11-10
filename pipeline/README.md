@@ -349,7 +349,7 @@ story needs too is a candidate for the generic table.
   Opus's safeguards partway (a story of drugging and a knife), two of four calls since stage 2: a rerun of the same
   prompt has gone through each time. If it keeps happening, step 12 can be split by paragraph range.
 
-## The Speckled Band (2026-11-08, in progress: `runs/speckled-band/`)
+## The Speckled Band (2026-11-08 to 11-09, steps 1–12 done: `runs/speckled-band/`)
 
 | Step | Calls | Cost | Result |
 |---|---|---|---|
@@ -366,6 +366,14 @@ story needs too is a candidate for the generic table.
 | 9d sorting the questions | 1 | $0.33 | 54 case, 43 ask, 12 side: 97 on the page, 2 of the side ones hidden in the data |
 | 9e observations, room | 3 | $8.42 | 102 observations on 34 questions; one sealed room, 10 openings. The third call is a repair from the check added after the review ($2.67): three facts, so that the table can complete |
 | 9f the user's review | by hand | $0 | essentials ruled: small enough, down a rope, no marks or poison, could be called a band, whistle, milk (the route and being struck by the cane no longer essential); the rat line as `passes: small` at ¶205, since the repair dated it only at the give-away |
+| 10 strains | 1 | $3.23 | 138 likely clashes |
+| 10b typed data | 2 | $5.88 | 74 lines (16 actions, 38 patches, 10 possibilities, 6 joins, 4 ramifies), one repair round |
+| 10c routes | 1 | $2.81 | 4 lines of data, 11 `noroute` reasons |
+| 11 leak check | 157 + 157 | $15.85 + $0.46 | Opus 21 → 11 flagged of 1,046 after two fix rounds ($0.70). Left: 7 observations and the sealed room's question (not the fix's to rewrite: reviewed by hand), 3 possibilities the fix defended |
+| 11d by hand | | $0 | "a venomous snake" available at the give-away (¶248), not ¶167; Holmes's "imprudence in allowing this brute to trace her" no longer answers *how* he traced her (it made a contradiction with "he has followed me") |
+| 12 path | 4 | $12.19 | 152 moves (69 circles, 15 crossings, 20 trust, 13 links, 10 ways, 5 route steps, 1 got). The recorded path at first held 125: the repair merge keyed every link, way and route move alike and kept one of each (`repair.mjs` `keyOf`, fixed); rebuilt from the recorded answers at no cost. Three `c` moves dated by hand: the dating put a link that needs the route before it. Played to the end, and every page check passed |
+
+Run total: $152.96.
 
 - **The safeguards and the reading.** Opus stopped 7 of the first 15 reading calls (`reasoning_extraction` where tagged;
   a withheld answer comes back as prose with `stop_reason` `end_turn`, and was at first recorded as an empty scene).

@@ -1,0 +1,50 @@
+NONE  ¶24 q.who_holds_income (grimesby_roylott): 0 link(s); 0 links, 0 comparison(s) in all
+NONE  ¶49 q.where_julia_died (roylott_house): 0 link(s); 0 links, 0 comparison(s) in all
+route ¶55 q.who_unlocked (julia): 0 link(s), 1 change(s); 0 links, 0 comparison(s) in all
+NONE  ¶66 q.one_who_cares (the man she is to marry): 0 link(s); 0 links, 0 comparison(s) in all
+NONE  ¶80 q.fled (she is only making a discreet visit): 0 link(s); 0 links, 0 comparison(s) in all
+NONE  ¶99 q.roylott_knows (he has found out): 0 link(s); 0 links, 0 comparison(s) in all
+NONE  ¶114 q.danger_cause (someone would lose her income when she marries): 0 link(s); 2 links, 0 comparison(s) in all
+NONE  ¶114 q.why_julia_died (to keep her share of her mother's money from being paid out on her marriage): 0 link(s); 2 links, 0 comparison(s) in all
+NONE  ¶114 q.julia_share (grimesby_roylott): 0 link(s); 2 links, 0 comparison(s) in all
+NONE  ¶129 q.who_feared (grimesby_roylott): 0 link(s); 7 links, 0 comparison(s) in all
+NONE  ¶129 q.roylott_in_trouble (he controls her income and is what she fears): 0 link(s); 7 links, 0 comparison(s) in all
+NONE  ¶135 q.why_repairs (to move Helen into the room where her sister died): 0 link(s); 7 links, 0 comparison(s) in all
+route ¶135 q.who_ordered_repairs (grimesby_roylott): 1 link(s); 7 links, 0 comparison(s) in all
+NONE  ¶175 q.fears_real (her fears are well founded): 0 link(s); 8 links, 0 comparison(s) in all
+NONE  ¶207 q.smoke_path (by some opening between the two rooms): 0 link(s); 8 links, 0 comparison(s) in all
+NONE  ¶207 q.ventilator_into (roylott_room): 0 link(s); 8 links, 0 comparison(s) in all
+NONE  ¶215 q.why_this_room (whatever harmed Julia can work only in that room): 0 link(s); 8 links, 0 comparison(s) in all
+route ¶217 q.who_julia (grimesby_roylott): 1 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶237 q.tonight (the whistle comes, and something passes through the ventilator to the bed): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶239 q.who_cried (grimesby_roylott): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶241 q.who_lantern (grimesby_roylott): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶244 q.how_roylott_died (killed by one of his own dangerous animals): 0 link(s); 12 links, 0 comparison(s) in all
+route ¶244 q.who_put_fittings (grimesby_roylott): 2 link(s); 12 links, 0 comparison(s) in all
+route ¶244 q.who_clamped (grimesby_roylott): 2 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶244 q.what_danger (whatever reached Julia in that room): 0 link(s); 12 links, 0 comparison(s) in all
+route ¶244 q.roylott_aim (she was to die in that bed, as her sister did): 0 link(s), a plan, 1 stop(s); 12 links, 0 comparison(s) in all
+route ¶244 q.what_struck (the_serpent): 0 link(s), 2 stop(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.how_julia_died (the bite of the swamp adder): 0 link(s); 12 links, 0 comparison(s) in all
+route ¶247 q.why_no_objection (he meant to see that the wedding never took place): 4 link(s), a plan; 12 links, 0 comparison(s) in all
+NONE  ¶247 q.who_whistled (grimesby_roylott): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.whistle_from (roylott_room): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.how_reached (through a small opening the inquiry did not list): 0 link(s); 12 links, 0 comparison(s) in all
+route ¶247 q.why_no_opposition (he means to see that the wedding never takes place): 4 link(s), a plan, 2 stop(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.why_whistle_again (she now sleeps in the room where Julia heard it): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.heard_last_night (she heard it): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.what_gipsies_did (nothing: they had no part in it): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.lock_safe (no: whatever reached Julia got past a locked door): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.why_bell_rope (to give a way from the opening down to the bed): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.why_ventilator (to let something pass from the next room into this one): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.what_came_through (a venomous snake): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.milk_for (the_serpent): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.who_saucer (grimesby_roylott): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶247 q.snake_source (the_correspondent): 0 link(s); 12 links, 0 comparison(s) in all
+NONE  ¶248 q.clang (iron_safe): 0 link(s); 12 links, 4 comparison(s) in all
+NONE  ¶248 q.helen_heard (she heard both): 0 link(s); 12 links, 4 comparison(s) in all
+NONE  ¶248 q.roylott_at_scream (roylott_room): 0 link(s); 12 links, 4 comparison(s) in all
+NONE  ¶248 q.what_lashed (a venomous snake): 0 link(s); 12 links, 4 comparison(s) in all
+NONE  ¶248 q.soothing_sound (a snake hissing): 0 link(s); 12 links, 4 comparison(s) in all
+NONE  ¶250 q.why_snake_bit (Holmes's blows drove it back through the ventilator, roused): 0 link(s); 12 links, 4 comparison(s) in all
+9 of 49 gated questions have a reasoning route

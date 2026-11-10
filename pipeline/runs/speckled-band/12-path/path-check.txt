@@ -1,0 +1,173 @@
+ok ¶7 circle q.fled = she has fled for good
+ok ¶14 cross q.fled = she has fled for good
+ok ¶14 circle q.fled = she is only making a discreet visit
+ok ¶17 circle q.why_little_aid = he is ill or infirm
+ok ¶20 cross q.why_little_aid = he is ill or infirm
+ok ¶20 circle q.why_little_aid = he takes her fears for fancies
+ok ¶20 circle q.one_who_cares = the man she is to marry
+ok ¶20 circle q.danger_cause = the marriage itself is the danger
+ok ¶22 circle q.who_holds_income = grimesby_roylott
+  ¶25 answered: Who has the control of the lady's income until she marries?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right)
+ok ¶25 circle q.mother_death = Dr. Roylott had a hand in it
+ok ¶25 circle q.mother_death = a genuine railway accident
+ok ¶30 cross q.mother_death = Dr. Roylott had a hand in it
+ok ¶30 cross q.danger_cause = the marriage itself is the danger
+ok ¶30 circle q.danger_cause = someone would lose her income when she marries
+ok ¶30 circle q.why_julia_died = to keep her share of her mother's money from being paid out on her marriage
+ok ¶30 circle q.julia_share = grimesby_roylott
+ok ¶30 circle q.how_julia_died = an attack by one of the animals loose on the grounds
+ok ¶35 circle q.where_julia_died = roylott_house
+  ¶50 answered: Where did Julia die?: The old ancestral house at Stoke Moran (you circled The old ancestral house at Stoke Moran: right)
+ok ¶50 circle q.who_unlocked = julia
+ok ¶50 circle q.roylott_at_scream = roylott_room
+ok ¶50 circle q.what_band = something living, marked with spots or bands
+ok ¶50 a f.julia_door_locked ~ f.julia_door_open
+  ¶56 answered: Who unlocked Julia's door?: Julia (you circled Julia: right)
+ok ¶56 cross q.how_julia_died = an attack by one of the animals loose on the grounds
+ok ¶56 way julia_door|person
+ok ¶56 way julia_windows|person
+ok ¶56 way julia_chimney|person
+ok ¶56 way julia_walls|person
+ok ¶56 way julia_walls|small
+ok ¶56 way julia_flooring|person
+ok ¶56 way julia_flooring|small
+ok ¶56 got f.cigar_smell_passed
+ok ¶60 circle q.how_julia_died = pure fear and nervous shock
+  ¶67 answered: Who is the one person who cares for the lady?: the man she is to marry (you circled the man she is to marry: right)
+ok ¶67 circle q.fears_real = her fears are well founded
+ok ¶67 circle q.why_repairs = to move Helen into the room where her sister died
+ok ¶67 circle q.who_ordered_repairs = grimesby_roylott
+ok ¶74 circle q.who_feared = grimesby_roylott
+ok ¶74 circle q.roylott_in_trouble = he controls her income and is what she fears
+  ¶81 answered: Has the lady in black run away from something for good?: she is only making a discreet visit (you circled she is only making a discreet visit: right)
+ok ¶90 circle q.who_julia = the gipsies, acting for Dr. Roylott
+ok ¶90 circle q.how_reached = through the window, a shutter bar being raised from outside
+ok ¶90 circle q.clang = shutter_bars
+ok ¶90 circle q.bars_outside = a bar can be raised from outside
+ok ¶90 circle q.what_band = gipsies
+ok ¶90 circle q.bars_outside = they cannot be opened from outside
+ok ¶91 circle q.what_gipsies_did = they got at her through the window, raising a shutter bar
+ok ¶98 circle q.roylott_knows = he has found out
+  ¶100 answered: Does Dr. Roylott know that Helen has gone to Holmes?: he has found out (you circled he has found out: right)
+  ¶115 answered: What lies behind the dangers the lady speaks of?: someone would lose her income when she marries, or the doctor wants to prevent her marriage (you circled someone would lose her income when she marries: right) | What reason could anyone have had for wanting Julia dead?: to keep her share of her mother's money from being paid out on her marriage, or to prevent her marriage (you circled to keep her share of her mother's money from being paid out on her marriage: right) | Who gained Julia's share of the money when she died?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right)
+ok ¶115 circle q.why_no_objection = he meant to see that the wedding never took place
+ok ¶115 circle q.why_no_opposition = he means to see that the wedding never takes place
+ok ¶115 c hyp:q.who_ordered_repairs=grimesby_roylott → hyp:q.why_no_opposition=he means to see that the wedding never takes place
+ok ¶115 c pre:q.why_no_objection → hyp:q.why_no_objection=he meant to see that the wedding never took place
+ok ¶115 c pre:q.why_no_opposition → hyp:q.why_no_opposition=he means to see that the wedding never takes place
+ok ¶115 plan hyp:q.why_no_objection=he meant to see that the wedding never took place
+ok ¶115 plan hyp:q.why_no_opposition=he means to see that the wedding never takes place
+  ¶130 answered: Who or what is the lady in black so afraid of?: Dr. Grimesby Roylott, or whatever ended her sister's life (you circled Dr. Grimesby Roylott: right) | What has Dr. Grimesby Roylott to do with the lady's trouble?: he controls her income and is what she fears, or he had a hand in her sister's death (you circled he controls her income and is what she fears: right)
+ok ¶131 circle q.lock_safe = no: whatever reached Julia got past a locked door
+ok ¶131 trust stmt:f.holmes_says_lock
+  ¶136 answered: Why were the repairs started in the west wing just now?: to move Helen into the room where her sister died (you circled to move Helen into the room where her sister died: right) | Who ordered the repairs in the west wing?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right)
+ok ¶140 cross q.who_julia = the gipsies, acting for Dr. Roylott
+ok ¶140 cross q.how_reached = through the window, a shutter bar being raised from outside
+ok ¶140 cross q.clang = shutter_bars
+ok ¶140 cross q.bars_outside = a bar can be raised from outside
+ok ¶140 cross q.what_band = gipsies
+ok ¶140 cross q.what_gipsies_did = they got at her through the window, raising a shutter bar
+ok ¶140 trust stmt:f.holmes_theory
+ok ¶140 trust stmt:f.holmes_bar_clang
+ok ¶140 trust stmt:f.helen_band_people
+ok ¶140 way julia_windows|small
+ok ¶147 trust stmt:f.holmes_supposes_asked
+ok ¶149 circle q.what_band = bell_rope
+ok ¶149 trust stmt:f.helen_says_housekeeper
+ok ¶151 cross q.what_band = bell_rope
+ok ¶153 circle q.smoke_path = by some opening between the two rooms
+ok ¶153 circle q.ventilator_into = roylott_room
+ok ¶153 circle q.why_this_room = whatever harmed Julia can work only in that room
+ok ¶153 circle q.why_whistle_again = she now sleeps in the room where Julia heard it
+ok ¶153 trust stmt:f.helen_certain_alone
+ok ¶153 trust stmt:f.watson_says_alone
+ok ¶153 link f.ventilator_little → q.what_came_through
+ok ¶153 link f.rope_on_hook → q.what_came_through
+ok ¶153 link f.hook_above_vent → q.what_came_through
+ok ¶153 link f.rope_reaches_pillow → q.what_came_through
+ok ¶153 link f.no_marks → q.what_came_through
+ok ¶153 link f.doctors_no_poison → q.what_came_through
+ok ¶153 link f.julia_shrieks_band → q.what_came_through
+ok ¶153 link f.julia_holds_match → q.what_came_through
+ok ¶156 circle q.who_julia = grimesby_roylott
+ok ¶156 circle q.who_put_fittings = grimesby_roylott
+ok ¶156 trust stmt:f.holmes_builder_fool
+ok ¶156 c hyp:q.who_julia=grimesby_roylott → hyp:q.why_no_objection=he meant to see that the wedding never took place
+ok ¶165 link f.saucer_on_safe → q.what_came_through
+ok ¶165 link f.saucer_small → q.what_came_through
+ok ¶166 circle q.who_saucer = grimesby_roylott
+ok ¶166 link f.no_cat_kept → q.what_came_through
+ok ¶169 circle q.what_band = dog_lash
+ok ¶169 cross q.what_band = dog_lash
+  ¶176 answered: Are the lady's fears well founded?: her fears are well founded (you circled her fears are well founded: right)
+ok ¶194 cross q.how_julia_died = pure fear and nervous shock
+ok ¶194 trust stmt:f.helen_fear_belief
+ok ¶194 trust stmt:f.helen_asks_fright
+ok ¶196 circle q.what_danger = whatever reached Julia in that room
+ok ¶205 way ventilator|person
+ok ¶205 way ventilator|small
+  ¶208 answered: How did the smell of Dr. Roylott's cigars get into Julia's room?: by some opening between the two rooms (you circled by some opening between the two rooms: right) | Which room does the ventilator open into?: Dr. Roylott's bedroom (you circled Dr. Roylott's bedroom: right)
+  ¶216 answered: Why would Helen have to be moved into the middle room in particular?: whatever harmed Julia can work only in that room (you circled whatever harmed Julia can work only in that room: right)
+ok ¶216 circle q.how_reached = through a small opening the inquiry did not list
+ok ¶216 circle q.why_bell_rope = to give a way from the opening down to the bed
+ok ¶216 circle q.why_ventilator = to let something pass from the next room into this one
+ok ¶216 circle q.who_clamped = grimesby_roylott
+ok ¶216 trust stmt:f.watson_vent_not_unusual
+ok ¶216 route roylott_room
+ok ¶216 route ventilator
+ok ¶216 route hook
+ok ¶216 route bell_rope
+ok ¶216 route pillow
+ok ¶216 circle q.why_bed_clamped = to keep the bed always in the same position to the ventilator and the rope
+ok ¶216 c hyp:q.who_put_fittings=grimesby_roylott → hyp:q.why_no_objection=he meant to see that the wedding never took place
+ok ¶216 c hyp:q.who_put_fittings=grimesby_roylott → hyp:q.why_no_opposition=he means to see that the wedding never takes place
+ok ¶216 c hyp:q.who_clamped=grimesby_roylott → hyp:q.why_no_objection=he meant to see that the wedding never took place
+ok ¶216 c hyp:q.who_clamped=grimesby_roylott → hyp:q.why_no_opposition=he means to see that the wedding never takes place
+  ¶218 answered: Did anyone bring about Julia's death, and if so who?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right)
+ok ¶218 circle q.tonight = the whistle comes, and something passes through the ventilator to the bed
+ok ¶220 trust stmt:f.holmes_says_harrow
+ok ¶222 a f.shutters_barred ~ f.shutters_open_night
+ok ¶222 account f.holmes_says_shutters|f.helen_opens_shutters
+ok ¶236 circle q.who_lantern = grimesby_roylott
+ok ¶236 circle q.roylott_aim = she was to die in that bed, as her sister did
+ok ¶236 plan hyp:q.roylott_aim=she was to die in that bed, as her sister did
+ok ¶236 link f.holmes_lashes → q.what_came_through
+  ¶238 answered: What will happen in the middle room to-night?: the whistle comes, and something passes through the ventilator to the bed, or harm comes to Dr. Roylott himself (you circled the whistle comes, and something passes through the ventilator to the bed: right)
+ok ¶238 circle q.who_whistled = grimesby_roylott
+ok ¶238 circle q.whistle_from = roylott_room
+ok ¶238 circle q.heard_last_night = she heard it
+ok ¶238 circle q.what_gipsies_did = nothing: they had no part in it
+ok ¶238 circle q.who_cried = grimesby_roylott
+ok ¶238 trust stmt:f.julia_perhaps_lawn
+ok ¶238 trust stmt:f.helen_says_gipsies
+ok ¶238 trust stmt:f.julia_very_likely
+ok ¶238 link f.whistle_vigil → q.what_came_through
+  ¶240 answered: Who gave the horrible cry?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right)
+  ¶242 answered: Who lit the dark-lantern in the next room?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right)
+ok ¶242 circle q.what_band = a strip of cloth, such as a ribbon, strap or headcloth
+ok ¶244 cross q.what_band = a strip of cloth, such as a ribbon, strap or headcloth
+ok ¶244 trust stmt:f.helen_delirium
+ok ¶244 circle q.how_roylott_died = killed by one of his own dangerous animals
+ok ¶244 circle q.what_came_through = a small creature from among Dr. Roylott's Indian animals
+ok ¶244 circle q.what_lashed = a venomous snake
+ok ¶244 circle q.soothing_sound = a snake hissing
+ok ¶244 circle q.what_struck = the_serpent
+ok ¶244 stop hyp:q.roylott_aim=she was to die in that bed, as her sister did|hyp:q.what_struck=the_serpent
+ok ¶244 stop hyp:q.why_no_opposition=he means to see that the wedding never takes place|hyp:q.what_struck=the_serpent
+  ¶245 answered: How did Dr. Grimesby Roylott come to die?: killed by one of his own dangerous animals, or he was himself the wrongdoer and died as a result of it (you circled killed by one of his own dangerous animals: right) | Who had the bell-rope and the ventilator put in?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right) | Who had the bed clamped to the floor?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right) | What is the danger that Holmes expects to-night?: whatever reached Julia in that room (you circled whatever reached Julia in that room: right) | What was meant to happen to the sleeper in the middle room to-night?: she was to die in that bed, as her sister did (you circled she was to die in that bed, as her sister did: right) | What has struck Dr. Roylott down?: The swamp adder, or the thing Holmes struck at, come back through the ventilator, or The peculiar yellow band with brownish speckles (you circled The swamp adder: right)
+ok ¶245 circle q.how_julia_died = the bite of the swamp adder
+ok ¶245 circle q.why_snake_bit = Holmes's blows drove it back through the ventilator, roused
+ok ¶245 circle q.snake_source = the_correspondent
+ok ¶246 circle q.clang = iron_safe
+ok ¶246 circle q.helen_heard = she heard both
+ok ¶246 circle q.milk_for = a small creature kept secretly in the room
+ok ¶246 trust stmt:f.helen_may_be_deceived
+ok ¶246 trust stmt:f.helen_says_papers
+ok ¶247 trust stmt:f.inquiry_concludes
+  ¶248 answered: How did Julia die?: the bite of the swamp adder, or something small and living that got into the room, or a poison the doctors' tests could not find, or poison or a drug (you circled the bite of the swamp adder: right) | Why did Dr. Roylott offer no objection to Julia's marriage?: he meant to see that the wedding never took place (you circled he meant to see that the wedding never took place: right) | Who made the low whistle in the night?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right) | Where did the whistle come from?: Dr. Roylott's bedroom (you circled Dr. Roylott's bedroom: right) | How could anything have reached Julia in a room shut on every side?: through a small opening the inquiry did not list (you circled through a small opening the inquiry did not list: right) | Why has Dr. Roylott offered no opposition to Helen's marriage?: he means to see that the wedding never takes place (you circled he means to see that the wedding never takes place: right) | Why has the low whistle been heard again now?: she now sleeps in the room where Julia heard it, or the snake is being sent to her now, as it was to her sister, or her own wedding is drawing near (you circled she now sleeps in the room where Julia heard it: right) | Did Helen really hear the whistle last night?: she heard it (you circled she heard it: right) | What did the gipsies do on the night Julia died?: nothing: they had no part in it (you circled nothing: they had no part in it: right) | Will locking her door keep Helen safe to-night?: no: whatever reached Julia got past a locked door (you circled no: whatever reached Julia got past a locked door: right) | What was the bell-rope put there for?: to give a way from the opening down to the bed (you circled to give a way from the opening down to the bed: right) | What was the ventilator really put there for?: to let something pass from the next room into this one (you circled to let something pass from the next room into this one: right) | What, if anything, came through the ventilator into that room?: a venomous snake, or a small creature from among Dr. Roylott's Indian animals, or something else (you circled a small creature from among Dr. Roylott's Indian animals: right) | Who or what is the saucer of milk for?: The swamp adder, or a small creature kept secretly in the room (you circled a small creature kept secretly in the room: right) | Who put the saucer of milk on the safe?: Dr. Grimesby Roylott (you circled Dr. Grimesby Roylott: right) | How did Dr. Roylott come by the swamp adder?: The correspondent who sends the Indian animals (you circled The correspondent who sends the Indian animals: right)
+ok ¶248 compare hyp:q.why_no_objection=he meant to see that the wedding never took place|f.holmes_says_puts_through
+  ¶249 answered: What made the clanging sound?: The large iron safe, or something metal in Dr. Roylott's room (you circled The large iron safe: right) | Did Helen really hear the whistle and the metallic sound that night?: she heard both (you circled she heard both: right) | Was Dr. Roylott in his room when Julia screamed?: Dr. Roylott's bedroom (you circled Dr. Roylott's bedroom: right) | What was Holmes lashing at on the bell-pull?: a venomous snake (you circled a venomous snake: right) | What made the gentle sound like steam escaping from a kettle?: a snake hissing (you circled a snake hissing: right)
+ok ¶249 a f.safe_ajar ~ f.safe_door_shut_clang
+ok ¶249 account f.holmes_says_puts_through|f.roylott_stands_on_chair
+  ¶251 answered: What made the snake bite Dr. Roylott?: Holmes's blows drove it back through the ventilator, roused (you circled Holmes's blows drove it back through the ventilator, roused: right)
+all moves played in 234 s

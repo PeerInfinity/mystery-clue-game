@@ -1,0 +1,9 @@
+The four links failed because each needs a reason already circled for the fitting it serves. I moved them to ¶244, after the circle on the bell-rope's purpose, and added the missing circle on why the bed was clamped.
+
+```jsonl
+{"file":"path","do":"circle","q":"q.why_bed_clamped","pick":"to keep the bed always in the same position to the ventilator and the rope","at":216,"why":"Holmes says that the lady could not move her bed, so it must always stand in the same place in relation to the ventilator and the rope.","for_q":["q.why_bed_clamped","q.who_clamped"]}
+{"file":"path","do":"c","of":"hyp:q.who_put_fittings=grimesby_roylott","for":"hyp:q.why_no_objection=he meant to see that the wedding never took place","at":244,"why":"A serpent has been found on him, and the sham rope he had put up gave such a creature a road from the opening to Julia's pillow.","for_q":["q.who_put_fittings","q.why_no_objection"]}
+{"file":"path","do":"c","of":"hyp:q.who_put_fittings=grimesby_roylott","for":"hyp:q.why_no_opposition=he means to see that the wedding never takes place","at":244,"why":"The same rope now ends at the pillow where Helen has been made to sleep.","for_q":["q.who_put_fittings","q.why_no_opposition"]}
+{"file":"path","do":"c","of":"hyp:q.who_clamped=grimesby_roylott","for":"hyp:q.why_no_objection=he meant to see that the wedding never took place","at":244,"why":"The clamped bed kept Julia at the lower end of the rope, within reach of whatever came down it.","for_q":["q.who_clamped","q.why_no_objection"]}
+{"file":"path","do":"c","of":"hyp:q.who_clamped=grimesby_roylott","for":"hyp:q.why_no_opposition=he means to see that the wedding never takes place","at":244,"why":"The bed cannot be moved, so Helen, sleeping there now, lies at the end of the same rope.","for_q":["q.who_clamped","q.why_no_opposition"]}
+```

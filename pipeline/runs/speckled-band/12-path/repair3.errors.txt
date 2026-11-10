@@ -1,0 +1,12 @@
+o.wct_small: no link move of f.ventilator_little to q.what_came_through
+o.wct_rope: no link move of f.rope_on_hook to q.what_came_through
+o.wct_rope: no link move of f.hook_above_vent to q.what_came_through
+o.wct_rope: no link move of f.rope_reaches_pillow to q.what_came_through
+o.wct_no_trace: no link move of f.no_marks to q.what_came_through
+o.wct_no_trace: no link move of f.doctors_no_poison to q.what_came_through
+o.wct_band: no link move of f.julia_shrieks_band to q.what_came_through
+o.wct_band: no link move of f.julia_holds_match to q.what_came_through
+o.wct_milk: no link move of f.saucer_on_safe to q.what_came_through
+o.wct_milk: no link move of f.saucer_small to q.what_came_through
+o.wct_milk: no link move of f.no_cat_kept to q.what_came_through
+o.wct_whistle: no link move of f.whistle_vigil to q.what_came_through

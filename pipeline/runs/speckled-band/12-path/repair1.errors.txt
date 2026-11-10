@@ -1,0 +1,4 @@
+FAIL ¶156 c hyp:q.who_put_fittings=grimesby_roylott: not taken: It does not serve that. Nothing it brings about meets the goal, or a need of a step already linked to it.
+FAIL ¶156 c hyp:q.who_put_fittings=grimesby_roylott: not taken: It does not serve that. Nothing it brings about meets the goal, or a need of a step already linked to it.
+FAIL ¶216 c hyp:q.who_clamped=grimesby_roylott: not taken: It does not serve that. Nothing it brings about meets the goal, or a need of a step already linked to it.
+FAIL ¶216 c hyp:q.who_clamped=grimesby_roylott: not taken: It does not serve that. Nothing it brings about meets the goal, or a need of a step already linked to it.

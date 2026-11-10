@@ -1,1 +1,2 @@
-[{"file":"possibility","q":"q.what_came_through","value":"a venomous snake","available":248}]
+[{"file":"possibility","q":"q.what_came_through","value":"a venomous snake","available":248},
+{"file":"patch","id":"f.holmes_trusts_helen","set":{"asserts":[{"of":"the_lady_in_black","attr":"condition","value":"imprudent in allowing Roylott to trace her","time":{"at":"t.roylott_traces"}},{"of":"grimesby_roylott","attr":"action","value":"traces his stepdaughter to Baker Street","to":"the_lady_in_black","time":{"at":"t.roylott_traces"}},{"q":"q.roylott_knows","pick":"he has found out"}]}}]
