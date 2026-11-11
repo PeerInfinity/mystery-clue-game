@@ -1,0 +1,21 @@
+{
+  "facts": [
+    {"id": "f.tull_role", "of": "tull", "attr": "role", "value": "sergeant, of Wickham", "time": {"from": "t.before"}, "para": 1, "quote": "I am Sergeant Tull, of Wickham"},
+    {"id": "f.drawer_forced", "of": "drawer", "attr": "condition", "value": "forced, and the week's takings gone", "time": {"at": "t.wed"}, "para": 1, "quote": "I found the cash drawer of Dr. Mott's surgery forced, and the week's takings gone"},
+    {"id": "f.lunn_lives", "of": "lunn", "attr": "lives_at", "value": "side_door", "detail": "opposite it", "time": {"from": "t.before"}, "para": 2, "quote": "Mrs. Lunn lives opposite the side door of the surgery"},
+    {"id": "f.lunn_tells", "of": "lunn", "attr": "tells", "value": "acct.lunn", "to": "tull", "how": "told", "time": {"at": "t.wed"}, "para": 2, "quote": "she told me"},
+    {"id": "f.figure_door", "of": "figure", "attr": "location", "value": "side_door", "detail": "coming out, and going off down Mill Lane", "time": {"at": "t.nine"}, "para": 2, "quote": "I saw a figure come out at the side door and go off down Mill Lane"},
+    {"id": "f.figure_cloak", "of": "figure", "attr": "wearing", "value": "cloak", "detail": "in the dark; Mrs. Lunn knew the figure by it", "time": {"at": "t.nine"}, "para": 2, "quote": "I knew him by his long grey cloak"},
+    {"id": "f.figure_is_mott", "of": "figure", "attr": "identity", "value": "mott", "time": {"at": "t.nine"}, "para": 2, "quote": "It was Dr. Mott", "truth": false, "q": "q.figure", "pick": "mott"},
+    {"id": "f.mott_bedside", "of": "mott", "attr": "location", "value": "hale_house", "detail": "at the Squire's bedside, three miles off", "time": {"from": "t.eight", "to": "t.ten"}, "para": 3, "quote": "at nine o'clock on Tuesday Dr. Mott was at Squire Hale's bedside, three miles off"},
+    {"id": "f.tull_bedside", "of": "tull", "attr": "location", "value": "hale_house", "detail": "sitting with Dr. Mott", "time": {"from": "t.eight", "to": "t.ten"}, "para": 3, "quote": "I sat there with him from eight until ten"},
+    {"id": "f.mott_greatcoat", "of": "mott", "attr": "wearing", "value": "greatcoat", "detail": "driving out in it, for the rain", "time": {"from": "t.eight", "to": "t.ten"}, "para": 4, "quote": "He had driven out in his greatcoat, for the rain"},
+    {"id": "f.cloak_peg", "of": "cloak", "attr": "location", "value": "passage", "detail": "on its peg, still damp", "time": {"at": "t.wed"}, "para": 4, "quote": "I found the grey cloak on its peg in the surgery passage, and it was still damp"},
+    {"id": "f.keys", "of": "side_door", "attr": "condition", "value": "its keys: the doctor's, Mr. Pell's and Kitty's", "time": {"from": "t.before"}, "para": 5, "quote": "Two people beside the doctor have a key to the side door"},
+    {"id": "f.pell_role", "of": "pell", "attr": "role", "value": "the dispenser", "time": {"from": "t.before"}, "para": 5, "quote": "Mr. Pell, the dispenser"},
+    {"id": "f.kitty_small", "of": "kitty", "attr": "condition", "value": "hardly five feet tall", "detail": "the housemaid", "time": {"from": "t.before"}, "para": 5, "quote": "who is hardly five feet tall"},
+    {"id": "f.lunn_tells_again", "of": "lunn", "attr": "tells", "value": "acct.lunn_again", "to": "tull", "how": "told", "time": {"at": "t.later"}, "para": 5, "quote": "I went back to Mrs. Lunn"},
+    {"id": "f.figure_tall", "of": "figure", "attr": "condition", "value": "tall: the cloak hung well clear of the ground, as on the doctor", "time": {"at": "t.nine"}, "para": 5, "quote": "The cloak hung on that figure as it hangs on the doctor"},
+    {"id": "f.pell_owns", "of": "pell", "attr": "says", "value": "he put on the cloak because the whole lane knew it for the doctor's", "to": "tull", "time": {"at": "t.later"}, "para": 6, "quote": "He had put on the cloak, he said, because the whole lane knew it for the doctor's", "asserts": [{"q": "q.figure", "pick": "pell"}]}
+  ]
+}

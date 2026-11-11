@@ -1,0 +1,17 @@
+{
+  "description": "The true path of the miniature: a witness saw a figure and took it for a man she knew by his cloak; what she saw is kept, her identification is set aside, and the cloak leads to who wore it.",
+  "moves": [
+    {"at": 3, "do": "link", "entry": "f.mott_bedside", "q": "q.figure", "see": "three miles off", "for_q": ["q.figure"], "why": "The doctor was at the Squire's bedside at nine: I sat beside him."},
+    {"at": 3, "do": "link", "entry": "f.figure_cloak", "q": "q.figure", "see": "she knew the figure by the cloak", "for_q": ["q.figure"], "why": "Mrs. Lunn knew him by the cloak, in the dark."},
+    {"at": 3, "do": "trust", "on": "f.figure_is_mott", "link": "stmt:f.figure_is_mott", "level": "distrusted", "for_q": ["q.figure"], "why": "She saw a figure in a cloak; that it was the doctor is what she made of it, and it cannot be so."},
+    {"at": 3, "do": "link", "entry": "f.lunn_tells", "q": "q.figure", "see": "it was wrong", "for_q": ["q.figure"], "why": "Her mistake is itself worth having: somebody passed for the doctor."},
+    {"at": 3, "do": "cross", "q": "q.figure", "pick": "mott", "for_q": ["q.figure"], "why": "Not the doctor."},
+    {"at": 4, "do": "link", "entry": "f.mott_greatcoat", "q": "q.figure", "for_q": ["q.figure"], "why": "He wore his greatcoat that night."},
+    {"at": 4, "do": "link", "entry": "f.cloak_peg", "q": "q.figure", "see": "someone else wore it in the rain", "for_q": ["q.figure"], "why": "And the cloak he left at home was damp in the morning."},
+    {"at": 5, "do": "link", "entry": "f.keys", "q": "q.figure", "see": "could let themselves out at the side door", "for_q": ["q.figure"], "why": "Whoever came out at the side door had a key to it."},
+    {"at": 5, "do": "link", "entry": "f.figure_tall", "q": "q.figure", "for_q": ["q.figure"], "why": "The cloak hung clear of the ground."},
+    {"at": 5, "do": "link", "entry": "f.kitty_small", "q": "q.figure", "see": "on Kitty it would have trailed", "for_q": ["q.figure"], "why": "Kitty is hardly five feet tall."},
+    {"at": 5, "do": "cross", "q": "q.figure", "pick": "kitty", "for_q": ["q.figure"], "why": "Too small for the cloak."},
+    {"at": 5, "do": "circle", "q": "q.figure", "pick": "pell", "for_q": ["q.figure"], "why": "That leaves the dispenser."}
+  ]
+}

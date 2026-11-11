@@ -9,14 +9,14 @@
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
-import { CASE, WORLD, STORE, pageUrl } from './case-env.mjs';
+import { CASE, WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
 import { controlOf, made } from '../ui/world-moves.js';
 const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
 const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/');
 const STOP = +(process.env.STOP ?? 1e9);
 
-const list = await (await fetch('http://127.0.0.1:9333/json')).json();
+const list = await (await fetch(`${CDP}/json`)).json();
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
 await new Promise((r) => ws.addEventListener('open', r));
 let n = 0; const pending = new Map(); const errors = [];

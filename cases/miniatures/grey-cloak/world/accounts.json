@@ -1,0 +1,7 @@
+{
+  "accounts": [
+    {"id": "acct.tull", "label": "What Sergeant Tull sees and hears himself", "origin": "tull", "how": "saw", "facts": ["f.tull_role", "f.drawer_forced", "f.lunn_lives", "f.lunn_tells", "f.mott_bedside", "f.tull_bedside", "f.mott_greatcoat", "f.cloak_peg", "f.keys", "f.pell_role", "f.kitty_small", "f.lunn_tells_again", "f.pell_owns"]},
+    {"id": "acct.lunn", "label": "What Mrs. Lunn saw from her window", "origin": "lunn", "how": "saw", "facts": ["f.figure_door", "f.figure_cloak", "f.figure_is_mott"]},
+    {"id": "acct.lunn_again", "label": "What Mrs. Lunn added when asked again", "origin": "lunn", "how": "saw", "facts": ["f.figure_tall"]}
+  ]
+}

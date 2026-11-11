@@ -4,7 +4,7 @@
 // the player says (engine/world.js). The player is the reader: the marks and moves are the reader's own. Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
@@ -331,6 +331,27 @@ function acceptedAssertions() {
     })];
 }
 
+/**
+ * What the circled answers need of where their agent was: a circle on a question whose entry is a typed action is
+ * that one's act, and an act that needs its agent at a door or at a place puts them there at some moment of its
+ * window. Set against where the timeline has them (`alibis`).
+ */
+function presenceNeeds(accepted) {
+    const out = [];
+    for (const mark of accepted) {
+        if (mark.mark !== 'circled') continue;
+        const f = hypAction(mark.id);
+        if (!f || !(f.time?.from && f.time?.to)) continue;
+        const { entries = [] } = pointImplications(f, nameOf, { ...placeCtx, order: data.order });
+        for (const r of entries) {
+            if (r.role !== 'requires' || !(r.at || r.place)) continue;
+            const places = r.at ? (placeCtx.joins?.[r.at] ?? []) : [r.place];
+            if (places.length) out.push({ mark, of: f.of, places, time: f.time, same: placeCtx.same, label: `it needs ${nameOf(f.of)} at ${nameOf(r.at ?? r.place)}` });
+        }
+    }
+    return out;
+}
+
 // --- Rendering.
 const levelName = (l) => (l == null ? 'unmodelled' : LEVELS[l]);
 const dot = (l) => `<span class="lvl lvl-${levelName(l)}" title="${levelName(l)}"></span>`;
@@ -548,7 +569,7 @@ const markText = (x) => {
     return `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}${via}`;
 };
 function clashSide(x) {
-    if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${markText(x)}</a>`;
+    if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${markText(x)}</a>${x.needs ? ` <span class="small muted">(${esc(x.needs)})</span>` : ''}`;
     const f = factOf(x.fact);
     if (x.kind === 'pick') {
         const q = qById.get(x.q);
@@ -562,7 +583,8 @@ const statePhrase = (x, f) => (x.claim && x.claim === x.fact ? `${ent(f.of)} ${f
 /** Whose word a fact is, ahead of it on a side of a contradiction: the origins of its chains, unless it is a narrator's own. */
 function wordOf(f) {
     if (f.reasoned || f.hyp || CLAIM_ATTRS.has(f.attr)) return '';
-    const who = [...new Set(chainsOf(f).map((c) => c.origin))].filter((o) => o && o !== '?' && !narratorIds.has(o));
+    // With one narrator, their own needs no name; with several, it does (the porter's statement against the Inspector's).
+    const who = [...new Set(chainsOf(f).map((c) => c.origin))].filter((o) => o && o !== '?' && (!narratorIds.has(o) || data.narrators.length > 1));
     return who.length ? `${who.map((o) => `${ent(o)}’s`).join(' and ')} word: ` : '';
 }
 function clashTitle(c) {
@@ -795,7 +817,8 @@ function render() {
     // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
     if (shownPara !== state.para && visibleEl(st)) { shownPara = state.para; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
 
-    const clashes = contradictions(data, acceptedAssertions());
+    const acceptedNow = acceptedAssertions();
+    const clashes = [...contradictions(data, acceptedNow), ...alibis(data, acceptedNow, presenceNeeds(acceptedNow))];
     const clashing = new Set(clashes.flatMap((c) => [c.a, c.b]).flatMap((x) => (x.mark ? [x.id, `q:${x.q}`] : [x.fact])));
     current = clashes;
     document.getElementById('undo').disabled = !state.history.length;
@@ -827,9 +850,11 @@ function render() {
 function linkStep(l, body, title, resolving) {
     const key = linkKey(l);
     const mark = resolving?.links.includes(key) ? ' resolving' : '';
-    const level = state.trust.links[key] ?? DEFAULT_LEVEL;
-    const opts = LEVELS.slice(0, -1).map((n, i) => `<option value="${i}"${i === level ? ' selected' : ''}>${n}</option>`).join('');
-    return `<span class="link-step${mark}"${mark ? ' title="Distrusting this link alone takes this side off the timeline"' : ''}>${body} <select class="link-trust" data-key="${esc(key)}" title="${title}">${opts}</select>${dropChip(resolving?.drop?.links.get(key))}</span>`;
+    // A link with a level of its own to start from (a doubtable narrator's own statement: as the narration) offers up to it.
+    const base = l.base ?? DEFAULT_LEVEL;
+    const level = state.trust.links[key] ?? base;
+    const opts = LEVELS.slice(0, Math.max(LEVELS.length - 1, base + 1)).map((n, i) => `<option value="${i}"${i === level ? ' selected' : ''}>${n}</option>`).join('');
+    return `<span class="link-step${mark}"${mark ? ' title="Distrusting this link alone takes this side off the timeline"' : ''}>${body} <select class="link-trust" data-key="${esc(key)}" data-base="${base}" title="${title}">${opts}</select>${dropChip(resolving?.drop?.links.get(key))}</span>`;
 }
 /**
  * A chain's links, but its statement's own link, which is drawn once above the chains (stmtHtml), and the narration
@@ -1744,8 +1769,8 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('change', (e) => {
     if (e.target.matches('.link-trust')) {
-        const v = Number(e.target.value), k = e.target.dataset.key;
-        changeTrust((tr) => { if (v === DEFAULT_LEVEL) delete tr.links[k]; else tr.links[k] = v; });
+        const v = Number(e.target.value), k = e.target.dataset.key, base = Number(e.target.dataset.base ?? DEFAULT_LEVEL);
+        changeTrust((tr) => { if (v === base) delete tr.links[k]; else tr.links[k] = v; });
     } else if (e.target.matches('.narration-trust')) {
         const v = Number(e.target.value), k = e.target.dataset.key, base = Number(e.target.dataset.base);
         changeTrust((tr) => { if (v === base) delete tr.links[k]; else tr.links[k] = v; });

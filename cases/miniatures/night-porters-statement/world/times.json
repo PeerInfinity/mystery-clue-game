@@ -1,0 +1,11 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.wed", "label": "Wednesday", "after": "t.before", "para": 5, "quote": "since Wednesday"},
+    {"id": "t.ten", "label": "Thursday, ten o'clock at night", "after": "t.wed", "para": 2, "quote": "at ten on Thursday night"},
+    {"id": "t.one", "label": "Friday, one o'clock in the night", "after": "t.ten", "para": 3, "quote": "At one o'clock"},
+    {"id": "t.seven", "label": "Friday, seven in the morning", "after": "t.one", "para": 5, "quote": "at seven on Friday"},
+    {"id": "t.found", "label": "Friday morning", "after": "t.seven", "para": 1, "quote": "On Friday morning"},
+    {"id": "t.later", "label": "Friday, later", "after": "t.found", "para": 6, "quote": "I showed Kemp the lock-up book"}
+  ]
+}

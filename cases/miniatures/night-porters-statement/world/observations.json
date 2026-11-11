@@ -1,0 +1,8 @@
+{
+  "observations": [
+    {"id": "o.unforced", "q": "q.who", "from": ["f.unforced"], "says": "nothing was forced: it was done with the keys", "essential": true},
+    {"id": "o.keys", "q": "q.who", "from": ["f.keys_belt"], "says": "by his own statement the keys never left Kemp's belt that night", "essential": true},
+    {"id": "o.lockup", "q": "q.who", "from": ["f.finch_lockup"], "says": "Finch was under lock and key from ten until seven", "essential": true, "against": ["finch"]},
+    {"id": "o.on_duty", "q": "q.who", "from": ["f.kemp_on"], "says": "Kemp was in the bank all night"}
+  ]
+}

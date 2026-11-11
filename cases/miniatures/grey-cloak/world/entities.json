@@ -1,0 +1,17 @@
+{
+  "entities": [
+    {"id": "tull", "kind": "person", "name": "Sergeant Tull"},
+    {"id": "mott", "kind": "person", "name": "Dr. Mott"},
+    {"id": "lunn", "kind": "person", "name": "Mrs. Lunn"},
+    {"id": "pell", "kind": "person", "name": "Mr. Pell"},
+    {"id": "kitty", "kind": "person", "name": "Kitty"},
+    {"id": "figure", "kind": "person", "name": "the figure at the side door"},
+    {"id": "surgery", "kind": "place", "name": "Dr. Mott's surgery"},
+    {"id": "passage", "kind": "place", "name": "the surgery passage", "within": "surgery"},
+    {"id": "side_door", "kind": "place", "name": "the side door of the surgery", "within": "surgery"},
+    {"id": "hale_house", "kind": "place", "name": "Squire Hale's"},
+    {"id": "drawer", "kind": "object", "name": "the cash drawer"},
+    {"id": "cloak", "kind": "object", "name": "the long grey cloak"},
+    {"id": "greatcoat", "kind": "object", "name": "Dr. Mott's greatcoat"}
+  ]
+}

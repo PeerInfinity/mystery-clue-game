@@ -1,0 +1,12 @@
+{
+  "id": "night_porters_statement",
+  "title": "The Night Porter's Statement",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "reeve", "name": "Inspector Reeve", "kind": "first-person"},
+    {"id": "kemp", "name": "Josiah Kemp", "kind": "first-person", "doubtable": true}
+  ],
+  "subtitle": "Inspector Reeve's file",
+  "source": {"written": "2026-11-11", "word_count": 220}
+}

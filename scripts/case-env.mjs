@@ -1,6 +1,8 @@
 // The case a page check plays (CASE=<dir>, a directory under the site root with story.txt and world/; default
 // cases/silver-blaze), as the page addresses it (ui/world-case.js: `?case=`, and its saves' names).
 import path from 'node:path';
+/** The headless Chrome a check drives: its debugging port (CDP_PORT, default 9333), so checks can run side by side, each on its own. */
+export const CDP = `http://127.0.0.1:${process.env.CDP_PORT ?? 9333}`;
 export const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 const DEFAULT = 'cases/silver-blaze';
 export const CASE = (process.env.CASE ?? DEFAULT).replace(/\/+$/, '');

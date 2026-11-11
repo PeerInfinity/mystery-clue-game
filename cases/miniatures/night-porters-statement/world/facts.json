@@ -1,0 +1,16 @@
+{
+  "facts": [
+    {"id": "f.open", "of": "strongroom", "attr": "condition", "value": "found open, and four hundred pounds gone", "time": {"at": "t.found"}, "para": 1, "quote": "the strongroom of Bly's Bank was found open, and four hundred pounds gone"},
+    {"id": "f.kemp_role", "of": "kemp", "attr": "role", "value": "the night porter", "time": {"from": "t.before"}, "para": 1, "quote": "Josiah Kemp, the night porter"},
+    {"id": "f.kemp_writes", "of": "kemp", "attr": "action", "value": "writes down his night for Inspector Reeve", "time": {"at": "t.found"}, "para": 1, "quote": "write down his night for me"},
+    {"id": "f.kemp_on", "of": "kemp", "attr": "location", "value": "bank", "detail": "on duty", "time": {"from": "t.ten", "to": "t.seven"}, "para": 2, "quote": "I came on at ten on Thursday night"},
+    {"id": "f.keys_belt", "of": "kemp", "attr": "carrying", "value": "keys", "detail": "given him by Mr. Bly; never off his belt until the morning", "time": {"from": "t.ten", "to": "t.seven"}, "para": 2, "quote": "from that minute until the morning they never left my belt"},
+    {"id": "f.finch_window", "of": "finch", "attr": "location", "value": "bank", "detail": "at the window, looking in; he ran from the lamp", "time": {"at": "t.one"}, "para": 3, "quote": "was standing at the window of the bank, looking in", "truth": false},
+    {"id": "f.finch_role", "of": "finch", "attr": "role", "value": "a clerk of the bank, turned off last month", "time": {"from": "t.before"}, "para": 3, "quote": "the clerk who was turned off last month"},
+    {"id": "f.unforced", "of": "strongroom_door", "attr": "condition", "value": "not forced: opened with its key, as the street door was", "time": {"at": "t.found"}, "para": 4, "quote": "Neither had been forced: both were opened with their keys"},
+    {"id": "f.finch_lockup", "of": "finch", "attr": "location", "value": "lockup", "detail": "for a debt; locked in by Inspector Reeve himself", "time": {"from": "t.ten", "to": "t.seven"}, "para": 5, "quote": "I turned the key on him myself at ten on Thursday night"},
+    {"id": "f.finch_since", "of": "finch", "attr": "condition", "value": "held for a debt since Wednesday", "time": {"from": "t.wed"}, "para": 5, "quote": "he has been in my own lock-up at Cross Street since Wednesday"},
+    {"id": "f.reeve_shows", "of": "reeve", "attr": "action", "value": "shows Josiah Kemp the lock-up book", "time": {"at": "t.later"}, "para": 6, "quote": "I showed Kemp the lock-up book"},
+    {"id": "f.money_found", "of": "money", "attr": "location", "value": "porters_box", "detail": "under the coals", "time": {"at": "t.later"}, "para": 6, "quote": "The four hundred pounds were under the coals in the porter's box", "q": "q.who", "pick": "kemp"}
+  ]
+}

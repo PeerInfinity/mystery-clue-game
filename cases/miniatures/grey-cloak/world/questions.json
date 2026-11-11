@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.figure", "label": "Who was it that Mrs. Lunn saw at the side door?", "entry": {"of": "figure", "attr": "identity", "time": {"at": "t.nine"}}, "raised": 2, "quote": "So who was it that she saw?", "possibilities": [{"value": "something else", "available": 2, "via": "always"}, {"value": "mott", "available": 2, "via": "direct", "quote": "It was Dr. Mott"}, {"value": "pell", "available": 5, "via": "direct", "quote": "Two people beside the doctor have a key to the side door"}, {"value": "kitty", "available": 5, "via": "direct", "quote": "Two people beside the doctor have a key to the side door"}], "answer": "pell", "answer_given_at": 6, "answer_given_quote": "Mr. Pell did not deny it long", "answer_inferable_at": 5, "answer_from": "f.figure_tall"}
+  ]
+}

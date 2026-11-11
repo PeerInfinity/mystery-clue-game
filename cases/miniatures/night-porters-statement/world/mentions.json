@@ -1,0 +1,16 @@
+{
+ "entities": {
+  "reeve": ["Inspector Reeve"],
+  "kemp": ["Josiah Kemp", "Kemp"],
+  "bly": ["Mr. Bly"],
+  "finch": ["Tobias Finch"],
+  "bank": ["Bly's Bank", "the bank"],
+  "strongroom": ["the strongroom"],
+  "porters_box": ["the porter's box"],
+  "lockup": ["my own lock-up at Cross Street"],
+  "money": ["four hundred pounds", "The four hundred pounds"],
+  "keys": ["the keys of the bank and of the strongroom"],
+  "street_door": ["the street door"],
+  "strongroom_door": ["the strongroom door"]
+ }
+}

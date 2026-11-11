@@ -56,7 +56,7 @@ const GENERIC = {
     drug: { label: 'drugging', requires: [{ of: '$agent', carrying: '$item' }], effects: [{ of: '$to', attr: 'condition', value: 'drugged' }] },
     strike: { label: 'striking', requires: [{ of: '$agent', carrying: '$item' }, { of: '$agent', place: '$where' }], effects: [{ of: '$to', attr: 'condition', value: 'struck down' }] },
     keep_key: { label: 'keeping a key to', requires: [], effects: [{ of: '$agent', key: '$thing' }] },
-    take: { label: 'taking up', requires: [], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
+    take: { label: 'taking up', requires: [{ of: '$agent', place: '$where' }], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
     hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place', unless: '$where' }, { of: '$agent', charge: '$where' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
 };

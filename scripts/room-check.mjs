@@ -4,9 +4,10 @@
 // and one allowed, undo and a reload; and that a case with no world/room.json has no panel. Needs the page served
 // (node scripts/serve.js) and the headless Chrome on port 9333 (one script at a time). Exits 1 on any failure.
 const BASE = process.env.URL ?? 'http://localhost:8321/';
+const CDP = `http://127.0.0.1:${process.env.CDP_PORT ?? 9333}`;
 const FIXTURE = 'scripts/fixtures/sealed-room';
 const STORE = `${FIXTURE.replace(/[^A-Za-z0-9]+/g, '-')}-world-v1`;
-const target = await (await fetch('http://127.0.0.1:9333/json/new?about:blank', { method: 'PUT' })).json();
+const target = await (await fetch(`${CDP}/json/new?about:blank`, { method: 'PUT' })).json();
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((r) => { ws.onopen = r; });
 let n = 0; const pending = new Map(); const problems = [];
@@ -136,6 +137,6 @@ ok(!/travel down a chain/.test(await text('.desc-list')), 'and the observation t
 ok(problems.length === 0, 'no errors in the page', problems.join(' | ').slice(0, 600));
 
 await ev(`localStorage.removeItem(${JSON.stringify(STORE)})`);
-await fetch(`http://127.0.0.1:9333/json/close/${target.id}`);
+await fetch(`${CDP}/json/close/${target.id}`);
 console.log(failed ? `${failed} failed` : 'all passed');
 process.exit(failed ? 1 : 0);

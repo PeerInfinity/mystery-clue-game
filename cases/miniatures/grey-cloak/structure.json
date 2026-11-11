@@ -1,0 +1,19 @@
+{
+  "story": "grey-cloak",
+  "mechanic": "A mistaken witness, not a lying one: she saw a figure and took it for a man she knew by his cloak. What she saw is kept and her identification is set aside; her mistake is itself evidence.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md. `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue, `chain` the tellings that bring it.",
+  "goal": "q.figure",
+  "frame": [
+    {"id": "fr.drawer", "says": "The cash drawer of the surgery was found forced on Wednesday morning, the week's takings gone.", "facts": ["f.drawer_forced"]}
+  ],
+  "questions": [
+    {"id": "q.figure", "asks": "Who was it that Mrs. Lunn saw at the side door?", "answer": "Mr. Pell", "others": ["Dr. Mott", "Kitty"], "gate": 6, "needs": [["c.lunn", "c.bedside", "c.cloak", "c.keys", "c.lunn_again"]], "rules_out": {"Dr. Mott": "c.bedside: he was three miles off, in the narrator's sight", "Kitty": "c.lunn_again and c.keys: the cloak cleared the ground, and she is hardly five feet tall", "anyone else": "c.keys: a key to the side door"}}
+  ],
+  "clues": [
+    {"id": "c.lunn", "source": "Mrs. Lunn, who lives opposite the side door, to the narrator on Wednesday", "says": "At nine she saw a figure come out at the side door and go off down the lane; it was the doctor, she says: she knew him by his long grey cloak.", "facts": ["f.figure_door", "f.figure_cloak", "f.figure_is_mott"], "chain": ["f.lunn_tells"], "note": "One fact of the three is false and sincerely meant: her identification."},
+    {"id": "c.bedside", "source": "The narrator's own evening", "says": "From eight until ten he sat with the doctor at the Squire's bedside, three miles off.", "facts": ["f.mott_bedside", "f.tull_bedside"]},
+    {"id": "c.cloak", "source": "The narrator's own eyes", "says": "The doctor drove out in his greatcoat; his grey cloak was on its peg in the surgery passage on Wednesday, still damp.", "facts": ["f.mott_greatcoat", "f.cloak_peg"]},
+    {"id": "c.keys", "source": "The narrator's own knowledge of the household", "says": "Beside the doctor, the dispenser and the housemaid have keys to the side door; the housemaid is hardly five feet tall.", "facts": ["f.keys", "f.pell_role", "f.kitty_small"]},
+    {"id": "c.lunn_again", "source": "Mrs. Lunn, asked again", "says": "The cloak hung on the figure as on the doctor, well clear of the ground.", "facts": ["f.figure_tall"], "chain": ["f.lunn_tells_again"]}
+  ]
+}

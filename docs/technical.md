@@ -16,7 +16,7 @@ paragraph and quote that give it. Every fact reached the reader through **accoun
 reader; the player is the reader. The player sets a **trust** level per link, per statement, per person and per
 narrator (a narrator's own observations certain by default); a fact is as trusted as its best chain (of those whose tellings the story has told so far), a chain as its weakest link, and what reaches the
 threshold is on the timeline. **Contradictions** among what is on the timeline are found automatically (two places,
-two states or two identities at once). **Questions** list possibilities; a circled one is the player's hypothesis, an
+two states or two identities at once, or a circled answer that needs someone at a place the timeline has them away from). **Questions** list possibilities; a circled one is the player's hypothesis, an
 entry like any other. The player's **moves** (a change, what an action needs and does, what it is for, what a plan
 would need, and the plan checks) are checked by a generic action table (`engine/actions.js`). The true path through
 the page (`world/path.json`) is played by the checks, the autoplay and the hints. `docs/case-format.md` "The world

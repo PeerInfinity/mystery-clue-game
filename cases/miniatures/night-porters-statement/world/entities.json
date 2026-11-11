@@ -1,0 +1,16 @@
+{
+  "entities": [
+    {"id": "reeve", "kind": "person", "name": "Inspector Reeve"},
+    {"id": "kemp", "kind": "person", "name": "Josiah Kemp"},
+    {"id": "bly", "kind": "person", "name": "Mr. Bly"},
+    {"id": "finch", "kind": "person", "name": "Tobias Finch"},
+    {"id": "bank", "kind": "place", "name": "Bly's Bank"},
+    {"id": "strongroom", "kind": "place", "name": "the strongroom", "within": "bank"},
+    {"id": "porters_box", "kind": "place", "name": "the porter's box", "within": "bank"},
+    {"id": "lockup", "kind": "place", "name": "the lock-up at Cross Street"},
+    {"id": "money", "kind": "object", "name": "four hundred pounds"},
+    {"id": "keys", "kind": "object", "name": "the keys of the bank and of the strongroom"},
+    {"id": "street_door", "kind": "object", "name": "the street door"},
+    {"id": "strongroom_door", "kind": "object", "name": "the strongroom door"}
+  ]
+}

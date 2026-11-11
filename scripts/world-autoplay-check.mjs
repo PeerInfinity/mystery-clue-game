@@ -7,13 +7,13 @@
 // 9333 (one script at a time). Exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
-import { WORLD, STORE, AUTOPLAY_STORE, pageUrl } from './case-env.mjs';
+import { WORLD, STORE, AUTOPLAY_STORE, pageUrl, CDP } from './case-env.mjs';
 const moves = JSON.parse(fs.readFileSync(path.join(WORLD, 'path.json'), 'utf8')).moves;
 const BASE = process.env.URL ?? 'http://localhost:8321/';
 const LAYOUT = process.argv[2] ?? 'three';
 const J = JSON.stringify;
 
-const list = await (await fetch('http://127.0.0.1:9333/json')).json();
+const list = await (await fetch(`${CDP}/json`)).json();
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
 await new Promise((r) => ws.addEventListener('open', r));
 let n = 0; const pending = new Map(); const errors = [];

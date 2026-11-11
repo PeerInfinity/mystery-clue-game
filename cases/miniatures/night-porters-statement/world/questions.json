@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who took the four hundred pounds?", "entry": {"of": "?", "attr": "action", "time": {"after": "t.ten", "before": "t.found"}}, "raised": 1, "quote": "four hundred pounds gone", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "finch", "available": 3, "via": "direct", "quote": "I think it right to say so"}, {"value": "kemp", "available": 2, "via": "indirect", "from": "f.keys_belt"}], "answer": "kemp", "answer_given_at": 6, "answer_given_quote": "The four hundred pounds were under the coals in the porter's box", "answer_inferable_at": 5, "answer_from": "f.finch_lockup"}
+  ]
+}

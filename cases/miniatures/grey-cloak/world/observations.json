@@ -1,0 +1,10 @@
+{
+  "observations": [
+    {"id": "o.away", "q": "q.figure", "from": ["f.mott_bedside"], "says": "at nine Dr. Mott was three miles off, in the sergeant's own sight", "essential": true, "against": ["mott"]},
+    {"id": "o.by_cloak", "q": "q.figure", "from": ["f.figure_cloak"], "says": "she knew the figure by the cloak, in the dark, not by its face", "essential": true},
+    {"id": "o.mistake", "q": "q.figure", "from": [{"doubted": "f.lunn_tells"}], "says": "what she saw stands; that it was the doctor was her own conclusion, and it was wrong", "essential": true, "against": ["mott"]},
+    {"id": "o.cloak_out", "q": "q.figure", "from": ["f.mott_greatcoat", "f.cloak_peg"], "says": "the doctor drove out in his greatcoat, and the cloak he left behind was damp in the morning: someone else wore it in the rain", "essential": true},
+    {"id": "o.keys", "q": "q.figure", "from": ["f.keys"], "says": "only Mr. Pell and Kitty, beside the doctor, could let themselves out at the side door", "essential": true},
+    {"id": "o.tall", "q": "q.figure", "from": ["f.figure_tall", "f.kitty_small"], "says": "the cloak cleared the ground: on Kitty it would have trailed", "essential": true, "against": ["kitty"]}
+  ]
+}

@@ -10,7 +10,7 @@
 // 9333 (one script at a time). Prints a line per gated question; exits 1 if one has no route.
 import fs from 'node:fs';
 import path from 'node:path';
-import { WORLD, STORE, pageUrl } from './case-env.mjs';
+import { WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
 
 const BASE = process.env.URL ?? 'http://localhost:8321/';
 const J = JSON.stringify;
@@ -32,7 +32,7 @@ function marksAt(p) {
     return marks;
 }
 
-const list = await (await fetch('http://127.0.0.1:9333/json')).json();
+const list = await (await fetch(`${CDP}/json`)).json();
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
 await new Promise((r) => ws.addEventListener('open', r));
 let n = 0; const pending = new Map(); const errors = [];

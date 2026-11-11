@@ -4,8 +4,10 @@
 //   npm run page-checks          (URL=… to check another server, for example the built site; CASE=<dir> another
 //                                case, the page's ?case=: scripts/case-env.mjs)
 // Starts what is missing and stops only what it started: the local server (scripts/serve.js, port 8321) and a headless
-// Chrome on port 9333 with a profile of its own (CHROME: the browser to run; default google-chrome). Exits 1 if any
-// check fails.
+// Chrome on port 9333 with a profile of its own (CHROME: the browser to run; default google-chrome; CDP_PORT: another
+// port, so that several runs can go side by side, each with its own Chrome: scripts/page-checks-all.mjs). FIXTURE=0
+// leaves out the checks on the invented case (the room panel and its moves), which are the same for every CASE.
+// Exits 1 if any check fails.
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -14,16 +16,17 @@ const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const up = (url) => fetch(url).then((r) => r.ok, () => false);
 
+const CDP = `http://127.0.0.1:${process.env.CDP_PORT ?? 9333}`;
 const started = [];
 let profile = null;
 if (!process.env.URL && !(await up('http://localhost:8321/'))) {
     started.push(spawn(process.execPath, [path.join(ROOT, 'scripts/serve.js')], { stdio: 'ignore' }));
     for (let i = 0; i < 50 && !(await up('http://localhost:8321/')); i++) await sleep(100);
 }
-if (!(await up('http://127.0.0.1:9333/json/version'))) {
+if (!(await up(`${CDP}/json/version`))) {
     profile = fs.mkdtempSync(path.join(os.tmpdir(), 'page-checks-chrome-'));
-    started.push(spawn(process.env.CHROME ?? 'google-chrome', ['--headless=new', '--remote-debugging-port=9333', `--user-data-dir=${profile}`, '--window-size=1400,900', 'about:blank'], { stdio: 'ignore' }));
-    for (let i = 0; i < 100 && !(await up('http://127.0.0.1:9333/json/version')); i++) await sleep(100);
+    started.push(spawn(process.env.CHROME ?? 'google-chrome', ['--headless=new', `--remote-debugging-port=${process.env.CDP_PORT ?? 9333}`, `--user-data-dir=${profile}`, '--window-size=1400,900', 'about:blank'], { stdio: 'ignore' }));
+    for (let i = 0; i < 100 && !(await up(`${CDP}/json/version`)); i++) await sleep(100);
 }
 const checks = [
     ['path-check.mjs'],
@@ -38,7 +41,8 @@ const checks = [
     ['world-hints-check.mjs', 'below', { CASE: 'scripts/fixtures/sealed-room' }],
 ];
 const failed = [];
-for (const [script, ...rest] of checks) {
+const fixture = process.env.FIXTURE !== '0';
+for (const [script, ...rest] of checks.filter(([s, ...r]) => fixture || !(s === 'room-check.mjs' || r.some((x) => typeof x === 'object' && x.CASE)))) {
     const env = { ...process.env, ...(typeof rest.at(-1) === 'object' ? rest.pop() : {}) };
     const label = [script, ...rest, env.PHONE ? '(phone)' : '', env.CASE && env.CASE !== process.env.CASE ? `(${path.basename(env.CASE)})` : ''].join(' ').trim();
     console.log(`\n== ${label}`);

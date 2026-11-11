@@ -14,7 +14,13 @@ game: [The Lamp-Keeper's Word](https://peerinfinity.github.io/mystery-clue-game/
 [The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench)
 (a locked room, and the ways into it) ·
 [The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door)
-(what an act needed, and who had it)
+(what an act needed, and who had it) ·
+[The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house)
+(one evening, told by two people) ·
+[The Grey Cloak](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/grey-cloak)
+(an honest witness who is wrong) ·
+[The Night Porter's Statement](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/night-porters-statement)
+(a storyteller you cannot wholly believe)
 
 **Watson's timeline**: you read a fair-play detective story as Dr Watson, and keep an ordered list of what happened,
 who was where, who did what, and when. What Watson sees himself is certain; everything else reached him through a
@@ -29,7 +35,7 @@ There are two full cases, both by Arthur Conan Doyle (1892, public domain), and 
   ([`pipeline/README.md`](pipeline/README.md)): a first version, not yet reviewed by hand, so it may still have rough
   edges, such as a label that says more than the story has told.
 
-There are also five **miniatures**, short stories written for the game (linked above), each with just enough in it to
+There are also eight **miniatures**, short stories written for the game (linked above), each with just enough in it to
 show one mechanic. They are the first of a new direction, stories written for this system
 ([`docs/authored-stories.md`](docs/authored-stories.md), which contains spoilers), and the best place to start.
 

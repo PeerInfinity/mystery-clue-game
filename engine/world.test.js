@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE, isRight, compatible, narrationLink } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, alibis, provenance, chainLevel, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE, isRight, compatible, narrationLink } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -210,4 +210,32 @@ test("a mark's chain: one link from the reader's hypothesis, starting uncertain,
     assert.equal(LEVELS[chainLevel(c)], 'uncertain');
     assert.equal(LEVELS[chainLevel(c, { links: { [hypothesisKey('q.who', 'man')]: 2 } })], 'trusted');
     assert.equal(LEVELS[chainLevel(c, { links: { [hypothesisKey('q.who', 'man')]: 2 }, people: { [HYPOTHESIS]: 0 } })], 'distrusted');
+});
+
+test('a doubtable narrator: each of their own observations has a statement link, starting as certain as the narration', () => {
+    const facts = [loc('own', 'horse', 'moor', { at: 't1' }), loc('own2', 'man', 'moor', { at: 't1' })];
+    const p = provenance({ ...world(facts), narrators: [{ id: 'watson', doubtable: true }] });
+    const own = p.factChains('own');
+    assert.deepEqual(own.map((c) => c.links.map(linkKey)), [['stmt:own', 'narrates:watson']]);
+    assert.equal(LEVELS[levelOf(own)], 'certain', 'undoubted, it is as certain as before');
+    assert.equal(LEVELS[levelOf(own, { links: { 'stmt:own': 0 } })], 'distrusted');
+    assert.equal(LEVELS[levelOf(p.factChains('own2'), { links: { 'stmt:own': 0 } })], 'certain', 'the rest of what the narrator says stands');
+    assert.deepEqual(resolvingLinks(own, {}, 1).links, ['stmt:own']);
+});
+
+test('an alibi: elsewhere for the whole window, by one location or several end to end', () => {
+    const mark = { id: 'hyp:q=man', kind: 'pick', q: 'q', pick: 'man', mark: 'circled' };
+    const need = (time) => [{ mark, of: 'man', places: ['stable'], time, label: 'it needs him at the stable' }];
+    const st = (id, value, time, of = 'man') => ({ id, fact: id, kind: 'state', of, attr: 'location', value, neg: false, time });
+    const w = world([]);
+    const whole = alibis(w, [st('a', 'london', { from: 't1', to: 't4' })], need({ from: 't2', to: 't3' }));
+    assert.deepEqual(whole.map((c) => [c.a.id, c.b.id, c.b.needs]), [['a', 'hyp:q=man', 'it needs him at the stable']]);
+    assert.equal(alibis(w, [st('a', 'london', { from: 't1', to: 't3' })], need({ from: 't2', to: 't4' })).length, 0, 'part of the window is no alibi');
+    assert.equal(alibis(w, [st('a', 'london', { at: 't2' })], need({ from: 't2', to: 't3' })).length, 0, 'seen elsewhere at one moment is no alibi');
+    assert.equal(alibis(w, [st('a', 'london', { from: 't1' })], need({ from: 't1', to: 't3' })).length, 0, 'an open end covers only its start');
+    assert.equal(alibis(w, [st('a', 'stall', { from: 't1', to: 't4' })], need({ from: 't2', to: 't3' })).length, 0, 'a place within the one needed is no alibi');
+    assert.equal(alibis(w, [st('a', 'london', { from: 't1', to: 't4' }, 'horse')], need({ from: 't2', to: 't3' })).length, 0, 'someone else');
+    const chain = alibis(w, [st('a', 'london', { from: 't1', to: 't2' }), st('b', 'hollow', { from: 't2', to: 't4' })], need({ from: 't1', to: 't3' }));
+    assert.deepEqual(chain.map((c) => c.a.id), ['a', 'b'], 'two locations end to end: a contradiction with each');
+    assert.equal(alibis(w, [st('a', 'london', { from: 't1', to: 't2' }), st('b', 'hollow', { from: 't3', to: 't4' })], need({ from: 't1', to: 't4' })).length, 0, 'a gap between them');
 });

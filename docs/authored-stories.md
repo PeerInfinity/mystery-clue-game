@@ -3,7 +3,7 @@
 **Spoilers:** this page gives numbers from the data of "Silver Blaze" and "The Speckled Band", and names one question of
 the second. "What the miniatures showed" gives away both miniatures.
 
-**Status (2026-11-10): a direction set in discussion with the user. Of the experiments below, five mechanic
+**Status (2026-11-10): a direction set in discussion with the user. Of the experiments below, eight mechanic
 miniatures are written (`cases/miniatures/`); nothing else is built.** It changes parts of
 `docs/archipelago-plan.md` and `docs/interconnected-world.md`; what it supersedes is listed below and noted at the top
 of each.
@@ -98,7 +98,7 @@ Still needed as planned: "any of these" between facts, hints that make links, na
 
 ## What the miniatures showed
 
-Experiment 1, begun 2026-11-10. Five miniatures are written, each an invented story of under 350 words with its world
+Experiment 1, begun 2026-11-10. Eight miniatures are written, each an invented story of under 350 words with its world
 model, its true path and its logic (`structure.json`, beside the case):
 
 | Miniature | Mechanic | Size |
@@ -109,6 +109,9 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 5 observations (4 essential), 7 moves |
+| `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
+| `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
+| `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
 
 Played at `?case=cases/miniatures/<name>`. `npm test` validates them and checks each `structure.json` against its
 world model.
@@ -366,6 +369,40 @@ Rulings and one more idea, 2026-11-11:
   fails to place them at the scene. Taking a thing needs its taker at the place (the generic action table).
 - **Idea 9, two narrators: a narrator's own statements must be doubtable** where a story has an unreliable
   narrator; a story without one works as now (a narrator's own observations certain, with no statement link).
+  **Built 2026-11-11** (`alibis`, `engine/world.js`; `docs/case-format.md`, "Alibis"). The Cellar Door needed no
+  change of data: circling the ostler raises "Ned Sharp: in two places at once? the carrier's man's word: Ned Sharp
+  at the loft over the stable, against your hypothesis: Ned Sharp (it needs Ned Sharp at the cellar door)". The
+  Last Ferry's question became a typed taking of the cup at the vestry; circling the carter raises two, one for
+  each location of his alibi (on the ferry until eight, on the far bank after), so distrusting either piece lifts
+  it. Two things to know. The window of the taking is the author's: it starts when the lamp is lit, which is the
+  answer to the miniature's other question, so the alibi holds even for a player who has not accepted the
+  lamplighter's sighting; until ¶3 the page shows that start as "a time not yet told". And an alibi's last
+  location has to be given an end ("on the far bank until Monday morning"), which the ferryman did not say in so
+  many words: it rests on there being no boat back.
+- **Doubtable narrators: built 2026-11-11** as an option (`doubtable: true` on a narrator). The Dinner at Larch
+  House has two reliable narrators who do not disagree; The Night Porter's Statement uses the option (below).
+
+What the two-narrator, mistaken-witness and unreliable-narrator miniatures showed (2026-11-11):
+
+24. **Two reliable narrators need nothing new.** Each fact has its chain through its own narrator, the grid by
+    source has a column for each, and nothing in the format says which narrator a paragraph belongs to: the prose
+    says it ("Clara Marlow's account."). With more than one narrator a side of a contradiction now names whose own
+    word it is.
+25. **A sincere mistake is expressible as it stands** (idea 5): the witness's account holds what she saw of "the
+    figure at the side door" (an entity of its own) and her identification of it (`identity`, false), each with its
+    statement link, so the one is kept and the other set aside; her telling, doubted, is evidence (`doubted`). The
+    prose has to give the two apart ("I saw a figure… It was Dr. Mott… I knew him by his cloak").
+26. **An identification does not carry whereabouts.** "The figure was Dr. Mott" and "the figure was at the side
+    door at nine" do not put Dr. Mott at the side door, so his being three miles off raises no contradiction with
+    her identification. The clash comes only from the player's own circle on "who was it?" against her pick.
+    Contradictions compare one entity's states; an accepted identity could join two entities' locations.
+27. **A doubtable narrator's false statement cannot be evidence.** A witness's lie leaves its telling on the
+    timeline, which can be linked (`doubted`). A narrator's own statement has no telling: distrusted, it is gone,
+    and nothing remains to link. The Night Porter's Statement's essentials therefore say nothing of his lie; the
+    gate can be passed with it still believed, and the contradiction it makes left open.
+28. **Marking one narrator doubtable shows on the page**: only his statements have "This statement itself". Here
+    that is natural (his part is a statement written for the other); in a story where the reader should not know
+    which narrator to doubt, every narrator would need the mark.
 - **11. Doubting the author** (the user's idea, with the note that it may not be worth building): a way for the
   player to say that the story or its data is wrong, like a bug report. It would need somewhere for the reports to
   go, and the user does not want to set that up.

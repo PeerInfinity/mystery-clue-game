@@ -122,7 +122,10 @@ only that link; what others told the narrator has the tellings first. `id` is an
 Settings (*Trust in Watson as narrator*), and it caps every chain through that narrator, the tellings to the narrator
 included. A narration link is never listed among the links whose distrust alone takes a fact off (`resolvingLinks`),
 and a person's cap does not apply to it. `name` is the narrator's name in the page's words ("Watson's own"). Several
-narrators give a fact one chain through each who has it. The player's marks and moves are the reader's own: *your
+narrators give a fact one chain through each who has it. A narrator with `doubtable: true` (a story with an unreliable
+narrator) has a statement link (`stmt:<fact>`) on each of their own observations as well, starting as trusted as the
+narration, so the player can distrust one of them and keep the rest; without it a narrator's own observations can be
+doubted only all together, in Settings. The player's marks and moves are the reader's own: *your
 hypothesis*, *your reasoning*.
 - **`questions.json`**: an uncertain entry `{id, label, entry, raised, quote, possibilities, answer, kind?, latent?,
   settled?, note?}`. `label` is the question as the player reads it ("Who drugged Hunter's supper?"), shown only
@@ -193,6 +196,13 @@ contradiction written by hand:
   before}` nothing certain. Only the partial order of `after` decides "certainly": unordered points never overlap.
   So a move needs its own time point (the horse near Mapleton at dawn, led into Mapleton after: `t.tue_into_mapleton`).
 - Claims with `modal: possible` take no part.
+- **Alibis** (`alibis` in `engine/world.js`). A circled answer to a question whose `entry` is a typed action (`act`)
+  over a `{from, to}` window is that one's act. If the act needs its agent at a door (`at`: either side of it,
+  `joins`) or at a place (`place`, from the entry's `where`; `take` needs it, as `strike` does), and accepted
+  locations of that one, none of them within a needed place, cover the whole window (one, or several end to end),
+  each is a contradiction with the circle: "in two places at once?", the circle's side saying what it needs. An open
+  end covers only its start, so an alibi's last location needs a `to`. Failing to place someone at the scene is no
+  contradiction; that stays in the question's detail ("nothing on the timeline says so").
 
 **The player's marks** (`markAssertions`). Each possibility of a question is uncertain (unmarked), circled or crossed
 out; several may be circled. A circle asserts the possibility and a crossing denies it, as picks with `mark` set and

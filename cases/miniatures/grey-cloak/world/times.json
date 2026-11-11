@@ -1,0 +1,10 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.eight", "label": "Tuesday, eight o'clock at night", "after": "t.before", "para": 3, "quote": "from eight until ten"},
+    {"id": "t.nine", "label": "Tuesday, nine o'clock at night", "after": "t.eight", "para": 2, "quote": "At nine o'clock last night"},
+    {"id": "t.ten", "label": "Tuesday, ten o'clock at night", "after": "t.nine", "para": 3, "quote": "from eight until ten"},
+    {"id": "t.wed", "label": "Wednesday morning", "after": "t.ten", "para": 1, "quote": "On Wednesday morning"},
+    {"id": "t.later", "label": "Wednesday, later", "after": "t.wed", "para": 5, "quote": "I went back to Mrs. Lunn"}
+  ]
+}

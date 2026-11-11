@@ -93,7 +93,13 @@ export function provenance(data) {
     // the same links (the stranger's "lost" without his wish that the boy gets the paper). A narrator's own
     // observations have only the narration link.
     const stmtLink = (id, from) => ({ from, to: from, how: 'statement', stmt: id, uncertain: false });
-    const withStmt = (id, ch) => (ch.links.some((l) => !l.narrator) ? { ...ch, links: [stmtLink(id, ch.origin ?? '?'), ...ch.links] } : ch);
+    // A narrator marked `doubtable` (world/case.json: a story with an unreliable narrator) has a statement link on
+    // each of their own observations too, so one can be distrusted without the rest; otherwise they are as certain
+    // as the narration.
+    const doubtable = new Set(narrators.filter((n) => n.doubtable).map((n) => n.id));
+    // Such a statement starts as trusted as the narration (`base`), not at uncertain as what others say does.
+    const withStmt = (id, ch) => (ch.links.some((l) => !l.narrator) ? { ...ch, links: [stmtLink(id, ch.origin ?? '?'), ...ch.links] }
+        : doubtable.has(ch.origin) ? { ...ch, links: [{ ...stmtLink(id, ch.origin), base: ch.links.at(-1).base }, ...ch.links] } : ch);
     // The chains carrying an account to the reader: to a narrator, then that narrator's narration.
     const toReader = (aid) => narrators.flatMap((n) => chains(aid, n.id).map((links) => [...links, narrationLink(n)]));
     // `own`: the statement the link is for: the claim's own assertions by default, or one fact of its content (his walk
@@ -337,6 +343,38 @@ export function contradictions(data, accepted = null) {
             const [pos, neg] = a.neg ? [kb, va] : [ka, vb];
             if (pos.includes(neg)) out.push({ a, b, why: `${a.of}: at ${pos[0]} and not at ${neg}` });
         }
+    }
+    return out;
+}
+
+/**
+ * Alibis: a hypothesis that needs someone at a place at some moment of a window (`needs`: `[{mark, of, places,
+ * time: {from, to}, label}]`, `mark` the circle's assertion) against the accepted locations of that one. It is a
+ * contradiction only when the timeline has them elsewhere for the whole window: one location covering it, or
+ * several end to end, none of them within a needed place. Failing to place them at the scene is no alibi. Returns
+ * contradictions `{a: a location, b: the mark (with `needs`: the label), why}`, one for each location of the cover,
+ * so that distrusting any piece of the alibi lifts it.
+ */
+export function alibis(data, accepted, needs) {
+    const order = data.order ?? timeOrder(data.times);
+    const pl = data.places ?? places(data);
+    const out = [];
+    for (const n of needs) {
+        const w = coverOf(n.time);
+        if (!w || w.incl) continue;
+        const away = accepted.filter((x) => x.kind === 'state' && x.attr === 'location' && !x.neg && (n.same ?? ((a, b) => a === b))(x.of, n.of) && typeof x.value === 'string' && pl.fixed(x.value)
+            && !n.places.some((p) => pl.chain(x.value).includes(p)) && coverOf(x.time));
+        // Walk the window from its start: each step a location that holds at the point reached.
+        const cover = [];
+        let at = w.start, done = false;
+        for (let i = 0; i <= away.length && !done; i++) {
+            const next = away.filter((x) => !cover.includes(x)).find((x) => { const c = coverOf(x.time); return !c.incl && order.le(c.start, at) && order.lt(at, c.end); });
+            if (!next) break;
+            cover.push(next);
+            at = coverOf(next.time).end;
+            done = order.le(w.end, at);
+        }
+        if (done) for (const x of cover) out.push({ a: x, b: { ...n.mark, needs: n.label }, why: `${n.of}: needed at ${n.places.join(' or ')}, and at ${x.value}` });
     }
     return out;
 }

@@ -1,0 +1,18 @@
+{
+  "story": "night-porters-statement",
+  "mechanic": "An unreliable narrator: part of the story is told by someone whose statements can be doubted one by one. One of them is against what the other narrator knows himself; it is set aside, and another statement of the same narrator is kept.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md. The two narrators' parts are the clues. The first narrator is reliable (his own observations are certain and cannot be doubted singly); the second is marked `doubtable` in world/case.json.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.strongroom", "says": "On Friday morning the strongroom was found open and four hundred pounds gone; the night porter wrote down his night.", "facts": ["f.open", "f.kemp_role", "f.kemp_writes"]}
+  ],
+  "questions": [
+    {"id": "q.who", "asks": "Who took the four hundred pounds?", "answer": "Josiah Kemp", "others": ["Tobias Finch"], "gate": 6, "needs": [["c.kemp_keys", "c.kemp_finch", "c.doors", "c.lockup"]], "rules_out": {"Tobias Finch": "c.lockup contradicts c.kemp_finch: he was locked up all night", "anyone without the keys": "c.doors: nothing was forced; c.kemp_keys: the keys never left the porter"}}
+  ],
+  "clues": [
+    {"id": "c.kemp_keys", "source": "The night porter's own statement", "says": "He came on at ten; the keys of the bank and the strongroom never left his belt until the morning.", "facts": ["f.kemp_on", "f.keys_belt"]},
+    {"id": "c.kemp_finch", "source": "The night porter's own statement", "says": "At one he saw the dismissed clerk looking in at the bank's window.", "facts": ["f.finch_window", "f.finch_role"], "false": true},
+    {"id": "c.doors", "source": "The Inspector's own examination", "says": "Neither the street door nor the strongroom door was forced: both were opened with their keys.", "facts": ["f.unforced"]},
+    {"id": "c.lockup", "source": "The Inspector's own knowledge", "says": "The dismissed clerk was in the Inspector's lock-up from ten on Thursday night until seven on Friday, the Inspector turning the key himself.", "facts": ["f.finch_lockup", "f.finch_since"]}
+  ]
+}
