@@ -6,7 +6,9 @@
   "scripts": {
     "test": "node --test \"engine/**/*.test.js\" \"scripts/**/*.test.js\"",
     "v1:test": "cd v1 && node --test",
-    "validate-world": "node scripts/validate-world.js cases/silver-blaze",
+    "validate-world": "for d in cases/miniatures/*/; do node scripts/validate-world.js $d --quiet; done",
+    "v2:test": "cd v2 && node --test \"engine/**/*.test.js\" \"scripts/**/*.test.js\"",
+    "v2:page-checks": "node v2/scripts/page-checks-all.mjs",
     "page-checks": "node scripts/page-checks.mjs",
     "page-checks-all": "node scripts/page-checks-all.mjs",
     "build-site": "node scripts/build-site.js",

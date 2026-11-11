@@ -2,7 +2,7 @@
 // Validate the world model as data (<case>/world/: the case header, entities, mentions, times, facts, accounts,
 // questions, strains) and print its counts. A case is its story text and these files; nothing else is read.
 //
-//   node scripts/validate-world.js cases/silver-blaze [--quiet]
+//   node scripts/validate-world.js cases/miniatures/rent-box [--quiet]
 //
 // Checks: ids unique; every `of`, `to` and entity-valued value (a location's or lives_at's, or any id with an
 // underscore) names an entity (the case's or the world's own); every time reference names a time point and `after`

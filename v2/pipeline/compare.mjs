@@ -16,7 +16,7 @@ import { normalize } from '../engine/story.js';
 const [name, part = 'all'] = process.argv.slice(2);
 if (!CASES[name]?.target) { console.error('usage: compare.mjs <case with a target> [part]'); process.exit(2); }
 const T = path.join(ROOT, CASES[name].target), N = caseDir(name);
-const V1 = path.join(ROOT, 'v1', CASES[name].target);
+const V1 = path.join(ROOT, '..', 'v1', CASES[name].target);
 const outDir = path.join(runDir(name), 'compare');
 fs.mkdirSync(outDir, { recursive: true });
 

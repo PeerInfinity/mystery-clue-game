@@ -1,0 +1,15 @@
+{
+  "facts": [
+    {"id": "f.dead", "of": "arkwright", "attr": "location", "value": "strongroom", "time": {"at": "t.night"}, "para": 1, "quote": "found him dead in the strongroom"},
+    {"id": "f.door", "of": "door", "attr": "closed_to", "value": "small", "detail": "bolted on the inside", "time": {"at": "t.night"}, "para": 2, "quote": "bolted on the inside"},
+    {"id": "f.chimney", "of": "chimney", "attr": "closed_to", "value": "person", "detail": "barred with iron", "time": {"at": "t.night"}, "para": 3, "quote": "barred with iron"},
+    {"id": "f.walls", "of": "walls", "attr": "closed_to", "value": "small", "detail": "sound", "time": {"at": "t.night"}, "para": 4, "quote": "were sound"},
+    {"id": "f.smoke", "of": "smoke", "attr": "passed", "value": "strongroom", "between": ["office", "strongroom"], "passes": "air", "time": {"at": "t.night"}, "para": 5, "quote": "drifted into the strongroom"},
+    {"id": "f.animals", "of": "silas", "attr": "carrying", "value": "animals", "time": {"at": "t.night"}, "para": 6, "quote": "keeps colonial animals"},
+    {"id": "f.grating", "of": "grating", "attr": "passes", "value": "small", "detail": "opens into the office", "time": {"at": "t.night"}, "para": 7, "quote": "opened into the office"},
+    {"id": "f.chain", "of": "chain", "attr": "attached", "value": "hook", "time": {"at": "t.night"}, "para": 8, "quote": "hung from a hook"},
+    {"id": "f.hook", "of": "hook", "attr": "near", "value": "grating", "time": {"at": "t.night"}, "para": 8, "quote": "beside the grating"},
+    {"id": "f.reach", "of": "chain", "attr": "reaches", "value": "desk", "time": {"at": "t.night"}, "para": 9, "quote": "reached down to the ledger desk"},
+    {"id": "f.fixed", "of": "desk", "attr": "fixed", "value": "floor", "time": {"at": "t.night"}, "para": 9, "quote": "bolted to the floor"}
+  ]
+}

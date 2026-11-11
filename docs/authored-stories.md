@@ -407,6 +407,14 @@ What the two-narrator, mistaken-witness and unreliable-narrator miniatures showe
   player to say that the story or its data is wrong, like a bug report. It would need somewhere for the reports to
   go, and the user does not want to set that up.
 
+- **The two Holmes cases are archived at `v2/`** (the user's proposal, 2026-11-11): Silver Blaze and The Speckled
+  Band, the pipeline and the documents about them, with their own copy of the page, the engine and the checks, as
+  they stood that day (every page check passing with the day's engine). The reason: every change for the short
+  cases had to be re-checked against them, some forty minutes a run, and they are experiments the direction has
+  moved on from. Whether to bring them forward to a later engine is to be decided later. The bare address is now a
+  start page listing the short cases (`start.html`), and the two cases' old addresses go on to `v2/`. The page
+  checks of all the short cases together take about two minutes (`npm run page-checks-all`).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

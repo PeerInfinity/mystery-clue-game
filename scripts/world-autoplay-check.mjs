@@ -2,7 +2,7 @@
 // cursor): it must finish without stopping or a page error, at the last paragraph, with its save holding what the true
 // path leaves (every mark, the reasoning moves, the trust set), and the player's own save untouched.
 //   node scripts/world-autoplay-check.mjs [layout]      layout: three (default), two or one; PHONE=1 a phone's width
-//   CASE=<dir> …                                         another case (the page's ?case=; default cases/silver-blaze)
+//   CASE=<dir> …                                         another case (the page's ?case=; default cases/miniatures/rent-box)
 // Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome on port
 // 9333 (one script at a time). Exits 1 on any failure.
 import fs from 'node:fs';

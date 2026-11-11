@@ -1,0 +1,5 @@
+{
+  "accounts": [
+    {"id": "acct.penn", "label": "What Penn saw", "origin": "penn", "how": "saw", "facts": ["f.dead", "f.door", "f.chimney", "f.walls", "f.smoke", "f.animals", "f.grating", "f.chain", "f.hook", "f.reach", "f.fixed"]}
+  ]
+}

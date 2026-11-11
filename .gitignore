@@ -1,9 +1,9 @@
 node_modules/
 .cache/
 _site/
-pipeline/runs/*/trial/
-# The pipeline's generated files, rebuilt by its scripts (pipeline/README.md, "Records"): every prompt as sent
+v2/pipeline/runs/*/trial/
+# The pipeline's generated files, rebuilt by its scripts (v2/pipeline/README.md, "Records"): every prompt as sent
 # (node pipeline/prompts.mjs <case> --write; checked against the hash in meta.json) and a run's assembled case
 # (node pipeline/assemble.mjs <case>). The runs of 2026-11-06 committed theirs, which stay tracked.
-pipeline/runs/**/*prompt.md
-pipeline/runs/*/case/
+v2/pipeline/runs/**/*prompt.md
+v2/pipeline/runs/*/case/

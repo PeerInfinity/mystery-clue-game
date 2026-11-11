@@ -1,51 +1,43 @@
 # Mystery clue game
 
-**Play in your browser:** [Silver Blaze](https://peerinfinity.github.io/mystery-clue-game/) ·
-[The Speckled Band](https://peerinfinity.github.io/mystery-clue-game/?case=cases/speckled-band) ·
-[How to play](https://peerinfinity.github.io/mystery-clue-game/guide.html)
+**Play in your browser:** [the start page](https://peerinfinity.github.io/mystery-clue-game/) · [How to play](https://peerinfinity.github.io/mystery-clue-game/guide.html)
 
-**New here? Start with a two-minute case**, each an invented story of a few paragraphs built around one move of the
-game: [The Lamp-Keeper's Word](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/lamp-keepers-word)
-(one witness's word reaches you by two people) ·
-[The Rent Box](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box)
-(two lodgers' statements that cannot both be true) ·
-[The Last Ferry](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry)
-(what happened in what order) ·
-[The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench)
-(a locked room, and the ways into it) ·
-[The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door)
-(what an act needed, and who had it) ·
-[The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house)
-(one evening, told by two people) ·
-[The Grey Cloak](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/grey-cloak)
-(an honest witness who is wrong) ·
-[The Night Porter's Statement](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/night-porters-statement)
-(a storyteller you cannot wholly believe)
+You read a short detective story a paragraph at a time and keep an ordered list of what happened: who was where, who
+did what, and when. What the narrator sees is certain; everything else reached the narrator through a chain of people,
+and you choose how far to trust each link. The page lists the contradictions among what you accept. The story raises
+questions as it goes; before it gives an answer away you show it, by linking the evidence and circling the answer the
+evidence leaves.
 
-**Watson's timeline**: you read a fair-play detective story as Dr Watson, and keep an ordered list of what happened,
-who was where, who did what, and when. What Watson sees himself is certain; everything else reached him through a
-chain of people (a witness, the police, the papers, Holmes), and you choose how far to trust each link. The page
-lists the contradictions among what you accept. The story raises questions as it goes; you circle the answer you
-believe and cross out the ones you have ruled out, and before the story gives an answer away you commit to one.
+**Short cases**, each an invented story of a few paragraphs, about two minutes long, built around one move of the game:
+[The Lamp-Keeper's Word](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/lamp-keepers-word) (one witness's word reaches you by two people) ·
+[The Rent Box](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box) (two lodgers' statements that cannot both be true) ·
+[The Last Ferry](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry) (what happened in what order) ·
+[The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench) (a locked room, and the ways into it) ·
+[The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door) (what an act needed, and who had it) ·
+[The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house) (one evening, told by two people) ·
+[The Grey Cloak](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/grey-cloak) (an honest witness who is wrong) ·
+[The Night Porter's Statement](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/night-porters-statement) (a storyteller you cannot wholly
+believe)
 
-There are two full cases, both by Arthur Conan Doyle (1892, public domain), and both are experimental:
+They are the first of the project's present direction, stories written for this system
+([`docs/authored-stories.md`](docs/authored-stories.md), which contains spoilers).
 
-- **"Silver Blaze"**, the case the game was built on, refined over many rounds of review.
-- **"The Adventure of the Speckled Band"**, the first story set up by the new-story pipeline
-  ([`pipeline/README.md`](pipeline/README.md)): a first version, not yet reviewed by hand, so it may still have rough
-  edges, such as a label that says more than the story has told.
+**Two full cases**, both by Arthur Conan Doyle (1892, public domain), which the page was built on. You read them as Dr
+Watson. They are experiments, kept in [`v2/`](v2/README.md) as they stood on 2026-11-11, with their own copy of the
+page, so the page can change for the new stories without disturbing them:
 
-There are also eight **miniatures**, short stories written for the game (linked above), each with just enough in it to
-show one mechanic. They are the first of a new direction, stories written for this system
-([`docs/authored-stories.md`](docs/authored-stories.md), which contains spoilers), and the best place to start.
+- [**Silver Blaze**](https://peerinfinity.github.io/mystery-clue-game/v2/), the case the game was built on, refined over many rounds of review.
+- [**The Adventure of the Speckled Band**](https://peerinfinity.github.io/mystery-clue-game/v2/?case=cases/speckled-band), the first story set up by the new-story
+  pipeline ([`v2/pipeline/README.md`](v2/pipeline/README.md)): a first version, not reviewed by hand, so it may have
+  rough edges, such as a label that says more than the story has told.
 
 ## Status: experimental, a working foundation
 
 Each story is modelled whole: every event, where each one came from and through whom, and the questions it raises.
 Nothing on the page runs ahead of the paragraph you have read. It can be played to the end, with hints from wherever
-you are, and a careful reader's playthrough can be watched. Both cases are experiments, a foundation more than a
-finished game, and either may change a great deal: the directions it might grow in are collected in
-[`docs/ideas.md`](docs/ideas.md) (which contains spoilers).
+you are, and a careful reader's playthrough can be watched. It is a foundation more than a finished game and may
+change a great deal: the directions it might grow in are collected in [`docs/authored-stories.md`](docs/authored-stories.md)
+and [`docs/ideas.md`](docs/ideas.md) (both contain spoilers).
 
 ## What is in it
 
@@ -66,7 +58,7 @@ finished game, and either may change a great deal: the directions it might grow 
 
 ## The earlier game
 
-Watson's timeline grew out of an earlier game on the same story,
+The page grew out of an earlier game on Silver Blaze,
 **[kept at `v1/`](https://peerinfinity.github.io/mystery-clue-game/v1/)** with
 [its own guide](https://peerinfinity.github.io/mystery-clue-game/v1/guide.html). Its people, places, things and
 clues become cards; every card raises questions with candidate answers, like pencil marks in sudoku; you rule
@@ -79,8 +71,9 @@ of its own. It may be removed later.
 ## Run it locally
 
 ```
-node scripts/serve.js            # http://localhost:8321/ (the earlier game: http://localhost:8321/v1/)
-npm test                         # engine tests and full case validation (under a second)
+node scripts/serve.js            # http://localhost:8321/ (the full cases: /v2/; the earlier game: /v1/)
+npm test                         # engine tests and the validation of every short case (under a second)
+npm run page-checks-all          # every short case played through the real page (about two minutes)
 ```
 
 No build step and no runtime dependencies (`npm install` fetches only the schema checker the tests use).
@@ -89,9 +82,11 @@ No build step and no runtime dependencies (`npm install` fetches only the schema
 
 - [`docs/technical.md`](docs/technical.md): how it is built, the commands, the checks. No spoilers.
 - [`docs/case-format.md`](docs/case-format.md): the case format and the engine behaviour it drives. Spoilers.
-- [`docs/reading-annotated.md`](docs/reading-annotated.md): a careful reader's thoughts through the whole of Silver Blaze,
-  the specification the moves were built from. Spoilers.
-- [`docs/logic-audit.md`](docs/logic-audit.md): for each answer the gate asks for, which links of the reader's
-  reasoning the page supports. Spoilers.
+- [`docs/authored-stories.md`](docs/authored-stories.md): the present direction, what each short case showed, and the
+  mechanics to add. Spoilers.
+- [`v2/docs/reading-annotated.md`](v2/docs/reading-annotated.md): a careful reader's thoughts through the whole of
+  Silver Blaze, the specification the moves were built from. Spoilers.
+- [`v2/docs/logic-audit.md`](v2/docs/logic-audit.md): for each answer the gate asks for in Silver Blaze, which links
+  of the reader's reasoning the page supports. Spoilers.
 - [`docs/ideas.md`](docs/ideas.md): where the project stands, why the earlier game fell short, ideas not built,
   known limitations. Spoilers.

@@ -2,7 +2,7 @@
 // Chrome of its own (ports from 9340), and all share the local server. The checks on the invented case (the room
 // panel) are the same whatever the case, so only the first run makes them.
 //   npm run page-checks-all            JOBS=<n> runs at once (default 3: more, and a loaded machine makes moves time out)
-//   npm run page-checks-all -- cases/silver-blaze cases/miniatures/rent-box      only these
+//   npm run page-checks-all -- cases/miniatures/rent-box cases/miniatures/rent-box      only these
 // Prints each case's result as it ends, slowest last; exits 1 if any check fails.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -12,7 +12,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const up = (url) => fetch(url).then((r) => r.ok, () => false);
 
 const found = [];
-for (const base of ['cases', 'cases/miniatures']) for (const dir of fs.readdirSync(path.join(ROOT, base))) if (fs.existsSync(path.join(ROOT, base, dir, 'world', 'path.json'))) found.push(`${base}/${dir}`);
+for (const base of ['cases', 'cases/miniatures'].filter((b) => fs.existsSync(path.join(ROOT, b)))) for (const dir of fs.readdirSync(path.join(ROOT, base))) if (fs.existsSync(path.join(ROOT, base, dir, 'world', 'path.json'))) found.push(`${base}/${dir}`);
 const cases = process.argv.slice(2).length ? process.argv.slice(2).map((c) => c.replace(/\/+$/, '')) : found;
 // The longest first, so the short ones fill in beside them: by the size of the true path.
 const size = (c) => fs.statSync(path.join(ROOT, c, 'world', 'path.json')).size;

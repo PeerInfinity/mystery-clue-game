@@ -4,7 +4,7 @@ import { timeOrder, contradictions } from './world.js';
 import fs from 'node:fs';
 import { ACTIONS, GENERIC_ACTIONS, setCaseActions, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, orderSteps } from './actions.js';
 // The tests are Silver Blaze's: its own action types (injuring, laying against) come from its case file.
-setCaseActions(JSON.parse(fs.readFileSync(new URL('../cases/silver-blaze/world/actions.json', import.meta.url), 'utf8')));
+setCaseActions(JSON.parse(fs.readFileSync(new URL('./test-actions.json', import.meta.url), 'utf8')));
 import { places } from './world.js';
 
 // The stable door in small: locked at nine, the boy goes out and locks it behind him, open in the morning.
@@ -322,5 +322,5 @@ test("a case's own action types come over the generic ones, and go with the next
     assert.ok(ACTIONS.injure && !GENERIC_ACTIONS.injure, 'injuring is Silver Blaze\'s own');
     setCaseActions({ actions: [{ id: 'whistle', label: 'whistling', requires: [], effects: [{ of: '$to', attr: 'condition', value: 'called back' }] }] });
     assert.ok(ACTIONS.whistle && !ACTIONS.injure && ACTIONS.lock, 'another case: its own, the generic, not the last case\'s');
-    setCaseActions(JSON.parse(fs.readFileSync(new URL('../cases/silver-blaze/world/actions.json', import.meta.url), 'utf8')));
+    setCaseActions(JSON.parse(fs.readFileSync(new URL('./test-actions.json', import.meta.url), 'utf8')));
 });

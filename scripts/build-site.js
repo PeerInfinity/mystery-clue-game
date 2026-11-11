@@ -10,7 +10,7 @@ import { execSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const out = path.resolve(root, process.argv[2] ?? '_site');
-const PAGES = ['index.html', 'guide.html', 'world.html', 'v1/index.html', 'v1/logic.html', 'v1/guide.html'];
+const PAGES = ['index.html', 'start.html', 'guide.html', 'world.html', 'v2/index.html', 'v2/guide.html', 'v1/index.html', 'v1/logic.html', 'v1/guide.html'];
 const files = new Set(PAGES);
 // Every reference to a page file carries the build's version (?v=<commit>), so a browser that caches files for a
 // while (GitHub Pages allows 10 minutes) never pairs a new page with an old stylesheet or module.
@@ -45,8 +45,10 @@ while (todo.length) {
 // (v1/cases/<case>/): what loadCase reads, the action tables the autoplay plays (v1/ui/autoplay.js: the reader's and
 // the minimal one), the hints' data and incremental mode's waits (without them the page offers no Hint button and no
 // incremental pace).
-for (const dir of [...fs.readdirSync(path.join(root, 'cases')), ...fs.readdirSync(path.join(root, 'cases', 'miniatures')).map((d) => path.join('miniatures', d))]) {
-    const world = path.join('cases', dir, 'world');
+// The two full cases kept at v2/ (v2/cases/<case>/) are collected the same way.
+const worlds = [...fs.readdirSync(path.join(root, 'cases', 'miniatures')).map((d) => path.join('cases', 'miniatures', d)), ...fs.readdirSync(path.join(root, 'v2', 'cases')).map((d) => path.join('v2', 'cases', d))];
+for (const dir of worlds) {
+    const world = path.join(dir, 'world');
     if (!fs.existsSync(path.join(root, world, 'case.json'))) continue;
     const header = JSON.parse(fs.readFileSync(path.join(root, world, 'case.json'), 'utf8'));
     for (const f of fs.readdirSync(path.join(root, world))) if (f.endsWith('.json')) files.add(path.join(world, f));

@@ -1,0 +1,18 @@
+{
+  "id": "sealed_room",
+  "title": "The Affair of the Counting House",
+  "author": "a test fixture",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "penn",
+      "name": "Penn",
+      "kind": "first-person",
+      "trust": "certain"
+    }
+  ],
+  "subtitle": "the timeline",
+  "source": {
+    "word_count": 70
+  }
+}

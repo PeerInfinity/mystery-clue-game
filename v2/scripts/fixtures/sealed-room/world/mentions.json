@@ -1,0 +1,52 @@
+{
+ "entities": {
+  "penn": [
+   "Penn"
+  ],
+  "arkwright": [
+   "Mr. Arkwright",
+   "Arkwright"
+  ],
+  "silas": [
+   "Old Silas"
+  ],
+  "strongroom": [
+   "the strongroom"
+  ],
+  "office": [
+   "the office"
+  ],
+  "door": [
+   "The door of the strongroom"
+  ],
+  "chimney": [
+   "The chimney of the strongroom"
+  ],
+  "walls": [
+   "The walls of the strongroom"
+  ],
+  "smoke": [
+   "Pipe smoke"
+  ],
+  "animals": [
+   "colonial animals"
+  ],
+  "grating": [
+   "A small grating"
+  ],
+  "chain": [
+   "A chain",
+   "The chain",
+   "the chain"
+  ],
+  "hook": [
+   "a hook"
+  ],
+  "desk": [
+   "the ledger desk"
+  ],
+  "floor": [
+   "the floor"
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "sealed": {
+  "place": "strongroom",
+  "surfaces": [
+   "walls"
+  ],
+  "time": "t.night",
+  "question": "How could anything have reached Arkwright?"
+ },
+ "openings": {
+  "door": {
+   "kind": "door",
+   "sides": [
+    "strongroom",
+    "office"
+   ]
+  },
+  "chimney": {
+   "kind": "chimney",
+   "sides": [
+    "strongroom",
+    "office"
+   ]
+  },
+  "grating": {
+   "kind": "vent",
+   "sides": [
+    "strongroom",
+    "office"
+   ]
+  }
+ }
+}

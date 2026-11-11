@@ -1,0 +1,214 @@
+/* Watson's timeline (world.html): the story so far, the event list, and the selected event's or name's detail. */
+body.world-page { display: block; height: auto; }
+.world-page .top { position: sticky; top: 0; z-index: 5; }
+.reading-at { display: inline-flex; align-items: center; gap: 6px; }
+.reading-at input { width: 5em; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; }
+.world-main { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 2fr); gap: 16px; padding: 12px 16px 40px; }
+.world-main h2 { font-size: 18px; margin: 4px 0 8px; }
+.world-story, .world-detail { position: sticky; top: 70px; align-self: start; max-height: calc(100vh - 86px); overflow: auto; }
+.world-story { font-family: var(--serif); font-size: 14px; padding-right: 6px; }
+.world-story p { margin: 0 0 8px; color: var(--muted); }
+.world-story p.now { color: var(--ink); }
+.world-story p.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { from { background: var(--chip); color: var(--ink); } to { background: transparent; } }
+#timeline .para, #detail .para, #q-box .para, #clashes .para { cursor: pointer; }
+.world-detail { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.world-detail h2 { font-family: var(--sans); font-size: 15px; font-weight: 600; }
+.world-detail h3 { font-size: 13px; color: var(--muted); font-family: var(--sans); margin: 12px 0 4px; }
+.para { font-size: 11px; color: var(--muted); background: var(--chip); border-radius: 8px; padding: 0 5px; white-space: nowrap; font-family: var(--sans); }
+.events { list-style: none; margin: 0; padding: 0; }
+.events li { padding: 3px 6px; border-radius: 6px; }
+.time-head { margin-top: 10px; font-family: var(--serif); font-weight: 600; border-bottom: 1px solid var(--line); color: var(--accent); }
+.event { cursor: pointer; display: block; }
+.event:hover { background: var(--accent-soft); }
+.event.sel { outline: 1px solid var(--accent); }
+.event.time-event { font-style: italic; color: var(--accent); font-size: 13px; }
+.event.below { opacity: .45; }
+.event.clash { background: var(--bad-soft); }
+.when { font-size: 12px; color: var(--muted); }
+.said { font-family: var(--serif); font-style: italic; }
+.asserts { margin: 2px 0 2px 18px; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+.asserts li::before { content: "asserts: "; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+.lvl { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; border: 1px solid var(--muted); }
+.lvl-certain { background: var(--good); border-color: var(--good); }
+.lvl-trusted { background: var(--good-soft); border-color: var(--good); }
+.lvl-uncertain { background: transparent; }
+.lvl-distrusted { background: var(--bad); border-color: var(--bad); }
+.ent { color: var(--ink); text-decoration: underline dotted var(--muted); cursor: pointer; }
+.ent:hover { color: var(--accent); }
+.chains, .people { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.chains li { margin: 4px 0; line-height: 1.8; }
+.link-step { white-space: nowrap; }
+.how { font-size: 11px; color: var(--muted); }
+.link-trust, .person-trust { font-size: 12px; padding: 0 2px; }
+.quote { font-family: var(--serif); font-style: italic; color: var(--muted); }
+.clash-box { background: var(--bad-soft); border: 1px solid var(--bad); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 13px; }
+.clash-box summary { cursor: pointer; color: var(--bad); font-weight: 600; }
+.clash-box ol { margin: 6px 0; padding-left: 20px; }
+.clash-box li { margin: 4px 0; }
+.clash-box li.sel { outline: 1px solid var(--bad); border-radius: 4px; padding: 2px 4px; }
+.drop { font-size: 11px; color: var(--bad); margin-left: 2px; }
+.trace { font-size: 12px; margin-left: 4px; }
+.side { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 4px; }
+.resolving, .link-step.resolving { background: #f5e3a3; border-radius: 4px; padding: 0 3px; color: var(--ink); }
+:root[data-theme="dark"] .resolving { background: #5a4a1a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .resolving { background: #5a4a1a; } }
+p.bad { color: var(--bad); } p.good { color: var(--good); }
+.view-bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.view-bar label { margin-right: 8px; }
+.world-main.wide { grid-template-columns: minmax(0, 1fr) minmax(0, 5fr) minmax(0, 2fr); }
+.grid-wrap { overflow: auto; max-height: calc(100vh - 140px); border: 1px solid var(--line); border-radius: 8px; }
+.pack { --colw: 13em; font-size: 12px; line-height: 1.4; width: calc(var(--cols) * var(--colw)); }
+.pack-head { position: sticky; top: 0; z-index: 2; display: grid; grid-template-columns: repeat(var(--cols), var(--colw)); background: var(--panel); border-bottom: 1px solid var(--line); }
+.pack-head > div { padding: 4px 6px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 1px dotted var(--line); }
+.pack-body { position: relative; background-image: repeating-linear-gradient(to right, transparent 0 calc(var(--colw) - 1px), var(--line) calc(var(--colw) - 1px) var(--colw)); }
+.pack-item { position: absolute; box-sizing: border-box; padding: 0 3px; }
+.pack-item .event { padding: 1px 3px; background: var(--bg); }
+.pack-time { font-family: var(--serif); font-size: 13px; color: var(--accent); background: var(--bg); padding: 4px 6px 1px; border-top: 1px solid var(--line); font-weight: 600; }
+.grid-span { color: var(--accent); }
+/* Questions: the panel, their place on the timeline, the player's marks. */
+.q-box { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 13px; background: var(--panel); }
+.q-box summary { cursor: pointer; font-weight: 600; }
+.q-box ol { margin: 6px 0; padding-left: 28px; max-height: 45vh; overflow: auto; }
+.q-box li { margin: 6px 0; }
+.q-box li.sel { outline: 1px solid var(--accent); border-radius: 4px; padding: 2px 4px; }
+.q-box li.clash > a { color: var(--bad); }
+.q-grip { cursor: grab; touch-action: none; user-select: none; opacity: .55; padding: 2px 5px 2px 0; }
+.q-top { border: 0; background: none; color: inherit; opacity: .55; cursor: pointer; font-size: 12px; padding: 0 3px; }
+.q-grip:hover, .q-top:hover, .q-grip:focus-visible { opacity: 1; }
+.q-box li.dragging { background: var(--accent-soft); border-radius: 4px; cursor: grabbing; }
+.q-box li.dragging:not(.q-line) > :not(.q-grip, a, .para) { display: none; }
+.q-box li.q-line { list-style: none; margin-left: -28px; padding-top: 2px; border-top: 2px solid var(--accent); font-size: 11px; color: var(--accent); }
+.link-more { display: block; font-size: 12px; margin: 5px 0; padding: 0; border: 0; background: none; color: var(--accent); cursor: pointer; text-decoration: underline; }
+.poss-row { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0; }
+.poss { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 12px; border: 1px dashed var(--muted); background: transparent; color: var(--ink); cursor: pointer; }
+.poss.circled { border: 2px solid var(--accent); font-weight: 600; }
+.poss.crossed { text-decoration: line-through; color: var(--muted); border-style: solid; border-color: var(--line); }
+.poss.right { box-shadow: 0 0 0 2px var(--good); }
+.poss.wrong { box-shadow: 0 0 0 2px var(--bad); }
+.more { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--chip); color: var(--muted); cursor: pointer; }
+.poss-group { margin: 2px 0 0 10px; }
+.q-mark { display: inline-block; width: 1.2em; text-align: center; border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 11px; margin-right: 4px; }
+.events .question, .grid-span .question { cursor: pointer; border: 1px dashed var(--accent); border-radius: 6px; margin: 2px 0; color: var(--accent); }
+.question.sel { outline: 1px solid var(--accent); }
+.question.clash { background: var(--bad-soft); }
+.event.hyp { border-left: 3px dashed var(--accent); margin-left: 14px; font-style: italic; }
+.event.hyp.right { border-left-color: var(--good); }
+.event.hyp.wrong { border-left-color: var(--bad); text-decoration: line-through; }
+.marks { list-style: none; padding: 0; font-size: 13px; }
+
+@media (max-width: 1000px) {
+  .world-main { grid-template-columns: 1fr; }
+  .world-story, .world-detail { position: static; max-height: 40vh; }
+}
+
+/* Watson's reasoning: the player's own entries, and the moves that make them. */
+.event.reasoned { border-left: 3px double var(--accent); padding-left: 6px; font-style: italic; }
+.moves { list-style: none; padding-left: 0; margin: 4px 0; }
+.moves li { margin: 3px 0; }
+.move { font: inherit; font-size: 12px; padding: 1px 8px; border-radius: 4px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+.note { background: var(--chip); padding: 4px 8px; border-radius: 4px; }
+
+/* The layouts. Three columns: the parts side by side, the page scrolling. With tabs (two panels, or one; a phone
+   always one): the page fills the window like the game's, each panel scrolling on its own. */
+.world-main > div { min-width: 0; }
+body.world-page.tabbed { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+body.world-page.tabbed .top { position: static; }
+.world-tabs { flex: 1; min-height: 0; }
+.world-tabs .panel-body { overflow: auto; padding: 12px 16px 40px; }
+.world-tabs .world-story, .world-tabs .world-detail { position: static; max-height: none; overflow: visible; }
+.world-tabs .q-box ol { max-height: none; }
+.world-tabs .grid-wrap { max-height: calc(100dvh - 200px); }
+.world-tabs .tab .small { color: inherit; }
+.settings-panel .check { display: block; }
+@media (max-width: 699px) {
+  .reading-at input { width: 3.5em; }
+  .world-tabs .panel-body { padding: 10px 12px 40px; }
+}
+/* A layout not in use takes no room (its own display would beat the hidden attribute). */
+.world-page main[hidden], #parked[hidden] { display: none !important; }
+@media (max-width: 600px) {
+  /* The settings button sits at the start of the second header row: its menu opens to the right, within the screen. */
+  .world-page .settings-panel { left: 0; right: auto; }
+}
+.world-tabs .world-story { font-size: 16px; }
+/* The mark of an entry the player can reason from. */
+.can-reason { font-size: 11px; color: var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 0 4px; font-style: normal; cursor: pointer; }
+
+/* Notices where the player is looking: the gate before a give-away, the answers just given, a link that no longer fits. */
+.notices { position: fixed; bottom: 12px; right: 16px; width: min(420px, calc(100vw - 32px)); z-index: 20; display: flex; flex-direction: column; gap: 8px;
+  max-height: calc(100dvh - 90px); overflow: auto; }
+.notice { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; box-shadow: 0 2px 10px rgba(0,0,0,.25); font-size: 14px; }
+.notice p { margin: 4px 0; }
+.notice ul { margin: 4px 0; padding-left: 18px; }
+.notice[hidden] { display: none; }
+.lapse-news { border-color: var(--bad); }
+.gate-news { border-color: var(--accent, var(--ink)); }
+.gate-news.flash { animation: notice-flash 1.2s; }
+@keyframes notice-flash { 0%, 100% { outline: 0 solid transparent; } 30% { outline: 3px solid var(--accent); } }
+
+/* Two plans side by side. */
+.compare { border-collapse: collapse; margin: 4px 0; width: 100%; }
+.compare th, .compare td { border: 1px solid var(--line); padding: 3px 6px; text-align: left; vertical-align: top; }
+.compare th { font-weight: 600; }
+
+/* Likely clashes: amber, softer than a contradiction. */
+.strain-box { border: 1px solid #c8961e; background: color-mix(in srgb, #e8b03a 14%, var(--panel)); border-radius: 6px; padding: 6px 10px; margin: 8px 0; }
+.strain-box summary { cursor: pointer; font-weight: 600; color: #8a5a00; }
+:root[data-theme="dark"] .strain-box summary { color: #f0c060; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .strain-box summary { color: #f0c060; } }
+.strain-box li { margin: 6px 0; }
+.strain-box li.held { opacity: .6; }
+.strains-key li { margin: 4px 0; }
+/* The autoplay (ui/world-autoplay.js): what a move shows the reader, highlighted for a moment. */
+.ap-seen { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 12%, transparent); transition: background .3s; }
+/* On a phone the autoplay's strip sits at the top: the header goes below it, so its Read on stays in view. */
+@media (max-width: 699px) { body.world-page.autoplaying { padding-top: 112px; } }
+/* The Cards: everyone and everything met so far, by kind. */
+.cards-box { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 13px; background: var(--panel); }
+.cards-box summary { font-weight: 600; cursor: pointer; }
+.cards-box h3 { margin: 8px 0 2px; font-size: 13px; }
+.cards-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.cards-list li.sel { font-weight: 600; }
+.mentions summary { cursor: pointer; font-weight: 600; margin-top: 10px; }
+.said { padding-left: 18px; }
+.said li { margin: 4px 0; }
+#story a.ent { color: inherit; }
+/* A hint: its rungs so far, More, Do it. */
+.hint-news .hint-rungs { margin: 4px 0 6px; padding-left: 20px; }
+.hint-news .hint-rungs li { margin: 3px 0; }
+
+/* The room panel (ui/world-room.js): only for a case with world/room.json. */
+.room-part { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: var(--shadow); }
+.rm { font-size: 13px; }
+.rm h3 { font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+.rm-q { font-family: var(--serif); font-size: 15px; margin: 0 0 8px; }
+.rm-note { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 4px 8px; margin: 0 0 8px; }
+.rm-table { border-collapse: collapse; width: 100%; }
+.rm-table th { font-weight: 500; color: var(--muted); text-align: left; font-size: 12px; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+.rm-table td { padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.way-pick { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.way-pick button { font-size: 11px; padding: 1px 5px; border: 1px dashed var(--line); border-radius: 4px; background: transparent; color: var(--muted); cursor: pointer; }
+.way-chip { min-width: 54px; font-size: 12px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--line); cursor: pointer; }
+.way-chip.closed { background: var(--chip); color: var(--ink); }
+.way-chip.open { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+.rm-chain { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.rm-node { padding: 3px 8px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 12px; }
+.rm-arrow { color: var(--muted); font-size: 12px; }
+.rm-add { padding: 3px 8px; border-radius: 12px; border: 1px dashed var(--accent); color: var(--accent); font-size: 12px; background: transparent; cursor: pointer; }
+.rm-reqs { margin: 0; padding-left: 16px; }
+.rm-reqs li { margin: 2px 0; }
+.rm-moves { margin: 6px 0 0; }
+.rm-tag { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; margin-left: 4px; white-space: nowrap; font-weight: 400; }
+
+/* Observations linked to open questions (ui/world.js, linkHtml and descriptionHtml). */
+.link-q { display: block; width: 100%; text-align: left; font-size: 13px; padding: 5px 8px; margin: 3px 0; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+.link-q.on { border-color: var(--accent); background: var(--accent-soft); }
+.link-row { font-size: 11px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 0 7px; background: transparent; cursor: pointer; white-space: nowrap; }
+.link-row.on { border-style: solid; background: var(--accent-soft); }
+.linking-bar { background: var(--accent); color: #fff; padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 8px; }
+.linking-bar button { background: transparent; color: #fff; border: 1px solid #fff; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.desc { margin-top: 4px; }
+.desc-list { margin: 2px 0 4px; padding-left: 16px; }
+.link-start { font-size: 11px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 0 7px; background: transparent; cursor: pointer; }
+.link-start.on { border-style: solid; background: var(--accent-soft); }

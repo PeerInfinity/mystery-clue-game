@@ -1,0 +1,228 @@
+// Play the true path (cases/silver-blaze/world/path.json) through Watson's timeline (index.html) in headless Chrome:
+// a fresh page, "Read on" to each move's paragraph (so the commitment gate is met for real), then the move's clicks,
+// each checked: its control is offered, the save shows the move, `see` (a pattern) is on the page after it, and the
+// page throws nothing. Every answer the story gives on the way must find the player's one circle right; at the end of
+// the story no contradiction may be open and no likely clash unheld.
+//   node scripts/path-check.mjs [path.json]      STOP=<para> stops after that paragraph's moves (and keeps the page)
+//   CASE=<dir> node scripts/path-check.mjs       another case (the page's ?case=; default cases/silver-blaze)
+// Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome
+// on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
+import fs from 'node:fs';
+import path from 'node:path';
+import { CASE, WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
+import { controlOf, made } from '../ui/world-moves.js';
+const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
+const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
+const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/v2/');
+const STOP = +(process.env.STOP ?? 1e9);
+
+const list = await (await fetch(`${CDP}/json`)).json();
+const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
+await new Promise((r) => ws.addEventListener('open', r));
+let n = 0; const pending = new Map(); const errors = [];
+ws.addEventListener('message', (e) => {
+    const m = JSON.parse(e.data);
+    if (pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
+    if (m.method === 'Runtime.exceptionThrown') errors.push(m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text);
+    if (m.method === 'Runtime.consoleAPICalled' && m.params.type === 'error') errors.push(m.params.args.map((a) => a.value ?? a.description).join(' '));
+});
+const send = (method, params = {}) => new Promise((r) => { const id = ++n; pending.set(id, r); ws.send(JSON.stringify({ id, method, params })); });
+const ev = async (expr) => { const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true }); if (r.result?.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description ?? 'eval failed'); return r.result?.result?.value; };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const J = JSON.stringify;
+const ready = async () => { for (let i = 0; i < 150; i++) { if (await ev(`!!document.querySelector('#timeline')?.children.length`).catch(() => false)) return; await sleep(200); } throw new Error('page not ready'); };
+
+await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
+await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
+await send('Page.navigate', { url: URL_ }); await sleep(1500);
+// A fresh page in three columns: every part in view, as on a laptop.
+await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three' }))}); 1`);
+await send('Page.reload'); await sleep(800); await ready();
+errors.length = 0;
+
+const reload = async () => { await send('Page.reload'); await sleep(500); await ready(); };
+const save = () => ev(`JSON.parse(localStorage.getItem(${J(STORE)}) ?? '{}')`);
+const exists = (sel) => ev(`!!document.querySelector(${J(sel)})`);
+const click = async (sel) => { const ok = await ev(`(() => { const e = document.querySelector(${J(sel)}); if (!e) return false; e.click(); return true; })()`); await sleep(30); return ok; };
+const choose = async (sel, value) => { const ok = await ev(`(() => { const e = document.querySelector(${J(sel)}); if (!e) return false; e.value = ${J(String(value))}; e.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`); await sleep(30); return ok; };
+const pageText = () => ev(`document.body.innerText`);
+const esc = (s) => s.replace(/["\\]/g, '\\$&');
+const LEVELS = { distrusted: 0, uncertain: 1, trusted: 2 };
+
+let failures = 0;
+const fail = (m, why) => { failures++; console.log(`FAIL ¶${m.at} ${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}: ${why}`); };
+
+/** Open what a move works on in the detail panel: a fact on the timeline, a question, or a likely clash's side. */
+async function openOn(on) {
+    if (on === 'route') return click(`#timeline [data-fact^="r:r:"] .ph`);
+    if (on.startsWith('q:')) return (await click(`#q-box a.link[data-q="${esc(on.slice(2))}"]`)) || click(`#q-box [data-q="${esc(on.slice(2))}"]`);
+    if (/^(hyp|pre):/.test(on)) return openOn(`q:${on.slice(4).split('=')[0]}`);
+    if (await exists(`#timeline [data-fact="${esc(on)}"]`)) return click(`#timeline [data-fact="${esc(on)}"] .ph`) || click(`#timeline [data-fact="${esc(on)}"]`);
+    return false;
+}
+const defaultOn = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
+
+// --- Earliest. The data's earliest paragraph for a circle; the page's, for the reasoning moves, found in play.
+const W = WORLD;
+const qs = new Map(JSON.parse(fs.readFileSync(path.join(W, 'questions.json'), 'utf8')).questions.map((q) => [q.id, q]));
+const strains = fs.existsSync(path.join(W, 'strains.json')) ? JSON.parse(fs.readFileSync(path.join(W, 'strains.json'), 'utf8')).strains : [];
+const label = (m) => `${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`;
+const early = [];
+const report = (m, at, why) => { early.push({ m, at }); failures++; console.log(`FAIL EARLY ¶${m.at} → ¶${at} ${label(m)}${why ? ` (${why})` : ''}`); };
+for (const m of moves.filter((x) => x.do === 'circle' && !x.late)) {
+    const q = qs.get(m.q), o = q?.possibilities.find((x) => x.value === m.pick);
+    if (!o) continue;
+    const right = q.answer === m.pick || (q.also_right ?? []).includes(m.pick);
+    const strain = strains.find((x) => [x.a, x.b].some((y) => y?.q === m.q && y.pick === m.pick));
+    const at = right ? Math.max(q.raised ?? 0, o.available, q.answer_inferable_at ?? 0) : m.see && strain ? Math.max(q.raised ?? 0, o.available, strain.available) : null;
+    if (at != null && at < m.at) report(m, at, right ? 'the answer is inferable there' : `its likely clash ${strain.id} shows there`);
+}
+const REASON = new Set(['a', 'b', 'c', 'plan', 'stop', 'compare', 'account']);
+/** Does the page allow move m now? Nothing is left behind: a move taken is undone, a plan opened is closed. */
+async function allowed(m) {
+    const on = defaultOn(m);
+    if (on && !(await openOn(on))) return false;
+    if (['a', 'b', 'c'].includes(m.do)) {
+        const sel = m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
+        if (!(await exists(sel))) return false;
+        const n = (await save()).reasoning?.length ?? 0;
+        await click(sel);
+        const took = ((await save()).reasoning?.length ?? 0) === n + 1;
+        if (took) await click('#undo');
+        return took;
+    }
+    // A plan or a check is a view: allowed once it shows what the move is for (`see`), or, without one, once offered.
+    // A check clicked can only be taken back by reloading the page (its result is not saved).
+    const plan = m.do === 'plan' ? m.of : m.key.split('|')[0], d = `#detail [data-move-d="${esc(plan)}"]`;
+    if (!(await exists(d))) return false;
+    const shut = await ev(`document.querySelector(${J(d)}).innerText !== 'Hide'`);
+    if (shut) await click(d);
+    let ok = true, clicked = false;
+    if (m.do !== 'plan') {
+        const sel = `#detail [data-${m.do}="${esc(m.key)}"]`;
+        ok = await exists(sel);
+        if (ok && m.see) { await click(sel); clicked = true; }
+    }
+    if (ok && m.see) ok = new RegExp(m.see).test(await ev(`document.querySelector('#detail').innerText`));
+    if (clicked) await reload();
+    else if (shut && (await exists(d))) await click(d);
+    return ok;
+}
+let probing = [];   // the next paragraph's reasoning moves not yet found allowed earlier
+async function probe(now) {
+    for (const m of probing) if (await allowed(m)) { report(m, now, 'the page allows it'); probing = probing.filter((x) => x !== m); }
+    if (errors.length) { failures++; console.log(`FAIL ¶${now} page error while trying moves early: ${errors.splice(0).join(' | ')}`); }
+}
+
+async function readTo(p) {
+    probing = moves.filter((m) => m.at === p && REASON.has(m.do) && !m.late);
+    while (true) {
+        const now = (await save()).para ?? 1;
+        if (now >= p) return true;
+        if (probing.length) await probe(now);
+        await click('#next');
+        const after = (await save()).para ?? 1;
+        const news = await ev(`(() => { const e = document.querySelector('#answer-news'); return e && !e.hidden ? [...e.querySelectorAll('li')].map((li) => ({ text: li.innerText, bad: !!li.querySelector('.bad') })) : []; })()`);
+        for (const a of news) if (a.bad) { failures++; console.log(`FAIL ¶${after} answer: ${a.text}`); }
+        if (news.length) { console.log(`  ¶${after} answered: ${news.map((a) => a.text.replace(/\s+/g, ' ')).join(' | ')}`); await click('[data-answers-close]'); }
+        if (after === now) {
+            const gate = await ev(`document.querySelector('#gate-news')?.innerText ?? ''`);
+            failures++; console.log(`FAIL gate before ¶${now + 1}: ${gate.replace(/\s+/g, ' ')}`);
+            return false;
+        }
+    }
+}
+
+async function play(m) {
+    const on = defaultOn(m);
+    if (on && !(await openOn(on))) return fail(m, `cannot open ${on}`);
+    const before = await save();
+    switch (m.do) {
+        case 'circle': case 'cross': {
+            const sel = `#q-box [data-mark-q="${esc(m.q)}"][data-mark-pick="${esc(m.pick)}"]`;
+            if (!(await exists(sel))) await click(`#q-box [data-more-q="${esc(m.q)}"]`);
+            if (!(await exists(sel))) return fail(m, 'possibility not offered');
+            const want = m.do === 'circle' ? 'circled' : 'crossed';
+            for (let i = 0; i < 3 && (await save()).marks?.[m.q]?.[m.pick] !== want; i++) await click(sel);
+            if ((await save()).marks?.[m.q]?.[m.pick] !== want) return fail(m, 'mark not saved');
+            break;
+        }
+        case 'trust': {
+            const sel = m.link ? `#detail .link-trust[data-key="${esc(m.link)}"]` : `#detail .person-trust[data-person="${esc(m.person)}"]`;
+            if (!(await exists(sel))) return fail(m, `no trust control for ${m.link ?? m.person} on ${on}`);
+            await choose(sel, LEVELS[m.level]);
+            const tr = (await save()).trust ?? {};
+            const got = m.link ? tr.links?.[m.link] : tr.people?.[m.person];
+            if (got !== LEVELS[m.level] && !(m.level === 'uncertain' && got == null)) return fail(m, 'trust not saved');
+            break;
+        }
+        case 'a': case 'b': case 'c': {
+            const sel = m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
+            if (!(await exists(sel))) return fail(m, 'move not offered');
+            await click(sel);
+            const note = await ev(`document.querySelector('#detail .note')?.innerText ?? ''`);
+            if ((await save()).reasoning?.length !== (before.reasoning?.length ?? 0) + 1) return fail(m, `not taken${note ? ': ' + note : ''}`);
+            break;
+        }
+        case 'plan': {
+            const sel = `#detail [data-move-d="${esc(m.of)}"]`;
+            if (!(await exists(sel))) return fail(m, 'no "What would this need?"');
+            const shut = await ev(`document.querySelector(${J(sel)}).innerText !== 'Hide'`);
+            if (shut) await click(sel);
+            break;
+        }
+        case 'stop': case 'compare': case 'account': {
+            const sel = `#detail [data-${m.do}="${esc(m.key)}"]`;
+            const d = `#detail [data-move-d="${esc(m.key.split('|')[0])}"]`;
+            if (!(await exists(sel)) && (await exists(d)) && (await ev(`document.querySelector(${J(d)}).innerText !== 'Hide'`))) await click(d);
+            if (!(await exists(sel))) return fail(m, 'check not offered');
+            await click(sel);
+            break;
+        }
+        case 'hold': {
+            const sel = `[data-hold="${esc(m.strain)}"]`;
+            if (!(await exists(sel))) return fail(m, 'likely clash not shown');
+            await click(sel);
+            if (!(await save()).held?.includes(m.strain)) return fail(m, 'not held');
+            break;
+        }
+        case 'way': case 'got': case 'route': case 'link': {
+            const sel = controlOf(m);
+            if (!(await exists(sel))) return fail(m, 'not offered');
+            await click(sel);
+            if (!made(m, await save())) return fail(m, `not taken: ${await ev(`document.querySelector('.rm-note')?.innerText ?? ''`)}`);
+            break;
+        }
+        default: return fail(m, 'unknown move');
+    }
+    if (m.see && !new RegExp(m.see).test(await pageText())) return fail(m, `not on the page: /${m.see}/`);
+    if (errors.length) { const e = errors.splice(0); return fail(m, `page error: ${e.join(' | ')}`); }
+    console.log(`ok ¶${m.at} ${m.do} ${m.way ?? m.node ?? m.entry ?? m.q ?? m.of ?? m.a ?? m.key ?? m.strain ?? m.link ?? m.person ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.do === 'link' ? ' → ' + m.q : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`);
+}
+
+const t0 = Date.now();
+// SAVE=<file>: write the save at the end (with STOP, the state to look at a paragraph from).
+const dump = async () => { if (process.env.SAVE) fs.writeFileSync(process.env.SAVE, JSON.stringify(await save())); };
+let last = 1;
+for (const m of moves) {
+    if (m.at > STOP) break;
+    if (m.at < last) { fail(m, `out of order (after ¶${last})`); continue; }
+    if (!(await readTo(m.at))) break;
+    last = m.at;
+    await play(m);
+}
+if (STOP >= 1e9 && !failures) {
+    const end = await ev(`+document.getElementById('para').max`);
+    if (!(await readTo(end))) { console.log(`${failures} failure(s)`); process.exit(1); }
+    const lacked = await ev(`[...document.querySelectorAll('#q-box p')].filter((p) => /^Your description lacked/.test(p.textContent)).map((p) => p.closest('li').querySelector('a.link').textContent + ': ' + p.textContent)`);
+    for (const l of lacked) { failures++; console.log(`FAIL at the end: ${l}`); }
+    const open = await ev(`document.querySelector('#clashes .clash-box summary')?.innerText ?? ''`);
+    if (open) { failures++; console.log(`FAIL at the end: ${open}\n${await ev(`document.querySelector('#clashes').innerText`)}`); }
+    const unheld = await ev(`[...document.querySelectorAll('#clashes [data-hold]')].map((b) => b.closest('li').innerText.replace(/\\s+/g, ' '))`);
+    for (const s of unheld) { failures++; console.log(`FAIL at the end, a likely clash not held: ${s}`); }
+}
+await dump();
+if (early.length) console.log(`${early.length} move(s) allowed before their paragraph`);
+console.log(`${failures ? `${failures} failure(s)` : 'all moves played'} in ${Math.round((Date.now() - t0) / 1000)} s`);
+ws.close();
+process.exit(failures ? 1 : 0);

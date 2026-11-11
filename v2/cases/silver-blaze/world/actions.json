@@ -1,0 +1,9 @@
+{
+  "description": "The case's own action types (engine/actions.js has the generic ones): each `{id, label, requires, effects}` in the action table's rule shape, its roles `$agent`, `$thing`, `$to`, `$item`, `$about`, `$via`, `$where`. `ramifies`: what a goal's state brings with it, `{if: {attr, value}, then: {attr, value}}` of the same thing (a horse injured before its race loses it).",
+  "ramifies": [{"if": {"attr": "condition", "value": "injured"}, "then": {"attr": "condition", "value": "loses the race"}}],
+  "actions": [
+    {"id": "injure", "label": "injuring", "requires": [{"of": "$via", "state": "door", "value": "open"}, {"of": "$agent", "at": "$via"}, {"guard": "$via"}], "effects": [{"of": "$thing", "attr": "condition", "value": "injured"}]},
+    {"id": "lay_against", "label": "laying against", "requires": [{"of": "$thing", "attr": "condition", "value": "loses the race"}], "effects": [{"of": "$agent", "attr": "condition", "value": "in funds"}]},
+    {"id": "cut_self", "label": "cut, as he fell,", "requires": [{"of": "$agent", "carrying": "$item"}, {"of": "$agent", "attr": "condition", "value": "struck down"}], "effects": [{"of": "$agent", "attr": "condition", "value": "cut"}]}
+  ]
+}

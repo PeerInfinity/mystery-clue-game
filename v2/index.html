@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silver Blaze: Watson's Timeline</title>
+<link rel="stylesheet" href="ui/style.css">
+<link rel="stylesheet" href="ui/world.css">
+</head>
+<body class="world-page">
+<header class="top">
+  <h1><span class="case-title">Silver Blaze</span> <span class="subtitle">Watson's timeline</span></h1>
+  <div class="controls">
+    <span class="reading-at">
+      <label title="Read on to this paragraph (the story so far stays above: scroll up to re-read it)">Read to ¶<input type="number" id="para" min="1" size="4"></label>
+      <button type="button" id="next" title="Read the next paragraph">Read on ▶</button>
+    </span>
+    <button type="button" id="undo" class="quiet" title="Undo the last change of trust, of a mark, or of your reasoning">Undo</button>
+    <button type="button" id="hint" class="quiet" title="What a careful reader would do next: each press a step further">Hint</button>
+    <details class="settings" id="settings">
+      <summary title="Settings: what is on the timeline, and the page's layout"><span class="gear" aria-hidden="true">⚙</span> <span class="long">Settings</span><span class="short">Settings</span></summary>
+      <div class="settings-panel">
+        <div class="small muted opt-group-title">The timeline</div>
+        <label title="Facts whose best chain you trust at least this far are on the timeline.">On the timeline from
+          <select id="threshold"></select>
+        </label>
+        <label class="check" title="Show the facts below the threshold too, faded."><span><input type="checkbox" id="show-below"> Show the rest, faded</span></label>
+        <span id="narrator-trust" class="narrator-trust"></span>
+        <div class="small muted opt-group-title settings-rule" title="Kept on this device">The page</div>
+        <label id="layout-label" title="Three columns side by side (a wide screen), or panels with tabs: two side by side, or one (a phone always shows one)">Layout
+          <select id="layout"><option value="three">Three columns</option><option value="two">Two columns, with tabs</option><option value="one">One column, with tabs</option></select>
+        </label>
+        <label title="Light or dark, or as this device is set">Theme
+          <select id="theme"><option value="system">As the system</option><option value="light">Light</option><option value="dark">Dark</option></select>
+        </label>
+        <label title="How long the Hint button waits after each press">Wait between hints
+          <select id="hint-wait"><option value="0">none</option><option value="10">10 seconds</option><option value="30">30 seconds</option><option value="60">a minute</option></select>
+        </label>
+        <label title="Before the story gives an answer away: whether a question with evidence to link lets you on only with the evidence linked and the right answer circled, or with any one answer circled">To read past an answer
+          <select id="gate-rule"><option value="strict">show it: the evidence and the right answer</option><option value="any">commit to any answer</option></select>
+        </label>
+        <button type="button" id="reset" class="quiet settings-rule" title="Every link and person back to uncertain">Reset trust…</button>
+        <button type="button" id="start-over" class="quiet" title="Clear your timeline on this device: trust, marks, reasoning, back to ¶1 (the page's layout, theme and hint wait are kept)">Start over…</button>
+        <button type="button" id="autoplay-open" class="quiet settings-rule" title="A careful reader plays the whole story through this page; your timeline is kept aside">Watch the autoplay…</button>
+        <a class="settings-link settings-rule" href="guide.html" target="_blank" rel="noopener">How to play (the guide)…</a>
+        <a class="settings-link" href="../">The short cases, and the page as it is now…</a>
+        <a class="settings-link" href="../v1/">The earlier game…</a>
+      </div>
+    </details>
+    <a id="guide-link" class="guide-link" href="guide.html" target="_blank" rel="noopener" title="How to play: the guide, in a new tab">?</a>
+  </div>
+</header>
+
+<!-- The page's parts. The layout (ui/world.js, mountLayout) puts each into a column, or into a tabbed panel; the
+     parts not shown wait in #parked. -->
+<main class="world-main" id="three"></main>
+<main class="layout world-tabs" id="tabbed" hidden>
+  <section class="panel" data-panel="0"><div class="tabs" role="tablist"></div><div class="back-row small" hidden></div><div class="panel-body tool-body" id="panel-0"></div></section>
+  <section class="panel" data-panel="1"><div class="tabs" role="tablist"></div><div class="back-row small" hidden></div><div class="panel-body tool-body" id="panel-1"></div></section>
+</main>
+<div class="notices"><div id="gate-news" class="notice gate-news" role="status" hidden></div><div id="answer-news" class="notice answer-news" role="status" hidden></div><div id="lapse-news" class="notice lapse-news" role="status" hidden></div><div id="hint-news" class="notice hint-news" role="status" hidden></div></div>
+<div id="parked" hidden>
+  <section class="part world-story" data-part="story" aria-label="The story so far"><h2>The story</h2><div id="story"></div></section>
+  <section class="part" data-part="clashes" aria-label="Contradictions"><div id="clashes"></div></section>
+  <section class="part" data-part="questions" aria-label="Questions"><div id="questions"></div></section>
+  <section class="part" data-part="cards" aria-label="Cards"><div id="cards"></div></section>
+  <section class="part world-timeline" data-part="timeline" aria-label="The timeline">
+    <div class="view-bar"><h2>The timeline</h2>
+      <span class="small"><label>View <select id="view"><option value="list">List</option><option value="place">Grid by place</option><option value="source">Grid by source</option></select></label>
+      <label title="Every entry, or only those you can reason from (marked ⚙)">Show <select id="only-moves"><option value="all">Everything</option><option value="moves">Only entries with moves ⚙</option></select></label>
+      <label id="depth-label">Places <select id="depth"><option value="1">by region</option><option value="2">by area</option><option value="3">by place</option><option value="9">in full</option></select></label></span>
+    </div>
+    <div id="timeline"><p class="muted">Reading the case…</p></div>
+  </section>
+  <aside class="part world-detail" data-part="detail" id="detail" aria-label="Details"><p class="muted">Click an event for where it comes from, or a name for its own timeline.</p></aside>
+</div>
+<script type="module" src="ui/world.js"></script>
+</body>
+</html>

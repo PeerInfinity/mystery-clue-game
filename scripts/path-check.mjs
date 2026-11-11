@@ -1,10 +1,10 @@
-// Play the true path (cases/silver-blaze/world/path.json) through Watson's timeline (index.html) in headless Chrome:
+// Play the true path (cases/miniatures/rent-box/world/path.json) through Watson's timeline (index.html) in headless Chrome:
 // a fresh page, "Read on" to each move's paragraph (so the commitment gate is met for real), then the move's clicks,
 // each checked: its control is offered, the save shows the move, `see` (a pattern) is on the page after it, and the
 // page throws nothing. Every answer the story gives on the way must find the player's one circle right; at the end of
 // the story no contradiction may be open and no likely clash unheld.
 //   node scripts/path-check.mjs [path.json]      STOP=<para> stops after that paragraph's moves (and keeps the page)
-//   CASE=<dir> node scripts/path-check.mjs       another case (the page's ?case=; default cases/silver-blaze)
+//   CASE=<dir> node scripts/path-check.mjs       another case (the page's ?case=; default cases/miniatures/rent-box)
 // Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';

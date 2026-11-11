@@ -9,7 +9,7 @@
 // 9333 (one script at a time). Exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
-import { WORLD, STORE, IS_DEFAULT, pageUrl, CDP } from './case-env.mjs';
+import { WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
 const BASE = process.env.URL ?? 'http://localhost:8321/';
 const J = JSON.stringify;
 
@@ -109,8 +109,7 @@ function mistakesOf() {
     return { start: { para, marks, trust: { links, people: {} } }, expect };
 }
 if (!which || which === 'mistakes') {
-    if (IS_DEFAULT) await run('mistakes', { para: 20, marks: { 'q.who_killed': { simpson: 'circled' }, 'q.weapon': { "Simpson's Penang-lawyer": 'circled' }, 'q.drug_where': { 'at the house, after his portion was set apart': 'crossed' } }, trust: { links: { 'f.tell_recital': 0 }, people: {} } }, ['move', 'unmark', 'uncross', 'trust']);
-    else { const m = mistakesOf(); console.log(`mistakes: ${J(m.start)}`); await run('mistakes', m.start, m.expect); }
+    const m = mistakesOf(); console.log(`mistakes: ${J(m.start)}`); await run('mistakes', m.start, m.expect);
 }
 console.log(failures ? `${failures} failure(s)` : 'the hints reach the end');
 ws.close();

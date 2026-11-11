@@ -6,8 +6,8 @@
 // uncertain; its question (kind provenance) says what else it could have been. Every chain ends with a narrator's
 // `narrates` link to the reader (world/case.json `narrators`).
 //
-//   node scripts/world-provenance.js cases/silver-blaze            every fact's chains
-//   node scripts/world-provenance.js cases/silver-blaze --accounts each account's chains and who holds it when
+//   node scripts/world-provenance.js cases/miniatures/rent-box            every fact's chains
+//   node scripts/world-provenance.js cases/miniatures/rent-box --accounts each account's chains and who holds it when
 
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,4 +1,4 @@
-// The autoplay of Watson's timeline: the true path (cases/silver-blaze/world/path.json) played through the page, from
+// The autoplay of Watson's timeline: the true path (cases/miniatures/rent-box/world/path.json) played through the page, from
 // the first paragraph to the last, as a careful reader plays it. Each move is made with the page's own controls (a
 // click on the element, a value chosen and its change dispatched), a cursor gliding to each; the caption says the move
 // in plain words and the reader's thought (`why`); what a move shows the reader (`see`) is highlighted for a moment.

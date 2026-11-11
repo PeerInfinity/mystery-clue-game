@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mystery clue game</title>
+<style>
+:root {
+  --bg: #f6f1e7; --panel: #fffdf8; --ink: #2a2520; --muted: #7a6f63; --line: #ddd2c0; --accent: #8a3b12;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1d1a17; --panel: #26221e; --ink: #ece4d8; --muted: #a39887; --line: #3d362f; --accent: #e0915c; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); }
+main { max-width: 760px; margin: 0 auto; padding: 28px 16px 56px; }
+h1 { font: 600 30px/1.2 var(--serif); margin: 0 0 6px; }
+h2 { font: 600 20px/1.3 var(--serif); margin: 34px 0 10px; }
+p.lead { font-size: 18px; margin: 0 0 14px; }
+a { color: var(--accent); }
+ul.cases { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+ul.cases a { display: block; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; text-decoration: none; color: inherit; }
+ul.cases a:hover, ul.cases a:focus-visible { border-color: var(--accent); }
+ul.cases b { font: 600 18px/1.3 var(--serif); color: var(--accent); display: block; }
+ul.cases span { color: var(--muted); }
+.small { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Mystery clue game</h1>
+<p class="lead">You read a short detective story a paragraph at a time and keep a timeline of what happened: who was
+where, who said what, and how far you believe each of them. Before the story gives an answer away, you show it: link
+the evidence and circle the answer it leaves.</p>
+<p><a href="guide.html">How to play</a></p>
+
+<h2>Short cases</h2>
+<p class="small">About two minutes each. Each turns on one move of the game; start anywhere.</p>
+<ul class="cases">
+  <li><a href="./?case=cases/miniatures/lamp-keepers-word"><b>The Lamp-Keeper's Word</b><span>One witness's word reaches you by two people.</span></a></li>
+  <li><a href="./?case=cases/miniatures/rent-box"><b>The Rent Box</b><span>Two lodgers' statements that cannot both be true.</span></a></li>
+  <li><a href="./?case=cases/miniatures/last-ferry"><b>The Last Ferry</b><span>What happened in what order.</span></a></li>
+  <li><a href="./?case=cases/miniatures/ring-on-the-bench"><b>The Ring on the Bench</b><span>A locked room, and the ways into it.</span></a></li>
+  <li><a href="./?case=cases/miniatures/cellar-door"><b>The Cellar Door</b><span>What an act needed, and who had it.</span></a></li>
+  <li><a href="./?case=cases/miniatures/dinner-at-larch-house"><b>The Dinner at Larch House</b><span>One evening, told by two people.</span></a></li>
+  <li><a href="./?case=cases/miniatures/grey-cloak"><b>The Grey Cloak</b><span>An honest witness who is wrong.</span></a></li>
+  <li><a href="./?case=cases/miniatures/night-porters-statement"><b>The Night Porter's Statement</b><span>A storyteller you cannot wholly believe.</span></a></li>
+</ul>
+
+<h2>Full cases</h2>
+<p class="small">Two Sherlock Holmes stories by Arthur Conan Doyle (1892), each a whole story of a few hours. They are
+experiments, kept as they stood when the short cases began, with their own copy of the page.</p>
+<ul class="cases">
+  <li><a href="v2/"><b>Silver Blaze</b><span>A racehorse gone, and its trainer dead on the moor.</span></a></li>
+  <li><a href="v2/?case=cases/speckled-band"><b>The Adventure of the Speckled Band</b><span>A sister's death in a locked room, two years ago.</span></a></li>
+</ul>
+
+<p class="small" style="margin-top: 34px">An earlier, different game on Silver Blaze is kept at <a href="v1/">v1/</a>.</p>
+</main>
+</body>
+</html>

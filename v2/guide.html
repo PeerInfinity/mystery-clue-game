@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to play: Watson's Timeline</title>
+<script>
+// The case the guide was opened from (?case=, as the page's), for the theme and the way back.
+const fromCase = new URLSearchParams(location.search).get('case');
+const caseKey = fromCase ? fromCase.replace(/\/+$/, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') : 'silver-blaze';
+// The theme chosen in the page's Settings (kept on this device with the timeline), so the guide matches the page.
+try {
+    const t = JSON.parse(localStorage.getItem(`${caseKey}-world-v1`) ?? 'null')?.theme;
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+} catch { /* no storage: as the system */ }
+</script>
+<style>
+:root {
+  --bg: #f6f1e7; --panel: #fffdf8; --ink: #2a2520; --muted: #7a6f63; --line: #ddd2c0;
+  --accent: #8a3b12; --accent-soft: #f3e2d4; --good: #2f6b3a; --good-soft: #e1efdf;
+  --bad: #9b2c2c; --bad-soft: #f6dede; --warn: #8a6100; --warn-soft: #f7ecd0; --chip: #efe7da;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1a17; --panel: #26221e; --ink: #ece4d8; --muted: #a39887; --line: #3d362f;
+    --accent: #e0915c; --accent-soft: #3a2a1f; --good: #8fcf98; --good-soft: #20331f;
+    --bad: #ef8f8f; --bad-soft: #3a2020; --warn: #e6c36a; --warn-soft: #3a3020; --chip: #332d27;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d1a17; --panel: #26221e; --ink: #ece4d8; --muted: #a39887; --line: #3d362f;
+  --accent: #e0915c; --accent-soft: #3a2a1f; --good: #8fcf98; --good-soft: #20331f;
+  --bad: #ef8f8f; --bad-soft: #3a2020; --warn: #e6c36a; --warn-soft: #3a3020; --chip: #332d27;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.25; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+.top h1 { font-size: 22px; margin: 0; }
+.subtitle { font-size: 14px; color: var(--muted); font-style: italic; font-weight: 400; }
+.back { font-size: 14px; white-space: nowrap; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 8px 16px 64px; }
+.lead { font-family: var(--serif); font-size: 18px; }
+.aside { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 10px 14px; margin: 16px 0; font-size: 15px; }
+.aside.warn { border-left-color: var(--bad); }
+
+nav.toc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; margin: 20px 0 8px; }
+nav.toc h2 { font-size: 16px; margin: 0 0 4px; }
+nav.toc ol { margin: 0; padding-left: 1.4em; columns: 2 240px; column-gap: 24px; font-size: 15px; }
+nav.toc li { break-inside: avoid; }
+
+section { border-top: 1px solid var(--line); margin-top: 28px; padding-top: 4px; }
+section h2 { font-size: 24px; margin: 18px 0 8px; }
+section h3 { font-size: 18px; margin: 20px 0 4px; }
+p { margin: 0 0 .8em; }
+ul, ol { padding-left: 1.4em; margin: 0 0 .8em; }
+li { margin: 3px 0; }
+dl { margin: 0 0 1em; }
+dt { font-weight: 600; margin-top: 10px; }
+dd { margin: 2px 0 0 1.2em; }
+
+/* Bits of the page's own look, drawn for the examples. */
+.btn { display: inline-block; background: var(--accent); color: #fff; border-radius: 6px; padding: 1px 9px; font-size: 14px; white-space: nowrap; }
+.btn.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.tab { display: inline-block; border: 1px solid var(--line); border-bottom: 0; border-radius: 6px 6px 0 0; padding: 0 8px; font-size: 14px; background: var(--panel); white-space: nowrap; }
+.chip { display: inline-block; background: var(--chip); color: var(--ink); border-radius: 12px; padding: 1px 9px; font-size: 14px; border: 1px solid transparent; white-space: nowrap; }
+.chip.circled { border: 2px solid var(--accent); padding: 0 8px; font-weight: 600; }
+.chip.struck { text-decoration: line-through; opacity: .55; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--good); vertical-align: middle; margin-right: 3px; }
+.dot.certain { background: var(--good); }
+.dot.trusted { background: var(--good-soft); }
+.dot.uncertain { background: transparent; border-color: var(--muted); }
+.dot.distrusted { background: var(--bad); border-color: var(--bad); }
+.para { font-size: 12px; color: var(--muted); background: var(--chip); border-radius: 8px; padding: 0 5px; white-space: nowrap; }
+.clash { background: var(--bad-soft); border-radius: 3px; padding: 0 4px; }
+.strain { background: var(--warn-soft); border-radius: 3px; padding: 0 4px; }
+.demo { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 10px 0 14px; font-size: 15px; }
+.kbd { font: 13px var(--sans); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); white-space: nowrap; }
+.muted { color: var(--muted); }
+
+@media (max-width: 480px) {
+  .subtitle { display: none; }
+  .top h1 { font-size: 19px; }
+  section h2 { font-size: 21px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Watson's timeline <span class="subtitle">how to play</span></h1>
+  <a class="back" href="./">← Back to the timeline</a>
+</header>
+
+<main class="wrap">
+
+<p class="lead">You read a Sherlock Holmes story, told by Dr Watson, and keep an ordered list of what happened: who was
+where, who did what, and when.</p>
+
+<p>This guide gives nothing away. Its examples come from the story's first pages, where you learn that a famous
+racehorse has disappeared and its trainer has been found dead, or they are made up.</p>
+
+<nav class="toc" aria-label="Contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#what">What it is</a></li>
+    <li><a href="#screen">The screen</a></li>
+    <li><a href="#reading">Reading on, and the gate</a></li>
+    <li><a href="#timeline">The timeline</a></li>
+    <li><a href="#trust">Trust: how it reached you</a></li>
+    <li><a href="#clashes">Contradictions and likely clashes</a></li>
+    <li><a href="#questions">Questions and your marks</a></li>
+    <li><a href="#moves">Reasoning: the moves</a></li>
+    <li><a href="#room">The room</a></li>
+    <li><a href="#observations">Observations</a></li>
+    <li><a href="#plans">Plans and their checks</a></li>
+    <li><a href="#cards">Cards and the story's names</a></li>
+    <li><a href="#hints">Hints</a></li>
+    <li><a href="#undo">Undo</a></li>
+    <li><a href="#autoplay">Watching the autoplay</a></li>
+    <li><a href="#settings">Settings and starting over</a></li>
+    <li><a href="#earlier">The earlier game</a></li>
+  </ol>
+</nav>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="what">
+<h2>1. What it is</h2>
+<p>The page is built on Sherlock Holmes stories by Arthur Conan Doyle: <i>Silver Blaze</i> and <i>The Adventure of
+the Speckled Band</i>, both first published in 1892. Both cases are experimental. Watson tells each story, and you read it a paragraph at a time: what he sees over Holmes's shoulder, reads in the papers, hears
+from the people he meets.</p>
+<p>New to the page? Start with one of the eight <b>short cases</b>, invented stories of a few paragraphs that take about
+two minutes each and turn on one move of the game: <a href="../?case=cases/miniatures/lamp-keepers-word">The
+Lamp-Keeper's Word</a>, <a href="../?case=cases/miniatures/rent-box">The Rent Box</a>,
+<a href="../?case=cases/miniatures/last-ferry">The Last Ferry</a>,
+<a href="../?case=cases/miniatures/ring-on-the-bench">The Ring on the Bench</a>,
+<a href="../?case=cases/miniatures/cellar-door">The Cellar Door</a>,
+<a href="../?case=cases/miniatures/dinner-at-larch-house">The Dinner at Larch House</a>,
+<a href="../?case=cases/miniatures/grey-cloak">The Grey Cloak</a> and
+<a href="../?case=cases/miniatures/night-porters-statement">The Night Porter's Statement</a>. Each has its own narrator in
+Watson's place.</p>
+<p>Everything the story tells goes onto <b>the timeline</b>, an ordered list of events. What Watson sees for himself
+is certain. Everything else reached him through someone: a witness, the police, a newspaper, Holmes. You decide how
+far to trust each of them, and the page shows the <b>contradictions</b> among what you accept.</p>
+<p>The story raises <b>questions</b> as it goes (who did it? where was he? what was it for?). You answer them the way
+you fill in a sudoku: circle the answer you think is right, cross out the ones you have ruled out. You can also
+<b>reason</b> from what is on the timeline: point out that something must have changed, what an action needed, what
+it was for. The page checks each step against the timeline.</p>
+<p>There is no score. Before the story gives an answer away you must commit to one, and where the story has given
+you the evidence for it, you must show the answer first: link the evidence and circle the answer it leaves.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="screen">
+<h2>2. The screen</h2>
+<ul>
+  <li><b>The header</b> holds the title, the reading controls (<i>Read to ¶</i> and
+  <span class="btn">Read on ▶</span>), <span class="btn quiet">Undo</span>, <span class="btn quiet">Hint</span>,
+  <span class="btn quiet">⚙ Settings</span>, and a link to this guide.</li>
+  <li><b>The story</b>: everything read so far, the newest paragraph last.</li>
+  <li><b>The timeline</b>, with the contradictions, the questions and the cards above it.</li>
+  <li><b>The detail</b>: whatever you last clicked, an event, a question or a name, with all there is to say about
+  it.</li>
+</ul>
+<p>On a wide screen these sit in three columns. In Settings you can choose panels with tabs instead, two side by side
+or one (a phone always shows one): <span class="tab">Story</span> <span class="tab">Timeline</span>
+<span class="tab">Questions</span> <span class="tab">Contradictions</span> <span class="tab">Cards</span>
+<span class="tab">Detail</span>. A link opens its tab in the <i>other</i> panel, so what you were looking at stays in
+view; in one column it opens in place, with a <span class="muted">← Back to …</span> link above it.</p>
+<p>A paragraph number, such as <span class="para">¶12</span>, anywhere on the page scrolls the story to that
+paragraph.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="reading">
+<h2>3. Reading on, and the gate</h2>
+<p><span class="btn">Read on ▶</span> reads one more paragraph. To read further at once, type a later paragraph's
+number in <i>Read to ¶</i>. Reading only goes forward: to look again at something already read, scroll up in the
+story, or click a paragraph number.</p>
+<h3 id="gate">The gate</h3>
+<p>Sometimes the story is about to give away the answer to a question you could have worked out already. Then
+reading stops just before that paragraph, and a notice says which questions it answers: <b>commit first</b> by
+circling exactly one answer to each.</p>
+<p>Where a question has <b>evidence to link</b> (see <a href="#observations">observations</a>), the story goes on
+only once you have shown its answer: every piece of its evidence linked to it, and the right answer circled. The
+notice says how much of the evidence you have linked; when all of it is linked and the story still waits, the answer
+you circled is not the one it leads to. A statement you have decided is false counts as evidence too: link it to the
+question once you have distrusted it. For a question with no evidence to link, any one answer will do, right or
+wrong. If you would rather never be held up, Settings has <i>To read past an answer</i>: <i>commit to any
+answer</i>.</p>
+<p>The notice links to
+each question and has its own <span class="btn quiet">Hint</span> and <span class="btn quiet">Hide</span> (Read on
+shows it again).</p>
+<p>When you read past it, a notice says what the story has answered, what you circled, and whether you were right.
+The question itself keeps the answer, with the words that gave it away.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="timeline">
+<h2>4. The timeline</h2>
+<p>Each event is one line: who, what, and where, under a heading for its point in time ("Monday evening",
+"Monday, nine o'clock"), with the paragraph it came from. A dot in front shows how far you trust it (see <a href="#trust">Trust</a>).
+Click an event for its detail: the words of the story it comes from, when it happened, and how it reached you.</p>
+<p>The bar above the timeline changes how it is shown:</p>
+<dl>
+  <dt>View</dt>
+  <dd><i>List</i>, the events in order; <i>Grid by place</i>, a column for each place (with <i>Places</i>: by
+  region, by area, by place or in full); or <i>Grid by source</i>, a column for each person the news came from. In a
+  grid, each entry starts a line below the start of the one before it, so the order in time still reads top to
+  bottom.</dd>
+  <dt>Show</dt>
+  <dd><i>Everything</i>, or <i>Only entries with moves ⚙</i>: the events you can reason from (see
+  <a href="#moves">the moves</a>).</dd>
+</dl>
+<p>Some lines are not the story's but yours: your circled answers (your hypotheses) and the conclusions of your
+reasoning (your reasoning), each at its point in time.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="trust">
+<h2>5. Trust: how it reached you</h2>
+<p>Every event came to you along a <b>chain</b>: someone saw it, told someone else, who told the papers, which
+Watson read, and Watson tells you. The detail of an event shows each of its chains, link by link, up to Watson, for
+example:</p>
+<div class="demo"><span class="dot trusted"></span>the stable lad → <i>told</i> → the police → <i>told</i> → the
+newspapers → <i>printed</i> → Watson</div>
+<p>Each link has its own setting, and so does the statement itself (<i>This statement itself:</i>), apart from the
+rest that came the same way. There are four levels:</p>
+<ul>
+  <li><span class="dot certain"></span><b>certain</b>: Watson saw it himself. Only his own eyes are certain.
+  (Watson is a careful narrator: what he tells you he saw, you can take as certain. Settings has <i>Trust in Watson
+  as narrator</i> if you would rather not.)</li>
+  <li><span class="dot trusted"></span><b>trusted</b>: you believe this link.</li>
+  <li><span class="dot uncertain"></span><b>uncertain</b>: you have not decided. Every link starts here.</li>
+  <li><span class="dot distrusted"></span><b>distrusted</b>: you do not believe it.</li>
+</ul>
+<p>A chain is only as strong as its weakest link, and an event is as trusted as its best chain. Under
+<b>People</b>, the detail also lets you cap a person: "at most uncertain" holds for everything that passed through
+them.</p>
+<p>What is on the timeline depends on your trust: by default, everything at least <i>uncertain</i> is shown. In
+Settings, <i>On the timeline from</i> raises that bar (only what you trust), and <i>Show the rest, faded</i> keeps
+what falls below it in view, greyed. <span class="btn quiet">Reset trust…</span> in Settings puts every link and
+person back to uncertain.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="clashes">
+<h2>6. Contradictions and likely clashes</h2>
+<p>When two things on the timeline cannot both be true (someone in two places at once, a door both locked and open at
+the same moment), the page lists them as a <span class="clash">contradiction</span>. You never have to look for
+these: they appear as soon as both sides are on the timeline.</p>
+<p>Each contradiction names its two sides; <i>trace</i> shows both sides' chains. A link or a person marked there is one
+whose distrust alone would take that side off the timeline, and the page says how many other events would go with it. To resolve a
+contradiction, decide which side you believe and distrust what brought the other, or change the circle that caused
+it.</p>
+<p>A <span class="strain">likely clash</span> (in amber, <i>unlikely together</i>) is weaker: one of your circled
+answers and something on the timeline can both be true, but they sit badly together. You can
+<span class="btn quiet">I hold both</span> if you still believe them, and <i>Reconsider</i> later. When the story
+answers a question, its detail lists what a careful reader would have noticed along the way.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="questions">
+<h2>7. Questions and your marks</h2>
+<p>The story raises questions as it goes. They are in the Questions list, and each also sits on the timeline at its
+point in time. Each question lists possible answers:</p>
+<div class="demo"><b>? Where is the horse now?</b><br>
+<span class="chip circled">on the moor</span> <span class="chip struck">in its stable</span>
+<span class="chip">at another stable</span> <span class="muted">More…</span></div>
+<p>The answers shown first are those someone in the story puts forward, and "something else". <i>More</i> has the
+rest: other ideas a reader might have and, for a who or where question, every person, animal or place met so far. Click an answer to <b>circle</b> it, again to
+<b>cross it out</b>, and again to leave it uncertain.</p>
+<p>Where a question asks who did something that could only be done on the spot (opened a door, took a thing from a
+room), circling a name says that they were there. If the timeline has them somewhere else for the whole of the time
+it could have happened, that is a contradiction like any other: take the circle off, or decide you do not believe
+whoever puts them elsewhere.</p>
+<p>A circled answer goes on the timeline as your hypothesis, and takes part in contradictions like anything else: if
+your answer cannot be true alongside what you trust, you will see it. A crossed-out answer is your claim that it was
+not so. Any answer that fits is accepted when the story answers; there is not only one route to it.</p>
+<p>Click a question's name for its detail: the words that raised it, when it is about, your marks and what each
+takes for granted, and, once the story has answered, the answer.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="moves">
+<h2>8. Reasoning: the moves</h2>
+<p>An event marked <b>⚙</b> on the timeline is one you can reason from. Open it, and its detail offers the moves that
+fit it. Each move puts a new entry on the timeline, marked as your reasoning, trusted as far as its weakest
+premise. The page checks every move against the timeline, and offers only those that hold.</p>
+<dl>
+  <dt>(a) It changed</dt>
+  <dd>On a state (where something is, who has it, whether a door is open): a state lasts until something changes it.
+  If the timeline has two different states of the same thing, <span class="btn quiet">It changed</span> points out
+  that something changed it between them, and that becomes a question of its own: what did?</dd>
+  <dt>(b) What it needs and what it does</dt>
+  <dd>On an action: <span class="btn quiet">Point out what it needs and what it does</span> lists what had to be so
+  just before it (to take something, you must be where it is) and what is so just after, each with what the timeline
+  says about it.</dd>
+  <dt>(c) What is this for?</dt>
+  <dd>On an action or an intention: the intentions on the timeline it could serve, stated in the story or circled by
+  you. <span class="btn quiet">For this</span> links them; the page checks that what it brings about meets the goal,
+  or a need of a step already linked.</dd>
+  <dt>(d) What would this need?</dt>
+  <dd>On a plan, one the story describes or one you have built by linking steps to an intention: each step's needs,
+  met by an earlier step, by the timeline, or by nothing, and whether the steps reach the goal. See
+  <a href="#plans">Plans</a>.</dd>
+</dl>
+<p>Your reasoning rests on what it was drawn from. If that changes (you distrust a premise, or change a circle), the
+move stops holding: a notice in the corner says so, and the entry's detail lists it under <i>No longer fits</i>. It
+comes back if what changed changes back. <span class="btn quiet">Withdraw</span> takes a move back for good.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="plans">
+<h2>9. Plans and their checks</h2>
+<p>Once a plan's needs are open (<span class="btn quiet">What would this need?</span>), its detail offers three
+checks:</p>
+<ul>
+  <li><b>What stopped it?</b> If an intended step never happened, what on the timeline prevented it.</li>
+  <li><b>Compare with another plan</b>: two plans side by side, step by step, with their goals and whether each is
+  reached.</li>
+  <li><b>Does it account for this?</b> Whether the plan explains something else on the timeline.</li>
+</ul>
+<p>A plan's needs that nothing meets are listed in red. That is often where the next question lies.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="room">
+<h2>The room</h2>
+<p>Some stories turn on how a place is arranged. Those have a <b>Room</b> panel; the others do not.</p>
+<ul>
+  <li><b>The ways in.</b> A row for each way into a closed place, as the story tells of it. Mark each one closed or open, separately
+  for a person and for something small. The page refuses a mark nothing on the timeline supports.</li>
+  <li><b>Something got through.</b> If something crossed between two places, there is a way between them, even one nobody has found.</li>
+  <li><b>A route.</b> Build a way from one place to another, a link at a time, from what is on the timeline.</li>
+</ul>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="observations">
+<h2>Observations</h2>
+<p>In stories that have it, you can point out that something on the timeline is relevant to an open question: open the
+event and choose under <b>Relevant to…</b>, or press <b>Link observations…</b> on a question and go down the timeline. If it
+tells something about that question, what it shows is written under the question, with where it came from, and it stays only
+as long as you trust the event. If not, your link stays as a note. Some answers are not a name but a description you build this way.</p>
+<p><b>Relevant to…</b> lists the open questions in the order of the Questions list. Put them in the order you like there:
+drag a question by its <b>≡</b> (or focus it and use the arrow keys), or press <b>↑</b> to send it to the top. A <b>dividing
+line</b> in that list decides what is offered: drag it up and only the questions above it appear, with
+<b>Show the others</b> for the rest. A question newly raised comes in just above the line.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="cards">
+<h2>10. Cards and the story's names</h2>
+<p>Every name in the story is a link: a person, a horse, a place, a thing. Click one for its <b>card</b> in the
+detail: the questions about it, the sentences of the story that mention it, and its own timeline (only the events it
+takes part in).</p>
+<p>The <span class="tab">Cards</span> list holds everyone and everything met so far, by kind (people, animals,
+places, things…), each a link to its card.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="hints">
+<h2>11. Hints</h2>
+<p><span class="btn quiet">Hint</span> says what a careful reader would do next, from wherever you are. If one of your
+marks is wrong where it matters, or you distrust something a careful reader would believe, the hint starts there.
+Otherwise it points to the next step: a question to answer before the story gives it away, a move to make, or simply
+"read on".</p>
+<p>Each press goes a step further: first <i>where</i> to look, then <i>the reasoning</i>, then <i>the move</i>
+itself, with <span class="btn quiet">Do it</span> to make it for you. After each press the button waits a little
+(30 seconds unless you change it in Settings), so that you think before you ask again.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="undo">
+<h2>12. Undo</h2>
+<p><span class="btn quiet">Undo</span> takes back your last change of trust, of a mark, or of your reasoning, one at a
+time. Reading on is not undone.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="autoplay">
+<h2>13. Watching the autoplay</h2>
+<p><span class="btn quiet">Watch the autoplay…</span> in Settings shows a careful reader filling in the timeline
+through the page, from the first paragraph to the last: every circle, every trust, every move, with a caption saying
+what each one is and why. It contains every answer, so <b>watch it only once you have played, or if you do not mind
+spoilers</b>.</p>
+<p>Your own timeline is kept aside and comes back when you stop. A strip of controls goes with it: it starts paused:
+choose a speed, then <span class="btn quiet">Start</span>; then <span class="btn quiet">Pause</span> /
+<span class="btn quiet">Resume</span>, <span class="btn quiet">Step</span>
+(the next move or paragraph, then pause), the speed, from ¼× to 4×, and <span class="btn quiet">Stop</span>. At normal
+speed it takes about a quarter of an hour.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="settings">
+<h2>14. Settings and starting over</h2>
+<p><span class="btn quiet">⚙ Settings</span> has two parts. Clicking anywhere outside it closes it.</p>
+<h3>The timeline</h3>
+<dl>
+  <dt>On the timeline from</dt>
+  <dd>How far you must trust an event for it to be on the timeline (see <a href="#trust">Trust</a>).</dd>
+  <dt>Show the rest, faded</dt>
+  <dd>Keep what falls below that in view, greyed.</dd>
+  <dt>Trust in Watson as narrator</dt>
+  <dd>How far you trust what Watson tells you. Everything in the story comes to you through him, so lowering it
+  lowers everything; by default it is <i>certain</i>.</dd>
+</dl>
+<h3>The page</h3>
+<dl>
+  <dt>Layout</dt>
+  <dd><i>Three columns</i>, <i>Two columns, with tabs</i> or <i>One column, with tabs</i>. A phone always shows one.</dd>
+  <dt>Theme</dt>
+  <dd><i>As the system</i>, <i>Light</i> or <i>Dark</i>. This guide follows the same choice.</dd>
+  <dt>Wait between hints</dt>
+  <dd>None, 10 or 30 seconds, or a minute.</dd>
+  <dt>To read past an answer</dt>
+  <dd>What <a href="#gate">the gate</a> asks of a question that has evidence to link: <i>show it</i> (the evidence
+  linked and the right answer circled; the default), or <i>commit to any answer</i>.</dd>
+</dl>
+<h3>Saving and starting over</h3>
+<p>Your timeline saves itself in this browser as you play: close the page and come back, and you are where you left
+off. <span class="btn quiet">Reset trust…</span> puts every link and person back to uncertain (and Watson as narrator back
+to certain) and keeps the rest.
+<span class="btn quiet">Start over…</span> asks first, then clears everything (your place in the story, your trust,
+marks and reasoning) and starts again from the first paragraph. It keeps the layout, the theme, the wait between
+hints and the gate's rule.</p>
+<p>Hover over almost any button or setting for a short explanation.</p>
+</section>
+
+<!-- ------------------------------------------------------------------ -->
+<section id="earlier">
+<h2>15. The earlier game</h2>
+<p>Watson's timeline grew out of an earlier game on <i>Silver Blaze</i>, in which you collect cards and build inferences to
+beat Holmes to his deductions. It is kept as it was, with its own guide: <a href="../v1/">the earlier game</a> (also in
+Settings, <i>The earlier game…</i>). The two keep separate saves.</p>
+<p style="margin-top: 28px"><a href="./">← Back to the timeline</a></p>
+</section>
+
+</main>
+<script>
+if (fromCase) for (const a of document.querySelectorAll('a[href="./"]')) a.href = `./?case=${encodeURIComponent(fromCase)}`;
+</script>
+</body>
+</html>

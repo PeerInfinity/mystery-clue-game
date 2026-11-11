@@ -1,0 +1,6 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.night", "label": "The Monday night", "after": "t.before", "para": 1, "quote": "on the Monday night"}
+  ]
+}
