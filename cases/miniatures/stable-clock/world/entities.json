@@ -1,0 +1,24 @@
+{
+  "entities": [
+    {"id": "penrose", "kind": "person", "name": "Arthur Penrose"},
+    {"id": "giles", "kind": "person", "name": "Sir Giles Royle"},
+    {"id": "edwin", "kind": "person", "name": "Mr. Edwin Royle"},
+    {"id": "susan", "kind": "person", "name": "Susan"},
+    {"id": "bowker", "kind": "person", "name": "Bowker"},
+    {"id": "inspector", "kind": "person", "name": "the inspector"},
+    {"id": "hall", "kind": "place", "name": "Coldharbour Hall"},
+    {"id": "library", "kind": "place", "name": "the library", "within": "hall"},
+    {"id": "study", "kind": "place", "name": "Sir Giles's study", "within": "hall"},
+    {"id": "back_stairs", "kind": "place", "name": "the back stairs", "within": "hall"},
+    {"id": "lodge", "kind": "place", "name": "the lodge"},
+    {"id": "stable_yard", "kind": "place", "name": "the stable yard"},
+    {"id": "hall_clock", "kind": "object", "name": "the hall clock"},
+    {"id": "stable_clock", "kind": "object", "name": "the stable clock"},
+    {"id": "church_clock", "kind": "object", "name": "the church clock"},
+    {"id": "watch", "kind": "object", "name": "Arthur Penrose's watch"},
+    {"id": "bullet", "kind": "object", "name": "the bullet"},
+    {"id": "study_window", "kind": "object", "name": "the window of the study"},
+    {"id": "garden_door", "kind": "object", "name": "the garden door"},
+    {"id": "revolver", "kind": "object", "name": "Sir Giles's revolver"}
+  ]
+}

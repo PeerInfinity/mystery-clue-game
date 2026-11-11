@@ -1,0 +1,20 @@
+{
+  "story": "stable-clock",
+  "mechanic": "One event told at two times (an event that happens once): two honest witnesses time a shot by two clocks, and the clash is on the timeline before anyone is accused. The time that cannot stand is the slow clock's, and with it goes an alibi.",
+  "note": "Spoilers. The logic written before the prose (docs/authored-stories.md, outline A). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue.",
+  "goal": "q.library",
+  "frame": [
+    {"id": "fr.shot", "says": "A shot was fired through the window of Sir Giles's study that evening.", "facts": ["f.bullet"]}
+  ],
+  "questions": [
+    {"id": "q.when", "asks": "When was the shot fired?", "answer": "nine o'clock", "others": ["a quarter to nine"], "gate": 7, "needs": [["c.maid", "c.gardener", "c.hall_clock", "c.stable_clock"]], "rules_out": {"a quarter to nine": "c.stable_clock: the gardener read the stable clock (c.gardener), and it is a quarter of an hour slow; c.hall_clock: the clock the housemaid counted was right"}},
+    {"id": "q.library", "asks": "Was Mr. Royle still in the library when the shot was fired?", "answer": "no", "others": ["yes"], "gate": 7, "needs": [["c.evening", "c.maid"]], "rules_out": {"yes": "c.evening: he left at ten to nine by the hall clock; c.maid: the shot came at nine by the same clock"}}
+  ],
+  "clues": [
+    {"id": "c.evening", "source": "The narrator's own evening", "says": "Mr. Royle sat with the narrator in the library until ten to nine by the hall clock.", "facts": ["f.edwin_library", "f.edwin_leaves"]},
+    {"id": "c.maid", "source": "Susan, the housemaid, to the narrator", "says": "The shot came as the hall clock struck nine; she counted the strokes.", "facts": ["f.shot_nine", "f.susan_counted"], "chain": ["f.susan_tells"]},
+    {"id": "c.gardener", "source": "Bowker, the gardener, to the narrator", "says": "The shot was at a quarter to nine; he looked at the stable clock the moment he heard it.", "facts": ["f.shot_quarter", "f.bowker_clock"], "chain": ["f.bowker_tells"], "false": true},
+    {"id": "c.hall_clock", "source": "The narrator's own morning", "says": "The narrator set the hall clock that morning by the church clock.", "facts": ["f.hall_set"]},
+    {"id": "c.stable_clock", "source": "The narrator's own look next morning", "says": "The stable clock is a quarter of an hour slow.", "facts": ["f.stable_slow"]}
+  ]
+}

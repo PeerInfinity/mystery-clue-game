@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.maid", "q": "q.when", "from": ["f.susan_counted"], "says": "the housemaid counted the strokes of the hall clock as the shot came: nine", "essential": true},
+    {"id": "o.hall", "q": "q.when", "from": ["f.hall_set"], "says": "the hall clock was right that evening: set that morning by the church", "essential": true, "against": ["a quarter to nine"]},
+    {"id": "o.slow", "q": "q.when", "from": ["f.bowker_clock", "f.stable_slow"], "says": "the gardener took the time from the stable clock, and it is a quarter of an hour slow: his quarter to nine was nine by the hall clock", "essential": true, "against": ["a quarter to nine"]},
+    {"id": "o.mistake", "q": "q.when", "from": [{"doubted": "f.bowker_tells"}], "says": "the gardener was honest, and wrong: the time he gave was the slow clock's", "essential": true},
+    {"id": "o.left", "q": "q.library", "from": ["f.edwin_leaves"], "says": "he left the library at ten to nine, by the hall clock", "essential": true, "against": ["yes"]},
+    {"id": "o.after", "q": "q.library", "from": ["f.shot_nine"], "says": "the shot came at nine by the same clock, ten minutes after he left", "essential": true, "against": ["yes"]},
+    {"id": "o.bullet", "q": "q.when", "from": ["f.bullet"], "says": "the shot was aimed at Sir Giles's chair"}
+  ]
+}

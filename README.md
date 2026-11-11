@@ -13,6 +13,7 @@ evidence leaves.
 [The Rent Box](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box) (two lodgers' statements that cannot both be true) ·
 [The Rent Box Papers](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box-papers) (the same case, its clues as papers you read in any order) ·
 [The Last Ferry](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry) (what happened in what order) ·
+[The Stable Clock](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/stable-clock) (one shot, two honest witnesses, two times) ·
 [The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench) (a locked room, and the ways into it) ·
 [The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door) (what an act needed, and who had it) ·
 [The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house) (one evening, told by two people) ·

@@ -1,0 +1,11 @@
+{
+  "id": "stable_clock",
+  "title": "The Stable Clock",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "penrose", "name": "Arthur Penrose", "kind": "first-person"}
+  ],
+  "subtitle": "Arthur Penrose's timeline",
+  "source": {"written": "2026-11-11", "word_count": 330}
+}

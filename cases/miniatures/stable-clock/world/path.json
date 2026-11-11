@@ -1,0 +1,17 @@
+{
+  "description": "The true path of the miniature: one shot told at two times by two honest witnesses, each by a clock; the slow clock found, the gardener's time set aside, and with it the alibi.",
+  "moves": [
+    {"at": 3, "do": "link", "entry": "f.susan_counted", "q": "q.when", "see": "counted the strokes of the hall clock", "for_q": ["q.when"], "why": "Susan counted nine strokes of the hall clock as the shot came."},
+    {"at": 4, "do": "link", "entry": "f.edwin_leaves", "q": "q.library", "see": "he left the library at ten to nine", "for_q": ["q.library"], "why": "Mr. Royle left me at ten to nine by the hall clock."},
+    {"at": 5, "do": "link", "entry": "f.hall_set", "q": "q.when", "see": "the hall clock was right that evening", "for_q": ["q.when"], "why": "I set the hall clock myself that morning, by the church."},
+    {"at": 6, "do": "link", "entry": "f.bowker_clock", "q": "q.when", "for_q": ["q.when"], "why": "Bowker took his time from the stable clock."},
+    {"at": 6, "do": "link", "entry": "f.stable_slow", "q": "q.when", "see": "his quarter to nine was nine", "for_q": ["q.when"], "why": "And the stable clock is a quarter of an hour slow."},
+    {"at": 6, "do": "trust", "on": "f.shot_quarter", "link": "stmt:f.shot_quarter", "level": "distrusted", "for_q": ["q.when"], "why": "So the shot was not at a quarter to nine: that was the stable clock's time, not the true one."},
+    {"at": 6, "do": "link", "entry": "f.bowker_tells", "q": "q.when", "see": "honest, and wrong", "for_q": ["q.when"], "why": "Bowker told me what he saw; it was the clock that was wrong."},
+    {"at": 6, "do": "circle", "q": "q.when", "pick": "nine o'clock", "for_q": ["q.when"], "why": "Both clocks, read right, say nine."},
+    {"at": 6, "do": "cross", "q": "q.when", "pick": "a quarter to nine", "for_q": ["q.when"], "why": "The slow clock's time."},
+    {"at": 6, "do": "link", "entry": "f.shot_nine", "q": "q.library", "see": "ten minutes after he left", "for_q": ["q.library"], "why": "The shot came at nine by the hall clock, the clock he left me by."},
+    {"at": 6, "do": "circle", "q": "q.library", "pick": "no", "for_q": ["q.library"], "why": "He had been gone ten minutes."},
+    {"at": 6, "do": "cross", "q": "q.library", "pick": "yes", "for_q": ["q.library"], "why": "Only if the slow clock were right."}
+  ]
+}

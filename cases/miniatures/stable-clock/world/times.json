@@ -1,0 +1,12 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.morning", "label": "Thursday morning", "after": "t.before", "para": 5, "quote": "that morning"},
+    {"id": "t.evening", "label": "Thursday evening", "after": "t.morning", "para": 1, "quote": "On the Thursday evening"},
+    {"id": "t.quarter_to", "label": "Thursday, a quarter to nine", "after": "t.evening", "para": 4, "quote": "It was a quarter to nine"},
+    {"id": "t.ten_to", "label": "Thursday, ten to nine", "after": "t.quarter_to", "para": 1, "quote": "at ten minutes to nine"},
+    {"id": "t.nine", "label": "Thursday, nine o'clock", "after": "t.ten_to", "para": 3, "quote": "striking nine"},
+    {"id": "t.friday", "label": "Friday morning", "after": "t.nine", "para": 6, "quote": "On Friday morning"},
+    {"id": "t.later", "label": "Friday afternoon", "after": "t.friday", "para": 7, "quote": "that afternoon"}
+  ]
+}

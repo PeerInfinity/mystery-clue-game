@@ -623,6 +623,8 @@ function wordOf(f) {
     return who.length ? `${who.map((o) => `${ent(o)}’s`).join(' and ')} word: ` : '';
 }
 function clashTitle(c) {
+    // One event told twice, at two times (facts with the same `event`).
+    if (c.event) return 'One event, at two times?';
     if (c.a.kind === 'pick') return esc(qById.has(c.a.q) ? qLabel(qById.get(c.a.q)) : c.a.q);
     // What the contradiction is about: the state's own subject (what a claim asserts, not the claim's speaker).
     const f = c.a.mark || !c.a.attr ? factOf(c.a.fact) : c.a;

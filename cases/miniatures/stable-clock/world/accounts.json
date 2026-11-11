@@ -1,0 +1,7 @@
+{
+  "accounts": [
+    {"id": "acct.penrose", "label": "What Arthur Penrose sees and hears himself", "origin": "penrose", "how": "saw", "facts": ["f.penrose_guest", "f.edwin_nephew", "f.penrose_library", "f.edwin_library", "f.edwin_leaves", "f.bullet", "f.susan_tells", "f.bowker_tells", "f.hall_set", "f.stable_slow", "f.edwin_owns"]},
+    {"id": "acct.susan", "label": "What Susan heard on the back stairs", "origin": "susan", "how": "saw", "facts": ["f.susan_stairs", "f.shot_nine", "f.susan_counted"]},
+    {"id": "acct.bowker", "label": "What Bowker heard at the lodge", "origin": "bowker", "how": "saw", "facts": ["f.bowker_lodge", "f.shot_quarter", "f.bowker_clock"]}
+  ]
+}

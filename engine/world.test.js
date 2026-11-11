@@ -257,3 +257,14 @@ test('an identity carries whereabouts: the figure was the man, so the man was wh
     const near = { ...world([facts[0], loc('ms', 'man', 'stall', { at: 't2' }), facts[2]], [q]), entities: ents };
     assert.deepEqual(contradictions(near), [], 'within the same place: no clash');
 });
+
+test('one event told at two times: a contradiction, only when the times certainly do not meet', () => {
+    const shot = (id, time, extra = {}) => ({ id, of: '?', attr: 'action', value: 'fires a shot', event: 'e.shot', time, para: 1, quote: 'x', ...extra });
+    assert.deepEqual(why(world([shot('s1', { at: 't2' }), shot('s2', { at: 't3' })])), ['e.shot: once, at two times']);
+    assert.deepEqual(why(world([shot('s1', { at: 't2' }), shot('s2', { at: 't2' })])), [], 'the same time');
+    assert.deepEqual(why(world([shot('s1', { at: 't2' }), shot('s2', { at: 'tx' })])), [], 'times not ordered: not certain');
+    assert.deepEqual(why(world([shot('s1', { at: 't2' }), shot('s2', { after: 't1', before: 't4' })])), [], 'an uncertain time');
+    assert.deepEqual(why(world([shot('s1', { at: 't2' }), { ...shot('s2', { at: 't3' }), event: 'e.other' }])), [], 'another event');
+    const w = world([shot('s1', { at: 't2' }), shot('s2', { at: 't3' })]);
+    assert.deepEqual(contradictions(w, assertions(w).filter((x) => x.id !== 's2')), [], 'one of them set aside');
+});

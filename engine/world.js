@@ -198,7 +198,7 @@ export function assertions(data) {
     const out = [];
     for (const f of data.facts) {
         const claim = CLAIM_ATTRS.has(f.attr);
-        out.push({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: claim ? true : ('truth' in f ? f.truth : true), para: f.given_at ?? f.para, ...(f.claim ? { claim: f.claim } : {}), ...(f.word ? { by: f.word } : {}) });
+        out.push({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: claim ? true : ('truth' in f ? f.truth : true), para: f.given_at ?? f.para, ...(f.claim ? { claim: f.claim } : {}), ...(f.word ? { by: f.word } : {}), ...(f.event ? { event: f.event } : {}) });
         if (!claim && f.q && f.pick != null) out.push({ id: `${f.id}#pick`, fact: f.id, kind: 'pick', q: f.q, pick: f.pick, neg: false, truth: 'truth' in f ? f.truth : true, para: f.given_at ?? f.para });
         if (!claim) continue;
         list(f.asserts).forEach((x, i) => {
@@ -285,6 +285,8 @@ export function places(data) {
  *   and its denial (`neg`) of the same place or one containing it.
  * - An identity (a state, or a circled answer of a question whose entry is one) against the locations it joins: the
  *   one it names elsewhere than where the other was (`{a, b: the identity, via: the other's location, why}`).
+ * - One event told twice (two facts with the same `event`, an event that happens once) at two times that cannot meet:
+ *   `{a, b, event, why}`.
  * Claims with `modal: 'possible'` take no part. Two circled marks of one question are an open choice, not reported.
  */
 export function contradictions(data, accepted = null) {
@@ -345,6 +347,19 @@ export function contradictions(data, accepted = null) {
             const [pos, neg] = a.neg ? [kb, va] : [ka, vb];
             if (pos.includes(neg)) out.push({ a, b, why: `${a.of}: at ${pos[0]} and not at ${neg}` });
         }
+    }
+
+    // One event happens once: two tellings of it whose times certainly do not meet cannot both hold.
+    const byEvent = new Map();
+    for (const x of all) if (x.kind === 'state' && x.event && !x.neg) byEvent.set(x.event, [...(byEvent.get(x.event) ?? []), x]);
+    for (const [event, xs] of byEvent) for (let i = 0; i < xs.length; i++) for (let j = i + 1; j < xs.length; j++) {
+        const a = xs[i], b = xs[j];
+        if (a.fact === b.fact) continue;
+        const ca = coverOf(a.time), cb = coverOf(b.time);
+        // Certainly apart: one ends before the other starts (in the time order, not only by the paragraphs).
+        const apart = (c, d) => (c.incl ? order.lt(c.end, d.start) : order.le(c.end, d.start));
+        if (!ca || !cb || !(apart(ca, cb) || apart(cb, ca))) continue;
+        out.push({ a, b, event, why: `${event}: once, at two times` });
     }
 
     // An identity carries whereabouts: "the figure was Dr. Mott" puts Dr. Mott where the figure was, at the time the

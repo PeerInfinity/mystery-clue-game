@@ -108,6 +108,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/rent-box-papers` | The Rent Box with its clues as case files (sub-stories): a main story of five paragraphs, three papers delivered one by one, read in any order. | 5 + 2 + 2 + 2 paragraphs, 23 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (5 essential), 11 moves |
 
 | `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
+| `cases/miniatures/stable-clock` | One event at two times: two honest witnesses time one shot by two clocks; the clash is on the timeline at once, the slow clock is found, and an alibi goes with the wrong time. | 7 paragraphs, 17 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
@@ -459,6 +460,24 @@ goes, the reading controls on the tab shown, a move's `at` a list).
   player to say that the story or its data is wrong, like a bug report. It would need somewhere for the reports to
   go, and the user does not want to set that up.
 
+One event, two times (step 4 of the provisional order; outline A, 2026-11-11):
+
+38. **"Happens once" is one field.** Facts that tell the same happening share an `event` id; two of them accepted at
+    times that certainly do not meet are a contradiction ("One event, at two times?"), with no question tied to it.
+    Without it the housemaid's "nine" and the gardener's "a quarter to nine" were two shots, and nothing clashed
+    unless the facts asserted picks of a question, which would have made the question carry the clash instead of the
+    timeline.
+39. **The Stable Clock** (outline A as drafted; names and prose settled here): the clash appears at ¶4, when the
+    gardener speaks and before anyone is accused; the hall clock set by the church (¶5) and the stable clock a
+    quarter of an hour slow (¶6) settle it. The gardener is honest: his statement of the time is distrusted by its
+    own statement link and linked as evidence (`doubted`), while what else he said (he looked at the stable clock)
+    stays, as Mrs. Lunn's sighting did in The Grey Cloak. The second question (was Mr. Royle still in the library?)
+    follows from the first, through the hall clock both times are told by.
+40. **The two sides read alike.** On the timeline and in the contradiction both are "Someone: fires a shot …", told
+    apart only by their time headings and their detail ("as the hall clock struck nine", "at a quarter to nine by
+    the stable clock"). Each fact's detail carries its time for that reason; a contradiction side could show its time
+    point as well, if the user wants it.
+
 - **The two Holmes cases are archived at `v2/`** (the user's proposal, 2026-11-11): Silver Blaze and The Speckled
   Band, the pipeline and the documents about them, with their own copy of the page, the engine and the checks, as
   they stood that day (every page check passing with the day's engine). The reason: every change for the short
@@ -623,7 +642,7 @@ A provisional order, this session's suggestion (the user has not ruled):
    an entry a move reveals. Done 2026-11-11 (findings 29 to 31).
 3. Sub-stories, on one existing miniature first (The Rent Box: the two statements and the narrator's afternoon as
    three files and a short spine). This is experiment 3 of the list above and the largest piece. Done 2026-11-11 (findings 32 to 37), as a new case, The Rent Box Papers.
-4. The order of two events as an entry that can be doubted, with its miniature (idea 1).
+4. The order of two events as an entry that can be doubted, with its miniature (idea 1). Done 2026-11-11 as "one event, two times" (the user's ruling under finding 14: each telling an entry of its own; the small addition is `event`), findings 38 to 40, The Stable Clock.
 5. The remaining mechanics, each with its miniature: a document's own properties, who could have known, two
    readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8).
 6. Blind solvers on the miniatures (experiment 2); it costs money and needs the user's go-ahead.

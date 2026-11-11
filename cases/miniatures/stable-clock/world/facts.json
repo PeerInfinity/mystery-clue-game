@@ -1,0 +1,21 @@
+{
+  "facts": [
+    {"id": "f.penrose_guest", "of": "penrose", "attr": "role", "value": "a guest at Coldharbour Hall, an old friend of Sir Giles Royle", "time": {"from": "t.before"}, "para": 1, "quote": "I was staying at Coldharbour Hall with my old friend Sir Giles Royle"},
+    {"id": "f.edwin_nephew", "of": "edwin", "attr": "role", "value": "Sir Giles Royle's nephew", "time": {"from": "t.before"}, "para": 1, "quote": "his nephew, Mr. Edwin Royle"},
+    {"id": "f.penrose_library", "of": "penrose", "attr": "location", "value": "library", "detail": "at chess", "time": {"from": "t.evening", "to": "t.ten_to"}, "para": 1, "quote": "I sat in the library"},
+    {"id": "f.edwin_library", "of": "edwin", "attr": "location", "value": "library", "detail": "at chess with Arthur Penrose", "time": {"from": "t.evening", "to": "t.ten_to"}, "para": 1, "quote": "I sat in the library with his nephew, Mr. Edwin Royle, over a game of chess"},
+    {"id": "f.edwin_leaves", "of": "edwin", "attr": "action", "value": "leaves the library, saying he has a letter to write", "detail": "at ten to nine by the hall clock", "time": {"at": "t.ten_to"}, "para": 1, "quote": "He left me at ten minutes to nine by the hall clock"},
+    {"id": "f.bullet", "of": "bullet", "attr": "location", "value": "study", "detail": "in the panelling above Sir Giles's chair, fired through the window", "time": {"from": "t.nine"}, "para": 2, "quote": "the bullet was found in the panelling above the chair where he sits of an evening"},
+    {"id": "f.susan_tells", "of": "susan", "attr": "tells", "value": "acct.susan", "to": "penrose", "how": "told", "time": {"after": "t.nine", "before": "t.later"}, "para": 3, "quote": "she told me"},
+    {"id": "f.susan_stairs", "of": "susan", "attr": "location", "value": "back_stairs", "time": {"at": "t.nine"}, "para": 3, "quote": "Susan, the housemaid, was on the back stairs"},
+    {"id": "f.shot_nine", "of": "?", "attr": "action", "value": "fires a shot through the window of Sir Giles's study", "event": "e.shot", "detail": "as the hall clock struck nine", "time": {"at": "t.nine"}, "para": 3, "quote": "It came just as the hall clock was striking nine"},
+    {"id": "f.susan_counted", "of": "susan", "attr": "action", "value": "counts the strokes of the hall clock as the shot comes", "time": {"at": "t.nine"}, "para": 3, "quote": "I counted the strokes"},
+    {"id": "f.bowker_tells", "of": "bowker", "attr": "tells", "value": "acct.bowker", "to": "penrose", "how": "told", "time": {"after": "t.nine", "before": "t.later"}, "para": 4, "quote": "It was a quarter to nine"},
+    {"id": "f.bowker_lodge", "of": "bowker", "attr": "location", "value": "lodge", "time": {"at": "t.nine"}, "para": 4, "quote": "Bowker, the gardener, was at the lodge"},
+    {"id": "f.shot_quarter", "of": "?", "attr": "action", "value": "fires a shot through the window of Sir Giles's study", "event": "e.shot", "detail": "at a quarter to nine by the stable clock", "time": {"at": "t.quarter_to"}, "para": 4, "quote": "It was a quarter to nine", "truth": false},
+    {"id": "f.bowker_clock", "of": "bowker", "attr": "action", "value": "looks out at the stable clock the moment he hears the shot", "time": {"at": "t.nine"}, "para": 4, "quote": "I looked out at the stable clock the moment I heard it"},
+    {"id": "f.hall_set", "of": "hall_clock", "attr": "condition", "value": "right: set that morning by Arthur Penrose, by the church clock in the village", "time": {"from": "t.morning"}, "para": 5, "quote": "I had set the hall clock myself that morning, by the church clock in the village"},
+    {"id": "f.stable_slow", "of": "stable_clock", "attr": "condition", "value": "a quarter of an hour slow", "detail": "at a quarter to ten when the hall clock's time was ten", "time": {"at": "t.friday"}, "para": 6, "quote": "When my watch said ten, the stable clock stood at a quarter to ten"},
+    {"id": "f.edwin_owns", "of": "edwin", "attr": "says", "value": "he went out by the garden door with his uncle's revolver, and fired at nine", "to": "inspector", "time": {"at": "t.later"}, "para": 7, "quote": "he owned to it", "asserts": [{"q": "q.when", "pick": "nine o'clock"}, {"q": "q.library", "pick": "no"}]}
+  ]
+}

@@ -213,6 +213,13 @@ contradiction written by hand:
   (a state lasts until the next change, and a later different value is a change, not a contradiction); `{after,
   before}` nothing certain. Only the partial order of `after` decides "certainly": unordered points never overlap.
   So a move needs its own time point (the horse near Mapleton at dawn, led into Mapleton after: `t.tue_into_mapleton`).
+- **An identity carries whereabouts** (2026-11-11). An accepted identity (a state, or a circled answer of a question
+  whose entry is one) joins the locations of the two it names: "the figure was Dr. Mott" against "Dr. Mott at the
+  Squire's" is a contradiction with three sides, the one's location, the identity and the other's location (`via`).
+- **One event at two times** (2026-11-11). Facts that tell the same happening share an `event` id (`"event":
+  "e.shot"`, on two facts or more): it happens once, so two of them whose times certainly do not meet (the shot at a
+  quarter to nine and at nine) are a contradiction, with no question needed. Times that may meet, or are not
+  ordered, raise nothing.
 - Claims with `modal: possible` take no part.
 - **Alibis** (`alibis` in `engine/world.js`). A circled answer to a question whose `entry` is a typed action (`act`)
   over a `{from, to}` window is that one's act. If the act needs its agent at a door (`at`: either side of it,

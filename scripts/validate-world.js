@@ -222,6 +222,8 @@ for (const f of facts) {
     if (f.heard_by && (!f.word || !narratorIds.has(f.heard_by))) err(f.id, `heard_by: ${f.heard_by} is no narrator, or the fact has no word`);
     if (f.claim && f.word) err(f.id, 'claim or word, not both');
     if ('neg' in f && f.neg !== true) err(f.id, 'neg is true or absent');
+    // One event told more than once (`event`: its id, shared by every fact that tells it): it happens once.
+    if (f.event != null && (typeof f.event !== 'string' || !f.event || facts.filter((g) => g.event === f.event).length < 2)) err(f.id, `event ${f.event}: an id shared by two facts or more`);
     if (f.attr === 'location' && f.value != null && typeof f.value === 'string' && !entities.has(f.value)) err(f.id, `location: no entity ${f.value} (put the rest in detail)`);
     if (f.q) {
         const q = qById.get(f.q);
