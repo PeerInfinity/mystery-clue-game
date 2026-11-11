@@ -435,22 +435,34 @@ The user, asked which of the findings need a decision before the work is handed 
   where a paper was found, can be a file like any other, since a file is prose with a source.
 - **The order of the work: no preference yet.** It may be decided provisionally or left open.
 
-What follows from sub-stories, as this session sees it (a sketch for the next session, not ruled):
+**The two-index design, ruled by the user 2026-11-11.** Every paragraph has two indexes: the story it belongs to
+(the main story, or a sub-story), and its number within that story. Both are kept all the way through: in the data
+(a fact's place, where a question is raised, where an answer becomes available), in the saves, and in what the
+player sees ("the Captain's statement, ¶2"). An earlier sketch of this session's, numbering the whole afresh for each
+playthrough by splicing a file in where the reader stood, is dropped: its numbers would have meant different things
+in different playthroughs.
 
-- Everything is now keyed to one paragraph number in one story: a fact's `para`, "told by the paragraph read to",
-  the gate "before ¶N". With files read in an order the player or a shuffle chooses, a file's paragraphs need
-  numbers of their own (`{file, n}` in the data) and a place in this playthrough's reading order. The smallest
-  step that keeps the engine's rule: when a file is opened its paragraphs are spliced in after the paragraph the
-  reader is at, and the page numbers the whole for this playthrough.
+- **Read-to is per story.** The page keeps how far the reader has read in each story, and an entry is on the
+  timeline when its paragraph is at or before that point in its own story. It does not depend on the order in which
+  the sub-stories were opened, and a file can be read in part and returned to.
+- **A reading order where one is needed** (which mention of a person comes first, how entries told at the same
+  time are sorted): the order in which the sub-stories were opened, never shown as a number. (Agreed.)
+- **Give-aways and gates are in the main story only**, at first: a file is evidence, and never ends the case.
+  (Agreed.)
+- The cost is broad and mechanical: every comparison of one paragraph number in the engine, the page, the
+  validator and the checks becomes a lookup by story and number.
+
+What else follows from sub-stories, as this session sees it (not ruled):
+
 - The gate already asks for evidence, so it makes the reader open the files a question needs without a new rule:
-  the story waits until the needed entries are on the timeline and linked. A question's give-away stays in the
-  spine. `structure.json`'s `needs` says which files those are, and would at last be read by something.
+  the story waits until the needed entries are on the timeline and linked. `structure.json`'s `needs` says which
+  files those are, and would at last be read by something.
 - A file's prose cannot depend on what was read before it. The protagonist's thoughts in a file are about that
   file alone ("the hand is hers"), never about how it bears on another ("so the Captain lied").
 - The same mechanism serves "a clue found only by asking" (idea 10: the reader chooses which file to open and may
   not have time for all) and delivery by an Archipelago.
-- A true path cannot name paragraphs any more: its moves have to play in any order of reading that the logic
-  allows, and the checks have to try more than one.
+- A true path's move names what must have been read for it, by story and paragraph ("after the Captain's statement
+  ¶2 and the main story ¶3"), which holds in any order of reading; the checks have to try more than one order.
 
 A provisional order, this session's suggestion (the user has not ruled):
 
