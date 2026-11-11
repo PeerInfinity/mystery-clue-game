@@ -1,0 +1,16 @@
+{
+ "entities": {
+  "ellis": ["Dr. Ellis"],
+  "holt": ["Mr. Joseph Holt", "Mr. Holt", "Holt"],
+  "mary": ["Mrs. Holt", "Mary"],
+  "martin": ["Mr. Martin Grove", "Mr. Grove"],
+  "clerk": ["Mr. Grove's clerk"],
+  "thornby": ["Thornby"],
+  "mill": ["Dyer's Mill", "the mill"],
+  "loom_room": ["the loom-room door"],
+  "fete": ["the church fête"],
+  "leeds": ["Leeds"],
+  "telegram": ["a telegram", "the telegram"],
+  "night_book": ["The mill's night book"]
+ }
+}

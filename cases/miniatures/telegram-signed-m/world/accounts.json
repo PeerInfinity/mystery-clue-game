@@ -1,0 +1,6 @@
+{
+  "accounts": [
+    {"id": "acct.ellis", "label": "What Dr. Ellis sees, reads and knows himself", "origin": "ellis", "how": "saw", "facts": ["f.ellis_role", "f.holt_owner", "f.holt_struck", "f.tel_pocket", "f.holt_went", "f.tel_sent", "f.tel_words", "f.tel_hand", "f.mary_wife", "f.martin_partner", "f.mary_fete", "f.ellis_fete", "f.clerk_tells", "f.key_drawn", "f.grove_owns"]},
+    {"id": "acct.clerk", "label": "What Mr. Grove's clerk saw of his master", "origin": "clerk", "how": "saw", "facts": ["f.martin_train"]}
+  ]
+}

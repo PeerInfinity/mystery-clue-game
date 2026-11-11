@@ -1,0 +1,20 @@
+{
+  "story": "telegram-signed-m",
+  "mechanic": "Two readings of one clue (idea 6): a telegram signed M. reads as the wife's or the partner's; what it shows about who was waiting at the mill depends on which is circled (observations with `if`), until the alibi picks: sending it needed its sender at the Leeds office at four (an action type of the case's own), and the wife was at the fête in the narrator's sight.",
+  "note": "Spoilers. The logic written before the prose (docs/authored-stories.md, outline D). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files (here the telegram is one: files/telegram.txt). `facts` names the world model's facts that realise a clue.",
+  "goal": "q.waiting",
+  "frame": [
+    {"id": "fr.struck", "says": "Mr. Holt was found struck down at his mill at eleven; a telegram was in his pocket.", "facts": ["f.holt_struck", "f.tel_pocket"]}
+  ],
+  "questions": [
+    {"id": "q.sender", "asks": "Who sent the telegram?", "answer": "Martin Grove", "others": ["Mary Holt"], "gate": 7, "needs": [["c.tel_office", "c.fete", "c.train"]], "rules_out": {"Mary Holt": "c.tel_office: handed in at Leeds at four; c.fete: she was at Thornby from three until five, in the narrator's sight"}},
+    {"id": "q.waiting", "asks": "Who was waiting at the mill?", "answer": "Martin Grove", "others": ["Mary Holt"], "gate": 7, "needs": [["c.tel_words", "c.key"]], "rules_out": {"Mary Holt": "c.key: the one key drawn that evening was Mr. Grove's; c.tel_words read with the sender Martin: the sender named the place and the hour"}}
+  ],
+  "clues": [
+    {"id": "c.tel_office", "source": "The telegram (a paper)", "says": "Handed in at Leeds at four.", "facts": ["f.tel_sent"], "file": "telegram"},
+    {"id": "c.tel_words", "source": "The telegram (a paper)", "says": "'Come to the mill at ten. M.'", "facts": ["f.tel_words"], "file": "telegram"},
+    {"id": "c.fete", "source": "The narrator's own afternoon", "says": "Mrs. Holt was at the fête from three until five, the narrator at her side.", "facts": ["f.mary_fete"]},
+    {"id": "c.train", "source": "Mr. Grove's clerk, to the narrator", "says": "Mr. Grove took the two o'clock train to Leeds.", "facts": ["f.martin_train"], "chain": ["f.clerk_tells"]},
+    {"id": "c.key", "source": "The mill's night book, read by the narrator", "says": "One key was drawn that evening, at half past nine: Mr. Grove's.", "facts": ["f.key_drawn"]}
+  ]
+}

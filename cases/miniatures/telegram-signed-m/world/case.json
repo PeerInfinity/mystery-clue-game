@@ -1,0 +1,14 @@
+{
+  "id": "telegram_signed_m",
+  "title": "The Telegram Signed M.",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "files": [
+    {"id": "tel", "title": "The telegram in Mr. Holt's pocket", "short": "Telegram", "text": "../files/telegram.txt", "delivered": 2}
+  ],
+  "narrators": [
+    {"id": "ellis", "name": "Dr. Ellis", "kind": "first-person"}
+  ],
+  "subtitle": "Dr. Ellis's timeline",
+  "source": {"written": "2026-11-11", "word_count": 280}
+}

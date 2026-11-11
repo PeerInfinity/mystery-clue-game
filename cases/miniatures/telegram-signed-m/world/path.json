@@ -1,0 +1,14 @@
+{
+  "description": "The true path of the miniature: a telegram signed M., handed in at Leeds at four; the wife at the fête in the narrator's sight, the partner on the train to Leeds; the telegram then read as the partner's, and the one key drawn that night.",
+  "moves": [
+    {"at": [2, "tel:1"], "do": "link", "entry": "f.tel_sent", "q": "q.sender", "see": "at the Leeds office then", "for_q": ["q.sender"], "why": "Whoever sent it was at the Leeds office at four."},
+    {"at": [4], "do": "link", "entry": "f.mary_fete", "q": "q.sender", "see": "in the doctor's sight", "for_q": ["q.sender"], "why": "Mrs. Holt was beside me at the fête all that time."},
+    {"at": [4], "do": "cross", "q": "q.sender", "pick": "mary", "for_q": ["q.sender"], "why": "She could not have been in Leeds at four."},
+    {"at": [5], "do": "link", "entry": "f.martin_train", "q": "q.sender", "see": "by the two o'clock train", "for_q": ["q.sender"], "why": "Mr. Grove went to Leeds that afternoon."},
+    {"at": [5], "do": "circle", "q": "q.sender", "pick": "martin", "for_q": ["q.sender"], "why": "The M. is Martin."},
+    {"at": [5, "tel:2"], "do": "link", "entry": "f.tel_words", "q": "q.waiting", "see": "a meeting he meant to keep", "for_q": ["q.waiting"], "why": "Read as his, the telegram is Mr. Grove asking Holt to meet him at the mill at ten."},
+    {"at": [6], "do": "link", "entry": "f.key_drawn", "q": "q.waiting", "see": "one key was drawn that evening", "for_q": ["q.waiting"], "why": "And his was the one key drawn that night."},
+    {"at": [6], "do": "circle", "q": "q.waiting", "pick": "martin", "for_q": ["q.waiting"], "why": "Mr. Grove was waiting."},
+    {"at": [6], "do": "cross", "q": "q.waiting", "pick": "mary", "for_q": ["q.waiting"], "why": "Not Mrs. Holt."}
+  ]
+}

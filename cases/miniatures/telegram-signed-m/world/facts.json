@@ -1,0 +1,20 @@
+{
+  "facts": [
+    {"id": "f.ellis_role", "of": "ellis", "attr": "role", "value": "a doctor, of Thornby", "time": {"from": "t.before"}, "para": 1, "quote": "I am Dr. Ellis, of Thornby"},
+    {"id": "f.holt_owner", "of": "holt", "attr": "role", "value": "owner of Dyer's Mill", "time": {"from": "t.before"}, "para": 1, "quote": "Mr. Joseph Holt, its owner"},
+    {"id": "f.holt_struck", "of": "holt", "attr": "condition", "value": "struck down, by the loom-room door", "time": {"at": "t.eleven"}, "para": 1, "quote": "lay struck down by the loom-room door"},
+    {"id": "f.tel_pocket", "of": "telegram", "attr": "condition", "value": "in Mr. Holt's pocket", "time": {"at": "t.eleven"}, "para": 2, "quote": "In his pocket was a telegram"},
+    {"id": "f.holt_went", "of": "holt", "attr": "location", "value": "mill", "detail": "gone there because of the telegram", "time": {"at": "t.ten"}, "para": 2, "quote": "He had gone to the mill because of it"},
+    {"id": "f.tel_sent", "of": "?", "attr": "action", "value": "hands in the telegram at Leeds", "time": {"at": "t.four"}, "para": "tel:1", "quote": "Handed in at Leeds, 4.0 p.m."},
+    {"id": "f.tel_words", "of": "telegram", "attr": "condition", "value": "reads 'Come to the mill at ten. M.'", "time": {"at": "t.eleven"}, "para": "tel:2", "quote": "Come to the mill at ten. M."},
+    {"id": "f.tel_hand", "of": "telegram", "attr": "condition", "value": "written out in the post office clerk's hand, not the sender's", "time": {"at": "t.eleven"}, "para": "tel:3", "quote": "The form is written out in the post office clerk's hand, not the sender's"},
+    {"id": "f.mary_wife", "of": "mary", "attr": "role", "value": "Mr. Holt's wife", "time": {"from": "t.before"}, "para": 3, "quote": "His wife is Mary"},
+    {"id": "f.martin_partner", "of": "martin", "attr": "role", "value": "Mr. Holt's partner in the mill", "time": {"from": "t.before"}, "para": 3, "quote": "his partner in the mill is Mr. Martin Grove"},
+    {"id": "f.mary_fete", "of": "mary", "attr": "location", "value": "fete", "detail": "opening it at three, giving the prizes at five, Dr. Ellis at her side between", "time": {"from": "t.three", "to": "t.five"}, "para": 4, "quote": "I was at her side in the tea tent between, the whole two hours"},
+    {"id": "f.ellis_fete", "of": "ellis", "attr": "location", "value": "fete", "detail": "at Mrs. Holt's side in the tea tent", "time": {"from": "t.three", "to": "t.five"}, "para": 4, "quote": "I was at her side in the tea tent between"},
+    {"id": "f.clerk_tells", "of": "clerk", "attr": "tells", "value": "acct.clerk", "to": "ellis", "how": "told", "time": {"after": "t.eleven", "before": "t.later"}, "para": 5, "quote": "Mr. Grove's clerk told me"},
+    {"id": "f.martin_train", "of": "martin", "attr": "action", "value": "takes the two o'clock train to Leeds, and does not say why", "time": {"at": "t.two"}, "para": 5, "quote": "his master took the two o'clock train to Leeds"},
+    {"id": "f.key_drawn", "of": "martin", "attr": "action", "value": "draws his key of the mill (the only key drawn that evening)", "time": {"at": "t.half_nine"}, "para": 6, "quote": "one key drawn that evening, at half past nine: Mr. Grove's"},
+    {"id": "f.grove_owns", "of": "martin", "attr": "says", "value": "he sent the telegram and waited for his partner in the dark", "to": "ellis", "time": {"at": "t.later"}, "para": 7, "quote": "owned that he had sent the telegram and waited for his partner in the dark", "asserts": [{"q": "q.sender", "pick": "martin"}, {"q": "q.waiting", "pick": "martin"}]}
+  ]
+}

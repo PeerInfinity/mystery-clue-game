@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "send_telegram", "label": "handing in a telegram", "requires": [{"of": "$agent", "place": "$where"}], "effects": []}
+  ]
+}

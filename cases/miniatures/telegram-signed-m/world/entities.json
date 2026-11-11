@@ -1,0 +1,17 @@
+{
+  "entities": [
+    {"id": "ellis", "kind": "person", "name": "Dr. Ellis"},
+    {"id": "holt", "kind": "person", "name": "Mr. Joseph Holt"},
+    {"id": "mary", "kind": "person", "name": "Mary Holt"},
+    {"id": "martin", "kind": "person", "name": "Mr. Martin Grove"},
+    {"id": "clerk", "kind": "person", "name": "Mr. Grove's clerk"},
+    {"id": "thornby", "kind": "place", "name": "Thornby"},
+    {"id": "mill", "kind": "place", "name": "Dyer's Mill"},
+    {"id": "loom_room", "kind": "place", "name": "the loom-room door", "within": "mill"},
+    {"id": "fete", "kind": "place", "name": "the church fête", "within": "thornby"},
+    {"id": "leeds", "kind": "place", "name": "Leeds"},
+    {"id": "leeds_office", "kind": "place", "name": "the post office at Leeds", "within": "leeds"},
+    {"id": "telegram", "kind": "document", "name": "the telegram"},
+    {"id": "night_book", "kind": "document", "name": "the mill's night book"}
+  ]
+}

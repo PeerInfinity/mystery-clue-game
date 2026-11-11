@@ -111,6 +111,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/stable-clock` | One event at two times: two honest witnesses time one shot by two clocks; the clash is on the timeline at once, the slow clock is found, and an alibi goes with the wrong time. | 7 paragraphs, 17 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
 | `cases/miniatures/will-in-the-bible` | A document's own properties: a will read as a paper of its own, whose date and the christening it speaks of are set against the parish register. | 5 + 3 paragraphs (main story, the will), 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 14 moves |
 | `cases/miniatures/loose-board` | Who could have known: a theft that needed its thief to know the hiding-place (an action type of the case's own), told to one person, passed on by her without meaning to. | 6 paragraphs, 16 facts, 2 accounts, 1 telling, 1 question, 5 observations (all essential), 10 moves |
+| `cases/miniatures/telegram-signed-m` | Two readings of one clue: a telegram signed M. reads as the wife's or the partner's, and what it shows depends on which is circled, until the alibi picks. | 7 + 3 paragraphs (main story, the telegram), 16 facts, 2 accounts, 1 telling, 2 questions, 7 observations (5 essential), 9 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
@@ -515,6 +516,23 @@ Who could have known? (step 5, outline C; 2026-11-11):
 47. **The outline missed a suspect.** The sister knew, so she had to be ruled out: she was beside the narrator the
     whole hour. A chance thief ("something else") is ruled out by an observation against it: nothing else was
     touched.
+
+The order of the remaining work (the user, 2026-11-11, asked whether to fix issues as they come or finish the first
+versions first): defects are fixed as they are found; design changes are gathered and decided together once the
+outlines have first versions, except where a story cannot be written without one (outline E's new move). Open for
+that review so far: finding 46 (knowledge passed on by tellings), finding 35 (a case whose papers come early), finding
+36 (the path check's test for moves made too early, off for cases with files).
+
+Two readings of one clue (step 5, outline D; 2026-11-11):
+
+48. **The Telegram Signed M.** needs nothing new. The telegram is a paper (delivered at ¶2, where the doctor copies
+    it out); the same link of its words to "Who was waiting at the mill?" shows "read as Mrs. Holt's, … a meeting she
+    meant to keep" or "read as Mr. Grove's, … he meant to keep", by which sender is circled (two observations with
+    `if`), and only the second is essential. Sending a telegram is an action type of the case's own that needs its
+    sender at the Leeds office, so circling Mrs. Holt is at once a contradiction with the fête she was at in the
+    narrator's sight.
+49. **A third reading the prose had to close.** Whose hand the telegram is in would have been another way to read
+    it; the paper's own last line says the form is in the post office clerk's hand.
 
 - **The two Holmes cases are archived at `v2/`** (the user's proposal, 2026-11-11): Silver Blaze and The Speckled
   Band, the pipeline and the documents about them, with their own copy of the page, the engine and the checks, as

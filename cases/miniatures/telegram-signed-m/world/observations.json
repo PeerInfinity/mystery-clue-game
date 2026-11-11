@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.office", "q": "q.sender", "from": ["f.tel_sent"], "says": "it was handed in at Leeds at four: its sender was at the Leeds office then", "essential": true},
+    {"id": "o.fete", "q": "q.sender", "from": ["f.mary_fete"], "says": "Mrs. Holt was at the fête in Thornby from three until five, in the doctor's sight", "essential": true, "against": ["mary"]},
+    {"id": "o.train", "q": "q.sender", "from": ["f.martin_train"], "says": "Mr. Grove went to Leeds by the two o'clock train", "essential": true},
+    {"id": "o.hand", "q": "q.sender", "from": ["f.tel_hand"], "says": "the hand on the form is the clerk's: it tells nothing of the sender"},
+    {"id": "o.asked_martin", "q": "q.waiting", "from": ["f.tel_words"], "if": {"q": "q.sender", "pick": "martin"}, "says": "read as Mr. Grove's, the telegram named the place and the hour of a meeting he meant to keep", "essential": true},
+    {"id": "o.asked_mary", "q": "q.waiting", "from": ["f.tel_words"], "if": {"q": "q.sender", "pick": "mary"}, "says": "read as Mrs. Holt's, the telegram named the place and the hour of a meeting she meant to keep"},
+    {"id": "o.key", "q": "q.waiting", "from": ["f.key_drawn"], "says": "one key was drawn that evening, at half past nine: Mr. Grove's", "essential": true, "against": ["mary"]}
+  ]
+}

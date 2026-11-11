@@ -19,6 +19,7 @@ evidence leaves.
 [The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door) (what an act needed, and who had it) ·
 [The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house) (one evening, told by two people) ·
 [The Will in the Bible](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/will-in-the-bible) (a paper that says more than it could have known) ·
+[The Telegram Signed M.](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/telegram-signed-m) (one clue that reads two ways) ·
 [The Grey Cloak](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/grey-cloak) (an honest witness who is wrong) ·
 [The Night Porter's Statement](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/night-porters-statement) (a storyteller you cannot wholly
 believe)
