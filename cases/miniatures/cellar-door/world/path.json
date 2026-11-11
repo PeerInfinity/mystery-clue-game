@@ -1,0 +1,12 @@
+{
+  "description": "The true path of the miniature: a door locked at night and open in the morning, so someone unlocked and opened it between; what that act needed (a key, and being at the door) is set against what the timeline says of each man.",
+  "moves": [
+    {"at": 1, "do": "a", "a": "f.open", "b": "f.locked", "for_q": ["q.who"], "why": "Locked at ten, open at six: someone unlocked and opened it in between."},
+    {"at": 5, "do": "link", "entry": "f.two_keys", "q": "q.who", "see": "there are two keys, and Ned has neither", "for_q": ["q.who"], "why": "Unlocking needs a key, and there are only two."},
+    {"at": 5, "do": "link", "entry": "f.ned_loft", "q": "q.who", "see": "Ned was in the loft across the yard", "for_q": ["q.who"], "why": "It needs a man at the door, and Ned was across the yard all night."},
+    {"at": 5, "do": "cross", "q": "q.who", "pick": "ned", "for_q": ["q.who"], "why": "No key, and not at the door: the drink came to him some other way."},
+    {"at": 5, "do": "link", "entry": "f.jem_key", "q": "q.who", "see": "Jem carries a key to the door", "for_q": ["q.who"], "why": "Jem has the other key."},
+    {"at": 5, "do": "link", "entry": "f.jem_sleeps", "q": "q.who", "see": "Jem lay all night in the passage", "for_q": ["q.who"], "why": "And he lay all night in the passage the door opens off."},
+    {"at": 5, "do": "circle", "q": "q.who", "pick": "jem", "for_q": ["q.who"], "why": "Everything the act needed, Jem had."}
+  ]
+}

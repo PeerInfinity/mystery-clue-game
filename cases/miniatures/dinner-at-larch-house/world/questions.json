@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who took the notes from the study desk?", "entry": {"of": "?", "attr": "action", "time": {"after": "t.gong", "before": "t.gone"}}, "raised": 1, "quote": "the drawer was empty", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "voss", "available": 2, "via": "direct", "quote": "One of our two guests took my notes"}, {"value": "pym", "available": 2, "via": "direct", "quote": "One of our two guests took my notes"}], "answer": "pym", "answer_given_at": 6, "answer_given_quote": "with a letter from Miss Pym that I shall not copy here", "answer_inferable_at": 5, "answer_from": "f.unwatched"}
+  ]
+}

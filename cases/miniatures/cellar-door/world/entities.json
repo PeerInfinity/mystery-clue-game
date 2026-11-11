@@ -1,0 +1,18 @@
+{
+  "joins": {"cellar_door": ["cellar", "passage"]},
+  "entities": [
+    {"id": "coyle", "kind": "person", "name": "Martha Coyle"},
+    {"id": "ned", "kind": "person", "name": "Ned Sharp"},
+    {"id": "jem", "kind": "person", "name": "Jem Tully"},
+    {"id": "carrier", "kind": "person", "name": "the carrier's man"},
+    {"id": "anchor", "kind": "place", "name": "the Anchor"},
+    {"id": "cellar", "kind": "place", "name": "the cellar", "within": "anchor"},
+    {"id": "passage", "kind": "place", "name": "the passage behind the taproom", "within": "anchor"},
+    {"id": "yard", "kind": "place", "name": "the yard"},
+    {"id": "loft", "kind": "place", "name": "the loft over the stable"},
+    {"id": "cellar_door", "kind": "object", "name": "the cellar door"},
+    {"id": "cask", "kind": "object", "name": "the best brandy cask"},
+    {"id": "coyle_key", "kind": "object", "name": "Martha Coyle's key to the cellar"},
+    {"id": "jem_key", "kind": "object", "name": "Jem Tully's key to the cellar"}
+  ]
+}

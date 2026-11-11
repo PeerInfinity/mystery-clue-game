@@ -1,0 +1,24 @@
+{
+  "facts": [
+    {"id": "f.vane_role", "of": "vane", "attr": "role", "value": "goldsmith, of Fetter Court", "time": {"from": "t.before"}, "para": 1, "quote": "goldsmith, of Fetter Court"},
+    {"id": "f.ring_left", "of": "ring", "attr": "location", "value": "workroom", "detail": "on the bench", "time": {"at": "t.night"}, "para": 1, "quote": "I left a customer's ring on the bench in my workroom"},
+    {"id": "f.ring_gone", "of": "workroom", "attr": "condition", "value": "the ring is gone from the bench", "time": {"at": "t.morning"}, "para": 1, "quote": "in the morning the ring was gone"},
+    {"id": "f.door", "of": "door", "attr": "closed_to", "value": "small", "detail": "locked all night", "time": {"at": "t.night"}, "para": 1, "quote": "The door of the workroom was locked all night"},
+    {"id": "f.key_belt", "of": "vane", "attr": "carrying", "value": "key", "detail": "at her belt", "time": {"at": "t.night"}, "para": 1, "quote": "the key hung at my belt"},
+    {"id": "f.tom_role", "of": "tom", "attr": "role", "value": "Esther Vane's apprentice", "time": {"from": "t.before"}, "para": 2, "quote": "My apprentice, Tom Pike"},
+    {"id": "f.tom_knew", "of": "tom", "attr": "knows", "value": "the ring was on the bench", "time": {"at": "t.night"}, "para": 2, "quote": "knew the ring was there"},
+    {"id": "f.window", "of": "window", "attr": "closed_to", "value": "person", "detail": "barred, the bars a hand's breadth apart", "time": {"at": "t.night"}, "para": 2, "quote": "the window of the workroom is barred"},
+    {"id": "f.walls", "of": "walls", "attr": "closed_to", "value": "small", "detail": "brick, and sound", "time": {"at": "t.night"}, "para": 3, "quote": "are brick, and sound"},
+    {"id": "f.filings", "of": "filings", "attr": "condition", "value": "scattered, that had been left in a heap", "time": {"at": "t.morning"}, "para": 4, "quote": "were scattered"},
+    {"id": "f.draught", "of": "draught", "attr": "passed", "value": "workroom", "between": ["yard", "workroom"], "passes": "air", "time": {"at": "t.night"}, "para": 4, "quote": "A draught from the yard had blown through the workroom that night"},
+    {"id": "f.belli_lodges", "of": "belli", "attr": "lives_at", "value": "yard", "detail": "across it; the organ-grinder", "time": {"from": "t.before"}, "para": 5, "quote": "lodges across the yard"},
+    {"id": "f.keeps", "of": "belli", "attr": "carrying", "value": "monkey", "detail": "kept, and let run in the yard after dark", "time": {"at": "t.night"}, "para": 5, "quote": "He keeps a monkey, and lets it run in the yard after dark"},
+    {"id": "f.pane", "of": "pane", "attr": "passes", "value": "small", "detail": "open to the yard, a gap no wider than a hand", "time": {"at": "t.night"}, "para": 6, "quote": "stood open to the yard"},
+    {"id": "f.cord", "of": "cord", "attr": "attached", "value": "roller", "time": {"at": "t.night"}, "para": 7, "quote": "hung from a roller"},
+    {"id": "f.roller", "of": "roller", "attr": "near", "value": "pane", "time": {"at": "t.night"}, "para": 7, "quote": "beside the pane"},
+    {"id": "f.reach", "of": "cord", "attr": "reaches", "value": "bench", "time": {"at": "t.night"}, "para": 8, "quote": "reached down to the bench"},
+    {"id": "f.fixed", "of": "bench", "attr": "fixed", "value": "floor", "time": {"at": "t.night"}, "para": 8, "quote": "screwed to the floor"},
+    {"id": "f.monkey_took", "of": "monkey", "attr": "action", "value": "took the ring: it is found in its bedding with two shirt-studs", "time": {"at": "t.night"}, "para": 9, "quote": "Signor Belli found the ring in its bedding", "q": "q.what", "pick": "monkey"},
+    {"id": "f.belli_brings", "of": "belli", "attr": "action", "value": "brings the ring back across the yard", "time": {"at": "t.later"}, "para": 9, "quote": "brought it across the yard with many apologies"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "cellar_door",
+  "title": "The Cellar Door",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "coyle", "name": "Martha Coyle", "kind": "first-person"}
+  ],
+  "subtitle": "Martha Coyle's timeline",
+  "source": {"written": "2026-11-11", "word_count": 250}
+}

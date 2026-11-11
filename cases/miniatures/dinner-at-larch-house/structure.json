@@ -1,0 +1,17 @@
+{
+  "story": "dinner-at-larch-house",
+  "mechanic": "Two narrators: each is certain of their own part of the evening, neither account answers the question alone, and the two are read as one timeline.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md. Here the two narrators' accounts are the clues, each already a unit with its own source; the frame is the first narrator's.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.notes", "says": "Fifty pounds put in the study desk as the dinner gong went were gone when the guests had left.", "facts": ["f.notes_put", "f.drawer_empty", "f.dinner"]}
+  ],
+  "questions": [
+    {"id": "q.who", "asks": "Who took the notes from the study desk?", "answer": "Miss Pym", "others": ["Captain Voss"], "gate": 6, "needs": [["c.table", "c.landing", "c.down"]], "rules_out": {"Captain Voss": "c.landing: he was watched all the time he was out", "George Marlow, the maid": "c.table: they never left the dining-room", "anyone before the joint": "c.landing: nobody else crossed the hall"}}
+  ],
+  "clues": [
+    {"id": "c.table", "source": "George Marlow, who did not leave the table", "says": "He and the maid stayed in the dining-room throughout; Clara was upstairs from the soup until the joint; Captain Voss went out during the fish, Miss Pym during the dessert.", "facts": ["f.george_stays", "f.hannah_stays", "f.clara_called", "f.voss_out", "f.pym_out"]},
+    {"id": "c.landing", "source": "Clara Marlow, on the nursery landing above the hall from the soup until the joint", "says": "Captain Voss took something from his overcoat and went straight back, never out of her sight or near the study door; nobody else crossed the hall.", "facts": ["f.clara_landing", "f.voss_hall", "f.voss_watched", "f.hall_empty"]},
+    {"id": "c.down", "source": "Clara Marlow", "says": "She went down as the joint was carried in, and after that nobody watched the hall.", "facts": ["f.clara_down", "f.unwatched"]}
+  ]
+}

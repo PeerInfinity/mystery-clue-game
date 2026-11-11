@@ -1,0 +1,6 @@
+{
+  "accounts": [
+    {"id": "acct.george", "label": "What George Marlow saw himself", "origin": "george", "how": "saw", "facts": ["f.dinner", "f.notes_put", "f.drawer_empty", "f.george_stays", "f.hannah_stays", "f.clara_called", "f.voss_out", "f.pym_out", "f.george_asks", "f.notes_back"]},
+    {"id": "acct.clara", "label": "What Clara Marlow saw herself", "origin": "clara", "how": "saw", "facts": ["f.clara_landing", "f.voss_hall", "f.voss_watched", "f.hall_empty", "f.clara_down", "f.unwatched"]}
+  ]
+}

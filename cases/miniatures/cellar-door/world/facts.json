@@ -1,0 +1,23 @@
+{
+  "facts": [
+    {"id": "f.coyle_role", "of": "coyle", "attr": "role", "value": "keeps the Anchor at Saltby", "time": {"from": "t.before"}, "para": 1, "quote": "I keep the Anchor at Saltby"},
+    {"id": "f.locked", "of": "cellar_door", "attr": "door", "value": "locked", "detail": "by Martha Coyle, as every night", "time": {"from": "t.ten"}, "para": 1, "quote": "I locked the cellar door myself"},
+    {"id": "f.open", "of": "cellar_door", "attr": "door", "value": "open", "time": {"at": "t.six"}, "para": 1, "quote": "the cellar door stood open", "q": "q.who"},
+    {"id": "f.cask", "of": "cask", "attr": "condition", "value": "a gallon lighter", "time": {"at": "t.six"}, "para": 1, "quote": "the best brandy cask was a gallon lighter"},
+    {"id": "f.ned_role", "of": "ned", "attr": "role", "value": "the ostler", "time": {"from": "t.before"}, "para": 2, "quote": "Ned Sharp, the ostler"},
+    {"id": "f.ned_drunk", "of": "ned", "attr": "condition", "value": "dead drunk in the yard", "time": {"at": "t.six"}, "para": 2, "quote": "was dead drunk in the yard that morning"},
+    {"id": "f.jem_role", "of": "jem", "attr": "role", "value": "the potman", "time": {"from": "t.before"}, "para": 2, "quote": "Jem Tully, the potman"},
+    {"id": "f.jem_sober", "of": "jem", "attr": "condition", "value": "as sober as a judge", "time": {"at": "t.six"}, "para": 2, "quote": "was as sober as a judge"},
+    {"id": "f.door_where", "of": "cellar_door", "attr": "condition", "value": "opens off the passage behind the taproom", "time": {"from": "t.before"}, "para": 3, "quote": "The cellar door opens off the passage behind the taproom"},
+    {"id": "f.two_keys", "of": "cellar_door", "attr": "condition", "value": "has two keys: Martha Coyle's and Jem Tully's", "time": {"from": "t.before"}, "para": 3, "quote": "There are two keys to it"},
+    {"id": "f.coyle_key", "of": "coyle", "attr": "carrying", "value": "coyle_key", "key": "cellar_door", "detail": "on her own ring", "time": {"from": "t.ten", "to": "t.six"}, "para": 3, "quote": "One is on my own ring"},
+    {"id": "f.jem_key", "of": "jem", "attr": "carrying", "value": "jem_key", "key": "cellar_door", "detail": "night and day, for the morning's barrels", "time": {"from": "t.ten", "to": "t.six"}, "para": 3, "quote": "the other Jem carries, night and day"},
+    {"id": "f.carrier_tells", "of": "carrier", "attr": "tells", "value": "acct.carrier", "to": "coyle", "how": "told", "time": {"at": "t.later"}, "para": 4, "quote": "the carrier's man told me"},
+    {"id": "f.ned_loft", "of": "ned", "attr": "location", "value": "loft", "detail": "never stirring; the carrier's man had to climb over him to get out", "time": {"from": "t.ten", "to": "t.six"}, "para": 4, "quote": "He was up there before ten and never stirred till six"},
+    {"id": "f.ned_sleeps", "of": "ned", "attr": "lives_at", "value": "loft", "detail": "across the yard", "time": {"from": "t.before"}, "para": 4, "quote": "Ned sleeps in the loft over the stable, across the yard"},
+    {"id": "f.jem_sleeps", "of": "jem", "attr": "location", "value": "passage", "detail": "on the settle", "time": {"from": "t.ten", "to": "t.six"}, "para": 5, "quote": "Jem sleeps on the settle in the passage, from ten until I come down at six"},
+    {"id": "f.jem_gives", "of": "jem", "attr": "action", "value": "gives up his key, and the money with it", "time": {"at": "t.later"}, "para": 6, "quote": "He gave it up, and the money with it", "q": "q.who", "pick": "jem"},
+    {"id": "f.jem_sold", "of": "jem", "attr": "action", "value": "sells a gallon of brandy to the carrier's man", "time": {"at": "t.midnight"}, "para": 6, "quote": "he had sold a gallon to the carrier's man at midnight"},
+    {"id": "f.jem_stood", "of": "jem", "attr": "action", "value": "stands Ned Sharp a mugful, so that Martha Coyle should look no further than the yard", "time": {"at": "t.dawn"}, "para": 6, "quote": "stood Ned a mugful at dawn"}
+  ]
+}

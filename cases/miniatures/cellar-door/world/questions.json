@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who opened the cellar door in the night?", "entry": {"of": "?", "attr": "action", "act": ["unlock", "open"], "thing": "cellar_door", "value": "opening the cellar door", "time": {"from": "t.ten", "to": "t.six"}}, "raised": 1, "quote": "the cellar door stood open", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "ned", "available": 2, "via": "direct", "quote": "Two men about the place might have done it"}, {"value": "jem", "available": 2, "via": "direct", "quote": "Two men about the place might have done it"}], "answer": "jem", "answer_given_at": 6, "answer_given_quote": "He gave it up, and the money with it", "answer_inferable_at": 5, "answer_from": "f.jem_sleeps"}
+  ]
+}

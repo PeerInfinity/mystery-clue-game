@@ -1,0 +1,22 @@
+{
+  "description": "The true path of the miniature: every way into the room closed to a person, something that got through all the same, the way it came found, and a route from the yard to the bench that only something small that climbs could take.",
+  "moves": [
+    {"at": 1, "do": "way", "way": "door|person", "mark": "closed", "for_q": ["q.what"], "why": "Locked all night, the key at my belt: nobody came by the door."},
+    {"at": 2, "do": "way", "way": "window|person", "mark": "closed", "for_q": ["q.what"], "why": "Barred: no person comes through a hand's breadth."},
+    {"at": 3, "do": "way", "way": "walls|person", "mark": "closed", "for_q": ["q.what"], "why": "Brick, and sound."},
+    {"at": 4, "do": "got", "of": "f.draught", "for_q": ["q.what"], "why": "A draught came in from the yard, so there is a way nobody has mentioned."},
+    {"at": 6, "do": "way", "way": "pane|small", "mark": "open", "for_q": ["q.what"], "why": "The way the draught came: a gap for something small."},
+    {"at": 6, "do": "link", "entry": "f.pane", "q": "q.what", "see": "small enough for the open pane", "for_q": ["q.what"], "why": "Whatever took the ring had to fit that."},
+    {"at": 8, "do": "route", "node": "yard", "for_q": ["q.what"], "why": "Start where the draught came from."},
+    {"at": 8, "do": "route", "node": "pane", "for_q": ["q.what"], "why": "Through the open pane."},
+    {"at": 8, "do": "route", "node": "roller", "for_q": ["q.what"], "why": "The roller of the blind is beside it."},
+    {"at": 8, "do": "route", "node": "cord", "for_q": ["q.what"], "why": "The cord hangs from the roller."},
+    {"at": 8, "do": "route", "node": "bench", "for_q": ["q.what"], "why": "And it reaches the bench, where the ring lay."},
+    {"at": 8, "do": "link", "entry": "route", "q": "q.what", "see": "able to climb down a cord", "for_q": ["q.what"], "why": "It must have come that way, and gone back up it."},
+    {"at": 8, "do": "link", "entry": "f.door", "q": "q.what", "see": "nothing came in by the door", "for_q": ["q.what"], "why": "The door was locked all night."},
+    {"at": 8, "do": "link", "entry": "f.window", "q": "q.what", "see": "no person came in by the window", "for_q": ["q.what"], "why": "And the bars stop a person."},
+    {"at": 8, "do": "cross", "q": "q.what", "pick": "tom", "for_q": ["q.what"], "why": "Tom knew of the ring, but no person could get in."},
+    {"at": 8, "do": "link", "entry": "f.keeps", "q": "q.what", "see": "loose in the yard after dark", "for_q": ["q.what"], "why": "One thing small enough, that climbs, was loose in the yard that night."},
+    {"at": 8, "do": "circle", "q": "q.what", "pick": "monkey", "for_q": ["q.what"], "why": "Signor Belli's monkey."}
+  ]
+}

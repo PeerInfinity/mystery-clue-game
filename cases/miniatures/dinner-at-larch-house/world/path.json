@@ -1,0 +1,11 @@
+{
+  "description": "The true path of the miniature: one narrator saw who left the table and when, the other saw the hall for part of the evening; neither account answers alone, and together they leave one guest.",
+  "moves": [
+    {"at": 4, "do": "link", "entry": "f.voss_watched", "q": "q.who", "see": "never near the study", "for_q": ["q.who"], "why": "Clara watched Captain Voss the whole time he was out."},
+    {"at": 4, "do": "cross", "q": "q.who", "pick": "voss", "for_q": ["q.who"], "why": "He fetched something from his coat and went straight back."},
+    {"at": 4, "do": "link", "entry": "f.hall_empty", "q": "q.who", "see": "nobody else crossed the hall", "for_q": ["q.who"], "why": "And nobody else crossed the hall while she sat there."},
+    {"at": 5, "do": "link", "entry": "f.unwatched", "q": "q.who", "see": "nobody watched the hall", "for_q": ["q.who"], "why": "So the notes went after the joint, when the hall was unwatched."},
+    {"at": 5, "do": "link", "entry": "f.pym_out", "q": "q.who", "see": "Miss Pym went out during the dessert", "for_q": ["q.who"], "why": "George saw only one person leave the table after that."},
+    {"at": 5, "do": "circle", "q": "q.who", "pick": "pym", "for_q": ["q.who"], "why": "Miss Pym, during the dessert."}
+  ]
+}

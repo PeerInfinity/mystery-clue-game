@@ -3,7 +3,7 @@
 **Spoilers:** this page gives numbers from the data of "Silver Blaze" and "The Speckled Band", and names one question of
 the second. "What the miniatures showed" gives away both miniatures.
 
-**Status (2026-11-10): a direction set in discussion with the user. Of the experiments below, the first three mechanic
+**Status (2026-11-10): a direction set in discussion with the user. Of the experiments below, five mechanic
 miniatures are written (`cases/miniatures/`); nothing else is built.** It changes parts of
 `docs/archipelago-plan.md` and `docs/interconnected-world.md`; what it supersedes is listed below and noted at the top
 of each.
@@ -98,7 +98,7 @@ Still needed as planned: "any of these" between facts, hints that make links, na
 
 ## What the miniatures showed
 
-Experiment 1, begun 2026-11-10. Three miniatures are written, each an invented story of under 350 words with its world
+Experiment 1, begun 2026-11-10. Five miniatures are written, each an invented story of under 350 words with its world
 model, its true path and its logic (`structure.json`, beside the case):
 
 | Miniature | Mechanic | Size |
@@ -107,6 +107,8 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 23 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (5 essential), 10 moves |
 
 | `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
+| `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
+| `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 5 observations (4 essential), 7 moves |
 
 Played at `?case=cases/miniatures/<name>`. `npm test` validates them and checks each `structure.json` against its
 world model.
@@ -263,6 +265,110 @@ Written after the fixes above, and it needed no change to the engine or the page
 16. **Witnesses' evidence passes the new gate while merely uncertain.** The lamplighter's and the ferryman's facts
     are essential and never more than uncertain (finding 5); the gate asks only that they are on the timeline and
     linked. A player who distrusts the ferryman cannot pass, and is not told why beyond the count of evidence.
+
+### The fifth and sixth of the list (2026-11-11): a room and a route, one reasoning move
+
+Miniature 4 of the proposed list (linking observations, the answer accepted only on the evidence) was not written as
+a case of its own: since the gate changed, every miniature is that. Neither of these two needed a change to the
+engine or the page.
+
+17. **The sealed-room fixture is not the published miniature.** The kickoff said to reuse it. Its mechanic and its
+    data's shape are reused whole (`world/room.json`, the same facts of `closed_to`, `passed`, `passes`, `attached`,
+    `near`, `reaches`, `fixed`), but its plot (something small comes through a grating and down a chain to a man) is
+    the plot of The Speckled Band, and published beside that story it would give it away. The Ring on the Bench is
+    a different story on the same mechanic; the fixture stays as the page checks' fixture.
+18. **The room's moves are not evidence.** The marks on the ways-in table and "Something got through" are played on
+    the true path, but nothing requires them: the gate looks only at observations, and an observation comes from
+    facts or from the route. "No person could get in" is two essential observations from the door's and the
+    window's facts, which repeat what the table already shows. The route is the one move of the room that an
+    observation can require (`route_through`).
+19. **Every clue of a room is the narrator's own look at it** (finding 5 again): a room cannot be delivered as case
+    files unless a file can be "what the window is like".
+20. **The alibi can be mechanical, and miniature 3's finding 13 has an answer.** In The Cellar Door the question's
+    entry is a typed action (`act: [unlock, open]` of the door, over a `{from, to}` window). Circling a suspect
+    makes it that one's act, and the question's detail lists what the act needed with what the timeline says of
+    each: for the false suspect "has a key to the cellar door: nothing on the timeline says so" and "at the cellar
+    door: the timeline has Ned Sharp at the loft over the stable"; for the right one, all three met. No move is
+    needed for it, and nothing had to be built. Three limits: it shows only in the question's detail, not as a
+    contradiction on the timeline; a need that is against the timeline is told only over a `{from, to}` window
+    (over `{after, before}` it is "nothing says so"); and the generic action table knows doors, keys, giving,
+    drugging, striking, hiding and little else, so "took the cup from the shelf" (miniature 3) would need an
+    action type of its own in `world/actions.json`, or a generic `take` that needs its taker at the place.
+21. **A reasoning move is not evidence either.** "It changed" (the door locked, then open: someone unlocked and
+    opened it between) is on the true path and puts the act on the timeline, but the gate cannot ask for it, and
+    the needs the page shows under a circled suspect are a view, not something the player links. The essential
+    observations say the same thing again in words ("there are two keys, and Ned has neither"). So in both of
+    these miniatures the mechanic's own moves are optional, and what passes the gate is linking.
+22. **A key is a key by its wording.** A `carrying` fact meets "has a key to the door" if it has `key: <door>`, a
+    field the format does not document, or if its value is text containing the word "key"; an entity id such as
+    `jem_key` does not count. It must also start at the same time point as the question's window. The first try
+    read "Jem Tully has something" until the key's phrase in `mentions.json` was moved to the paragraph that first
+    tells of it.
+
+23. **Two defects the room miniature found, both fixed 2026-11-11.** A link to the route was lost when the route
+    grew: the route's entry is named after its nodes, so a route linked at two nodes and then extended kept a link
+    to an entry that no longer existed, and its observation never filled. The link now stays with the route. And the
+    hints said "read on" at a gate that would not open (every move of the path made, the evidence still short), on
+    which the hints check looped without end, as it could not have before the gate asked for evidence. The hint now
+    points at the gate's notice, and the check fails when "read on" does not move the reader. The cause in the data
+    was a path whose room moves had no `for_q`, so the hints played them after the links; the path has it now.
+
+## Mechanics to add, each with a miniature to show it
+
+Proposed 2026-11-11 while the fifth and sixth miniatures were in their checks; the user: "I'll want to implement all
+of these eventually." None is built and no order is ruled. The first group comes out of the findings above. The
+session's suggestion for where to start: 2 (it closes the most visible gap in what has been played) and 5 (every
+false statement so far is a deliberate lie, and the sincere mistake is the commoner device in detective fiction).
+
+Close to what exists:
+
+1. **The order of two events as something that can be doubted.** The order now lives in `times.json` (finding 14).
+   "A happened before B" becomes an entry with a source, so it can be linked, distrusted and contradicted.
+   *Miniature:* two witnesses saw the same two things (a shot, a carriage leaving) and give them in opposite orders;
+   one stood where the sound arrives late.
+2. **An alibi as a contradiction on the timeline.** The Cellar Door shows an act's needs only in the question's
+   detail (finding 20). "Your answer needs Ned at the cellar door" goes on the timeline as part of the hypothesis,
+   and clashes with "Ned in the loft" like any two places. *Miniature:* The Last Ferry, with an action of taking
+   that needs its taker at the place.
+3. **A document as a clue with properties of its own:** a date, a hand, where it was found, what it could not have
+   known when written. *Miniature:* a will dated in March names a grandchild born in June.
+4. **Who could have known?** The format has `knows`. A question answered by tracing who was told what: the culprit
+   used something only three people had been told. *Miniature:* a burglar went straight to the one loose
+   floorboard.
+
+New, but small:
+
+5. **A mistaken witness, not a lying one.** The statement is sincere and an inference in it is wrong: a coat was
+   seen, not a face. The player keeps the observation and rejects the conclusion. *Miniature:* "I saw the doctor
+   leave at nine" becomes "I saw the doctor's cloak leave at nine".
+6. **Two readings of one clue.** Observations can already depend on another answer (`if`). A clue means one thing
+   under one hypothesis and another under the other, and a later fact picks. *Miniature:* a telegram, "COME AT ONCE
+   NOT SAFE".
+7. **Absence as evidence.** Something that should be on the timeline and is not; needs the general negative the
+   format lacks (finding 7). *Miniature:* a watchman's clock punched every hour but three.
+8. **Means: what an act needed besides presence.** The action needs grow beyond keys and doors: strength, a skill,
+   a tool, height. *Miniature:* the bundle is tied with a sailor's knot, and one of three suspects cannot tie it.
+
+Larger:
+
+9. **Two narrators.** The format allows more than one and no case uses it. The same evening told twice, each
+   certain of their own part. *Miniature:* a husband's and a wife's accounts of a dinner; the theft is in the gap.
+10. **A clue found only by asking.** The reader chooses which witnesses to question and reads only those
+    paragraphs: the first step toward the pluggable spine, and the largest change to the page. *Miniature:* three
+    neighbours, and time to question two.
+
+Rulings and one more idea, 2026-11-11:
+
+- **Idea 2, the alibi: ruled.** A circled answer to a question whose entry is a typed action puts that act's need
+  of presence on the timeline with the circle, as part of the hypothesis, so it clashes with an entry that has the
+  suspect elsewhere ("in two places at once?"), resolved by taking the circle off or distrusting the alibi's source.
+  It counts only when the timeline has the suspect elsewhere for the whole of the act's window, not when it merely
+  fails to place them at the scene. Taking a thing needs its taker at the place (the generic action table).
+- **Idea 9, two narrators: a narrator's own statements must be doubtable** where a story has an unreliable
+  narrator; a story without one works as now (a narrator's own observations certain, with no statement link).
+- **11. Doubting the author** (the user's idea, with the note that it may not be worth building): a way for the
+  player to say that the story or its data is wrong, like a bug report. It would need somewhere for the reports to
+  go, and the user does not want to set that up.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

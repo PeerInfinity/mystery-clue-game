@@ -1,0 +1,17 @@
+{
+ "entities": {
+  "coyle": ["Martha Coyle"],
+  "ned": ["Ned Sharp", "Ned"],
+  "jem": ["Jem Tully", "Jem"],
+  "carrier": ["the carrier's man"],
+  "anchor": ["the Anchor"],
+  "cellar": [],
+  "passage": ["the passage behind the taproom", "the passage"],
+  "yard": ["the yard"],
+  "loft": ["the loft over the stable"],
+  "cellar_door": ["the cellar door", "The cellar door"],
+  "cask": ["the best brandy cask"],
+  "coyle_key": ["my own ring"],
+  "jem_key": ["the other Jem carries", "his key"]
+ }
+}

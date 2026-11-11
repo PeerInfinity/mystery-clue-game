@@ -1,0 +1,12 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.gong", "label": "Thursday, the dinner gong", "after": "t.before", "para": 1, "quote": "As the gong went"},
+    {"id": "t.soup", "label": "Thursday, the soup", "after": "t.gong", "para": 2, "quote": "with the soup"},
+    {"id": "t.fish", "label": "Thursday, the fish", "after": "t.soup", "para": 2, "quote": "during the fish"},
+    {"id": "t.joint", "label": "Thursday, the joint", "after": "t.fish", "para": 2, "quote": "as the joint was carried in"},
+    {"id": "t.dessert", "label": "Thursday, the dessert", "after": "t.joint", "para": 2, "quote": "during the dessert"},
+    {"id": "t.gone", "label": "Thursday, the guests gone", "after": "t.dessert", "para": 1, "quote": "When our guests had gone"},
+    {"id": "t.friday", "label": "Friday morning", "after": "t.gone", "para": 6, "quote": "by Friday's first post"}
+  ]
+}

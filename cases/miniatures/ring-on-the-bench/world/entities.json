@@ -1,0 +1,22 @@
+{
+  "entities": [
+    {"id": "vane", "kind": "person", "name": "Esther Vane"},
+    {"id": "tom", "kind": "person", "name": "Tom Pike"},
+    {"id": "belli", "kind": "person", "name": "Signor Belli"},
+    {"id": "monkey", "kind": "animal", "name": "Signor Belli's monkey"},
+    {"id": "workroom", "kind": "place", "name": "the workroom"},
+    {"id": "yard", "kind": "place", "name": "the yard"},
+    {"id": "ring", "kind": "object", "name": "the customer's ring"},
+    {"id": "door", "kind": "object", "name": "the door of the workroom"},
+    {"id": "key", "kind": "object", "name": "the key of the workroom"},
+    {"id": "window", "kind": "object", "name": "the window of the workroom"},
+    {"id": "walls", "kind": "object", "name": "the walls of the workroom"},
+    {"id": "filings", "kind": "object", "name": "the gold filings"},
+    {"id": "draught", "kind": "object", "name": "a draught"},
+    {"id": "pane", "kind": "object", "name": "the ventilating pane"},
+    {"id": "roller", "kind": "object", "name": "the roller of the blind"},
+    {"id": "cord", "kind": "object", "name": "the cord of the blind"},
+    {"id": "bench", "kind": "object", "name": "the bench"},
+    {"id": "floor", "kind": "object", "name": "the floor"}
+  ]
+}

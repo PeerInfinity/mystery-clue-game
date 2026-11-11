@@ -38,11 +38,16 @@ async function run(name, start, expect = []) {
     for (let i = 0; i < 100 && !(await ev(`!!window.__hint`).catch(() => false)); i++) await sleep(200);
     errors.length = 0;
     const t0 = Date.now(), seen = new Set();
-    let hints = 0, presses = 0, last = null, same = 0;
+    let hints = 0, presses = 0, last = null, same = 0, stuck = 0, lastPara = null;
     const kinds = {};
     while (hints < 2000) {
         const t = await ev(`window.__hint.target()`);
         if (t.kind === 'done') break;
+        // "Read on" that does not move the reader on (the gate holds, and the hints have nothing more) is a failure.
+        const at = await ev(`JSON.parse(localStorage.getItem(${J(STORE)})).para`);
+        stuck = t.kind === 'read' && at === lastPara ? stuck + 1 : 0;
+        lastPara = at;
+        if (stuck > 2) { fail(`${name}: the hint is to read on, and the reader does not get past ¶${at}: ${await ev(`document.querySelector('#gate-news')?.innerText ?? ''`)}`); break; }
         const key = J(t);
         same = key === last && t.kind !== 'read' ? same + 1 : 0;
         last = key;

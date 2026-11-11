@@ -1,0 +1,10 @@
+{
+  "observations": [
+    {"id": "o.voss_watched", "q": "q.who", "from": ["f.voss_watched"], "says": "all the time Captain Voss was out he was in Clara's sight, and never near the study", "essential": true, "against": ["voss"]},
+    {"id": "o.hall_empty", "q": "q.who", "from": ["f.hall_empty"], "says": "nobody else crossed the hall from the soup until the joint", "essential": true},
+    {"id": "o.unwatched", "q": "q.who", "from": ["f.unwatched"], "says": "from the joint onward nobody watched the hall", "essential": true},
+    {"id": "o.pym_out", "q": "q.who", "from": ["f.pym_out"], "says": "Miss Pym went out during the dessert, when nobody watched", "essential": true},
+    {"id": "o.rest", "q": "q.who", "from": ["f.george_stays", "f.hannah_stays"], "says": "George and the maid never left the dining-room"},
+    {"id": "o.voss_out", "q": "q.who", "from": ["f.voss_out"], "says": "Captain Voss was out during the fish, on George's account alone a suspect"}
+  ]
+}

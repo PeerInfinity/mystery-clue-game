@@ -31,7 +31,7 @@ for (const dir of cases) {
             assert.ok(questions.has(q.id), `no question ${q.id}`);
             for (const set of q.needs) for (const id of set) assert.ok(clues.has(id), `${q.id}: no clue ${id}`);
             const needed = new Set(q.needs.flat().flatMap((id) => [...clues.get(id).facts, ...(clues.get(id).chain ?? [])]));
-            for (const o of observations.filter((x) => x.q === q.id && x.essential)) for (const f of o.from.map((x) => x.doubted ?? x)) assert.ok(needed.has(f), `${o.id}: ${f} is in no clue ${q.id} needs`);
+            for (const o of observations.filter((x) => x.q === q.id && x.essential)) for (const f of o.from.map((x) => x.doubted ?? x).filter((x) => typeof x === 'string')) assert.ok(needed.has(f), `${o.id}: ${f} is in no clue ${q.id} needs`);
         }
     });
 }

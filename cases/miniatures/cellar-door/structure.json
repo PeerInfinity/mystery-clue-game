@@ -1,0 +1,19 @@
+{
+  "story": "cellar-door",
+  "mechanic": "One reasoning move: a thing was in one state and then in another, so someone changed it between; the act that changes it has needs (a key, being at the door), and each suspect is set against them.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md. `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue, `chain` the tellings that bring it.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.door", "says": "The cellar door was locked at ten on Friday night and stood open at six on Saturday morning, the brandy cask a gallon lighter.", "facts": ["f.locked", "f.open", "f.cask"]},
+    {"id": "fr.men", "says": "Two men about the place might have done it: the ostler and the potman.", "facts": ["f.ned_role", "f.jem_role"]}
+  ],
+  "questions": [
+    {"id": "q.who", "asks": "Who opened the cellar door in the night?", "answer": "Jem Tully", "others": ["Ned Sharp"], "gate": 6, "needs": [["c.keys", "c.loft", "c.settle"]], "rules_out": {"Ned Sharp": "c.keys: he has no key; c.loft: he was across the yard all night", "the narrator": "her own word only: she holds the other key and tells the story"}}
+  ],
+  "clues": [
+    {"id": "c.drunk", "source": "The narrator, on Saturday morning", "says": "The ostler was dead drunk in the yard; the potman was sober.", "facts": ["f.ned_drunk", "f.jem_sober"], "false_trail": true},
+    {"id": "c.keys", "source": "The narrator's own knowledge of her house", "says": "The cellar door opens off the passage; it has two keys, hers and the one the potman carries night and day.", "facts": ["f.door_where", "f.two_keys", "f.coyle_key", "f.jem_key"]},
+    {"id": "c.loft", "source": "The carrier's man, to the narrator: his night in the stable loft", "says": "The ostler was up in the loft before ten and never stirred till six.", "facts": ["f.ned_loft"], "chain": ["f.carrier_tells"], "note": "The witness turns out to be the buyer of the brandy; what he says of the ostler is true."},
+    {"id": "c.settle", "source": "The narrator's own knowledge of her house", "says": "The potman sleeps on the settle in the passage, from ten until six.", "facts": ["f.jem_sleeps"]}
+  ]
+}

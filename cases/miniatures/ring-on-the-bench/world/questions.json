@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.what", "label": "Who or what took the ring?", "entry": {"of": "?", "attr": "action", "time": {"at": "t.night"}}, "raised": 1, "quote": "in the morning the ring was gone", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "tom", "available": 2, "via": "direct", "quote": "knew the ring was there"}, {"value": "monkey", "available": 5, "via": "indirect", "from": "f.keeps"}], "answer": "monkey", "answer_given_at": 9, "answer_given_quote": "It was the monkey", "answer_inferable_at": 8, "answer_from": "f.reach"}
+  ]
+}

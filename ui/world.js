@@ -771,6 +771,9 @@ function render() {
     const keys = new Set(lapsed.map((l) => moveKey(l.move)));
     lapseNews = heldKeys ? [...lapseNews.filter((l) => keys.has(moveKey(l.move))), ...lapsed.filter((l) => heldKeys.has(moveKey(l.move)))] : [];
     heldKeys = new Set(held.map(moveKey));
+    // A link to the route stays with the route as it grows or is taken back (its entry is named after its nodes).
+    const routeNow = reasoned.find((f) => f.attr === 'route');
+    if (routeNow) for (const l of state.links) if (l.entry.startsWith('r:r:') && l.entry !== routeNow.id) l.entry = routeNow.id;
     // A telling can be linked like any entry: that it was said stands, whatever becomes of what it carried.
     if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted });
     syncQuestions();
@@ -1825,6 +1828,8 @@ window.__routes = (ids = []) => {
 };
 const hintApi = {
     para: () => state.para, last: LAST, wait: () => state.hintWait,
+    // The gate holds the reader here: reading on is not possible yet.
+    gateHolds: () => state.para < LAST && gateAt(state.para + 1).length > 0,
     question: (id) => (qById.has(id) ? { ...qById.get(id), label: qLabel(qById.get(id)) } : undefined), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
     name: (id) => (entityById.has(id) ? nameOf(id) : null),
     // A link of a chain in words: a telling as the timeline says it, a speech as who said it to whom.

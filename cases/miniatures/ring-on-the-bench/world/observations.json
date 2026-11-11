@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.door", "q": "q.what", "from": ["f.door"], "says": "nothing came in by the door", "essential": true, "against": ["tom"]},
+    {"id": "o.window", "q": "q.what", "from": ["f.window"], "says": "no person came in by the window: the bars are a hand's breadth apart", "essential": true, "against": ["tom"]},
+    {"id": "o.size", "q": "q.what", "from": ["f.pane"], "says": "small enough for the open pane", "essential": true},
+    {"id": "o.climb", "q": "q.what", "from": [{"route_through": ["pane", "cord"]}], "says": "able to climb down a cord", "essential": true},
+    {"id": "o.kept", "q": "q.what", "from": ["f.keeps"], "says": "loose in the yard after dark", "essential": true},
+    {"id": "o.draught", "q": "q.what", "from": ["f.draught"], "says": "the way in was open to the yard that night"},
+    {"id": "o.walls", "q": "q.what", "from": ["f.walls"], "says": "nor through the walls"}
+  ]
+}

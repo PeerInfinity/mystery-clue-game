@@ -1,0 +1,10 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.ten", "label": "Friday, ten o'clock at night", "after": "t.before", "para": 1, "quote": "On Friday at ten o'clock"},
+    {"id": "t.midnight", "label": "Friday, midnight", "after": "t.ten", "para": 6, "quote": "at midnight"},
+    {"id": "t.dawn", "label": "Saturday, dawn", "after": "t.midnight", "para": 6, "quote": "at dawn"},
+    {"id": "t.six", "label": "Saturday, six in the morning", "after": "t.dawn", "para": 1, "quote": "At six on Saturday morning"},
+    {"id": "t.later", "label": "Saturday, later", "after": "t.six", "para": 4, "quote": "the carrier's man told me"}
+  ]
+}

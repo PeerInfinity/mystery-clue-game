@@ -1,0 +1,12 @@
+{
+  "id": "dinner_at_larch_house",
+  "title": "The Dinner at Larch House",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "george", "name": "George Marlow", "kind": "first-person"},
+    {"id": "clara", "name": "Clara Marlow", "kind": "first-person"}
+  ],
+  "subtitle": "the Marlows' timeline",
+  "source": {"written": "2026-11-11", "word_count": 260}
+}

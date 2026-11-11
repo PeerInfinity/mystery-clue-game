@@ -1,0 +1,9 @@
+{
+  "observations": [
+    {"id": "o.keys", "q": "q.who", "from": ["f.two_keys"], "says": "there are two keys, and Ned has neither", "essential": true, "against": ["ned"]},
+    {"id": "o.jem_key", "q": "q.who", "from": ["f.jem_key"], "says": "Jem carries a key to the door, night and day", "essential": true},
+    {"id": "o.ned_loft", "q": "q.who", "from": ["f.ned_loft"], "says": "Ned was in the loft across the yard from ten until six", "essential": true, "against": ["ned"]},
+    {"id": "o.jem_passage", "q": "q.who", "from": ["f.jem_sleeps"], "says": "Jem lay all night in the passage the door opens off", "essential": true},
+    {"id": "o.drunk", "q": "q.who", "from": ["f.ned_drunk"], "says": "Ned had drink from somewhere"}
+  ]
+}

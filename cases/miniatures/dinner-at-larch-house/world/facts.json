@@ -1,0 +1,20 @@
+{
+  "facts": [
+    {"id": "f.dinner", "of": "george", "attr": "action", "value": "gives a small dinner with Clara Marlow, for Captain Voss and Miss Pym", "time": {"at": "t.gong"}, "para": 1, "quote": "we gave a small dinner at Larch House"},
+    {"id": "f.notes_put", "of": "notes", "attr": "location", "value": "study", "detail": "in the drawer of the study desk, put there by George Marlow", "time": {"at": "t.gong"}, "para": 1, "quote": "I put fifty pounds in notes in the drawer of the study desk"},
+    {"id": "f.drawer_empty", "of": "drawer", "attr": "contents", "value": "nothing", "time": {"at": "t.gone"}, "para": 1, "quote": "the drawer was empty"},
+    {"id": "f.george_stays", "of": "george", "attr": "location", "value": "dining_room", "detail": "not leaving the table", "time": {"from": "t.soup", "to": "t.gone"}, "para": 2, "quote": "I did not leave the table from the soup to the coffee"},
+    {"id": "f.hannah_stays", "of": "hannah", "attr": "location", "value": "dining_room", "detail": "the maid, at the sideboard", "time": {"from": "t.soup", "to": "t.gone"}, "para": 2, "quote": "was at the sideboard the whole time"},
+    {"id": "f.clara_called", "of": "clara", "attr": "location", "value": "upstairs", "detail": "called up with the soup, back as the joint was carried in", "time": {"from": "t.soup", "to": "t.joint"}, "para": 2, "quote": "Clara was called upstairs with the soup and came back as the joint was carried in"},
+    {"id": "f.voss_out", "of": "voss", "attr": "action", "value": "goes out of the dining-room, to fetch his cigar-case from his overcoat, he says; gone some minutes", "time": {"at": "t.fish"}, "para": 2, "quote": "Captain Voss went out during the fish"},
+    {"id": "f.pym_out", "of": "pym", "attr": "action", "value": "goes out of the dining-room, to speak to her coachman", "time": {"at": "t.dessert"}, "para": 2, "quote": "Miss Pym went out during the dessert"},
+    {"id": "f.george_asks", "of": "george", "attr": "action", "value": "asks Clara Marlow to set down what she saw", "time": {"at": "t.gone"}, "para": 2, "quote": "I have asked my wife to set down what she saw"},
+    {"id": "f.clara_landing", "of": "clara", "attr": "location", "value": "landing", "detail": "with the baby; it looks down on the hall and on the study door", "time": {"from": "t.soup", "to": "t.joint"}, "para": 3, "quote": "From the soup until the joint I sat with the baby on the nursery landing"},
+    {"id": "f.voss_hall", "of": "voss", "attr": "location", "value": "hall", "detail": "takes something from his overcoat on the hall stand and goes straight back in", "time": {"at": "t.fish"}, "para": 4, "quote": "He took something from the pocket of his overcoat on the hall stand and went straight back in"},
+    {"id": "f.voss_watched", "of": "voss", "attr": "location", "value": "study", "neg": true, "detail": "never out of Clara Marlow's sight, nor near the study door", "time": {"at": "t.fish"}, "para": 4, "quote": "he did not go near the study door"},
+    {"id": "f.hall_empty", "of": "hall", "attr": "condition", "value": "crossed by nobody but Captain Voss", "time": {"from": "t.soup", "to": "t.joint"}, "para": 4, "quote": "Nobody else crossed the hall while I sat there"},
+    {"id": "f.clara_down", "of": "clara", "attr": "location", "value": "dining_room", "detail": "come down as the joint was carried in", "time": {"from": "t.joint", "to": "t.gone"}, "para": 5, "quote": "I went down as the joint was carried in"},
+    {"id": "f.unwatched", "of": "hall", "attr": "condition", "value": "watched by nobody", "time": {"from": "t.joint", "to": "t.gone"}, "para": 5, "quote": "After that there was nobody to watch the hall"},
+    {"id": "f.notes_back", "of": "pym", "attr": "action", "value": "sends the notes back by the first post, with a letter", "time": {"at": "t.friday"}, "para": 6, "quote": "with a letter from Miss Pym that I shall not copy here", "q": "q.who", "pick": "pym"}
+  ]
+}

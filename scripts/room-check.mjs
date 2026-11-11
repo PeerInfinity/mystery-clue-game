@@ -129,7 +129,10 @@ ok(/had everything it needed/.test(await text('#q-box')), 'at the give-away the 
 ok(/small enough for the grating/.test(await text('.desc-list')), 'links survive a reload');
 await click('[data-route-back]');
 ok(await count('.rm-node') === 4, 'a link taken back');
-ok(!/travel down a chain/.test(await text('.desc-list')), 'and the observation that rested on the route goes with it');
+ok(/travel down a chain/.test(await text('.desc-list')), 'the link stays with the route, which still runs through the chain');
+await click('[data-route-back]');
+ok(await count('.rm-node') === 3, 'another link taken back');
+ok(!/travel down a chain/.test(await text('.desc-list')), 'and the observation that rested on the chain goes with it');
 ok(problems.length === 0, 'no errors in the page', problems.join(' | ').slice(0, 600));
 
 await ev(`localStorage.removeItem(${JSON.stringify(STORE)})`);

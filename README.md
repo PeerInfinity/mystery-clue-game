@@ -10,7 +10,11 @@ game: [The Lamp-Keeper's Word](https://peerinfinity.github.io/mystery-clue-game/
 [The Rent Box](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box)
 (two lodgers' statements that cannot both be true) ·
 [The Last Ferry](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry)
-(what happened in what order)
+(what happened in what order) ·
+[The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench)
+(a locked room, and the ways into it) ·
+[The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door)
+(what an act needed, and who had it)
 
 **Watson's timeline**: you read a fair-play detective story as Dr Watson, and keep an ordered list of what happened,
 who was where, who did what, and when. What Watson sees himself is certain; everything else reached him through a
@@ -25,7 +29,7 @@ There are two full cases, both by Arthur Conan Doyle (1892, public domain), and 
   ([`pipeline/README.md`](pipeline/README.md)): a first version, not yet reviewed by hand, so it may still have rough
   edges, such as a label that says more than the story has told.
 
-There are also three **miniatures**, short stories written for the game (linked above), each with just enough in it to
+There are also five **miniatures**, short stories written for the game (linked above), each with just enough in it to
 show one mechanic. They are the first of a new direction, stories written for this system
 ([`docs/authored-stories.md`](docs/authored-stories.md), which contains spoilers), and the best place to start.
 

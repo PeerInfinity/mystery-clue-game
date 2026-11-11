@@ -1,0 +1,11 @@
+{
+  "id": "ring_on_the_bench",
+  "title": "The Ring on the Bench",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "vane", "name": "Esther Vane", "kind": "first-person"}
+  ],
+  "subtitle": "Esther Vane's timeline",
+  "source": {"written": "2026-11-11", "word_count": 200}
+}

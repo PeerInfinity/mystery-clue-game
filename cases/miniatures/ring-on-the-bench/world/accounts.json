@@ -1,0 +1,5 @@
+{
+  "accounts": [
+    {"id": "acct.vane", "label": "What Esther Vane sees and hears herself", "origin": "vane", "how": "saw", "facts": ["f.vane_role", "f.ring_left", "f.ring_gone", "f.door", "f.key_belt", "f.tom_role", "f.tom_knew", "f.window", "f.walls", "f.filings", "f.draught", "f.belli_lodges", "f.keeps", "f.pane", "f.cord", "f.roller", "f.reach", "f.fixed", "f.monkey_took", "f.belli_brings"]}
+  ]
+}

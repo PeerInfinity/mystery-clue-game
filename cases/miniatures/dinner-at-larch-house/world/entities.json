@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {"id": "george", "kind": "person", "name": "George Marlow"},
+    {"id": "clara", "kind": "person", "name": "Clara Marlow"},
+    {"id": "voss", "kind": "person", "name": "Captain Voss"},
+    {"id": "pym", "kind": "person", "name": "Miss Pym"},
+    {"id": "hannah", "kind": "person", "name": "Hannah"},
+    {"id": "house", "kind": "place", "name": "Larch House"},
+    {"id": "dining_room", "kind": "place", "name": "the dining-room", "within": "house"},
+    {"id": "hall", "kind": "place", "name": "the hall", "within": "house"},
+    {"id": "study", "kind": "place", "name": "the study", "within": "house"},
+    {"id": "upstairs", "kind": "place", "name": "upstairs", "within": "house"},
+    {"id": "landing", "kind": "place", "name": "the nursery landing", "within": "upstairs"},
+    {"id": "notes", "kind": "object", "name": "fifty pounds in notes"},
+    {"id": "drawer", "kind": "object", "name": "the drawer of the study desk"},
+    {"id": "study_door", "kind": "object", "name": "the study door"},
+    {"id": "overcoat", "kind": "object", "name": "Captain Voss's overcoat"}
+  ]
+}

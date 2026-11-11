@@ -80,6 +80,9 @@ export async function makeHints({ store, api }) {
         if (open.length) {
             try { for (const m of open) if (allowedNow(m, store)) return { kind: 'move', m }; } finally { api.restore(view); }
         }
+        // Nothing of the path is left to do, and the gate still holds: what it lacks is on its notice (evidence that
+        // went when an entry left the timeline, or an answer the path does not make).
+        if (P < api.last && api.gateHolds()) return { kind: 'read', why: 'The story waits at the gate: its notice says which question still lacks its evidence or its answer. Look at what you have linked to it, and whether each entry is still on the timeline.' };
         return { kind: P >= api.last ? 'done' : 'read' };
     }
 

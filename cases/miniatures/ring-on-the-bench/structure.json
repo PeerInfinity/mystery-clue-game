@@ -1,0 +1,22 @@
+{
+  "story": "ring-on-the-bench",
+  "mechanic": "A room and a route: every way in is closed to a person, something got through all the same, and the way it came, with what hangs beside it, makes a route only something small that climbs could take.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md. `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue. Every clue here is the narrator's own look at her room. The same mechanic is exercised by the test fixture scripts/fixtures/sealed-room, which is not published: its plot is too near The Speckled Band's.",
+  "goal": "q.what",
+  "frame": [
+    {"id": "fr.ring", "says": "A ring left on the bench of the workroom on Thursday night was gone in the morning.", "facts": ["f.ring_left", "f.ring_gone"]}
+  ],
+  "questions": [
+    {"id": "q.what", "asks": "Who or what took the ring?", "answer": "Signor Belli's monkey", "others": ["Tom Pike"], "gate": 9, "needs": [["c.door", "c.window", "c.pane", "c.cord", "c.monkey"]], "rules_out": {"Tom Pike": "c.door and c.window: no person could come in", "anything that cannot climb": "c.cord: the only way from the pane to the bench is down the cord"}}
+  ],
+  "clues": [
+    {"id": "c.tom", "source": "The narrator's own knowledge", "says": "Her apprentice knew the ring was there.", "facts": ["f.tom_knew"], "false_trail": true},
+    {"id": "c.door", "source": "The narrator", "says": "The door was locked all night and the key hung at her belt.", "facts": ["f.door", "f.key_belt"]},
+    {"id": "c.window", "source": "The narrator's room", "says": "The window is barred, the bars a hand's breadth apart.", "facts": ["f.window"]},
+    {"id": "c.walls", "source": "The narrator's room", "says": "The walls are brick, and sound.", "facts": ["f.walls"]},
+    {"id": "c.draught", "source": "The narrator's room, in the morning", "says": "The filings were scattered: a draught from the yard had blown through.", "facts": ["f.filings", "f.draught"]},
+    {"id": "c.pane", "source": "The narrator's room", "says": "A ventilating pane above the window stood open to the yard, a hand wide.", "facts": ["f.pane"]},
+    {"id": "c.cord", "source": "The narrator's room", "says": "The cord of the blind hangs from a roller beside the pane and reaches down to the bench, which is screwed to the floor.", "facts": ["f.cord", "f.roller", "f.reach", "f.fixed"]},
+    {"id": "c.monkey", "source": "The narrator's own knowledge of her neighbour", "says": "The organ-grinder across the yard keeps a monkey and lets it run in the yard after dark.", "facts": ["f.keeps", "f.belli_lodges"]}
+  ]
+}
