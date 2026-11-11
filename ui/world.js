@@ -391,6 +391,13 @@ function presenceNeeds(accepted) {
 const levelName = (l) => (l == null ? 'unmodelled' : LEVELS[l]);
 const dot = (l) => `<span class="lvl lvl-${levelName(l)}" title="${levelName(l)}"></span>`;
 const anchorOf = (t) => t.at ?? t.from ?? t.after ?? t.before ?? t.to;
+/** A side of a contradiction's time, in words: "at Thursday, nine o'clock", "from … until …" (empty if it has none). */
+function sideTime(t) {
+    if (!t) return '';
+    const w = t.at ? `at ${timeLabel(t.at)}` : t.from && t.to ? `from ${timeLabel(t.from)} until ${timeLabel(t.to)}` : t.from ? `from ${timeLabel(t.from)}`
+        : t.after && t.before ? `between ${timeLabel(t.after)} and ${timeLabel(t.before)}` : t.before ? `before ${timeLabel(t.before)}` : t.after ? `after ${timeLabel(t.after)}` : t.to ? `until ${timeLabel(t.to)}` : '';
+    return w ? ` <span class="side-time small">${w}</span>` : '';
+}
 function whenNote(t) {
     if (t.at) return '';
     if (t.from && t.to) return ` <span class="when">until ${timeLabel(t.to)}</span>`;
@@ -611,7 +618,7 @@ function clashSide(x) {
         const who = x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : wordOf(f);
         return `<a class="link" data-fact="${esc(f.id)}">${who}${x.neg ? 'not ' : ''}${pickText(q, x.pick)}</a> ${paraSpan(givenAt(f))}`;
     }
-    return `<a class="link" data-fact="${esc(f.id)}">${statePhrase(x, f)}</a> ${paraSpan(givenAt(f))}`;
+    return `<a class="link" data-fact="${esc(f.id)}">${statePhrase(x, f)}</a>${sideTime(x.time ?? f.time)} ${paraSpan(givenAt(f))}`;
 }
 /** A state on one side of a contradiction: the fact, or what a claim asserts, with whose word it is. */
 const statePhrase = (x, f) => (x.claim && x.claim === x.fact ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, neg: x.neg, time: x.time, id: '' })}` : `${wordOf(f)}${phrase(f)}`);
@@ -944,14 +951,14 @@ function sideHtml(x, label) {
     }
     const f = factOf(x.fact);
     if (f.reasoned) {
-        return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a></p>
+        return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a>${sideTime(x.time ?? f.time)}</p>
       <p class="small">From your reasoning. Trusted: <b>${levelName(levelOfFact(f))}</b>, as its weakest premise. Lower your trust in a premise, or withdraw it.</p>
       <ul class="events">${f.reasoned.premises.map((id) => factOf(id)).filter(Boolean).map((p) => eventRow(p, new Set())).join('')}</ul></div>`;
     }
     const what = x.kind === 'pick'
         ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : wordOf(f)}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
         : statePhrase(x, f);
-    return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${what}</a></p>
+    return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${what}</a>${x.kind === 'pick' ? '' : sideTime(x.time ?? f.time)}</p>
       <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>${r.links.length || r.people.length ? '; <span class="resolving">marked</span>: distrusting it alone takes this side off the timeline' : '; no single link takes it off: it has independent chains'}.</p>
       ${stmtHtml(chains, r)}<ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;

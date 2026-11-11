@@ -33,6 +33,7 @@ body.world-page { display: block; height: auto; }
 .event.below { opacity: .45; }
 .event.clash { background: var(--bad-soft); }
 .when { font-size: 12px; color: var(--muted); }
+.side-time { color: var(--muted); white-space: nowrap; }
 .said { font-family: var(--serif); font-style: italic; }
 .asserts { margin: 2px 0 2px 18px; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
 .asserts li::before { content: "asserts: "; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
