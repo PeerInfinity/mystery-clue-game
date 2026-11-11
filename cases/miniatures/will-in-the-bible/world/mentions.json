@@ -1,0 +1,19 @@
+{
+ "entities": {
+  "dacre": ["Henry Dacre"],
+  "harriet": ["Miss Harriet Pym", "Miss Pym", "Harriet Pym"],
+  "lionel": ["Mr. Lionel Pym", "Mr. Pym", "Lionel Pym"],
+  "grice": ["Mrs. Grice"],
+  "thomas": ["Thomas"],
+  "wells": ["Wells"],
+  "ashcombe": ["Ashcombe House", "Ashcombe"],
+  "sitting_room": ["sitting-room"],
+  "frome": ["Frome"],
+  "church": ["the church"],
+  "bible": ["the family Bible", "The Bible", "the Bible"],
+  "register": ["the parish register", "the register"],
+  "old_will": ["The will she made at my office"],
+  "new_will": ["a later will"],
+  "keys": ["the keys of the house"]
+ }
+}

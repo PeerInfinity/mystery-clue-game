@@ -1,0 +1,6 @@
+{
+  "accounts": [
+    {"id": "acct.dacre", "label": "What Henry Dacre sees, reads and knows himself", "origin": "dacre", "how": "saw", "facts": ["f.dacre_role", "f.harriet_died", "f.old_will", "f.grice_housekeeper", "f.lionel_brings", "f.lionel_tells", "f.will_date", "f.will_bequest", "f.will_thomas", "f.will_hand", "f.bible_room", "f.lionel_keys", "f.grice_gone", "f.buried", "f.thomas_born", "f.thomas_christened", "f.lionel_owns"]},
+    {"id": "acct.lionel", "label": "Where Mr. Pym says he found the will", "origin": "lionel", "how": "saw", "facts": ["f.will_found"]}
+  ]
+}

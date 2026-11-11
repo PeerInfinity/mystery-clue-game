@@ -1,0 +1,14 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.past", "label": "Three years before", "after": "t.before", "para": 1, "quote": "three years before"},
+    {"id": "t.march3", "label": "The third of March", "after": "t.past", "para": "will:1", "quote": "made this third day of March"},
+    {"id": "t.may2", "label": "The second of May", "after": "t.march3", "para": 1, "quote": "died on the second of May"},
+    {"id": "t.may5", "label": "The fifth of May", "after": "t.may2", "para": 4, "quote": "buried on the fifth of May"},
+    {"id": "t.may6", "label": "The day after the funeral", "after": "t.may5", "para": 3, "quote": "the day after the funeral"},
+    {"id": "t.june14", "label": "The fourteenth of June", "after": "t.may6", "para": 4, "quote": "born on the fourteenth of June"},
+    {"id": "t.july1", "label": "The first of July", "after": "t.june14", "para": 4, "quote": "christened on the first of July"},
+    {"id": "t.august", "label": "August", "after": "t.july1", "para": 2, "quote": "In August"},
+    {"id": "t.later", "label": "Later", "after": "t.august", "para": 4, "quote": "I rode over to Ashcombe"}
+  ]
+}

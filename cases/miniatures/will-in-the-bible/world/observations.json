@@ -1,0 +1,13 @@
+{
+  "observations": [
+    {"id": "o.date", "q": "q.dated", "from": ["f.will_date"], "says": "it is dated the third of March", "essential": true},
+    {"id": "o.font", "q": "q.dated", "from": ["f.will_thomas"], "says": "it speaks of Thomas as already christened", "essential": true},
+    {"id": "o.christened", "q": "q.dated", "from": ["f.thomas_christened"], "says": "Thomas was christened on the first of July, four months after the will's date", "essential": true, "against": ["yes"]},
+    {"id": "o.dead", "q": "q.who", "from": ["f.will_thomas", "f.harriet_died", "f.thomas_christened"], "says": "Miss Pym died two months before the christening the will speaks of: she could not have written it", "essential": true, "against": ["harriet"]},
+    {"id": "o.gain", "q": "q.who", "from": ["f.old_will"], "says": "the earlier will gives Mrs. Grice the house; this one takes it from her", "essential": true, "against": ["grice"]},
+    {"id": "o.away", "q": "q.who", "from": ["f.grice_gone"], "says": "Mrs. Grice left the day after the funeral, and never came back to the Bible", "essential": true, "against": ["grice"]},
+    {"id": "o.keys", "q": "q.who", "from": ["f.lionel_keys"], "says": "since her death only Mr. Pym could come at the Bible", "essential": true},
+    {"id": "o.gains", "q": "q.who", "from": ["f.will_bequest"], "says": "the will leaves everything to Mr. Pym"},
+    {"id": "o.hand", "q": "q.who", "from": ["f.will_hand"], "says": "whoever wrote it could copy her hand"}
+  ]
+}

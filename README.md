@@ -17,6 +17,7 @@ evidence leaves.
 [The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench) (a locked room, and the ways into it) ·
 [The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door) (what an act needed, and who had it) ·
 [The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house) (one evening, told by two people) ·
+[The Will in the Bible](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/will-in-the-bible) (a paper that says more than it could have known) ·
 [The Grey Cloak](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/grey-cloak) (an honest witness who is wrong) ·
 [The Night Porter's Statement](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/night-porters-statement) (a storyteller you cannot wholly
 believe)

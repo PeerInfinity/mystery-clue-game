@@ -1,0 +1,14 @@
+{
+  "id": "will_in_the_bible",
+  "title": "The Will in the Bible",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "files": [
+    {"id": "will", "title": "The will found in the Bible", "short": "Will", "text": "../files/will.txt", "delivered": 2}
+  ],
+  "narrators": [
+    {"id": "dacre", "name": "Henry Dacre", "kind": "first-person"}
+  ],
+  "subtitle": "Henry Dacre's timeline",
+  "source": {"written": "2026-11-11", "word_count": 330}
+}

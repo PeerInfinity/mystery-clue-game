@@ -1,0 +1,22 @@
+{
+  "facts": [
+    {"id": "f.dacre_role", "of": "dacre", "attr": "role", "value": "solicitor, of Wells", "time": {"from": "t.before"}, "para": 1, "quote": "I am Henry Dacre, solicitor, of Wells"},
+    {"id": "f.harriet_died", "of": "harriet", "attr": "action", "value": "dies", "time": {"at": "t.may2"}, "para": 1, "quote": "died on the second of May"},
+    {"id": "f.old_will", "of": "old_will", "attr": "condition", "value": "leaves Ashcombe House to Mrs. Grice and the rest of the estate to the church", "detail": "made at Henry Dacre's office", "time": {"from": "t.past"}, "para": 1, "quote": "leaves the house to Mrs. Grice, her housekeeper, and the rest of her estate to the church"},
+    {"id": "f.grice_housekeeper", "of": "grice", "attr": "role", "value": "Miss Pym's housekeeper", "time": {"from": "t.before"}, "para": 1, "quote": "Mrs. Grice, her housekeeper"},
+    {"id": "f.lionel_brings", "of": "lionel", "attr": "action", "value": "brings Henry Dacre a later will", "time": {"at": "t.august"}, "para": 2, "quote": "brought me a later will"},
+    {"id": "f.lionel_tells", "of": "lionel", "attr": "tells", "value": "acct.lionel", "to": "dacre", "how": "told", "time": {"at": "t.august"}, "para": 2, "quote": "which he said he had found that week in the family Bible"},
+    {"id": "f.will_found", "of": "lionel", "attr": "action", "value": "finds the will in the family Bible", "time": {"at": "t.august"}, "para": 2, "quote": "he had found that week in the family Bible", "truth": false},
+    {"id": "f.will_date", "of": "new_will", "attr": "condition", "value": "dated the third of March", "time": {"at": "t.august"}, "para": "will:1", "quote": "made this third day of March"},
+    {"id": "f.will_bequest", "of": "new_will", "attr": "condition", "value": "revokes all former wills and leaves all to Lionel Pym", "time": {"at": "t.august"}, "para": "will:1", "quote": "I revoke all former wills, and leave all I have to my nephew Lionel Pym"},
+    {"id": "f.will_thomas", "of": "new_will", "attr": "condition", "value": "leaves a silver watch to 'my great-nephew Thomas, whom I held at the font'", "time": {"at": "t.august"}, "para": "will:2", "quote": "To my great-nephew Thomas, whom I held at the font"},
+    {"id": "f.will_hand", "of": "new_will", "attr": "condition", "value": "in a hand very like Miss Pym's, and her signature too", "time": {"at": "t.august"}, "para": "will:3", "quote": "The hand is very like hers"},
+    {"id": "f.bible_room", "of": "bible", "attr": "location", "value": "sitting_room", "time": {"from": "t.before", "to": "t.may2"}, "para": 3, "quote": "The Bible had lain in Miss Pym's sitting-room all her life"},
+    {"id": "f.lionel_keys", "of": "lionel", "attr": "carrying", "value": "keys", "detail": "as her executor", "time": {"from": "t.may2", "to": "t.august"}, "para": 3, "quote": "Since her death Mr. Pym, as her executor, had kept the keys of the house"},
+    {"id": "f.grice_gone", "of": "grice", "attr": "location", "value": "frome", "detail": "at her sister's; never back at Ashcombe", "time": {"from": "t.may6", "to": "t.august"}, "para": 3, "quote": "Mrs. Grice went to her sister at Frome the day after the funeral, and had not been back"},
+    {"id": "f.buried", "of": "harriet", "attr": "condition", "value": "buried", "time": {"at": "t.may5"}, "para": 4, "quote": "Miss Pym was buried on the fifth of May"},
+    {"id": "f.thomas_born", "of": "thomas", "attr": "action", "value": "is born, son of Lionel Pym", "time": {"at": "t.june14"}, "para": 4, "quote": "Thomas, son of Lionel Pym, was born on the fourteenth of June"},
+    {"id": "f.thomas_christened", "of": "thomas", "attr": "action", "value": "is christened", "time": {"at": "t.july1"}, "para": 4, "quote": "christened on the first of July"},
+    {"id": "f.lionel_owns", "of": "lionel", "attr": "says", "value": "he wrote the will himself, in her hand as near as he could make it", "to": "dacre", "time": {"at": "t.later"}, "para": 5, "quote": "He had written the will himself", "asserts": [{"q": "q.who", "pick": "lionel"}, {"q": "q.dated", "pick": "no"}]}
+  ]
+}

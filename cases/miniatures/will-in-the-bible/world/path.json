@@ -1,0 +1,19 @@
+{
+  "description": "The true path of the miniature: a will read as a paper of its own, its date and the christening it speaks of set against the parish register; with the testatrix dead before the christening and the housekeeper away and the loser by it, the nephew who held the keys.",
+  "moves": [
+    {"at": [2, "will:1"], "do": "link", "entry": "f.will_date", "q": "q.dated", "see": "dated the third of March", "for_q": ["q.dated"], "why": "The will says it was made on the third of March."},
+    {"at": [2, "will:2"], "do": "link", "entry": "f.will_thomas", "q": "q.dated", "see": "already christened", "for_q": ["q.dated"], "why": "And it speaks of holding Thomas at the font."},
+    {"at": [3], "do": "link", "entry": "f.lionel_keys", "q": "q.who", "see": "only Mr. Pym could come at the Bible", "for_q": ["q.who"], "why": "Since her death the keys were Mr. Pym's."},
+    {"at": [3], "do": "link", "entry": "f.grice_gone", "q": "q.who", "see": "never came back to the Bible", "for_q": ["q.who"], "why": "Mrs. Grice was at Frome from the day after the funeral."},
+    {"at": [3], "do": "link", "entry": "f.old_will", "q": "q.who", "see": "this one takes it from her", "for_q": ["q.who"], "why": "And the new will would rob her of the house."},
+    {"at": [4], "do": "link", "entry": "f.thomas_christened", "q": "q.dated", "see": "four months after the will's date", "for_q": ["q.dated"], "why": "Thomas was christened on the first of July."},
+    {"at": [4], "do": "circle", "q": "q.dated", "pick": "no", "for_q": ["q.dated"], "why": "A will of March cannot speak of a christening in July."},
+    {"at": [4], "do": "cross", "q": "q.dated", "pick": "yes", "for_q": ["q.dated"], "why": "Not on the third of March."},
+    {"at": [4, "will:2"], "do": "link", "entry": "f.will_thomas", "q": "q.who", "for_q": ["q.who"], "why": "The will speaks of the christening."},
+    {"at": [4], "do": "link", "entry": "f.harriet_died", "q": "q.who", "for_q": ["q.who"], "why": "Miss Pym died on the second of May."},
+    {"at": [4], "do": "link", "entry": "f.thomas_christened", "q": "q.who", "see": "she could not have written it", "for_q": ["q.who"], "why": "Two months before the christening."},
+    {"at": [4], "do": "cross", "q": "q.who", "pick": "harriet", "for_q": ["q.who"], "why": "Not by her."},
+    {"at": [4], "do": "cross", "q": "q.who", "pick": "grice", "for_q": ["q.who"], "why": "Away, and the loser by it."},
+    {"at": [4], "do": "circle", "q": "q.who", "pick": "lionel", "for_q": ["q.who"], "why": "The one who had the keys, and gains everything."}
+  ]
+}

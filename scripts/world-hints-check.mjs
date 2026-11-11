@@ -113,7 +113,11 @@ function mistakesOf() {
     const later = gated.find((q) => q.raised > para && q.possibilities.some((p) => p.value === q.answer));
     if (later) { marks[later.id] = { [later.answer]: 'crossed' }; expect.push('uncross'); }
     const distrusted = new Set(moves.filter((m) => m.do === 'trust').map((m) => m.link));
-    const tell = facts.find((f) => f.attr === 'tells' && start.seen(f.given_at ?? f.para) && f.truth !== false && f.truth !== null && !distrusted.has(f.id));
+    // A telling that carries something true (distrusting one that carries only what is false is harmless, and the
+    // hints rightly leave it alone).
+    const accounts = READ('accounts.json').accounts;
+    const carriesTrue = (f) => [f.value].flat().some((a) => (accounts.find((x) => x.id === a)?.facts ?? []).some((id) => facts.find((g) => g.id === id)?.truth !== false));
+    const tell = facts.find((f) => f.attr === 'tells' && start.seen(f.given_at ?? f.para) && f.truth !== false && f.truth !== null && !distrusted.has(f.id) && carriesTrue(f));
     const links = {};
     if (tell) { links[tell.id] = 0; expect.push('trust'); }
     return { start: { para, ...(caseFiles.length ? { log: start.log } : {}), marks, trust: { links, people: {} } }, expect };

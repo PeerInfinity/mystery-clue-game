@@ -1,0 +1,116 @@
+{
+  "story": "will-in-the-bible",
+  "mechanic": "A document's own properties (idea 3): a will with a date, a bequest and a name, read as a paper of its own; it names a child as christened who was christened four months after its date and two months after the testatrix died. The timeline's order made visible by an observation, not by a contradiction.",
+  "note": "Spoilers. The logic written before the prose (docs/authored-stories.md, outline B). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files (here the will is one: files/will.txt). `facts` names the world model's facts that realise a clue.",
+  "goal": "q.who",
+  "frame": [
+    {
+      "id": "fr.brought",
+      "says": "Her nephew brought the solicitor a later will in August, said to be found in the family Bible.",
+      "facts": [
+        "f.lionel_brings",
+        "f.will_found"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q.dated",
+      "asks": "Was the will made when it says?",
+      "answer": "no",
+      "others": [
+        "yes"
+      ],
+      "gate": 5,
+      "needs": [
+        [
+          "c.will_date",
+          "c.will_font",
+          "c.register"
+        ]
+      ],
+      "rules_out": {
+        "yes": "c.will_font names Thomas as held at the font; c.register: he was christened on the first of July, four months after the will's date"
+      }
+    },
+    {
+      "id": "q.who",
+      "asks": "Who wrote the will found in the Bible?",
+      "answer": "Lionel Pym",
+      "others": [
+        "Harriet Pym",
+        "Mrs. Grice"
+      ],
+      "gate": 5,
+      "needs": [
+        [
+          "c.death",
+          "c.will_font",
+          "c.register",
+          "c.old_will",
+          "c.keys"
+        ]
+      ],
+      "rules_out": {
+        "Harriet Pym": "c.death, c.will_font and c.register: she died two months before the christening she writes of",
+        "Mrs. Grice": "c.old_will: the new will takes the house from her; c.keys: she was gone from the day after the funeral, and only Lionel Pym could come at the Bible"
+      }
+    }
+  ],
+  "clues": [
+    {
+      "id": "c.death",
+      "source": "The narrator's own knowledge",
+      "says": "Miss Pym died on the second of May.",
+      "facts": [
+        "f.harriet_died"
+      ]
+    },
+    {
+      "id": "c.old_will",
+      "source": "The narrator's own office",
+      "says": "The earlier will leaves the house to Mrs. Grice and the rest to the church.",
+      "facts": [
+        "f.old_will"
+      ]
+    },
+    {
+      "id": "c.will_date",
+      "source": "The will found in the Bible (a paper)",
+      "says": "It is dated the third of March and leaves all to Lionel Pym.",
+      "facts": [
+        "f.will_date",
+        "f.will_bequest"
+      ],
+      "file": "will"
+    },
+    {
+      "id": "c.will_font",
+      "source": "The will found in the Bible (a paper)",
+      "says": "It leaves a watch to 'my great-nephew Thomas, whom I held at the font'.",
+      "facts": [
+        "f.will_thomas"
+      ],
+      "file": "will"
+    },
+    {
+      "id": "c.keys",
+      "source": "The narrator's own knowledge",
+      "says": "Since her death only Lionel Pym had the keys of the house; Mrs. Grice left the day after the funeral.",
+      "facts": [
+        "f.lionel_keys",
+        "f.grice_gone"
+      ]
+    },
+    {
+      "id": "c.register",
+      "source": "The parish register, read by the narrator",
+      "says": "She was buried on the fifth of May; Thomas was born on the fourteenth of June and christened on the first of July.",
+      "facts": [
+        "f.buried",
+        "f.thomas_born",
+        "f.thomas_christened"
+      ]
+    }
+  ]
+}

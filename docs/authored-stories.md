@@ -109,6 +109,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 
 | `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/stable-clock` | One event at two times: two honest witnesses time one shot by two clocks; the clash is on the timeline at once, the slow clock is found, and an alibi goes with the wrong time. | 7 paragraphs, 17 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
+| `cases/miniatures/will-in-the-bible` | A document's own properties: a will read as a paper of its own, whose date and the christening it speaks of are set against the parish register. | 5 + 3 paragraphs (main story, the will), 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 14 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
@@ -475,8 +476,23 @@ One event, two times (step 4 of the provisional order; outline A, 2026-11-11):
     follows from the first, through the hall clock both times are told by.
 40. **The two sides read alike.** On the timeline and in the contradiction both are "Someone: fires a shot …", told
     apart only by their time headings and their detail ("as the hall clock struck nine", "at a quarter to nine by
-    the stable clock"). Each fact's detail carries its time for that reason; a contradiction side could show its time
-    point as well, if the user wants it.
+    the stable clock"). **The user's ruling: show the time directly.** Every side of a contradiction, in the list and
+    in its trace, now ends with its time ("at Thursday, nine o'clock", "from … until …").
+
+A document's own properties (step 5, outline B; 2026-11-11):
+
+41. **The Will in the Bible** needs nothing new. The will is a paper of its own (a file, delivered at ¶2, where the
+    nephew brings it), and its properties are facts of the document as an entity: its date, its bequest, the
+    christening it speaks of, the hand it is in. "It speaks of a christening four months after its own date" is the
+    timeline's order made visible by observations (`o.christened`, `o.dead`), as the outline expected: nothing on the
+    timeline clashes, because a will that names a christening is no state of the christening.
+42. **A clue the prose has to make airtight.** The outline's "it names a great-nephew born after its date" is not
+    proof (a will can name a child expected); "whom I held at the font" is, since the christening is in the register.
+    The testatrix is the answer the paper itself offers (her hand, her signature, her name), ruled out by her death
+    before the christening; the housekeeper by her loss under the new will and her absence from the house.
+43. **A check that assumed too much.** The hints check's run with mistakes distrusts a telling and expects the hints
+    to undo it; here the only telling carries only what is false (the nephew's "found in the Bible"), so distrusting
+    it is harmless and the hints rightly leave it. The check now picks a telling that carries something true.
 
 - **The two Holmes cases are archived at `v2/`** (the user's proposal, 2026-11-11): Silver Blaze and The Speckled
   Band, the pipeline and the documents about them, with their own copy of the page, the engine and the checks, as
