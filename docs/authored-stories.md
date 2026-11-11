@@ -419,9 +419,9 @@ The two engine changes of 2026-11-11 (step 2 of the provisional order below):
 31. **The Ring on the Bench cannot require "Something got through" as it stands.** The move is offered only while
     no way in that accounts for the crossing has been told: once the open pane is read (¶6), it is refused, so a
     reader who reads on past ¶5 without it could never fill an observation that needs it, and the gate would never
-    open. The move is about a way nobody has found; once the way is found, the pane is the evidence. The choices were: leave it optional; offer the move after the way is found too; or
-    let an observation accept either of two entries, the move's or the pane's). **Ruled by the user 2026-11-11: left
-    optional.** Once the way in is found, the pane is the evidence.
+    open. The move is about a way nobody has found; once the way is found, the pane is the evidence. The choices
+    were: leave it optional; offer the move after the way is found too; or let an observation accept either of two
+    entries, the move's or the pane's. **Ruled by the user 2026-11-11: left optional.**
 - **11. Doubting the author** (the user's idea, with the note that it may not be worth building): a way for the
   player to say that the story or its data is wrong, like a bug report. It would need somewhere for the reports to
   go, and the user does not want to set that up.
