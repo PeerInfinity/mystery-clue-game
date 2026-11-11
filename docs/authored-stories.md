@@ -415,6 +415,56 @@ What the two-narrator, mistaken-witness and unreliable-narrator miniatures showe
   start page listing the short cases (`start.html`), and the two cases' old addresses go on to `v2/`. The page
   checks of all the short cases together take about two minutes (`npm run page-checks-all`).
 
+## Rulings on the open findings, and case files as sub-stories (2026-11-11)
+
+The user, asked which of the findings need a decision before the work is handed on:
+
+- **Moves that the gate does not require are not a problem** (findings 18, 21): it is probably better that only
+  some of the possible moves are necessary. One way to make a move necessary where an author wants it: a timeline
+  entry that the move reveals is needed as evidence (an observation from the entry of "It changed", of "Something
+  got through", as the route's already can be).
+- **A contradiction that can be left open is not a problem** (finding 6 and the ruling under finding 10): it may be
+  good that some contradictions do not touch the case's main questions, and there are already ways to make one
+  matter (a `doubted` observation, an alibi).
+- **A narrator's false statement that cannot be evidence is not a problem** (finding 27).
+- **The order between two events as something to link and doubt** (finding 14, idea 1): wanted.
+- **Case files become timeline entries by being read.** A case file is a side-story, or sub-story: the
+  protagonist reads the file, with whatever is known of where it came from and any thoughts of the protagonist's
+  about it. So a file has paragraphs of its own for its entries to cite, and the index of paragraphs has to take in
+  the readings of files. This answers findings 4, 5 and 19 for the direction: what the narrator saw of a room, or
+  where a paper was found, can be a file like any other, since a file is prose with a source.
+- **The order of the work: no preference yet.** It may be decided provisionally or left open.
+
+What follows from sub-stories, as this session sees it (a sketch for the next session, not ruled):
+
+- Everything is now keyed to one paragraph number in one story: a fact's `para`, "told by the paragraph read to",
+  the gate "before ¶N". With files read in an order the player or a shuffle chooses, a file's paragraphs need
+  numbers of their own (`{file, n}` in the data) and a place in this playthrough's reading order. The smallest
+  step that keeps the engine's rule: when a file is opened its paragraphs are spliced in after the paragraph the
+  reader is at, and the page numbers the whole for this playthrough.
+- The gate already asks for evidence, so it makes the reader open the files a question needs without a new rule:
+  the story waits until the needed entries are on the timeline and linked. A question's give-away stays in the
+  spine. `structure.json`'s `needs` says which files those are, and would at last be read by something.
+- A file's prose cannot depend on what was read before it. The protagonist's thoughts in a file are about that
+  file alone ("the hand is hers"), never about how it bears on another ("so the Captain lied").
+- The same mechanism serves "a clue found only by asking" (idea 10: the reader chooses which file to open and may
+  not have time for all) and delivery by an Archipelago.
+- A true path cannot name paragraphs any more: its moves have to play in any order of reading that the logic
+  allows, and the checks have to try more than one.
+
+A provisional order, this session's suggestion (the user has not ruled):
+
+1. The guide speaks of "the narrator", not Watson (the user wants this).
+2. Two contained engine changes: an identification carries whereabouts (finding 26); an observation can come from
+   an entry a move reveals.
+3. Sub-stories, on one existing miniature first (The Rent Box: the two statements and the narrator's afternoon as
+   three files and a short spine). This is experiment 3 of the list above and the largest piece.
+4. The order of two events as an entry that can be doubted, with its miniature (idea 1).
+5. The remaining mechanics, each with its miniature: a document's own properties, who could have known, two
+   readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8).
+6. Blind solvers on the miniatures (experiment 2); it costs money and needs the user's go-ahead.
+7. A story of 20 to 30 questions.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
