@@ -6,7 +6,8 @@
 // the viewer's layout, choosing tabs as a player would. `?autoplay=fast` plays with no pauses and no cursor (the check,
 // scripts/world-autoplay-check.mjs). The same moves are checked by scripts/path-check.mjs from outside the page.
 
-import { $, sleep, esc, Stopped, Failed, makeMover } from './world-moves.js';
+import { $, sleep, esc, Stopped, Failed, makeMover, nextRead, readToOf } from './world-moves.js';
+import { refList } from '../engine/refs.js';
 
 import { CASE, pageUrl } from './world-case.js';
 const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], ['4', '4×']];
@@ -14,6 +15,9 @@ const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], [
 export async function start({ store, fast = false }) {
     const path = await fetch(`${CASE}/world/path.json`, { cache: 'no-cache' }).then((r) => r.json());
     const moves = path.moves;
+    // The case's files (sub-stories), read as each move needs them (world/case.json).
+    const files = await fetch(`${CASE}/world/case.json`, { cache: 'no-cache' }).then((r) => r.json()).then((c) => c.files ?? []);
+    const title = (id) => files.find((f) => f.id === id)?.title;
     const s = { speed: fast ? 0 : 1, paused: false, stepping: false, stopped: false, failed: null, done: false, moves: 0, lastCaption: '' };
     const factor = () => (fast ? 0 : s.speed);
     const gate = async () => { while (s.paused && !s.stopped) await sleep(150); if (s.stopped) throw new Stopped(); };
@@ -57,7 +61,7 @@ export async function start({ store, fast = false }) {
     };
 
     // ---------- moving through the page (ui/world-moves.js) ----------
-    const { shown, showPart, press, play: make } = makeMover({ store, fast, factor, gate, cursor: fast ? null : cursor });
+    const { shown, showPart, press, play: make, readOne } = makeMover({ store, fast, factor, gate, cursor: fast ? null : cursor });
 
     /** Highlight for a moment the smallest part of the page that shows what the move was for. */
     async function seen(pattern) {
@@ -108,14 +112,16 @@ export async function start({ store, fast = false }) {
         stepped();
         await wait(2200);   // time to read the caption
     }
-    async function readTo(p) {
-        while ((saved().para ?? 1) < p) {
-            const now = saved().para ?? 1;
-            caption(`Reading ¶${now + 1}`);
-            await press('#next');
-            const after = saved().para ?? 1;
-            if (after === now) throw new Failed(`the gate held before ¶${now + 1}`);
-            $('#ap-para').textContent = `¶${after}`;
+    // Read on, in each story, to what `at` needs (a paragraph, or a list in several stories).
+    async function readTo(at) {
+        for (let story; (story = nextRead(at, files, readToOf(saved()))) != null;) {
+            const now = readToOf(saved())(story);
+            const tag = story === 'main' ? `¶${now + 1}` : `“${title(story)}”, ¶${now + 1}`;
+            caption(`Reading ${tag}`);
+            await readOne(story);
+            const after = readToOf(saved())(story);
+            if (after === now) throw new Failed(story === 'main' ? `the gate held before ¶${now + 1}` : `${tag} could not be read`);
+            $('#ap-para').textContent = story === 'main' ? `¶${after}` : `${files.find((f) => f.id === story)?.short} ¶${after}`;
             if (!$('#answer-news').hidden) {
                 caption('The story gives answers away: each with the circle made for it.');
                 await wait(3500);
@@ -134,8 +140,10 @@ export async function start({ store, fast = false }) {
         await gate();
         for (const m of moves) {
             await readTo(m.at);
-            try { await play(m); } catch (e) { if (e instanceof Failed) throw new Failed(`¶${m.at}, ${await words(m).catch(() => m.do)}: ${e.message}`); throw e; }
+            try { await play(m); } catch (e) { if (e instanceof Failed) throw new Failed(`¶${refList(m.at).join(', ')}, ${await words(m).catch(() => m.do)}: ${e.message}`); throw e; }
         }
+        // The main story to its end: its last paragraph, as its tab shows it.
+        if ($('[data-story]') && !$('[data-story="main"].on')) await press('[data-story="main"]');
         await readTo(Number($('#para').max));
         s.done = true;
         ending(`The end of the story: ${s.moves} moves, every question answered.`);

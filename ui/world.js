@@ -7,6 +7,7 @@
 import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
+import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
 import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
 
@@ -57,13 +58,31 @@ data.places = places(data);
 const prov = provenance(data);
 const allAssertions = assertions(data);
 const assertionById = new Map(allAssertions.map((x) => [x.id, x]));
-const story = text.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
-// Where the story names each entity (world/mentions.json, matched by engine/story.js): the story's names are links to
+const paragraphs = (t) => t.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
+const story = paragraphs(text);
+// The case files (world/case.json `files`): sub-stories the narrator reads, each with its own paragraphs, each
+// delivered when the main story reaches its `delivered` paragraph (or from the start). A paragraph's reference is a
+// bare number in the main story, "<file>:<n>" in a file (engine/refs.js).
+const files = header.files ?? [];
+const fileTexts = await Promise.all(files.map((f) => get(`${W}/${f.text}`, 'text')));
+const fileById = new Map(files.map((f) => [f.id, f]));
+const stories = new Map([[MAIN, story], ...files.map((f, i) => [f.id, paragraphs(fileTexts[i])])]);
+const storyIds = [...stories.keys()];
+const lastOf = (id) => (stories.get(id)?.length ?? 1) - 1;
+const lengths = Object.fromEntries(storyIds.map((id) => [id, lastOf(id)]));
+// Where each story names each entity (world/mentions.json, matched by engine/story.js): the story's names are links to
 // their card, every one alike. An entity the story never names by a phrase is placed by its `source` quote.
-const named = new Story(text, { mentions: { entities: mentions.entities }, entities: w.entities });
+const storyOpts = { mentions: { entities: mentions.entities }, entities: w.entities };
+const namedBy = new Map([[MAIN, new Story(text, storyOpts)], ...files.map((f, i) => [f.id, new Story(fileTexts[i], storyOpts)])]);
 const entityById = new Map(data.entities.map((e) => [e.id, e]));
-// The name each entity goes by at the paragraph read to (engine/shown.js): never one the story has not used yet.
-const names = shownNames(data.entities, mentions.entities, story);
+// The name each entity goes by by what has been read (engine/shown.js): never one the story has not used yet. Over
+// every paragraph in the order of reading (what is read first), worked out again when more is read.
+const textOf = (key) => { const r = parseRef(key); return stories.get(r.story)?.[r.n] ?? ''; };
+let namesMemo = null;
+const names = () => {
+    if (namesMemo?.r !== reading || namesMemo.n !== reading.count) namesMemo = { r: reading, n: reading.count, v: shownNames(data.entities, mentions.entities, ['', ...reading.full().keys.map(textOf)], posOf) };
+    return namesMemo.v;
+};
 const timeById = new Map(data.times.map((t) => [t.id, t]));
 const factById = new Map(data.facts.map((f) => [f.id, f]));
 // The entries the player's moves give (the reader's reasoning), worked out afresh at each drawing.
@@ -114,24 +133,38 @@ function hypAction(id) {
 const allFacts = () => [...data.facts, ...reasoned];
 const qById = new Map(data.questions.map((q) => [q.id, q]));
 const accountById = new Map(data.accounts.map((a) => [a.id, a]));
-const LAST = story.length - 1;
+const LAST = story.length - 1;   // the main story's last paragraph
 
 // --- State: how far the story is read, the player's trust and marks on questions. Saved in this browser only.
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null };
+const state = { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
 else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); for (const k of ['layout', 'panels', 'theme']) if (own[k] != null) state[k] = own[k]; } catch { /* the defaults */ }
 state.sel = null;
 state.note = null;
+// What has been read, in each story and in what order (engine/refs.js); `para` is the main story's, kept for the
+// checks and for saves from before the files.
+let reading = Reading.fromSave(state, lengths);
+const posOf = (x) => reading.pos(x);
+const seen = (x) => x != null && reading.seen(x);
+/** Compare two references by the order of reading (what is unread after what is read). */
+const byRead = (a, b) => { const x = posOf(a), y = posOf(b); return x === y ? 0 : x < y ? -1 : 1; };
+const syncReading = () => { state.para = reading.readTo(MAIN); state.log = [...reading.log]; };
+syncReading();
+const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
+if (!delivered(state.story)) state.story = MAIN;
+/** A paragraph's reference as the player sees it: "¶3" in the main story, "Rudd ¶2" in a file. */
+const paraTag = (x) => { const p = parseRef(x); if (!p) return '¶?'; return p.story === MAIN ? `¶${p.n}` : `${fileById.get(p.story)?.short ?? p.story} ¶${p.n}`; };
+const paraSpan = (x) => `<span class="para" data-ref="${esc(refKey(x) ?? '')}">${esc(paraTag(x))}</span>`;
 if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -146,7 +179,7 @@ function cycleMark(qid, pick) {
 }
 
 // --- Words.
-const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'your hypothesis' : id === REASONING ? 'your reasoning' : id === READER ? 'you' : (entityById.has(id) ? names.nameAt(id, state.para) : null) ?? narratorName(id) ?? id);
+const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'your hypothesis' : id === REASONING ? 'your reasoning' : id === READER ? 'you' : (entityById.has(id) ? names().nameAt(id, reading.count) : null) ?? narratorName(id) ?? id);
 const ent = (id) => (id === HYPOTHESIS || id === REASONING ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ? nameOf(id) : ''));
 /** An entity at the head of a line: its name capitalised (the reader's hypothesis: "Your hypothesis"). */
 const entHead = (id) => ent(id).replace(/>([a-z])/, (m, c) => `>${c.toUpperCase()}`).replace(/^([a-z])/, (m, c) => c.toUpperCase());
@@ -163,25 +196,27 @@ const val = (v) => list(v).map((x) => {
 // not yet told" (its day and hour too are the story's to tell).
 const timeLabel = (id) => {
     const t = timeById.get(id);
-    return t ? esc(timeLabelAt(t, state.para)) : esc(id);
+    return t ? esc(timeLabelAt(t, reading.count, posOf)) : esc(id);
 };
 /** A question's label as the story has asked it by the paragraph read to (engine/shown.js). */
-const qLabel = (q) => questionLabelAt(q, state.para);
-const qVisible = (q) => q && ((q.raised != null && q.raised <= state.para) || (q.answer_given_at != null && q.answer_given_at <= state.para));
+const qLabel = (q) => questionLabelAt(q, reading.count, posOf);
+const qVisible = (q) => q && (seen(q.raised) || seen(q.answer_given_at));
 // The player's questions: raised (or answered) so far; a question about provenance only if the story raises it.
-const qListed = (q) => !q.hidden && qVisible(q) && (q.kind !== 'provenance' || (q.raised != null && q.raised <= state.para));
-const listedQuestions = () => data.questions.filter(qListed).sort((a, b) => (a.raised ?? a.answer_given_at) - (b.raised ?? b.answer_given_at));
+const qListed = (q) => !q.hidden && qVisible(q) && (q.kind !== 'provenance' || seen(q.raised));
+const listedQuestions = () => data.questions.filter(qListed).sort((a, b) => byRead(a.raised ?? a.answer_given_at, b.raised ?? b.answer_given_at));
 // When each entity is first met: the earliest paragraph a fact naming it is given at.
 const kindOf = entityKinds(data);
-const firstMet = new Map();
+const metAt = new Map();   // entity → every paragraph a fact naming it is given at
 for (const f of data.facts) {
     const g = givenAt(f);
     if (g == null) continue;
-    for (const id of [f.of, f.to, ...list(f.value)]) if (typeof id === 'string' && entityById.has(id) && !(firstMet.get(id) <= g)) firstMet.set(id, g);
+    for (const id of [f.of, f.to, ...list(f.value)]) if (typeof id === 'string' && entityById.has(id)) metAt.set(id, [...(metAt.get(id) ?? []), g]);
 }
-// Met: first named in the story, or first on the timeline, whichever is earlier (an entity of the world model alone
+/** Where an entity is first on the timeline, by what has been read first (null: no fact names it). */
+const firstMet = (id) => reading.earliest(metAt.get(id) ?? []);
+// Met: first named in a story, or first on the timeline, whichever was read first (an entity of the world model alone
 // has no mention, and is met where a fact first names it).
-const firstSeen = (id) => Math.min(named.firstAt.get(id) ?? Infinity, firstMet.get(id) ?? Infinity);
+const firstSeen = (id) => reading.earliest([...storyIds.map((s) => { const n = namedBy.get(s).firstAt.get(id); return n == null ? null : (s === MAIN ? n : `${s}:${n}`); }), firstMet(id)]);
 const OTHER_IDEAS = 'Other ideas';
 const KIND_GROUP = { person: 'People and animals met so far', animal: 'People and animals met so far', place: 'Places met so far' };
 /**
@@ -193,18 +228,18 @@ function questionOptions(q) {
     // An idea that is itself a person, animal or place goes in among all the others met so far, not on its own.
     const kinds = answerKinds(q, kindOf);
     const isKind = (v) => kinds.includes(kindOf(v));
-    const listed = q.possibilities.filter((p) => p.available <= state.para);
+    const listed = q.possibilities.filter((p) => seen(p.available));
     const out = listed.filter((p) => p.via !== 'indirect' || !isKind(p.value)).map((p) => ({ value: p.value, proposed: p.via !== 'indirect', group: OTHER_IDEAS }));
     if (!kinds.length) return out;
     const met = data.entities.filter((e) => isKind(e.id) && e.id !== q.entry?.of && !out.some((o) => o.value === e.id)
-        && (firstMet.get(e.id) <= state.para || listed.some((p) => p.value === e.id)));
+        && (seen(firstMet(e.id)) || listed.some((p) => p.value === e.id)));
     met.sort((a, b) => nameOf(a.id).localeCompare(nameOf(b.id)));
     return [...out, ...met.map((e) => ({ value: e.id, proposed: false, group: KIND_GROUP[e.kind] }))];
 }
 const possShown = (q, pick) => qListed(q) && questionOptions(q).some((o) => o.value === pick);
 const shownPossibilities = questionOptions;
 const markOf = (q, pick) => state.marks[q.id]?.[pick];
-const givenAway = (q) => q.answer != null && q.answer_given_at != null && q.answer_given_at <= state.para;
+const givenAway = (q) => q.answer != null && seen(q.answer_given_at);
 // The time point a question sits at on the timeline, if its entry has one.
 const qAnchor = (q) => {
     const t = q.entry?.time;
@@ -230,7 +265,7 @@ function phrase(f) {
     if (f.attr === 'route') return `A route: ${f.value.map(ent).join(' → ')}`;
     const E = f.of === '?' ? 'Someone' : ent(f.of);
     // Told early in brief (`given_at`): until its own paragraph, only the brief words that told it.
-    if (f.given_quote && f.given_at != null && f.given_at <= state.para && state.para < f.para) return `${E}: <span class="said">“${esc(f.given_quote)}”</span>`;
+    if (f.given_quote && seen(f.given_at) && !seen(f.para)) return `${E}: <span class="said">“${esc(f.given_quote)}”</span>`;
     if (f.reasoned && f.attr === 'action' && f.act) return `${E}: ${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${ent(f.thing)}`;
     if (f.away) return `${E} away from ${ent(f.away)}${f.hyp === true ? ' <span class="small muted">(your hypothesis)</span>' : ''}`;
     const v = val(f.value);
@@ -275,7 +310,7 @@ function phrase(f) {
         case 'weekday': return `It is ${v}`;
         case 'hour': return `${v}`;
         case 'tells': {
-            const accts = list(f.value).map((a) => esc(accountById.has(a) ? questionLabelAt(accountById.get(a), state.para) : a)).join(', ');
+            const accts = list(f.value).map((a) => esc(accountById.has(a) ? questionLabelAt(accountById.get(a), reading.count, posOf) : a)).join(', ');
             return `${E} tells ${ent(f.to)} (${esc(f.how)}${f.partial ? ', in part' : ''}): ${accts}`;
         }
         default: return f.of === 'weather' ? `The weather: ${v}` : `${E}: ${v}${d}`;
@@ -290,7 +325,7 @@ const isTimeEvent = (f) => TIME_ATTRS.has(f.attr) || ['calendar', 'clock', 'weat
 // later, by a letter, to someone else) is not shown, and does not hold the fact up. Where a fact's every chain passes
 // through a later telling (a telling's paragraph after the first thing it carries), the chains stand as they are.
 const toldChains = (chains) => {
-    const told = chains.filter((c) => c.links.every((l) => !l.telling || !(givenAt(factById.get(l.telling)) > state.para)));
+    const told = chains.filter((c) => c.links.every((l) => { if (!l.telling) return true; const g = givenAt(factById.get(l.telling)); return g == null || seen(g); }));
     return told.length ? told : chains;
 };
 const claimChains = (id) => toldChains(prov.claimChains(id));
@@ -313,7 +348,7 @@ const chainsOfAssertion = (x) => (x.mark ? [x.from ? hypothesisChain(...x.from.s
 /** How far the player trusts a narrator's narration (by default the case's trust, certain unless it says otherwise). */
 const narrationLevel = (id) => { const n = data.narrators.find((x) => x.id === id); return n ? state.trust.links[linkKey(narrationLink(n))] ?? narrationLink(n).base : DEFAULT_LEVEL; };
 /** Told by the paragraph read to, and modelled (a chain reaches the reader, or a telling). */
-const visible = (f) => { const g = givenAt(f); return g != null && g <= state.para && levelOfFact(f) != null; };
+const visible = (f) => seen(givenAt(f)) && levelOfFact(f) != null;
 const accepted = (f) => levelOfFact(f) >= state.threshold;
 
 /** The assertions on the timeline: told so far, and trusted at least to the threshold; and the player's marks. */
@@ -387,7 +422,7 @@ function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
     const cls = ['event', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} <span class="para">¶${givenAt(f)}</span>${linkingQ ? ` <button type="button" class="link-row${isLinked(f.id, linkingQ) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(linkingQ)}">${isLinked(f.id, linkingQ) ? 'linked ✓' : '+ relevant'}</button>` : ''}${assertsHtml(f)}</${tag}>`;
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} ${paraSpan(givenAt(f))}${linkingQ ? ` <button type="button" class="link-row${isLinked(f.id, linkingQ) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(linkingQ)}">${isLinked(f.id, linkingQ) ? 'linked ✓' : '+ relevant'}</button>` : ''}${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -402,7 +437,7 @@ function hypPhrase(q, pick) {
 function questionRows(q, clashing, tag = 'li') {
     const sel = state.sel === `q:${q.id}` ? ' sel' : '';
     const crossed = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'crossed').map((p) => pickText(q, p.value));
-    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(qLabel(q))} <span class="para">¶${q.raised ?? q.answer_given_at}</span>${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ¶${q.answer_given_at}: <b>${answerText(q)}</b></span>` : ''}</${tag}>`;
+    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(qLabel(q))} ${paraSpan(q.raised ?? q.answer_given_at)}${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ${paraTag(q.answer_given_at)}: <b>${answerText(q)}</b></span>` : ''}</${tag}>`;
     const circles = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'circled').map((p) => {
         const lvl = markLevel(q, p.value);
         if (lvl < state.threshold && !state.showBelow) return '';
@@ -438,7 +473,7 @@ function eventList(filter, clashing, qFilter = () => true) {
         const fs = at.get(id) ?? [];
         const qq = qs.get(id) ?? [];
         if (!fs.length && !qq.length) continue;
-        fs.sort((a, b) => givenAt(a) - givenAt(b));
+        fs.sort((a, b) => byRead(givenAt(a), givenAt(b)));
         out.push(`<li class="time-head">${timeLabel(id)}</li>`, ...fs.map((f) => eventRow(f, clashing)), ...qq.flatMap((q) => questionRows(q, clashing)));
     }
     return out.length ? `<ol class="events">${out.join('')}</ol>` : '<p class="muted">Nothing yet.</p>';
@@ -501,7 +536,7 @@ function eventGrid(clashing) {
         const fs = at.get(id) ?? [];
         const qq = qs.get(id) ?? [];
         if (!fs.length && !qq.length) continue;
-        fs.sort((a, b) => givenAt(a) - givenAt(b));
+        fs.sort((a, b) => byRead(givenAt(a), givenAt(b)));
         rows.push({ head: id });
         for (const f of fs) {
             const c = isTimeEvent(f) ? null : colOf(f);
@@ -574,9 +609,9 @@ function clashSide(x) {
     if (x.kind === 'pick') {
         const q = qById.get(x.q);
         const who = x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : wordOf(f);
-        return `<a class="link" data-fact="${esc(f.id)}">${who}${x.neg ? 'not ' : ''}${pickText(q, x.pick)}</a> <span class="para">¶${givenAt(f)}</span>`;
+        return `<a class="link" data-fact="${esc(f.id)}">${who}${x.neg ? 'not ' : ''}${pickText(q, x.pick)}</a> ${paraSpan(givenAt(f))}`;
     }
-    return `<a class="link" data-fact="${esc(f.id)}">${statePhrase(x, f)}</a> <span class="para">¶${givenAt(f)}</span>`;
+    return `<a class="link" data-fact="${esc(f.id)}">${statePhrase(x, f)}</a> ${paraSpan(givenAt(f))}`;
 }
 /** A state on one side of a contradiction: the fact, or what a claim asserts, with whose word it is. */
 const statePhrase = (x, f) => (x.claim && x.claim === x.fact ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, neg: x.neg, time: x.time, id: '' })}` : `${wordOf(f)}${phrase(f)}`);
@@ -687,7 +722,7 @@ const roomCtx = { at: (ft, t) => { if (ft.from && !ft.to) return !data.order.lt(
 const paraOf = (id) => givenAt(factById.get(id)) ?? 0;
 /** What the player's room moves put on the timeline. */
 function roomEntries(told) {
-    const stamp = (e) => ({ ...e, time: roomTime(), given_at: Math.max(0, ...e.reasoned.premises.map(paraOf)) });
+    const stamp = (e) => ({ ...e, time: roomTime(), given_at: reading.latest(e.reasoned.premises.map(paraOf)) ?? 0 });
     const got = state.room.got.map((id) => told.find((f) => f.id === id)).filter(Boolean).map((f) => stamp(pointPassage(f, [], room.openings).entry));
     const r = checkRoute(state.room.route, [...told, ...got], room.openings);
     return [...got, ...(r.ok ? [stamp(r.entry)] : [])];
@@ -699,7 +734,7 @@ function roomView(told) {
     roomKnown = known;
     const rows = waysIn(room.sealed, known, room.openings, roomCtx);
     const marks = Object.fromEntries(Object.entries(state.room.ways).filter(([k, m]) => { const [row, size] = k.split('|'); return checkWayMark(rows, row, size, m).ok; }));
-    const shownRows = rows.map((r) => ({ ...r, evidence: Object.keys(marks).some((k) => k.startsWith(`${r.id}|`)) ? [...new Set(Object.entries(r.cells).flatMap(([, c]) => c.by).map((f) => [f.detail, f.para != null ? `¶${f.para}` : null].filter(Boolean).join(', ')))].filter(Boolean).join('; ') : '' }));
+    const shownRows = rows.map((r) => ({ ...r, evidence: Object.keys(marks).some((k) => k.startsWith(`${r.id}|`)) ? [...new Set(Object.entries(r.cells).flatMap(([, c]) => c.by).map((f) => [f.detail, f.para != null ? paraTag(f.para) : null].filter(Boolean).join(', ')))].filter(Boolean).join('; ') : '' }));
     const gotOffers = known.filter((f) => f.attr === 'passed' && !state.room.got.includes(f.id) && !foundBy({ sides: f.between, passes: f.passes }, known, room.openings));
     // The route as far as it still holds, and the links on from its end.
     const links = linksOf(known, room.openings);
@@ -763,8 +798,8 @@ function descriptionHtml(q) {
     if (!observations) return '';
     const mine = observed.filled.filter((x) => x.obs.q === q.id);
     const notes = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
-    const from = (x) => x.entries.map((e) => `¶${givenAt(e) ?? '?'}`).join(', ');
-    const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''} <span class="para">${from(x)}</span></li>`).join('');
+    const from = (x) => x.entries.map((e) => paraTag(givenAt(e))).join(', ');
+    const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
     const noteHtml_ = notes.length ? `<div class="small muted">Your notes: ${notes.map((e) => phrase(e)).join('; ')}</div>` : '';
@@ -784,7 +819,7 @@ function render() {
     const told = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
     placeCtx = engineCtx(told);
     const lapses = [], held = [];
-    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id) ?? hypAction(id) ?? presupposed(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held });
+    reasoned = reasonedEntries(state.reasoning, (id) => factById.get(id) ?? hypIntention(id) ?? hypAction(id) ?? presupposed(id), data.order, nameOf, givenAt, { ...placeCtx, entries: told, lapsed: lapses, held, latest: (xs) => reading.latest(xs) });
     if (room) reasoned = [...reasoned, ...roomEntries(told)];
     reasonedById = new Map(reasoned.map((f) => [f.id, f]));
     // An aim still circled but not yet told (read back) is not a lapse: the link returns on reading on.
@@ -801,10 +836,12 @@ function render() {
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
-    document.getElementById('para').value = state.para;
-    document.getElementById('para').max = LAST;
-    document.getElementById('next').disabled = state.para >= LAST;
-    document.getElementById('para').min = state.para;
+    // The reading controls work on the story shown in the Story panel (the main story, or a file).
+    const sid = state.story, at = reading.readTo(sid);
+    document.getElementById('para').value = at;
+    document.getElementById('para').max = lastOf(sid);
+    document.getElementById('next').disabled = at >= lastOf(sid);
+    document.getElementById('para').min = at;
     document.getElementById('show-below').checked = state.showBelow;
     const th = document.getElementById('threshold');
     th.innerHTML = LEVELS.slice(0, -1).map((l, i) => `<option value="${i}"${i === state.threshold ? ' selected' : ''}>${l}</option>`).join('');
@@ -813,9 +850,11 @@ function render() {
 
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
-    st.innerHTML = story.slice(1, state.para + 1).map((p, i) => `<p class="${i + 1 === state.para ? 'now' : ''}"><span class="para">¶${i + 1}</span> ${paraHtml(i + 1)}</p>`).join('');
+    st.innerHTML = storyTabsHtml() + (at ? stories.get(sid).slice(1, at + 1).map((p, i) => `<p class="sp${i + 1 === at && reading.log.at(-1) === `${sid}:${at}` ? ' now' : ''}" data-sp="${esc(`${sid}:${i + 1}`)}">${paraSpan(sid === MAIN ? i + 1 : `${sid}:${i + 1}`)} ${paraHtml(sid, i + 1)}</p>`).join('')
+        : `<p class="muted small">${esc(fileById.get(sid)?.title ?? '')}: not read yet. <b>Read on ▶</b> reads it.</p>`);
     // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
-    if (shownPara !== state.para && visibleEl(st)) { shownPara = state.para; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
+    const shownKey = `${sid}:${at}`;
+    if (shownPara !== shownKey && visibleEl(st)) { shownPara = shownKey; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
 
     const acceptedNow = acceptedAssertions();
     const clashes = [...contradictions(data, acceptedNow), ...alibis(data, acceptedNow, presenceNeeds(acceptedNow))];
@@ -911,7 +950,7 @@ function sideHtml(x, label) {
         ? `${x.claim ? `${ent(f.of)} ${f.attr === 'believes' ? 'believes' : 'says'}: ` : wordOf(f)}${x.neg ? 'not ' : ''}${pickText(qById.get(x.q), x.pick)}`
         : statePhrase(x, f);
     return `<div class="side"><h3>${label}</h3><p><a class="link" data-fact="${esc(f.id)}">${what}</a></p>
-      <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
+      <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>${r.links.length || r.people.length ? '; <span class="resolving">marked</span>: distrusting it alone takes this side off the timeline' : '; no single link takes it off: it has independent chains'}.</p>
       ${stmtHtml(chains, r)}<ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
 }
@@ -1004,7 +1043,7 @@ function doubted(id) {
     if (f.attr !== 'tells') return false;
     const told = new Set(list(f.value));
     const lies = data.accounts.filter((a) => told.has(a.id) || [...prov.ancestors(a.id)].some((p) => told.has(p)))
-        .flatMap((a) => list(a.facts)).map((x) => factById.get(x)).filter((x) => x && x.truth === false && givenAt(x) <= state.para);
+        .flatMap((a) => list(a.facts)).map((x) => factById.get(x)).filter((x) => x && x.truth === false && seen(givenAt(x)));
     return lies.length > 0 && lies.every((x) => !accepted(x));
 }
 /** What is on the timeline now: told so far and trusted to the threshold, with the player's own entries. */
@@ -1097,7 +1136,7 @@ function planHtml(f) {
 /** Whether a hypothesis id's possibility (or a presupposing question) is told so far, circled or not. */
 const hypShown = (id) => {
     const p = /^pre:(.+)$/.exec(id);
-    if (p) { const q = qById.get(p[1]); return !!q && q.raised <= state.para; }
+    if (p) { const q = qById.get(p[1]); return !!q && seen(q.raised); }
     const m = /^hyp:(.+)=(.+)$/.exec(id); const q = m && qById.get(m[1]); return !!q && possShown(q, m[2]);
 };
 /** The question a hypothesis id or a presupposition belongs to. */
@@ -1209,9 +1248,9 @@ function compareHtml(f, plan) {
     const goal = (g, reached) => (g ? `${phrase({ ...g, id: '' })} (${reached === 'reached' ? 'its steps reach it' : 'its steps do not reach it'})` : 'none the engine can read');
     const item = (x) => {
         const key = `${f.id}|${x.id}`;
-        if (!compared.has(key)) return `<li><button type="button" class="move" data-compare="${esc(key)}">Compare</button> ${phrase(x)} <span class="para">¶${givenAt(x)}</span></li>`;
+        if (!compared.has(key)) return `<li><button type="button" class="move" data-compare="${esc(key)}">Compare</button> ${phrase(x)} ${paraSpan(givenAt(x))}</li>`;
         const r = comparePlans(plan, { id: x.id, ...x.plan }, on, nameOf, { ...placeCtx, order: data.order, entries: on });
-        return `<li>${phrase(x)} <span class="para">¶${givenAt(x)}</span>
+        return `<li>${phrase(x)} ${paraSpan(givenAt(x))}
           <table class="compare small"><tr><th></th><th>This plan</th><th>That plan</th></tr>
           <tr><th>Goal</th><td>${goal(r.a.goal, r.a.reached)}</td><td>${goal(r.b.goal, r.b.reached)}</td></tr>
           <tr><th>Steps</th><td>${r.a.steps}</td><td>${r.b.steps}</td></tr>
@@ -1232,7 +1271,7 @@ function accountHtml(f, plan) {
         return `<span class="bad small">no: nothing it brings about is the plan's goal or a need of its steps; the plan leaves it unexplained</span>`;
     };
     const key = (x) => `${f.id}|${x.id}`;
-    const items = xs.map((x) => `<li>${accountChecked.has(key(x)) ? '' : `<button type="button" class="move" data-account="${esc(key(x))}">Check</button> `}${stepText(x)} <span class="para">¶${givenAt(x)}</span>${accountChecked.has(key(x)) ? ` ${answer(x)}` : ''}</li>`).join('');
+    const items = xs.map((x) => `<li>${accountChecked.has(key(x)) ? '' : `<button type="button" class="move" data-account="${esc(key(x))}">Check</button> `}${stepText(x)} ${paraSpan(givenAt(x))}${accountChecked.has(key(x)) ? ` ${answer(x)}` : ''}</li>`).join('');
     return `<h3>Does it account for this?</h3><p class="small">What else ${ent(plan.agent)} did or wanted, on the timeline: does it serve the plan?</p><ul class="moves">${items}</ul>`;
 }
 function movesHtml(f) {
@@ -1285,11 +1324,22 @@ function chipsHtml(q) {
     }
     return html;
 }
+// --- The story's tabs: the main story and each file delivered so far, with how far each is read.
+function storyTabsHtml() {
+    if (!files.length) return '';
+    const tab = (id, title) => {
+        const at = reading.readTo(id), last = lastOf(id);
+        return `<button type="button" class="story-tab${state.story === id ? ' on' : ''}${!at ? ' unread' : ''}" data-story="${esc(id)}" title="${at ? `Read to ¶${at} of ${last}` : 'Not read yet'}">${esc(title)} <span class="small muted">${at}/${last}</span></button>`;
+    };
+    const shown = files.filter((f) => delivered(f.id));
+    const waiting = files.length - shown.length;
+    return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div>${waiting ? `<p class="small muted story-waiting">${waiting === 1 ? 'One more paper' : `${waiting} more papers`} may come as the story goes on.</p>` : ''}`;
+}
 // --- The story's names, and the Cards.
 /** A paragraph of the story: its text, its names linked to their cards, its _italics_ as such. */
-function paraHtml(i) {
-    const p = story[i];
-    const links = named.spans[i].filter((x) => x.kind === 'entity' && entityById.has(x.ids[0])).sort((a, b) => a.start - b.start);
+function paraHtml(sid, i) {
+    const p = stories.get(sid)[i];
+    const links = namedBy.get(sid).spans[i].filter((x) => x.kind === 'entity' && entityById.has(x.ids[0])).sort((a, b) => a.start - b.start);
     const italic = [];
     for (const m of p.matchAll(/_([^_]+)_/g)) italic.push([m.index, m.index + m[0].length]);
     const cuts = new Set([0, p.length, ...links.flatMap((x) => [x.start, x.end]), ...italic.flat()]);
@@ -1309,19 +1359,19 @@ function paraHtml(i) {
 const CARD_GROUPS = [['People', ['person']], ['Animals', ['animal']], ['Places', ['place']], ['Things', ['object', 'document', 'race']], ['Groups', ['group']]];
 /** The people, animals, places, things and groups met so far, by kind, in the order met: each opens its card. */
 function cardsPanel() {
-    const met = data.entities.filter((e) => firstSeen(e.id) <= state.para);
+    const met = data.entities.filter((e) => seen(firstSeen(e.id)));
     let count = 0;
     const groups = CARD_GROUPS.map(([name, kinds]) => {
-        const xs = met.filter((e) => kinds.includes(e.kind)).sort((a, b) => firstSeen(a.id) - firstSeen(b.id));
+        const xs = met.filter((e) => kinds.includes(e.kind)).sort((a, b) => byRead(firstSeen(a.id), firstSeen(b.id)));
         count += xs.length;
-        return xs.length ? `<h3>${name} <span class="small muted">(${xs.length})</span></h3><ul class="cards-list">${xs.map((e) => `<li class="${state.sel === e.id ? 'sel' : ''}">${ent(e.id)} <span class="para">¶${firstSeen(e.id)}</span></li>`).join('')}</ul>` : '';
+        return xs.length ? `<h3>${name} <span class="small muted">(${xs.length})</span></h3><ul class="cards-list">${xs.map((e) => `<li class="${state.sel === e.id ? 'sel' : ''}">${ent(e.id)} ${paraSpan(firstSeen(e.id))}</li>`).join('')}</ul>` : '';
     }).join('');
     if (!count) return { html: '', count };
     return { count, html: `<details class="cards-box" id="cards-box"${state.cardsOpen || layoutNow() !== 'three' ? ' open' : ''}><summary>Cards (${count})</summary>${groups}<p class="small muted">Everyone and everything met so far, in the order met. A name opens its card: its own timeline, the questions about it, and where the story mentions it.</p></details>` };
 }
 /** The sentence of a paragraph around a span, the span itself in bold. */
-function sentenceAt(i, span) {
-    const p = story[i];
+function sentenceAt(sid, i, span) {
+    const p = stories.get(sid)[i];
     const before = p.slice(0, span.start), after = p.slice(span.end);
     const start = Math.max(0, ...[...before.matchAll(/[.!?][’”"]?\s/g)].map((m) => m.index + m[0].length));
     const stop = after.search(/[.!?][’”"]?(\s|$)/);
@@ -1333,10 +1383,12 @@ function sentenceAt(i, span) {
 function entityDetail(id, clashing) {
     const qs = listedQuestions().filter((q) => q.entry?.of === id);
     const spots = [];
-    for (let i = 1; i <= state.para; i++) for (const x of named.spans[i]) if (x.kind === 'entity' && x.ids[0] === id) spots.push([i, x]);
-    const said = spots.map(([i, x]) => `<li>${sentenceAt(i, x)} <span class="para">¶${i}</span></li>`).join('');
+    for (const sid of storyIds) for (let i = 1; i <= reading.readTo(sid); i++) for (const x of namedBy.get(sid).spans[i]) if (x.kind === 'entity' && x.ids[0] === id) spots.push([sid, i, x]);
+    const refOf = (sid, i) => (sid === MAIN ? i : `${sid}:${i}`);
+    spots.sort((a, b) => byRead(refOf(a[0], a[1]), refOf(b[0], b[1])));
+    const said = spots.map(([sid, i, x]) => `<li>${sentenceAt(sid, i, x)} ${paraSpan(refOf(sid, i))}</li>`).join('');
     return `<h2>${esc(nameOf(id))}</h2>
-      ${qs.length ? `<h3>Questions about it</h3><ul class="card-qs">${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span></li>`).join('')}</ul>` : ''}
+      ${qs.length ? `<h3>Questions about it</h3><ul class="card-qs">${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> ${paraSpan(q.raised ?? q.answer_given_at)}</li>`).join('')}</ul>` : ''}
       ${spots.length ? `<details class="mentions" id="mentions-box"${state.mentionsOpen ? ' open' : ''}><summary>Where the story mentions it (${spots.length})</summary><ul class="said">${said}</ul></details>` : ''}
       <h3>Its timeline</h3>${eventList((f) => f.of === id, clashing, (q) => q.entry?.of === id)}`;
 }
@@ -1345,8 +1397,8 @@ function questionsPanel(clashing) {
     const { above, below } = arranged();
     const qs = [...above, ...below];
     if (!qs.length) return '';
-    const item = (q, i) => `<li value="${i + 1}" data-q-row="${esc(q.id)}" class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><span class="q-grip" role="button" tabindex="0" aria-label="Move this question: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span><button type="button" class="q-top" data-q-top="${esc(q.id)}" aria-label="Move to the top" title="To the top">↑</button> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="para">¶${q.raised ?? q.answer_given_at}</span>${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
-      ${chipsHtml(q)}${descriptionHtml(q)}${givenAway(q) ? `<div class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b></div>` : ''}</li>`;
+    const item = (q, i) => `<li value="${i + 1}" data-q-row="${esc(q.id)}" class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><span class="q-grip" role="button" tabindex="0" aria-label="Move this question: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span><button type="button" class="q-top" data-q-top="${esc(q.id)}" aria-label="Move to the top" title="To the top">↑</button> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> ${paraSpan(q.raised ?? q.answer_given_at)}${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
+      ${chipsHtml(q)}${descriptionHtml(q)}${givenAway(q) ? `<div class="small">Answered at ${paraTag(q.answer_given_at)}: <b>${answerText(q)}</b></div>` : ''}</li>`;
     const line = observations ? `<li class="q-line" data-q-row="${LINE}"><span class="q-grip" role="button" tabindex="0" aria-label="Move the dividing line: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span> Questions above this line are offered under “Relevant to…”. Drag it up to shorten that list.</li>` : '';
     const items = above.map(item).join('') + line + below.map((q, i) => item(q, above.length + i)).join('');
     return `<details class="q-box" id="q-box"${state.qOpen ? ' open' : ''}><summary>Questions (${qs.length})</summary><ol>${items}</ol><p class="small muted">The answers shown are those someone in the story puts forward; “More” has the rest. Click one to circle it, again to cross it out, again to leave it uncertain. What you circle goes on the timeline as your hypothesis.</p></details>`;
@@ -1417,10 +1469,10 @@ function strainSideOn(x) {
     const q = qById.get(x.q);
     return !!q && markOf(q, x.pick) === 'circled' && possShown(q, x.pick) && markLevel(q.id, x.pick) >= state.threshold;
 }
-const activeStrains = () => strainList.filter((s) => s.available <= state.para && (strainSideIsMark(s.a) || strainSideIsMark(s.b)) && strainSideOn(s.a) && strainSideOn(s.b));
+const activeStrains = () => strainList.filter((s) => seen(s.available) && (strainSideIsMark(s.a) || strainSideIsMark(s.b)) && strainSideOn(s.a) && strainSideOn(s.b));
 function strainSideHtml(x, inKey = false) {
     if (inKey && typeof x !== 'string') { const q = qById.get(x.q); return `<b>${pickText(q, x.pick)}</b> for “${esc(qLabel(q))}”`; }
-    if (typeof x === 'string') { const f = factById.get(x); return f ? `<a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a> <span class="para">¶${givenAt(f)}</span>` : esc(x); }
+    if (typeof x === 'string') { const f = factById.get(x); return f ? `<a class="link" data-fact="${esc(f.id)}">${phrase(f)}</a> ${paraSpan(givenAt(f))}` : esc(x); }
     const q = qById.get(x.q);
     return `your circle on “<a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>”: <b>${pickText(q, x.pick)}</b>`;
 }
@@ -1433,7 +1485,7 @@ function strainsHtml(strains) {
 }
 /** At a question's give-away: the likely clashes a careful reader would have noticed, whatever the player circled. */
 function keyStrainsHtml(q) {
-    const ss = strainList.filter((s) => s.key === q.id && s.available <= state.para);
+    const ss = strainList.filter((s) => s.key === q.id && seen(s.available));
     if (!givenAway(q) || !ss.length) return '';
     return `<h3>What a careful reader would have noticed</h3><ul class="strains-key small">${ss.map((s) => `<li><b>${esc(s.why)}</b> ${strainSideHtml(s.a, true)} / ${strainSideHtml(s.b, true)}</li>`).join('')}</ul>`;
 }
@@ -1442,10 +1494,10 @@ function questionDetail(q, clashing) {
     const chains = marked.map((p) => hypothesisChain(q.id, p.value));
     const markLi = marked.map((p) => `<li>${markOf(q, p.value) === 'circled' ? 'Circled' : 'Crossed out'}: ${pickText(q, p.value)}${clashing.has(hypothesisKey(q.id, p.value)) ? ' <span class="bad small">in a contradiction</span>' : ''}<ul class="chains">${chainHtml(hypothesisChain(q.id, p.value))}</ul></li>`).join('');
     return `<h2><span class="q-mark">?</span> ${esc(qLabel(q))}</h2>
-      ${q.own ? `<p class="small">Raised by your reasoning: <a class="link" data-fact="${esc(q.change)}">${phrase(reasonedById.get(q.change) ?? {})}</a></p>` : `<p class="quote">“${esc(q.quote ?? '')}” <span class="para">¶${q.raised ?? q.answer_given_at}</span></p>`}
+      ${q.own ? `<p class="small">Raised by your reasoning: <a class="link" data-fact="${esc(q.change)}">${phrase(reasonedById.get(q.change) ?? {})}</a></p>` : `<p class="quote">“${esc(q.quote ?? '')}” ${paraSpan(q.raised ?? q.answer_given_at)}</p>`}
       ${qAnchor(q) ? `<p class="small">When: ${timeLabel(qAnchor(q))}${whenNote(typeof q.entry.time === 'string' ? {} : q.entry.time)}.</p>` : ''}
       ${chipsHtml(q)}${descriptionHtml(q)}
-      ${givenAway(q) ? `<p class="small">Answered at ¶${q.answer_given_at}: <b>${answerText(q)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>${keyStrainsHtml(q)}` : ''}
+      ${givenAway(q) ? `<p class="small">Answered at ${paraTag(q.answer_given_at)}: <b>${answerText(q)}</b><br><span class="quote">“${esc(q.answer_given_quote ?? '')}”</span></p>${keyStrainsHtml(q)}` : ''}
       ${marked.length ? `<h3>Your marks, your hypothesis</h3><ul class="marks">${markLi}</ul>${peopleHtml(chains)}` : '<p class="small muted">No marks yet: every possibility is uncertain.</p>'}${candidatesHtml(q)}${actionMovesHtml(q)}${aimPlansHtml(q)}`;
 }
 
@@ -1470,7 +1522,7 @@ function renderDetail(clashing) {
         const chains = chainsOf(f);
         const content = CLAIM_ATTRS.has(f.attr) && list(f.asserts).length ? claimChains(f.id) : [];
         el.innerHTML = `<h2>${phrase(f)}</h2>
-          <p class="quote">“${esc(f.given_quote ?? f.quote)}” <span class="para">¶${givenAt(f)}</span></p>
+          <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.</p>
           ${f.attr === 'tells' ? '<p class="small muted">A telling: how an account passed from one person to another.</p>'
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
@@ -1497,8 +1549,17 @@ function renderDetail(clashing) {
  * nobody is stuck. Reading stops before the first paragraph whose give-aways are not committed. Reading only goes forward: the
  * story so far stays on the page to scroll back through.
  */
-const GATED = data.questions.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && q.answer_inferable_at < q.answer_given_at);
-const atPara = (p, fn) => { const was = state.para; state.para = p; try { return fn(); } finally { state.para = was; } };
+// Inferable before it is given: at an earlier paragraph of the main story, or in a file (a file never gives an answer away).
+const earlierRef = (a, b) => refList(a).length > 0 && refList(a).every((r) => { const x = parseRef(r), y = parseRef(b); return !!x && !!y && y.story === MAIN && (x.story !== MAIN || x.n < y.n); });
+const GATED = data.questions.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && earlierRef(q.answer_inferable_at, q.answer_given_at));
+/** `fn` as things stood with the main story read to ¶p (the files as read now, up to what was read before it). */
+const atPara = (p, fn) => {
+    const was = reading;
+    const r = new Reading(was.log.filter((k) => { const x = parseRef(k); return x.story !== MAIN || x.n <= p; }), lengths);
+    r.readOn(MAIN, p);
+    reading = r; syncReading();
+    try { return fn(); } finally { reading = was; syncReading(); }
+};
 const circledCount = (q) => shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled').length;
 /** The gated questions given away at ¶p and not committed to just before it. */
 // The gate before a paragraph that gives an answer away. A question with required evidence (essential observations)
@@ -1524,16 +1585,27 @@ const setPara = (n) => {
     // The answers given on the way, with how the player's marks fare.
     if (to > from) answerNews = GATED.filter((q) => q.answer_given_at > from && q.answer_given_at <= to).map((q) => ({ q, picks: atPara(q.answer_given_at - 1, () => shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled').map((o) => o.value)) }));
     else answerNews = [];
-    state.para = to;
+    reading.readOn(MAIN, to);
+    syncReading();
     save(); render();
 };
+/** Read on in a file to its paragraph n (a file has no gate: it never gives an answer away). */
+const readFile = (id, n) => {
+    if (!delivered(id)) return;
+    reading.readOn(id, Math.max(reading.readTo(id), Math.min(lastOf(id), n | 0)));
+    answerNews = [];
+    syncReading();
+    save(); render();
+};
+/** Read on in the story shown in the Story panel. */
+const readShown = (n) => (state.story === MAIN ? setPara(n) : readFile(state.story, n));
 let flashGate = false;
 function renderGate() {
     const el = document.getElementById('gate-news');
     const qs = gateAt(state.para + 1);
     const key = qs.map((q) => q.id).join('|');
     el.hidden = !qs.length || gateHidden === key;
-    document.getElementById('next').title = qs.length ? `Before ¶${state.para + 1}: commit to an answer first` : 'Read the next paragraph';
+    document.getElementById('next').title = state.story !== MAIN ? `Read the next paragraph of ${fileById.get(state.story)?.title ?? 'this paper'}` : qs.length ? `Before ¶${state.para + 1}: commit to an answer first` : 'Read the next paragraph';
     if (!qs.length) return;
     const count = (q) => {
         const n = circledCount(q), d = evidenceOf(q), s = gateState(q);
@@ -1560,8 +1632,12 @@ function renderAnswers() {
     };
     el.innerHTML = `<p><b>The story has answered:</b></p><ul>${answerNews.map(line).join('')}</ul><p><button type="button" class="quiet" data-answers-close>Dismiss</button></p>`;
 }
-document.getElementById('next').addEventListener('click', () => { if (gateAt(state.para + 1).length) { gateHidden = null; flashGate = true; render(); return; } setPara(state.para + 1); });
-document.getElementById('para').addEventListener('change', (e) => setPara(Number(e.target.value)));
+document.getElementById('next').addEventListener('click', () => {
+    if (state.story !== MAIN) { readFile(state.story, reading.readTo(state.story) + 1); return; }
+    if (gateAt(state.para + 1).length) { gateHidden = null; flashGate = true; render(); return; }
+    setPara(state.para + 1);
+});
+document.getElementById('para').addEventListener('change', (e) => readShown(Number(e.target.value)));
 document.getElementById('threshold').addEventListener('change', (e) => { state.threshold = Number(e.target.value); save(); render(); });
 document.getElementById('only-moves').addEventListener('change', (e) => { state.onlyMoves = e.target.value === 'moves'; save(); render(); });
 document.getElementById('view').addEventListener('change', (e) => { state.view = e.target.value; save(); render(); });
@@ -1742,13 +1818,18 @@ document.addEventListener('click', (e) => {
         if (again) (again.closest('#tabbed .panel-body') ?? window).scrollBy(0, again.getBoundingClientRect().top - top);
         return;
     }
+    const tab = e.target.closest('[data-story]');
+    if (tab) { state.story = tab.dataset.story; save(); render(); return; }
     const pa = e.target.closest('.para');
     if (pa && !e.target.closest('#story')) {
-        // A paragraph number scrolls the story to that paragraph.
-        const n = Number(pa.textContent.match(/\d+/)?.[0]);
+        // A paragraph number scrolls the story to that paragraph (in its own story's tab).
+        const ref = parseRef(pa.dataset.ref ?? pa.textContent.match(/\d+/)?.[0]);
+        if (!ref) return;
+        if (delivered(ref.story)) state.story = ref.story;
+        save();
         reveal('story', panelFrom(e));
         render();
-        const p = document.querySelectorAll('#story p')[n - 1];
+        const p = document.querySelector(`#story p[data-sp="${CSS.escape(`${ref.story}:${ref.n}`)}"]`);
         if (p) {
             if (layoutNow() === 'three') {
                 const box = document.querySelector('.world-story');
@@ -1853,6 +1934,9 @@ window.__routes = (ids = []) => {
 };
 const hintApi = {
     para: () => state.para, last: LAST, wait: () => state.hintWait,
+    // The files: how far each is read, whether it has come, and its title; and whether references are all read.
+    files: () => files.map((f) => ({ id: f.id, title: f.title, delivered: delivered(f.id), read: reading.readTo(f.id), last: lastOf(f.id) })),
+    seenAll: (at) => reading.seenAll(at), readTo: (id) => reading.readTo(id),
     // The gate holds the reader here: reading on is not possible yet.
     gateHolds: () => state.para < LAST && gateAt(state.para + 1).length > 0,
     question: (id) => (qById.has(id) ? { ...qById.get(id), label: qLabel(qById.get(id)) } : undefined), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
@@ -1874,7 +1958,7 @@ const hintApi = {
         const a = lifted ? state.trust : other, b = lifted ? other : state.trust;   // a: with the distrust, b: without
         const hit = [];
         for (const f of data.facts) {
-            if (f.attr === 'tells' || !(givenAt(f) <= state.para)) continue;
+            if (f.attr === 'tells' || !seen(givenAt(f))) continue;
             const cs = chainsOf(f);
             if (cs.length && levelOf(cs, a) < state.threshold && levelOf(cs, b) >= state.threshold) hit.push(f.truth === false);
             if (CLAIM_ATTRS.has(f.attr) && list(f.asserts).length) {

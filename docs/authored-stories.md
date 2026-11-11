@@ -105,6 +105,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 |---|---|---|
 | `cases/miniatures/lamp-keepers-word` | A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it. | 8 paragraphs, 24 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
 | `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 23 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (5 essential), 10 moves |
+| `cases/miniatures/rent-box-papers` | The Rent Box with its clues as case files (sub-stories): a main story of five paragraphs, three papers delivered one by one, read in any order. | 5 + 2 + 2 + 2 paragraphs, 23 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (5 essential), 11 moves |
 
 | `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
@@ -422,6 +423,38 @@ The two engine changes of 2026-11-11 (step 2 of the provisional order below):
     open. The move is about a way nobody has found; once the way is found, the pane is the evidence. The choices
     were: leave it optional; offer the move after the way is found too; or let an observation accept either of two
     entries, the move's or the pane's. **Ruled by the user 2026-11-11: left optional.**
+
+Case files as sub-stories, built on a new version of The Rent Box (experiment 3; 2026-11-11). The user's rulings on
+the design laid out before it: a new case beside the original rather than a change to it; delivery built now, each
+file delivered where the main story first mentions it; the rest as proposed (a reference `"rudd:2"` where a number
+goes, the reading controls on the tab shown, a move's `at` a list).
+
+32. **The Rent Box Papers.** A main story of five paragraphs (the box empty; "I went up to the Captain … I wrote it
+    down"; "Mr. Fenn knocked at four … I wrote down what he told me too"; "I read the two over, and saw that one of my
+    lodgers was telling me a thing that was not so. So I wrote down my own afternoon"; the give-away) and three
+    papers of two paragraphs each, delivered at ¶2, ¶3 and ¶4. The facts, accounts and observations are the
+    original's, only their paragraphs moved; the gate before ¶5 needs evidence from all three papers, so it makes the
+    reader open them with no rule of its own. The original's "Fenn could not have been in Cable Street and in my
+    yard" is gone: it joined two papers, and the page shows that contradiction by itself.
+33. **The order of reading is the order paragraphs were read**, not the order papers were opened (a refinement of
+    the agreed rule, with the same effect where a paper is read through at once): the save keeps the log of
+    paragraphs read, and how far each story is read follows from it. It decides which mention of a name counts as
+    first and how entries of one time point are sorted. It is never shown.
+34. **What the code needed** (`engine/refs.js`): every comparison of paragraph numbers in the page, the names and
+    labels (`engine/shown.js`), the reasoning entries (`engine/actions.js`), the validator and the checks goes through
+    the reading or through "surely read first" (the validator: the same story and no later, or a main-story paragraph
+    no later than the other's file is delivered). A case without files reads exactly as before. The true path plays
+    in all twelve orders of reading the three papers (each with the main story first and last) and with each paper
+    read whole; the autoplay and the hints (which now say which paper to read on in) reach the end.
+35. **In this case the order of reading changes little.** The second question is raised, and the last paper
+    delivered, at ¶4, so every move waits for ¶4 and all the reading of papers happens there. A case whose papers
+    come early, with questions that can be settled one paper at a time, would test the orders harder.
+36. **Two limits.** The path check's test that no reasoning move is possible before its paragraph runs only for a
+    case without files (it compares single numbers). And a mention's `paras` range in `mentions.json` means little
+    across stories; none of the miniatures needs one.
+37. **Delivery is one rule among possible ones.** The page asks only whether a file has come (`delivered`: here, a
+    paragraph of the main story read); delivery from outside (an Archipelago item, a clue found by asking) can answer
+    the same question another way without touching the rest.
 - **11. Doubting the author** (the user's idea, with the note that it may not be worth building): a way for the
   player to say that the story or its data is wrong, like a bug report. It would need somewhere for the reports to
   go, and the user does not want to set that up.
@@ -589,7 +622,7 @@ A provisional order, this session's suggestion (the user has not ruled):
 2. Two contained engine changes: an identification carries whereabouts (finding 26); an observation can come from
    an entry a move reveals. Done 2026-11-11 (findings 29 to 31).
 3. Sub-stories, on one existing miniature first (The Rent Box: the two statements and the narrator's afternoon as
-   three files and a short spine). This is experiment 3 of the list above and the largest piece.
+   three files and a short spine). This is experiment 3 of the list above and the largest piece. Done 2026-11-11 (findings 32 to 37), as a new case, The Rent Box Papers.
 4. The order of two events as an entry that can be doubted, with its miniature (idea 1).
 5. The remaining mechanics, each with its miniature: a document's own properties, who could have known, two
    readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8).

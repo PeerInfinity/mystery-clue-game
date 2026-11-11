@@ -25,8 +25,10 @@ export const asName = (phrase) => {
 /**
  * `entities`, `mentions` (`{id: [phrase | {text, paras}]}`), `paras` (the story's paragraphs). Returns
  * `{ nameAt(id, para), steps(id) }`: the name shown at a paragraph, and the entity's [from, name] steps.
+ * `pos`: for a case of more than one story (engine/refs.js), where a reference the data gives (a name's `from`, a
+ * mention's `paras`) stands among `paras`, which are then every paragraph in the order of reading.
  */
-export function shownNames(entities, mentions, paras) {
+export function shownNames(entities, mentions, paras, pos = (x) => x) {
     const low = paras.map(lower);
     const first = (text, from = 1, to = paras.length - 1) => {   // from ¶1: the title (¶0) names the story, not who is in it
         const t = lower(text).replace(/^the /, '');
@@ -42,10 +44,10 @@ export function shownNames(entities, mentions, paras) {
         const e = byId.get(id);
         let out = [];
         if (!e) out = [];
-        else if (e.names?.length) out = e.names.map((n) => [n.from, n.name]).sort((a, b) => a[0] - b[0]);
+        else if (e.names?.length) out = e.names.map((n) => [pos(n.from), n.name]).sort((a, b) => a[0] - b[0]);
         else {
             const own = first(e.name);
-            const seen = list(mentions[id]).map((p) => (typeof p === 'string' ? [first(p), p] : [first(p.text, p.paras?.[0], p.paras?.[1]), p.text])).filter(([at]) => at != null).sort((a, b) => a[0] - b[0]);
+            const seen = list(mentions[id]).map((p) => (typeof p === 'string' ? [first(p), p] : [first(p.text, p.paras ? pos(p.paras[0]) : undefined, p.paras ? pos(p.paras[1]) : undefined), p.text])).filter(([at]) => at != null).sort((a, b) => a[0] - b[0]);
             // A name the text never uses verbatim is a description written for the first mention ("The stranger at
             // the stable"): it holds from there. A name the text uses holds from where it does, the first phrase before.
             if (own == null) out = [[seen.length ? seen[0][0] : 0, e.name]];
@@ -65,16 +67,16 @@ export function shownNames(entities, mentions, paras) {
 }
 
 /** A question's (or an account's) label at a paragraph: its `labels` (`[{from, label}]`), the latest begun, else its `label`. */
-export function questionLabelAt(q, para = Infinity) {
-    const s = (q.labels ?? []).filter((l) => l.from <= para).sort((a, b) => a.from - b.from);
-    return s.length ? s.at(-1).label : q.labels?.length ? [...q.labels].sort((a, b) => a.from - b.from)[0].label : q.label;
+export function questionLabelAt(q, para = Infinity, pos = (x) => x) {
+    const s = (q.labels ?? []).filter((l) => pos(l.from) <= para).sort((a, b) => pos(a.from) - pos(b.from));
+    return s.length ? s.at(-1).label : q.labels?.length ? [...q.labels].sort((a, b) => pos(a.from) - pos(b.from))[0].label : q.label;
 }
 /** A question's [from, label] steps, from where it is raised (`from`). */
 export const questionSteps = (q, from) => (q.labels?.length ? q.labels.map((l) => [Math.max(l.from, from), l.label]).sort((a, b) => a[0] - b[0]) : [[from, q.label]]);
 /** A time point's [from, label] steps. */
-export const timeSteps = (t) => (t.labels?.length ? t.labels.map((l) => [l.from, l.label]).sort((a, b) => a[0] - b[0]) : [[t.para ?? 0, t.label]]);
+export const timeSteps = (t, pos = (x) => x) => (t.labels?.length ? t.labels.map((l) => [pos(l.from), l.label]).sort((a, b) => a[0] - b[0]) : [[pos(t.para ?? 0), t.label]]);
 /** A time point's label at a paragraph (UNTOLD_TIME before the story dates it). */
-export function timeLabelAt(t, para = Infinity) {
-    const s = timeSteps(t).filter(([from]) => from <= para);
+export function timeLabelAt(t, para = Infinity, pos = (x) => x) {
+    const s = timeSteps(t, pos).filter(([from]) => from <= para);
     return s.length ? s.at(-1)[1] : UNTOLD_TIME;
 }

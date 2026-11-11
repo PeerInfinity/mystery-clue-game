@@ -16,7 +16,8 @@ else. Every JSON file is one object per line inside its list.
 | File | Required | What |
 |---|---|---|
 | `story.txt` | yes | The story's text, paragraphs separated by blank lines. Paragraphs are numbered from 0 as `engine/story.js` splits the text (¶0 the title); every `para` in the data is that number, and every `quote` is found in its paragraph (curly quotes and dashes normalised). |
-| `world/case.json` | yes | The case header: `{id, title, author, story, narrators, subtitle?, source}`. `story` is the story file, relative to `world/` (`../story.txt`); `narrators` who tells the story to the reader (see "The reader and the narrators" below); `subtitle` the page's name beside the title ("Watson's timeline"; default "the timeline"); `source` says where the text comes from (Gutenberg id, collection, first published, word count, public-domain status). |
+| `world/case.json` | yes | The case header: `{id, title, author, story, narrators, subtitle?, files?, source}`. `story` is the story file, relative to `world/` (`../story.txt`); `narrators` who tells the story to the reader (see "The reader and the narrators" below); `subtitle` the page's name beside the title ("Watson's timeline"; default "the timeline"); `source` says where the text comes from (Gutenberg id, collection, first published, word count, public-domain status). |
+| `files/<id>.txt` | no | A case file (a sub-story): a paper the narrator reads, its own paragraphs from ¶0 (its title). Listed in `world/case.json` `files`; see "Case files" below. |
 | `world/entities.json` | yes | Every entity, with `moves` (what travels) and `joins` (a door's two sides). |
 | `world/mentions.json` | yes | How the story names each entity: `{entities: {id: [phrase, …]}}`, a phrase a string or `{text, paras: [from, to]}` to limit it to some paragraphs (inclusive). Matched exactly on word boundaries, the longest winning where two overlap (`engine/story.js`). The story's names are links to their cards; an entity's card appears at its first mention (or at its `source` quote). |
 | `world/times.json` | yes | The time points and their partial order. |
@@ -29,6 +30,23 @@ else. Every JSON file is one object per line inside its list.
 | `world/actions.json` | no | The case's own action types, `{id, label, requires, effects}` in the action table's rule shape, and `ramifies` (what a goal's state brings with it); the generic ones are the engine's (see "Typed states and actions"). |
 | `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`; `CASE=<dir> node scripts/path-check.mjs` for another case). |
 | `structure.json` | no | Beside `world/`, for an authored story: the logic it was written from, `{story, mechanic, goal, frame, questions: [{id, asks, answer, others, gate, needs, rules_out}], clues: [{id, source, says, facts, chain?, false?, false_trail?}]}` (`docs/authored-stories.md`; the shape sketched in `docs/archipelago-plan.md`). `needs` lists alternative sets of clues. The page does not read it; `npm test` checks that its clues, facts and questions exist and that every essential observation of a question rests on facts of the clues it needs. So far only the miniatures (`cases/miniatures/`) have one. |
+
+**Case files** (sub-stories; since 2026-11-11; the design in `docs/authored-stories.md`, "The two-index design").
+`world/case.json` may list `files: [{id, title, short, text, delivered?}]`: a paper the narrator reads, with `text`
+its file relative to `world/` (`../files/rudd.txt`), `title` its tab in the Story panel, `short` the label of its
+paragraphs ("Rudd ¶2"), and `delivered` the paragraph of the main story at which it comes (absent: from the start).
+Every paragraph then has two indexes, its story and its number in it: a reference is a bare number for the main story
+(every case without files stays as it was) and `"<file>:<n>"` for a file's paragraph (`engine/refs.js`), wherever the
+data names a paragraph (`para`, `given_at`, `raised`, `available`, a time point's `para`, labels' `from`). The reader
+reads each story forward on its own, in any order, and a file can be left half read; what is on the timeline is what
+has been read, in every story. Where an order among what is read matters (which mention of a name came first, how
+entries of one time point are sorted) it is the order in which the paragraphs were read. A file never gives an answer
+away: `answer_given_at` is a paragraph of the main story, and the gate stays there. `answer_inferable_at` may be a
+list of references, every paragraph the inference needs (`["rudd:2", "self:2"]`); so may a true path move's `at`
+(what must have been read before it), and the validator checks that it covers what the move uses. Where the
+validator checks that one paragraph comes no later than another, across stories it means "surely read first": the
+same story and no later, or a main-story paragraph no later than where the other's file is delivered. A file's
+prose stands alone: the narrator's thoughts in it are about that paper only, never about how it bears on another.
 
 The world model was first written beside the earlier game's data and pointed into it (`old`, references to the
 annotated reading's thoughts, the earlier game's time windows); since 2026-11-06 it stands alone. The page shows

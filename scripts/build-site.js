@@ -41,7 +41,7 @@ while (todo.length) {
     }
 }
 
-// Cases. Watson's timeline's (cases/<case>/, and the mechanic miniatures, cases/miniatures/<case>/): world/*.json and the story its case.json names. The earlier game's
+// Cases. Watson's timeline's (cases/<case>/, and the mechanic miniatures, cases/miniatures/<case>/): world/*.json and the story its case.json names, with its files' texts. The earlier game's
 // (v1/cases/<case>/): what loadCase reads, the action tables the autoplay plays (v1/ui/autoplay.js: the reader's and
 // the minimal one), the hints' data and incremental mode's waits (without them the page offers no Hint button and no
 // incremental pace).
@@ -53,6 +53,8 @@ for (const dir of worlds) {
     const header = JSON.parse(fs.readFileSync(path.join(root, world, 'case.json'), 'utf8'));
     for (const f of fs.readdirSync(path.join(root, world))) if (f.endsWith('.json')) files.add(path.join(world, f));
     files.add(path.normalize(path.join(world, header.story)));
+    // Its case files (sub-stories), each a text of its own.
+    for (const f of header.files ?? []) files.add(path.normalize(path.join(world, f.text)));
 }
 for (const dir of fs.readdirSync(path.join(root, 'v1', 'cases'))) {
     const base = path.join('v1', 'cases', dir);

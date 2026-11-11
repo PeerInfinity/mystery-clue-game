@@ -1,0 +1,135 @@
+{
+  "story": "rent-box-papers",
+  "mechanic": "A contradiction among accepted statements, resolved by distrusting one: two lodgers' statements cannot both hold, and the narrator's own observation is against one of them.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md (questions[].needs lists alternative sets of clues; here each question has one set). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue. This is The Rent Box with its clues as case files (sub-stories): each clue's `source` names the file that carries it.",
+  "goal": "q.who",
+  "frame": [
+    {
+      "id": "fr.box",
+      "says": "The rents were counted into the box at one o'clock; at three the box was empty.",
+      "facts": [
+        "f.box_full",
+        "f.box_empty",
+        "f.box_place"
+      ]
+    },
+    {
+      "id": "fr.house",
+      "says": "Nobody lives in the house but the narrator and her two lodgers.",
+      "facts": [
+        "f.no_servant",
+        "f.fenn_lodger",
+        "f.rudd_lodger"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q.untrue",
+      "asks": "Which lodger told Ada Orme a thing that was not so?",
+      "answer": "Captain Rudd",
+      "others": [
+        "Mr. Fenn"
+      ],
+      "gate": 5,
+      "needs": [
+        [
+          "c.rudd_statement",
+          "c.fenn_statement",
+          "c.back_door"
+        ]
+      ],
+      "rules_out": {
+        "Mr. Fenn": "c.back_door contradicts c.rudd_statement, and nothing contradicts c.fenn_statement"
+      }
+    },
+    {
+      "id": "q.who",
+      "asks": "Who emptied the rent box?",
+      "answer": "Captain Rudd",
+      "others": [
+        "Mr. Fenn"
+      ],
+      "gate": 5,
+      "needs": [
+        [
+          "c.front_door",
+          "c.back_door",
+          "c.fenn_left",
+          "c.rudd_indoors"
+        ]
+      ],
+      "rules_out": {
+        "Mr. Fenn": "c.fenn_left, c.front_door and c.back_door: he was outside both doors from the moment the box was full",
+        "anyone from outside": "c.front_door and c.back_door"
+      }
+    }
+  ],
+  "clues": [
+    {
+      "id": "c.rudd_statement",
+      "source": "Captain Rudd, to the narrator at three o'clock: what he says he saw from the back parlour",
+      "says": "At half past two Fenn crossed the yard and came in at the back door.",
+      "facts": [
+        "f.rudd_fenn_yard",
+        "f.rudd_back_open"
+      ],
+      "chain": [
+        "f.rudd_tells"
+      ],
+      "false": true,
+      "file": "rudd"
+    },
+    {
+      "id": "c.fenn_statement",
+      "source": "Mr. Fenn, to the narrator at four o'clock, of himself",
+      "says": "At half past two he was at the reading room in Cable Street.",
+      "facts": [
+        "f.fenn_reading"
+      ],
+      "chain": [
+        "f.fenn_tells"
+      ],
+      "file": "fenn"
+    },
+    {
+      "id": "c.back_door",
+      "source": "The narrator's own afternoon",
+      "says": "She was in the kitchen from one until three with the back door at her elbow; it is the only way in from the yard and it did not open.",
+      "facts": [
+        "f.back_shut",
+        "f.ada_kitchen"
+      ],
+      "file": "self"
+    },
+    {
+      "id": "c.front_door",
+      "source": "The narrator's own afternoon",
+      "says": "The front door was locked from one until four and its key was in her pocket.",
+      "facts": [
+        "f.front_locked",
+        "f.key_pocket"
+      ],
+      "file": "self"
+    },
+    {
+      "id": "c.fenn_left",
+      "source": "The narrator's own afternoon",
+      "says": "Fenn stood by while the rents were counted and was let out at the front door at one.",
+      "facts": [
+        "f.fenn_stood_by",
+        "f.fenn_let_out"
+      ],
+      "file": "self"
+    },
+    {
+      "id": "c.rudd_indoors",
+      "source": "The narrator's own knowledge",
+      "says": "The Captain had not been out of the house all day.",
+      "facts": [
+        "f.rudd_in_house"
+      ],
+      "file": "rudd"
+    }
+  ]
+}

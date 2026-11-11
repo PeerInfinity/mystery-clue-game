@@ -1,0 +1,19 @@
+{
+ "entities": {
+  "ada": ["Ada Orme"],
+  "fenn": ["Mr. Fenn", "Fenn"],
+  "rudd": ["Captain Rudd", "the Captain"],
+  "constable": ["the constable"],
+  "house": ["9 Tanner's Row", "the house"],
+  "dining_room": ["the dining-room sideboard"],
+  "back_parlour": ["the back parlour"],
+  "kitchen": ["the kitchen"],
+  "yard": ["the yard", "my yard"],
+  "reading_room": ["the reading room in Cable Street", "Cable Street"],
+  "front_door": ["the front door"],
+  "back_door": ["the back door"],
+  "front_key": ["the key"],
+  "box": ["the box"],
+  "sea_chest": ["the Captain's sea-chest"]
+ }
+}

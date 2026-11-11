@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {"id": "ada", "kind": "person", "name": "Ada Orme"},
+    {"id": "fenn", "kind": "person", "name": "Mr. Fenn"},
+    {"id": "rudd", "kind": "person", "name": "Captain Rudd"},
+    {"id": "constable", "kind": "person", "name": "the constable"},
+    {"id": "house", "kind": "place", "name": "9 Tanner's Row"},
+    {"id": "dining_room", "kind": "place", "name": "the dining-room", "within": "house"},
+    {"id": "back_parlour", "kind": "place", "name": "the back parlour", "within": "house"},
+    {"id": "kitchen", "kind": "place", "name": "the kitchen", "within": "house"},
+    {"id": "yard", "kind": "place", "name": "the yard"},
+    {"id": "reading_room", "kind": "place", "name": "the reading room in Cable Street"},
+    {"id": "front_door", "kind": "object", "name": "the front door"},
+    {"id": "back_door", "kind": "object", "name": "the back door"},
+    {"id": "front_key", "kind": "object", "name": "the key of the front door"},
+    {"id": "box", "kind": "object", "name": "the rent box"},
+    {"id": "sea_chest", "kind": "object", "name": "Captain Rudd's sea-chest"}
+  ]
+}

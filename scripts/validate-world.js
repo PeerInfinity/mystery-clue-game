@@ -26,6 +26,7 @@ import { provenance, loadWorld } from './world-provenance.js';
 import { assertions, contradictions, CLAIM_ATTRS, LEVELS } from '../engine/world.js';
 import { ACTIONS, GENERIC_ACTIONS, STATES, setCaseActions } from '../engine/actions.js';
 import { REASONED_MOVES } from '../engine/observations.js';
+import { MAIN, parseRef } from '../engine/refs.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -33,8 +34,32 @@ if (!dir) { console.error('usage: validate-world.js <case dir> [--quiet]'); proc
 const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
 
 const caseData = read('world/case.json');
-const story = fs.readFileSync(path.join(dir, 'world', caseData.story), 'utf8')
+const paragraphsOf = (file) => fs.readFileSync(path.join(dir, 'world', file), 'utf8')
     .split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean).map(normalize);
+const story = paragraphsOf(caseData.story);
+// The case files (sub-stories, engine/refs.js): each its own paragraphs, delivered at a paragraph of the main story
+// (or from the start). A paragraph's reference is a number (the main story) or "<file>:<n>".
+const caseFiles = caseData.files ?? [];
+const fileErrors = [];
+const stories = new Map([[MAIN, story]]);
+for (const f of caseFiles) {
+    if (!f.id || f.id === MAIN || !/^[A-Za-z0-9_-]+$/.test(f.id) || stories.has(f.id)) { fileErrors.push(`case.json: file id ${f.id}`); continue; }
+    if (!f.title || !f.short) fileErrors.push(`case.json: file ${f.id}: needs a title and a short label`);
+    if (f.delivered != null && !(Number.isInteger(f.delivered) && f.delivered >= 1 && f.delivered < story.length)) fileErrors.push(`case.json: file ${f.id}: delivered is a paragraph of the main story`);
+    try { stories.set(f.id, paragraphsOf(f.text)); } catch { fileErrors.push(`case.json: file ${f.id}: no text ${f.text}`); }
+}
+const deliveredAt = (id) => (id === MAIN ? 0 : caseFiles.find((f) => f.id === id)?.delivered ?? 0);
+/** A paragraph reference that exists (a number in the main story, or "<file>:<n>"). */
+const isRef = (x) => { const r = parseRef(x); return !!r && (typeof x === 'number' || typeof x === 'string') && stories.has(r.story) && r.n >= 0 && r.n < stories.get(r.story).length; };
+/** Is `a` surely read whenever `b` is? The same story and no later; or a main-story paragraph no later than b's file is delivered. */
+const le = (a, b) => {
+    const x = parseRef(a), y = parseRef(b);
+    if (!x || !y || x.n <= 0) return true;
+    if (x.story === y.story) return x.n <= y.n;
+    return x.story === MAIN && x.n <= deliveredAt(y.story);
+};
+/** `a` may be read after `b` (an error where a must come first). Unknown either way: no. */
+const after = (a, b) => a != null && b != null && !le(a, b);
 const allEntities = read('world/entities.json').entities;
 // The case's own action types (world/actions.json, optional): each `{id, label, requires, effects}`, an id the
 // generic table does not have, every rule naming a role or a thing; `ramifies` each `{if, then}` of {attr, value}.
@@ -75,7 +100,7 @@ const earliest = (f) => f.inferable_at ?? givenAt(f);
 const TELL_HOWS = new Set(['told', 'overheard', 'statement', 'sworn statement', 'report', 'newspaper', 'telegram', 'analysis', 'letter']);
 const ACCOUNT_HOWS = new Set(['saw', 'did', 'said', 'examination', 'analysis', 'inference', 'own', 'report', 'bundle']);
 
-const errors = [...errors0, ...actionErrors];
+const errors = [...errors0, ...actionErrors, ...fileErrors];
 const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const timeIds = new Set(times.map((t) => t.id));
 const factById = new Map(facts.map((f) => [f.id, f]));
@@ -85,7 +110,7 @@ const qById = new Map(questions.map((q) => [q.id, q]));
 for (const x of [...times, ...questions, ...accounts, ...allEntities]) {
     for (const [k, f] of [['labels', 'label'], ['names', 'name']]) {
         if (x[k] == null) continue;
-        if (!Array.isArray(x[k]) || !x[k].length || x[k].some((l) => !Number.isInteger(l.from) || typeof l[f] !== 'string' || !l[f])) errors0.push(`${x.id}: ${k} is a list of {from, ${f}}`);
+        if (!Array.isArray(x[k]) || !x[k].length || x[k].some((l) => !isRef(l.from) || typeof l[f] !== 'string' || !l[f])) errors0.push(`${x.id}: ${k} is a list of {from, ${f}}`);
     }
 }
 const seen = new Set();
@@ -95,10 +120,11 @@ for (const x of [...times, ...facts, ...questions, ...accounts]) {
 }
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 // A reader's step the facts do not model, in words, with the paragraph a reader could take it: {para, text}.
-const reasoningBad = (r, by) => (!Number.isInteger(r?.para) || !r.text ? 'is {para, text}' : by != null && r.para > by ? `¶${r.para} is after ¶${by}` : null);
+const reasoningBad = (r, by) => (!isRef(r?.para) || !r.text ? 'is {para, text}' : after(r.para, by) ? `¶${r.para} is after ¶${by}` : null);
 const quoteIn = (id, quote, para) => {
-    if (!Number.isInteger(para) || !story[para]) return err(id, `no paragraph ${para}`);
-    if (!story[para].includes(normalize(quote))) err(id, `quote not in ¶${para}: "${quote.slice(0, 60)}"`);
+    if (!isRef(para) || parseRef(para).n < 1) return err(id, `no paragraph ${para}`);
+    const r = parseRef(para);
+    if (!stories.get(r.story)[r.n].includes(normalize(quote))) err(id, `quote not in ¶${para}: "${quote.slice(0, 60)}"`);
 };
 
 // Times: references and no cycle in `after`.
@@ -155,16 +181,16 @@ for (const f of facts) {
     else if (f.given_at != null && f.given_at !== f.para) err(f.id, 'given_at without given_quote');
     const premises = list(f.from).length + list(f.reasoning).length;
     if (basis === 'inferable' && !premises) err(f.id, 'inferable without from or reasoning');
-    if ((premises > 0) !== Number.isInteger(f.inferable_at)) err(f.id, 'from (or reasoning) and inferable_at go together');
+    if ((premises > 0) !== isRef(f.inferable_at)) err(f.id, 'from (or reasoning) and inferable_at go together');
     for (const r of list(f.reasoning)) if (reasoningBad(r, f.inferable_at)) err(f.id, `reasoning: ${reasoningBad(r, f.inferable_at)}`);
     for (const p of list(f.from)) {
         const pf = factById.get(p);
         if (!pf) err(f.id, `from: no fact ${p}`);
-        else if (earliest(pf) > f.inferable_at) err(f.id, `from: ${p} is not inferable before ¶${earliest(pf)}, after inferable_at ¶${f.inferable_at}`);
+        else if (after(earliest(pf), f.inferable_at)) err(f.id, `from: ${p} is not inferable before ¶${earliest(pf)}, after inferable_at ¶${f.inferable_at}`);
     }
     const given = givenAt(f);
-    if (Number.isInteger(f.inferable_at) && given != null && f.inferable_at > given) err(f.id, `inferable_at ¶${f.inferable_at} after given ¶${given}`);
-    if (basis !== 'inferable' && Number.isInteger(f.inferable_at) && f.inferable_at === given) err(f.id, 'inferable_at no earlier than given: drop it');
+    if (isRef(f.inferable_at) && given != null && after(f.inferable_at, given)) err(f.id, `inferable_at ¶${f.inferable_at} after given ¶${given}`);
+    if (basis !== 'inferable' && isRef(f.inferable_at) && f.inferable_at === given) err(f.id, 'inferable_at no earlier than given: drop it');
     if (f.strength && !STRENGTHS.has(f.strength)) err(f.id, `strength ${f.strength}`);
     if (f.attr === 'observes') for (const v of list(f.value)) if (!factById.has(v) && /^f\./.test(v)) err(f.id, `observes: no fact ${v}`);
     if ('truth' in f && ![true, false, null].includes(f.truth)) err(f.id, `truth ${f.truth}`);
@@ -190,7 +216,7 @@ for (const f of facts) {
     if (f.claim) {
         const c = factById.get(f.claim);
         if (!c || !CLAIM_ATTRS.has(c.attr)) err(f.id, `claim: ${f.claim} is not a says or believes fact`);
-        else if (c.para > (f.given_at ?? f.para)) err(f.id, `claim: ${f.claim} is told after it (¶${c.para})`);
+        else if (after(c.para, f.given_at ?? f.para)) err(f.id, `claim: ${f.claim} is told after it (¶${c.para})`);
     }
     if (f.word && !entities.has(f.word)) err(f.id, `word: no entity ${f.word}`);
     if (f.heard_by && (!f.word || !narratorIds.has(f.heard_by))) err(f.id, `heard_by: ${f.heard_by} is no narrator, or the fact has no word`);
@@ -253,16 +279,16 @@ for (const q of questions) {
         // A possibility general knowledge brings is listed by the player's move, not by a paragraph (world/room.json).
         if (p.via === 'knowledge' && !room?.categories?.some((c) => c.id === p.category && c.q === q.id && c.members.some((m) => m.value === p.value))) err(q.id, `${p.value}: via knowledge needs a category of room.json on this question listing it`);
         if (p.via !== 'always' && p.via !== 'knowledge') {
-            if (!Number.isInteger(p.available)) err(q.id, `${p.value}: no available paragraph`);
+            if (!isRef(p.available)) err(q.id, `${p.value}: no available paragraph`);
             if (!p.from && !p.reasoning && !p.quote) err(q.id, `${p.value}: needs from (a fact), reasoning or a quote`);
         }
         if (p.from && !factById.has(p.from)) err(q.id, `${p.value}: from: no fact ${p.from}`);
         if (p.reasoning && reasoningBad(p.reasoning, p.available)) err(q.id, `${p.value}: reasoning: ${reasoningBad(p.reasoning, p.available)}`);
-        if (p.from && factById.has(p.from) && earliest(factById.get(p.from)) > p.available) err(q.id, `${p.value}: available ¶${p.available} before its fact ${p.from} (¶${earliest(factById.get(p.from))})`);
+        if (p.from && factById.has(p.from) && after(earliest(factById.get(p.from)), p.available)) err(q.id, `${p.value}: available ¶${p.available} before its fact ${p.from} (¶${earliest(factById.get(p.from))})`);
         if (p.quote) quoteIn(`${q.id} ${p.value}`, p.quote, p.available);
         if (p.by && !factById.has(p.by)) err(q.id, `${p.value}: by: no fact ${p.by}`);
-        if (p.out != null && p.out < p.available) err(q.id, `${p.value}: out ¶${p.out} before available ¶${p.available}`);
-        if (p.by && factById.has(p.by) && factById.get(p.by).para > p.out) err(q.id, `${p.value}: out ¶${p.out} before its fact ${p.by}`);
+        if (p.out != null && after(p.available, p.out)) err(q.id, `${p.value}: out ¶${p.out} before available ¶${p.available}`);
+        if (p.by && factById.has(p.by) && after(factById.get(p.by).para, p.out)) err(q.id, `${p.value}: out ¶${p.out} before its fact ${p.by}`);
     }
     if (q.answer != null) {
         const p = ps.find((x) => x.value === q.answer);
@@ -278,20 +304,22 @@ for (const q of questions) {
         if (v === q.answer || (v === 'something else' && !byDescription(q.id))) err(q.id, `also_right "${v}": not the answer, not "something else"`);
     }
     if (q.answer != null) {
-        if (!Number.isInteger(q.answer_given_at) || !q.answer_given_quote) err(q.id, 'an answer needs answer_given_at and its quote');
+        if (!Number.isInteger(q.answer_given_at) || !q.answer_given_quote) err(q.id, 'an answer needs answer_given_at (a paragraph of the main story: a file never gives an answer away) and its quote');
         else quoteIn(`${q.id} answer given`, q.answer_given_quote, q.answer_given_at);
         if (!('answer_inferable_at' in q)) err(q.id, 'an answer needs answer_inferable_at (null: only the give-away)');
         const ia = q.answer_inferable_at;
         if (ia != null) {
-            if (ia > q.answer_given_at) err(q.id, `answer inferable ¶${ia} after given ¶${q.answer_given_at}`);
+            // In a case with files, where it becomes inferable may be a list: every paragraph it needs read.
+            const ias = Array.isArray(ia) ? ia : [ia];
+            if (!ias.length || ias.some((x) => !isRef(x))) err(q.id, `answer_inferable_at: no paragraph ${ia}`);
+            if (ias.some((x) => parseRef(x)?.story === MAIN && after(x, q.answer_given_at))) err(q.id, `answer inferable ¶${ia} after given ¶${q.answer_given_at}`);
             // A reader who can reach the answer at ¶ia (or where the question is raised, if later) must be able to
             // circle it there: the page's gate asks for a circle before the give-away.
-            const rightAt = Math.min(...q.possibilities.filter((p) => p.value === q.answer || (q.also_right ?? []).includes(p.value)).map((p) => p.available ?? Infinity));
-            const from = Math.max(ia, q.raised ?? 0);
-            if (rightAt > from) err(q.id, `answer inferable at ¶${from}${from > ia ? ' (where it is raised)' : ''}, but no right possibility is available before ¶${rightAt}`);
+            const rights = q.possibilities.filter((p) => p.value === q.answer || (q.also_right ?? []).includes(p.value));
+            if (!rights.some((p) => p.available != null && (ias.some((x) => le(p.available, x)) || le(p.available, q.raised ?? 0)))) err(q.id, `answer inferable at ¶${ia} (or where it is raised, ¶${q.raised}), but no right possibility is available by then (${rights.map((p) => `¶${p.available}`).join(', ')})`);
             if (q.answer_reasoning) { if (reasoningBad(q.answer_reasoning, ia)) err(q.id, `answer_reasoning: ${reasoningBad(q.answer_reasoning, ia)}`); }
             else if (!q.answer_from || !factById.has(q.answer_from)) err(q.id, `answer_from: no fact ${q.answer_from} (or give answer_reasoning)`);
-            else if (earliest(factById.get(q.answer_from)) > ia) err(q.id, `answer_from ${q.answer_from} is later than ¶${ia}`);
+            else if (ias.every((x) => after(earliest(factById.get(q.answer_from)), x))) err(q.id, `answer_from ${q.answer_from} is later than ¶${ia}`);
         }
         if (q.answer_strength && !STRENGTHS.has(q.answer_strength)) err(q.id, `answer_strength ${q.answer_strength}`);
     }
@@ -344,16 +372,38 @@ const strainsFile = path.join(dir, 'world', 'strains.json');
 const strains = fs.existsSync(strainsFile) ? read('world/strains.json').strains : [];
 for (const s of strains) {
     const side = (x) => {
-        if (typeof x === 'string') { const f = factById.get(x); if (!f) err(s.id, `no fact ${x}`); return f ? earliest(f) ?? Infinity : Infinity; }
+        if (typeof x === 'string') { const f = factById.get(x); if (!f) err(s.id, `no fact ${x}`); return f ? earliest(f) : null; }
         const q = qById.get(x?.q), p = q?.possibilities.find((o) => o.value === x?.pick);
         if (!p) err(s.id, `no possibility ${x?.q} = ${x?.pick}`);
-        return p?.available ?? q?.raised ?? Infinity;
+        return p?.available ?? q?.raised ?? null;
     };
-    const at = Math.max(side(s.a), side(s.b));
+    const sides = [side(s.a), side(s.b)];
     if (!s.why) err(s.id, 'a strain needs why');
-    if (!Number.isInteger(s.available) || s.available < at) err(s.id, `available ¶${s.available} before both sides (¶${at})`);
+    if (!isRef(s.available) || sides.some((x) => x == null || after(x, s.available))) err(s.id, `available ¶${s.available} before both sides (¶${sides.join(', ¶')})`);
     if (!qById.get(s.key)?.answer) err(s.id, `key: ${s.key} is not a question with an answer`);
     if (s.from && !(factById.has(s.from) || qById.has(String(s.from).split(' ')[0]))) err(s.id, `from: ${s.from}`);
+}
+
+// The true path (world/path.json, optional): each move's `at`, a paragraph or (a case with files) a list of them,
+// covers what the move uses: the entry it links or works on, the question it marks and the answer it picks.
+const pathFile = path.join(dir, 'world', 'path.json');
+if (fs.existsSync(pathFile)) {
+    const moves = read('world/path.json').moves ?? [];
+    moves.forEach((m, i) => {
+        const id = `path move ${i + 1} (${m.do})`;
+        const at = list(m.at);
+        if (!at.length || at.some((x) => !isRef(x))) { err(id, `at: no paragraph ${JSON.stringify(m.at)}`); return; }
+        if (!caseFiles.length && Array.isArray(m.at)) err(id, 'at: a list only in a case with files');
+        const uses = [];
+        const fact = (x) => { const f = factById.get(x); if (f && givenAt(f) != null) uses.push([x, givenAt(f)]); };
+        for (const k of ['entry', 'on', 'a', 'b', 'of', 'for']) if (typeof m[k] === 'string') fact(m[k]);
+        if (m.do === 'trust' && m.link) fact(m.link);
+        const q = qById.get(m.q);
+        if (q?.raised != null) uses.push([m.q, q.raised]);
+        const p = q?.possibilities.find((o) => o.value === m.pick);
+        if (p?.available != null) uses.push([`${m.q} = ${m.pick}`, p.available]);
+        for (const [what, ref] of uses) if (!at.some((x) => le(ref, x))) err(id, `at ${JSON.stringify(m.at)} does not cover ${what} (¶${ref})`);
+    });
 }
 
 for (const e of errors) console.log(e);
@@ -373,16 +423,16 @@ if (!quiet) {
         const sure = cs.filter((c) => !c.links.some((l) => l.uncertain));
         return `${sure.length ? 'a certain chain' : 'only uncertain chains'}, ${cs.length > 1 ? 'several' : 'one'}`;
     }));
-    const ahead = facts.filter((f) => Number.isInteger(f.inferable_at) && givenAt(f) != null && f.inferable_at < givenAt(f));
+    const ahead = facts.filter((f) => isRef(f.inferable_at) && givenAt(f) != null && f.inferable_at !== givenAt(f) && le(f.inferable_at, givenAt(f)));
     console.log(`\nFacts inferable before the story states them (${ahead.length})\n` + ahead.map((f) => `  ¶${f.inferable_at} → ¶${givenAt(f)}  ${f.id}${f.strength === 'likely' ? ' (likely)' : ''}`).join('\n'));
-    const early = facts.filter((f) => f.given_at != null && f.given_at < f.para);
+    const early = facts.filter((f) => f.given_at != null && f.given_at !== f.para && le(f.given_at, f.para));
     console.log(`\nFacts given before the paragraph that tells them in full (${early.length})\n` + early.map((f) => `  ¶${f.given_at} (told ¶${f.para})  ${f.id}`).join('\n'));
     const never = facts.filter((f) => givenAt(f) == null);
     console.log(`\nFacts never stated by ¶46, only inferable (${never.length}): ${never.map((f) => f.id).join(', ')}`);
     console.log('\nAnswers: inferable → given\n' + questions.filter((q) => q.answer != null).map((q) => `  ${q.answer_inferable_at == null ? '  —' : `¶${q.answer_inferable_at}`.padStart(4)} → ¶${String(q.answer_given_at).padEnd(4)} ${q.id} = ${q.answer}${q.answer_strength === 'likely' ? ' (likely)' : ''}`).join('\n'));
-    const met = contradictions(world, asserted).sort((p, q) => Math.max(p.a.para, p.b.para, p.via?.para ?? 0) - Math.max(q.a.para, q.b.para, q.via?.para ?? 0));
+    const met = contradictions(world, asserted);
     const tag = (x) => `${x.id}${x.truth === false ? ' (false)' : x.truth == null ? ' (?)' : ''} ¶${x.para}`;
-    console.log(`\nContradictions a reader trusting every source meets (${met.length}), by the paragraph that completes them\n` + met.map((c) => `  ¶${Math.max(c.a.para, c.b.para, c.via?.para ?? 0)}  ${c.why}: ${tag(c.a)} / ${tag(c.b)}${c.via ? ` / ${tag(c.via)}` : ''}`).join('\n'));
+    console.log(`\nContradictions a reader trusting every source meets (${met.length})\n` + met.map((c) => `  ${c.why}: ${tag(c.a)} / ${tag(c.b)}${c.via ? ` / ${tag(c.via)}` : ''}`).join('\n'));
     show('Facts by origin', count(told, (f) => [...new Set(prov.factChains(f.id).map((c) => c.origin ?? '?'))].join(' + ') || '(reader)'));
 }
 console.log(`${errors.length} error(s)`);

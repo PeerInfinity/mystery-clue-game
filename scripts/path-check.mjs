@@ -5,16 +5,24 @@
 // the story no contradiction may be open and no likely clash unheld.
 //   node scripts/path-check.mjs [path.json]      STOP=<para> stops after that paragraph's moves (and keeps the page)
 //   CASE=<dir> node scripts/path-check.mjs       another case (the page's ?case=; default cases/miniatures/rent-box)
+// A case with files (sub-stories): each move's `at` lists what must have been read, and the check reads just that,
+// story by story, in the order ORDER gives (story ids, comma-separated; default the main story, then the files as the
+// case lists them); WHOLE=1 reads a file to its end once it is opened. scripts/page-checks.mjs tries several orders.
 // Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
 import { CASE, WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
-import { controlOf, made } from '../ui/world-moves.js';
+import { controlOf, made, nextRead, readToOf } from '../ui/world-moves.js';
+import { MAIN, refList } from '../engine/refs.js';
 const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
 const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/');
 const STOP = +(process.env.STOP ?? 1e9);
+const files = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).files ?? [];
+const ORDER = process.env.ORDER ? process.env.ORDER.split(',') : null;
+const WHOLE = !!process.env.WHOLE;
+const atText = (at) => refList(at).join(', ');
 
 const list = await (await fetch(`${CDP}/json`)).json();
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
@@ -50,7 +58,7 @@ const esc = (s) => s.replace(/["\\]/g, '\\$&');
 const LEVELS = { distrusted: 0, uncertain: 1, trusted: 2 };
 
 let failures = 0;
-const fail = (m, why) => { failures++; console.log(`FAIL ¶${m.at} ${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}: ${why}`); };
+const fail = (m, why) => { failures++; console.log(`FAIL ¶${atText(m.at)} ${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}: ${why}`); };
 
 /** Open what a move works on in the detail panel: a fact on the timeline, a question, or a likely clash's side. */
 async function openOn(on) {
@@ -69,7 +77,7 @@ const strains = fs.existsSync(path.join(W, 'strains.json')) ? JSON.parse(fs.read
 const label = (m) => `${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`;
 const early = [];
 const report = (m, at, why) => { early.push({ m, at }); failures++; console.log(`FAIL EARLY ¶${m.at} → ¶${at} ${label(m)}${why ? ` (${why})` : ''}`); };
-for (const m of moves.filter((x) => x.do === 'circle' && !x.late)) {
+for (const m of moves.filter((x) => x.do === 'circle' && !x.late && !files.length)) {
     const q = qs.get(m.q), o = q?.possibilities.find((x) => x.value === m.pick);
     if (!o) continue;
     const right = q.answer === m.pick || (q.also_right ?? []).includes(m.pick);
@@ -114,7 +122,31 @@ async function probe(now) {
     if (errors.length) { failures++; console.log(`FAIL ¶${now} page error while trying moves early: ${errors.splice(0).join(' | ')}`); }
 }
 
-async function readTo(p) {
+/** Read one paragraph more of a story, through its tab (a case with files) and Read on. */
+const readOne = async (story) => {
+    if (files.length && !(await exists(`[data-story="${story}"].on`)) && !(await click(`[data-story="${story}"]`))) return false;
+    return click('#next');
+};
+async function readTo(at) {
+    if (files.length) {
+        // Story by story, in ORDER, just what `at` needs (WHOLE: a file once opened, to its end).
+        for (let story; (story = nextRead(at, files, readToOf(await save()), ORDER)) != null;) {
+            const was = readToOf(await save())(story);
+            const to = WHOLE && story !== MAIN ? Infinity : was + 1;
+            for (let i = was; i < to; i++) { await readOne(story); if (readToOf(await save())(story) === i) break; }
+            const now = readToOf(await save())(story);
+            const news = await ev(`(() => { const e = document.querySelector('#answer-news'); return e && !e.hidden ? [...e.querySelectorAll('li')].map((li) => ({ text: li.innerText, bad: !!li.querySelector('.bad') })) : []; })()`);
+            for (const a of news) if (a.bad) { failures++; console.log(`FAIL ¶${now} answer: ${a.text}`); }
+            if (news.length) { console.log(`  ¶${now} answered: ${news.map((a) => a.text.replace(/\s+/g, ' ')).join(' | ')}`); await click('[data-answers-close]'); }
+            if (now === was) {
+                const gate = await ev(`document.querySelector('#gate-news')?.innerText ?? ''`);
+                failures++; console.log(`FAIL ${story === MAIN ? `gate before ¶${was + 1}: ${gate.replace(/\s+/g, ' ')}` : `could not read ${story} ¶${was + 1}`}`);
+                return false;
+            }
+        }
+        return true;
+    }
+    const p = at;
     probing = moves.filter((m) => m.at === p && REASON.has(m.do) && !m.late);
     while (true) {
         const now = (await save()).para ?? 1;
@@ -197,7 +229,7 @@ async function play(m) {
     }
     if (m.see && !new RegExp(m.see).test(await pageText())) return fail(m, `not on the page: /${m.see}/`);
     if (errors.length) { const e = errors.splice(0); return fail(m, `page error: ${e.join(' | ')}`); }
-    console.log(`ok ¶${m.at} ${m.do} ${m.way ?? m.node ?? m.entry ?? m.q ?? m.of ?? m.a ?? m.key ?? m.strain ?? m.link ?? m.person ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.do === 'link' ? ' → ' + m.q : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`);
+    console.log(`ok ¶${atText(m.at)} ${m.do} ${m.way ?? m.node ?? m.entry ?? m.q ?? m.of ?? m.a ?? m.key ?? m.strain ?? m.link ?? m.person ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.do === 'link' ? ' → ' + m.q : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`);
 }
 
 const t0 = Date.now();
@@ -205,13 +237,16 @@ const t0 = Date.now();
 const dump = async () => { if (process.env.SAVE) fs.writeFileSync(process.env.SAVE, JSON.stringify(await save())); };
 let last = 1;
 for (const m of moves) {
-    if (m.at > STOP) break;
-    if (m.at < last) { fail(m, `out of order (after ¶${last})`); continue; }
+    if (!files.length) {
+        if (m.at > STOP) break;
+        if (m.at < last) { fail(m, `out of order (after ¶${last})`); continue; }
+    }
     if (!(await readTo(m.at))) break;
-    last = m.at;
+    if (!files.length) last = m.at;
     await play(m);
 }
 if (STOP >= 1e9 && !failures) {
+    if (files.length) await click(`[data-story="${MAIN}"]`);
     const end = await ev(`+document.getElementById('para').max`);
     if (!(await readTo(end))) { console.log(`${failures} failure(s)`); process.exit(1); }
     const lacked = await ev(`[...document.querySelectorAll('#q-box p')].filter((p) => /^Your description lacked/.test(p.textContent)).map((p) => p.closest('li').querySelector('a.link').textContent + ': ' + p.textContent)`);

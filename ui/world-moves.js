@@ -3,6 +3,8 @@
 // (ui/world-autoplay.js) and the hints' Do it (ui/world-hints.js); the moves are path.json's (docs/case-format.md).
 // scripts/path-check.mjs makes the same moves from outside the page.
 
+import { MAIN, parseRef, refList, Reading } from '../engine/refs.js';
+
 export const $ = (sel) => document.querySelector(sel);
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const esc = (s) => String(s).replace(/["\\]/g, '\\$&');
@@ -14,6 +16,34 @@ export const REASONING = new Set(['a', 'b', 'c']);
 export const ROOM_MOVES = new Set(['way', 'got', 'route', 'link']);
 /** `entry: "route"` in a link move: the route the player has built, whatever its id. */
 const ROUTE_ENTRY = 'r:r:';
+
+// --- Reading, in a case of more than one story (engine/refs.js): a move's `at` is a paragraph, or a list of them in
+// several stories, every one of which must have been read before the move.
+/** How far each story is read, by a save. */
+export const readToOf = (save) => { const r = Reading.fromSave(save ?? {}); return (id) => r.readTo(id); };
+/** What `at` needs read, story by story (`{story: n}`); a file needs the main story read to where it is delivered. */
+export function needsOf(at, files = []) {
+    const need = {};
+    for (const x of refList(at)) {
+        const r = parseRef(x);
+        if (!r) continue;
+        need[r.story] = Math.max(need[r.story] ?? 0, r.n);
+        const d = r.story === MAIN ? null : files.find((f) => f.id === r.story)?.delivered;
+        if (d) need[MAIN] = Math.max(need[MAIN] ?? 0, d);
+    }
+    return need;
+}
+/**
+ * The story to read one more paragraph of, toward `at`: the first in `order` (story ids; default the main story, then
+ * the files as the case lists them) still short of what `at` needs and already delivered; a file not yet delivered
+ * waits for the main story. null: everything `at` needs is read.
+ */
+export function nextRead(at, files, readTo, order = null) {
+    const need = needsOf(at, files);
+    const came = (id) => id === MAIN || !((files.find((f) => f.id === id)?.delivered ?? 0) > readTo(MAIN));
+    for (const id of order ?? [MAIN, ...files.map((f) => f.id)]) if ((need[id] ?? 0) > readTo(id) && came(id)) return id;
+    return Object.entries(need).some(([id, n]) => n > readTo(id)) ? MAIN : null;
+}
 
 /** What a move works on, opened in the detail first: its `on`, or its own `a`/`of` for a move or a plan. */
 export const onOf = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
@@ -105,6 +135,11 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
         el.dispatchEvent(new Event('change', { bubbles: true }));
         return true;
     }
+    /** Read one more paragraph of a story: its tab in the Story panel (a case with files), then Read on. */
+    async function readOne(story = MAIN) {
+        if ($('[data-story]') && !$(`[data-story="${esc(story)}"].on`) && !(await press(`[data-story="${esc(story)}"]`))) return false;
+        return press('#next');
+    }
     async function openOn(on) {
         for (const sel of openerOf(on)) if (await press(sel)) return true;
         return false;
@@ -153,7 +188,7 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
             default: throw new Failed(`unknown move ${m.do}`);
         }
     }
-    return { saved, shown, showPart, press, choose, openOn, play };
+    return { saved, shown, showPart, press, choose, openOn, play, readOne };
 }
 
 /**

@@ -14,7 +14,7 @@
 //  (d) nothing: read on.
 // A move is offered from its `hint_at` (or `at`): never before the page can support it.
 
-import { $, esc, LEVELS, Failed, makeMover, allowedNow, made, onOf, VIEWS } from './world-moves.js';
+import { $, esc, LEVELS, Failed, makeMover, allowedNow, made, onOf, VIEWS, nextRead } from './world-moves.js';
 
 import { CASE } from './world-case.js';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -38,7 +38,7 @@ export async function makeHints({ store, api }) {
     const tried = (m) => m.do === 'circle' && !!crossOf(m.q, m.pick);
     const from = (m) => m.hint_at ?? m.at;
     const rightCircled = (q, save) => Object.entries(save.marks?.[q] ?? {}).some(([p, v]) => v === 'circled' && api.isRight(q, p));
-    const distrustedByPath = (key, P) => moves.some((m) => m.do === 'trust' && (m.link === key || m.person === key) && m.at <= P);
+    const distrustedByPath = (key) => moves.some((m) => m.do === 'trust' && (m.link === key || m.person === key) && api.seenAll(m.at));
 
     function target() {
         const save = saved(), P = save.para ?? 1;
@@ -54,15 +54,15 @@ export async function makeHints({ store, api }) {
                 if (!listed(q, pick)) continue;
                 if (v === 'circled' && !api.isRight(q, pick)) {
                     const cross = crossOf(q, pick);
-                    if (cross && cross.at <= P) return { kind: 'unmark', q, pick, why: cross.why, fix: { do: 'cross', q, pick } };
-                    if (right && from(right) <= P) return { kind: 'unmark', q, pick, why: right.why, fix: { do: 'clear', q, pick } };
+                    if (cross && api.seenAll(cross.at)) return { kind: 'unmark', q, pick, why: cross.why, fix: { do: 'cross', q, pick } };
+                    if (right && api.seenAll(from(right))) return { kind: 'unmark', q, pick, why: right.why, fix: { do: 'clear', q, pick } };
                 }
-                if (v === 'crossed' && api.isRight(q, pick) && right && from(right) <= P) return { kind: 'uncross', q, pick, why: right.why, fix: { do: 'circle', q, pick } };
+                if (v === 'crossed' && api.isRight(q, pick) && right && api.seenAll(from(right))) return { kind: 'uncross', q, pick, why: right.why, fix: { do: 'circle', q, pick } };
             }
         }
         // (b) a distrust the path does not make.
         for (const [key, level] of Object.entries(save.trust?.links ?? {})) {
-            if (level !== LEVELS.distrusted || distrustedByPath(key, P)) continue;
+            if (level !== LEVELS.distrusted || distrustedByPath(key)) continue;
             if (key.startsWith('stmt:') && api.statementFalse(key.slice(5))) continue;
             if (key.startsWith('hyp:')) continue;   // a mark's own link: the marks are (a)'s
             if (api.distrustEffect({ link: key }).harmless) continue;   // it takes off only what is false: as good as the path's
@@ -74,7 +74,7 @@ export async function makeHints({ store, api }) {
         // A distrust of the path counts as made when it would take nothing more off the timeline: the player has
         // taken the same false things off by another link of the chain.
         const done = (m) => m.do === 'trust' && m.level === 'distrusted' && api.distrustEffect(m.link ? { link: m.link } : { person: m.person }, false).n === 0;
-        const open = moves.filter((m) => !VIEWS.has(m.do) && from(m) <= P && !tried(m) && !made(m, save) && !done(m)
+        const open = moves.filter((m) => !VIEWS.has(m.do) && api.seenAll(from(m)) && !tried(m) && !made(m, save) && !done(m)
             && !((m.do === 'circle' || m.do === 'cross') && rightCircled(m.q, save)))
             .sort((a, b) => deadline(a) - deadline(b) || a.i - b.i);
         if (open.length) {
@@ -82,8 +82,17 @@ export async function makeHints({ store, api }) {
         }
         // Nothing of the path is left to do, and the gate still holds: what it lacks is on its notice (evidence that
         // went when an entry left the timeline, or an answer the path does not make).
+        // In a case with files: the next move of the path not yet readable says which paper to read on in.
+        const files = api.files();
+        if (files.length) {
+            const readTo = (id) => api.readTo(id);
+            const waiting = moves.find((m) => !VIEWS.has(m.do) && !made(m, save) && !tried(m) && !api.seenAll(from(m)));
+            const story = waiting ? nextRead(from(waiting), files, readTo) : null;
+            const f = files.find((x) => x.id === story);
+            if (f) return { kind: 'read', story, why: `Read on in “${f.title}”.` };
+        }
         if (P < api.last && api.gateHolds()) return { kind: 'read', why: 'The story waits at the gate: its notice says which question still lacks its evidence or its answer. Look at what you have linked to it, and whether each entry is still on the timeline.' };
-        return { kind: P >= api.last ? 'done' : 'read' };
+        return { kind: P >= api.last ? 'done' : 'read', ...(files.length ? { story: 'main', why: 'Nothing more to do for now: read on in the story.' } : {}) };
     }
 
     // ---------- the words ----------
@@ -173,7 +182,7 @@ export async function makeHints({ store, api }) {
         if (!fast) document.body.append(cursor);
         const mover = makeMover({ store, fast, factor: () => (fast ? 0 : 2), cursor: fast ? null : cursor });
         try {
-            if (t.kind === 'read') await mover.press('#next');
+            if (t.kind === 'read') { if (!(await mover.readOne(t.story ?? 'main'))) throw new Failed('the story could not be read on'); }
             else if (t.kind === 'trust') api.setTrust(t.link ? { link: t.link } : { person: t.person }, LEVELS.uncertain);
             else if (t.kind === 'move') await mover.play(t.m);
             else if (t.fix.do === 'clear') {

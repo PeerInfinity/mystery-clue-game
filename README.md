@@ -11,6 +11,7 @@ evidence leaves.
 **Short cases**, each an invented story of a few paragraphs, about two minutes long, built around one move of the game:
 [The Lamp-Keeper's Word](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/lamp-keepers-word) (one witness's word reaches you by two people) ·
 [The Rent Box](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box) (two lodgers' statements that cannot both be true) ·
+[The Rent Box Papers](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/rent-box-papers) (the same case, its clues as papers you read in any order) ·
 [The Last Ferry](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry) (what happened in what order) ·
 [The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench) (a locked room, and the ways into it) ·
 [The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door) (what an act needed, and who had it) ·

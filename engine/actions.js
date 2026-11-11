@@ -568,8 +568,10 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
         const lapse = (x) => ctx.lapsed?.push({ move: m, ...x });
         const gone = premises.find((id, i) => !ps[i]);
         if (gone) { lapse({ gone, why: 'What it was reasoned from is no longer there.' }); continue; }
-        const given = Math.max(...ps.map((p) => givenAt(p) ?? Infinity));
-        if (!Number.isFinite(given)) continue;
+        // Told when its last premise is (`ctx.latest`: of references in more than one story, the one read last).
+        const gs = ps.map((p) => givenAt(p));
+        const given = gs.some((g) => g == null) ? null : ctx.latest ? ctx.latest(gs) : Math.max(...gs);
+        if (given == null || (typeof given === 'number' && !Number.isFinite(given))) continue;
         const c = { ...ctx, order };
         let r;
         if (m.move === 'a') r = pointChange(order, ps[0], ps[1], [], nameOf);

@@ -10,6 +10,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
+import { MAIN, Reading, parseRef, refList } from '../engine/refs.js';
+import { needsOf } from '../ui/world-moves.js';
 const BASE = process.env.URL ?? 'http://localhost:8321/';
 const J = JSON.stringify;
 
@@ -44,7 +46,8 @@ async function run(name, start, expect = []) {
         const t = await ev(`window.__hint.target()`);
         if (t.kind === 'done') break;
         // "Read on" that does not move the reader on (the gate holds, and the hints have nothing more) is a failure.
-        const at = await ev(`JSON.parse(localStorage.getItem(${J(STORE)})).para`);
+        // How much has been read, in every story (a case with files: a paper read on moves the reader too).
+        const at = await ev(`(() => { const s = JSON.parse(localStorage.getItem(${J(STORE)})); return s.log?.length ?? s.para; })()`);
         stuck = t.kind === 'read' && at === lastPara ? stuck + 1 : 0;
         lastPara = at;
         if (stuck > 2) { fail(`${name}: the hint is to read on, and the reader does not get past ¶${at}: ${await ev(`document.querySelector('#gate-news')?.innerText ?? ''`)}`); break; }
@@ -64,6 +67,7 @@ async function run(name, start, expect = []) {
         if (errors.length) { fail(`${name}: page error: ${errors.splice(0).join(' | ')}`); break; }
     }
     const save = await ev(`JSON.parse(localStorage.getItem(${J(STORE)}))`);
+    if (await ev(`!!document.querySelector('[data-story="main"]')`)) await ev(`document.querySelector('[data-story="main"]').click(); 1`);
     const end = await ev(`+document.getElementById('para').max`);
     if (save.para !== end) fail(`${name}: stopped at ¶${save.para}`);
     const open = await ev(`document.querySelector('#clashes .clash-box summary')?.innerText ?? ''`);
@@ -82,6 +86,7 @@ if (which === 'below') await run('below the line', { para: 1, qOrder: { above: [
 // told), the true account of Holmes's recital distrusted, a right answer (the house) crossed out before it is raised.
 // Another case's, from its own data (mistakesOf).
 const READ = (f) => JSON.parse(fs.readFileSync(path.join(WORLD, f), 'utf8'));
+const caseFiles = READ('case.json').files ?? [];
 /**
  * Mistakes of the same three kinds for any case: a wrong answer circled on the first question the gate asks about,
  * where it becomes a possibility; the answer of a question not raised yet crossed out; a telling told by then that
@@ -90,23 +95,28 @@ const READ = (f) => JSON.parse(fs.readFileSync(path.join(WORLD, f), 'utf8'));
 function mistakesOf() {
     const qs = READ('questions.json').questions, facts = READ('facts.json').facts, moves = READ('path.json').moves;
     const isRight = (q, v) => v === q.answer || (q.also_right ?? []).includes(v);
-    const gated = qs.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && q.answer_inferable_at < q.answer_given_at).sort((a, b) => a.raised - b.raised);
+    // Inferable before it is given: an earlier paragraph of the main story, or a file's (engine/refs.js).
+    const earlier = (a, b) => refList(a).length > 0 && refList(a).every((x) => { const r = parseRef(x); return r.story !== MAIN || r.n < b; });
+    const gated = qs.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && earlier(q.answer_inferable_at, q.answer_given_at)).sort((a, b) => a.raised - b.raised);
     const marks = {}, expect = ['move'];
     let para = 1;
+    const start = new Reading(['main:1']);
+    const readAlso = (at) => { const need = needsOf(at, caseFiles); start.readOn(MAIN, need[MAIN] ?? 0); for (const [id, n] of Object.entries(need)) start.readOn(id, n); };
     const wrongQ = gated.find((q) => q.possibilities.some((p) => p.via !== 'always' && !isRight(q, p.value)));
     if (wrongQ) {
         const w = wrongQ.possibilities.find((p) => p.via !== 'always' && !isRight(wrongQ, p.value));
-        para = Math.max(wrongQ.raised, w.available);
+        readAlso([wrongQ.raised, w.available]);
+        para = start.readTo(MAIN);
         marks[wrongQ.id] = { [w.value]: 'circled' };
         expect.push('unmark');
     }
     const later = gated.find((q) => q.raised > para && q.possibilities.some((p) => p.value === q.answer));
     if (later) { marks[later.id] = { [later.answer]: 'crossed' }; expect.push('uncross'); }
     const distrusted = new Set(moves.filter((m) => m.do === 'trust').map((m) => m.link));
-    const tell = facts.find((f) => f.attr === 'tells' && (f.given_at ?? f.para) <= para && f.truth !== false && f.truth !== null && !distrusted.has(f.id));
+    const tell = facts.find((f) => f.attr === 'tells' && start.seen(f.given_at ?? f.para) && f.truth !== false && f.truth !== null && !distrusted.has(f.id));
     const links = {};
     if (tell) { links[tell.id] = 0; expect.push('trust'); }
-    return { start: { para, marks, trust: { links, people: {} } }, expect };
+    return { start: { para, ...(caseFiles.length ? { log: start.log } : {}), marks, trust: { links, people: {} } }, expect };
 }
 if (!which || which === 'mistakes') {
     const m = mistakesOf(); console.log(`mistakes: ${J(m.start)}`); await run('mistakes', m.start, m.expect);

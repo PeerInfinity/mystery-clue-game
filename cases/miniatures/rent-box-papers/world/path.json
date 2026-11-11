@@ -1,0 +1,16 @@
+{
+  "description": "The true path of the miniature (The Rent Box, its clues as case files; `at` lists what must have been read): two statements that cannot both hold, one of them against the narrator's own observation; that statement distrusted, and the question it was told to cover answered by who could reach the box.",
+  "moves": [
+    {"at": [4, "self:2"], "do": "link", "entry": "f.back_shut", "q": "q.untrue", "see": "nobody came in from the yard", "for_q": ["q.untrue"], "why": "The back door is the only way in from the yard, and it did not open."},
+    {"at": [4, "rudd:2", "self:2"], "do": "trust", "on": "f.rudd_back_open", "link": "f.rudd_tells", "level": "distrusted", "for_q": ["q.untrue"], "why": "So nobody came in at the back door at half past two: what the Captain said he saw did not happen."},
+    {"at": [4, "rudd:2"], "do": "link", "entry": "f.rudd_tells", "q": "q.untrue", "see": "what he said cannot stand", "for_q": ["q.untrue"], "why": "And it was the Captain who told me so: his telling is itself the thing that was not so."},
+    {"at": [4], "do": "circle", "q": "q.untrue", "pick": "rudd", "for_q": ["q.untrue"], "why": "The Captain's is the statement my own afternoon contradicts."},
+    {"at": [4], "do": "cross", "q": "q.untrue", "pick": "fenn", "for_q": ["q.untrue"], "why": "Nothing I saw myself is against what Mr. Fenn said."},
+    {"at": ["self:1"], "do": "link", "entry": "f.front_locked", "q": "q.who", "see": "by the front door after one", "for_q": ["q.who"], "why": "The front door was locked from one, and I had the key."},
+    {"at": ["self:2"], "do": "link", "entry": "f.back_shut", "q": "q.who", "see": "nobody came in from the yard", "for_q": ["q.who"], "why": "And the back door never opened."},
+    {"at": ["self:1"], "do": "link", "entry": "f.fenn_let_out", "q": "q.who", "see": "Mr. Fenn was outside from one", "for_q": ["q.who"], "why": "Mr. Fenn went out while the box was still full, and no door let him back."},
+    {"at": ["rudd:1"], "do": "link", "entry": "f.rudd_in_house", "q": "q.who", "see": "the Captain was inside the whole time", "for_q": ["q.who"], "why": "The Captain never left the house."},
+    {"at": ["rudd:2", "self:2"], "do": "circle", "q": "q.who", "pick": "rudd", "for_q": ["q.who"], "why": "Nobody came in, Mr. Fenn was out, and I did not rob myself: only the Captain could reach the box."},
+    {"at": ["rudd:2", "self:2"], "do": "cross", "q": "q.who", "pick": "fenn", "for_q": ["q.who"], "why": "He was outside both doors from one o'clock."}
+  ]
+}
