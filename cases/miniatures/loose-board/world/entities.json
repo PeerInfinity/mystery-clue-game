@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {"id": "ann", "kind": "person", "name": "Ann Tolley"},
+    {"id": "jane", "kind": "person", "name": "Jane Marsh"},
+    {"id": "voss", "kind": "person", "name": "Mr. Voss"},
+    {"id": "dick", "kind": "person", "name": "Dick"},
+    {"id": "constable", "kind": "person", "name": "the constable"},
+    {"id": "shop", "kind": "place", "name": "the draper's shop in Fore Street"},
+    {"id": "hiding_place", "kind": "place", "name": "the hiding-place under the loose board", "within": "shop"},
+    {"id": "st_marys", "kind": "place", "name": "St. Mary's"},
+    {"id": "hilltop", "kind": "place", "name": "Hilltop"},
+    {"id": "jane_house", "kind": "place", "name": "Jane Marsh's house"},
+    {"id": "cash_box", "kind": "object", "name": "the cash-box"},
+    {"id": "till", "kind": "object", "name": "the till"},
+    {"id": "letter", "kind": "document", "name": "Ann Tolley's letter to her sister"},
+    {"id": "delivery_book", "kind": "document", "name": "the delivery book"},
+    {"id": "trunk", "kind": "object", "name": "Mr. Voss's trunk"}
+  ]
+}

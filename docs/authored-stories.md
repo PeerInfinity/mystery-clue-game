@@ -110,6 +110,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/stable-clock` | One event at two times: two honest witnesses time one shot by two clocks; the clash is on the timeline at once, the slow clock is found, and an alibi goes with the wrong time. | 7 paragraphs, 17 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
 | `cases/miniatures/will-in-the-bible` | A document's own properties: a will read as a paper of its own, whose date and the christening it speaks of are set against the parish register. | 5 + 3 paragraphs (main story, the will), 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 14 moves |
+| `cases/miniatures/loose-board` | Who could have known: a theft that needed its thief to know the hiding-place (an action type of the case's own), told to one person, passed on by her without meaning to. | 6 paragraphs, 16 facts, 2 accounts, 1 telling, 1 question, 5 observations (all essential), 10 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
@@ -493,6 +494,27 @@ A document's own properties (step 5, outline B; 2026-11-11):
 43. **A check that assumed too much.** The hints check's run with mistakes distrusts a telling and expects the hints
     to undo it; here the only telling carries only what is false (the nephew's "found in the Bible"), so distrusting
     it is harmless and the hints rightly leave it. The check now picks a telling that carries something true.
+
+Who could have known? (step 5, outline C; 2026-11-11):
+
+44. **The Loose Board** needs an action type of its own and no engine change: `take_hidden` (`world/actions.json`)
+    needs its taker to know the hiding-place (`{of: $agent, attr: knows, value: $about}`) and to be at the shop
+    (`place: $where`). The question's entry is that act over the hour the shop was shut, so circling a suspect makes
+    it that one's act, and the question's detail lists the needs: Dick "knows the hiding-place: nothing on the
+    timeline says so"; Mr. Voss and Jane, met. The need to be at the shop does the rest: circling Dick (on his round
+    at Hilltop) or Jane (beside the narrator at the funeral) is at once a contradiction, by the alibi rule.
+45. **One page defect found and fixed:** a circled answer made into "that one's act" kept the entry's `thing`, `to`,
+    `item`, `via` and `where`, but dropped `about`, so the need read "Dick knows" with nothing after it. Any question
+    whose act has an `about` (asking about something, too) had the same gap.
+46. **Knowledge passed on is not read from the tellings.** The outline hoped to read "who knows the hiding-place"
+    from the provenance the other way: whoever is told an account knows what it carries. As built, the lodger's
+    knowing is a fact of the sister's statement (implied: he was at the table when she read the letter out), and the
+    narrator's letter to her sister is an action and a fact that she knows. Provenance runs toward the narrator, and
+    a telling outward (the letter, the reading aloud) is no part of it. Deriving `knows` from tellings would be an
+    engine change, for the user to decide on.
+47. **The outline missed a suspect.** The sister knew, so she had to be ruled out: she was beside the narrator the
+    whole hour. A chance thief ("something else") is ruled out by an observation against it: nothing else was
+    touched.
 
 - **The two Holmes cases are archived at `v2/`** (the user's proposal, 2026-11-11): Silver Blaze and The Speckled
   Band, the pipeline and the documents about them, with their own copy of the page, the engine and the checks, as

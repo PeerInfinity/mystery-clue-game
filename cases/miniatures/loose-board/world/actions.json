@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "take_hidden", "label": "taking from its hiding-place", "requires": [{"of": "$agent", "attr": "knows", "value": "$about"}, {"of": "$agent", "place": "$where"}], "effects": [{"of": "$agent", "attr": "carrying", "value": "$thing"}]}
+  ]
+}

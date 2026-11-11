@@ -15,6 +15,7 @@ evidence leaves.
 [The Last Ferry](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry) (what happened in what order) ·
 [The Stable Clock](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/stable-clock) (one shot, two honest witnesses, two times) ·
 [The Ring on the Bench](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/ring-on-the-bench) (a locked room, and the ways into it) ·
+[The Loose Board](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/loose-board) (who could have known where it was hidden?) ·
 [The Cellar Door](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door) (what an act needed, and who had it) ·
 [The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house) (one evening, told by two people) ·
 [The Will in the Bible](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/will-in-the-bible) (a paper that says more than it could have known) ·

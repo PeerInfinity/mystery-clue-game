@@ -1,0 +1,6 @@
+{
+  "accounts": [
+    {"id": "acct.ann", "label": "What Ann Tolley sees and knows herself", "origin": "ann", "how": "saw", "facts": ["f.ann_role", "f.box_hidden", "f.ann_writes", "f.jane_knows", "f.told_one", "f.ann_funeral", "f.jane_funeral", "f.box_gone", "f.untouched", "f.dick_role", "f.dick_round", "f.jane_tells", "f.box_found"]},
+    {"id": "acct.jane", "label": "What Jane Marsh says happened at her breakfast table", "origin": "jane", "how": "saw", "facts": ["f.jane_read", "f.voss_table", "f.voss_knows"]}
+  ]
+}

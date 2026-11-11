@@ -1,0 +1,11 @@
+{
+  "id": "loose_board",
+  "title": "The Loose Board",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "ann", "name": "Ann Tolley", "kind": "first-person"}
+  ],
+  "subtitle": "Ann Tolley's timeline",
+  "source": {"written": "2026-11-11", "word_count": 250}
+}

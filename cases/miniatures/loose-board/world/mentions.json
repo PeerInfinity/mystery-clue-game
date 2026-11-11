@@ -1,0 +1,19 @@
+{
+ "entities": {
+  "ann": ["Ann Tolley"],
+  "jane": ["my sister Jane", "Jane"],
+  "voss": ["Mr. Voss", "Her lodger"],
+  "dick": ["Dick"],
+  "constable": ["The constable"],
+  "shop": ["the draper's shop in Fore Street", "the shop"],
+  "hiding_place": ["a loose board behind the counter", "the board"],
+  "st_marys": ["St. Mary's"],
+  "hilltop": ["Hilltop"],
+  "jane_house": ["her breakfast table"],
+  "cash_box": ["My cash-box", "my cash-box", "the cash-box"],
+  "till": ["The till"],
+  "letter": ["my letter"],
+  "delivery_book": ["my delivery book"],
+  "trunk": ["Mr. Voss's trunk"]
+ }
+}

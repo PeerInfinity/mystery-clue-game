@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who took the cash-box?", "entry": {"of": "?", "attr": "action", "act": ["take_hidden"], "thing": "cash_box", "about": "hiding_place", "where": "shop", "value": "taking the cash-box from under the loose board", "time": {"from": "t.two", "to": "t.three"}}, "raised": 2, "quote": "Who took it?", "possibilities": [{"value": "something else", "available": 2, "via": "always"}, {"value": "jane", "available": 2, "via": "indirect", "from": "f.jane_knows"}, {"value": "dick", "available": 4, "via": "direct", "quote": "Dick, my errand boy, is in and out of the shop all week"}, {"value": "voss", "available": 5, "via": "direct", "quote": "Her lodger, Mr. Voss, was at the table"}], "answer": "voss", "answer_given_at": 6, "answer_given_quote": "The constable found my cash-box in Mr. Voss's trunk", "answer_inferable_at": 5, "answer_from": "f.voss_knows"}
+  ]
+}

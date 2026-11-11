@@ -1,0 +1,9 @@
+{
+  "observations": [
+    {"id": "o.straight", "q": "q.who", "from": ["f.untouched"], "says": "the thief went straight to the board and touched nothing else: whoever it was knew where the box was", "essential": true, "against": ["something else"]},
+    {"id": "o.told_one", "q": "q.who", "from": ["f.told_one"], "says": "the only one Ann Tolley ever told was her sister", "essential": true},
+    {"id": "o.jane_away", "q": "q.who", "from": ["f.jane_funeral"], "says": "Jane was at the funeral beside Ann Tolley the whole hour", "essential": true, "against": ["jane"]},
+    {"id": "o.dick_away", "q": "q.who", "from": ["f.dick_round"], "says": "Dick was two miles off at Hilltop the whole hour, and was never told", "essential": true, "against": ["dick"]},
+    {"id": "o.heard", "q": "q.who", "from": ["f.jane_read", "f.voss_knows"], "says": "Jane read the letter out at her table, and Mr. Voss heard where the box was", "essential": true}
+  ]
+}

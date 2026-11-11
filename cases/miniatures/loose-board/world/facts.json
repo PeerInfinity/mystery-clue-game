@@ -1,0 +1,20 @@
+{
+  "facts": [
+    {"id": "f.ann_role", "of": "ann", "attr": "role", "value": "keeps the draper's shop in Fore Street", "time": {"from": "t.before"}, "para": 1, "quote": "I keep the draper's shop in Fore Street"},
+    {"id": "f.box_hidden", "of": "cash_box", "attr": "location", "value": "hiding_place", "detail": "under a loose board behind the counter", "time": {"from": "t.before", "to": "t.three"}, "para": 1, "quote": "My cash-box lives under a loose board behind the counter"},
+    {"id": "f.ann_writes", "of": "ann", "attr": "action", "value": "writes to her sister Jane where the cash-box is hidden", "time": {"at": "t.last_month"}, "para": 1, "quote": "I wrote to my sister Jane and told her where it was"},
+    {"id": "f.jane_knows", "of": "jane", "attr": "knows", "value": "hiding_place", "detail": "from Ann Tolley's letter", "time": {"from": "t.last_month"}, "para": 1, "quote": "told her where it was"},
+    {"id": "f.told_one", "of": "hiding_place", "attr": "condition", "value": "told by Ann Tolley to nobody but her sister Jane", "time": {"from": "t.last_month"}, "para": 1, "quote": "I have never told anyone else"},
+    {"id": "f.ann_funeral", "of": "ann", "attr": "location", "value": "st_marys", "detail": "at her aunt's funeral, the shop shut", "time": {"from": "t.two", "to": "t.three"}, "para": 2, "quote": "went with Jane to our aunt's funeral at St. Mary's"},
+    {"id": "f.jane_funeral", "of": "jane", "attr": "location", "value": "st_marys", "detail": "beside Ann Tolley the whole hour", "time": {"from": "t.two", "to": "t.three"}, "para": 2, "quote": "She was beside me the whole hour"},
+    {"id": "f.box_gone", "of": "cash_box", "attr": "condition", "value": "gone, the board up", "time": {"at": "t.three"}, "para": 2, "quote": "the board was up, and the cash-box was gone"},
+    {"id": "f.untouched", "of": "shop", "attr": "condition", "value": "nothing else touched: the till and its two pounds of silver as Ann Tolley left them", "time": {"at": "t.three"}, "para": 3, "quote": "Nothing else in the shop had been touched"},
+    {"id": "f.dick_role", "of": "dick", "attr": "role", "value": "Ann Tolley's errand boy, in and out of the shop all week", "time": {"from": "t.before"}, "para": 4, "quote": "Dick, my errand boy, is in and out of the shop all week"},
+    {"id": "f.dick_round", "of": "dick", "attr": "location", "value": "hilltop", "detail": "on the round, two miles off, by the delivery book: names signed at three houses there", "time": {"from": "t.one", "to": "t.four"}, "para": 4, "quote": "my delivery book has him on the round to Hilltop, two miles off, from one o'clock until four"},
+    {"id": "f.jane_tells", "of": "jane", "attr": "tells", "value": "acct.jane", "to": "ann", "how": "told", "time": {"after": "t.three", "before": "t.later"}, "para": 5, "quote": "Jane told me"},
+    {"id": "f.jane_read", "of": "jane", "attr": "action", "value": "reads Ann Tolley's letter aloud at her breakfast table, not thinking what was in it", "time": {"at": "t.breakfast"}, "para": 5, "quote": "she read it aloud at her breakfast table, not thinking what was in it"},
+    {"id": "f.voss_table", "of": "voss", "attr": "location", "value": "jane_house", "detail": "at her breakfast table, her lodger", "time": {"at": "t.breakfast"}, "para": 5, "quote": "Her lodger, Mr. Voss, was at the table"},
+    {"id": "f.voss_knows", "of": "voss", "attr": "knows", "value": "hiding_place", "detail": "he heard the letter read aloud", "basis": "implied", "time": {"from": "t.breakfast"}, "para": 5, "quote": "Her lodger, Mr. Voss, was at the table"},
+    {"id": "f.box_found", "of": "constable", "attr": "action", "value": "finds the cash-box in Mr. Voss's trunk, its lock broken open", "time": {"at": "t.later"}, "para": 6, "quote": "The constable found my cash-box in Mr. Voss's trunk", "q": "q.who", "pick": "voss"}
+  ]
+}

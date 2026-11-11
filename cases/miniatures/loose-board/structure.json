@@ -1,0 +1,19 @@
+{
+  "story": "loose-board",
+  "mechanic": "Who could have known? (idea 4): a theft that needed its thief to know the hiding-place (an action type of the case's own, with a need of `knows`), the hiding-place told to one person only, and passed on by her without meaning to.",
+  "note": "Spoilers. The logic written before the prose (docs/authored-stories.md, outline C). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue. The sister, who knew, is added to the outline's two suspects and ruled out by her being with the narrator.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.theft", "says": "The shop was shut from two until three; the cash-box under the loose board was gone.", "facts": ["f.box_hidden", "f.box_gone"]}
+  ],
+  "questions": [
+    {"id": "q.who", "asks": "Who took the cash-box?", "answer": "Mr. Voss", "others": ["Dick", "Jane Marsh", "a chance thief"], "gate": 6, "needs": [["c.untouched", "c.told_one", "c.funeral", "c.round", "c.read_aloud"]], "rules_out": {"a chance thief": "c.untouched: the thief went straight to the board", "Jane Marsh": "c.funeral: with the narrator the whole hour", "Dick": "c.round: two miles off the whole hour; c.told_one: never told"}}
+  ],
+  "clues": [
+    {"id": "c.told_one", "source": "The narrator's own knowledge", "says": "She told only her sister Jane where the box was, in a letter.", "facts": ["f.told_one", "f.jane_knows"]},
+    {"id": "c.funeral", "source": "The narrator's own afternoon", "says": "Jane was with her at the funeral from two until three.", "facts": ["f.jane_funeral"]},
+    {"id": "c.untouched", "source": "The narrator's own look at the shop", "says": "Nothing else was touched: the till and its silver as she left them.", "facts": ["f.untouched"]},
+    {"id": "c.round", "source": "The delivery book, read by the narrator", "says": "Dick was on the round to Hilltop, two miles off, from one until four.", "facts": ["f.dick_round"]},
+    {"id": "c.read_aloud", "source": "Jane Marsh, to the narrator", "says": "She read the letter aloud at her breakfast table, her lodger there.", "facts": ["f.jane_read", "f.voss_knows"], "chain": ["f.jane_tells"]}
+  ]
+}

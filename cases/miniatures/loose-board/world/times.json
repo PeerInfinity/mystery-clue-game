@@ -1,0 +1,12 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.last_month", "label": "Last month", "after": "t.before", "para": 1, "quote": "Last month"},
+    {"id": "t.breakfast", "label": "The morning the letter came", "after": "t.last_month", "para": 5, "quote": "when my letter came"},
+    {"id": "t.one", "label": "Wednesday, one o'clock", "after": "t.breakfast", "para": 4, "quote": "from one o'clock"},
+    {"id": "t.two", "label": "Wednesday, two o'clock", "after": "t.one", "para": 2, "quote": "On Wednesday I shut the shop from two o'clock"},
+    {"id": "t.three", "label": "Wednesday, three o'clock", "after": "t.two", "para": 2, "quote": "until three"},
+    {"id": "t.four", "label": "Wednesday, four o'clock", "after": "t.three", "para": 4, "quote": "until four"},
+    {"id": "t.later", "label": "Later", "after": "t.four", "para": 6, "quote": "The constable found my cash-box"}
+  ]
+}

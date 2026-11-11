@@ -127,8 +127,8 @@ function hypAction(id) {
     const own = q?.possibilities.find((p) => p.value === m[2])?.action;
     if (own && markOf(q, m[2]) === 'circled' && possShown(q, m[2])) return { id, attr: 'action', ...own, time: own.time ?? hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
     if (!q?.entry?.act || !entityById.has(m[2]) || markOf(q, m[2]) !== 'circled' || !possShown(q, m[2])) return null;
-    const { act, thing, to, item, via, where } = q.entry;
-    return { id, of: m[2], attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), ...(where ? { where } : {}), time: hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
+    const { act, thing, to, item, via, where, about } = q.entry;
+    return { id, of: m[2], attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), ...(where ? { where } : {}), ...(about ? { about } : {}), time: hypTime(q), hyp: { q: q.id, pick: m[2] }, given_at: q.raised };
 }
 const allFacts = () => [...data.facts, ...reasoned];
 const qById = new Map(data.questions.map((q) => [q.id, q]));
