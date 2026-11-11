@@ -1,0 +1,22 @@
+{
+  "entities": [
+    {"id": "crane", "kind": "person", "name": "Josiah Crane"},
+    {"id": "bell", "kind": "person", "name": "Silas Bell"},
+    {"id": "reed", "kind": "person", "name": "Tam Reed"},
+    {"id": "amos", "kind": "person", "name": "Amos Dunn"},
+    {"id": "hobb", "kind": "person", "name": "Old Hobb"},
+    {"id": "church", "kind": "place", "name": "St. Olave's"},
+    {"id": "vestry", "kind": "place", "name": "the vestry", "within": "church"},
+    {"id": "lych_gate", "kind": "place", "name": "the lych-gate"},
+    {"id": "ferry", "kind": "place", "name": "the ferry"},
+    {"id": "far_bank", "kind": "place", "name": "the far bank"},
+    {"id": "landing", "kind": "place", "name": "the landing"},
+    {"id": "boiler_house", "kind": "place", "name": "the boiler-house"},
+    {"id": "cup", "kind": "object", "name": "the christening cup"},
+    {"id": "sack", "kind": "object", "name": "Bell's sack"},
+    {"id": "gate_lamp", "kind": "object", "name": "the gate lamp"},
+    {"id": "vestry_door", "kind": "object", "name": "the vestry door"},
+    {"id": "crane_key", "kind": "object", "name": "the vicar's key to the vestry"},
+    {"id": "amos_key", "kind": "object", "name": "the sexton's key to the vestry"}
+  ]
+}

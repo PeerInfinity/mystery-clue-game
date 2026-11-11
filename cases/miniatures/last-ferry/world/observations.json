@@ -1,0 +1,13 @@
+{
+  "observations": [
+    {"id": "o.when_seen", "q": "q.when", "from": ["f.cup_seen"], "says": "the cup was on its shelf when the lamp was lit", "essential": true, "against": ["before the lamp was lit"]},
+    {"id": "o.when_unlit", "q": "q.when", "from": ["f.lamp_unlit"], "says": "Bell went out with his sack before the lamp was lit"},
+    {"id": "o.who_seen", "q": "q.who", "from": ["f.cup_seen"], "says": "the cup was still there when the lamp was lit", "essential": true},
+    {"id": "o.who_aboard", "q": "q.who", "from": ["f.bell_on_ferry"], "says": "by then Bell was in mid-river, and on the ferry until eight", "essential": true, "against": ["bell"]},
+    {"id": "o.who_no_boat", "q": "q.who", "from": ["f.boat_lies"], "says": "the ferry lay at the far bank all night: he could not come back", "essential": true, "against": ["bell"]},
+    {"id": "o.who_locked", "q": "q.who", "from": ["f.amos_locks", "f.lock_unforced"], "says": "the vestry was locked when the lamp was lit, and the lock was never forced: whoever took the cup had a key", "essential": true},
+    {"id": "o.who_keys", "q": "q.who", "from": ["f.two_keys"], "says": "there are two keys, the vicar's and the sexton's", "essential": true},
+    {"id": "o.who_only_boat", "q": "q.who", "from": ["f.only_boat"], "says": "and there is no other boat on the water"},
+    {"id": "o.who_sack", "q": "q.who", "from": ["f.bell_leaves"], "says": "Bell's sack went out at the gate before the lamp was lit, while the cup was still on its shelf"}
+  ]
+}

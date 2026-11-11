@@ -1,0 +1,20 @@
+{
+  "story": "last-ferry",
+  "mechanic": "An alibi by the order of events: the suspect's leaving comes before the last time the thing was seen, and he had no way back. The events are told out of order and by relative times; the timeline puts them in order.",
+  "note": "Spoilers. The logic written before the prose, in the shape sketched in docs/archipelago-plan.md (questions[].needs lists alternative sets of clues; here each question has one set). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue, `chain` the tellings that bring it.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.cup", "says": "The cup was set on its shelf in the vestry after evensong; at nine the shelf was bare.", "facts": ["f.cup_set", "f.shelf_bare", "f.crane_returns"]}
+  ],
+  "questions": [
+    {"id": "q.when", "asks": "Was the cup taken before the gate lamp was lit, or after?", "answer": "after the lamp was lit", "others": ["before the lamp was lit"], "gate": 6, "needs": [["c.reed"]], "rules_out": {"before the lamp was lit": "c.reed: the cup was on its shelf when the lamp was lit"}},
+    {"id": "q.who", "asks": "Who took the christening cup?", "answer": "Amos Dunn", "others": ["Silas Bell"], "gate": 6, "needs": [["c.reed", "c.hobb", "c.lock", "c.keys"]], "rules_out": {"Silas Bell": "c.reed puts the taking after the lamp was lit; c.hobb puts Bell on the water before it was lit and across the river after, with the only boat", "anyone without a key": "c.reed (the door locked when the lamp was lit) and c.lock (never forced)", "the narrator": "c.keys: his key was in his pocket (his own word)"}}
+  ],
+  "clues": [
+    {"id": "c.bell_sack", "source": "The narrator, leaving after evensong", "says": "Bell, who had quarrelled with him, went out at the lych-gate with a sack over his shoulder, before the gate lamp was lit.", "facts": ["f.bell_leaves", "f.lamp_unlit", "f.bell_quarrel"], "false_trail": true},
+    {"id": "c.reed", "source": "Tam Reed, the lamplighter, to the narrator on Sunday night: what he saw as he lit the gate lamp", "says": "The cup was on its shelf; the sexton was at the vestry door with his keys, locked it and went off.", "facts": ["f.reed_lights", "f.cup_seen", "f.amos_at_door", "f.amos_locks"], "chain": ["f.reed_tells"]},
+    {"id": "c.hobb", "source": "Old Hobb, the ferryman, to the narrator on Monday morning: his last crossing", "says": "Bell came aboard as he cast off; they were in mid-river when the gate lamp was kindled; he landed Bell on the far bank at eight, and the boat, the only one on the water, lay there all night.", "facts": ["f.bell_boards", "f.bell_on_ferry", "f.bell_lands", "f.boat_lies"], "chain": ["f.hobb_tells"], "note": "The order of two events from different sources (the casting off, the lighting of the lamp) rests on one sentence of this clue."},
+    {"id": "c.lock", "source": "The narrator, at nine o'clock", "says": "He unlocked the vestry door himself, and the lock had not been forced.", "facts": ["f.lock_unforced"]},
+    {"id": "c.keys", "source": "The narrator's own knowledge", "says": "There are two keys to the vestry: his, in his pocket all the evening, and the sexton's.", "facts": ["f.two_keys", "f.key_pocket", "f.amos_key"]}
+  ]
+}

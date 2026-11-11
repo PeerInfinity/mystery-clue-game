@@ -1,0 +1,22 @@
+{
+ "entities": {
+  "crane": ["Josiah Crane"],
+  "bell": ["Silas Bell", "Bell"],
+  "reed": ["Tam Reed"],
+  "amos": ["Amos Dunn", "the sexton"],
+  "hobb": ["Old Hobb", "Hobb"],
+  "church": ["St. Olave's"],
+  "vestry": ["the vestry"],
+  "lych_gate": ["the lych-gate"],
+  "ferry": ["ferry", "the boat"],
+  "far_bank": ["the far bank"],
+  "landing": ["the landing"],
+  "boiler_house": ["the boiler-house"],
+  "cup": ["the silver christening cup", "the cup"],
+  "sack": ["a sack", "that sack", "his sack"],
+  "gate_lamp": ["the lamp at the gate", "the gate lamp", "the lamp"],
+  "vestry_door": ["the vestry door"],
+  "crane_key": ["Mine"],
+  "amos_key": ["his key"]
+ }
+}

@@ -1,0 +1,16 @@
+{
+  "description": "The true path of the miniature: the cup was last seen after the suspect had left, and he could not come back; the order of events clears him, and the keys leave one man.",
+  "moves": [
+    {"at": 3, "do": "link", "entry": "f.cup_seen", "q": "q.when", "see": "the cup was on its shelf when the lamp was lit", "for_q": ["q.when"], "why": "Tam Reed saw the cup on its shelf as he lit the lamp."},
+    {"at": 3, "do": "circle", "q": "q.when", "pick": "after the lamp was lit", "for_q": ["q.when"], "why": "So it was taken after the lamp was lit."},
+    {"at": 3, "do": "cross", "q": "q.when", "pick": "before the lamp was lit", "for_q": ["q.when"], "why": "It cannot have gone before: it was still there."},
+    {"at": 5, "do": "link", "entry": "f.cup_seen", "q": "q.who", "see": "the cup was still there when the lamp was lit", "for_q": ["q.who"], "why": "Whoever took it took it after the lamp was lit."},
+    {"at": 5, "do": "link", "entry": "f.bell_on_ferry", "q": "q.who", "see": "by then Bell was in mid-river", "for_q": ["q.who"], "why": "The ferry cast off before the lamp was lit, with Bell aboard: Hobb saw it kindled behind them."},
+    {"at": 5, "do": "link", "entry": "f.boat_lies", "q": "q.who", "see": "he could not come back", "for_q": ["q.who"], "why": "And the only boat lay at the far bank all night."},
+    {"at": 5, "do": "cross", "q": "q.who", "pick": "bell", "for_q": ["q.who"], "why": "Bell left before the cup was last seen, and had no way back."},
+    {"at": 5, "do": "link", "entry": "f.amos_locks", "q": "q.who", "for_q": ["q.who"], "why": "The vestry was locked when the lamp was lit."},
+    {"at": 5, "do": "link", "entry": "f.lock_unforced", "q": "q.who", "see": "whoever took the cup had a key", "for_q": ["q.who"], "why": "And at nine the lock had not been forced: it was opened with a key."},
+    {"at": 5, "do": "link", "entry": "f.two_keys", "q": "q.who", "see": "there are two keys", "for_q": ["q.who"], "why": "There are two keys, and mine was in my pocket."},
+    {"at": 5, "do": "circle", "q": "q.who", "pick": "amos", "for_q": ["q.who"], "why": "The other key is the sexton's."}
+  ]
+}

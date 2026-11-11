@@ -1,0 +1,32 @@
+{
+  "facts": [
+    {"id": "f.crane_role", "of": "crane", "attr": "role", "value": "vicar of St. Olave's at Marrow Quay", "time": {"from": "t.before"}, "para": 1, "quote": "vicar of St. Olave's at Marrow Quay"},
+    {"id": "f.cup_set", "of": "cup", "attr": "location", "value": "vestry", "detail": "set back on its shelf by Josiah Crane", "time": {"at": "t.evensong"}, "para": 1, "quote": "I set the silver christening cup back on its shelf in the vestry"},
+    {"id": "f.crane_returns", "of": "crane", "attr": "action", "value": "comes back for his spectacles and unlocks the vestry door", "time": {"at": "t.nine"}, "para": 1, "quote": "I came back for my spectacles, unlocked the vestry door"},
+    {"id": "f.shelf_bare", "of": "vestry", "attr": "condition", "value": "the shelf bare: the cup is gone", "time": {"at": "t.nine"}, "para": 1, "quote": "found the shelf bare"},
+    {"id": "f.lock_unforced", "of": "vestry_door", "attr": "condition", "value": "locked, and the lock not forced", "time": {"at": "t.nine"}, "para": 1, "quote": "The lock had not been forced"},
+    {"id": "f.bell_role", "of": "bell", "attr": "role", "value": "the carter", "time": {"from": "t.before"}, "para": 2, "quote": "Silas Bell, the carter"},
+    {"id": "f.bell_quarrel", "of": "bell", "attr": "action", "value": "quarrels with Josiah Crane over the pew rents", "time": {"at": "t.before"}, "para": 2, "quote": "who had quarrelled with me over the pew rents"},
+    {"id": "f.bell_leaves", "of": "bell", "attr": "action", "value": "goes out at the lych-gate with a sack over his shoulder", "time": {"at": "t.evensong"}, "para": 2, "quote": "go out at the lych-gate with a sack over his shoulder"},
+    {"id": "f.lamp_unlit", "of": "gate_lamp", "attr": "condition", "value": "not yet lit", "time": {"at": "t.evensong"}, "para": 2, "quote": "the lamp at the gate was not yet lit"},
+    {"id": "f.reed_role", "of": "reed", "attr": "role", "value": "lights the gate lamp every evening", "time": {"from": "t.before"}, "para": 3, "quote": "Tam Reed lights the gate lamp every evening"},
+    {"id": "f.reed_tells", "of": "reed", "attr": "tells", "value": "acct.reed", "to": "crane", "how": "told", "time": {"at": "t.night"}, "para": 3, "quote": "I knocked at his door that night"},
+    {"id": "f.reed_lights", "of": "reed", "attr": "action", "value": "lights the gate lamp", "time": {"at": "t.lamp"}, "para": 3, "quote": "When I lit the lamp"},
+    {"id": "f.cup_seen", "of": "cup", "attr": "location", "value": "vestry", "detail": "on its shelf, seen through the bright window", "time": {"at": "t.lamp"}, "para": 3, "quote": "I could see the cup on its shelf"},
+    {"id": "f.amos_at_door", "of": "amos", "attr": "location", "value": "vestry", "detail": "at the door, with his keys", "time": {"at": "t.lamp"}, "para": 3, "quote": "Amos Dunn the sexton was at the vestry door with his keys"},
+    {"id": "f.amos_locks", "of": "amos", "attr": "action", "value": "locks the vestry door and goes off down the lane", "time": {"at": "t.lamp"}, "para": 3, "quote": "I saw him lock it and go off down the lane"},
+    {"id": "f.bell_lives", "of": "bell", "attr": "lives_at", "value": "far_bank", "detail": "across the river", "time": {"from": "t.before"}, "para": 4, "quote": "Bell lives across the river"},
+    {"id": "f.only_boat", "of": "ferry", "attr": "condition", "value": "the only boat on the water", "detail": "Old Hobb's", "time": {"from": "t.before"}, "para": 4, "quote": "Old Hobb's ferry is the only boat on this water"},
+    {"id": "f.hobb_tells", "of": "hobb", "attr": "tells", "value": "acct.hobb", "to": "crane", "how": "told", "time": {"at": "t.monday"}, "para": 4, "quote": "I was at the landing when it came back"},
+    {"id": "f.bell_boards", "of": "bell", "attr": "action", "value": "comes aboard the ferry with his sack", "time": {"at": "t.cast_off"}, "para": 4, "quote": "Bell came aboard with his sack as I cast off"},
+    {"id": "f.bell_on_ferry", "of": "bell", "attr": "location", "value": "ferry", "detail": "in mid-river when the gate lamp is kindled", "time": {"from": "t.cast_off", "to": "t.eight"}, "para": 4, "quote": "We were in mid-river when I saw the gate lamp kindled behind us"},
+    {"id": "f.bell_lands", "of": "bell", "attr": "location", "value": "far_bank", "detail": "landed there by Old Hobb", "time": {"from": "t.eight"}, "para": 4, "quote": "I landed him on the far bank as the clock struck eight"},
+    {"id": "f.boat_lies", "of": "ferry", "attr": "condition", "value": "lies at the far bank all night", "time": {"from": "t.eight", "to": "t.monday"}, "para": 4, "quote": "the boat lay there all night"},
+    {"id": "f.two_keys", "of": "vestry_door", "attr": "condition", "value": "has two keys: the vicar's and the sexton's", "time": {"from": "t.before"}, "para": 5, "quote": "There are two keys to the vestry"},
+    {"id": "f.key_pocket", "of": "crane", "attr": "carrying", "value": "crane_key", "detail": "in his pocket all the evening", "time": {"from": "t.evensong", "to": "t.nine"}, "para": 5, "quote": "Mine had been in my pocket all the evening"},
+    {"id": "f.amos_key", "of": "amos", "attr": "carrying", "value": "amos_key", "time": {"from": "t.before"}, "para": 5, "quote": "The other is the sexton's"},
+    {"id": "f.crane_goes", "of": "crane", "attr": "action", "value": "goes to Amos Dunn's cottage", "time": {"at": "t.later"}, "para": 6, "quote": "I went to Amos Dunn's cottage"},
+    {"id": "f.amos_brings", "of": "amos", "attr": "action", "value": "brings the cup out from under the coke in the boiler-house", "time": {"at": "t.later"}, "para": 6, "quote": "He brought the cup out from under the coke in the boiler-house", "q": "q.who", "pick": "amos"},
+    {"id": "f.amos_owns", "of": "amos", "attr": "says", "value": "he went back with his key when Tam Reed was out of sight, meaning only to pawn the cup until harvest", "to": "crane", "time": {"at": "t.later"}, "para": 6, "quote": "He had gone back with his key when Tam Reed was out of sight", "asserts": [{"q": "q.when", "pick": "after the lamp was lit"}]}
+  ]
+}

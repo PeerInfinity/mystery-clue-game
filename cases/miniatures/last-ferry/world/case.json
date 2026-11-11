@@ -1,0 +1,11 @@
+{
+  "id": "last_ferry",
+  "title": "The Last Ferry",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "crane", "name": "Josiah Crane", "kind": "first-person"}
+  ],
+  "subtitle": "Josiah Crane's timeline",
+  "source": {"written": "2026-11-11", "word_count": 330}
+}

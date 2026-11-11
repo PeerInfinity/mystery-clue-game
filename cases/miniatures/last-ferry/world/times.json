@@ -1,0 +1,13 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.evensong", "label": "Sunday, after evensong", "after": "t.before", "para": 1, "quote": "when evensong was over"},
+    {"id": "t.cast_off", "label": "Sunday, the ferry casts off", "after": "t.evensong", "para": 4, "quote": "as I cast off"},
+    {"id": "t.lamp", "label": "Sunday, the gate lamp is lit", "after": "t.cast_off", "para": 3, "quote": "When I lit the lamp"},
+    {"id": "t.eight", "label": "Sunday, eight o'clock", "after": "t.lamp", "para": 4, "quote": "as the clock struck eight"},
+    {"id": "t.nine", "label": "Sunday, nine o'clock", "after": "t.eight", "para": 1, "quote": "At nine o'clock"},
+    {"id": "t.night", "label": "Sunday night", "after": "t.nine", "para": 3, "quote": "that night"},
+    {"id": "t.monday", "label": "Monday morning", "after": "t.night", "para": 4, "quote": "On Monday morning"},
+    {"id": "t.later", "label": "Monday, later", "after": "t.monday", "para": 6, "quote": "I went to Amos Dunn's cottage"}
+  ]
+}

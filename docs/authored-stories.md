@@ -3,7 +3,7 @@
 **Spoilers:** this page gives numbers from the data of "Silver Blaze" and "The Speckled Band", and names one question of
 the second. "What the miniatures showed" gives away both miniatures.
 
-**Status (2026-11-10): a direction set in discussion with the user. Of the experiments below, the first two mechanic
+**Status (2026-11-10): a direction set in discussion with the user. Of the experiments below, the first three mechanic
 miniatures are written (`cases/miniatures/`); nothing else is built.** It changes parts of
 `docs/archipelago-plan.md` and `docs/interconnected-world.md`; what it supersedes is listed below and noted at the top
 of each.
@@ -98,13 +98,15 @@ Still needed as planned: "any of these" between facts, hints that make links, na
 
 ## What the miniatures showed
 
-Experiment 1, begun 2026-11-10. Two miniatures are written, each an invented story of under 350 words with its world
+Experiment 1, begun 2026-11-10. Three miniatures are written, each an invented story of under 350 words with its world
 model, its true path and its logic (`structure.json`, beside the case):
 
 | Miniature | Mechanic | Size |
 |---|---|---|
 | `cases/miniatures/lamp-keepers-word` | A lying link in a chain: one witness's word reaches the narrator by two carriers, and one of them changed it. | 8 paragraphs, 24 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
 | `cases/miniatures/rent-box` | A contradiction among accepted statements, resolved by distrusting one. | 6 paragraphs, 23 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (5 essential), 10 moves |
+
+| `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 
 Played at `?case=cases/miniatures/<name>`. `npm test` validates them and checks each `structure.json` against its
 world model.
@@ -238,6 +240,29 @@ question (which clue removes which other answer).
 Smaller things: a "who" question offers the narrator herself and the constable under "More"; `how` on a telling has no
 word for a note or a slate ("statement" was used); a typed door state brings the reasoning mark and the move "It
 changed" onto entries where the miniature has no use for them.
+
+### The third miniature (2026-11-11): an alibi by the order of events
+
+Written after the fixes above, and it needed no change to the engine or the page. What it showed:
+
+13. **The timeline shows the order; nothing reasons from it.** The page does what the mechanic needs for the eye: the
+    events are told out of order (nine o'clock in ¶1, the lighting of the lamp in ¶3, the ferry's casting off in ¶4),
+    and at ¶4 the casting off takes its place above the lamp, with the suspect "at the ferry until eight o'clock"
+    across the moment the cup was last seen. But the alibi itself is observation text. A circled culprit asserts
+    nothing about where he was, so "Bell took it" and "Bell was in mid-river" raise no contradiction, and the
+    question's entry (an action by someone, between two points) is not compared with anyone's whereabouts. Silver
+    Blaze has a form for this (a typed action with `where`, so a circled striker must be at the place of the deed);
+    it was not tried here, to keep to one mechanic, and it reports "nothing on the timeline says so", not an alibi.
+14. **The order between two events is not an entry.** That the ferry cast off before the lamp was lit is one
+    sentence of the ferryman's ("We were in mid-river when I saw the gate lamp kindled") and lives in `times.json` as
+    `after`. It cannot be linked as evidence or distrusted: the player links the suspect's stay on the ferry, whose
+    detail repeats the sentence. If the ferryman were lying about the order, distrusting his telling would take his
+    facts off but leave the time points in the order he gave.
+15. **A question can ask about order**, with answers that are not entities ("before the lamp was lit", "after").
+    It gave the miniature moves at ¶3, two paragraphs before the rest, so not every move falls at the end.
+16. **Witnesses' evidence passes the new gate while merely uncertain.** The lamplighter's and the ferryman's facts
+    are essential and never more than uncertain (finding 5); the gate asks only that they are on the timeline and
+    linked. A player who distrusts the ferryman cannot pass, and is not told why beyond the count of evidence.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
