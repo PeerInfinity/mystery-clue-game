@@ -594,7 +594,7 @@ function clashTitle(c) {
     return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : 'two identities?'}`;
 }
 
-const clashKey = (c) => `clash:${c.a.id}|${c.b.id}`;
+const clashKey = (c) => `clash:${c.a.id}|${c.b.id}${c.via ? `|${c.via.id}` : ''}`;
 let current = [];
 
 // --- The layout: three columns side by side, or panels with tabs (two, or one; a phone always one). The page's parts
@@ -819,11 +819,11 @@ function render() {
 
     const acceptedNow = acceptedAssertions();
     const clashes = [...contradictions(data, acceptedNow), ...alibis(data, acceptedNow, presenceNeeds(acceptedNow))];
-    const clashing = new Set(clashes.flatMap((c) => [c.a, c.b]).flatMap((x) => (x.mark ? [x.id, `q:${x.q}`] : [x.fact])));
+    const clashing = new Set(clashes.flatMap((c) => [c.a, c.b, c.via].filter(Boolean)).flatMap((x) => (x.mark ? [x.id, `q:${x.q}`] : [x.fact])));
     current = clashes;
     document.getElementById('undo').disabled = !state.history.length;
     document.getElementById('clashes').innerHTML = clashes.length
-        ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
+        ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}${c.via ? `<br>with ${clashSide(c.via)}` : ''}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
         : '';
     const strains = activeStrains();
     document.getElementById('clashes').innerHTML += strainsHtml(strains);
@@ -1453,12 +1453,12 @@ function renderDetail(clashing) {
     const el = document.getElementById('detail');
     const sel = state.sel;
     if (sel?.startsWith('clash:')) {
-        const [a, b] = sel.slice(6).split('|').map((id) => assertionById.get(id));
         const open = current.find((c) => clashKey(c) === sel);
-        const c = open ?? { a, b };
+        const [a, b, via] = sel.slice(6).split('|').map((id) => assertionById.get(id));
+        const c = open ?? { a, b, via };
         el.innerHTML = `<h2>${clashTitle(c)}</h2>
           <p class="small ${open ? 'bad' : 'good'}">${open ? 'Both sides are on the timeline: they cannot both hold.' : 'Resolved: one side is no longer on the timeline.'}</p>
-          ${sideHtml(c.a, 'One side')}${sideHtml(c.b, 'Against')}`;
+          ${sideHtml(c.a, 'One side')}${sideHtml(c.b, 'Against')}${c.via ? sideHtml(c.via, 'With') : ''}`;
         return;
     }
     if (sel && reasonedById.has(sel)) {

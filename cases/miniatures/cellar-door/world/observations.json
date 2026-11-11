@@ -1,5 +1,6 @@
 {
   "observations": [
+    {"id": "o.opened", "q": "q.who", "from": [{"reasoned": "changed", "premises": ["f.locked", "f.open"]}], "says": "locked at ten and open at six: someone unlocked and opened it in the night, and that needed a key and a man at the door", "essential": true},
     {"id": "o.keys", "q": "q.who", "from": ["f.two_keys"], "says": "there are two keys, and Ned has neither", "essential": true, "against": ["ned"]},
     {"id": "o.jem_key", "q": "q.who", "from": ["f.jem_key"], "says": "Jem carries a key to the door, night and day", "essential": true},
     {"id": "o.ned_loft", "q": "q.who", "from": ["f.ned_loft"], "says": "Ned was in the loft across the yard from ten until six", "essential": true, "against": ["ned"]},

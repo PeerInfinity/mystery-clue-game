@@ -108,7 +108,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 
 | `cases/miniatures/last-ferry` | An alibi by the order of events: the suspect left before the thing was last seen, and had no way back. Told out of order, by relative times. | 6 paragraphs, 28 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
-| `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 5 observations (4 essential), 7 moves |
+| `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
@@ -403,6 +403,25 @@ What the two-narrator, mistaken-witness and unreliable-narrator miniatures showe
 28. **Marking one narrator doubtable shows on the page**: only his statements have "This statement itself". Here
     that is natural (his part is a statement written for the other); in a story where the reader should not know
     which narrator to doubt, every narrator would need the mark.
+
+The two engine changes of 2026-11-11 (step 2 of the provisional order below):
+
+29. **An identity now carries whereabouts** (finding 26 answered). An accepted identity, the story's or the player's
+    circle on a question whose entry is one, joins the locations of the two it names: "the figure was Dr. Mott"
+    against "Dr. Mott at the Squire's bedside" is a contradiction with three sides, the doctor's location, the
+    identity and the figure's location (`via`), any of which lifts it when distrusted. In The Grey Cloak it appears
+    at ¶3, the moment the alibi is read, and the true path's distrust of Mrs. Lunn's identification resolves it; no
+    data changed. A circled wrong suspect of the same question now meets the same contradiction.
+30. **An observation can come from the entry a move reveals**: `{reasoned: "changed", premises: [two states]}` (the
+    entry of "It changed") or `{reasoned: "got_through", premises: [a crossing]}`. The Cellar Door now requires its
+    move: "locked at ten and open at six: someone unlocked and opened it in the night" is essential, and the true
+    path links the act "It changed" puts on the timeline. The hints find the move and the link without help.
+31. **The Ring on the Bench cannot require "Something got through" as it stands.** The move is offered only while
+    no way in that accounts for the crossing has been told: once the open pane is read (¶6), it is refused, so a
+    reader who reads on past ¶5 without it could never fill an observation that needs it, and the gate would never
+    open. The move is about a way nobody has found; once the way is found, the pane is the evidence. Left optional
+    for now, for the user to decide (the choices: leave it optional; offer the move after the way is found too; or
+    let an observation accept either of two entries, the move's or the pane's).
 - **11. Doubting the author** (the user's idea, with the note that it may not be worth building): a way for the
   player to say that the story or its data is wrong, like a bug report. It would need somewhere for the reports to
   go, and the user does not want to set that up.
@@ -566,9 +585,9 @@ tied with a knot that only a seaman ties. Three people were in the house.
 
 A provisional order, this session's suggestion (the user has not ruled):
 
-1. The guide speaks of "the narrator", not Watson (the user wants this).
+1. The guide speaks of "the narrator", not Watson (the user wants this). Done 2026-11-11.
 2. Two contained engine changes: an identification carries whereabouts (finding 26); an observation can come from
-   an entry a move reveals.
+   an entry a move reveals. Done 2026-11-11 (findings 29 to 31).
 3. Sub-stories, on one existing miniature first (The Rent Box: the two statements and the narrator's afternoon as
    three files and a short spine). This is experiment 3 of the list above and the largest piece.
 4. The order of two events as an entry that can be doubted, with its miniature (idea 1).

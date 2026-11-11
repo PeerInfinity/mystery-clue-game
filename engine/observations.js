@@ -4,10 +4,17 @@
 // An entry in `from` is a fact's id, or `{route_through: [things]}` for a route the player has built through them, or
 // `{doubted: id}` for a statement (a telling, or a claim) the player has linked and no longer believes: a lie as
 // evidence. Whether it is doubted is the page's to say (`ctx.doubted(id)`: what it carried that is false is off the
-// timeline).
+// timeline). Or `{reasoned: move, premises: [ids]}` for the entry a move of the player's puts on the timeline:
+// "changed" (It changed, from two states, in either order) or "got_through" (Something got through, from a crossing),
+// so that an author can make that move necessary.
+
+/** The moves whose entries an observation can name, by the name it uses: the move's code in `reasoned.move`. */
+export const REASONED_MOVES = { changed: 'a', got_through: 'g' };
+const samePremises = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
 
 const matches = (from, e, ctx) => (typeof from === 'string' ? e.id === from
     : from.doubted ? e.id === from.doubted && !!ctx.doubted?.(e.id)
+    : from.reasoned ? e.reasoned?.move === REASONED_MOVES[from.reasoned] && samePremises(e.reasoned.premises ?? [], from.premises ?? [])
     : e.attr === 'route' && from.route_through.every((n) => e.value.includes(n)));
 
 /**

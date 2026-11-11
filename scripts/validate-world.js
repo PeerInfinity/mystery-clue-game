@@ -25,6 +25,7 @@ import { normalize } from '../engine/story.js';
 import { provenance, loadWorld } from './world-provenance.js';
 import { assertions, contradictions, CLAIM_ATTRS, LEVELS } from '../engine/world.js';
 import { ACTIONS, GENERIC_ACTIONS, STATES, setCaseActions } from '../engine/actions.js';
+import { REASONED_MOVES } from '../engine/observations.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -332,7 +333,9 @@ for (const f of facts) {
 for (const o of observationList) {
     if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);
     if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
-    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr)) : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
+    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr))
+        : f.reasoned ? !REASONED_MOVES[f.reasoned] || !Array.isArray(f.premises) || f.premises.length !== (f.reasoned === 'changed' ? 2 : 1) || f.premises.some((x) => !factById.has(x))
+        : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
     if (!o.says) err(o.id, 'no says');
     if (o.if && !qById.get(o.if.q)?.possibilities.some((x) => x.value === o.if.pick)) err(o.id, `if: no possibility ${o.if.q} = ${o.if.pick}`);
     for (const p of list(o.against)) if (!qById.get(o.q)?.possibilities.some((x) => x.value === p)) err(o.id, `against: no possibility ${p}`);
@@ -377,9 +380,9 @@ if (!quiet) {
     const never = facts.filter((f) => givenAt(f) == null);
     console.log(`\nFacts never stated by ¶46, only inferable (${never.length}): ${never.map((f) => f.id).join(', ')}`);
     console.log('\nAnswers: inferable → given\n' + questions.filter((q) => q.answer != null).map((q) => `  ${q.answer_inferable_at == null ? '  —' : `¶${q.answer_inferable_at}`.padStart(4)} → ¶${String(q.answer_given_at).padEnd(4)} ${q.id} = ${q.answer}${q.answer_strength === 'likely' ? ' (likely)' : ''}`).join('\n'));
-    const met = contradictions(world, asserted).sort((p, q) => Math.max(p.a.para, p.b.para) - Math.max(q.a.para, q.b.para));
+    const met = contradictions(world, asserted).sort((p, q) => Math.max(p.a.para, p.b.para, p.via?.para ?? 0) - Math.max(q.a.para, q.b.para, q.via?.para ?? 0));
     const tag = (x) => `${x.id}${x.truth === false ? ' (false)' : x.truth == null ? ' (?)' : ''} ¶${x.para}`;
-    console.log(`\nContradictions a reader trusting every source meets (${met.length}), by the paragraph that completes them\n` + met.map((c) => `  ¶${Math.max(c.a.para, c.b.para)}  ${c.why}: ${tag(c.a)} / ${tag(c.b)}`).join('\n'));
+    console.log(`\nContradictions a reader trusting every source meets (${met.length}), by the paragraph that completes them\n` + met.map((c) => `  ¶${Math.max(c.a.para, c.b.para, c.via?.para ?? 0)}  ${c.why}: ${tag(c.a)} / ${tag(c.b)}${c.via ? ` / ${tag(c.via)}` : ''}`).join('\n'));
     show('Facts by origin', count(told, (f) => [...new Set(prov.factChains(f.id).map((c) => c.origin ?? '?'))].join(' + ') || '(reader)'));
 }
 console.log(`${errors.length} error(s)`);

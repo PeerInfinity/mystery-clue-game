@@ -283,6 +283,8 @@ export function places(data) {
  *   whose values cannot both hold: two places neither within the other (a thing that moves, or a person carrying
  *   it, is placed through its own location at that time where that is certain), different identities, or a place
  *   and its denial (`neg`) of the same place or one containing it.
+ * - An identity (a state, or a circled answer of a question whose entry is one) against the locations it joins: the
+ *   one it names elsewhere than where the other was (`{a, b: the identity, via: the other's location, why}`).
  * Claims with `modal: 'possible'` take no part. Two circled marks of one question are an open choice, not reported.
  */
 export function contradictions(data, accepted = null) {
@@ -342,6 +344,40 @@ export function contradictions(data, accepted = null) {
         } else if (a.neg !== b.neg) {
             const [pos, neg] = a.neg ? [kb, va] : [ka, vb];
             if (pos.includes(neg)) out.push({ a, b, why: `${a.of}: at ${pos[0]} and not at ${neg}` });
+        }
+    }
+
+    // An identity carries whereabouts: "the figure was Dr. Mott" puts Dr. Mott where the figure was, at the time the
+    // identity is about. The identity is a state on the timeline, or a circled answer of a question whose entry is one.
+    // Each clash has three sides: the other one's location (`a`), the identity (`b`), and where the first one was
+    // (`via`), so that distrusting any of them lifts it.
+    const isEntity = (id) => typeof id === 'string' && pl.byId.has(id);
+    const idents = [];
+    for (const x of all) {
+        if (x.neg) continue;
+        if (x.kind === 'state' && x.attr === 'identity' && isEntity(x.of) && isEntity(x.value)) idents.push({ x, of: x.of, is: x.value, time: x.time });
+        else if (x.kind === 'pick' && x.fact == null) {
+            const e = qById.get(x.q)?.entry;
+            if (e?.attr === 'identity' && isEntity(e.of) && isEntity(x.pick) && e.of !== x.pick) idents.push({ x, of: e.of, is: x.pick, time: typeof e.time === 'object' ? e.time : null });
+        }
+    }
+    for (const id of idents) {
+        const ct = id.time ? coverOf(id.time) : null;
+        for (const la of locs) {
+            if (la.of !== id.of || la.neg || la.fact === id.x.fact) continue;
+            const ca = coverOf(la.time);
+            if (!ca || (ct && !overlaps(order, ca, ct))) continue;
+            const at0 = ct && covers(ca, ct) ? ct : ca;
+            for (const lb of locs) {
+                if (lb.of !== id.is || lb.neg || lb.fact === la.fact || lb.fact === id.x.fact) continue;
+                const cb = coverOf(lb.time);
+                if (!overlaps(order, at0, cb)) continue;
+                const at = covers(cb, at0) ? at0 : cb;
+                const va = fixedAt(la.value, at), vb = fixedAt(lb.value, at);
+                if (!va || !vb) continue;
+                const ka = pl.chain(va), kb = pl.chain(vb);
+                if (!ka.includes(vb) && !kb.includes(va)) out.push({ a: lb, b: id.x, via: la, why: `${id.is} in two places, if ${id.of} was ${id.is}: ${vb} and ${va}` });
+            }
         }
     }
     return out;

@@ -397,7 +397,9 @@ mechanic for any question. The player points out that a timeline entry is releva
 data holds for that pair is then filled in, keeping its logic (entries, their chains, its question).
 
 - `{id, q, from: [entry], says, essential?, against?, if?}`. An entry in `from` is a fact's id (a telling's too: that it was said stays on the timeline when what it carried is distrusted), or `{doubted: <a telling or a claim>}` for a lie as evidence (the statement linked, and what it carried that is false off the timeline), or
-  `{route_through: [things]}` for a route the player built through them. It is filled when every entry is on the timeline
+  `{route_through: [things]}` for a route the player built through them, or `{reasoned: "changed", premises: [two states]}`
+  (the entry of "It changed" on those two, in either order) or `{reasoned: "got_through", premises: [a crossing]}` (the
+  entry of "Something got through"), so that an author can make a move necessary by requiring the entry it reveals. It is filled when every entry is on the timeline
   and linked to `q`, and goes if one leaves. A link that fills nothing stays as the player's note.
 - `if: {q, pick}`: filled only with that answer of another question circled. A clue the story reads more than one way is an
   ordinary question with those readings as its possibilities, and what follows from each reading depends on it through `if`.

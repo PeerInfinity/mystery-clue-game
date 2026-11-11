@@ -239,3 +239,21 @@ test('an alibi: elsewhere for the whole window, by one location or several end t
     assert.deepEqual(chain.map((c) => c.a.id), ['a', 'b'], 'two locations end to end: a contradiction with each');
     assert.equal(alibis(w, [st('a', 'london', { from: 't1', to: 't2' }), st('b', 'hollow', { from: 't3', to: 't4' })], need({ from: 't1', to: 't4' })).length, 0, 'a gap between them');
 });
+
+test('an identity carries whereabouts: the figure was the man, so the man was where the figure was', () => {
+    const ents = [...entities, { id: 'figure', kind: 'person' }];
+    const q = { id: 'q.fig', entry: { of: 'figure', attr: 'identity', time: { at: 't2' } }, answer: 'horse', possibilities: [{ value: 'man' }, { value: 'something else' }] };
+    const facts = [loc('fd', 'figure', 'stable', { at: 't2' }), loc('mh', 'man', 'london', { from: 't1', to: 't3' }),
+        { id: 'fid', of: 'figure', attr: 'identity', value: 'man', time: { at: 't2' }, para: 2, quote: 'x', truth: false, q: 'q.fig', pick: 'man' }];
+    const w = { ...world(facts, [q]), entities: ents };
+    const cs = contradictions(w);
+    assert.deepEqual(cs.map((c) => [c.a.id, c.b.id, c.via?.id, c.why]), [['mh', 'fid', 'fd', 'man in two places, if figure was man: london and stable']]);
+    assert.deepEqual(contradictions(w, assertions(w).filter((x) => x.id !== 'fid')).map((c) => c.why), [], 'the identity set aside: no clash');
+    assert.deepEqual(contradictions(w, assertions(w).filter((x) => x.id !== 'fd')).map((c) => c.why), [], 'nor without where the figure was');
+    const others = assertions(w).filter((x) => x.id !== 'fid' && x.fact !== 'fid');
+    assert.deepEqual(contradictions(w, [...others, ...markAssertions(w, { 'q.fig': { man: 'circled' } })]).map((c) => [c.b.id, c.why]),
+        [['hyp:q.fig=man', 'man in two places, if figure was man: london and stable']], 'a circled answer of an identity question too');
+    assert.deepEqual(contradictions(w, [...others, ...markAssertions(w, { 'q.fig': { man: 'crossed' } })]), [], 'a crossing joins nothing');
+    const near = { ...world([facts[0], loc('ms', 'man', 'stall', { at: 't2' }), facts[2]], [q]), entities: ents };
+    assert.deepEqual(contradictions(near), [], 'within the same place: no clash');
+});

@@ -78,3 +78,14 @@ test('a lie as evidence: a statement linked counts once the page says it is doub
     assert.equal(fill(obs, links, known, {}, { doubted: (id) => id === 'f.tells' }).filled.length, 1);
     assert.equal(fill(obs, [], known, {}, { doubted: () => true }).filled.length, 0, 'doubted but not linked');
 });
+
+test('an entry a move reveals counts by its move and its premises, in either order', () => {
+    const OB = [{ id: 'o.changed', q: 'q', from: [{ reasoned: 'changed', premises: ['f.locked', 'f.open'] }], says: 'someone opened it', essential: true },
+        { id: 'o.got', q: 'q', from: [{ reasoned: 'got_through', premises: ['f.ring'] }], says: 'there is a way in', essential: true }];
+    const changed = { id: 'r:a:f.open|f.locked', attr: 'action', reasoned: { move: 'a', premises: ['f.open', 'f.locked'] } };
+    const got = { id: 'r:g:f.ring', attr: 'opening', reasoned: { move: 'g', premises: ['f.ring'] } };
+    const other = { id: 'r:a:f.open|f.shut', attr: 'action', reasoned: { move: 'a', premises: ['f.open', 'f.shut'] } };
+    assert.deepEqual(fill(OB, [link(changed.id), link(got.id)], [changed, got]).filled.map((x) => x.obs.id), ['o.changed', 'o.got']);
+    assert.deepEqual(fill(OB, [link(other.id)], [other]).filled, [], 'another change is not it');
+    assert.deepEqual(fill(OB, [link('f.open'), link('f.locked')], [{ id: 'f.open' }, { id: 'f.locked' }]).filled, [], 'the premises linked are not the move');
+});
