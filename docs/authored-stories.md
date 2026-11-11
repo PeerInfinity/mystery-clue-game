@@ -452,6 +452,12 @@ in different playthroughs.
 - The cost is broad and mechanical: every comparison of one paragraph number in the engine, the page, the
   validator and the checks becomes a lookup by story and number.
 
+- **Nothing may assume when a file appears** (the user): an Archipelago item can arrive at any time, so a file
+  cannot be tied to a paragraph of the main story that introduces it. The main story can say that papers will come;
+  it cannot say which have.
+- **Sub-stories are chosen by tabs in the Story panel** (the user), and the reader can switch tabs at any time; a
+  file need not be finished once opened.
+
 What else follows from sub-stories, as this session sees it (not ruled):
 
 - The gate already asks for evidence, so it makes the reader open the files a question needs without a new rule:
@@ -463,6 +469,100 @@ What else follows from sub-stories, as this session sees it (not ruled):
   not have time for all) and delivery by an Archipelago.
 - A true path's move names what must have been read for it, by story and paragraph ("after the Captain's statement
   ¶2 and the main story ¶3"), which holds in any order of reading; the checks have to try more than one order.
+
+**The order of events in doubt** (finding 14, idea 1). The user: two accounts that give different times for the same
+event are already handled, by an entry on the timeline for each account, each of them doubtable; no new kind of
+entry for "A before B" is wanted. This session agrees for nearly every case, and it covers The Last Ferry: the
+ferryman's "we were in mid-river when the lamp was lit" is his fact that the carter was on the ferry at the time
+point of the lamp, and distrusting him takes it off. Two things remain outside it. The engine does not know that
+two entries are one event told twice, so "the shot at a quarter to nine" and "the shot at nine" raise no
+contradiction by themselves (an action has no single value to clash on); marking an event as happening once, so
+that two times for it clash, would be the small addition. And where a time point stands in `times.json` stays as it
+is when its source is distrusted, which is harmless while its entries are gone.
+
+## Outlines for the miniatures not yet written (2026-11-11)
+
+Drafted by this session at the user's request, logic first: the question, the clues as units, what rules each
+other answer out, and what the format needs. Names and prose are the next session's to settle. Each is six to
+eight paragraphs, like the others.
+
+**A. One event, two times (idea 1): "The Stable Clock".** A shot is heard at the Hall. The housemaid heard it as
+the hall clock struck nine. The gardener, at the lodge, heard it at a quarter to nine by the stable clock. A guest
+left the library, where he had sat with the narrator, at ten to nine.
+- Questions: "When was the shot fired?" (a quarter to nine; nine) and "Was the guest still in the library when it
+  was fired?" (yes; no). The second follows from the first.
+- Clues: the housemaid's statement; the gardener's statement; the narrator's own evening in the library (the guest
+  there until ten to nine by the hall clock, which the narrator set that morning by the church); the narrator's
+  look at the stable clock next day (a quarter of an hour slow).
+- Rules out a quarter to nine: the stable clock was slow, so the gardener's quarter to nine was nine. He is honest,
+  and what he says is wrong as stated. So the guest has no alibi.
+- Needs: two entries for one event at two times, each doubtable (expressible now); the small addition above, so
+  that the two clash without the player's circle; nothing for "this clock is slow" beyond an observation.
+
+**B. A document's own properties (idea 3): "The Will in the Bible".** A will found in the family Bible leaves all
+to a nephew and is dated the third of March. It names "my great-nephew Thomas". The testatrix died on the second
+of May. Thomas was born on the fourteenth of June.
+- Questions: "Was the will written on the day it is dated?" (yes; no) and "Who wrote it?" (the testatrix; the
+  nephew; the housekeeper, who gains by the earlier will).
+- Clues: the will itself (its date, its bequest, the name in it), a file; the parish register, read by the narrator
+  (the death, the birth); the earlier will at the solicitor's (the housekeeper gains); who had the Bible after May
+  (the nephew, as executor).
+- Rules out "as dated" and the testatrix: it names a child born after its date and after her death. Rules out the
+  housekeeper: the new will takes her legacy away, and she did not hold the Bible.
+- Needs: a document as an entity with facts of its own (dated, names, found where). The clash "it names someone not
+  yet born" is the timeline's order made visible, and is not automatic: a thing mentioned before it exists has no
+  form. An observation carries it.
+
+**C. Who could have known? (idea 4): "The Loose Board".** A shopkeeper hides her cash-box under a loose board. A
+thief goes straight to it and disturbs nothing else. She told one person, her sister, in a letter.
+- Question: "Who took the cash-box?" (the errand boy, who was in and out of the shop all week; the sister's lodger).
+- Clues: the state of the shop (nothing else touched: the thief knew the place); the shopkeeper's letter to her
+  sister (the only telling of it); the sister's statement (she read the letter aloud at her breakfast table, the
+  lodger there); the delivery book (the errand boy out on his round that hour, signed for at three houses).
+- Rules out the errand boy: he was never told and was elsewhere. Rules out a chance thief: nothing else was touched.
+- Needs: the hiding-place as an account passed on by tellings, which is the provenance the format already has,
+  read the other way: who holds the account. A taking that needs its taker to know the place (an action type with a
+  need of `knows`), so that a circled suspect shows "knows the hiding-place: nothing on the timeline says so".
+
+**D. Two readings of one clue (idea 6): "The Telegram Signed M."** A mill-owner went to his mill at night and was
+struck down there. In his pocket is a telegram, handed in at Leeds at four that afternoon: "Come to the mill at
+ten. M." His wife is Mary; his partner is Martin.
+- Questions: "Who sent the telegram?" (Mary; Martin) and "Who was waiting at the mill?" (the same two).
+- Clues: the telegram (a file: its words, its office, its hour); the narrator's own afternoon (Mary opened the
+  church fête at three and gave the prizes at five, in the village); the partner's clerk (Martin took the two
+  o'clock train to Leeds); the mill's night book (one key drawn that evening, the partner's).
+- The telegram reads two ways until a third fact picks: with Mary circled it puts her in Leeds at four, against the
+  fête; with Martin circled it agrees with the train. An observation with `if` for each reading.
+- Rules out Mary: she was in the village at four, in the narrator's sight.
+- Needs: `if` on observations (exists), and the alibi (exists) if sending the telegram is a typed act that needs its
+  sender at the office.
+
+**E. Absence as evidence (idea 7): "The Watchman's Clock".** A warehouse's night watchman carries a tell-tale
+clock and must punch it at a station each hour. A bale of silk is gone in the morning. The card is punched at
+twelve, one, two, four and five.
+- Questions: "When was the bale taken?" (before two; between two and four; after four) and "Who took it?" (the
+  watchman; the carter, who has a yard key).
+- Clues: the card (a file); the watchman's statement (he made every round and saw nothing); the constable on the
+  beat (he tried the yard gate at half past two and found it fast, and at half past three found it on the latch);
+  the publican (the watchman drank in his back room from a little before three until nearly four); the carter's
+  wife and lodger (the carter at home in bed with a broken ankle that week).
+- Rules out the carter: his ankle. Rules out the other hours: the gate, and the rounds that were made. The
+  watchman's statement is false in one thing, the round at three.
+- Needs: a move for a gap in a regular series ("something is missing here": punches at twelve, one, two, four and
+  five, and none at three), which puts "no round at three" on the timeline as the reader's own entry. That entry
+  is then evidence, the user's way of making a move necessary. The general negative of finding 7 is not needed
+  for this one: the absence is inferred from a series, not stated.
+
+**F. Means (idea 8): "The Sailor's Knot".** The stolen plate is found in the shrubbery, bundled in a tablecloth and
+tied with a knot that only a seaman ties. Three people were in the house.
+- Question: "Who tied the bundle?" (a sailor home on leave, the cook's brother; the groom; the parlourmaid).
+- Clues: the bundle (the knot, drawn and named by the narrator, who served at sea); the landlord of the inn (the
+  sailor sat in his taproom from seven until closing); the groom's discharge book, found in his box (four years in
+  the fishing fleet as a boy); the parlourmaid, asked to tie up a parcel in front of the narrator (a granny knot).
+- Rules out the sailor: elsewhere all evening (the alibi). Rules out the parlourmaid: she cannot tie it.
+- Needs: an action type of the case's own (`world/actions.json`: tying the bundle needs its agent at the place and
+  knowing the knot), so that a circled suspect shows each need against the timeline. No engine change is expected:
+  a need that is any other state is met by an entry saying so.
 
 A provisional order, this session's suggestion (the user has not ruled):
 
