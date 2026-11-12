@@ -398,9 +398,13 @@ export function requirementStatus(order, entries, req, ctx = {}) {
         const ok = req.neg ? h.value !== req.value : h.value === req.value;
         return { status: ok ? 'met' : 'against', entry: h.entry, persisting: true };
     }
-    // Any other state: an entry saying so, not after the time it is needed.
-    const has = others.find((e) => same(e.of, req.of) && e.attr === req.attr && same(e.value, req.value) && !!e.neg === !!req.neg && notAfter(e));
-    return has ? { status: 'met', entry: has } : { status: 'unknown' };
+    // Any other state: an entry saying so, not after the time it is needed; one saying the opposite is against it
+    // (she knows no knot but a granny: tying a carrick bend needs it).
+    const like = (e) => same(e.of, req.of) && e.attr === req.attr && same(e.value, req.value) && notAfter(e);
+    const has = others.find((e) => like(e) && !!e.neg === !!req.neg);
+    if (has) return { status: 'met', entry: has };
+    const denied = others.find((e) => like(e) && !!e.neg !== !!req.neg);
+    return denied ? { status: 'against', entry: denied } : { status: 'unknown' };
 }
 
 /** The guards of a place at an action's time `t` (entries with `guards: <place>`, on watch then): the lad on guard. */

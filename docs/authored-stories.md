@@ -112,6 +112,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/will-in-the-bible` | A document's own properties: a will read as a paper of its own, whose date and the christening it speaks of are set against the parish register. | 5 + 3 paragraphs (main story, the will), 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 14 moves |
 | `cases/miniatures/loose-board` | Who could have known: a theft that needed its thief to know the hiding-place (an action type of the case's own), told to one person, passed on by her without meaning to. | 6 paragraphs, 16 facts, 2 accounts, 1 telling, 1 question, 5 observations (all essential), 10 moves |
 | `cases/miniatures/telegram-signed-m` | Two readings of one clue: a telegram signed M. reads as the wife's or the partner's, and what it shows depends on which is circled, until the alibi picks. | 7 + 3 paragraphs (main story, the telegram), 16 facts, 2 accounts, 1 telling, 2 questions, 7 observations (5 essential), 9 moves |
+| `cases/miniatures/sailors-knot` | Means: tying the bundle is an action type of the case's own that needs its agent at the house and knowing a seaman's knot; circled, the sailor's place is an alibi contradiction, the parlourmaid's knowledge is against her, the groom's both met. | 7 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/watchmans-clock` | Absence as evidence: a watchman's card punched every hour from twelve until five but three; "Something is missing here" puts the reader's own "no round at three" on the timeline, required by the gate and against his statement that he made every round. | 6 + 2 paragraphs (main story, the card), 22 facts, 3 accounts, 2 tellings, 2 questions, 8 observations (5 essential), 11 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
@@ -522,7 +523,8 @@ The order of the remaining work (the user, 2026-11-11, asked whether to fix issu
 versions first): defects are fixed as they are found; design changes are gathered and decided together once the
 outlines have first versions, except where a story cannot be written without one (outline E's new move). Open for
 that review so far: finding 46 (knowledge passed on by tellings), finding 35 (a case whose papers come early), finding
-36 (the path check's test for moves made too early, off for cases with files).
+36 (the path check's test for moves made too early, off for cases with files); and from E and F, findings 53, 55
+and 56.
 
 Two readings of one clue (step 5, outline D; 2026-11-11):
 
@@ -559,6 +561,22 @@ it rests on, required by its rule and time, and a denial that clashes with what 
     doubted) instead of taking the first away; distrusting the whole card takes it away. That reads right, but it
     means the entry's premises are not fixed when the move is made, unlike the other moves; observations name it by
     rule and time for that reason.
+
+Means (step 5, outline F; 2026-11-11):
+
+54. **The Sailor's Knot** needs an action type of its own (`tie_bundle`: knowing the knot, and being at Fernleigh,
+    from nine until half past ten) and one small engine change, the rule of finding 51 carried over to needs: a need
+    of any other state (`requirementStatus`) is now *against* an entry that denies it, where before it said "nothing
+    on the timeline says so". Circled, the parlourmaid's need reads "the timeline has Ellen does not know the carrick
+    bend"; the sailor's place gives the alibi contradiction; the groom's two needs are met (checked on the page).
+55. **A knowledge need that fails raises no contradiction**, only "against" in the question's detail: alibis come
+    from place needs alone. Whether every need of a circled act should be an assertion that can clash (her "knows"
+    against her "does not know") is for the design review; the gate does not need it here, since the observation
+    against her is essential.
+56. **Two wordings for one alibi.** Circling the sailor lists the contradiction "in two places at once?", while the
+    question's own needs say "nothing on the timeline says so (it has Tom Pike at the Bell)". Both are right (a
+    place elsewhere at one moment does not by itself deny the need), but side by side they read oddly. For the
+    review.
 
 - **The two Holmes cases are archived at `v2/`** (the user's proposal, 2026-11-11): Silver Blaze and The Speckled
   Band, the pipeline and the documents about them, with their own copy of the page, the engine and the checks, as
@@ -726,8 +744,8 @@ A provisional order, this session's suggestion (the user has not ruled):
    three files and a short spine). This is experiment 3 of the list above and the largest piece. Done 2026-11-11 (findings 32 to 37), as a new case, The Rent Box Papers.
 4. The order of two events as an entry that can be doubted, with its miniature (idea 1). Done 2026-11-11 as "one event, two times" (the user's ruling under finding 14: each telling an entry of its own; the small addition is `event`), findings 38 to 40, The Stable Clock.
 5. The remaining mechanics, each with its miniature: a document's own properties, who could have known, two
-   readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8). B to E done 2026-11-11 (findings 41 to
-   53: The Will in the Bible, The Loose Board, The Telegram Signed M., The Watchman's Clock).
+   readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8). Done 2026-11-11 (findings 41 to 56:
+   The Will in the Bible, The Loose Board, The Telegram Signed M., The Watchman's Clock, The Sailor's Knot).
 6. Blind solvers on the miniatures (experiment 2); it costs money and needs the user's go-ahead.
 7. A story of 20 to 30 questions.
 

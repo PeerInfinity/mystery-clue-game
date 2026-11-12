@@ -1,0 +1,6 @@
+{
+  "accounts": [
+    {"id": "acct.hale", "label": "What John Hale sees, reads and knows himself", "origin": "hale", "how": "saw", "facts": ["f.hale_role", "f.plate_sideboard", "f.plate_shrubbery", "f.knot", "f.bend_seaman", "f.pike_role", "f.pike_knows", "f.pike_kitchen", "f.rudd_role", "f.ellen_role", "f.rudd_home", "f.ellen_home", "f.landlord_tells", "f.rudd_fleet", "f.rudd_knows", "f.ellen_parcel", "f.ellen_granny", "f.rudd_owns"]},
+    {"id": "acct.landlord", "label": "What the landlord of the Bell saw of Pike", "origin": "landlord", "how": "saw", "facts": ["f.pike_bell"]}
+  ]
+}

@@ -349,3 +349,12 @@ test('move (m): a gap in a regular series, from the rule and its record', () => 
     assert.equal(none.length, 0);
     assert.match(lapsed[0].why, /has it/);
 });
+
+test('a need of any other state is against an entry that denies it', () => {
+    const order = { lt: () => false, le: () => true };
+    const req = { id: 'r', of: 'ellen', attr: 'knows', value: 'bend', time: { at: 't1' } };
+    const no = { id: 'n', of: 'ellen', attr: 'knows', value: 'bend', neg: true, time: { from: 't0' } };
+    assert.equal(requirementStatus(order, [no], req).status, 'against');
+    assert.equal(requirementStatus(order, [{ ...no, neg: false }], req).status, 'met');
+    assert.equal(requirementStatus(order, [], req).status, 'unknown');
+});

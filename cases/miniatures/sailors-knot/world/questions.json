@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who tied the bundle?", "entry": {"of": "?", "attr": "action", "act": ["tie_bundle"], "thing": "bundle", "about": "carrick_bend", "where": "fernleigh", "value": "tying the plate up in the tablecloth with a carrick bend", "time": {"from": "t.nine", "to": "t.half_ten"}}, "raised": 1, "quote": "Who tied the bundle?", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "pike", "available": 3, "via": "direct", "quote": "Every eye in the house went at once to Tom Pike"}, {"value": "rudd", "available": 3, "via": "direct", "quote": "Our groom, Sam Rudd"}, {"value": "ellen", "available": 3, "via": "direct", "quote": "Ellen, the parlourmaid"}], "answer": "rudd", "answer_given_at": 7, "answer_given_quote": "he owned that he had tied it", "answer_inferable_at": 6, "answer_from": "f.ellen_granny"}
+  ]
+}

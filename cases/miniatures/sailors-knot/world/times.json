@@ -1,0 +1,11 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.afternoon", "label": "Thursday afternoon", "after": "t.before", "para": 3, "quote": "had spent the afternoon in the kitchen"},
+    {"id": "t.seven", "label": "Thursday, seven o'clock", "after": "t.afternoon", "para": 4, "quote": "from seven"},
+    {"id": "t.nine", "label": "Thursday, nine o'clock", "after": "t.seven", "para": 1, "quote": "when the table was cleared at nine"},
+    {"id": "t.half_ten", "label": "Thursday, half past ten", "after": "t.nine", "para": 1, "quote": "At half past ten"},
+    {"id": "t.eleven", "label": "Thursday, eleven o'clock", "after": "t.half_ten", "para": 4, "quote": "until he closed at eleven"},
+    {"id": "t.later", "label": "Afterwards", "after": "t.eleven", "para": 4, "quote": "The landlord of the Bell told me"}
+  ]
+}

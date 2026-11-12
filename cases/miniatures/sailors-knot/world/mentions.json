@@ -1,0 +1,19 @@
+{
+ "entities": {
+  "hale": ["John Hale"],
+  "ashby": ["Mrs. Ashby"],
+  "pike": ["Tom Pike", "Pike"],
+  "rudd": ["Sam Rudd", "Rudd"],
+  "ellen": ["Ellen"],
+  "landlord": ["The landlord of the Bell"],
+  "fernleigh": ["Fernleigh"],
+  "dining_room": ["the dining-room"],
+  "kitchen": ["the kitchen"],
+  "shrubbery": ["the shrubbery"],
+  "bell": ["the Bell"],
+  "plate": ["the silver plate"],
+  "bundle": ["the bundle"],
+  "carrick_bend": ["a carrick bend", "the carrick bend"],
+  "book": ["his discharge book"]
+ }
+}

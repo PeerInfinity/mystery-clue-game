@@ -1,0 +1,12 @@
+{
+  "description": "The true path of the miniature: a bundle tied with a seaman's knot; the sailor at the inn all evening, the parlourmaid who knows no knot but a granny, the groom who learned the knot in the fishing fleet.",
+  "moves": [
+    {"at": 2, "do": "link", "entry": "f.knot", "q": "q.who", "see": "whoever tied it knew the knot", "for_q": ["q.who"], "why": "Whoever tied it knew the carrick bend."},
+    {"at": 4, "do": "link", "entry": "f.pike_bell", "q": "q.who", "see": "from seven until eleven", "for_q": ["q.who"], "why": "Pike knows the knot, but he was at the Bell all evening."},
+    {"at": 4, "do": "cross", "q": "q.who", "pick": "pike", "for_q": ["q.who"], "why": "Not Pike: tying it needed him at Fernleigh."},
+    {"at": 5, "do": "link", "entry": "f.rudd_knows", "q": "q.who", "see": "in the fishing fleet", "for_q": ["q.who"], "why": "Rudd learned the knot in the fishing fleet."},
+    {"at": 6, "do": "link", "entry": "f.ellen_granny", "q": "q.who", "see": "no knot but a granny", "for_q": ["q.who"], "why": "Ellen cannot tie it."},
+    {"at": 6, "do": "cross", "q": "q.who", "pick": "ellen", "for_q": ["q.who"], "why": "Not Ellen."},
+    {"at": 6, "do": "circle", "q": "q.who", "pick": "rudd", "for_q": ["q.who"], "why": "Rudd knew the knot and was at Fernleigh all evening."}
+  ]
+}

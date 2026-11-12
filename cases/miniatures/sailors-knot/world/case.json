@@ -1,0 +1,11 @@
+{
+  "id": "sailors_knot",
+  "title": "The Sailor's Knot",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "hale", "name": "John Hale", "kind": "first-person"}
+  ],
+  "subtitle": "John Hale's timeline",
+  "source": {"written": "2026-11-11", "word_count": 250}
+}

@@ -281,7 +281,7 @@ The player's moves, each checked by these rules, give entries with the source *t
   between. Refused when nothing differs, the order is not certain, or a state or a change of the thing lies between.
 - (b) `pointImplications`: an action's requirements (time `{to}` the action: holding up to it) and effects (`{from}`
   it); a change from (a) gives only its other needs (the key), its states being its premises. Each requirement is
-  shown met, against (persistence gives another value) or with nothing on the timeline saying so
+  shown met, against (persistence gives another value, or, for any other state, an entry denies it) or with nothing on the timeline saying so
   (`requirementStatus`).
 - (c) `checkFit`, "what is this for?": an action or an intention serves an intention if something it brings about
   (`productsOf`: an action's effects; an intention's goal, and what that goal brings with it) meets the goal or a

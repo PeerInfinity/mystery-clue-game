@@ -1,0 +1,23 @@
+{
+  "facts": [
+    {"id": "f.hale_role", "of": "hale", "attr": "role", "value": "twenty years at sea; staying with his sister at Fernleigh", "time": {"from": "t.before"}, "para": 1, "quote": "I am John Hale, twenty years at sea"},
+    {"id": "f.plate_sideboard", "of": "plate", "attr": "location", "value": "dining_room", "detail": "on the sideboard, the table cleared", "time": {"at": "t.nine"}, "para": 1, "quote": "the silver plate was on the dining-room sideboard when the table was cleared at nine"},
+    {"id": "f.plate_shrubbery", "of": "plate", "attr": "location", "value": "shrubbery", "detail": "bundled up in the dining-room tablecloth", "time": {"at": "t.half_ten"}, "para": 1, "quote": "I found it in the shrubbery, bundled up in the dining-room tablecloth"},
+    {"id": "f.knot", "of": "bundle", "attr": "condition", "value": "tied with a carrick bend, drawn up hard", "time": {"at": "t.half_ten"}, "para": 2, "quote": "It was tied with a carrick bend, drawn up hard"},
+    {"id": "f.bend_seaman", "of": "carrick_bend", "attr": "reputed", "value": "a seaman's knot, for joining two hawsers; a landsman does not tie it", "time": {"from": "t.before"}, "para": 2, "quote": "it is a seaman's knot, for joining two hawsers, and a landsman does not tie it"},
+    {"id": "f.pike_role", "of": "pike", "attr": "role", "value": "the cook's brother, an able seaman home on leave", "time": {"from": "t.before"}, "para": 3, "quote": "Tom Pike, the cook's brother, an able seaman home on leave"},
+    {"id": "f.pike_knows", "of": "pike", "attr": "knows", "value": "carrick_bend", "detail": "an able seaman", "time": {"from": "t.before"}, "para": 3, "quote": "an able seaman home on leave"},
+    {"id": "f.pike_kitchen", "of": "pike", "attr": "location", "value": "kitchen", "detail": "with his sister, the cook", "time": {"from": "t.afternoon", "to": "t.seven"}, "para": 3, "quote": "had spent the afternoon in the kitchen with his sister"},
+    {"id": "f.rudd_role", "of": "rudd", "attr": "role", "value": "the groom at Fernleigh", "time": {"from": "t.before"}, "para": 3, "quote": "Our groom, Sam Rudd"},
+    {"id": "f.ellen_role", "of": "ellen", "attr": "role", "value": "the parlourmaid at Fernleigh", "time": {"from": "t.before"}, "para": 3, "quote": "Ellen, the parlourmaid"},
+    {"id": "f.rudd_home", "of": "rudd", "attr": "location", "value": "fernleigh", "detail": "all evening", "time": {"from": "t.seven", "to": "t.eleven"}, "para": 3, "quote": "were at Fernleigh all evening"},
+    {"id": "f.ellen_home", "of": "ellen", "attr": "location", "value": "fernleigh", "detail": "all evening", "time": {"from": "t.seven", "to": "t.eleven"}, "para": 3, "quote": "were at Fernleigh all evening"},
+    {"id": "f.landlord_tells", "of": "landlord", "attr": "tells", "value": "acct.landlord", "to": "hale", "how": "told", "time": {"at": "t.later"}, "para": 4, "quote": "The landlord of the Bell told me"},
+    {"id": "f.pike_bell", "of": "pike", "attr": "location", "value": "bell", "detail": "in the taproom; he never stirred", "time": {"from": "t.seven", "to": "t.eleven"}, "para": 4, "quote": "Pike sat in his taproom from seven until he closed at eleven, and never stirred"},
+    {"id": "f.rudd_fleet", "of": "rudd", "attr": "role", "value": "four years in the Grimsby fishing fleet as a boy", "detail": "by his discharge book", "time": {"from": "t.before"}, "para": 5, "quote": "four years in the Grimsby fishing fleet as a boy"},
+    {"id": "f.rudd_knows", "of": "rudd", "attr": "knows", "value": "carrick_bend", "detail": "learned in the fishing fleet", "time": {"from": "t.before"}, "para": 5, "quote": "Every lad in that fleet learns the carrick bend"},
+    {"id": "f.ellen_parcel", "of": "ellen", "attr": "action", "value": "ties up a parcel before John Hale, with a granny knot", "time": {"at": "t.later"}, "para": 6, "quote": "She tied a granny knot"},
+    {"id": "f.ellen_granny", "of": "ellen", "attr": "knows", "value": "carrick_bend", "neg": true, "detail": "she knows no knot but a granny", "time": {"from": "t.before"}, "para": 6, "quote": "owned that she knew no other"},
+    {"id": "f.rudd_owns", "of": "rudd", "attr": "says", "value": "he tied the bundle, and meant to carry it off in the night", "to": "hale", "time": {"at": "t.later"}, "para": 7, "quote": "he owned that he had tied it, and meant to carry it off in the night", "asserts": [{"q": "q.who", "pick": "rudd"}]}
+  ]
+}

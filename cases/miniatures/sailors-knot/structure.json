@@ -1,0 +1,18 @@
+{
+  "story": "sailors-knot",
+  "mechanic": "Means (idea 8): tying the bundle is an action type of the case's own (world/actions.json: tie_bundle needs its agent at Fernleigh and knowing the knot), so a circled suspect's needs are shown against the timeline: the sailor's place (an alibi: a contradiction), the parlourmaid's knowledge (against: she knows no knot but a granny), the groom's both met.",
+  "note": "Spoilers. The logic written before the prose (docs/authored-stories.md, outline F). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.found", "says": "The plate, on the sideboard at nine, was found in the shrubbery at half past ten, bundled in the tablecloth.", "facts": ["f.plate_sideboard", "f.plate_shrubbery"]}
+  ],
+  "questions": [
+    {"id": "q.who", "asks": "Who tied the bundle?", "answer": "Sam Rudd, the groom", "others": ["Tom Pike, the sailor", "Ellen, the parlourmaid"], "gate": 7, "needs": [["c.knot", "c.taproom", "c.book", "c.parcel"]], "rules_out": {"Tom Pike": "c.taproom: at the Bell from seven until eleven (the place tying needs)", "Ellen": "c.parcel: she knows no knot but a granny (the knowledge tying needs)"}}
+  ],
+  "clues": [
+    {"id": "c.knot", "source": "The bundle, as the narrator found it", "says": "Tied with a carrick bend, a seaman's knot that a landsman does not tie.", "facts": ["f.knot", "f.bend_seaman"]},
+    {"id": "c.taproom", "source": "The landlord of the Bell, to the narrator", "says": "Pike sat in the taproom from seven until closing at eleven.", "facts": ["f.pike_bell"], "chain": ["f.landlord_tells"]},
+    {"id": "c.book", "source": "The groom's discharge book, read by the narrator", "says": "Four years in the Grimsby fishing fleet as a boy; every lad there learns the carrick bend.", "facts": ["f.rudd_fleet", "f.rudd_knows"]},
+    {"id": "c.parcel", "source": "The parlourmaid, before the narrator", "says": "Asked to tie a parcel, she tied a granny knot, and knew no other.", "facts": ["f.ellen_parcel", "f.ellen_granny"]}
+  ]
+}

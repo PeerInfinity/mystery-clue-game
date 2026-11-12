@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "tie_bundle", "label": "tying the bundle", "requires": [{"of": "$agent", "attr": "knows", "value": "$about"}, {"of": "$agent", "place": "$where"}], "effects": []}
+  ]
+}

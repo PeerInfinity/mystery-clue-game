@@ -1,0 +1,10 @@
+{
+  "observations": [
+    {"id": "o.knot", "q": "q.who", "from": ["f.knot"], "says": "the bundle was tied with a carrick bend: whoever tied it knew the knot", "essential": true},
+    {"id": "o.taproom", "q": "q.who", "from": ["f.pike_bell"], "says": "Pike sat in the Bell's taproom from seven until eleven", "essential": true, "against": ["pike"]},
+    {"id": "o.fleet", "q": "q.who", "from": ["f.rudd_knows"], "says": "Rudd learned the carrick bend as a boy in the fishing fleet", "essential": true},
+    {"id": "o.granny", "q": "q.who", "from": ["f.ellen_granny"], "says": "Ellen knows no knot but a granny", "essential": true, "against": ["ellen"]},
+    {"id": "o.seaman", "q": "q.who", "from": ["f.bend_seaman"], "says": "a landsman does not tie a carrick bend"},
+    {"id": "o.home", "q": "q.who", "from": ["f.rudd_home"], "says": "Rudd was at Fernleigh all evening"}
+  ]
+}

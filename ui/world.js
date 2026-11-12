@@ -297,7 +297,7 @@ function phrase(f) {
         case 'fixed': return `${E} fixed to ${v}${d}`;
         case 'says': return `${E}${f.to ? ` to ${ent(f.to)}` : ''}: <span class="said">${v}</span>`;
         case 'believes': return `${E} believes ${v}`;
-        case 'knows': return `${E} knows ${v}`;
+        case 'knows': return `${E} ${f.neg ? '<b>does not</b> know' : 'knows'} ${v}`;
         case 'lit': return `${E} has ${v}${f.hyp === true ? ' <span class="small muted">(your hypothesis)</span>' : ''}`;
         case 'intends': return f.aimChange ? `${E} changes his mind: making for ${ent(f.aimChange.from)}, then for ${ent(f.aimChange.to)}` : `${E} means ${v}`;
         case 'observes': {

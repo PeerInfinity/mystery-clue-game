@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {"id": "hale", "kind": "person", "name": "John Hale"},
+    {"id": "ashby", "kind": "person", "name": "Mrs. Ashby"},
+    {"id": "pike", "kind": "person", "name": "Tom Pike"},
+    {"id": "rudd", "kind": "person", "name": "Sam Rudd"},
+    {"id": "ellen", "kind": "person", "name": "Ellen"},
+    {"id": "landlord", "kind": "person", "name": "the landlord of the Bell"},
+    {"id": "fernleigh", "kind": "place", "name": "Fernleigh"},
+    {"id": "dining_room", "kind": "place", "name": "the dining-room", "within": "fernleigh"},
+    {"id": "kitchen", "kind": "place", "name": "the kitchen", "within": "fernleigh"},
+    {"id": "shrubbery", "kind": "place", "name": "the shrubbery", "within": "fernleigh"},
+    {"id": "bell", "kind": "place", "name": "the Bell"},
+    {"id": "plate", "kind": "object", "name": "the silver plate"},
+    {"id": "bundle", "kind": "object", "name": "the bundle"},
+    {"id": "carrick_bend", "kind": "object", "name": "the carrick bend"},
+    {"id": "book", "kind": "document", "name": "Rudd's discharge book"}
+  ]
+}
