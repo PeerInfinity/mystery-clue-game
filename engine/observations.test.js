@@ -89,3 +89,10 @@ test('an entry a move reveals counts by its move and its premises, in either ord
     assert.deepEqual(fill(OB, [link(other.id)], [other]).filled, [], 'another change is not it');
     assert.deepEqual(fill(OB, [link('f.open'), link('f.locked')], [{ id: 'f.open' }, { id: 'f.locked' }]).filled, [], 'the premises linked are not the move');
 });
+
+test('a gap pointed out ("Something is missing here") is named by its rule and its time', () => {
+    const gap = { id: 'r:m:f.rule@t3', rule: 'f.rule', gap: 't3', reasoned: { move: 'm', premises: ['f.rule', 'p1', 'p2'] } };
+    const obs = [{ id: 'o', q: 'q', from: [{ reasoned: 'missing', of: 'f.rule', at: 't3' }], says: 'no round at three' }];
+    assert.equal(fill(obs, [{ entry: gap.id, q: 'q' }], [gap]).filled.length, 1);
+    assert.equal(fill([{ ...obs[0], from: [{ reasoned: 'missing', of: 'f.rule', at: 't2' }] }], [{ entry: gap.id, q: 'q' }], [gap]).filled.length, 0);
+});

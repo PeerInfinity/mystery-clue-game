@@ -1,0 +1,14 @@
+{
+  "id": "watchmans_clock",
+  "title": "The Watchman's Clock",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "files": [
+    {"id": "card", "title": "Tuesday's card from the watchman's clock", "short": "Card", "text": "../files/card.txt", "delivered": 2}
+  ],
+  "narrators": [
+    {"id": "marsh", "name": "Edwin Marsh", "kind": "first-person"}
+  ],
+  "subtitle": "Edwin Marsh's timeline",
+  "source": {"written": "2026-11-11", "word_count": 274}
+}

@@ -112,6 +112,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/will-in-the-bible` | A document's own properties: a will read as a paper of its own, whose date and the christening it speaks of are set against the parish register. | 5 + 3 paragraphs (main story, the will), 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 14 moves |
 | `cases/miniatures/loose-board` | Who could have known: a theft that needed its thief to know the hiding-place (an action type of the case's own), told to one person, passed on by her without meaning to. | 6 paragraphs, 16 facts, 2 accounts, 1 telling, 1 question, 5 observations (all essential), 10 moves |
 | `cases/miniatures/telegram-signed-m` | Two readings of one clue: a telegram signed M. reads as the wife's or the partner's, and what it shows depends on which is circled, until the alibi picks. | 7 + 3 paragraphs (main story, the telegram), 16 facts, 2 accounts, 1 telling, 2 questions, 7 observations (5 essential), 9 moves |
+| `cases/miniatures/watchmans-clock` | Absence as evidence: a watchman's card punched every hour from twelve until five but three; "Something is missing here" puts the reader's own "no round at three" on the timeline, required by the gate and against his statement that he made every round. | 6 + 2 paragraphs (main story, the card), 22 facts, 3 accounts, 2 tellings, 2 questions, 8 observations (5 essential), 11 moves |
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
@@ -534,6 +535,31 @@ Two readings of one clue (step 5, outline D; 2026-11-11):
 49. **A third reading the prose had to close.** Whose hand the telegram is in would have been another way to read
     it; the paper's own last line says the form is in the post office clerk's hand.
 
+Absence as evidence (step 5, outline E; 2026-11-11). The user agreed the design before it was built: the story tells
+the rule, the record points back to it, one button per gap, the reader's own entry as trusted as the least of what
+it rests on, required by its rule and time, and a denial that clashes with what it denies.
+
+50. **"Something is missing here"** (move m, `pointGap` in `engine/actions.js`). A rule carries `series: {attr,
+    value, at: [times]}`; the record's entries carry `series: <rule>`. On the rule or a punch, the page offers one
+    button per time the record on the timeline lacks; the entry it gives is the series' state denied at that time
+    ("Abel Ward: no round made"), resting on the rule and on every entry of the record then on the timeline, so it
+    is as trusted as the least of them, and it lapses if the record leaves the timeline or comes to have that time.
+    An observation names it by `{reasoned: "missing", of: rule, at: time}`. The gate of "Who took the bale?" holds
+    until that entry is linked (checked on the page: two of three essential observations, then all three).
+51. **A denial against what it denies, for any attribute.** Until now only locations, typed states and identities
+    clashed with their denials; now the same entity, attribute and value, asserted and denied at times that meet,
+    is a contradiction ("Abel Ward: round made, and not?"). The watchman's statement ("every round, from twelve
+    until five") meets the reader's own gap at once, so the lie shows up by itself; the path distrusts it.
+52. **The outline's publican could not stay.** He put the watchman in his back room from a little before three until
+    nearly four: an alibi for the very hour the gate was opened, which leaves no one to have taken the bale (the
+    carter is in splints). The story drops him. An outline written in one pass needs its timeline checked as the
+    structure is written, and the structure-first method caught it.
+53. **The record as premises changes with the timeline.** Because the gap rests on whatever of the record is on the
+    timeline, distrusting one punch makes another gap available (no round at two, if the two o'clock punch is
+    doubted) instead of taking the first away; distrusting the whole card takes it away. That reads right, but it
+    means the entry's premises are not fixed when the move is made, unlike the other moves; observations name it by
+    rule and time for that reason.
+
 - **The two Holmes cases are archived at `v2/`** (the user's proposal, 2026-11-11): Silver Blaze and The Speckled
   Band, the pipeline and the documents about them, with their own copy of the page, the engine and the checks, as
   they stood that day (every page check passing with the day's engine). The reason: every change for the short
@@ -700,7 +726,8 @@ A provisional order, this session's suggestion (the user has not ruled):
    three files and a short spine). This is experiment 3 of the list above and the largest piece. Done 2026-11-11 (findings 32 to 37), as a new case, The Rent Box Papers.
 4. The order of two events as an entry that can be doubted, with its miniature (idea 1). Done 2026-11-11 as "one event, two times" (the user's ruling under finding 14: each telling an entry of its own; the small addition is `event`), findings 38 to 40, The Stable Clock.
 5. The remaining mechanics, each with its miniature: a document's own properties, who could have known, two
-   readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8).
+   readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8). B to E done 2026-11-11 (findings 41 to
+   53: The Will in the Bible, The Loose Board, The Telegram Signed M., The Watchman's Clock).
 6. Blind solvers on the miniatures (experiment 2); it costs money and needs the user's go-ahead.
 7. A story of 20 to 30 questions.
 

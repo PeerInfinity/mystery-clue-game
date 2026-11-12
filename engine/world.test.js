@@ -268,3 +268,10 @@ test('one event told at two times: a contradiction, only when the times certainl
     const w = world([shot('s1', { at: 't2' }), shot('s2', { at: 't3' })]);
     assert.deepEqual(contradictions(w, assertions(w).filter((x) => x.id !== 's2')), [], 'one of them set aside');
 });
+
+test('a denial against what it denies, for any kind of state, when the times meet', () => {
+    const round = (id, time, extra = {}) => ({ id, of: 'w', attr: 'round', value: 'round made', time, para: 1, quote: 'x', ...extra });
+    assert.deepEqual(why(world([round('r1', { from: 't1', to: 't4' }), round('r2', { at: 't2' }, { neg: true })])), ['w: round made, asserted and denied']);
+    assert.deepEqual(why(world([round('r1', { at: 't1' }), round('r2', { at: 't2' }, { neg: true })])), [], 'times that do not meet');
+    assert.deepEqual(why(world([round('r1', { at: 't2' }), round('r2', { at: 't2' }, { neg: true, value: 'other' })])), [], 'another value');
+});

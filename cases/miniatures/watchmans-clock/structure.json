@@ -1,0 +1,20 @@
+{
+  "story": "watchmans-clock",
+  "mechanic": "Absence as evidence (idea 7): a watchman must punch his clock every hour from twelve until five, and the card has twelve, one, two, four and five. \"Something is missing here\" (move m, on the rule or a punch) puts the reader's own entry \"no round at three\" on the timeline; it is required evidence, and against the watchman's statement that he made every round it is a contradiction by itself (a denial against what it denies).",
+  "note": "Spoilers. The logic written before the prose (docs/authored-stories.md, outline E). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files (here the card is one: files/card.txt). `facts` names the world model's facts that realise a clue. The outline's publican (the watchman in his back room from before three until nearly four) would have given the watchman an alibi for the very hour, and is left out.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.gone", "says": "A bale of silk on the floor by the yard gate at eight on Monday night was gone at six on Tuesday morning.", "facts": ["f.bale_there", "f.bale_gone"]}
+  ],
+  "questions": [
+    {"id": "q.when", "asks": "When was the bale taken?", "answer": "between half past two and half past three", "others": ["after five"], "gate": 6, "needs": [["c.gate"]], "rules_out": {"after five": "c.gate: fast at half past two, on the latch at half past three"}},
+    {"id": "q.who", "asks": "Who took it?", "answer": "Abel Ward, the watchman", "others": ["Joe Tanner, the carter"], "gate": 6, "needs": [["c.rule", "c.card", "c.gate", "c.ankle"]], "rules_out": {"Joe Tanner": "c.ankle: in splints since Saturday, he could not have stood under a bale"}, "points_to": {"Abel Ward": "c.rule with c.card: no round at three (the reader's own entry, move m), in the hour the gate was opened; against c.statement, which says every round was made"}}
+  ],
+  "clues": [
+    {"id": "c.rule", "source": "The narrator: the rule of the house", "says": "The watchman must punch his clock at the station every hour, from twelve until five.", "facts": ["f.rule"]},
+    {"id": "c.card", "source": "The card from the clock (a paper)", "says": "Punched at twelve, one, two, four and five.", "facts": ["f.p12", "f.p1", "f.p2", "f.p4", "f.p5"], "file": "card"},
+    {"id": "c.statement", "source": "The watchman, to the narrator", "says": "He made every round and saw nothing; if it went, it went after five; only the carter has the other key.", "facts": ["f.ward_rounds", "f.ward_nothing", "f.tanner_key"], "chain": ["f.ward_tells"]},
+    {"id": "c.gate", "source": "The constable on the beat, to the narrator", "says": "The gate was fast at half past two, and on the latch at half past three.", "facts": ["f.gate_fast", "f.gate_latch"], "chain": ["f.bright_tells"]},
+    {"id": "c.ankle", "source": "The narrator, at the carter's house", "says": "The carter lay in bed with his ankle in splints since Saturday.", "facts": ["f.tanner_ankle"]}
+  ]
+}

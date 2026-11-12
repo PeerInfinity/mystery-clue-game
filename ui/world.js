@@ -9,7 +9,7 @@ import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
-import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps } from '../engine/actions.js';
+import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps, pointGap, gapsOf } from '../engine/actions.js';
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described } from '../engine/observations.js';
@@ -313,7 +313,7 @@ function phrase(f) {
             const accts = list(f.value).map((a) => esc(accountById.has(a) ? questionLabelAt(accountById.get(a), reading.count, posOf) : a)).join(', ');
             return `${E} tells ${ent(f.to)} (${esc(f.how)}${f.partial ? ', in part' : ''}): ${accts}`;
         }
-        default: return f.of === 'weather' ? `The weather: ${v}` : `${E}: ${v}${d}`;
+        default: return f.of === 'weather' ? `The weather: ${v}` : `${E}: ${f.neg ? '<b>no</b> ' : ''}${v}${d}`;
     }
 }
 const SIZE_WORD = { person: 'a person', small: 'anything small', air: 'even air' };
@@ -423,8 +423,8 @@ function assertsHtml(f) {
  * An entry the player can reason from (its detail offers moves): a typed state, a typed action, an intention with a
  * goal, a claim with a plan. Marked on the timeline so the moves can be found.
  */
-const canReason = (f) => ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || list(f.act).length > 0 || !!f.goal || !!f.plan;
-const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need)">⚙</span>';
+const canReason = (f) => ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || list(f.act).length > 0 || !!f.goal || !!f.plan || !!f.series;
+const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need, what is missing)">⚙</span>';
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
@@ -635,7 +635,7 @@ function clashTitle(c) {
     if (c.a.kind === 'pick') return esc(qById.has(c.a.q) ? qLabel(qById.get(c.a.q)) : c.a.q);
     // What the contradiction is about: the state's own subject (what a claim asserts, not the claim's speaker).
     const f = c.a.mark || !c.a.attr ? factOf(c.a.fact) : c.a;
-    return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : 'two identities?'}`;
+    return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : f.attr === 'identity' ? 'two identities?' : `${esc(f.value)}, and not?`}`;
 }
 
 const clashKey = (c) => `clash:${c.a.id}|${c.b.id}${c.via ? `|${c.via.id}` : ''}`;
@@ -1080,6 +1080,22 @@ function changeMoveHtml(f) {
     const items = others.map((o) => `<li>${done(o) ? '<span class="small muted">pointed out:</span> ' : `<button type="button" class="move" data-move-a="${esc(f.id)}" data-with="${esc(o.id)}">It changed</button> `}${phrase(o)} <span class="small muted">${timeLabel(anchorOf(o.time))}</span></li>`).join('');
     return `<h3>A state</h3>${lasts}${others.length ? `<p class="small">Point out a change: it differs from another state of ${ent(f.of)} on the timeline, so something changed it between them.</p><ul class="moves">${items}</ul>` : ''}`;
 }
+/**
+ * Move (m) on a rule of a regular series, or on an entry of its record: "Something is missing here", one button for
+ * each time the rule names at which the record on the timeline has nothing.
+ */
+function gapMoveHtml(f) {
+    const rule = f.series && typeof f.series === 'object' ? f : typeof f.series === 'string' ? factOf(f.series) : null;
+    if (!rule) return '';
+    const on = onTimeline();
+    if (!on.some((e) => e.id === rule.id)) return '';
+    const done = (t) => state.reasoning.some((m) => m.move === 'm' && m.of === rule.id && m.at === t);
+    const gaps = gapsOf(rule, on);
+    const record = on.filter((e) => e.series === rule.id && !e.neg).sort((a, b) => rankOf(anchorOf(a.time)) - rankOf(anchorOf(b.time)));
+    const items = gaps.map((t) => `<li>${done(t) ? `<span class="small muted">pointed out:</span> nothing at ${timeLabel(t)}` : `<button type="button" class="move" data-move-m="${esc(rule.id)}" data-at="${esc(t)}">Something is missing here: at ${timeLabel(t)}</button>`}</li>`).join('');
+    const said = record.length ? `on the timeline at ${record.map((e) => timeLabel(anchorOf(e.time))).join('; ')}` : 'nothing on the timeline records it yet';
+    return `<h3>A regular series</h3><p class="small">${rule === f ? 'The rule names' : `A rule (${phrase(rule)}) names`} ${list(rule.series.at).length} times; ${said}.</p>${items ? `<ul class="moves">${items}</ul>` : ''}`;
+}
 /** Move (b) on a typed action: what it needs just before and does just after, each with what the timeline says. */
 function implicationsHtml(f) {
     if (!list(f.act).length) return '';
@@ -1151,7 +1167,7 @@ const hypShown = (id) => {
 /** The question a hypothesis id or a presupposition belongs to. */
 const qOfHyp = (id) => qById.get(/^(?:hyp|pre):(.+?)(?:=.*)?$/.exec(id ?? '')?.[1]) ?? null;
 /** A move's key, to find it again in `state.reasoning`. */
-const moveKey = (m) => [m.move, m.a ?? m.of, m.b ?? m.for ?? ''].join('|');
+const moveKey = (m) => [m.move, m.a ?? m.of, m.b ?? m.for ?? m.at ?? ''].join('|');
 /** An entry a move was reasoned from, though it may no longer be there (an aim no longer circled). */
 const premiseText = (id) => {
     const f = factOf(id) ?? hypIntention(id, true) ?? hypGhost(id);
@@ -1201,7 +1217,8 @@ function lostNeedWhy(l) {
 function lapseText(l) {
     const m = l.move;
     const what = m.move === 'c' ? `${premiseText(m.of)} <b>for</b> ${premiseText(m.for)}`
-        : m.move === 'a' ? `a change between ${premiseText(m.a)} and ${premiseText(m.b)}` : `what ${premiseText(m.of)} needs and does`;
+        : m.move === 'a' ? `a change between ${premiseText(m.a)} and ${premiseText(m.b)}`
+        : m.move === 'm' ? `something missing at ${timeLabel(m.at)}, by ${premiseText(m.of)}` : `what ${premiseText(m.of)} needs and does`;
     return `${what}. ${lapseWhy(l)}`;
 }
 /** On an entry's detail: the player's moves from it that no longer hold. */
@@ -1287,12 +1304,13 @@ function movesHtml(f) {
     const q = f.reasoned?.move === 'a' && f.of === '?' ? (questionOfChange(f) ?? qById.get(`who:${f.id}`)) : null;
     const who = q ? `<h3>Who did it? <span class="small muted">(your hypothesis)</span></h3>
       <p class="small">${q.own ? 'Your own question' : 'The question'}: <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a></p>${chipsHtml(q)}${candidatesHtml(q)}` : '';
-    return `${changeMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${lapsedHtml(f)}${planHtml(f)}`;
+    return `${changeMoveHtml(f)}${gapMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${lapsedHtml(f)}${planHtml(f)}`;
 }
 function reasonedDetail(f) {
     const how = f.reasoned.move === 'g' ? 'Something crossed between two places, so there is a way between them.'
         : f.reasoned.move === 'r' ? 'Each link of the route is on the timeline.'
         : f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
+        : f.reasoned.move === 'm' ? 'A rule names this time, and the record has nothing at it: something is missing here.'
         : f.reasoned.move === 'c' ? 'What it brings about meets the goal of an intention, or a need of a step toward it.'
         : f.reasoned.role === 'requires' ? 'What an action needs just before it.' : 'What an action does.';
     const premises = f.reasoned.premises.map((id) => factOf(id)).filter(Boolean);
@@ -1745,6 +1763,13 @@ document.addEventListener('click', (e) => {
         addMove({ move: 'a', a: a.id, b: b.id }, r.entry.id);
         return;
     }
+    const mm = e.target.closest('[data-move-m]');
+    if (mm) {
+        const r = pointGap(factOf(mm.dataset.moveM), mm.dataset.at, onTimeline());
+        if (r.why) { state.note = r.why; render(); return; }
+        addMove({ move: 'm', of: mm.dataset.moveM, at: mm.dataset.at }, r.entry.id);
+        return;
+    }
     const mc = e.target.closest('[data-move-c]');
     if (mc) {
         const x = factOf(mc.dataset.moveC), t = factOf(mc.dataset.for);
@@ -1788,6 +1813,7 @@ document.addEventListener('click', (e) => {
         }
         const m = f.reasoned.move === 'a' ? (x) => x.move === 'a' && x.a === f.reasoned.premises[0] && x.b === f.reasoned.premises[1] || x.move === 'a' && x.b === f.reasoned.premises[0] && x.a === f.reasoned.premises[1]
             : f.reasoned.move === 'c' ? (x) => x.move === 'c' && x.of === f.reasoned.premises[0] && x.for === f.reasoned.premises[1]
+            : f.reasoned.move === 'm' ? (x) => x.move === 'm' && x.of === f.rule && x.at === f.gap
             : (x) => x.move === 'b' && x.of === f.reasoned.premises[0];
         remember();
         state.reasoning = state.reasoning.filter((x) => !m(x));
@@ -1949,7 +1975,7 @@ const hintApi = {
     // The gate holds the reader here: reading on is not possible yet.
     gateHolds: () => state.para < LAST && gateAt(state.para + 1).length > 0,
     question: (id) => (qById.has(id) ? { ...qById.get(id), label: qLabel(qById.get(id)) } : undefined), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
-    name: (id) => (entityById.has(id) ? nameOf(id) : null),
+    name: (id) => (entityById.has(id) ? nameOf(id) : null), timeName: (id) => timeLabel(id).replace(/<[^>]+>/g, ''),
     // A link of a chain in words: a telling as the timeline says it, a speech as who said it to whom.
     linkName: (key) => {
         const f = factById.get(key);

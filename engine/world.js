@@ -349,6 +349,16 @@ export function contradictions(data, accepted = null) {
         }
     }
 
+    // A denial against what it denies, for any other kind of state: the same thing, attribute and value, asserted and
+    // denied at times that meet ("he made every round" against "no round at three").
+    const others = all.filter((x) => x.kind === 'state' && !(SINGLE_ATTRS.has(x.attr) || STATES[x.attr]) && x.value != null && x.of != null && !CLAIM_ATTRS.has(x.attr));
+    const denials = others.filter((x) => x.neg);
+    for (const d of denials) for (const p of others) {
+        if (p.neg || p.fact === d.fact || p.of !== d.of || p.attr !== d.attr || p.value !== d.value) continue;
+        if (!overlaps(order, coverOf(p.time), coverOf(d.time))) continue;
+        out.push({ a: p, b: d, why: `${d.of}: ${d.value}, asserted and denied` });
+    }
+
     // One event happens once: two tellings of it whose times certainly do not meet cannot both hold.
     const byEvent = new Map();
     for (const x of all) if (x.kind === 'state' && x.event && !x.neg) byEvent.set(x.event, [...(byEvent.get(x.event) ?? []), x]);

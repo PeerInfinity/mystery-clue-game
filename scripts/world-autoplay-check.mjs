@@ -55,7 +55,7 @@ if (!st?.done) { console.log(`${failures} failure(s) (${LAYOUT}${process.env.PHO
 const marks = {};
 for (const m of moves) if (m.do === 'circle' || m.do === 'cross') (marks[m.q] ??= {})[m.pick] = m.do === 'circle' ? 'circled' : 'crossed';
 for (const [q, picks] of Object.entries(marks)) for (const [p, v] of Object.entries(picks)) if (save.marks?.[q]?.[p] !== v) fail(`mark ${q} = ${p}: ${save.marks?.[q]?.[p]}, not ${v}`);
-const reasoned = moves.filter((m) => ['a', 'b', 'c'].includes(m.do)).length;
+const reasoned = moves.filter((m) => ['a', 'b', 'c', 'm'].includes(m.do)).length;
 if ((save.reasoning?.length ?? 0) !== reasoned) fail(`${save.reasoning?.length ?? 0} reasoning moves, not ${reasoned}`);
 for (const m of moves.filter((x) => x.do === 'trust' && x.link)) if (save.trust?.links?.[m.link] !== { distrusted: 0, uncertain: 1, trusted: 2 }[m.level]) fail(`trust ${m.link} not ${m.level}`);
 const after = await ev(`localStorage.getItem(${J(STORE)})`);

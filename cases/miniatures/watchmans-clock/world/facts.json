@@ -1,0 +1,26 @@
+{
+  "facts": [
+    {"id": "f.marsh_role", "of": "marsh", "attr": "role", "value": "chief clerk at Lowther's warehouse", "time": {"from": "t.before"}, "para": 1, "quote": "chief clerk at Lowther's warehouse on Quay Street"},
+    {"id": "f.bale_there", "of": "bale", "attr": "location", "value": "yard", "detail": "on the floor by the gate, the yard locked", "time": {"at": "t.eight"}, "para": 1, "quote": "I locked the yard with a bale of China silk on the floor by the gate"},
+    {"id": "f.bale_gone", "of": "bale", "attr": "condition", "value": "gone from the yard", "time": {"at": "t.six"}, "para": 1, "quote": "when I unlocked it at six on Tuesday morning the bale was gone"},
+    {"id": "f.ward_role", "of": "ward", "attr": "role", "value": "night watchman at Lowther's", "time": {"from": "t.before"}, "para": 2, "quote": "Our night watchman, Abel Ward"},
+    {"id": "f.rule", "of": "ward", "attr": "rule", "value": "he must punch his tell-tale clock at the station in the yard every hour, from twelve until five", "series": {"attr": "round", "value": "round made", "at": ["t.twelve", "t.one", "t.two", "t.three", "t.four", "t.five"], "detail": "by the rule; nothing on the card"}, "time": {"from": "t.before"}, "para": 2, "quote": "he must punch it at the station in the yard every hour, from twelve until five"},
+    {"id": "f.card_locked", "of": "card", "attr": "condition", "value": "marked by the clock at each punch; only Edwin Marsh can unlock it", "time": {"from": "t.before"}, "para": 2, "quote": "the clock marks each punch on a card that only I can unlock"},
+    {"id": "f.card_taken", "of": "marsh", "attr": "action", "value": "takes Tuesday's card out of the clock", "time": {"at": "t.six"}, "para": 2, "quote": "I took Tuesday's card out of it myself"},
+    {"id": "f.p12", "of": "ward", "attr": "round", "value": "round made", "detail": "the clock punched at the station", "series": "f.rule", "time": {"at": "t.twelve"}, "para": "card:2", "quote": "12.0"},
+    {"id": "f.p1", "of": "ward", "attr": "round", "value": "round made", "detail": "the clock punched at the station", "series": "f.rule", "time": {"at": "t.one"}, "para": "card:2", "quote": "1.0"},
+    {"id": "f.p2", "of": "ward", "attr": "round", "value": "round made", "detail": "the clock punched at the station", "series": "f.rule", "time": {"at": "t.two"}, "para": "card:2", "quote": "2.0"},
+    {"id": "f.p4", "of": "ward", "attr": "round", "value": "round made", "detail": "the clock punched at the station", "series": "f.rule", "time": {"at": "t.four"}, "para": "card:2", "quote": "4.0"},
+    {"id": "f.p5", "of": "ward", "attr": "round", "value": "round made", "detail": "the clock punched at the station", "series": "f.rule", "time": {"at": "t.five"}, "para": "card:2", "quote": "5.0"},
+    {"id": "f.ward_tells", "of": "ward", "attr": "tells", "value": "acct.ward", "to": "marsh", "how": "told", "time": {"at": "t.later"}, "para": 3, "quote": "Ward's statement to me"},
+    {"id": "f.ward_rounds", "of": "ward", "attr": "round", "value": "round made", "detail": "every round, from twelve until five", "time": {"from": "t.twelve", "to": "t.six"}, "para": 3, "quote": "I made every round, from twelve until five", "truth": false},
+    {"id": "f.ward_nothing", "of": "ward", "attr": "condition", "value": "saw and heard nothing all night", "time": {"from": "t.twelve", "to": "t.six"}, "para": 3, "quote": "saw and heard nothing", "truth": false},
+    {"id": "f.tanner_key", "of": "tanner", "attr": "carrying", "value": "a key to the yard gate", "detail": "the only one besides Ward's", "time": {"from": "t.before"}, "para": 3, "quote": "Only Joe Tanner, the carter, has a key to the gate besides me"},
+    {"id": "f.tanner_role", "of": "tanner", "attr": "role", "value": "the carter", "time": {"from": "t.before"}, "para": 3, "quote": "Joe Tanner, the carter"},
+    {"id": "f.bright_tells", "of": "bright", "attr": "tells", "value": "acct.bright", "to": "marsh", "how": "told", "time": {"at": "t.later"}, "para": 4, "quote": "Constable Bright, whose beat is Quay Street, told me"},
+    {"id": "f.gate_fast", "of": "gate", "attr": "door", "value": "locked", "detail": "tried by Constable Bright and found fast", "time": {"at": "t.half_two"}, "para": 4, "quote": "he tried our yard gate at half past two and found it fast"},
+    {"id": "f.gate_latch", "of": "gate", "attr": "door", "value": "shut", "detail": "found on the latch by Constable Bright", "time": {"at": "t.half_three"}, "para": 4, "quote": "at half past three found it on the latch"},
+    {"id": "f.tanner_ankle", "of": "tanner", "attr": "condition", "value": "in bed, his ankle in splints; he could not have stood under a bale of silk", "detail": "set by the surgeon on Saturday", "time": {"from": "t.saturday"}, "para": 5, "quote": "He lay in bed with his ankle in splints, set by the surgeon on Saturday"},
+    {"id": "f.ward_owns", "of": "ward", "attr": "says", "value": "at three he carried the bale out to a cart in the lane, and locked the gate again before his round at four", "to": "marsh", "time": {"at": "t.later"}, "para": 6, "quote": "he owned that at three he had carried the bale out to a cart in the lane", "asserts": [{"q": "q.who", "pick": "ward"}, {"q": "q.when", "pick": "between half past two and half past three"}]}
+  ]
+}

@@ -128,6 +128,7 @@ export async function makeHints({ store, api }) {
                     : m.do === 'trust' ? (m.person ? `Distrust ${api.name(m.person)}.` : m.link.startsWith('stmt:') ? 'Distrust this statement itself (its own trust, above its chains).' : `Distrust this link of its chain: ${api.linkName(m.link)}.`)
                     : m.do === 'a' ? `Point out that it changed: against ${entry(m.b)}.`
                     : m.do === 'b' ? 'Point out what it needs and what it does.'
+                    : m.do === 'm' ? `Point out that something is missing here: at ${api.timeName?.(m.time) ?? m.time}.`
                     : m.do === 'c' ? `Ask “What is this for?”: for ${entry(m.for)}.`
                     : m.do === 'hold' ? 'You hold both: set it aside.'
                     : m.do === 'way' ? `Mark ${api.name(m.way.split('|')[0]) ?? m.way.split('|')[0]} ${m.mark} to ${m.way.split('|')[1] === 'person' ? 'a person' : 'something small'}.`

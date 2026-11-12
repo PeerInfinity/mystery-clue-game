@@ -6,14 +6,17 @@
 // evidence. Whether it is doubted is the page's to say (`ctx.doubted(id)`: what it carried that is false is off the
 // timeline). Or `{reasoned: move, premises: [ids]}` for the entry a move of the player's puts on the timeline:
 // "changed" (It changed, from two states, in either order) or "got_through" (Something got through, from a crossing),
-// so that an author can make that move necessary.
+// so that an author can make that move necessary; or `{reasoned: "missing", of: rule, at: time}` for "Something is
+// missing here" (a gap in the rule's series at that time), named by its rule and its time, since what else it rests
+// on (the record) is what the timeline holds.
 
 /** The moves whose entries an observation can name, by the name it uses: the move's code in `reasoned.move`. */
-export const REASONED_MOVES = { changed: 'a', got_through: 'g' };
+export const REASONED_MOVES = { changed: 'a', got_through: 'g', missing: 'm' };
 const samePremises = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
 
 const matches = (from, e, ctx) => (typeof from === 'string' ? e.id === from
     : from.doubted ? e.id === from.doubted && !!ctx.doubted?.(e.id)
+    : from.reasoned === 'missing' ? e.reasoned?.move === 'm' && e.rule === from.of && e.gap === from.at
     : from.reasoned ? e.reasoned?.move === REASONED_MOVES[from.reasoned] && samePremises(e.reasoned.premises ?? [], from.premises ?? [])
     : e.attr === 'route' && from.route_through.every((n) => e.value.includes(n)));
 

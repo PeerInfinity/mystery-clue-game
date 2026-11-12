@@ -68,7 +68,7 @@ async function openOn(on) {
     if (await exists(`#timeline [data-fact="${esc(on)}"]`)) return click(`#timeline [data-fact="${esc(on)}"] .ph`) || click(`#timeline [data-fact="${esc(on)}"]`);
     return false;
 }
-const defaultOn = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
+const defaultOn = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'm', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
 
 // --- Earliest. The data's earliest paragraph for a circle; the page's, for the reasoning moves, found in play.
 const W = WORLD;
@@ -85,13 +85,13 @@ for (const m of moves.filter((x) => x.do === 'circle' && !x.late && !files.lengt
     const at = right ? Math.max(q.raised ?? 0, o.available, q.answer_inferable_at ?? 0) : m.see && strain ? Math.max(q.raised ?? 0, o.available, strain.available) : null;
     if (at != null && at < m.at) report(m, at, right ? 'the answer is inferable there' : `its likely clash ${strain.id} shows there`);
 }
-const REASON = new Set(['a', 'b', 'c', 'plan', 'stop', 'compare', 'account']);
+const REASON = new Set(['a', 'b', 'c', 'm', 'plan', 'stop', 'compare', 'account']);
 /** Does the page allow move m now? Nothing is left behind: a move taken is undone, a plan opened is closed. */
 async function allowed(m) {
     const on = defaultOn(m);
     if (on && !(await openOn(on))) return false;
-    if (['a', 'b', 'c'].includes(m.do)) {
-        const sel = m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
+    if (['a', 'b', 'c', 'm'].includes(m.do)) {
+        const sel = m.do === 'm' ? `#detail [data-move-m="${esc(m.of)}"][data-at="${esc(m.time)}"]` : m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
         if (!(await exists(sel))) return false;
         const n = (await save()).reasoning?.length ?? 0;
         await click(sel);
@@ -188,8 +188,8 @@ async function play(m) {
             if (got !== LEVELS[m.level] && !(m.level === 'uncertain' && got == null)) return fail(m, 'trust not saved');
             break;
         }
-        case 'a': case 'b': case 'c': {
-            const sel = m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
+        case 'a': case 'b': case 'c': case 'm': {
+            const sel = m.do === 'm' ? `#detail [data-move-m="${esc(m.of)}"][data-at="${esc(m.time)}"]` : m.do === 'a' ? `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]` : m.do === 'b' ? `#detail [data-move-b="${esc(m.of)}"]` : `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
             if (!(await exists(sel))) return fail(m, 'move not offered');
             await click(sel);
             const note = await ev(`document.querySelector('#detail .note')?.innerText ?? ''`);

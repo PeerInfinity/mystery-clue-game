@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { timeOrder, contradictions } from './world.js';
 import fs from 'node:fs';
-import { ACTIONS, GENERIC_ACTIONS, setCaseActions, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, orderSteps } from './actions.js';
+import { ACTIONS, GENERIC_ACTIONS, setCaseActions, changePath, pointChange, pointImplications, holdsBefore, requirementStatus, reasonedEntries, placeAt, sideOf, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, orderSteps, pointGap, gapsOf } from './actions.js';
 // The tests are Silver Blaze's: its own action types (injuring, laying against) come from its case file.
 setCaseActions(JSON.parse(fs.readFileSync(new URL('./test-actions.json', import.meta.url), 'utf8')));
 import { places } from './world.js';
@@ -323,4 +323,29 @@ test("a case's own action types come over the generic ones, and go with the next
     setCaseActions({ actions: [{ id: 'whistle', label: 'whistling', requires: [], effects: [{ of: '$to', attr: 'condition', value: 'called back' }] }] });
     assert.ok(ACTIONS.whistle && !ACTIONS.injure && ACTIONS.lock, 'another case: its own, the generic, not the last case\'s');
     setCaseActions(JSON.parse(fs.readFileSync(new URL('./test-actions.json', import.meta.url), 'utf8')));
+});
+
+test('move (m): a gap in a regular series, from the rule and its record', () => {
+    const rule = { id: 'f.rule', of: 'w', attr: 'rule', value: 'a round every hour', series: { attr: 'round', value: 'round made', at: ['t1', 't2', 't3'] }, para: 1 };
+    const p1 = { id: 'p1', of: 'w', attr: 'round', value: 'round made', series: 'f.rule', time: { at: 't1' }, para: 2 };
+    const p3 = { id: 'p3', of: 'w', attr: 'round', value: 'round made', series: 'f.rule', time: { at: 't3' }, para: 2 };
+    assert.match(pointGap(rule, 't2', [rule]).why, /records/, 'no record on the timeline: nothing to find missing');
+    assert.deepEqual(gapsOf(rule, [rule, p1, p3]), ['t2']);
+    const r = pointGap(rule, 't2', [rule, p1, p3]);
+    assert.equal(r.entry.id, 'r:m:f.rule@t2');
+    assert.deepEqual([r.entry.of, r.entry.attr, r.entry.value, r.entry.neg, r.entry.time.at], ['w', 'round', 'round made', true, 't2']);
+    assert.deepEqual(r.entry.reasoned.premises, ['f.rule', 'p1', 'p3']);
+    assert.match(pointGap(rule, 't3', [rule, p1, p3]).why, /has it/);
+    assert.match(pointGap(rule, 't9', [rule, p1, p3]).why, /not a time/);
+    // As a move: it holds while the record lacks the time, and lapses when a record of it comes.
+    const order = { lt: () => false, le: () => true };
+    const lapsed = [];
+    const ids = new Map([rule, p1, p3].map((f) => [f.id, f]));
+    const got = reasonedEntries([{ move: 'm', of: 'f.rule', at: 't2' }], (id) => ids.get(id), order, (x) => x, (f) => f.para, { entries: [rule, p1, p3], lapsed });
+    assert.equal(got.length, 1);
+    assert.equal(got[0].given_at, 2);
+    const p2 = { ...p1, id: 'p2', time: { at: 't2' } };
+    const none = reasonedEntries([{ move: 'm', of: 'f.rule', at: 't2' }], (id) => ids.get(id), order, (x) => x, (f) => f.para, { entries: [rule, p1, p2, p3], lapsed });
+    assert.equal(none.length, 0);
+    assert.match(lapsed[0].why, /has it/);
 });

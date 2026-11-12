@@ -18,6 +18,8 @@
 //   the goal or a need of a step already linked to it.
 // - (d) `checkPlan`: "what would this need?": a plan's steps in order, each need met by an earlier step, by the
 //   timeline, or by nothing.
+// - (m) `pointGap`: "something is missing here": a rule says a thing happens at each of a list of times, the record
+//   of it is on the timeline, and the record has nothing at one of them.
 // What the player points out is an entry of the world model with the source *the reader's reasoning* (`REASONING`), as
 // trusted as its weakest premise.
 
@@ -279,6 +281,30 @@ export function pointChange(order, a, b, known = [], nameOf = (id) => id) {
         },
     };
 }
+
+/**
+ * Move (m), "Something is missing here": a rule that something happens at each of a list of times (the rule's fact
+ * carries `series: {attr, value, at: [times], of?}`), and its record on the timeline (the facts with `series: <the
+ * rule's id>`, each at its time) has nothing at one of them. Gives "no <value> at that time", reasoned from the rule
+ * and the record (as trusted as the least of them), or `why` it is refused: the time is not one the rule names, the
+ * record is not on the timeline, or it has that time.
+ */
+export function pointGap(rule, at, entries = []) {
+    const s = rule?.series;
+    if (!s || typeof s !== 'object' || !list(s.at).includes(at)) return { why: 'That is not a time the rule names.' };
+    const record = entries.filter((e) => e.series === rule.id && !e.neg && e.id !== rule.id);
+    if (!record.length) return { why: 'Nothing on the timeline records it.' };
+    const there = record.find((e) => e.time?.at === at);
+    if (there) return { why: 'The record has it at that time.', there };
+    return {
+        entry: {
+            id: `r:m:${rule.id}@${at}`, of: s.of ?? rule.of, attr: s.attr, value: s.value, neg: true, gap: at, rule: rule.id,
+            ...(s.detail ? { detail: s.detail } : {}), time: { at }, reasoned: { move: 'm', premises: [rule.id, ...record.map((e) => e.id)] },
+        },
+    };
+}
+/** The times of a rule's series at which its record on the timeline has nothing (move m would take each). */
+export const gapsOf = (rule, entries = []) => (rule?.series && typeof rule.series === 'object' ? list(rule.series.at).filter((t) => !pointGap(rule, t, entries).why) : []);
 
 /**
  * Persistence: the value a typed state of `of` has just before time `t`, as far as the entries say: the latest state
@@ -554,7 +580,7 @@ export function stops(x, step, nameOf = (id) => id, ctx = {}) {
  * gives nothing, and is listed in `ctx.lapsed` (if given) as `{move, why, gone?, ruledOut?}`: `gone`, the premise no
  * longer there (a hypothesis no longer circled). A move whose premises are not yet told is not listed. The moves that
  * hold are listed in `ctx.held`, if given. `moves`:
- * `[{move: 'a', a, b} | {move: 'b', of} | {move: 'c', of, for}]`; `lookup`: id → a fact or an earlier entry;
+ * `[{move: 'a', a, b} | {move: 'b', of} | {move: 'c', of, for} | {move: 'm', of: rule, at: time}]`; `lookup`: id → a fact or an earlier entry;
  * `givenAt`: when an entry is told. A move (c) gives the link "this, in order that that": `{attr: 'purpose', for,
  * serves}`, at the time of what it links.
  */
@@ -563,6 +589,19 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
     const find = (id) => out.get(id) ?? lookup(id);
     const linkedTo = (tid) => [...out.values()].filter((e) => e.reasoned.move === 'c' && e.for === tid).map((e) => find(e.reasoned.premises[0])).filter((s) => s && list(s.act).length);
     for (const m of moves) {
+        if (m.move === 'm') {
+            // A gap rests on the rule and on the record as it now stands on the timeline (`ctx.entries`).
+            const rule = find(m.of);
+            if (!rule) { ctx.lapsed?.push({ move: m, gone: m.of, why: 'What it was reasoned from is no longer there.' }); continue; }
+            const r = pointGap(rule, m.at, ctx.entries ?? []);
+            if (r.why) { ctx.lapsed?.push({ move: m, why: r.why }); continue; }
+            const gs = r.entry.reasoned.premises.map((id) => givenAt(find(id)));
+            const given = gs.some((g) => g == null) ? null : ctx.latest ? ctx.latest(gs) : Math.max(...gs);
+            if (given == null || (typeof given === 'number' && !Number.isFinite(given))) continue;
+            ctx.held?.push(m);
+            out.set(r.entry.id, { ...r.entry, given_at: given });
+            continue;
+        }
         const premises = m.move === 'a' ? [m.a, m.b] : m.move === 'c' ? [m.of, m.for] : [m.of];
         const ps = premises.map(find);
         const lapse = (x) => ctx.lapsed?.push({ move: m, ...x });

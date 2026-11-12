@@ -220,6 +220,9 @@ contradiction written by hand:
   "e.shot"`, on two facts or more): it happens once, so two of them whose times certainly do not meet (the shot at a
   quarter to nine and at nine) are a contradiction, with no question needed. Times that may meet, or are not
   ordered, raise nothing.
+- **A denial against what it denies** (2026-11-11), for any other attribute: the same entity, attribute and value,
+  asserted and denied at times that certainly meet ("he made every round, from twelve until five" against the
+  reader's own "no round at three").
 - Claims with `modal: possible` take no part.
 - **Alibis** (`alibis` in `engine/world.js`). A circled answer to a question whose `entry` is a typed action (`act`)
   over a `{from, to}` window is that one's act. If the act needs its agent at a door (`at`: either side of it,
@@ -289,6 +292,14 @@ The player's moves, each checked by these rules, give entries with the source *t
   disappears when it no longer fits (the paper circled as a drug). `reasonedEntries` lists such moves in
   `ctx.lapsed` with why (`ruledOut`: the item's kinds that would make it fit; `gone`: a premise no longer there) and
   the moves that hold in `ctx.held`; the page announces a move that held and no longer does.
+- (m) `pointGap`, "something is missing here" (2026-11-11): a rule that something happens at set times carries
+  `series: {attr, value, at: [times], of?, detail?}` (the watchman must punch his clock every hour from twelve until
+  five), and each entry of its record carries `series: <the rule's id>`, with the rule's `of`, `attr` and `value`, at
+  one of its times (the card's punches). On the rule or on a record entry, the page offers the move at each time the
+  record on the timeline lacks; it gives the reader's own entry, the series' state denied at that time (`neg`, `rule`,
+  `gap`), resting on the rule and the record as the timeline then holds it (as trusted as the least of them). It
+  lapses when the record leaves the timeline or comes to have that time. A move `{move: 'm', of: rule, at: time}`;
+  in path.json `{do: "m", of: rule, time}` (`at` there is the paragraph).
 - (d) `checkPlan`, "what would this need?": a plan's steps in order, each need met by an earlier step's effect, by
   the timeline, or by nothing (`open`), and whether the steps reach the goal. On a claim's plan (the police theory)
   or on the steps the player has linked to an intention.
@@ -424,7 +435,8 @@ data holds for that pair is then filled in, keeping its logic (entries, their ch
 - `{id, q, from: [entry], says, essential?, against?, if?}`. An entry in `from` is a fact's id (a telling's too: that it was said stays on the timeline when what it carried is distrusted), or `{doubted: <a telling or a claim>}` for a lie as evidence (the statement linked, and what it carried that is false off the timeline), or
   `{route_through: [things]}` for a route the player built through them, or `{reasoned: "changed", premises: [two states]}`
   (the entry of "It changed" on those two, in either order) or `{reasoned: "got_through", premises: [a crossing]}` (the
-  entry of "Something got through"), so that an author can make a move necessary by requiring the entry it reveals. It is filled when every entry is on the timeline
+  entry of "Something got through"), or `{reasoned: "missing", of: rule, at: time}` (the entry of "Something is missing
+  here", named by its rule and time: what else it rests on is the record as the timeline holds it), so that an author can make a move necessary by requiring the entry it reveals. It is filled when every entry is on the timeline
   and linked to `q`, and goes if one leaves. A link that fills nothing stays as the player's note.
 - `if: {q, pick}`: filled only with that answer of another question circled. A clue the story reads more than one way is an
   ordinary question with those readings as its possibilities, and what follows from each reading depends on it through `if`.

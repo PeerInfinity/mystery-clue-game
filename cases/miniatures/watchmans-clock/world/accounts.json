@@ -1,0 +1,7 @@
+{
+  "accounts": [
+    {"id": "acct.marsh", "label": "What Edwin Marsh sees, reads and knows himself", "origin": "marsh", "how": "saw", "facts": ["f.marsh_role", "f.bale_there", "f.bale_gone", "f.ward_role", "f.rule", "f.card_locked", "f.card_taken", "f.p12", "f.p1", "f.p2", "f.p4", "f.p5", "f.ward_tells", "f.bright_tells", "f.tanner_ankle", "f.ward_owns"]},
+    {"id": "acct.ward", "label": "Abel Ward's statement of his night", "origin": "ward", "how": "saw", "facts": ["f.ward_rounds", "f.ward_nothing", "f.tanner_key", "f.tanner_role"]},
+    {"id": "acct.bright", "label": "What Constable Bright found on his beat", "origin": "bright", "how": "saw", "facts": ["f.gate_fast", "f.gate_latch"]}
+  ]
+}

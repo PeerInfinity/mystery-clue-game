@@ -224,6 +224,17 @@ for (const f of facts) {
     if ('neg' in f && f.neg !== true) err(f.id, 'neg is true or absent');
     // One event told more than once (`event`: its id, shared by every fact that tells it): it happens once.
     if (f.event != null && (typeof f.event !== 'string' || !f.event || facts.filter((g) => g.event === f.event).length < 2)) err(f.id, `event ${f.event}: an id shared by two facts or more`);
+    // A regular series: the rule carries `series: {attr, value, at: [times]}`; each entry of its record `series: <rule>`,
+    // with the rule's attr and value, at one of its times.
+    if (f.series != null && typeof f.series === 'object') {
+        const s = f.series;
+        if (!s.attr || s.value == null || !Array.isArray(s.at) || s.at.length < 2 || s.at.some((t) => !timeIds.has(t))) err(f.id, 'series: {attr, value, at: [two times or more]}');
+        if (s.of != null && !entities.has(s.of)) err(f.id, `series.of: no entity ${s.of}`);
+    } else if (f.series != null) {
+        const r = factById.get(f.series);
+        if (!(r?.series && typeof r.series === 'object')) err(f.id, `series: ${f.series} is no rule with a series`);
+        else if (f.attr !== r.series.attr || f.value !== r.series.value || (r.series.of ?? r.of) !== f.of || !r.series.at.includes(f.time?.at)) err(f.id, `series: not of ${f.series}'s kind (its of, attr and value, at one of its times)`);
+    }
     if (f.attr === 'location' && f.value != null && typeof f.value === 'string' && !entities.has(f.value)) err(f.id, `location: no entity ${f.value} (put the rest in detail)`);
     if (f.q) {
         const q = qById.get(f.q);
@@ -364,6 +375,7 @@ for (const o of observationList) {
     if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);
     if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
     for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr))
+        : f.reasoned === 'missing' ? !factById.get(f.of)?.series?.at?.includes(f.at)
         : f.reasoned ? !REASONED_MOVES[f.reasoned] || !Array.isArray(f.premises) || f.premises.length !== (f.reasoned === 'changed' ? 2 : 1) || f.premises.some((x) => !factById.has(x))
         : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
     if (!o.says) err(o.id, 'no says');

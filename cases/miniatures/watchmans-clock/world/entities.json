@@ -1,0 +1,15 @@
+{
+  "entities": [
+    {"id": "marsh", "kind": "person", "name": "Edwin Marsh"},
+    {"id": "ward", "kind": "person", "name": "Abel Ward"},
+    {"id": "tanner", "kind": "person", "name": "Joe Tanner"},
+    {"id": "bright", "kind": "person", "name": "Constable Bright"},
+    {"id": "warehouse", "kind": "place", "name": "Lowther's warehouse"},
+    {"id": "yard", "kind": "place", "name": "the yard", "within": "warehouse"},
+    {"id": "tanner_house", "kind": "place", "name": "Tanner's house"},
+    {"id": "gate", "kind": "object", "name": "the yard gate"},
+    {"id": "bale", "kind": "object", "name": "the bale of China silk"},
+    {"id": "clock", "kind": "object", "name": "the tell-tale clock"},
+    {"id": "card", "kind": "document", "name": "Tuesday's card"}
+  ]
+}

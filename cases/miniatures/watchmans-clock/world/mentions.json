@@ -1,0 +1,15 @@
+{
+ "entities": {
+  "marsh": ["Edwin Marsh"],
+  "ward": ["Abel Ward", "Ward"],
+  "tanner": ["Joe Tanner", "Tanner"],
+  "bright": ["Constable Bright"],
+  "warehouse": ["Lowther's warehouse", "Lowther's"],
+  "yard": ["the yard"],
+  "tanner_house": ["Tanner's house"],
+  "gate": ["the gate", "our yard gate"],
+  "bale": ["a bale of China silk", "the bale"],
+  "clock": ["a tell-tale clock", "the clock"],
+  "card": ["Tuesday's card", "the card"]
+ }
+}

@@ -1,0 +1,17 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.saturday", "label": "Saturday", "after": "t.before", "para": 5, "quote": "set by the surgeon on Saturday"},
+    {"id": "t.eight", "label": "Monday, eight at night", "after": "t.saturday", "para": 1, "quote": "At eight on Monday night"},
+    {"id": "t.twelve", "label": "Tuesday, twelve o'clock", "after": "t.eight", "para": 2, "quote": "from twelve until five"},
+    {"id": "t.one", "label": "Tuesday, one o'clock", "after": "t.twelve", "para": 2, "quote": "every hour"},
+    {"id": "t.two", "label": "Tuesday, two o'clock", "after": "t.one", "para": 2, "quote": "every hour"},
+    {"id": "t.half_two", "label": "Tuesday, half past two", "after": "t.two", "para": 4, "quote": "at half past two"},
+    {"id": "t.three", "label": "Tuesday, three o'clock", "after": "t.half_two", "para": 2, "quote": "every hour"},
+    {"id": "t.half_three", "label": "Tuesday, half past three", "after": "t.three", "para": 4, "quote": "at half past three"},
+    {"id": "t.four", "label": "Tuesday, four o'clock", "after": "t.half_three", "para": 2, "quote": "every hour"},
+    {"id": "t.five", "label": "Tuesday, five o'clock", "after": "t.four", "para": 2, "quote": "from twelve until five"},
+    {"id": "t.six", "label": "Tuesday, six in the morning", "after": "t.five", "para": 1, "quote": "at six on Tuesday morning"},
+    {"id": "t.later", "label": "Tuesday, later", "after": "t.six", "para": 3, "quote": "Ward's statement to me"}
+  ]
+}
