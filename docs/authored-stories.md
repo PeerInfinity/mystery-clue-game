@@ -828,6 +828,9 @@ they are, with no cost for a link that shows nothing, since no difficulty is to 
     turns it wrote a tool call as text (`<invoke name="click">…`, often repeated) instead of the JSON asked for, and
     those turns were lost; the harness now takes the first action from that form and tells the model it has no
     tools. The runaway turns of the first run may have been the same pattern repeating.
+    A third run with those fixes: **both answers right, 28 turns, $0.65**, every turn taken. The gap move at turn
+    10; never at "not all linked yet" (it linked the evidence before reading to the gate); 7 links. It still wrote
+    the call as text on 12 turns despite the instruction, and the harness took each one.
 
 ## What the game needs from the concept library
 
