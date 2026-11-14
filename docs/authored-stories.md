@@ -859,6 +859,22 @@ question's summary lists what is begun; and the gate's notice counts what is beg
 added at the user's wish once the first two were in). Naming what is missing (a hint written for each observation)
 is left out.
 
+**Haiku again on the seven held at the gate** (one run each, 2026-11-14, after papers were announced, the guide said a
+disbelieved statement is evidence, the solver saw the room panel, and begun observations were reported; $1.08 in
+all). Three more solved, every answer right: The Lamp-Keeper's Word (71 turns), The Telegram Signed M. (53), The Will
+in the Bible (90). Four ran out of turns at the gate, each with the right answers circled except The Ring on the Bench:
+
+68. **The papers were read.** In The Rent Box Papers every paper was read to its end (0 of 2 before, for two of
+    them), and the telegram and the will were read and solved.
+69. **A lie in two parts** (The Rent Box, The Rent Box Papers). The captain's statement carries two things that are
+    not so (Fenn crossing the yard, the back door open). Both runs linked the statement and distrusted the back door
+    alone; the observation from `{doubted}` fills only when every false part is off the timeline, so it stayed a
+    note, at "1 of 2", for some ninety turns. Nothing says the statement is half disbelieved.
+70. **Begun, and not finished** (The Stable Clock). The gate said "3 of 4, and 1 more begun"; it never linked the
+    gardener's looking at the stable clock, the other half, though it opened that entry early and distrusted it.
+71. **The route still not built** (The Ring on the Bench), with the room panel now in view: it marked every way in,
+    many times over, and never added a step to the route. It circled "something else".
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
