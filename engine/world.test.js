@@ -275,3 +275,15 @@ test('a denial against what it denies, for any kind of state, when the times mee
     assert.deepEqual(why(world([round('r1', { at: 't1' }), round('r2', { at: 't2' }, { neg: true })])), [], 'times that do not meet');
     assert.deepEqual(why(world([round('r1', { at: 't2' }), round('r2', { at: 't2' }, { neg: true, value: 'other' })])), [], 'another value');
 });
+
+test('a need of any other state against a state that denies it, while it holds', () => {
+    const mark = { id: 'hyp:q=maid', kind: 'pick', q: 'q', pick: 'maid', mark: 'circled' };
+    const need = [{ mark, of: 'maid', attr: 'knows', value: 'bend', time: { from: 't2', to: 't3' }, req: 'r1', label: 'it needs the maid to know the bend' }];
+    const st = (time, neg = true) => ({ id: 's', fact: 's', kind: 'state', of: 'maid', attr: 'knows', value: 'bend', neg, time });
+    const w = world([]);
+    const got = alibis(w, [st({ from: 't1' })], need);
+    assert.deepEqual(got.map((c) => [c.a.id, c.b.id, c.b.req]), [['s', 'hyp:q=maid', 'r1']]);
+    assert.equal(alibis(w, [st({ from: 't1' }, false)], need).length, 0, 'saying so is no contradiction');
+    assert.equal(alibis(w, [st({ from: 't4' })], need).length, 0, 'begun after the window');
+    assert.equal(alibis(w, [st({ from: 't0', to: 't1' })], need).length, 0, 'over before it');
+});

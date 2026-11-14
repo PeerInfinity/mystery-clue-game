@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { CASE, WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
-import { controlOf, made, nextRead, readToOf } from '../ui/world-moves.js';
+import { controlOf, made, nextRead, readToOf, needsOf } from '../ui/world-moves.js';
 import { MAIN, refList } from '../engine/refs.js';
 const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
@@ -76,7 +76,23 @@ const qs = new Map(JSON.parse(fs.readFileSync(path.join(W, 'questions.json'), 'u
 const strains = fs.existsSync(path.join(W, 'strains.json')) ? JSON.parse(fs.readFileSync(path.join(W, 'strains.json'), 'utf8')).strains : [];
 const label = (m) => `${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`;
 const early = [];
-const report = (m, at, why) => { early.push({ m, at }); failures++; console.log(`FAIL EARLY ¶${m.at} → ¶${at} ${label(m)}${why ? ` (${why})` : ''}`); };
+const report = (m, at, why) => { early.push({ m, at }); failures++; console.log(`FAIL EARLY ¶${atText(m.at)} → ¶${atText(at)} ${label(m)}${why ? ` (${why})` : ''}`); };
+// A case with files: a move is early when what the data needs (each story read to, a paper's delivery counted) is
+// at most what the move's `at` reads, and less somewhere.
+const lessNeeds = (x, y) => {
+    const a = needsOf(x, files), b = needsOf(y, files);
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+    return [...keys].every((k) => (a[k] ?? 0) <= (b[k] ?? 0)) && [...keys].some((k) => (a[k] ?? 0) < (b[k] ?? 0));
+};
+for (const m of moves.filter((x) => x.do === 'circle' && !x.late && files.length)) {
+    const q = qs.get(m.q), o = q?.possibilities.find((x) => x.value === m.pick);
+    if (!o) continue;
+    const right = q.answer === m.pick || (q.also_right ?? []).includes(m.pick);
+    const strain = strains.find((x) => [x.a, x.b].some((y) => y?.q === m.q && y.pick === m.pick));
+    const at = right ? [q.raised, o.available, ...refList(q.answer_inferable_at)].filter((x) => x != null)
+        : m.see && strain ? [q.raised, o.available, ...refList(strain.available)].filter((x) => x != null) : null;
+    if (at && lessNeeds(at, m.at)) report(m, Object.entries(needsOf(at, files)).map(([k, n]) => (k === MAIN ? n : `${k}:${n}`)), right ? 'the answer is inferable there' : `its likely clash ${strain.id} shows there`);
+}
 for (const m of moves.filter((x) => x.do === 'circle' && !x.late && !files.length)) {
     const q = qs.get(m.q), o = q?.possibilities.find((x) => x.value === m.pick);
     if (!o) continue;
@@ -117,6 +133,8 @@ async function allowed(m) {
     return ok;
 }
 let probing = [];   // the next paragraph's reasoning moves not yet found allowed earlier
+/** Where the reading stands, for a report: each story read to. */
+const readingText = (sv) => [MAIN, ...files.map((f) => f.id)].map((id) => [id, readToOf(sv)(id)]).filter(([, n]) => n).map(([id, n]) => (id === MAIN ? n : `${id}:${n}`));
 async function probe(now) {
     for (const m of probing) if (await allowed(m)) { report(m, now, 'the page allows it'); probing = probing.filter((x) => x !== m); }
     if (errors.length) { failures++; console.log(`FAIL ¶${now} page error while trying moves early: ${errors.splice(0).join(' | ')}`); }
@@ -129,8 +147,11 @@ const readOne = async (story) => {
 };
 async function readTo(at) {
     if (files.length) {
-        // Story by story, in ORDER, just what `at` needs (WHOLE: a file once opened, to its end).
+        // Story by story, in ORDER, just what `at` needs (WHOLE: a file once opened, to its end). Before each paragraph,
+        // the reasoning moves of this `at` are tried: one the page takes already is early.
+        probing = moves.filter((m) => J(m.at) === J(at) && REASON.has(m.do) && !m.late);
         for (let story; (story = nextRead(at, files, readToOf(await save()), ORDER)) != null;) {
+            if (probing.length) await probe(readingText(await save()));
             const was = readToOf(await save())(story);
             const to = WHOLE && story !== MAIN ? Infinity : was + 1;
             for (let i = was; i < to; i++) { await readOne(story); if (readToOf(await save())(story) === i) break; }

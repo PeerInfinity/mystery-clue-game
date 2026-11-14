@@ -379,9 +379,16 @@ function presenceNeeds(accepted) {
         if (!f || !(f.time?.from && f.time?.to)) continue;
         const { entries = [] } = pointImplications(f, nameOf, { ...placeCtx, order: data.order });
         for (const r of entries) {
-            if (r.role !== 'requires' || !(r.at || r.place)) continue;
-            const places = r.at ? (placeCtx.joins?.[r.at] ?? []) : [r.place];
-            if (places.length) out.push({ mark, of: f.of, places, time: f.time, same: placeCtx.same, label: `it needs ${nameOf(f.of)} at ${nameOf(r.at ?? r.place)}` });
+            if (r.role !== 'requires') continue;
+            if (r.at || r.place) {
+                const places = r.at ? (placeCtx.joins?.[r.at] ?? []) : [r.place];
+                if (places.length) out.push({ mark, of: f.of, places, time: f.time, same: placeCtx.same, req: r.id, label: `it needs ${nameOf(f.of)} at ${nameOf(r.at ?? r.place)}` });
+                continue;
+            }
+            // Any other state the act needs (knowing a knot): against a state on the timeline that denies it.
+            if (r.attr && r.value != null && !STATES[r.attr] && !OPEN_STATES.has(r.attr) && !['key', 'item', 'charge', 'away', 'guard', 'among'].some((k) => r[k] != null) && r.of !== '?') {
+                out.push({ mark, of: r.of, attr: r.attr, value: r.value, neg: !!r.neg, time: f.time, same: placeCtx.same, req: r.id, label: `it needs: ${phrase(r).replace(/<[^>]+>/g, '')}` });
+            }
         }
     }
     return out;
@@ -635,7 +642,7 @@ function clashTitle(c) {
     if (c.a.kind === 'pick') return esc(qById.has(c.a.q) ? qLabel(qById.get(c.a.q)) : c.a.q);
     // What the contradiction is about: the state's own subject (what a claim asserts, not the claim's speaker).
     const f = c.a.mark || !c.a.attr ? factOf(c.a.fact) : c.a;
-    return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : f.attr === 'identity' ? 'two identities?' : `${esc(f.value)}, and not?`}`;
+    return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : f.attr === 'identity' ? 'two identities?' : `${f.attr === 'knows' ? 'knows ' : ''}${entityById.has(f.value) ? nameOf(f.value) : esc(f.value)}, and not?`}`;
 }
 
 const clashKey = (c) => `clash:${c.a.id}|${c.b.id}${c.via ? `|${c.via.id}` : ''}`;
@@ -1454,6 +1461,9 @@ function needsHtml(a) {
     const row = (req) => {
         const x = metByKnown(req, t, a.id);
         if (x) return `<li>${phrase(req)} <span class="good small">met by ${stepText(x)}</span></li>`;
+        // A need a contradiction already sets against the timeline (an alibi; a knot she cannot tie) says so here too.
+        const c = current.find((y) => y.b?.req === req.id);
+        if (c) return `<li>${phrase(req)} <span class="bad small">against: the timeline has ${phrase(factOf(c.a.fact) ?? c.a)} (a contradiction)</span></li>`;
         return `<li>${phrase(req)} ${statusHtml(requirementStatus(data.order, onTimeline(), req, placeCtx))}</li>`;
     };
     const needs = entries.filter((e) => e.role === 'requires');

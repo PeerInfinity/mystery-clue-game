@@ -230,7 +230,10 @@ contradiction written by hand:
   locations of that one, none of them within a needed place, cover the whole window (one, or several end to end),
   each is a contradiction with the circle: "in two places at once?", the circle's side saying what it needs. An open
   end covers only its start, so an alibi's last location needs a `to`. Failing to place someone at the scene is no
-  contradiction; that stays in the question's detail ("nothing on the timeline says so").
+  contradiction; that stays in the question's detail ("nothing on the timeline says so"). A need of any other state
+  (2026-11-14: knowing the knot) is a contradiction with an accepted state that denies it and holds in the window
+  (begun by its end, not over before its start). Each such contradiction carries the need's id (`req`), and the
+  question's list of needs shows that need as against, naming the contradiction.
 
 **The player's marks** (`markAssertions`). Each possibility of a question is uncertain (unmarked), circled or crossed
 out; several may be circled. A circle asserts the possibility and a crossing denies it, as picks with `mark` set and

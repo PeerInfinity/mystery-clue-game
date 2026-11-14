@@ -524,7 +524,7 @@ versions first): defects are fixed as they are found; design changes are gathere
 outlines have first versions, except where a story cannot be written without one (outline E's new move). Open for
 that review so far: finding 46 (knowledge passed on by tellings), finding 35 (a case whose papers come early), finding
 36 (the path check's test for moves made too early, off for cases with files); and from E and F, findings 53, 55
-and 56.
+and 56. All decided 2026-11-14 (below, before "Means").
 
 Two readings of one clue (step 5, outline D; 2026-11-11):
 
@@ -561,6 +561,22 @@ it rests on, required by its rule and time, and a denial that clashes with what 
     doubted) instead of taking the first away; distrusting the whole card takes it away. That reads right, but it
     means the entry's premises are not fixed when the move is made, unlike the other moves; observations name it by
     rule and time for that reason.
+
+The design review of the first versions (2026-11-14). The user agreed every recommendation and left the order open:
+
+- Finding 36: the path check's test for moves made too early now runs for cases with files too. A circle is early
+  when what the data needs (each story read to, a paper's delivery counted) is no more than its `at` and less
+  somewhere; a reasoning move is tried before each paragraph read toward its `at`. Shown to catch both kinds on a
+  doctored path of The Watchman's Clock (the reasoning move only in the order that opens the card first, which the
+  page checks run).
+- Findings 55 and 56: every need of a circled act can now clash. A need of any other state is a contradiction with
+  an accepted state that denies it while it holds (Ellen circled: "Ellen: knows the carrick bend, and not?"), and a
+  need a contradiction sets against the timeline (an alibi among them) says so in the question's list of needs
+  ("against: the timeline has Tom Pike at the Bell (a contradiction)") instead of "nothing on the timeline says so".
+- Finding 46 (knowledge passed on by tellings): left as it is; facts written by hand served in C. Taken up again if
+  the long story needs it.
+- Finding 35 (a case whose papers come early): folded into the story of 20 to 30 questions, not a miniature of its own.
+- Finding 53 (the gap's premises follow the record on the timeline): kept as built.
 
 Means (step 5, outline F; 2026-11-11):
 

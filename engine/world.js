@@ -415,6 +415,10 @@ export function contradictions(data, accepted = null) {
  * several end to end, none of them within a needed place. Failing to place them at the scene is no alibi. Returns
  * contradictions `{a: a location, b: the mark (with `needs`: the label), why}`, one for each location of the cover,
  * so that distrusting any piece of the alibi lifts it.
+ *
+ * A need of any other state (`{mark, of, attr, value, neg?, time, label}`: knowing the knot) is against an accepted
+ * state that denies it and holds in the window: begun by its end, not over before its start (she knows no knot but
+ * a granny). `req` on a need is passed on to the mark's side, so that the act's needs can name the contradiction.
  */
 export function alibis(data, accepted, needs) {
     const order = data.order ?? timeOrder(data.times);
@@ -423,6 +427,16 @@ export function alibis(data, accepted, needs) {
     for (const n of needs) {
         const w = coverOf(n.time);
         if (!w || w.incl) continue;
+        const side = { ...n.mark, needs: n.label, ...(n.req ? { req: n.req } : {}) };
+        if (n.attr) {
+            for (const x of accepted) {
+                if (x.kind !== 'state' || x.attr !== n.attr || x.value !== n.value || !!x.neg === !!n.neg || !(n.same ?? ((a, b) => a === b))(x.of, n.of)) continue;
+                const s = x.time?.at ?? x.time?.from, e = x.time?.at ?? x.time?.to;
+                if (!s || !order.le(s, w.end) || (e && order.lt(e, w.start))) continue;
+                out.push({ a: x, b: side, why: `${n.of}: needs ${n.neg ? 'not ' : ''}${n.attr} ${n.value}, and the timeline denies it` });
+            }
+            continue;
+        }
         const away = accepted.filter((x) => x.kind === 'state' && x.attr === 'location' && !x.neg && (n.same ?? ((a, b) => a === b))(x.of, n.of) && typeof x.value === 'string' && pl.fixed(x.value)
             && !n.places.some((p) => pl.chain(x.value).includes(p)) && coverOf(x.time));
         // Walk the window from its start: each step a location that holds at the point reached.
@@ -435,7 +449,7 @@ export function alibis(data, accepted, needs) {
             at = coverOf(next.time).end;
             done = order.le(w.end, at);
         }
-        if (done) for (const x of cover) out.push({ a: x, b: { ...n.mark, needs: n.label }, why: `${n.of}: needed at ${n.places.join(' or ')}, and at ${x.value}` });
+        if (done) for (const x of cover) out.push({ a: x, b: side, why: `${n.of}: needed at ${n.places.join(' or ')}, and at ${x.value}` });
     }
     return out;
 }
