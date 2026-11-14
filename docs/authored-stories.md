@@ -774,6 +774,25 @@ A provisional order, this session's suggestion (the user has not ruled):
    (`structure.json`), shown to the user before anything else; then the delivery mechanism, its design laid out
    first; then the prose and data; then a blind run. It takes in finding 35 and, if needed, finding 46.
 
+### The long story's logic (step 7.1, 2026-11-14; awaiting the user's review)
+
+`cases/custom-house-fire/structure.json` is the logic of the story of step 7, written before anything else: the truth
+in eight sentences, 14 frame entries (the narrator's own observations), 24 papers carrying 41 clues, and 25 questions
+in three layers (17 small, 7 that need others solved first, the goal). `node scripts/structure-check.mjs <dir> [seeds]`
+checks it: references, something against every listed wrong answer, every paper needed, no loop, every question
+reachable, and a forward fill of the papers on the questions for each seed, played to the end. The format gained
+`papers`, a clue's `paper`, a question's `requires` (the layers) and `raised` (the main story, or the paper whose
+reading raises the question), and `delivery.start`.
+
+75. **One paper to a question cannot work.** With 24 papers on 24 questions no placement at all can be played: the
+    question solved last holds a paper, and every paper is needed by some question. There must be fewer papers to
+    earn than questions, so some solutions give nothing (or a filler), or papers are in hand from the start. The
+    structure starts with four (the Board's letter, the Collector's statement, the two printed tables) and earns
+    twenty on 24 questions.
+76. **The order is narrower than hoped.** Over 5,000 seeds every placement drawn plays to the end, but a player has on
+    average two questions to choose from (three at the start), and on ten of the 25 steps only one. Wider play needs
+    more papers at the start, fewer papers per question, or fewer `requires`.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
