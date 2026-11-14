@@ -1,7 +1,8 @@
 // A blind solver: a model plays one case through the real page, seeing only what a player sees (the page as text and
 // a numbered list of the controls it may use) and the player's guide, and never the case's data, the hints or the
 // autoplay. Experiment 2 of docs/authored-stories.md ("Is a miniature fun?"): can the case be solved from the page?
-//   CASE=<dir> MODEL=haiku MAX=150 node scripts/blind-solve.mjs      (DRY=1: write the first prompt only, no call)
+//   CASE=<dir> MODEL=haiku MAX=150 BUDGET=3 node scripts/blind-solve.mjs   (DRY=1: the first prompt only, no call;
+//   OUTPUT_CAP: the output tokens one call may write, default 4000; BUDGET: dollars, the run stops there)
 // Each turn is one blind call (`claude -p` from an empty directory, no tools, no settings: the pattern of
 // v2/pipeline/lib.mjs, copied here). Costs money. The record goes to .cache/blind/<case>/<time>/: each turn's prompt
 // and reply, and summary.json (turns, cost, what the story answered and whether the circles were right).
@@ -14,6 +15,11 @@ import { CASE, WORLD, STORE, pageUrl, CDP, ROOT } from './case-env.mjs';
 
 const MODEL = process.env.MODEL ?? 'haiku';
 const MAX = +(process.env.MAX ?? 150);
+// Guards on spending: a reply is a few hundred tokens, so each call's output is capped (a Sonnet run of 2026-11-14 had
+// two turns write some 128,000 hidden tokens each, $1.70 apiece, before a short reply); and the run stops at BUDGET
+// dollars.
+const OUTPUT_CAP = +(process.env.OUTPUT_CAP ?? 4000);
+const BUDGET = +(process.env.BUDGET ?? 3);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const up = (url) => fetch(url).then((r) => r.ok, () => false);
 const J = JSON.stringify;
@@ -101,7 +107,7 @@ fs.mkdirSync(blindDir, { recursive: true });
 async function call(prompt) {
     const args = ['-p', '--model', MODEL, '--tools', '', '--strict-mcp-config', '--setting-sources', '', '--no-session-persistence', '--system-prompt', SYSTEM, '--output-format', 'json'];
     const out = await new Promise((resolve, reject) => {
-        const child = spawn('claude', args, { cwd: blindDir, stdio: ['pipe', 'pipe', 'pipe'] });
+        const child = spawn('claude', args, { cwd: blindDir, stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, CLAUDE_CODE_MAX_OUTPUT_TOKENS: String(OUTPUT_CAP) } });
         let so = '', se = '';
         child.stdout.on('data', (d) => { so += d; });
         child.stderr.on('data', (d) => { se += d; });
@@ -111,7 +117,7 @@ async function call(prompt) {
     });
     const r = JSON.parse(out);
     if (r.is_error) throw new Error(`model error: ${String(r.result).slice(0, 300)}`);
-    return { text: r.result ?? '', cost: r.total_cost_usd ?? 0, model: Object.keys(r.modelUsage ?? {})[0] ?? MODEL };
+    return { text: r.result ?? '', cost: r.total_cost_usd ?? 0, model: Object.keys(r.modelUsage ?? {})[0] ?? MODEL, usage: r.usage ?? {} };
 }
 const parse = (text) => { const m = /\{[\s\S]*\}/.exec(text); if (!m) return null; try { return JSON.parse(m[0]); } catch { return null; } };
 
@@ -122,6 +128,7 @@ const answered = [];
 let notes = '', cost = 0, model = MODEL, turn = 0, end = 'turns ran out';
 fs.writeFileSync(path.join(RUN, 'system.md'), SYSTEM);
 for (; turn < MAX; turn++) {
+    if (cost >= BUDGET) { end = `budget of $${BUDGET} reached`; break; }
     const v = await ev(VIEW);
     for (const a of v.answers) if (!answered.some((x) => x.text === a.text)) { answered.push({ ...a, turn }); console.log(`turn ${turn}: the story answered: ${a.text}${a.bad ? '  (WRONG)' : ''}`); }
     if (((await save()).para ?? 1) >= mainLen) { end = 'reached the end of the story'; break; }
@@ -130,7 +137,8 @@ for (; turn < MAX; turn++) {
     let reply, a;
     try { reply = await call(prompt); } catch (e) { console.log(`turn ${turn}: ${e.message}`); end = `call failed: ${e.message}`; break; }
     cost += reply.cost; model = reply.model;
-    fs.writeFileSync(path.join(RUN, `${String(turn).padStart(3, '0')}.md`), `${prompt}\n\n<!-- reply -->\n${reply.text}\n`);
+    if (reply.cost > 0.25) console.log(`turn ${turn}: this call cost $${reply.cost.toFixed(2)} (${reply.usage.output_tokens} output tokens)`);
+    fs.writeFileSync(path.join(RUN, `${String(turn).padStart(3, '0')}.md`), `${prompt}\n\n<!-- reply -->\n${reply.text}\n\n<!-- cost ${reply.cost} usage ${J(reply.usage)} -->\n`);
     a = parse(reply.text);
     if (!a?.action) { history.push(`(a reply that was not a JSON action: ${reply.text.slice(0, 80)})`); continue; }
     if (typeof a.notes === 'string') notes = a.notes.slice(0, 1500);
