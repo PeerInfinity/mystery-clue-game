@@ -90,7 +90,7 @@ const guide = fs.readFileSync(path.join(ROOT, 'guide.html'), 'utf8')
 
 const SYSTEM = `You are playing a detective game in a web page, as its reader. A short mystery story is told a paragraph at a time; you build a timeline of what you learn, decide whom to trust, mark answers to the story's questions (circle the one you believe, cross out the ones you rule out), and link the evidence that shows each answer. Before the story gives an answer away, a gate stops you until you have linked the evidence for it and circled an answer. Your aim is to reach the end of the story with every question answered rightly, by reasoning from the evidence; guessing is not the point.
 
-You see the page as text, and a numbered list of the controls you may use. Each turn you do one thing. Reply with only a JSON object, no other text:
+You see the page as text, and a numbered list of the controls you may use. Each turn you do one thing. You have no tools: do not write tool calls or XML. Reply with only a JSON object, no other text:
 {"thought": "<one or two sentences: what you are doing and why>", "notes": "<your running notes, which replace the previous ones and are all you remember besides your last actions: suspects, evidence, what is left to do; under 150 words>", "action": {"click": <number>}}
 or, for a control listed as "select", {"select": <number>, "value": "<one of its options>"}.
 Click a timeline entry to open it in the Detail panel; the Detail panel then offers what you can do with it (trust, "Relevant to…" links, moves). "Read on ▶" reads the next paragraph.
@@ -119,7 +119,16 @@ async function call(prompt) {
     if (r.is_error) throw new Error(`model error: ${String(r.result).slice(0, 300)}`);
     return { text: r.result ?? '', cost: r.total_cost_usd ?? 0, model: Object.keys(r.modelUsage ?? {})[0] ?? MODEL, usage: r.usage ?? {} };
 }
-const parse = (text) => { const m = /\{[\s\S]*\}/.exec(text); if (!m) return null; try { return JSON.parse(m[0]); } catch { return null; } };
+// The reply: the JSON asked for, or (Sonnet, 2026-11-14, a turn in four) a tool call written out as text
+// (`<invoke name="click"><parameter name="click">43</parameter></invoke>`, often repeated): its first action is taken.
+const parse = (text) => {
+    const m = /\{[\s\S]*\}/.exec(text);
+    if (m) try { return JSON.parse(m[0]); } catch { /* not JSON: try the other form */ }
+    const c = /<parameter name="(click|select)">\s*(\d+)\s*<\/parameter>/.exec(text);
+    if (!c) return null;
+    const v = /<parameter name="value">([^<]*)<\/parameter>/.exec(text);
+    return { action: c[1] === 'select' ? { select: +c[2], value: v?.[1] ?? '' } : { click: +c[2] }, written_as_a_call: true };
+};
 
 // --- The loop.
 const mainLen = fs.readFileSync(path.join(ROOT, CASE, 'story.txt'), 'utf8').split(/\n\s*\n/).filter((p) => p.trim()).length - 1;

@@ -819,6 +819,15 @@ they are, with no cost for a link that shows nothing, since no difficulty is to 
     was pressed. Most of what remains is circling and linking around the gate, and the order of the work (reading
     the card, opening entries one by one). Run 2's higher cost is not explained by its length; the record keeps only
     each run's total.
+63. **Sonnet** (Claude Sonnet 5.5, The Watchman's Clock, 2026-11-14). A first run was stopped at turn 22 with $3.73
+    spent: two turns had each written some 128,000 hidden output tokens ($1.63 and $1.74) before a short, normal
+    reply, against $0.01 to $0.03 for the rest. The harness now caps each call's output and stops a run at a budget.
+    The second run: **both answers right, 45 turns, $0.91**, no costly turn. It found "Something is missing here" at
+    turn 8 (Haiku: 28 to 38) and spent 5 turns at "not all linked yet" (Haiku: 8 to 53); it made 9 links, each of
+    the essential ones and few others, linking the latch and the gap to both questions of its own accord. On 12
+    turns it wrote a tool call as text (`<invoke name="click">…`, often repeated) instead of the JSON asked for, and
+    those turns were lost; the harness now takes the first action from that form and tells the model it has no
+    tools. The runaway turns of the first run may have been the same pattern repeating.
 
 ## What the game needs from the concept library
 
