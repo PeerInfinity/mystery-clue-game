@@ -857,7 +857,7 @@ function render() {
     const routeNow = reasoned.find((f) => f.attr === 'route');
     if (routeNow) for (const l of state.links) if (l.entry.startsWith('r:r:') && l.entry !== routeNow.id) l.entry = routeNow.id;
     // A telling can be linked like any entry: that it was said stands, whatever becomes of what it carried.
-    if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted });
+    if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted, partlyDoubted });
     syncQuestions();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
@@ -1061,16 +1061,20 @@ function statusHtml(r) {
  * A statement the player no longer believes, for a lie as evidence (an observation from `{doubted: id}`): a telling
  * whose false facts told so far are all off the timeline, or a claim whose false assertions are.
  */
-function doubted(id) {
+function doubtOf(id) {
     const f = factById.get(id);
-    if (!f) return false;
-    if (CLAIM_ATTRS.has(f.attr)) return allAssertions.some((x) => x.claim === id && x.truth === false) && levelOf(claimChains(id), state.trust) < state.threshold;
-    if (f.attr !== 'tells') return false;
+    if (!f) return 'none';
+    if (CLAIM_ATTRS.has(f.attr)) return allAssertions.some((x) => x.claim === id && x.truth === false) && levelOf(claimChains(id), state.trust) < state.threshold ? 'all' : 'none';
+    if (f.attr !== 'tells') return 'none';
     const told = new Set(list(f.value));
     const lies = data.accounts.filter((a) => told.has(a.id) || [...prov.ancestors(a.id)].some((p) => told.has(p)))
         .flatMap((a) => list(a.facts)).map((x) => factById.get(x)).filter((x) => x && x.truth === false && seen(givenAt(x)));
-    return lies.length > 0 && lies.every((x) => !accepted(x));
+    const off = lies.filter((x) => !accepted(x)).length;
+    return !lies.length || !off ? 'none' : off === lies.length ? 'all' : 'some';
 }
+const doubted = (id) => doubtOf(id) === 'all';
+/** A telling some, not all, of whose false facts told so far are off the timeline: a lie half disbelieved. */
+const partlyDoubted = (id) => doubtOf(id) === 'some';
 /** What is on the timeline now: told so far and trusted to the threshold, with the player's own entries. */
 const onTimeline = () => allFacts().filter((f) => f.attr !== 'tells' && visible(f) && accepted(f));
 const isTypedState = (f) => (STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg;

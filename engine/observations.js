@@ -40,13 +40,17 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
         filled.push({ obs: o, entries: hits.map((h) => entry(h.entry)), says: o.says });
     }
     // Begun: an observation from more than one entry, some of them linked, not all (and, with `if`, its reading
-    // circled). The links say that something is still missing, not what.
+    // circled); or one whose statement is linked and only partly disbelieved (`ctx.partlyDoubted(id)`: some of what
+    // it carried that is false is off the timeline, not all). The links say that something is still missing, not what.
     const partial = [];
+    const half = (f, e) => !!f.doubted && e.id === f.doubted && !!ctx.partlyDoubted?.(e.id);
     for (const o of observations) {
-        if (o.from.length < 2 || filled.some((x) => x.obs === o)) continue;
+        if (filled.some((x) => x.obs === o)) continue;
         if (o.if && marks[o.if.q]?.[o.if.pick] !== 'circled') continue;
         const mine = links.filter((l) => l.q === o.q && entry(l.entry));
-        const hits = o.from.map((f) => mine.find((l) => matches(f, entry(l.entry), ctx))).filter(Boolean);
+        const halves = o.from.map((f) => mine.find((l) => half(f, entry(l.entry)))).filter(Boolean);
+        if (o.from.length < 2 && !halves.length) continue;
+        const hits = [...o.from.map((f) => mine.find((l) => matches(f, entry(l.entry), ctx))).filter(Boolean), ...halves];
         if (!hits.length) continue;
         hits.forEach((h) => used.add(h));
         partial.push({ obs: o, entries: hits.map((h) => entry(h.entry)), of: o.from.length });

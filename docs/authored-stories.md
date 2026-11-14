@@ -875,6 +875,13 @@ in the Bible (90). Four ran out of turns at the gate, each with the right answer
 71. **The route still not built** (The Ring on the Bench), with the room panel now in view: it marked every way in,
     many times over, and never added a step to the route. It circled "something else".
 
+The user's rulings (2026-11-14): for finding 69, a statement linked and only partly disbelieved counts as begun ("part
+of something not yet complete"; `ctx.partlyDoubted` in `fill`), checked on The Rent Box: one false part distrusted,
+begun; both, filled. Finding 70 is to be tried with Sonnet. For finding 71 the user tries the room panel, and a look
+at it found: the route section is a heading and two buttons, with nothing saying what a route is for or that the
+finished route is an entry to link to the question; and in three columns the gate's notice floats over the
+Questions panel and hides part of it.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.

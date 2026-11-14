@@ -442,7 +442,7 @@ data holds for that pair is then filled in, keeping its logic (entries, their ch
   here", named by its rule and time: what else it rests on is the record as the timeline holds it), so that an author can make a move necessary by requiring the entry it reveals. It is filled when every entry is on the timeline
   and linked to `q`, and goes if one leaves. An observation from several entries with some of them linked is
   *begun* (`partial` from `fill`, 2026-11-14): the page says of each such link that it is part of something not yet
-  complete, and lists it under the question, without naming what is missing. A link that does neither stays as the
+  complete, and lists it under the question, without naming what is missing. A statement linked for `{doubted}` and only partly disbelieved (some of its false parts off the timeline, not all) is begun too. A link that does neither stays as the
   player's note, and says so.
 - `if: {q, pick}`: filled only with that answer of another question circled. A clue the story reads more than one way is an
   ordinary question with those readings as its possibilities, and what follows from each reading depends on it through `if`.

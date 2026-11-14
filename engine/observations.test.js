@@ -110,3 +110,12 @@ test('an observation from several entries, some linked: begun, not filled, and n
     assert.equal(all.partial.length, 0);
     assert.equal(fill([{ ...obs[0], if: { q: 'x', pick: 'p' } }], [{ entry: 'a', q: 'q' }], [a, b]).partial.length, 0, 'a reading not circled: nothing begun');
 });
+
+test('a statement linked and only partly disbelieved: begun', () => {
+    const t = { id: 't' };
+    const obs = [{ id: 'o', q: 'q', from: [{ doubted: 't' }], says: 'a lie' }];
+    const r = fill(obs, [{ entry: 't', q: 'q' }], [t], {}, { doubted: () => false, partlyDoubted: () => true });
+    assert.deepEqual([r.filled.length, r.partial.length, r.notes.length], [0, 1, 0]);
+    assert.equal(fill(obs, [{ entry: 't', q: 'q' }], [t], {}, { doubted: () => false, partlyDoubted: () => false }).notes.length, 1, 'not disbelieved at all: a note');
+    assert.equal(fill(obs, [{ entry: 't', q: 'q' }], [t], {}, { doubted: () => true, partlyDoubted: () => false }).filled.length, 1);
+});
