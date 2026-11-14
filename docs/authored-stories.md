@@ -771,6 +771,35 @@ Each is about two minutes: read five to eight paragraphs, then make every move a
 when the deciding clue arrives. More than half the moves are links (7 of 11, and 5 of 10). In the first, the reader can
 do nothing useful between meeting the contradiction and finding the paper except distrust a side on a guess.
 
+### The first blind solver (experiment 2, 2026-11-14)
+
+The user asked for one blind run with Haiku first. `scripts/blind-solve.mjs` plays a case through the real page: each
+turn the model gets the guide, its last twelve actions, its own running notes, the page as text and a numbered list
+of the controls a player may use (not the hints, the autoplay or Settings), and answers with one action as JSON. One
+`claude -p` call a turn, from an empty directory with no tools (the pattern of the archived pipeline). Records go to
+`.cache/blind/` (not committed).
+
+The Watchman's Clock, Claude Haiku 5.5: **both answers right, through the gate, in 71 turns, for $0.10.**
+
+57. **The new move was found unaided.** At turn 31, from a punch's detail, it pressed "Something is missing here: at
+    Tuesday, three o'clock" ("Ward's missing round would put him away from the station"), and linked the gap to "Who
+    took the bale?". It never distrusted the statement because of the contradiction; it set the statement's rounds to
+    distrusted at turn 57, by its own reading.
+58. **The gate's count was the wall.** From turn 33 to 64 it sat at "its evidence is not all linked yet: 2 of 3"
+    without knowing which piece was missing. It was the gate's state on the latch at half past three, linked to
+    "When" long before but not to "Who" (the observation "the gate was opened with a key between half past two and
+    half past three"). The same entry needed twice, for two questions, read to it as already done. Thirty turns of
+    a two-minute case went there, five of them pressing "Hint".
+59. **Linking everything works.** It ended with 18 links to "Who" and "When", against 5 essential observations; the
+    extra links cost nothing and were kept as notes. A player who links every entry to every question passes the
+    gate without the reasoning the gate means to require. Whether a link should be able to be wrong (a note that
+    shows nothing, counted against the player, or a limit) is for the user.
+60. **Two circles at once on "When"** ("something else" and the right answer) held the gate until it noticed "(2
+    circled)" in the gate notice.
+61. **Harness defects found and fixed after the run:** a "Hint" button inside the gate notice was offered (the hint
+    text itself shows in a panel the solver never saw, so nothing leaked, but turns were wasted), and "nothing
+    changed" was reported for clicks that changed only the view (More), as it compared the save and the detail alone.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
