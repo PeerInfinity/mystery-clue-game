@@ -886,6 +886,12 @@ Questions panel and hides part of it.
     meant: "The stable-clock link is still part of an incomplete observation, so I'm opening Bowker's glance at the
     stable clock" (turn 19), and linked it. Nine links, against five essential observations.
 
+The user's rulings on the room panel (2026-11-14): the route section now says what a route is for ("How could it have
+come? Build a way, one step at a time, from where it could start to where it had to reach; then link the finished
+route to the question"), and so does the guide; and in three columns the notices keep to the right-hand column. The
+room check's drag of the questions' line now scrolls it into view first (the longer room panel had pushed it below
+the window).
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.

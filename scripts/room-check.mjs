@@ -99,6 +99,8 @@ const rows = () => ev(`[...document.querySelectorAll('#q-box [data-q-row]')].map
 const centre = (sel) => ev(`(() => { const r = document.querySelector(${JSON.stringify(sel)}).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
 const mouse = (type, p, extra = {}) => send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', ...extra });
 async function drag(from, to, offset) {
+    // In view first, as a player would have it: a mouse at a point below the window reaches nothing.
+    await ev(`document.querySelector(${JSON.stringify(from)}).scrollIntoView({ block: 'center' }); 1`); await sleep(50);
     const a = await centre(from), b = await centre(to);
     await mouse('mouseMoved', a, { button: 'none' }); await mouse('mousePressed', a, { buttons: 1, clickCount: 1 });
     await mouse('mouseMoved', { x: a.x, y: (a.y + b.y) / 2 }, { buttons: 1 }); await mouse('mouseMoved', { x: a.x, y: b.y + offset }, { buttons: 1 });

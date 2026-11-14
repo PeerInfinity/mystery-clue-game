@@ -37,6 +37,7 @@ ${got ? `<p class="rm-moves">${got}</p>` : ''}`;
         const nodes = v.route.nodes.map((n) => `<span class="rm-node">${ent(n)}</span>`).join('<span class="rm-arrow">→</span>');
         const next = v.route.next.map((n) => `<button type="button" class="rm-add" data-route-add="${esc(n)}">+ ${esc(h.nameOf(n))}</button>`).join(' ');
         return `<h3>A route</h3>
+<p class="small muted">How could it have come? Build a way, one step at a time, from where it could start to where it had to reach; then link the finished route to the question (it is on the timeline).</p>
 <div class="rm-chain">${nodes}${nodes && next ? '<span class="rm-arrow">→</span>' : ''}${next}</div>
 ${v.route.nodes.length ? '<p class="rm-moves"><button type="button" class="quiet" data-route-back>Take back the last link</button></p>' : ''}
 ${v.route.steady.length ? `<p class="small muted">${v.route.steady.map((f) => h.phrase(f)).join('; ')}: the far end stays where it is.</p>` : ''}`;

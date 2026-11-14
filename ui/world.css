@@ -151,6 +151,13 @@ body.world-page.tabbed .top { position: static; }
 .notice p { margin: 4px 0; }
 .notice ul { margin: 4px 0; padding-left: 18px; }
 .notice[hidden] { display: none; }
+/* In three columns the notices keep to the right-hand column (2 of 7 parts, or 2 of 8 with a wide timeline, after the
+   page's padding and gaps), so that they never cover the middle one. A percentage of a fixed box is of the viewport
+   without its scrollbar. */
+@media (min-width: 1001px) {
+  body:not(.tabbed) .notices { width: min(420px, calc((100% - 64px) * 2 / 7)); }
+  body:not(.tabbed):has(.world-main.wide) .notices { width: min(420px, calc((100% - 64px) * 2 / 8)); }
+}
 .lapse-news { border-color: var(--bad); }
 .gate-news { border-color: var(--accent, var(--ink)); }
 .gate-news.flash { animation: notice-flash 1.2s; }
