@@ -882,6 +882,10 @@ at it found: the route section is a heading and two buttons, with nothing saying
 finished route is an entry to link to the question; and in three columns the gate's notice floats over the
 Questions panel and hides part of it.
 
+72. **Sonnet on The Stable Clock** (2026-11-14): **both answers right, 30 turns, $0.95.** It read the new report as
+    meant: "The stable-clock link is still part of an incomplete observation, so I'm opening Bowker's glance at the
+    stable clock" (turn 19), and linked it. Nine links, against five essential observations.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
