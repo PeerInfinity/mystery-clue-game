@@ -867,7 +867,7 @@ function render() {
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
     st.innerHTML = storyTabsHtml() + (at ? stories.get(sid).slice(1, at + 1).map((p, i) => `<p class="sp${i + 1 === at && reading.log.at(-1) === `${sid}:${at}` ? ' now' : ''}" data-sp="${esc(`${sid}:${i + 1}`)}">${paraSpan(sid === MAIN ? i + 1 : `${sid}:${i + 1}`)} ${paraHtml(sid, i + 1)}</p>`).join('')
-        : `<p class="muted small">${esc(fileById.get(sid)?.title ?? '')}: not read yet. <b>Read on ▶</b> reads it.</p>`);
+        : `<p class="muted small">${esc(fileById.get(sid)?.title ?? '')}: not read yet. <b>Read on ▶</b> reads it.</p>`) + paperNotes();
     // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
     const shownKey = `${sid}:${at}`;
     if (shownPara !== shownKey && visibleEl(st)) { shownPara = shownKey; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
@@ -1359,6 +1359,13 @@ function chipsHtml(q) {
     return html;
 }
 // --- The story's tabs: the main story and each file delivered so far, with how far each is read.
+/** The papers that have come and are not read to their end: `[{id, title, at, last}]`. */
+const unreadPapers = () => files.filter((f) => delivered(f.id) && reading.readTo(f.id) < lastOf(f.id)).map((f) => ({ id: f.id, title: f.title, at: reading.readTo(f.id), last: lastOf(f.id) }));
+/** Under the main story: each paper that has come and is not read to its end, with a button to open it. */
+function paperNotes() {
+    if (state.story !== MAIN) return '';
+    return unreadPapers().map((p) => `<p class="paper-note small">${p.at ? 'A paper not read to its end' : 'A paper has come'}: <b>${esc(p.title)}</b> (${p.at} of ${p.last} read). <button type="button" class="quiet" data-story="${esc(p.id)}">Open it</button></p>`).join('');
+}
 function storyTabsHtml() {
     if (!files.length) return '';
     const tab = (id, title) => {
@@ -1655,6 +1662,7 @@ function renderGate() {
         : `The story goes on once you have shown the answer: link the evidence for it (“Link observations…”) and circle the one answer the evidence leaves${loose ? '. A question with no evidence to link takes any one answer' : ''}.`;
     el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. ${rule}</p>
       <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
+      ${unreadPapers().length ? `<p class="small">Papers not read to their end: ${unreadPapers().map((p) => `${esc(p.title)} (${p.at} of ${p.last})`).join('; ')}. Their tabs are in the Story panel.</p>` : ''}
       ${qs.some((q) => gateState(q) === 'evidence') ? '<p class="small">One event can be evidence for more than one question: one you have linked to another question may be needed for this one too.</p>' : ''}
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }

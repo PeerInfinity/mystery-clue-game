@@ -850,6 +850,11 @@ of turns at the gate, six of them with the right answers already circled; what e
 67. **The room's route** (The Ring on the Bench): never built; but the harness showed the model the room panel's
     buttons without its text (the panel was not among the parts it read). Fixed; the run is to be repeated.
 
+The user's rulings (2026-11-14): papers are announced (a note under the main story for each paper that has come and
+is not read to its end, with a button to open it; and the gate's notice lists them); the guide says that a statement
+you no longer believe can be evidence, distrusted and linked; and for finding 66 the user wants some way to report
+that something is still missing, its form to be discussed.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
