@@ -762,8 +762,17 @@ A provisional order, this session's suggestion (the user has not ruled):
 5. The remaining mechanics, each with its miniature: a document's own properties, who could have known, two
    readings of one clue, absence as evidence, means (ideas 3, 4, 6, 7, 8). Done 2026-11-11 (findings 41 to 56:
    The Will in the Bible, The Loose Board, The Telegram Signed M., The Watchman's Clock, The Sailor's Knot).
-6. Blind solvers on the miniatures (experiment 2); it costs money and needs the user's go-ahead.
-7. A story of 20 to 30 questions.
+6. Blind solvers on the miniatures (experiment 2); it costs money and needs the user's go-ahead. Done 2026-11-14
+   (findings 57 to 74): Haiku solved 14 of the 15 cases, Sonnet The Stable Clock.
+7. A story of 20 to 30 questions. Design agreed 2026-11-14, to be built in a new session (Fable, at the user's
+   choice): papers are earned by solving questions, in an order drawn at random for each playthrough within what the
+   logic allows (a local simulation of the Archipelago plan: locations are solved questions, items are papers; a
+   seed to replay; the page checks over several seeds); a short main story of the narrator's own observations and
+   the questions, and some twenty papers; some twenty small questions, each one of the mechanics the miniatures
+   show, a few larger ones that need them, and one final question; the premise a fire at the customs house of a
+   small harbour town (a ledger, a ship's log, the tide table, the night watch). Order: the logic first
+   (`structure.json`), shown to the user before anything else; then the delivery mechanism, its design laid out
+   first; then the prose and data; then a blind run. It takes in finding 35 and, if needed, finding 46.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
