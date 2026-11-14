@@ -902,6 +902,16 @@ the window).
     faded", now on), so a hasty distrust can be seen and undone. The blind solver could not reach Settings, so it had
     never seen distrusted entries at all.
 
+74. **Haiku once more on the four still held** (2026-11-14). The Rent Box (146 turns, $0.24; 81 of them showing its
+    half-disbelieved statement as begun), The Rent Box Papers (128, $0.16) and The Ring on the Bench (85, $0.10; it
+    built the route from the yard by the pane and the cord to the bench) were solved, every answer right; these
+    loaded the page before finding 73's changes. The Stable Clock, after them, ran out of turns at "3 of 4": it again
+    distrusted the gardener's true half at turn 9 (the new line said what that would take away), but the entry
+    stayed in view, faded, and at turn 84 it trusted it again and completed that observation. What it never did was
+    the fourth: the gardener honest and wrong, which needs his "quarter to nine" disbelieved while the statement is
+    linked; with nothing of it disbelieved the link is a plain note. So fourteen of the fifteen cases have now been
+    solved by Haiku, and The Stable Clock by Sonnet.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
