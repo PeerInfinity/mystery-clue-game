@@ -24,7 +24,8 @@ const matches = (from, e, ctx) => (typeof from === 'string' ? e.id === from
  * What the player's links give, from the entries on the timeline (`known`). An observation is filled when every entry
  * it comes from is on the timeline and linked to its question; it goes if one of them leaves the timeline. `if`: only
  * with that answer of another question circled (`marks`: `{question: {possibility: mark}}`), for what depends on how
- * a clue is read. A link that fills nothing stays as the player's note.
+ * a clue is read. `partial`: the observations from several entries that are begun (some linked, not all), with the
+ * entries linked, so the page can say that something is still missing. A link that does neither stays as a note.
  */
 export function fill(observations, links, known, marks = {}, ctx = {}) {
     const entry = (id) => known.find((e) => e.id === id);
@@ -38,8 +39,20 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
         hits.forEach((h) => used.add(h));
         filled.push({ obs: o, entries: hits.map((h) => entry(h.entry)), says: o.says });
     }
+    // Begun: an observation from more than one entry, some of them linked, not all (and, with `if`, its reading
+    // circled). The links say that something is still missing, not what.
+    const partial = [];
+    for (const o of observations) {
+        if (o.from.length < 2 || filled.some((x) => x.obs === o)) continue;
+        if (o.if && marks[o.if.q]?.[o.if.pick] !== 'circled') continue;
+        const mine = links.filter((l) => l.q === o.q && entry(l.entry));
+        const hits = o.from.map((f) => mine.find((l) => matches(f, entry(l.entry), ctx))).filter(Boolean);
+        if (!hits.length) continue;
+        hits.forEach((h) => used.add(h));
+        partial.push({ obs: o, entries: hits.map((h) => entry(h.entry)), of: o.from.length });
+    }
     const notes = links.filter((l) => entry(l.entry) && !used.has(l));
-    return { filled, notes };
+    return { filled, partial, notes };
 }
 
 /** For one question: what its essential observations are and which of them the player's description still lacks. */

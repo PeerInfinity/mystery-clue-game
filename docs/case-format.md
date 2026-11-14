@@ -440,7 +440,10 @@ data holds for that pair is then filled in, keeping its logic (entries, their ch
   (the entry of "It changed" on those two, in either order) or `{reasoned: "got_through", premises: [a crossing]}` (the
   entry of "Something got through"), or `{reasoned: "missing", of: rule, at: time}` (the entry of "Something is missing
   here", named by its rule and time: what else it rests on is the record as the timeline holds it), so that an author can make a move necessary by requiring the entry it reveals. It is filled when every entry is on the timeline
-  and linked to `q`, and goes if one leaves. A link that fills nothing stays as the player's note.
+  and linked to `q`, and goes if one leaves. An observation from several entries with some of them linked is
+  *begun* (`partial` from `fill`, 2026-11-14): the page says of each such link that it is part of something not yet
+  complete, and lists it under the question, without naming what is missing. A link that does neither stays as the
+  player's note, and says so.
 - `if: {q, pick}`: filled only with that answer of another question circled. A clue the story reads more than one way is an
   ordinary question with those readings as its possibilities, and what follows from each reading depends on it through `if`.
 - `essential`: needed for the description to count as a solution, and required by the gate: the story goes on past the question's give-away only with every essential observation filled and a right answer circled (Settings can put back the old rule, any one answer; a question with no essential observation takes any one answer). The rest add to it. `against`: possibilities it tells against.

@@ -771,7 +771,7 @@ const roomChange = (fn) => { remember(); state.room = fn(state.room); save(); re
 
 // --- Observations (world/observations.json; engine/observations.js): an entry linked to an open question.
 let linkingQ = null;      // the question "Link observations…" is working on (not saved)
-let observed = { filled: [], notes: [] };
+let observed = { filled: [], partial: [], notes: [] };
 // The player's order of the Questions list and its dividing line. Only what the player has moved is kept: a question not
 // yet placed comes just above the line, so that one newly raised is always offered and disturbs nothing.
 const LINE = '|';
@@ -806,8 +806,16 @@ function linkHtml(f) {
     if (!up.length && !down.length) return '';
     const all = linkAllFor === f.id, extra = down.filter((q) => all || isLinked(f.id, q.id)), qs = [...up, ...extra];
     const more = down.length - extra.length;
-    const shows = observed.filled.filter((x) => x.entries.includes(f) || x.entries.some((e) => e.id === f.id));
-    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${more ? `<button type="button" class="link-more" data-link-more="${esc(f.id)}">Show the others (${more})</button>` : ''}${shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>.</p>`).join('')}`;
+    // What each of its links does: shows something, is part of something not yet complete, or is kept as a note.
+    const has = (x) => x.entries.some((e) => e.id === f.id);
+    const said = [...state.links.filter((l) => l.entry === f.id && qById.has(l.q)).map((l) => {
+        const q = qById.get(l.q), name = `<span class="muted">(${esc(qLabel(q))})</span>`;
+        const shows = observed.filled.filter((x) => x.obs.q === q.id && has(x));
+        if (shows.length) return shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>. ${name}</p>`).join('');
+        if (observed.partial.some((x) => x.obs.q === q.id && has(x))) return `<p class="small">Part of something not yet complete: with something else, linked too, it would show more. ${name}</p>`;
+        return `<p class="small muted">Kept as a note: as the timeline stands, it shows nothing about this on its own. ${name}</p>`;
+    })].join('');
+    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${more ? `<button type="button" class="link-more" data-link-more="${esc(f.id)}">Show the others (${more})</button>` : ''}${said}`;
 }
 /** What the player has shown about a question: its observations, their sources, and any notes. */
 function descriptionHtml(q) {
@@ -815,12 +823,13 @@ function descriptionHtml(q) {
     const mine = observed.filled.filter((x) => x.obs.q === q.id);
     const notes = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
     const from = (x) => x.entries.map((e) => paraTag(givenAt(e))).join(', ');
+    const begun = observed.partial.filter((x) => x.obs.q === q.id).map((x) => `<li class="muted">Part of something not yet complete: ${x.entries.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
     const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
     const noteHtml_ = notes.length ? `<div class="small muted">Your notes: ${notes.map((e) => phrase(e)).join('; ')}</div>` : '';
     const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>` : '';
-    return `<div class="desc">${items ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
+    return `<div class="desc">${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
 const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span><button type="button" data-linking-done>Done</button></div>` : '');
 
@@ -1654,7 +1663,12 @@ function renderGate() {
     const count = (q) => {
         const n = circledCount(q), d = evidenceOf(q), s = gateState(q);
         if (s === 'pick') return n === 0 ? 'nothing circled yet' : `${n} circled`;
-        if (s === 'evidence') { const all = observations.filter((o) => o.q === q.id && o.essential).length; return `its evidence is not all linked yet: ${all - d.missing.length} of ${all}`; }
+        if (s === 'evidence') {
+            const all = observations.filter((o) => o.q === q.id && o.essential).length;
+            // Begun: an essential observation of several entries with some of them linked (not saying which).
+            const begun = observed.partial.filter((x) => x.obs.q === q.id && x.obs.essential).length;
+            return `its evidence is not all linked yet: ${all - d.missing.length} of ${all}${begun ? `, and ${begun} more begun` : ''}`;
+        }
         return 'the evidence is linked, and it does not lead to the answer you circled';
     };
     const strict = strictGate() && qs.some((q) => evidenceOf(q).any), loose = qs.some((q) => !strictGate() || !evidenceOf(q).any);

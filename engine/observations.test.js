@@ -29,7 +29,8 @@ test('a link the data does not know stays as a note', () => {
 
 test('an observation resting on two entries needs both linked', () => {
     assert.equal(fill(OBS, [link('f.bite')], known).filled.length, 0);
-    assert.deepEqual(fill(OBS, [link('f.bite')], known).notes, [link('f.bite')], 'until then, a note');
+    assert.deepEqual(fill(OBS, [link('f.bite')], known).notes, [], 'until then, not a note');
+    assert.deepEqual(fill(OBS, [link('f.bite')], known).partial.map((x) => x.obs.id), ['o.teeth'], 'but begun');
     const r = fill(OBS, [link('f.bite'), link('f.doctor')], known);
     assert.deepEqual(r.filled.map((x) => x.obs.id), ['o.teeth']);
     assert.deepEqual(r.notes, []);
@@ -95,4 +96,17 @@ test('a gap pointed out ("Something is missing here") is named by its rule and i
     const obs = [{ id: 'o', q: 'q', from: [{ reasoned: 'missing', of: 'f.rule', at: 't3' }], says: 'no round at three' }];
     assert.equal(fill(obs, [{ entry: gap.id, q: 'q' }], [gap]).filled.length, 1);
     assert.equal(fill([{ ...obs[0], from: [{ reasoned: 'missing', of: 'f.rule', at: 't2' }] }], [{ entry: gap.id, q: 'q' }], [gap]).filled.length, 0);
+});
+
+test('an observation from several entries, some linked: begun, not filled, and not a note', () => {
+    const a = { id: 'a' }, b = { id: 'b' }, c = { id: 'c' };
+    const obs = [{ id: 'o', q: 'q', from: ['a', 'b'], says: 'both' }];
+    const r = fill(obs, [{ entry: 'a', q: 'q' }, { entry: 'c', q: 'q' }], [a, b, c]);
+    assert.equal(r.filled.length, 0);
+    assert.deepEqual(r.partial.map((x) => [x.obs.id, x.entries.map((e) => e.id), x.of]), [['o', ['a'], 2]]);
+    assert.deepEqual(r.notes.map((l) => l.entry), ['c']);
+    const all = fill(obs, [{ entry: 'a', q: 'q' }, { entry: 'b', q: 'q' }], [a, b]);
+    assert.equal(all.filled.length, 1);
+    assert.equal(all.partial.length, 0);
+    assert.equal(fill([{ ...obs[0], if: { q: 'x', pick: 'p' } }], [{ entry: 'a', q: 'q' }], [a, b]).partial.length, 0, 'a reading not circled: nothing begun');
 });

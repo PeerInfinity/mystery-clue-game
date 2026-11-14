@@ -853,7 +853,11 @@ of turns at the gate, six of them with the right answers already circled; what e
 The user's rulings (2026-11-14): papers are announced (a note under the main story for each paper that has come and
 is not read to its end, with a button to open it; and the gate's notice lists them); the guide says that a statement
 you no longer believe can be evidence, distrusted and linked; and for finding 66 the user wants some way to report
-that something is still missing, its form to be discussed.
+that something is still missing, its form to be discussed. Chosen the same day from four ideas: each link says what
+it did, in the entry's detail ("Shows: …", "Part of something not yet complete", or "Kept as a note"), and the
+question's summary lists what is begun; and the gate's notice counts what is begun ("2 of 3, and 1 more begun",
+added at the user's wish once the first two were in). Naming what is missing (a hint written for each observation)
+is left out.
 
 ## What the game needs from the concept library
 
