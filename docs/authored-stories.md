@@ -892,6 +892,16 @@ route to the question"), and so does the guide; and in three columns the notices
 room check's drag of the questions' line now scrolls it into view first (the longer room panel had pushed it below
 the window).
 
+73. **What Sonnet did that Haiku did not, on The Stable Clock.** The gardener's statement has a true part (he looked
+    at the stable clock as the shot came) and a false one (the shot at a quarter to nine). Both Haiku runs opened the
+    true part and distrusted "this one statement" there (its own trust), taking off the timeline the very entry the
+    case needs; the begun report could not help, since the half to link was gone. Sonnet distrusted the false part
+    alone. The user's rulings: next to each trust control not at distrusted, an event's detail now says what
+    distrusting it would take off the timeline ("Distrusting it takes off the timeline: Bowker: looks out at the
+    stable clock…"); and what falls below the threshold stays in view, faded, by default (Settings' "Show the rest,
+    faded", now on), so a hasty distrust can be seen and undone. The blind solver could not reach Settings, so it had
+    never seen distrusted entries at all.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
