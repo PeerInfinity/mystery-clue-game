@@ -804,6 +804,22 @@ The user's rulings on these (2026-11-14): the page says that one event can be ev
 (the gate notice, while a question's evidence is incomplete, and the guide's section on observations); links stay as
 they are, with no cost for a link that shows nothing, since no difficulty is to be added until everything else works.
 
+62. **Three runs more after that change, with the harness fixed** (Haiku, The Watchman's Clock, 2026-11-14). All three
+    reached the end with both answers right and found "Something is missing here" unaided (turns 28, 38 and 37).
+
+    | Run | Turns | Turns with "not all linked yet" | Links | Cost |
+    |---|---|---|---|---|
+    | 1 (before) | 71 | 53 | 18 | $0.10 |
+    | 2 | 36 | 8 | 8 | $0.22 |
+    | 3 | 57 | 14 | 16 | $0.07 |
+    | 4 | 65 | 20 | 12 | $0.09 |
+
+    The wait at "2 of 3" fell from 53 turns to 8 to 20. Run 4 still met the old wall briefly: the latch at half
+    past three, linked to "When", found for "Who" at turn 48 after trying the rule and the statement. No hint
+    was pressed. Most of what remains is circling and linking around the gate, and the order of the work (reading
+    the card, opening entries one by one). Run 2's higher cost is not explained by its length; the record keeps only
+    each run's total.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
