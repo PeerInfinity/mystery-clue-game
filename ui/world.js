@@ -1655,6 +1655,7 @@ function renderGate() {
         : `The story goes on once you have shown the answer: link the evidence for it (“Link observations…”) and circle the one answer the evidence leaves${loose ? '. A question with no evidence to link takes any one answer' : ''}.`;
     el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. ${rule}</p>
       <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
+      ${qs.some((q) => gateState(q) === 'evidence') ? '<p class="small">One event can be evidence for more than one question: one you have linked to another question may be needed for this one too.</p>' : ''}
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
 }

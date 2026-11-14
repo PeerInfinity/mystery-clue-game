@@ -800,6 +800,10 @@ The Watchman's Clock, Claude Haiku 5.5: **both answers right, through the gate, 
     text itself shows in a panel the solver never saw, so nothing leaked, but turns were wasted), and "nothing
     changed" was reported for clicks that changed only the view (More), as it compared the save and the detail alone.
 
+The user's rulings on these (2026-11-14): the page says that one event can be evidence for more than one question
+(the gate notice, while a question's evidence is incomplete, and the guide's section on observations); links stay as
+they are, with no cost for a link that shows nothing, since no difficulty is to be added until everything else works.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.
