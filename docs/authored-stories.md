@@ -832,6 +832,24 @@ they are, with no cost for a link that shows nothing, since no difficulty is to 
     10; never at "not all linked yet" (it linked the evidence before reading to the gate); 7 links. It still wrote
     the call as text on 12 turns despite the instruction, and the harness took each one.
 
+**Haiku on the other fourteen cases** (one run each, 2026-11-14, $1.74 in all, at most 150 turns). Seven reached the
+end with every answer right: The Cellar Door (31 turns), Dinner at Larch House (29), The Grey Cloak (36), The Last
+Ferry (47), The Loose Board (34), The Night Porter's Statement (25), The Sailor's Knot (33). The other seven ran out
+of turns at the gate, six of them with the right answers already circled; what each still lacked:
+
+64. **Papers never opened** (The Telegram Signed M., The Will in the Bible, The Rent Box Papers): the telegram and
+    the will at 0 of 3, Mr. Fenn's statement and the narrator's afternoon at 0 of 2. It read the main story with
+    "Read on" to the gate and never chose a paper's tab, so the evidence on them never reached the timeline. (On
+    The Watchman's Clock it did find the card, late.) In The Rent Box Papers it circled the wrong man, for want of
+    them.
+65. **A lie as evidence needs the statement disbelieved** (The Lamp-Keeper's Word, The Rent Box): the statements were
+    linked, but not distrusted, so the observation from `{doubted}` never filled. In The Rent Box it set the
+    statement's own trust only at the last turn, and to trusted.
+66. **Half of a two-entry observation** (The Stable Clock): the stable clock's being slow was linked, the gardener's
+    taking his time from it was not; nothing on the page says a link is half of something.
+67. **The room's route** (The Ring on the Bench): never built; but the harness showed the model the room panel's
+    buttons without its text (the panel was not among the parts it read). Fixed; the run is to be repeated.
+
 ## What the game needs from the concept library
 
 - A case names its people, places and objects as concepts, so that the same logic can be given another theme.

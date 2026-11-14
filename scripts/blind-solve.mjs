@@ -66,7 +66,7 @@ const VIEW = `(() => {
     const els = [...document.querySelectorAll('button, a.link, select, #timeline [data-fact] .ph, [data-story], [data-mark-q], input[type=checkbox]')]
         .filter((e) => vis(e) && !e.disabled && !e.matches(skip) && !e.closest(skip));
     document.querySelectorAll('[data-blind]').forEach((e) => e.removeAttribute('data-blind'));
-    const where = (e) => (e.closest('#story') ? 'story' : e.closest('#questions') ? 'questions' : e.closest('#clashes') ? 'contradictions' : e.closest('#timeline') ? 'timeline' : e.closest('#detail') ? 'detail' : 'page');
+    const where = (e) => (e.closest('#story') ? 'story' : e.closest('#questions') ? 'questions' : e.closest('#clashes') ? 'contradictions' : e.closest('#timeline') ? 'timeline' : e.closest('#detail') ? 'detail' : e.closest('#room') ? 'room' : 'page');
     const controls = els.map((e, i) => {
         e.setAttribute('data-blind', String(i + 1));
         const t = (e.tagName === 'SELECT' ? (e.title || e.closest('label')?.innerText.split('\\n')[0] || 'choose') + ' [now: ' + e.options[e.selectedIndex]?.text + '; options: ' + [...e.options].map((o) => o.text).join(' / ') + ']'
@@ -77,7 +77,7 @@ const VIEW = `(() => {
     return {
         text: [part('#gate-news', 'Notice: the gate'), part('#answer-news', 'Notice: the story answered'), part('#lapse-news', 'Notice'),
             part('#story', 'Story panel (read so far, paragraph ' + para.value + ' of ' + para.max + ' of the story shown)'), part('#questions', 'Questions'), part('#clashes', 'Contradictions'),
-            part('#timeline', 'Timeline'), part('#detail', 'Detail (what you last opened)')].filter(Boolean).join('\\n\\n'),
+            part('#timeline', 'Timeline'), part('#room', 'The room'), part('#detail', 'Detail (what you last opened)')].filter(Boolean).join('\\n\\n'),
         controls: controls.join('\\n'),
         answers: [...document.querySelectorAll('#answer-news li')].filter(vis).map((li) => ({ text: li.innerText.replace(/\\s+/g, ' ').trim(), bad: !!li.querySelector('.bad') })),
     };
