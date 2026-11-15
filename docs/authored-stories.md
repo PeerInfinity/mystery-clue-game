@@ -918,8 +918,9 @@ script that found each fact's paragraph from its quote; the data files are the s
     is not the goal could do without a give-away (it is judged when solved); that would be a format change.
 88. **"Something is missing here" is offered for hours not yet read.** The watch book has one entry to a paragraph, so
     with the book half read every later hour is "missing", and the path check called the true path's move late. The
-    move carries `late` with that reason. A record in one paragraph (The Watchman's Clock) never showed it. For the
-    user: should the move wait until the record's paper is read to its end?
+    move carried `late` with that reason. A record in one paragraph (The Watchman's Clock) never showed it. The
+    user's ruling (2026-11-15): the move waits. The page offers a gap only once every paper that holds an entry of
+    the record is read to its end, and says so on the rule and the entries meanwhile; `late` is gone from the path.
 89. **Time points shared between papers** have one home paragraph and `labels` listing every paper that tells the
     time, so the label shows whichever is read first. A time told relative to a contested event ("some minutes
     before the bell") is left unordered against the two clock times, or the timeline's order would give away which
@@ -931,6 +932,8 @@ script that found each fact's paragraph from its quote; the data files are the s
     entry names a berth) is the narrator's own fact, beside the false one.
 91. **Yes and no are both offered outright.** An answer that is `indirect` sits behind "More", which for a yes-or-no
     question would point at it; both are `direct`, quoting the question's own words.
+    The Archipelago-CC session rebuilt the world from this export on 2026-11-15 (its commit `4720ea7a03` on
+    `mystery-world`, not merged: only the version changed, to `dd0448338832`).
 92. **Not looked at by eye yet:** the needs and alibis the page shows for the three acts of the case's own (signing a
     pass at the Custom House, sending word of the lamp, firing the house). The fire's need of a key is stated by
     observations and not as a typed need (finding 22: a key is a key by its wording and its time).

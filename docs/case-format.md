@@ -317,7 +317,8 @@ The player's moves, each checked by these rules, give entries with the source *t
   `series: {attr, value, at: [times], of?, detail?}` (the watchman must punch his clock every hour from twelve until
   five), and each entry of its record carries `series: <the rule's id>`, with the rule's `of`, `attr` and `value`, at
   one of its times (the card's punches). On the rule or on a record entry, the page offers the move at each time the
-  record on the timeline lacks; it gives the reader's own entry, the series' state denied at that time (`neg`, `rule`,
+  record on the timeline lacks, once every paper that holds an entry of the record is read to its end (a half-read
+  record would show every hour not yet reached as missing); it gives the reader's own entry, the series' state denied at that time (`neg`, `rule`,
   `gap`), resting on the rule and the record as the timeline then holds it (as trusted as the least of them). It
   lapses when the record leaves the timeline or comes to have that time. A move `{move: 'm', of: rule, at: time}`;
   in path.json `{do: "m", of: rule, time}` (`at` there is the paragraph).

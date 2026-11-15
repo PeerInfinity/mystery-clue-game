@@ -1173,11 +1173,14 @@ function gapMoveHtml(f) {
     const on = onTimeline();
     if (!on.some((e) => e.id === rule.id)) return '';
     const done = (t) => state.reasoning.some((m) => m.move === 'm' && m.of === rule.id && m.at === t);
-    const gaps = gapsOf(rule, on);
+    // A gap is a gap only once the record is read through: while a paper that holds entries of it is half read,
+    // every hour not yet reached would look missing.
+    const unread = [...new Set(data.facts.filter((e) => e.series === rule.id).map((e) => parseRef(givenAt(e))?.story))].filter((sid) => sid && sid !== MAIN && reading.readTo(sid) < lastOf(sid));
+    const gaps = unread.length ? [] : gapsOf(rule, on);
     const record = on.filter((e) => e.series === rule.id && !e.neg).sort((a, b) => rankOf(anchorOf(a.time)) - rankOf(anchorOf(b.time)));
     const items = gaps.map((t) => `<li>${done(t) ? `<span class="small muted">pointed out:</span> nothing at ${timeLabel(t)}` : `<button type="button" class="move" data-move-m="${esc(rule.id)}" data-at="${esc(t)}">Something is missing here: at ${timeLabel(t)}</button>`}</li>`).join('');
     const said = record.length ? `on the timeline at ${record.map((e) => timeLabel(anchorOf(e.time))).join('; ')}` : 'nothing on the timeline records it yet';
-    return `<h3>A regular series</h3><p class="small">${rule === f ? 'The rule names' : `A rule (${phrase(rule)}) names`} ${list(rule.series.at).length} times; ${said}.</p>${items ? `<ul class="moves">${items}</ul>` : ''}`;
+    return `<h3>A regular series</h3><p class="small">${rule === f ? 'The rule names' : `A rule (${phrase(rule)}) names`} ${list(rule.series.at).length} times; ${said}.</p>${unread.length ? `<p class="small muted">Read ${unread.map((sid) => esc(fileById.get(sid)?.title ?? sid)).join(' and ')} to the end to see whether anything is missing.</p>` : ''}${items ? `<ul class="moves">${items}</ul>` : ''}`;
 }
 /** Move (b) on a typed action: what it needs just before and does just after, each with what the timeline says. */
 function implicationsHtml(f) {
