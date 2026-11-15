@@ -1,6 +1,6 @@
 {
   "description": "The true path of the fixture (The Vestry Cup; `at` lists what must have been read), question by question: each move serves the one question in its `for_q`, and a seed's order of solving is played (scripts/path-check.mjs). Amos is placed by the tower stair, the key by the key book, Mr. Vane by the note from the Grange; then the cup, with the survey's one door.",
-  "seeds": [1,2,495],
+  "seeds": [7,2,287],
   "moves": [
     {"at": 2, "do": "link", "entry": "f.amos_up", "q": "q.tower", "see": "went up the tower stair at six", "for_q": ["q.tower"], "why": "I saw him go up at six."},
     {"at": 2, "do": "link", "entry": "f.amos_down", "q": "q.tower", "see": "came down it at nine", "for_q": ["q.tower"], "why": "And come down at nine."},

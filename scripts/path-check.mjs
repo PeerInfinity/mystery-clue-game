@@ -31,6 +31,9 @@ const STOP = +(process.env.STOP ?? 1e9);
 const files = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).files ?? [];
 const ORDER = process.env.ORDER ? process.env.ORDER.split(',') : null;
 const WHOLE = !!process.env.WHOLE;
+// GOAL_FIRST=1 (earned papers): the goal is solved as soon as it can be, the ending read with questions still open,
+// and the rest solved after it. The ending must stay shut until then and take nothing from the questions left.
+const GOAL_FIRST = !!process.env.GOAL_FIRST;
 const atText = (at) => refList(at).join(', ');
 
 const list = await (await fetch(`${CDP}/json`)).json();
@@ -275,13 +278,32 @@ if (EARNED) {
     const logic = caseLogic({ questions: R('questions.json').questions, observations: R('observations.json').observations, facts: R('facts.json').facts, files, delivery: header.delivery });
     const place = placement(logic, SEED);
     // The order of solving: among the questions open, one drawn by a generator of its own from the seed.
-    const order = choices(logic, place, rng(SEED ^ 0x5bd1e995)).order;
+    // GOAL_FIRST: the goal when it is open, else what it rests on (and what those rest on), else any.
+    const lq = new Map(logic.questions.map((q) => [q.id, q]));
+    const under = new Set();
+    const walk = (id) => { for (const r of lq.get(id)?.requires ?? []) if (!under.has(r)) { under.add(r); walk(r); } };
+    if (GOAL_FIRST) walk(logic.goal);
+    const rand = rng(SEED ^ 0x5bd1e995);
+    const first = (open) => open.find((q) => q.id === logic.goal) ?? (() => { const u = open.filter((q) => under.has(q.id)), from = u.length ? u : open; return from[Math.floor(rand() * from.length)]; })();
+    const order = choices(logic, place, rand, GOAL_FIRST ? first : null).order;
+    const mainEnd = await ev(`+document.getElementById('para').max`), ENDING = header.delivery.ending ?? mainEnd;
+    const mainAt = async () => readToOf(await save())(MAIN);
+    let after = 0;
     const title = (id) => files.find((f) => f.id === id)?.title ?? id;
     console.log(`seed ${SEED}: ${order.map((q) => `${q}${place.get(q) ? ` brings ${place.get(q)}` : ''}`).join(', ')}`);
     const byQ = new Map();
     for (const m of moves) { const q = m.for_q?.[0]; if (!byQ.has(q)) byQ.set(q, []); byQ.get(q).push(m); }
     for (const q of byQ.keys()) if (!order.includes(q)) fail({ at: [], do: 'path' }, `moves for ${q}, which is no question to solve`);
     const solved = new Set();
+    if (GOAL_FIRST) {
+        // The ending is shut while the goal is open: the story reads up to it and no further.
+        await click(`.story-tab[data-story="${MAIN}"]`);
+        for (let i = await mainAt(); i < ENDING - 1; i++) await readOne(MAIN);
+        await readOne(MAIN);
+        const at = await mainAt();
+        if (at !== ENDING - 1) { failures++; console.log(`FAIL the ending (¶${ENDING} on) with the goal open: the story is read to ¶${at}`); }
+        else console.log(`  the ending is shut at ¶${ENDING} while the goal is open`);
+    }
     for (const q of order) {
         // The papers held, and the replies to the questions solved (a reply comes with its question, whatever the seed).
         const want = [...heldAfter(logic, place, solved), ...files.filter((f) => f.reply != null && solved.has(f.reply)).map((f) => f.id)].sort();
@@ -299,7 +321,18 @@ if (EARNED) {
         else console.log(`  solved ${q}: ${expect}`);
         await click('[data-solved-close]');
         solved.add(q);
+        if (GOAL_FIRST && q !== logic.goal && solved.has(logic.goal)) after++;
+        if (GOAL_FIRST && q === logic.goal) {
+            const left = order.length - solved.size;
+            await click(`.story-tab[data-story="${MAIN}"]`);
+            for (let i = await mainAt(); i < mainEnd; i++) await readOne(MAIN);
+            const at = await mainAt();
+            if (at !== mainEnd) { failures++; console.log(`FAIL the ending after the goal: the story is read to ¶${at} of ${mainEnd}`); break; }
+            if (!left) console.log('  nothing was left open when the goal was solved (the goal rests on every question, or this seed leaves none)');
+            else console.log(`  the ending read to ¶${mainEnd} with ${left} question(s) open`);
+        }
     }
+    if (GOAL_FIRST && !failures) console.log(`  ${after} question(s) solved after the ending`);
 }
 for (const m of EARNED ? [] : moves) {
     if (!files.length) {

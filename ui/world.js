@@ -300,7 +300,7 @@ const KIND_WORD = { money: 'money', message: 'a message', drug: 'a drug' };
 /** A typed action or an intention as a short phrase: who, doing what, to whom, with what. */
 function stepText(x) {
     if (!list(x.act).length) return x.hyp ? (/^to /.test(x.value) ? `${ent(x.of)}, aiming ${esc(x.value)}` : `${ent(x.of)}, driven by ${esc(x.value)}`) : x.goal ? `${ent(x.of)} wants: ${phrase({ ...x.goal, id: '' })}` : phrase(x);
-    const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && (list(x.act).includes('take') ? val(x.item) : list(x.act).includes('cut_self') ? `by ${val(x.item)}` : `with ${val(x.item)}`), x.about && `for ${esc(x.about)}`, x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
+    const roles = [x.thing && ent(x.thing), x.to && `${x.act === 'give' ? 'to ' : ''}${ent(x.to)}`, x.item && (list(x.act).includes('take') ? val(x.item) : list(x.act).includes('cut_self') ? `by ${val(x.item)}` : `with ${val(x.item)}`), x.about && (entityById.has(x.about) ? `(${esc(nameOf(x.about))})` : `for ${esc(x.about)}`), x.via && `through ${ent(x.via)}`].filter(Boolean).join(' ');
     const note = x.intended ? ' <span class="small muted">(intended)</span>' : x.hyp ? ' <span class="small muted">(your hypothesis)</span>' : '';
     return `${x.of === '?' ? 'Someone' : ent(x.of)}: ${list(x.act).map((t) => ACTIONS[t].label).join(' and ')} ${roles}${note}`;
 }
@@ -1806,8 +1806,9 @@ function broughtHtml(qid, button = true) {
     if (qid === logic?.goal) return 'The case is solved: the end of the story can be read.';
     const p = source.brought(qid), r = replyOf.get(qid);
     const open = (id) => (button ? ` <button type="button" class="quiet" data-story="${esc(id)}">Open it</button>` : '');
-    const reply = r ? `It was answered: <b>${esc(r.title)}</b>${open(r.id)}` : '';
-    const paper = p ? `It brought: <b>${esc(fileById.get(p)?.title ?? p)}</b>${open(p)}` : EARNED ? 'It brought nothing new.' : '';
+    const stop = button ? '' : '.';
+    const reply = r ? `It was answered: <b>${esc(r.title)}</b>${stop}${open(r.id)}` : '';
+    const paper = p ? `It brought: <b>${esc(fileById.get(p)?.title ?? p)}</b>${stop}${open(p)}` : EARNED ? 'It brought nothing new.' : '';
     return [reply, paper].filter(Boolean).join(button ? '<br>' : ' ');
 }
 function renderSolved() {

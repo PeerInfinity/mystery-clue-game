@@ -53,7 +53,7 @@ if (caseHeader.delivery?.mode === 'earned') {
     const seeds = (() => { try { return JSON.parse(fs.readFileSync(path.join(caseDir, 'world', 'path.json'), 'utf8')).seeds ?? [1]; } catch { return [1]; } })().map(String);
     const at = (i) => seeds[i % seeds.length];
     checks.splice(0, 6,
-        ...seeds.map((SEED) => ['path-check.mjs', { SEED }]), ['path-check.mjs', { SEED: at(0), WHOLE: '1' }],
+        ...seeds.map((SEED) => ['path-check.mjs', { SEED }]), ['path-check.mjs', { SEED: at(0), WHOLE: '1' }], ['path-check.mjs', { SEED: at(1), GOAL_FIRST: '1' }],
         ['world-autoplay-check.mjs', 'three', { SEED: at(0) }], ['world-autoplay-check.mjs', 'two', { SEED: at(1) }], ['world-autoplay-check.mjs', 'one', { SEED: at(2) }],
         ['world-autoplay-check.mjs', 'one', { PHONE: '1', SEED: at(1) }],
         ...seeds.map((SEED) => ['world-hints-check.mjs', { SEED }]));
@@ -65,7 +65,7 @@ const failed = [];
 const fixture = process.env.FIXTURE !== '0';
 for (const [script, ...rest] of checks.filter(([s, ...r]) => fixture || !(s === 'room-check.mjs' || r.some((x) => typeof x === 'object' && x.CASE)))) {
     const env = { ...process.env, ...(typeof rest.at(-1) === 'object' ? rest.pop() : {}) };
-    const label = [script, ...rest, env.PHONE ? '(phone)' : '', env.ORDER ? `(order ${env.ORDER})` : '', env.WHOLE ? '(each file whole)' : '', env.SEED && caseHeader.delivery?.mode === 'earned' ? `(seed ${env.SEED})` : '', env.CASE && env.CASE !== process.env.CASE ? `(${path.basename(env.CASE)})` : ''].join(' ').trim();
+    const label = [script, ...rest, env.PHONE ? '(phone)' : '', env.ORDER ? `(order ${env.ORDER})` : '', env.WHOLE ? '(each file whole)' : '', env.GOAL_FIRST ? '(the goal first)' : '', env.SEED && caseHeader.delivery?.mode === 'earned' ? `(seed ${env.SEED})` : '', env.CASE && env.CASE !== process.env.CASE ? `(${path.basename(env.CASE)})` : ''].join(' ').trim();
     console.log(`\n== ${label}`);
     const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts', script), ...rest], { env, encoding: 'utf8' });
     // Only what matters: the failures and each check's last line.

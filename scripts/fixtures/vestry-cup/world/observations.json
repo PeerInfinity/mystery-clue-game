@@ -9,7 +9,7 @@
     {"id": "o.cup_six", "q": "q.cup", "from": ["f.cup_locked"], "says": "the cup was locked away at six, so it went between six and nine", "essential": true},
     {"id": "o.cup_door", "q": "q.cup", "from": ["f.vestry_one_door"], "says": "the windows are barred: the only way into the vestry is its door, and so its key", "essential": true, "against": ["something else"]},
     {"id": "o.cup_amos", "q": "q.cup", "from": [{"solved": "q.tower"}], "says": "Amos Reed was up the tower the whole time", "essential": true, "against": ["amos"]},
-    {"id": "o.cup_vane", "q": "q.cup", "from": [{"solved": "q.vane"}], "says": "Mr. Vane was at the Grange the whole time", "essential": true, "against": ["vane"]},
+    {"id": "o.cup_vane", "q": "q.cup", "from": [{"solved": "q.vane"}], "says": "Mr. Vane was at the Grange the whole time", "against": ["vane"]},
     {"id": "o.cup_key", "q": "q.cup", "from": [{"solved": "q.key"}], "says": "Hester Dent had the vestry key from half past seven to a quarter past eight", "essential": true}
   ]
 }

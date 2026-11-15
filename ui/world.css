@@ -11,7 +11,8 @@ body.world-page { display: block; height: auto; }
 .world-story p.now { color: var(--ink); }
 .world-story p.flash { animation: flash 1.6s ease-out; }
 /* The story's tabs: the main story and the papers delivered so far (a case with files). */
-.story-tabs { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 0 6px; margin-bottom: 6px; background: var(--bg); border-bottom: 1px solid var(--line); font-family: var(--sans); }
+/* Many papers (a long case): the tabs keep to a third of the column and scroll, so the text below stays in view. */
+.story-tabs { position: sticky; top: 0; z-index: 1; max-height: 34vh; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 0 6px; margin-bottom: 6px; background: var(--bg); border-bottom: 1px solid var(--line); font-family: var(--sans); }
 .story-tab { background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 13px; }
 .story-tab.on { color: var(--ink); border-color: var(--accent); font-weight: 600; }
 .paper-note { font-family: var(--sans); border-left: 3px solid var(--accent); padding: 2px 8px; margin: 8px 0; }

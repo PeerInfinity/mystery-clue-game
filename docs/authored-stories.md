@@ -943,8 +943,21 @@ script that found each fact's paragraph from its quote; the data files are the s
     question would point at it; both are `direct`, quoting the question's own words.
     The Archipelago-CC session rebuilt the world from this export on 2026-11-15 (its commit `4720ea7a03` on
     `mystery-world`, not merged: only the version changed, to `dd0448338832`).
-92. **Not looked at by eye yet:** the needs and alibis the page shows for the three acts of the case's own (signing a
-    pass at the Custom House, sending word of the lamp, firing the house). The fire's need of a key is stated by
+92. **Looked at by eye (2026-11-15), and three things fixed.** With 34 tabs (24 papers, ten replies) the tab list,
+    which sticks to the top of the story column, was taller than the column and hid the text of every paper: it now
+    keeps to a third of the window's height and scrolls. An act's topic (`about`) was shown as its raw id
+    ("for lamp_errand"): it is now the topic's name. And an act's label is followed by its thing with no word
+    between, so the three acts of the case's own are relabelled to read on into it ("putting initials to" the
+    three passes). Seen and left: a question's time window that begins and ends on one day reads "3 September
+    until 3 September, eleven at night"; "circle an aim, or read on" is still offered when the story is read to its
+    end; a reply not opened leaves its "A paper has come" note under the story, so ten can stack there.
+    A check plays the ending with questions open (`GOAL_FIRST=1` on the true-path check, in `npm run
+    page-checks` for a case with earned papers): the ending shut while the goal is open, read once it is solved,
+    and the questions left solved after it. In this case the goal rests on all 24 other questions, so nothing is
+    ever left open; the fixture's question about the curate was made a side question (its observation under the
+    cup no longer essential, no give-away) so that the check has something to play.
+    The needs and alibis the page shows for the three acts of the case's own (signing a
+    pass at the Custom House, sending word of the lamp, firing the house) read rightly. The fire's need of a key is stated by
     observations and not as a typed need (finding 22: a key is a key by its wording and its time).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
