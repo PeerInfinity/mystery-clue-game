@@ -807,6 +807,20 @@ Next: the case's logic as Archipelago logic, in the rules.json format of the Arc
     one warning that counts item names against locations) and writes a world package from it. Not yet done: a seed
     generated from that world, and whether `mystery` survives into slot data.
 
+78. **An Archipelago-CC session built the world and reported** (2026-11-14; its branch `mystery-world`, not merged).
+    Measured there: 10 one-player and 5 two-player seeds generate, the spoiler test passes on all ten, and the web
+    client against a real server checks every location. The validator's warning counts item names, not the pool,
+    and does not matter. The export changed to match its report: the name map moved to `world[1].slot_data.mystery`
+    (a plain slot-data key that an exported preset keeps; at the top level it reached the slot only by accident),
+    with the case's version (a hash of `structure.json`) so the page can refuse another version's slot; item and
+    location ids are pinned in `structure.json` (`ap`, and the `archipelago` block) and must never change or be
+    reused; the game's name has no colon (it becomes a file name); the file now passes that repository's schema.
+    The goal stays an event in the file; the world is built there with `--victory-location`, which makes the last
+    question an ordinary check (location 1024, item 26) so that the server sees the goal. The bridge it recommends:
+    one host module there, and four messages with the page (`mystery:questionSolved`, `mystery:requestState`,
+    `mystery:state` with the papers held and the questions already checked, `mystery:refused`); the page deals only
+    in its own ids. Not built: there is no page side yet.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
