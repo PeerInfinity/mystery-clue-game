@@ -58,8 +58,14 @@ solved. The placement is drawn from a seed (`engine/delivery.js`, the forward fi
 case's logic, which the page derives from its own data (`caseLogic`): a question's papers are those its essential
 observations' facts are told in (where each is given; an inferred fact's premises'), and the paper that raises it;
 what it rests on is the questions its `{solved}` observations name. `goal` is the question that ends the case: it
-holds no paper, and it is given away at the main story's last paragraph, which the gate keeps until it is solved;
-the rest of the main story can be read from the start. The validator requires, in an earned case, an essential
+holds no paper, and it is given away in the main story's ending. The ending is the main story from paragraph
+`ending` on (default: the last paragraph); the gate keeps all of it until the goal is solved, and the rest of the
+main story can be read from the start. Since 2026-11-15 only the goal must be given away: any other question may
+leave out `answer_given_at` and its quote (it is judged when solved, and stays solvable after the ending is read),
+and no question is raised in the ending or given away before it. A file with `reply: <question>` is a **reply**: it
+comes the moment that question is solved, whatever the placement brings, and tells the answer in someone's voice. A
+reply is no paper of the logic: it is not placed, carries no entries (no fact is told in it, no question raised),
+and should say no more than its own question's answer; a question has at most one, and the goal has none. The validator requires, in an earned case, an essential
 observation on every question with an answer, no loop of solved questions, no more papers to earn than questions
 besides the goal, every question reachable with every paper, and a placement that can be drawn; with a
 `structure.json` beside it, `npm test` holds the derived logic equal to the structure's (`structureLogic`: a

@@ -13,7 +13,7 @@ import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, p
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described } from '../engine/observations.js';
-import { caseLogic, deliveryMode, placement, newSeed, isOpen } from '../engine/delivery.js';
+import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
@@ -186,7 +186,9 @@ const source = {
     /** The paper a solved question brought (null: nothing new). */
     brought: (q) => (state.solved[q] ? place.get(q) ?? null : null),
 };
-const delivered = (id) => id === MAIN || (fileById.has(id) && (EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
+// A reply (a file with `reply: <question>`) comes when its question is solved, whatever brings the papers.
+const replyOf = new Map(files.filter((f) => f.reply != null).map((f) => [f.reply, f]));
+const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).reply != null ? !!state.solved?.[fileById.get(id).reply] : EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
 /** Can this question be solved now (earned papers): not solved, its papers come, what it rests on solved. Otherwise always. */
 const openNow = (id) => { const lq = logic?.questions.find((x) => x.id === id); return !lq || isOpen(lq, source.held(), new Set(Object.keys(state.solved))); };
 // For the autoplay and the checks: the delivery as the page has it.
@@ -194,7 +196,7 @@ const openNow = (id) => { const lq = logic?.questions.find((x) => x.id === id); 
 window.__trying = (on) => { trying = !!on; };
 window.__delivery = { earned: EARNED, seed: state.seed ?? null, open: openNow, held: () => [...source.held()], solved: () => Object.keys(state.solved) };
 /** How a paper came: held from the start, or brought by solving a question (its id). */
-const cameBy = (id) => (logic?.start.includes(id) ? 'start' : Object.keys(state.solved).find((q) => source.brought(q) === id) ?? null);
+const cameBy = (id) => (fileById.get(id)?.reply != null ? fileById.get(id).reply : logic?.start.includes(id) ? 'start' : Object.keys(state.solved).find((q) => source.brought(q) === id) ?? null);
 if (!delivered(state.story)) state.story = MAIN;
 /** A paragraph's reference as the player sees it: "¶3" in the main story, "Rudd ¶2" in a file. */
 const paraTag = (x) => { const p = parseRef(x); if (!p) return '¶?'; return p.story === MAIN ? `¶${p.n}` : `${fileById.get(p.story)?.short ?? p.story} ¶${p.n}`; };
@@ -1455,7 +1457,7 @@ function storyTabsHtml() {
     const waiting = files.length - shown.length;
     // Papers earned by solving questions: how each came, and nothing about how many are still out or where they are.
     if (EARNED) {
-        const how = (f) => { const by = cameBy(f.id); return by === 'start' ? 'in hand from the start' : by && qById.has(by) ? `brought by solving <a class="link" data-q="${esc(by)}">${esc(qLabel(qById.get(by)))}</a>` : ''; };
+        const how = (f) => { const by = cameBy(f.id); return by === 'start' ? 'in hand from the start' : by && qById.has(by) ? `${f.reply != null ? 'the reply to' : 'brought by solving'} <a class="link" data-q="${esc(by)}">${esc(qLabel(qById.get(by)))}</a>` : ''; };
         return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div><details class="papers-box small"><summary>The papers (${shown.length})</summary><ul>${shown.map((f) => `<li><b>${esc(f.title)}</b>: ${how(f)}</li>`).join('')}</ul><p class="muted">More papers come as you solve questions.</p></details>`;
     }
     return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div>${waiting ? `<p class="small muted story-waiting">${waiting === 1 ? 'One more paper' : `${waiting} more papers`} may come as the story goes on.</p>` : ''}`;
@@ -1740,7 +1742,13 @@ function gateState(q) {
     if (!d.done) return 'evidence';
     return picks.length === 1 && isRight(q, picks[0].value) ? null : 'wrong';
 }
-const gateAt = (p) => atPara(p - 1, () => GATED.filter((q) => q.answer_given_at === p && qListed(q) && gateState(q) !== null));
+// The ending (earned papers): the main story from `delivery.ending` on is held until the goal is solved.
+const ENDING = EARNED ? endingOf(header, LAST) : null;
+const goalQ = EARNED ? data.questions.find((q) => q.id === header.delivery.goal) : null;
+const gateAt = (p) => atPara(p - 1, () => {
+    const held = GATED.filter((q) => q.answer_given_at === p && qListed(q) && gateState(q) !== null);
+    return ENDING != null && p >= ENDING && goalQ && !held.includes(goalQ) && gateState(goalQ) !== null ? [...held, goalQ] : held;
+});
 let gateHidden = null;    // the gate's key while its notice is hidden
 let answerNews = [];      // the answers just given: {q, mark}
 const setPara = (n) => {
@@ -1796,8 +1804,11 @@ function renderGate() {
 /** What solving a question brought: a paper (with a button to open it), or nothing new. */
 function broughtHtml(qid, button = true) {
     if (qid === logic?.goal) return 'The case is solved: the end of the story can be read.';
-    const p = source.brought(qid);
-    return p ? `It brought: <b>${esc(fileById.get(p)?.title ?? p)}</b>${button ? ` <button type="button" class="quiet" data-story="${esc(p)}">Open it</button>` : ''}` : 'It brought nothing new.';
+    const p = source.brought(qid), r = replyOf.get(qid);
+    const open = (id) => (button ? ` <button type="button" class="quiet" data-story="${esc(id)}">Open it</button>` : '');
+    const reply = r ? `It was answered: <b>${esc(r.title)}</b>${open(r.id)}` : '';
+    const paper = p ? `It brought: <b>${esc(fileById.get(p)?.title ?? p)}</b>${open(p)}` : EARNED ? 'It brought nothing new.' : '';
+    return [reply, paper].filter(Boolean).join(button ? '<br>' : ' ');
 }
 function renderSolved() {
     const el = document.getElementById('solved-news');

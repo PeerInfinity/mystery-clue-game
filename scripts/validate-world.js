@@ -48,6 +48,7 @@ for (const f of caseFiles) {
     if (!f.title || !f.short) fileErrors.push(`case.json: file ${f.id}: needs a title and a short label`);
     if (f.delivered != null && !(Number.isInteger(f.delivered) && f.delivered >= 1 && f.delivered < story.length)) fileErrors.push(`case.json: file ${f.id}: delivered is a paragraph of the main story`);
     if (f.delivered != null && caseData.delivery?.mode === 'earned') fileErrors.push(`case.json: file ${f.id}: a paper earned by solving questions has no delivered paragraph`);
+    if (f.reply != null && (f.delivered != null || (caseData.delivery?.start ?? []).includes(f.id))) fileErrors.push(`case.json: file ${f.id}: a reply comes when its question is solved, at no paragraph and not from the start`);
     try { stories.set(f.id, paragraphsOf(f.text)); } catch { fileErrors.push(`case.json: file ${f.id}: no text ${f.text}`); }
 }
 const deliveredAt = (id) => (id === MAIN ? 0 : caseFiles.find((f) => f.id === id)?.delivered ?? 0);
@@ -323,7 +324,10 @@ for (const q of questions) {
         if (v === q.answer || (v === 'something else' && !byDescription(q.id))) err(q.id, `also_right "${v}": not the answer, not "something else"`);
     }
     if (q.answer != null) {
-        if (!Number.isInteger(q.answer_given_at) || !q.answer_given_quote) err(q.id, 'an answer needs answer_given_at (a paragraph of the main story: a file never gives an answer away) and its quote');
+        // Papers earned by solving questions: only the goal must be given away (the others are judged when solved).
+        const optional = caseData.delivery?.mode === 'earned' && q.id !== caseData.delivery.goal && q.answer_given_at == null && q.answer_given_quote == null;
+        if (optional) { /* never given away */ }
+        else if (!Number.isInteger(q.answer_given_at) || !q.answer_given_quote) err(q.id, 'an answer needs answer_given_at (a paragraph of the main story: a file never gives an answer away) and its quote');
         else quoteIn(`${q.id} answer given`, q.answer_given_quote, q.answer_given_at);
         if (!('answer_inferable_at' in q)) err(q.id, 'an answer needs answer_inferable_at (null: only the give-away)');
         const ia = q.answer_inferable_at;
@@ -331,7 +335,7 @@ for (const q of questions) {
             // In a case with files, where it becomes inferable may be a list: every paragraph it needs read.
             const ias = Array.isArray(ia) ? ia : [ia];
             if (!ias.length || ias.some((x) => !isRef(x))) err(q.id, `answer_inferable_at: no paragraph ${ia}`);
-            if (ias.some((x) => parseRef(x)?.story === MAIN && after(x, q.answer_given_at))) err(q.id, `answer inferable ¶${ia} after given ¶${q.answer_given_at}`);
+            if (!optional && ias.some((x) => parseRef(x)?.story === MAIN && after(x, q.answer_given_at))) err(q.id, `answer inferable ¶${ia} after given ¶${q.answer_given_at}`);
             // A reader who can reach the answer at ¶ia (or where the question is raised, if later) must be able to
             // circle it there: the page's gate asks for a circle before the give-away.
             const rights = q.possibilities.filter((p) => p.value === q.answer || (q.also_right ?? []).includes(p.value));
@@ -400,7 +404,24 @@ if (mode === 'earned') {
     for (const id of d.start ?? []) if (!caseFiles.some((f) => f.id === id)) err('case.json', `delivery.start: no file ${id}`);
     if (!qById.has(d.goal)) err('case.json', `delivery.goal: no question ${d.goal}`);
     for (const q of questions) if (q.answer != null && !q.latent && q.kind !== 'provenance' && !byDescription(q.id)) err(q.id, 'papers are earned by solving questions: it needs essential observations');
-    if (qById.get(d.goal)?.answer_given_at !== story.length - 1) err('case.json', `delivery.goal: ${d.goal} is given away at the main story's last paragraph`);
+    // The ending: the main story's paragraphs from `delivery.ending` (default the last), held until the goal is solved.
+    // Nothing a question rests on or is raised by lies in it, and what it gives away is given away there only.
+    const ending = d.ending ?? story.length - 1;
+    if (!(Number.isInteger(ending) && ending >= 2 && ending < story.length)) err('case.json', `delivery.ending: ${ending} is no paragraph of the main story after the first`);
+    if (!(qById.get(d.goal)?.answer_given_at >= ending)) err('case.json', `delivery.goal: ${d.goal} is given away in the ending (¶${ending} on)`);
+    for (const q of questions) {
+        if (Number.isInteger(q.answer_given_at) && q.answer_given_at < ending) err(q.id, `given away at ¶${q.answer_given_at}, before the ending (¶${ending}): every paragraph before the ending can be read from the start`);
+        if (Number.isInteger(q.raised) && q.raised >= ending) err(q.id, `raised in the ending (¶${q.raised})`);
+    }
+    // Replies: a file with `reply: <question>` comes when that question is solved. It answers; it is no evidence.
+    const replies = caseFiles.filter((f) => f.reply != null);
+    for (const f of replies) {
+        const q = qById.get(f.reply);
+        if (!q || q.answer == null || f.reply === d.goal) err('case.json', `file ${f.id}: reply to ${f.reply}, which is no answered question besides the goal`);
+        if (replies.some((g) => g !== f && g.reply === f.reply)) err('case.json', `file ${f.id}: ${f.reply} has two replies`);
+        for (const x of facts) if ([x.para, x.given_at].some((r) => r != null && parseRef(r)?.story === f.id)) err(x.id, `told in ${f.id}, a reply: a reply carries no entries`);
+        for (const x of questions) if (x.raised != null && parseRef(x.raised)?.story === f.id) err(x.id, `raised in ${f.id}, a reply`);
+    }
     const logic = caseLogic({ questions, observations: observationList, facts, files: caseFiles, delivery: d });
     const byId = new Map(logic.questions.map((q) => [q.id, q]));
     const loops = (id, trail) => (trail.includes(id) ? [...trail, id] : (byId.get(id)?.requires ?? []).map((r) => loops(r, [...trail, id])).find(Boolean) ?? null);
@@ -472,7 +493,7 @@ if (!quiet) {
     console.log(`\nFacts given before the paragraph that tells them in full (${early.length})\n` + early.map((f) => `  ¶${f.given_at} (told ¶${f.para})  ${f.id}`).join('\n'));
     const never = facts.filter((f) => givenAt(f) == null);
     console.log(`\nFacts never stated by ¶46, only inferable (${never.length}): ${never.map((f) => f.id).join(', ')}`);
-    console.log('\nAnswers: inferable → given\n' + questions.filter((q) => q.answer != null).map((q) => `  ${q.answer_inferable_at == null ? '  —' : `¶${q.answer_inferable_at}`.padStart(4)} → ¶${String(q.answer_given_at).padEnd(4)} ${q.id} = ${q.answer}${q.answer_strength === 'likely' ? ' (likely)' : ''}`).join('\n'));
+    console.log('\nAnswers: inferable → given\n' + questions.filter((q) => q.answer != null).map((q) => `  ${q.answer_inferable_at == null ? '  —' : `¶${q.answer_inferable_at}`.padStart(4)} → ¶${String(q.answer_given_at ?? '—').padEnd(4)} ${q.id} = ${q.answer}${q.answer_strength === 'likely' ? ' (likely)' : ''}`).join('\n'));
     const met = contradictions(world, asserted);
     const tag = (x) => `${x.id}${x.truth === false ? ' (false)' : x.truth == null ? ' (?)' : ''} ¶${x.para}`;
     console.log(`\nContradictions a reader trusting every source meets (${met.length})\n` + met.map((c) => `  ${c.why}: ${tag(c.a)} / ${tag(c.b)}${c.via ? ` / ${tag(c.via)}` : ''}`).join('\n'));

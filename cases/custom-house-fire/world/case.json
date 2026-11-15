@@ -3,7 +3,7 @@
   "title": "The Fire at the Custom House",
   "author": "written for this project (the first full-size case: papers earned by solving questions)",
   "story": "../story.txt",
-  "delivery": {"mode": "earned", "start": ["board_letter", "pell", "tide_table", "timetable"], "goal": "q.who"},
+  "delivery": {"mode": "earned", "start": ["board_letter", "pell", "tide_table", "timetable"], "goal": "q.who", "ending": 22},
   "files": [
     {"id": "board_letter", "title": "The Board's letter to the Collector", "short": "Board", "text": "../files/board_letter.txt"},
     {"id": "pell", "title": "What Mr. Pell told me", "short": "Pell", "text": "../files/pell.txt"},
@@ -28,7 +28,17 @@
     {"id": "gate_book", "title": "The quay gate-keeper's night book", "short": "Gate book", "text": "../files/gate_book.txt"},
     {"id": "garrick_note", "title": "A note to the carter", "short": "Note", "text": "../files/garrick_note.txt"},
     {"id": "timetable", "title": "The railway timetable", "short": "Timetable", "text": "../files/timetable.txt"},
-    {"id": "station_master", "title": "What the station-master told me", "short": "Station-master", "text": "../files/station_master.txt"}
+    {"id": "station_master", "title": "What the station-master told me", "short": "Station-master", "text": "../files/station_master.txt"},
+    {"id": "r_fire_office", "title": "The fire office's report", "short": "Fire office", "text": "../files/r_fire_office.txt", "reply": "q.set"},
+    {"id": "r_locksmith", "title": "The locksmith's note", "short": "Locksmith", "text": "../files/r_locksmith.txt", "reply": "q.door"},
+    {"id": "r_messenger", "title": "What the messenger told me", "short": "Messenger", "text": "../files/r_messenger.txt", "reply": "q.oil"},
+    {"id": "r_crouch_again", "title": "What Crouch told me the second time", "short": "Crouch again", "text": "../files/r_crouch_again.txt", "reply": "q.round"},
+    {"id": "r_sexton", "title": "What the sexton told me", "short": "Sexton", "text": "../files/r_sexton.txt", "reply": "q.bell"},
+    {"id": "r_porthcarn", "title": "A telegram from Porthcarn", "short": "Porthcarn", "text": "../files/r_porthcarn.txt", "reply": "q.venn"},
+    {"id": "r_tormouth", "title": "A telegram from Tormouth", "short": "Tormouth", "text": "../files/r_tormouth.txt", "reply": "q.garrick"},
+    {"id": "r_cardiff", "title": "A telegram from Cardiff", "short": "Cardiff", "text": "../files/r_cardiff.txt", "reply": "q.sep3"},
+    {"id": "r_odell_again", "title": "A note from Mr. Odell", "short": "Odell's note", "text": "../files/r_odell_again.txt", "reply": "q.sep24"},
+    {"id": "r_marsh", "title": "What Mrs. Marsh told me", "short": "Mrs. Marsh", "text": "../files/r_marsh.txt", "reply": "q.cart"}
   ],
   "narrators": [
     {"id": "ashby", "name": "Henry Ashby", "kind": "first-person"}

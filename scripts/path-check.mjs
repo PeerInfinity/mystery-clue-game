@@ -283,7 +283,8 @@ if (EARNED) {
     for (const q of byQ.keys()) if (!order.includes(q)) fail({ at: [], do: 'path' }, `moves for ${q}, which is no question to solve`);
     const solved = new Set();
     for (const q of order) {
-        const want = [...heldAfter(logic, place, solved)].sort();
+        // The papers held, and the replies to the questions solved (a reply comes with its question, whatever the seed).
+        const want = [...heldAfter(logic, place, solved), ...files.filter((f) => f.reply != null && solved.has(f.reply)).map((f) => f.id)].sort();
         const tabs = (await ev(`[...document.querySelectorAll('.story-tab')].map((b) => b.dataset.story).filter((x) => x !== 'main')`)).sort();
         if (J(tabs) !== J(want)) { failures++; console.log(`FAIL before ${q}: the papers on the page are ${tabs.join(', ') || 'none'}, not ${want.join(', ') || 'none'}`); }
         if (!(await ev(`window.__delivery.open(${J(q)})`))) { failures++; console.log(`FAIL ${q}: the page does not have it open`); }

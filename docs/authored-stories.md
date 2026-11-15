@@ -916,6 +916,15 @@ script that found each fact's paragraph from its quote; the data files are the s
     given away at a main-story paragraph, and in an earned case every paragraph but the last can be read from the
     start. So the last paragraph is a summing-up that states all 25 answers, each in quotable words. A question that
     is not the goal could do without a give-away (it is judged when solved); that would be a format change.
+    The user's rulings (2026-11-15): a question that is not the goal may have no give-away; the ending may be
+    several paragraphs; and a give-away may come as a paper of its own. Built as: only the goal is given away in
+    the main story; the ending is the main story from `delivery.ending` on (here four paragraphs, a short
+    confession), held until the goal alone is solved, so side questions can be left open and solved afterwards;
+    and a **reply** is a file fixed to its question that comes when the question is solved (ten here, where
+    somebody in the story would naturally answer: the fire office, the locksmith, telegrams from three ports). A
+    reply is not placed and is no Archipelago item, carries no entries, and says no more than its question's
+    answer. A give-away in an ordinary earned paper was rejected: it could come before its question is solved,
+    and a question given away is no longer judged, so its check would be lost.
 88. **"Something is missing here" is offered for hours not yet read.** The watch book has one entry to a paragraph, so
     with the book half read every later hour is "missing", and the path check called the true path's move late. The
     move carried `late` with that reason. A record in one paragraph (The Watchman's Clock) never showed it. The

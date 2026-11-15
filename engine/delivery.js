@@ -88,6 +88,9 @@ export const newSeed = () => 1 + Math.floor(Math.random() * 0x7ffffffe);
 
 // --- The logic of a case. The page and the validator derive it from the world model; the check that it is the logic
 // the story was written from compares it with structure.json (structureLogic), which the page never reads.
+/** Where the main story's ending begins (earned papers): its paragraphs from there are held until the goal is solved. Default: the last. */
+export const endingOf = (header, last) => header?.delivery?.ending ?? last;
+
 /** The delivery a case's header asks for: `paragraph` (a file comes at its main-story paragraph, or from the start) or `earned`. */
 export const deliveryMode = (header) => header?.delivery?.mode ?? 'paragraph';
 
@@ -99,7 +102,9 @@ export const deliveryMode = (header) => header?.delivery?.mode ?? 'paragraph';
  */
 export function caseLogic({ questions, observations, facts, files, delivery }) {
     const factById = new Map(facts.map((f) => [f.id, f]));
-    const fileIds = new Set(files.map((f) => f.id));
+    // A reply (a file with `reply`: it comes when its question is solved) is no paper of the logic: nothing rests on it.
+    const papers = files.filter((f) => !f.reply);
+    const fileIds = new Set(papers.map((f) => f.id));
     const paperOf = (ref) => { const r = ref == null ? null : parseRef(ref); return r && r.story !== MAIN && fileIds.has(r.story) ? r.story : null; };
     const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
     const factPapers = (id, seen = new Set()) => {
@@ -113,18 +118,18 @@ export function caseLogic({ questions, observations, facts, files, delivery }) {
     for (const q of questions) {
         const mine = (observations ?? []).filter((o) => o.q === q.id && o.essential);
         if (!mine.length) continue;
-        const papers = new Set([paperOf(q.raised)].filter(Boolean)), requires = [];
+        const own = new Set([paperOf(q.raised)].filter(Boolean)), requires = [];
         for (const o of mine) for (const e of o.from) {
-            if (typeof e === 'string') factPapers(e).forEach((p) => papers.add(p));
+            if (typeof e === 'string') factPapers(e).forEach((p) => own.add(p));
             else if (e.solved) { if (!requires.includes(e.solved)) requires.push(e.solved); }
-            else if (e.doubted) factPapers(e.doubted).forEach((p) => papers.add(p));
-            else if (e.reasoned === 'missing') factPapers(e.of).forEach((p) => papers.add(p));
-            else if (e.reasoned) (e.premises ?? []).forEach((x) => factPapers(x).forEach((p) => papers.add(p)));
+            else if (e.doubted) factPapers(e.doubted).forEach((p) => own.add(p));
+            else if (e.reasoned === 'missing') factPapers(e.of).forEach((p) => own.add(p));
+            else if (e.reasoned) (e.premises ?? []).forEach((x) => factPapers(x).forEach((p) => own.add(p)));
         }
-        out.push({ id: q.id, sets: [[...papers].sort()], requires });
+        out.push({ id: q.id, sets: [[...own].sort()], requires });
     }
     const start = delivery?.start ?? [];
-    return { questions: out, start, earned: files.map((f) => f.id).filter((id) => !start.includes(id)), goal: delivery?.goal ?? null };
+    return { questions: out, start, earned: papers.map((f) => f.id).filter((id) => !start.includes(id)), goal: delivery?.goal ?? null };
 }
 
 /** The same logic from structure.json: a question's sets are its `needs`, each the papers of its clues and the paper that raises it. */

@@ -105,7 +105,7 @@ function mistakesOf() {
     const isRight = (q, v) => v === q.answer || (q.also_right ?? []).includes(v);
     // Inferable before it is given: an earlier paragraph of the main story, or a file's (engine/refs.js).
     const earlier = (a, b) => refList(a).length > 0 && refList(a).every((x) => { const r = parseRef(x); return r.story !== MAIN || r.n < b; });
-    const gated = qs.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && earlier(q.answer_inferable_at, q.answer_given_at)).sort((a, b) => a.raised - b.raised);
+    const gated = qs.filter((q) => q.answer != null && !q.latent && q.raised != null && q.answer_inferable_at != null && q.answer_given_at != null && earlier(q.answer_inferable_at, q.answer_given_at)).sort((a, b) => a.raised - b.raised);
     const marks = {}, expect = ['move'];
     let para = 1;
     const start = new Reading(['main:1']);
