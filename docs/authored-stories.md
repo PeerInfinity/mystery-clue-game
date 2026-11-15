@@ -821,6 +821,44 @@ Next: the case's logic as Archipelago logic, in the rules.json format of the Arc
     `mystery:state` with the papers held and the questions already checked, `mystery:refused`); the page deals only
     in its own ids. Not built: there is no page side yet.
 
+### The delivery mechanism: the design agreed (step 7.2, 2026-11-14; not built)
+
+Laid out to the user as six decisions with alternatives; the user agreed every recommendation, details to be
+adjusted later if wanted.
+
+1. **Solved, at any moment.** The gate's judgement (`gateState` in `ui/world.js`: exactly one answer circled, every
+   essential observation filled, the circled answer right) is consulted after every move for every question the
+   player can see, not only at a give-away. The moment it holds the question is solved for good: its marks lock,
+   Undo does not take it back, distrusting its evidence afterwards does not reopen it. With the evidence complete a
+   wrong circle says "not this answer" and nothing more (no growing wait: no difficulty is added until everything
+   else works). The clicks stay as they are (crossing out still passes through circling). No commit button.
+2. **A solved question is evidence.** A question that `requires` others (the layers) has, among its essential
+   observations, "question X is solved"; it fills by itself when X is solved, with no link for the player to make,
+   and the larger question lists what it rests on and which of those are not solved yet. Not chosen: the player
+   linking the solved question; hiding a question until what it waits for is solved; enforcing nothing.
+3. **Papers arrive by one rule with a source behind it.** The page asks "has this paper come?" (`delivered`). Playing
+   alone: a placement of papers on questions drawn from a seed by the forward fill of `scripts/structure-check.mjs`
+   (one shared module); solving a question delivers the paper placed on it. The seed is drawn for a new game, kept
+   in the save, shown in Settings, and can be given in the address to replay. Connected to an Archipelago (later,
+   once the long story has prose): the same rule answered by the bridge's `mystery:state` (finding 78); the code is
+   shaped for it now. The page derives the logic for the fill from the case's own data (each question's essential
+   observations, the paper each rests on, where it is raised, what it waits for), and a test holds that equal to
+   `structure.json`; the page does not read `structure.json` or `rules.json`.
+4. **What the player sees.** On solving, a notice where papers are announced today: "Solved. It brought: <paper>"
+   with a button to open it, or "Solved. It brought nothing new." The question carries a solved mark and what it
+   brought. A short list of the papers says how each came (held from the start, or brought by which question). Not
+   shown: how many papers are still out, or which questions hold them.
+5. **The main story in one part.** All of it is readable from the start except its last paragraph, which waits for
+   the goal question, by the gate as it is today. The questions raised in the main story are visible early; the rest
+   appear as their papers are read.
+6. **The checks.** The true path is written per question (the moves that solve it), not as one fixed order; the path
+   check plays a seed by repeatedly solving any question that is open and expects each paper to arrive as placed.
+   The page checks run three seeds a case, chosen once by script: the narrowest order found, the widest, an ordinary
+   one. Hints and autoplay only suggest moves for a question that is open now. A tiny invented fixture case (three
+   questions, three papers) carries the mechanism until the long story has prose and data.
+
+The build is handed to an Opus session (the kickoff: `.cache/delivery-build-kickoff.md`, not committed).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
