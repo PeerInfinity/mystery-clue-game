@@ -13,6 +13,7 @@ import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, p
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described } from '../engine/observations.js';
+import { caseLogic, deliveryMode, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
@@ -156,7 +157,44 @@ const seen = (x) => x != null && reading.seen(x);
 const byRead = (a, b) => { const x = posOf(a), y = posOf(b); return x === y ? 0 : x < y ? -1 : 1; };
 const syncReading = () => { state.para = reading.readTo(MAIN); state.log = [...reading.log]; };
 syncReading();
-const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
+// --- Delivery (docs/authored-stories.md, "The delivery mechanism"): whether a paper has come. By default a file comes
+// at its `delivered` paragraph of the main story (or from the start). With `delivery.mode: earned` (case.json) a paper
+// comes by a source: held from the start, or brought by solving the question it is placed on. Playing alone, the
+// placement is drawn from a seed by the fill of engine/delivery.js, from the logic of the case's own data; the seed is
+// kept in the save, shown in Settings, and can be given in the address (`?seed=`) to replay. Connected to an
+// Archipelago (later), the same two questions are the bridge's to answer (its `mystery:state`: the papers held, the
+// questions checked), and `source` is replaced by one that asks it.
+const EARNED = deliveryMode(header) === 'earned';
+const seedParam = Number(new URLSearchParams(location.search).get('seed')) || null;
+if (EARNED) {
+    const progress = (state.log?.length ?? 0) > 1 || state.links.length || Object.keys(state.marks).length;
+    if (seedParam && state.seed && seedParam !== state.seed && progress && AUTOPLAY === null && !confirm(`Start a new game with seed ${seedParam}? Your timeline on this device is cleared.`)) { /* keep the game in hand */ }
+    else if (seedParam && seedParam !== state.seed) {
+        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
+        for (const k of Object.keys(state)) if (!(k in keep)) delete state[k];
+        Object.assign(state, { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: true, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {} }, keep, { seed: seedParam });
+        reading = Reading.fromSave(state, lengths);
+        syncReading();
+    }
+    if (!state.seed) state.seed = newSeed();
+}
+const logic = EARNED ? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery }) : null;
+const place = EARNED ? placement(logic, state.seed) ?? new Map() : new Map();
+const source = {
+    /** The papers held now. */
+    held: () => new Set([...(logic?.start ?? []), ...Object.keys(state.solved).map((q) => place.get(q)).filter(Boolean)]),
+    /** The paper a solved question brought (null: nothing new). */
+    brought: (q) => (state.solved[q] ? place.get(q) ?? null : null),
+};
+const delivered = (id) => id === MAIN || (fileById.has(id) && (EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
+/** Can this question be solved now (earned papers): not solved, its papers come, what it rests on solved. Otherwise always. */
+const openNow = (id) => { const lq = logic?.questions.find((x) => x.id === id); return !lq || isOpen(lq, source.held(), new Set(Object.keys(state.solved))); };
+// For the autoplay and the checks: the delivery as the page has it.
+// While a move is only being tried (and will be taken back), nothing is solved: `window.__trying(true)` … `(false)`.
+window.__trying = (on) => { trying = !!on; };
+window.__delivery = { earned: EARNED, seed: state.seed ?? null, open: openNow, held: () => [...source.held()], solved: () => Object.keys(state.solved) };
+/** How a paper came: held from the start, or brought by solving a question (its id). */
+const cameBy = (id) => (logic?.start.includes(id) ? 'start' : Object.keys(state.solved).find((q) => source.brought(q) === id) ?? null);
 if (!delivered(state.story)) state.story = MAIN;
 /** A paragraph's reference as the player sees it: "¶3" in the main story, "Rudd ¶2" in a file. */
 const paraTag = (x) => { const p = parseRef(x); if (!p) return '¶?'; return p.story === MAIN ? `¶${p.n}` : `${fileById.get(p.story)?.short ?? p.story} ¶${p.n}`; };
@@ -165,7 +203,7 @@ if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved, seed: state.seed })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -829,7 +867,7 @@ function descriptionHtml(q) {
     const notes = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
     const from = (x) => x.entries.map((e) => (e.solved ? 'solved' : paraTag(givenAt(e)))).join(', ');
     const begun = observed.partial.filter((x) => x.obs.q === q.id).map((x) => `<li class="muted">Part of something not yet complete: ${x.entries.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
-    const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
+    const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map((v) => esc(entityById.has(v) ? nameOf(v) : v)).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
     const noteHtml_ = notes.length ? `<div class="small muted">Your notes: ${notes.map((e) => phrase(e)).join('; ')}</div>` : '';
@@ -837,7 +875,7 @@ function descriptionHtml(q) {
     // not named).
     const rests = [...new Set(observations.filter((o) => o.q === q.id && o.essential).flatMap((o) => o.from.filter((e) => e.solved).map((e) => e.solved)))].map((id) => qById.get(id)).filter(Boolean);
     const restsHtml = rests.length && !isSolved(q.id) ? `<div class="small rests-on">It rests on ${rests.length === 1 ? 'another question' : `${rests.length} other questions`}: <ul>${rests.map((r) => `<li>${qListed(r) ? `<a class="link" data-q="${esc(r.id)}">${esc(qLabel(r))}</a>` : 'a question not raised yet'}${isSolved(r.id) ? ' <span class="good">solved</span>' : ' <span class="muted">not solved yet</span>'}</li>`).join('')}</ul></div>` : '';
-    const status = isSolved(q.id) ? `<p class="small good solved-note">Solved.</p>` : judgement(q) === 'wrong' ? '<p class="small bad not-this">Not this answer.</p>' : '';
+    const status = isSolved(q.id) ? `<p class="small good solved-note">Solved.${EARNED ? ` <span class="muted">${broughtHtml(q.id, false)}</span>` : ''}</p>` : judgement(q) === 'wrong' ? '<p class="small bad not-this">Not this answer.</p>' : '';
     const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>` : '';
     return `<div class="desc">${status}${restsHtml}${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
@@ -1412,6 +1450,11 @@ function storyTabsHtml() {
     };
     const shown = files.filter((f) => delivered(f.id));
     const waiting = files.length - shown.length;
+    // Papers earned by solving questions: how each came, and nothing about how many are still out or where they are.
+    if (EARNED) {
+        const how = (f) => { const by = cameBy(f.id); return by === 'start' ? 'in hand from the start' : by && qById.has(by) ? `brought by solving <a class="link" data-q="${esc(by)}">${esc(qLabel(qById.get(by)))}</a>` : ''; };
+        return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div><details class="papers-box small"><summary>The papers (${shown.length})</summary><ul>${shown.map((f) => `<li><b>${esc(f.title)}</b>: ${how(f)}</li>`).join('')}</ul><p class="muted">More papers come as you solve questions.</p></details>`;
+    }
     return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div>${waiting ? `<p class="small muted story-waiting">${waiting === 1 ? 'One more paper' : `${waiting} more papers`} may come as the story goes on.</p>` : ''}`;
 }
 // --- The story's names, and the Cards.
@@ -1665,8 +1708,9 @@ let solvedNews = [];      // the questions just solved, until the notice is dism
  * good: its circle is kept (Undo and distrust do not take it back), the story's other proposals are crossed out, and
  * a larger question resting on it fills that evidence by itself (so the judgement runs again until nothing changes).
  */
+let trying = false;       // a move only tried and taken back (the hints, the checks): nothing is judged meanwhile
 function judge() {
-    if (!observations) return;
+    if (!observations || trying) return;
     let fresh = false;
     for (let more = true; more;) {
         more = false;
@@ -1746,13 +1790,19 @@ function renderGate() {
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
 }
+/** What solving a question brought: a paper (with a button to open it), or nothing new. */
+function broughtHtml(qid, button = true) {
+    if (qid === logic?.goal) return 'The case is solved: the end of the story can be read.';
+    const p = source.brought(qid);
+    return p ? `It brought: <b>${esc(fileById.get(p)?.title ?? p)}</b>${button ? ` <button type="button" class="quiet" data-story="${esc(p)}">Open it</button>` : ''}` : 'It brought nothing new.';
+}
 function renderSolved() {
     const el = document.getElementById('solved-news');
     if (!el) return;
     const qs = solvedNews.map((id) => qById.get(id)).filter(Boolean);
     el.hidden = !qs.length;
     if (!qs.length) return;
-    el.innerHTML = `<ul>${qs.map((q) => `<li><b>Solved.</b> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>: ${pickText(q, state.solved[q.id].pick)}</li>`).join('')}</ul><p><button type="button" class="quiet" data-solved-close>Dismiss</button></p>`;
+    el.innerHTML = `<ul>${qs.map((q) => `<li><b>Solved.</b> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>: ${pickText(q, state.solved[q.id].pick)}${EARNED ? `<br>${broughtHtml(q.id)}` : ''}</li>`).join('')}</ul><p><button type="button" class="quiet" data-solved-close>Dismiss</button></p>`;
 }
 function renderAnswers() {
     const el = document.getElementById('answer-news');
@@ -2078,6 +2128,8 @@ window.__routes = (ids = []) => {
 };
 const hintApi = {
     para: () => state.para, last: LAST, wait: () => state.hintWait,
+    // Papers earned by solving questions: a question is open when its papers have come and what it rests on is solved.
+    earned: EARNED, open: (id) => !EARNED || openNow(id),
     // The files: how far each is read, whether it has come, and its title; and whether references are all read.
     files: () => files.map((f) => ({ id: f.id, title: f.title, delivered: delivered(f.id), read: reading.readTo(f.id), last: lastOf(f.id) })),
     seenAll: (at) => reading.seenAll(at), readTo: (id) => reading.readTo(id),
@@ -2121,6 +2173,12 @@ const hintApi = {
 document.getElementById('hint-wait').value = String(state.hintWait);
 document.getElementById('hint-wait').addEventListener('change', (e) => { state.hintWait = Number(e.target.value); save(); });
 document.getElementById('gate-rule').value = strictGate() ? 'strict' : 'any';
+// The seed of the papers' placement (earned papers only): shown, with the address that replays it.
+if (EARNED && document.getElementById('seed-row')) {
+    const row = document.getElementById('seed-row');
+    row.hidden = false;
+    row.innerHTML = `Seed of this game: <b id="seed-value">${state.seed}</b> <a class="settings-link" href="${esc(pageUrl(`seed=${state.seed}`))}" title="The address of this game's placement of the papers: a new game with it plays the same">replay it</a>`;
+}
 document.getElementById('gate-rule').addEventListener('change', (e) => { state.gate = e.target.value; save(); render(); });
 if (AUTOPLAY === null) import('./world-hints.js').then((m) => m.makeHints({ store: STORE, api: hintApi }));
 else document.getElementById('hint').hidden = true;

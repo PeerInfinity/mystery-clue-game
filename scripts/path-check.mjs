@@ -8,6 +8,11 @@
 // A case with files (sub-stories): each move's `at` lists what must have been read, and the check reads just that,
 // story by story, in the order ORDER gives (story ids, comma-separated; default the main story, then the files as the
 // case lists them); WHOLE=1 reads a file to its end once it is opened. scripts/page-checks.mjs tries several orders.
+// Papers earned by solving questions (case.json `delivery.mode: earned`): the check plays a seed (SEED, default 1;
+// the page's ?seed=), question by question: the placement is drawn here by the same module as the page's
+// (engine/delivery.js) from the case's own data, and the questions are solved in an order drawn from the seed among
+// those open, each by its moves (`for_q`); before each, the papers on the page must be exactly those held, and after
+// it the question must be solved and the notice must say what it brought.
 // Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';
@@ -15,9 +20,13 @@ import path from 'node:path';
 import { CASE, WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
 import { controlOf, made, nextRead, readToOf, needsOf } from '../ui/world-moves.js';
 import { MAIN, refList } from '../engine/refs.js';
+import { caseLogic, deliveryMode, placement, choices, rng, heldAfter } from '../engine/delivery.js';
 const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
 const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
-const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/');
+const header = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8'));
+const EARNED = deliveryMode(header) === 'earned';
+const SEED = Number(process.env.SEED ?? 1);
+const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', EARNED ? `seed=${SEED}` : '');
 const STOP = +(process.env.STOP ?? 1e9);
 const files = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).files ?? [];
 const ORDER = process.env.ORDER ? process.env.ORDER.split(',') : null;
@@ -42,10 +51,12 @@ const ready = async () => { for (let i = 0; i < 150; i++) { if (await ev(`!!docu
 
 await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
-await send('Page.navigate', { url: URL_ }); await sleep(1500);
+// The case's address without a seed first: a save from another seed would make the page ask before starting anew.
+await send('Page.navigate', { url: pageUrl(process.env.URL ?? 'http://localhost:8321/') }); await sleep(1500);
 // A fresh page in three columns: every part in view, as on a laptop.
 await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three' }))}); 1`);
-await send('Page.reload'); await sleep(800); await ready();
+if (EARNED) await send('Page.navigate', { url: URL_ }); else await send('Page.reload');
+await sleep(800); await ready();
 errors.length = 0;
 
 const reload = async () => { await send('Page.reload'); await sleep(500); await ready(); };
@@ -128,7 +139,7 @@ async function allowed(m) {
         if (ok && m.see) { await click(sel); clicked = true; }
     }
     if (ok && m.see) ok = new RegExp(m.see).test(await ev(`document.querySelector('#detail').innerText`));
-    if (clicked) await reload();
+    if (clicked) { await reload(); await ev(`window.__trying?.(true); 1`); }
     else if (shut && (await exists(d))) await click(d);
     return ok;
 }
@@ -136,13 +147,15 @@ let probing = [];   // the next paragraph's reasoning moves not yet found allowe
 /** Where the reading stands, for a report: each story read to. */
 const readingText = (sv) => [MAIN, ...files.map((f) => f.id)].map((id) => [id, readToOf(sv)(id)]).filter(([, n]) => n).map(([id, n]) => (id === MAIN ? n : `${id}:${n}`));
 async function probe(now) {
-    for (const m of probing) if (await allowed(m)) { report(m, now, 'the page allows it'); probing = probing.filter((x) => x !== m); }
+    // A move tried here is taken back: nothing it would complete is judged solved meanwhile.
+    await ev(`window.__trying?.(true); 1`);
+    try { for (const m of probing) if (await allowed(m)) { report(m, now, 'the page allows it'); probing = probing.filter((x) => x !== m); } } finally { await ev(`window.__trying?.(false); 1`).catch(() => null); }
     if (errors.length) { failures++; console.log(`FAIL ¶${now} page error while trying moves early: ${errors.splice(0).join(' | ')}`); }
 }
 
 /** Read one paragraph more of a story, through its tab (a case with files) and Read on. */
 const readOne = async (story) => {
-    if (files.length && !(await exists(`[data-story="${story}"].on`)) && !(await click(`[data-story="${story}"]`))) return false;
+    if (files.length && !(await exists(`.story-tab[data-story="${story}"].on`)) && !(await click(`.story-tab[data-story="${story}"]`))) return false;
     return click('#next');
 };
 async function readTo(at) {
@@ -257,7 +270,37 @@ const t0 = Date.now();
 // SAVE=<file>: write the save at the end (with STOP, the state to look at a paragraph from).
 const dump = async () => { if (process.env.SAVE) fs.writeFileSync(process.env.SAVE, JSON.stringify(await save())); };
 let last = 1;
-for (const m of moves) {
+if (EARNED) {
+    const R = (f) => JSON.parse(fs.readFileSync(path.join(WORLD, f), 'utf8'));
+    const logic = caseLogic({ questions: R('questions.json').questions, observations: R('observations.json').observations, facts: R('facts.json').facts, files, delivery: header.delivery });
+    const place = placement(logic, SEED);
+    // The order of solving: among the questions open, one drawn by a generator of its own from the seed.
+    const order = choices(logic, place, rng(SEED ^ 0x5bd1e995)).order;
+    const title = (id) => files.find((f) => f.id === id)?.title ?? id;
+    console.log(`seed ${SEED}: ${order.map((q) => `${q}${place.get(q) ? ` brings ${place.get(q)}` : ''}`).join(', ')}`);
+    const byQ = new Map();
+    for (const m of moves) { const q = m.for_q?.[0]; if (!byQ.has(q)) byQ.set(q, []); byQ.get(q).push(m); }
+    for (const q of byQ.keys()) if (!order.includes(q)) fail({ at: [], do: 'path' }, `moves for ${q}, which is no question to solve`);
+    const solved = new Set();
+    for (const q of order) {
+        const want = [...heldAfter(logic, place, solved)].sort();
+        const tabs = (await ev(`[...document.querySelectorAll('.story-tab')].map((b) => b.dataset.story).filter((x) => x !== 'main')`)).sort();
+        if (J(tabs) !== J(want)) { failures++; console.log(`FAIL before ${q}: the papers on the page are ${tabs.join(', ') || 'none'}, not ${want.join(', ') || 'none'}`); }
+        if (!(await ev(`window.__delivery.open(${J(q)})`))) { failures++; console.log(`FAIL ${q}: the page does not have it open`); }
+        let ok = true;
+        for (const m of byQ.get(q) ?? []) { if (!(await readTo(m.at))) { ok = false; break; } await play(m); }
+        if (!ok) break;
+        const sv = await save();
+        if (!sv.solved?.[q]) { failures++; console.log(`FAIL ${q}: not solved after its moves`); break; }
+        const news = (await ev(`document.querySelector('#solved-news')?.hidden ? '' : document.querySelector('#solved-news').innerText`)).replace(/\s+/g, ' ');
+        const expect = q === logic.goal ? 'The case is solved' : place.get(q) ? `It brought: ${title(place.get(q))}` : 'It brought nothing new';
+        if (!news.includes(expect)) { failures++; console.log(`FAIL ${q}: the notice says "${news}", not "${expect}"`); }
+        else console.log(`  solved ${q}: ${expect}`);
+        await click('[data-solved-close]');
+        solved.add(q);
+    }
+}
+for (const m of EARNED ? [] : moves) {
     if (!files.length) {
         if (m.at > STOP) break;
         if (m.at < last) { fail(m, `out of order (after ¶${last})`); continue; }
@@ -267,7 +310,7 @@ for (const m of moves) {
     await play(m);
 }
 if (STOP >= 1e9 && !failures) {
-    if (files.length) await click(`[data-story="${MAIN}"]`);
+    if (files.length) await click(`.story-tab[data-story="${MAIN}"]`);
     const end = await ev(`+document.getElementById('para').max`);
     if (!(await readTo(end))) { console.log(`${failures} failure(s)`); process.exit(1); }
     const lacked = await ev(`[...document.querySelectorAll('#q-box p')].filter((p) => /^Your description lacked/.test(p.textContent)).map((p) => p.closest('li').querySelector('a.link').textContent + ': ' + p.textContent)`);

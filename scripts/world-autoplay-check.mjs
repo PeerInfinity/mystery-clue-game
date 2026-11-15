@@ -36,7 +36,9 @@ const firstQ = JSON.parse(fs.readFileSync(path.join(WORLD, 'questions.json'), 'u
 const mine = { para: 3, layout: LAYOUT, marks: firstQ ? { [firstQ.id]: { [firstQ.possibilities.find((p) => p.via !== 'always').value]: 'circled' } } : {} };
 await ev(`localStorage.setItem(${J(STORE)}, ${J(J(mine))}); localStorage.removeItem(${J(AUTOPLAY_STORE)}); 1`);
 const t0 = Date.now();
-await send('Page.navigate', { url: pageUrl(BASE, 'autoplay=fast') });
+// Papers earned by solving questions: the autoplay plays the placement of SEED (default 1).
+const earned = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).delivery?.mode === 'earned';
+await send('Page.navigate', { url: pageUrl(BASE, `autoplay=fast${earned ? `&seed=${process.env.SEED ?? 1}` : ''}`) });
 let st = null;
 while (Date.now() - t0 < 15 * 60000) {
     await sleep(2000);
@@ -60,6 +62,6 @@ if ((save.reasoning?.length ?? 0) !== reasoned) fail(`${save.reasoning?.length ?
 for (const m of moves.filter((x) => x.do === 'trust' && x.link)) if (save.trust?.links?.[m.link] !== { distrusted: 0, uncertain: 1, trusted: 2 }[m.level]) fail(`trust ${m.link} not ${m.level}`);
 const after = await ev(`localStorage.getItem(${J(STORE)})`);
 if (after !== J(mine)) fail(`the player's own save changed: ${after}`);
-console.log(`${failures ? `${failures} failure(s)` : `the autoplay played ${st?.moves} moves to ¶${save.para}`} in ${Math.round((Date.now() - t0) / 1000)} s (${LAYOUT}${phone ? ', phone' : ''})`);
+console.log(`${failures ? `${failures} failure(s)` : `the autoplay played ${st?.moves} moves to ¶${save.para}`} in ${Math.round((Date.now() - t0) / 1000)} s (${LAYOUT}${phone ? ', phone' : ''}${earned ? `, seed ${process.env.SEED ?? 1}` : ''})`);
 ws.close();
 process.exit(failures ? 1 : 0);

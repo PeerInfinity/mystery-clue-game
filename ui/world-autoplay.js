@@ -138,12 +138,31 @@ export async function start({ store, fast = false }) {
         // It starts paused (not the check), so the viewer can choose a speed first.
         if (!fast) { setPaused(true, 'A careful reader will read the story and fill in the timeline, move by move. Choose a speed, then press Start.'); $('#ap-pause').textContent = 'Start'; }
         await gate();
-        for (const m of moves) {
+        const one = async (m) => {
             await readTo(m.at);
             try { await play(m); } catch (e) { if (e instanceof Failed) throw new Failed(`¶${refList(m.at).join(', ')}, ${await words(m).catch(() => m.do)}: ${e.message}`); throw e; }
-        }
+        };
+        const delivery = window.__delivery;
+        if (delivery?.earned) {
+            // Papers earned by solving questions: question by question (each move's `for_q`), the first in the path's
+            // order that is open now; what solving it brought is shown a moment.
+            const byQ = new Map();
+            for (const m of moves) { const q = m.for_q?.[0] ?? null; if (!byQ.has(q)) byQ.set(q, []); byQ.get(q).push(m); }
+            const left = new Set(byQ.keys());
+            while (left.size) {
+                const q = [...left].find((x) => x === null || delivery.open(x));
+                if (q === undefined) throw new Failed(`no question left is open (${[...left].join(', ')})`);
+                for (const m of byQ.get(q)) await one(m);
+                left.delete(q);
+                if (!$('#solved-news').hidden) {
+                    caption($('#solved-news li')?.innerText.replace(/\s+/g, ' ').replace(/ Open it$/, '') ?? 'Solved.');
+                    await wait(3000);
+                    await press('[data-solved-close]');
+                }
+            }
+        } else for (const m of moves) await one(m);
         // The main story to its end: its last paragraph, as its tab shows it.
-        if ($('[data-story]') && !$('[data-story="main"].on')) await press('[data-story="main"]');
+        if ($('.story-tab[data-story]') && !$('.story-tab[data-story="main"].on')) await press('.story-tab[data-story="main"]');
         await readTo(Number($('#para').max));
         s.done = true;
         ending(`The end of the story: ${s.moves} moves, every question answered.`);

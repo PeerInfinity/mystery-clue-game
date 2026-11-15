@@ -138,7 +138,7 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
     }
     /** Read one more paragraph of a story: its tab in the Story panel (a case with files), then Read on. */
     async function readOne(story = MAIN) {
-        if ($('[data-story]') && !$(`[data-story="${esc(story)}"].on`) && !(await press(`[data-story="${esc(story)}"]`))) return false;
+        if ($('.story-tab[data-story]') && !$(`.story-tab[data-story="${esc(story)}"].on`) && !(await press(`.story-tab[data-story="${esc(story)}"]`))) return false;
         return press('#next');
     }
     async function openOn(on) {

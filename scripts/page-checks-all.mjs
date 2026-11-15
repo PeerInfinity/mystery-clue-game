@@ -13,6 +13,10 @@ const up = (url) => fetch(url).then((r) => r.ok, () => false);
 
 const found = [];
 for (const base of ['cases', 'cases/miniatures'].filter((b) => fs.existsSync(path.join(ROOT, b)))) for (const dir of fs.readdirSync(path.join(ROOT, base))) if (fs.existsSync(path.join(ROOT, base, dir, 'world', 'path.json'))) found.push(`${base}/${dir}`);
+// The invented fixtures that are cases of their own (papers earned by solving questions: scripts/fixtures/vestry-cup).
+for (const dir of fs.readdirSync(path.join(ROOT, 'scripts/fixtures'))) {
+    try { if (JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/fixtures', dir, 'world', 'case.json'), 'utf8')).delivery?.mode === 'earned') found.push(`scripts/fixtures/${dir}`); } catch { /* not a case */ }
+}
 const cases = process.argv.slice(2).length ? process.argv.slice(2).map((c) => c.replace(/\/+$/, '')) : found;
 // The longest first, so the short ones fill in beside them: by the size of the true path.
 const size = (c) => fs.statSync(path.join(ROOT, c, 'world', 'path.json')).size;

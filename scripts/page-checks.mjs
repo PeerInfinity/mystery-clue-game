@@ -43,9 +43,21 @@ const checks = [
 // A case with files (sub-stories): the true path again in every order of reading the files, the main story read
 // first and then last, and once reading each file whole when it is opened (scripts/path-check.mjs, ORDER and WHOLE).
 const caseDir = path.join(ROOT, process.env.CASE ?? 'cases/miniatures/rent-box');
-const caseFiles = (() => { try { return JSON.parse(fs.readFileSync(path.join(caseDir, 'world', 'case.json'), 'utf8')).files ?? []; } catch { return []; } })();
+const caseHeader = (() => { try { return JSON.parse(fs.readFileSync(path.join(caseDir, 'world', 'case.json'), 'utf8')); } catch { return {}; } })();
+const caseFiles = caseHeader.files ?? [];
 const perms = (xs) => (xs.length <= 1 ? [xs] : xs.flatMap((x, i) => perms([...xs.slice(0, i), ...xs.slice(i + 1)]).map((p) => [x, ...p])));
-if (caseFiles.length) {
+if (caseHeader.delivery?.mode === 'earned') {
+    // Papers earned by solving questions: the seeds chosen once by scripts/delivery-seeds.mjs (path.json `seeds`: the
+    // narrowest order, the widest, an ordinary one). The true path on each (and once reading each paper whole), the
+    // autoplay in each layout on the seeds in turn, the hints on each.
+    const seeds = (() => { try { return JSON.parse(fs.readFileSync(path.join(caseDir, 'world', 'path.json'), 'utf8')).seeds ?? [1]; } catch { return [1]; } })().map(String);
+    const at = (i) => seeds[i % seeds.length];
+    checks.splice(0, 6,
+        ...seeds.map((SEED) => ['path-check.mjs', { SEED }]), ['path-check.mjs', { SEED: at(0), WHOLE: '1' }],
+        ['world-autoplay-check.mjs', 'three', { SEED: at(0) }], ['world-autoplay-check.mjs', 'two', { SEED: at(1) }], ['world-autoplay-check.mjs', 'one', { SEED: at(2) }],
+        ['world-autoplay-check.mjs', 'one', { PHONE: '1', SEED: at(1) }],
+        ...seeds.map((SEED) => ['world-hints-check.mjs', { SEED }]));
+} else if (caseFiles.length) {
     const orders = perms(caseFiles.map((f) => f.id)).flatMap((p) => [['main', ...p], [...p, 'main']]);
     checks.splice(1, 0, ...orders.map((o) => ['path-check.mjs', { ORDER: o.join(',') }]), ['path-check.mjs', { WHOLE: '1' }]);
 }
@@ -53,7 +65,7 @@ const failed = [];
 const fixture = process.env.FIXTURE !== '0';
 for (const [script, ...rest] of checks.filter(([s, ...r]) => fixture || !(s === 'room-check.mjs' || r.some((x) => typeof x === 'object' && x.CASE)))) {
     const env = { ...process.env, ...(typeof rest.at(-1) === 'object' ? rest.pop() : {}) };
-    const label = [script, ...rest, env.PHONE ? '(phone)' : '', env.ORDER ? `(order ${env.ORDER})` : '', env.WHOLE ? '(each file whole)' : '', env.CASE && env.CASE !== process.env.CASE ? `(${path.basename(env.CASE)})` : ''].join(' ').trim();
+    const label = [script, ...rest, env.PHONE ? '(phone)' : '', env.ORDER ? `(order ${env.ORDER})` : '', env.WHOLE ? '(each file whole)' : '', env.SEED && caseHeader.delivery?.mode === 'earned' ? `(seed ${env.SEED})` : '', env.CASE && env.CASE !== process.env.CASE ? `(${path.basename(env.CASE)})` : ''].join(' ').trim();
     console.log(`\n== ${label}`);
     const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts', script), ...rest], { env, encoding: 'utf8' });
     // Only what matters: the failures and each check's last line.

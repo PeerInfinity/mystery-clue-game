@@ -9,7 +9,8 @@
 //  (b) a distrust the path does not make: a link or a person set to distrusted, unless it keeps only false things off
 //      the timeline (a false statement's own link, or any other link of a false chain: as good as the path's);
 //  (c) the next move of the path not made, that the page allows now (tried and taken back, engine and page alike),
-//      those for the soonest answer given away first; a circle or a crossing counts as done once the question has a
+//      those for the soonest answer given away first (with papers earned by solving questions, only the moves of a
+//      question open now); a circle or a crossing counts as done once the question has a
 //      right answer circled (any right one: the light as well as the noise);
 //  (d) nothing: read on.
 // A move is offered from its `hint_at` (or `at`): never before the page can support it.
@@ -45,7 +46,9 @@ export async function makeHints({ store, api }) {
         // (a) a wrong mark on a question the path settles; only one on an answer the page lists now (reading back
         // can leave a mark on an answer not yet offered, which cannot be clicked).
         const view = api.view();
-        const listed = (q, pick) => { try { return allowedNow({ do: 'cross', q, pick }, store); } finally { api.restore(view); } };
+        // Moves tried here are taken back: nothing they would complete is judged solved meanwhile (window.__trying).
+        const trial = (m) => { window.__trying?.(true); try { return allowedNow(m, store); } finally { window.__trying?.(false); } };
+        const listed = (q, pick) => { try { return trial({ do: 'cross', q, pick }); } finally { api.restore(view); } };
         for (const q of [...new Set(moves.filter((m) => m.q).map((m) => m.q))]) {
             if (!api.qListed(q)) continue;
             const right = rightOf(q);
@@ -74,11 +77,13 @@ export async function makeHints({ store, api }) {
         // A distrust of the path counts as made when it would take nothing more off the timeline: the player has
         // taken the same false things off by another link of the chain.
         const done = (m) => m.do === 'trust' && m.level === 'distrusted' && api.distrustEffect(m.link ? { link: m.link } : { person: m.person }, false).n === 0;
-        const open = moves.filter((m) => !VIEWS.has(m.do) && api.seenAll(from(m)) && !tried(m) && !made(m, save) && !done(m)
+        // Papers earned by solving questions: only the moves of a question open now (its papers come, what it rests on solved).
+        const forOpen = (m) => !api.earned || !(m.for_q ?? []).length || m.for_q.some((q) => api.open(q));
+        const open = moves.filter((m) => !VIEWS.has(m.do) && forOpen(m) && api.seenAll(from(m)) && !tried(m) && !made(m, save) && !done(m)
             && !((m.do === 'circle' || m.do === 'cross') && rightCircled(m.q, save)))
             .sort((a, b) => deadline(a) - deadline(b) || a.i - b.i);
         if (open.length) {
-            try { for (const m of open) if (allowedNow(m, store)) return { kind: 'move', m }; } finally { api.restore(view); }
+            try { for (const m of open) if (trial(m)) return { kind: 'move', m }; } finally { api.restore(view); }
         }
         // Nothing of the path is left to do, and the gate still holds: what it lacks is on its notice (evidence that
         // went when an entry left the timeline, or an answer the path does not make).
@@ -86,7 +91,7 @@ export async function makeHints({ store, api }) {
         const files = api.files();
         if (files.length) {
             const readTo = (id) => api.readTo(id);
-            const waiting = moves.find((m) => !VIEWS.has(m.do) && !made(m, save) && !tried(m) && !api.seenAll(from(m)));
+            const waiting = moves.find((m) => !VIEWS.has(m.do) && forOpen(m) && !made(m, save) && !tried(m) && !api.seenAll(from(m)));
             const story = waiting ? nextRead(from(waiting), files, readTo) : null;
             const f = files.find((x) => x.id === story);
             if (f) return { kind: 'read', story, why: `Read on in “${f.title}”.` };

@@ -13,6 +13,10 @@ import { WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
 import { MAIN, Reading, parseRef, refList } from '../engine/refs.js';
 import { needsOf } from '../ui/world-moves.js';
 const BASE = process.env.URL ?? 'http://localhost:8321/';
+// Papers earned by solving questions: the hints play the placement of SEED (default 1), kept in the save.
+const EARNED = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).delivery?.mode === 'earned';
+const SEED = Number(process.env.SEED ?? 1);
+const PATH = JSON.parse(fs.readFileSync(path.join(WORLD, 'path.json'), 'utf8')).moves;
 const J = JSON.stringify;
 
 const list = await (await fetch(`${CDP}/json`)).json();
@@ -35,7 +39,7 @@ let failures = 0;
 const fail = (why) => { failures++; console.log(`FAIL ${why}`); };
 async function run(name, start, expect = []) {
     await send('Page.navigate', { url: pageUrl(BASE) }); await sleep(1200);
-    await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three', hintWait: 0, ...start }))}); 1`);
+    await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three', hintWait: 0, ...(EARNED ? { seed: SEED } : {}), ...start }))}); 1`);
     await send('Page.reload'); await sleep(800);
     for (let i = 0; i < 100 && !(await ev(`!!window.__hint`).catch(() => false)); i++) await sleep(200);
     errors.length = 0;
@@ -55,6 +59,10 @@ async function run(name, start, expect = []) {
         same = key === last && t.kind !== 'read' ? same + 1 : 0;
         last = key;
         if (same > 2) { fail(`${name}: the same hint three times over, at ¶${(await ev(`JSON.parse(localStorage.getItem(${J(STORE)})).para`))}: ${t.rungs.join(' / ')}`); break; }
+        // Papers earned by solving questions: a hint is only ever about a question open now.
+        if (EARNED && t.kind === 'move') {
+            for (const q of PATH[t.i]?.for_q ?? []) if (!(await ev(`window.__delivery.open(${J(q)})`))) { fail(`${name}: a hint for ${q}, which is not open: ${t.rungs.at(-1)}`); }
+        }
         if (t.kind !== 'read') { hints++; kinds[t.kind] = (kinds[t.kind] ?? 0) + 1; seen.add(t.kind); }
         // Hint to the last rung, then Do it.
         for (let r = 0; r < t.rungs.length; r++) { await ev(`window.__hint.press()`); presses++; }
@@ -67,7 +75,7 @@ async function run(name, start, expect = []) {
         if (errors.length) { fail(`${name}: page error: ${errors.splice(0).join(' | ')}`); break; }
     }
     const save = await ev(`JSON.parse(localStorage.getItem(${J(STORE)}))`);
-    if (await ev(`!!document.querySelector('[data-story="main"]')`)) await ev(`document.querySelector('[data-story="main"]').click(); 1`);
+    if (await ev(`!!document.querySelector('.story-tab[data-story="main"]')`)) await ev(`document.querySelector('.story-tab[data-story="main"]').click(); 1`);
     const end = await ev(`+document.getElementById('para').max`);
     if (save.para !== end) fail(`${name}: stopped at ¶${save.para}`);
     const open = await ev(`document.querySelector('#clashes .clash-box summary')?.innerText ?? ''`);

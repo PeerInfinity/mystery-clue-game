@@ -162,6 +162,9 @@ body.world-page.tabbed .top { position: static; }
 .gate-news { border-color: var(--accent, var(--ink)); }
 .solved-news { border-color: var(--good); }
 .solved-mark { color: var(--good); font-size: 0.85em; white-space: nowrap; }
+.papers-box { margin: 0.3em 0 0.6em; }
+.papers-box ul { margin: 0.2em 0 0.2em 1.2em; padding: 0; }
+.seed-row { margin: 0.4em 0; }
 .rests-on ul { margin: 0.2em 0 0.4em 1.2em; padding: 0; }
 .gate-news.flash { animation: notice-flash 1.2s; }
 @keyframes notice-flash { 0%, 100% { outline: 0 solid transparent; } 30% { outline: 3px solid var(--accent); } }
