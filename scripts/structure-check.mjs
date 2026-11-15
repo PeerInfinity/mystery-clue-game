@@ -4,6 +4,7 @@
 // answer has what rules it out, that every paper and clue is used, that every question can be reached, and then
 // places the papers at random on the questions for many seeds, as an Archipelago fill would, and plays each placement.
 import fs from 'node:fs';
+import { isOpen, fill, play, choices, rng } from '../engine/delivery.js';
 
 const dir = process.argv[2] ?? 'cases/custom-house-fire';
 const seeds = Number(process.argv[3] ?? 2000);
@@ -71,7 +72,8 @@ const order = [];
     for (const q of s.questions) visit(q.id, []);
 }
 
-const open = (q, held, solved) => !solved.has(q.id) && (q.requires ?? []).every((r) => solved.has(r)) && paperSets.get(q.id).some((set) => [...set].every((p) => held.has(p)));
+const logicQ = s.questions.map((q) => ({ id: q.id, sets: paperSets.get(q.id), requires: q.requires ?? [] }));
+const open = (q, held, solved) => isOpen(logicQ.find((x) => x.id === q.id), held, solved);
 const locations = s.questions.filter((q) => q.id !== s.goal).map((q) => q.id);
 const earned = s.papers.map((p) => p.id).filter((p) => !start.has(p));
 if (earned.length > locations.length) err(`${earned.length} papers to earn and only ${locations.length} questions besides the goal`);
@@ -94,57 +96,18 @@ for (const id of order) {
     all.set(id, set);
 }
 
-// A seeded placement of papers on questions; a question with no paper gives nothing.
-const rng = (seed) => () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-const shuffle = (list, rand) => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-// Playing a placement: the player solves every open question (a round), and takes the papers they hold.
-const play = (place) => {
-    const held = new Set(start), solved = new Set(), widths = [];
-    for (;;) {
-        const now = s.questions.filter((q) => open(q, held, solved));
-        if (!now.length) break;
-        widths.push(now.length);
-        for (const q of now) { solved.add(q.id); if (place.get(q.id)) held.add(place.get(q.id)); }
-    }
-    return { done: solved.size === s.questions.length, widths, solved };
-};
-// The slowest player: one question at a time, how many are open to choose from at each step.
-const choices = (place, rand) => {
-    const held = new Set(start), solved = new Set(), counts = [];
-    for (;;) {
-        const now = s.questions.filter((q) => open(q, held, solved));
-        if (!now.length) break;
-        counts.push(now.length);
-        const q = now[Math.floor(rand() * now.length)];
-        solved.add(q.id);
-        if (place.get(q.id)) held.add(place.get(q.id));
-    }
-    return counts;
-};
-// The fill, as Archipelago does it going forward: among the questions that can be reached with the papers placed so
-// far and that hold nothing yet, one is drawn, and a paper not yet placed is put on it; when every reachable question
-// is taken and papers remain, the draw has failed and is made again (counted). Questions left over give nothing.
-const fill = (rand) => {
-    const place = new Map(), left = shuffle(earned, rand);
-    while (left.length) {
-        const free = [...play(place).solved].filter((id) => id !== s.goal && !place.has(id));
-        if (!free.length) return null;
-        place.set(free[Math.floor(rand() * free.length)], left.pop());
-    }
-    return place;
-};
+const logic = { questions: logicQ, start: [...start], earned, goal: s.goal };
 let good = 0, redraws = 0;
 const rounds = [], narrow = [], firstOrders = new Set(), stepCounts = [], empty = new Map(locations.map((l) => [l, 0]));
 for (let seed = 1; seed <= seeds; seed++) {
     const rand = rng(seed);
-    let place = null;
-    for (let tries = 0; !place && tries < 1000; tries++) { place = fill(rand); if (!place) redraws++; }
+    const { place, redraws: n } = fill(logic, rand);
+    redraws += n;
     if (!place) continue;
-    const r = play(place);
-    if (!r.done) continue;
+    const r = play(logic, place);
     good++;
     rounds.push(r.widths.length);
-    const c = choices(place, rand);
+    const c = choices(logic, place, rand).counts;
     stepCounts.push(c);
     narrow.push(c.filter((n) => n === 1).length);
     for (const l of locations) if (!place.has(l)) empty.set(l, empty.get(l) + 1);
