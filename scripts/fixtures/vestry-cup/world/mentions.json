@@ -1,0 +1,24 @@
+{
+ "entities": {
+  "kit": ["Kit Sorrel"],
+  "amos": ["Amos Reed", "Amos", "the sexton"],
+  "vane": ["Mr. Vane"],
+  "hester": ["Hester Dent", "H. Dent"],
+  "holt": ["Mrs. Holt"],
+  "squire": ["the Squire"],
+  "churchwardens": ["the churchwardens'"],
+  "church": ["St. Ebba's"],
+  "vestry": ["The vestry,"],
+  "chancel": ["the chancel"],
+  "porch": ["the church porch", "the porch"],
+  "tower": ["the tower"],
+  "lodge": ["the sexton's lodge"],
+  "grange": ["the Grange"],
+  "cup": ["the silver cup", "the cup"],
+  "cupboard": ["the vestry cupboard", "the cupboard"],
+  "vestry_door": ["the vestry door", "The vestry door"],
+  "vestry_key": ["the vestry key", "Vestry key"],
+  "tower_stair": ["the tower stair", "The tower stair"],
+  "key_book": ["the key book"]
+ }
+}

@@ -1,0 +1,24 @@
+{
+  "entities": [
+    {"id": "kit", "kind": "person", "name": "Kit Sorrel"},
+    {"id": "amos", "kind": "person", "name": "Amos Reed"},
+    {"id": "vane", "kind": "person", "name": "Mr. Vane"},
+    {"id": "hester", "kind": "person", "name": "Hester Dent"},
+    {"id": "holt", "kind": "person", "name": "Mrs. Holt"},
+    {"id": "squire", "kind": "person", "name": "the Squire"},
+    {"id": "churchwardens", "kind": "group", "name": "the churchwardens"},
+    {"id": "church", "kind": "place", "name": "St. Ebba's"},
+    {"id": "vestry", "kind": "place", "name": "the vestry", "within": "church"},
+    {"id": "chancel", "kind": "place", "name": "the chancel", "within": "church"},
+    {"id": "porch", "kind": "place", "name": "the church porch", "within": "church"},
+    {"id": "tower", "kind": "place", "name": "the tower", "within": "church"},
+    {"id": "lodge", "kind": "place", "name": "the sexton's lodge"},
+    {"id": "grange", "kind": "place", "name": "the Grange"},
+    {"id": "cup", "kind": "object", "name": "the silver cup"},
+    {"id": "cupboard", "kind": "object", "name": "the vestry cupboard"},
+    {"id": "vestry_door", "kind": "object", "name": "the vestry door"},
+    {"id": "vestry_key", "kind": "object", "name": "the vestry key"},
+    {"id": "tower_stair", "kind": "object", "name": "the tower stair"},
+    {"id": "key_book", "kind": "document", "name": "the key book"}
+  ]
+}

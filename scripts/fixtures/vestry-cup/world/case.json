@@ -1,0 +1,17 @@
+{
+  "id": "vestry_cup",
+  "title": "The Vestry Cup",
+  "author": "written for this project (an invented fixture: papers earned by solving questions)",
+  "story": "../story.txt",
+  "delivery": {"mode": "earned", "start": ["key_book"], "goal": "q.cup"},
+  "files": [
+    {"id": "key_book", "title": "The key book of the sexton's lodge", "short": "Key book", "text": "../files/key_book.txt"},
+    {"id": "grange", "title": "A note from the Grange", "short": "Grange", "text": "../files/grange.txt"},
+    {"id": "survey", "title": "From the churchwardens' survey", "short": "Survey", "text": "../files/survey.txt"}
+  ],
+  "narrators": [
+    {"id": "kit", "name": "Kit Sorrel", "kind": "first-person"}
+  ],
+  "subtitle": "Kit Sorrel's timeline",
+  "source": {"written": "2026-11-14", "word_count": 344}
+}

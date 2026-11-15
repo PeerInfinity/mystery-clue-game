@@ -1,0 +1,8 @@
+{
+  "accounts": [
+    {"id": "acct.kit", "label": "What Kit Sorrel sees", "origin": "kit", "how": "saw", "facts": ["f.kit_role", "f.cupboard_place", "f.cup_locked", "f.door_locked", "f.key_to_lodge", "f.cup_gone", "f.kit_porch", "f.amos_up", "f.amos_down", "f.stair_only", "f.one_key", "f.sign_rule", "f.kit_takes_book", "f.vane_sent_for", "f.hester_flowers", "f.book_tells", "f.holt_tells", "f.survey_tells", "f.cup_back"]},
+    {"id": "acct.key_book", "label": "What the key book says", "origin": "hester", "how": "did", "facts": ["f.key_out", "f.key_back"]},
+    {"id": "acct.holt", "label": "Mrs. Holt's note", "origin": "holt", "how": "saw", "facts": ["f.vane_grange"]},
+    {"id": "acct.survey", "label": "The churchwardens' survey", "origin": "churchwardens", "how": "examination", "facts": ["f.vestry_one_door"]}
+  ]
+}

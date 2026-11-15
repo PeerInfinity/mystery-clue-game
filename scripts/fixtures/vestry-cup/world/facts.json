@@ -1,0 +1,27 @@
+{
+  "facts": [
+    {"id": "f.kit_role", "of": "kit", "attr": "role", "value": "clerk of St. Ebba's", "time": {"from": "t.before"}, "para": 1, "quote": "clerk of St. Ebba's"},
+    {"id": "f.cupboard_place", "of": "cupboard", "attr": "location", "value": "vestry", "time": {"from": "t.before"}, "para": 1, "quote": "the vestry cupboard"},
+    {"id": "f.cup_locked", "of": "cup", "attr": "location", "value": "cupboard", "detail": "locked in by Kit Sorrel", "time": {"at": "t.six"}, "para": 1, "quote": "I locked the silver cup in the vestry cupboard"},
+    {"id": "f.door_locked", "of": "vestry_door", "attr": "door", "value": "locked", "detail": "locked by Kit Sorrel", "time": {"at": "t.six"}, "para": 1, "quote": "locked the vestry door behind me"},
+    {"id": "f.key_to_lodge", "of": "vestry_key", "attr": "location", "value": "lodge", "detail": "taken back by Kit Sorrel", "time": {"at": "t.six"}, "para": 1, "quote": "took its key back to the sexton's lodge"},
+    {"id": "f.cup_gone", "of": "cupboard", "attr": "contents", "value": "nothing", "detail": "still locked, and the cup gone", "time": {"at": "t.nine"}, "para": 1, "quote": "the cupboard was locked and the cup was gone"},
+    {"id": "f.kit_porch", "of": "kit", "attr": "location", "value": "porch", "detail": "with the ringers' list", "time": {"from": "t.six", "to": "t.nine"}, "para": 2, "quote": "I sat in the church porch the whole time with the ringers' list"},
+    {"id": "f.amos_up", "of": "amos", "attr": "action", "value": "goes up the tower stair", "time": {"at": "t.six"}, "para": 2, "quote": "go up the tower stair at six"},
+    {"id": "f.amos_down", "of": "amos", "attr": "action", "value": "comes down the tower stair", "time": {"at": "t.nine"}, "para": 2, "quote": "come down it at nine"},
+    {"id": "f.stair_only", "of": "tower_stair", "attr": "condition", "value": "comes down into the porch, and is the only way up or down the tower", "time": {"from": "t.before"}, "para": 2, "quote": "it is the only way up or down"},
+    {"id": "f.one_key", "of": "vestry_door", "attr": "condition", "value": "has one key, which hangs in the sexton's lodge", "time": {"from": "t.before"}, "para": 3, "quote": "The vestry door has that one key, and it hangs in the sexton's lodge"},
+    {"id": "f.sign_rule", "of": "vestry_key", "attr": "condition", "value": "whoever borrows it signs the key book", "time": {"from": "t.before"}, "para": 3, "quote": "whoever borrows it signs the key book there"},
+    {"id": "f.kit_takes_book", "of": "kit", "attr": "carrying", "value": "key_book", "detail": "taken away from the lodge", "time": {"from": "t.nine"}, "para": 3, "quote": "I took the key book away with me"},
+    {"id": "f.vane_sent_for", "of": "vane", "attr": "action", "value": "is sent for to the Grange, and misses evensong", "time": {"at": "t.afternoon"}, "para": 4, "quote": "he had been sent for to the Grange that afternoon"},
+    {"id": "f.hester_flowers", "of": "hester", "attr": "role", "value": "the churchwarden's daughter, who does the altar flowers", "time": {"from": "t.before"}, "para": 4, "quote": "Hester Dent, the churchwarden's daughter, does the altar flowers"},
+    {"id": "f.book_tells", "of": "hester", "attr": "tells", "value": "acct.key_book", "to": "kit", "how": "statement", "time": {"at": "t.nine"}, "para": "key_book:1", "quote": "H. Dent"},
+    {"id": "f.key_out", "of": "hester", "attr": "carrying", "value": "vestry_key", "detail": "signed out for the altar flowers", "time": {"from": "t.half_seven", "to": "t.quarter_eight"}, "para": "key_book:1", "quote": "Vestry key out at half past seven, for the altar flowers"},
+    {"id": "f.key_back", "of": "vestry_key", "attr": "location", "value": "lodge", "detail": "signed back by H. Dent", "time": {"at": "t.quarter_eight"}, "para": "key_book:2", "quote": "Vestry key back at a quarter past eight"},
+    {"id": "f.holt_tells", "of": "holt", "attr": "tells", "value": "acct.holt", "to": "kit", "how": "letter", "time": {"at": "t.monday"}, "para": "grange:1", "quote": "Mrs. Holt, housekeeper at the Grange, to the clerk of St. Ebba's"},
+    {"id": "f.vane_grange", "of": "vane", "attr": "location", "value": "grange", "detail": "at the Squire's bedside, Mrs. Holt with him", "time": {"from": "t.five", "to": "t.half_nine"}, "para": "grange:2", "quote": "he did not leave the bedside until half past nine"},
+    {"id": "f.survey_tells", "of": "churchwardens", "attr": "tells", "value": "acct.survey", "to": "kit", "how": "report", "time": {"at": "t.before"}, "para": "survey:1", "quote": "The vestry"},
+    {"id": "f.vestry_one_door", "of": "vestry", "attr": "condition", "value": "one door, into the chancel, and two windows, both barred", "time": {"from": "t.before"}, "para": "survey:1", "quote": "has one door, into the chancel, and two windows, both barred"},
+    {"id": "f.cup_back", "of": "hester", "attr": "action", "value": "brings the cup back to Kit Sorrel", "time": {"at": "t.monday"}, "para": 5, "quote": "Hester Dent brought the cup back to me", "q": "q.cup", "pick": "hester"}
+  ]
+}

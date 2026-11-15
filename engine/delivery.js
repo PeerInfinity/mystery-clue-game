@@ -9,6 +9,8 @@
 // question that holds nothing (the end). A placement is a Map from a question to the paper it brings; a question
 // with none brings nothing.
 
+import { MAIN, parseRef } from './refs.js';
+
 /** A small seeded generator (mulberry32): the same seed gives the same numbers in node and in the browser. */
 export function rng(seed) {
     let s = seed | 0;
@@ -83,3 +85,56 @@ export const placement = (logic, seed) => fill(logic, rng(seed)).place;
 
 /** A new seed for a new game. */
 export const newSeed = () => 1 + Math.floor(Math.random() * 0x7ffffffe);
+
+// --- The logic of a case. The page and the validator derive it from the world model; the check that it is the logic
+// the story was written from compares it with structure.json (structureLogic), which the page never reads.
+/** The delivery a case's header asks for: `paragraph` (a file comes at its main-story paragraph, or from the start) or `earned`. */
+export const deliveryMode = (header) => header?.delivery?.mode ?? 'paragraph';
+
+/**
+ * A case's logic from its own data: for each question with essential observations, the papers they rest on (where
+ * each fact of theirs is told, a premise's for a fact only inferred), the paper that raises the question, and the
+ * questions its "question X is solved" observations name (`requires`). `world`: {questions, observations, facts,
+ * files, delivery} as the case's files hold them.
+ */
+export function caseLogic({ questions, observations, facts, files, delivery }) {
+    const factById = new Map(facts.map((f) => [f.id, f]));
+    const fileIds = new Set(files.map((f) => f.id));
+    const paperOf = (ref) => { const r = ref == null ? null : parseRef(ref); return r && r.story !== MAIN && fileIds.has(r.story) ? r.story : null; };
+    const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
+    const factPapers = (id, seen = new Set()) => {
+        const f = factById.get(id);
+        if (!f || seen.has(id)) return [];
+        seen.add(id);
+        const at = givenAt(f);
+        return at != null ? [paperOf(at)].filter(Boolean) : (f.from ?? []).flatMap((x) => factPapers(x, seen));
+    };
+    const out = [];
+    for (const q of questions) {
+        const mine = (observations ?? []).filter((o) => o.q === q.id && o.essential);
+        if (!mine.length) continue;
+        const papers = new Set([paperOf(q.raised)].filter(Boolean)), requires = [];
+        for (const o of mine) for (const e of o.from) {
+            if (typeof e === 'string') factPapers(e).forEach((p) => papers.add(p));
+            else if (e.solved) { if (!requires.includes(e.solved)) requires.push(e.solved); }
+            else if (e.doubted) factPapers(e.doubted).forEach((p) => papers.add(p));
+            else if (e.reasoned === 'missing') factPapers(e.of).forEach((p) => papers.add(p));
+            else if (e.reasoned) (e.premises ?? []).forEach((x) => factPapers(x).forEach((p) => papers.add(p)));
+        }
+        out.push({ id: q.id, sets: [[...papers].sort()], requires });
+    }
+    const start = delivery?.start ?? [];
+    return { questions: out, start, earned: files.map((f) => f.id).filter((id) => !start.includes(id)), goal: delivery?.goal ?? null };
+}
+
+/** The same logic from structure.json: a question's sets are its `needs`, each the papers of its clues and the paper that raises it. */
+export function structureLogic(s) {
+    const clues = new Map((s.clues ?? []).map((c) => [c.id, c]));
+    const questions = s.questions.map((q) => ({
+        id: q.id,
+        sets: q.needs.map((set) => [...new Set([...(q.raised && q.raised !== 'main' ? [q.raised] : []), ...set.map((c) => clues.get(c)?.paper).filter(Boolean)])].sort()),
+        requires: q.requires ?? [],
+    }));
+    const start = s.delivery?.start ?? [];
+    return { questions, start, earned: s.papers.map((p) => p.id).filter((id) => !start.includes(id)), goal: s.goal };
+}

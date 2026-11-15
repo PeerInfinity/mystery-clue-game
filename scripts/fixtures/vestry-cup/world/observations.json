@@ -1,0 +1,15 @@
+{
+  "observations": [
+    {"id": "o.tower_up", "q": "q.tower", "from": ["f.amos_up"], "says": "Amos Reed went up the tower stair at six", "essential": true},
+    {"id": "o.tower_down", "q": "q.tower", "from": ["f.amos_down"], "says": "and came down it at nine", "essential": true},
+    {"id": "o.tower_stair", "q": "q.tower", "from": ["f.stair_only"], "says": "the stair is the only way up or down, and it comes down into the porch where Kit Sorrel sat", "essential": true, "against": ["vestry"]},
+    {"id": "o.key_out", "q": "q.key", "from": ["f.key_out"], "says": "Hester Dent signed the vestry key out at half past seven", "essential": true},
+    {"id": "o.key_back", "q": "q.key", "from": ["f.key_back"], "says": "and signed it back at a quarter past eight: nobody else signed for it", "essential": true, "against": ["amos"]},
+    {"id": "o.vane_grange", "q": "q.vane", "from": ["f.vane_grange"], "says": "Mr. Vane was at the Squire's bedside from five until half past nine", "essential": true, "against": ["vestry"]},
+    {"id": "o.cup_six", "q": "q.cup", "from": ["f.cup_locked"], "says": "the cup was locked away at six, so it went between six and nine", "essential": true},
+    {"id": "o.cup_door", "q": "q.cup", "from": ["f.vestry_one_door"], "says": "the windows are barred: the only way into the vestry is its door, and so its key", "essential": true, "against": ["something else"]},
+    {"id": "o.cup_amos", "q": "q.cup", "from": [{"solved": "q.tower"}], "says": "Amos Reed was up the tower the whole time", "essential": true, "against": ["amos"]},
+    {"id": "o.cup_vane", "q": "q.cup", "from": [{"solved": "q.vane"}], "says": "Mr. Vane was at the Grange the whole time", "essential": true, "against": ["vane"]},
+    {"id": "o.cup_key", "q": "q.cup", "from": [{"solved": "q.key"}], "says": "Hester Dent had the vestry key from half past seven to a quarter past eight", "essential": true}
+  ]
+}

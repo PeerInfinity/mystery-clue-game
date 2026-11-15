@@ -1,0 +1,35 @@
+{
+  "story": "vestry-cup",
+  "title": "The Vestry Cup",
+  "mechanic": "Papers earned by solving questions: three questions and the goal, three papers, one held from the start; the goal rests on the other three questions solved.",
+  "note": "Spoilers. An invented fixture that carries the delivery mechanism (docs/authored-stories.md, step 7.2) until the long story has prose and data. The shape of cases/custom-house-fire/structure.json: `papers`, a clue's `paper`, a question's `requires` and `raised`. The page derives the same logic from the world model (engine/delivery.js caseLogic); scripts/validate-world.test.js holds the two equal.",
+  "goal": "q.cup",
+  "delivery": {"earned_by": "solving a question", "start": ["key_book"]},
+  "truth": [
+    "On Sunday at six the clerk, Kit Sorrel, locks the silver cup in the vestry cupboard, locks the vestry door and takes its one key back to the sexton's lodge.",
+    "Amos Reed, the sexton, rings in the tower from six until nine, seen going up and coming down by the clerk in the porch. Mr. Vane, the curate, is at the Grange from five until half past nine.",
+    "Hester Dent signs the vestry key out at half past seven, takes the cup home to mend its foot, and signs the key back at a quarter past eight. The vestry has one door and barred windows."
+  ],
+  "frame": [
+    {"id": "fr.locked", "says": "The cup was locked away at six and gone at nine; the vestry door was locked and its key taken back to the lodge.", "facts": ["f.cup_locked", "f.door_locked", "f.key_to_lodge", "f.cup_gone"]},
+    {"id": "fr.tower", "says": "Amos Reed went up the tower stair at six and came down at nine, seen from the porch, the stair's only end.", "facts": ["f.amos_up", "f.amos_down", "f.stair_only", "f.kit_porch"]},
+    {"id": "fr.key_rule", "says": "The vestry door has one key, kept in the lodge, and whoever borrows it signs the key book.", "facts": ["f.one_key", "f.sign_rule"]}
+  ],
+  "papers": [
+    {"id": "key_book", "title": "The key book of the sexton's lodge", "clues": ["c.key_out", "c.key_back"]},
+    {"id": "grange", "title": "A note from the Grange", "clues": ["c.vane"]},
+    {"id": "survey", "title": "From the churchwardens' survey", "clues": ["c.door"]}
+  ],
+  "clues": [
+    {"id": "c.key_out", "paper": "key_book", "says": "Hester Dent signed the vestry key out at half past seven.", "facts": ["f.key_out"]},
+    {"id": "c.key_back", "paper": "key_book", "says": "She signed it back at a quarter past eight; nobody else signed.", "facts": ["f.key_back"]},
+    {"id": "c.vane", "paper": "grange", "says": "Mr. Vane sat at the Squire's bedside from five until half past nine.", "facts": ["f.vane_grange"]},
+    {"id": "c.door", "paper": "survey", "says": "The vestry has one door and barred windows.", "facts": ["f.vestry_one_door"]}
+  ],
+  "questions": [
+    {"id": "q.tower", "layer": 1, "asks": "Where was Amos Reed from six until nine?", "answer": "the tower", "others": ["the vestry"], "rules_out": {"the vestry": "fr.tower: up the stair at six, down at nine, and the stair the only way"}, "needs": [["fr.tower"]], "raised": "main"},
+    {"id": "q.key", "layer": 1, "asks": "Who had the vestry key on Sunday evening?", "answer": "Hester Dent", "others": ["Amos Reed"], "rules_out": {"Amos Reed": "c.key_back: nobody else signed for it, and fr.key_rule: whoever borrows it signs"}, "needs": [["fr.key_rule", "c.key_out", "c.key_back"]], "raised": "main"},
+    {"id": "q.vane", "layer": 1, "asks": "Where was Mr. Vane on Sunday evening?", "answer": "the Grange", "others": ["the vestry"], "rules_out": {"the vestry": "c.vane: at the bedside from five until half past nine"}, "needs": [["c.vane"]], "raised": "grange"},
+    {"id": "q.cup", "layer": 2, "asks": "Who took the cup from the vestry cupboard?", "answer": "Hester Dent", "others": ["Amos Reed", "Mr. Vane", "something else"], "rules_out": {"Amos Reed": "q.tower", "Mr. Vane": "q.vane", "something else": "c.door: only by the door, so only with the key (q.key)"}, "needs": [["fr.locked", "c.door"]], "requires": ["q.tower", "q.key", "q.vane"], "raised": "main"}
+  ]
+}

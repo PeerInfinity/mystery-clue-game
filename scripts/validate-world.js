@@ -27,6 +27,7 @@ import { assertions, contradictions, CLAIM_ATTRS, LEVELS } from '../engine/world
 import { ACTIONS, GENERIC_ACTIONS, STATES, setCaseActions } from '../engine/actions.js';
 import { REASONED_MOVES } from '../engine/observations.js';
 import { MAIN, parseRef } from '../engine/refs.js';
+import { caseLogic, deliveryMode, play, placement } from '../engine/delivery.js';
 
 const dir = process.argv[2];
 const quiet = process.argv.includes('--quiet');
@@ -46,17 +47,22 @@ for (const f of caseFiles) {
     if (!f.id || f.id === MAIN || !/^[A-Za-z0-9_-]+$/.test(f.id) || stories.has(f.id)) { fileErrors.push(`case.json: file id ${f.id}`); continue; }
     if (!f.title || !f.short) fileErrors.push(`case.json: file ${f.id}: needs a title and a short label`);
     if (f.delivered != null && !(Number.isInteger(f.delivered) && f.delivered >= 1 && f.delivered < story.length)) fileErrors.push(`case.json: file ${f.id}: delivered is a paragraph of the main story`);
+    if (f.delivered != null && caseData.delivery?.mode === 'earned') fileErrors.push(`case.json: file ${f.id}: a paper earned by solving questions has no delivered paragraph`);
     try { stories.set(f.id, paragraphsOf(f.text)); } catch { fileErrors.push(`case.json: file ${f.id}: no text ${f.text}`); }
 }
 const deliveredAt = (id) => (id === MAIN ? 0 : caseFiles.find((f) => f.id === id)?.delivered ?? 0);
 /** A paragraph reference that exists (a number in the main story, or "<file>:<n>"). */
 const isRef = (x) => { const r = parseRef(x); return !!r && (typeof x === 'number' || typeof x === 'string') && stories.has(r.story) && r.n >= 0 && r.n < stories.get(r.story).length; };
-/** Is `a` surely read whenever `b` is? The same story and no later; or a main-story paragraph no later than b's file is delivered. */
+/**
+ * Is `a` surely read whenever `b` is? The same story and no later; or a main-story paragraph no later than b's file is
+ * delivered; or the main story's ¶1, where the page opens. A paper earned by solving a question (`delivery.mode:
+ * earned`) is delivered at no paragraph, so only the same story counts: where more is needed the data lists both.
+ */
 const le = (a, b) => {
     const x = parseRef(a), y = parseRef(b);
     if (!x || !y || x.n <= 0) return true;
     if (x.story === y.story) return x.n <= y.n;
-    return x.story === MAIN && x.n <= deliveredAt(y.story);
+    return x.story === MAIN && (x.n <= 1 || x.n <= deliveredAt(y.story));
 };
 /** `a` may be read after `b` (an error where a must come first). Unknown either way: no. */
 const after = (a, b) => a != null && b != null && !le(a, b);
@@ -374,13 +380,36 @@ for (const f of facts) {
 for (const o of observationList) {
     if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);
     if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
-    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr))
+    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.solved ? !qById.has(f.solved) || f.solved === o.q : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr))
         : f.reasoned === 'missing' ? !factById.get(f.of)?.series?.at?.includes(f.at)
         : f.reasoned ? !REASONED_MOVES[f.reasoned] || !Array.isArray(f.premises) || f.premises.length !== (f.reasoned === 'changed' ? 2 : 1) || f.premises.some((x) => !factById.has(x))
         : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
     if (!o.says) err(o.id, 'no says');
     if (o.if && !qById.get(o.if.q)?.possibilities.some((x) => x.value === o.if.pick)) err(o.id, `if: no possibility ${o.if.q} = ${o.if.pick}`);
     for (const p of list(o.against)) if (!qById.get(o.q)?.possibilities.some((x) => x.value === p)) err(o.id, `against: no possibility ${p}`);
+}
+// Delivery (case.json `delivery`, engine/delivery.js): `paragraph` (the default: a file comes at its `delivered`
+// paragraph of the main story) or `earned` (a paper comes when a question it is placed on is solved, by a seed's
+// placement): the papers held from the start are files, the goal a question; every question with an answer can be
+// solved (essential observations); "question X is solved" names no loop; there are no more papers to earn than
+// questions besides the goal; every question can be reached with every paper, and a placement can be drawn.
+const mode = deliveryMode(caseData);
+if (!['paragraph', 'earned'].includes(mode)) err('case.json', `delivery mode ${mode}: paragraph or earned`);
+if (mode === 'earned') {
+    const d = caseData.delivery;
+    for (const id of d.start ?? []) if (!caseFiles.some((f) => f.id === id)) err('case.json', `delivery.start: no file ${id}`);
+    if (!qById.has(d.goal)) err('case.json', `delivery.goal: no question ${d.goal}`);
+    for (const q of questions) if (q.answer != null && !q.latent && q.kind !== 'provenance' && !byDescription(q.id)) err(q.id, 'papers are earned by solving questions: it needs essential observations');
+    if (qById.get(d.goal)?.answer_given_at !== story.length - 1) err('case.json', `delivery.goal: ${d.goal} is given away at the main story's last paragraph`);
+    const logic = caseLogic({ questions, observations: observationList, facts, files: caseFiles, delivery: d });
+    const byId = new Map(logic.questions.map((q) => [q.id, q]));
+    const loops = (id, trail) => (trail.includes(id) ? [...trail, id] : (byId.get(id)?.requires ?? []).map((r) => loops(r, [...trail, id])).find(Boolean) ?? null);
+    for (const q of logic.questions) { const l = loops(q.id, []); if (l) { err(q.id, `a loop of solved questions: ${l.join(' -> ')}`); break; } }
+    const others = logic.questions.filter((q) => q.id !== d.goal).length;
+    if (logic.earned.length > others) err('case.json', `${logic.earned.length} papers to earn and only ${others} questions besides the goal`);
+    const all = play({ ...logic, start: [...logic.start, ...logic.earned], earned: [] }, new Map());
+    for (const q of logic.questions) if (!all.solved.has(q.id)) err(q.id, 'cannot be solved even with every paper');
+    if (!errors.length && !placement(logic, 1)) err('case.json', 'no placement of the papers can be drawn');
 }
 const strainsFile = path.join(dir, 'world', 'strains.json');
 const strains = fs.existsSync(strainsFile) ? read('world/strains.json').strains : [];

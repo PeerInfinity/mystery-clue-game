@@ -1,0 +1,13 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.afternoon", "label": "Sunday afternoon", "after": "t.before", "para": 4, "quote": "that afternoon"},
+    {"id": "t.five", "label": "Sunday, five o'clock", "after": "t.afternoon", "para": "grange:2", "quote": "came at five on Sunday"},
+    {"id": "t.six", "label": "Sunday, six o'clock", "after": "t.five", "para": 1, "quote": "On Sunday at six o'clock"},
+    {"id": "t.half_seven", "label": "Sunday, half past seven", "after": "t.six", "para": "key_book:1", "quote": "at half past seven"},
+    {"id": "t.quarter_eight", "label": "Sunday, a quarter past eight", "after": "t.half_seven", "para": "key_book:2", "quote": "at a quarter past eight"},
+    {"id": "t.nine", "label": "Sunday, nine o'clock", "after": "t.quarter_eight", "para": 1, "quote": "At nine o'clock"},
+    {"id": "t.half_nine", "label": "Sunday, half past nine", "after": "t.nine", "para": "grange:2", "quote": "until half past nine"},
+    {"id": "t.monday", "label": "Monday morning", "after": "t.half_nine", "para": "grange:1", "quote": "on Monday morning"}
+  ]
+}
