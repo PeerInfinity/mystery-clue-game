@@ -186,6 +186,12 @@ of a paper is numbered within it, with the paper's short name: <span class="para
 gives an answer away; the story itself does. <span class="btn">Read on ▶</span> in the story does not read the
 papers for you: while a paper that has come is not read to its end, a note under the story says so, with a button
 to open it, and the gate's notice lists it.</p>
+<p>In other cases papers are <b>earned</b>: a few are in the narrator's hands from the start, and each of the rest
+comes when you solve a question (see <a href="#solved">solved questions</a>). Which question brings which paper is
+drawn at random for each new game, so two games of the same case can go in a different order; some questions bring
+nothing new. <i>The papers</i>, under the tabs, lists each paper you have and how it came: in hand from the start, or
+brought by solving which question. The main story can be read from the start, all but its last paragraph, which waits
+until the case is solved.</p>
 <h3 id="gate">The gate</h3>
 <p>Sometimes the story is about to give away the answer to a question you could have worked out already. Then
 reading stops just before that paragraph, and a notice says which questions it answers.</p>
@@ -292,6 +298,17 @@ what the timeline says. A crossed-out answer is your claim that it was
 not so. Any answer that fits is accepted when the story answers; there is not only one route to it.</p>
 <p>Click a question's name for its detail: the words that raised it, when it is about, your marks and what each
 takes for granted, and, once the story has answered, the answer.</p>
+<h3 id="solved">Solved questions</h3>
+<p>A question with evidence to link is <b>solved</b> the moment all of its evidence is linked (see
+<a href="#observations">observations</a>) and exactly one answer is circled, the right one. You need not wait for
+the story to reach it. A notice says so, and the question is marked <b>✓ solved</b>. Solved is
+for good: its circle stays (Undo does not take it back, and nor does distrusting its evidence afterwards), the other
+answers put forward are crossed out, and a click on another answer only crosses it out or clears it. If all the
+evidence is linked and the answer you circled is wrong, the question says <i>Not this answer.</i>, and nothing more.</p>
+<p>Some questions rest on others: part of their evidence is that another question is solved. That part fills in by
+itself when the other question is solved, and the question lists what it rests on and which of those are not solved
+yet. Where papers are earned, the notice also says what solving the question brought: a paper, with a button to open
+it, or nothing new.</p>
 </section>
 
 <!-- ------------------------------------------------------------------ -->
@@ -449,13 +466,18 @@ speed a short case takes about a minute.</p>
   <dd>None, 10 or 30 seconds, or a minute.</dd>
   <dt>To read past an answer</dt>
   <dd>What <a href="#gate">the gate</a> asks of a question that has evidence to link: <i>show it</i> (the evidence
-  linked and the right answer circled; the default), or <i>commit to any answer</i>.</dd>
+  linked and the right answer circled; the default), or <i>commit to any answer</i>. A question is
+  <a href="#solved">solved</a> only by its evidence and the right answer, whichever you choose.</dd>
+  <dt>Seed of this game</dt>
+  <dd>Where papers are earned: the number that decided which question brings which paper, and <i>replay it</i>, an
+  address that starts a new game with the same papers in the same places (it asks before clearing a game in
+  hand).</dd>
 </dl>
 <h3>Saving and starting over</h3>
 <p>Each case saves itself in this browser as you play: close the page and come back, and you are where you left off.
 <span class="btn quiet">Reset trust…</span> puts every link and person back to uncertain (and each narrator back to
 certain) and keeps the rest. <span class="btn quiet">Start over…</span> asks first, then clears everything (your
-place in the story, your trust, marks and reasoning) and starts again from the first paragraph. It keeps the layout,
+place in the story, your trust, marks and reasoning) and starts again from the first paragraph (where papers are earned, with a new seed). It keeps the layout,
 the theme, the wait between hints and the gate's rule.</p>
 <p>Settings also links to this guide, to <i>All the cases…</i> (the start page) and to the earlier game. Hover over
 almost any button or setting for a short explanation.</p>

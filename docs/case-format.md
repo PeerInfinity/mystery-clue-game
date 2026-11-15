@@ -16,7 +16,7 @@ else. Every JSON file is one object per line inside its list.
 | File | Required | What |
 |---|---|---|
 | `story.txt` | yes | The story's text, paragraphs separated by blank lines. Paragraphs are numbered from 0 as `engine/story.js` splits the text (¶0 the title); every `para` in the data is that number, and every `quote` is found in its paragraph (curly quotes and dashes normalised). |
-| `world/case.json` | yes | The case header: `{id, title, author, story, narrators, subtitle?, files?, source}`. `story` is the story file, relative to `world/` (`../story.txt`); `narrators` who tells the story to the reader (see "The reader and the narrators" below); `subtitle` the page's name beside the title ("Watson's timeline"; default "the timeline"); `source` says where the text comes from (Gutenberg id, collection, first published, word count, public-domain status). |
+| `world/case.json` | yes | The case header: `{id, title, author, story, narrators, subtitle?, files?, delivery?, source}`. `story` is the story file, relative to `world/` (`../story.txt`); `narrators` who tells the story to the reader (see "The reader and the narrators" below); `subtitle` the page's name beside the title ("Watson's timeline"; default "the timeline"); `source` says where the text comes from (Gutenberg id, collection, first published, word count, public-domain status). |
 | `files/<id>.txt` | no | A case file (a sub-story): a paper the narrator reads, its own paragraphs from ¶0 (its title). Listed in `world/case.json` `files`; see "Case files" below. |
 | `world/entities.json` | yes | Every entity, with `moves` (what travels) and `joins` (a door's two sides). |
 | `world/mentions.json` | yes | How the story names each entity: `{entities: {id: [phrase, …]}}`, a phrase a string or `{text, paras: [from, to]}` to limit it to some paragraphs (inclusive). Matched exactly on word boundaries, the longest winning where two overlap (`engine/story.js`). The story's names are links to their cards; an entity's card appears at its first mention (or at its `source` quote). |
@@ -45,8 +45,26 @@ away: `answer_given_at` is a paragraph of the main story, and the gate stays the
 list of references, every paragraph the inference needs (`["rudd:2", "self:2"]`); so may a true path move's `at`
 (what must have been read before it), and the validator checks that it covers what the move uses. Where the
 validator checks that one paragraph comes no later than another, across stories it means "surely read first": the
-same story and no later, or a main-story paragraph no later than where the other's file is delivered. A file's
+same story and no later, or a main-story paragraph no later than where the other's file is delivered, or the main
+story's ¶1 (the page opens there). A paper earned by solving questions is delivered at no paragraph, so for it only
+the same story counts; where more is needed the data lists both references. A file's
 prose stands alone: the narrator's thoughts in it are about that paper only, never about how it bears on another.
+
+**Papers earned by solving questions** (since 2026-11-14; the design in `docs/authored-stories.md`, "The delivery
+mechanism"). `world/case.json` may have `delivery: {mode, start?, goal?}`. `mode: paragraph` (the default, every
+miniature) is the above: a file comes at its `delivered` paragraph. `mode: earned`: a file has no `delivered`; the
+papers in `start` are in hand from the start, and each of the others comes when the question it is placed on is
+solved. The placement is drawn from a seed (`engine/delivery.js`, the forward fill of an Archipelago generator) on the
+case's logic, which the page derives from its own data (`caseLogic`): a question's papers are those its essential
+observations' facts are told in (where each is given; an inferred fact's premises'), and the paper that raises it;
+what it rests on is the questions its `{solved}` observations name. `goal` is the question that ends the case: it
+holds no paper, and it is given away at the main story's last paragraph, which the gate keeps until it is solved;
+the rest of the main story can be read from the start. The validator requires, in an earned case, an essential
+observation on every question with an answer, no loop of solved questions, no more papers to earn than questions
+besides the goal, every question reachable with every paper, and a placement that can be drawn; with a
+`structure.json` beside it, `npm test` holds the derived logic equal to the structure's (`structureLogic`: a
+question's `needs`, each the papers of its clues and the paper that raises it, and its `requires`). The invented
+example is `scripts/fixtures/vestry-cup/`.
 
 The world model was first written beside the earlier game's data and pointed into it (`old`, references to the
 annotated reading's thoughts, the earlier game's time windows); since 2026-11-06 it stands alone. The page shows
@@ -400,6 +418,11 @@ The player's moves, each checked by these rules, give entries with the source *t
   (raised, the possibility available, `answer_inferable_at`), and each wrong answer tried against its likely clash's
   `available`. Crossings and trust are judgement and not timed. A move found early is either the path being late
   (move it) or the page running ahead of the story (a leak to fix).
+  In a case whose papers are earned, the path is read question by question: each move serves the one question in its
+  `for_q`, the order of the list within a question is kept, and the order among questions is the player's (the path
+  check draws one from the seed among the questions open; the autoplay takes the first open in the list's order; the
+  hints offer only moves of a question open now). `seeds`: the seeds the page checks play (the narrowest order, the
+  widest, an ordinary one), chosen once by `node scripts/delivery-seeds.mjs <dir> [n] --write`.
   Four moves for a case with a room or observations: `way` (`way: "<row>|<size>"`, `mark: closed | open`), `got` (`of`: a `passed`
   fact), `route` (`node`, one per link, in order) and `link` (`entry`: a fact id, or `route` for the route built; `q`). The path
   check fails if, at the end of the story, a description lacks an essential observation.
@@ -439,7 +462,9 @@ data holds for that pair is then filled in, keeping its logic (entries, their ch
   `{route_through: [things]}` for a route the player built through them, or `{reasoned: "changed", premises: [two states]}`
   (the entry of "It changed" on those two, in either order) or `{reasoned: "got_through", premises: [a crossing]}` (the
   entry of "Something got through"), or `{reasoned: "missing", of: rule, at: time}` (the entry of "Something is missing
-  here", named by its rule and time: what else it rests on is the record as the timeline holds it), so that an author can make a move necessary by requiring the entry it reveals. It is filled when every entry is on the timeline
+  here", named by its rule and time: what else it rests on is the record as the timeline holds it), so that an author can make a move necessary by requiring the entry it reveals, or `{solved: <question>}`: that question solved, which
+  fills by itself with no link to make (a larger question resting on smaller ones; the page lists them under it, and
+  which are not solved yet). It is filled when every entry is on the timeline
   and linked to `q`, and goes if one leaves. An observation from several entries with some of them linked is
   *begun* (`partial` from `fill`, 2026-11-14): the page says of each such link that it is part of something not yet
   complete, and lists it under the question, without naming what is missing. A statement linked for `{doubted}` and only partly disbelieved (some of its false parts off the timeline, not all) is begun too. A link that does neither stays as the
@@ -447,6 +472,13 @@ data holds for that pair is then filled in, keeping its logic (entries, their ch
 - `if: {q, pick}`: filled only with that answer of another question circled. A clue the story reads more than one way is an
   ordinary question with those readings as its possibilities, and what follows from each reading depends on it through `if`.
 - `essential`: needed for the description to count as a solution, and required by the gate: the story goes on past the question's give-away only with every essential observation filled and a right answer circled (Settings can put back the old rule, any one answer; a question with no essential observation takes any one answer). The rest add to it. `against`: possibilities it tells against.
+- **Solved** (2026-11-14): the moment a question the player can see, not yet given away, has every essential
+  observation filled and exactly one answer circled, a right one, it is solved for good, whatever the gate's setting
+  (the page's `judge`, after every drawing). Its circle is kept (Undo and distrust do not take it back), the story's
+  other proposals are crossed out, and a click on another answer only crosses it out or clears it; with the evidence
+  complete and a wrong answer circled the question says "Not this answer." A solved question passes the gate. Saved as
+  `solved: {question: {pick, marks, n}}`; while a move is only tried and taken back (the hints, the path check),
+  nothing is judged.
 - A question answered by a description (the story names the thing only at the end) has "something else" in `also_right`.
 
 The engine also has "What else of this kind?" and the fit check (`whatElse`, `fits`, `checkCrossing`), tested but not used by

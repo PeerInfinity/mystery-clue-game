@@ -137,6 +137,9 @@ To settle when this is built:
   entry of its evidence afterwards does not reopen it.
 - **The response shows the evidence is complete.** While evidence is missing a circle is a pencil mark; once it is
   complete, a wrong circle gets a reaction. That is accepted. The page still hides which evidence is missing.
+- **Built** (2026-11-14, `docs/authored-stories.md`, findings 79–85): crossing out still passes through circling
+  (a solve comes only from exactly one circle, so the circle on the way is judged; on solving the other proposals are
+  crossed out by themselves); the circling-first rule, permanence and the response are as above; no growing wait yet.
 - **A case without `observations.json`** cannot use this. Its questions go on accepting any answer until their
   observations exist, so the change can land one story at a time.
 

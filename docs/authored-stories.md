@@ -821,7 +821,7 @@ Next: the case's logic as Archipelago logic, in the rules.json format of the Arc
     `mystery:state` with the papers held and the questions already checked, `mystery:refused`); the page deals only
     in its own ids. Not built: there is no page side yet.
 
-### The delivery mechanism: the design agreed (step 7.2, 2026-11-14; not built)
+### The delivery mechanism: the design agreed (step 7.2, 2026-11-14; built the same day)
 
 Laid out to the user as six decisions with alternatives; the user agreed every recommendation, details to be
 adjusted later if wanted.
@@ -858,6 +858,44 @@ adjusted later if wanted.
    questions, three papers) carries the mechanism until the long story has prose and data.
 
 The build is handed to an Opus session (the kickoff: `.cache/delivery-build-kickoff.md`, not committed).
+
+**Built** (2026-11-14), in five commits, on the invented fixture `scripts/fixtures/vestry-cup` (The Vestry Cup: five
+paragraphs, three papers, three questions and the goal); the long story still has logic only. The format and the
+commands are in `docs/case-format.md` ("Papers earned by solving questions", "Solved") and `docs/technical.md`;
+`guide.html` has "Solved questions" and earned papers. The fifteen miniatures play as before (every page check).
+
+79. **Locking a solved question's marks would refuse the miniatures' own paths.** The Rent Box Papers links the
+    evidence, circles the Captain, then crosses out Mr. Fenn; with "its marks lock" the crossing is refused, since the
+    question is already solved. Built instead: on solving, the story's other proposals cross themselves out, the
+    circle can never change, and a click on another answer only crosses it out or clears it.
+80. **Solving judges strictly whatever the gate's setting.** With Settings' "commit to any answer", the gate's own
+    test would make any single circle a solve and so earn papers for nothing. Solving always asks for the evidence
+    and the right answer; the setting decides only whether the main story's gate opens.
+81. **Three questions and three papers could not show the mechanism.** With two questions besides the goal to place
+    papers on, the fill has almost one placement: no question that brings nothing, no choice of order, no question
+    raised by an earned paper. The fixture has three questions and the goal, one paper held from the start and two
+    earned: four placements, a question raised in an earned paper (the note from the Grange), a goal that rests on the
+    three others solved. The fill's own measure (`structure-check.mjs`): 2.5 of the 4 steps have one question open.
+82. **The logic derived from the case's data matched structure.json at the first try** on the fixture: a question's
+    papers are those its essential observations' facts are told in and the paper that raises it, and "question X is
+    solved" observations give `requires`. Not yet known for the long story, whose clues have no facts yet; the test
+    will say.
+83. **Surely read first, across stories, for an earned paper:** only the same story, no later (and the main story's
+    ¶1, where the page opens), since no main-story paragraph delivers it. The fixture needed no more: where a move
+    needs two stories its `at` lists both.
+84. **Trying a move to see if the page allows it could solve a question for good.** The hints and the path check
+    make a move and take it back with Undo to learn whether the page takes it; a tried link that completed the
+    evidence solved the question, and Undo does not take a solve back. Found by the hint check's new assertion (every
+    hint is about an open question): a hint for the key question after it was solved with one link of two. Nothing is
+    judged while a move is only tried (`window.__trying`). The same holds for any check or helper that probes by
+    making and undoing a move.
+85. **The order a seed gives is narrow on so small a case**: over 500 seeds the narrowest order has one question to
+    choose from at three of four steps, the widest at two. The page checks play seeds 1, 2 and 495
+    (`scripts/delivery-seeds.mjs`); on the long story the same script will pick from its wider spread (finding 76).
+
+Not built, as agreed: the bridge to an Archipelago (the page's `source` object, `held` and `brought`, is what its
+`mystery:state` will answer), any growing wait after a wrong answer, and the long story's prose and data, which is
+the next step and the user's to start.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
