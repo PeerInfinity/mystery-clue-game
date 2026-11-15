@@ -26,6 +26,11 @@ evidence leaves.
 [The Night Porter's Statement](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/night-porters-statement) (a storyteller you cannot wholly
 believe)
 
+**A longer case**, the first full-size story written for this game:
+[The Fire at the Custom House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/custom-house-fire)
+(twenty-five questions and twenty-four papers; you hold four papers at the start and earn the others by answering
+questions, in an order drawn afresh for each game).
+
 They are the first of the project's present direction, stories written for this system
 ([`docs/authored-stories.md`](docs/authored-stories.md), which contains spoilers).
 

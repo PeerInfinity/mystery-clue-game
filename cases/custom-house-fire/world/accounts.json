@@ -1,0 +1,28 @@
+{
+  "accounts": [
+    {"id": "acct.ashby", "label": "What Henry Ashby sees, reads and knows himself", "origin": "ashby", "how": "saw", "facts": ["f.ashby_role", "f.burned", "f.ashby_came", "f.ch_layout", "f.box_place", "f.anchor_place", "f.mole_walk", "f.berths", "f.mill_lane", "f.pell_role", "f.pell_home", "f.london", "f.prout_role", "f.crouch_role", "f.garrick_role", "f.venn_role", "f.marigold_gone", "f.stove", "f.oilcan", "f.cupboard", "f.press", "f.chest", "f.vault", "f.lock_drawn", "f.door_unmarked", "f.windows", "f.two_keys", "f.pell_shows_key", "f.prout_shows_key", "f.ledger_whole", "f.clock_office", "f.clock_anchor", "f.clock_church", "f.cloak_found", "f.prout_owns", "f.board_tells", "f.letter_came", "f.pell_tells", "f.hume_tells", "f.finch_tells", "f.book_tells", "f.watch_rule", "f.crouch_tells", "f.lobb_tells", "f.odell_tells", "f.hlog_tells", "f.rowe_tells", "f.bales_tells", "f.prout_tells", "f.hearn_tells", "f.tully_tells", "f.tide_tells", "f.slog_tells", "f.olog_tells", "f.ledger_tells", "f.entry_names", "f.notice_tells", "f.one_hand", "f.pass1", "f.pass2", "f.pass3", "f.gate_tells", "f.note_tells", "f.timetable_tells", "f.keel_tells"]},
+    {"id": "acct.board", "label": "The Board's letter", "origin": "board", "how": "said", "facts": ["f.audit"]},
+    {"id": "acct.pell", "label": "Mr. Pell's statement", "origin": "pell", "how": "saw", "facts": ["f.pell_locked", "f.pell_key", "f.pell_cloak", "f.pell_told", "f.pell_ledger"]},
+    {"id": "acct.hume", "label": "Dr. Hume's note", "origin": "hume", "how": "saw", "facts": ["f.pell_cliff", "f.pell_foot"]},
+    {"id": "acct.finch", "label": "Mrs. Finch's statement", "origin": "finch", "how": "saw", "facts": ["f.no_cloak", "f.sat_up", "f.sent_doctor"]},
+    {"id": "acct.watch_book", "label": "What the night watch book says", "origin": "crouch", "how": "did", "facts": ["f.w_ten", "f.w_eleven", "f.w_twelve", "f.w_two", "f.w_three", "f.w_four", "f.w_five", "f.w_six", "f.door_fast_ten", "f.door_fast_eleven", "f.door_fast_twelve"]},
+    {"id": "acct.crouch", "label": "Silas Crouch's statement", "origin": "crouch", "how": "saw", "facts": ["f.crouch_rounds", "f.crouch_bell"]},
+    {"id": "acct.lobb", "label": "The potboy's statement", "origin": "lobb", "how": "saw", "facts": ["f.message", "f.crouch_went", "f.chair_empty"]},
+    {"id": "acct.odell", "label": "Mr. Odell's statement", "origin": "odell", "how": "did", "facts": ["f.errand", "f.prout_knows", "f.told_one"]},
+    {"id": "acct.harbour_log", "label": "What the harbour log says", "origin": "odell", "how": "did", "facts": ["f.sailed", "f.bell_log"]},
+    {"id": "acct.rowe", "label": "Mrs. Rowe's statement", "origin": "rowe", "how": "saw", "facts": ["f.bell_church", "f.rowe_clock"]},
+    {"id": "acct.bales", "label": "The landlord's statement", "origin": "bales", "how": "saw", "facts": ["f.prout_cribbage", "f.not_at_bell"]},
+    {"id": "acct.prout", "label": "Mr. Prout's statement", "origin": "prout", "how": "saw", "facts": ["f.prout_claim", "f.prout_key"]},
+    {"id": "acct.hearn", "label": "The baker's statement", "origin": "hearn", "how": "saw", "facts": ["f.figure_door", "f.figure_cloak", "f.figure_is_pell"]},
+    {"id": "acct.tully", "label": "Sam Tully's statement", "origin": "tully", "how": "saw", "facts": ["f.tully_mole", "f.on_mole"]},
+    {"id": "acct.tide_table", "label": "What the tide table says", "origin": "commissioners", "how": "report", "facts": ["f.bar_rule", "f.tide_sep24", "f.tide_oct14"]},
+    {"id": "acct.ship_log_sept", "label": "The Marigold's log for September", "origin": "venn", "how": "did", "facts": ["f.cardiff"]},
+    {"id": "acct.ship_log_oct", "label": "The Marigold's log for October", "origin": "venn", "how": "did", "facts": ["f.log_bar", "f.venn_sea", "f.porthcarn"]},
+    {"id": "acct.ledger", "label": "What the bond ledger says", "origin": "ch_office", "how": "report", "facts": ["f.entry_sep3", "f.entry_sep24", "f.entry_oct8"]},
+    {"id": "acct.notice", "label": "The harbour commissioners' notice", "origin": "commissioners", "how": "said", "facts": ["f.new_quay"]},
+    {"id": "acct.gate_book", "label": "What the gate-keeper's night book says", "origin": "gatekeeper", "how": "did", "facts": ["f.cart1", "f.cart2", "f.cart3"]},
+    {"id": "acct.note", "label": "Mr. Garrick's note", "origin": "garrick", "how": "said", "facts": ["f.note", "f.note_cellar"]},
+    {"id": "acct.timetable", "label": "What the railway timetable says", "origin": "railway", "how": "report", "facts": ["f.road", "f.trains"]},
+    {"id": "acct.keel", "label": "The station-master's statement", "origin": "keel", "how": "saw", "facts": ["f.garrick_left"]}
+  ]
+}

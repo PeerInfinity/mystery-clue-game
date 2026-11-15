@@ -46,7 +46,7 @@ while (todo.length) {
 // the minimal one), the hints' data and incremental mode's waits (without them the page offers no Hint button and no
 // incremental pace).
 // The two full cases kept at v2/ (v2/cases/<case>/) are collected the same way.
-const worlds = [...fs.readdirSync(path.join(root, 'cases', 'miniatures')).map((d) => path.join('cases', 'miniatures', d)), ...fs.readdirSync(path.join(root, 'v2', 'cases')).map((d) => path.join('v2', 'cases', d))];
+const worlds = [...fs.readdirSync(path.join(root, 'cases')).filter((d) => d !== 'miniatures').map((d) => path.join('cases', d)), ...fs.readdirSync(path.join(root, 'cases', 'miniatures')).map((d) => path.join('cases', 'miniatures', d)), ...fs.readdirSync(path.join(root, 'v2', 'cases')).map((d) => path.join('v2', 'cases', d))];
 for (const dir of worlds) {
     const world = path.join(dir, 'world');
     if (!fs.existsSync(path.join(root, world, 'case.json'))) continue;

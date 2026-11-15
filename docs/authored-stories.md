@@ -897,6 +897,44 @@ Not built, as agreed: the bridge to an Archipelago (the page's `source` object, 
 `mystery:state` will answer), any growing wait after a wrong answer, and the long story's prose and data, which is
 the next step and the user's to start.
 
+### The long story's prose and data (step 7.3, 2026-11-14)
+
+**The Fire at the Custom House** (`cases/custom-house-fire/`, played at `?case=cases/custom-house-fire`): a main story
+of 22 paragraphs and 24 papers (about 2,600 words), 68 entities, 43 time points, 127 facts in 24 accounts, 25
+questions, 99 observations (all but one essential) and a true path of 110 moves. Four papers are held from the
+start; twenty are earned on 24 questions. Written from `structure.json`, prose first, then the data by a one-off
+script that found each fact's paragraph from its quote; the data files are the source from here on.
+
+86. **It validated, and its derived logic matched the structure, almost at once.** The validator's first run found one
+    kind of error (the shape of an answer's reasoning); the logic the page derives from the data equalled
+    `structure.json` at the first try, and the six contradictions the validator lists are the six designed (the two
+    bell times, Prout's claim against the landlord and against the potboy, the ledger's berth against the log's
+    Cardiff, the baker's naming against the doctor, and the confession against the baker). The true path, the autoplay
+    in every layout and the hints play to the end on the three seeds (`CASE=cases/custom-house-fire npm run page-checks`,
+    about 25 minutes); the first run failed only on finding 88.
+87. **Every answer has to be given away in the last paragraph.** The format requires each answered question to be
+    given away at a main-story paragraph, and in an earned case every paragraph but the last can be read from the
+    start. So the last paragraph is a summing-up that states all 25 answers, each in quotable words. A question that
+    is not the goal could do without a give-away (it is judged when solved); that would be a format change.
+88. **"Something is missing here" is offered for hours not yet read.** The watch book has one entry to a paragraph, so
+    with the book half read every later hour is "missing", and the path check called the true path's move late. The
+    move carries `late` with that reason. A record in one paragraph (The Watchman's Clock) never showed it. For the
+    user: should the move wait until the record's paper is read to its end?
+89. **Time points shared between papers** have one home paragraph and `labels` listing every paper that tells the
+    time, so the label shows whichever is read first. A time told relative to a contested event ("some minutes
+    before the bell") is left unordered against the two clock times, or the timeline's order would give away which
+    clock is right; the bell itself is a time point of its own, and the two clock times are two facts of one `event`.
+90. **A false entry cannot be the evidence of the small question about it.** Distrusted, it leaves the timeline, so
+    "Was the Marigold at Saltmere on 3 September?" rests on the ship's log alone and the ledger enters only as the
+    paper that raises the question. The ledger's telling as a lie (`doubted`) needs all three entries disbelieved, so
+    it is required only by the larger question that joins them. What a true reading of a false document shows (the
+    entry names a berth) is the narrator's own fact, beside the false one.
+91. **Yes and no are both offered outright.** An answer that is `indirect` sits behind "More", which for a yes-or-no
+    question would point at it; both are `direct`, quoting the question's own words.
+92. **Not looked at by eye yet:** the needs and alibis the page shows for the three acts of the case's own (signing a
+    pass at the Custom House, sending word of the lamp, firing the house). The fire's need of a key is stated by
+    observations and not as a typed need (finding 22: a key is a key by its wording and its time).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

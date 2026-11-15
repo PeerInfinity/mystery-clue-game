@@ -1,0 +1,38 @@
+{
+  "id": "custom_house_fire",
+  "title": "The Fire at the Custom House",
+  "author": "written for this project (the first full-size case: papers earned by solving questions)",
+  "story": "../story.txt",
+  "delivery": {"mode": "earned", "start": ["board_letter", "pell", "tide_table", "timetable"], "goal": "q.who"},
+  "files": [
+    {"id": "board_letter", "title": "The Board's letter to the Collector", "short": "Board", "text": "../files/board_letter.txt"},
+    {"id": "pell", "title": "What Mr. Pell told me", "short": "Pell", "text": "../files/pell.txt"},
+    {"id": "doctor", "title": "Dr. Hume's note", "short": "Dr. Hume", "text": "../files/doctor.txt"},
+    {"id": "housekeeper", "title": "What Mrs. Finch told me", "short": "Mrs. Finch", "text": "../files/housekeeper.txt"},
+    {"id": "watch_book", "title": "The night watch book", "short": "Watch book", "text": "../files/watch_book.txt"},
+    {"id": "crouch", "title": "What Silas Crouch told me", "short": "Crouch", "text": "../files/crouch.txt"},
+    {"id": "potboy", "title": "What the potboy told me", "short": "Potboy", "text": "../files/potboy.txt"},
+    {"id": "odell", "title": "What Mr. Odell told me", "short": "Odell", "text": "../files/odell.txt"},
+    {"id": "harbour_log", "title": "The harbour log, Tuesday night", "short": "Harbour log", "text": "../files/harbour_log.txt"},
+    {"id": "rowe", "title": "What Mrs. Rowe told me", "short": "Mrs. Rowe", "text": "../files/rowe.txt"},
+    {"id": "landlord", "title": "What the landlord of the Anchor told me", "short": "Landlord", "text": "../files/landlord.txt"},
+    {"id": "prout", "title": "What Mr. Prout told me", "short": "Prout", "text": "../files/prout.txt"},
+    {"id": "baker", "title": "What the baker told me", "short": "Baker", "text": "../files/baker.txt"},
+    {"id": "fisherman", "title": "What Sam Tully told me", "short": "Tully", "text": "../files/fisherman.txt"},
+    {"id": "tide_table", "title": "The tide table", "short": "Tide table", "text": "../files/tide_table.txt"},
+    {"id": "ship_log_sept", "title": "The Marigold's log, September", "short": "Log, Sept.", "text": "../files/ship_log_sept.txt"},
+    {"id": "ship_log_oct", "title": "The Marigold's log, October", "short": "Log, Oct.", "text": "../files/ship_log_oct.txt"},
+    {"id": "ledger", "title": "The bond ledger: the Marigold entries", "short": "Ledger", "text": "../files/ledger.txt"},
+    {"id": "harbour_notice", "title": "The harbour commissioners' notice", "short": "Notice", "text": "../files/harbour_notice.txt"},
+    {"id": "passes", "title": "Three passes from the gate-keeper's file", "short": "Passes", "text": "../files/passes.txt"},
+    {"id": "gate_book", "title": "The quay gate-keeper's night book", "short": "Gate book", "text": "../files/gate_book.txt"},
+    {"id": "garrick_note", "title": "A note to the carter", "short": "Note", "text": "../files/garrick_note.txt"},
+    {"id": "timetable", "title": "The railway timetable", "short": "Timetable", "text": "../files/timetable.txt"},
+    {"id": "station_master", "title": "What the station-master told me", "short": "Station-master", "text": "../files/station_master.txt"}
+  ],
+  "narrators": [
+    {"id": "ashby", "name": "Henry Ashby", "kind": "first-person"}
+  ],
+  "subtitle": "Henry Ashby's timeline",
+  "source": {"written": "2026-11-14", "word_count": 2544}
+}
