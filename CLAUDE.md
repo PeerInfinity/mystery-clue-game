@@ -32,6 +32,7 @@ See `docs/technical.md`. The ones used most:
 | Validate every short case (one: `node scripts/validate-world.js <dir>`) | `npm run validate-world` |
 | Every page check on every short case, three at a time, each with its own Chrome (about 2 min; cases as arguments for only those) | `npm run page-checks-all` |
 | Every page check on one case (starts the server and its own Chrome if needed; `CDP_PORT` another Chrome port) | `CASE=<dir> npm run page-checks` |
+| A long story's logic: check it (references, reachability, a fill per seed), and export it as Archipelago rules | `node scripts/structure-check.mjs <dir> [seeds]`, `node scripts/export-rules.mjs <dir>` |
 | Play one case's true path through the page (seconds; port 9333) | `CASE=<dir> node scripts/path-check.mjs` |
 | The autoplay to the end (port 9333; a layout argument), the hints (a hint-only player to the end) | `CASE=<dir> node scripts/world-autoplay-check.mjs`, `CASE=<dir> node scripts/world-hints-check.mjs` |
 | The archived full cases: their tests, and their page checks (manual only, about 45 min; run in the background) | `npm run v2:test`, `npm run v2:page-checks` |

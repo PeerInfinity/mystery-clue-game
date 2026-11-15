@@ -793,6 +793,20 @@ reading raises the question), and `delivery.start`.
     average two questions to choose from (three at the start), and on ten of the 25 steps only one. Wider play needs
     more papers at the start, fewer papers per question, or fewer `requires`.
 
+The user's rulings on the logic (2026-11-14): good for a first full-size case; questions that give nothing are
+acceptable; raising questions inside papers is acceptable and worth testing now; a story need not use every mechanic.
+Next: the case's logic as Archipelago logic, in the rules.json format of the Archipelago-CC repository.
+
+77. **The logic as Archipelago rules** (`node scripts/export-rules.mjs <dir>` writes `<dir>/rules.json`; `npm test`
+    keeps it in step with `structure.json`). Papers are items (progression), each question besides the goal a location,
+    the goal an event location holding Victory, the papers in hand from the start `starting_items`, and "Nothing new" a
+    filler for the questions that give nothing. A location's rule is a flat list of papers (`Has`, `HasAll`, `Or`
+    between alternatives): its own, the paper that raises it, and those of every question it requires. Locations have
+    neutral names ("Question 07"), since the multiworld sees them; the `mystery` section, which is not part of the
+    format, maps them back to question and paper ids. Archipelago-CC's world generator accepts the file (`--validate`,
+    one warning that counts item names against locations) and writes a world package from it. Not yet done: a seed
+    generated from that world, and whether `mystery` survives into slot data.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
