@@ -143,7 +143,7 @@ export function format(doc) {
     return out.join('\n') + '\n';
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     const dir = process.argv[2];
     if (!dir) { console.error('usage: node scripts/export-rules.mjs <case dir> [out file]'); process.exit(2); }
     const out = process.argv[3] ?? `${dir}/rules.json`;
