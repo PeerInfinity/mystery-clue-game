@@ -911,7 +911,7 @@ script that found each fact's paragraph from its quote; the data files are the s
     bell times, Prout's claim against the landlord and against the potboy, the ledger's berth against the log's
     Cardiff, the baker's naming against the doctor, and the confession against the baker). The true path, the autoplay
     in every layout and the hints play to the end on the three seeds (`CASE=cases/custom-house-fire npm run page-checks`,
-    about 25 minutes); the first run failed only on finding 88.
+    over ten minutes); the first run failed only on finding 88.
 87. **Every answer has to be given away in the last paragraph.** The format requires each answered question to be
     given away at a main-story paragraph, and in an earned case every paragraph but the last can be read from the
     start. So the last paragraph is a summing-up that states all 25 answers, each in quotable words. A question that
