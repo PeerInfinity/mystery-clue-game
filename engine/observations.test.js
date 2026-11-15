@@ -119,3 +119,22 @@ test('a statement linked and only partly disbelieved: begun', () => {
     assert.equal(fill(obs, [{ entry: 't', q: 'q' }], [t], {}, { doubted: () => false, partlyDoubted: () => false }).notes.length, 1, 'not disbelieved at all: a note');
     assert.equal(fill(obs, [{ entry: 't', q: 'q' }], [t], {}, { doubted: () => true, partlyDoubted: () => false }).filled.length, 1);
 });
+
+test('a solved question is evidence that fills by itself, with no link', () => {
+    const obs = [
+        { id: 'o.a', q: 'q.big', from: [{ solved: 'q.small' }], says: 'the small one is settled', essential: true },
+        { id: 'o.b', q: 'q.big', from: ['f.x', { solved: 'q.other' }], says: 'x, with the other settled', essential: true },
+    ];
+    const known = [{ id: 'f.x' }];
+    const links = [{ entry: 'f.x', q: 'q.big' }];
+    let r = fill(obs, links, known, {}, { solved: () => false });
+    assert.deepEqual(r.filled, []);
+    assert.equal(r.partial.length, 1, 'o.b is begun by its link');
+    r = fill(obs, [], known, {}, { solved: (q) => q === 'q.small' });
+    assert.deepEqual(r.filled.map((x) => x.obs.id), ['o.a']);
+    assert.equal(r.filled[0].entries[0].solved, 'q.small');
+    assert.deepEqual(r.partial, [], 'nothing the player did, nothing begun');
+    r = fill(obs, links, known, {}, { solved: () => true });
+    assert.deepEqual(r.filled.map((x) => x.obs.id), ['o.a', 'o.b']);
+    assert.deepEqual(described(obs, 'q.big', r.filled), { any: true, done: true, missing: [] });
+});

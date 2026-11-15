@@ -160,6 +160,9 @@ body.world-page.tabbed .top { position: static; }
 }
 .lapse-news { border-color: var(--bad); }
 .gate-news { border-color: var(--accent, var(--ink)); }
+.solved-news { border-color: var(--good); }
+.solved-mark { color: var(--good); font-size: 0.85em; white-space: nowrap; }
+.rests-on ul { margin: 0.2em 0 0.4em 1.2em; padding: 0; }
 .gate-news.flash { animation: notice-flash 1.2s; }
 @keyframes notice-flash { 0%, 100% { outline: 0 solid transparent; } 30% { outline: 3px solid var(--accent); } }
 

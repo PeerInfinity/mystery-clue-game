@@ -139,13 +139,14 @@ const LAST = story.length - 1;   // the main story's last paragraph
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: true, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null };
+const state = { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: true, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {} };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
 else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); for (const k of ['layout', 'panels', 'theme']) if (own[k] != null) state[k] = own[k]; } catch { /* the defaults */ }
 state.sel = null;
 state.note = null;
+if (!state.solved || typeof state.solved !== 'object') state.solved = {};
 // What has been read, in each story and in what order (engine/refs.js); `para` is the main story's, kept for the
 // checks and for saves from before the files.
 let reading = Reading.fromSave(state, lengths);
@@ -164,15 +165,18 @@ if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
 const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
 function cycleMark(qid, pick) {
+    // A solved question keeps its circle; another of its answers only goes between crossed out and uncertain.
+    const sv = state.solved[qid];
+    if (sv && pick === sv.pick) return;
     remember();
     const m = { ...(state.marks[qid] ?? {}) };
-    const next = MARK_NEXT[m[pick]];
+    const next = sv ? (m[pick] === 'crossed' ? undefined : 'crossed') : MARK_NEXT[m[pick]];
     if (next) m[pick] = next; else delete m[pick];
     state.marks = { ...state.marks, [qid]: m };
     save(); render();
@@ -203,6 +207,7 @@ const qLabel = (q) => questionLabelAt(q, reading.count, posOf);
 const qVisible = (q) => q && (seen(q.raised) || seen(q.answer_given_at));
 // The player's questions: raised (or answered) so far; a question about provenance only if the story raises it.
 const qListed = (q) => !q.hidden && qVisible(q) && (q.kind !== 'provenance' || seen(q.raised));
+const isSolved = (id) => !!state.solved[id];
 const listedQuestions = () => data.questions.filter(qListed).sort((a, b) => byRead(a.raised ?? a.answer_given_at, b.raised ?? b.answer_given_at));
 // When each entity is first met: the earliest paragraph a fact naming it is given at.
 const kindOf = entityKinds(data);
@@ -822,14 +827,19 @@ function descriptionHtml(q) {
     if (!observations) return '';
     const mine = observed.filled.filter((x) => x.obs.q === q.id);
     const notes = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
-    const from = (x) => x.entries.map((e) => paraTag(givenAt(e))).join(', ');
+    const from = (x) => x.entries.map((e) => (e.solved ? 'solved' : paraTag(givenAt(e)))).join(', ');
     const begun = observed.partial.filter((x) => x.obs.q === q.id).map((x) => `<li class="muted">Part of something not yet complete: ${x.entries.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
     const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map(esc).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
     const noteHtml_ = notes.length ? `<div class="small muted">Your notes: ${notes.map((e) => phrase(e)).join('; ')}</div>` : '';
+    // A larger question lists the questions it rests on, and which of them are not solved yet (one not yet raised is
+    // not named).
+    const rests = [...new Set(observations.filter((o) => o.q === q.id && o.essential).flatMap((o) => o.from.filter((e) => e.solved).map((e) => e.solved)))].map((id) => qById.get(id)).filter(Boolean);
+    const restsHtml = rests.length && !isSolved(q.id) ? `<div class="small rests-on">It rests on ${rests.length === 1 ? 'another question' : `${rests.length} other questions`}: <ul>${rests.map((r) => `<li>${qListed(r) ? `<a class="link" data-q="${esc(r.id)}">${esc(qLabel(r))}</a>` : 'a question not raised yet'}${isSolved(r.id) ? ' <span class="good">solved</span>' : ' <span class="muted">not solved yet</span>'}</li>`).join('')}</ul></div>` : '';
+    const status = isSolved(q.id) ? `<p class="small good solved-note">Solved.</p>` : judgement(q) === 'wrong' ? '<p class="small bad not-this">Not this answer.</p>' : '';
     const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>` : '';
-    return `<div class="desc">${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
+    return `<div class="desc">${status}${restsHtml}${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
 const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span><button type="button" data-linking-done>Done</button></div>` : '');
 
@@ -857,8 +867,9 @@ function render() {
     const routeNow = reasoned.find((f) => f.attr === 'route');
     if (routeNow) for (const l of state.links) if (l.entry.startsWith('r:r:') && l.entry !== routeNow.id) l.entry = routeNow.id;
     // A telling can be linked like any entry: that it was said stands, whatever becomes of what it carried.
-    if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted, partlyDoubted });
+    if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted, partlyDoubted, solved: isSolved });
     syncQuestions();
+    judge();
     const qList = document.querySelector('#q-box ol');
     const qScroll = qList?.scrollTop ?? 0;
     // The reading controls work on the story shown in the Story panel (the main story, or a file).
@@ -908,6 +919,7 @@ function render() {
     renderLapseNews();
     renderGate();
     renderAnswers();
+    renderSolved();
     renderDetail(clashing);
 }
 
@@ -1464,7 +1476,7 @@ function questionsPanel(clashing) {
     const { above, below } = arranged();
     const qs = [...above, ...below];
     if (!qs.length) return '';
-    const item = (q, i) => `<li value="${i + 1}" data-q-row="${esc(q.id)}" class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><span class="q-grip" role="button" tabindex="0" aria-label="Move this question: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span><button type="button" class="q-top" data-q-top="${esc(q.id)}" aria-label="Move to the top" title="To the top">↑</button> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> ${paraSpan(q.raised ?? q.answer_given_at)}${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
+    const item = (q, i) => `<li value="${i + 1}" data-q-row="${esc(q.id)}" class="${state.sel === `q:${q.id}` ? 'sel' : ''}${clashing.has(`q:${q.id}`) ? ' clash' : ''}"><span class="q-grip" role="button" tabindex="0" aria-label="Move this question: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span><button type="button" class="q-top" data-q-top="${esc(q.id)}" aria-label="Move to the top" title="To the top">↑</button> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>${isSolved(q.id) ? ' <span class="solved-mark" title="Solved: the evidence linked and the right answer circled">✓ solved</span>' : ''} ${paraSpan(q.raised ?? q.answer_given_at)}${qAnchor(q) ? '' : ' <span class="small muted" title="Its entry has no place in time: it is only here">(no time)</span>'}
       ${chipsHtml(q)}${descriptionHtml(q)}${givenAway(q) ? `<div class="small">Answered at ${paraTag(q.answer_given_at)}: <b>${answerText(q)}</b></div>` : ''}</li>`;
     const line = observations ? `<li class="q-line" data-q-row="${LINE}"><span class="q-grip" role="button" tabindex="0" aria-label="Move the dividing line: drag it, or use the up and down arrow keys" title="Drag to move (or the arrow keys)">≡</span> Questions above this line are offered under “Relevant to…”. Drag it up to shorten that list.</li>` : '';
     const items = above.map(item).join('') + line + below.map((q, i) => item(q, above.length + i)).join('');
@@ -1637,7 +1649,43 @@ const circledCount = (q) => shownPossibilities(q).filter((o) => markOf(q, o.valu
 // every other question does). `gateState`: 'pick' (not one circle), 'evidence', 'wrong', or null (met).
 const strictGate = () => state.gate !== 'any';
 const evidenceOf = (q) => (observations ? described(observations, q.id, observed.filled) : { any: false });
+// Solved (docs/authored-stories.md, "The delivery mechanism", decision 1): the strict judgement, whatever the gate's
+// setting: exactly one answer circled, every essential observation filled, the circled answer right. 'pick',
+// 'evidence', 'wrong' (the evidence complete: "not this answer"), or null (it holds).
+function judgement(q) {
+    const picks = shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled');
+    if (picks.length !== 1) return 'pick';
+    const d = evidenceOf(q);
+    if (!d.any || !d.done) return 'evidence';
+    return isRight(q, picks[0].value) ? null : 'wrong';
+}
+let solvedNews = [];      // the questions just solved, until the notice is dismissed
+/**
+ * After every move, every question the player can see is judged; the moment the judgement holds it is solved for
+ * good: its circle is kept (Undo and distrust do not take it back), the story's other proposals are crossed out, and
+ * a larger question resting on it fills that evidence by itself (so the judgement runs again until nothing changes).
+ */
+function judge() {
+    if (!observations) return;
+    let fresh = false;
+    for (let more = true; more;) {
+        more = false;
+        for (const q of data.questions) {
+            if (isSolved(q.id) || !qListed(q) || givenAway(q) || judgement(q) !== null) continue;
+            const pick = shownPossibilities(q).find((o) => markOf(q, o.value) === 'circled').value;
+            const marks = { [pick]: 'circled' };
+            for (const o of shownPossibilities(q)) if (o.value !== pick && (o.proposed || markOf(q, o.value))) marks[o.value] = 'crossed';
+            state.marks = { ...state.marks, [q.id]: marks };
+            state.solved = { ...state.solved, [q.id]: { pick, marks, n: Object.keys(state.solved).length + 1 } };
+            solvedNews = [...solvedNews, q.id];
+            more = fresh = true;
+        }
+        if (more) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted, partlyDoubted, solved: isSolved });
+    }
+    if (fresh) save();
+}
 function gateState(q) {
+    if (isSolved(q.id)) return null;
     const picks = shownPossibilities(q).filter((o) => markOf(q, o.value) === 'circled');
     if (circledCount(q) !== 1) return 'pick';
     const d = evidenceOf(q);
@@ -1697,6 +1745,14 @@ function renderGate() {
       ${qs.some((q) => gateState(q) === 'evidence') ? '<p class="small">One event can be evidence for more than one question: one you have linked to another question may be needed for this one too.</p>' : ''}
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
+}
+function renderSolved() {
+    const el = document.getElementById('solved-news');
+    if (!el) return;
+    const qs = solvedNews.map((id) => qById.get(id)).filter(Boolean);
+    el.hidden = !qs.length;
+    if (!qs.length) return;
+    el.innerHTML = `<ul>${qs.map((q) => `<li><b>Solved.</b> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>: ${pickText(q, state.solved[q.id].pick)}</li>`).join('')}</ul><p><button type="button" class="quiet" data-solved-close>Dismiss</button></p>`;
 }
 function renderAnswers() {
     const el = document.getElementById('answer-news');
@@ -1785,6 +1841,8 @@ document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));
     if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); state.links = h.links ?? []; } else state.trust = h;
+    // Solved is for good: Undo does not take it back, nor the marks it locked.
+    for (const [qid, sv] of Object.entries(state.solved)) state.marks = { ...state.marks, [qid]: { ...(state.marks[qid] ?? {}), ...sv.marks } };
     state.history = state.history.slice(0, -1);
     save(); render();
 });
@@ -1853,6 +1911,7 @@ document.addEventListener('click', (e) => {
     if (e.target.closest('[data-lapse-close]')) { lapseNews = []; renderLapseNews(); return; }
     if (e.target.closest('[data-gate-hide]')) { gateHidden = gateAt(state.para + 1).map((q) => q.id).join('|'); renderGate(); return; }
     if (e.target.closest('[data-answers-close]')) { answerNews = []; renderAnswers(); return; }
+    if (e.target.closest('[data-solved-close]')) { solvedNews = []; renderSolved(); return; }
     const wd = e.target.closest('[data-withdraw]');
     if (wd) {
         // Withdraw the move that gave this entry; what was reasoned from it goes with it.

@@ -8,13 +8,15 @@
 // "changed" (It changed, from two states, in either order) or "got_through" (Something got through, from a crossing),
 // so that an author can make that move necessary; or `{reasoned: "missing", of: rule, at: time}` for "Something is
 // missing here" (a gap in the rule's series at that time), named by its rule and its time, since what else it rests
-// on (the record) is what the timeline holds.
+// on (the record) is what the timeline holds. Or `{solved: q}`: question q is solved (`ctx.solved(q)`), a larger
+// question's evidence that fills by itself, with no link for the player to make.
 
 /** The moves whose entries an observation can name, by the name it uses: the move's code in `reasoned.move`. */
 export const REASONED_MOVES = { changed: 'a', got_through: 'g', missing: 'm' };
 const samePremises = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
 
 const matches = (from, e, ctx) => (typeof from === 'string' ? e.id === from
+    : from.solved ? false
     : from.doubted ? e.id === from.doubted && !!ctx.doubted?.(e.id)
     : from.reasoned === 'missing' ? e.reasoned?.move === 'm' && e.rule === from.of && e.gap === from.at
     : from.reasoned ? e.reasoned?.move === REASONED_MOVES[from.reasoned] && samePremises(e.reasoned.premises ?? [], from.premises ?? [])
@@ -33,11 +35,11 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
     const filled = [];
     for (const o of observations) {
         const mine = links.filter((l) => l.q === o.q && entry(l.entry));
-        const hits = o.from.map((f) => mine.find((l) => matches(f, entry(l.entry), ctx)));
+        const hits = o.from.map((f) => (f.solved ? (ctx.solved?.(f.solved) ? { solved: f.solved } : null) : mine.find((l) => matches(f, entry(l.entry), ctx))));
         if (hits.some((h) => !h)) continue;
         if (o.if && marks[o.if.q]?.[o.if.pick] !== 'circled') continue;
-        hits.forEach((h) => used.add(h));
-        filled.push({ obs: o, entries: hits.map((h) => entry(h.entry)), says: o.says });
+        hits.filter((h) => !h.solved).forEach((h) => used.add(h));
+        filled.push({ obs: o, entries: hits.map((h) => (h.solved ? { id: `solved:${h.solved}`, solved: h.solved } : entry(h.entry))), says: o.says });
     }
     // Begun: an observation from more than one entry, some of them linked, not all (and, with `if`, its reading
     // circled); or one whose statement is linked and only partly disbelieved (`ctx.partlyDoubted(id)`: some of what
@@ -50,7 +52,7 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
         const mine = links.filter((l) => l.q === o.q && entry(l.entry));
         const halves = o.from.map((f) => mine.find((l) => half(f, entry(l.entry)))).filter(Boolean);
         if (o.from.length < 2 && !halves.length) continue;
-        const hits = [...o.from.map((f) => mine.find((l) => matches(f, entry(l.entry), ctx))).filter(Boolean), ...halves];
+        const hits = [...o.from.filter((f) => !f.solved).map((f) => mine.find((l) => matches(f, entry(l.entry), ctx))).filter(Boolean), ...halves];
         if (!hits.length) continue;
         hits.forEach((h) => used.add(h));
         partial.push({ obs: o, entries: hits.map((h) => entry(h.entry)), of: o.from.length });
