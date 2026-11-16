@@ -62,6 +62,18 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
 }
 
 /** For one question: what its essential observations are and which of them the player's description still lacks. */
+/**
+ * Whether a question's required evidence is on the page yet, whatever is linked: `{all, here}`, the essential
+ * observations of `q` and those of them whose entries the reader has (`has(id)`: the fact is given by what was read).
+ * An entry that is the player's own move counts by its premises (a gap or a route, which have none named: as here),
+ * and "question solved" counts as here: what a question rests on is told apart from what has not come yet.
+ */
+export function onPage(observations, q, has) {
+    const all = observations.filter((o) => o.q === q && o.essential);
+    const there = (f) => (typeof f === 'string' ? has(f) : f.solved ? true : f.doubted ? has(f.doubted) : f.reasoned && f.premises ? f.premises.every(has) : true);
+    return { all: all.length, here: all.filter((o) => o.from.every(there)).length };
+}
+
 export function described(observations, q, filled) {
     const all = observations.filter((o) => o.q === q && o.essential);
     const missing = all.filter((o) => !filled.some((x) => x.obs === o)).map((o) => o.says);

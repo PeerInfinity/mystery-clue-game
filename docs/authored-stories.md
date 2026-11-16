@@ -959,6 +959,23 @@ script that found each fact's paragraph from its quote; the data files are the s
     The needs and alibis the page shows for the three acts of the case's own (signing a
     pass at the Custom House, sending word of the lamp, firing the house) read rightly. The fire's need of a key is stated by
     observations and not as a typed need (finding 22: a key is a key by its wording and its time).
+93. **The first blind run of the long story (Haiku, 2026-11-16): stuck at the held ending, no question solved.**
+    The solver now runs in parts (`MAX` turns a go, `RESUME`, `STATUS`), ends itself after 200 turns with nothing
+    new read and no question solved, and may send a `report` of a fault with any move (it sent none). In 261 turns
+    ($0.71) Haiku read the story to the held ending and the four papers in hand by turn 61, circled two small
+    answers rightly without finishing their evidence, and then spent 200 turns linking some thirty entries to the
+    goal, whose notice said "its evidence is not all linked yet: 1 of 14". Most of the fourteen are in papers that
+    had not come, the notice did not say that the goal rests on other questions, and the question's own list named
+    most of those as "a question not raised yet". Its notes called the small questions "solved" when the page
+    counted none. Three changes, at the user's word (to be looked at again when difficulty is discussed):
+    while the ending is held and the goal cannot be solved from what the reader has, the notice says that it rests
+    on other questions or lacks evidence not on the page yet, says to solve the smaller questions first, and lists
+    the open questions whose evidence is all on the page now, in place of the count; every unsolved question with
+    evidence to link says "Not solved yet", with its circle and how much of its evidence is in place, or that some
+    of it is not on the page yet; and the guide and the solver's instructions say to solve the smaller questions
+    first. The list of what can be solved now is a help the page did not give before: it tells the reader which
+    questions the papers in hand suffice for. Seen and left: a click on a question already linked (✓) unlinks
+    it, and the solver did that several times by mistake.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

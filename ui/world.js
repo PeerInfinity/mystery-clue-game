@@ -12,7 +12,7 @@ import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
 import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps, pointGap, gapsOf } from '../engine/actions.js';
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
-import { fill, described } from '../engine/observations.js';
+import { fill, described, onPage } from '../engine/observations.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -877,7 +877,8 @@ function descriptionHtml(q) {
     // not named).
     const rests = [...new Set(observations.filter((o) => o.q === q.id && o.essential).flatMap((o) => o.from.filter((e) => e.solved).map((e) => e.solved)))].map((id) => qById.get(id)).filter(Boolean);
     const restsHtml = rests.length && !isSolved(q.id) ? `<div class="small rests-on">It rests on ${rests.length === 1 ? 'another question' : `${rests.length} other questions`}: <ul>${rests.map((r) => `<li>${qListed(r) ? `<a class="link" data-q="${esc(r.id)}">${esc(qLabel(r))}</a>` : 'a question not raised yet'}${isSolved(r.id) ? ' <span class="good">solved</span>' : ' <span class="muted">not solved yet</span>'}</li>`).join('')}</ul></div>` : '';
-    const status = isSolved(q.id) ? `<p class="small good solved-note">Solved.${EARNED ? ` <span class="muted">${broughtHtml(q.id, false)}</span>` : ''}</p>` : judgement(q) === 'wrong' ? '<p class="small bad not-this">Not this answer.</p>' : '';
+    const status = isSolved(q.id) ? `<p class="small good solved-note">Solved.${EARNED ? ` <span class="muted">${broughtHtml(q.id, false)}</span>` : ''}</p>` : judgement(q) === 'wrong' ? '<p class="small bad not-this">Not this answer.</p>'
+        : !givenAway(q) && evidenceOf(q).any ? `<p class="small muted unsolved-note">Not solved yet: ${unsolvedWhy(q)}.</p>` : '';
     const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>` : '';
     return `<div class="desc">${status}${restsHtml}${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
@@ -1707,6 +1708,23 @@ function judgement(q) {
     if (!d.any || !d.done) return 'evidence';
     return isRight(q, picks[0].value) ? null : 'wrong';
 }
+// Why a question with evidence to link is not solved yet, in words: its circle, and how much of its evidence is in
+// place (linked, or a question it rests on solved); with part of the evidence not on the page yet (a paper not come,
+// a paragraph not read), that is said in place of the count, which no linking could raise to the full.
+const hasFact = (id) => { const f = factById.get(id); return !!f && visible(f); };
+const evidenceHere = (q) => { const r = onPage(observations, q.id, hasFact); return r.here === r.all; };
+const restsOpen = (q) => [...new Set(observations.filter((o) => o.q === q.id && o.essential).flatMap((o) => o.from.filter((e) => e.solved).map((e) => e.solved)))].filter((id) => !isSolved(id));
+/** A question that can be solved from what the reader has now: its evidence on the page, what it rests on solved. */
+const workable = (q) => !isSolved(q.id) && !givenAway(q) && evidenceOf(q).any && evidenceHere(q) && !restsOpen(q).length;
+function unsolvedWhy(q) {
+    const n = circledCount(q), d = evidenceOf(q);
+    const all = observations.filter((o) => o.q === q.id && o.essential).length;
+    const circle = n === 0 ? 'no answer circled' : n === 1 ? 'one answer circled' : `${n} answers circled (it takes exactly one)`;
+    const evidence = !evidenceHere(q) ? 'some of its evidence is not on the page yet'
+        : d.done ? 'all of its evidence is in place'
+        : `${all - d.missing.length} of ${all} pieces of its evidence in place${restsOpen(q).length ? ' (a question it rests on counts as one)' : ''}`;
+    return `${circle}; ${evidence}`;
+}
 let solvedNews = [];      // the questions just solved, until the notice is dismissed
 /**
  * After every move, every question the player can see is judged; the moment the judgement holds it is solved for
@@ -1794,10 +1812,21 @@ function renderGate() {
     const strict = strictGate() && qs.some((q) => evidenceOf(q).any), loose = qs.some((q) => !strictGate() || !evidenceOf(q).any);
     const rule = !strict ? `Commit first: circle exactly one answer${qs.length === 1 ? '' : ' for each'}. Any answer will do; the key shows at ¶${state.para + 1}.`
         : `The story goes on once you have shown the answer: link the evidence for it (“Link observations…”) and circle the one answer the evidence leaves${loose ? '. A question with no evidence to link takes any one answer' : ''}.`;
-    el.innerHTML = `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${qs.length === 1 ? 'this question' : `these ${qs.length} questions`}. ${rule}</p>
-      <ul>${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>
+    // The held ending (earned papers), while the goal cannot be solved from what the reader has: the notice says what
+    // the ending waits for and which questions can be solved now, not a count of the goal's evidence that no linking
+    // could raise (most of it is in papers not come yet).
+    const far = EARNED && goalQ && qs.includes(goalQ) && state.para + 1 >= ENDING && !workable(goalQ) && judgement(goalQ) !== 'wrong';
+    const rest = far ? qs.filter((q) => q !== goalQ) : qs;
+    const qLink = (q) => `<a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>`;
+    const open = far ? listedQuestions().filter((q) => q !== goalQ && !isSolved(q.id) && !givenAway(q) && evidenceOf(q).any) : [];
+    const now = open.filter(workable);
+    const farHtml = !far ? '' : `<p><b>The ending is held</b> until the case's main question is solved: ${qLink(goalQ)}${/[?!.]$/.test(qLabel(goalQ)) ? '' : '.'} It cannot be solved yet: ${restsOpen(goalQ).length ? 'it rests on other questions that are not solved' : 'some of its evidence is not on the page yet'}. Solve the smaller questions first: each one solved may bring a new paper.</p>
+      ${now.length ? `<p class="small">${open.length} question${open.length === 1 ? '' : 's'} raised so far ${open.length === 1 ? 'is' : 'are'} not solved. ${now.length === open.length ? (open.length === 1 ? 'All its evidence is' : 'All their evidence is') : now.length === 1 ? 'This one has all its evidence' : `These ${now.length} have all their evidence`} on the page now:</p><ul class="ending-open">${now.map((q) => `<li>${qLink(q)} <span class="small muted">(${unsolvedWhy(q)})</span></li>`).join('')}</ul>`
+        : open.length ? `<p class="small">${open.length} question${open.length === 1 ? '' : 's'} raised so far ${open.length === 1 ? 'is' : 'are'} not solved, and none has all its evidence on the page: read the papers you have to their ends.</p>` : ''}`;
+    el.innerHTML = `${rest.length ? `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${rest.length === 1 ? 'this question' : `these ${rest.length} questions`}. ${rule}</p>
+      <ul>${rest.map((q) => `<li>${qLink(q)} <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>` : ''}${farHtml}
       ${unreadPapers().length ? `<p class="small">Papers not read to their end: ${unreadPapers().map((p) => `${esc(p.title)} (${p.at} of ${p.last})`).join('; ')}. Their tabs are in the Story panel.</p>` : ''}
-      ${qs.some((q) => gateState(q) === 'evidence') ? '<p class="small">One event can be evidence for more than one question: one you have linked to another question may be needed for this one too.</p>' : ''}
+      ${rest.some((q) => gateState(q) === 'evidence') ? '<p class="small">One event can be evidence for more than one question: one you have linked to another question may be needed for this one too.</p>' : ''}
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;
     if (flashGate) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); flashGate = false; }
 }
