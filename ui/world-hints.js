@@ -94,7 +94,7 @@ export async function makeHints({ store, api }) {
             const waiting = moves.find((m) => !VIEWS.has(m.do) && forOpen(m) && !made(m, save) && !tried(m) && !api.seenAll(from(m)));
             const story = waiting ? nextRead(from(waiting), files, readTo) : null;
             const f = files.find((x) => x.id === story);
-            if (f) return { kind: 'read', story, why: `Read on in “${f.title}”.` };
+            if (f) return { kind: 'read', story, why: `Read on in “${f.title}”.`, title: f.title };
         }
         if (P < api.last && api.gateHolds()) return { kind: 'read', why: 'The story waits at the gate: its notice says which question still lacks its evidence or its answer. Look at what you have linked to it, and whether each entry is still on the timeline.' };
         return { kind: P >= api.last ? 'done' : 'read', ...(files.length ? { story: 'main', why: 'Nothing more to do for now: read on in the story.' } : {}) };
@@ -110,24 +110,31 @@ export async function makeHints({ store, api }) {
         return `“${($(`#timeline [data-fact="${esc(id)}"]`)?.textContent ?? id).replace(/\s+/g, ' ').replace(/\s*⚙?\s*¶\d+\s*$/, '').trim()}”`;
     };
     const pickName = (q, pick) => api.name(pick) ?? pick;
+    // "Look at …": the thing named is a link that selects it, as a click on it anywhere on the page does. A rung is
+    // plain text, or {html} where it carries such a link.
+    const H = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const a = (attr, id, text) => `<a class="link" data-${attr}="${H(id)}">${H(text)}</a>`;
+    const qLink = (q) => a('q', q, qName(q));
+    const entryLink = (id) => (!id ? '' : /^(hyp|pre):/.test(id) ? a('q', id.slice(4).split('=')[0], entry(id)) : a('fact', id, entry(id)));
+    const look = (html, again = false) => ({ html: `Look ${again ? 'again ' : ''}at ${html}.` });
     const qName = (q) => `“${api.question(q)?.label ?? q}”`;
     function rungs(t) {
         switch (t.kind) {
-            case 'read': return [t.why ?? 'Nothing more to do for now: read on.'];
+            case 'read': return [t.title && t.story ? { html: `Read on in ${a('story', t.story, `“${t.title}”`)}.` } : t.why ?? 'Nothing more to do for now: read on.'];
             case 'done': return ['The story is over, and nothing is left to do.'];
-            case 'unmark': return [`Look again at ${qName(t.q)}.`, t.why, t.fix.do === 'cross' ? `Cross out “${pickName(t.q, t.pick)}”.` : `Take your circle off “${pickName(t.q, t.pick)}”.`];
-            case 'uncross': return [`Look again at ${qName(t.q)}.`, t.why, `Circle “${pickName(t.q, t.pick)}”.`];
-            case 'trust': return [t.link ? `Look at your trust in ${t.link.startsWith('stmt:') ? entry(t.link.slice(5)) : api.linkName(t.link)}.` : `Look at your trust in ${api.name(t.person)}.`,
+            case 'unmark': return [look(qLink(t.q), true), t.why, t.fix.do === 'cross' ? `Cross out “${pickName(t.q, t.pick)}”.` : `Take your circle off “${pickName(t.q, t.pick)}”.`];
+            case 'uncross': return [look(qLink(t.q), true), t.why, `Circle “${pickName(t.q, t.pick)}”.`];
+            case 'trust': return [{ html: `Look at your trust in ${t.link ? (t.link.startsWith('stmt:') ? entryLink(t.link.slice(5)) : H(api.linkName(t.link))) : a('ent', t.person, api.name(t.person))}.` },
                 'Distrusting it takes away more than what is false: some of what came that way is true, and the timeline needs it.',
                 'Set it back to uncertain.'];
             case 'move': {
                 const m = t.m;
-                const where = m.do === 'circle' || m.do === 'cross' ? `Look at ${qName(m.q)}.`
+                const where = m.do === 'circle' || m.do === 'cross' ? look(qLink(m.q))
                     : m.do === 'hold' ? 'Look at the likely clashes.'
                     : m.do === 'way' || m.do === 'got' ? 'Look at the ways in.'
                     : m.do === 'route' ? 'Look at the route.'
                     : m.do === 'link' && m.entry === 'route' ? 'Look at your route.'
-                    : `Look at ${entry(onOf(m))}.`;
+                    : look(entryLink(onOf(m)));
                 const what = m.do === 'circle' ? `Circle “${pickName(m.q, m.pick)}”.`
                     : m.do === 'cross' ? `Cross out “${pickName(m.q, m.pick)}”.`
                     : m.do === 'trust' ? (m.person ? `Distrust ${api.name(m.person)}.` : m.link.startsWith('stmt:') ? 'Distrust this statement itself (its own trust, above its chains).' : `Distrust this link of its chain: ${api.linkName(m.link)}.`)
@@ -154,7 +161,7 @@ export async function makeHints({ store, api }) {
         const last = h.rung >= rs.length;
         const canDo = last && h.target.kind !== 'done';
         box.hidden = false;
-        box.innerHTML = `<p><b>Hint</b></p><ol class="hint-rungs">${shown.map((r) => `<li>${r.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])}</li>`).join('')}</ol>
+        box.innerHTML = `<p><b>Hint</b></p><ol class="hint-rungs">${shown.map((r) => `<li>${r?.html ?? H(r ?? '')}</li>`).join('')}</ol>
           <p>${!last ? '<button type="button" class="quiet" data-hint-more>More</button> ' : ''}${canDo ? '<button type="button" data-hint-do>Do it</button> ' : ''}<button type="button" class="quiet" data-hint-close>Close</button></p>`;
         if (!last) box.querySelector('[data-hint-more]').disabled = Date.now() < h.until;
     }
@@ -212,6 +219,6 @@ export async function makeHints({ store, api }) {
         else if (e.target.closest('[data-hint-close]')) { box.hidden = true; h.key = null; }
     });
     // For the check (scripts/world-hints-check.mjs): the hint now, as words, without pressing.
-    window.__hint = { target: () => { const t = target(); return { kind: t.kind, i: t.m?.i ?? null, rungs: rungs(t) }; }, press, doIt, state: () => ({ rung: h.rung, kind: h.target?.kind ?? null, until: h.until }) };
+    window.__hint = { target: () => { const t = target(); return { kind: t.kind, i: t.m?.i ?? null, rungs: rungs(t).map((r) => (r?.html ? r.html.replace(/<[^>]+>/g, '') : r)) }; }, press, doIt, state: () => ({ rung: h.rung, kind: h.target?.kind ?? null, until: h.until }) };
     return { press, doIt };
 }
