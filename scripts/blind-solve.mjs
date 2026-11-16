@@ -2,7 +2,13 @@
 // a numbered list of the controls it may use) and the player's guide, and never the case's data, the hints or the
 // autoplay. Experiment 2 of docs/authored-stories.md ("Is a miniature fun?"): can the case be solved from the page?
 //   CASE=<dir> MODEL=haiku MAX=150 BUDGET=3 node scripts/blind-solve.mjs   (DRY=1: the first prompt only, no call;
-//   OUTPUT_CAP: the output tokens one call may write, default 4000; BUDGET: dollars, the run stops there)
+//   OUTPUT_CAP: the output tokens one call may write, default 4000; BUDGET: dollars for the whole run, it stops there)
+// A long run in parts: MAX is the turns of one invocation, and the run's state (the page's save, the solver's notes
+// and last actions, the cost) is kept in its record after every turn, so
+//   CASE=<dir> RESUME=last MAX=100 node scripts/blind-solve.mjs    goes on where the case's latest run stopped
+//   CASE=<dir> STATUS=last node scripts/blind-solve.mjs            says where it stands (no call, no Chrome)
+// (`last` or a record's directory). STUCK=200: the run ends when that many turns pass with nothing new read and no
+// question solved (0: never). SEED: the placement of an earned case's papers (default: drawn by the page).
 // Each turn is one blind call (`claude -p` from an empty directory, no tools, no settings: the pattern of
 // v2/pipeline/lib.mjs, copied here). Costs money. The record goes to .cache/blind/<case>/<time>/: each turn's prompt
 // and reply, and summary.json (turns, cost, what the story answered and whether the circles were right).
@@ -18,11 +24,38 @@ const MAX = +(process.env.MAX ?? 150);
 // Guards on spending: a reply is a few hundred tokens, so each call's output is capped (a Sonnet run of 2026-11-14 had
 // two turns write some 128,000 hidden tokens each, $1.70 apiece, before a short reply); and the run stops at BUDGET
 // dollars.
-const OUTPUT_CAP = +(process.env.OUTPUT_CAP ?? 4000);
+const STUCK = +(process.env.STUCK ?? 200);
+const OUTPUT_CAP =+(process.env.OUTPUT_CAP ?? 4000);
 const BUDGET = +(process.env.BUDGET ?? 3);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const up = (url) => fetch(url).then((r) => r.ok, () => false);
 const J = JSON.stringify;
+
+// --- The run's record, and the state a run goes on from (RESUME) or reports (STATUS).
+const RUNS = path.join(ROOT, '.cache', 'blind', CASE.replace(/[^A-Za-z0-9]+/g, '-'));
+const runDir = (v) => {
+    if (v !== 'last') return path.resolve(ROOT, v);
+    const all = fs.existsSync(RUNS) ? fs.readdirSync(RUNS).sort().filter((d) => fs.existsSync(path.join(RUNS, d, 'state.json'))) : [];
+    if (!all.length) { console.error(`no run of ${CASE} with a state to go on from in ${path.relative(ROOT, RUNS)}`); process.exit(1); }
+    return path.join(RUNS, all.at(-1));
+};
+const from = process.env.RESUME ?? process.env.STATUS;
+const RUN = from ? runDir(from) : path.join(RUNS, new Date().toISOString().replace(/[:.]/g, '-'));
+const kept = from ? JSON.parse(fs.readFileSync(path.join(RUN, 'state.json'), 'utf8')) : null;
+const QUESTIONS = JSON.parse(fs.readFileSync(path.join(WORLD, 'questions.json'), 'utf8')).questions;
+const standing = (st) => {
+    const sv = st.save ?? {}, solved = Object.keys(sv.solved ?? {});
+    return [`${path.relative(ROOT, RUN)}: ${st.turn} turns, $${Math.round(st.cost * 1000) / 1000} (${st.model}); ${st.end ?? 'not ended'}`,
+        `  the story: paragraph ${sv.para ?? 1} of ${st.mainLen}; paragraphs read in all (the papers too): ${sv.log?.length ?? 0}`,
+        `  questions solved: ${solved.length} of ${QUESTIONS.length}${solved.length ? ` (${solved.join(', ')})` : ''}`,
+        `  questions circled: ${QUESTIONS.filter((q) => Object.values(sv.marks?.[q.id] ?? {}).includes('circled')).length}; links: ${sv.links?.length ?? 0}`,
+        `  the last turn that read something new or solved a question: ${st.progressTurn} (${st.turn - st.progressTurn} turns ago${STUCK ? `; the run ends at ${STUCK}` : ''})`,
+        `  the story answered: ${st.answered.length ? st.answered.map((a) => `${a.text}${a.bad ? ' (WRONG)' : ''}`).join(' | ') : 'nothing yet'}`,
+        `  the solver's notes: ${st.notes || '(none)'}`,
+        '  its last actions:', ...st.history.slice(-8).map((h) => `    - ${h}`)].join('\n');
+};
+if (process.env.STATUS) { console.log(standing(kept)); process.exit(0); }
+if (kept?.done) { console.error(`that run is over (${kept.end}); nothing to go on with`); process.exit(1); }
 
 // --- The page: server and Chrome as page-checks.mjs starts them.
 const started = [];
@@ -36,6 +69,7 @@ if (!(await up(`${CDP}/json/version`))) {
     for (let i = 0; i < 100 && !(await up(`${CDP}/json/version`)); i++) await sleep(100);
 }
 const stop = () => { for (const p of started) p.kill(); };
+for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { stop(); process.exit(1); });
 
 const tabs = await (await fetch(`${CDP}/json`)).json();
 const ws = new WebSocket(tabs.find((t) => t.type === 'page').webSocketDebuggerUrl);
@@ -51,8 +85,8 @@ const ev = async (expr) => { const r = await send('Runtime.evaluate', { expressi
 await send('Page.enable'); await send('Runtime.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
 await send('Page.navigate', { url: pageUrl('http://localhost:8321/') }); await sleep(1500);
-// A fresh page in three columns: every part in view at once.
-await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three' }))}); 1`);
+// A fresh page in three columns: every part in view at once. A run gone on with: the page as it was saved.
+await ev(`localStorage.setItem(${J(STORE)}, ${J(J(kept?.save ?? { layout: 'three', ...(process.env.SEED ? { seed: +process.env.SEED } : {}) }))}); 1`);
 await send('Page.reload'); await sleep(1500);
 const save = () => ev(`JSON.parse(localStorage.getItem(${J(STORE)}) ?? '{}')`);
 
@@ -88,7 +122,7 @@ const guide = fs.readFileSync(path.join(ROOT, 'guide.html'), 'utf8')
     .replace(/<(style|script|nav)[\s\S]*?<\/\1>/g, '').replace(/<\/(p|h\d|li|dt|dd|section|tr)>/g, '\n').replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&[a-z]+;/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
 
-const SYSTEM = `You are playing a detective game in a web page, as its reader. A short mystery story is told a paragraph at a time; you build a timeline of what you learn, decide whom to trust, mark answers to the story's questions (circle the one you believe, cross out the ones you rule out), and link the evidence that shows each answer. Before the story gives an answer away, a gate stops you until you have linked the evidence for it and circled an answer. Your aim is to reach the end of the story with every question answered rightly, by reasoning from the evidence; guessing is not the point.
+const SYSTEM = `You are playing a detective game in a web page, as its reader. A mystery story is told a paragraph at a time; you build a timeline of what you learn, decide whom to trust, mark answers to the story's questions (circle the one you believe, cross out the ones you rule out), and link the evidence that shows each answer. Before the story gives an answer away, a gate stops you until you have linked the evidence for it and circled an answer. In a longer story, papers come to you as you solve its questions (the guide says how), and the story's ending is held until its last question is solved. Your aim is to reach the end of the story with every question answered rightly, by reasoning from the evidence; guessing is not the point.
 
 You see the page as text, and a numbered list of the controls you may use. Each turn you do one thing. You have no tools: do not write tool calls or XML. Reply with only a JSON object, no other text:
 {"thought": "<one or two sentences: what you are doing and why>", "notes": "<your running notes, which replace the previous ones and are all you remember besides your last actions: suspects, evidence, what is left to do; under 150 words>", "action": {"click": <number>}}
@@ -100,7 +134,6 @@ The player's guide follows.
 ${guide}`;
 
 // --- One blind call (v2/pipeline/lib.mjs's pattern): no tools, no settings, an empty directory.
-const RUN = path.join(ROOT, '.cache', 'blind', CASE.replace(/[^A-Za-z0-9]+/g, '-'), new Date().toISOString().replace(/[:.]/g, '-'));
 fs.mkdirSync(RUN, { recursive: true });
 const blindDir = path.join(os.tmpdir(), 'blind-solver');
 fs.mkdirSync(blindDir, { recursive: true });
@@ -132,15 +165,27 @@ const parse = (text) => {
 
 // --- The loop.
 const mainLen = fs.readFileSync(path.join(ROOT, CASE, 'story.txt'), 'utf8').split(/\n\s*\n/).filter((p) => p.trim()).length - 1;
-const history = [];
-const answered = [];
-let notes = '', cost = 0, model = MODEL, turn = 0, end = 'turns ran out';
+const history = kept?.history ?? [];
+const answered = kept?.answered ?? [];
+let notes = kept?.notes ?? '', cost = kept?.cost ?? 0, model = kept?.model ?? MODEL, turn = kept?.turn ?? 0, end = `the ${MAX} turns of this part ran out`;
+// Progress: something newly read (the story or a paper) or a question solved. `progressTurn`: the last turn with any.
+let progressTurn = kept?.progressTurn ?? 0, done = false;
+const measure = (sv) => (sv.log?.length ?? 0) + 1000 * Object.keys(sv.solved ?? {}).length;
+let best = kept ? measure(kept.save) : 0;
+/** Keeps the run's state after `turns` turns, so that it can be gone on with from there. */
+const keep = async (turns) => {
+    const sv = await save();
+    if (measure(sv) > best) { best = measure(sv); progressTurn = turns; }
+    fs.writeFileSync(path.join(RUN, 'state.json'), J({ case: CASE, model, turn: turns, cost, notes, history: history.slice(-12), answered, progressTurn, mainLen, done, end: done ? end : null, save: sv }) + '\n');
+};
+if (kept) console.log(`going on with ${path.relative(ROOT, RUN)} from turn ${turn} ($${cost.toFixed(3)} so far)`);
 fs.writeFileSync(path.join(RUN, 'system.md'), SYSTEM);
-for (; turn < MAX; turn++) {
+for (const first = turn; turn < first + MAX; turn++) {
+    if (STUCK && turn - progressTurn >= STUCK) { end = `stuck: ${STUCK} turns with nothing new read and no question solved`; done = true; break; }
     if (cost >= BUDGET) { end = `budget of $${BUDGET} reached`; break; }
     const v = await ev(VIEW);
     for (const a of v.answers) if (!answered.some((x) => x.text === a.text)) { answered.push({ ...a, turn }); console.log(`turn ${turn}: the story answered: ${a.text}${a.bad ? '  (WRONG)' : ''}`); }
-    if (((await save()).para ?? 1) >= mainLen) { end = 'reached the end of the story'; break; }
+    if (((await save()).para ?? 1) >= mainLen) { end = 'reached the end of the story'; done = true; break; }
     const prompt = `Your last actions (oldest first):\n${history.slice(-12).map((h) => `- ${h}`).join('\n') || '(none yet)'}\n\nYour notes:\n${notes || '(none yet)'}\n\n# The page now\n\n${v.text}\n\n# Controls\n${v.controls}\n\nYour move (one JSON object).`;
     if (process.env.DRY) { fs.writeFileSync(path.join(RUN, 'dry.md'), prompt); console.log(`DRY: the first prompt is ${prompt.length} characters, the system prompt ${SYSTEM.length}; written to ${path.relative(ROOT, RUN)}/dry.md`); end = 'dry run'; break; }
     let reply, a;
@@ -149,7 +194,7 @@ for (; turn < MAX; turn++) {
     if (reply.cost > 0.25) console.log(`turn ${turn}: this call cost $${reply.cost.toFixed(2)} (${reply.usage.output_tokens} output tokens)`);
     fs.writeFileSync(path.join(RUN, `${String(turn).padStart(3, '0')}.md`), `${prompt}\n\n<!-- reply -->\n${reply.text}\n\n<!-- cost ${reply.cost} usage ${J(reply.usage)} -->\n`);
     a = parse(reply.text);
-    if (!a?.action) { history.push(`(a reply that was not a JSON action: ${reply.text.slice(0, 80)})`); continue; }
+    if (!a?.action) { history.push(`(a reply that was not a JSON action: ${reply.text.slice(0, 80)})`); await keep(turn + 1); continue; }
     if (typeof a.notes === 'string') notes = a.notes.slice(0, 1500);
     const num = a.action.click ?? a.action.select;
     const label = (v.controls.split('\n').find((l) => l.startsWith(`${num}. `)) ?? `${num}. (no such control)`).replace(/^\d+\. /, '');
@@ -165,12 +210,15 @@ for (; turn < MAX; turn++) {
     history.push(`${what} → ${result}${note ? ` (${note})` : ''}`);
     console.log(`turn ${turn}: ${what} → ${result}  | ${String(a.thought ?? '').slice(0, 120)}`);
     if (errors.length) console.log(`  page error: ${errors.splice(0).join(' | ')}`);
+    await keep(turn + 1);
 }
+if (!process.env.DRY) await keep(turn);
 const final = await save();
-const keys = JSON.parse(fs.readFileSync(path.join(WORLD, 'questions.json'), 'utf8')).questions.map((q) => ({ q: q.id, answer: q.answer, marks: final.marks?.[q.id] ?? {} }));
-const summary = { case: CASE, model, turns: turn, end, cost_usd: Math.round(cost * 1000) / 1000, answered, marks: keys, links: final.links ?? [], reasoning: final.reasoning ?? [], record: path.relative(ROOT, RUN) };
+const keys = QUESTIONS.map((q) => ({ q: q.id, answer: q.answer, marks: final.marks?.[q.id] ?? {} }));
+const summary = { case: CASE, model, turns: turn, end, solved: Object.keys(final.solved ?? {}), cost_usd: Math.round(cost * 1000) / 1000, answered, marks: keys, links: final.links ?? [], reasoning: final.reasoning ?? [], record: path.relative(ROOT, RUN) };
 fs.writeFileSync(path.join(RUN, 'summary.json'), J(summary, null, 2) + '\n');
 console.log(`\n${end} after ${turn} turns, $${summary.cost_usd} (${model}); record in ${summary.record}`);
+if (!done && !process.env.DRY) console.log(`to go on: CASE=${CASE} RESUME=last MAX=${MAX} node scripts/blind-solve.mjs   (where it stands: STATUS=last)`);
 for (const k of keys) console.log(`  ${k.q}: the answer ${k.answer}; marks ${J(k.marks)}`);
 ws.close();
 stop();
