@@ -52,7 +52,8 @@ const standing = (st) => {
         `  the last turn that read something new or solved a question: ${st.progressTurn} (${st.turn - st.progressTurn} turns ago${STUCK ? `; the run ends at ${STUCK}` : ''})`,
         `  the story answered: ${st.answered.length ? st.answered.map((a) => `${a.text}${a.bad ? ' (WRONG)' : ''}`).join(' | ') : 'nothing yet'}`,
         `  the solver's notes: ${st.notes || '(none)'}`,
-        '  its last actions:', ...st.history.slice(-8).map((h) => `    - ${h}`)].join('\n');
+        '  its last actions:', ...st.history.slice(-8).map((h) => `    - ${h}`),
+        `  its reports: ${st.reports?.length ? '' : 'none'}`, ...(st.reports ?? []).map((r) => `    - turn ${r.turn} (story paragraph ${r.para}): ${r.report}`)].join('\n');
 };
 if (process.env.STATUS) { console.log(standing(kept)); process.exit(0); }
 if (kept?.done) { console.error(`that run is over (${kept.end}); nothing to go on with`); process.exit(1); }
@@ -127,6 +128,7 @@ const SYSTEM = `You are playing a detective game in a web page, as its reader. A
 You see the page as text, and a numbered list of the controls you may use. Each turn you do one thing. You have no tools: do not write tool calls or XML. Reply with only a JSON object, no other text:
 {"thought": "<one or two sentences: what you are doing and why>", "notes": "<your running notes, which replace the previous ones and are all you remember besides your last actions: suspects, evidence, what is left to do; under 150 words>", "action": {"click": <number>}}
 or, for a control listed as "select", {"select": <number>, "value": "<one of its options>"}.
+If you notice something wrong, you may add one more field to that object: "report": "<what is wrong and where, in a sentence or two>". Use it for a fault in the story's logic (two things that cannot both be true and are not meant as a lie, a question that cannot be answered from what you have, an answer you were held to that the evidence does not show), a fault in the page (a control that does not do what it says, text that is unclear or misleading), or anything else the game's makers should know. A report changes nothing in the game and is not shown to you again, so make each one once, and only when you are fairly sure; being unsure of an answer is not a fault.
 Click a timeline entry to open it in the Detail panel; the Detail panel then offers what you can do with it (trust, "Relevant to…" links, moves). "Read on ▶" reads the next paragraph.
 
 The player's guide follows.
@@ -167,6 +169,7 @@ const parse = (text) => {
 const mainLen = fs.readFileSync(path.join(ROOT, CASE, 'story.txt'), 'utf8').split(/\n\s*\n/).filter((p) => p.trim()).length - 1;
 const history = kept?.history ?? [];
 const answered = kept?.answered ?? [];
+const reports = kept?.reports ?? [];
 let notes = kept?.notes ?? '', cost = kept?.cost ?? 0, model = kept?.model ?? MODEL, turn = kept?.turn ?? 0, end = `the ${MAX} turns of this part ran out`;
 // Progress: something newly read (the story or a paper) or a question solved. `progressTurn`: the last turn with any.
 let progressTurn = kept?.progressTurn ?? 0, done = false;
@@ -176,7 +179,7 @@ let best = kept ? measure(kept.save) : 0;
 const keep = async (turns) => {
     const sv = await save();
     if (measure(sv) > best) { best = measure(sv); progressTurn = turns; }
-    fs.writeFileSync(path.join(RUN, 'state.json'), J({ case: CASE, model, turn: turns, cost, notes, history: history.slice(-12), answered, progressTurn, mainLen, done, end: done ? end : null, save: sv }) + '\n');
+    fs.writeFileSync(path.join(RUN, 'state.json'), J({ case: CASE, model, turn: turns, cost, notes, history: history.slice(-12), answered, reports, progressTurn, mainLen, done, end: done ? end : null, save: sv }) + '\n');
 };
 if (kept) console.log(`going on with ${path.relative(ROOT, RUN)} from turn ${turn} ($${cost.toFixed(3)} so far)`);
 fs.writeFileSync(path.join(RUN, 'system.md'), SYSTEM);
@@ -196,6 +199,7 @@ for (const first = turn; turn < first + MAX; turn++) {
     a = parse(reply.text);
     if (!a?.action) { history.push(`(a reply that was not a JSON action: ${reply.text.slice(0, 80)})`); await keep(turn + 1); continue; }
     if (typeof a.notes === 'string') notes = a.notes.slice(0, 1500);
+    if (typeof a.report === 'string' && a.report.trim()) { reports.push({ turn, para: (await save()).para ?? 1, report: a.report.trim().slice(0, 1000) }); console.log(`turn ${turn}: REPORT: ${a.report.trim().slice(0, 1000)}`); }
     const num = a.action.click ?? a.action.select;
     const label = (v.controls.split('\n').find((l) => l.startsWith(`${num}. `)) ?? `${num}. (no such control)`).replace(/^\d+\. /, '');
     const before = J(await save()) + (await ev(`document.querySelector('.world-main')?.innerText ?? document.body.innerText`));
@@ -215,7 +219,7 @@ for (const first = turn; turn < first + MAX; turn++) {
 if (!process.env.DRY) await keep(turn);
 const final = await save();
 const keys = QUESTIONS.map((q) => ({ q: q.id, answer: q.answer, marks: final.marks?.[q.id] ?? {} }));
-const summary = { case: CASE, model, turns: turn, end, solved: Object.keys(final.solved ?? {}), cost_usd: Math.round(cost * 1000) / 1000, answered, marks: keys, links: final.links ?? [], reasoning: final.reasoning ?? [], record: path.relative(ROOT, RUN) };
+const summary = { case: CASE, model, turns: turn, end, solved: Object.keys(final.solved ?? {}), reports, cost_usd: Math.round(cost * 1000) / 1000, answered, marks: keys, links: final.links ?? [], reasoning: final.reasoning ?? [], record: path.relative(ROOT, RUN) };
 fs.writeFileSync(path.join(RUN, 'summary.json'), J(summary, null, 2) + '\n');
 console.log(`\n${end} after ${turn} turns, $${summary.cost_usd} (${model}); record in ${summary.record}`);
 if (!done && !process.env.DRY) console.log(`to go on: CASE=${CASE} RESUME=last MAX=${MAX} node scripts/blind-solve.mjs   (where it stands: STATUS=last)`);
