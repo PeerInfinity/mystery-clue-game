@@ -976,6 +976,20 @@ script that found each fact's paragraph from its quote; the data files are the s
     first. The list of what can be solved now is a help the page did not give before: it tells the reader which
     questions the papers in hand suffice for. Seen and left: a click on a question already linked (✓) unlinks
     it, and the solver did that several times by mistake.
+94. **The second Haiku run (2026-11-16), after those changes: 12 of 25 questions solved, then stuck.** It stopped at
+    the $3 the user set, at turn 667, two turns short of the 200-turn stuck rule. Four questions were solved in the
+    first hundred turns, ten by turn 300, the twelfth at turn 469; it read 94 paragraphs (the story to the held
+    ending, and the papers its questions brought). The last 200 turns went on one question, where Crouch was
+    between one o'clock and the bell, with the right answer circled and one of its two pieces of evidence linked.
+    The missing piece is the plainest in the story (the pier-head lamp is a quarter of an hour from the watch-box,
+    ¶3); the solver decided instead that Crouch's statement had to be disbelieved, opened the entry of the telling
+    again and again, and sent the run's one report: that the telling shows "Trusted: certain" and offers no way to
+    distrust it. The page says of a link that fills nothing only that it is "kept as a note"; nothing says what
+    kind of thing is still missing. Its notes had two solved answers the wrong way round by turn 300, and called a
+    question solved that the page did not. The cost of a turn rose with the page: $0.19 for the first hundred
+    turns, $0.55 for the sixth. The user's ideas for what comes next, not built: a link that provides required
+    evidence cannot be unlinked (the solver unlinked by mistake some fifteen times), and at some point a mode like
+    the earlier game's incremental one, which tries every option for the player.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
