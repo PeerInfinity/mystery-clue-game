@@ -229,6 +229,11 @@ body.world-page.tabbed .top { position: static; }
 .link-q.on { border-color: var(--accent); background: var(--accent-soft); }
 .link-row { font-size: 11px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 0 7px; background: transparent; cursor: pointer; white-space: nowrap; }
 .link-row.on { border-style: solid; background: var(--accent-soft); }
+.link-row.tried, .link-q.tried { color: var(--muted); border-color: var(--line); border-style: solid; cursor: default; text-decoration: line-through; }
+.link-row:disabled, .link-q:disabled { cursor: default; }
+.link-q:disabled { opacity: 1; }
+body.link-only-new #timeline .event.link-done { display: none; }
+.linking-bar .link-only-new { font-size: 12px; white-space: nowrap; }
 .linking-bar { background: var(--accent); color: #fff; padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 8px; }
 .linking-bar button { background: transparent; color: #fff; border: 1px solid #fff; border-radius: 4px; font-size: 12px; cursor: pointer; }
 .desc { margin-top: 4px; }

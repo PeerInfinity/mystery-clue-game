@@ -78,21 +78,44 @@ ok(/small enough for the grating/.test(await text('.desc-list')), 'a known link 
 ok(/¶7/.test(await text('.desc-list')), 'with where it came from');
 await click('#timeline [data-fact="f.walls"] .ph');
 await click('#detail [data-link-entry="f.walls"]');
-ok(/Your notes/.test(await text('#q-box')) && (await count('.desc-list li')) === 1, 'an unknown link stays as a note', await text('#q-box'));
+// Checked links (the default): a link that is no evidence is refused and marked as tried, for good; evidence stays.
+const set = (sel, value) => ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); e.value = ${JSON.stringify(value)}; e.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+ok(!/Your notes/.test(await text('#q-box')) && (await count('.desc-list li')) === 1, 'a link that shows nothing is refused', await text('#q-box'));
+ok(/Tried: it shows nothing/.test(await text('#detail .note')), 'and the page says so', await text('#detail'));
+ok(await count('#detail [data-link-entry="f.walls"].tried:disabled') === 1 && /tried/.test(await text('#detail [data-link-entry="f.walls"]')), 'its button is marked as tried and is off');
 await click('#undo');
-ok(!/Your notes/.test(await text('#q-box')), 'undo takes a link back');
+ok(await count('#detail [data-link-entry="f.walls"].tried') === 1, 'undo does not clear a tried mark');
+ok(/small enough for the grating/.test(await text('.desc-list')), 'nor take back a link that is evidence', await text('#q-box'));
+await click('#timeline [data-fact="f.grating"] .ph');
+ok(await count('#detail [data-link-entry="f.grating"].on:disabled') === 1, 'a link that is evidence cannot be removed');
+await click('#detail [data-link-entry="f.grating"].on');
+ok(/small enough for the grating/.test(await text('.desc-list')), 'a click on it changes nothing');
+// The other setting: every link kept, as evidence or as a note; back to checked, the note becomes a tried mark.
+await set('#link-rule', 'free');
+await click('#timeline [data-fact="f.walls"] .ph');
+ok(await count('#detail [data-link-entry="f.walls"].tried') === 0, 'with links not checked, nothing is marked as tried');
+await click('#detail [data-link-entry="f.walls"]');
+ok(/Your notes/.test(await text('#q-box')), 'and an unknown link stays as a note', await text('#q-box'));
+await set('#link-rule', 'checked');
+ok(!/Your notes/.test(await text('#q-box')) && await count('#detail [data-link-entry="f.walls"].tried') === 1, 'checked again, the note becomes a tried mark', await text('#q-box'));
 // From the question (B), and a route as an entry.
 await click('[data-linking="q.what_came"]');
 ok(/Linking to/.test(await text('#timeline')), 'the linking mode shows on the timeline');
 ok(await click('#timeline [data-fact^="r:r:"] [data-link-entry]'), 'the route can be linked');
 ok(/travel down a chain/.test(await text('.desc-list')), 'a route counts by what it runs through', await text('.desc-list'));
 await click('#timeline [data-fact="f.dead"] [data-link-entry]');
-ok(/Your notes/.test(await text('#q-box')) && !/something that bites/.test(await text('.desc-list')), 'an observation that depends on an answer waits for it', await text('#q-box'));
+ok(/Part of something not yet complete/.test(await text('.desc-list')) && !/something that bites/.test(await text('.desc-list')), 'an observation that depends on an answer waits for it, its link kept', await text('#q-box'));
+ok(/not tried yet: \d+ of \d+ entries/.test(await text('#q-box')), 'each open question counts what is not tried yet', await text('#q-box'));
+const shownRows = () => ev(`[...document.querySelectorAll('#timeline .event')].filter((e) => e.offsetParent !== null).length`);
+const before = await shownRows();
+await click('[data-link-only-new]');
+ok(await shownRows() < before && await count('#timeline .event.link-done') > 0, 'only what is not tried yet: the linked and the tried rows are hidden', `${before} rows`);
+await click('[data-link-only-new]');
 await click('[data-linking-done]');
 ok(!/Linking to/.test(await text('#timeline')), 'Done leaves the mode');
 await click('#q-box [data-mark-q="q.how"][data-mark-pick="a bite"]');
 ok(/something that bites/.test(await text('.desc-list')), 'circling the answer fills it in', await text('.desc-list'));
-ok(!/Your notes/.test(await text('#q-box')), 'and the note gives way to it');
+ok(!/Part of something not yet complete/.test(await text('.desc-list')), 'and the waiting link gives way to it');
 ok(await count('[data-part="timeline"] .link-row') === 0, 'no buttons on the rows outside the mode');
 // The player's order of the questions, and the line that decides what "Relevant to…" offers. A real drag, by the mouse.
 const rows = () => ev(`[...document.querySelectorAll('#q-box [data-q-row]')].map((x) => x.dataset.qRow).join(' ')`);

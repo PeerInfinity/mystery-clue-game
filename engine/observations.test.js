@@ -138,3 +138,20 @@ test('a solved question is evidence that fills by itself, with no link', () => {
     assert.deepEqual(r.filled.map((x) => x.obs.id), ['o.a', 'o.b']);
     assert.deepEqual(described(obs, 'q.big', r.filled), { any: true, done: true, missing: [] });
 });
+
+test('bears: an entry is evidence for a question whatever else its observation waits for', async () => {
+    const { bears, onPage } = await import('./observations.js');
+    const obs = [
+        { id: 'o1', q: 'q.a', from: ['f.one', 'f.two'], says: 'both', essential: true },
+        { id: 'o2', q: 'q.a', from: [{ doubted: 'f.lie' }], says: 'a lie', essential: true },
+        { id: 'o3', q: 'q.b', from: ['f.three'], says: 'three', if: { q: 'q.a', pick: 'x' } },
+        { id: 'o4', q: 'q.b', from: [{ solved: 'q.a' }], says: 'a is solved', essential: true },
+    ];
+    assert.equal(bears(obs, 'q.a', { id: 'f.one' }), true);          // half of an observation from two entries
+    assert.equal(bears(obs, 'q.a', { id: 'f.lie' }), true);          // a statement not yet disbelieved
+    assert.equal(bears(obs, 'q.b', { id: 'f.three' }), true);        // waits for a reading circled
+    assert.equal(bears(obs, 'q.b', { id: 'f.one' }), false);         // evidence for another question only
+    assert.equal(bears(obs, 'q.a', { id: 'f.other' }), false);
+    assert.deepEqual(onPage(obs, 'q.a', (id) => id !== 'f.two'), { all: 2, here: 1 });
+    assert.deepEqual(onPage(obs, 'q.b', () => false), { all: 1, here: 1 });   // "question solved" counts as here
+});

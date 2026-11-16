@@ -327,12 +327,20 @@ tells something about that question, what it shows is written under the question
 example:</p>
 <div class="demo"><b>? Who took the inkstand?</b><br>
 <span class="muted">Shows:</span> the housekeeper was at the market all morning <span class="para">¶3</span></div>
-<p>It stays only as long as you trust the event. One event can be evidence for more than one question, and what it
+<p><b>A link is checked as you make it.</b> If the event is evidence for the question, the link is kept, and it
+stays: you cannot take it back, and Undo does not. If it is not, the link is refused with <i>Tried: it shows nothing
+about this question</i>, and from then on that question's button on that event reads <i>✗ tried</i> (on the timeline,
+<i>tried ✗</i>) and is off: the page remembers what you have tried, and Undo does not clear it. Under each open
+question, <i>not tried yet: 31 of 40 entries</i> counts what is left for it, and while you are linking,
+<b>only what is not tried yet</b> hides the entries already linked to the question or tried for it. So you can
+always work a question through by going down what is left; reasoning gets there sooner.</p>
+<p>What a link shows stays only as long as you trust the event. One event can be evidence for more than one question, and what it
 shows may differ for each: link it to every question it bears on. A statement you no longer believe can be evidence
 too: what someone said falsely can show something about them. Distrust the statement (its own trust, in its detail)
-and link it; what it shows is filled in only while you disbelieve it. Some observations rest on two events or more: link one of them and its detail says it
-is <i>part of something not yet complete</i>, and the question lists it so, until the rest is linked too. If the
-event tells nothing about the question as the timeline stands, your link is <i>kept as a note</i>. The gate's
+and link it; what it shows is filled in only while you disbelieve it. Some evidence needs something else before it
+shows anything: a second event linked too, a statement disbelieved, an event trusted enough to be on the timeline,
+another question's answer circled. Such a link is kept, its detail says it is <i>part of something not yet
+complete</i>, and the question lists it so, until the rest is there; it does not say what the rest is. The gate's
 notice counts such an observation too, while it waits: <i>2 of 3, and 1 more begun</i>. Some answers are not a name but a description you build this way.</p>
 <p><b>Relevant to…</b> lists the open questions in the order of the Questions list. Put them in the order you like
 there: drag a question by its <b>≡</b> (or focus it and use the arrow keys), or press <b>↑</b> to send it to the top.
@@ -477,6 +485,12 @@ speed a short case takes about a minute.</p>
   <dd>What <a href="#gate">the gate</a> asks of a question that has evidence to link: <i>show it</i> (the evidence
   linked and the right answer circled; the default), or <i>commit to any answer</i>. A question is
   <a href="#solved">solved</a> only by its evidence and the right answer, whichever you choose.</dd>
+  <dt>Links</dt>
+  <dd><i>Checked as you make them</i> (the default): evidence is kept and cannot be removed, and a link that shows
+  nothing is refused and marked as tried (see <a href="#observations">observations</a>). Or <i>all kept, as
+  evidence or as notes</i>: nothing is refused or marked, a link that shows nothing stays under the question as
+  your own note, and any link can be removed by clicking it again. Changing back to checked turns such notes into
+  tried marks.</dd>
   <dt>Seed of this game</dt>
   <dd>Where papers are earned: the number that decided which question brings which paper, and <i>replay it</i>, an
   address that starts a new game with the same papers in the same places (it asks before clearing a game in

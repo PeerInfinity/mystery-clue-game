@@ -63,6 +63,18 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
 
 /** For one question: what its essential observations are and which of them the player's description still lacks. */
 /**
+ * Whether an entry is evidence for a question at all: it is one of the entries some observation of `q` comes from,
+ * whatever else that observation waits for (the rest of its entries, the statement disbelieved, a reading circled,
+ * the entry trusted enough to be on the timeline). What a checked link is judged by: such a link is kept, any other
+ * is refused.
+ */
+const couldMatch = (from, e) => (typeof from === 'string' ? e.id === from
+    : from.solved ? false
+    : from.doubted ? e.id === from.doubted
+    : matches(from, e, {}));
+export const bears = (observations, q, e) => observations.some((o) => o.q === q && o.from.some((f) => couldMatch(f, e)));
+
+/**
  * Whether a question's required evidence is on the page yet, whatever is linked: `{all, here}`, the essential
  * observations of `q` and those of them whose entries the reader has (`has(id)`: the fact is given by what was read).
  * An entry that is the player's own move counts by its premises (a gap or a route, which have none named: as here),

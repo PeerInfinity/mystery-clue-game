@@ -990,6 +990,24 @@ script that found each fact's paragraph from its quote; the data files are the s
     turns, $0.55 for the sixth. The user's ideas for what comes next, not built: a link that provides required
     evidence cannot be unlinked (the solver unlinked by mistake some fifteen times), and at some point a mode like
     the earlier game's incremental one, which tries every option for the player.
+95. **Checked links (2026-11-16), the first idea taken from the earlier game's incremental mode.** The user's
+    rulings: a link that is evidence cannot be unlinked; a link that is not is refused, and the pair of entry and
+    question is marked as tried for good; somewhere the page lists what has not been tried; no automation yet;
+    and all of it is a setting from the start (Settings, "Links": checked, the default, or all kept as before),
+    on every case, since such things will become difficulty settings. That trying every entry on every question
+    now solves every linking step is intended. Built so: a link is evidence when its entry is one some
+    observation of the question comes from, whatever else that observation waits for (engine `bears`), so a lie
+    linked while still believed, a link that waits for a reading circled, and a link to an entry not yet trusted
+    onto the timeline are kept and shown as "part of something not yet complete", the wording of evidence from
+    two entries (the cost, accepted: it tells the reader that a statement is evidence in a way not yet found).
+    Tried marks and evidence links survive Undo, as solved questions do. Links as the reader's own notes are
+    gone with the rule on; a note from a game played with it off becomes a tried mark. A route is not marked as
+    tried (it is the reader's own and changes as it is built). The list of what is not tried is the timeline
+    itself in linking mode ("tried ✗" on a row, and "only what is not tried yet" to hide what is done), with a
+    count under each open question, so it needs no panel in any layout. Trust is left as it is: the user's
+    ruling is that contradictions are its feedback. Circles too: "Not this answer" already marks a tried
+    answer once the evidence is in. The reasoning moves and the room need nothing: the page offers only a move
+    that holds and refuses a mark nothing supports.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

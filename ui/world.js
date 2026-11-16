@@ -12,7 +12,7 @@ import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
 import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps, pointGap, gapsOf } from '../engine/actions.js';
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
-import { fill, described, onPage } from '../engine/observations.js';
+import { fill, described, onPage, bears } from '../engine/observations.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -140,7 +140,7 @@ const LAST = story.length - 1;   // the main story's last paragraph
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: true, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {} };
+const state = { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: true, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {}, linkRule: 'checked' };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
@@ -148,6 +148,7 @@ else try { const own = JSON.parse(localStorage.getItem(PLAYER_STORE) ?? '{}'); f
 state.sel = null;
 state.note = null;
 if (!state.solved || typeof state.solved !== 'object') state.solved = {};
+if (!state.tried || typeof state.tried !== 'object') state.tried = {};
 // What has been read, in each story and in what order (engine/refs.js); `para` is the main story's, kept for the
 // checks and for saves from before the files.
 let reading = Reading.fromSave(state, lengths);
@@ -170,9 +171,9 @@ if (EARNED) {
     const progress = (state.log?.length ?? 0) > 1 || state.links.length || Object.keys(state.marks).length;
     if (seedParam && state.seed && seedParam !== state.seed && progress && AUTOPLAY === null && !confirm(`Start a new game with seed ${seedParam}? Your timeline on this device is cleared.`)) { /* keep the game in hand */ }
     else if (seedParam && seedParam !== state.seed) {
-        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
+        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate', 'linkRule'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
         for (const k of Object.keys(state)) if (!(k in keep)) delete state[k];
-        Object.assign(state, { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: true, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {} }, keep, { seed: seedParam });
+        Object.assign(state, { para: 1, log: null, story: MAIN, threshold: DEFAULT_LEVEL, showBelow: true, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {} }, keep, { seed: seedParam });
         reading = Reading.fromSave(state, lengths);
         syncReading();
     }
@@ -205,7 +206,7 @@ if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved, seed: state.seed })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, threshold: state.threshold, showBelow: state.showBelow, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved, seed: state.seed, tried: state.tried, linkRule: state.linkRule })); } catch { /* not saved */ } };
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
 const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
@@ -480,8 +481,8 @@ const REASON_MARK = '<span class="can-reason" title="You can reason from this: o
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
-    const cls = ['event', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} ${paraSpan(givenAt(f))}${linkingQ ? ` <button type="button" class="link-row${isLinked(f.id, linkingQ) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(linkingQ)}">${isLinked(f.id, linkingQ) ? 'linked ✓' : '+ relevant'}</button>` : ''}${assertsHtml(f)}</${tag}>`;
+    const cls = ['event', linkingQ && (isLinked(f.id, linkingQ) || isTried(f.id, linkingQ)) ? 'link-done' : '', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} ${paraSpan(givenAt(f))}${linkingQ ? ` ${linkButton('link-row', f.id, linkingQ, '+ relevant', 'linked ✓', 'tried ✗')}` : ''}${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -837,11 +838,39 @@ function setOrder(row, focus = null) {
     if (focus) document.querySelector(`#q-box [data-q-row="${CSS.escape(focus)}"] .q-grip`)?.focus();
 }
 const isLinked = (entry, q) => state.links.some((l) => l.entry === entry && l.q === q);
+// Checked links (Settings, the default): a link is judged as it is made. One that is evidence for its question (alone
+// or with something else: engine `bears`) is kept and cannot be taken back; any other is refused, and the pair is
+// marked as tried for good (`state.tried`: {question: [entries]}; Undo does not clear it). A route is not marked: it
+// is the player's own, and changes as it is built. Off: every link is kept, as evidence or as a note, and can be removed.
+const checkedLinks = () => state.linkRule !== 'free';
+const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && bears(observations, q, e); };
+const isTried = (entry, q) => checkedLinks() && (state.tried[q] ?? []).includes(entry);
+const markTried = (entry, q) => { if (!entry.startsWith('r:') && !(state.tried[q] ?? []).includes(entry)) state.tried = { ...state.tried, [q]: [...(state.tried[q] ?? []), entry] }; };
+/** Links from before the rule, or from a game played with it off: one that is no evidence becomes a tried mark. */
+function sweepLinks() {
+    if (!observations || !checkedLinks()) return;
+    const gone = state.links.filter((l) => qById.has(l.q) && !l.entry.startsWith('r:') && factOf(l.entry) && !bearsOn(l.entry, l.q));
+    if (!gone.length) return;
+    for (const l of gone) markTried(l.entry, l.q);
+    state.links = state.links.filter((l) => !gone.includes(l));
+    save();
+}
+let linkOnlyNew = false;  // linking: show only the entries not yet linked or tried for the question (not saved)
 function toggleLink(entry, q) {
+    if (checkedLinks()) {
+        if (isLinked(entry, q)) { if (bearsOn(entry, q)) { state.note = 'This link is evidence for the question: it stays.'; render(); return; } }
+        else if (isTried(entry, q)) { state.note = 'Already tried: it shows nothing about this question.'; render(); return; }
+        else if (!bearsOn(entry, q)) { if (trying) return; markTried(entry, q); state.note = 'Tried: it shows nothing about this question.'; save(); render(); return; }
+    }
     remember();
     state.links = isLinked(entry, q) ? state.links.filter((l) => !(l.entry === entry && l.q === q)) : [...state.links, { entry, q }];
     save(); render();
 }
+/** A link's button: to link; linked (with checked links it stays, so the button is off); or tried and refused. */
+const linkButton = (cls, entry, q, add, on, tried) => {
+    const linked = isLinked(entry, q), t = !linked && isTried(entry, q), fixed = checkedLinks() && (t || (linked && bearsOn(entry, q)));
+    return `<button type="button" class="${cls}${linked ? ' on' : ''}${t ? ' tried' : ''}" data-link-entry="${esc(entry)}" data-link-q="${esc(q)}"${fixed ? ` disabled title="${t ? 'Already tried: it shows nothing about this question' : 'Evidence for the question: it stays'}"` : ''}>${linked ? on : t ? tried : add}</button>`;
+};
 let linkAllFor = null;   // the event whose "Relevant to…" shows the questions below the line as well
 /** "Relevant to…" in an event's detail: the open questions above the player's line, so that the list points at none. */
 function linkHtml(f) {
@@ -858,17 +887,21 @@ function linkHtml(f) {
         const shows = observed.filled.filter((x) => x.obs.q === q.id && has(x));
         if (shows.length) return shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>. ${name}</p>`).join('');
         if (observed.partial.some((x) => x.obs.q === q.id && has(x))) return `<p class="small">Part of something not yet complete: with something else, linked too, it would show more. ${name}</p>`;
+        if (checkedLinks() && bearsOn(f.id, q.id)) return `<p class="small">Part of something not yet complete: it is evidence for this, and as the timeline stands something else is still needed before it shows it. ${name}</p>`;
         return `<p class="small muted">Kept as a note: as the timeline stands, it shows nothing about this on its own. ${name}</p>`;
     })].join('');
-    return `<h3>Relevant to…</h3>${qs.map((q) => `<button type="button" class="link-q${isLinked(f.id, q.id) ? ' on' : ''}" data-link-entry="${esc(f.id)}" data-link-q="${esc(q.id)}">${esc(qLabel(q))}${isLinked(f.id, q.id) ? ' ✓' : ''}</button>`).join('')}${more ? `<button type="button" class="link-more" data-link-more="${esc(f.id)}">Show the others (${more})</button>` : ''}${said}`;
+    return `<h3>Relevant to…</h3>${qs.map((q) => linkButton('link-q', f.id, q.id, esc(qLabel(q)), `${esc(qLabel(q))} ✓`, `${esc(qLabel(q))} ✗ tried`)).join('')}${more ? `<button type="button" class="link-more" data-link-more="${esc(f.id)}">Show the others (${more})</button>` : ''}${said}`;
 }
 /** What the player has shown about a question: its observations, their sources, and any notes. */
 function descriptionHtml(q) {
     if (!observations) return '';
     const mine = observed.filled.filter((x) => x.obs.q === q.id);
-    const notes = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
+    const noted = observed.notes.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter(Boolean);
+    // With checked links a link that fills nothing yet is still evidence: it waits for something else.
+    const waiting = checkedLinks() ? noted.filter((e) => bearsOn(e.id, q.id)) : [], notes = noted.filter((e) => !waiting.includes(e));
     const from = (x) => x.entries.map((e) => (e.solved ? 'solved' : paraTag(givenAt(e)))).join(', ');
-    const begun = observed.partial.filter((x) => x.obs.q === q.id).map((x) => `<li class="muted">Part of something not yet complete: ${x.entries.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
+    const begun = [...observed.partial.filter((x) => x.obs.q === q.id).map((x) => x.entries), ...waiting.filter((e) => !observed.partial.some((x) => x.obs.q === q.id && x.entries.includes(e))).map((e) => [e])]
+        .map((es) => `<li class="muted">Part of something not yet complete: ${es.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
     const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map((v) => esc(entityById.has(v) ? nameOf(v) : v)).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
@@ -879,12 +912,23 @@ function descriptionHtml(q) {
     const restsHtml = rests.length && !isSolved(q.id) ? `<div class="small rests-on">It rests on ${rests.length === 1 ? 'another question' : `${rests.length} other questions`}: <ul>${rests.map((r) => `<li>${qListed(r) ? `<a class="link" data-q="${esc(r.id)}">${esc(qLabel(r))}</a>` : 'a question not raised yet'}${isSolved(r.id) ? ' <span class="good">solved</span>' : ' <span class="muted">not solved yet</span>'}</li>`).join('')}</ul></div>` : '';
     const status = isSolved(q.id) ? `<p class="small good solved-note">Solved.${EARNED ? ` <span class="muted">${broughtHtml(q.id, false)}</span>` : ''}</p>` : judgement(q) === 'wrong' ? '<p class="small bad not-this">Not this answer.</p>'
         : !givenAway(q) && evidenceOf(q).any ? `<p class="small muted unsolved-note">Not solved yet: ${unsolvedWhy(q)}.</p>` : '';
-    const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>` : '';
+    const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>${checkedLinks() ? ` <span class="small muted untried-count" data-untried="${esc(q.id)}"></span>` : ''}` : '';
     return `<div class="desc">${status}${restsHtml}${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
-const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span><button type="button" data-linking-done>Done</button></div>` : '');
+const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span>${checkedLinks() ? `<label class="link-only-new" title="Hide the entries already linked to this question or tried for it"><input type="checkbox" data-link-only-new${linkOnlyNew ? ' checked' : ''}> only what is not tried yet</label>` : ''}<button type="button" data-linking-done>Done</button></div>` : '');
 
 let shownPara = null;
+/** After a drawing: how many of the timeline's entries are neither linked to each open question nor tried for it. */
+function untriedCounts() {
+    document.body.classList.toggle('link-only-new', !!linkingQ && linkOnlyNew && checkedLinks());
+    const spans = [...document.querySelectorAll('[data-untried]')];
+    if (!spans.length) return;
+    const ids = [...new Set([...document.querySelectorAll('#timeline [data-fact]')].map((e) => e.dataset.fact))];
+    for (const s of spans) {
+        const q = s.dataset.untried, left = ids.filter((id) => !isLinked(id, q) && !isTried(id, q)).length;
+        s.textContent = `not tried yet: ${left} of ${ids.length} entries`;
+    }
+}
 function render() {
     mountLayout();
     applyTheme();
@@ -908,6 +952,7 @@ function render() {
     const routeNow = reasoned.find((f) => f.attr === 'route');
     if (routeNow) for (const l of state.links) if (l.entry.startsWith('r:r:') && l.entry !== routeNow.id) l.entry = routeNow.id;
     // A telling can be linked like any entry: that it was said stands, whatever becomes of what it carried.
+    sweepLinks();
     if (observations) observed = fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted, partlyDoubted, solved: isSolved });
     syncQuestions();
     judge();
@@ -955,6 +1000,7 @@ function render() {
     document.getElementById('depth-label').hidden = state.view !== 'place';
     document.querySelector('.world-main').classList.toggle('wide', state.view !== 'list');
     document.getElementById('timeline').innerHTML = linkingBar() + (state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing));
+    untriedCounts();
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
     renderTabs({ cards: cards.count, questions: listedQuestions().length, clashes: clashes.length + strains.filter((s) => !state.held.includes(s.id)).length });
     renderLapseNews();
@@ -1920,7 +1966,7 @@ document.addEventListener('keydown', (e) => {
 document.getElementById('start-over').addEventListener('click', () => {
     if (!confirm('Start over from the first paragraph? Your trust, marks and reasoning on this device are cleared (layout, theme and the hint wait are kept). This cannot be undone.')) return;
     try {
-        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
+        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate', 'linkRule'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
         localStorage.setItem(PLAYER_STORE, JSON.stringify(keep));
         localStorage.removeItem(AUTOPLAY_STORE);
     } catch { /* nothing saved to clear */ }
@@ -1934,7 +1980,7 @@ document.addEventListener('toggle', (e) => {
 document.getElementById('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     const h = JSON.parse(state.history.at(-1));
-    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); state.links = h.links ?? []; } else state.trust = h;
+    if (h.trust) { state.trust = h.trust; state.marks = h.marks ?? {}; state.reasoning = h.reasoning ?? []; state.held = h.held ?? []; state.room = h.room ?? freshRoom(); /* a move only tried (the hints, the checks) is taken back whole */ const fixed = checkedLinks() && !trying ? state.links.filter((l) => bearsOn(l.entry, l.q)) : []; state.links = [...(h.links ?? []), ...fixed.filter((l) => !(h.links ?? []).some((x) => x.entry === l.entry && x.q === l.q))]; } else state.trust = h;
     // Solved is for good: Undo does not take it back, nor the marks it locked.
     for (const [qid, sv] of Object.entries(state.solved)) state.marks = { ...state.marks, [qid]: { ...(state.marks[qid] ?? {}), ...sv.marks } };
     state.history = state.history.slice(0, -1);
@@ -1953,6 +1999,7 @@ document.addEventListener('click', (e) => {
         const st = e.target.closest('[data-linking]');
         if (st) { linkingQ = linkingQ === st.dataset.linking ? null : st.dataset.linking; if (linkingQ) reveal('timeline', panelFrom(e)); render(); return; }
         if (e.target.closest('[data-linking-done]')) { linkingQ = null; render(); return; }
+        if (e.target.closest('[data-link-only-new]')) { linkOnlyNew = e.target.closest('[data-link-only-new]').checked; render(); return; }
     }
     const tb = e.target.closest('[data-tab]');
     if (tb) { chooseTab(panelFrom(e) ?? 0, tb.dataset.tab); backs = []; save(); render(); return; }
@@ -2224,6 +2271,8 @@ if (EARNED && document.getElementById('seed-row')) {
     row.innerHTML = `Seed of this game: <b id="seed-value">${state.seed}</b> <a class="settings-link" href="${esc(pageUrl(`seed=${state.seed}`))}" title="The address of this game's placement of the papers: a new game with it plays the same">replay it</a>`;
 }
 document.getElementById('gate-rule').addEventListener('change', (e) => { state.gate = e.target.value; save(); render(); });
+document.getElementById('link-rule').value = checkedLinks() ? 'checked' : 'free';
+document.getElementById('link-rule').addEventListener('change', (e) => { state.linkRule = e.target.value; save(); render(); });
 if (AUTOPLAY === null) import('./world-hints.js').then((m) => m.makeHints({ store: STORE, api: hintApi }));
 else document.getElementById('hint').hidden = true;
 if (AUTOPLAY !== null) { save(); import('./world-autoplay.js').then((m) => m.start({ store: STORE, fast: AUTOPLAY === 'fast' })); }
