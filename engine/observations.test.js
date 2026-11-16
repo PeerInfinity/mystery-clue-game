@@ -152,6 +152,16 @@ test('bears: an entry is evidence for a question whatever else its observation w
     assert.equal(bears(obs, 'q.b', { id: 'f.three' }), true);        // waits for a reading circled
     assert.equal(bears(obs, 'q.b', { id: 'f.one' }), false);         // evidence for another question only
     assert.equal(bears(obs, 'q.a', { id: 'f.other' }), false);
+    // A premise of a reasoning move an observation comes from: evidence that waits for the move.
+    const { waits } = await import('./observations.js');
+    const moved = [{ id: 'o5', q: 'q.c', from: [{ reasoned: 'changed', premises: ['f.shut', 'f.open'] }], says: 'it was opened', essential: true },
+        { id: 'o6', q: 'q.c', from: [{ reasoned: 'missing', of: 'f.rule', at: 't.one' }], says: 'no round at one', essential: true }];
+    assert.equal(bears(moved, 'q.c', { id: 'f.shut' }), true);
+    assert.equal(bears(moved, 'q.c', { id: 'f.rule' }), true);
+    assert.equal(bears(moved, 'q.c', { id: 'f.round_two', series: 'f.rule' }), true);
+    assert.equal(bears(moved, 'q.c', { id: 'f.elsewhere' }), false);
+    assert.equal(waits(moved, 'q.c', { id: 'f.shut' }, []), true);
+    assert.equal(waits(moved, 'q.c', { id: 'f.shut' }, [{ obs: moved[0] }]), false);
     assert.deepEqual(onPage(obs, 'q.a', (id) => id !== 'f.two'), { all: 2, here: 1 });
     assert.deepEqual(onPage(obs, 'q.b', () => false), { all: 1, here: 1 });   // "question solved" counts as here
 });

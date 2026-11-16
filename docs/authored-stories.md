@@ -1008,6 +1008,30 @@ script that found each fact's paragraph from its quote; the data files are the s
     ruling is that contradictions are its feedback. Circles too: "Not this answer" already marks a tried
     answer once the evidence is in. The reasoning moves and the room need nothing: the page offers only a move
     that holds and refuses a mark nothing supports.
+96. **"Left to try" (2026-11-16): one place that counts every kind of move not yet made.** The user's idea, with
+    the question of where it goes in three columns: a box above the questions (so it is in the same place in
+    every layout), one line of counts when shut, lists when open. Reading: the story and each paper not read to
+    its end. Reasoning moves: every move the page would take now and that is not made, taken from the buttons
+    of each entry's own detail so the two cannot disagree (a move offered from either of two entries is one
+    move); the room's moves are not in it. Links: for each open question the entries neither linked nor tried,
+    as counts (the list is the timeline in linking mode, which a click opens). Answers: the open questions with
+    nothing circled. Trust is left out: it never counts down. A setting, on by default. Counting the moves for
+    every entry at each drawing costs a few milliseconds on the long case (a redraw of some 20 ms with a
+    hundred entries on the timeline). It came from the third Haiku run, stuck on a question whose last piece of
+    evidence was "It changed" from one pair of entries when it had made the move from another.
+97. **The third Haiku run (checked links; 2026-11-16): 8 of 25 questions in 600 turns ($2.26), stopped 24 turns
+    short of the stuck rule.** Not a clean comparison with the second run (12 of 25): each drew its own seed, so
+    the papers came in another order. Wasted moves fell while it worked (4 in a hundred turns at best), and its
+    notes listed what it had tried. It stuck for 176 turns on how the fire-setter came in, three of four pieces
+    in place: the fourth is "It changed" between the door found fast at twelve and the bolt drawn back, and it
+    had made the move from the door locked at six and the bolt drawn back, whose entry was refused. Two things
+    followed. A fault of the build: an entry of the reader's own reasoning was never marked as tried (the
+    exemption meant for routes took every reasoned entry), so the same refused link could be tried without end;
+    mended. And a ruling of the user's: a premise of a reasoning move that an observation comes from is evidence
+    that waits, like a lie not yet disbelieved, so linking the bolt drawn back is kept and shown as "part of
+    something not yet complete" where it was refused as showing nothing; once the move is made and its entry
+    linked, the premise's link is listed no longer. Not changed: the observation takes the move from one pair of
+    entries only (an observation cannot say "this move or that one").
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

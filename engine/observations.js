@@ -65,14 +65,21 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
 /**
  * Whether an entry is evidence for a question at all: it is one of the entries some observation of `q` comes from,
  * whatever else that observation waits for (the rest of its entries, the statement disbelieved, a reading circled,
- * the entry trusted enough to be on the timeline). What a checked link is judged by: such a link is kept, any other
+ * the entry trusted enough to be on the timeline, a reasoning move made from it). What a checked link is judged by: such a link is kept, any other
  * is refused.
  */
+// A premise of a reasoning move an observation comes from is evidence too, waiting for the move: the two states of
+// "It changed", the crossing of "Something got through", the rule of "Something is missing here" and the entries of
+// its record (`e.series`).
 const couldMatch = (from, e) => (typeof from === 'string' ? e.id === from
     : from.solved ? false
     : from.doubted ? e.id === from.doubted
+    : from.reasoned === 'missing' ? matches(from, e, {}) || e.id === from.of || e.series === from.of
+    : from.reasoned ? matches(from, e, {}) || (from.premises ?? []).includes(e.id)
     : matches(from, e, {}));
 export const bears = (observations, q, e) => observations.some((o) => o.q === q && o.from.some((f) => couldMatch(f, e)));
+/** Whether something that entry is evidence for is still not shown (`filled`: what `fill` gave): the link waits. */
+export const waits = (observations, q, e, filled) => observations.some((o) => o.q === q && o.from.some((f) => couldMatch(f, e)) && !filled.some((x) => x.obs === o));
 
 /**
  * Whether a question's required evidence is on the page yet, whatever is linked: `{all, here}`, the essential

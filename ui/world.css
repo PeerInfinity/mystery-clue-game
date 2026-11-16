@@ -81,6 +81,9 @@ p.bad { color: var(--bad); } p.good { color: var(--good); }
 .q-box summary { cursor: pointer; font-weight: 600; }
 .q-box ol { margin: 6px 0; padding-left: 28px; max-height: 45vh; overflow: auto; }
 .q-box li { margin: 6px 0; }
+.left-box h4 { margin: 8px 0 2px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.left-box ul { margin: 2px 0; padding-left: 18px; max-height: 24vh; overflow: auto; }
+.left-box li { margin: 3px 0; }
 .q-box li.sel { outline: 1px solid var(--accent); border-radius: 4px; padding: 2px 4px; }
 .q-box li.clash > a { color: var(--bad); }
 .q-grip { cursor: grab; touch-action: none; user-select: none; opacity: .55; padding: 2px 5px 2px 0; }

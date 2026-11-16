@@ -98,6 +98,17 @@ await click('#detail [data-link-entry="f.walls"]');
 ok(/Your notes/.test(await text('#q-box')), 'and an unknown link stays as a note', await text('#q-box'));
 await set('#link-rule', 'checked');
 ok(!/Your notes/.test(await text('#q-box')) && await count('#detail [data-link-entry="f.walls"].tried') === 1, 'checked again, the note becomes a tried mark', await text('#q-box'));
+// "Left to try", above the questions: its counts, a question's links from it, and its setting.
+ok(/Left to try: \d+ papers? to read · \d+ moves? · \d+ links · \d+ answers?/.test(await text('#left-box summary')), 'the box of what is left to try counts each kind', await text('#left-box summary'));
+ok(/\d+ of \d+ entries/.test(await text('#left-box [data-untried-n]')), 'with the links not tried for each open question');
+await click('#left-box [data-left-linking]');
+ok(/Linking to/.test(await text('#timeline')) && await ev(`document.querySelector('[data-link-only-new]').checked`), 'a question there opens its linking, showing only what is not tried yet');
+await click('[data-link-only-new]');
+await click('[data-linking-done]');
+await set('#left-list', 'off');
+ok(await count('#left-box') === 0, 'the setting takes the box away');
+await set('#left-list', 'on');
+ok(await count('#left-box') === 1, 'and brings it back');
 // From the question (B), and a route as an entry.
 await click('[data-linking="q.what_came"]');
 ok(/Linking to/.test(await text('#timeline')), 'the linking mode shows on the timeline');
