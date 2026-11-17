@@ -121,6 +121,7 @@ export function caseLogic({ questions, observations, facts, files, delivery }) {
         const own = new Set([paperOf(q.raised)].filter(Boolean)), requires = [];
         for (const o of mine) for (const e of o.from) {
             if (typeof e === 'string') factPapers(e).forEach((p) => own.add(p));
+            else if (e.any) e.any.forEach((x) => factPapers(x).forEach((p) => own.add(p))); // any one would do: asking for the papers of all is the safe side
             else if (e.solved) { if (!requires.includes(e.solved)) requires.push(e.solved); }
             else if (e.doubted) factPapers(e.doubted).forEach((p) => own.add(p));
             else if (e.reasoned === 'missing') factPapers(e.of).forEach((p) => own.add(p));

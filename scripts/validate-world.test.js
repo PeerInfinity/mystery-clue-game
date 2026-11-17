@@ -34,7 +34,7 @@ for (const dir of cases) {
             const frame = new Map((s.frame ?? []).map((f) => [f.id, f]));
             for (const set of q.needs) for (const id of set) assert.ok(clues.has(id) || frame.has(id), `${q.id}: no clue ${id}`);
             const needed = new Set(q.needs.flat().flatMap((id) => { const c = clues.get(id) ?? frame.get(id); return [...c.facts, ...(c.chain ?? [])]; }));
-            for (const o of observations.filter((x) => x.q === q.id && x.essential)) for (const f of o.from.map((x) => x.doubted ?? x).filter((x) => typeof x === 'string')) assert.ok(needed.has(f), `${o.id}: ${f} is in no clue ${q.id} needs`);
+            for (const o of observations.filter((x) => x.q === q.id && x.essential)) for (const f of o.from.flatMap((x) => x.any ?? [x.doubted ?? x]).filter((x) => typeof x === 'string')) assert.ok(needed.has(f), `${o.id}: ${f} is in no clue ${q.id} needs`);
         }
     });
     // Papers earned by solving questions: the logic the page derives from the world model (engine/delivery.js) is the

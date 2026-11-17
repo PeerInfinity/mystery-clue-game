@@ -165,3 +165,17 @@ test('bears: an entry is evidence for a question whatever else its observation w
     assert.deepEqual(onPage(obs, 'q.a', (id) => id !== 'f.two'), { all: 2, here: 1 });
     assert.deepEqual(onPage(obs, 'q.b', () => false), { all: 1, here: 1 });   // "question solved" counts as here
 });
+
+test('any one of several entries alike fills an observation, and each of them is evidence', async () => {
+    const { bears, waits, onPage } = await import('./observations.js');
+    const obs = [{ id: 'o1', q: 'q.a', from: [{ any: ['f.p1', 'f.p2', 'f.p3'] }], says: 'the casks went out', essential: true }];
+    const known = [{ id: 'f.p1' }, { id: 'f.p2' }, { id: 'f.p3' }, { id: 'f.x' }];
+    for (const id of ['f.p1', 'f.p2', 'f.p3']) assert.deepEqual(fill(obs, [{ entry: id, q: 'q.a' }], known).filled.map((x) => x.obs.id), ['o1'], id);
+    assert.deepEqual(fill(obs, [{ entry: 'f.x', q: 'q.a' }], known).filled, []);
+    assert.equal(bears(obs, 'q.a', { id: 'f.p3' }), true);
+    assert.equal(bears(obs, 'q.a', { id: 'f.x' }), false);
+    const r = fill(obs, [{ entry: 'f.p2', q: 'q.a' }], known);
+    assert.equal(waits(obs, 'q.a', { id: 'f.p1' }, r.filled), false);   // shown already by another of them
+    assert.deepEqual(onPage(obs, 'q.a', (id) => id === 'f.p3'), { all: 1, here: 1 });
+    assert.deepEqual(onPage(obs, 'q.a', () => false), { all: 1, here: 0 });
+});

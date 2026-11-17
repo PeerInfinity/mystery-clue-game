@@ -1083,6 +1083,21 @@ script that found each fact's paragraph from its quote; the data files are the s
     them; the solver could not). And the page, while linking, marks the line of each question the linked
     question rests on, and of its circled answer: "counted ✓ (solved)" or "counts once this question is solved".
 
+101. **The sixth Haiku run (2026-11-17; the same seed, a $6 limit): 13 of 25 questions, stuck for 200 turns at
+    turn 605, $3.20. The wall was the case's, not the solver's.** "Who let the brandy out of bond?" stood at 3 of
+    4. The piece missing was the gate book's entry of the cart going up Mill Lane on 24 September. The gate book
+    has three such entries (3 and 24 September, 8 October), word for word alike on the timeline, and the
+    observation named only the second. The solver linked the first, the page refused it and marked it tried, and
+    it concluded, reasonably, that the Mill Lane entries do not bear on the question. The same fault had cost it
+    about a hundred turns on "Where did Marsh's cart take the casks?", which named only the first entry (it tried
+    the other two first). With free links this was a nuisance; with checked links a refusal says "this shows
+    nothing", which was false. At the user's word an entry of an observation can be `{any: [facts]}`: any one of
+    them fills it and each is evidence (a checked link of any is kept). In this case the three cart entries are
+    alike for both questions, and the three passes for the brandy question; the pass of 3 September stays the
+    only one for the initials, where its date is the point. Of the last changes: the notes show the solver
+    knowing which questions were solved and guessing that a piece might rest on an unsolved question; it opened
+    "Left to try" twice, early, for the papers, and not while stuck; it sent no reports.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

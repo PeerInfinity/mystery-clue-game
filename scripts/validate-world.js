@@ -384,7 +384,7 @@ for (const f of facts) {
 for (const o of observationList) {
     if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);
     if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
-    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.solved ? !qById.has(f.solved) || f.solved === o.q : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr))
+    for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.any ? !Array.isArray(f.any) || f.any.length < 2 || f.any.some((x) => !factById.has(x)) : f.solved ? !qById.has(f.solved) || f.solved === o.q : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr))
         : f.reasoned === 'missing' ? !factById.get(f.of)?.series?.at?.includes(f.at)
         : f.reasoned ? !REASONED_MOVES[f.reasoned] || !Array.isArray(f.premises) || f.premises.length !== (f.reasoned === 'changed' ? 2 : 1) || f.premises.some((x) => !factById.has(x))
         : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);

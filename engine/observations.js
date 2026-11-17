@@ -9,13 +9,16 @@
 // so that an author can make that move necessary; or `{reasoned: "missing", of: rule, at: time}` for "Something is
 // missing here" (a gap in the rule's series at that time), named by its rule and its time, since what else it rests
 // on (the record) is what the timeline holds. Or `{solved: q}`: question q is solved (`ctx.solved(q)`), a larger
-// question's evidence that fills by itself, with no link for the player to make.
+// question's evidence that fills by itself, with no link for the player to make. Or `{any: [ids]}`: any one of those
+// facts, for entries that show the same thing equally (three passes alike, three entries of one book): the link of
+// any of them fills it, and the others are evidence too (a checked link of one is kept, not refused).
 
 /** The moves whose entries an observation can name, by the name it uses: the move's code in `reasoned.move`. */
 export const REASONED_MOVES = { changed: 'a', got_through: 'g', missing: 'm' };
 const samePremises = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
 
 const matches = (from, e, ctx) => (typeof from === 'string' ? e.id === from
+    : from.any ? from.any.includes(e.id)
     : from.solved ? false
     : from.doubted ? e.id === from.doubted && !!ctx.doubted?.(e.id)
     : from.reasoned === 'missing' ? e.reasoned?.move === 'm' && e.rule === from.of && e.gap === from.at
@@ -72,6 +75,7 @@ export function fill(observations, links, known, marks = {}, ctx = {}) {
 // "It changed", the crossing of "Something got through", the rule of "Something is missing here" and the entries of
 // its record (`e.series`).
 const couldMatch = (from, e) => (typeof from === 'string' ? e.id === from
+    : from.any ? from.any.includes(e.id)
     : from.solved ? false
     : from.doubted ? e.id === from.doubted
     : from.reasoned === 'missing' ? matches(from, e, {}) || e.id === from.of || e.series === from.of
@@ -89,7 +93,7 @@ export const waits = (observations, q, e, filled) => observations.some((o) => o.
  */
 export function onPage(observations, q, has) {
     const all = observations.filter((o) => o.q === q && o.essential);
-    const there = (f) => (typeof f === 'string' ? has(f) : f.solved ? true : f.doubted ? has(f.doubted) : f.reasoned && f.premises ? f.premises.every(has) : true);
+    const there = (f) => (typeof f === 'string' ? has(f) : f.any ? f.any.some(has) : f.solved ? true : f.doubted ? has(f.doubted) : f.reasoned && f.premises ? f.premises.every(has) : true);
     return { all: all.length, here: all.filter((o) => o.from.every(there)).length };
 }
 
