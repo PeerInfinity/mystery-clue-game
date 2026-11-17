@@ -52,7 +52,7 @@ const standing = (st) => {
         `  the last turn that read something new or solved a question: ${st.progressTurn} (${st.turn - st.progressTurn} turns ago${STUCK ? `; the run ends at ${STUCK}` : ''})`,
         `  the story answered: ${st.answered.length ? st.answered.map((a) => `${a.text}${a.bad ? ' (WRONG)' : ''}`).join(' | ') : 'nothing yet'}`,
         `  the solver's notes: ${st.notes || '(none)'}`,
-        '  its last actions:', ...st.history.slice(-8).map((h) => `    - ${h}`),
+        '  its last actions:', ...st.history.slice(-8).map((h) => `    - ${String(h).split('  [why: ')[0]}`),
         `  its reports: ${st.reports?.length ? '' : 'none'}`, ...(st.reports ?? []).map((r) => `    - turn ${r.turn} (story paragraph ${r.para}): ${r.report}`)].join('\n');
 };
 if (process.env.STATUS) { console.log(standing(kept)); process.exit(0); }
@@ -126,7 +126,7 @@ const guide = fs.readFileSync(path.join(ROOT, 'guide.html'), 'utf8')
 const SYSTEM = `You are playing a detective game in a web page, as its reader. A mystery story is told a paragraph at a time; you build a timeline of what you learn, decide whom to trust, mark answers to the story's questions (circle the one you believe, cross out the ones you rule out), and link the evidence that shows each answer. Before the story gives an answer away, a gate stops you until you have linked the evidence for it and circled an answer. In a longer story, papers come to you as you solve its questions (the guide says how), and the story's ending is held until its last question is solved. In such a story solve the smaller questions first: the last question rests on them, and most of its evidence is in papers that only come as they are solved. A question is solved only when the page says "Solved"; a circled answer alone is not. Your aim is to reach the end of the story with every question answered rightly, by reasoning from the evidence; guessing is not the point.
 
 You see the page as text, and a numbered list of the controls you may use. Each turn you do one thing. You have no tools: do not write tool calls or XML. Reply with only a JSON object, no other text:
-{"thought": "<one or two sentences: what you are doing and why>", "notes": "<your running notes, which replace the previous ones and are all you remember besides your last actions: suspects, evidence, what is left to do; under 150 words>", "action": {"click": <number>}}
+{"thought": "<one or two sentences: what you are doing and why>", "notes": "<your running notes, which replace the previous ones and are all you remember besides your last actions and the thought you had for each: suspects, evidence, what is left to do; under 150 words>", "action": {"click": <number>}}
 or, for a control listed as "select", {"select": <number>, "value": "<one of its options>"}.
 If you notice something wrong, you may add one more field to that object: "report": "<what is wrong and where, in a sentence or two>". Use it for a fault in the story's logic (two things that cannot both be true and are not meant as a lie, a question that cannot be answered from what you have, an answer you were held to that the evidence does not show), a fault in the page (a control that does not do what it says, text that is unclear or misleading), or anything else the game's makers should know. A report changes nothing in the game and is not shown to you again, so make each one once, and only when you are fairly sure; being unsure of an answer is not a fault.
 Click a timeline entry to open it in the Detail panel; the Detail panel then offers what you can do with it (trust, "Relevant to…" links, moves). "Read on ▶" reads the next paragraph.
@@ -167,7 +167,17 @@ const parse = (text) => {
 
 // --- The loop.
 const mainLen = fs.readFileSync(path.join(ROOT, CASE, 'story.txt'), 'utf8').split(/\n\s*\n/).filter((p) => p.trim()).length - 1;
+// What the solver remembers besides its notes: its last HISTORY actions, each with how it went and the thought it
+// had for it (so that it sees why it did a thing, and that it did not work), and a count of any action it has
+// repeated (a run of 2026-11-16 pressed one button 117 times in 146 turns with twelve actions and no thoughts kept).
+const HISTORY = +(process.env.HISTORY ?? 30), REPEATS = 4;
 const history = kept?.history ?? [];
+const actOf = (h) => String(h).split(' → ')[0];
+const repeated = () => {
+    const n = new Map();
+    for (const h of history.slice(-HISTORY)) n.set(actOf(h), (n.get(actOf(h)) ?? 0) + 1);
+    return [...n].filter(([a, k]) => k >= REPEATS && !/Read on/.test(a)).sort((x, y) => y[1] - x[1]).map(([a, k]) => `- ${k} times: ${a}`);
+};
 const answered = kept?.answered ?? [];
 const reports = kept?.reports ?? [];
 let notes = kept?.notes ?? '', cost = kept?.cost ?? 0, model = kept?.model ?? MODEL, turn = kept?.turn ?? 0, end = `the ${MAX} turns of this part ran out`;
@@ -179,7 +189,7 @@ let best = kept ? measure(kept.save) : 0;
 const keep = async (turns) => {
     const sv = await save();
     if (measure(sv) > best) { best = measure(sv); progressTurn = turns; }
-    fs.writeFileSync(path.join(RUN, 'state.json'), J({ case: CASE, model, turn: turns, cost, notes, history: history.slice(-12), answered, reports, progressTurn, mainLen, done, end: done ? end : null, save: sv }) + '\n');
+    fs.writeFileSync(path.join(RUN, 'state.json'), J({ case: CASE, model, turn: turns, cost, notes, history: history.slice(-HISTORY), answered, reports, progressTurn, mainLen, done, end: done ? end : null, save: sv }) + '\n');
 };
 if (kept) console.log(`going on with ${path.relative(ROOT, RUN)} from turn ${turn} ($${cost.toFixed(3)} so far)`);
 fs.writeFileSync(path.join(RUN, 'system.md'), SYSTEM);
@@ -189,7 +199,8 @@ for (const first = turn; turn < first + MAX; turn++) {
     const v = await ev(VIEW);
     for (const a of v.answers) if (!answered.some((x) => x.text === a.text)) { answered.push({ ...a, turn }); console.log(`turn ${turn}: the story answered: ${a.text}${a.bad ? '  (WRONG)' : ''}`); }
     if (((await save()).para ?? 1) >= mainLen) { end = 'reached the end of the story'; done = true; break; }
-    const prompt = `Your last actions (oldest first):\n${history.slice(-12).map((h) => `- ${h}`).join('\n') || '(none yet)'}\n\nYour notes:\n${notes || '(none yet)'}\n\n# The page now\n\n${v.text}\n\n# Controls\n${v.controls}\n\nYour move (one JSON object).`;
+    const again = repeated();
+    const prompt = `Your last actions (oldest first), each with how it went and why you did it:\n${history.slice(-HISTORY).map((h) => `- ${h}`).join('\n') || '(none yet)'}${again.length ? `\n\nRepeated in your last ${Math.min(HISTORY, history.length)} actions (if one of these has not got you further, do something else):\n${again.join('\n')}` : ''}\n\nYour notes:\n${notes || '(none yet)'}\n\n# The page now\n\n${v.text}\n\n# Controls\n${v.controls}\n\nYour move (one JSON object).`;
     if (process.env.DRY) { fs.writeFileSync(path.join(RUN, 'dry.md'), prompt); console.log(`DRY: the first prompt is ${prompt.length} characters, the system prompt ${SYSTEM.length}; written to ${path.relative(ROOT, RUN)}/dry.md`); end = 'dry run'; break; }
     let reply, a;
     try { reply = await call(prompt); } catch (e) { console.log(`turn ${turn}: ${e.message}`); end = `call failed: ${e.message}`; break; }
@@ -211,7 +222,7 @@ for (const first = turn; turn < first + MAX; turn++) {
     const note = await ev(`document.querySelector('#detail .note')?.innerText ?? ''`);
     const what = a.action.select != null ? `select ${label} = ${a.action.value}` : `click ${label}`;
     const result = !did ? 'not possible' : before === after ? 'nothing changed' : 'done';
-    history.push(`${what} → ${result}${note ? ` (${note})` : ''}`);
+    history.push(`${what} → ${result}${note ? ` (${note})` : ''}${a.thought ? `  [why: ${String(a.thought).replace(/\s+/g, ' ').slice(0, 200)}]` : ''}`);
     console.log(`turn ${turn}: ${what} → ${result}  | ${String(a.thought ?? '').slice(0, 120)}`);
     if (errors.length) console.log(`  page error: ${errors.splice(0).join(' | ')}`);
     await keep(turn + 1);
