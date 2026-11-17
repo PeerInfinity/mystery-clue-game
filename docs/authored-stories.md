@@ -1032,6 +1032,16 @@ script that found each fact's paragraph from its quote; the data files are the s
     something not yet complete" where it was refused as showing nothing; once the move is made and its entry
     linked, the premise's link is listed no longer. Not changed: the observation takes the move from one pair of
     entries only (an observation cannot say "this move or that one").
+98. **The fourth Haiku run (2026-11-16), on the second run's seed with all of the above: 13 of 25 questions,
+    stuck after 646 turns ($2.72).** The same papers in the same order as the second run (12 of 25, $3.00 at 667
+    turns). It passed both earlier sticking points: how the fire-setter came in (it went down the watch book's
+    "door fast" entries, two refused and marked, the third kept) and where Crouch was. It stuck on who let the
+    brandy out of bond, three of four pieces in place, sure that the fourth was an entry of its own reasoning
+    when it is the cart's entry in the gate-keeper's book for the same night as the pass it had linked. In its
+    last 146 turns it pressed "Link observations…" and "Linking…" 117 times: one button that turns the linking
+    on and off, so that every press changes the page and nothing tells the solver it is going nowhere. It had
+    tried six entries for that question of about a hundred, and never went down what was left: the tried marks
+    help a solver that works through a list, and Haiku does not unless its own idea of the answer runs out.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
