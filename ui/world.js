@@ -843,12 +843,26 @@ const isLinked = (entry, q) => state.links.some((l) => l.entry === entry && l.q 
 // marked as tried for good (`state.tried`: {question: [entries]}; Undo does not clear it). A route is not marked: it
 // is the player's own, and changes as it is built. Off: every link is kept, as evidence or as a note, and can be removed.
 const checkedLinks = () => state.linkRule !== 'free';
-const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && bears(observations, q, e); };
+// A statement that is evidence once disbelieved (`{doubted: telling}`) is evidence through what it carries too: a
+// link to any fact it told (false or true: to keep only the false would say which is the lie) is kept, and waits.
+const carriedBy = (t) => {
+    const f = factById.get(t);
+    if (!f || f.attr !== 'tells') return [];
+    const told = new Set(list(f.value));
+    return data.accounts.filter((a) => told.has(a.id) || [...prov.ancestors(a.id)].some((p) => told.has(p))).flatMap((a) => list(a.facts));
+};
+const viaStatement = (entry, q) => observations.filter((o) => o.q === q && o.from.some((f) => f?.doubted && carriedBy(f.doubted).includes(entry)));
+const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(observations, q, e) || viaStatement(entry, q).length > 0); };
+/** A kept link that still waits: something it is evidence for is not shown yet. */
+const waitsOn = (e, q) => waits(observations, q, e, observed.filled) || viaStatement(e.id, q).some((o) => !observed.filled.some((x) => x.obs === o));
 const isTried = (entry, q) => checkedLinks() && (state.tried[q] ?? []).includes(entry);
 const markTried = (entry, q) => { if (!entry.startsWith('r:r:') && !(state.tried[q] ?? []).includes(entry)) state.tried = { ...state.tried, [q]: [...(state.tried[q] ?? []), entry] }; };
 /** Links from before the rule, or from a game played with it off: one that is no evidence becomes a tried mark. */
 function sweepLinks() {
     if (!observations || !checkedLinks()) return;
+    // A tried mark on what is evidence after all (the case's data or the rule changed since it was made) is dropped.
+    const wrong = Object.entries(state.tried).filter(([q, es]) => qById.has(q) && es.some((id) => bearsOn(id, q)));
+    if (wrong.length) { state.tried = { ...state.tried, ...Object.fromEntries(wrong.map(([q, es]) => [q, es.filter((id) => !bearsOn(id, q))])) }; save(); }
     const gone = state.links.filter((l) => qById.has(l.q) && !l.entry.startsWith('r:r:') && factOf(l.entry) && !bearsOn(l.entry, l.q));
     if (!gone.length) return;
     for (const l of gone) markTried(l.entry, l.q);
@@ -887,7 +901,7 @@ function linkHtml(f) {
         const shows = observed.filled.filter((x) => x.obs.q === q.id && has(x));
         if (shows.length) return shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>. ${name}</p>`).join('');
         if (observed.partial.some((x) => x.obs.q === q.id && has(x))) return `<p class="small">Part of something not yet complete: with something else, linked too, it would show more. ${name}</p>`;
-        if (checkedLinks() && bearsOn(f.id, q.id)) return waits(observations, q.id, f, observed.filled) ? `<p class="small">Part of something not yet complete: it is evidence for this, and as the timeline stands something else is still needed before it shows it. ${name}</p>`
+        if (checkedLinks() && bearsOn(f.id, q.id)) return waitsOn(f, q.id) ? `<p class="small">Part of something not yet complete: it is evidence for this, and as the timeline stands something else is still needed before it shows it. ${name}</p>`
             : `<p class="small muted">Part of what you have shown about this. ${name}</p>`;
         return `<p class="small muted">Kept as a note: as the timeline stands, it shows nothing about this on its own. ${name}</p>`;
     })].join('');
@@ -901,7 +915,7 @@ function descriptionHtml(q) {
     // With checked links a link that fills nothing yet is still evidence: it waits for something else.
     // (one whose evidence is all shown by now, a premise of a move since made, is listed no longer).
     const kept = checkedLinks() ? noted.filter((e) => bearsOn(e.id, q.id)) : [], notes = noted.filter((e) => !kept.includes(e));
-    const waiting = kept.filter((e) => waits(observations, q.id, e, observed.filled));
+    const waiting = kept.filter((e) => waitsOn(e, q.id));
     const from = (x) => x.entries.map((e) => (e.solved ? 'solved' : paraTag(givenAt(e)))).join(', ');
     const begun = [...observed.partial.filter((x) => x.obs.q === q.id).map((x) => x.entries), ...waiting.filter((e) => !observed.partial.some((x) => x.obs.q === q.id && x.entries.includes(e))).map((e) => [e])]
         .map((es) => `<li class="muted">Part of something not yet complete: ${es.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
@@ -1481,8 +1495,8 @@ function leftHtml() {
     const linkQs = observations && checkedLinks() ? open.filter((q) => observations.some((o) => o.q === q.id)) : [];
     const n = (k, one, many = `${one}s`) => `${k} ${k === 1 ? one : many}`;
     const part = (title, items, none) => `<h4>${title}</h4>${items.length ? `<ul>${items.map((x) => `<li>${x}</li>`).join('')}</ul>` : `<p class="small muted">${none}</p>`}`;
-    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${n(papers.length, 'paper')} to read · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}</summary>
-      ${part('Reading', papers.map((p) => `<a class="link" data-story="${esc(p.id)}">${esc(p.title)}</a> <span class="small muted">${p.at} of ${p.last} read${p.held ? '; held until a question is answered (see the notice)' : ''}</span>`), 'Everything you have is read.')}
+    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${n(papers.filter((p) => !p.held).length, 'paper')} to read · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}</summary>
+      ${part('Reading', papers.map((p) => `<a class="link" data-story="${esc(p.id)}">${esc(p.title)}</a> <span class="small muted">${p.at} of ${p.last} read${p.held ? '; nothing to read now: it is held until a question is answered (see the notice), and is not counted above' : ''}</span>`), 'Everything you have is read.')}
       ${part('Reasoning moves on offer', moves, 'None on offer that you have not made.')}
       ${linkQs.length ? part('Links not tried yet', linkQs.map((q) => `<a class="link" data-left-linking="${esc(q.id)}" title="Link to this question, showing only what is not tried yet">${esc(qLabel(q))}</a> <span class="small muted" data-untried-n="${esc(q.id)}"></span>`), '') : ''}
       ${part('Questions with no answer circled', unmarked.map((q) => `<a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>`), 'Every open question has an answer circled.')}

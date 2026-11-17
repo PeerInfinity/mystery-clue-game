@@ -110,7 +110,7 @@ const VIEW = `(() => {
     });
     const para = document.getElementById('para');
     return {
-        text: [part('#gate-news', 'Notice: the gate'), part('#answer-news', 'Notice: the story answered'), part('#lapse-news', 'Notice'),
+        text: [part('#gate-news', 'Notice: the gate'), part('#answer-news', 'Notice: the story answered'), part('#solved-news', 'Notice: solved'), part('#lapse-news', 'Notice'),
             part('#story', 'Story panel (read so far, paragraph ' + para.value + ' of ' + para.max + ' of the story shown)'), part('#questions', 'Questions'), part('#clashes', 'Contradictions'),
             part('#timeline', 'Timeline'), part('#room', 'The room'), part('#detail', 'Detail (what you last opened)')].filter(Boolean).join('\\n\\n'),
         controls: controls.join('\\n'),

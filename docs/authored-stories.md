@@ -1053,6 +1053,28 @@ script that found each fact's paragraph from its quote; the data files are the s
     And the solver's memory, which is the harness's and not the page's: it is given its last thirty actions (it
     had twelve), each with the thought it had for it, and a count of any action repeated four times or more
     among them. A reader remembers what they have just tried, and why; the solver did not.
+99. **A claim stands for its statement (2026-11-16), from the fifth Haiku run's report.** Whether Mr. Prout was at
+    the Anchor takes his statement, disbelieved, as evidence (`{doubted: the telling}`). The solver linked the
+    false claim in it, which was refused and marked as tried; then it distrusted the claim, rightly, and
+    reported that the tried mark still barred it. The user's ruling: when a statement is evidence for a
+    question once disbelieved, a link to any fact that statement told is kept and waits ("part of something not
+    yet complete"), as a premise of a move is; any fact, the true ones too, since to keep only the false would
+    say which is the lie. The statement itself is still the entry that fills the evidence.
+    The same run's second report ("the page says one paper remains unread, but every paper tab shows x/x")
+    found two faults. Of the page: "Left to try" counted the story as a paper to read while the gate held it;
+    a held story is now listed as held and not counted. Of the harness: the "Solved" notice (what solving a
+    question brought, with the button that opens the paper) was not in the text the solver is given, in any
+    run so far, so it saw "Open it" buttons with nothing said about them; it is given the notice now.
+100. **The fifth Haiku run (2026-11-16; the same seed, the longer memory): 13 of 25 questions, $3.00 at 581
+    turns.** Level with the fourth run's total, and dearer by the turn (the thirty actions with their
+    thoughts: $0.27 for the first hundred turns where the fourth paid $0.12). What the memory changed: moves
+    that did nothing fell to between 3 and 14 in a hundred (the fourth run's first hundred had 39), it named
+    its own loops ("opened three times without being read, so I'll stop clicking its tab"), and it never
+    pressed one control for a hundred turns. It sent the two reports of finding 99. Its last 141 turns went
+    on who let the brandy out of bond again, now by trying entries: 23 refused and marked for that question,
+    the pass of the same night found and kept at the last turn, the cart's entry in the gate-keeper's book
+    still to find. So with checked links a weak solver does get on by trial, slowly: some six turns a try at
+    its pace, with about a hundred entries a question.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
