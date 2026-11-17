@@ -1103,6 +1103,16 @@ script that found each fact's paragraph from its quote; the data files are the s
     word any of the three serves for both (a premise of a move can be `{any: [facts]}` too), and the two lines
     say "on its round" for "at twelve". The other hits differ in their detail, and the detail is the point (two
     clocks, two tellers, two times). The sweep does not find entries worded differently that show the same thing.
+102. **The seventh Haiku run (2026-11-17; the same seed, after finding 101's changes): 11 of 25 questions, stuck
+    for 200 turns at turn 762, $3.86. Two walls, neither the entries alike (the Mill Lane entries were taken).**
+    The first, turns 90 to 144 and a report: a paper opened at "0 of 5" shows no text until "Read on" is
+    pressed, and the solver took the empty view for a paper that would not open. The second, the last 200 turns:
+    "Where did Marsh's cart take the casks?" stood at 2 of 3 with all three entries linked. The solver had
+    distrusted the line of Mr. Garrick's note that says where the casks went (reading the note as a guilty
+    man's); distrusted, it is off the timeline and shows nothing, and the page said only "Part of something not
+    yet complete: something else is still needed", which the solver read as "find another entry". Trust was
+    left without feedback of its own when checked links were built (contradictions were to be the feedback);
+    this is the first run it cost much. Neither is changed yet: both wait for the user's word.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
