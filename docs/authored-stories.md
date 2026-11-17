@@ -1042,6 +1042,9 @@ script that found each fact's paragraph from its quote; the data files are the s
     on and off, so that every press changes the page and nothing tells the solver it is going nowhere. It had
     tried six entries for that question of about a hundred, and never went down what was left: the tried marks
     help a solver that works through a list, and Haiku does not unless its own idea of the answer runs out.
+    A fault of the harness, mended after the run: "Left to try" was shut, and its heading was not among the
+    controls the solver is given, so it saw the line of counts and could not open the lists. The switch "only
+    what is not tried yet" was among its controls throughout, and it never pressed it.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
