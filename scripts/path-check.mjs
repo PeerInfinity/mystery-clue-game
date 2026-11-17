@@ -304,6 +304,8 @@ if (EARNED) {
         if (at !== ENDING - 1) { failures++; console.log(`FAIL the ending (¶${ENDING} on) with the goal open: the story is read to ¶${at}`); }
         else console.log(`  the ending is shut at ¶${ENDING} while the goal is open`);
     }
+    const restsOfGoal = [...new Set(JSON.parse(fs.readFileSync(path.join(WORLD, 'observations.json'), 'utf8')).observations.filter((o) => o.q === logic.goal).flatMap((o) => o.from.filter((f) => f?.solved).map((f) => f.solved)))];
+    let restsSeen = false;
     for (const q of order) {
         // The papers held, and the replies to the questions solved (a reply comes with its question, whatever the seed).
         const want = [...heldAfter(logic, place, solved), ...files.filter((f) => f.reply != null && solved.has(f.reply)).map((f) => f.id)].sort();
@@ -321,6 +323,18 @@ if (EARNED) {
         else console.log(`  solved ${q}: ${expect}`);
         await click('[data-solved-close]');
         solved.add(q);
+        // Linking to the goal: the line of a question it rests on says that it counts (solved), or will once solved.
+        if (!restsSeen && restsOfGoal.includes(q) && !solved.has(logic.goal) && (await exists(`[data-linking="${logic.goal}"]`))) {
+            restsSeen = true;
+            await click(`[data-linking="${logic.goal}"]`);
+            const tag = await ev(`document.querySelector('#timeline [data-rests="${q}"]')?.innerText ?? ''`);
+            if (!/counted/.test(tag)) { failures++; console.log(`FAIL linking to the goal: the line of ${q}, solved, does not say it is counted ("${tag}")`); }
+            const open = restsOfGoal.find((r) => !solved.has(r));
+            const other = open ? await ev(`document.querySelector('#timeline [data-rests="${open}"]')?.innerText ?? null`) : null;
+            if (other != null && !/counts once/.test(other)) { failures++; console.log(`FAIL linking to the goal: the line of ${open}, not solved, says "${other}"`); }
+            await click('[data-linking-done]');
+            console.log(`  linking to the goal: the line of ${q} says "${tag}"${other != null ? `, that of ${open} "${other}"` : ''}`);
+        }
         if (GOAL_FIRST && q !== logic.goal && solved.has(logic.goal)) after++;
         if (GOAL_FIRST && q === logic.goal) {
             const left = order.length - solved.size;

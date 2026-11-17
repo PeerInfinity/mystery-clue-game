@@ -1075,6 +1075,13 @@ script that found each fact's paragraph from its quote; the data files are the s
     the pass of the same night found and kept at the last turn, the cart's entry in the gate-keeper's book
     still to find. So with checked links a weak solver does get on by trial, slowly: some six turns a try at
     its pace, with about a hundred entries a question.
+    Its notes spoke of entries "not reachable by control number": its own circled answers, which the timeline
+    shows as lines like any entry ("Mr. Prout: signing the pass of 3 September"), and which it wanted to link
+    as the missing evidence for who let the brandy out. That evidence was in place already: the larger question
+    rests on the smaller, and "question solved" had filled by itself. Two changes at the user's word. The
+    harness lists the timeline's question lines and circled answers among the controls (a reader can click
+    them; the solver could not). And the page, while linking, marks the line of each question the linked
+    question rests on, and of its circled answer: "counted ✓ (solved)" or "counts once this question is solved".
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

@@ -98,7 +98,7 @@ const VIEW = `(() => {
     const vis = (e) => !!e && e.offsetParent !== null;
     const part = (sel, title) => { const e = document.querySelector(sel); const t = vis(e) ? e.innerText.trim() : ''; return t ? '## ' + title + '\\n' + t : ''; };
     const skip = ${J(SKIP)};
-    const els = [...document.querySelectorAll('button, a.link, select, #left-box > summary, #timeline [data-fact] .ph, [data-story], [data-mark-q], input[type=checkbox]')]
+    const els = [...document.querySelectorAll('button, a.link, select, #left-box > summary, #timeline [data-fact] .ph, #timeline .question, #timeline .event.hyp, [data-story], [data-mark-q], input[type=checkbox]')]
         .filter((e) => vis(e) && !e.disabled && !e.matches(skip) && !e.closest(skip));
     document.querySelectorAll('[data-blind]').forEach((e) => e.removeAttribute('data-blind'));
     const where = (e) => (e.closest('#story') ? 'story' : e.closest('#questions') ? 'questions' : e.closest('#clashes') ? 'contradictions' : e.closest('#timeline') ? 'timeline' : e.closest('#detail') ? 'detail' : e.closest('#room') ? 'room' : 'page');

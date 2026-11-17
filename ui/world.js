@@ -494,17 +494,26 @@ function hypPhrase(q, pick) {
     return `${esc(qLabel(q))} <b>${pickText(q, pick)}</b>`;
 }
 /** A question at its place on the timeline, with its circled possibilities as entries under it. */
+/**
+ * While linking: on the timeline's line of a question that the question being linked to rests on, and on its circled
+ * answer, what that question is to it: evidence already, by being solved, or evidence once it is solved. A circled
+ * answer looks like an entry and cannot be linked; this says why there is nothing to link.
+ */
+const restTag = (q) => {
+    if (!linkingQ || !observations || !observations.some((o) => o.q === linkingQ && o.from.some((f) => f?.solved === q.id))) return '';
+    return ` <span class="rest-tag${isSolved(q.id) ? ' on' : ''}" data-rests="${esc(q.id)}" title="The question you are linking to rests on this one: nothing to link here">${isSolved(q.id) ? 'counted ✓ (solved)' : 'counts once this question is solved'}</span>`;
+};
 function questionRows(q, clashing, tag = 'li') {
     const sel = state.sel === `q:${q.id}` ? ' sel' : '';
     const crossed = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'crossed').map((p) => pickText(q, p.value));
-    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(qLabel(q))} ${paraSpan(q.raised ?? q.answer_given_at)}${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ${paraTag(q.answer_given_at)}: <b>${answerText(q)}</b></span>` : ''}</${tag}>`;
+    const head = `<${tag} class="question${sel}${clashing.has(`q:${q.id}`) ? ' clash' : ''}" data-q="${esc(q.id)}"><span class="q-mark">?</span> ${esc(qLabel(q))} ${paraSpan(q.raised ?? q.answer_given_at)}${crossed.length ? ` <span class="small muted">crossed out: <s>${crossed.join('</s>, <s>')}</s></span>` : ''}${givenAway(q) ? ` <span class="small">answered ${paraTag(q.answer_given_at)}: <b>${answerText(q)}</b></span>` : ''}${restTag(q)}</${tag}>`;
     const circles = shownPossibilities(q).filter((p) => markOf(q, p.value) === 'circled').map((p) => {
         const lvl = markLevel(q, p.value);
         if (lvl < state.threshold && !state.showBelow) return '';
         const cls = ['event', 'hyp', lvl < state.threshold ? 'below' : '', clashing.has(hypothesisKey(q.id, p.value)) ? 'clash' : '', givenAway(q) ? (isRight(q, p.value) ? 'right' : 'wrong') : ''].filter(Boolean).join(' ');
         const pp = q.possibilities.find((x) => x.value === p.value);
         const can = pp?.goal || pp?.need || q.presupposes || hypAction(hypothesisKey(q.id, p.value));
-        return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span>${can ? ` ${REASON_MARK}` : ''}</${tag}>`;
+        return `<${tag} class="${cls}" data-q="${esc(q.id)}" title="Your hypothesis">${dot(lvl)}<span class="ph">${hypPhrase(q, p.value)}</span>${can ? ` ${REASON_MARK}` : ''}${restTag(q)}</${tag}>`;
     });
     return [head, ...circles];
 }
