@@ -242,4 +242,5 @@ body.link-only-new #timeline .event.link-done { display: none; }
 .desc { margin-top: 4px; }
 .desc-list { margin: 2px 0 4px; padding-left: 16px; }
 .link-start { font-size: 11px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 0 7px; background: transparent; cursor: pointer; }
-.link-start.on { border-style: solid; background: var(--accent-soft); }
+.link-start.on { border-style: solid; background: var(--accent-soft); cursor: default; display: inline-block; padding: 1px 7px; }
+.linking-bar { position: sticky; top: 0; z-index: 2; }

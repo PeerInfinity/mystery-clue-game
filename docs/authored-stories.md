@@ -1045,6 +1045,11 @@ script that found each fact's paragraph from its quote; the data files are the s
     A fault of the harness, mended after the run: "Left to try" was shut, and its heading was not among the
     controls the solver is given, so it saw the line of counts and could not open the lists. The switch "only
     what is not tried yet" was among its controls throughout, and it never pressed it.
+    After it, at the user's word: starting and ending the linking are two controls in two places ("Link
+    observations…" under the question starts; "Done", in the bar that now stays at the top of the timeline, ends),
+    so a press after a press no longer undoes itself. The linking mode is kept and not removed: every run made
+    more of its links from an entry's "Relevant to…" list than from the timeline's rows (71 to 21, 69 to 56, 44
+    to 19; the first run 16 to 28), but the mode is where the list of what is not tried lives.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

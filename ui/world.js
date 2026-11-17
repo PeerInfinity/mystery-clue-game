@@ -915,7 +915,9 @@ function descriptionHtml(q) {
     const restsHtml = rests.length && !isSolved(q.id) ? `<div class="small rests-on">It rests on ${rests.length === 1 ? 'another question' : `${rests.length} other questions`}: <ul>${rests.map((r) => `<li>${qListed(r) ? `<a class="link" data-q="${esc(r.id)}">${esc(qLabel(r))}</a>` : 'a question not raised yet'}${isSolved(r.id) ? ' <span class="good">solved</span>' : ' <span class="muted">not solved yet</span>'}</li>`).join('')}</ul></div>` : '';
     const status = isSolved(q.id) ? `<p class="small good solved-note">Solved.${EARNED ? ` <span class="muted">${broughtHtml(q.id, false)}</span>` : ''}</p>` : judgement(q) === 'wrong' ? '<p class="small bad not-this">Not this answer.</p>'
         : !givenAway(q) && evidenceOf(q).any ? `<p class="small muted unsolved-note">Not solved yet: ${unsolvedWhy(q)}.</p>` : '';
-    const start = !givenAway(q) ? `<button type="button" class="link-start${linkingQ === q.id ? ' on' : ''}" data-linking="${esc(q.id)}">${linkingQ === q.id ? 'Linking…' : 'Link observations…'}</button>${checkedLinks() ? ` <span class="small muted untried-count" data-untried="${esc(q.id)}"></span>` : ''}` : '';
+    // Starting and ending are two controls in two places: the button here starts, Done at the top of the timeline
+    // ends (one button for both let a press after a press undo itself: a blind solver did that 117 times running).
+    const start = !givenAway(q) ? `${linkingQ === q.id ? '<span class="small link-start on">Linking: go down the timeline. <b>Done</b> is at its top.</span>' : `<button type="button" class="link-start" data-linking="${esc(q.id)}">Link observations…</button>`}${checkedLinks() ? ` <span class="small muted untried-count" data-untried="${esc(q.id)}"></span>` : ''}` : '';
     return `<div class="desc">${status}${restsHtml}${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
 const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span>${checkedLinks() ? `<label class="link-only-new" title="Hide the entries already linked to this question or tried for it"><input type="checkbox" data-link-only-new${linkOnlyNew ? ' checked' : ''}> only what is not tried yet</label>` : ''}<button type="button" data-linking-done>Done</button></div>` : '');
@@ -2051,7 +2053,7 @@ document.addEventListener('click', (e) => {
         const ln = e.target.closest('[data-left-linking]');
         if (ln) { linkingQ = ln.dataset.leftLinking; linkOnlyNew = true; reveal('timeline', panelFrom(e)); render(); return; }
         const st = e.target.closest('[data-linking]');
-        if (st) { linkingQ = linkingQ === st.dataset.linking ? null : st.dataset.linking; if (linkingQ) reveal('timeline', panelFrom(e)); render(); return; }
+        if (st) { linkingQ = st.dataset.linking; reveal('timeline', panelFrom(e)); render(); return; }
         if (e.target.closest('[data-linking-done]')) { linkingQ = null; render(); return; }
         if (e.target.closest('[data-link-only-new]')) { linkOnlyNew = e.target.closest('[data-link-only-new]').checked; render(); return; }
     }
