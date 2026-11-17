@@ -386,7 +386,7 @@ for (const o of observationList) {
     if (!Array.isArray(o.from) || !o.from.length) err(o.id, 'from: a list of entries');
     for (const f of o.from ?? []) if (typeof f === 'string' ? !factById.has(f) : f.any ? !Array.isArray(f.any) || f.any.length < 2 || f.any.some((x) => !factById.has(x)) : f.solved ? !qById.has(f.solved) || f.solved === o.q : f.doubted ? !(factById.get(f.doubted)?.attr === 'tells' || CLAIM_ATTRS.has(factById.get(f.doubted)?.attr))
         : f.reasoned === 'missing' ? !factById.get(f.of)?.series?.at?.includes(f.at)
-        : f.reasoned ? !REASONED_MOVES[f.reasoned] || !Array.isArray(f.premises) || f.premises.length !== (f.reasoned === 'changed' ? 2 : 1) || f.premises.some((x) => !factById.has(x))
+        : f.reasoned ? !REASONED_MOVES[f.reasoned] || !Array.isArray(f.premises) || f.premises.length !== (f.reasoned === 'changed' ? 2 : 1) || f.premises.some((x) => (typeof x === 'string' ? !factById.has(x) : !Array.isArray(x?.any) || x.any.length < 2 || x.any.some((y) => !factById.has(y))))
         : !Array.isArray(f.route_through) || f.route_through.some((n) => !entities.has(n))) err(o.id, `from: no entry ${JSON.stringify(f)}`);
     if (!o.says) err(o.id, 'no says');
     if (o.if && !qById.get(o.if.q)?.possibilities.some((x) => x.value === o.if.pick)) err(o.id, `if: no possibility ${o.if.q} = ${o.if.pick}`);

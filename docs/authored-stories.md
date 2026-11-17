@@ -1097,6 +1097,12 @@ script that found each fact's paragraph from its quote; the data files are the s
     only one for the initials, where its date is the point. Of the last changes: the notes show the solver
     knowing which questions were solved and guessing that a piece might rest on an unsolved question; it opened
     "Left to try" twice, early, for the papers, and not while stuck; it sent no reports.
+    A sweep of all eighteen cases for entries worded alike of which an observation named one (the same subject,
+    attribute, value and detail) found one more: the watch book's "door tried, fast" at ten, eleven and twelve,
+    of which the way-in question took only twelve, as a link and as the premise of "It changed". At the user's
+    word any of the three serves for both (a premise of a move can be `{any: [facts]}` too), and the two lines
+    say "on its round" for "at twelve". The other hits differ in their detail, and the detail is the point (two
+    clocks, two tellers, two times). The sweep does not find entries worded differently that show the same thing.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

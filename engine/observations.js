@@ -11,11 +11,14 @@
 // on (the record) is what the timeline holds. Or `{solved: q}`: question q is solved (`ctx.solved(q)`), a larger
 // question's evidence that fills by itself, with no link for the player to make. Or `{any: [ids]}`: any one of those
 // facts, for entries that show the same thing equally (three passes alike, three entries of one book): the link of
-// any of them fills it, and the others are evidence too (a checked link of one is kept, not refused).
+// any of them fills it, and the others are evidence too (a checked link of one is kept, not refused). A premise of
+// a `reasoned` entry can be `{any: [ids]}` in the same way: the move made from any one of them is the entry.
 
 /** The moves whose entries an observation can name, by the name it uses: the move's code in `reasoned.move`. */
 export const REASONED_MOVES = { changed: 'a', got_through: 'g', missing: 'm' };
-const samePremises = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+// A premise named by an observation is a fact's id, or `{any: [ids]}` for any one of several alike.
+const alts = (p) => (typeof p === 'string' ? [p] : p.any);
+const samePremises = (a, b) => a.length === b.length && b.every((p) => a.some((x) => alts(p).includes(x)));
 
 const matches = (from, e, ctx) => (typeof from === 'string' ? e.id === from
     : from.any ? from.any.includes(e.id)
@@ -79,7 +82,7 @@ const couldMatch = (from, e) => (typeof from === 'string' ? e.id === from
     : from.solved ? false
     : from.doubted ? e.id === from.doubted
     : from.reasoned === 'missing' ? matches(from, e, {}) || e.id === from.of || e.series === from.of
-    : from.reasoned ? matches(from, e, {}) || (from.premises ?? []).includes(e.id)
+    : from.reasoned ? matches(from, e, {}) || (from.premises ?? []).some((p) => alts(p).includes(e.id))
     : matches(from, e, {}));
 export const bears = (observations, q, e) => observations.some((o) => o.q === q && o.from.some((f) => couldMatch(f, e)));
 /** Whether something that entry is evidence for is still not shown (`filled`: what `fill` gave): the link waits. */
@@ -93,7 +96,7 @@ export const waits = (observations, q, e, filled) => observations.some((o) => o.
  */
 export function onPage(observations, q, has) {
     const all = observations.filter((o) => o.q === q && o.essential);
-    const there = (f) => (typeof f === 'string' ? has(f) : f.any ? f.any.some(has) : f.solved ? true : f.doubted ? has(f.doubted) : f.reasoned && f.premises ? f.premises.every(has) : true);
+    const there = (f) => (typeof f === 'string' ? has(f) : f.any ? f.any.some(has) : f.solved ? true : f.doubted ? has(f.doubted) : f.reasoned && f.premises ? f.premises.every((p) => alts(p).some(has)) : true);
     return { all: all.length, here: all.filter((o) => o.from.every(there)).length };
 }
 

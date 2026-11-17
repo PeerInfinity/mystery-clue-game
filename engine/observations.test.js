@@ -178,4 +178,11 @@ test('any one of several entries alike fills an observation, and each of them is
     assert.equal(waits(obs, 'q.a', { id: 'f.p1' }, r.filled), false);   // shown already by another of them
     assert.deepEqual(onPage(obs, 'q.a', (id) => id === 'f.p3'), { all: 1, here: 1 });
     assert.deepEqual(onPage(obs, 'q.a', () => false), { all: 1, here: 0 });
+    // A premise of a move, any one of several: the move from any of them is the entry.
+    const moved = [{ id: 'o2', q: 'q.b', from: [{ reasoned: 'changed', premises: [{ any: ['f.p1', 'f.p2'] }, 'f.open'] }], says: 'it was opened', essential: true }];
+    const made = (a) => ({ id: `r:a:${a}|f.open`, reasoned: { move: 'a', premises: [a, 'f.open'] } });
+    for (const a of ['f.p1', 'f.p2']) assert.equal(fill(moved, [{ entry: made(a).id, q: 'q.b' }], [made(a)]).filled.length, 1, a);
+    assert.equal(fill(moved, [{ entry: made('f.x').id, q: 'q.b' }], [made('f.x')]).filled.length, 0);
+    assert.equal(bears(moved, 'q.b', { id: 'f.p2' }), true);
+    assert.deepEqual(onPage(moved, 'q.b', (id) => id === 'f.p2' || id === 'f.open'), { all: 1, here: 1 });
 });

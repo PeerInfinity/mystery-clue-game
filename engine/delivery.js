@@ -125,7 +125,7 @@ export function caseLogic({ questions, observations, facts, files, delivery }) {
             else if (e.solved) { if (!requires.includes(e.solved)) requires.push(e.solved); }
             else if (e.doubted) factPapers(e.doubted).forEach((p) => own.add(p));
             else if (e.reasoned === 'missing') factPapers(e.of).forEach((p) => own.add(p));
-            else if (e.reasoned) (e.premises ?? []).forEach((x) => factPapers(x).forEach((p) => own.add(p)));
+            else if (e.reasoned) (e.premises ?? []).flatMap((x) => (typeof x === 'string' ? [x] : x.any)).forEach((x) => factPapers(x).forEach((p) => own.add(p)));
         }
         out.push({ id: q.id, sets: [[...own].sort()], requires });
     }
