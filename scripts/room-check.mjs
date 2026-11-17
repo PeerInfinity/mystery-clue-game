@@ -112,7 +112,7 @@ ok(await count('#left-box') === 1, 'and brings it back');
 // From the question (B), and a route as an entry.
 await click('[data-linking="q.what_came"]');
 ok(/Linking to/.test(await text('#timeline')), 'the linking mode shows on the timeline');
-ok(await count('[data-linking="q.what_came"]') === 0 && /Done is at its top/.test(await text('#q-box')), 'while linking, the question has no button to press again: Done is on the timeline', await text('#q-box'));
+ok(await count('[data-linking="q.what_came"]') === 0 && /Done linking is at its top/.test(await text('#q-box')), 'while linking, the question has no button to press again: Done is on the timeline', await text('#q-box'));
 ok(await click('#timeline [data-fact^="r:r:"] [data-link-entry]'), 'the route can be linked');
 ok(/travel down a chain/.test(await text('.desc-list')), 'a route counts by what it runs through', await text('.desc-list'));
 await click('#timeline [data-fact="f.dead"] [data-link-entry]');

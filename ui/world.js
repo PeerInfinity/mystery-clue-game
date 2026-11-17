@@ -917,10 +917,10 @@ function descriptionHtml(q) {
         : !givenAway(q) && evidenceOf(q).any ? `<p class="small muted unsolved-note">Not solved yet: ${unsolvedWhy(q)}.</p>` : '';
     // Starting and ending are two controls in two places: the button here starts, Done at the top of the timeline
     // ends (one button for both let a press after a press undo itself: a blind solver did that 117 times running).
-    const start = !givenAway(q) ? `${linkingQ === q.id ? '<span class="small link-start on">Linking: go down the timeline. <b>Done</b> is at its top.</span>' : `<button type="button" class="link-start" data-linking="${esc(q.id)}">Link observations…</button>`}${checkedLinks() ? ` <span class="small muted untried-count" data-untried="${esc(q.id)}"></span>` : ''}` : '';
+    const start = !givenAway(q) ? `${linkingQ === q.id ? '<span class="small link-start on">Linking: go down the timeline. <b>Done linking</b> is at its top.</span>' : `<button type="button" class="link-start" data-linking="${esc(q.id)}">Link observations…</button>`}${checkedLinks() ? ` <span class="small muted untried-count" data-untried="${esc(q.id)}"></span>` : ''}` : '';
     return `<div class="desc">${status}${restsHtml}${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
-const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span>${checkedLinks() ? `<label class="link-only-new" title="Hide the entries already linked to this question or tried for it"><input type="checkbox" data-link-only-new${linkOnlyNew ? ' checked' : ''}> only what is not tried yet</label>` : ''}<button type="button" data-linking-done>Done</button></div>` : '');
+const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span>${checkedLinks() ? `<label class="link-only-new" title="Hide the entries already linked to this question or tried for it"><input type="checkbox" data-link-only-new${linkOnlyNew ? ' checked' : ''}> only what is not tried yet</label>` : ''}<button type="button" data-linking-done>Done linking</button></div>` : '');
 
 let shownPara = null;
 /** After a drawing: how many of the timeline's entries are neither linked to each open question nor tried for it. */
