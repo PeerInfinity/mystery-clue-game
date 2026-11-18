@@ -1141,7 +1141,9 @@ script that found each fact's paragraph from its quote; the data files are the s
     certain" (that it was said) and has no trust control: what it says is doubted on each entry it carried, and
     nothing on the statement says so or leads there. Reproduced: with the statement linked and its three
     entries distrusted the page counts 7 of 9, so the question can be done; the way to it is not shown. The
-    same dead end at Mr. Prout's statement. Not changed yet.
+    same dead end at Mr. Prout's statement. Changed at the user's word: a statement's detail says that its being
+    said is certain and what it says is trusted separately, and lists the entries it carried, each opening its
+    own detail (on every statement alike, so it says nothing of which is a lie).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

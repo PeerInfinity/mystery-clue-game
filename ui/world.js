@@ -860,6 +860,18 @@ const carriedBy = (t) => {
     const told = new Set(list(f.value));
     return data.accounts.filter((a) => told.has(a.id) || [...prov.ancestors(a.id)].some((p) => told.has(p))).flatMap((a) => list(a.facts));
 };
+/**
+ * A statement's detail: that it was said is certain, and what it says is trusted apart from that, on each entry it
+ * carried. Those entries are listed, each opening its own detail, where its trust is set (a blind solver looked for
+ * the way to doubt a statement on the statement, found "Trusted: certain" and no control, and reported a dead end
+ * thirteen times). On every statement alike, so it says nothing of which is a lie.
+ */
+function toldHtml(f) {
+    const told = carriedBy(f.id).map((id) => factById.get(id)).filter((x) => x && visible(x));
+    return `<p class="small muted">A telling: how an account passed from one person to another.</p>
+      <p class="small told-note">That this was said is certain. What it says is trusted separately: to doubt any of it, open that entry and set your trust there.</p>
+      ${told.length ? `<h3>What it says</h3><ul class="events told-list">${told.map((x) => eventRow(x, new Set())).join('')}</ul>` : ''}`;
+}
 const viaStatement = (entry, q) => observations.filter((o) => o.q === q && o.from.some((f) => f?.doubted && carriedBy(f.doubted).includes(entry)));
 const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(observations, q, e) || viaStatement(entry, q).length > 0); };
 /** A kept link that still waits: something it is evidence for is not shown yet. */
@@ -1787,7 +1799,7 @@ function renderDetail(clashing) {
         el.innerHTML = `<h2>${phrase(f)}</h2>
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.</p>
-          ${f.attr === 'tells' ? '<p class="small muted">A telling: how an account passed from one person to another.</p>'
+          ${f.attr === 'tells' ? toldHtml(f)
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
           ${peopleHtml([...chains, ...content])}${movesHtml(f)}${linkHtml(f)}`;
