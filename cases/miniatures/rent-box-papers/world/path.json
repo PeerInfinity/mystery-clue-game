@@ -10,6 +10,7 @@
     {"at": ["self:2"], "do": "link", "entry": "f.back_shut", "q": "q.who", "see": "nobody came in from the yard", "for_q": ["q.who"], "why": "And the back door never opened."},
     {"at": ["self:1"], "do": "link", "entry": "f.fenn_let_out", "q": "q.who", "see": "Mr. Fenn was outside from one", "for_q": ["q.who"], "why": "Mr. Fenn went out while the box was still full, and no door let him back."},
     {"at": ["rudd:1"], "do": "link", "entry": "f.rudd_in_house", "q": "q.who", "see": "the Captain was inside the whole time", "for_q": ["q.who"], "why": "The Captain never left the house."},
+    {"at": ["rudd:2", "self:2"], "do": "link", "entry": "f.no_servant", "q": "q.who", "see": "nobody else in the house", "for_q": ["q.who"], "why": "And there was nobody else in the house to do it."},
     {"at": ["rudd:2", "self:2"], "do": "circle", "q": "q.who", "pick": "rudd", "for_q": ["q.who"], "why": "Nobody came in, Mr. Fenn was out, and I did not rob myself: only the Captain could reach the box."},
     {"at": ["rudd:2", "self:2"], "do": "cross", "q": "q.who", "pick": "fenn", "for_q": ["q.who"], "why": "He was outside both doors from one o'clock."}
   ]

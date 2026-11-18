@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.when_after", "q": "q.when", "from": ["o.when_seen"], "says": "the cup was on its shelf when the lamp was lit: it was taken after", "concludes": "after the lamp was lit"},
+    {"id": "i.who_not_bell", "q": "q.who", "from": ["o.who_seen", "o.who_aboard", "o.who_no_boat"], "says": "the cup was taken after the lamp was lit; by then Bell was in mid-river, and the ferry lay at the far bank all night: it was not Bell", "rules_out": ["bell"]},
+    {"id": "i.who_key", "q": "q.who", "from": ["o.who_seen", "o.who_locked"], "says": "it was taken from a locked vestry whose lock was never forced: by someone with a key"},
+    {"id": "i.who_amos", "q": "q.who", "from": ["i.who_key", "o.who_keys"], "says": "there are two keys, the vicar's and the sexton's, and the vicar's was in his own pocket: it was Amos", "concludes": "amos"}
+  ]
+}

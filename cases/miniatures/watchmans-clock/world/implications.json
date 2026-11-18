@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.when_between", "q": "q.when", "from": ["o.fast", "o.latch"], "says": "the gate was fast at half past two and on the latch at half past three: the bale went out in the hour between", "concludes": "between half past two and half past three"},
+    {"id": "i.who_not_tanner", "q": "q.who", "from": ["o.ankle"], "says": "Tanner, in splints since Saturday, could not have carried a bale: it was not Tanner", "rules_out": ["tanner"]},
+    {"id": "i.who_ward", "q": "q.who", "from": ["o.opened", "o.keys", "i.who_not_tanner", "o.gap"], "says": "the gate was opened with a key, only Ward and Tanner have one, and Ward was away from his station in that hour: it was Ward", "concludes": "ward"},
+    {"id": "i.who_lied", "q": "q.who", "from": ["o.gap", "o.lie"], "says": "so what Ward says, that he made every round, is not so"}
+  ]
+}

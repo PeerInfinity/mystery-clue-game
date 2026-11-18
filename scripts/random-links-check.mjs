@@ -27,6 +27,10 @@ const rand = rng(SHUFFLE);
 const facts = R('facts.json').facts, observations = R('observations.json').observations, questions = R('questions.json').questions;
 const implications = R('implications.json').implications;
 const qById = new Map(questions.map((q) => [q.id, q]));
+// A question whose evidence needs a route built in the room panel, or something got through: this player makes
+// no room moves, so such a case cannot be finished by it. Said, and passed over.
+const roomOnly = observations.filter((o) => o.from.some((f) => f && typeof f === 'object' && (f.route_through || f.reasoned === 'got_through')));
+if (roomOnly.length) { console.log(`skipped: ${roomOnly.map((o) => o.id).join(', ')} need${roomOnly.length === 1 ? 's' : ''} a move in the room panel, which this player does not make`); process.exit(0); }
 const autoQs = [...new Set(implications.map((i) => i.q))].filter((q) => qById.has(q));
 const right = (q) => [].concat(qById.get(q).answer ?? [], qById.get(q).also_right ?? []);
 const values = (q) => qById.get(q).possibilities.map((x) => x.value);

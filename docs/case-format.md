@@ -267,7 +267,13 @@ contradiction written by hand:
   subject: each entity of those kinds but the ones named, so "nobody but Mrs. Orme and the Captain was in the
   house from one until three" is a denial of that location for everyone else, set against any one person's
   entry there. Someone whose identity is in question (the entry of an identity question, or the subject of an
-  identity fact) is not counted: they may be one of those named. So far only in an implication's `asserts`.
+  identity fact) is not counted: they may be one of those named. With nobody excepted it is about the unnamed
+  too ("someone went through the door"). So far only in an implication's `asserts`.
+- **Typed acts** (2026-11-18). A state with `act` (a fact, what a claim or an implication asserts, an answer's
+  typed form) is the same act as another by its types and roles (`thing`, `to`, `item`, `about`, `via`,
+  `where`), not by its words. A denial denies every act that has the types and roles it names: "nobody went
+  through the front door" denies going through it with a sack; "she did not sail from Saltmere" denies an entry
+  that has her take casks aboard and sail. In an `asserts`, a typed act needs no `value`.
 - **A statement denied by name** (2026-11-18). An assertion `{kind: 'denial', denies: <an assertion's id>}`
   contradicts that assertion while both are accepted. For what cannot be typed ("so what the ledger says of the
   Marigold is not so"); only an implication makes one (`denies`).

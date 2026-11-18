@@ -29,6 +29,15 @@ export const DERIVED = 'derived';
  */
 export const EVERY = '*';
 /**
+ * A typed act among the assertions: a state with `act` (the action types, engine/actions.js) and its roles. Two are
+ * the same act by their types and roles, not by their words; a denial that names fewer of them denies every act
+ * that has those ("nobody went through the front door" denies going through it with a sack).
+ */
+export const ACT_ROLES = ['thing', 'to', 'item', 'about', 'via', 'where'];
+export const typedAct = (x) => (list(x?.act).length ? { act: list(x.act), ...Object.fromEntries(ACT_ROLES.filter((r) => x[r] != null).map((r) => [r, x[r]])) } : {});
+/** Whether denial `d` denies what `p` asserts: the same value, or (typed acts) every type and role `d` names. */
+const deniesWhat = (d, p) => (list(d.act).length ? list(d.act).every((a) => list(p.act).includes(a)) && ACT_ROLES.every((r) => d[r] == null || d[r] === p[r]) : d.value != null && p.value === d.value);
+/**
  * A narrator's one link to the reader: keyed by the narrator, its level by default the narrator's `trust` (default
  * certain: the fair-play contract, a first-person narrator's own observations and an impersonal narrator's report);
  * the player may change it. An impersonal third-person narrator is the pseudo-entity `narrator`.
@@ -206,13 +215,13 @@ export function assertions(data) {
     const out = [];
     for (const f of data.facts) {
         const claim = CLAIM_ATTRS.has(f.attr);
-        out.push({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: claim ? true : ('truth' in f ? f.truth : true), para: f.given_at ?? f.para, ...(f.claim ? { claim: f.claim } : {}), ...(f.word ? { by: f.word } : {}), ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}) });
+        out.push({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: claim ? true : ('truth' in f ? f.truth : true), para: f.given_at ?? f.para, ...(f.claim ? { claim: f.claim } : {}), ...(f.word ? { by: f.word } : {}), ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}), ...typedAct(f) });
         if (!claim && f.q && f.pick != null) out.push({ id: `${f.id}#pick`, fact: f.id, kind: 'pick', q: f.q, pick: f.pick, neg: false, truth: 'truth' in f ? f.truth : true, para: f.given_at ?? f.para });
         if (!claim) continue;
         list(f.asserts).forEach((x, i) => {
             const base = { id: `${f.id}#${i}`, fact: f.id, claim: f.id, by: f.of, how: f.attr, modal: f.modal ?? null, para: f.given_at ?? f.para };
             if (x.q) out.push({ ...base, kind: 'pick', q: x.q, pick: x.pick, neg: !!x.neg, truth: pickTruth(x.q, x.pick, x.neg) });
-            else out.push({ ...base, kind: 'state', of: x.of, attr: x.attr, value: x.value, neg: !!x.neg, time: x.time ?? f.time, truth: 'truth' in x ? x.truth : null });
+            else out.push({ ...base, kind: 'state', of: x.of, attr: x.attr, value: x.value, neg: !!x.neg, time: x.time ?? f.time, truth: 'truth' in x ? x.truth : null, ...typedAct(x) });
         });
     }
     return out;
@@ -260,7 +269,7 @@ export function answerStates(q, pick, denied = false) {
         const time = x.time ?? (q.entry?.time && typeof q.entry.time === 'object' ? q.entry.time : undefined);
         const c = coverOf(time);
         if (denied && (!c || (x.neg && !c.incl))) return;
-        out.push({ n, of: x.of, attr: x.attr, value: x.value, neg: !!x.neg !== denied, time, denied, ...(x.event ? { event: x.event } : {}), ...(denied && !c.incl ? { whole: true } : {}) });
+        out.push({ n, of: x.of, attr: x.attr, value: x.value, neg: !!x.neg !== denied, time, denied, ...(x.event ? { event: x.event } : {}), ...typedAct(x), ...(denied && !c.incl ? { whole: true } : {}) });
     });
     return out;
 }
@@ -328,7 +337,8 @@ export function contradictions(data, accepted = null) {
     const pl = data.places ?? places(data);
     // A statement about everyone is one about each (`each`: the statement itself, which is the side reported).
     const unknown = new Set([...(data.questions ?? []).filter((q) => q.entry?.attr === 'identity').map((q) => q.entry.of), ...(data.facts ?? []).filter((x) => x.attr === 'identity').map((x) => x.of)]);
-    const everyone = (x) => (data.entities ?? []).filter((e) => list(x.every).includes(e.kind) && !list(x.but).includes(e.id) && !unknown.has(e.id)).map((e) => ({ ...x, of: e.id, each: x }));
+    // With nobody excepted it is about the unnamed too ("someone went through the door").
+    const everyone = (x) => [...(data.entities ?? []).filter((e) => list(x.every).includes(e.kind) && !list(x.but).includes(e.id) && !unknown.has(e.id)).map((e) => e.id), ...(list(x.but).length ? [] : ['?'])].map((of) => ({ ...x, of, each: x }));
     const all = (accepted ?? assertions(data)).filter((x) => !x.modal).flatMap((x) => (x.kind === 'state' && x.of === EVERY ? everyone(x) : [x]));
     let out = [];
 
@@ -421,13 +431,13 @@ export function contradictions(data, accepted = null) {
 
     // A denial against what it denies, for any other kind of state: the same thing, attribute and value, asserted and
     // denied at times that meet ("he made every round" against "no round at three").
-    const others = all.filter((x) => x.kind === 'state' && !(SINGLE_ATTRS.has(x.attr) || STATES[x.attr]) && x.value != null && x.of != null && !CLAIM_ATTRS.has(x.attr));
+    const others = all.filter((x) => x.kind === 'state' && !(SINGLE_ATTRS.has(x.attr) || STATES[x.attr]) && (x.value != null || list(x.act).length) && x.of != null && !CLAIM_ATTRS.has(x.attr));
     const denials = others.filter((x) => x.neg);
     for (const d of denials) for (const p of others) {
         if (d.whole) continue;
-        if (p.neg || (p.fact != null && p.fact === d.fact) || p.of !== d.of || p.attr !== d.attr || p.value !== d.value) continue;
+        if (p.neg || (p.fact != null && p.fact === d.fact) || p.of !== d.of || p.attr !== d.attr || !deniesWhat(d, p)) continue;
         if (!overlaps(order, coverOf(p.time), coverOf(d.time)) && !between(p.time, coverOf(d.time))) continue;
-        out.push({ a: p, b: d, why: `${d.of}: ${d.value}, asserted and denied` });
+        out.push({ a: p, b: d, why: `${d.of}: ${d.value ?? list(d.act).join(' and ')}, asserted and denied` });
     }
 
     // One event happens once: two tellings of it whose times certainly do not meet cannot both hold.

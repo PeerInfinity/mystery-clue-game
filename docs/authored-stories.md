@@ -1252,12 +1252,37 @@ script that found each fact's paragraph from its quote; the data files are the s
       whole of it", which is exactly what Crouch's own statement contradicts. Three rules' `asserts` said the
       same as the answer and were taken out (the long case: 7 rules with `asserts`, 2 with `denies`).
     - The validator marks the key and fails if that contradicts what is true, in every case, with rules or not.
+108. **Typed acts in the contradictions, and rules for every short case (2026-11-18; the user's four requests
+    after finding 107).**
+    - **"Nobody did it."** A typed act is the same act as another by its types and roles, and a denial denies
+      every act that has what it names. With the subject "everyone" this is "nobody went through the front door
+      from one until four", which meets any one person's going through it, and with nobody excepted someone
+      unnamed too. The Rent Box: "nobody came into the house or left it after one" is now two such entries, one
+      a door.
+    - **The export as a typed act.** The long case has two actions of its own, taking aboard for export and
+      sailing from a place; the ledger's entries of 24 September and 8 October are typed with them, and the two
+      rules that denied them by id now deny the act ("she did not sail from Saltmere at noon"; "she took no
+      casks aboard"). No rule of any case uses `denies` now; the form stays for what cannot be typed.
+    - **Rules for the other 14 short cases**: 50 rules, every case's true path played with the answers marked
+      from the evidence. What writing them showed, as in finding 105: three answers rest on a piece that was not
+      asked for, and its link was added to the true path (Larch House: that George and the maid never left the
+      dining-room; the watchman's clock: that only Ward and Tanner have keys; the Rent Box with papers: that
+      nobody else lives in the house). The other way round, pieces asked for by hand that no way to the answer
+      uses: Ned in the loft (the cellar door; he has no key either), Finch in the lock-up (the night porter: the
+      keys alone conclude it), the stable clock being slow (the housemaid and the hall clock conclude it), and
+      the two pieces against Mrs. Grice (the will). Judgements made, to be looked at: Jem from having a key and lying at the door, with
+      the other key's keeper unnamed; the last ferry's "the vicar's key was in his own pocket" is the narrator's
+      word in no entry; Mr. Voss as "the one other who learned of it".
+    - **Typed answers and statements in the short cases**: the two times of the shot and "yes, in the library"
+      (the stable clock), who waited at the mill (the telegram), and Finch not in the bank (the night porter).
+      Where a question's answers are places or an identity the first step of finding 107 types them unasked
+      (the lamp-keeper's word, the grey cloak).
     Still open:
-    - The ledger's two later entries are still denied by id. Typing them needs the export as a typed act (a case
-      action "ships", with what and when), not a sentence compared letter by letter.
-    - "Nobody did it" of a typed act; the answers of 13 questions of the long case still sentences ("it was set", "to destroy the
-      bond ledger"); the values of `condition` facts.
-    - The other 14 miniatures have no rules, and no typed answers yet.
+    - Sentences still: the answers of 13 questions of the long case ("it was set", "to destroy the bond ledger")
+      and most of the short cases' "when" answers; the values of `condition` facts; untyped `action` facts.
+      Each needs a decision of vocabulary (what a motive is, in typed form), which is the user's.
+    - A statement about everyone only in an implication's `asserts`, not yet in a witness's own entry ("nobody
+      passed me").
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

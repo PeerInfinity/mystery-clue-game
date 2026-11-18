@@ -1,0 +1,9 @@
+{
+  "implications": [
+    {"id": "i.figure_not_mott", "q": "q.figure", "from": ["o.away"], "says": "at nine Dr. Mott was three miles off, in the sergeant's sight: it was not he at the side door", "rules_out": ["mott"]},
+    {"id": "i.figure_cloak", "q": "q.figure", "from": ["o.by_cloak", "o.cloak_out"], "says": "she knew the figure by the cloak alone, and that night someone other than the doctor wore it"},
+    {"id": "i.figure_mistake", "q": "q.figure", "from": ["i.figure_not_mott", "o.mistake"], "says": "so what Mrs. Lunn saw stands, and her naming the doctor does not"},
+    {"id": "i.figure_not_kitty", "q": "q.figure", "from": ["o.by_cloak", "o.tall"], "says": "the cloak cleared the ground on the one who wore it, and on Kitty it would have trailed: it was not Kitty", "rules_out": ["kitty"]},
+    {"id": "i.figure_pell", "q": "q.figure", "from": ["i.figure_not_mott", "i.figure_not_kitty", "o.keys"], "says": "only Mr. Pell and Kitty, beside the doctor, could let themselves out at the side door, and it was neither the doctor nor Kitty: it was Mr. Pell", "concludes": "pell"}
+  ]
+}

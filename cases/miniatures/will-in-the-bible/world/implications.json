@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.dated_no", "q": "q.dated", "from": ["o.date", "o.font", "o.christened"], "says": "it is dated the third of March and speaks of a christening that was on the first of July: it was not made when it says", "concludes": "no"},
+    {"id": "i.who_not_harriet", "q": "q.who", "from": ["o.dead"], "says": "Miss Pym died two months before the christening the will speaks of: she did not write it", "rules_out": ["harriet"]},
+    {"id": "i.who_not_grice", "q": "q.who", "from": ["o.gain", "o.away"], "says": "the will takes the house from Mrs. Grice, and she never came back to the Bible: she did not write it", "rules_out": ["grice"]},
+    {"id": "i.who_lionel", "q": "q.who", "from": ["i.who_not_harriet", "o.keys"], "says": "it was written after her death, and since her death only Mr. Pym could come at the Bible: he wrote it", "concludes": "lionel"}
+  ]
+}

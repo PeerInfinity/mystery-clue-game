@@ -1,0 +1,7 @@
+{
+  "implications": [
+    {"id": "i.who_not_voss", "q": "q.who", "from": ["o.voss_watched"], "says": "he was in Clara's sight all the time he was out, and never near the study: it was not Captain Voss", "rules_out": ["voss"]},
+    {"id": "i.who_after", "q": "q.who", "from": ["o.voss_watched", "o.hall_empty", "o.unwatched"], "says": "while the hall was watched nobody went to the study: the notes were taken from the joint onward, when nobody watched"},
+    {"id": "i.who_pym", "q": "q.who", "from": ["i.who_after", "o.pym_out", "o.rest"], "says": "Miss Pym went out during the dessert, and the others never left the dining-room: it was she", "concludes": "pym"}
+  ]
+}

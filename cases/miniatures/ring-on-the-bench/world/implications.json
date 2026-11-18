@@ -1,0 +1,6 @@
+{
+  "implications": [
+    {"id": "i.what_not_tom", "q": "q.what", "from": ["o.door", "o.window"], "says": "nothing came in by the door, and no person could pass the bars of the window: it was not Tom", "rules_out": ["tom"]},
+    {"id": "i.what_monkey", "q": "q.what", "from": ["o.door", "o.window", "o.size", "o.climb", "o.kept"], "says": "what took it came in by the open pane and down the cord: small enough, a climber, and loose in the yard after dark. It was the monkey", "concludes": "monkey"}
+  ]
+}

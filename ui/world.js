@@ -4,7 +4,7 @@
 // the player says (engine/world.js). The player is the reader: the marks and moves are the reader's own. Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, EVERY, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, EVERY, typedAct, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
@@ -323,7 +323,7 @@ function phrase(f) {
     const E = f.who ?? (f.of === '?' ? 'Someone' : ent(f.of));
     // Told early in brief (`given_at`): until its own paragraph, only the brief words that told it.
     if (f.given_quote && seen(f.given_at) && !seen(f.para)) return `${E}: <span class="said">“${esc(f.given_quote)}”</span>`;
-    if (f.reasoned && f.attr === 'action' && f.act) return `${E}: ${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${ent(f.thing)}`;
+    if (f.reasoned && f.attr === 'action' && f.act) return `${E}: ${f.neg ? '<b>not</b> ' : ''}${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${ent(f.thing ?? f.item ?? f.where)}`;
     if (f.away) return `${E} away from ${ent(f.away)}${f.hyp === true ? ' <span class="small muted">(your hypothesis)</span>' : ''}`;
     const v = val(f.value);
     const d = f.detail ? ` <span class="muted">(${esc(f.detail)})</span>` : '';
@@ -417,7 +417,7 @@ function acceptedAssertions() {
     const got = new Set(follows.map((x) => x.id));
     const marks = markAssertions(data, state.marks, possShown).filter((x) => !got.has(x.id) && lvlOf(x) >= state.threshold);
     const mine = reasoned.filter((f) => visible(f) && accepted(f))
-        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at, ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}) }));
+        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at, ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}), ...typedAct(f) }));
     return [...follows, ...marks, ...mine, ...allAssertions.filter((x) => {
         const f = factById.get(x.fact);
         if (!visible(f)) return false;
@@ -490,7 +490,7 @@ function assertsHtml(f) {
  * An entry the player can reason from (its detail offers moves): a typed state, a typed action, an intention with a
  * goal, a claim with a plan. Marked on the timeline so the moves can be found.
  */
-const canReason = (f) => ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || list(f.act).length > 0 || !!f.goal || !!f.plan || !!f.series;
+const canReason = (f) => ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || (list(f.act).length > 0 && !f.neg) || !!f.goal || !!f.plan || !!f.series;
 const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need, what is missing)">⚙</span>';
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
@@ -1412,7 +1412,7 @@ function gapMoveHtml(f) {
 }
 /** Move (b) on a typed action: what it needs just before and does just after, each with what the timeline says. */
 function implicationsHtml(f) {
-    if (!list(f.act).length) return '';
+    if (!list(f.act).length || f.neg) return '';
     if (!madeB(f.id)) {
         return `<h3>An action</h3><p><button type="button" class="move" data-move-b="${esc(f.id)}">Point out what it needs and what it does</button></p>`;
     }

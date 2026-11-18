@@ -346,3 +346,17 @@ test("an answer's typed form: asserted with a circle, denied with a cross where 
     assert.equal(marks({ two: 'crossed' }).length, 1, 'the denial of two states is neither');
     assert.equal(marks({ two: 'circled' }).length, 3);
 });
+
+test('typed acts: the same act by its types and roles; a denial that names fewer denies the more specific; nobody, of an act', () => {
+    const ents = [...entities, { id: 'door', kind: 'object' }, { id: 'sack', kind: 'object' }];
+    const act = (id, of, time, extra = {}) => ({ id, of, attr: 'action', act: ['go_through'], thing: 'door', value: 'x', time, para: 1, quote: 'x', ...extra });
+    const run = (facts) => contradictions({ ...world(facts), entities: ents }).map((c) => `${c.a.id}/${c.b.id}`);
+    const nobody = act('f.nobody', '*', { from: 't1', to: 't4' }, { every: 'person', neg: true, value: undefined });
+    assert.deepEqual(run([nobody, act('f.m', 'man', { at: 't2' }, { item: 'sack', value: 'goes in with a sack' })]), ['f.m/f.nobody']);
+    assert.deepEqual(run([nobody, act('f.s', '?', { after: 't1', before: 't3' })]), ['f.s/f.nobody'], 'with nobody excepted, someone unnamed too');
+    assert.deepEqual(run([{ ...nobody, but: ['man'] }, act('f.s', '?', { at: 't2' }), act('f.m', 'man', { at: 't2' })]), [], 'the one excepted, and someone who may be he');
+    assert.deepEqual(run([nobody, act('f.o', 'man', { at: 't2' }, { thing: 'sack' })]), [], 'another thing');
+    assert.deepEqual(run([nobody, act('f.o', 'man', { at: 't2' }, { act: ['open'] })]), [], 'another act');
+    assert.deepEqual(run([act('f.no', 'man', { at: 't2' }, { neg: true, item: 'sack' }), act('f.m', 'man', { at: 't2' })]), [], 'a denial of the more specific does not deny the plain act');
+    assert.deepEqual(run([act('f.no', 'man', { at: 't2' }, { neg: true, act: ['go_through'] }), act('f.m', 'man', { at: 't2' }, { act: ['open', 'go_through'] })]), ['f.m/f.no'], 'one of two acts denied');
+});

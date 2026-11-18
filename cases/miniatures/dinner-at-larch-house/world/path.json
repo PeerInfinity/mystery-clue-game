@@ -6,6 +6,8 @@
     {"at": 4, "do": "link", "entry": "f.hall_empty", "q": "q.who", "see": "nobody else crossed the hall", "for_q": ["q.who"], "why": "And nobody else crossed the hall while she sat there."},
     {"at": 5, "do": "link", "entry": "f.unwatched", "q": "q.who", "see": "nobody watched the hall", "for_q": ["q.who"], "why": "So the notes went after the joint, when the hall was unwatched."},
     {"at": 5, "do": "link", "entry": "f.pym_out", "q": "q.who", "see": "Miss Pym went out during the dessert", "for_q": ["q.who"], "why": "George saw only one person leave the table after that."},
+    {"at": 5, "do": "link", "entry": "f.george_stays", "q": "q.who", "for_q": ["q.who"], "why": "George did not leave the table."},
+    {"at": 5, "do": "link", "entry": "f.hannah_stays", "q": "q.who", "see": "never left the dining-room", "for_q": ["q.who"], "why": "Nor did the maid: of those at dinner, only Miss Pym went out unwatched."},
     {"at": 5, "do": "circle", "q": "q.who", "pick": "pym", "for_q": ["q.who"], "why": "Miss Pym, during the dessert."}
   ]
 }

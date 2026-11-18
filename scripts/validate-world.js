@@ -360,10 +360,16 @@ for (const f of facts) if (f.attr === 'believes' && !f.modal && list(f.asserts).
 }
 for (const c of contradictions(world, asserted.filter((x) => x.truth === true))) err(`${c.a.id} / ${c.b.id}`, `true assertions contradict: ${c.why}`);
 
+// A typed act in an `asserts`: its types known, its roles entities.
+function badAct(where, x) {
+    for (const t of list(x.act)) if (!ACTIONS[t]) err(where, `asserts: no action type ${t}`);
+    if (list(x.act).length) for (const r of ['thing', 'to', 'item', 'about', 'via', 'where']) if (x[r] != null && !entities.has(x[r])) err(where, `asserts: ${r}: no entity ${x[r]}`);
+}
 // What an answer says in typed form (a possibility's `asserts`), and the key against the true story: with every right
 // answer circled and every other crossed out, no mark may contradict what the key holds true.
 for (const q of qById.values()) for (const p of q.possibilities ?? []) for (const x of list(p.asserts)) {
-    if (!x.of || !x.attr || !('value' in x)) { err(q.id, `${p.value}: asserts: a state {of, attr, value, neg?, time?}`); continue; }
+    if (!x.of || !x.attr || (!('value' in x) && !list(x.act).length)) { err(q.id, `${p.value}: asserts: a state {of, attr, value, neg?, time?}, or a typed act`); continue; }
+    badAct(`${q.id}: ${p.value}`, x);
     if (x.of !== '?' && !entities.has(x.of)) err(q.id, `${p.value}: asserts: no entity ${x.of}`);
     for (const k of Object.keys(x.time ?? {})) if (!['at', 'from', 'to', 'after', 'before'].includes(k) || !timeIds.has(x.time[k])) err(q.id, `${p.value}: asserts: time.${k}: no time ${x.time[k]}`);
 }
@@ -408,7 +414,8 @@ if (fs.existsSync(path.join(dir, 'world', 'implications.json'))) {
     for (const i of imps) {
         if (i.asserts != null && !Array.isArray(i.asserts)) err('implications', `${i.id}: asserts: a list of states`);
         for (const x of list(i.asserts)) {
-            if (!x.of || !x.attr || !('value' in x)) { err('implications', `${i.id}: asserts: a state {of, attr, value, neg?, time}`); continue; }
+            if (!x.of || !x.attr || (!('value' in x) && !list(x.act).length)) { err('implications', `${i.id}: asserts: a state {of, attr, value, neg?, time}, or a typed act {of, attr: "action", act, roles}`); continue; }
+            badAct(`implications: ${i.id}`, x);
             if (x.of === '*') { if (!list(x.every).length) err('implications', `${i.id}: asserts: of "*" needs every: a kind`); for (const b of list(x.but)) if (!entities.has(b)) err('implications', `${i.id}: asserts: but: no entity ${b}`); }
             else if (x.of !== '?' && !entities.has(x.of)) err('implications', `${i.id}: asserts: no entity ${x.of}`);
             if (CLAIM_ATTRS.has(x.attr)) err('implications', `${i.id}: asserts: a state, not a claim`);
