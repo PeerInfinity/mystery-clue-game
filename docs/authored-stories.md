@@ -1302,17 +1302,66 @@ script that found each fact's paragraph from its quote; the data files are the s
     - Not done: "an accident of the stove". The stove "cold, raked out and shut" the next noon does not, by
       strict logic, deny a stove alight in the night; the story's own inference is that a stove raked out and
       shut was put out on purpose. That rule stays written.
-    Not built, to be put to the user first: goals for "What was the fire meant to destroy?" and "Why was the
-    Custom House burned?". The data shape is plain (the aim's `goal`; the Board's audit as an intention with a
-    step that needs the ledger; "preventing" as a goal that denies a need of another's step). What is not plain
-    is what the page should do with it, since a motive contradicts nothing: "the chest was left locked, so the
-    fire was not for the money" is an aim not attempted, which is likely, not certain.
+    What the page should do with a motive was put to the user, since a motive contradicts nothing: "the chest
+    was left locked, so the fire was not for the money" is an aim nothing was done toward, which is likely, not
+    certain. The user chose likely rule-outs, weaker than a contradiction (finding 110).
+110. **Evidence weaker than a contradiction (2026-11-18).** The user's ruling: an aim not carried out is ruled out
+    as unlikely; and, asked for more that could be done with weaker evidence, agreed to seven things, to be built
+    in this order as far as possible.
+    Built:
+    - **1. A strength on every rule.** `strength: "likely"` on an implication; what follows is as strong as its
+      weakest step by the best way to it. A likely answer still solves its question (the default put to the
+      user), shown dashed and "(likely)". What is only likely makes no contradiction: "unlikely together, by
+      the evidence". In the long case the four steps no entry states (finding 106) are marked likely: J.P. not
+      Mr. Pell's, so Mr. Prout's; the entries false because the casks went to a cellar; Mr. Garrick with no
+      train back; a key used by its keeper (two rules). The effect: the initials and Mr. Garrick's absence are
+      likely answers; the entries stay certain, by the other way (two exports that could not have been made);
+      and who set the fire stays certain by the long way, while the short proof of finding 106 is now only a
+      likely way to it.
+    - **The aims of the fire.** The three answers of "What was the fire meant to destroy?" carry a `goal`, the
+      bond store's state is typed, and the two hand-written rule-outs (not the money, not the brandy) are gone:
+      the table makes those answers unlikely from the chest and the vault. The right answer is still concluded
+      for certain from the heap at the press. "Preventing" (the fire as a goal against the Board's audit) is not
+      typed: nothing the page does would use it yet.
+    - **2. Trust beside each conclusion**, as far as it could go without a ruling: each statement in a
+      question's tree has the dot of how far it is trusted, its weakest premise. Making a conclusion "likely"
+      when it rests on an uncertain statement is not built, because every witness's statement starts as
+      uncertain: every answer of every case would start as likely. Whether that is wanted is the user's to say
+      (it would make "trusted" something the player has to grant before an answer is certain).
+    Agreed and not built, each to be discussed before building:
+    - 3. Means, opportunity and motive as a grid: each suspect against what the act needs, met, against, or
+      nothing says so, from the action table; in place of hand-written likely clashes.
+    - 4. Absence as evidence: a typed watcher (who, where, when), so that "not seen" is "likely not there".
+    - 5. Defaults that can be defeated: "a clock is right unless shown wrong", "a stove raked out and shut was
+      put out on purpose" (the stove rule of finding 109), "an aim was attempted" defeated by what its holder
+      believed (the ledger he thought was in the press).
+    - 6. More than one way to an answer: corroborated, or hanging on one statement.
+    - 7. A witness's record: one statement shown false, and the page suggests doubting the rest.
     Still open:
     - Sentences still: the answers of 12 questions of the long case ("it was set", "to destroy the bond ledger")
       and most of the short cases' "when" answers; the values of `condition` facts; untyped `action` facts.
       Each needs a decision of vocabulary (what a motive is, in typed form), which is the user's.
     - A statement about everyone only in an implication's `asserts`, not yet in a witness's own entry ("nobody
       passed me").
+111. **Five levels of trust: the user's rulings (2026-11-18; not built, handed to a new session).** Asked whether
+    more levels of trust would make sense, on one scale with likely and certain. The rulings:
+    - Five levels: confirmed, likely, uncertain, unlikely, ruled out ("trust as likely", "trust as confirmed",
+      "distrust as unlikely", "distrust as ruled out").
+    - Uncertain is the default; an uncertain entry is shown greyed and does not count for the logic. The
+      narrator's own observations start as confirmed.
+    - Confirmed counts and can give a certain conclusion; likely counts and gives at most a likely one; a
+      statement held unlikely counts, as false, for likely evidence, and one ruled out for certain evidence. A
+      conclusion is as strong as the weakest of its rules and its premises.
+    - Clashes: a contradiction among what is confirmed; "unlikely together" where a side is only likely; and,
+      where a side is still uncertain, a grey "cannot both be so: undecided", which is a difficulty setting, on
+      by default for now. (Without it nothing would clash until both sides were trusted, and resolving a clash
+      is the main loop of the game.)
+    - A whole paper or a whole person can be raised at once.
+    - The list of what is left to try shows the statements still uncertain.
+    - On the timeline the levels are told apart by more than colour: dashed for likely either way, solid for
+      settled; a dashed line through an unlikely entry and a solid one through one ruled out.
+    - Saved games need not be kept.
+    This settles the question left open in finding 110 (trust feeding strength).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

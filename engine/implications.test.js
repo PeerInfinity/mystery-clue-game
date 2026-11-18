@@ -180,3 +180,25 @@ test("the rules nobody writes: an answer's typed form against what one observati
     assert.deepEqual(withTable(hand, data, obs).map((r) => r.id), ['i.x', 't.unmarked.1', 't.fast.2'], 'a rule written by hand for the same is kept, and not doubled');
     setCaseActions({});
 });
+
+test('strength: what follows is as strong as its weakest step, by the best way to it', async () => {
+    const { certain, derivedAssertions } = await import('./implications.js');
+    const imps = [
+        { id: 'i.a', q: 'q', from: ['o.1'], says: 'a', rules_out: ['x'], strength: 'likely' },
+        { id: 'i.b', q: 'q', from: ['o.2'], says: 'b', rules_out: ['x'] },
+        { id: 'i.c', q: 'q', from: ['i.a'], says: 'c', rules_out: ['y'] },
+        { id: 'i.d', q: 'q', from: [{ any: ['i.a', 'o.3'] }], says: 'd', concludes: 'z' },
+    ];
+    const run = (shown) => { const has = (id) => shown.includes(id); const d = derive(imps, has, () => false); return { d, has }; };
+    let { d, has } = run(['o.1']);
+    assert.equal(certain('i.a', d, has), false);
+    assert.equal(certain('i.c', d, has), false, 'it rests on a likely step');
+    assert.equal(certain('i.d', d, has), false, 'the one way that holds is likely');
+    ({ d, has } = run(['o.1', 'o.2', 'o.3']));
+    assert.equal(certain({ any: ['i.a', 'i.b'] }, d, has), true, 'another way is certain');
+    assert.equal(certain('i.d', d, has), true, 'by the other premise');
+    const data = { entities: [], questions: [{ id: 'q', entry: {}, answer: 'z', possibilities: [{ value: 'x' }, { value: 'y' }, { value: 'z' }] }] };
+    ({ d, has } = run(['o.1']));
+    const got = Object.fromEntries(derivedAssertions(data, d, (q) => q.possibilities.map((p) => p.value), { shown: has }).map((x) => [x.pick, !!x.likely]));
+    assert.deepEqual(got, { z: true, x: true, y: true });
+});

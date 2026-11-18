@@ -287,7 +287,7 @@ for (const q of questions) {
         if (p.via === 'always' && p.value !== 'something else') err(q.id, `${p.value}: via always is for "something else"`);
         // An aim's goal and the last step it implies; a reason's need, added to an action type when circled.
         if (p === ps[0] && q.presupposes && (!entities.has(q.entry?.of) || list(q.presupposes.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via', 'item'].some((r) => q.presupposes[r] != null && !entities.has(q.presupposes[r])))) err(q.id, 'presupposes: a typed action of the entry\'s entity');
-        if (p.goal && (!entities.has(p.goal.of) || !p.goal.attr || p.goal.value == null)) err(q.id, `${p.value}: a goal is {of: an entity, attr, value}`);
+        if (p.goal && (!entities.has(p.goal.of) || !p.goal.attr || p.goal.value == null)) err(q.id, `${p.value}: a goal is {of: an entity, attr, value, neg?}`);
         if (p.step && (!list(p.step.act).length || list(p.step.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via'].some((r) => p.step[r] != null && !entities.has(p.step[r])))) err(q.id, `${p.value}: step is a typed action`);
         if (p.step && !p.goal) err(q.id, `${p.value}: a step belongs to an aim with a goal`);
         if (p.action && ((p.action.of !== '?' && !entities.has(p.action.of)) || !list(p.action.act).length || list(p.action.act).some((t) => !ACTIONS[t]) || ['thing', 'to', 'via', 'item'].some((r) => p.action[r] != null && !entities.has(p.action[r])))) err(q.id, `${p.value}: action is a typed action of an entity`);
@@ -408,7 +408,7 @@ if (fs.existsSync(path.join(dir, 'world', 'implications.json'))) {
     const { withTable } = await import('../engine/implications.js');
     const written = read('world/implications.json').implications;
     const imps = withTable(written, { ...world, order: world.order ?? (await import('../engine/world.js')).timeOrder(world.times) }, observationList);
-    if (!quiet) console.log(`\nRules from the answers' typed forms (${imps.length - written.length})\n` + imps.filter((i) => i.table).map((i) => `  ${i.id}: ${i.from[0]} rules out ${i.rules_out[0]} (${i.q})`).join('\n'));
+    if (!quiet) console.log(`\nRules from the answers' typed forms (${imps.length - written.length})\n` + imps.filter((i) => i.table).map((i) => `  ${i.id}: ${i.from[0]} ${i.strength === 'likely' ? 'makes unlikely' : 'rules out'} ${i.rules_out[0]} (${i.q})`).join('\n'));
     const rightOf = (q) => [].concat(qById.get(q)?.answer ?? [], qById.get(q)?.also_right ?? []);
     const valuesOf = (q) => (qById.get(q)?.possibilities ?? []).map((x) => x.value);
     for (const line of problems(imps, observationList, [...qById.values()], rightOf, valuesOf)) err('implications', line);
@@ -416,6 +416,7 @@ if (fs.existsSync(path.join(dir, 'world', 'implications.json'))) {
     const assertedIds = new Map(asserted.map((x) => [x.id, x]));
     for (const i of imps) {
         if (i.asserts != null && !Array.isArray(i.asserts)) err('implications', `${i.id}: asserts: a list of states`);
+        if (i.strength != null && i.strength !== 'likely') err('implications', `${i.id}: strength: "likely", or left out for certain`);
         for (const x of list(i.asserts)) {
             if (!x.of || !x.attr || (!('value' in x) && !list(x.act).length)) { err('implications', `${i.id}: asserts: a state {of, attr, value, neg?, time}, or a typed act {of, attr: "action", act, roles}`); continue; }
             badAct(`implications: ${i.id}`, x);

@@ -495,7 +495,7 @@ knowledge", and "Observations and open questions"). An invented example is `scri
 `docs/authored-stories.md` finding 105). An observation is a statement a link shows; an implication is a statement
 that follows from others, shown by itself the moment they all are.
 
-- `{id, q, from: [premise], says, rules_out?: [possibility], concludes?: possibility, asserts?, denies?}`. A premise is the id of an
+- `{id, q, from: [premise], says, rules_out?: [possibility], concludes?: possibility, asserts?, denies?, strength?}`. A premise is the id of an
   observation or of another implication (so they make a tree; of any question), or `{any: [ids]}` for any one of
   several, or `{solved: q}`. Two implications with the same conclusion are two ways to it. `rules_out` crosses those
   answers of `q` out; `concludes` is its answer.
@@ -534,6 +534,20 @@ that follows from others, shown by itself the moment they all are.
     follows contradicts. `path-check.mjs` with `ANSWERS=evidence LIES=1` plays the true path without its moves of
     trust: every false statement on the timeline that the engine says the evidence contradicts must be in a
     contradiction on the page (run by `page-checks` for a case with the file).
+- **Strength** (2026-11-18; `certain` in `engine/implications.js`; finding 110). An implication is certain unless
+  it carries `strength: "likely"`: a step that is probable and not forced (initials that are surely the clerk's;
+  no other train, so he did not come back). What follows is as strong as its weakest step by the best way to it:
+  certain if some way to it is certain throughout. An answer marked only as likely is still circled or crossed
+  out, and still solves its question; the page shows it dashed, in amber, with "(likely)", and says "So, likely"
+  and "Makes unlikely" in the tree. What is only likely contradicts nothing: where it cannot stand with an entry
+  the pair is listed as "unlikely together, by the evidence", beside the likely clashes, and not among the
+  contradictions. Each implication in the tree has the dot of how far it is trusted (its weakest premise).
+- **An aim nothing was done toward** (2026-11-18). A possibility's `goal` (`{of, attr, value, neg?}`: the state
+  wanted, as in the Holmes cases) is read by the table's rules: where an entry at or after the deed denies that
+  state, the observation it comes from makes that answer unlikely (a table rule with `strength: "likely"`): had
+  the money been the aim, the chest would not be whole with the money in it. Likely only, since an aim can
+  fail; and never against the right answer. A circled aim goes on the timeline as an intention only for a
+  question whose entry is one (`attr: "intends"`).
 - **The rules nobody writes** (2026-11-18; `tableRules`, `withTable` in `engine/implications.js`; finding 109).
   Where an answer has a typed form and what one observation comes from contradicts it, linking that observation
   rules the answer out, as an implication `{id: "t.<observation>.<n>", q, from: [observation], rules_out: [answer],

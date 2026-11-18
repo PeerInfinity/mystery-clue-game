@@ -13,7 +13,7 @@ import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, p
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described, onPage, bears, waits } from '../engine/observations.js';
-import { derive, verdict, premiseIds, derivedAssertions, impliedStates, supportLevel, supportIds, withTable } from '../engine/implications.js';
+import { derive, verdict, premiseIds, derivedAssertions, impliedStates, supportLevel, supportIds, withTable, certain, LIKELY } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -108,7 +108,7 @@ function hypIntention(id, anyMark = false) {
     if (!m) return null;
     const q = qById.get(m[1]);
     const p = q?.possibilities.find((x) => x.value === m[2]);
-    if (!p?.goal || (!anyMark && markOf(q, p.value) !== 'circled') || !possShown(q, p.value)) return null;
+    if (!p?.goal || q.entry?.attr !== 'intends' || (!anyMark && markOf(q, p.value) !== 'circled') || !possShown(q, p.value)) return null;
     return { id, of: q.entry.of, attr: 'intends', value: p.value, goal: p.goal, ...(p.step ? { step: p.step } : {}), time: hypTime(q), hyp: { q: q.id, pick: p.value }, given_at: q.raised };
 }
 const hypTime = (q) => (q.entry.time && typeof q.entry.time === 'object' ? q.entry.time : typeof q.entry.time === 'string' ? { at: q.entry.time } : {});
@@ -419,7 +419,7 @@ function acceptedAssertions() {
     const got = new Set(follows.map((x) => x.id));
     const marks = markAssertions(data, state.marks, possShown).filter((x) => !got.has(x.id) && lvlOf(x) >= state.threshold);
     const mine = reasoned.filter((f) => visible(f) && accepted(f))
-        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at, ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}), ...typedAct(f) }));
+        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at, ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}), ...typedAct(f), ...(f.likely ? { likely: true } : {}) }));
     return [...follows, ...marks, ...mine, ...allAssertions.filter((x) => {
         const f = factById.get(x.fact);
         if (!visible(f)) return false;
@@ -485,7 +485,7 @@ function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
     const below = lvl < state.threshold;
     const cls = ['event', linkingQ && (isLinked(f.id, linkingQ) || isTried(f.id, linkingQ)) ? 'link-done' : '', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', below ? 'below' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} ${paraSpan(givenAt(f))}${linkingQ ? ` ${linkButton('link-row', f.id, linkingQ, '+ relevant', 'linked ✓', 'tried ✗')}` : ''}${assertsHtml(f)}</${tag}>`;
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}${f.likely ? ' <span class="small muted">(likely)</span>' : ''}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} ${paraSpan(givenAt(f))}${linkingQ ? ` ${linkButton('link-row', f.id, linkingQ, '+ relevant', 'linked ✓', 'tried ✗')}` : ''}${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -944,12 +944,14 @@ function impliedEntries() {
         if (have.has(said(x))) continue;
         have.add(said(x));
         const premises = groundsOf(x.imp);
-        out.push({ ...x, reasoned: { move: 'i', premises, imp: x.imp }, given_at: reading.latest(premises.map((id) => givenAt(factOf(id)) ?? 0)) ?? 0 });
+        out.push({ ...x, ...(certain(x.imp, derivedNow, shownStatement) ? {} : { likely: true }), reasoned: { move: 'i', premises, imp: x.imp }, given_at: reading.latest(premises.map((id) => givenAt(factOf(id)) ?? 0)) ?? 0 });
     }
     return out;
 }
 const followsAssertions = () => (state.answerRule === 'evidence' && derivedNow.length
-    ? derivedAssertions(data, derivedNow.filter((i) => autoQ(i.q) && qById.has(i.q) && qListed(qById.get(i.q))), (q) => shownPossibilities(q).map((o) => o.value), { states: false }) : []);
+    ? derivedAssertions(data, derivedNow.filter((i) => autoQ(i.q) && qById.has(i.q) && qListed(qById.get(i.q))), (q) => shownPossibilities(q).map((o) => o.value), { states: false, shown: shownStatement }) : []);
+/** The answers the evidence marks only as likely (a step on every way to them is likely): their marks' keys. */
+let likelyMarks = new Set();
 /** How far what follows is trusted: as its weakest premise, and no more than the player trusts their own reasoning. */
 function derivedLevel(x) {
     const top = LEVELS.length - 1;
@@ -974,8 +976,11 @@ function followsHtml(q) {
             return `<li class="premise">${esc(observed.filled.find((x) => x.obs.id === id)?.says ?? id)}</li>`;
         });
         const iq = qById.get(i.q);
-        const out = i.concludes != null ? ` <b class="good">So: ${pickText(iq, i.concludes)}.</b>` : list(i.rules_out).length ? ` <span class="small muted">Rules out: ${list(i.rules_out).map((v) => pickText(iq, v)).join(', ')}.</span>` : '';
-        return `<li class="follows" data-follows="${esc(i.id)}"><span class="arrow">⇒</span> ${esc(i.says)}.${out}<ul>${kids.join('')}</ul></li>`;
+        const sure = certain(i.id, derivedNow, shownStatement);
+        const out = i.concludes != null ? ` <b class="good">${sure ? 'So' : 'So, likely'}: ${pickText(iq, i.concludes)}.</b>` : list(i.rules_out).length ? ` <span class="small muted">${sure ? 'Rules out' : 'Makes unlikely'}: ${list(i.rules_out).map((v) => pickText(iq, v)).join(', ')}.</span>` : sure ? '' : ' <span class="small muted">(likely)</span>';
+        // How far it is trusted, as on the timeline: its weakest premise (the dot's colour).
+        const lvl = derivedLevel({ derived: i.id });
+        return `<li class="follows" data-follows="${esc(i.id)}">${dot(lvl < 0 ? null : lvl)}<span class="arrow">⇒</span> ${esc(i.says)}.${out}<ul>${kids.join('')}</ul></li>`;
     };
     return `<div class="small muted">What follows from it</div><ul class="follows-list">${mine.filter((i) => !used.has(i.id)).map(tree).join('')}</ul>`;
 }
@@ -1114,6 +1119,7 @@ function render() {
     sweepLinks();
     if (observations) { observed = fillNow(); follow(); }
     if (state.answerRule === 'evidence' && derivedNow.length) { reasoned = [...reasoned, ...impliedEntries()]; reasonedById = new Map(reasoned.map((f) => [f.id, f])); }
+    likelyMarks = new Set(followsAssertions().filter((x) => x.kind === 'pick' && x.likely).map((x) => x.id));
     syncQuestions();
     judge();
     const qList = document.querySelector('#q-box ol');
@@ -1139,7 +1145,10 @@ function render() {
     if (shownPara !== shownKey && visibleEl(st)) { shownPara = shownKey; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
 
     const acceptedNow = acceptedAssertions();
-    const clashes = [...contradictions(data, acceptedNow), ...alibis(data, acceptedNow, presenceNeeds(acceptedNow))];
+    const allClashes = [...contradictions(data, acceptedNow), ...alibis(data, acceptedNow, presenceNeeds(acceptedNow))];
+    // What is only likely contradicts nothing: where it cannot stand with an entry, the two sit badly together.
+    const isSoft = (c) => [c.a, c.b, c.via].some((x) => x?.likely);
+    const clashes = allClashes.filter((c) => !isSoft(c)), soft = allClashes.filter(isSoft);
     const clashing = new Set(clashes.flatMap((c) => [c.a, c.b, c.via].filter(Boolean)).flatMap((x) => (x.mark || x.by === DERIVED ? [x.id, `q:${x.q}`] : [x.fact])));
     current = clashes;
     document.getElementById('undo').disabled = !state.history.length;
@@ -1147,7 +1156,8 @@ function render() {
         ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is on the timeline</summary><ol>${clashes.map((c) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${clashSide(c.a)}<br>against ${clashSide(c.b)}${c.via ? `<br>with ${clashSide(c.via)}` : ''}</li>`).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in a link of one of them.</p></details>`
         : '';
     const strains = activeStrains();
-    document.getElementById('clashes').innerHTML += strainsHtml(strains);
+    document.getElementById('clashes').innerHTML += strainsHtml(strains) + (soft.length ? `<details class="strain-box" open><summary>${soft.length} unlikely together, by the evidence</summary>
+      <p class="small muted">Not a contradiction: one side is only likely.</p><ol>${soft.map((c) => `<li>${clashSide(c.a)}<br>with ${clashSide(c.b)}${c.via ? `<br>and ${clashSide(c.via)}` : ''}</li>`).join('')}</ol></details>` : '');
     document.getElementById('questions').innerHTML = leftHtml() + questionsPanel(clashing);
     const cards = cardsPanel();
     document.getElementById('cards').innerHTML = cards.html;
@@ -1674,11 +1684,13 @@ function reasonedDetail(f) {
 
 // --- Questions: the panel, and one question in the detail.
 const AUTO_TITLE = { undefined: 'Open: nothing you have shown settles it', circled: 'It follows from what you have shown', crossed: 'Ruled out by what you have shown' };
+const LIKELY_TITLE = { circled: 'Likely, from what you have shown: a step on the way to it is probable, not certain', crossed: 'Unlikely, from what you have shown: not ruled out for certain' };
 const MARK_TITLE = { undefined: 'Uncertain: click to circle', circled: 'Circled: click to cross out', crossed: 'Crossed out: click to make uncertain again' };
 function chip(q, p) {
     const m = markOf(q, p.value);
     const judged = givenAway(q) && m ? ((m === 'circled') === isRight(q, p.value) ? ' right' : ' wrong') : '';
-    return `<button type="button" class="poss ${m ?? 'open'}${judged}" data-mark-q="${esc(q.id)}" data-mark-pick="${esc(p.value)}" title="${(autoQ(q.id) ? AUTO_TITLE : MARK_TITLE)[m]}">${pickText(q, p.value)}</button>`;
+    const weak = autoQ(q.id) && m && likelyMarks.has(hypothesisKey(q.id, p.value));
+    return `<button type="button" class="poss ${m ?? 'open'}${judged}${weak ? ' likely' : ''}" data-mark-q="${esc(q.id)}" data-mark-pick="${esc(p.value)}" title="${weak ? LIKELY_TITLE[m] : (autoQ(q.id) ? AUTO_TITLE : MARK_TITLE)[m]}">${pickText(q, p.value)}${weak ? ' <span class="small">(likely)</span>' : ''}</button>`;
 }
 // The questions whose "More" list is open (not saved).
 const moreOpen = new Set();

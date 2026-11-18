@@ -161,6 +161,7 @@ export const impliedStates = (derived) => derived.flatMap((i) => (i.asserts ?? [
  */
 export function derivedAssertions(data, derived, valuesOf, opts = {}) {
     const out = [];
+    const shown = opts.shown ?? (() => true);
     const qById = new Map(data.questions.map((q) => [q.id, q]));
     const entities = new Set((data.entities ?? []).map((e) => e.id));
     for (const qid of new Set(derived.map((i) => i.q))) {
@@ -196,6 +197,8 @@ export function derivedAssertions(data, derived, valuesOf, opts = {}) {
     }
     for (const i of derived) for (const id of [].concat(i.denies ?? [])) out.push({ id: `${i.id}!${id}`, fact: null, kind: 'denial', denies: id, q: i.q, imp: i.id, by: DERIVED, derived: i.id, truth: null });
     if (opts.states !== false) for (const s of impliedStates(derived)) out.push({ ...s, fact: null, kind: 'state', by: DERIVED, derived: s.imp, truth: null });
+    // What rests on a likely step by every way to it is likely, and no more (`likely`).
+    for (const x of out) if (!certain(x.derived, derived, shown)) x.likely = true;
     return out;
 }
 
@@ -240,15 +243,21 @@ export function tableRules(data, observations) {
         const marks = markAssertions(data, { [q.id]: { [p.value]: 'circled' } });
         if (!marks.length) return;
         const needs = actNeeds(marks[0], answerAction(q, p.value, isEntity), ctx);
-        if (marks.length < 2 && !needs.length && q.entry?.attr !== 'identity') return;
+        // An aim (`goal`: the state wanted) that an entry denies after the deed: nothing was done toward it, so it
+        // was likely not the aim. Likely only: an aim can fail.
+        const t = q.entry?.time && typeof q.entry.time === 'object' ? q.entry.time : {};
+        const span = { from: t.from ?? t.after, to: t.to ?? t.before };
+        const aims = p.goal && span.from && span.to ? [{ mark: marks[0], of: p.goal.of, attr: p.goal.attr, value: p.goal.value, neg: !!p.goal.neg, time: span, effect: true, label: 'its aim' }] : [];
+        if (marks.length < 2 && !needs.length && !aims.length && q.entry?.attr !== 'identity') return;
         const against = (ids) => { const a = told.filter((x) => ids.includes(x.fact)); return a.length > 0 && (contradictions(data, [...a, ...marks]).some((c) => marks.includes(c.a) || marks.includes(c.b)) || alibis(data, a, needs).length > 0); };
         for (const o of observations) {
             if (o.q !== q.id || o.if || !o.from.every((f) => typeof f === 'string' || Array.isArray(f.any))) continue;
             const fixed = o.from.filter((f) => typeof f === 'string'), anys = o.from.filter((f) => typeof f !== 'string');
             // Every choice among "any one of" must contradict it (one such group at most is tried one by one).
             const sets = anys.length ? anys[0].any.map((x) => [...fixed, x, ...anys.slice(1).flatMap((g) => g.any)]) : [fixed];
-            if (anys.length > 1 || !sets.every(against)) continue;
-            out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: one of the answers cannot stand with that`, rules_out: [p.value], table: true });
+            if (anys.length > 1) continue;
+            if (sets.every(against)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: one of the answers cannot stand with that`, rules_out: [p.value], table: true });
+            else if (aims.length && sets.every((ids) => alibis(data, told.filter((x) => ids.includes(x.fact)), aims).length > 0)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: had one of the answers been the aim, something would have been done toward it`, rules_out: [p.value], strength: LIKELY, table: true });
         }
     });
     return out;
@@ -257,4 +266,23 @@ export function tableRules(data, observations) {
 export function withTable(implications, data, observations) {
     const same = (t) => implications.some((i) => i.q === t.q && i.from.length === 1 && i.from[0] === t.from[0] && (i.rules_out ?? []).includes(t.rules_out[0]));
     return [...implications, ...tableRules(data, observations).filter((t) => !same(t))];
+}
+
+/**
+ * Strength (2026-11-18): an implication is certain unless it says `strength: 'likely'` (a step that is probable and
+ * not forced: an aim that nothing was done toward; initials that are "surely" the clerk's). What follows is as
+ * strong as its weakest step, by the best way to it: certain if some way to it is certain throughout.
+ * `certain(support, derived, shown)`: `support` as in `derivedAssertions`; `shown(id)`: an observation is shown.
+ */
+export const LIKELY = 'likely';
+export function certain(support, derived, shown = () => true) {
+    const byId = new Map(derived.map((i) => [i.id, i]));
+    const of = (s, trail) => {
+        if (typeof s !== 'string') return s.all ? s.all.every((x) => of(x, trail)) : (s.any ?? []).some((x) => of(x, trail));
+        const i = byId.get(s);
+        if (!i) return shown(s);
+        if (trail.includes(s) || i.strength === LIKELY) return false;
+        return i.from.every((p) => (typeof p === 'string' ? of(p, [...trail, s]) : p.any ? p.any.some((x) => (byId.has(x) || shown(x)) && of(x, [...trail, s])) : true));
+    };
+    return of(support, []);
 }
