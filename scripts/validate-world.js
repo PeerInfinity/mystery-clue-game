@@ -380,6 +380,21 @@ for (const f of facts) {
     if (f.attr === 'passed' && !(f.between?.length === 2 && f.between.every((x) => entities.has(x)))) err(f.id, 'passed: between is two entities');
     if (['attached', 'reaches', 'near', 'fixed'].includes(f.attr) && !entities.has(f.value)) err(f.id, `${f.attr}: no entity ${f.value}`);
 }
+// What the statements shown imply together (world/implications.json, optional; engine/implications.js): every
+// reference, no wrong answer concluded and no right one ruled out, and each question that has implications answered
+// when everything is shown. The observations an answer can do without are listed, for the author to read.
+if (fs.existsSync(path.join(dir, 'world', 'implications.json'))) {
+    const { problems, spare } = await import('../engine/implications.js');
+    const imps = read('world/implications.json').implications;
+    const rightOf = (q) => [].concat(qById.get(q)?.answer ?? [], qById.get(q)?.also_right ?? []);
+    const valuesOf = (q) => (qById.get(q)?.possibilities ?? []).map((x) => x.value);
+    for (const line of problems(imps, observationList, [...qById.values()], rightOf, valuesOf)) err('implications', line);
+    for (const q of new Set(imps.map((i) => i.q))) {
+        if (!qById.has(q)) continue;
+        const s = spare(imps, observationList, q, valuesOf(q));
+        if (s.spare.length) console.log(`  implications: ${q} follows without ${s.spare.join(', ')}`);
+    }
+}
 // What an entry shows about a question once linked (world/observations.json, optional).
 for (const o of observationList) {
     if (!qById.has(o.q)) err(o.id, `no question ${o.q}`);

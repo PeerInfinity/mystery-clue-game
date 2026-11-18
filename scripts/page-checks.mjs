@@ -61,6 +61,12 @@ if (caseHeader.delivery?.mode === 'earned') {
     const orders = perms(caseFiles.map((f) => f.id)).flatMap((p) => [['main', ...p], [...p, 'main']]);
     checks.splice(1, 0, ...orders.map((o) => ['path-check.mjs', { ORDER: o.join(',') }]), ['path-check.mjs', { WHOLE: '1' }]);
 }
+// A case with its implications written (world/implications.json, the experiment): the true path once more with the
+// answers marked from the evidence, where a circle must follow from the path's links.
+if (fs.existsSync(path.join(caseDir, 'world', 'implications.json'))) {
+    const first = checks.find((x) => x[0] === 'path-check.mjs');
+    checks.splice(checks.indexOf(first) + 1, 0, ['path-check.mjs', { ...(first.find((x) => x && typeof x === 'object') ?? {}), ANSWERS: 'evidence' }]);
+}
 const failed = [];
 const fixture = process.env.FIXTURE !== '0';
 for (const [script, ...rest] of checks.filter(([s, ...r]) => fixture || !(s === 'room-check.mjs' || r.some((x) => typeof x === 'object' && x.CASE)))) {

@@ -85,7 +85,9 @@ const send = (method, params = {}) => new Promise((r) => { const id = ++n; pendi
 const ev = async (expr) => { const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true }); if (r.result?.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description ?? 'eval failed'); return r.result?.result?.value; };
 await send('Page.enable'); await send('Runtime.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
-await send('Page.navigate', { url: pageUrl('http://localhost:8321/') }); await sleep(1500);
+// ANSWERS=evidence: the answers marked from what the evidence implies (the address says it: the setting is not the solver's).
+const ANSWERS = process.env.ANSWERS === 'evidence' || kept?.answers === 'evidence' ? 'answers=evidence' : '';
+await send('Page.navigate', { url: pageUrl('http://localhost:8321/', ANSWERS) }); await sleep(1500);
 // A fresh page in three columns: every part in view at once. A run gone on with: the page as it was saved.
 await ev(`localStorage.setItem(${J(STORE)}, ${J(J(kept?.save ?? { layout: 'three', ...(process.env.SEED ? { seed: +process.env.SEED } : {}) }))}); 1`);
 await send('Page.reload'); await sleep(1500);
@@ -93,7 +95,7 @@ const save = () => ev(`JSON.parse(localStorage.getItem(${J(STORE)}) ?? '{}')`);
 
 // --- What the solver sees. The controls it may not use: the hints, the autoplay, Settings, starting over, the guide
 // link (the guide is in the prompt), and the layout. A hint button inside a notice (the gate's) is a hint too.
-const SKIP = '#hint, [data-hint], #settings, #reset, #start-over, #autoplay-open, #guide-link, #layout, #theme, #hint-wait, #gate-rule, #hint-news, #view, #only-moves, #depth';
+const SKIP = '#answer-rule, #hint, [data-hint], #settings, #reset, #start-over, #autoplay-open, #guide-link, #layout, #theme, #hint-wait, #gate-rule, #hint-news, #view, #only-moves, #depth';
 const VIEW = `(() => {
     const vis = (e) => !!e && e.offsetParent !== null;
     const part = (sel, title) => { const e = document.querySelector(sel); const t = vis(e) ? e.innerText.trim() : ''; return t ? '## ' + title + '\\n' + t : ''; };
@@ -127,7 +129,7 @@ const guide = fs.readFileSync(path.join(ROOT, 'guide.html'), 'utf8')
     .replace(/<(style|script|nav)[\s\S]*?<\/\1>/g, '').replace(/<\/(p|h\d|li|dt|dd|section|tr)>/g, '\n').replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&[a-z]+;/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
 
-const SYSTEM = `You are playing a detective game in a web page, as its reader. A mystery story is told a paragraph at a time; you build a timeline of what you learn, decide whom to trust, mark answers to the story's questions (circle the one you believe, cross out the ones you rule out), and link the evidence that shows each answer. Before the story gives an answer away, a gate stops you until you have linked the evidence for it and circled an answer. In a longer story, papers come to you as you solve its questions (the guide says how), and the story's ending is held until its last question is solved. In such a story solve the smaller questions first: the last question rests on them, and most of its evidence is in papers that only come as they are solved. A question is solved only when the page says "Solved"; a circled answer alone is not. Your aim is to reach the end of the story with every question answered rightly, by reasoning from the evidence; guessing is not the point.
+const SYSTEM = (ANSWERS ? `In this game the setting "Answers: marked from the evidence" is on (the guide's Settings describe it). For the questions it covers you do not circle or cross out answers, and clicking one does nothing: link evidence, and the page crosses an answer out when what you have shown rules it out, circles it when it follows, and shows under the question what follows from what. Where the text below speaks of circling an answer, for those questions it is done for you. A question whose answers still respond to your click is marked by you as usual.\n\n` : '') + `You are playing a detective game in a web page, as its reader. A mystery story is told a paragraph at a time; you build a timeline of what you learn, decide whom to trust, mark answers to the story's questions (circle the one you believe, cross out the ones you rule out), and link the evidence that shows each answer. Before the story gives an answer away, a gate stops you until you have linked the evidence for it and circled an answer. In a longer story, papers come to you as you solve its questions (the guide says how), and the story's ending is held until its last question is solved. In such a story solve the smaller questions first: the last question rests on them, and most of its evidence is in papers that only come as they are solved. A question is solved only when the page says "Solved"; a circled answer alone is not. Your aim is to reach the end of the story with every question answered rightly, by reasoning from the evidence; guessing is not the point.
 
 You see the page as text, and a numbered list of the controls you may use. Each turn you do one thing. You have no tools: do not write tool calls or XML. Reply with only a JSON object, no other text:
 {"thought": "<one or two sentences: what you are doing and why>", "notes": "<your running notes, which replace the previous ones and are all you remember besides your last actions and the thought you had for each: suspects, evidence, what is left to do; under 150 words>", "action": {"click": <number>}}
@@ -193,7 +195,7 @@ let best = kept ? measure(kept.save) : 0;
 const keep = async (turns) => {
     const sv = await save();
     if (measure(sv) > best) { best = measure(sv); progressTurn = turns; }
-    fs.writeFileSync(path.join(RUN, 'state.json'), J({ case: CASE, model, turn: turns, cost, notes, history: history.slice(-HISTORY), answered, reports, progressTurn, mainLen, done, end: done ? end : null, save: sv }) + '\n');
+    fs.writeFileSync(path.join(RUN, 'state.json'), J({ case: CASE, model, turn: turns, cost, notes, history: history.slice(-HISTORY), answered, reports, progressTurn, mainLen, done, end: done ? end : null, answers: ANSWERS ? 'evidence' : 'hand', save: sv }) + '\n');
 };
 if (kept) console.log(`going on with ${path.relative(ROOT, RUN)} from turn ${turn} ($${cost.toFixed(3)} so far)`);
 fs.writeFileSync(path.join(RUN, 'system.md'), SYSTEM);

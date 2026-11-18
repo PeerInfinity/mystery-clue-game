@@ -1144,6 +1144,28 @@ script that found each fact's paragraph from its quote; the data files are the s
     same dead end at Mr. Prout's statement. Changed at the user's word: a statement's detail says that its being
     said is certain and what it says is trusted separately, and lists the entries it carried, each opening its
     own detail (on every statement alike, so it says nothing of which is a lie).
+105. **Implications: an experiment the user asked for (2026-11-18).** The ninth run's report on the cart question
+    was fair: a question is solved when every observation its author marked `essential` is linked and one answer
+    circled, and nothing reads what the observations imply. Measured on the long case: 98 essential pieces over
+    25 questions; 48 labelled as against a named wrong answer, 26 "another question is solved", 24 neither; of 61
+    wrong answers 26 are ruled out by nothing ("something else" everywhere, and Mr. Pell for the brandy). The
+    user's rulings: statements that say what other statements imply together, shown automatically as soon as
+    their premises are linked, in a tree; the answers circled and crossed out by the page from them, the
+    player's own circling removed for now ("the priority is accurately tracking the logic, and removing the
+    circling mechanic means that we rely entirely on the logic, which means it gets tested"); an answer accepted
+    when an implication concludes it or every other is ruled out; a piece the answer does without is kept as
+    support; an implication goes when a premise is distrusted, a solved question stays solved. Built as a setting
+    ("Answers: marked from the evidence", off by default; `docs/case-format.md`, Implications), with the rules
+    written first for The Rent Box and for the cart, the initials and the brandy of the long case. One decision
+    of the building: an observation's `against` is not read, since the piece seldom rules the answer out alone
+    ("the berths lie inside the quay gate" does so only with "the cart went out by the town gate").
+    What writing those rules showed. The Rent Box, who emptied it: "Mr. Fenn was outside" was required and is
+    not needed; "there was nobody else in the house" was not required and is (its link was added to the true
+    path). The cart: the berths piece only rules out the other answer. The brandy: "read as Mr. Prout's" restates
+    the rest. The initials: the evidence rules out Mr. Pell, and the step to Mr. Prout rests on what no entry
+    says, that nobody else at the Custom House has those initials (written as a rule, and listed as a gap).
+    Lost with the player's circles, for those questions: "Not this answer", a guess on the timeline as a
+    hypothesis, and the hints' circle steps (a hint that says to circle is done already).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

@@ -1,0 +1,11 @@
+{
+  "implications": [
+    {"id": "i.cart_not_ship", "q": "q.cart", "from": ["o.cart_out", "o.cart_inside"], "says": "the cart passed out by the town gate, and the berths lie inside the quay gate: it was not going to a vessel", "rules_out": ["berths"]},
+    {"id": "i.cart_cellar", "q": "q.cart", "from": ["o.cart_out", "o.cart_note"], "says": "it went up Mill Lane, where Mr. Garrick writes that the casks had been going to his cellar: it took them there", "concludes": "garrick_cellar"},
+    {"id": "i.passes_first_not_pell", "q": "q.passes", "from": ["o.passes_first", "o.passes_london"], "says": "the first pass was signed at Saltmere while Mr. Pell was in London: he did not sign it"},
+    {"id": "i.passes_not_pell", "q": "q.passes", "from": ["i.passes_first_not_pell", "o.passes_hand"], "says": "one hand signed all three, and it was not Mr. Pell's", "rules_out": ["pell"]},
+    {"id": "i.passes_prout", "q": "q.passes", "from": ["i.passes_not_pell"], "says": "J.P. on a pass of the Custom House that is not Josiah Pell's is Jonas Prout's", "concludes": "prout"},
+    {"id": "i.inside_signed", "q": "q.inside", "from": ["o.inside_passes", "o.inside_out"], "says": "the casks left the bond store on passes the clerk signed"},
+    {"id": "i.inside_prout", "q": "q.inside", "from": ["i.inside_signed", "o.inside_cart"], "says": "and they went to a cellar in the town, not aboard a ship: Mr. Prout let the brandy out of bond", "concludes": "prout"}
+  ]
+}

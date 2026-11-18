@@ -26,7 +26,12 @@ const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
 const header = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8'));
 const EARNED = deliveryMode(header) === 'earned';
 const SEED = Number(process.env.SEED ?? 1);
-const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', EARNED ? `seed=${SEED}` : '');
+// ANSWERS=evidence: the answers marked from what the evidence implies (world/implications.json). A circle of the
+// path on a question that has implications is not clicked: it must be there already, from the path's links.
+const ANSWERS = process.env.ANSWERS ?? '';
+const AQ = ANSWERS ? `answers=${ANSWERS}` : '';
+const impQs = new Set(ANSWERS === 'evidence' && fs.existsSync(path.join(WORLD, 'implications.json')) ? JSON.parse(fs.readFileSync(path.join(WORLD, 'implications.json'), 'utf8')).implications.map((i) => i.q) : []);
+const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', [EARNED ? `seed=${SEED}` : '', AQ].filter(Boolean).join('&'));
 const STOP = +(process.env.STOP ?? 1e9);
 const files = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).files ?? [];
 const ORDER = process.env.ORDER ? process.env.ORDER.split(',') : null;
@@ -55,7 +60,7 @@ const ready = async () => { for (let i = 0; i < 150; i++) { if (await ev(`!!docu
 await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
 // The case's address without a seed first: a save from another seed would make the page ask before starting anew.
-await send('Page.navigate', { url: pageUrl(process.env.URL ?? 'http://localhost:8321/') }); await sleep(1500);
+await send('Page.navigate', { url: pageUrl(process.env.URL ?? 'http://localhost:8321/', AQ) }); await sleep(1500);
 // A fresh page in three columns: every part in view, as on a laptop.
 await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three' }))}); 1`);
 if (EARNED) await send('Page.navigate', { url: URL_ }); else await send('Page.reload');
@@ -208,6 +213,11 @@ async function play(m) {
     const before = await save();
     switch (m.do) {
         case 'circle': case 'cross': {
+            if (impQs.has(m.q)) {
+                const q = qs.get(m.q), right = q && (q.answer === m.pick || (q.also_right ?? []).includes(m.pick));
+                if (m.do === 'circle' && right && (await save()).marks?.[m.q]?.[m.pick] !== 'circled') return fail(m, 'the answer does not follow from what the path has linked');
+                break;
+            }
             const sel = `#q-box [data-mark-q="${esc(m.q)}"][data-mark-pick="${esc(m.pick)}"]`;
             if (!(await exists(sel))) await click(`#q-box [data-more-q="${esc(m.q)}"]`);
             if (!(await exists(sel))) return fail(m, 'possibility not offered');

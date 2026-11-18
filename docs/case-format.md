@@ -27,6 +27,7 @@ else. Every JSON file is one object per line inside its list.
 | `world/strains.json` | no | Likely clashes; without it the page shows none. |
 | `world/room.json` | no | The arrangement of a room: openings and a sealed place. Without it the page has no room panel. See "The arrangement of a room". |
 | `world/observations.json` | no | What an entry shows about a question once the player links them. Without it the page offers no links. See "Observations". |
+| `world/implications.json` | no | An experiment: what the statements shown imply when put together, and which answers that rules out or concludes. Used when Settings has the answers marked from the evidence. |
 | `world/actions.json` | no | The case's own action types, `{id, label, requires, effects}` in the action table's rule shape, and `ramifies` (what a goal's state brings with it); the generic ones are the engine's (see "Typed states and actions"). |
 | `world/path.json` | no | The true path through the page: needed for the autoplay, the hints and the page checks (`npm run page-checks`; `CASE=<dir> node scripts/path-check.mjs` for another case). |
 | `structure.json` | no | Beside `world/`, for an authored story: the logic it was written from, `{story, mechanic, goal, frame, questions: [{id, asks, answer, others, gate, needs, rules_out}], clues: [{id, source, says, facts, chain?, false?, false_trail?}]}` (`docs/authored-stories.md`; the shape sketched in `docs/archipelago-plan.md`). `needs` lists alternative sets of clues. The page does not read it; `npm test` checks that its clues, facts and questions exist and that every essential observation of a question rests on facts of the clues it needs. So far only the miniatures (`cases/miniatures/`) have one. |
@@ -460,6 +461,25 @@ knowledge", and "Observations and open questions"). An invented example is `scri
   locked, for any size.
 - The player's moves: a mark on a cell of the table, refused unless a fact supports it; "Something got through", an
   entry `attr: opening`; the route, link by link, an entry `attr: route`.
+
+**Implications** (`world/implications.json`, optional; `engine/implications.js`; an experiment since 2026-11-18,
+`docs/authored-stories.md` finding 105). An observation is a statement a link shows; an implication is a statement
+that follows from others, shown by itself the moment they all are.
+
+- `{id, q, from: [premise], says, rules_out?: [possibility], concludes?: possibility}`. A premise is the id of an
+  observation or of another implication (so they make a tree; of any question), or `{any: [ids]}` for any one of
+  several, or `{solved: q}`. Two implications with the same conclusion are two ways to it. `rules_out` crosses those
+  answers of `q` out; `concludes` is its answer.
+- With Settings "Answers: marked from the evidence" (`?answers=evidence` for one visit), a question that has
+  implications is not marked by the player. An answer is crossed out when an implication that holds rules it out,
+  and circled when one concludes it or when every other answer is ruled out; the question is solved when its answer
+  is concluded. `essential` is not read for such a question, and an observation's `against` is a label only: what
+  rules an answer out is an implication, with every premise that takes. A question without implications is played
+  as before.
+- The validator checks every reference, that no wrong answer is concluded and no right one ruled out, and that each
+  question with implications is answered when everything is shown; it lists the observations an answer follows
+  without. `path-check.mjs` with `ANSWERS=evidence` plays the true path in that mode: a circle of the path on such a
+  question is not clicked and must be there from the path's links (run by `page-checks` for a case with the file).
 
 **Observations** (`world/observations.json`, optional; `engine/observations.js`; the design: `docs/ideas.md`). The general
 mechanic for any question. The player points out that a timeline entry is relevant to an open question; an observation the

@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.who_shut", "q": "q.who", "from": ["o.who_front", "o.who_back"], "says": "nobody came into the house or left it after one: whoever emptied the box was inside it"},
+    {"id": "i.who_not_fenn", "q": "q.who", "from": ["i.who_shut", "o.who_fenn"], "says": "Mr. Fenn, outside from one o'clock when the box was full, could not have come back to it", "rules_out": ["fenn"]},
+    {"id": "i.who_rudd", "q": "q.who", "from": ["i.who_shut", "o.who_rudd", "o.who_house"], "says": "the Captain was inside the whole time, and there was nobody else in the house to do it: it was he", "concludes": "rudd"},
+    {"id": "i.untrue_rudd", "q": "q.untrue", "from": ["o.untrue_back", "o.untrue_said"], "says": "nobody came in from the yard, and it was the Captain who said somebody did: his is the thing that was not so", "concludes": "rudd"}
+  ]
+}
