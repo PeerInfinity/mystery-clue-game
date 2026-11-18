@@ -1112,7 +1112,12 @@ script that found each fact's paragraph from its quote; the data files are the s
     man's); distrusted, it is off the timeline and shows nothing, and the page said only "Part of something not
     yet complete: something else is still needed", which the solver read as "find another entry". Trust was
     left without feedback of its own when checked links were built (contradictions were to be the feedback);
-    this is the first run it cost much. Neither is changed yet: both wait for the user's word.
+    this is the first run it cost much. Both changed at the user's word. The unread paper's view has its own
+    button, "Read its first paragraph ▶" (the line there had named Read on already: a line was not enough).
+    And a linked entry that is evidence for the question but below the timeline's level says so, in its detail,
+    in the question's list ("Linked, but you do not trust it enough for it to count") and in "Not solved yet".
+    This says that the statement matters, which a kept link says already, and not whether it is true. (Entries
+    of distrusted statements are shown faded by default already: "Show the rest, faded".)
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

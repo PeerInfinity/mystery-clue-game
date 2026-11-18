@@ -863,6 +863,11 @@ const carriedBy = (t) => {
 const viaStatement = (entry, q) => observations.filter((o) => o.q === q && o.from.some((f) => f?.doubted && carriedBy(f.doubted).includes(entry)));
 const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(observations, q, e) || viaStatement(entry, q).length > 0); };
 /** A kept link that still waits: something it is evidence for is not shown yet. */
+// Evidence the player's own trust keeps from counting: an entry some observation of `q` not yet shown comes from
+// (itself, or as one of several alike), linked or not, that is below the timeline's level. Said outright, since
+// "something else is needed" sent a blind solver looking for another entry for two hundred turns.
+const untrusted = (e, q) => !!e && !e.reasoned && !accepted(e) && observations.some((o) => o.q === q && !observed.filled.some((x) => x.obs === o) && o.from.some((f) => (typeof f === 'string' ? f === e.id : !!f.any?.includes(e.id))));
+const UNTRUSTED = 'It is evidence for this, but you do not trust it enough for it to count: it shows nothing until it is back on your timeline.';
 const waitsOn = (e, q) => waits(observations, q, e, observed.filled) || viaStatement(e.id, q).some((o) => !observed.filled.some((x) => x.obs === o));
 const isTried = (entry, q) => checkedLinks() && (state.tried[q] ?? []).includes(entry);
 const markTried = (entry, q) => { if (!entry.startsWith('r:r:') && !(state.tried[q] ?? []).includes(entry)) state.tried = { ...state.tried, [q]: [...(state.tried[q] ?? []), entry] }; };
@@ -910,6 +915,7 @@ function linkHtml(f) {
         const shows = observed.filled.filter((x) => x.obs.q === q.id && has(x));
         if (shows.length) return shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>. ${name}</p>`).join('');
         if (observed.partial.some((x) => x.obs.q === q.id && has(x))) return `<p class="small">Part of something not yet complete: with something else, linked too, it would show more. ${name}</p>`;
+        if (untrusted(f, q.id)) return `<p class="small untrusted-note">${UNTRUSTED} ${name}</p>`;
         if (checkedLinks() && bearsOn(f.id, q.id)) return waitsOn(f, q.id) ? `<p class="small">Part of something not yet complete: it is evidence for this, and as the timeline stands something else is still needed before it shows it. ${name}</p>`
             : `<p class="small muted">Part of what you have shown about this. ${name}</p>`;
         return `<p class="small muted">Kept as a note: as the timeline stands, it shows nothing about this on its own. ${name}</p>`;
@@ -928,6 +934,8 @@ function descriptionHtml(q) {
     const from = (x) => x.entries.map((e) => (e.solved ? 'solved' : paraTag(givenAt(e)))).join(', ');
     const begun = [...observed.partial.filter((x) => x.obs.q === q.id).map((x) => x.entries), ...waiting.filter((e) => !observed.partial.some((x) => x.obs.q === q.id && x.entries.includes(e))).map((e) => [e])]
         .map((es) => `<li class="muted">Part of something not yet complete: ${es.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
+    const off = state.links.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter((e) => untrusted(e, q.id))
+        .map((e) => `<li class="muted untrusted-note">Linked, but you do not trust it enough for it to count: ${phrase(e)} ${paraSpan(givenAt(e))}</li>`).join('');
     const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length ? ` <span class="small muted">against: ${list(x.obs.against).map((v) => esc(entityById.has(v) ? nameOf(v) : v)).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
@@ -941,7 +949,7 @@ function descriptionHtml(q) {
     // Starting and ending are two controls in two places: the button here starts, Done at the top of the timeline
     // ends (one button for both let a press after a press undo itself: a blind solver did that 117 times running).
     const start = !givenAway(q) ? `${linkingQ === q.id ? '<span class="small link-start on">Linking: go down the timeline. <b>Done linking</b> is at its top.</span>' : `<button type="button" class="link-start" data-linking="${esc(q.id)}">Link observations…</button>`}${checkedLinks() ? ` <span class="small muted untried-count" data-untried="${esc(q.id)}"></span>` : ''}` : '';
-    return `<div class="desc">${status}${restsHtml}${items || begun ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
+    return `<div class="desc">${status}${restsHtml}${items || begun || off ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}${off}</ul>` : ''}${noteHtml_}${verdict}${start}</div>`;
 }
 const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span>${checkedLinks() ? `<label class="link-only-new" title="Hide the entries already linked to this question or tried for it"><input type="checkbox" data-link-only-new${linkOnlyNew ? ' checked' : ''}> only what is not tried yet</label>` : ''}<button type="button" data-linking-done>Done linking</button></div>` : '');
 
@@ -1005,7 +1013,7 @@ function render() {
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
     st.innerHTML = storyTabsHtml() + (at ? stories.get(sid).slice(1, at + 1).map((p, i) => `<p class="sp${i + 1 === at && reading.log.at(-1) === `${sid}:${at}` ? ' now' : ''}" data-sp="${esc(`${sid}:${i + 1}`)}">${paraSpan(sid === MAIN ? i + 1 : `${sid}:${i + 1}`)} ${paraHtml(sid, i + 1)}</p>`).join('')
-        : `<p class="muted small">${esc(fileById.get(sid)?.title ?? '')}: not read yet. <b>Read on ▶</b> reads it.</p>`) + paperNotes();
+        : `<p class="muted small">${esc(fileById.get(sid)?.title ?? '')}: this paper is open, and nothing of it is read yet. <button type="button" class="read-first" data-read-first>Read its first paragraph ▶</button> <span class="muted">(<b>Read on ▶</b>, above, does the same.)</span></p>`) + paperNotes();
     // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
     const shownKey = `${sid}:${at}`;
     if (shownPara !== shownKey && visibleEl(st)) { shownPara = shownKey; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
@@ -1845,7 +1853,8 @@ function unsolvedWhy(q) {
     const evidence = !evidenceHere(q) ? 'some of its evidence is not on the page yet'
         : d.done ? 'all of its evidence is in place'
         : `${all - d.missing.length} of ${all} pieces of its evidence in place${restsOpen(q).length ? ' (a question it rests on counts as one)' : ''}`;
-    return `${circle}; ${evidence}`;
+    const off = state.links.some((l) => l.q === q.id && untrusted(factOf(l.entry), q.id)) ? '; something you linked does not count while you distrust it' : '';
+    return `${circle}; ${evidence}${off}`;
 }
 let solvedNews = [];      // the questions just solved, until the notice is dismissed
 /**
@@ -1991,6 +2000,8 @@ document.getElementById('threshold').addEventListener('change', (e) => { state.t
 document.getElementById('only-moves').addEventListener('change', (e) => { state.onlyMoves = e.target.value === 'moves'; save(); render(); });
 document.getElementById('view').addEventListener('change', (e) => { state.view = e.target.value; save(); render(); });
 document.getElementById('depth').addEventListener('change', (e) => { state.depth = Number(e.target.value); save(); render(); });
+// An unread paper's own button: the same as Read on (a blind solver took the empty view for a paper that would not open).
+document.addEventListener('click', (e) => { if (e.target.closest('[data-read-first]')) document.getElementById('next').click(); });
 document.getElementById('show-below').addEventListener('change', (e) => { state.showBelow = e.target.checked; save(); render(); });
 document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Put every link and person back to uncertain (and each narrator to the story\'s default)?')) return;
