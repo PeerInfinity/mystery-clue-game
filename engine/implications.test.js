@@ -83,3 +83,60 @@ test('every way to an answer: the smallest sets of statements it follows from', 
     }
     assert.deepEqual(ways([or[3]], 'q.x', ['x', 'y', 'z'], ['x']), []);
 });
+
+test('what follows as assertions: answers, the states they are, typed statements and statements denied by name', async () => {
+    const { derivedAssertions, supportLevel, supportIds } = await import('./implications.js');
+    const { contradictions, assertions } = await import('./world.js');
+    const data = {
+        entities: [{ id: 'town', kind: 'place' }, { id: 'mole', kind: 'place', within: 'town' }, { id: 'inn', kind: 'place', within: 'town' }, { id: 'house', kind: 'place', within: 'town' }, { id: 'watch', kind: 'person' }, { id: 'clerk', kind: 'person' }, { id: 'figure', kind: 'person' }],
+        moves: [], times: [{ id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }],
+        accounts: [], narrators: [{ id: 'n' }],
+        facts: [
+            { id: 'f.seen', of: 'watch', attr: 'location', value: 'mole', time: { from: 't1', to: 't3' }, para: 1 },
+            { id: 'f.said', of: 'watch', attr: 'location', value: 'house', time: { from: 't1', to: 't3' }, para: 1, truth: false },
+            { id: 'f.rounds', of: 'watch', attr: 'round', value: 'made', time: { from: 't1', to: 't3' }, para: 1, truth: false },
+            { id: 'f.ledger', of: 'clerk', attr: 'action', value: 'ships the casks, by the ledger', time: { at: 't2' }, para: 1, truth: false },
+            { id: 'f.was_clerk', of: 'figure', attr: 'identity', value: 'watch', time: { at: 't2' }, para: 1, truth: false },
+        ],
+        questions: [
+            { id: 'q.where', entry: { of: 'watch', attr: 'location', time: { from: 't1', to: 't3' } }, possibilities: [{ value: 'mole' }, { value: 'inn' }, { value: 'house' }], answer: 'mole' },
+            { id: 'q.fig', entry: { of: 'figure', attr: 'identity', time: { at: 't2' } }, possibilities: [{ value: 'watch' }, { value: 'clerk' }], answer: 'clerk' },
+            { id: 'q.text', entry: { of: 'house', attr: 'condition', time: { after: 't1', before: 't3' } }, possibilities: [{ value: 'yes' }, { value: 'no' }], answer: 'no' },
+        ],
+    };
+    const imps = [
+        { id: 'i.mole', q: 'q.where', from: ['o.a'], says: 'he was on the mole', concludes: 'mole' },
+        { id: 'i.not_house', q: 'q.where', from: ['o.a', 'o.b'], says: 'not at the house', rules_out: ['house'] },
+        { id: 'i.not_watch', q: 'q.fig', from: ['i.mole'], says: 'not the watch', rules_out: ['watch'] },
+        { id: 'i.no', q: 'q.text', from: ['o.b'], says: 'no round at two, and nothing was shipped', concludes: 'no', asserts: [{ of: 'watch', attr: 'round', value: 'made', neg: true, time: { at: 't2' } }], denies: 'f.ledger' },
+    ];
+    const values = (q) => q.possibilities.map((p) => p.value);
+    const all = derive(imps, () => true, () => true);
+    const got = derivedAssertions(data, all, values);
+    const byId = new Map(got.map((x) => [x.id, x]));
+    assert.equal(byId.get('hyp:q.where=mole').mark, 'circled');
+    assert.equal(byId.get('hyp:q.where=mole@state').value, 'mole');
+    assert.equal(byId.get('hyp:q.where=house@state').whole, true, 'ruled out over a stretch: not there throughout');
+    assert.ok(byId.get('hyp:q.where=inn').neg, 'the others once one is concluded');
+    assert.ok(!byId.has('hyp:q.where=inn@state'), 'crossed out only by the conclusion: no state denied');
+    assert.deepEqual(byId.get('hyp:q.where=house@state').derived, { any: ['i.not_house'] });
+    assert.equal(byId.get('hyp:q.fig=watch@state').attr, 'identity');
+    assert.ok(!byId.has('hyp:q.text=no@state'), 'a free-text answer has no typed form');
+    assert.equal(byId.get('i.no!f.ledger').denies, 'f.ledger');
+    assert.equal(byId.get('r:i:i.no:0').neg, true);
+    assert.ok(!derivedAssertions(data, all, values, { states: false }).some((x) => x.id === 'r:i:i.no:0'));
+    // Against the story: nothing true is contradicted, and each lie is.
+    const told = assertions(data);
+    const clash = (xs) => contradictions(data, [...xs, ...got]).filter((c) => got.includes(c.a) || got.includes(c.b)).map((c) => (got.includes(c.a) ? c.b : c.a).id).sort();
+    assert.deepEqual(clash(told.filter((x) => x.truth === true)), []);
+    assert.deepEqual(clash(told), ['f.ledger', 'f.rounds', 'f.said', 'f.said', 'f.was_clerk']);
+    // Trust: an implication as its weakest premise, the better of two ways.
+    const lv = { 'o.a': 3, 'o.b': 1 };
+    const level = (id) => supportLevel(byId.get(id).derived, all, (o) => lv[o] ?? null, 3);
+    assert.equal(level('hyp:q.where=mole'), 3);
+    assert.equal(level('hyp:q.where=house'), 3, 'ruled out by the weaker rule, and by the conclusion');
+    assert.equal(level('i.no!f.ledger'), 1);
+    assert.equal(level('hyp:q.fig=watch'), 3);
+    assert.deepEqual(supportIds(byId.get('hyp:q.where=house').derived).sort(), ['i.mole', 'i.not_house']);
+    assert.equal(supportLevel('i.mole', all.filter((i) => i.id !== 'i.mole'), () => null, 3), null, 'not holding');
+});

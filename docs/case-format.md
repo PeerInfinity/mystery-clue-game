@@ -248,6 +248,16 @@ contradiction written by hand:
 - **A denial against what it denies** (2026-11-11), for any other attribute: the same entity, attribute and value,
   asserted and denied at times that certainly meet ("he made every round, from twelve until five" against the
   reader's own "no round at three").
+- **A denial over a stretch of time** (2026-11-18). A denial with `{from, to}` says "at no moment of it". Beyond
+  the times both sides certainly cover, it is set against the same thing asserted at some moment between two
+  points (`{after, before}`) when both points lie in the stretch ("not in the house from one until four" against
+  "in the house sometime between two and three"). A denial marked `whole` says less, "not so for the whole of it"
+  (the denial of an answer that says "there throughout"): it is contradicted only by locations within that place
+  that hold the stretch from end to end, one or several, each a side of the contradiction; a moment elsewhere is
+  enough for it to stand. Only what follows from the evidence makes a `whole` denial (see "Implications").
+- **A statement denied by name** (2026-11-18). An assertion `{kind: 'denial', denies: <an assertion's id>}`
+  contradicts that assertion while both are accepted. For what cannot be typed ("so what the ledger says of the
+  Marigold is not so"); only an implication makes one (`denies`).
 - Claims with `modal: possible` take no part.
 - **Alibis** (`alibis` in `engine/world.js`). A circled answer to a question whose `entry` is a typed action (`act`)
   over a `{from, to}` window is that one's act. If the act needs its agent at a door (`at`: either side of it,
@@ -466,7 +476,7 @@ knowledge", and "Observations and open questions"). An invented example is `scri
 `docs/authored-stories.md` finding 105). An observation is a statement a link shows; an implication is a statement
 that follows from others, shown by itself the moment they all are.
 
-- `{id, q, from: [premise], says, rules_out?: [possibility], concludes?: possibility}`. A premise is the id of an
+- `{id, q, from: [premise], says, rules_out?: [possibility], concludes?: possibility, asserts?, denies?}`. A premise is the id of an
   observation or of another implication (so they make a tree; of any question), or `{any: [ids]}` for any one of
   several, or `{solved: q}`. Two implications with the same conclusion are two ways to it. `rules_out` crosses those
   answers of `q` out; `concludes` is its answer.
@@ -476,6 +486,32 @@ that follows from others, shown by itself the moment they all are.
   is concluded. `essential` is not read for such a question, and an observation's `against` is a label only: what
   rules an answer out is an implication, with every premise that takes. A question without implications is played
   as before.
+- **What follows, in the contradiction tracking** (2026-11-18; `derivedAssertions` in `engine/implications.js`,
+  `docs/authored-stories.md` finding 107). With the answers marked from the evidence, what follows is an assertion
+  like any other on the timeline, resting on its premises and not on the reader's hypothesis: it is trusted as far
+  as its weakest premise (the better of two ways), and a contradiction's trace shows the implications and the
+  entries under them.
+  - An answer that follows is asserted and one ruled out is denied, as a circle and a cross are (so an identity
+    that follows carries whereabouts, and a typed act its alibi).
+  - Where the question's `entry` gives the answer a typed form and a certain time (`at`, or `from` and `to`), the
+    state is asserted too: a place answer of a `location` entry is that location, and one that an implication
+    rules out is that location denied (over a stretch: `whole`, above); an identity an implication rules out is
+    that identity denied. An answer crossed out only because another is concluded is not denied as a state ("not
+    at Saltmere" is not so of what hung in the Custom House, which is in Saltmere). A free-text answer ("it was
+    set", "no") has no typed form: of the long case's 25 questions, 5 answers are people, 3 places and 17 text.
+  - `asserts: [{of, attr, value, neg?, time, event?}]` on an implication (optional): what it says as typed
+    statements, in the form of a claim's `asserts` (states only, each with a time). They take part in the
+    contradictions, and the page puts each on the timeline as an entry of the reader's reasoning (`reasoned.move:
+    'i'`, id `r:i:<implication>:<n>`), unless the timeline already holds the same statement in the same words.
+  - `denies: <assertion id>` (or a list) on an implication (optional): a statement that cannot be typed, reasoned
+    not to be so: a fact's id, or for a claim the item it asserts (`<fact>#<n>`; that it was said is certain).
+  - Nothing here is wired to the statement it contradicts: "no round at one" (`asserts`) meets "I made every
+    round" because both are typed. `denies` is the one place a rule names its target.
+  - The validator checks the form, and that with everything shown nothing that follows contradicts what the key
+    holds true, or itself (a wrong rule shows as a contradiction); it prints the false statements that what
+    follows contradicts. `path-check.mjs` with `ANSWERS=evidence LIES=1` plays the true path without its moves of
+    trust: every false statement on the timeline that the engine says the evidence contradicts must be in a
+    contradiction on the page (run by `page-checks` for a case with the file).
 - The validator checks every reference, that no wrong answer is concluded and no right one ruled out, and that each
   question with implications is answered when everything is shown; it lists the observations an answer follows
   without. `path-check.mjs` with `ANSWERS=evidence` plays the true path in that mode: a circle of the path on such a

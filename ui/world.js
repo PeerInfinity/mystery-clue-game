@@ -4,7 +4,7 @@
 // the player says (engine/world.js). The player is the reader: the marks and moves are the reader's own. Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
@@ -13,7 +13,7 @@ import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, p
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described, onPage, bears, waits } from '../engine/observations.js';
-import { derive, verdict, premiseIds } from '../engine/implications.js';
+import { derive, verdict, premiseIds, derivedAssertions, impliedStates, supportLevel, supportIds } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -410,10 +410,13 @@ const accepted = (f) => levelOfFact(f) >= state.threshold;
 function acceptedAssertions() {
     // An implied answer is as trusted as the circle that implies it.
     const lvlOf = (x) => { const m = x.from && /^hyp:(.+)=(.+)$/.exec(x.from); return m ? markLevel(m[1], m[2]) : markLevel(x.q, x.pick); };
-    const marks = markAssertions(data, state.marks, possShown).filter((x) => lvlOf(x) >= state.threshold);
+    // What follows from the evidence stands in place of the marks the page made from it, resting on its premises.
+    const follows = followsAssertions().filter((x) => derivedLevel(x) >= state.threshold);
+    const got = new Set(follows.map((x) => x.id));
+    const marks = markAssertions(data, state.marks, possShown).filter((x) => !got.has(x.id) && lvlOf(x) >= state.threshold);
     const mine = reasoned.filter((f) => visible(f) && accepted(f))
-        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at }));
-    return [...marks, ...mine, ...allAssertions.filter((x) => {
+        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at, ...(f.event ? { event: f.event } : {}) }));
+    return [...follows, ...marks, ...mine, ...allAssertions.filter((x) => {
         const f = factById.get(x.fact);
         if (!visible(f)) return false;
         if (x.claim && x.claim === x.fact) return levelOf(claimChains(x.claim), state.trust) >= state.threshold;
@@ -682,6 +685,7 @@ const markText = (x) => {
     return `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}${via}`;
 };
 function clashSide(x) {
+    if (x.by === DERIVED) return `<a class="link" data-q="${esc(x.q)}">${followText(x)}</a>${x.kind === 'state' ? sideTime(x.time) : ''}${x.needs ? ` <span class="small muted">(${esc(x.needs)})</span>` : ''}`;
     if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${markText(x)}</a>${x.needs ? ` <span class="small muted">(${esc(x.needs)})</span>` : ''}`;
     const f = factOf(x.fact);
     if (x.kind === 'pick') {
@@ -925,6 +929,44 @@ function follow() {
     }
     derivedSeen = new Set(derivedNow.map((i) => i.id));
 }
+// What follows, in the contradiction tracking (engine/implications.js `derivedAssertions`): the answers the evidence
+// gives and rules out, the states those are, and the statements an implication denies by name, each trusted as its
+// weakest premise; and an implication's typed statements (`asserts`) as entries of the timeline, from the reader's
+// reasoning. Only with the answers marked from the evidence.
+const holdsNow = (id) => shownStatement(id) || derivedNow.some((d) => d.id === id);
+/** The timeline entries under a statement or an implication: what it rests on, through other implications. */
+function groundsOf(id, trail = []) {
+    const i = derivedNow.find((d) => d.id === id);
+    if (!i) return (observed.filled.find((x) => x.obs.id === id)?.entries ?? []).filter((e) => !e.solved).map((e) => e.id);
+    if (trail.includes(id)) return [];
+    return [...new Set(premiseIds(i, holdsNow).filter((p) => !p.startsWith('solved:')).flatMap((p) => groundsOf(p, [...trail, id])))];
+}
+// One that says what the timeline already says in the same words (a witness's entry, a move of the player's, or
+// another implication's) is left out: the same statement twice would be two rows, and two contradictions for one.
+function impliedEntries() {
+    const said = (x) => JSON.stringify([x.of, x.attr, x.value, !!x.neg, Object.entries(x.time ?? {}).sort()]);
+    const have = new Set(onTimeline().map(said));
+    const out = [];
+    for (const x of impliedStates(derivedNow.filter((i) => autoQ(i.q)))) {
+        if (have.has(said(x))) continue;
+        have.add(said(x));
+        const premises = groundsOf(x.imp);
+        out.push({ ...x, reasoned: { move: 'i', premises, imp: x.imp }, given_at: reading.latest(premises.map((id) => givenAt(factOf(id)) ?? 0)) ?? 0 });
+    }
+    return out;
+}
+const followsAssertions = () => (state.answerRule === 'evidence' && derivedNow.length
+    ? derivedAssertions(data, derivedNow.filter((i) => autoQ(i.q) && qById.has(i.q) && qListed(qById.get(i.q))), (q) => shownPossibilities(q).map((o) => o.value), { states: false }) : []);
+/** How far what follows is trusted: as its weakest premise, and no more than the player trusts their own reasoning. */
+function derivedLevel(x) {
+    const top = LEVELS.length - 1;
+    const ofStatement = (id) => { const o = observed.filled.find((y) => y.obs.id === id); if (!o) return null; const ls = o.entries.filter((e) => !e.solved).map((e) => levelOfFact(e)); return ls.some((l) => l == null) ? null : Math.min(top, ...ls); };
+    const l = supportLevel(x.derived, derivedNow, ofStatement, top);
+    return l == null ? -1 : Math.min(l, state.trust.people[REASONING] ?? top);
+}
+const followText = (x) => (x.kind === 'pick' ? `${x.neg ? 'The evidence rules out' : 'It follows from the evidence'}: ${pickText(qById.get(x.q), x.pick)}`
+    : x.kind === 'state' ? `${x.neg ? 'The evidence rules out' : 'It follows from the evidence'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, id: '' })}`
+    : `From the evidence: ${esc(derivedNow.find((d) => d.id === x.imp)?.says ?? '')}`);
 /** Under a question: what follows from what is shown, each implication over the statements it came from. */
 function followsHtml(q) {
     if (!autoQ(q.id)) return '';
@@ -1078,6 +1120,7 @@ function render() {
     // A telling can be linked like any entry: that it was said stands, whatever becomes of what it carried.
     sweepLinks();
     if (observations) { observed = fillNow(); follow(); }
+    if (state.answerRule === 'evidence' && derivedNow.length) { reasoned = [...reasoned, ...impliedEntries()]; reasonedById = new Map(reasoned.map((f) => [f.id, f])); }
     syncQuestions();
     judge();
     const qList = document.querySelector('#q-box ol');
@@ -1104,7 +1147,7 @@ function render() {
 
     const acceptedNow = acceptedAssertions();
     const clashes = [...contradictions(data, acceptedNow), ...alibis(data, acceptedNow, presenceNeeds(acceptedNow))];
-    const clashing = new Set(clashes.flatMap((c) => [c.a, c.b, c.via].filter(Boolean)).flatMap((x) => (x.mark ? [x.id, `q:${x.q}`] : [x.fact])));
+    const clashing = new Set(clashes.flatMap((c) => [c.a, c.b, c.via].filter(Boolean)).flatMap((x) => (x.mark || x.by === DERIVED ? [x.id, `q:${x.q}`] : [x.fact])));
     current = clashes;
     document.getElementById('undo').disabled = !state.history.length;
     document.getElementById('clashes').innerHTML = clashes.length
@@ -1194,6 +1237,14 @@ function dropCounts(chains) {
 const dropChip = (n) => (!n ? '' : ` <span class="drop" title="Distrusting it takes ${n} event${n === 1 ? '' : 's'} now on the timeline off it">−${n}</span>`);
 
 function sideHtml(x, label) {
+    if (x.by === DERIVED) {
+        const ids = supportIds(x.derived).filter((id) => derivedNow.some((d) => d.id === id));
+        const under = [...new Set(ids.flatMap((id) => groundsOf(id)))].map((id) => factOf(id)).filter(Boolean);
+        return `<div class="side"><h3>${label}</h3><p><a class="link" data-q="${esc(x.q)}">${followText(x)}</a>${x.kind === 'state' ? sideTime(x.time) : ''}</p>
+      <p class="small">From the evidence you have linked. Trusted: <b>${levelName(derivedLevel(x))}</b>, as its weakest premise. Lower your trust in a premise, and it goes.</p>
+      <ul class="follows-list">${ids.map((id) => `<li class="follows"><span class="arrow">⇒</span> ${esc(derivedNow.find((d) => d.id === id).says)}.</li>`).join('')}</ul>
+      <ul class="events">${under.map((p) => eventRow(p, new Set())).join('')}</ul></div>`;
+    }
     const chains = chainsOfAssertion(x);
     const r = { ...resolvingLinks(chains, state.trust, state.threshold), drop: dropCounts(chains) };
     if (x.mark) {
@@ -1615,6 +1666,7 @@ function reasonedDetail(f) {
         : f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
         : f.reasoned.move === 'm' ? 'A rule names this time, and the record has nothing at it: something is missing here.'
         : f.reasoned.move === 'c' ? 'What it brings about meets the goal of an intention, or a need of a step toward it.'
+        : f.reasoned.move === 'i' ? `It follows from the evidence you have linked: ${esc(derivedNow.find((d) => d.id === f.reasoned.imp)?.says ?? '')}.`
         : f.reasoned.role === 'requires' ? 'What an action needs just before it.' : 'What an action does.';
     const premises = f.reasoned.premises.map((id) => factOf(id)).filter(Boolean);
     const cap = { origin: REASONING, links: [{ from: REASONING, to: READER, how: 'reasoning' }] };
@@ -1624,7 +1676,7 @@ function reasonedDetail(f) {
       <h3>From</h3><ul class="events">${premises.map((p) => eventRow(p, new Set())).join('')}</ul>
       ${peopleHtml([cap])}
       ${movesHtml(f)}
-      <p><button type="button" class="move" data-withdraw="${esc(f.id)}">Withdraw this reasoning</button></p>`;
+      ${f.reasoned.move === 'i' ? `<p class="small muted">It stays while what it follows from is on your timeline and linked${qById.has(derivedNow.find((d) => d.id === f.reasoned.imp)?.q) ? `: <a class="link" data-q="${esc(derivedNow.find((d) => d.id === f.reasoned.imp).q)}">the question</a>` : ''}.</p>` : `<p><button type="button" class="move" data-withdraw="${esc(f.id)}">Withdraw this reasoning</button></p>`}`;
 }
 
 // --- Questions: the panel, and one question in the detail.

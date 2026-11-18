@@ -1198,6 +1198,56 @@ script that found each fact's paragraph from its quote; the data files are the s
     long case: 25 of 25 solved and the story read out, 1,977 links, six minutes, the page and the engine never
     apart. The Rent Box: finished only once the player could disbelieve a statement, since "which lodger told a
     thing that was not so" has the lie itself as a premise (the one place a lie is on the way to an answer).
+107. **What follows, in the contradiction tracking (2026-11-18).** The user asked whether the statements of the
+    evidence use the format the contradiction tracking does. They did not: a contradiction is found among typed
+    assertions (who or what, an attribute, a value, a time, with chains and trust), and an observation or an
+    implication is a sentence with `rules_out` and `concludes`. The plan was to make each implication's outcome
+    an assertion from the question's typed `entry`, with nothing new to write. What checking that showed first:
+    - The outcomes were in the tracking already, by the back door: the page wrote each verdict as a circle or a
+      cross, and marks are assertions. But they rested on "your hypothesis", not on their premises.
+    - A ruled-out answer met almost nothing. Every answer of every question of the long case was tried, asserted
+      and denied, against every statement: a denied wrong answer met one statement in the case (the baker's "It
+      was the Collector"), and a place answer was never set against where the timeline has the thing.
+    - A question's `entry` types what the question is about, not its answer. Of the 25 answers, 5 are people, 3
+      places and 17 free text ("it was set", "no", "half an hour"); 20 of the 25 entries are timed "sometime
+      between", which the engine compares with nothing.
+    - The lies are not reached by answers. Of the case's 7 false statements, 5 clashed with true entries already
+      and the other 3 (Crouch's rounds, two entries of the ledger) are contradicted by what a rule says on the
+      way ("no round at one", "she could not have sailed"), which is no answer. 16 of the 68 rules are such
+      statements.
+    The user's rulings: do the small first step all the same (it may matter more in other stories); a typed
+    field on an implication; a statement that cannot be typed may be denied by its id; a denial over a stretch of
+    time by accurate logic, no shortcut; in general, move as much of the free text as can be moved to typed
+    statements; and, later, a form for "nobody came into the house after one".
+    Built (`docs/case-format.md`, "Implications" and the list of contradictions):
+    - What follows is an assertion resting on its premises, trusted as its weakest (the better of two ways), and
+      a contradiction's trace shows the rules and the entries under them. A place answer with a certain time is
+      that location; one a rule rules out is that location denied; an identity a rule rules out is denied.
+    - `asserts` on an implication: typed statements, each on the timeline as an entry of the reader's reasoning
+      (left out when the timeline says the same already). `denies`: a statement by its id.
+    - Time. A denial over a stretch means "at no moment of it", and now also meets the same thing asserted "at
+      some moment between" two points inside the stretch. The denial of an answer over a stretch means less,
+      "not so for the whole of it", and is met only by locations that hold the stretch end to end.
+    - The validator: with everything shown, nothing that follows may contradict what is true; and it lists the
+      false statements that what follows contradicts. A page check plays the true path without its moves of
+      trust and asks that each such lie on the timeline be in a contradiction.
+    In the long case 12 rules now carry a typed field (10 `asserts`, 2 `denies`), 6 of them new entries on the
+    timeline; with everything linked and every lie still believed, all 7 false statements are in a contradiction
+    with what follows. The Rent Box has none to write: its one intermediate statement is "nobody came into the
+    house or left it after one".
+    What the page check caught: an answer crossed out only because another was concluded had been denied as a
+    state, and "the cloak was not at Saltmere" is false of a cloak that hung in the Custom House, which is in
+    Saltmere. Only an answer a rule itself rules out is denied as a state.
+    Open:
+    - **"Nobody came into the house after one."** No form yet. It is a denial about everyone, or everyone but
+      some: a subject such as `{every: 'person', but: [...]}` on a state or a typed act, set against any one
+      person's entry in the stretch. To be designed with the user.
+    - **More of the free text typed.** The answers of 17 questions are sentences; several are a state of the
+      entry's subject in other words ("the watch did not make every round": the `asserts` of its rule). A
+      possibility could carry its own typed form, as it already can an `action` or a `goal`. The values of
+      `condition` and of untyped `action` facts are sentences too, which is why the ledger's entries had to be
+      denied by id.
+    - The other 14 miniatures have no rules, so none of this is seen in them yet.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

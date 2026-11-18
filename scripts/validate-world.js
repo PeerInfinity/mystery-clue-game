@@ -389,8 +389,34 @@ if (fs.existsSync(path.join(dir, 'world', 'implications.json'))) {
     const rightOf = (q) => [].concat(qById.get(q)?.answer ?? [], qById.get(q)?.also_right ?? []);
     const valuesOf = (q) => (qById.get(q)?.possibilities ?? []).map((x) => x.value);
     for (const line of problems(imps, observationList, [...qById.values()], rightOf, valuesOf)) err('implications', line);
+    // What an implication says in typed form (`asserts`: states with a time) or of a statement by name (`denies`).
+    const assertedIds = new Map(asserted.map((x) => [x.id, x]));
+    for (const i of imps) {
+        if (i.asserts != null && !Array.isArray(i.asserts)) err('implications', `${i.id}: asserts: a list of states`);
+        for (const x of list(i.asserts)) {
+            if (!x.of || !x.attr || !('value' in x)) { err('implications', `${i.id}: asserts: a state {of, attr, value, neg?, time}`); continue; }
+            if (x.of !== '?' && !entities.has(x.of)) err('implications', `${i.id}: asserts: no entity ${x.of}`);
+            if (CLAIM_ATTRS.has(x.attr)) err('implications', `${i.id}: asserts: a state, not a claim`);
+            const ks = Object.keys(x.time ?? {});
+            if (!ks.length || ks.some((k) => !['at', 'from', 'to', 'after', 'before'].includes(k) || !timeIds.has(x.time[k]))) err('implications', `${i.id}: asserts: a time of known points (at, from, to, after, before)`);
+        }
+        for (const id of list(i.denies)) {
+            const t = assertedIds.get(id);
+            if (!t) err('implications', `${i.id}: denies: no statement ${id}`);
+            else if (CLAIM_ATTRS.has(t.attr) && t.kind === 'state' && !t.claim) err('implications', `${i.id}: denies ${id}: that it was said is certain; name what it asserts (${id}#0)`);
+        }
+    }
+    // With everything shown, nothing that follows may contradict what the answer key holds true, or itself: a wrong
+    // rule shows as a contradiction. What it contradicts of the false statements is the lies the evidence shows.
+    const { derive, derivedAssertions } = await import('../engine/implications.js');
+    const follows = derivedAssertions(world, derive(imps, () => true, () => true), (q) => q.possibilities.map((x) => x.value));
+    const isDerived = (x) => follows.includes(x);
+    const sideName = (x) => (isDerived(x) ? `what follows (${x.imp ?? x.id})` : x.id);
+    for (const c of contradictions(world, [...asserted.filter((x) => x.truth === true), ...follows])) if (isDerived(c.a) || isDerived(c.b)) err('implications', `${sideName(c.a)} / ${sideName(c.b)}: what follows contradicts what is true: ${c.why}`);
+    const shownLies = contradictions(world, [...asserted, ...follows]).filter((c) => (isDerived(c.a) || isDerived(c.b)) && [c.a, c.b].some((x) => !isDerived(x) && x.truth === false));
     // The report (not with --quiet), for the author to read: each question's ways to its answer, and what stands out.
     const { ways } = await import('../engine/implications.js');
+    if (!quiet) console.log(`\nWhat follows, as assertions: ${follows.length} (${follows.filter((x) => x.kind === 'state').length} typed states, ${follows.filter((x) => x.kind === 'denial').length} statements denied by name). False statements it contradicts (${shownLies.length})\n` + shownLies.map((c) => `  ${sideName(c.a)} / ${sideName(c.b)}: ${c.why}`).join('\n'));
     const obsById = new Map(observationList.map((o) => [o.id, o]));
     const impById = new Map(imps.map((i) => [i.id, i]));
     const gaveAt = (id) => { const f = factById.get(id); return f ? f.given_at ?? f.para : null; };

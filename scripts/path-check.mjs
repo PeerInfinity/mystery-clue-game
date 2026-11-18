@@ -22,7 +22,11 @@ import { controlOf, made, nextRead, readToOf, needsOf } from '../ui/world-moves.
 import { MAIN, refList } from '../engine/refs.js';
 import { caseLogic, deliveryMode, placement, choices, rng, heldAfter } from '../engine/delivery.js';
 const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
-const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves;
+// LIES=1 (with ANSWERS=evidence): the path without its moves of trust, so that every false statement stays believed.
+// What a move would then show (`see`) is not asked, and the story is not read to its end: at the end every false
+// statement that what follows from the evidence contradicts, by the engine, must be in a contradiction on the page.
+const LIES = !!process.env.LIES;
+const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves.filter((m) => !LIES || m.do !== 'trust');
 const header = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8'));
 const EARNED = deliveryMode(header) === 'earned';
 const SEED = Number(process.env.SEED ?? 1);
@@ -215,7 +219,7 @@ async function play(m) {
         case 'circle': case 'cross': {
             if (impQs.has(m.q)) {
                 const q = qs.get(m.q), right = q && (q.answer === m.pick || (q.also_right ?? []).includes(m.pick));
-                if (m.do === 'circle' && right && (await save()).marks?.[m.q]?.[m.pick] !== 'circled') return fail(m, 'the answer does not follow from what the path has linked');
+                if (m.do === 'circle' && right && !LIES && (await save()).marks?.[m.q]?.[m.pick] !== 'circled') return fail(m, 'the answer does not follow from what the path has linked');
                 break;
             }
             const sel = `#q-box [data-mark-q="${esc(m.q)}"][data-mark-pick="${esc(m.pick)}"]`;
@@ -274,7 +278,7 @@ async function play(m) {
         }
         default: return fail(m, 'unknown move');
     }
-    if (m.see && !new RegExp(m.see).test(await pageText())) return fail(m, `not on the page: /${m.see}/`);
+    if (m.see && !LIES && !new RegExp(m.see).test(await pageText())) return fail(m, `not on the page: /${m.see}/`);
     if (errors.length) { const e = errors.splice(0); return fail(m, `page error: ${e.join(' | ')}`); }
     console.log(`ok ¶${atText(m.at)} ${m.do} ${m.way ?? m.node ?? m.entry ?? m.q ?? m.of ?? m.a ?? m.key ?? m.strain ?? m.link ?? m.person ?? ''}${m.pick ? ' = ' + m.pick : ''}${m.do === 'link' ? ' → ' + m.q : ''}${m.for ? ' → ' + m.for : ''}${m.b ? ' ~ ' + m.b : ''}`);
 }
@@ -367,7 +371,19 @@ for (const m of EARNED ? [] : moves) {
     if (!files.length) last = m.at;
     await play(m);
 }
-if (STOP >= 1e9 && !failures) {
+if (LIES) {
+    const { loadWorld } = await import('./world-provenance.js');
+    const { assertions, contradictions } = await import('../engine/world.js');
+    const { derive, derivedAssertions } = await import('../engine/implications.js');
+    const world = loadWorld(CASE), imps = JSON.parse(fs.readFileSync(path.join(WORLD, 'implications.json'), 'utf8')).implications;
+    const follows = derivedAssertions(world, derive(imps, () => true, () => true), (q) => q.possibilities.map((x) => x.value));
+    const lies = [...new Set(contradictions(world, [...assertions(world), ...follows]).flatMap((c) => (follows.includes(c.a) ? [c.b] : follows.includes(c.b) ? [c.a] : [])).filter((x) => x.truth === false).map((x) => x.fact))];
+    const keys = await ev(`[...document.querySelectorAll('#clashes [data-clash]')].map((a) => a.dataset.clash)`);
+    // Only what the path has read to: a statement the page has not come to is on no timeline.
+    const there = await ev(`${J(lies)}.filter((id) => document.querySelector('#timeline [data-fact="' + id + '"]'))`);
+    for (const id of there) if (!keys.some((k) => k.slice(6).split('|').some((x) => x === id || x.startsWith(id + '#')))) { failures++; console.log(`FAIL at the end: ${id} is false and what follows contradicts it, and no contradiction on the page names it`); }
+    console.log(`${there.length} false statement(s) on the timeline that the evidence contradicts; ${keys.length} contradiction(s) on the page`);
+} else if (STOP >= 1e9 && !failures) {
     if (files.length) await click(`.story-tab[data-story="${MAIN}"]`);
     const end = await ev(`+document.getElementById('para').max`);
     if (!(await readTo(end))) { console.log(`${failures} failure(s)`); process.exit(1); }

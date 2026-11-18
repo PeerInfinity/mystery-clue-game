@@ -287,3 +287,30 @@ test('a need of any other state against a state that denies it, while it holds',
     assert.equal(alibis(w, [st({ from: 't4' })], need).length, 0, 'begun after the window');
     assert.equal(alibis(w, [st({ from: 't0', to: 't1' })], need).length, 0, 'over before it');
 });
+
+test('a denial for a stretch against what held at some moment between two points inside it', () => {
+    const neg = loc('f.never', 'man', 'stable', { from: 't1', to: 't4' }, { neg: true });
+    assert.deepEqual(why(world([neg, loc('f.some', 'man', 'stall', { after: 't2', before: 't3' })])), ['man: at stall and not at stable']);
+    assert.deepEqual(why(world([neg, loc('f.some', 'man', 'london', { after: 't2', before: 't3' })])), [], 'somewhere else');
+    assert.deepEqual(why(world([neg, loc('f.some', 'man', 'stall', { after: 't2', before: 'tx' })])), [], 'tx is not certainly inside the stretch');
+    assert.deepEqual(why(world([loc('f.at', 'man', 'stable', { at: 't2' }, { neg: true }), loc('f.some', 'man', 'stall', { after: 't1', before: 't3' })])), [], 'a denial at one point does not hold the stretch');
+    const st = (id, time, extra = {}) => ({ id, of: 'man', attr: 'round', value: 'made', time, para: 1, quote: 'x', ...extra });
+    assert.deepEqual(why(world([st('f.no', { from: 't1', to: 't4' }, { neg: true }), st('f.yes', { after: 't1', before: 't3' })])), ['man: made, asserted and denied']);
+});
+
+test('a denial of a whole stretch: only locations within the place that hold it end to end contradict it', () => {
+    const not = { id: 'd', fact: null, kind: 'state', of: 'man', attr: 'location', value: 'stable', neg: true, whole: true, time: { from: 't1', to: 't4' }, by: 'derived' };
+    const run = (facts) => { const w = world(facts); return contradictions(w, [...assertions(w), not]).map((c) => `${c.a.id}: ${c.why}`); };
+    assert.deepEqual(run([loc('f.a', 'man', 'stall', { at: 't2' })]), [], 'there for a moment: he may have left');
+    assert.deepEqual(run([loc('f.a', 'man', 'stall', { from: 't1', to: 't3' })]), [], 'not to the end');
+    assert.deepEqual(run([loc('f.a', 'man', 'stall', { from: 't1', to: 't4' })]), ['f.a: man: at stable throughout, and not']);
+    assert.deepEqual(run([loc('f.a', 'man', 'stall', { from: 't1', to: 't3' }), loc('f.b', 'man', 'stable', { from: 't3', to: 't4' })]).length, 2, 'end to end: each piece a side');
+    assert.deepEqual(run([loc('f.a', 'man', 'london', { from: 't1', to: 't4' })]), [], 'elsewhere agrees with it');
+});
+
+test('a statement denied by name contradicts that statement, while both are accepted', () => {
+    const w = world([{ id: 'f.entry', of: 'box', attr: 'action', value: 'is shipped, by the ledger', time: { at: 't2' }, para: 1, quote: 'x', truth: false }]);
+    const d = { id: 'i.x!f.entry', fact: null, kind: 'denial', denies: 'f.entry', q: 'q', by: 'derived' };
+    assert.deepEqual(contradictions(w, [...assertions(w), d]).map((c) => [c.a.id, c.b.id]), [['f.entry', 'i.x!f.entry']]);
+    assert.deepEqual(contradictions(w, [d]), []);
+});

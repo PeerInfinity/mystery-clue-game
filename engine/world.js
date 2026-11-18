@@ -20,6 +20,8 @@ export const OPEN_STATES = new Set(['heading']);
 
 /** The end of every provenance chain: the reader, to whom each narrator tells the story. Not an entity of the story. */
 export const READER = 'reader';
+/** Whose an assertion is (`by`) when it follows from the evidence the player has shown (engine/implications.js). */
+export const DERIVED = 'derived';
 /**
  * A narrator's one link to the reader: keyed by the narrator, its level by default the narrator's `trust` (default
  * certain: the fair-play contract, a first-person narrator's own observations and an impersonal narrator's report);
@@ -287,6 +289,10 @@ export function places(data) {
  *   one it names elsewhere than where the other was (`{a, b: the identity, via: the other's location, why}`).
  * - One event told twice (two facts with the same `event`, an event that happens once) at two times that cannot meet:
  *   `{a, b, event, why}`.
+ * - Time, beyond what both certainly cover: a denial for a stretch (`neg`, `{from, to}`: at no moment of it) against
+ *   the same thing asserted at some moment between two points both in the stretch (`{after, before}`); and a denial
+ *   of a whole stretch (`whole`: not so throughout, the denial of an answer) against locations that hold it end to end.
+ * - A statement denied by name (`{kind: 'denial', denies: <assertion id>}`) against that assertion.
  * Claims with `modal: 'possible'` take no part. Two circled marks of one question are an open choice, not reported.
  */
 export function contradictions(data, accepted = null) {
@@ -321,6 +327,8 @@ export function contradictions(data, accepted = null) {
     };
     // Whether cover `c` holds throughout cover `d` (so a thing's place over c is its place at d).
     const covers = (c, d) => !!(c && d) && order.le(c.start, d.start) && (c.incl ? order.le(d.end, c.end) : (order.lt(d.end, c.end) || (!d.incl && d.end === c.end)));
+    // Whether what held at some moment between two points (`{after, before}`) did so inside stretch `c`: both points in it.
+    const between = (t, c) => !!(t?.after && t?.before && c && !c.incl && order.le(c.start, t.after) && order.le(t.before, c.end));
     const groups = new Map();
     for (const s of states) {
         const k = `${s.of}|${s.attr}`;
@@ -328,9 +336,18 @@ export function contradictions(data, accepted = null) {
     }
     for (const xs of groups.values()) for (let i = 0; i < xs.length; i++) for (let j = i + 1; j < xs.length; j++) {
         const a = xs[i], b = xs[j];
-        if (a.fact === b.fact) continue;
+        if (a.fact != null && a.fact === b.fact) continue;
+        if (a.whole || b.whole) continue;
         const ca = coverOf(a.time), cb = coverOf(b.time);
-        if (!overlaps(order, ca, cb)) continue;
+        if (!overlaps(order, ca, cb)) {
+            // Something that held at some moment between two points, against a denial for a stretch that holds them both.
+            if (a.neg === b.neg) continue;
+            const [p, d] = a.neg ? [b, a] : [a, b];
+            if (!between(p.time, coverOf(d.time))) continue;
+            if (a.attr !== 'location') { if (p.value === d.value) out.push({ a: p, b: d, why: `${p.of}: ${p.value}, asserted and denied` }); }
+            else if (pl.fixed(p.value) && pl.chain(p.value).includes(d.value)) out.push({ a: p, b: d, why: `${p.of}: at ${p.value} and not at ${d.value}` });
+            continue;
+        }
         if (a.attr === 'identity' || STATES[a.attr]) {
             if (!a.neg && !b.neg && a.value !== b.value) out.push({ a, b, why: `${a.of}: ${a.value} or ${b.value}` });
             else if (a.neg !== b.neg && a.value === b.value) out.push({ a, b, why: `${a.of}: ${a.value}, asserted and denied` });
@@ -349,13 +366,33 @@ export function contradictions(data, accepted = null) {
         }
     }
 
+    // A denial of a whole stretch (`whole`: "not there from one until the bell", the denial of an answer that says
+    // there throughout) is met only by locations within that place that hold the stretch from end to end, one or
+    // several: each is a side, so that distrusting any piece lifts it. Somewhere else for a moment is enough for it.
+    for (const d of locs) {
+        if (!d.neg || !d.whole) continue;
+        const w = coverOf(d.time);
+        if (!w || w.incl) continue;
+        const within = locs.filter((x) => { const c = coverOf(x.time); if (x === d || x.neg || x.of !== d.of || !c || c.incl) return false; const v = fixedAt(x.value, c); return !!v && pl.chain(v).includes(d.value); });
+        const pieces = [];
+        let at = w.start, done = false;
+        for (let i = 0; i <= within.length && !done; i++) {
+            const next = within.filter((x) => !pieces.includes(x)).find((x) => { const c = coverOf(x.time); return order.le(c.start, at) && order.lt(at, c.end); });
+            if (!next) break;
+            pieces.push(next);
+            at = coverOf(next.time).end;
+            done = order.le(w.end, at);
+        }
+        if (done) for (const x of pieces) out.push({ a: x, b: d, why: `${d.of}: at ${d.value} throughout, and not` });
+    }
+
     // A denial against what it denies, for any other kind of state: the same thing, attribute and value, asserted and
     // denied at times that meet ("he made every round" against "no round at three").
     const others = all.filter((x) => x.kind === 'state' && !(SINGLE_ATTRS.has(x.attr) || STATES[x.attr]) && x.value != null && x.of != null && !CLAIM_ATTRS.has(x.attr));
     const denials = others.filter((x) => x.neg);
     for (const d of denials) for (const p of others) {
-        if (p.neg || p.fact === d.fact || p.of !== d.of || p.attr !== d.attr || p.value !== d.value) continue;
-        if (!overlaps(order, coverOf(p.time), coverOf(d.time))) continue;
+        if (p.neg || (p.fact != null && p.fact === d.fact) || p.of !== d.of || p.attr !== d.attr || p.value !== d.value) continue;
+        if (!overlaps(order, coverOf(p.time), coverOf(d.time)) && !between(p.time, coverOf(d.time))) continue;
         out.push({ a: p, b: d, why: `${d.of}: ${d.value}, asserted and denied` });
     }
 
@@ -364,7 +401,7 @@ export function contradictions(data, accepted = null) {
     for (const x of all) if (x.kind === 'state' && x.event && !x.neg) byEvent.set(x.event, [...(byEvent.get(x.event) ?? []), x]);
     for (const [event, xs] of byEvent) for (let i = 0; i < xs.length; i++) for (let j = i + 1; j < xs.length; j++) {
         const a = xs[i], b = xs[j];
-        if (a.fact === b.fact) continue;
+        if (a.fact != null && a.fact === b.fact) continue;
         const ca = coverOf(a.time), cb = coverOf(b.time);
         // Certainly apart: one ends before the other starts (in the time order, not only by the paragraphs).
         const apart = (c, d) => (c.incl ? order.lt(c.end, d.start) : order.le(c.end, d.start));
@@ -405,7 +442,20 @@ export function contradictions(data, accepted = null) {
             }
         }
     }
-    return out;
+    // A statement denied by name (`kind: 'denial'`, `denies`: an assertion's id): what could not be typed, and is
+    // reasoned not to be so ("so what the ledger says of the Marigold is not so").
+    for (const d of all) if (d.kind === 'denial') for (const t of all) if (t.id === d.denies) out.push({ a: t, b: d, why: `${t.id}: stated, and reasoned not so` });
+
+    // What follows from the evidence says one thing in two forms (an answer, and the state it is): one clash a pair.
+    const src = (x) => x.fact ?? (x.q != null && x.pick != null ? `${x.q}=${x.pick}` : x.id);
+    const seen = new Set();
+    return out.filter((c) => {
+        if (c.a.by !== DERIVED && c.b.by !== DERIVED) return true;
+        const k = [src(c.a), src(c.b), c.via ? src(c.via) : ''].join('|');
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+    });
 }
 
 /**

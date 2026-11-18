@@ -11,6 +11,8 @@
 // With these a question needs no checklist: its answer is known when an implication concludes it, or when every
 // other answer is ruled out. What is shown beyond that is support, and wanted by nothing.
 
+import { isRight, coverOf, hypothesisKey, DERIVED } from './world.js';
+
 const holds = (p, has, solved) => (typeof p === 'string' ? has(p) : p.any ? p.any.some(has) : p.solved ? !!solved?.(p.solved) : false);
 
 /**
@@ -134,4 +136,82 @@ export function spare(implications, observations, q, values) {
     if (!follows(all)) return { needed: [], spare: [] };
     const needed = mine.filter((o) => { const s = new Set(all); s.delete(o.id); return !follows(s); }).map((o) => o.id);
     return { needed, spare: mine.map((o) => o.id).filter((id) => !needed.includes(id)) };
+}
+
+// --- What follows, as assertions the contradiction engine reads (engine/world.js `contradictions`).
+//
+// An answer that follows is asserted and one ruled out is denied, as a circle and a cross are, but resting on the
+// implications that say so (`derived`: a support, below) and not on the reader's hypothesis. Where the question's
+// entry gives the answer a typed form, the state is asserted too: a place answer of a location entry with a certain
+// time is that location (ruled out by an implication over a stretch: denied for the whole stretch, `whole`, which
+// only locations holding it end to end contradict), and an identity an implication rules out is that identity denied. An implication can say
+// more, in two optional fields:
+//   asserts: [{of, attr, value, neg?, time}]   typed statements, in the form of a claim's `asserts` (states only);
+//   denies: <assertion id> | [ids]             a statement that cannot be typed, reasoned not to be so.
+// A support is an implication's id, `{all: [supports]}` or `{any: [supports]}`.
+
+/** The typed statements of the implications that hold: `{id: 'r:i:<implication>:<n>', imp, of, attr, value, neg, time}`. */
+export const impliedStates = (derived) => derived.flatMap((i) => (i.asserts ?? []).map((x, n) => ({ ...x, id: `r:i:${i.id}:${n}`, imp: i.id, neg: !!x.neg })));
+
+/**
+ * The assertions of what follows. `data`: the world (questions, entities); `derived`: what `derive` gave;
+ * `valuesOf(q)`: the question's possible answers (those shown); `opts.states: false` leaves out the typed
+ * statements of `asserts` (the page puts those on the timeline as entries of its own).
+ */
+export function derivedAssertions(data, derived, valuesOf, opts = {}) {
+    const out = [];
+    const qById = new Map(data.questions.map((q) => [q.id, q]));
+    const entities = new Set((data.entities ?? []).map((e) => e.id));
+    for (const qid of new Set(derived.map((i) => i.q))) {
+        const q = qById.get(qid);
+        if (!q) continue;
+        const values = valuesOf(q), mine = derived.filter((i) => i.q === qid);
+        const v = verdict(qid, values, derived);
+        const concluded = values.includes(v.concluded) ? v.concluded : null;
+        const rulers = (x) => mine.filter((i) => (i.rules_out ?? []).includes(x)).map((i) => i.id);
+        const why = concluded == null ? null : v.by === 'implication' ? { any: mine.filter((i) => i.concludes === concluded).map((i) => i.id) } : { all: values.filter((x) => x !== concluded).map((x) => ({ any: rulers(x) })) };
+        const truth = (pick, neg) => (q.answer == null ? null : isRight(q, pick) !== neg);
+        const e = q.entry ?? {}, cover = coverOf(typeof e.time === 'object' ? e.time : null);
+        // `ruled`: the implications that rule the answer out themselves. An answer crossed out only because another
+        // is concluded is not denied as a state: "not at Saltmere" is not so of what hung in the Custom House there.
+        const add = (pick, neg, support, ruled = null) => {
+            const base = { fact: null, q: qid, pick, neg, by: DERIVED, derived: support, truth: truth(pick, neg) };
+            out.push({ ...base, id: hypothesisKey(qid, pick), kind: 'pick', mark: neg ? 'crossed' : 'circled' });
+            if (!cover || !entities.has(e.of) || !entities.has(pick) || e.of === pick) return;
+            if (neg) { if (!ruled?.length) return; base.derived = { any: ruled }; }
+            if (e.attr === 'location') out.push({ ...base, id: `${hypothesisKey(qid, pick)}@state`, kind: 'state', of: e.of, attr: 'location', value: pick, time: e.time, ...(neg && !cover.incl ? { whole: true } : {}) });
+            else if (e.attr === 'identity' && neg && cover.incl) out.push({ ...base, id: `${hypothesisKey(qid, pick)}@state`, kind: 'state', of: e.of, attr: 'identity', value: pick, time: e.time });
+        };
+        if (concluded != null) add(concluded, false, why);
+        for (const x of values) {
+            if (x === concluded) continue;
+            const r = rulers(x);
+            if (r.length || concluded != null) add(x, true, { any: [...r, ...(concluded != null ? [why] : [])] }, r);
+        }
+    }
+    for (const i of derived) for (const id of [].concat(i.denies ?? [])) out.push({ id: `${i.id}!${id}`, fact: null, kind: 'denial', denies: id, q: i.q, imp: i.id, by: DERIVED, derived: i.id, truth: null });
+    if (opts.states !== false) for (const s of impliedStates(derived)) out.push({ ...s, fact: null, kind: 'state', by: DERIVED, derived: s.imp, truth: null });
+    return out;
+}
+
+/** The implications a support names, each once. */
+export const supportIds = (s) => (typeof s === 'string' ? [s] : [...new Set((s?.all ?? s?.any ?? []).flatMap(supportIds))]);
+
+/**
+ * How far a support is trusted: an implication as its weakest premise, `all` as its weakest, `any` as its best that
+ * holds. `derived`: the implications that hold; `levelOfStatement(id)`: an observation's level (null: not shown);
+ * `top`: the level of what needs no trust (a question solved). Null: it does not hold.
+ */
+export function supportLevel(support, derived, levelOfStatement, top) {
+    const byId = new Map(derived.map((i) => [i.id, i]));
+    const least = (xs) => (xs.some((x) => x == null) ? null : Math.min(top, ...xs));
+    const best = (xs) => { const ok = xs.filter((x) => x != null); return ok.length ? Math.max(...ok) : null; };
+    const of = (s, trail) => {
+        if (typeof s !== 'string') return s.all ? least(s.all.map((x) => of(x, trail))) : best((s.any ?? []).map((x) => of(x, trail)));
+        const i = byId.get(s);
+        if (!i) return levelOfStatement(s);
+        if (trail.includes(s)) return null;
+        return least(i.from.map((p) => (typeof p === 'string' ? of(p, [...trail, s]) : p.any ? best(p.any.map((x) => of(x, [...trail, s]))) : top)));
+    };
+    return of(support, []);
 }
