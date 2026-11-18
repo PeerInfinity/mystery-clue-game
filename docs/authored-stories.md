@@ -1126,7 +1126,8 @@ script that found each fact's paragraph from its quote; the data files are the s
     132 opened a timeline entry and 22 tried a link. In the page as text each entry's line ends "+ relevant";
     in the numbered controls the entry's line and its button are two items, and the button's says only
     "+ relevant", with no entry. A reader sees the button beside its entry; the solver must count. A fault of
-    the harness, waiting for the user's word. It used "Left to try" while stuck for the first time (for the one
+    the harness, changed at the user's word: a button on an entry's line is listed with its entry ("+ relevant ←
+    for the entry: …"), and a checkbox, listed until now with no words at all, with its label and whether it is on. It used "Left to try" while stuck for the first time (for the one
     move on offer). One page error, at turn 449: a contradiction open in the detail, one side distrusted, and
     the side no longer an assertion to draw; fixed (the detail says "Resolved" and shows no sides).
 
