@@ -176,6 +176,13 @@ hypothesis*, *your reasoning*.
   Holmes's wire; whether the papers had the night from the police or from the witnesses). It is kept in the data
   and off the player's list unless the story itself raises it.
   - `entry` is `{of, attr, time}`, with `of: "?"` for a question about who.
+  - A possibility may carry `asserts` (2026-11-18): what the answer says in typed form, `[{of, attr, value, neg?,
+    time?, event?}]`, the time the entry's unless given ("yes" to "Was Mr. Prout at the Anchor when the bell
+    rang?": his location there at the bell). A circle asserts those states and a cross denies them, by the
+    player's hand or from the evidence, where one state says the denial exactly (`answerStates` in
+    `engine/world.js`): one state only; at a point, the opposite at that point; over a stretch, "not for the
+    whole of it". The validator marks the key (right answers circled, the others crossed out) and fails if that
+    contradicts what is true: an answer that is wrong and yet true as a state must not be typed.
   - `raised` is the paragraph where the story opens the question (null while it never doubts the entry: `latent`).
   - Each possibility is `{value, how?, available, via, from?, reasoning?, quote?, out?, by?}`. An answer is listed to the
     player only from its `available` paragraph, the point where the story makes it a possibility. `via: direct`
@@ -252,9 +259,15 @@ contradiction written by hand:
   the times both sides certainly cover, it is set against the same thing asserted at some moment between two
   points (`{after, before}`) when both points lie in the stretch ("not in the house from one until four" against
   "in the house sometime between two and three"). A denial marked `whole` says less, "not so for the whole of it"
-  (the denial of an answer that says "there throughout"): it is contradicted only by locations within that place
-  that hold the stretch from end to end, one or several, each a side of the contradiction; a moment elsewhere is
-  enough for it to stand. Only what follows from the evidence makes a `whole` denial (see "Implications").
+  (the denial of an answer that says "there throughout"): it is contradicted only by what holds the stretch from
+  end to end, one entry or several (locations within that place; of any other state, the same value: "I made
+  every round, from ten until six"), each a side of the contradiction; a moment elsewhere is enough for it to
+  stand. Only the denial of an answer is `whole` (a typed answer crossed out, or ruled out by the evidence).
+- **A statement about everyone** (2026-11-18). `{of: "*", every: <kind or kinds>, but?: [ids]}` in place of a
+  subject: each entity of those kinds but the ones named, so "nobody but Mrs. Orme and the Captain was in the
+  house from one until three" is a denial of that location for everyone else, set against any one person's
+  entry there. Someone whose identity is in question (the entry of an identity question, or the subject of an
+  identity fact) is not counted: they may be one of those named. So far only in an implication's `asserts`.
 - **A statement denied by name** (2026-11-18). An assertion `{kind: 'denial', denies: <an assertion's id>}`
   contradicts that assertion while both are accepted. For what cannot be typed ("so what the ledger says of the
   Marigold is not so"); only an implication makes one (`denies`).
@@ -498,9 +511,12 @@ that follows from others, shown by itself the moment they all are.
     rules out is that location denied (over a stretch: `whole`, above); an identity an implication rules out is
     that identity denied. An answer crossed out only because another is concluded is not denied as a state ("not
     at Saltmere" is not so of what hung in the Custom House, which is in Saltmere). A free-text answer ("it was
-    set", "no") has no typed form: of the long case's 25 questions, 5 answers are people, 3 places and 17 text.
+    set", "no") has no typed form unless its possibility gives it one (`asserts`, under `questions.json`): then
+    the state is asserted with the answer and denied with it, however it was ruled out. Of the long case's 25
+    questions, 5 answers are people, 3 places and 17 text.
   - `asserts: [{of, attr, value, neg?, time, event?}]` on an implication (optional): what it says as typed
-    statements, in the form of a claim's `asserts` (states only, each with a time). They take part in the
+    statements, in the form of a claim's `asserts` (states only, each with a time; the subject may be everyone,
+    `of: "*"`, above). They take part in the
     contradictions, and the page puts each on the timeline as an entry of the reader's reasoning (`reasoned.move:
     'i'`, id `r:i:<implication>:<n>`), unless the timeline already holds the same statement in the same words.
   - `denies: <assertion id>` (or a list) on an implication (optional): a statement that cannot be typed, reasoned

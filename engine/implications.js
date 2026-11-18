@@ -11,7 +11,7 @@
 // With these a question needs no checklist: its answer is known when an implication concludes it, or when every
 // other answer is ruled out. What is shown beyond that is support, and wanted by nothing.
 
-import { isRight, coverOf, hypothesisKey, DERIVED } from './world.js';
+import { isRight, coverOf, hypothesisKey, answerStates, DERIVED } from './world.js';
 
 const holds = (p, has, solved) => (typeof p === 'string' ? has(p) : p.any ? p.any.some(has) : p.solved ? !!solved?.(p.solved) : false);
 
@@ -177,6 +177,10 @@ export function derivedAssertions(data, derived, valuesOf, opts = {}) {
         const add = (pick, neg, support, ruled = null) => {
             const base = { fact: null, q: qid, pick, neg, by: DERIVED, derived: support, truth: truth(pick, neg) };
             out.push({ ...base, id: hypothesisKey(qid, pick), kind: 'pick', mark: neg ? 'crossed' : 'circled' });
+            // What the answer says in typed form, where its possibility says (`asserts`): the author's own word for
+            // it, so it is denied with the answer however that was ruled out.
+            for (const st of answerStates(q, pick, neg)) out.push({ ...base, ...st, id: `${hypothesisKey(qid, pick)}@a${st.n}`, kind: 'state', truth: null });
+            base.denied = neg;
             if (!cover || !entities.has(e.of) || !entities.has(pick) || e.of === pick) return;
             if (neg) { if (!ruled?.length) return; base.derived = { any: ruled }; }
             if (e.attr === 'location') out.push({ ...base, id: `${hypothesisKey(qid, pick)}@state`, kind: 'state', of: e.of, attr: 'location', value: pick, time: e.time, ...(neg && !cover.incl ? { whole: true } : {}) });

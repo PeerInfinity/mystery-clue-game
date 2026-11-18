@@ -1238,16 +1238,26 @@ script that found each fact's paragraph from its quote; the data files are the s
     What the page check caught: an answer crossed out only because another was concluded had been denied as a
     state, and "the cloak was not at Saltmere" is false of a cloak that hung in the Custom House, which is in
     Saltmere. Only an answer a rule itself rules out is denied as a state.
-    Open:
-    - **"Nobody came into the house after one."** No form yet. It is a denial about everyone, or everyone but
-      some: a subject such as `{every: 'person', but: [...]}` on a state or a typed act, set against any one
-      person's entry in the stretch. To be designed with the user.
-    - **More of the free text typed.** The answers of 17 questions are sentences; several are a state of the
-      entry's subject in other words ("the watch did not make every round": the `asserts` of its rule). A
-      possibility could carry its own typed form, as it already can an `action` or a `goal`. The values of
-      `condition` and of untyped `action` facts are sentences too, which is why the ledger's entries had to be
-      denied by id.
-    - The other 14 miniatures have no rules, so none of this is seen in them yet.
+    Then, the same day, the two things left open, both asked for by the user:
+    - **A statement about everyone.** `{of: "*", every: 'person', but: [...]}` as the subject of a typed
+      statement: one about each of them, set against any one person's entry. Someone whose identity is in
+      question is not counted, since they may be one of those named. In The Rent Box, "the Captain was inside the
+      whole time, and there was nobody else in the house" is now "nobody but Mrs. Orme or the Captain at the
+      house from one until three", on the timeline. What is typed is who was in the house, not that nobody came
+      in: coming in is an act, and "nobody did it" of a typed act has no form yet.
+    - **An answer's typed form.** A possibility may carry `asserts`. A circle asserts it and a cross denies it,
+      by hand or from the evidence, where one state says the denial exactly. In the long case: "yes" to the
+      rounds (every round from ten until six), to Mr. Prout at the table, to the brig at Saltmere on the third,
+      and the two times of the bell. Concluding "no" now denies "every round, from ten until six" as "not for the
+      whole of it", which is exactly what Crouch's own statement contradicts. Three rules' `asserts` said the
+      same as the answer and were taken out (the long case: 7 rules with `asserts`, 2 with `denies`).
+    - The validator marks the key and fails if that contradicts what is true, in every case, with rules or not.
+    Still open:
+    - The ledger's two later entries are still denied by id. Typing them needs the export as a typed act (a case
+      action "ships", with what and when), not a sentence compared letter by letter.
+    - "Nobody did it" of a typed act; the answers of 13 questions of the long case still sentences ("it was set", "to destroy the
+      bond ledger"); the values of `condition` facts.
+    - The other 14 miniatures have no rules, and no typed answers yet.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

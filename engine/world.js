@@ -23,6 +23,12 @@ export const READER = 'reader';
 /** Whose an assertion is (`by`) when it follows from the evidence the player has shown (engine/implications.js). */
 export const DERIVED = 'derived';
 /**
+ * The subject of a statement about everyone: `{of: '*', every: <kind or kinds>, but?: [ids]}`, each entity of those
+ * kinds but the ones named ("nobody but Mrs. Orme and the Captain was in the house from one until three"). Someone
+ * whose identity is itself in question (the figure at the door) is not counted: they may be one of those named.
+ */
+export const EVERY = '*';
+/**
  * A narrator's one link to the reader: keyed by the narrator, its level by default the narrator's `trust` (default
  * certain: the fair-play contract, a first-person narrator's own observations and an impersonal narrator's report);
  * the player may change it. An impersonal third-person narrator is the pseudo-entity `narrator`.
@@ -200,7 +206,7 @@ export function assertions(data) {
     const out = [];
     for (const f of data.facts) {
         const claim = CLAIM_ATTRS.has(f.attr);
-        out.push({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: claim ? true : ('truth' in f ? f.truth : true), para: f.given_at ?? f.para, ...(f.claim ? { claim: f.claim } : {}), ...(f.word ? { by: f.word } : {}), ...(f.event ? { event: f.event } : {}) });
+        out.push({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: claim ? true : ('truth' in f ? f.truth : true), para: f.given_at ?? f.para, ...(f.claim ? { claim: f.claim } : {}), ...(f.word ? { by: f.word } : {}), ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}) });
         if (!claim && f.q && f.pick != null) out.push({ id: `${f.id}#pick`, fact: f.id, kind: 'pick', q: f.q, pick: f.pick, neg: false, truth: 'truth' in f ? f.truth : true, para: f.given_at ?? f.para });
         if (!claim) continue;
         list(f.asserts).forEach((x, i) => {
@@ -229,12 +235,33 @@ export function markAssertions(data, marks = {}, shown = null) {
             if (!isOption(q, pick, kindOf) || (shown && !shown(q, pick))) continue;
             const neg = mark === 'crossed';
             out.push({ id: hypothesisKey(qid, pick), fact: null, kind: 'pick', q: qid, pick, neg, mark, by: HYPOTHESIS, truth: q.answer == null ? null : isRight(q, pick) !== neg });
+            // What the answer says in typed form (the possibility's `asserts`): asserted with a circle, denied with a cross.
+            for (const st of answerStates(q, pick, neg)) out.push({ ...st, id: `${hypothesisKey(qid, pick)}@a${st.n}`, fact: null, kind: 'state', q: qid, pick, mark: 'typed', by: HYPOTHESIS, truth: null });
             // A circled answer that implies another question's answer asserts that too (the hoof: the horse struck).
             const imp = !neg && q.possibilities?.find((p) => p.value === pick)?.implies;
             const iq = imp && qById.get(imp.q);
             if (iq && (!shown || shown(iq, imp.pick))) out.push({ id: `${hypothesisKey(qid, pick)}>${imp.q}`, fact: null, kind: 'pick', q: imp.q, pick: imp.pick, neg: false, mark: 'implied', from: hypothesisKey(qid, pick), by: HYPOTHESIS, truth: iq.answer == null ? null : isRight(iq, imp.pick) });
         }
     }
+    return out;
+}
+/**
+ * What an answer says in typed form: the states of its possibility's `asserts` (`[{of, attr, value, neg?, time?,
+ * event?}]`, the time the entry's unless given), or with `denied` their denial, where one state says it exactly:
+ * one state only (the denial of two is neither's); at a point, the opposite at that point; over a stretch, "not for
+ * the whole of it" (`whole`). A denial "at no moment of a stretch" or "at some moment between" has no denial that
+ * is one state, and gives nothing. Each `{n, of, attr, value, neg, time, denied, whole?, event?}`.
+ */
+export function answerStates(q, pick, denied = false) {
+    const xs = list(q.possibilities?.find((p) => p.value === pick)?.asserts);
+    if (!xs.length || (denied && xs.length > 1)) return [];
+    const out = [];
+    xs.forEach((x, n) => {
+        const time = x.time ?? (q.entry?.time && typeof q.entry.time === 'object' ? q.entry.time : undefined);
+        const c = coverOf(time);
+        if (denied && (!c || (x.neg && !c.incl))) return;
+        out.push({ n, of: x.of, attr: x.attr, value: x.value, neg: !!x.neg !== denied, time, denied, ...(x.event ? { event: x.event } : {}), ...(denied && !c.incl ? { whole: true } : {}) });
+    });
     return out;
 }
 /**
@@ -293,13 +320,17 @@ export function places(data) {
  *   the same thing asserted at some moment between two points both in the stretch (`{after, before}`); and a denial
  *   of a whole stretch (`whole`: not so throughout, the denial of an answer) against locations that hold it end to end.
  * - A statement denied by name (`{kind: 'denial', denies: <assertion id>}`) against that assertion.
+ * - A statement about everyone (`of: EVERY`) as one about each of them.
  * Claims with `modal: 'possible'` take no part. Two circled marks of one question are an open choice, not reported.
  */
 export function contradictions(data, accepted = null) {
     const order = data.order ?? timeOrder(data.times);
     const pl = data.places ?? places(data);
-    const all = (accepted ?? assertions(data)).filter((x) => !x.modal);
-    const out = [];
+    // A statement about everyone is one about each (`each`: the statement itself, which is the side reported).
+    const unknown = new Set([...(data.questions ?? []).filter((q) => q.entry?.attr === 'identity').map((q) => q.entry.of), ...(data.facts ?? []).filter((x) => x.attr === 'identity').map((x) => x.of)]);
+    const everyone = (x) => (data.entities ?? []).filter((e) => list(x.every).includes(e.kind) && !list(x.but).includes(e.id) && !unknown.has(e.id)).map((e) => ({ ...x, of: e.id, each: x }));
+    const all = (accepted ?? assertions(data)).filter((x) => !x.modal).flatMap((x) => (x.kind === 'state' && x.of === EVERY ? everyone(x) : [x]));
+    let out = [];
 
     const byQ = new Map();
     const qById = new Map((data.questions ?? []).map((q) => [q.id, q]));
@@ -369,11 +400,13 @@ export function contradictions(data, accepted = null) {
     // A denial of a whole stretch (`whole`: "not there from one until the bell", the denial of an answer that says
     // there throughout) is met only by locations within that place that hold the stretch from end to end, one or
     // several: each is a side, so that distrusting any piece lifts it. Somewhere else for a moment is enough for it.
-    for (const d of locs) {
-        if (!d.neg || !d.whole) continue;
+    // Of any other state: the same value, held end to end ("he made every round, from ten until six").
+    for (const d of all) {
+        if (d.kind !== 'state' || !d.neg || !d.whole || d.value == null) continue;
         const w = coverOf(d.time);
         if (!w || w.incl) continue;
-        const within = locs.filter((x) => { const c = coverOf(x.time); if (x === d || x.neg || x.of !== d.of || !c || c.incl) return false; const v = fixedAt(x.value, c); return !!v && pl.chain(v).includes(d.value); });
+        const same = d.attr === 'location' ? (x, c) => { const v = fixedAt(x.value, c); return !!v && pl.chain(v).includes(d.value); } : (x) => x.value === d.value;
+        const within = all.filter((x) => { const c = coverOf(x.time); return x.kind === 'state' && x !== d && !x.neg && x.of === d.of && x.attr === d.attr && x.value != null && !!c && !c.incl && same(x, c); });
         const pieces = [];
         let at = w.start, done = false;
         for (let i = 0; i <= within.length && !done; i++) {
@@ -383,7 +416,7 @@ export function contradictions(data, accepted = null) {
             at = coverOf(next.time).end;
             done = order.le(w.end, at);
         }
-        if (done) for (const x of pieces) out.push({ a: x, b: d, why: `${d.of}: at ${d.value} throughout, and not` });
+        if (done) for (const x of pieces) out.push({ a: x, b: d, why: `${d.of}: ${d.attr === 'location' ? 'at ' : ''}${d.value} throughout, and not` });
     }
 
     // A denial against what it denies, for any other kind of state: the same thing, attribute and value, asserted and
@@ -391,6 +424,7 @@ export function contradictions(data, accepted = null) {
     const others = all.filter((x) => x.kind === 'state' && !(SINGLE_ATTRS.has(x.attr) || STATES[x.attr]) && x.value != null && x.of != null && !CLAIM_ATTRS.has(x.attr));
     const denials = others.filter((x) => x.neg);
     for (const d of denials) for (const p of others) {
+        if (d.whole) continue;
         if (p.neg || (p.fact != null && p.fact === d.fact) || p.of !== d.of || p.attr !== d.attr || p.value !== d.value) continue;
         if (!overlaps(order, coverOf(p.time), coverOf(d.time)) && !between(p.time, coverOf(d.time))) continue;
         out.push({ a: p, b: d, why: `${d.of}: ${d.value}, asserted and denied` });
@@ -449,6 +483,7 @@ export function contradictions(data, accepted = null) {
     // What follows from the evidence says one thing in two forms (an answer, and the state it is): one clash a pair.
     const src = (x) => x.fact ?? (x.q != null && x.pick != null ? `${x.q}=${x.pick}` : x.id);
     const seen = new Set();
+    out = out.map((c) => (c.a.each || c.b.each || c.via?.each ? { ...c, a: c.a.each ?? c.a, b: c.b.each ?? c.b, ...(c.via ? { via: c.via.each ?? c.via } : {}) } : c));
     return out.filter((c) => {
         if (c.a.by !== DERIVED && c.b.by !== DERIVED) return true;
         const k = [src(c.a), src(c.b), c.via ? src(c.via) : ''].join('|');

@@ -4,7 +4,7 @@
 // the player says (engine/world.js). The player is the reader: the marks and moves are the reader's own. Facts at or above the threshold are on the timeline; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, EVERY, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
@@ -233,7 +233,7 @@ function cycleMark(qid, pick) {
 }
 
 // --- Words.
-const nameOf = (id) => (id === '?' ? 'someone' : id === HYPOTHESIS ? 'your hypothesis' : id === REASONING ? 'your reasoning' : id === READER ? 'you' : (entityById.has(id) ? names().nameAt(id, reading.count) : null) ?? narratorName(id) ?? id);
+const nameOf = (id) => (id === '?' ? 'someone' : id === EVERY ? 'everyone' : id === HYPOTHESIS ? 'your hypothesis' : id === REASONING ? 'your reasoning' : id === READER ? 'you' : (entityById.has(id) ? names().nameAt(id, reading.count) : null) ?? narratorName(id) ?? id);
 const ent = (id) => (id === HYPOTHESIS || id === REASONING ? `<span class="hyp-name">${nameOf(id)}</span>` : id && entityById.has(id) ? `<a class="ent" data-ent="${esc(id)}">${esc(nameOf(id))}</a>` : esc(id === '?' ? 'Someone' : id ? nameOf(id) : ''));
 /** An entity at the head of a line: its name capitalised (the reader's hypothesis: "Your hypothesis"). */
 const entHead = (id) => ent(id).replace(/>([a-z])/, (m, c) => `>${c.toUpperCase()}`).replace(/^([a-z])/, (m, c) => c.toUpperCase());
@@ -318,7 +318,9 @@ function stepText(x) {
 function phrase(f) {
     if (f.attr === 'opening') { const by = foundBy(f, roomKnown, room.openings); return `A way between ${ent(f.sides[0])} and ${ent(f.sides[1])}${by ? `: ${ent(by)}` : ', not yet found'}`; }
     if (f.attr === 'route') return `A route: ${f.value.map(ent).join(' → ')}`;
-    const E = f.of === '?' ? 'Someone' : ent(f.of);
+    // A statement about everyone: "Nobody but … at the house" for the denial, "Everyone but …" otherwise.
+    if (f.of === EVERY && !f.who) return phrase({ ...f, neg: false, who: `${f.neg ? 'Nobody' : 'Everyone'}${list(f.but).length ? ` but ${list(f.but).map(ent).join(f.neg ? ' or ' : ' and ')}` : ''}` });
+    const E = f.who ?? (f.of === '?' ? 'Someone' : ent(f.of));
     // Told early in brief (`given_at`): until its own paragraph, only the brief words that told it.
     if (f.given_quote && seen(f.given_at) && !seen(f.para)) return `${E}: <span class="said">“${esc(f.given_quote)}”</span>`;
     if (f.reasoned && f.attr === 'action' && f.act) return `${E}: ${list(f.act).map((t) => ACTIONS[t].label).join(' and ')} ${ent(f.thing)}`;
@@ -415,7 +417,7 @@ function acceptedAssertions() {
     const got = new Set(follows.map((x) => x.id));
     const marks = markAssertions(data, state.marks, possShown).filter((x) => !got.has(x.id) && lvlOf(x) >= state.threshold);
     const mine = reasoned.filter((f) => visible(f) && accepted(f))
-        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at, ...(f.event ? { event: f.event } : {}) }));
+        .map((f) => ({ id: f.id, fact: f.id, kind: 'state', of: f.of, attr: f.attr, value: f.value, neg: !!f.neg, time: f.time, truth: null, para: f.given_at, ...(f.event ? { event: f.event } : {}), ...(f.of === EVERY ? { every: f.every, but: f.but } : {}) }));
     return [...follows, ...marks, ...mine, ...allAssertions.filter((x) => {
         const f = factById.get(x.fact);
         if (!visible(f)) return false;
@@ -684,9 +686,11 @@ const markText = (x) => {
     const via = m ? ` (implied by your answer to “${esc(qById.has(m[1]) ? qLabel(qById.get(m[1])) : m[1])}”: ${pickText(qById.get(m[1]), m[2])})` : '';
     return `${x.neg ? 'You crossed out' : 'Your hypothesis'}: ${pickText(qById.get(x.q), x.pick)}${via}`;
 };
+/** A typed answer on one side: what the circle asserts, or what the cross denies. */
+const typedMarkText = (x) => `${x.denied ? 'You crossed out' : 'Your hypothesis'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, neg: x.denied ? !x.neg : x.neg, id: '' })}`;
 function clashSide(x) {
     if (x.by === DERIVED) return `<a class="link" data-q="${esc(x.q)}">${followText(x)}</a>${x.kind === 'state' ? sideTime(x.time) : ''}${x.needs ? ` <span class="small muted">(${esc(x.needs)})</span>` : ''}`;
-    if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${markText(x)}</a>${x.needs ? ` <span class="small muted">(${esc(x.needs)})</span>` : ''}`;
+    if (x.mark) return `<a class="link" data-q="${esc(x.q)}">${x.kind === 'state' ? typedMarkText(x) + sideTime(x.time) : markText(x)}</a>${x.needs ? ` <span class="small muted">(${esc(x.needs)})</span>` : ''}`;
     const f = factOf(x.fact);
     if (x.kind === 'pick') {
         const q = qById.get(x.q);
@@ -709,7 +713,7 @@ function clashTitle(c) {
     if (c.event) return 'One event, at two times?';
     if (c.a.kind === 'pick') return esc(qById.has(c.a.q) ? qLabel(qById.get(c.a.q)) : c.a.q);
     // What the contradiction is about: the state's own subject (what a claim asserts, not the claim's speaker).
-    const f = c.a.mark || !c.a.attr ? factOf(c.a.fact) : c.a;
+    const f = !c.a.attr ? factOf(c.a.fact) : c.a;
     return `${ent(f.of)}: ${f.attr === 'location' ? 'in two places at once?' : STATES[f.attr] ? 'two states at once?' : f.attr === 'identity' ? 'two identities?' : `${f.attr === 'knows' ? 'knows ' : ''}${entityById.has(f.value) ? nameOf(f.value) : esc(f.value)}, and not?`}`;
 }
 
@@ -965,7 +969,7 @@ function derivedLevel(x) {
     return l == null ? -1 : Math.min(l, state.trust.people[REASONING] ?? top);
 }
 const followText = (x) => (x.kind === 'pick' ? `${x.neg ? 'The evidence rules out' : 'It follows from the evidence'}: ${pickText(qById.get(x.q), x.pick)}`
-    : x.kind === 'state' ? `${x.neg ? 'The evidence rules out' : 'It follows from the evidence'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, id: '' })}`
+    : x.kind === 'state' ? `${x.denied ? 'The evidence rules out' : 'It follows from the evidence'}: ${phrase({ of: x.of, attr: x.attr, value: x.value, neg: x.denied ? !x.neg : x.neg, id: '' })}`
     : `From the evidence: ${esc(derivedNow.find((d) => d.id === x.imp)?.says ?? '')}`);
 /** Under a question: what follows from what is shown, each implication over the statements it came from. */
 function followsHtml(q) {
@@ -1248,7 +1252,7 @@ function sideHtml(x, label) {
     const chains = chainsOfAssertion(x);
     const r = { ...resolvingLinks(chains, state.trust, state.threshold), drop: dropCounts(chains) };
     if (x.mark) {
-        return `<div class="side"><h3>${label}</h3><p><a class="link" data-q="${esc(x.q)}">${markText(x)}</a></p>
+        return `<div class="side"><h3>${label}</h3><p><a class="link" data-q="${esc(x.q)}">${x.kind === 'state' ? typedMarkText(x) + sideTime(x.time) : markText(x)}</a></p>
       <p class="small">Trusted: <b>${levelName(levelOf(chains, state.trust))}</b>. Change the mark, or lower your trust in it.</p>
       ${stmtHtml(chains, r)}<ul class="chains">${chains.map((c) => chainHtml(c, r)).join('')}</ul>${peopleHtml(chains, r)}</div>`;
     }

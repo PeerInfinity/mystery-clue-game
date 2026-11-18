@@ -314,3 +314,35 @@ test('a statement denied by name contradicts that statement, while both are acce
     assert.deepEqual(contradictions(w, [...assertions(w), d]).map((c) => [c.a.id, c.b.id]), [['f.entry', 'i.x!f.entry']]);
     assert.deepEqual(contradictions(w, [d]), []);
 });
+
+test('a statement about everyone is one about each, but those named and those whose identity is in question', () => {
+    const ents = [...entities, { id: 'groom', kind: 'person' }, { id: 'figure', kind: 'person' }];
+    const w = (facts) => ({ ...world(facts, [{ id: 'q.fig', entry: { of: 'figure', attr: 'identity', time: { at: 't2' } }, possibilities: [] }]), entities: ents });
+    const nobody = { id: 'f.nobody', of: '*', every: 'person', but: ['watson'], attr: 'location', value: 'stable', neg: true, time: { from: 't1', to: 't4' }, para: 1, quote: 'x' };
+    const run = (facts) => { const x = w(facts); return contradictions(x).map((c) => `${c.a.id}/${c.b.id}: ${c.why}`); };
+    assert.deepEqual(run([nobody, loc('f.w', 'watson', 'stall', { at: 't2' })]), [], 'one of those named');
+    assert.deepEqual(run([nobody, loc('f.h', 'horse', 'stall', { at: 't2' })]), [], 'an animal is no person');
+    assert.deepEqual(run([nobody, loc('f.f', 'figure', 'stall', { at: 't2' })]), [], 'the figure may be one of those named');
+    assert.deepEqual(run([nobody, loc('f.m', 'man', 'stall', { at: 't2' }), loc('f.g', 'groom', 'stall', { after: 't2', before: 't3' })]), ['f.nobody/f.m: man: at stall and not at stable', 'f.g/f.nobody: groom: at stall and not at stable']);
+});
+
+test("an answer's typed form: asserted with a circle, denied with a cross where one state says the denial", () => {
+    const q = { id: 'q', entry: { of: 'man', attr: 'condition', time: { at: 't2' } }, answer: 'no', possibilities: [
+        { value: 'yes', asserts: [{ of: 'man', attr: 'location', value: 'stable' }] },
+        { value: 'all night', asserts: [{ of: 'man', attr: 'round', value: 'made', time: { from: 't1', to: 't4' } }] },
+        { value: 'never', asserts: [{ of: 'man', attr: 'round', value: 'made', neg: true, time: { from: 't1', to: 't4' } }] },
+        { value: 'two', asserts: [{ of: 'man', attr: 'location', value: 'stable' }, { of: 'horse', attr: 'location', value: 'stable' }] },
+        { value: 'no' }] };
+    const round = { id: 'f.r', of: 'man', attr: 'round', value: 'made', time: { from: 't1', to: 't4' }, para: 1, quote: 'x' };
+    const w = world([loc('f.s', 'man', 'stall', { at: 't2' }), loc('f.l', 'man', 'london', { at: 't2' }, { truth: false }), round], [q]);
+    const marks = (m) => markAssertions(w, { q: m });
+    assert.deepEqual(marks({ yes: 'circled' }).map((x) => [x.id, x.kind, x.neg, x.time]), [['hyp:q=yes', 'pick', false, undefined], ['hyp:q=yes@a0', 'state', false, { at: 't2' }]], "the entry's time");
+    const clash = (m) => contradictions(w, [...assertions(w), ...marks(m)]).filter((c) => c.a.mark || c.b.mark).map((c) => [c.a.id, c.b.id].sort().join('/'));
+    assert.deepEqual(clash({ yes: 'circled' }), ['f.l/hyp:q=yes@a0']);
+    assert.deepEqual(clash({ yes: 'crossed' }), ['f.s/hyp:q=yes@a0']);
+    assert.equal(marks({ 'all night': 'crossed' })[1].whole, true);
+    assert.deepEqual(clash({ 'all night': 'crossed' }), ['f.r/hyp:q=all night@a0'], 'not for the whole of it, against the whole of it');
+    assert.equal(marks({ never: 'crossed' }).length, 1, 'the denial of "at no moment" is no one state');
+    assert.equal(marks({ two: 'crossed' }).length, 1, 'the denial of two states is neither');
+    assert.equal(marks({ two: 'circled' }).length, 3);
+});
