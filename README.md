@@ -3,8 +3,9 @@
 **Play in your browser:** [the start page](https://peerinfinity.github.io/mystery-clue-game/) · [How to play](https://peerinfinity.github.io/mystery-clue-game/guide.html)
 
 You read a short detective story a paragraph at a time and keep an ordered list of what happened: who was where, who
-did what, and when. What the narrator sees is certain; everything else reached the narrator through a chain of people,
-and you choose how far to trust each link. The page lists the contradictions among what you accept. The story raises
+did what, and when. What the narrator sees is confirmed; everything else reached the narrator through a chain of people,
+starts as uncertain, and counts for nothing until you choose how far to trust it (five levels, from confirmed to
+ruled out). The page lists the contradictions among what you accept. The story raises
 questions as it goes; before it gives an answer away you show it, by linking the evidence and circling the answer the
 evidence leaves.
 

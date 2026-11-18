@@ -6,7 +6,7 @@
 const BASE = process.env.URL ?? 'http://localhost:8321/';
 const CDP = `http://127.0.0.1:${process.env.CDP_PORT ?? 9333}`;
 const FIXTURE = 'scripts/fixtures/sealed-room';
-const STORE = `${FIXTURE.replace(/[^A-Za-z0-9]+/g, '-')}-world-v1`;
+const STORE = `${FIXTURE.replace(/[^A-Za-z0-9]+/g, '-')}-world-v2`;
 const target = await (await fetch(`${CDP}/json/new?about:blank`, { method: 'PUT' })).json();
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((r) => { ws.onopen = r; });

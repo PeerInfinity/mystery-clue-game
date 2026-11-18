@@ -6,7 +6,7 @@
 // the viewer's layout, choosing tabs as a player would. `?autoplay=fast` plays with no pauses and no cursor (the check,
 // scripts/world-autoplay-check.mjs). The same moves are checked by scripts/path-check.mjs from outside the page.
 
-import { $, sleep, esc, Stopped, Failed, makeMover, nextRead, readToOf } from './world-moves.js';
+import { $, sleep, esc, Stopped, Failed, makeMover, nextRead, readToOf, made } from './world-moves.js';
 import { refList } from '../engine/refs.js';
 
 import { CASE, pageUrl } from './world-case.js';
@@ -95,7 +95,7 @@ export async function start({ store, fast = false }) {
             const pick = $(chipSel(m))?.innerText ?? $(`a.ent[data-ent="${esc(m.pick)}"]`)?.innerText ?? m.pick;
             return `${m.do === 'cross' ? 'Crossing out' : isRight(m) ? 'Circling' : 'Trying'} “${pick}” on “${qLabel(m.q)}”`;
         }
-        if (m.do === 'trust') return `Distrusting this statement: ${($(`#timeline [data-fact="${esc(m.on)}"]`)?.innerText ?? $('#detail h2')?.innerText ?? m.on).replace(/\s*¶\d+\s*$/, '')}`;
+        if (m.do === 'trust') return `${{ confirmed: 'Trusting as confirmed', likely: 'Trusting as likely', unlikely: 'Distrusting as unlikely', 'ruled out': 'Ruling out' }[m.level] ?? 'Setting the trust of'}: ${($(`#timeline [data-fact="${esc(m.on)}"]`)?.innerText ?? $('#detail h2')?.innerText ?? m.on).replace(/\s*¶\d+\s*$/, '')}`;
         if (m.do === 'way') { const [row, size] = m.way.split('|'); return `Marking ${$(`[data-way-row="${esc(row)}"] td`)?.innerText ?? row} ${m.mark} to ${size === 'person' ? 'a person' : 'something small'}`; }
         if (m.do === 'got') return 'Something got through';
         if (m.do === 'route') return 'Adding a link to the route';
@@ -139,6 +139,8 @@ export async function start({ store, fast = false }) {
         if (!fast) { setPaused(true, 'A careful reader will read the story and fill in the timeline, move by move. Choose a speed, then press Start.'); $('#ap-pause').textContent = 'Start'; }
         await gate();
         const one = async (m) => {
+            // A statement trusted already for another question's moves is not trusted again.
+            if (m.do === 'trust' && made(m, saved())) return;
             await readTo(m.at);
             try { await play(m); } catch (e) { if (e instanceof Failed) throw new Failed(`¶${refList(m.at).join(', ')}, ${await words(m).catch(() => m.do)}: ${e.message}`); throw e; }
         };

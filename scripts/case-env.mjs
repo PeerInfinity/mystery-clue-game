@@ -8,7 +8,7 @@ const DEFAULT = 'cases/miniatures/rent-box';
 export const CASE = (process.env.CASE ?? DEFAULT).replace(/\/+$/, '');
 export const WORLD = path.join(ROOT, CASE, 'world');
 const key = CASE.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
-export const STORE = `${key}-world-v1`;
-export const AUTOPLAY_STORE = `${key}-world-autoplay`;
+export const STORE = `${key}-world-v2`;
+export const AUTOPLAY_STORE = `${key}-world-autoplay-v2`;
 /** The page's address for this case on server `base`, with more parameters (`autoplay=fast`). */
 export const pageUrl = (base, extra = '') => { const q = [`case=${encodeURIComponent(CASE)}`, extra].filter(Boolean).join('&'); return q ? `${base}?${q}` : base; };

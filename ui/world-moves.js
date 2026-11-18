@@ -8,7 +8,8 @@ import { MAIN, parseRef, refList, Reading } from '../engine/refs.js';
 export const $ = (sel) => document.querySelector(sel);
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const esc = (s) => String(s).replace(/["\\]/g, '\\$&');
-export const LEVELS = { distrusted: 0, uncertain: 1, trusted: 2 };
+/** The trust levels by name (engine/world.js `LEVELS`), as a path's moves name them. */
+export const LEVELS = { 'ruled out': 0, unlikely: 1, uncertain: 2, likely: 3, confirmed: 4 };
 export class Stopped extends Error {}
 export class Failed extends Error {}
 export const VIEWS = new Set(['plan', 'stop', 'compare', 'account']);
@@ -78,7 +79,7 @@ const sameMove = (x, m) => x.move === m.do && (m.do === 'a' ? ((x.a === m.a && x
 /** Has the save got this move's effect? (Views have none.) */
 export function made(m, save) {
     if (m.do === 'circle' || m.do === 'cross') return save.marks?.[m.q]?.[m.pick] === (m.do === 'circle' ? 'circled' : 'crossed');
-    if (m.do === 'trust') return m.link ? (save.trust?.links?.[m.link] ?? LEVELS.uncertain) === LEVELS[m.level] : (save.trust?.people?.[m.person] ?? null) === LEVELS[m.level];
+    if (m.do === 'trust') return (m.link ? save.trust?.links?.[m.link] : save.trust?.people?.[m.person]) === LEVELS[m.level];
     if (REASONING.has(m.do)) return (save.reasoning ?? []).some((x) => sameMove(x, m));
     if (m.do === 'hold') return (save.held ?? []).includes(m.strain);
     if (m.do === 'way') return save.room?.ways?.[m.way] === m.mark;

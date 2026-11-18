@@ -6,7 +6,7 @@
 // What a hint is about, in this order:
 //  (a) a mark on a question the path settles, wrong by now: a wrong answer circled, a right one crossed out (only once
 //      the path has its reason: its crossing, or its right circle, at or before the paragraph read to);
-//  (b) a distrust the path does not make: a link or a person set to distrusted, unless it keeps only false things off
+//  (b) a distrust the path does not make: a link or a person set to unlikely or ruled out, unless it keeps only false things off
 //      the timeline (a false statement's own link, or any other link of a false chain: as good as the path's);
 //  (c) the next move of the path not made, that the page allows now (tried and taken back, engine and page alike),
 //      those for the soonest answer given away first (with papers earned by solving questions, only the moves of a
@@ -19,6 +19,7 @@ import { $, esc, LEVELS, Failed, makeMover, allowedNow, made, onOf, VIEWS, nextR
 
 import { CASE } from './world-case.js';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const TRUST_VERB = { confirmed: 'Trust as confirmed', likely: 'Trust as likely', uncertain: 'Leave as uncertain', unlikely: 'Distrust as unlikely', 'ruled out': 'Distrust as ruled out' };
 
 /**
  * `api` (ui/world.js): para(), last, question(id), qListed(id), isRight(id, pick), statementFalse(id), name(id),
@@ -65,18 +66,19 @@ export async function makeHints({ store, api }) {
         }
         // (b) a distrust the path does not make.
         for (const [key, level] of Object.entries(save.trust?.links ?? {})) {
-            if (level !== LEVELS.distrusted || distrustedByPath(key)) continue;
+            if (level > LEVELS.unlikely || distrustedByPath(key)) continue;
             if (key.startsWith('stmt:') && api.statementFalse(key.slice(5))) continue;
             if (key.startsWith('hyp:')) continue;   // a mark's own link: the marks are (a)'s
             if (api.distrustEffect({ link: key }).harmless) continue;   // it takes off only what is false: as good as the path's
             return { kind: 'trust', link: key };
         }
-        for (const [person, level] of Object.entries(save.trust?.people ?? {})) if (level === LEVELS.distrusted && !api.distrustEffect({ person }).harmless) return { kind: 'trust', person };
+        for (const [person, level] of Object.entries(save.trust?.people ?? {})) if (level <= LEVELS.unlikely && !distrustedByPath(person) && !api.distrustEffect({ person }).harmless) return { kind: 'trust', person };
         // (c) the next move of the path that the page allows now.
         const deadline = (m) => Math.min(...(m.for_q ?? []).map((q) => api.question(q)?.answer_given_at).filter((g) => g > P), Infinity);
-        // A distrust of the path counts as made when it would take nothing more off the timeline: the player has
-        // taken the same false things off by another link of the chain.
-        const done = (m) => m.do === 'trust' && m.level === 'distrusted' && api.distrustEffect(m.link ? { link: m.link } : { person: m.person }, false).n === 0;
+        // A distrust of the path counts as made when every false statement it lowers is held unlikely or ruled out
+        // already: the player has lowered the same false things by another link of the chain.
+        // A raising counts as made when the entry it is for counts already (the player raised its paper or its person).
+        const done = (m) => m.do === 'trust' && (LEVELS[m.level] <= LEVELS.unlikely ? api.lowered(m.link ? { link: m.link } : { person: m.person }) : api.countsNow(m.on));
         // Papers earned by solving questions: only the moves of a question open now (its papers come, what it rests on solved).
         const forOpen = (m) => !api.earned || !(m.for_q ?? []).length || m.for_q.some((q) => api.open(q));
         const open = moves.filter((m) => !VIEWS.has(m.do) && forOpen(m) && api.seenAll(from(m)) && !tried(m) && !made(m, save) && !done(m)
@@ -126,7 +128,7 @@ export async function makeHints({ store, api }) {
             case 'uncross': return [look(qLink(t.q), true), t.why, `Circle “${pickName(t.q, t.pick)}”.`];
             case 'trust': return [{ html: `Look at your trust in ${t.link ? (t.link.startsWith('stmt:') ? entryLink(t.link.slice(5)) : H(api.linkName(t.link))) : a('ent', t.person, api.name(t.person))}.` },
                 'Distrusting it takes away more than what is false: some of what came that way is true, and the timeline needs it.',
-                'Set it back to uncertain.'];
+                'Take that setting back.'];
             case 'move': {
                 const m = t.m;
                 const where = m.do === 'circle' || m.do === 'cross' ? look(qLink(m.q))
@@ -137,7 +139,7 @@ export async function makeHints({ store, api }) {
                     : look(entryLink(onOf(m)));
                 const what = m.do === 'circle' ? `Circle “${pickName(m.q, m.pick)}”.`
                     : m.do === 'cross' ? `Cross out “${pickName(m.q, m.pick)}”.`
-                    : m.do === 'trust' ? (m.person ? `Distrust ${api.name(m.person)}.` : m.link.startsWith('stmt:') ? 'Distrust this statement itself (its own trust, above its chains).' : `Distrust this link of its chain: ${api.linkName(m.link)}.`)
+                    : m.do === 'trust' ? `${TRUST_VERB[m.level] ?? 'Set your trust'}: ${m.person ? `everything ${api.name(m.person)} says` : m.link.startsWith('stmt:') ? 'this statement itself (its own trust, above its chains)' : `everything that came by this link of its chain, ${api.linkName(m.link)}`}.`
                     : m.do === 'a' ? `Point out that it changed: against ${entry(m.b)}.`
                     : m.do === 'b' ? 'Point out what it needs and what it does.'
                     : m.do === 'm' ? `Point out that something is missing here: at ${api.timeName?.(m.time) ?? m.time}.`

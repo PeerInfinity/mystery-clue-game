@@ -42,7 +42,7 @@ const deniesWhat = (d, p) => (list(d.act).length ? list(d.act).every((a) => list
  * certain: the fair-play contract, a first-person narrator's own observations and an impersonal narrator's report);
  * the player may change it. An impersonal third-person narrator is the pseudo-entity `narrator`.
  */
-export const narrationLink = (n) => ({ from: n.id, to: READER, how: 'narrates', narrator: n.id, base: LEVELS.indexOf(n.trust ?? 'certain'), uncertain: false });
+export const narrationLink = (n) => ({ from: n.id, to: READER, how: 'narrates', narrator: n.id, base: LEVELS.indexOf(n.trust ?? 'confirmed'), uncertain: false });
 /** The narrators of a case, `{id, name?, trust?}` (world/case.json). */
 const narratorsOf = (data) => {
     if (!data.narrators?.length) throw new Error('a case needs narrators (world/case.json)');
@@ -297,8 +297,8 @@ export function isOption(q, pick, kindOf) {
 /** The reader's hypothesis: the source of the player's marks, a person of its own so that one cap covers them all. */
 export const HYPOTHESIS = 'hypothesis';
 export const hypothesisKey = (q, pick) => `hyp:${q}=${pick}`;
-/** The one chain of a mark: a single link from the reader's hypothesis to the reader, keyed by the mark, starting uncertain. */
-export const hypothesisChain = (q, pick) => ({ account: null, origin: HYPOTHESIS, links: [{ from: HYPOTHESIS, to: READER, how: 'hypothesis', hyp: hypothesisKey(q, pick), uncertain: false }] });
+/** The one chain of a mark: a single link from the reader's hypothesis to the reader, keyed by the mark, starting at likely (a guess counts as likely, and no more). */
+export const hypothesisChain = (q, pick) => ({ account: null, origin: HYPOTHESIS, links: [{ from: HYPOTHESIS, to: READER, how: 'hypothesis', hyp: hypothesisKey(q, pick), base: LIKELY_LEVEL, uncertain: false }] });
 
 /** Places: what each is within, and which move (vehicles, and any thing that is not a place). */
 export function places(data) {
@@ -563,9 +563,17 @@ export const compatible = (q, a, b) => a !== b && isRight(q, a) && isRight(q, b)
 
 export const givenAt = (f) => f.given_at ?? ((f.basis ?? 'stated') === 'inferable' ? null : f.para);
 
-/** Trust levels, lowest first. A narration link starts at its narrator's trust (certain by default); every other link starts `uncertain`. */
-export const LEVELS = ['distrusted', 'uncertain', 'trusted', 'certain'];
-export const DEFAULT_LEVEL = 1;
+/**
+ * Trust levels, lowest first, on one scale with the strength of what follows (engine/implications.js). What is
+ * confirmed or likely counts as evidence; what is uncertain (the default for what anyone but a narrator says) is
+ * shown and counts for nothing; what is unlikely or ruled out counts only as a lie can (a `{doubted}` observation).
+ * A narration link starts at its narrator's trust (confirmed by default); a mark of the reader's own at likely.
+ */
+export const LEVELS = ['ruled out', 'unlikely', 'uncertain', 'likely', 'confirmed'];
+export const RULED_OUT = 0, UNLIKELY = 1, UNCERTAIN = 2, LIKELY_LEVEL = 3, CONFIRMED = 4;
+export const DEFAULT_LEVEL = UNCERTAIN;
+/** Whether what is held at this level counts as evidence. */
+export const counts = (l) => l != null && l >= LIKELY_LEVEL;
 
 /**
  * The key of a link the player can trust: a statement's own link by its fact (`stmt:<id>`); a telling by its fact id; a speech (a claim's or a word's link) by
@@ -575,20 +583,30 @@ export const DEFAULT_LEVEL = 1;
 export const linkKey = (l) => (l.hyp ? l.hyp : l.know ? l.know : l.narrator ? `narrates:${l.narrator}` : l.stmt ? `stmt:${l.stmt}` : l.telling ? l.telling : `${l.how === 'member' ? 'member' : l.how === 'unknown' ? 'unknown' : 'said'}:${l.from}>${l.to}`);
 
 /**
- * How far the player trusts a chain: its weakest link, a link's level being the player's choice for it (default
- * uncertain; a narration link's its narrator's trust), lowered by the level set for the person it comes from, if any
- * (not a narration link: the narrator's trust as narrator is that link's own). `trust`: `{links: {key: level},
- * people: {id: level}}`.
+ * The level of one link that is not a statement's own: the player's choice for it, else the level set for the
+ * person it comes from (not a narration link: the narrator's trust as narrator is that link's own), else the level
+ * it starts at (`base`; a member's link to their group says nothing by itself and limits nothing), else uncertain.
+ */
+export function hopLevel(l, trust = {}) {
+    const own = trust.links?.[linkKey(l)];
+    if (own != null) return own;
+    const p = l.narrator ? null : trust.people?.[l.from];
+    return p ?? l.base ?? (l.how === 'member' ? CONFIRMED : DEFAULT_LEVEL);
+}
+/**
+ * How far the player trusts a chain. The most specific setting wins: the statement's own level if it has one (set
+ * by the player, or the level a doubtable narrator's statement starts at); else each link it came by as `hopLevel`
+ * says (the link's own setting, else its person's, else uncertain), the weakest of them: hearsay is as good as its
+ * weaker hop. Never more than the narration it came through. `trust`: `{links: {key: level}, people: {id: level}}`.
  */
 export function chainLevel(chain, trust = {}) {
-    let level = LEVELS.length - 1;
+    let frame = CONFIRMED, hops = CONFIRMED, own = null;
     for (const l of chain.links) {
-        let x = trust.links?.[linkKey(l)] ?? l.base ?? DEFAULT_LEVEL;
-        const p = l.narrator ? null : trust.people?.[l.from];
-        if (p != null) x = Math.min(x, p);
-        level = Math.min(level, x);
+        if (l.narrator) frame = Math.min(frame, hopLevel(l, trust));
+        else if (l.stmt) own = trust.links?.[linkKey(l)] ?? l.base ?? own;
+        else hops = Math.min(hops, hopLevel(l, trust));
     }
-    return level;
+    return Math.min(frame, own ?? hops);
 }
 
 /** How far the player trusts a fact or a claim's content: its best chain (null: no chain, the reader's own inference). */
@@ -598,11 +616,11 @@ export function levelOf(chains, trust = {}) {
 }
 
 /**
- * The links, and the people, whose distrust alone would take a fact below the threshold: every chain of it passes
- * through them (and the fact is now at or above it). `chains`: the fact's chains; returns `{links: [key], people: [id]}`.
+ * The links, and the people, whose ruling out alone would take a fact below the threshold (by default: it would no
+ * longer count): every chain of it passes through them (and the fact is now at or above it). `chains`: the fact's chains; returns `{links: [key], people: [id]}`.
  * A narration link is the frame every fact comes in, not a source to weigh against another: it is never listed.
  */
-export function resolvingLinks(chains, trust = {}, threshold = DEFAULT_LEVEL) {
+export function resolvingLinks(chains, trust = {}, threshold = LIKELY_LEVEL) {
     const out = { links: [], people: [] };
     if (!chains.length || threshold <= 0 || levelOf(chains, trust) < threshold) return out;
     const keys = [...new Set(chains.flatMap((c) => c.links.filter((l) => !l.narrator).map(linkKey)))];

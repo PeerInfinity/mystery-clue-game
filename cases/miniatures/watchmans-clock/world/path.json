@@ -2,8 +2,10 @@
   "description": "The true path of the miniature: a watchman's card punched every hour but three; the gap pointed out as the reader's own entry, set against his statement that he made every round; the gate fast at half past two and on the latch at half past three; the carter in splints.",
   "moves": [
     {"at": [2, "card:2"], "do": "m", "of": "f.rule", "time": "t.three", "for_q": ["q.who"], "why": "Every hour from twelve until five, and the card has twelve, one, two, four and five: nothing at three."},
-    {"at": [3, "card:2"], "do": "trust", "on": "f.ward_rounds", "link": "stmt:f.ward_rounds", "level": "distrusted", "for_q": ["q.who"], "why": "He says he made every round; the card has none at three."},
+    {"at": [3, "card:2"], "do": "trust", "on": "f.ward_rounds", "link": "stmt:f.ward_rounds", "level": "ruled out", "for_q": ["q.who"], "why": "He says he made every round; the card has none at three."},
+    {"at": [4], "do": "trust", "on": "f.gate_fast", "link": "stmt:f.gate_fast", "level": "likely", "gen": "trust", "for_q": ["q.when"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": [4], "do": "link", "entry": "f.gate_fast", "q": "q.when", "see": "at half past two the yard gate was fast", "for_q": ["q.when"], "why": "Fast at half past two."},
+    {"at": [4], "do": "trust", "on": "f.gate_latch", "link": "stmt:f.gate_latch", "level": "likely", "gen": "trust", "for_q": ["q.when"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": [4], "do": "link", "entry": "f.gate_latch", "q": "q.when", "see": "opened in the hour between", "for_q": ["q.when"], "why": "On the latch at half past three: opened in the hour between."},
     {"at": [4], "do": "cross", "q": "q.when", "pick": "after five", "for_q": ["q.when"], "why": "Not after five: the gate was open by half past three."},
     {"at": [4], "do": "circle", "q": "q.when", "pick": "between half past two and half past three", "for_q": ["q.when"], "why": "Between half past two and half past three."},
@@ -11,6 +13,7 @@
     {"at": [4, "card:2"], "do": "link", "entry": "r:m:f.rule@t.three", "q": "q.who", "see": "Ward was not at the station in that hour", "for_q": ["q.who"], "why": "And the one round Ward missed is the round at three, in that hour."},
     {"at": [5], "do": "link", "entry": "f.tanner_ankle", "q": "q.who", "see": "could not have stood under a bale", "for_q": ["q.who"], "why": "Tanner has the other key, but he is in splints."},
     {"at": [5], "do": "cross", "q": "q.who", "pick": "tanner", "for_q": ["q.who"], "why": "Not Tanner."},
+    {"at": [5], "do": "trust", "on": "f.tanner_key", "link": "stmt:f.tanner_key", "level": "likely", "gen": "trust", "for_q": ["q.who"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": [5], "do": "link", "entry": "f.tanner_key", "q": "q.who", "see": "only Ward and Tanner have keys", "for_q": ["q.who"], "why": "The gate was opened with a key, and there are two."},
     {"at": [5], "do": "circle", "q": "q.who", "pick": "ward", "for_q": ["q.who"], "why": "Ward, away from his round in the hour the gate was opened."}
   ]

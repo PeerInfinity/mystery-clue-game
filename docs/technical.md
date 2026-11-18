@@ -15,9 +15,9 @@ The world model (a case's `world/`; the examples here are Silver Blaze's, `v2/ca
 someone is, who holds what, what a door is, who did what), each at a **time point** of a partial order, each with the
 paragraph and quote that give it. Every fact reached the reader through **accounts** passed on by **tellings** to a
 **narrator** (Watson), who tells the reader, so each has one or more provenance chains from its origin to the
-reader; the player is the reader. The player sets a **trust** level per link, per statement, per person and per
-narrator (a narrator's own observations certain by default); a fact is as trusted as its best chain (of those whose tellings the story has told so far), a chain as its weakest link, and what reaches the
-threshold is on the timeline. **Contradictions** among what is on the timeline are found automatically (two places,
+reader; the player is the reader. The player sets a **trust** level per statement, per link (a paper, a telling), per person and per
+narrator, one of five: confirmed, likely, uncertain, unlikely, ruled out (`docs/case-format.md`, "Trust"). A narrator's own observations start confirmed; what anyone else says starts uncertain, is shown in grey and counts for nothing. The most specific setting wins; a fact is as trusted as its best chain (of those whose tellings the story has told so far), and what is likely or
+confirmed counts as evidence. **Contradictions** among what counts (and, in grey, with what is still uncertain) are found automatically (two places,
 two states or two identities at once, or a circled answer that needs someone at a place the timeline has them away from). **Questions** list possibilities; a circled one is the player's hypothesis, an
 entry like any other. The player's **moves** (a change, what an action needs and does, what it is for, what a plan
 would need, and the plan checks) are checked by a generic action table (`engine/actions.js`). The true path through
@@ -75,6 +75,7 @@ is the earlier game's, for its JSON Schema.
 | Rebuild a pipeline run's prompts (not committed), checked against their recorded hashes; rebuild its assembled case | `node v2/pipeline/prompts.mjs <case> [step] [--write]`; `node v2/pipeline/assemble.mjs <case>` |
 | How each fact of the world model reached the reader (`--accounts`: per account, and who holds it when) | `node scripts/world-provenance.js <case dir>` |
 | Every check of Watson's timeline that plays the page, one after another (the path, the autoplay in each layout and on a phone, the hints); starts the server and a headless Chrome of its own if they are not running, and stops only those (about 6 minutes). `CASE=<dir>` checks another case (a pipeline run's: `CASE=pipeline/runs/silver-blaze-r2/case`; its hint check makes its mistakes from the case's own data) | `npm run page-checks` |
+| The moves of trust a true path needs (each statement that starts uncertain trusted as likely before its first use); run again after a path changes | `node scripts/path-trust.mjs [<dir>...]` |
 | Every page check on every short case, three cases at a time, each with a headless Chrome of its own (`JOBS=<n>`; cases as arguments for only those); about two minutes | `npm run page-checks-all` |
 | The reasoning routes of a case: for each gated question, the links "What is this for?" and plan checks the real page accepts just before its give-away, with the right answers circled that a careful reader could have circled by then, and the changes "It changed" points out, the stops "What stopped it?" finds, the plans to compare and what a plan accounts for (`window.__routes` in `ui/world.js`; `--json <file>` for the report; Silver Blaze: 10 of 27 gated questions, the rest reached by what is told and likely clashes) | `CASE=<dir> node scripts/route-check.mjs` |
 | A player who only tries things, with the answers marked from the evidence (a case with `world/implications.json`; `SHUFFLE` the order, `SEED` an earned case's placement; port 9333; six minutes on the long case) | `CASE=<dir> node scripts/random-links-check.mjs` |

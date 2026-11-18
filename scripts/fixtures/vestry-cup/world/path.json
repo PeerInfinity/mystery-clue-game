@@ -6,12 +6,16 @@
     {"at": 2, "do": "link", "entry": "f.amos_down", "q": "q.tower", "see": "came down it at nine", "for_q": ["q.tower"], "why": "And come down at nine."},
     {"at": 2, "do": "link", "entry": "f.stair_only", "q": "q.tower", "see": "the only way up or down", "for_q": ["q.tower"], "why": "And the stair is the only way, and it comes down where I sat."},
     {"at": 2, "do": "circle", "q": "q.tower", "pick": "tower", "for_q": ["q.tower"], "why": "So he was up the tower the whole time."},
+    {"at": [3, "key_book:1"], "do": "trust", "on": "f.key_out", "link": "stmt:f.key_out", "level": "likely", "gen": "trust", "for_q": ["q.key"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": [3, "key_book:1"], "do": "link", "entry": "f.key_out", "q": "q.key", "see": "signed the vestry key out at half past seven", "for_q": ["q.key"], "why": "The key book has Miss Dent taking the key at half past seven."},
+    {"at": [3, "key_book:2"], "do": "trust", "on": "f.key_back", "link": "stmt:f.key_back", "level": "likely", "gen": "trust", "for_q": ["q.key"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": [3, "key_book:2"], "do": "link", "entry": "f.key_back", "q": "q.key", "see": "nobody else signed for it", "for_q": ["q.key"], "why": "And bringing it back at a quarter past eight; nobody else signed for it."},
     {"at": [3, "key_book:1"], "do": "circle", "q": "q.key", "pick": "hester", "for_q": ["q.key"], "why": "So Hester Dent had the key that evening."},
+    {"at": ["grange:2"], "do": "trust", "on": "f.vane_grange", "link": "stmt:f.vane_grange", "level": "likely", "gen": "trust", "for_q": ["q.vane"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": ["grange:2"], "do": "link", "entry": "f.vane_grange", "q": "q.vane", "see": "at the Squire's bedside", "for_q": ["q.vane"], "why": "Mrs. Holt sat with him at the Grange from five until half past nine."},
     {"at": ["grange:2"], "do": "circle", "q": "q.vane", "pick": "grange", "for_q": ["q.vane"], "why": "So he was at the Grange all evening."},
     {"at": 1, "do": "link", "entry": "f.cup_locked", "q": "q.cup", "see": "it went between six and nine", "for_q": ["q.cup"], "why": "I locked the cup away at six myself."},
+    {"at": ["survey:1"], "do": "trust", "on": "f.vestry_one_door", "link": "stmt:f.vestry_one_door", "level": "likely", "gen": "trust", "for_q": ["q.cup"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": ["survey:1"], "do": "link", "entry": "f.vestry_one_door", "q": "q.cup", "see": "the only way into the vestry is its door", "for_q": ["q.cup"], "why": "The windows are barred, so whoever took it came in by the door, with the key."},
     {"at": [4, "key_book:1"], "do": "circle", "q": "q.cup", "pick": "hester", "for_q": ["q.cup"], "why": "Amos was up the tower and Mr. Vane at the Grange; Hester Dent had the key."}
   ]

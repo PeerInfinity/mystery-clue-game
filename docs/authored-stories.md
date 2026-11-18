@@ -1343,7 +1343,7 @@ script that found each fact's paragraph from its quote; the data files are the s
       Each needs a decision of vocabulary (what a motive is, in typed form), which is the user's.
     - A statement about everyone only in an implication's `asserts`, not yet in a witness's own entry ("nobody
       passed me").
-111. **Five levels of trust: the user's rulings (2026-11-18; not built, handed to a new session).** Asked whether
+111. **Five levels of trust: the user's rulings (2026-11-18; built the same day, below).** Asked whether
     more levels of trust would make sense, on one scale with likely and certain. The rulings:
     - Five levels: confirmed, likely, uncertain, unlikely, ruled out ("trust as likely", "trust as confirmed",
       "distrust as unlikely", "distrust as ruled out").
@@ -1362,6 +1362,35 @@ script that found each fact's paragraph from its quote; the data files are the s
       settled; a dashed line through an unlikely entry and a solid one through one ruled out.
     - Saved games need not be kept.
     This settles the question left open in finding 110 (trust feeding strength).
+    Built (`docs/case-format.md`, "Trust"). What reading the code showed first, and the user's rulings on it:
+    - Until now "uncertain" counted (the timeline's threshold was uncertain), so the real change is that a
+      witness's word counts for nothing until it is trusted. In the long case 62 of 104 entries start uncertain
+      and 43 of the true path's 76 links go to one; five of the short cases have none.
+    - Trust was set per link and a statement had two (its own and the telling's), a person only a cap. Ruled:
+      the most specific setting wins (the statement's own, else its paper's or telling's, else the person's, else
+      uncertain; hearsay as its weaker hop). Setting a person, or a paper, sets everything under it to that level
+      (the settings below are taken back and can be set apart again). A list of the sources at the top level with
+      their levels, each opening one layer down (the Sources part).
+    - A link to an uncertain entry is kept and waits, with a button to trust it as likely. Confirmed is free to
+      set until corroboration (item 6 of finding 110) is built. The page sets no level itself; a clash names its
+      weaker side. A hand-made circle counts as likely. "Its being false counts" only where a case has a
+      lie-as-evidence piece (`{doubted}`): the page does not assert the denial of every statement ruled out.
+    - "Disbelieved" had meant "below the threshold", which every uncertain statement now is: it is now "held
+      unlikely or ruled out", and a lie is likely evidence when unlikely and certain evidence when ruled out.
+    - `certain` (rule strength) and `supportLevel` (trust) walked the same tree: one `strength` now. A clash is
+      as strong as its weakest side, which folds in the "likely" answers of finding 110.
+    - The true paths: `scripts/path-trust.mjs` writes a move that trusts a statement as likely before the first
+      move that uses it (62 moves over 10 cases; where papers are earned, once in each question's moves), and
+      the whole paper at once before "Something is missing here", which reads a whole record. The seven moves
+      that distrusted a lie now rule it out. The threshold setting is gone ("Hide what is ruled out" in its
+      place), and a setting lists or hides the grey clashes.
+    - What the checks caught: a gap in a record was offered at every hour while the book's entries were
+      uncertain (a record now counts its uncertain entries); with papers earned an entry used for two questions
+      must be trusted in the moves of each; the hint against a wrong distrust looked for what it took off the
+      timeline, which is now nothing (it looks for what it lowers).
+    - Not done, and to be looked at with the user: with every statement of the true path only likely, most
+      answers that rest on a witness read "(likely)", and a lie against the narrator's own observation is listed
+      as undecided until it is trusted or ruled out; whether the page should offer "confirmed" is item 6.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

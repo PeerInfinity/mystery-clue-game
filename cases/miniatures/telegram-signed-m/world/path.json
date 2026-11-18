@@ -4,6 +4,7 @@
     {"at": [2, "tel:1"], "do": "link", "entry": "f.tel_sent", "q": "q.sender", "see": "at the Leeds office then", "for_q": ["q.sender"], "why": "Whoever sent it was at the Leeds office at four."},
     {"at": [4], "do": "link", "entry": "f.mary_fete", "q": "q.sender", "see": "in the doctor's sight", "for_q": ["q.sender"], "why": "Mrs. Holt was beside me at the fête all that time."},
     {"at": [4], "do": "cross", "q": "q.sender", "pick": "mary", "for_q": ["q.sender"], "why": "She could not have been in Leeds at four."},
+    {"at": [5], "do": "trust", "on": "f.martin_train", "link": "stmt:f.martin_train", "level": "likely", "gen": "trust", "for_q": ["q.sender"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": [5], "do": "link", "entry": "f.martin_train", "q": "q.sender", "see": "by the two o'clock train", "for_q": ["q.sender"], "why": "Mr. Grove went to Leeds that afternoon."},
     {"at": [5], "do": "circle", "q": "q.sender", "pick": "martin", "for_q": ["q.sender"], "why": "The M. is Martin."},
     {"at": [5, "tel:2"], "do": "link", "entry": "f.tel_words", "q": "q.waiting", "see": "a meeting he meant to keep", "for_q": ["q.waiting"], "why": "Read as his, the telegram is Mr. Grove asking Holt to meet him at the mill at ten."},

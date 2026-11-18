@@ -28,10 +28,10 @@
       <summary title="Settings: what is on the timeline, and the page's layout"><span class="gear" aria-hidden="true">⚙</span> <span class="long">Settings</span><span class="short">Settings</span></summary>
       <div class="settings-panel">
         <div class="small muted opt-group-title">The timeline</div>
-        <label title="Facts whose best chain you trust at least this far are on the timeline.">On the timeline from
-          <select id="threshold"></select>
+        <label class="check" title="What you have ruled out is struck through on the timeline; this takes it off"><span><input type="checkbox" id="hide-out"> Hide what is ruled out</span></label>
+        <label title="Two statements that cannot both be so, where one at least is still uncertain: listed in grey as undecided, or not listed until you trust both">Clashes with what is uncertain
+          <select id="grey-clash"><option value="on">listed, in grey</option><option value="off">not listed</option></select>
         </label>
-        <label class="check" title="Show the facts below the threshold too, faded."><span><input type="checkbox" id="show-below"> Show the rest, faded</span></label>
         <span id="narrator-trust" class="narrator-trust"></span>
         <div class="small muted opt-group-title settings-rule" title="Kept on this device">The page</div>
         <label id="layout-label" title="Three columns side by side (a wide screen), or panels with tabs: two side by side, or one (a phone always shows one)">Layout
@@ -56,7 +56,7 @@
           <select id="left-list"><option value="on">listed</option><option value="off">not listed</option></select>
         </label>
         <div id="seed-row" class="small seed-row" hidden></div>
-        <button type="button" id="reset" class="quiet settings-rule" title="Every link and person back to uncertain">Reset trust…</button>
+        <button type="button" id="reset" class="quiet settings-rule" title="Every level of trust you have set, taken back">Reset trust…</button>
         <button type="button" id="start-over" class="quiet" title="Clear your timeline on this device: trust, marks, reasoning, back to ¶1 (the page's layout, theme and hint wait are kept)">Start over…</button>
         <button type="button" id="autoplay-open" class="quiet settings-rule" title="A careful reader plays the whole story through this page; your timeline is kept aside">Watch the autoplay…</button>
         <a class="settings-link settings-rule" href="guide.html" target="_blank" rel="noopener">How to play (the guide)…</a>
@@ -80,6 +80,7 @@
   <section class="part world-story" data-part="story" aria-label="The story so far"><h2>The story</h2><div id="story"></div></section>
   <section class="part" data-part="clashes" aria-label="Contradictions"><div id="clashes"></div></section>
   <section class="part" data-part="questions" aria-label="Questions"><div id="questions"></div></section>
+  <section class="part" data-part="sources" aria-label="Sources"><div id="sources"></div></section>
   <section class="part" data-part="cards" aria-label="Cards"><div id="cards"></div></section>
   <section class="part world-timeline" data-part="timeline" aria-label="The timeline">
     <div class="view-bar"><h2>The timeline</h2>

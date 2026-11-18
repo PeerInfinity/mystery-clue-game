@@ -22,11 +22,12 @@ import { controlOf, made, nextRead, readToOf, needsOf } from '../ui/world-moves.
 import { MAIN, refList } from '../engine/refs.js';
 import { caseLogic, deliveryMode, placement, choices, rng, heldAfter } from '../engine/delivery.js';
 const FILE = process.argv[2] ?? path.join(WORLD, 'path.json');
-// LIES=1 (with ANSWERS=evidence): the path without its moves of trust, so that every false statement stays believed.
+// LIES=1 (with ANSWERS=evidence): the path without its moves of distrust (a false statement stays uncertain: its
+// clash is then an undecided one).
 // What a move would then show (`see`) is not asked, and the story is not read to its end: at the end every false
 // statement that what follows from the evidence contradicts, by the engine, must be in a contradiction on the page.
 const LIES = !!process.env.LIES;
-const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves.filter((m) => !LIES || m.do !== 'trust');
+const moves = JSON.parse(fs.readFileSync(FILE, 'utf8')).moves.filter((m) => !LIES || m.do !== 'trust' || ['likely', 'confirmed'].includes(m.level));
 const header = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8'));
 const EARNED = deliveryMode(header) === 'earned';
 const SEED = Number(process.env.SEED ?? 1);
@@ -78,7 +79,7 @@ const click = async (sel) => { const ok = await ev(`(() => { const e = document.
 const choose = async (sel, value) => { const ok = await ev(`(() => { const e = document.querySelector(${J(sel)}); if (!e) return false; e.value = ${J(String(value))}; e.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`); await sleep(30); return ok; };
 const pageText = () => ev(`document.body.innerText`);
 const esc = (s) => s.replace(/["\\]/g, '\\$&');
-const LEVELS = { distrusted: 0, uncertain: 1, trusted: 2 };
+const LEVELS = { 'ruled out': 0, unlikely: 1, uncertain: 2, likely: 3, confirmed: 4 };
 
 let failures = 0;
 const fail = (m, why) => { failures++; console.log(`FAIL ¶${atText(m.at)} ${m.do} ${m.q ?? m.of ?? m.a ?? m.key ?? ''}${m.pick ? ' = ' + m.pick : ''}: ${why}`); };
@@ -236,7 +237,7 @@ async function play(m) {
             await choose(sel, LEVELS[m.level]);
             const tr = (await save()).trust ?? {};
             const got = m.link ? tr.links?.[m.link] : tr.people?.[m.person];
-            if (got !== LEVELS[m.level] && !(m.level === 'uncertain' && got == null)) return fail(m, 'trust not saved');
+            if (got !== LEVELS[m.level]) return fail(m, 'trust not saved');
             break;
         }
         case 'a': case 'b': case 'c': case 'm': {

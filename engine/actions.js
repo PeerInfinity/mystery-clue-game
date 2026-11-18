@@ -597,7 +597,7 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
             // A gap rests on the rule and on the record as it now stands on the timeline (`ctx.entries`).
             const rule = find(m.of);
             if (!rule) { ctx.lapsed?.push({ move: m, gone: m.of, why: 'What it was reasoned from is no longer there.' }); continue; }
-            const r = pointGap(rule, m.at, ctx.entries ?? []);
+            const r = pointGap(rule, m.at, ctx.record ?? ctx.entries ?? []);
             if (r.why) { ctx.lapsed?.push({ move: m, why: r.why }); continue; }
             const gs = r.entry.reasoned.premises.map((id) => givenAt(find(id)));
             const given = gs.some((g) => g == null) ? null : ctx.latest ? ctx.latest(gs) : Math.max(...gs);

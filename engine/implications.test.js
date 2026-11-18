@@ -85,7 +85,7 @@ test('every way to an answer: the smallest sets of statements it follows from', 
 });
 
 test('what follows as assertions: answers, the states they are, typed statements and statements denied by name', async () => {
-    const { derivedAssertions, supportLevel, supportIds } = await import('./implications.js');
+    const { derivedAssertions, strength, supportIds } = await import('./implications.js');
     const { contradictions, assertions } = await import('./world.js');
     const data = {
         entities: [{ id: 'town', kind: 'place' }, { id: 'mole', kind: 'place', within: 'town' }, { id: 'inn', kind: 'place', within: 'town' }, { id: 'house', kind: 'place', within: 'town' }, { id: 'watch', kind: 'person' }, { id: 'clerk', kind: 'person' }, { id: 'figure', kind: 'person' }],
@@ -130,15 +130,20 @@ test('what follows as assertions: answers, the states they are, typed statements
     const clash = (xs) => contradictions(data, [...xs, ...got]).filter((c) => got.includes(c.a) || got.includes(c.b)).map((c) => (got.includes(c.a) ? c.b : c.a).id).sort();
     assert.deepEqual(clash(told.filter((x) => x.truth === true)), []);
     assert.deepEqual(clash(told), ['f.ledger', 'f.rounds', 'f.said', 'f.said', 'f.was_clerk']);
-    // Trust: an implication as its weakest premise, the better of two ways.
-    const lv = { 'o.a': 3, 'o.b': 1 };
-    const level = (id) => supportLevel(byId.get(id).derived, all, (o) => lv[o] ?? null, 3);
-    assert.equal(level('hyp:q.where=mole'), 3);
-    assert.equal(level('hyp:q.where=house'), 3, 'ruled out by the weaker rule, and by the conclusion');
-    assert.equal(level('i.no!f.ledger'), 1);
-    assert.equal(level('hyp:q.fig=watch'), 3);
+    // Strength: as the weakest premise, by the better of two ways; a likely rule gives likely at most.
+    const lv = { 'o.a': 4, 'o.b': 3 };
+    const level = (id) => strength(byId.get(id).derived, all, (o) => lv[o] ?? null);
+    assert.equal(level('hyp:q.where=mole'), 4);
+    assert.equal(level('hyp:q.where=house'), 4, 'ruled out by the weaker rule, and by the conclusion');
+    assert.equal(level('i.no!f.ledger'), 3);
+    assert.equal(level('hyp:q.fig=watch'), 4);
     assert.deepEqual(supportIds(byId.get('hyp:q.where=house').derived).sort(), ['i.mole', 'i.not_house']);
-    assert.equal(supportLevel('i.mole', all.filter((i) => i.id !== 'i.mole'), () => null, 3), null, 'not holding');
+    assert.equal(strength('i.mole', all.filter((i) => i.id !== 'i.mole'), () => null), null, 'not holding');
+    assert.equal(strength('i.mole', all.map((i) => (i.id === 'i.mole' ? { ...i, strength: 'likely' } : i)), () => 4), 3, 'a likely rule over confirmed statements');
+    // The assertions carry it: a statement held only as likely gives what is likely, and no more.
+    const weak = new Map(derivedAssertions(data, all, values, { level: (o) => lv[o] }).map((x) => [x.id, x]));
+    assert.equal(weak.get('i.no!f.ledger').level, 3);
+    assert.ok(weak.get('i.no!f.ledger').likely && !weak.get('hyp:q.where=mole').likely);
 });
 
 test("the rules nobody writes: an answer's typed form against what one observation comes from", async () => {

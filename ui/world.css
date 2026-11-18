@@ -32,7 +32,13 @@ body.world-page { display: block; height: auto; }
 .event:hover { background: var(--accent-soft); }
 .event.sel { outline: 1px solid var(--accent); }
 .event.time-event { font-style: italic; color: var(--accent); font-size: 13px; }
-.event.below { opacity: .45; }
+/* Trust on the timeline: what is uncertain in grey with no dot; unlikely struck with a dashed line, ruled out with a
+   solid one. Dashed means likely either way, solid means settled; the colour only backs it up. */
+.event.t-uncertain .ph, .event.t-unlikely .ph, .event.t-ruled-out .ph { color: var(--muted); }
+.event.t-uncertain .ph a, .event.t-unlikely .ph a, .event.t-ruled-out .ph a { color: inherit; }
+.event.t-unlikely .ph { text-decoration: line-through dashed; }
+.event.t-ruled-out .ph { text-decoration: line-through solid; }
+.event.t-uncertain > .lvl, .event.t-unlikely > .lvl, .event.t-ruled-out > .lvl { visibility: hidden; }
 .event.clash { background: var(--bad-soft); }
 .when { font-size: 12px; color: var(--muted); }
 .side-time { color: var(--muted); white-space: nowrap; }
@@ -40,10 +46,11 @@ body.world-page { display: block; height: auto; }
 .asserts { margin: 2px 0 2px 18px; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
 .asserts li::before { content: "asserts: "; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
 .lvl { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; border: 1px solid var(--muted); }
-.lvl-certain { background: var(--good); border-color: var(--good); }
-.lvl-trusted { background: var(--good-soft); border-color: var(--good); }
+.lvl-confirmed { background: var(--good); border-color: var(--good); }
+.lvl-likely { background: transparent; border: 1px dashed var(--good); }
 .lvl-uncertain { background: transparent; }
-.lvl-distrusted { background: var(--bad); border-color: var(--bad); }
+.lvl-unlikely { background: transparent; border: 1px dashed var(--bad); }
+.lvl-ruled-out { background: var(--bad); border-color: var(--bad); }
 .ent { color: var(--ink); text-decoration: underline dotted var(--muted); cursor: pointer; }
 .ent:hover { color: var(--accent); }
 .chains, .people { list-style: none; margin: 0; padding: 0; font-size: 13px; }
@@ -258,3 +265,15 @@ body.link-only-new #timeline .event.link-done { display: none; }
 /* An answer the evidence marks only as likely (a probable step on every way to it). */
 .poss.likely { border-style: dashed; border-color: #c8961e; }
 .poss.crossed.likely { text-decoration-style: dashed; }
+
+/* Clashes by strength: undecided (a side still uncertain) in grey. */
+.undecided-box { border: 1px dashed var(--muted); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 13px; color: var(--muted); }
+.undecided-box summary { cursor: pointer; font-weight: 600; }
+.undecided-box ol { margin: 6px 0; padding-left: 20px; }
+.undecided-box li { margin: 4px 0; }
+.side-lvl { font-style: italic; }
+.sources-list { list-style: none; padding-left: 0; margin: 4px 0; }
+.sources-list > li { margin: 3px 0; }
+.source-entries select, .sources-list select { font-size: 12px; }
+.quick-trust button { margin-right: 4px; }
+.takes { display: block; white-space: normal; }

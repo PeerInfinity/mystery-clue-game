@@ -75,10 +75,14 @@ dd { margin: 2px 0 0 1.2em; }
 .chip.circled { border: 2px solid var(--accent); padding: 0 8px; font-weight: 600; }
 .chip.struck { text-decoration: line-through; opacity: .55; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--good); vertical-align: middle; margin-right: 3px; }
-.dot.certain { background: var(--good); }
-.dot.trusted { background: var(--good-soft); }
+.dot.confirmed { background: var(--good); }
+.dot.likely { background: transparent; border-style: dashed; }
 .dot.uncertain { background: transparent; border-color: var(--muted); }
-.dot.distrusted { background: var(--bad); border-color: var(--bad); }
+.dot.unlikely { background: transparent; border-color: var(--bad); border-style: dashed; }
+.dot.ruled-out { background: var(--bad); border-color: var(--bad); }
+.grey { color: var(--muted); }
+.struck-dashed { color: var(--muted); text-decoration: line-through dashed; }
+.struck-solid { color: var(--muted); text-decoration: line-through solid; }
 .para { font-size: 12px; color: var(--muted); background: var(--chip); border-radius: 8px; padding: 0 5px; white-space: nowrap; }
 .clash { background: var(--bad-soft); border-radius: 3px; padding: 0 4px; }
 .strain { background: var(--warn-soft); border-radius: 3px; padding: 0 4px; }
@@ -138,9 +142,9 @@ one move of the game. <a href="start.html">The start page</a> lists them; start 
 <p>Every case is told by a <b>narrator</b>: someone in the story who tells you what they saw, heard and read. The
 header names whose timeline it is. Some cases have two narrators, each telling part of it.</p>
 <p>Everything the story tells goes onto <b>the timeline</b>, an ordered list of events. What the narrator sees for
-themselves is certain. Everything else reached the narrator through someone: a witness, a constable, a letter, a
-neighbour. You decide how far to trust each of them, and the page shows the <b>contradictions</b> among what you
-accept.</p>
+themselves is confirmed. Everything else reached the narrator through someone: a witness, a constable, a letter, a
+neighbour. It starts as <i>uncertain</i>, shown in grey, and counts for nothing until you decide how far to trust it.
+The page shows the <b>contradictions</b> among what you accept.</p>
 <p>The story raises <b>questions</b> as it goes (who took it? where was she? when did it happen?). You answer them the
 way you fill in a sudoku: circle the answer you think is right, cross out the ones you have ruled out. You show
 <i>why</i> by linking <b>observations</b>, the events on the timeline that bear on a question. You can also
@@ -158,13 +162,13 @@ it leaves.</p>
   <span class="btn">Read on ▶</span>), <span class="btn quiet">Undo</span>, <span class="btn quiet">Hint</span>,
   <span class="btn quiet">⚙ Settings</span>, and a link to this guide.</li>
   <li><b>The story</b>: everything read so far, the newest paragraph last.</li>
-  <li><b>The timeline</b>, with the contradictions, the questions and the cards above it.</li>
+  <li><b>The timeline</b>, with the contradictions, the questions, the sources and the cards above it.</li>
   <li><b>The detail</b>: whatever you last clicked, an event, a question or a name, with all there is to say about
   it.</li>
 </ul>
 <p>On a wide screen these sit in three columns. In Settings you can choose panels with tabs instead, two side by side
 or one (a phone always shows one): <span class="tab">Story</span> <span class="tab">Timeline</span>
-<span class="tab">Questions</span> <span class="tab">Contradictions</span> <span class="tab">Cards</span>
+<span class="tab">Questions</span> <span class="tab">Contradictions</span> <span class="tab">Sources</span> <span class="tab">Cards</span>
 <span class="tab">Detail</span>. A link opens its tab in the <i>other</i> panel, so what you were looking at stays in
 view; in one column it opens in place, with a <span class="muted">← Back to …</span> link above it.</p>
 <p>A paragraph number, such as <span class="para">¶4</span>, anywhere on the page scrolls the story to that
@@ -204,7 +208,7 @@ reading stops just before that paragraph, and a notice says which questions it a
 (see <a href="#observations">observations</a>), and the right answer circled. The notice says how much of the
 evidence you have linked; when all of it is linked and the story still waits, the answer you circled is not the one
 the evidence leaves. A statement you have decided is false counts as evidence too: link it to the question once you
-have distrusted it. A question with no evidence to link takes any one answer, right or wrong. If you would rather
+have distrusted it (as unlikely, or as ruled out). A question with no evidence to link takes any one answer, right or wrong. If you would rather
 never be held up, Settings has <i>To read past an answer</i>: <i>commit to any answer</i>.</p>
 <p>The notice links to each question and has its own <span class="btn quiet">Hint</span> and
 <span class="btn quiet">Hide</span> (Read on shows it again).</p>
@@ -240,31 +244,48 @@ reasoning (your reasoning), each at its point in time.</p>
 <p>Every event came to you along a <b>chain</b>: someone saw it, told someone else, who told the narrator, and the
 narrator tells you. The detail of an event shows each of its chains, link by link, up to the narrator, for
 example:</p>
-<div class="demo"><span class="dot trusted"></span>the sexton → <i>told</i> → the housekeeper → <i>told</i> → the
+<div class="demo"><span class="dot likely"></span>the sexton → <i>told</i> → the housekeeper → <i>told</i> → the
 curate</div>
-<p>Each link has its own setting, and so does the statement itself (<i>This statement itself:</i>), apart from the
-rest that came the same way. There are four levels:</p>
+<p>There are five levels of trust, and the timeline shows each in its own way (dashed means likely either way, solid
+means settled):</p>
 <ul>
-  <li><span class="dot certain"></span><b>certain</b>: the narrator saw it. Only the narrator's own eyes are
-  certain, and only as far as you trust the narrator (below).</li>
-  <li><span class="dot trusted"></span><b>trusted</b>: you believe this link.</li>
-  <li><span class="dot uncertain"></span><b>uncertain</b>: you have not decided. Every link starts here.</li>
-  <li><span class="dot distrusted"></span><b>distrusted</b>: you do not believe it.</li>
+  <li><span class="dot confirmed"></span><b>confirmed</b>: it is so. It counts as evidence, and what follows from
+  confirmed evidence can be certain. What the narrator saw for themselves starts here.</li>
+  <li><span class="dot likely"></span><b>likely</b>: you take it to be so. It counts as evidence, and what follows
+  from it is likely at most.</li>
+  <li><span class="grey">grey, no dot</span>: <b>uncertain</b>, you have not decided. Everything anyone but the
+  narrator says starts here. It is shown, and it counts for nothing: it is no evidence for any question.</li>
+  <li><span class="struck-dashed">struck through, dashed</span>: <b>unlikely</b>. You take it to be false; as a lie
+  it can be likely evidence.</li>
+  <li><span class="struck-solid">struck through, solid</span>: <b>ruled out</b>. It is false; as a lie it can be
+  certain evidence.</li>
 </ul>
-<p>A chain is only as strong as its weakest link, and an event is as trusted as its best chain. Under
-<b>People</b>, the detail also lets you cap a person: "at most uncertain" holds for everything that passed through
-them.</p>
-<p>The narrator is a link too. Everything in the story comes to you through the narration, and by default you take it
-as certain. Settings has <i>Trust in … as narrator</i>, one for each narrator: lower it if you think a narrator is
-mistaken, or is not telling you the truth, and everything they tell drops with it.</p>
-<p>What is on the timeline depends on your trust: by default, everything at least <i>uncertain</i> is shown. In
-Settings, <i>On the timeline from</i> raises that bar (only what you trust). What falls below it stays in view,
-greyed, so that you can open it and change your mind (<i>Show the rest, faded</i>, on by default). Next to each trust
-control, an event's detail says what distrusting it would take off the timeline: a statement can be partly true, and
-distrusting the true part loses it. A statement's own detail lists what it says: that it was said is certain, and each
-thing it says is trusted on its own entry, so open one of those to doubt it. Evidence you have linked to a question stops counting while it is below the bar:
-the question and the entry's detail then say that you do not trust it enough for it to count. <span class="btn quiet">Reset trust…</span> in Settings puts every link and
-person back to uncertain.</p>
+<p>So to use what a witness says you first <b>trust</b> it, as likely or as confirmed; and when it cannot be so, you
+<b>distrust</b> it, as unlikely or as ruled out. A conclusion is only as strong as the weakest thing it rests on.</p>
+<h3>Where trust is set</h3>
+<p>You can set trust at three heights, and the most specific setting wins:</p>
+<ul>
+  <li><b>One statement</b>: in the event's detail, <i>This statement itself</i>.</li>
+  <li><b>A paper, or everything someone told at one time</b>: the link of its chain (in the detail, or on the paper's
+  own entry: <i>Everything it says</i>).</li>
+  <li><b>A person</b>: under <b>People</b> in the detail, or in the Sources list.</li>
+</ul>
+<p>Setting a person sets everything they said to that level; setting a paper sets everything in it. After that you
+can still set one statement apart ("take the doctor at his word, but rule out this one sentence"). Where a statement
+came through two people, one telling the other, it is as trusted as the weaker of the two, unless you set the
+statement itself.</p>
+<p><b>Sources</b>, above the timeline, lists the narrator and everyone whose words have reached you, each with its
+level and a count of what they said at each level. Click a name for what came from them, one layer down: their
+papers or tellings, and under each of those its statements, each with its own setting.</p>
+<p>The narrator is a source too. Everything in the story comes to you through the narration, and by default you take
+it as confirmed. Lower it (in Sources, or in Settings: <i>Trust in … as narrator</i>) if you think a narrator is
+mistaken or is not telling you the truth: nothing they pass on can then be more trusted than they are.</p>
+<p>Next to each trust control, an event's detail says what ruling it out would stop from counting: a statement can
+be partly true, and ruling out the true part loses it. A statement's own entry lists what it says: that it was said
+stands, and what it says is trusted apart. Evidence you have linked to a question waits while it is uncertain: the
+question and the entry's detail then say that it does not count yet, with a button to trust it as likely.
+What is ruled out stays in view, struck through, unless you hide it (Settings: <i>Hide what is ruled out</i>).
+<span class="btn quiet">Reset trust…</span> in Settings takes back every level you have set.</p>
 </section>
 
 <!-- ------------------------------------------------------------------ -->
@@ -273,12 +294,20 @@ person back to uncertain.</p>
 <p>When two things on the timeline cannot both be true (someone in two places at once, a door both locked and open at
 the same moment, a thing said to have happened and shown not to have), the page lists them as a <span class="clash">contradiction</span>. You never have to look for
 these: they appear as soon as both sides are on the timeline.</p>
-<p>Each contradiction names its two sides; <i>trace</i> shows both sides' chains. A link or a person marked there is
-one whose distrust alone would take that side off the timeline, and the page says how many other events would go with
-it. A contradiction can stay open as long as you like. To resolve one, decide which side you believe and distrust
-what brought the other, or change the circle that caused it.</p>
+<p>How strong a clash is depends on its weaker side:</p>
+<ul>
+  <li><b>A contradiction</b>: both sides are confirmed. One of them has to go.</li>
+  <li><b>Unlikely together</b> (in amber): one side is only likely. The list marks the weaker side.</li>
+  <li><b>Cannot both be so: undecided</b> (in grey): one side at least is still uncertain. Nothing follows yet; it
+  shows you where a decision is waiting. (Settings can turn this list off: <i>Clashes with what is uncertain</i>.)</li>
+</ul>
+<p>Each clash names its two sides; <i>trace</i> shows both sides' chains, with buttons to trust or distrust each
+statement. A link or a person marked there is one whose ruling out alone would stop that side counting, and the page
+says how many other events would go with it. A clash can stay open as long as you like. To resolve one, decide which
+side you believe and distrust the other, or change the circle that caused it. The page never sets a level for
+you.</p>
 <p>A <span class="strain">likely clash</span> (in amber, <i>unlikely together</i>) is weaker: one of your circled
-answers and something on the timeline can both be true, but they sit badly together. You can
+answers and something on the timeline can both be true, but they sit badly together (these are written by the case's author). You can
 <span class="btn quiet">I hold both</span> if you still believe them, and <i>Reconsider</i> later.</p>
 </section>
 
@@ -300,8 +329,9 @@ whoever puts them elsewhere.</p>
 <p>Some answers say something plain about the timeline: "yes" to whether a man was in a place at an hour is that man
 in that place at that hour. Circle such an answer and the page holds you to it; cross it out and the page holds you
 to the opposite, and either can contradict a statement you still believe.</p>
-<p>A circled answer goes on the timeline as your hypothesis, and takes part in contradictions like anything else: if
-your answer cannot be true alongside what you trust, you will see it. Where the question asks who did something,
+<p>A circled answer goes on the timeline as your hypothesis, and takes part in the clashes like anything else: if
+your answer cannot be true alongside what you trust, you will see it. A guess counts as likely, so such a clash is
+listed as <i>unlikely together</i>. Where the question asks who did something,
 circling someone also brings in what doing it needs (being there; knowing how): if the timeline has them elsewhere
 the whole time, or says they could not, that is a contradiction too, and the question's detail lists each need with
 what the timeline says. A crossed-out answer is your claim that it was
@@ -326,7 +356,7 @@ answers put forward are crossed out, and a click on another answer only crosses 
 evidence is linked and the answer you circled is wrong, the question says <i>Not this answer.</i>, and nothing more.
 Until then the question says <i>Not solved yet</i>, with what it has so far: whether an answer is circled, and how many
 pieces of its evidence are in place, or that some of its evidence is not on the page yet (a paper that has not come,
-a paragraph not read), and whether something you linked does not count because you distrust it. A circled answer alone does not solve a question.</p>
+a paragraph not read), and whether something you linked does not count because you have not trusted it yet. A circled answer alone does not solve a question.</p>
 <p>Some questions rest on others: part of their evidence is that another question is solved. That part fills in by
 itself when the other question is solved (there is nothing to link: while you are linking to a question, the
 timeline's line of each question it rests on, and of your circled answer to it, says <i>counted ✓ (solved)</i> or
@@ -351,11 +381,11 @@ about this question</i>, and from then on that question's button on that event r
 question, <i>not tried yet: 31 of 40 entries</i> counts what is left for it, and while you are linking,
 <b>only what is not tried yet</b> hides the entries already linked to the question or tried for it. So you can
 always work a question through by going down what is left; reasoning gets there sooner.</p>
-<p>What a link shows stays only as long as you trust the event. One event can be evidence for more than one question, and what it
+<p>What a link shows stays only as long as you trust the event, as likely or confirmed. One event can be evidence for more than one question, and what it
 shows may differ for each: link it to every question it bears on. A statement you no longer believe can be evidence
-too: what someone said falsely can show something about them. Distrust the statement (its own trust, in its detail)
+too: what someone said falsely can show something about them. Distrust the statement (its own trust, in its detail: unlikely or ruled out)
 and link it; what it shows is filled in only while you disbelieve it. Some evidence needs something else before it
-shows anything: a second event linked too, a statement disbelieved, an event trusted enough to be on the timeline,
+shows anything: a second event linked too, a statement disbelieved, an event trusted as likely or confirmed,
 another question's answer circled, a <a href="#moves">reasoning move</a> made from it (the entry the move gives is
 then the one to link), or, for a thing somebody said, the whole statement it is part of, disbelieved and linked. Such a link is kept, its detail says it is <i>part of something not yet
 complete</i>, and the question lists it so, until the rest is there; it does not say what the rest is. The gate's
@@ -482,13 +512,14 @@ speed a short case takes about a minute.</p>
 <p><span class="btn quiet">⚙ Settings</span> has two parts. Clicking anywhere outside it closes it.</p>
 <h3>The timeline</h3>
 <dl>
-  <dt>On the timeline from</dt>
-  <dd>How far you must trust an event for it to be on the timeline (see <a href="#trust">Trust</a>).</dd>
-  <dt>Show the rest, faded</dt>
-  <dd>Keep what falls below that in view, greyed (on by default).</dd>
+  <dt>Hide what is ruled out</dt>
+  <dd>Take what you have ruled out off the timeline (off by default: it stays, struck through).</dd>
+  <dt>Clashes with what is uncertain</dt>
+  <dd>Whether two statements that cannot both be so are listed, in grey, while one of them is still uncertain (on
+  by default), or only once you trust both (see <a href="#clashes">Contradictions</a>).</dd>
   <dt>Trust in … as narrator</dt>
   <dd>One for each narrator of the case: how far you trust what they tell you. Lowering it lowers everything that came
-  through them; by default it is <i>certain</i>.</dd>
+  through them; by default it is <i>confirmed</i>.</dd>
 </dl>
 <h3>The page</h3>
 <dl>
@@ -520,7 +551,7 @@ speed a short case takes about a minute.</p>
   stand with a statement you still believe, the two are listed against each other, and tracing it shows the evidence
   it follows from. Where what follows says that something was so at a time (someone was not in a place, a round was
   not made), it is put on the timeline as an entry of your reasoning. Not every step is certain: where an answer
-  rests on a step that is only probable, it is marked <i>(likely)</i>, with a dashed outline. A likely answer
+  rests on a step that is only probable, or on a statement you hold only as likely, it is marked <i>(likely)</i>, with a dashed outline. A likely answer
   still settles its question. What is only likely contradicts nothing; if it cannot stand with something you
   believe, the two are listed as <i>unlikely together</i>.</dd>
   <dt>What is left to try</dt>
@@ -533,8 +564,8 @@ speed a short case takes about a minute.</p>
 </dl>
 <h3>Saving and starting over</h3>
 <p>Each case saves itself in this browser as you play: close the page and come back, and you are where you left off.
-<span class="btn quiet">Reset trust…</span> puts every link and person back to uncertain (and each narrator back to
-certain) and keeps the rest. <span class="btn quiet">Start over…</span> asks first, then clears everything (your
+<span class="btn quiet">Reset trust…</span> takes back every level you have set (each narrator goes back to
+confirmed) and keeps the rest. <span class="btn quiet">Start over…</span> asks first, then clears everything (your
 place in the story, your trust, marks and reasoning) and starts again from the first paragraph (where papers are earned, with a new seed). It keeps the layout,
 the theme, the wait between hints and the gate's rule.</p>
 <p>Settings also links to this guide, to <i>All the cases…</i> (the start page) and to the earlier game. Hover over

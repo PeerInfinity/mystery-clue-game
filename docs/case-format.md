@@ -161,10 +161,10 @@ one **narration link** (`narrates`, keyed `narrates:<id>`), the last link of eve
 narrator's own observations (an account with the narrator as origin, `how: saw`; Watson's is `acct.watson`) have
 only that link; what others told the narrator has the tellings first. `id` is an entity (a first-person narrator,
 `kind: first-person`) or `narrator`, the pseudo-entity of an impersonal third-person narrator (`kind: third-person`).
-`trust` is the narration's default level, `certain` if absent (the fair-play contract); the player may change it in
-Settings (*Trust in Watson as narrator*), and it caps every chain through that narrator, the tellings to the narrator
-included. A narration link is never listed among the links whose distrust alone takes a fact off (`resolvingLinks`),
-and a person's cap does not apply to it. `name` is the narrator's name in the page's words ("Watson's own"). Several
+`trust` is the narration's default level, `confirmed` if absent (the fair-play contract); the player may change it in
+Settings (*Trust in Watson as narrator*) or under Sources, and it caps every chain through that narrator, the tellings to the narrator
+included. A narration link is never listed among the links whose ruling out alone stops a fact counting (`resolvingLinks`),
+and a person's level does not apply to it. `name` is the narrator's name in the page's words ("Watson's own"). Several
 narrators give a fact one chain through each who has it. A narrator with `doubtable: true` (a story with an unreliable
 narrator) has a statement link (`stmt:<fact>`) on each of their own observations as well, starting as trusted as the
 narration, so the player can distrust one of them and keep the rest; without it a narrator's own observations can be
@@ -293,8 +293,9 @@ contradiction written by hand:
 out; several may be circled. A circle asserts the possibility and a crossing denies it, as picks with `mark` set and
 no fact, so they meet the claims' picks in the contradictions above; two circles of one question are an open choice
 and are not reported. Each mark comes on its own link from *the reader's hypothesis* (`hypothesisChain`, keyed
-`hyp:<question>=<possibility>`, `HYPOTHESIS` = `hypothesis`), which starts uncertain like any other link; the
-hypothesis is a person of its own, so one cap covers every mark. Only marks on questions raised so far and on possibilities available so far count.
+`hyp:<question>=<possibility>`, `HYPOTHESIS` = `hypothesis`), which starts at likely (a guess counts as likely, and no
+more: its clashes are "unlikely together"); the
+hypothesis is a person of its own, so one setting covers every mark. Only marks on questions raised so far and on possibilities available so far count.
 A "who" question (one with a person or an animal among its possibilities) may also be answered by any person or
 animal, a "where" question (a place among them) by any place, its own subject excepted (`answerKinds`, `isOption`);
 the page offers those met so far (named by a fact given so far). The page shows first only what someone in the story
@@ -440,7 +441,10 @@ The player's moves, each checked by these rules, give entries with the source *t
 - The true path (`world/path.json`): the moves a careful reader makes on Watson's timeline, in order, each at the
   paragraph `at` where the page first allows it, to the end of the story: `circle` and `cross` (a wrong answer is
   tried, its clash seen with `see`, then crossed out), `trust` (a `link` or `person` set to `level` on the detail of
-  `on`; the path distrusts only false statements, by their statement link), `a`, `b`, `c` (the moves), `plan` (open
+  `on`; `level` one of `confirmed`, `likely`, `uncertain`, `unlikely`, `ruled out`; the path rules out only false
+  statements, and trusts as likely each statement that starts uncertain before the first move that uses it: those
+  moves carry `gen: "trust"` and are written by `node scripts/path-trust.mjs`, to be run again when a path
+  changes), `a`, `b`, `c` (the moves), `plan` (open
   "What would this need?"), `stop`, `compare`, `account` (a check `key` on an open plan) and `hold` (a likely clash set
   aside). `see`: a pattern the page must show after the move; `for_q`: the gated questions the move serves (so a
   just-in-time path can be derived); `why`: the reader's thought in plain words (the autoplay's caption; hints later);
@@ -507,8 +511,8 @@ that follows from others, shown by itself the moment they all are.
   as before.
 - **What follows, in the contradiction tracking** (2026-11-18; `derivedAssertions` in `engine/implications.js`,
   `docs/authored-stories.md` finding 107). With the answers marked from the evidence, what follows is an assertion
-  like any other on the timeline, resting on its premises and not on the reader's hypothesis: it is trusted as far
-  as its weakest premise (the better of two ways), and a contradiction's trace shows the implications and the
+  like any other on the timeline, resting on its premises and not on the reader's hypothesis: it is as strong
+  as its weakest step (the better of two ways; "Strength", below), and a contradiction's trace shows the implications and the
   entries under them.
   - An answer that follows is asserted and one ruled out is denied, as a circle and a cross are (so an identity
     that follows carries whereabouts, and a typed act its alibi).
@@ -534,14 +538,17 @@ that follows from others, shown by itself the moment they all are.
     follows contradicts. `path-check.mjs` with `ANSWERS=evidence LIES=1` plays the true path without its moves of
     trust: every false statement on the timeline that the engine says the evidence contradicts must be in a
     contradiction on the page (run by `page-checks` for a case with the file).
-- **Strength** (2026-11-18; `certain` in `engine/implications.js`; finding 110). An implication is certain unless
+- **Strength** (2026-11-18; `strength` in `engine/implications.js`; findings 110 and 111). An implication is certain unless
   it carries `strength: "likely"`: a step that is probable and not forced (initials that are surely the clerk's;
-  no other train, so he did not come back). What follows is as strong as its weakest step by the best way to it:
-  certain if some way to it is certain throughout. An answer marked only as likely is still circled or crossed
+  no other train, so he did not come back). What follows is as strong as its weakest step by the best way to it,
+  on the scale of trust: a step is a rule (certain, or likely) or a premise, as far as the statement under it is
+  trusted (confirmed or likely; a statement that is evidence by being disbelieved, `{doubted}`, is confirmed
+  evidence when it is ruled out and likely evidence when it is held unlikely). So what follows is
+  certain only if some way to it is confirmed throughout, rules and statements. An answer marked only as likely is still circled or crossed
   out, and still solves its question; the page shows it dashed, in amber, with "(likely)", and says "So, likely"
   and "Makes unlikely" in the tree. What is only likely contradicts nothing: where it cannot stand with an entry
-  the pair is listed as "unlikely together, by the evidence", beside the likely clashes, and not among the
-  contradictions. Each implication in the tree has the dot of how far it is trusted (its weakest premise).
+  the pair is listed as "unlikely together", beside the likely clashes, and not among the
+  contradictions. Each implication in the tree has the dot of how strong it is.
 - **An aim nothing was done toward** (2026-11-18). A possibility's `goal` (`{of, attr, value, neg?}`: the state
   wanted, as in the Holmes cases) is read by the table's rules: where an entry at or after the deed denies that
   state, the observation it comes from makes that answer unlikely (a table rule with `strength: "likely"`): had
@@ -611,20 +618,41 @@ data holds for that pair is then filled in, keeping its logic (entries, their ch
 The engine also has "What else of this kind?" and the fit check (`whatElse`, `fits`, `checkCrossing`), tested but not used by
 the page: the fallback if a description proves not to be enough.
 
-**Trust** (`chainLevel`, `levelOf`). The levels, lowest first: *distrusted*, *uncertain*, *trusted*, *certain*. A
-narration link starts at its narrator's trust (certain by default), so a narrator's own observation is certain; every
-other link starts uncertain, and the player may set it lower or higher (never certain). A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words
+**Trust** (`chainLevel`, `hopLevel`, `levelOf`, `counts`; the user's rulings of 2026-11-18, `docs/authored-stories.md`
+finding 111). Five levels, lowest first, on one scale with the strength of what follows: *ruled out*, *unlikely*,
+*uncertain*, *likely*, *confirmed*.
+
+| Level | On the timeline | As evidence | If it clashes |
+|---|---|---|---|
+| confirmed | normal text, solid dot | counts; conclusions can be certain | a contradiction |
+| likely | normal text, hollow dashed dot | counts; conclusions at most likely | "unlikely together" |
+| uncertain (the default) | grey, no dot | does not count | a grey clash, "cannot both be so: undecided" (a setting, on by default) |
+| unlikely | grey, dashed strikethrough | as a lie (`{doubted}`): likely evidence | nothing |
+| ruled out | grey, solid strikethrough | as a lie: certain evidence | nothing |
+
+A narration link starts at its narrator's trust (confirmed by default), so a narrator's own observation is confirmed; a
+mark of the reader's own starts at likely; every other link starts uncertain. A link is keyed by its telling, or for a speech by speaker and hearer (all of Holmes's words
 to Watson are one link), or for a member by member and group (`linkKey`). Every chain that reaches a narrator through
 someone also starts with the **statement's own link** (`stmt:<id>`, the user's choice, 2026-11-05): a relayed fact's
-own, what a claim asserts by the claim's, a fact of a claim's content (`claim`) by that fact's. Distrusting it takes off
-that one statement and nothing else that came along the same links: the stranger's "lost" without his wish that the boy
-gets the paper, Straker's "to see that all was well" without his walk to the stables, Gregory's theories without what
-he found in Straker's pockets. A says or believes fact is itself an event (the speech, the belief) and has none: its
-statement link is on what it asserts. The page draws it once, above the chains, as "This statement itself". A person's level, when set, caps every link
-from that person. A chain is as strong as its weakest link, a fact as its best chain; a fact with no chain (the
-reader's own inference) is not modelled and not shown. A telling is shown as an event: as trusted as the narration when it is to a
-narrator (who witnesses it), uncertain otherwise (and no more than the narration). `resolvingLinks` gives the links and people whose distrust alone would take a fact below the
-threshold (those every chain of it passes through): the page marks them when it traces a contradiction.
+own, what a claim asserts by the claim's, a fact of a claim's content (`claim`) by that fact's. A says or believes fact is itself an event (the speech, the belief) and has none: its
+statement link is on what it asserts. The page draws it once, above the chains, as "This statement itself".
+
+**The most specific setting wins.** A chain's level is its statement's own level if that is set; else the weakest of
+the links it came by (hearsay is as good as its weaker hop), a link's level being its own setting, else the level set
+for the person it comes from, else uncertain (a member's link to their group limits nothing); and never more than
+the narration it came through. A fact is as trusted as its best chain; a fact with no chain (the
+reader's own inference) is not modelled and not shown. Setting a person's level sets everything they said to it,
+and setting a link's (a paper, a telling) everything it carried: the page takes back the settings below (`setPerson`,
+`setLink` in `ui/world.js`), which can then be set apart again ("take Dr. Hume at his word, but rule out this one
+sentence"). The **Sources** part of the page lists each narrator and each person whose words have arrived, with
+their level; a name opens what came from them one layer down (their papers and tellings, then the statements of each).
+The page sets no level by itself: a clash names the level of each side that is not confirmed, and its trace has
+buttons to trust or distrust each statement. A link to an entry still uncertain is kept and waits, and says so.
+A telling is shown as an event, as trusted as the narration (that it was said stands; what it says is trusted apart).
+`resolvingLinks` gives the links and people whose ruling out alone would stop a fact counting
+(those every chain of it passes through): the page marks them when it traces a clash. "Something is missing here"
+reads a record with its uncertain entries too: an entry not yet trusted is in the record all the same, though the
+gap pointed out is only as trusted as the record.
 
 The validator requires the true story to be consistent (no contradiction among the assertions the answer key holds
 true: every one it found was a data error) and prints the contradictions a reader who trusts every source meets, by

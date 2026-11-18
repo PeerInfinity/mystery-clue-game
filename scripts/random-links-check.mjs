@@ -2,7 +2,7 @@
 // whatever can be read, then takes the entries of the timeline in a shuffled order and, for each, links it to every
 // question in a shuffled order and makes the reasoning moves offered on it ("It changed", "Something is missing
 // here"); then reads again. When that brings nothing more and questions are open, it tries disbelieving each
-// statement in turn (the trust of the telling set to distrusted on one of the entries it carried), and puts the
+// statement in turn (the trust of the telling set to ruled out), and puts the
 // trust back at once: a lie that is evidence counts from that moment, and a question once solved stays solved. It
 // marks no answer.
 //   CASE=<dir> [SEED=<placement>] [SHUFFLE=<n>] node scripts/random-links-check.mjs
@@ -137,6 +137,9 @@ const tried = new Set();
 let links = 0, moves = 0, rounds = 0, doubts = 0, doubtedOnce = false;
 for (;; rounds++) {
     const read = await readAll();
+    // What anyone says starts as uncertain and counts for nothing: this player takes everyone at their word (likely),
+    // as soon as their words arrive, under Sources.
+    await ev(`(() => { for (let i = 0; i < 50; i++) { const s = [...document.querySelectorAll('#sources .person-trust')].find((x) => x.value === ''); if (!s) break; s.value = '3'; s.dispatchEvent(new Event('change', { bubbles: true })); } return 1; })()`);
     const ids = shuffle((await entriesNow()).filter((id) => !id.startsWith('hyp:')), rand);
     const open = autoQs.filter((q) => true);
     let did = 0;
@@ -166,7 +169,7 @@ for (;; rounds++) {
             if (!(await set(0))) continue;
             doubts++;
             await check(`disbelieving ${t}`);
-            await set(1);
+            await set('');
         }
         continue;
     }

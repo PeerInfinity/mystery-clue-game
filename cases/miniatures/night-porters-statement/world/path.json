@@ -1,7 +1,7 @@
 {
   "description": "The true path of the miniature: part of the story is a statement by a narrator who is not to be believed in everything. One thing he says is against what the other narrator knows himself; that one statement is set aside, and another of his own is kept and turned on him.",
   "moves": [
-    {"at": 5, "do": "trust", "on": "f.finch_window", "link": "stmt:f.finch_window", "level": "distrusted", "for_q": ["q.who"], "why": "Finch was locked up at Cross Street from ten until seven, on the Inspector's own key: Kemp did not see him at the window."},
+    {"at": 5, "do": "trust", "on": "f.finch_window", "link": "stmt:f.finch_window", "level": "ruled out", "for_q": ["q.who"], "why": "Finch was locked up at Cross Street from ten until seven, on the Inspector's own key: Kemp did not see him at the window."},
     {"at": 5, "do": "link", "entry": "f.finch_lockup", "q": "q.who", "see": "under lock and key", "for_q": ["q.who"], "why": "Finch could not have been at the bank."},
     {"at": 5, "do": "cross", "q": "q.who", "pick": "finch", "for_q": ["q.who"], "why": "Not Finch."},
     {"at": 5, "do": "link", "entry": "f.unforced", "q": "q.who", "see": "it was done with the keys", "for_q": ["q.who"], "why": "Both doors were opened with their keys."},

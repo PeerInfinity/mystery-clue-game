@@ -11,7 +11,7 @@
 // With these a question needs no checklist: its answer is known when an implication concludes it, or when every
 // other answer is ruled out. What is shown beyond that is support, and wanted by nothing.
 
-import { isRight, coverOf, hypothesisKey, answerStates, DERIVED, assertions, markAssertions, contradictions, alibis, entityKinds } from './world.js';
+import { isRight, coverOf, hypothesisKey, answerStates, DERIVED, assertions, markAssertions, contradictions, alibis, entityKinds, CONFIRMED, LIKELY_LEVEL } from './world.js';
 import { answerAction, actNeeds } from './actions.js';
 
 const holds = (p, has, solved) => (typeof p === 'string' ? has(p) : p.any ? p.any.some(has) : p.solved ? !!solved?.(p.solved) : false);
@@ -157,7 +157,8 @@ export const impliedStates = (derived) => derived.flatMap((i) => (i.asserts ?? [
 /**
  * The assertions of what follows. `data`: the world (questions, entities); `derived`: what `derive` gave;
  * `valuesOf(q)`: the question's possible answers (those shown); `opts.states: false` leaves out the typed
- * statements of `asserts` (the page puts those on the timeline as entries of its own).
+ * statements of `asserts` (the page puts those on the timeline as entries of its own); `opts.level(id)`: how far
+ * the statement under an observation is trusted (default: confirmed if `opts.shown(id)`).
  */
 export function derivedAssertions(data, derived, valuesOf, opts = {}) {
     const out = [];
@@ -197,32 +198,15 @@ export function derivedAssertions(data, derived, valuesOf, opts = {}) {
     }
     for (const i of derived) for (const id of [].concat(i.denies ?? [])) out.push({ id: `${i.id}!${id}`, fact: null, kind: 'denial', denies: id, q: i.q, imp: i.id, by: DERIVED, derived: i.id, truth: null });
     if (opts.states !== false) for (const s of impliedStates(derived)) out.push({ ...s, fact: null, kind: 'state', by: DERIVED, derived: s.imp, truth: null });
-    // What rests on a likely step by every way to it is likely, and no more (`likely`).
-    for (const x of out) if (!certain(x.derived, derived, shown)) x.likely = true;
+    // How strong each is (`level`), and what rests on a likely step or a likely statement by every way to it is
+    // likely, and no more (`likely`).
+    const level = opts.level ?? ((id) => (shown(id) ? CONFIRMED : null));
+    for (const x of out) { x.level = strength(x.derived, derived, level); if (x.level !== CONFIRMED) x.likely = true; }
     return out;
 }
 
 /** The implications a support names, each once. */
 export const supportIds = (s) => (typeof s === 'string' ? [s] : [...new Set((s?.all ?? s?.any ?? []).flatMap(supportIds))]);
-
-/**
- * How far a support is trusted: an implication as its weakest premise, `all` as its weakest, `any` as its best that
- * holds. `derived`: the implications that hold; `levelOfStatement(id)`: an observation's level (null: not shown);
- * `top`: the level of what needs no trust (a question solved). Null: it does not hold.
- */
-export function supportLevel(support, derived, levelOfStatement, top) {
-    const byId = new Map(derived.map((i) => [i.id, i]));
-    const least = (xs) => (xs.some((x) => x == null) ? null : Math.min(top, ...xs));
-    const best = (xs) => { const ok = xs.filter((x) => x != null); return ok.length ? Math.max(...ok) : null; };
-    const of = (s, trail) => {
-        if (typeof s !== 'string') return s.all ? least(s.all.map((x) => of(x, trail))) : best((s.any ?? []).map((x) => of(x, trail)));
-        const i = byId.get(s);
-        if (!i) return levelOfStatement(s);
-        if (trail.includes(s)) return null;
-        return least(i.from.map((p) => (typeof p === 'string' ? of(p, [...trail, s]) : p.any ? best(p.any.map((x) => of(x, [...trail, s]))) : top)));
-    };
-    return of(support, []);
-}
 
 /**
  * The rules nobody has to write (2026-11-18): where an answer has a typed form (its possibility's `asserts`, its
@@ -269,20 +253,28 @@ export function withTable(implications, data, observations) {
 }
 
 /**
- * Strength (2026-11-18): an implication is certain unless it says `strength: 'likely'` (a step that is probable and
- * not forced: an aim that nothing was done toward; initials that are "surely" the clerk's). What follows is as
- * strong as its weakest step, by the best way to it: certain if some way to it is certain throughout.
- * `certain(support, derived, shown)`: `support` as in `derivedAssertions`; `shown(id)`: an observation is shown.
+ * Strength (2026-11-18): how strong what follows is, on the scale of trust (engine/world.js `LEVELS`): as its
+ * weakest step by the best way to it. A step is a premise, as far as the statement under it is trusted
+ * (`levelOfStatement(id)`: an observation's level; null: not shown), or a rule: certain unless it says
+ * `strength: 'likely'` (a step that is probable and not forced: an aim that nothing was done toward; initials that
+ * are "surely" the clerk's), and then worth likely at most. `all` is as strong as its weakest, `any` as its best
+ * that holds; a question solved needs no trust. `support`: an implication's id, `{all: [supports]}` or
+ * `{any: [supports]}`; `derived`: the implications that hold. Null: it does not hold.
  */
 export const LIKELY = 'likely';
-export function certain(support, derived, shown = () => true) {
+export function strength(support, derived, levelOfStatement = () => CONFIRMED) {
     const byId = new Map(derived.map((i) => [i.id, i]));
+    const least = (xs) => (xs.some((x) => x == null) ? null : Math.min(CONFIRMED, ...xs));
+    const best = (xs) => { const ok = xs.filter((x) => x != null); return ok.length ? Math.max(...ok) : null; };
     const of = (s, trail) => {
-        if (typeof s !== 'string') return s.all ? s.all.every((x) => of(x, trail)) : (s.any ?? []).some((x) => of(x, trail));
+        if (typeof s !== 'string') return s.all ? least(s.all.map((x) => of(x, trail))) : best((s.any ?? []).map((x) => of(x, trail)));
         const i = byId.get(s);
-        if (!i) return shown(s);
-        if (trail.includes(s) || i.strength === LIKELY) return false;
-        return i.from.every((p) => (typeof p === 'string' ? of(p, [...trail, s]) : p.any ? p.any.some((x) => (byId.has(x) || shown(x)) && of(x, [...trail, s])) : true));
+        if (!i) return levelOfStatement(s);
+        if (trail.includes(s)) return null;
+        const l = least(i.from.map((p) => (typeof p === 'string' ? of(p, [...trail, s]) : p.any ? best(p.any.map((x) => of(x, [...trail, s]))) : CONFIRMED)));
+        return l == null ? null : i.strength === LIKELY ? Math.min(l, LIKELY_LEVEL) : l;
     };
     return of(support, []);
 }
+/** Whether what follows is certain: confirmed throughout by some way to it. `shown(id)`: an observation is shown (and taken as confirmed). */
+export const certain = (support, derived, shown = () => true) => strength(support, derived, (id) => (shown(id) ? CONFIRMED : null)) === CONFIRMED;

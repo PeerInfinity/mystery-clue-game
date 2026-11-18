@@ -59,7 +59,8 @@ for (const m of moves) if (m.do === 'circle' || m.do === 'cross') (marks[m.q] ??
 for (const [q, picks] of Object.entries(marks)) for (const [p, v] of Object.entries(picks)) if (save.marks?.[q]?.[p] !== v) fail(`mark ${q} = ${p}: ${save.marks?.[q]?.[p]}, not ${v}`);
 const reasoned = moves.filter((m) => ['a', 'b', 'c', 'm'].includes(m.do)).length;
 if ((save.reasoning?.length ?? 0) !== reasoned) fail(`${save.reasoning?.length ?? 0} reasoning moves, not ${reasoned}`);
-for (const m of moves.filter((x) => x.do === 'trust' && x.link)) if (save.trust?.links?.[m.link] !== { distrusted: 0, uncertain: 1, trusted: 2 }[m.level]) fail(`trust ${m.link} not ${m.level}`);
+// (A statement trusted by a generated move may since have been set with its whole paper: its own setting is then taken back.)
+for (const m of moves.filter((x) => x.do === 'trust' && x.link && !x.gen)) if (save.trust?.links?.[m.link] !== { 'ruled out': 0, unlikely: 1, uncertain: 2, likely: 3, confirmed: 4 }[m.level]) fail(`trust ${m.link} not ${m.level}`);
 const after = await ev(`localStorage.getItem(${J(STORE)})`);
 if (after !== J(mine)) fail(`the player's own save changed: ${after}`);
 console.log(`${failures ? `${failures} failure(s)` : `the autoplay played ${st?.moves} moves to ¶${save.para}`} in ${Math.round((Date.now() - t0) / 1000)} s (${LAYOUT}${phone ? ', phone' : ''}${earned ? `, seed ${process.env.SEED ?? 1}` : ''})`);
