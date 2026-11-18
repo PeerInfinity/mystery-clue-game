@@ -384,16 +384,64 @@ for (const f of facts) {
 // reference, no wrong answer concluded and no right one ruled out, and each question that has implications answered
 // when everything is shown. The observations an answer can do without are listed, for the author to read.
 if (fs.existsSync(path.join(dir, 'world', 'implications.json'))) {
-    const { problems, spare } = await import('../engine/implications.js');
+    const { problems } = await import('../engine/implications.js');
     const imps = read('world/implications.json').implications;
     const rightOf = (q) => [].concat(qById.get(q)?.answer ?? [], qById.get(q)?.also_right ?? []);
     const valuesOf = (q) => (qById.get(q)?.possibilities ?? []).map((x) => x.value);
     for (const line of problems(imps, observationList, [...qById.values()], rightOf, valuesOf)) err('implications', line);
-    for (const q of new Set(imps.map((i) => i.q))) {
-        if (!qById.has(q)) continue;
-        const s = spare(imps, observationList, q, valuesOf(q));
-        if (s.spare.length) console.log(`  implications: ${q} follows without ${s.spare.join(', ')}`);
+    // The report (not with --quiet), for the author to read: each question's ways to its answer, and what stands out.
+    const { ways } = await import('../engine/implications.js');
+    const obsById = new Map(observationList.map((o) => [o.id, o]));
+    const impById = new Map(imps.map((i) => [i.id, i]));
+    const gaveAt = (id) => { const f = factById.get(id); return f ? f.given_at ?? f.para : null; };
+    // What a way needs read: for each story, the furthest paragraph of the entries its observations come from
+    // (of several alike, the earliest).
+    // With the paragraph that raises the question and the one that offers its answer: nothing follows before those.
+    const needsOfWay = (w, q) => {
+        const needs = {};
+        const take = (ref) => { const r = ref == null ? null : parseRef(ref); if (r) needs[r.story] = Math.max(needs[r.story] ?? 0, r.n); };
+        const first = (ids) => ids.map(gaveAt).filter((x) => x != null).sort((x, y) => (le(x, y) ? -1 : 1))[0];
+        take(q.raised);
+        for (const o of q.possibilities ?? []) if (rightOf(q.id).includes(o.value)) take(o.available);
+        for (const id of w) for (const e of obsById.get(id)?.from ?? []) {
+            if (typeof e === 'string') take(gaveAt(e));
+            else if (e.any) take(first(e.any));
+            else if (e.doubted) take(gaveAt(e.doubted));
+            else if (e.reasoned === 'missing') take(gaveAt(e.of));
+            else if (e.reasoned) for (const x of e.premises ?? []) take(typeof x === 'string' ? gaveAt(x) : first(x.any));
+        }
+        return needs;
+    };
+    const lines = [];
+    for (const q of [...qById.values()].filter((x) => imps.some((i) => i.q === x.id))) {
+        const mine = imps.filter((i) => i.q === q.id), found = ways(imps, q.id, valuesOf(q.id), rightOf(q.id));
+        const inWay = new Set(found.flat());
+        const support = observationList.filter((o) => o.q === q.id && !inWay.has(o.id)).map((o) => o.id);
+        const fed = new Set(mine.flatMap((i) => i.from.flatMap((x) => (typeof x === 'string' ? [x] : x.any ?? []))));
+        const loose = observationList.filter((o) => o.q === q.id && !fed.has(o.id)).map((o) => o.id);
+        // A conclusion drawn from one implication alone: a step the story may not state.
+        const unstated = mine.filter((i) => i.concludes != null && i.from.length === 1 && typeof i.from[0] === 'string' && impById.has(i.from[0])).map((i) => i.id);
+        const neverRuled = valuesOf(q.id).filter((v) => !rightOf(q.id).includes(v) && v !== 'something else' && !mine.some((i) => (i.rules_out ?? []).includes(v)));
+        const today = observationList.filter((o) => o.q === q.id && o.essential).length;
+        lines.push(`  ${q.id}: ${found.length} way${found.length === 1 ? '' : 's'} (${found.map((w) => w.length).join(', ')} statements; ${today} asked for when marked by hand)`);
+        for (const w of found) lines.push(`      ${w.join(' + ')}`);
+        if (support.length) lines.push(`      in no way to the answer: ${support.join(', ')}`);
+        if (loose.length) lines.push(`      feeds no implication: ${loose.join(', ')}`);
+        if (unstated.length) lines.push(`      concluded from one implication alone (a step the story may not state): ${unstated.join(', ')}`);
+        if (neverRuled.length) lines.push(`      never ruled out by anything, only by the answer being concluded: ${neverRuled.join(', ')}`);
+        // When the answer follows, against when the data says it can be inferred and when the story gives it away.
+        const declared = {};
+        for (const ref of list(q.answer_inferable_at)) { const r = parseRef(ref); if (r) declared[r.story] = Math.max(declared[r.story] ?? 0, r.n); }
+        const needs = found.map((w) => needsOfWay(w, q));
+        const within = (a, b) => Object.keys(a).every((k) => (a[k] ?? 0) <= (b[k] ?? -1));
+        if (q.answer_inferable_at != null && needs.length) {
+            const less = needs.filter((n) => within(n, declared) && (Object.keys(declared).some((k) => (n[k] ?? 0) < declared[k])));
+            if (less.length) lines.push(`      follows from less than answer_inferable_at names (${JSON.stringify(q.answer_inferable_at)}): ${less.map((n) => JSON.stringify(n)).join(' or ')}`);
+            if (!needs.some((n) => within(n, declared))) lines.push(`      does not follow from what answer_inferable_at names (${JSON.stringify(q.answer_inferable_at)}): it takes ${needs.map((n) => JSON.stringify(n)).join(' or ')}`);
+        }
+        if (Number.isInteger(q.answer_given_at) && needs.length && !needs.some((n) => (n[MAIN] ?? 0) < q.answer_given_at)) err('implications', `${q.id}: no way to its answer is on the page before the story gives it away (¶${q.answer_given_at})`);
     }
+    if (!quiet) console.log('\nImplications: the ways to each answer\n' + lines.join('\n'));
 }
 // What an entry shows about a question once linked (world/observations.json, optional).
 for (const o of observationList) {

@@ -7,9 +7,12 @@
 // papers, one of which must all have come (its own evidence and the paper that raises it); `requires` the questions
 // that must be solved first. `start` the papers held from the start, `earned` those placed on questions, `goal` the
 // question that holds nothing (the end). A placement is a Map from a question to the paper it brings; a question
-// with none brings nothing.
+// with none brings nothing. A question read from its implications (caseLogic with `implications`) has `ways` in place
+// of those two: `[{papers, requires}]`, each a way to its answer with the questions that way rests on, since two
+// ways can rest on different questions.
 
 import { MAIN, parseRef } from './refs.js';
+import { ways as waysOf } from './implications.js';
 
 /** A small seeded generator (mulberry32): the same seed gives the same numbers in node and in the browser. */
 export function rng(seed) {
@@ -23,7 +26,8 @@ export function shuffle(list, rand) {
 }
 
 /** Can question q be solved now: not solved yet, what it requires solved, and one of its sets of papers held. */
-export const isOpen = (q, held, solved) => !solved.has(q.id) && (q.requires ?? []).every((r) => solved.has(r)) && q.sets.some((set) => [...set].every((p) => held.has(p)));
+export const isOpen = (q, held, solved) => !solved.has(q.id) && (q.ways ? q.ways.some((w) => w.requires.every((r) => solved.has(r)) && w.papers.every((p) => held.has(p)))
+    : (q.requires ?? []).every((r) => solved.has(r)) && q.sets.some((set) => [...set].every((p) => held.has(p))));
 
 /** The papers held once these questions are solved under a placement. */
 export const heldAfter = (logic, place, solved) => new Set([...logic.start, ...[...solved].map((q) => place.get(q)).filter(Boolean)]);
@@ -98,9 +102,12 @@ export const deliveryMode = (header) => header?.delivery?.mode ?? 'paragraph';
  * A case's logic from its own data: for each question with essential observations, the papers they rest on (where
  * each fact of theirs is told, a premise's for a fact only inferred), the paper that raises the question, and the
  * questions its "question X is solved" observations name (`requires`). `world`: {questions, observations, facts,
- * files, delivery} as the case's files hold them.
+ * files, delivery} as the case's files hold them. With `implications` (the answers marked from the evidence), a
+ * question that has implications is read from them: one entry of `ways` for each smallest set of statements its
+ * answer follows from. Without, every essential observation is asked for, which is the safe side for both ways of
+ * playing: the page places papers by that.
  */
-export function caseLogic({ questions, observations, facts, files, delivery }) {
+export function caseLogic({ questions, observations, facts, files, delivery, implications = null }) {
     const factById = new Map(facts.map((f) => [f.id, f]));
     // A reply (a file with `reply`: it comes when its question is solved) is no paper of the logic: nothing rests on it.
     const papers = files.filter((f) => !f.reply);
@@ -115,7 +122,32 @@ export function caseLogic({ questions, observations, facts, files, delivery }) {
         return at != null ? [paperOf(at)].filter(Boolean) : (f.from ?? []).flatMap((x) => factPapers(x, seen));
     };
     const out = [];
+    const obsById = new Map((observations ?? []).map((o) => [o.id, o]));
+    // What one observation asks for: the papers its entries are told in, and the questions it names as solved.
+    const asks = (o, own, requires) => { for (const e of o.from) {
+        if (typeof e === 'string') factPapers(e).forEach((p) => own.add(p));
+        else if (e.any) e.any.forEach((x) => factPapers(x).forEach((p) => own.add(p)));
+        else if (e.solved) { if (!requires.includes(e.solved)) requires.push(e.solved); }
+        else if (e.doubted) factPapers(e.doubted).forEach((p) => own.add(p));
+        else if (e.reasoned === 'missing') factPapers(e.of).forEach((p) => own.add(p));
+        else if (e.reasoned) (e.premises ?? []).flatMap((x) => (typeof x === 'string' ? [x] : x.any)).forEach((x) => factPapers(x).forEach((p) => own.add(p)));
+    } };
     for (const q of questions) {
+        if (implications?.some((i) => i.q === q.id)) {
+            const right = [].concat(q.answer ?? [], q.also_right ?? []);
+            const found = waysOf(implications, q.id, (q.possibilities ?? []).map((x) => x.value), right).map((w) => {
+                const own = new Set([paperOf(q.raised)].filter(Boolean)), requires = [];
+                for (const id of w) {
+                    if (id.startsWith('solved:')) { if (!requires.includes(id.slice(7))) requires.push(id.slice(7)); }
+                    else if (obsById.has(id)) asks(obsById.get(id), own, requires);
+                }
+                return { papers: [...own].sort(), requires: requires.filter((r) => r !== q.id).sort() };
+            });
+            // A way that asks for all another asks for, and more, is never the one needed.
+            const ways = found.filter((a, n) => !found.some((b, m) => m !== n && b.papers.every((x) => a.papers.includes(x)) && b.requires.every((x) => a.requires.includes(x)) && (b.papers.length + b.requires.length < a.papers.length + a.requires.length || m < n)));
+            out.push({ id: q.id, ways });
+            continue;
+        }
         const mine = (observations ?? []).filter((o) => o.q === q.id && o.essential);
         if (!mine.length) continue;
         const own = new Set([paperOf(q.raised)].filter(Boolean)), requires = [];

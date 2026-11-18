@@ -9,6 +9,7 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
+import { caseLogic } from '../engine/delivery.js';
 
 const PLAYER = '1';
 const TRUE = { rule: 'True_' };
@@ -46,14 +47,52 @@ export function paperSets(s) {
     return new Map(s.questions.map((q) => [q.id, sets(q.id)]));
 }
 
-export function exportRules(s, version = null) {
+// The same from a case's own logic (engine/delivery.js caseLogic with its implications): a question's `ways`, each
+// with the papers it asks for and the questions it rests on, whose own sets are multiplied in. A question without
+// ways (no implications written for it) has its one list of papers and its `requires`, as before.
+export function logicPaperSets(logic) {
+    const questions = new Map(logic.questions.map((q) => [q.id, q]));
+    const memo = new Map();
+    const least = (out) => out.filter((a, i) => !out.some((b, j) => j !== i && b.size <= a.size && [...b].every((p) => a.has(p)) && (b.size < a.size || j < i)));
+    const sets = (id, trail = []) => {
+        if (memo.has(id)) return memo.get(id);
+        if (trail.includes(id)) throw new Error(`a loop of requires: ${[...trail, id].join(' -> ')}`);
+        const q = questions.get(id);
+        if (!q) throw new Error(`no question ${id}`);
+        const own = q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] }));
+        const out = least(own.flatMap((w) => w.requires.reduce((acc, r) => acc.flatMap((a) => sets(r, [...trail, id]).map((b) => new Set([...a, ...b]))), [new Set(w.papers)])));
+        memo.set(id, out);
+        return out;
+    };
+    return new Map(logic.questions.map((q) => [q.id, sets(q.id)]));
+}
+
+/** A case's logic with its implications, from its world files; null when it has none written (the structure's logic is used). */
+export function worldLogic(dir) {
+    const R = (f) => JSON.parse(fs.readFileSync(`${dir}/world/${f}`, 'utf8'));
+    if (!fs.existsSync(`${dir}/world/implications.json`)) return null;
+    const header = R('case.json');
+    return caseLogic({ questions: R('questions.json').questions, observations: R('observations.json').observations, facts: R('facts.json').facts, files: header.files ?? [], delivery: header.delivery, implications: R('implications.json').implications });
+}
+
+// `logic`: the case's own logic with its implications (worldLogic), when it has them: a question's rule is then any
+// one of the ways to its answer, and the slot data says that the page must mark the answers from the evidence (a rule
+// that asks for less than every piece is only true of that way of playing).
+export function exportRules(s, version = null, logic = null) {
     const title = new Map(s.papers.map((p) => [p.id, p.title]));
     if (new Set(title.values()).size !== title.size) throw new Error('two papers share a title');
     const start = new Set(s.delivery?.start ?? []);
-    const sets = paperSets(s);
+    const sets = logic ? logicPaperSets(logic) : paperSets(s);
+    for (const q of s.questions) if (!sets.has(q.id)) throw new Error(`${q.id}: the case's logic has no such question`);
     const names = (set) => s.papers.filter((p) => set.has(p.id) && !start.has(p.id)).map((p) => p.title);
-    const hasAll = (set) => { const n = names(set); return n.length === 0 ? TRUE : n.length === 1 ? { rule: 'Has', args: { item_name: n[0] } } : { rule: 'HasAll', args: { item_names: n } }; };
-    const rule = (id) => { const alts = sets.get(id).map(hasAll); return alts.some((r) => r === TRUE) ? TRUE : alts.length === 1 ? alts[0] : { rule: 'Or', children: alts }; };
+    // The papers held from the start are no items: two ways that differ only in those are one, and a way that asks
+    // for all another does, and more, is left out.
+    const rule = (id) => {
+        const lists = sets.get(id).map((set) => names(set));
+        const least = lists.filter((a, i) => !lists.some((b, j) => j !== i && b.length <= a.length && b.every((n) => a.includes(n)) && (b.length < a.length || j < i)));
+        const alts = least.map((n) => (n.length === 0 ? TRUE : n.length === 1 ? { rule: 'Has', args: { item_name: n[0] } } : { rule: 'HasAll', args: { item_names: n } }));
+        return alts.some((r) => r === TRUE) ? TRUE : alts.length === 1 ? alts[0] : { rule: 'Or', children: alts };
+    };
 
     // The game's name is its identity on a server and becomes a file name (no colon: Windows cannot check one out).
     const ap = s.archipelago;
@@ -104,7 +143,7 @@ export function exportRules(s, version = null) {
         // slot_data.mystery: what the neutral names stand for, and which version of the case this is, for the page's side
         // of the bridge. The world generator carries it into the slot's data and into an exported preset.
         world: { [PLAYER]: { game, world_class_name: 'MysteryWorld', options: {}, world_directory: directory, option_definitions: {},
-            slot_data: { mystery: { story: s.story, version, goal: s.goal, locations: Object.fromEntries([...label].map(([q, name]) => [name, q])), items: Object.fromEntries(s.papers.map((p) => [p.title, p.id])) } } } },
+            slot_data: { mystery: { story: s.story, version, ...(logic ? { answers: 'evidence' } : {}), goal: s.goal, locations: Object.fromEntries([...label].map(([q, name]) => [name, q])), items: Object.fromEntries(s.papers.map((p) => [p.title, p.id])) } } } },
         exporter: {},
         game_info: { [PLAYER]: { completion_condition: { type: 'item_check', item: VICTORY } } },
         helpers: {},
@@ -115,6 +154,13 @@ export function exportRules(s, version = null) {
 export function readStructure(file) {
     const text = fs.readFileSync(file, 'utf8');
     return [JSON.parse(text), crypto.createHash('sha256').update(text).digest('hex').slice(0, 12)];
+}
+/** A case's export: its structure (names, ids), and its own logic where its implications are written. The version covers both files. */
+export function exportCase(dir) {
+    const [s, v] = readStructure(`${dir}/structure.json`);
+    const imp = `${dir}/world/implications.json`;
+    const version = fs.existsSync(imp) ? crypto.createHash('sha256').update(v + fs.readFileSync(imp, 'utf8')).digest('hex').slice(0, 12) : v;
+    return exportRules(s, version, worldLogic(dir));
 }
 
 // One section to a line where that keeps the file readable: a location, an item.
@@ -147,8 +193,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const dir = process.argv[2];
     if (!dir) { console.error('usage: node scripts/export-rules.mjs <case dir> [out file]'); process.exit(2); }
     const out = process.argv[3] ?? `${dir}/rules.json`;
-    const doc = exportRules(...readStructure(`${dir}/structure.json`));
+    const doc = exportCase(dir);
     fs.writeFileSync(out, format(doc));
     const locs = doc.regions[PLAYER]['The case'].locations;
+    const alts = locs.filter((l) => l.access_rule.rule === 'Or').length;
+    if (fs.existsSync(`${dir}/world/implications.json`)) console.log(`the logic is the case's implications: ${alts} of ${locs.length} locations have more than one way`);
     console.log(`${out}: ${locs.length} locations (1 the goal), ${Object.keys(doc.items[PLAYER]).length} items, ${doc.starting_items[PLAYER].length} papers at the start`);
 }

@@ -1166,6 +1166,38 @@ script that found each fact's paragraph from its quote; the data files are the s
     says, that nobody else at the Custom House has those initials (written as a rule, and listed as a gap).
     Lost with the player's circles, for those questions: "Not this answer", a guess on the timeline as a
     hypothesis, and the hints' circle steps (a hint that says to circle is done already).
+106. **The rules for all 25 questions of the long case, the ways to each answer, and the export from them
+    (2026-11-18; the user's order: the rules first, then the tests, then the delivery logic and the export).**
+    68 implications. `ways` lists every smallest set of statements an answer follows from; the validator prints
+    them with what stands out, and the export's rule for a location is any one of them. The true path plays to
+    the end with every answer marked from the evidence, on the three seeds. What the rules show of the story:
+    - 16 of the 25 answers follow from fewer statements than were asked for; the largest drops: the man in the
+      cloak 11 to 6, the three entries 9 to 2 (by the carts: each night's casks went to the cellar, so no export
+      was made), who set the fire 14 to 4.
+    - Pieces asked for twice under two names: the brig at Cardiff and the tide of the 24th are each both "that
+      question is solved" and a link of the same entry for the three entries; the berth's date likewise; the
+      bell's time for the half hour. The door found fast was both a link and the premise of "It changed".
+    - Steps no entry states: J.P. not Mr. Pell's, so Mr. Prout's (nobody else of those initials); the entries
+      false because the casks went to a cellar (that the three passes are the three entries' casks); that Mr.
+      Garrick could not have come back by road (the fifty-eight miles are in the story and are no evidence for
+      the question); that a key was used by its keeper.
+    - A statement's lie as evidence (Crouch's rounds, Mr. Prout at the table, the baker's Collector, the ledger)
+      is in no way to any answer: the answer shows the lie, not the lie the answer. So the wall of the ninth run
+      is not on the path of the logic at all.
+    - **The short proof.** Who set the fire follows from four statements without the rest of the case: the
+      fire-setter came in with a key (the door question solved), there are two keys, Mr. Prout's by his own word
+      never left his pocket, and Mr. Pell was at Cliff House with the doctor. In papers: the night watch book and
+      Mr. Prout's statement, of the 21 to earn. The other way (the reason, the boy sent, the man in the cloak)
+      takes most of the case. Whether the short proof should stand is the story's question, for the user.
+    - Judgements made in writing them, to be looked at: two witnesses for Mr. Prout's absence, not one; either
+      the doctor's sitting or the foot for Mr. Pell; any one false entry rules out "true exports".
+    - The short proof stays for now, at the user's word; alternatives are for later.
+    A player who only tries things (`scripts/random-links-check.mjs`): everything read, every entry linked to
+    every question in a shuffled order, the moves offered made, and when stuck each statement disbelieved in
+    turn and believed again; after every entry the page's marks against the engine's reading of the links. The
+    long case: 25 of 25 solved and the story read out, 1,977 links, six minutes, the page and the engine never
+    apart. The Rent Box: finished only once the player could disbelieve a statement, since "which lodger told a
+    thing that was not so" has the lie itself as a premise (the one place a lie is on the way to an answer).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

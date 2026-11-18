@@ -65,7 +65,10 @@ if (caseHeader.delivery?.mode === 'earned') {
 // answers marked from the evidence, where a circle must follow from the path's links.
 if (fs.existsSync(path.join(caseDir, 'world', 'implications.json'))) {
     const first = checks.find((x) => x[0] === 'path-check.mjs');
-    checks.splice(checks.indexOf(first) + 1, 0, ['path-check.mjs', { ...(first.find((x) => x && typeof x === 'object') ?? {}), ANSWERS: 'evidence' }]);
+    const env = first.find((x) => x && typeof x === 'object') ?? {};
+    // And a player who only tries things, in a shuffled order (scripts/random-links-check.mjs): the page's marks
+    // against the engine after every entry, and the case finished by trial alone. Six minutes on the long case.
+    checks.splice(checks.indexOf(first) + 1, 0, ['path-check.mjs', { ...env, ANSWERS: 'evidence' }], ['random-links-check.mjs', { ...env }]);
 }
 const failed = [];
 const fixture = process.env.FIXTURE !== '0';

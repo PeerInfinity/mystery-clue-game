@@ -480,6 +480,22 @@ that follows from others, shown by itself the moment they all are.
   question with implications is answered when everything is shown; it lists the observations an answer follows
   without. `path-check.mjs` with `ANSWERS=evidence` plays the true path in that mode: a circle of the path on such a
   question is not clicked and must be there from the path's links (run by `page-checks` for a case with the file).
+  `random-links-check.mjs` is a player who only tries things in that mode: it reads what can be read, links every
+  entry to every question in a shuffled order (`SHUFFLE`), makes the reasoning moves offered, and when stuck
+  disbelieves each statement in turn and believes it again. After every entry the page's marks are compared with
+  what the engine says follows from the links; at the end every question must be solved and the story read out.
+- `ways(implications, q, values, right)` flattens a question's implications into every smallest set of statements
+  its answer follows from (observation ids, and `solved:<q>`). The validator prints them for each question (not with
+  `--quiet`), with what stands out: an observation in no way to the answer, one that feeds no implication, an answer
+  concluded from one implication alone (a step the story may not state), a named wrong answer that nothing rules
+  out, and a way that needs less than `answer_inferable_at` names (or none that fits it). An answer with no way on
+  the page before the story gives it away is an error.
+- The delivery logic (`caseLogic` with `implications`) gives such a question `ways`: `[{papers, requires}]`, a way's
+  papers and the questions it rests on, in place of one list of papers and one of questions. The page does not pass
+  the implications: it places papers by every essential observation, which is safe for both ways of playing. The
+  Archipelago export does (`scripts/export-rules.mjs`, for a case with the file): a location's rule is any one of
+  the ways, each with the papers of the questions it rests on, and the slot data says `answers: "evidence"`, since
+  a rule that asks for less than every piece is true only when the page marks the answers from the evidence.
 
 **Observations** (`world/observations.json`, optional; `engine/observations.js`; the design: `docs/ideas.md`). The general
 mechanic for any question. The player points out that a timeline entry is relevant to an open question; an observation the

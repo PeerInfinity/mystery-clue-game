@@ -87,6 +87,42 @@ export function problems(implications, observations, questions, right, values) {
 }
 
 /**
+ * Every way to a question's answer: the smallest sets of statements from which it follows, the and/or tree of its
+ * implications flattened. A set's members are observation ids and `solved:<q>` (a premise that another question is
+ * solved). An answer follows by an implication that concludes a right answer (`right`: the answers accepted), or by
+ * every other answer (`values`) being ruled out. A set that contains another is left out. `[]` if nothing concludes.
+ */
+export function ways(implications, q, values, right) {
+    const byId = new Map(implications.map((i) => [i.id, i]));
+    const memo = new Map();
+    const key = (set) => [...set].sort().join('\u0001');
+    const least = (sets) => {
+        const uniq = [...new Map(sets.map((x) => [key(x), x])).values()].sort((a, b) => a.size - b.size);
+        return uniq.filter((x, n) => !uniq.slice(0, n).some((y) => [...y].every((e) => x.has(e))));
+    };
+    const both = (a, b) => least(a.flatMap((x) => b.map((y) => new Set([...x, ...y]))));
+    const ofId = (id, trail) => (byId.has(id) ? ofImp(byId.get(id), trail) : [new Set([id])]);
+    const ofPremise = (p, trail) => (typeof p === 'string' ? ofId(p, trail) : p.any ? least(p.any.flatMap((id) => ofId(id, trail))) : [new Set([`solved:${p.solved}`])]);
+    function ofImp(i, trail = []) {
+        if (memo.has(i.id)) return memo.get(i.id);
+        if (trail.includes(i.id)) return [];
+        const out = i.from.reduce((acc, p) => both(acc, ofPremise(p, [...trail, i.id])), [new Set()]);
+        memo.set(i.id, out);
+        return out;
+    }
+    const mine = implications.filter((i) => i.q === q);
+    const concluded = mine.filter((i) => i.concludes != null && right.includes(i.concludes)).flatMap((i) => ofImp(i));
+    // By elimination: for one right answer, every other answer ruled out, each by any implication that does so.
+    const eliminated = right.flatMap((ok) => {
+        const others = values.filter((v) => v !== ok);
+        if (!others.length) return [];
+        const per = others.map((v) => least(mine.filter((i) => (i.rules_out ?? []).includes(v)).flatMap((i) => ofImp(i))));
+        return per.some((x) => !x.length) ? [] : per.reduce((acc, x) => both(acc, x), [new Set()]);
+    });
+    return least([...concluded, ...eliminated]).map((x) => [...x].sort());
+}
+
+/**
  * For a question with implications: the observations its answer can do without. Each smallest set of its
  * observations from which the answer follows (other questions taken as solved) is found by leaving out one at a
  * time; an observation in none of them is support only. `{needed: [ids], spare: [ids]}`, for the author to read.

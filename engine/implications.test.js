@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { derive, verdict, problems, spare, premiseIds } from './implications.js';
+import { derive, verdict, problems, spare, premiseIds, ways } from './implications.js';
 
 const OBS = [
     { id: 'o.out', q: 'q.cart', says: 'the cart went out by the town gate' },
@@ -62,4 +62,24 @@ test('the checks: references, right and wrong answers, and an answer that never 
 
 test('the observations an answer can do without', () => {
     assert.deepEqual(spare(IMP, OBS, 'q.cart', VALUES['q.cart']), { needed: ['o.out', 'o.note'], spare: ['o.inside'] });
+});
+
+test('every way to an answer: the smallest sets of statements it follows from', () => {
+    assert.deepEqual(ways(IMP, 'q.cart', VALUES['q.cart'], ['cellar']), [['o.note', 'o.out']]);
+    assert.deepEqual(ways(IMP, 'q.who', VALUES['q.who'], ['ward']), [['o.note', 'o.out', 'solved:q.cart']]);
+    // Two ways (an implication for each, and any one of two premises), and a way by ruling the others out.
+    const or = [
+        { id: 'i.a', q: 'q.x', from: [{ any: ['o.1', 'o.2'] }, 'o.3'], says: 'a', concludes: 'x' },
+        { id: 'i.b', q: 'q.x', from: ['o.4'], says: 'b', concludes: 'x' },
+        { id: 'i.c', q: 'q.x', from: ['o.4', 'o.5'], says: 'c', concludes: 'x' },      // contains a smaller way: left out
+        { id: 'i.d', q: 'q.x', from: ['o.6'], says: 'd', rules_out: ['y'] },
+        { id: 'i.e', q: 'q.x', from: ['o.7'], says: 'e', rules_out: ['z'] },
+    ];
+    assert.deepEqual(ways(or, 'q.x', ['x', 'y', 'z'], ['x']), [['o.4'], ['o.1', 'o.3'], ['o.2', 'o.3'], ['o.6', 'o.7']]);
+    // Every way found is a way (the answer follows from exactly those statements), and no smaller one is.
+    for (const w of ways(or, 'q.x', ['x', 'y', 'z'], ['x'])) {
+        assert.equal(verdict('q.x', ['x', 'y', 'z'], derive(or, (id) => w.includes(id), () => false)).concluded, 'x');
+        for (const out of w) assert.equal(verdict('q.x', ['x', 'y', 'z'], derive(or, (id) => w.includes(id) && id !== out, () => false)).concluded, null);
+    }
+    assert.deepEqual(ways([or[3]], 'q.x', ['x', 'y', 'z'], ['x']), []);
 });
