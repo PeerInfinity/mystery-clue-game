@@ -534,6 +534,18 @@ that follows from others, shown by itself the moment they all are.
     follows contradicts. `path-check.mjs` with `ANSWERS=evidence LIES=1` plays the true path without its moves of
     trust: every false statement on the timeline that the engine says the evidence contradicts must be in a
     contradiction on the page (run by `page-checks` for a case with the file).
+- **The rules nobody writes** (2026-11-18; `tableRules`, `withTable` in `engine/implications.js`; finding 109).
+  Where an answer has a typed form and what one observation comes from contradicts it, linking that observation
+  rules the answer out, as an implication `{id: "t.<observation>.<n>", q, from: [observation], rules_out: [answer],
+  table: true}` made when the case is read (by the page, the validator and the checks alike:
+  `scripts/case-rules.mjs`). An answer's typed form is its possibility's `asserts`; its act, the possibility's own
+  `action` (`{of, act, thing, ..., time: {from, to}}`, `of: "?"` for someone unnamed: "by forcing the door") or the
+  question's typed entry with the answer as its agent, with what the action table says it needs and leaves
+  (`actNeeds` in `engine/actions.js`: the agent at a place, any other state needed, and an effect, which an entry
+  at or after the act's window may deny: forcing leaves a mark, and "no mark" is against it); and an identity.
+  Only true entries make such a rule, only observations that come from entries, and never against a right
+  answer. A rule written by hand for the same observation and answer is kept in its place (its words are
+  better). The validator lists them. Only cases with `world/implications.json` have them.
 - The validator checks every reference, that no wrong answer is concluded and no right one ruled out, and that each
   question with implications is answered when everything is shown; it lists the observations an answer follows
   without. `path-check.mjs` with `ANSWERS=evidence` plays the true path in that mode: a circle of the path on such a

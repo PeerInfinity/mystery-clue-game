@@ -11,7 +11,8 @@
 // With these a question needs no checklist: its answer is known when an implication concludes it, or when every
 // other answer is ruled out. What is shown beyond that is support, and wanted by nothing.
 
-import { isRight, coverOf, hypothesisKey, answerStates, DERIVED } from './world.js';
+import { isRight, coverOf, hypothesisKey, answerStates, DERIVED, assertions, markAssertions, contradictions, alibis, entityKinds } from './world.js';
+import { answerAction, actNeeds } from './actions.js';
 
 const holds = (p, has, solved) => (typeof p === 'string' ? has(p) : p.any ? p.any.some(has) : p.solved ? !!solved?.(p.solved) : false);
 
@@ -218,4 +219,42 @@ export function supportLevel(support, derived, levelOfStatement, top) {
         return least(i.from.map((p) => (typeof p === 'string' ? of(p, [...trail, s]) : p.any ? best(p.any.map((x) => of(x, [...trail, s]))) : top)));
     };
     return of(support, []);
+}
+
+/**
+ * The rules nobody has to write (2026-11-18): where an answer has a typed form (its possibility's `asserts`, its
+ * act with what that needs and leaves, an identity) and what one observation comes from contradicts it, linking
+ * that observation rules the answer out: `{id: 't.<observation>.<n>', q, from: [observation], says, rules_out: [answer],
+ * table: true}`. Only from true entries (a lie rules nothing out), only observations that come from entries (not
+ * from a move, a doubt or another question), and never a right answer (that would be a fault of the data, which
+ * the validator's check of the key finds). An observation from any one of several entries rules out only what
+ * each of them contradicts. The case's actions must be set (`setCaseActions`).
+ */
+export function tableRules(data, observations) {
+    const told = assertions(data).filter((x) => x.kind === 'state' && x.truth === true && !(x.claim && x.claim === x.fact));
+    const kindOf = entityKinds(data), isEntity = (id) => kindOf(id) != null;
+    const ctx = { joins: data.joins ?? {}, order: data.order };
+    const out = [];
+    for (const q of data.questions) (q.possibilities ?? []).forEach((p, n) => {
+        if (isRight(q, p.value)) return;
+        const marks = markAssertions(data, { [q.id]: { [p.value]: 'circled' } });
+        if (!marks.length) return;
+        const needs = actNeeds(marks[0], answerAction(q, p.value, isEntity), ctx);
+        if (marks.length < 2 && !needs.length && q.entry?.attr !== 'identity') return;
+        const against = (ids) => { const a = told.filter((x) => ids.includes(x.fact)); return a.length > 0 && (contradictions(data, [...a, ...marks]).some((c) => marks.includes(c.a) || marks.includes(c.b)) || alibis(data, a, needs).length > 0); };
+        for (const o of observations) {
+            if (o.q !== q.id || o.if || !o.from.every((f) => typeof f === 'string' || Array.isArray(f.any))) continue;
+            const fixed = o.from.filter((f) => typeof f === 'string'), anys = o.from.filter((f) => typeof f !== 'string');
+            // Every choice among "any one of" must contradict it (one such group at most is tried one by one).
+            const sets = anys.length ? anys[0].any.map((x) => [...fixed, x, ...anys.slice(1).flatMap((g) => g.any)]) : [fixed];
+            if (anys.length > 1 || !sets.every(against)) continue;
+            out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: one of the answers cannot stand with that`, rules_out: [p.value], table: true });
+        }
+    });
+    return out;
+}
+/** A case's implications with the table's own added (those not already written by hand with the same premise and answer). */
+export function withTable(implications, data, observations) {
+    const same = (t) => implications.some((i) => i.q === t.q && i.from.length === 1 && i.from[0] === t.from[0] && (i.rules_out ?? []).includes(t.rules_out[0]));
+    return [...implications, ...tableRules(data, observations).filter((t) => !same(t))];
 }

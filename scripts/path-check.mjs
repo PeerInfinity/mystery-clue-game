@@ -34,7 +34,7 @@ const SEED = Number(process.env.SEED ?? 1);
 // path on a question that has implications is not clicked: it must be there already, from the path's links.
 const ANSWERS = process.env.ANSWERS ?? '';
 const AQ = ANSWERS ? `answers=${ANSWERS}` : '';
-const impQs = new Set(ANSWERS === 'evidence' && fs.existsSync(path.join(WORLD, 'implications.json')) ? JSON.parse(fs.readFileSync(path.join(WORLD, 'implications.json'), 'utf8')).implications.map((i) => i.q) : []);
+const impQs = new Set(ANSWERS === 'evidence' ? (await import('./case-rules.mjs')).caseRules(CASE).map((i) => i.q) : []);
 const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', [EARNED ? `seed=${SEED}` : '', AQ].filter(Boolean).join('&'));
 const STOP = +(process.env.STOP ?? 1e9);
 const files = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).files ?? [];
@@ -375,7 +375,7 @@ if (LIES) {
     const { loadWorld } = await import('./world-provenance.js');
     const { assertions, contradictions } = await import('../engine/world.js');
     const { derive, derivedAssertions } = await import('../engine/implications.js');
-    const world = loadWorld(CASE), imps = JSON.parse(fs.readFileSync(path.join(WORLD, 'implications.json'), 'utf8')).implications;
+    const world = loadWorld(CASE), imps = (await import('./case-rules.mjs')).caseRules(CASE);
     const follows = derivedAssertions(world, derive(imps, () => true, () => true), (q) => q.possibilities.map((x) => x.value));
     const lies = [...new Set(contradictions(world, [...assertions(world), ...follows]).flatMap((c) => (follows.includes(c.a) ? [c.b] : follows.includes(c.b) ? [c.a] : [])).filter((x) => x.truth === false).map((x) => x.fact))];
     const keys = await ev(`[...document.querySelectorAll('#clashes [data-clash]')].map((a) => a.dataset.clash)`);

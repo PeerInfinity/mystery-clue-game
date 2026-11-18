@@ -640,3 +640,43 @@ export function agentNeeds(order, entries, change, agent, nameOf, ctx = {}) {
     const { entries: reqs = [] } = pointImplications({ ...change, id: `${change.id}@${agent}`, of: agent }, nameOf, { ...ctx, order });
     return reqs.filter((r) => r.role === 'requires').map((req) => ({ req, ...requirementStatus(order, entries, req, ctx) }));
 }
+
+/**
+ * An answer as a typed act, for what it needs and does: the possibility's own `action` ("by forcing the door":
+ * someone forcing it), or the question's typed entry with the answer as its agent (who led the horse out?). Its
+ * time is the action's own or the entry's. Null when the answer is no act. `isEntity(id)`.
+ */
+export function answerAction(q, pick, isEntity) {
+    const t = q?.entry?.time && typeof q.entry.time === 'object' ? q.entry.time : typeof q?.entry?.time === 'string' ? { at: q.entry.time } : {};
+    const id = `hyp:${q?.id}=${pick}`;
+    const own = q?.possibilities?.find((p) => p.value === pick)?.action;
+    if (own) return { id, attr: 'action', ...own, time: own.time ?? t, hyp: { q: q.id, pick } };
+    if (!q?.entry?.act || !isEntity(pick)) return null;
+    const { act, thing, to, item, via, where, about } = q.entry;
+    return { id, of: pick, attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), ...(where ? { where } : {}), ...(about ? { about } : {}), time: t, hyp: { q: q.id, pick } };
+}
+
+/**
+ * What an answer's act (`f`, over a window `{from, to}`) asks of the timeline, for `alibis` (engine/world.js):
+ * its agent at a door or a place at some moment of the window; any other state it needs (knowing the knot); and
+ * what it leaves behind (`effect`: a state it brings about, which a later entry may deny: a door forced is marked).
+ * Typed states (a door's) and keys are not asked here. Nothing is asked of an agent nobody has named.
+ * `mark`: the answer's assertion; `say(r)`: a need as words.
+ */
+export function actNeeds(mark, f, ctx = {}, nameOf = (id) => id, say = (r) => `${r.neg ? 'not ' : ''}${nameOf(r.of)}: ${r.value}`) {
+    const out = [];
+    if (!f || !(f.time?.from && f.time?.to)) return out;
+    const { entries = [] } = pointImplications(f, nameOf, ctx);
+    for (const r of entries) {
+        if (r.of === '?' || r.of == null) continue;
+        if (r.role === 'requires' && (r.at || r.place)) {
+            const places = r.at ? (ctx.joins?.[r.at] ?? []) : [r.place];
+            if (places.length) out.push({ mark, of: f.of, places, time: f.time, same: ctx.same, req: r.id, label: `it needs ${nameOf(f.of)} at ${nameOf(r.at ?? r.place)}` });
+            continue;
+        }
+        if (!r.attr || r.value == null || STATES[r.attr] || OPEN_STATES.has(r.attr) || ['key', 'item', 'charge', 'away', 'guard', 'among', 'through'].some((k) => r[k] != null)) continue;
+        if (r.role === 'requires') out.push({ mark, of: r.of, attr: r.attr, value: r.value, neg: !!r.neg, time: f.time, same: ctx.same, req: r.id, label: `it needs: ${say(r)}` });
+        else if (r.role === 'effects') out.push({ mark, of: r.of, attr: r.attr, value: r.value, neg: !!r.neg, time: f.time, same: ctx.same, req: r.id, effect: true, label: `it leaves: ${say(r)}` });
+    }
+    return out;
+}

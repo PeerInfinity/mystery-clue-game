@@ -527,6 +527,9 @@ export function alibis(data, accepted, needs) {
             for (const x of accepted) {
                 if (x.kind !== 'state' || x.attr !== n.attr || x.value !== n.value || !!x.neg === !!n.neg || !(n.same ?? ((a, b) => a === b))(x.of, n.of)) continue;
                 const s = x.time?.at ?? x.time?.from, e = x.time?.at ?? x.time?.to;
+                // What the act leaves behind (`effect`) lasts from the act on: an entry that denies it at or after the
+                // window's end is against it (a state lasts until something changes it).
+                if (n.effect) { if (!s || !order.le(w.end, s)) continue; out.push({ a: x, b: side, why: `${n.of}: it would leave ${n.neg ? 'not ' : ''}${n.attr} ${n.value}, and the timeline denies it` }); continue; }
                 if (!s || !order.le(s, w.end) || (e && order.lt(e, w.start))) continue;
                 out.push({ a: x, b: side, why: `${n.of}: needs ${n.neg ? 'not ' : ''}${n.attr} ${n.value}, and the timeline denies it` });
             }

@@ -1277,8 +1277,38 @@ script that found each fact's paragraph from its quote; the data files are the s
       (the stable clock), who waited at the mill (the telegram), and Finch not in the bank (the night porter).
       Where a question's answers are places or an identity the first step of finding 107 types them unasked
       (the lamp-keeper's word, the grey cloak).
+109. **Plans and motives: what the Holmes cases set up, and its first use here (2026-11-18).** The user asked
+    whether the typing of plans and motivations begun in the Holmes cases would fit. It does, as vocabulary: an
+    aim is a typed state someone wants (`goal`), an act has needs and effects from a table, a plan is steps whose
+    effects feed the next step's needs, a motive question is the end the rest serves. The engine for it is still
+    in the main tree; only the new cases did not use it. But it was built for moves the player makes ("what is
+    this for?"), and the direction now is the page tracking the logic by itself, so two things were missing: an
+    act's needs and effects did not reach the contradictions (only "was elsewhere" and "does not know how" did),
+    and a goal is only a state to bring about. The plan agreed: needs and effects into the tracking first, on
+    the long case's door; then goals for the motive questions, with "preventing" as the first new shape.
+    Built, the first part:
+    - An answer can be an act by someone unnamed (a possibility's `action` with `of: "?"`): "by forcing the
+      door" is someone forcing the street door between midnight and the bell.
+    - What an act leaves behind is asked of the timeline too: an entry at or after the act that denies it is a
+      contradiction with the answer (forcing leaves a mark; the door has none).
+    - **The rules nobody writes.** Where what one linked observation comes from contradicts an answer's typed
+      form, the page rules that answer out, with no rule in the file. The long case: the three rule-outs of the
+      door question (not forced, not by a window, not left unlocked) and "no theft to hide" are gone from the
+      file and come from the typed forms (two new actions, forcing and breaking in; the door's mark and the
+      windows' bars as denied conditions; the chest's contents typed). Eight more rule-outs came that nobody
+      had written: Mr. Pell, Mr. Garrick and Captain Venn for the fire by their alibis, Mr. Pell for the pass
+      signed while he was in London, and the wrong answers of the typed yes-or-no questions. In the short
+      cases: Ned in the loft, Ellen's granny knot, Mrs. Holt at the fête.
+    - Not done: "an accident of the stove". The stove "cold, raked out and shut" the next noon does not, by
+      strict logic, deny a stove alight in the night; the story's own inference is that a stove raked out and
+      shut was put out on purpose. That rule stays written.
+    Not built, to be put to the user first: goals for "What was the fire meant to destroy?" and "Why was the
+    Custom House burned?". The data shape is plain (the aim's `goal`; the Board's audit as an intention with a
+    step that needs the ledger; "preventing" as a goal that denies a need of another's step). What is not plain
+    is what the page should do with it, since a motive contradicts nothing: "the chest was left locked, so the
+    fire was not for the money" is an aim not attempted, which is likely, not certain.
     Still open:
-    - Sentences still: the answers of 13 questions of the long case ("it was set", "to destroy the bond ledger")
+    - Sentences still: the answers of 12 questions of the long case ("it was set", "to destroy the bond ledger")
       and most of the short cases' "when" answers; the values of `condition` facts; untyped `action` facts.
       Each needs a decision of vocabulary (what a motive is, in typed form), which is the user's.
     - A statement about everyone only in an implication's `asserts`, not yet in a witness's own entry ("nobody

@@ -6,6 +6,7 @@
 // since right or wrong does not enter the logic (docs/archipelago-plan.md, "The logic"). Location names are neutral
 // ("Question 07"): they are visible to the whole multiworld, and a question's wording can give things away; the real
 // ids are in the slot data (`world[1].slot_data.mystery`). Papers are named by their titles, which name only a source.
+import { caseRules } from './case-rules.mjs';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
@@ -72,7 +73,7 @@ export function worldLogic(dir) {
     const R = (f) => JSON.parse(fs.readFileSync(`${dir}/world/${f}`, 'utf8'));
     if (!fs.existsSync(`${dir}/world/implications.json`)) return null;
     const header = R('case.json');
-    return caseLogic({ questions: R('questions.json').questions, observations: R('observations.json').observations, facts: R('facts.json').facts, files: header.files ?? [], delivery: header.delivery, implications: R('implications.json').implications });
+    return caseLogic({ questions: R('questions.json').questions, observations: R('observations.json').observations, facts: R('facts.json').facts, files: header.files ?? [], delivery: header.delivery, implications: caseRules(dir) });
 }
 
 // `logic`: the case's own logic with its implications (worldLogic), when it has them: a question's rule is then any

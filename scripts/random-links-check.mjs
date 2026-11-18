@@ -14,7 +14,7 @@
 // Needs the game served and the headless Chrome (scripts/page-checks.mjs starts both).
 import fs from 'node:fs';
 import path from 'node:path';
-import { CDP, WORLD, STORE, pageUrl } from './case-env.mjs';
+import { CASE, CDP, WORLD, STORE, pageUrl } from './case-env.mjs';
 import { fill } from '../engine/observations.js';
 import { derive, verdict } from '../engine/implications.js';
 import { deliveryMode, rng, shuffle } from '../engine/delivery.js';
@@ -25,7 +25,7 @@ const EARNED = deliveryMode(header) === 'earned';
 const SEED = Number(process.env.SEED ?? 1), SHUFFLE = Number(process.env.SHUFFLE ?? 1);
 const rand = rng(SHUFFLE);
 const facts = R('facts.json').facts, observations = R('observations.json').observations, questions = R('questions.json').questions;
-const implications = R('implications.json').implications;
+const implications = (await import('./case-rules.mjs')).caseRules(CASE);
 const qById = new Map(questions.map((q) => [q.id, q]));
 // A question whose evidence needs a route built in the room panel, or something got through: this player makes
 // no room moves, so such a case cannot be finished by it. Said, and passed over.

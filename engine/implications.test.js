@@ -140,3 +140,43 @@ test('what follows as assertions: answers, the states they are, typed statements
     assert.deepEqual(supportIds(byId.get('hyp:q.where=house').derived).sort(), ['i.mole', 'i.not_house']);
     assert.equal(supportLevel('i.mole', all.filter((i) => i.id !== 'i.mole'), () => null, 3), null, 'not holding');
 });
+
+test("the rules nobody writes: an answer's typed form against what one observation comes from", async () => {
+    const { tableRules, withTable } = await import('./implications.js');
+    const { setCaseActions } = await import('./actions.js');
+    const { timeOrder } = await import('./world.js');
+    setCaseActions({ actions: [{ id: 'force', label: 'forcing', requires: [], effects: [{ of: '$thing', attr: 'condition', value: 'mark' }] }] });
+    const times = [{ id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }];
+    const win = { from: 't1', to: 't3' };
+    const data = {
+        entities: [{ id: 'door', kind: 'object' }, { id: 'inn', kind: 'place' }, { id: 'house', kind: 'place' }, { id: 'ann', kind: 'person' }, { id: 'bob', kind: 'person' }],
+        moves: [], joins: {}, times, order: timeOrder(times), accounts: [], narrators: [{ id: 'n' }],
+        facts: [
+            { id: 'f.unmarked', of: 'door', attr: 'condition', value: 'mark', neg: true, time: { at: 't4' }, para: 1 },
+            { id: 'f.fast1', of: 'door', attr: 'door', value: 'locked', time: { at: 't1' }, para: 1 },
+            { id: 'f.fast2', of: 'door', attr: 'door', value: 'locked', time: { at: 't2' }, para: 1 },
+            { id: 'f.ann_inn', of: 'ann', attr: 'location', value: 'inn', time: win, para: 1 },
+            { id: 'f.lie', of: 'bob', attr: 'location', value: 'inn', time: win, para: 1, truth: false },
+        ],
+        questions: [
+            { id: 'q.how', entry: { of: 'door', attr: 'condition', time: { after: 't1', before: 't3' } }, answer: 'with a key', possibilities: [
+                { value: 'with a key', action: { of: '?', act: ['unlock'], thing: 'door', time: win } },
+                { value: 'by force', action: { of: '?', act: ['force'], thing: 'door', time: win } },
+                { value: 'left open', asserts: [{ of: 'door', attr: 'door', value: 'locked', neg: true, time: win }] }] },
+            { id: 'q.who', entry: { of: '?', attr: 'action', act: ['take'], item: 'door', where: 'house', time: win }, answer: 'bob', possibilities: [{ value: 'ann' }, { value: 'bob' }] },
+        ],
+    };
+    const obs = [
+        { id: 'o.unmarked', q: 'q.how', from: ['f.unmarked'], says: 'the door is not marked' },
+        { id: 'o.fast', q: 'q.how', from: [{ any: ['f.fast1', 'f.fast2'] }], says: 'the door was found fast' },
+        { id: 'o.ann', q: 'q.who', from: ['f.ann_inn'], says: 'Ann was at the inn' },
+        { id: 'o.bob', q: 'q.who', from: ['f.lie'], says: 'Bob says he was at the inn' },
+        { id: 'o.solved', q: 'q.who', from: [{ solved: 'q.how' }], says: 'with a key' },
+    ];
+    const rules = tableRules(data, obs);
+    assert.deepEqual(rules.map((r) => [r.from[0], r.rules_out[0]]), [['o.unmarked', 'by force'], ['o.fast', 'left open'], ['o.ann', 'ann']], 'what the act leaves, a typed state, an alibi; never from a lie, never the right answer');
+    assert.ok(rules.every((r) => r.table && r.q && r.says));
+    const hand = [{ id: 'i.x', q: 'q.who', from: ['o.ann'], says: 'not Ann', rules_out: ['ann'] }];
+    assert.deepEqual(withTable(hand, data, obs).map((r) => r.id), ['i.x', 't.unmarked.1', 't.fast.2'], 'a rule written by hand for the same is kept, and not doubled');
+    setCaseActions({});
+});

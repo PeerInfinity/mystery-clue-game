@@ -9,11 +9,11 @@ import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
-import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps, pointGap, gapsOf } from '../engine/actions.js';
+import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, actNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps, pointGap, gapsOf } from '../engine/actions.js';
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described, onPage, bears, waits } from '../engine/observations.js';
-import { derive, verdict, premiseIds, derivedAssertions, impliedStates, supportLevel, supportIds } from '../engine/implications.js';
+import { derive, verdict, premiseIds, derivedAssertions, impliedStates, supportLevel, supportIds, withTable } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -45,7 +45,8 @@ const room = await get(`${W}/room.json`).catch(() => null);
 const observations = await get(`${W}/observations.json`).then((x) => x.observations ?? []).catch(() => null);
 // What the statements shown imply when put together (world/implications.json; engine/implications.js): optional,
 // an experiment. Used when Settings has the answers marked from the evidence.
-const implications = await get(`${W}/implications.json`).then((x) => x.implications ?? []).catch(() => []);
+const writtenRules = await get(`${W}/implications.json`).then((x) => x.implications ?? []).catch(() => []);
+let implications = writtenRules;   // with the rules from the answers' typed forms, once the world is read (below)
 const data = {
     entities: w.entities, moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
     accounts: accounts.accounts, questions: questions.questions, narrators: header.narrators,
@@ -60,6 +61,7 @@ document.querySelector('h1 .subtitle').textContent = header.subtitle ?? 'the tim
 for (const a of document.querySelectorAll('a[href="guide.html"]')) a.href = `guide.html${pageUrl().slice(2)}`;
 data.order = timeOrder(data.times);
 data.places = places(data);
+if (writtenRules.length && observations) implications = withTable(writtenRules, data, observations);
 const prov = provenance(data);
 const allAssertions = assertions(data);
 const assertionById = new Map(allAssertions.map((x) => [x.id, x]));
@@ -361,7 +363,7 @@ function phrase(f) {
             const seen = list(f.value).map((x) => factById.get(x)).filter((o) => o && visible(o));
             return seen.length ? `${E} sees: ${seen.map(phrase).join('; ')}` : `${E} notices something`;
         }
-        case 'contents': return `${E} holds ${v}`;
+        case 'contents': return `${E} ${f.neg ? 'does <b>not</b> hold' : 'holds'} ${v}${d}`;
         case 'reputed': return `${E}, by repute: ${v}`;
         case 'rule': return `${E}, as a rule: ${v}`;
         case 'weekday': return `It is ${v}`;
@@ -435,21 +437,8 @@ function presenceNeeds(accepted) {
     const out = [];
     for (const mark of accepted) {
         if (mark.mark !== 'circled') continue;
-        const f = hypAction(mark.id);
-        if (!f || !(f.time?.from && f.time?.to)) continue;
-        const { entries = [] } = pointImplications(f, nameOf, { ...placeCtx, order: data.order });
-        for (const r of entries) {
-            if (r.role !== 'requires') continue;
-            if (r.at || r.place) {
-                const places = r.at ? (placeCtx.joins?.[r.at] ?? []) : [r.place];
-                if (places.length) out.push({ mark, of: f.of, places, time: f.time, same: placeCtx.same, req: r.id, label: `it needs ${nameOf(f.of)} at ${nameOf(r.at ?? r.place)}` });
-                continue;
-            }
-            // Any other state the act needs (knowing a knot): against a state on the timeline that denies it.
-            if (r.attr && r.value != null && !STATES[r.attr] && !OPEN_STATES.has(r.attr) && !['key', 'item', 'charge', 'away', 'guard', 'among'].some((k) => r[k] != null) && r.of !== '?') {
-                out.push({ mark, of: r.of, attr: r.attr, value: r.value, neg: !!r.neg, time: f.time, same: placeCtx.same, req: r.id, label: `it needs: ${phrase(r).replace(/<[^>]+>/g, '')}` });
-            }
-        }
+        // Where its agent must be, any other state it needs (knowing a knot), and what it leaves behind.
+        out.push(...actNeeds(mark, hypAction(mark.id), { ...placeCtx, order: data.order }, nameOf, (r) => phrase(r).replace(/<[^>]+>/g, '')));
     }
     return out;
 }
