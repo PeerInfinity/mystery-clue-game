@@ -1769,7 +1769,9 @@ function renderDetail(clashing) {
         const open = current.find((c) => clashKey(c) === sel);
         const [a, b, via] = sel.slice(6).split('|').map((id) => assertionById.get(id));
         const c = open ?? { a, b, via };
-        el.innerHTML = `<h2>${clashTitle(c)}</h2>
+        // A side that is no assertion any more (what it rested on was distrusted): nothing of it is left to show.
+        if (!c.a || !c.b) el.innerHTML = '<h2>A contradiction</h2><p class="small good">Resolved: one side is no longer on the timeline.</p>';
+        else el.innerHTML = `<h2>${clashTitle(c)}</h2>
           <p class="small ${open ? 'bad' : 'good'}">${open ? 'Both sides are on the timeline: they cannot both hold.' : 'Resolved: one side is no longer on the timeline.'}</p>
           ${sideHtml(c.a, 'One side')}${sideHtml(c.b, 'Against')}${c.via ? sideHtml(c.via, 'With') : ''}`;
         return;

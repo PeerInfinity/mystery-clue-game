@@ -1118,6 +1118,17 @@ script that found each fact's paragraph from its quote; the data files are the s
     in the question's list ("Linked, but you do not trust it enough for it to count") and in "Not solved yet".
     This says that the statement matters, which a kept link says already, and not whether it is true. (Entries
     of distrusted statements are shown faded by default already: "Show the rest, faded".)
+103. **The eighth Haiku run (2026-11-18; the same seed, after finding 102's changes): 10 of 25 questions, stuck
+    for 200 turns at turn 539, $2.63. No report; no paper taken for shut; nothing distrusted that was needed.**
+    Two questions stood one piece short, each piece a plain entry never linked ("all three in one hand" for the
+    initials; "the berths lie inside the quay gate" for the cart). The solver named the first as the entry to
+    link six times, and each time clicked the entry's own line, which opens its detail. Of its last 199 turns
+    132 opened a timeline entry and 22 tried a link. In the page as text each entry's line ends "+ relevant";
+    in the numbered controls the entry's line and its button are two items, and the button's says only
+    "+ relevant", with no entry. A reader sees the button beside its entry; the solver must count. A fault of
+    the harness, waiting for the user's word. It used "Left to try" while stuck for the first time (for the one
+    move on offer). One page error, at turn 449: a contradiction open in the detail, one side distrusted, and
+    the side no longer an assertion to draw; fixed (the detail says "Resolved" and shows no sides).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
