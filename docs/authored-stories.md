@@ -1130,6 +1130,18 @@ script that found each fact's paragraph from its quote; the data files are the s
     for the entry: …"), and a checkbox, listed until now with no words at all, with its label and whether it is on. It used "Left to try" while stuck for the first time (for the one
     move on offer). One page error, at turn 449: a contradiction open in the detail, one side distrusted, and
     the side no longer an assertion to draw; fixed (the detail says "Resolved" and shows no sides).
+104. **The ninth Haiku run (2026-11-18; the same seed, the link buttons named; the limit raised to $12 on the
+    way): 15 of 25 questions, the furthest yet, stuck for 200 turns at turn 869, $4.75.** With its buttons named
+    the solver linked what it meant to. It began by trying every entry against one question at paragraph 8 (a
+    hundred turns for one question solved), then read on. The cart question's third piece, the one that rules
+    out the other answer (the berths lie inside the quay gate), it found by trying entries one after another,
+    with a report on the way that nothing on the page said what kind of piece was wanting; that opened the
+    cart, Crouch, the brandy and the entry's date. The wall, and thirteen reports: "What are the three Marigold
+    entries?" at 6 of 9. One piece is the ledger's statement as a lie. A statement's detail says "Trusted:
+    certain" (that it was said) and has no trust control: what it says is doubted on each entry it carried, and
+    nothing on the statement says so or leads there. Reproduced: with the statement linked and its three
+    entries distrusted the page counts 7 of 9, so the question can be done; the way to it is not shown. The
+    same dead end at Mr. Prout's statement. Not changed yet.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
