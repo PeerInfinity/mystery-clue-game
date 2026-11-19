@@ -655,6 +655,15 @@ notice counts. A clash is as strong as its sides: all confirmed, a contradiction
 confirmed, "cannot be so: against what is confirmed", with a button to rule that statement out; two sides short of
 it, "unlikely together" or, with one still uncertain, "undecided". Each side not confirmed has its level beside
 it, and the trace has buttons to trust or distrust each statement.
+**A source's record** (2026-11-19; `recordOf`, `laidTo`, `shownFalse` in `ui/world.js`; finding 112). Of the
+statements that start with one source: how many are confirmed, and how many stand alone against what is confirmed
+(the one weak side of an open clash); and how many of the statements that came from them are ruled out. A statement
+ruled out is laid to the one whose statement it is where its own setting rules it out, and else to whoever's paper,
+telling or word, ruled out, it came by (a word altered on the way is the carrier's). The record is a line on the
+source's page and card, and a note beside a statement not confirmed in its detail and on a side of a clash ("of what
+else came from Mrs. Lunn: 1 ruled out, 2 confirmed"). It sets no level. Its one effect: a kept link does not trust
+by itself an entry that came from a source with something else ruled out; the link waits, with the button, and says
+why. `scripts/path-trust.mjs` writes the move of trust a true path then needs before such a link.
 A telling is shown as an event, as trusted as the narration (that it was said stands; what it says is trusted apart).
 `resolvingLinks` gives the links and people whose ruling out alone would stop a fact counting
 (those every chain of it passes through): the page marks them when it traces a clash. "Something is missing here"

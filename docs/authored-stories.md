@@ -1405,6 +1405,30 @@ script that found each fact's paragraph from its quote; the data files are the s
       confirmed, a person's word uncertain); it needs a pass over the long case's sources. Corroboration (item
       6) may still offer "confirmed" before a question is solved.
 
+112. **A witness's record (item 7 of finding 110; 2026-11-19, built the same day).** What the cases hold, measured
+    first: 12 sources with a false statement; for 7 of them a true statement of the same source is essential
+    evidence (Crouch 3 of 13; Lunn 2 of 4); some of the false ones are mistakes, not lies (a figure taken for the
+    wrong man). So "one false, doubt the rest" as a one-click "hold the rest unlikely" was put to the user as either
+    empty (what is uncertain already counts for nothing) or a trap (it takes away evidence the answer needs, and
+    with a forged ledger it makes the other entries count as lies with no work). A reader uses a record at two
+    moments: two accounts disagree and nothing confirmed decides; an answer hangs on one person's word. The user
+    agreed to the recommendation, and to work in the "marked from the evidence" mode:
+    - *The record as a line*, both ways: so many confirmed, so many against what is confirmed, so many ruled out.
+      On the source's page and card. It says "ruled out", never "lied".
+    - *A note where it matters*: beside a statement not confirmed, in its detail and on a side of a clash.
+    - *A link no longer trusts by itself* what came from a source with something else ruled out: the one effect.
+      The page still sets no level against the player's word; it withholds a raise.
+    - *Shown false* is the player's own ruling out (and for the line, an open clash against what is confirmed).
+      Only a ruling out stops the link trusting, so the effect is the player's own doing and a path can be
+      checked without playing the page.
+    - No one-click button.
+    What building showed: in "The Lamp-Keeper's Word" the false statement is the keeper's own word as another
+    brought it, so by its origin the record blamed the honest one. A statement ruled out is therefore laid to
+    whoever's link is ruled out: its own source where the statement itself is, the carrier where the telling is
+    (the path rules out the telling). The true paths needed 5 moves of trust more (3 in the long case, one each in
+    "The Grey Cloak" and "The Watchman's Clock"): a true statement of a source linked after another of theirs was
+    ruled out.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

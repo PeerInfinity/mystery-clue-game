@@ -5,6 +5,9 @@
 // as a careful reader would: nothing speaks against it yet. Written into world/path.json line by line (one move per
 // line stays so); the moves it wrote before are taken out first, so it can be run again after a path changes. The
 // old level names of a path's own moves are renamed (distrusted: ruled out).
+// A link does not trust an entry by itself where another statement of the same source is ruled out (a witness's
+// record, finding 112): there the move is written before the link too. With papers earned the questions come in
+// any order, so a statement the path rules out anywhere counts from the start.
 //   node scripts/path-trust.mjs <case dir>...        (no argument: every short case, the long case, the fixtures)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,6 +17,7 @@ import { levelOf, linkKey, UNCERTAIN } from '../engine/world.js';
 const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 const all = () => [...fs.readdirSync(path.join(ROOT, 'cases/miniatures')).map((d) => `cases/miniatures/${d}`), 'cases/custom-house-fire', ...fs.readdirSync(path.join(ROOT, 'scripts/fixtures')).map((d) => `scripts/fixtures/${d}`)];
 const WHY = 'Nothing speaks against it so far: I take it as likely, and see what follows.';
+const WHY_RECORD = 'Something else from the same source is ruled out, so I do not take this on trust; but nothing speaks against this one, and I hold it likely.';
 const RENAME = { distrusted: 'ruled out', trusted: 'likely', certain: 'confirmed' };
 
 for (const dir of process.argv.length > 2 ? process.argv.slice(2) : all()) {
@@ -31,10 +35,17 @@ for (const dir of process.argv.length > 2 ? process.argv.slice(2) : all()) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
     const parse = (line) => { try { const m = JSON.parse(line.trim().replace(/,$/, '')); return m && typeof m === 'object' && m.do ? m : null; } catch { return null; } };
     for (const m of lines.map(parse)) if (m?.do === 'trust' && m.gen !== 'trust' && m.on) lowered.add(m.on);
+    // Whose statement an entry is, and the sources with a statement ruled out so far.
+    // (A statement ruled out is laid to its own source; one ruled out by its paper or telling, to who sent that.)
+    const ownerOf = (id, link) => (link && !link.startsWith('stmt:') ? byId.get(link)?.of ?? /^said:([^>]+)>/.exec(link)?.[1] : prov.factChains(id).flatMap((c) => c.links).find((l) => l.stmt)?.from) ?? null;
+    const cameFrom = (id) => prov.factChains(id).flatMap((c) => c.links.filter((l) => !l.narrator && l.how !== 'member').map((l) => l.from));
+    const isOut = (m) => m?.do === 'trust' && m.gen !== 'trust' && m.on && (RENAME[m.level] ?? m.level) === 'ruled out';
+    const out_ = new Set(earned ? lines.map(parse).filter(isOut).map((m) => ownerOf(m.on, m.link)) : []);
     for (const line of lines) {
         const m = parse(line);
         if (!m) { out.push(line); continue; }
         if (m.gen === 'trust') continue;
+        if (isOut(m)) out_.add(ownerOf(m.on, m.link));
         if (m.do === 'trust') { out.push(RENAME[m.level] ? line.replace(`"level": "${m.level}"`, `"level": "${RENAME[m.level]}"`) : line); continue; }
         const indent = line.match(/^\s*/)[0];
         const put = (o) => { added++; out.push(`${indent}${JSON.stringify(o).replace(/":/g, '": ').replace(/,"/g, ', "')},`); };
@@ -59,10 +70,10 @@ for (const dir of process.argv.length > 2 ? process.argv.slice(2) : all()) {
             if (levelOf(chains) !== UNCERTAIN) continue;
             const own = chains.flatMap((c) => c.links).find((l) => l.stmt);
             // A link that is kept trusts its entry as likely by itself (ui/world.js `trustByUse`): no move is needed.
-            if (own && m.do === 'link' && k === 'entry') { raised.add(key); continue; }
+            if (own && m.do === 'link' && k === 'entry' && !cameFrom(id).some((p) => out_.has(p))) { raised.add(key); continue; }
             if (!own) { console.log(`${dir}: ${id} starts uncertain and has no statement link of its own: not raised`); continue; }
             raised.add(key);
-            put({ ...head, on: id, link: linkKey(own), ...tail, why: WHY });
+            put({ ...head, on: id, link: linkKey(own), ...tail, why: cameFrom(id).some((p) => out_.has(p)) ? WHY_RECORD : WHY });
         }
         out.push(line);
     }

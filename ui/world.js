@@ -4,7 +4,7 @@
 // the player says (engine/world.js). The player is the reader: the marks and moves are the reader's own. Facts trusted as likely or confirmed count; what is uncertain is shown in grey and counts for nothing; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, RULED_OUT, UNLIKELY, UNCERTAIN, LIKELY_LEVEL, CONFIRMED, counts, linkKey, levelOf, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, EVERY, typedAct, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, RULED_OUT, UNLIKELY, UNCERTAIN, LIKELY_LEVEL, CONFIRMED, counts, linkKey, levelOf, hopLevel, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, EVERY, typedAct, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
@@ -1025,6 +1025,8 @@ const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(ob
 // "something else is needed" sent a blind solver looking for another entry for two hundred turns.
 const untrusted = (e, q) => !!e && !e.reasoned && !accepted(e) && observations.some((o) => o.q === q && !observed.filled.some((x) => x.obs === o) && o.from.some((f) => (typeof f === 'string' ? f === e.id : !!f.any?.includes(e.id))));
 const UNTRUSTED = 'It is evidence for this, but it does not count yet: it shows nothing until you trust it as likely or confirmed.';
+/** Why a link did not trust an entry by itself: another statement of its source is ruled out. */
+const recordWhy = (e) => { const ps = isStatement(e) && levelOfFact(e) === UNCERTAIN ? shownFalse(e) : []; return ps.length ? ` Something else that came from ${ps.map((p) => esc(nameOf(p))).join(' and ')} is ruled out, so a link does not trust this one by itself.` : ''; };
 const waitsOn = (e, q) => waits(observations, q, e, observed.filled) || viaStatement(e.id, q).some((o) => !observed.filled.some((x) => x.obs === o));
 const isTried = (entry, q) => checkedLinks() && (state.tried[q] ?? []).includes(entry);
 const markTried = (entry, q) => { if (!entry.startsWith('r:r:') && !(state.tried[q] ?? []).includes(entry)) state.tried = { ...state.tried, [q]: [...(state.tried[q] ?? []), entry] }; };
@@ -1075,7 +1077,8 @@ function toggleLink(entry, q) {
     remember();
     // To cite a statement is to hold it likely: a link that is kept trusts an entry still uncertain as likely, by its
     // own setting (not one the player has distrusted, and not a speech, whose content is trusted apart).
-    if (!isLinked(entry, q)) trustByUse(factById.get(entry), LIKELY_LEVEL, UNCERTAIN);
+    // Not where something else from the same source is ruled out: that one the player trusts, or not, by hand.
+    if (!isLinked(entry, q) && !(factById.has(entry) && shownFalse(factById.get(entry)).length)) trustByUse(factById.get(entry), LIKELY_LEVEL, UNCERTAIN);
     state.links = isLinked(entry, q) ? state.links.filter((l) => !(l.entry === entry && l.q === q)) : [...state.links, { entry, q }];
     save(); render();
 }
@@ -1100,7 +1103,7 @@ function linkHtml(f) {
         const shows = observed.filled.filter((x) => x.obs.q === q.id && has(x));
         if (shows.length) return shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>. ${name}</p>`).join('');
         if (observed.partial.some((x) => x.obs.q === q.id && has(x))) return `<p class="small">Part of something not yet complete: with something else, linked too, it would show more. ${name}</p>`;
-        if (untrusted(f, q.id)) return `<p class="small untrusted-note">${UNTRUSTED} ${quickTrust(f, [LIKELY_LEVEL, CONFIRMED])} ${name}</p>`;
+        if (untrusted(f, q.id)) return `<p class="small untrusted-note">${UNTRUSTED}${recordWhy(f)} ${quickTrust(f, [LIKELY_LEVEL, CONFIRMED])} ${name}</p>`;
         if (checkedLinks() && bearsOn(f.id, q.id)) return waitsOn(f, q.id) ? `<p class="small">Part of something not yet complete: it is evidence for this, and as the timeline stands something else is still needed before it shows it. ${name}</p>`
             : `<p class="small muted">Part of what you have shown about this. ${name}</p>`;
         return `<p class="small muted">Kept as a note: as the timeline stands, it shows nothing about this on its own. ${name}</p>`;
@@ -1120,7 +1123,7 @@ function descriptionHtml(q) {
     const begun = [...observed.partial.filter((x) => x.obs.q === q.id).map((x) => x.entries), ...waiting.filter((e) => !observed.partial.some((x) => x.obs.q === q.id && x.entries.includes(e))).map((e) => [e])]
         .map((es) => `<li class="muted">Part of something not yet complete: ${es.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
     const off = state.links.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter((e) => untrusted(e, q.id))
-        .map((e) => `<li class="muted untrusted-note">Linked, but it does not count until you trust it as likely or confirmed: ${phrase(e)} ${paraSpan(givenAt(e))} ${quickTrust(e, [LIKELY_LEVEL])}</li>`).join('');
+        .map((e) => `<li class="muted untrusted-note">Linked, but it does not count until you trust it as likely or confirmed: ${phrase(e)} ${paraSpan(givenAt(e))}${recordWhy(e)} ${quickTrust(e, [LIKELY_LEVEL])}</li>`).join('');
     const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length && !autoQ(q.id) ? ` <span class="small muted">against: ${list(x.obs.against).map((v) => esc(entityById.has(v) ? nameOf(v) : v)).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
@@ -1216,9 +1219,10 @@ function render() {
     const clashing = new Set(clashes.flatMap((c) => [c.a, c.b, c.via].filter(Boolean)).flatMap((x) => (x.mark || x.by === DERIVED ? [x.id, `q:${x.q}`] : [x.fact])));
     current = clashes;
     currentAll = allClashes;
+    againstNow = new Set(against.map((c) => weak(c)[0]).filter((x) => !x.mark && x.by !== DERIVED).map((x) => x.fact));
     document.getElementById('undo').disabled = !state.history.length;
     // Each side with its level where it is not confirmed: the weaker side is the one to look at.
-    const side = (x) => { const l = sideLevel.get(x.id) ?? CONFIRMED; return `${clashSide(x)}${l < CONFIRMED ? ` <span class="side-lvl small">(${levelName(l)})</span>` : ''}`; };
+    const side = (x) => { const l = sideLevel.get(x.id) ?? CONFIRMED, rec = l < CONFIRMED && !x.mark && x.by !== DERIVED ? recordNote(factOf(x.fact)) : ''; return `${clashSide(x)}${l < CONFIRMED ? ` <span class="side-lvl small">(${levelName(l)}${rec ? `; ${rec}` : ''})</span>` : ''}`; };
     const item = (c, joins) => `<li class="${state.sel === clashKey(c) ? 'sel' : ''}"><b>${clashTitle(c)}</b> <a class="link trace" data-clash="${esc(clashKey(c))}">trace</a><br>${side(c.a)}<br>${joins[0]} ${side(c.b)}${c.via ? `<br>${joins[1]} ${side(c.via)}` : ''}</li>`;
     document.getElementById('clashes').innerHTML = clashes.length
         ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is confirmed</summary><ol>${clashes.map((c) => item(c, ['against', 'with'])).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in one of them.</p></details>`
@@ -1345,6 +1349,47 @@ const sourceTree = (() => {
 const sourceLinks = (p) => [...(sourceTree.people.get(p)?.values() ?? [])].filter((x) => [...x.facts].some((id) => visible(factById.get(id)))).map((x) => x.link);
 /** The entries a link carried (all of them: for what a setting reaches). */
 const statementsUnder = (key) => { for (const m of sourceTree.people.values()) if (m.has(key)) return [...m.get(key).facts]; return []; };
+// --- A witness's record (docs/authored-stories.md, finding 112): of the statements that start with one source, how
+// many are confirmed and how many stand alone against what is confirmed (an open clash); and how many of those that
+// came from them the player has ruled out. It is shown where it matters and sets nothing; its one effect is that a
+// link to something else from a source with a statement ruled out no longer trusts it by itself (`toggleLink`).
+const stmtOwner = new Map([...sourceTree.stmts.entries()].flatMap(([p, ks]) => [...ks].map((k) => [k, p])));
+const contentChains = (f) => (CLAIM_ATTRS.has(f.attr) && list(f.asserts).length ? claimChains(f.id) : chainsOf(f));
+const isStatement = (f) => !!f && !f.reasoned && !f.hyp && f.attr !== 'tells';
+/** The people an entry came from: whose statement it is, and whoever passed it on (not a narrator's narration). */
+const cameFrom = (f) => (isStatement(f) ? [...new Set(contentChains(f).flatMap((c) => c.links.filter((l) => !l.narrator && l.how !== 'member').map((l) => l.from)))].filter((p) => p && p !== '?') : []);
+/**
+ * Whom a statement ruled out is laid to: the one whose statement it is, where the statement itself is ruled out;
+ * else whoever's paper, telling or word it came by is (a word altered on the way is the carrier's, not the speaker's).
+ */
+function laidTo(f) {
+    const out = new Set();
+    for (const c of contentChains(f)) {
+        const own = c.links.find((l) => l.stmt), set = own ? state.trust.links[linkKey(own)] : null;
+        if (set === RULED_OUT) out.add(own.from);
+        else if (set == null) for (const l of c.links) if (!l.narrator && !l.stmt && l.how !== 'member' && hopLevel(l, state.trust) === RULED_OUT) out.add(l.from);
+    }
+    return out;
+}
+const stmtLevel = (f) => (CLAIM_ATTRS.has(f.attr) && list(f.asserts).length ? levelOf(claimChains(f.id), state.trust) : levelOfFact(f));
+let againstNow = new Set();   // the statements that stand alone against what is confirmed, at the last drawing
+/** A source's record, without one statement (`except`: the one it is shown beside). */
+function recordOf(p, except = null) {
+    const own = [...(sourceTree.stmts.get(p) ?? [])].map((k) => factById.get(k.slice(5))).filter((f) => f && f.id !== except && visible(f));
+    const out = data.facts.filter((f) => isStatement(f) && f.id !== except && visible(f) && stmtLevel(f) === RULED_OUT && laidTo(f).has(p)).length;
+    return { n: own.length, out, confirmed: own.filter((f) => stmtLevel(f) === CONFIRMED).length, against: own.filter((f) => stmtLevel(f) !== RULED_OUT && againstNow.has(f.id)).length };
+}
+const recordText = (r) => [r.out ? `${r.out} ruled out` : '', r.against ? `${r.against} against what is confirmed` : '', r.confirmed ? `${r.confirmed} confirmed` : ''].filter(Boolean).join(', ');
+/** Beside one statement: what the records of those it came from say of the rest, or nothing. */
+const recordNote = (f) => cameFrom(f).map((p) => [p, recordText(recordOf(p, f.id))]).filter(([, t]) => t).map(([p, t]) => `of what else came from ${esc(nameOf(p))}: ${t}`).join('; ');
+/** The sources an entry came from that have something else ruled out: a link does not trust it by itself. */
+const shownFalse = (f) => cameFrom(f).filter((p) => recordOf(p, f.id).out > 0);
+/** A source's record as a line, for its own page and its card. */
+function recordLine(p) {
+    const r = recordOf(p), t = recordText(r);
+    if (!r.n && !r.out) return '';
+    return `<p class="small record-line">Record so far${r.n ? `, of ${r.n} statement${r.n === 1 ? '' : 's'} of their own` : ''}: ${t || 'nothing confirmed and nothing ruled out'}.${r.out ? ' <span class="muted">With something ruled out, a link to anything else that came from them does not trust it by itself.</span>' : ''}</p>`;
+}
 /** Set a link's level (null: not set). A link that carries statements sets them all: their own settings are taken back. */
 function setLink(tr, key, level) {
     if (level == null) delete tr.links[key]; else tr.links[key] = level;
@@ -1379,7 +1424,7 @@ function sourcesPanel() {
     const narr = data.narrators.map((n) => `<li>${dot(narrationLevel(n.id))}${esc(n.name ?? 'The narrator')} <span class="small muted">as narrator: what they saw themselves</span> <select class="narration-trust" data-key="${esc(linkKey(narrationLink(n)))}" data-base="${narrationLink(n).base}">${levelOpts(narrationLevel(n.id))}</select></li>`).join('');
     const rows = people.map((p) => {
         const ids = [...new Set(sourceLinks(p).flatMap((l) => statementsUnder(linkKey(l))))];
-        return `<li class="${state.sel === `src:${p}` ? 'sel' : ''}">${personStep(p)} <span class="small muted">${levelCounts(ids)}</span></li>`;
+        return `<li class="${state.sel === `src:${p}` ? 'sel' : ''}">${personStep(p)} <span class="small muted">${levelCounts(ids)}${recordOf(p).against ? `; ${recordOf(p).against} against what is confirmed` : ''}</span></li>`;
     }).join('');
     return `<details class="cards-box sources-box" id="sources-box"${state.sourcesOpen || layoutNow() !== 'three' ? ' open' : ''}><summary>Sources (${people.length})</summary><ul class="sources-list">${narr}${rows}</ul>
       <p class="small muted">Who told you what, and how far you trust each. Setting a level here sets everything that one said; a name opens what they said, one layer down.</p></details>`;
@@ -1399,6 +1444,7 @@ function sourceDetail(id) {
     if (!links.length) return `<h2>${esc(nameOf(id))}</h2><p class="muted">Nothing of theirs has reached you yet.</p>`;
     return `<h2>${esc(nameOf(id))}, as a source</h2>
       <p class="small">${personStep(id)} <a class="ent" data-ent="${esc(id)}">their card</a></p>
+      ${recordLine(id)}
       <p class="small muted">Setting a level sets everything below it. The most specific setting wins: a statement's own, else its paper's or telling's, else the person's, else uncertain.</p>
       <h3>What came from them</h3><ul class="sources-list">${links.map((l) => `<li>${dot(levelOf([{ links: [l] }], state.trust))}<a class="link" data-src="link:${esc(linkKey(l))}">${esc(linkName(linkKey(l)))}</a> <select class="link-trust" data-key="${esc(linkKey(l))}" title="How far you trust everything that came this way">${levelOpts(state.trust.links[linkKey(l)] ?? null, `not set: as ${nameOf(id)}`)}</select> <span class="small muted">${levelCounts(statementsUnder(linkKey(l)))}</span>${links.length === 1 ? entries(linkKey(l)) : ''}</li>`).join('')}</ul>`;
 }
@@ -1971,7 +2017,7 @@ function entityDetail(id, clashing) {
     spots.sort((a, b) => byRead(refOf(a[0], a[1]), refOf(b[0], b[1])));
     const said = spots.map(([sid, i, x]) => `<li>${sentenceAt(sid, i, x)} ${paraSpan(refOf(sid, i))}</li>`).join('');
     return `<h2>${esc(nameOf(id))}</h2>
-      ${sourceLinks(id).length ? `<p class="small">As a source: ${personStep(id)}</p>` : ''}
+      ${sourceLinks(id).length ? `<p class="small">As a source: ${personStep(id)}</p>${recordLine(id)}` : ''}
       ${qs.length ? `<h3>Questions about it</h3><ul class="card-qs">${qs.map((q) => `<li><a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a> ${paraSpan(q.raised ?? q.answer_given_at)}</li>`).join('')}</ul>` : ''}
       ${spots.length ? `<details class="mentions" id="mentions-box"${state.mentionsOpen ? ' open' : ''}><summary>Where the story mentions it (${spots.length})</summary><ul class="said">${said}</ul></details>` : ''}
       <h3>Its timeline</h3>${eventList((f) => f.of === id, clashing, (q) => q.entry?.of === id)}`;
@@ -2112,7 +2158,7 @@ function renderDetail(clashing) {
         const content = CLAIM_ATTRS.has(f.attr) && list(f.asserts).length ? claimChains(f.id) : [];
         el.innerHTML = `<h2>${phrase(f)}</h2>
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
-          <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.</p>
+          <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.${recordNote(f) ? ` <span class="muted">(${recordNote(f).replace(/^o/, 'O')}.)</span>` : ''}</p>
           ${f.attr === 'tells' ? toldHtml(f)
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}

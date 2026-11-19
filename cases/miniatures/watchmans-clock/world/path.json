@@ -11,6 +11,7 @@
     {"at": [4, "card:2"], "do": "link", "entry": "r:m:f.rule@t.three", "q": "q.who", "see": "Ward was not at the station in that hour", "for_q": ["q.who"], "why": "And the one round Ward missed is the round at three, in that hour."},
     {"at": [5], "do": "link", "entry": "f.tanner_ankle", "q": "q.who", "see": "could not have stood under a bale", "for_q": ["q.who"], "why": "Tanner has the other key, but he is in splints."},
     {"at": [5], "do": "cross", "q": "q.who", "pick": "tanner", "for_q": ["q.who"], "why": "Not Tanner."},
+    {"at": [5], "do": "trust", "on": "f.tanner_key", "link": "stmt:f.tanner_key", "level": "likely", "gen": "trust", "for_q": ["q.who"], "why": "Something else from the same source is ruled out, so I do not take this on trust; but nothing speaks against this one, and I hold it likely."},
     {"at": [5], "do": "link", "entry": "f.tanner_key", "q": "q.who", "see": "only Ward and Tanner have keys", "for_q": ["q.who"], "why": "The gate was opened with a key, and there are two."},
     {"at": [5], "do": "circle", "q": "q.who", "pick": "ward", "for_q": ["q.who"], "why": "Ward, away from his round in the hour the gate was opened."}
   ]
