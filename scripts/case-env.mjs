@@ -11,4 +11,6 @@ const key = CASE.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
 export const STORE = `${key}-world-v2`;
 export const AUTOPLAY_STORE = `${key}-world-autoplay-v2`;
 /** The page's address for this case on server `base`, with more parameters (`autoplay=fast`). */
-export const pageUrl = (base, extra = '') => { const q = [`case=${encodeURIComponent(CASE)}`, extra].filter(Boolean).join('&'); return q ? `${base}?${q}` : base; };
+// The page marks the answers from the evidence by default (since 2026-11-19); a check that does not say plays with
+// the answers marked by hand, as its moves were written (ANSWERS=evidence: with the default).
+export const pageUrl = (base, extra = '') => { const q = [`case=${encodeURIComponent(CASE)}`, extra, /(^|&)answers=/.test(extra) ? '' : `answers=${process.env.ANSWERS || 'hand'}`].filter(Boolean).join('&'); return q ? `${base}?${q}` : base; };

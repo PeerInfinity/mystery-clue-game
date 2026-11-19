@@ -146,7 +146,7 @@ const LAST = story.length - 1;   // the main story's last paragraph
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, log: null, story: MAIN, hideOut: false, greyClash: 'on', trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {}, linkRule: 'checked', leftList: 'on', leftOpen: false, answerRule: 'hand' };
+const state = { para: 1, log: null, story: MAIN, hideOut: false, greyClash: 'on', trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {}, linkRule: 'checked', leftList: 'on', leftOpen: false, answerRule: 'evidence' };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
@@ -2818,7 +2818,7 @@ document.getElementById('gate-rule').addEventListener('change', (e) => { state.g
 document.getElementById('left-list').value = state.leftList === 'off' ? 'off' : 'on';
 document.getElementById('left-list').addEventListener('change', (e) => { state.leftList = e.target.value; save(); render(); });
 document.getElementById('link-rule').value = checkedLinks() ? 'checked' : 'free';
-document.getElementById('answer-rule').value = state.answerRule === 'evidence' ? 'evidence' : 'hand';
+document.getElementById('answer-rule').value = state.answerRule === 'hand' ? 'hand' : 'evidence';
 document.getElementById('answer-rule').addEventListener('change', (e) => { state.answerRule = e.target.value; answerParam = null; derivedSeen = null; save(); render(); });
 document.getElementById('link-rule').addEventListener('change', (e) => { state.linkRule = e.target.value; save(); render(); });
 if (AUTOPLAY === null) import('./world-hints.js').then((m) => m.makeHints({ store: STORE, api: hintApi }));

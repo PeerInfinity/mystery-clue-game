@@ -1,7 +1,7 @@
 // A blind solver: a model plays one case through the real page, seeing only what a player sees (the page as text and
 // a numbered list of the controls it may use) and the player's guide, and never the case's data, the hints or the
 // autoplay. Experiment 2 of docs/authored-stories.md ("Is a miniature fun?"): can the case be solved from the page?
-//   CASE=<dir> MODEL=haiku MAX=150 BUDGET=3 node scripts/blind-solve.mjs   (DRY=1: the first prompt only, no call;
+//   CASE=<dir> MODEL=haiku MAX=150 BUDGET=3 node scripts/blind-solve.mjs   (ANSWERS=hand: the answers marked by the solver; DRY=1: the first prompt only, no call;
 //   OUTPUT_CAP: the output tokens one call may write, default 4000; BUDGET: dollars for the whole run, it stops there)
 // A long run in parts: MAX is the turns of one invocation, and the run's state (the page's save, the solver's notes
 // and last actions, the cost) is kept in its record after every turn, so
@@ -85,8 +85,9 @@ const send = (method, params = {}) => new Promise((r) => { const id = ++n; pendi
 const ev = async (expr) => { const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true }); if (r.result?.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description ?? 'eval failed'); return r.result?.result?.value; };
 await send('Page.enable'); await send('Runtime.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
-// ANSWERS=evidence: the answers marked from what the evidence implies (the address says it: the setting is not the solver's).
-const ANSWERS = process.env.ANSWERS === 'evidence' || kept?.answers === 'evidence' ? 'answers=evidence' : '';
+// The answers marked from what the evidence implies, the page's default (the address says it: the setting is not
+// the solver's); ANSWERS=hand: marked by the solver. A run gone on with keeps its own.
+const ANSWERS = (process.env.ANSWERS ?? kept?.answers ?? 'evidence') === 'hand' ? '' : 'answers=evidence';
 await send('Page.navigate', { url: pageUrl('http://localhost:8321/', ANSWERS) }); await sleep(1500);
 // A fresh page in three columns: every part in view at once. A run gone on with: the page as it was saved.
 await ev(`localStorage.setItem(${J(STORE)}, ${J(J(kept?.save ?? { layout: 'three', ...(process.env.SEED ? { seed: +process.env.SEED } : {}) }))}); 1`);
