@@ -1,5 +1,6 @@
 // The moves of trust a true path needs since what a witness says starts as uncertain and counts for nothing
-// (docs/authored-stories.md, finding 111): before the first move that uses an entry which starts uncertain, a move
+// (docs/authored-stories.md, finding 111): before the first move other than a link (a link trusts its entry by
+// itself) that uses an entry which starts uncertain, a move
 // that trusts that one statement as likely (`{do: 'trust', on, link: 'stmt:<id>', level: 'likely', gen: 'trust'}`),
 // as a careful reader would: nothing speaks against it yet. Written into world/path.json line by line (one move per
 // line stays so); the moves it wrote before are taken out first, so it can be run again after a path changes. The
@@ -57,6 +58,8 @@ for (const dir of process.argv.length > 2 ? process.argv.slice(2) : all()) {
             const chains = prov.factChains(id);
             if (levelOf(chains) !== UNCERTAIN) continue;
             const own = chains.flatMap((c) => c.links).find((l) => l.stmt);
+            // A link that is kept trusts its entry as likely by itself (ui/world.js `trustByUse`): no move is needed.
+            if (own && m.do === 'link' && k === 'entry') { raised.add(key); continue; }
             if (!own) { console.log(`${dir}: ${id} starts uncertain and has no statement link of its own: not raised`); continue; }
             raised.add(key);
             put({ ...head, on: id, link: linkKey(own), ...tail, why: WHY });

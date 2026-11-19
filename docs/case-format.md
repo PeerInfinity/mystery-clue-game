@@ -442,7 +442,8 @@ The player's moves, each checked by these rules, give entries with the source *t
   paragraph `at` where the page first allows it, to the end of the story: `circle` and `cross` (a wrong answer is
   tried, its clash seen with `see`, then crossed out), `trust` (a `link` or `person` set to `level` on the detail of
   `on`; `level` one of `confirmed`, `likely`, `uncertain`, `unlikely`, `ruled out`; the path rules out only false
-  statements, and trusts as likely each statement that starts uncertain before the first move that uses it: those
+  statements, and trusts as likely each statement that starts uncertain before the first move other than a link
+  that uses it (a link trusts its entry by itself): those
   moves carry `gen: "trust"` and are written by `node scripts/path-trust.mjs`, to be run again when a path
   changes), `a`, `b`, `c` (the moves), `plan` (open
   "What would this need?"), `stop`, `compare`, `account` (a check `key` on an open plan) and `hold` (a likely clash set
@@ -646,8 +647,14 @@ and setting a link's (a paper, a telling) everything it carried: the page takes 
 `setLink` in `ui/world.js`), which can then be set apart again ("take Dr. Hume at his word, but rule out this one
 sentence"). The **Sources** part of the page lists each narrator and each person whose words have arrived, with
 their level; a name opens what came from them one layer down (their papers and tellings, then the statements of each).
-The page sets no level by itself: a clash names the level of each side that is not confirmed, and its trace has
-buttons to trust or distrust each statement. A link to an entry still uncertain is kept and waits, and says so.
+The page sets no level against the player's word, but two things the player does set one (the user's rulings of
+2026-11-19): a link that is kept trusts its entry as likely, if it was still uncertain (`trustByUse`: to cite a
+statement is to hold it likely); and a question solved confirms what its answer rested on, the entries of its
+observations shown that were held likely (`confirmBy`; not a lie that was evidence, and nothing false), which the
+notice counts. A clash is as strong as its sides: all confirmed, a contradiction; one side alone short of
+confirmed, "cannot be so: against what is confirmed", with a button to rule that statement out; two sides short of
+it, "unlikely together" or, with one still uncertain, "undecided". Each side not confirmed has its level beside
+it, and the trace has buttons to trust or distrust each statement.
 A telling is shown as an event, as trusted as the narration (that it was said stands; what it says is trusted apart).
 `resolvingLinks` gives the links and people whose ruling out alone would stop a fact counting
 (those every chain of it passes through): the page marks them when it traces a clash. "Something is missing here"

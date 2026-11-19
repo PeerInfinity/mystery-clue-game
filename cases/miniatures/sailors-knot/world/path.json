@@ -2,7 +2,6 @@
   "description": "The true path of the miniature: a bundle tied with a seaman's knot; the sailor at the inn all evening, the parlourmaid who knows no knot but a granny, the groom who learned the knot in the fishing fleet.",
   "moves": [
     {"at": 2, "do": "link", "entry": "f.knot", "q": "q.who", "see": "whoever tied it knew the knot", "for_q": ["q.who"], "why": "Whoever tied it knew the carrick bend."},
-    {"at": 4, "do": "trust", "on": "f.pike_bell", "link": "stmt:f.pike_bell", "level": "likely", "gen": "trust", "for_q": ["q.who"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": 4, "do": "link", "entry": "f.pike_bell", "q": "q.who", "see": "from seven until eleven", "for_q": ["q.who"], "why": "Pike knows the knot, but he was at the Bell all evening."},
     {"at": 4, "do": "cross", "q": "q.who", "pick": "pike", "for_q": ["q.who"], "why": "Not Pike: tying it needed him at Fernleigh."},
     {"at": 5, "do": "link", "entry": "f.rudd_knows", "q": "q.who", "see": "in the fishing fleet", "for_q": ["q.who"], "why": "Rudd learned the knot in the fishing fleet."},

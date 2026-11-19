@@ -1040,6 +1040,31 @@ function sweepLinks() {
     state.links = state.links.filter((l) => !gone.includes(l));
     save();
 }
+/** Set one statement's own level where it now stands at `from` (a fact with a statement link of its own). Returns whether it did. */
+function trustByUse(f, level, from) {
+    if (!f || f.attr === 'tells' || levelOfFact(f) !== from) return false;
+    const own = chainsOf(f).flatMap((c) => c.links).find((l) => l.stmt);
+    if (!own) return false;
+    state.trust = { ...state.trust, links: { ...state.trust.links, [linkKey(own)]: level } };
+    return true;
+}
+/**
+ * A question solved confirms what its answer rested on: the entries its observations shown came from (and what a
+ * piece of reasoning among them was drawn from) that were held likely are confirmed. Not a statement that was
+ * evidence by being disbelieved, and nothing false. Returns how many it confirmed.
+ */
+function confirmBy(qid) {
+    let n = 0;
+    const done = new Set();
+    const one = (e) => {
+        if (!e || e.solved || done.has(e.id)) return;
+        done.add(e.id);
+        if (e.reasoned) { for (const p of e.reasoned.premises ?? []) one(factOf(p)); return; }
+        if (e.truth !== false && trustByUse(e, CONFIRMED, LIKELY_LEVEL)) n++;
+    };
+    for (const x of observed.filled) if (x.obs.q === qid) { const lied = new Set(x.obs.from.filter((f) => f?.doubted).map((f) => f.doubted)); for (const e of x.entries) if (!lied.has(e.id)) one(e); }
+    return n;
+}
 let linkOnlyNew = false;  // linking: show only the entries not yet linked or tried for the question (not saved)
 function toggleLink(entry, q) {
     if (checkedLinks()) {
@@ -1048,6 +1073,9 @@ function toggleLink(entry, q) {
         else if (!bearsOn(entry, q)) { if (trying) return; markTried(entry, q); state.note = 'Tried: it shows nothing about this question.'; save(); render(); return; }
     }
     remember();
+    // To cite a statement is to hold it likely: a link that is kept trusts an entry still uncertain as likely, by its
+    // own setting (not one the player has distrusted, and not a speech, whose content is trusted apart).
+    if (!isLinked(entry, q)) trustByUse(factById.get(entry), LIKELY_LEVEL, UNCERTAIN);
     state.links = isLinked(entry, q) ? state.links.filter((l) => !(l.entry === entry && l.q === q)) : [...state.links, { entry, q }];
     save(); render();
 }
@@ -1180,7 +1208,11 @@ function render() {
     const acceptedNow = acceptedAssertions(state.greyClash === 'off' ? LIKELY_LEVEL : UNCERTAIN);
     const allClashes = [...contradictions(data, acceptedNow), ...alibis(data, acceptedNow, presenceNeeds(acceptedNow))];
     // What is only likely contradicts nothing: where it cannot stand with an entry, the two sit badly together.
-    const clashes = allClashes.filter((c) => clashLevel(c) >= CONFIRMED), soft = allClashes.filter((c) => clashLevel(c) === LIKELY_LEVEL), grey = allClashes.filter((c) => clashLevel(c) < LIKELY_LEVEL);
+    // One side alone short of confirmed, against what is confirmed: that side cannot be so (`against`). With two
+    // sides short of it, the weaker decides: unlikely together, or undecided.
+    const weak = (c) => [c.a, c.b, c.via].filter((x) => x && (sideLevel.get(x.id) ?? CONFIRMED) < CONFIRMED);
+    const clashes = allClashes.filter((c) => clashLevel(c) >= CONFIRMED), against = allClashes.filter((c) => weak(c).length === 1);
+    const soft = allClashes.filter((c) => weak(c).length > 1 && clashLevel(c) === LIKELY_LEVEL), grey = allClashes.filter((c) => weak(c).length > 1 && clashLevel(c) < LIKELY_LEVEL);
     const clashing = new Set(clashes.flatMap((c) => [c.a, c.b, c.via].filter(Boolean)).flatMap((x) => (x.mark || x.by === DERIVED ? [x.id, `q:${x.q}`] : [x.fact])));
     current = clashes;
     currentAll = allClashes;
@@ -1191,9 +1223,13 @@ function render() {
     document.getElementById('clashes').innerHTML = clashes.length
         ? `<details class="clash-box" open><summary>${clashes.length} contradiction${clashes.length > 1 ? 's' : ''} among what is confirmed</summary><ol>${clashes.map((c) => item(c, ['against', 'with'])).join('')}</ol><p class="small muted">Trace a contradiction to see both sides' chains, then lower your trust in one of them.</p></details>`
         : '';
+    // The one side that cannot stand, with a button to rule it out where it is a statement with a level of its own.
+    const ruleOut = (c) => { const x = weak(c)[0], f = x.by === DERIVED || x.mark ? null : factOf(x.fact); const b = f ? quickTrust(f, [RULED_OUT]) : ''; return b ? `<br>${b}` : x.mark ? '<br><span class="small muted">Your own answer: change the circle.</span>' : ''; };
+    document.getElementById('clashes').innerHTML += against.length ? `<details class="clash-box against-box" open><summary>${against.length} cannot be so: against what is confirmed</summary>
+      <p class="small muted">The other side is confirmed, so the side marked cannot stand as it is.</p><ol>${against.map((c) => item(c, ['against', 'with']).replace(/<\/li>$/, `${ruleOut(c)}</li>`)).join('')}</ol></details>` : '';
     const strains = activeStrains();
     document.getElementById('clashes').innerHTML += strainsHtml(strains) + (soft.length ? `<details class="strain-box soft-box" open><summary>${soft.length} unlikely together</summary>
-      <p class="small muted">Not a contradiction: one side is only likely. The weaker side is marked.</p><ol>${soft.map((c) => item(c, ['with', 'and'])).join('')}</ol></details>` : '')
+      <p class="small muted">Not a contradiction: neither side is confirmed. The level of each is marked.</p><ol>${soft.map((c) => item(c, ['with', 'and'])).join('')}</ol></details>` : '')
       + (grey.length ? `<details class="undecided-box" open><summary>${grey.length} cannot both be so: undecided</summary>
       <p class="small muted">One side at least is still uncertain, so nothing follows yet. Decide what you trust.</p><ol>${grey.map((c) => item(c, ['against', 'with'])).join('')}</ol></details>` : '');
     document.getElementById('sources').innerHTML = sourcesPanel();
@@ -1211,7 +1247,7 @@ function render() {
     document.getElementById('timeline').innerHTML = linkingBar() + (state.view === 'list' ? eventList(movesOnly, clashing, movesOnlyQ) : eventGrid(clashing));
     untriedCounts();
     if (state.view !== 'list' && visibleEl(document.getElementById('timeline'))) packGrid();
-    renderTabs({ cards: cards.count, questions: listedQuestions().length, clashes: clashes.length + strains.filter((s) => !state.held.includes(s.id)).length });
+    renderTabs({ cards: cards.count, questions: listedQuestions().length, clashes: clashes.length + against.length + strains.filter((s) => !state.held.includes(s.id)).length });
     renderLapseNews();
     renderGate();
     renderAnswers();
@@ -2062,7 +2098,7 @@ function renderDetail(clashing) {
         // A side that is no assertion any more (what it rested on was distrusted): nothing of it is left to show.
         if (!c.a || !c.b) el.innerHTML = '<h2>A contradiction</h2><p class="small good">Resolved: one side no longer counts.</p>';
         else el.innerHTML = `<h2>${clashTitle(c)}</h2>
-          <p class="small ${open ? (clashLevel(c) >= CONFIRMED ? 'bad' : 'muted') : 'good'}">${!open ? 'Resolved: one side no longer counts.' : clashLevel(c) >= CONFIRMED ? 'Both sides are confirmed: they cannot both hold.' : clashLevel(c) === LIKELY_LEVEL ? 'Unlikely together: they cannot both hold, and one side is only likely.' : 'They cannot both be so, and it is undecided: one side at least is still uncertain.'}</p>
+          <p class="small ${open ? (clashLevel(c) >= CONFIRMED ? 'bad' : 'muted') : 'good'}">${!open ? 'Resolved: one side no longer counts.' : clashLevel(c) >= CONFIRMED ? 'Both sides are confirmed: they cannot both hold.' : [c.a, c.b, c.via].filter((x) => x && (sideLevel.get(x.id) ?? CONFIRMED) < CONFIRMED).length === 1 ? 'Against what is confirmed: the side that is not confirmed cannot be so.' : clashLevel(c) === LIKELY_LEVEL ? 'Unlikely together: they cannot both hold, and neither is confirmed.' : 'They cannot both be so, and it is undecided: one side at least is still uncertain.'}</p>
           ${sideHtml(c.a, 'One side')}${sideHtml(c.b, 'Against')}${c.via ? sideHtml(c.via, 'With') : ''}`;
         return;
     }
@@ -2157,6 +2193,7 @@ function unsolvedWhy(q) {
     return `${circle}; ${evidence}${off}`;
 }
 let solvedNews = [];      // the questions just solved, until the notice is dismissed
+const confirmed = {};     // how many statements each of them confirmed, for the notice
 /**
  * After every move, every question the player can see is judged; the moment the judgement holds it is solved for
  * good: its circle is kept (Undo and distrust do not take it back), the story's other proposals are crossed out, and
@@ -2176,6 +2213,7 @@ function judge() {
             state.marks = { ...state.marks, [q.id]: marks };
             state.solved = { ...state.solved, [q.id]: { pick, marks, n: Object.keys(state.solved).length + 1 } };
             solvedNews = [...solvedNews, q.id];
+            confirmed[q.id] = confirmBy(q.id);
             more = fresh = true;
         }
         if (more) { observed = fillNow(); follow(); }
@@ -2278,7 +2316,7 @@ function renderSolved() {
     const qs = solvedNews.map((id) => qById.get(id)).filter(Boolean);
     el.hidden = !qs.length;
     if (!qs.length) return;
-    el.innerHTML = `<ul>${qs.map((q) => `<li><b>Solved.</b> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>: ${pickText(q, state.solved[q.id].pick)}${EARNED ? `<br>${broughtHtml(q.id)}` : ''}</li>`).join('')}</ul><p><button type="button" class="quiet" data-solved-close>Dismiss</button></p>`;
+    el.innerHTML = `<ul>${qs.map((q) => `<li><b>Solved.</b> <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>: ${pickText(q, state.solved[q.id].pick)}${EARNED ? `<br>${broughtHtml(q.id)}` : ''}${confirmed[q.id] ? `<br><span class="small">What it rested on is now confirmed (${confirmed[q.id]} statement${confirmed[q.id] === 1 ? '' : 's'}).</span>` : ''}</li>`).join('')}</ul><p><button type="button" class="quiet" data-solved-close>Dismiss</button></p>`;
 }
 function renderAnswers() {
     const el = document.getElementById('answer-news');

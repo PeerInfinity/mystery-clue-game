@@ -8,9 +8,7 @@
     {"at": 3, "do": "cross", "q": "q.who", "pick": "something else", "for_q": ["q.who"], "why": "No chance thief would leave the till."},
     {"at": 4, "do": "link", "entry": "f.dick_round", "q": "q.who", "see": "two miles off at Hilltop", "for_q": ["q.who"], "why": "Dick was on his round all that hour."},
     {"at": 4, "do": "cross", "q": "q.who", "pick": "dick", "for_q": ["q.who"], "why": "Away, and never told."},
-    {"at": 5, "do": "trust", "on": "f.jane_read", "link": "stmt:f.jane_read", "level": "likely", "gen": "trust", "for_q": ["q.who"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": 5, "do": "link", "entry": "f.jane_read", "q": "q.who", "for_q": ["q.who"], "why": "Jane read my letter out at her table."},
-    {"at": 5, "do": "trust", "on": "f.voss_knows", "link": "stmt:f.voss_knows", "level": "likely", "gen": "trust", "for_q": ["q.who"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": 5, "do": "link", "entry": "f.voss_knows", "q": "q.who", "see": "Mr. Voss heard where the box was", "for_q": ["q.who"], "why": "And her lodger heard it."},
     {"at": 5, "do": "circle", "q": "q.who", "pick": "voss", "for_q": ["q.who"], "why": "The one who knew, and was not with me."}
   ]

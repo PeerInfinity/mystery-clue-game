@@ -4,7 +4,6 @@
     {"at": 1, "do": "a", "a": "f.open", "b": "f.locked", "for_q": ["q.who"], "why": "Locked at ten, open at six: someone unlocked and opened it in between."},
     {"at": 1, "do": "link", "entry": "r:a:f.locked|f.open", "q": "q.who", "see": "someone unlocked and opened it in the night", "for_q": ["q.who"], "why": "That act is what the question asks about: whoever did it needed a key, and to be at the door."},
     {"at": 5, "do": "link", "entry": "f.two_keys", "q": "q.who", "see": "there are two keys, and Ned has neither", "for_q": ["q.who"], "why": "Unlocking needs a key, and there are only two."},
-    {"at": 5, "do": "trust", "on": "f.ned_loft", "link": "stmt:f.ned_loft", "level": "likely", "gen": "trust", "for_q": ["q.who"], "why": "Nothing speaks against it so far: I take it as likely, and see what follows."},
     {"at": 5, "do": "link", "entry": "f.ned_loft", "q": "q.who", "see": "Ned was in the loft across the yard", "for_q": ["q.who"], "why": "It needs a man at the door, and Ned was across the yard all night."},
     {"at": 5, "do": "cross", "q": "q.who", "pick": "ned", "for_q": ["q.who"], "why": "No key, and not at the door: the drink came to him some other way."},
     {"at": 5, "do": "link", "entry": "f.jem_key", "q": "q.who", "see": "Jem carries a key to the door", "for_q": ["q.who"], "why": "Jem has the other key."},

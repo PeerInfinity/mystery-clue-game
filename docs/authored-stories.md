@@ -1388,9 +1388,22 @@ script that found each fact's paragraph from its quote; the data files are the s
       uncertain (a record now counts its uncertain entries); with papers earned an entry used for two questions
       must be trusted in the moves of each; the hint against a wrong distrust looked for what it took off the
       timeline, which is now nothing (it looks for what it lowers).
-    - Not done, and to be looked at with the user: with every statement of the true path only likely, most
-      answers that rest on a witness read "(likely)", and a lie against the narrator's own observation is listed
-      as undecided until it is trusted or ruled out; whether the page should offer "confirmed" is item 6.
+    - **After the user played the Rent Box (2026-11-19).** Two things stood out: most answers resting on a
+      witness read "(likely)", and a lie against the narrator's own observation was listed as "undecided". A
+      third, hidden by that case: a trust move before every link (43 in the long case). The user agreed to:
+      - *A link trusts.* A link that is kept trusts its entry as likely, if it was still uncertain. Uncertain
+        now means "not used yet". The generated moves of the true paths fell from 62 to 2 (the long case's
+        watch book, trusted whole before "Something is missing here").
+      - *Against what is confirmed.* A clash with one side alone short of confirmed is its own kind, "cannot
+        be so: against what is confirmed", with a button to rule that statement out. "Unlikely together" and
+        "undecided" are for two sides short of confirmed. This departs from finding 110 in one thing: a
+        likely answer against a confirmed entry is now listed here, not as "unlikely together".
+      - *Solving confirms.* A question solved confirms the statements its answer rested on that were held
+        likely, so trust grows as the case is solved and later answers can be certain.
+      So the loop: link (likely), a clash with what is confirmed (rule out), solved (confirmed).
+      Not built, agreed as a good fourth: the author setting where a source starts (a tide table likely or
+      confirmed, a person's word uncertain); it needs a pass over the long case's sources. Corroboration (item
+      6) may still offer "confirmed" before a question is solved.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

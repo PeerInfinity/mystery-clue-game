@@ -390,7 +390,7 @@ if (LIES) {
     if (!(await readTo(end))) { console.log(`${failures} failure(s)`); process.exit(1); }
     const lacked = await ev(`[...document.querySelectorAll('#q-box p')].filter((p) => /^Your description lacked/.test(p.textContent)).map((p) => p.closest('li').querySelector('a.link').textContent + ': ' + p.textContent)`);
     for (const l of lacked) { failures++; console.log(`FAIL at the end: ${l}`); }
-    const open = await ev(`document.querySelector('#clashes .clash-box summary')?.innerText ?? ''`);
+    const open = await ev(`document.querySelector('#clashes .clash-box:not(.against-box) summary')?.innerText ?? ''`);
     if (open) { failures++; console.log(`FAIL at the end: ${open}\n${await ev(`document.querySelector('#clashes').innerText`)}`); }
     const unheld = await ev(`[...document.querySelectorAll('#clashes [data-hold]')].map((b) => b.closest('li').innerText.replace(/\\s+/g, ' '))`);
     for (const s of unheld) { failures++; console.log(`FAIL at the end, a likely clash not held: ${s}`); }

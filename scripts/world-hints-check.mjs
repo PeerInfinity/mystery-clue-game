@@ -78,7 +78,7 @@ async function run(name, start, expect = []) {
     if (await ev(`!!document.querySelector('.story-tab[data-story="main"]')`)) await ev(`document.querySelector('.story-tab[data-story="main"]').click(); 1`);
     const end = await ev(`+document.getElementById('para').max`);
     if (save.para !== end) fail(`${name}: stopped at ¶${save.para}`);
-    const open = await ev(`document.querySelector('#clashes .clash-box summary')?.innerText ?? ''`);
+    const open = await ev(`document.querySelector('#clashes .clash-box:not(.against-box) summary')?.innerText ?? ''`);
     if (open) fail(`${name}: at the end, ${open}`);
     const unheld = await ev(`[...document.querySelectorAll('#clashes [data-hold]')].length`);
     if (unheld) fail(`${name}: at the end, ${unheld} likely clash(es) not held`);
