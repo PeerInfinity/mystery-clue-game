@@ -1429,6 +1429,34 @@ script that found each fact's paragraph from its quote; the data files are the s
     "The Grey Cloak" and "The Watchman's Clock"): a true statement of a source linked after another of theirs was
     ruled out.
 
+113. **More than one way to an answer, and agreement (item 6 of finding 110; 2026-11-19, built the same day).**
+    Measured first: every question of the 15 short cases has one way to its answer; in the long case 5 of 25 have
+    more, and only one has ways through different people. Two sources saying the same thing of the same moment:
+    one pair in all the cases (Lobb and Bales, the empty chair when the bell rang). So "corroborated" alone would
+    be a feature for one question. Agreed with the user, for the "marked from the evidence" mode:
+    - *What an answer rests on*, under every question that has its answer, by what is linked: its sources; "hangs
+      on the word of X alone" where it all comes through one person, with X's record (finding 112); several ways,
+      and whether two share no source (corroborated) or all pass through one person. It applies to every
+      question, and never says whether another way exists.
+    - *Agreement* as the mirror of a contradiction, listed under the clashes, with an offer to confirm where one
+      side is confirmed or both are likely. Not automatic: two can agree and both be wrong.
+    - *Independent*: no person and no paper or telling in common; a narrator's own observation is independent of
+      everyone.
+    - *Confirmed stays free to set by hand*: with one agreeing pair, earning it by agreement would starve the
+      player.
+    What building showed:
+    - "Who set fire to the Custom House?" follows three ways, one of them only through other questions' answers,
+      which shared no source with the rest by name and was called corroborated. A solved question now counts with
+      everything its own answer rests on; the three ways then share sources, and the line says only "3 ways". The
+      one corroborated answer is the three ledger entries (the gate-keeper, the Commissioners, Captain Venn).
+    - A statement over a stretch agrees with a sighting at one moment of it: in "The Watchman's Clock" the false
+      "I made every round" agreed with each of the five punches the narrator saw. A pair is therefore listed only
+      where the one short of confirmed is borne out whole (its time inside the other's), and only that one is
+      offered: a sighting at noon does not confirm "from six till noon".
+    - Not done: what follows from the evidence agreeing with a witness's statement (an answer the evidence gives
+      that a witness also states) is corroboration too, and is not listed. Authors could write for agreement: a
+      second witness to the same moment is now something the page uses.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { timeOrder, coverOf, overlaps, assertions, contradictions, alibis, provenance, chainLevel, counts, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE, isRight, compatible, narrationLink } from './world.js';
+import { timeOrder, coverOf, overlaps, assertions, contradictions, agreements, independent, alibis, provenance, chainLevel, counts, levelOf, linkKey, givenAt, LEVELS, resolvingLinks, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, answerKinds, entityKinds, isOption, WHO, WHERE, isRight, compatible, narrationLink } from './world.js';
 
 const times = [
     { id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }, { id: 't4', after: 't3' }, { id: 'tx', after: 't1' },
@@ -368,4 +368,25 @@ test('typed acts: the same act by its types and roles; a denial that names fewer
     assert.deepEqual(run([nobody, act('f.o', 'man', { at: 't2' }, { act: ['open'] })]), [], 'another act');
     assert.deepEqual(run([act('f.no', 'man', { at: 't2' }, { neg: true, item: 'sack' }), act('f.m', 'man', { at: 't2' })]), [], 'a denial of the more specific does not deny the plain act');
     assert.deepEqual(run([act('f.no', 'man', { at: 't2' }, { neg: true, act: ['go_through'] }), act('f.m', 'man', { at: 't2' }, { act: ['open', 'go_through'] })]), ['f.m/f.no'], 'one of two acts denied');
+});
+
+test('agreement: the same thing said twice at times that share a moment, and which side is borne out whole', () => {
+    const w = world([
+        loc('a', 'horse', 'stall', { at: 't2' }), loc('b', 'horse', 'stall', { from: 't1', to: 't3' }),
+        loc('c', 'horse', 'stall', { at: 't4' }), loc('d', 'horse', 'hollow', { at: 't2' }), loc('e', 'man', 'stall', { at: 't2' }),
+    ]);
+    const got = agreements(w).map((x) => [x.a.fact, x.b.fact, x.whole.a, x.whole.b]);
+    assert.deepEqual(got, [['a', 'b', true, false]], 'the sighting lies inside the stretch, not the stretch inside the sighting; another time, place or subject is no agreement');
+    assert.deepEqual(agreements(w, assertions(w).filter((x) => x.fact !== 'b')), [], 'only among what is passed');
+});
+
+test('independent sources: no person and no telling in common; a narrator\'s own is independent of everyone', () => {
+    const facts = [loc('a', 'horse', 'stall', { at: 't2' }), loc('b', 'horse', 'stall', { at: 't2' }), loc('c', 'horse', 'stall', { at: 't2' }), loc('d', 'horse', 'stall', { at: 't2' }),
+        { id: 'tm', of: 'man', attr: 'tells', value: ['acct.m', 'acct.m2'], to: 'watson', how: 'told', time: { at: 't3' }, para: 1, quote: 'x' },
+        { id: 'th', of: 'horse', attr: 'tells', value: 'acct.h', to: 'watson', how: 'told', time: { at: 't3' }, para: 1, quote: 'x' }];
+    const w = world(facts, [], [{ id: 'acct.w', origin: 'watson', how: 'saw', facts: ['a', 'tm', 'th'] }, { id: 'acct.m', origin: 'man', how: 'saw', facts: ['b'] }, { id: 'acct.m2', origin: 'man', how: 'saw', facts: ['c'] }, { id: 'acct.h', origin: 'horse', how: 'saw', facts: ['d'] }]);
+    const p = provenance(w), ch = (id) => p.factChains(id);
+    assert.ok(independent(ch('a'), ch('b')), 'the narrator saw it, and the man says so');
+    assert.ok(!independent(ch('b'), ch('c')), 'one man twice');
+    assert.ok(independent(ch('b'), ch('d')), 'two people, two tellings');
 });

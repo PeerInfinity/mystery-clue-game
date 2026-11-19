@@ -664,6 +664,21 @@ source's page and card, and a note beside a statement not confirmed in its detai
 else came from Mrs. Lunn: 1 ruled out, 2 confirmed"). It sets no level. Its one effect: a kept link does not trust
 by itself an entry that came from a source with something else ruled out; the link waits, with the button, and says
 why. `scripts/path-trust.mjs` writes the move of trust a true path then needs before such a link.
+**What an answer rests on, and agreement** (2026-11-19; finding 113). With the answers marked from the evidence,
+under a question whose answer follows the page says what it rests on by what is linked (`restsOnHtml`, `waySources`
+in `ui/world.js`): the ways to it that hold now (`ways` over the implications that hold, every member shown or
+solved), each with its sources (a narrator's own observation, a person's word, a statement that is evidence by
+being disbelieved, another question's answer). One way: "It rests on: …", or "It hangs on the word of X alone",
+with X's record where something is ruled out or against what is confirmed. Several: "It follows N ways", and
+"two of them share no source: it is corroborated" (no person, paper or telling, lie or question in common, a solved
+question counting with everything its own answer rests on) or "every one of them passes through the word of X". It
+never says whether another way exists. `agreements(data, accepted)` in `engine/world.js` is the mirror of
+`contradictions` for two told states: the same `of`, `attr`, `value` (and typed act), asserted or denied alike, at
+times that certainly share a moment, with `whole.a` when all `a` covers lies inside what `b` covers (`b` bears `a`
+out). `independent(chainsA, chainsB)`: no person and no paper, telling or word in common (a narration is shared by
+all, so a narrator's own observation is independent of everyone). The page lists a pair, under the clashes, where
+the two are independent and one short of confirmed is borne out whole; beside that one it offers "Trust as
+confirmed" where the other is confirmed or both are likely. Confirmed stays free to set by hand.
 A telling is shown as an event, as trusted as the narration (that it was said stands; what it says is trusted apart).
 `resolvingLinks` gives the links and people whose ruling out alone would stop a fact counting
 (those every chain of it passes through): the page marks them when it traces a clash. "Something is missing here"

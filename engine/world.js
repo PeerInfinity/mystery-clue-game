@@ -629,3 +629,33 @@ export function resolvingLinks(chains, trust = {}, threshold = LIKELY_LEVEL) {
     for (const p of people) if (levelOf(chains, { ...trust, people: { ...trust.people, [p]: 0 } }) < threshold) out.people.push(p);
     return out;
 }
+
+/**
+ * Agreement, the mirror of a contradiction (2026-11-19; docs/authored-stories.md, finding 113): two statements that
+ * say the same thing of the same subject (`of`, `attr`, `value`, a typed act's roles, asserted or denied alike) at
+ * times that certainly share a moment. `{a, b, whole: {a, b}}`: `whole.a` when everything `a` covers lies inside
+ * what `b` covers, so that `b` bears `a` out entirely (a sighting at noon is borne out by "from six till noon"; not
+ * the other way). Only states told (`fact`), not the reader's marks, what follows, claims as speech, or statements
+ * about everyone. Whether the two come from independent sources is `independent`, by their chains.
+ */
+export function agreements(data, accepted = null) {
+    const order = data.order ?? timeOrder(data.times);
+    const inside = (c, d) => order.le(d.start, c.start) && (d.incl ? order.le(c.end, d.end) : (order.lt(c.end, d.end) || (!c.incl && c.end === d.end)));
+    const key = (x) => JSON.stringify([x.of, x.attr, x.value, !!x.neg, typedAct(x)]);
+    const told = (accepted ?? assertions(data)).filter((x) => x.kind === 'state' && x.fact != null && !x.mark && x.by !== DERIVED && !x.modal && x.of !== EVERY && x.value != null && !CLAIM_ATTRS.has(x.attr) && x.attr !== 'tells' && coverOf(x.time));
+    const groups = new Map();
+    for (const x of told) groups.set(key(x), [...(groups.get(key(x)) ?? []), x]);
+    const out = [];
+    for (const xs of groups.values()) for (let i = 0; i < xs.length; i++) for (let j = i + 1; j < xs.length; j++) {
+        const a = xs[i], b = xs[j], ca = coverOf(a.time), cb = coverOf(b.time);
+        if (a.fact === b.fact || !overlaps(order, ca, cb)) continue;
+        out.push({ a, b, whole: { a: inside(ca, cb), b: inside(cb, ca) } });
+    }
+    return out;
+}
+/** Whether two statements come from independent sources: no chain of one shares a person, or a paper, a telling or a word, with a chain of the other. A narration is the frame of everything and is shared by all. */
+export function independent(chainsA, chainsB) {
+    const of = (chains) => new Set(chains.flatMap((c) => c.links.filter((l) => !l.narrator).flatMap((l) => [l.how === 'member' ? null : `p:${l.from}`, l.stmt ? null : `l:${linkKey(l)}`]).filter(Boolean)));
+    const a = of(chainsA), b = of(chainsB);
+    return ![...a].some((x) => b.has(x));
+}

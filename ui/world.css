@@ -277,3 +277,9 @@ body.link-only-new #timeline .event.link-done { display: none; }
 .source-entries select, .sources-list select { font-size: 12px; }
 .quick-trust button { margin-right: 4px; }
 .takes { display: block; white-space: normal; }
+
+.agree-box { border: 1px solid var(--good, #2e7d32); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 13px; }
+.agree-box summary { cursor: pointer; font-weight: 600; color: var(--good, #2e7d32); }
+.agree-box ol { margin: 6px 0; padding-left: 20px; }
+.agree-box li { margin: 4px 0; }
+.rests-on { margin-top: 4px; }

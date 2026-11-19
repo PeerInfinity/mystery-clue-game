@@ -4,7 +4,7 @@
 // the player says (engine/world.js). The player is the reader: the marks and moves are the reader's own. Facts trusted as likely or confirmed count; what is uncertain is shown in grey and counts for nothing; the
 // contradictions among them are listed. Nothing shown runs ahead of the paragraph read to.
 
-import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, RULED_OUT, UNLIKELY, UNCERTAIN, LIKELY_LEVEL, CONFIRMED, counts, linkKey, levelOf, hopLevel, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, EVERY, typedAct, answerKinds, entityKinds, isRight } from '../engine/world.js';
+import { READER, narrationLink, provenance, timeOrder, assertions, contradictions, agreements, independent, alibis, places, givenAt, LEVELS, DEFAULT_LEVEL, RULED_OUT, UNLIKELY, UNCERTAIN, LIKELY_LEVEL, CONFIRMED, counts, linkKey, levelOf, hopLevel, resolvingLinks, CLAIM_ATTRS, markAssertions, hypothesisChain, hypothesisKey, HYPOTHESIS, DERIVED, EVERY, typedAct, answerKinds, entityKinds, isRight } from '../engine/world.js';
 import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
@@ -13,7 +13,7 @@ import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, p
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described, onPage, bears, waits } from '../engine/observations.js';
-import { derive, verdict, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, LIKELY } from '../engine/implications.js';
+import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, LIKELY } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -1015,7 +1015,61 @@ function followsHtml(q) {
         const lvl = derivedLevel({ derived: i.id });
         return `<li class="follows" data-follows="${esc(i.id)}">${dot(lvl < 0 ? null : lvl)}<span class="arrow">⇒</span> ${esc(i.says)}.${out}<ul>${kids.join('')}</ul></li>`;
     };
-    return `<div class="small muted">What follows from it</div><ul class="follows-list">${mine.filter((i) => !used.has(i.id)).map(tree).join('')}</ul>`;
+    return `<div class="small muted">What follows from it</div><ul class="follows-list">${mine.filter((i) => !used.has(i.id)).map(tree).join('')}</ul>${restsOnHtml(q)}`;
+}
+/**
+ * What a question's answer rests on, by what is linked (docs/authored-stories.md, finding 113): every way to it that
+ * holds now (`ways`, over the implications that hold), each with the sources of its statements: a narrator's own
+ * observation, a person's word, a statement that is evidence by being ruled out, another question's answer. Said
+ * only of what is linked: one way, and on whom it hangs; or several, and whether two of them share no source
+ * (corroborated) or all pass through one person. It never says whether another way exists.
+ */
+const holdingWays = (q, pick) => ways(derivedNow, q.id, shownPossibilities(q).map((o) => o.value), [pick]).filter((s) => s.every((id) => (id.startsWith('solved:') ? isSolved(id.slice(7)) : shownStatement(id))));
+function waySources(set, trail = []) {
+    const out = { own: new Set(), people: new Set(), lies: new Set(), solved: new Set(), keys: new Set() };
+    // Another question's answer: what it rests on in its turn counts for what two ways share (not for the wording).
+    const under = (qid) => {
+        out.solved.add(qid); out.keys.add(`q:${qid}`);
+        const o = qById.get(qid), pick = state.solved[qid]?.pick;
+        if (!o || pick == null || trail.includes(qid)) return;
+        for (const w of holdingWays(o, pick)) for (const k of waySources(w, [...trail, qid]).keys) out.keys.add(k);
+    };
+    const entry = (e, lied) => {
+        if (!e) return;
+        if (e.solved) { under(e.solved); return; }
+        if (e.reasoned) { for (const p of e.reasoned.premises ?? []) entry(factOf(p), false); return; }
+        if (lied) { out.lies.add(e.id); out.keys.add(`lie:${e.id}`); return; }
+        const ps = cameFrom(e);
+        if (!ps.length) { for (const c of chainsOf(e)) if (c.origin) out.own.add(c.origin); return; }
+        for (const p of ps) { out.people.add(p); out.keys.add(`p:${p}`); }
+        for (const l of contentChains(e).flatMap((c) => c.links)) if (!l.narrator && !l.stmt && l.how !== 'member') out.keys.add(`l:${linkKey(l)}`);
+    };
+    for (const id of set) {
+        if (id.startsWith('solved:')) { under(id.slice(7)); continue; }
+        const x = observed.filled.find((y) => y.obs.id === id);
+        const lied = new Set((x?.obs.from ?? []).filter((f) => f?.doubted).map((f) => f.doubted));
+        for (const e of x?.entries ?? []) entry(e, lied.has(e.id));
+    }
+    return out;
+}
+function restsOnHtml(q) {
+    const v = verdictOf(q);
+    if (v.concluded == null) return '';
+    const all = holdingWays(q, v.concluded).map((w) => waySources(w));
+    if (!all.length) return '';
+    const word = (p) => `the word of ${esc(nameOf(p))}`;
+    const rec = (ps) => ps.map((p) => [p, recordOf(p)]).filter(([, r]) => r.out || r.against).map(([p, r]) => ` <span class="muted">(Of what came from ${esc(nameOf(p))}: ${recordText({ ...r, confirmed: 0 })}.)</span>`).join('');
+    let text;
+    if (all.length === 1) {
+        const w = all[0], ps = [...w.people];
+        const labels = [...[...w.own].map((o) => `what ${esc(narratorName(o) ?? nameOf(o))} saw and heard`), ...ps.map(word), ...(w.lies.size ? [`${w.lies.size === 1 ? 'a statement' : `${w.lies.size} statements`} you do not believe`] : []), ...[...w.solved].map((id) => `the answer to “${esc(qById.has(id) ? qLabel(qById.get(id)) : id)}”`)];
+        text = (ps.length === 1 && labels.length === 1 ? `It hangs on ${word(ps[0])} alone.` : `It rests on: ${labels.join('; ')}.`) + rec(ps);
+    } else {
+        const apart = all.some((a, i) => all.slice(i + 1).some((b) => ![...a.keys].some((k) => b.keys.has(k))));
+        const common = [...all[0].people].filter((p) => all.every((w) => w.people.has(p)));
+        text = `It follows ${all.length} ways.${apart ? ' Two of them share no source: it is corroborated.' : common.length ? ` Every one of them passes through ${common.map(word).join(' and ')}.${rec(common)}` : ''}`;
+    }
+    return `<div class="small rests-on" data-rests="${all.length}">By what you have linked: ${text}</div>`;
 }
 const viaStatement = (entry, q) => observations.filter((o) => o.q === q && o.from.some((f) => f?.doubted && carriedBy(f.doubted).includes(entry)));
 const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(observations, q, e) || viaStatement(entry, q).length > 0); };
@@ -1236,6 +1290,16 @@ function render() {
       <p class="small muted">Not a contradiction: neither side is confirmed. The level of each is marked.</p><ol>${soft.map((c) => item(c, ['with', 'and'])).join('')}</ol></details>` : '')
       + (grey.length ? `<details class="undecided-box" open><summary>${grey.length} cannot both be so: undecided</summary>
       <p class="small muted">One side at least is still uncertain, so nothing follows yet. Decide what you trust.</p><ol>${grey.map((c) => item(c, ['against', 'with'])).join('')}</ol></details>` : '');
+    // Agreement: two statements told that say the same thing at a shared moment, from sources that share nothing.
+    // Listed where one that is short of confirmed is borne out whole by the other; it can be confirmed where the other
+    // side is confirmed, or both are likely (an offer: two can agree and both be wrong).
+    const wide = state.greyClash === 'off' ? acceptedAssertions(UNCERTAIN) : acceptedNow;
+    const lvl = (x) => sideLevel.get(x.id) ?? CONFIRMED;
+    const agree = agreements(data, wide).filter((g) => ((lvl(g.a) < CONFIRMED && g.whole.a) || (lvl(g.b) < CONFIRMED && g.whole.b)) && independent(chainsOfAssertion(g.a), chainsOfAssertion(g.b)));
+    const offer = (x, o, whole) => (whole && lvl(x) < CONFIRMED && (lvl(o) === CONFIRMED || (lvl(x) === LIKELY_LEVEL && lvl(o) === LIKELY_LEVEL)) ? quickTrust(factOf(x.fact), [CONFIRMED]) : '');
+    const agreeItem = (g) => { const b = [offer(g.a, g.b, g.whole.a), offer(g.b, g.a, g.whole.b)].filter(Boolean); return `<li>${side(g.a)} ${offer(g.a, g.b, g.whole.a)}<br>and ${side(g.b)} ${offer(g.b, g.a, g.whole.b)}${b.length ? '' : `<br><span class="small muted">${!counts(lvl(g.a)) || !counts(lvl(g.b)) ? 'One of them at least does not count yet.' : 'Trust both as likely, or one as confirmed, and the other can be confirmed.'}</span>`}</li>`; };
+    document.getElementById('clashes').innerHTML += agree.length ? `<details class="agree-box" open><summary>${agree.length} agree: two sources that share nothing say the same</summary>
+      <p class="small muted">The opposite of a contradiction. Where one is confirmed, or both are likely, you can confirm what the other bears out. Two can agree and both be wrong.</p><ol>${agree.map(agreeItem).join('')}</ol></details>` : '';
     document.getElementById('sources').innerHTML = sourcesPanel();
     document.getElementById('questions').innerHTML = leftHtml() + questionsPanel(clashing);
     const cards = cardsPanel();
