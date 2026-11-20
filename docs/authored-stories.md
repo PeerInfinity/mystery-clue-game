@@ -1487,6 +1487,18 @@ script that found each fact's paragraph from its quote; the data files are the s
       ruled out)" beside the charge. The link to his admission waits for the player's trust. At the end the first
       question "follows 2 ways. Every one of them passes through the word of Mrs. Dabney", and the second rests on
       the word of Job Tarrant with "2 ruled out" beside it: the answer does hang on a liar's admission, as written.
+    **Haiku on it, blind (2026-11-20): both answers right, 40 turns, $0.09.**
+    - It read to ¶5 before doing anything, so it never stood at the clash with only the record to go on: putting
+      the curate a paragraph later orders the story, not the play (reading is held only at a give-away).
+    - The first tale: ruled out with the button under "cannot be so: against what is confirmed" (turn 4).
+    - The held-back link: it linked the carter's admission, read that it waits, and pressed "Trust as likely" on
+      the next turn (21, 22). No trouble.
+    - The agreement offer was never seen. It set the curate to likely and then to confirmed by hand, with the
+      cook's statement not yet linked, and ruled out the carter's charge from "against what is confirmed". With
+      confirmed free to set by hand, the offer is a convenience.
+    - Twenty turns (6 to 28) went on the first question: it had linked the cook's telling ("Mrs. Dabney tells
+      …"), which shows nothing, and not the statement under it; and the gate's "0 of 1" (the count for answers
+      marked by hand) told it one piece was wanted when either of two pairs is.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
