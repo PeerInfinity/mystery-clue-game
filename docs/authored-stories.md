@@ -119,6 +119,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
+| `cases/miniatures/wages-bag` | A witness's record and two sources that agree (findings 112 to 114): a first tale against the narrator's own observation; a second with one statement that is needed and one against another witness's word, nothing confirmed deciding it; a third witness who shares nothing with the second and agrees. | 6 paragraphs, 26 facts, 5 accounts, 4 tellings, 2 questions, 8 observations (4 essential), 4 implications, 17 moves |
 
 Played at `?case=cases/miniatures/<name>`. `npm test` validates them and checks each `structure.json` against its
 world model.
@@ -1456,6 +1457,36 @@ script that found each fact's paragraph from its quote; the data files are the s
     - Not done: what follows from the evidence agreeing with a witness's statement (an answer the evidence gives
       that a witness also states) is corroboration too, and is not listed. Authors could write for agreement: a
       second witness to the same moment is now something the page uses.
+
+114. **The Wages Bag: a miniature for the record and for agreement (2026-11-19).** Two blind Haiku runs first, with
+    the answers marked from the evidence (The Grey Cloak: 22 turns, $0.04; The Watchman's Clock: 58 turns, $0.10;
+    all answers right), showed that no existing case makes a player rule a statement out before the same source
+    is needed again: both were solved with the false statement left uncertain, so the held-back link never
+    happened. In The Watchman's Clock Haiku spent some 30 turns linking the same entries with the story at ¶2 of
+    6, where the evidence it wanted was not yet told, and got out by reading on. The user then made "marked from
+    the evidence" the default (a check's address says `answers=hand` unless told otherwise).
+    The case, agreed as an outline first: the carter's first tale (at the forge) is against the narrator's own
+    look into the forge and is ruled out; his second holds an admission that is needed (he had the key and went
+    in) and a charge (the foreman in the counting-room at half past eight) against the cook's word (the foreman in
+    her kitchen from eight till nine); the curate, a paragraph later, saw the foreman at the kitchen table at half
+    past eight. The user's rulings: the curate comes after the clash; the caught-out witness is wrong again here
+    (a case where he is right the second time is kept for later); plain story, no papers.
+    What writing it showed:
+    - **A rule from one witness's word ends the clash by itself.** Written first as "the cook says so, so he was
+      in the kitchen", the answer followed from one link as likely, the question was solved, solving confirmed
+      the cook, and the carter's charge stood "against what is confirmed": nothing was weighed. An implication can
+      only conclude a right answer, so a false statement never makes a rival conclusion. The clash matters only
+      if the rule asks for it: here the answer follows from the cook's word with the carter's charge disbelieved
+      (the record's way: a judgement, and likely at most unless it is ruled out) or from the cook's and the
+      curate's together. For an author: where two statements disagree, no rule should conclude from one of them
+      alone.
+    - **A suspect's own alibi would count as an independent source.** The foreman saying where he was would
+      "agree" with the cook, sharing no person or paper with her. He is given no statement in this case.
+      Independence by chains knows nothing of interest; not solved.
+    - On the page at ¶4: "cannot both be so: undecided", with "(uncertain; of what else came from Job Tarrant: 1
+      ruled out)" beside the charge. The link to his admission waits for the player's trust. At the end the first
+      question "follows 2 ways. Every one of them passes through the word of Mrs. Dabney", and the second rests on
+      the word of Job Tarrant with "2 ruled out" beside it: the answer does hang on a liar's admission, as written.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

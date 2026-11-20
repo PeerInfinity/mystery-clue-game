@@ -1,0 +1,11 @@
+{
+  "id": "wages_bag",
+  "title": "The Wages Bag",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "orchard", "name": "Samuel Orchard", "kind": "first-person"}
+  ],
+  "subtitle": "Samuel Orchard's timeline",
+  "source": {"written": "2026-11-19", "word_count": 330}
+}

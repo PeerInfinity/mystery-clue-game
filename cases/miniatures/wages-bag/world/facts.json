@@ -1,0 +1,30 @@
+{
+  "facts": [
+    {"id": "f.orchard_role", "of": "orchard", "attr": "role", "value": "clerk at Garth's Mill", "time": {"from": "t.before"}, "para": 1, "quote": "I am Samuel Orchard, clerk at Garth's Mill"},
+    {"id": "f.bag_locked", "of": "bag", "attr": "location", "value": "counting_room", "detail": "the week's wages in it, locked in", "time": {"at": "t.eight"}, "para": 1, "quote": "I locked the week's wages in their bag in the counting-room"},
+    {"id": "f.door_locked_eight", "of": "counting_door", "attr": "door", "value": "locked", "time": {"at": "t.eight"}, "para": 1, "quote": "I locked the week's wages in their bag in the counting-room"},
+    {"id": "f.key_nail_eight", "of": "key", "attr": "location", "value": "passage", "detail": "on its nail", "time": {"at": "t.eight"}, "para": 1, "quote": "hung the key on its nail in the passage"},
+    {"id": "f.orchard_village", "of": "orchard", "attr": "location", "value": "village", "detail": "at his supper", "time": {"from": "t.after_eight", "to": "t.ten_to"}, "para": 1, "quote": "walked down to the village for my supper"},
+    {"id": "f.door_locked_nine", "of": "counting_door", "attr": "door", "value": "locked", "time": {"at": "t.nine"}, "para": 1, "quote": "The counting-room door was locked"},
+    {"id": "f.key_nail_nine", "of": "key", "attr": "location", "value": "passage", "detail": "on its nail", "time": {"at": "t.nine"}, "para": 1, "quote": "the key was on its nail"},
+    {"id": "f.bag_gone", "of": "bag", "attr": "location", "value": "counting_room", "neg": true, "detail": "gone", "time": {"at": "t.nine"}, "para": 1, "quote": "the bag was gone"},
+    {"id": "f.wicks_role", "of": "wicks", "attr": "role", "value": "the foreman, living at the mill", "time": {"from": "t.before"}, "para": 2, "quote": "Mr. Wicks, the foreman"},
+    {"id": "f.tarrant_role", "of": "tarrant", "attr": "role", "value": "the carter, living at the mill", "time": {"from": "t.before"}, "para": 2, "quote": "Job Tarrant, the carter"},
+    {"id": "f.tarrant_tells_first", "of": "tarrant", "attr": "tells", "value": "acct.tarrant_first", "to": "orchard", "how": "told", "time": {"at": "t.saturday"}, "para": 2, "quote": "I asked Tarrant on Saturday where he had been"},
+    {"id": "f.tarrant_forge", "of": "tarrant", "attr": "location", "value": "forge", "detail": "mending a trace; he never left it", "time": {"from": "t.eight", "to": "t.nine"}, "para": 2, "quote": "At the forge from eight till nine, mending a trace", "truth": false},
+    {"id": "f.forge_empty", "of": "tarrant", "attr": "location", "value": "forge", "neg": true, "detail": "the forge dark, nobody there, the ashes cold", "time": {"at": "t.ten_to"}, "para": 2, "quote": "It was dark, there was nobody there, and the ashes were cold to my hand"},
+    {"id": "f.lantern_shed", "of": "lantern", "attr": "location", "value": "cart_shed", "detail": "the lantern from the counting-room", "time": {"at": "t.saturday"}, "para": 3, "quote": "I found the lantern from the counting-room standing in the cart-shed"},
+    {"id": "f.tarrant_tells_second", "of": "tarrant", "attr": "tells", "value": "acct.tarrant_second", "to": "orchard", "how": "told", "time": {"at": "t.saturday"}, "para": 3, "quote": "I put it to Tarrant, and he changed his tale"},
+    {"id": "f.tarrant_key", "of": "tarrant", "attr": "action", "value": "takes the key off its nail, goes into the counting-room for the lantern, and hangs the key back", "time": {"at": "t.after_eight"}, "para": 3, "quote": "A little after eight I took the key off its nail and went into the counting-room for the lantern, and I hung the key back"},
+    {"id": "f.wicks_counting", "of": "wicks", "attr": "location", "value": "counting_room", "time": {"at": "t.half_past"}, "para": 3, "quote": "At half past eight I saw Mr. Wicks in the counting-room", "truth": false},
+    {"id": "f.dabney_role", "of": "dabney", "attr": "role", "value": "cooks at the mill house, across the yard", "time": {"from": "t.before"}, "para": 4, "quote": "Mrs. Dabney cooks at the mill house, across the yard"},
+    {"id": "f.dabney_tells", "of": "dabney", "attr": "tells", "value": "acct.dabney", "to": "orchard", "how": "told", "time": {"at": "t.saturday"}, "para": 4, "quote": "she told me"},
+    {"id": "f.wicks_kitchen", "of": "wicks", "attr": "location", "value": "kitchen", "detail": "at his supper", "time": {"from": "t.eight", "to": "t.nine"}, "para": 4, "quote": "Mr. Wicks sat in my kitchen from eight till nine, at his supper"},
+    {"id": "f.lisle_role", "of": "lisle", "attr": "role", "value": "the curate", "time": {"from": "t.before"}, "para": 5, "quote": "Mr. Lisle, the curate"},
+    {"id": "f.lisle_tells", "of": "lisle", "attr": "tells", "value": "acct.lisle", "to": "orchard", "how": "told", "time": {"at": "t.saturday"}, "para": 5, "quote": "he told me"},
+    {"id": "f.lisle_lane", "of": "lisle", "attr": "location", "value": "mill_lane", "detail": "passing the mill house as the church clock struck the half hour", "time": {"at": "t.half_past"}, "para": 5, "quote": "The church clock struck the half hour as I passed the mill house"},
+    {"id": "f.wicks_window", "of": "wicks", "attr": "location", "value": "kitchen", "detail": "seen through the kitchen window, sitting at the table", "time": {"at": "t.half_past"}, "para": 5, "quote": "At half past eight I saw Mr. Wicks through the kitchen window, sitting at the table"},
+    {"id": "f.bag_found", "of": "bag", "attr": "location", "value": "cart", "detail": "under the seat, found by the constable", "time": {"at": "t.later"}, "para": 6, "quote": "found the wages bag under the seat of Tarrant's cart"},
+    {"id": "f.tarrant_owns", "of": "tarrant", "attr": "says", "value": "he took the bag when he went in for the lantern, and did not see Mr. Wicks at all", "to": "constable", "time": {"at": "t.later"}, "para": 6, "quote": "Tarrant owned that he had taken it when he went in for the lantern", "asserts": [{"q": "q.who", "pick": "tarrant"}, {"q": "q.where", "pick": "kitchen"}]}
+  ]
+}

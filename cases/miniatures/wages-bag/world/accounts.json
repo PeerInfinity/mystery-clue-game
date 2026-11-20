@@ -1,0 +1,9 @@
+{
+  "accounts": [
+    {"id": "acct.orchard", "label": "What Samuel Orchard sees and hears himself", "origin": "orchard", "how": "saw", "facts": ["f.orchard_role", "f.bag_locked", "f.door_locked_eight", "f.key_nail_eight", "f.orchard_village", "f.door_locked_nine", "f.key_nail_nine", "f.bag_gone", "f.wicks_role", "f.tarrant_role", "f.tarrant_tells_first", "f.forge_empty", "f.lantern_shed", "f.tarrant_tells_second", "f.dabney_role", "f.dabney_tells", "f.lisle_role", "f.lisle_tells", "f.bag_found", "f.tarrant_owns"]},
+    {"id": "acct.tarrant_first", "label": "Where Job Tarrant first says he was", "origin": "tarrant", "how": "saw", "facts": ["f.tarrant_forge"]},
+    {"id": "acct.tarrant_second", "label": "What Job Tarrant says when the lantern is put to him", "origin": "tarrant", "how": "saw", "facts": ["f.tarrant_key", "f.wicks_counting"]},
+    {"id": "acct.dabney", "label": "What Mrs. Dabney saw in her kitchen", "origin": "dabney", "how": "saw", "facts": ["f.wicks_kitchen"]},
+    {"id": "acct.lisle", "label": "What Mr. Lisle saw from the mill lane", "origin": "lisle", "how": "saw", "facts": ["f.lisle_lane", "f.wicks_window"]}
+  ]
+}

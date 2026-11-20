@@ -1,0 +1,21 @@
+{
+  "story": "wages-bag",
+  "mechanic": "A witness's record and two sources that agree: the carter's first tale is against the narrator's own observation and is ruled out; his second holds one statement that is needed and one that is against the cook's word, with nothing confirmed to decide it. His record tips it, or the curate, who shares nothing with the cook, agrees with her.",
+  "note": "Spoilers. The logic written before the prose (docs/authored-stories.md, finding 114). `frame` is what the narrator's own prose always carries; `clues` are the units that could be case files. `facts` names the world model's facts that realise a clue.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.bag", "says": "The wages bag was locked in the counting-room at eight and gone at nine, the door locked and the key on its nail.", "facts": ["f.bag_locked", "f.door_locked_eight", "f.key_nail_eight", "f.door_locked_nine", "f.key_nail_nine", "f.bag_gone"]}
+  ],
+  "questions": [
+    {"id": "q.where", "asks": "Where was Mr. Wicks at half past eight?", "answer": "kitchen", "others": ["counting_room"], "gate": 6, "needs": [["c.cook", "c.curate"], ["c.cook", "c.second_tale"]], "rules_out": {"counting_room": "c.cook and c.curate: two people who share nothing have him in the kitchen; or c.cook, and the carter's charge (c.second_tale) set aside on his record (c.first_tale, c.forge)"}},
+    {"id": "q.who", "asks": "Who took the wages bag?", "answer": "tarrant", "others": ["wicks"], "gate": 6, "needs": [["fr.bag", "c.second_tale", "c.cook"]], "rules_out": {"wicks": "c.cook: at his supper in the kitchen from eight till nine"}}
+  ],
+  "clues": [
+    {"id": "c.first_tale", "source": "Job Tarrant, the carter, to the narrator", "says": "He was at the forge from eight till nine and never left it.", "facts": ["f.tarrant_forge"], "chain": ["f.tarrant_tells_first"]},
+    {"id": "c.forge", "source": "The narrator's own walk back", "says": "At ten to nine the forge was dark and empty, the ashes cold.", "facts": ["f.forge_empty"]},
+    {"id": "c.lantern", "source": "The narrator, on Saturday morning", "says": "The counting-room lantern stood in the cart-shed.", "facts": ["f.lantern_shed"]},
+    {"id": "c.second_tale", "source": "Job Tarrant, when the lantern is put to him", "says": "A little after eight he took the key, went in for the lantern and hung the key back; at half past eight he saw Mr. Wicks in the counting-room.", "facts": ["f.tarrant_key", "f.wicks_counting"], "chain": ["f.tarrant_tells_second"]},
+    {"id": "c.cook", "source": "Mrs. Dabney, the cook, to the narrator", "says": "Mr. Wicks sat in her kitchen from eight till nine.", "facts": ["f.wicks_kitchen"], "chain": ["f.dabney_tells"]},
+    {"id": "c.curate", "source": "Mr. Lisle, the curate, to the narrator", "says": "At half past eight, passing the mill house, he saw Mr. Wicks at the kitchen table.", "facts": ["f.lisle_lane", "f.wicks_window"], "chain": ["f.lisle_tells"]}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "observations": [
+    {"id": "o.cook", "q": "q.where", "from": ["f.wicks_kitchen"], "says": "the cook has him in her kitchen from eight till nine", "essential": true, "against": ["counting_room"]},
+    {"id": "o.curate", "q": "q.where", "from": ["f.wicks_window"], "says": "the curate saw him through the kitchen window at half past eight"},
+    {"id": "o.accused", "q": "q.where", "from": [{"doubted": "f.tarrant_tells_second"}], "says": "it was the carter who put him in the counting-room, and that cannot stand"},
+    {"id": "o.locked", "q": "q.who", "from": ["f.door_locked_nine", "f.key_nail_nine"], "says": "the door was locked again and the key back on its nail: whoever took the bag went in with the key", "essential": true},
+    {"id": "o.admits", "q": "q.who", "from": ["f.tarrant_key"], "says": "by his own word the carter had the key and was in the counting-room a little after eight", "essential": true},
+    {"id": "o.supper", "q": "q.who", "from": ["f.wicks_kitchen"], "says": "the foreman was at his supper in the kitchen the whole hour", "essential": true, "against": ["wicks"]},
+    {"id": "o.lantern", "q": "q.who", "from": ["f.lantern_shed"], "says": "the counting-room lantern was out in the cart-shed: someone had been in for it"},
+    {"id": "o.forge", "q": "q.who", "from": [{"doubted": "f.tarrant_tells_first"}], "says": "the carter's first tale, that he never left the forge, cannot stand"}
+  ]
+}

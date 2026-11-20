@@ -1,0 +1,22 @@
+{
+  "description": "The true path of the miniature: the carter's first tale against the narrator's own observation, and ruled out; his second, two statements, one of them needed and one against the cook's word with nothing confirmed to decide it; the curate, who shares nothing with the cook, agrees with her, and the carter's charge cannot stand.",
+  "moves": [
+    {"at": 2, "do": "trust", "on": "f.tarrant_forge", "link": "stmt:f.tarrant_forge", "level": "ruled out", "for_q": ["q.who"], "why": "I looked into the forge at ten to nine myself: he was not there. What he first told me cannot be so."},
+    {"at": 2, "do": "link", "entry": "f.tarrant_tells_first", "q": "q.who", "see": "cannot stand", "for_q": ["q.who"], "why": "And a man who says he never left the forge, when he did, has a reason to say so."},
+    {"at": 3, "do": "link", "entry": "f.lantern_shed", "q": "q.who", "see": "someone had been in for it", "for_q": ["q.who"], "why": "The lantern is kept in the counting-room. Someone had been in."},
+    {"at": 3, "do": "link", "entry": "f.door_locked_nine", "q": "q.who", "for_q": ["q.who"], "why": "The door was locked when I came back."},
+    {"at": 3, "do": "link", "entry": "f.key_nail_nine", "q": "q.who", "see": "went in with the key", "for_q": ["q.who"], "why": "And the key was on its nail: the bag went out by the key."},
+    {"at": 3, "do": "trust", "on": "f.tarrant_key", "link": "stmt:f.tarrant_key", "level": "likely", "gen": "trust", "for_q": ["q.who"], "why": "Something else from the same source is ruled out, so I do not take this on trust; but nothing speaks against this one, and I hold it likely."},
+    {"at": 3, "do": "link", "entry": "f.tarrant_key", "q": "q.who", "see": "by his own word", "for_q": ["q.who"], "why": "He says himself that he had the key and went in. That goes against him, and I believe it."},
+    {"at": 4, "do": "link", "entry": "f.wicks_kitchen", "q": "q.where", "see": "in her kitchen from eight till nine", "for_q": ["q.where"], "why": "Mrs. Dabney has Mr. Wicks at her table the whole hour."},
+    {"at": 4, "do": "link", "entry": "f.wicks_kitchen", "q": "q.who", "see": "the whole hour", "for_q": ["q.who"], "why": "If she is right, Mr. Wicks did not go near the counting-room."},
+    {"at": 5, "do": "link", "entry": "f.wicks_window", "q": "q.where", "see": "through the kitchen window", "for_q": ["q.where"], "why": "Mr. Lisle saw him there too, and Mr. Lisle has nothing to do with the mill or with Mrs. Dabney."},
+    {"at": 5, "do": "trust", "on": "f.wicks_window", "link": "stmt:f.wicks_window", "level": "confirmed", "for_q": ["q.where"], "why": "Two people who share nothing say the same of the same moment: I take it as confirmed."},
+    {"at": 5, "do": "trust", "on": "f.wicks_counting", "link": "stmt:f.wicks_counting", "level": "ruled out", "for_q": ["q.where"], "why": "So Mr. Wicks was not in the counting-room at half past eight. Tarrant has now told me two things that were not so."},
+    {"at": 5, "do": "link", "entry": "f.tarrant_tells_second", "q": "q.where", "see": "cannot stand", "for_q": ["q.where"], "why": "It was Tarrant who put him in the counting-room."},
+    {"at": 5, "do": "circle", "q": "q.where", "pick": "kitchen", "for_q": ["q.where"], "why": "The cook and the curate both have him there."},
+    {"at": 5, "do": "cross", "q": "q.where", "pick": "counting_room", "for_q": ["q.where"], "why": "Only Tarrant put him there."},
+    {"at": 5, "do": "circle", "q": "q.who", "pick": "tarrant", "for_q": ["q.who"], "why": "The bag went by the key, Tarrant had the key in that hour, and Mr. Wicks was at his supper."},
+    {"at": 5, "do": "cross", "q": "q.who", "pick": "wicks", "for_q": ["q.who"], "why": "He was in the kitchen across the yard."}
+  ]
+}

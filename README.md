@@ -25,7 +25,8 @@ evidence leaves.
 [The Watchman's Clock](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/watchmans-clock) (what is missing from a record) ·
 [The Grey Cloak](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/grey-cloak) (an honest witness who is wrong) ·
 [The Night Porter's Statement](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/night-porters-statement) (a storyteller you cannot wholly
-believe)
+believe) ·
+[The Wages Bag](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/wages-bag) (one man's word against another's)
 
 **A longer case**, the first full-size story written for this game:
 [The Fire at the Custom House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/custom-house-fire)
