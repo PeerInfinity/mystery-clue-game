@@ -1523,6 +1523,18 @@ script that found each fact's paragraph from its quote; the data files are the s
       (b) The carter's key statement, held back by his record, stayed uncertain until turn 32, when it set
       everything the carter says to likely, and then that statement too. Not changed yet: both are for the user
       to rule on.
+    - *Built on the user's ruling (2026-11-21):* the linking ends by itself when its question is solved (the user
+      preferred leaving link mode to moving it to the next question), and the tried note names the question. For
+      (b) the question already lists such a link as "Linked, but it does not count until you trust it as likely";
+      the run missed it only because the link had gone to the other question.
+    - *A third run after that:* 57 turns, $0.12, both answers right, by the other road: it began linking after
+      one paragraph, ruled out the forge at turn 1, and solved "where" by the cook and the carter's charge
+      disbelieved. The linking no longer strayed. What cost it some 17 turns: it ruled out the carter's "Mr. Wicks
+      at the counting-room" and linked that statement, which is kept and waits, but the lie counts as evidence
+      only when the telling itself is linked (the observation is from `{doubted: telling}`), and the question did
+      not list the waiting link at all. It linked the telling at turn 40 and the question was solved. Smaller:
+      "Left to try: 1 paper to read" was read as a paper blocking the story, when it was the story itself.
+      Not changed yet.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
