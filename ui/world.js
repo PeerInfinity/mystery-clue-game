@@ -1135,8 +1135,8 @@ let linkOnlyNew = false;  // linking: show only the entries not yet linked or tr
 function toggleLink(entry, q) {
     if (checkedLinks()) {
         if (isLinked(entry, q)) { if (bearsOn(entry, q)) { state.note = 'This link is evidence for the question: it stays.'; render(); return; } }
-        else if (isTried(entry, q)) { state.note = 'Already tried: it shows nothing about this question.'; render(); return; }
-        else if (!bearsOn(entry, q)) { if (trying) return; markTried(entry, q); state.note = `Tried: it shows nothing about this question.${factById.get(entry)?.attr === 'tells' ? ' This entry is only that it was said. What was said are entries of their own, and each can be linked.' : ''}`; save(); render(); return; }
+        else if (isTried(entry, q)) { state.note = `Already tried: it shows nothing about “${qLabel(qById.get(q))}”.`; render(); return; }
+        else if (!bearsOn(entry, q)) { if (trying) return; markTried(entry, q); state.note = `Tried: it shows nothing about “${qLabel(qById.get(q))}”.${factById.get(entry)?.attr === 'tells' ? ' This entry is only that it was said. What was said are entries of their own, and each can be linked.' : ''}`; save(); render(); return; }
     }
     remember();
     // To cite a statement is to hold it likely: a link that is kept trusts an entry still uncertain as likely, by its
@@ -2334,6 +2334,7 @@ function judge() {
             state.marks = { ...state.marks, [q.id]: marks };
             state.solved = { ...state.solved, [q.id]: { pick, marks, n: Object.keys(state.solved).length + 1 } };
             solvedNews = [...solvedNews, q.id];
+            if (linkingQ === q.id) linkingQ = null;   // a solved question needs no more links: the linking ends, so the next link is not made to it unawares
             confirmed[q.id] = confirmBy(q.id);
             more = fresh = true;
         }
