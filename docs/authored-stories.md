@@ -1512,6 +1512,17 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *A telling that shows nothing* says so as before, and adds that it is only that it was said: what was said
       are entries of their own. A description of the page, the same for every telling.
     - Left as it is: the story does not hold at an undecided clash.
+    - *The Wages Bag played blind again by Haiku (2026-11-21, after these changes):* 44 turns, $0.11, both
+      answers right. It read four paragraphs, linked the curate and the cook, and "where" was solved by the two
+      together in 8 turns. The agreement offer stood on the page for those turns ("1 agree: two sources that
+      share nothing say the same") and was not taken: linking both solves the question, and the solving confirms
+      them, so the offer is never the shorter road here. It ruled out the carter's forge by the clash button. Then
+      27 turns went on "who". Two causes, both the page's. (a) After "where" was solved the linking stayed on it,
+      so its next links (the carter's key among them) went to the solved question, each answered "Tried: it shows
+      nothing about this question" without the question's name; it switched the linking to "who" only at turn 29.
+      (b) The carter's key statement, held back by his record, stayed uncertain until turn 32, when it set
+      everything the carter says to likely, and then that statement too. Not changed yet: both are for the user
+      to rule on.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
