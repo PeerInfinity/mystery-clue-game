@@ -11,8 +11,8 @@
 // With these a question needs no checklist: its answer is known when an implication concludes it, or when every
 // other answer is ruled out. What is shown beyond that is support, and wanted by nothing.
 
-import { isRight, coverOf, hypothesisKey, answerStates, DERIVED, assertions, markAssertions, contradictions, alibis, entityKinds, CONFIRMED, LIKELY_LEVEL } from './world.js';
-import { answerAction, actNeeds } from './actions.js';
+import { isRight, coverOf, overlaps, places, timeOrder, hypothesisKey, answerStates, DERIVED, assertions, markAssertions, contradictions, alibis, entityKinds, CONFIRMED, LIKELY_LEVEL } from './world.js';
+import { answerAction, actNeeds, pointImplications, productsOf, meets, requirementStatus } from './actions.js';
 
 const holds = (p, has, solved) => (typeof p === 'string' ? has(p) : p.any ? p.any.some(has) : p.solved ? !!solved?.(p.solved) : false);
 
@@ -278,3 +278,60 @@ export function strength(support, derived, levelOfStatement = () => CONFIRMED) {
 }
 /** Whether what follows is certain: confirmed throughout by some way to it. `shown(id)`: an observation is shown (and taken as confirmed). */
 export const certain = (support, derived, shown = () => true) => strength(support, derived, (id) => (shown(id) ? CONFIRMED : null)) === CONFIRMED;
+
+/**
+ * Means, opportunity and motive (2026-11-21; docs/authored-stories.md, finding 116): each suspect of a "who"
+ * question against what the act needs of its agent, by the action table, as far as the entries the player has
+ * shown say (`shown`: the ids of the facts linked to the question and trusted). Nothing is hand-written: the act is
+ * the question's typed entry with the suspect as its agent (`answerAction`), its needs are the table's
+ * (`pointImplications`), and a motive is a goal the suspect holds (a shown fact of theirs with `goal`) that
+ * something the act brings about meets.
+ * Returns null when no suspect's answer is a typed act, else `[{pick, opportunity, means, motive}]`, each a list of
+ * `{status: 'met' | 'against', req, facts: [ids]}`: a need appears only when something shown meets it or is against
+ * it, so the grid names nothing the player has not shown. Opportunity is a need to be at a place or a door (against:
+ * shown whereabouts elsewhere that cover the whole window, as `alibis`); means, any other need of the agent (a key,
+ * something carried, something known).
+ */
+export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}) {
+    const order = data.order ?? timeOrder(data.times), pl = data.places ?? places(data);
+    const kindOf = entityKinds(data), isEntity = (id) => kindOf(id) != null;
+    const c = { joins: data.joins ?? {}, order, places: pl, ...ctx };
+    const has = new Set(shown);
+    const told = assertions(data).filter((x) => x.kind === 'state' && x.fact != null && has.has(x.fact) && !x.mark);
+    const entries = data.facts.filter((f) => has.has(f.id));
+    const rows = [];
+    for (const pick of picks) {
+        const act = answerAction(q, pick, isEntity);
+        if (!act || act.of !== pick) continue;
+        const mark = markAssertions(data, { [q.id]: { [pick]: 'circled' } })[0] ?? { id: hypothesisKey(q.id, pick) };
+        const w = coverOf(act.time);
+        const within = (t) => { const k = coverOf(t); return !w || !k || overlaps(order, k, w); };
+        const row = { pick, opportunity: [], means: [], motive: [] };
+        for (const req of (pointImplications(act, nameOf, c).entries ?? []).filter((r) => r.role === 'requires' && r.of === pick)) {
+            const where = req.at ? (c.joins[req.at] ?? []) : req.place ? [req.place] : null;
+            if (where) {
+                const no = w ? alibis(data, told, [{ mark, of: pick, places: where, time: act.time, label: '' }]) : [];
+                const yes = told.filter((x) => x.attr === 'location' && !x.neg && x.of === pick && typeof x.value === 'string' && where.some((p) => pl.chain(x.value).includes(p)) && within(x.time));
+                if (no.length) row.opportunity.push({ status: 'against', req, facts: [...new Set(no.map((k) => k.a.fact))] });
+                else if (yes.length) row.opportunity.push({ status: 'met', req, facts: [...new Set(yes.map((x) => x.fact))] });
+                continue;
+            }
+            if (req.key || req.item) {
+                const fit = (e) => e.attr === 'carrying' && e.of === pick && (req.key ? e.key === req.key : (e.item ?? String(e.value).split(/[ ,]/)[0]) === req.item) && within(e.time);
+                const yes = entries.filter((e) => fit(e) && !e.neg), no = entries.filter((e) => fit(e) && e.neg);
+                if (yes.length) row.means.push({ status: 'met', req, facts: yes.map((e) => e.id) });
+                else if (no.length) row.means.push({ status: 'against', req, facts: no.map((e) => e.id) });
+                continue;
+            }
+            const st = requirementStatus(order, entries, req, c);
+            if (st.status !== 'unknown' && st.entry) (req.away ? row.opportunity : row.means).push({ status: st.status, req, facts: [st.entry.id] });
+        }
+        const brings = productsOf(act, nameOf, c);
+        for (const e of entries) {
+            if (!e.goal || e.of !== pick) continue;
+            if (brings.some((p) => meets(p, { of: e.goal.of, attr: e.goal.attr, value: e.goal.value, neg: !!e.goal.neg }, c))) row.motive.push({ status: 'met', req: { of: e.goal.of, attr: e.goal.attr, value: e.goal.value, neg: !!e.goal.neg }, facts: [e.id] });
+        }
+        rows.push(row);
+    }
+    return rows.length ? rows : null;
+}

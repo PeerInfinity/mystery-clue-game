@@ -556,6 +556,14 @@ that follows from others, shown by itself the moment they all are.
   the money been the aim, the chest would not be whole with the money in it. Likely only, since an aim can
   fail; and never against the right answer. A circled aim goes on the timeline as an intention only for a
   question whose entry is one (`attr: "intends"`).
+- **Means, opportunity and motive** (2026-11-21; `suspectGrid` in `engine/implications.js`; finding 116). Under a
+  "who" question whose `entry` is a typed act, the page sets each person who may be the answer against what the
+  act needs of its agent (the action table's `requires` with `of: "$agent"`): a place or a door is opportunity,
+  anything else (a key: a `carrying` fact with `key: <door>`; a thing carried; a state such as `knows`) is means,
+  and a motive is a fact of the suspect's with `goal` that one of the act's `effects` meets. Only entries linked
+  to the question and trusted count, and a need is named only when one of them meets it or is against it. Nothing
+  is written for it: type the act (`act`, its roles and a `{from, to}` window on the question's entry; the case's
+  own act in `world/actions.json` if the generic ones do not say what it needs) and the statements it reads.
 - **The rules nobody writes** (2026-11-18; `tableRules`, `withTable` in `engine/implications.js`; finding 109).
   Where an answer has a typed form and what one observation comes from contradicts it, linking that observation
   rules the answer out, as an implication `{id: "t.<observation>.<n>", q, from: [observation], rules_out: [answer],

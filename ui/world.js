@@ -13,7 +13,7 @@ import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, p
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described, onPage, bears, waits } from '../engine/observations.js';
-import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, LIKELY } from '../engine/implications.js';
+import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, suspectGrid, LIKELY } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -921,7 +921,11 @@ function verdictOf(q) {
     const v = verdict(q.id, values, derivedNow);
     return values.includes(v.concluded) ? v : { ...v, concluded: null, by: null, ruled: new Set(derivedNow.filter((i) => i.q === q.id).flatMap((i) => i.rules_out ?? []).filter((x) => values.includes(x))) };
 }
-const fillNow = () => fill(observations, state.links, [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted, partlyDoubted, solved: isSolved });
+// A lie as evidence is linked by its telling, or by any statement the telling carried that the player has linked and
+// holds unlikely or ruled out: to rule out what was said and link it is the natural move (a blind run of 2026-11-21
+// spent 17 turns before it linked the telling instead). Whether the telling counts is still `doubted`: all its lies off.
+const lieLinks = () => state.links.flatMap((l) => { const e = factById.get(l.entry); return !e || e.attr === 'tells' || levelOfFact(e) > UNLIKELY ? [] : viaStatement(l.entry, l.q).flatMap((o) => o.from.filter((f) => f?.doubted && carriedBy(f.doubted).includes(l.entry)).map((f) => ({ entry: f.doubted, q: l.q }))); });
+const fillNow = () => fill(observations, [...state.links, ...lieLinks()], [...onTimeline(), ...data.facts.filter((f) => f.attr === 'tells' && visible(f) && accepted(f))], state.marks, { doubted, partlyDoubted, solved: isSolved });
 /**
  * After the links are read: the implications that hold, and (answers from the evidence) the marks they give each
  * question that has implications: its concluded answer circled, the answers ruled out crossed out, the rest left.
@@ -1201,7 +1205,25 @@ function descriptionHtml(q) {
     // Starting and ending are two controls in two places: the button here starts, Done at the top of the timeline
     // ends (one button for both let a press after a press undo itself: a blind solver did that 117 times running).
     const start = !givenAway(q) ? `${linkingQ === q.id ? '<span class="small link-start on">Linking: go down the timeline. <b>Done linking</b> is at its top.</span>' : `<button type="button" class="link-start" data-linking="${esc(q.id)}">Link observations…</button>`}${checkedLinks() ? ` <span class="small muted untried-count" data-untried="${esc(q.id)}"></span>` : ''}` : '';
-    return `<div class="desc">${status}${restsHtml}${items || begun || off ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}${off}</ul>` : ''}${followsHtml(q)}${noteHtml_}${verdict}${start}</div>`;
+    return `<div class="desc">${status}${restsHtml}${items || begun || off ? `<div class="small muted">What you have shown about it</div><ul class="desc-list">${items}${begun}${off}</ul>` : ''}${followsHtml(q)}${gridHtml(q)}${noteHtml_}${verdict}${start}</div>`;
+}
+/**
+ * Means, opportunity and motive (finding 116): under a "who" question whose answer is a typed act, each suspect
+ * against what the act needs of the one who did it, by the action table (engine `suspectGrid`), as far as what the
+ * player has linked to the question and trusts says. The frame is the same for every such question and a need is
+ * named only once something linked meets it or is against it, so the grid says nothing the player has not shown.
+ * It decides nothing: the answers are marked by what follows from the evidence.
+ */
+function gridHtml(q) {
+    if (givenAway(q)) return '';
+    const who = shownPossibilities(q).map((o) => o.value).filter((v) => ['person', 'animal'].includes(entityById.get(v)?.kind));
+    if (who.length < 2) return '';
+    const shown = state.links.filter((l) => l.q === q.id).map((l) => factById.get(l.entry)).filter((f) => f && accepted(f)).map((f) => f.id);
+    const rows = suspectGrid(data, q, who, shown, nameOf, placeCtx);
+    if (!rows) return '';
+    const item = (c) => `<div class="grid-${c.status}">${c.status === 'met' ? '✓' : '✗ against:'} ${c.req.id ? `${phrase(c.req)}<br>` : ''}<span class="muted">${c.facts.map((id) => { const f = factById.get(id); return `${dot(levelOfFact(f))}${phrase(f)} ${paraSpan(givenAt(f))}`; }).join('; ')}</span></div>`;
+    const cell = (cs) => `<td>${cs.length ? cs.map(item).join('') : '<span class="muted">nothing shown</span>'}</td>`;
+    return `<table class="suspect-grid small" data-grid="${esc(q.id)}"><thead><tr><th></th><th title="Could they have been where it was done, when it was done?">Opportunity</th><th title="Had they what it takes: a key, a thing, a skill?">Means</th><th title="Did they want what it brings?">Motive</th></tr></thead><tbody>${rows.map((r) => `<tr><th>${ent(r.pick)}</th>${cell(r.opportunity)}${cell(r.means)}${cell(r.motive)}</tr>`).join('')}</tbody></table>`;
 }
 const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span>${checkedLinks() ? `<label class="link-only-new" title="Hide the entries already linked to this question or tried for it"><input type="checkbox" data-link-only-new${linkOnlyNew ? ' checked' : ''}> only what is not tried yet</label>` : ''}<button type="button" data-linking-done>Done linking</button></div>` : '');
 

@@ -1535,6 +1535,34 @@ script that found each fact's paragraph from its quote; the data files are the s
       not list the waiting link at all. It linked the telling at turn 40 and the question was solved. Smaller:
       "Left to try: 1 paper to read" was read as a paper blocking the story, when it was the story itself.
       Not changed yet.
+    - *A lie linked by what was said (the user's ruling, 2026-11-21).* A statement the player holds unlikely or
+      ruled out, linked to a question, now counts as its telling for a lie as evidence (`lieLinks` in
+      `ui/world.js`): to rule out what was said and link it is the natural move. Whether the lie counts is as
+      before: every false statement of the telling off the timeline.
+116. **Means, opportunity and motive as a grid (item 3 of finding 110; the user's rulings of 2026-11-21).**
+    - *What was found first.* No case has hand-written likely clashes any more, so there was nothing of that kind
+      to replace. Of some 20 "who" questions, 7 have a typed act. Motive is typed nowhere in the short cases. And
+      with the answers marked from the evidence nobody circles a suspect by hand, so the old "if it was X, they
+      would have needed..." list never shows.
+    - *The rulings.* A view of what the player has shown, deciding nothing (the answers still come from what
+      follows). And: as much as possible typed data, as little as possible hand-written; go on with the typing of
+      plans and motives. So no author tags were added: an untyped question has no grid until its act is typed.
+    - *Built* (`suspectGrid` in `engine/implications.js`, `gridHtml` in `ui/world.js`). Under a "who" question
+      whose entry is a typed act: a row for each person who may be the answer, and the columns Opportunity, Means,
+      Motive, the same for every case. The act's needs are the action table's, with the suspect as its agent.
+      A cell fills only from entries linked to the question and trusted: opportunity met by whereabouts at the
+      place within the window, against by whereabouts elsewhere that cover the whole window (as an alibi);
+      means met by a key or a thing carried, or another state the act needs; motive met by a goal the suspect
+      holds (a linked fact of theirs with `goal`) that something the act brings about meets. A need is named
+      only once something linked meets it or is against it, so the grid names nothing the player has not shown.
+    - *The Wages Bag typed for it.* The question's entry is the case's own act `take_locked` (at the place, with
+      a key to the door) over eight till nine; the carter's "took the key, went in" is two typed statements
+      (carrying the key; at the counting-room) where it was one sentence. The table now makes its own rule: the
+      cook's word alone rules Mr. Wicks out, as far as she is trusted (likely). The certain way is as before
+      (the cook borne out, by the curate or by the charge disbelieved).
+    - *Not yet.* Motive has the mechanism and no data: no short case states a motive in typed form, and what a
+      motive is in typed form beyond "a goal the act brings about" (gain, fear of exposure, a grudge) is the
+      user's to decide. The other "who" questions are typed one case at a time.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

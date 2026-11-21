@@ -283,3 +283,10 @@ body.link-only-new #timeline .event.link-done { display: none; }
 .agree-box ol { margin: 6px 0; padding-left: 20px; }
 .agree-box li { margin: 4px 0; }
 .rests-on { margin-top: 4px; }
+
+/* Means, opportunity and motive: each suspect against what the act needs, from what is linked. */
+.suspect-grid { border-collapse: collapse; margin: 6px 0; width: 100%; }
+.suspect-grid th, .suspect-grid td { border: 1px solid var(--line, #ccc); padding: 3px 6px; text-align: left; vertical-align: top; font-weight: normal; }
+.suspect-grid thead th { font-weight: bold; }
+.suspect-grid .grid-against { color: var(--bad, #a33); }
+.suspect-grid .grid-met { color: var(--good, #2a6); }

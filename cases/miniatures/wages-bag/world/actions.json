@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "take_locked", "label": "taking, out of a locked room,", "requires": [{"of": "$agent", "place": "$where"}, {"of": "$agent", "key": "$via"}], "effects": [{"of": "$agent", "attr": "carrying", "value": "$item"}]}
+  ]
+}

@@ -14,7 +14,7 @@
     {"id": "c.first_tale", "source": "Job Tarrant, the carter, to the narrator", "says": "He was at the forge from eight till nine and never left it.", "facts": ["f.tarrant_forge"], "chain": ["f.tarrant_tells_first"]},
     {"id": "c.forge", "source": "The narrator's own walk back", "says": "At ten to nine the forge was dark and empty, the ashes cold.", "facts": ["f.forge_empty"]},
     {"id": "c.lantern", "source": "The narrator, on Saturday morning", "says": "The counting-room lantern stood in the cart-shed.", "facts": ["f.lantern_shed"]},
-    {"id": "c.second_tale", "source": "Job Tarrant, when the lantern is put to him", "says": "A little after eight he took the key, went in for the lantern and hung the key back; at half past eight he saw Mr. Wicks in the counting-room.", "facts": ["f.tarrant_key", "f.wicks_counting"], "chain": ["f.tarrant_tells_second"]},
+    {"id": "c.second_tale", "source": "Job Tarrant, when the lantern is put to him", "says": "A little after eight he took the key, went in for the lantern and hung the key back; at half past eight he saw Mr. Wicks in the counting-room.", "facts": ["f.tarrant_key", "f.tarrant_in", "f.wicks_counting"], "chain": ["f.tarrant_tells_second"]},
     {"id": "c.cook", "source": "Mrs. Dabney, the cook, to the narrator", "says": "Mr. Wicks sat in her kitchen from eight till nine.", "facts": ["f.wicks_kitchen"], "chain": ["f.dabney_tells"]},
     {"id": "c.curate", "source": "Mr. Lisle, the curate, to the narrator", "says": "At half past eight, passing the mill house, he saw Mr. Wicks at the kitchen table.", "facts": ["f.lisle_lane", "f.wicks_window"], "chain": ["f.lisle_tells"]}
   ]

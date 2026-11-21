@@ -207,3 +207,30 @@ test('strength: what follows is as strong as its weakest step, by the best way t
     const got = Object.fromEntries(derivedAssertions(data, d, (q) => q.possibilities.map((p) => p.value), { shown: has }).map((x) => [x.pick, !!x.likely]));
     assert.deepEqual(got, { z: true, x: true, y: true });
 });
+
+test('suspectGrid: each suspect against what the act needs, from what is shown; a motive is a goal the act brings about', async () => {
+    const { suspectGrid } = await import('./implications.js');
+    const { setCaseActions } = await import('./actions.js');
+    setCaseActions({ actions: [{ id: 'take_locked', label: 'taking', requires: [{ of: '$agent', place: '$where' }, { of: '$agent', key: '$via' }], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] }] });
+    const data = {
+        entities: [{ id: 'a', kind: 'person' }, { id: 'b', kind: 'person' }, { id: 'room', kind: 'place' }, { id: 'kitchen', kind: 'place' }, { id: 'bag', kind: 'object' }, { id: 'door', kind: 'object' }],
+        times: [{ id: 't1' }, { id: 't2', after: 't1' }, { id: 't3', after: 't2' }],
+        accounts: [],
+        facts: [
+            { id: 'f.a_kitchen', of: 'a', attr: 'location', value: 'kitchen', time: { from: 't1', to: 't3' } },
+            { id: 'f.a_room', of: 'a', attr: 'location', value: 'room', time: { at: 't2' } },
+            { id: 'f.b_room', of: 'b', attr: 'location', value: 'room', time: { at: 't2' } },
+            { id: 'f.b_key', of: 'b', attr: 'carrying', value: 'key', key: 'door', time: { at: 't2' } },
+            { id: 'f.b_wants', of: 'b', attr: 'intends', value: 'to have the bag', goal: { of: 'b', attr: 'carrying', value: 'bag' }, time: { from: 't1' } },
+        ],
+        questions: [{ id: 'q', entry: { of: '?', attr: 'action', act: 'take_locked', item: 'bag', where: 'room', via: 'door', time: { from: 't1', to: 't3' } }, answer: 'b', possibilities: [{ value: 'a' }, { value: 'b' }] }],
+    };
+    const q = data.questions[0];
+    const cells = (shown) => Object.fromEntries(suspectGrid(data, q, ['a', 'b'], shown).map((r) => [r.pick, ['opportunity', 'means', 'motive'].map((k) => r[k].map((c) => `${c.status}:${c.facts}`).join(',')).join('|')]));
+    assert.deepEqual(cells([]), { a: '||', b: '||' });                                   // nothing shown, nothing named
+    assert.equal(cells(['f.a_room']).a, 'met:f.a_room||');                               // a sighting at the place
+    assert.equal(cells(['f.a_room', 'f.a_kitchen']).a, 'against:f.a_kitchen||');         // elsewhere the whole window: against
+    assert.equal(cells(['f.b_room', 'f.b_key', 'f.b_wants']).b, 'met:f.b_room|met:f.b_key|met:f.b_wants');
+    assert.equal(suspectGrid(data, { ...q, entry: { of: '?', attr: 'action' } }, ['a', 'b'], []), null);   // no typed act: no grid
+    setCaseActions({});
+});
