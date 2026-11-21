@@ -462,12 +462,21 @@ const levelCls = (l) => levelName(l).replace(' ', '-');
 const dot = (l) => `<span class="lvl lvl-${levelCls(l)}" title="${levelName(l)}"></span>`;
 /** What the player does to reach a level, in the words of the controls. */
 const LEVEL_VERB = ['Distrust as ruled out', 'Distrust as unlikely', 'Leave as uncertain', 'Trust as likely', 'Trust as confirmed'];
-/** A trust control's choices, the highest first; `unset`: the words for "not set" (a link with a level to start from has none). */
-const levelOpts = (cur, unset = null) => `${unset == null ? '' : `<option value=""${cur == null ? ' selected' : ''}>${esc(unset)}</option>`}${[4, 3, 2, 1, 0].map((i) => `<option value="${i}"${cur === i ? ' selected' : ''}>${LEVELS[i]}</option>`).join('')}`;
+/**
+ * Confirmed is earned, not set (the user's ruling of 2026-11-21): what a narrator saw is confirmed from the start; a
+ * statement becomes so when a question solved rested on it, or when the player takes the offer where two independent
+ * sources agree. Those statements are kept (`trust.earned`), so that one lowered since can be put back; no other
+ * control offers the level.
+ */
+const earned = (k) => (state.trust.earned ?? []).includes(k);
+const earn = (tr, k) => { tr.earned = [...new Set([...(tr.earned ?? []), k])]; };
+const mayConfirm = (k, base = null) => (base != null && Number(base) === CONFIRMED) || earned(k);
+/** A trust control's choices, the highest first (`top`: confirmed among them); `unset`: the words for "not set" (a link with a level to start from has none). */
+const levelOpts = (cur, unset = null, top = false) => `${unset == null ? '' : `<option value=""${cur == null ? ' selected' : ''}>${esc(unset)}</option>`}${[4, 3, 2, 1, 0].filter((i) => i !== CONFIRMED || top || cur === CONFIRMED).map((i) => `<option value="${i}"${cur === i ? ' selected' : ''}>${LEVELS[i]}</option>`).join('')}`;
 /** A statement's own trust key, if it has one (what a narrator saw has none: it is as the narration). */
 const stmtKeyOf = (f) => { const l = (CLAIM_ATTRS.has(f.attr) && list(f.asserts).length ? claimChains(f.id) : chainsOf(f)).flatMap((c) => c.links).find((x) => x.stmt); return l ? linkKey(l) : null; };
 /** Buttons that set one statement's own level, where it has one. */
-const quickTrust = (f, levels) => { const k = f && !f.reasoned && !f.hyp ? stmtKeyOf(f) : null; return k ? levels.map((i) => `<button type="button" class="quiet small" data-set-trust="${esc(k)}" data-level="${i}">${LEVEL_VERB[i]}</button>`).join(' ') : ''; };
+const quickTrust = (f, levels) => { const k = f && !f.reasoned && !f.hyp ? stmtKeyOf(f) : null; return k ? levels.filter((i) => i !== CONFIRMED || earned(k)).map((i) => `<button type="button" class="quiet small" data-set-trust="${esc(k)}" data-level="${i}">${LEVEL_VERB[i]}</button>`).join(' ') : ''; };
 const anchorOf = (t) => t.at ?? t.from ?? t.after ?? t.before ?? t.to;
 /** A side of a contradiction's time, in words: "at Thursday, nine o'clock", "from … until …" (empty if it has none). */
 function sideTime(t) {
@@ -1078,7 +1087,7 @@ const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(ob
 // (itself, or as one of several alike), linked or not, that is below the timeline's level. Said outright, since
 // "something else is needed" sent a blind solver looking for another entry for two hundred turns.
 const untrusted = (e, q) => !!e && !e.reasoned && !accepted(e) && observations.some((o) => o.q === q && !observed.filled.some((x) => x.obs === o) && o.from.some((f) => (typeof f === 'string' ? f === e.id : !!f.any?.includes(e.id))));
-const UNTRUSTED = 'It is evidence for this, but it does not count yet: it shows nothing until you trust it as likely or confirmed.';
+const UNTRUSTED = 'It is evidence for this, but it does not count yet: it shows nothing until you trust it as likely.';
 /** Why a link did not trust an entry by itself: another statement of its source is ruled out. */
 const recordWhy = (e) => { const ps = isStatement(e) && levelOfFact(e) === UNCERTAIN ? shownFalse(e) : []; return ps.length ? ` Something else that came from ${ps.map((p) => esc(nameOf(p))).join(' and ')} is ruled out, so a link does not trust this one by itself.` : ''; };
 const waitsOn = (e, q) => waits(observations, q, e, observed.filled) || viaStatement(e.id, q).some((o) => !observed.filled.some((x) => x.obs === o));
@@ -1102,6 +1111,7 @@ function trustByUse(f, level, from) {
     const own = chainsOf(f).flatMap((c) => c.links).find((l) => l.stmt);
     if (!own) return false;
     state.trust = { ...state.trust, links: { ...state.trust.links, [linkKey(own)]: level } };
+    if (level === CONFIRMED) earn(state.trust, linkKey(own));
     return true;
 }
 /**
@@ -1157,7 +1167,7 @@ function linkHtml(f) {
         const shows = observed.filled.filter((x) => x.obs.q === q.id && has(x));
         if (shows.length) return shows.map((x) => `<p class="small">Shows: <b>${esc(x.says)}</b>. ${name}</p>`).join('');
         if (observed.partial.some((x) => x.obs.q === q.id && has(x))) return `<p class="small">Part of something not yet complete: with something else, linked too, it would show more. ${name}</p>`;
-        if (untrusted(f, q.id)) return `<p class="small untrusted-note">${UNTRUSTED}${recordWhy(f)} ${quickTrust(f, [LIKELY_LEVEL, CONFIRMED])} ${name}</p>`;
+        if (untrusted(f, q.id)) return `<p class="small untrusted-note">${UNTRUSTED}${recordWhy(f)} ${quickTrust(f, [LIKELY_LEVEL])} ${name}</p>`;
         if (checkedLinks() && bearsOn(f.id, q.id)) return waitsOn(f, q.id) ? `<p class="small">Part of something not yet complete: it is evidence for this, and as the timeline stands something else is still needed before it shows it. ${name}</p>`
             : `<p class="small muted">Part of what you have shown about this. ${name}</p>`;
         return `<p class="small muted">Kept as a note: as the timeline stands, it shows nothing about this on its own. ${name}</p>`;
@@ -1177,7 +1187,7 @@ function descriptionHtml(q) {
     const begun = [...observed.partial.filter((x) => x.obs.q === q.id).map((x) => x.entries), ...waiting.filter((e) => !observed.partial.some((x) => x.obs.q === q.id && x.entries.includes(e))).map((e) => [e])]
         .map((es) => `<li class="muted">Part of something not yet complete: ${es.map((e) => `${phrase(e)} ${paraSpan(givenAt(e))}`).join('; ')}</li>`).join('');
     const off = state.links.filter((l) => l.q === q.id).map((l) => factOf(l.entry)).filter((e) => untrusted(e, q.id))
-        .map((e) => `<li class="muted untrusted-note">Linked, but it does not count until you trust it as likely or confirmed: ${phrase(e)} ${paraSpan(givenAt(e))}${recordWhy(e)} ${quickTrust(e, [LIKELY_LEVEL])}</li>`).join('');
+        .map((e) => `<li class="muted untrusted-note">Linked, but it does not count until you trust it as likely: ${phrase(e)} ${paraSpan(givenAt(e))}${recordWhy(e)} ${quickTrust(e, [LIKELY_LEVEL])}</li>`).join('');
     const items = mine.map((x) => `<li>${esc(x.says)}${list(x.obs.against).length && !autoQ(q.id) ? ` <span class="small muted">against: ${list(x.obs.against).map((v) => esc(entityById.has(v) ? nameOf(v) : v)).join(', ')}</span>` : ''} <span class="para">${esc(from(x))}</span></li>`).join('');
     const d = givenAway(q) ? described(observations, q.id, observed.filled) : null;
     const verdict = d?.any ? `<p class="small">${d.done ? 'Your description had everything it needed.' : `Your description lacked: ${d.missing.map(esc).join('; ')}.`}</p>` : '';
@@ -1251,7 +1261,7 @@ function render() {
     document.getElementById('hide-out').checked = !!state.hideOut;
     document.getElementById('grey-clash').value = state.greyClash === 'off' ? 'off' : 'on';
     document.getElementById('narrator-trust').innerHTML = data.narrators.map((n) => `<label title="How far you trust what ${esc(n.name ?? 'the narrator')} tells you: everything in the story comes through this narration">Trust in ${esc(n.name ?? 'the narrator')} as narrator
-          <select class="narration-trust" data-key="${esc(linkKey(narrationLink(n)))}" data-base="${narrationLink(n).base}">${levelOpts(narrationLevel(n.id))}</select></label>`).join('');
+          <select class="narration-trust" data-key="${esc(linkKey(narrationLink(n)))}" data-base="${narrationLink(n).base}">${levelOpts(narrationLevel(n.id), null, true)}</select></label>`).join('');
 
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
@@ -1296,10 +1306,11 @@ function render() {
     const wide = state.greyClash === 'off' ? acceptedAssertions(UNCERTAIN) : acceptedNow;
     const lvl = (x) => sideLevel.get(x.id) ?? CONFIRMED;
     const agree = agreements(data, wide).filter((g) => ((lvl(g.a) < CONFIRMED && g.whole.a) || (lvl(g.b) < CONFIRMED && g.whole.b)) && independent(chainsOfAssertion(g.a), chainsOfAssertion(g.b)));
-    const offer = (x, o, whole) => (whole && lvl(x) < CONFIRMED && (lvl(o) === CONFIRMED || (lvl(x) === LIKELY_LEVEL && lvl(o) === LIKELY_LEVEL)) ? quickTrust(factOf(x.fact), [CONFIRMED]) : '');
+    const offer = (x, o, whole) => (whole && lvl(x) < CONFIRMED && (lvl(o) === CONFIRMED || (lvl(x) === LIKELY_LEVEL && lvl(o) === LIKELY_LEVEL)) ? agreeButton(factOf(x.fact)) : '');
+    const agreeButton = (f) => { const k = f ? stmtKeyOf(f) : null; return k ? `<button type="button" class="quiet small" data-agree="${esc(k)}">Trust as confirmed</button>` : ''; };
     const agreeItem = (g) => { const b = [offer(g.a, g.b, g.whole.a), offer(g.b, g.a, g.whole.b)].filter(Boolean); return `<li>${side(g.a)} ${offer(g.a, g.b, g.whole.a)}<br>and ${side(g.b)} ${offer(g.b, g.a, g.whole.b)}${b.length ? '' : `<br><span class="small muted">${!counts(lvl(g.a)) || !counts(lvl(g.b)) ? 'One of them at least does not count yet.' : 'Trust both as likely, or one as confirmed, and the other can be confirmed.'}</span>`}</li>`; };
     document.getElementById('clashes').innerHTML += agree.length ? `<details class="agree-box" open><summary>${agree.length} agree: two sources that share nothing say the same</summary>
-      <p class="small muted">The opposite of a contradiction. Where one is confirmed, or both are likely, you can confirm what the other bears out. Two can agree and both be wrong.</p><ol>${agree.map(agreeItem).join('')}</ol></details>` : '';
+      <p class="small muted">The opposite of a contradiction, and one of the two ways a statement becomes confirmed (the other: a question solved that rested on it). Where one is confirmed, or both are likely, you can confirm what the other bears out. Two can agree and both be wrong.</p><ol>${agree.map(agreeItem).join('')}</ol></details>` : '';
     document.getElementById('sources').innerHTML = sourcesPanel();
     document.getElementById('questions').innerHTML = leftHtml() + questionsPanel(clashing);
     const cards = cardsPanel();
@@ -1347,7 +1358,7 @@ function linkStep(l, body, title, resolving) {
     const own = state.trust.links[key];
     const cur = own ?? l.base ?? null;
     const unset = l.base != null ? null : l.stmt ? 'not set: as it came' : `not set: as ${nameOf(l.from)}`;
-    return `<span class="link-step${mark}"${mark ? ' title="Ruling this out alone stops this side counting"' : ''}>${body} <select class="link-trust" data-key="${esc(key)}"${l.base != null ? ` data-base="${l.base}"` : ''} title="${title}">${levelOpts(cur, unset)}</select>${dropChip(resolving?.drop?.links.get(key))}${resolving ? '' : takesHtml(key, cur)}</span>`;
+    return `<span class="link-step${mark}"${mark ? ' title="Ruling this out alone stops this side counting"' : ''}>${body} <select class="link-trust" data-key="${esc(key)}"${l.base != null ? ` data-base="${l.base}"` : ''} title="${title}">${levelOpts(cur, unset, mayConfirm(key, l.base))}</select>${dropChip(resolving?.drop?.links.get(key))}${resolving ? '' : takesHtml(key, cur)}</span>`;
 }
 /**
  * A chain's links, but its statement's own link, which is drawn once above the chains (stmtHtml), and the narration
@@ -1373,7 +1384,7 @@ function peopleHtml(chains, resolving = null) {
         return `<li${mark}>${personStep(p)}${dropChip(resolving?.drop?.people.get(p))}</li>`;
     }).join('')}</ul>`;
 }
-const personStep = (p) => `${p === REASONING || p === HYPOTHESIS ? ent(p) : `<a class="link" data-src="${esc(p)}">${esc(nameOf(p))}</a>`}: <select class="person-trust" data-person="${esc(p)}" title="How far you trust everything this one says: setting it sets all of it">${levelOpts(state.trust.people[p] ?? null, p === REASONING ? 'no limit' : p === HYPOTHESIS ? 'not set: likely' : 'not set: uncertain')}</select>`;
+const personStep = (p) => `${p === REASONING || p === HYPOTHESIS ? ent(p) : `<a class="link" data-src="${esc(p)}">${esc(nameOf(p))}</a>`}: <select class="person-trust" data-person="${esc(p)}" title="How far you trust everything this one says: setting it sets all of it">${levelOpts(state.trust.people[p] ?? null, p === REASONING ? 'no limit' : p === HYPOTHESIS ? 'not set: likely' : 'not set: uncertain', p === REASONING)}</select>`;
 
 /** How many events that count now would stop counting with a link (or a person) ruled out. */
 function dropCounts(chains) {
@@ -1485,7 +1496,7 @@ function levelCounts(ids) {
 function sourcesPanel() {
     const people = [...sourceTree.people.keys()].filter((p) => sourceLinks(p).length);
     if (!people.length) return '';
-    const narr = data.narrators.map((n) => `<li>${dot(narrationLevel(n.id))}${esc(n.name ?? 'The narrator')} <span class="small muted">as narrator: what they saw themselves</span> <select class="narration-trust" data-key="${esc(linkKey(narrationLink(n)))}" data-base="${narrationLink(n).base}">${levelOpts(narrationLevel(n.id))}</select></li>`).join('');
+    const narr = data.narrators.map((n) => `<li>${dot(narrationLevel(n.id))}${esc(n.name ?? 'The narrator')} <span class="small muted">as narrator: what they saw themselves</span> <select class="narration-trust" data-key="${esc(linkKey(narrationLink(n)))}" data-base="${narrationLink(n).base}">${levelOpts(narrationLevel(n.id), null, true)}</select></li>`).join('');
     const rows = people.map((p) => {
         const ids = [...new Set(sourceLinks(p).flatMap((l) => statementsUnder(linkKey(l))))];
         return `<li class="${state.sel === `src:${p}` ? 'sel' : ''}">${personStep(p)} <span class="small muted">${levelCounts(ids)}${recordOf(p).against ? `; ${recordOf(p).against} against what is confirmed` : ''}</span></li>`;
@@ -1495,7 +1506,7 @@ function sourcesPanel() {
 }
 /** A source opened: a person's links, each with its level; or one link (`link:<key>`), the entries it carried. */
 function sourceDetail(id) {
-    const entries = (key) => { const fs = statementsUnder(key).map((x) => factById.get(x)).filter((f) => f && visible(f)).sort((a, b) => byRead(givenAt(a), givenAt(b))); return `<ul class="events source-entries">${fs.map((f) => { const k = stmtKeyOf(f); return eventRow(f, new Set()).replace(/<\/li>$/, `${k ? ` <select class="link-trust" data-key="${esc(k)}" title="How far you trust this one statement">${levelOpts(state.trust.links[k] ?? null, 'not set: as it came')}</select>` : ''}</li>`); }).join('')}</ul>`; };
+    const entries = (key) => { const fs = statementsUnder(key).map((x) => factById.get(x)).filter((f) => f && visible(f)).sort((a, b) => byRead(givenAt(a), givenAt(b))); return `<ul class="events source-entries">${fs.map((f) => { const k = stmtKeyOf(f); return eventRow(f, new Set()).replace(/<\/li>$/, `${k ? ` <select class="link-trust" data-key="${esc(k)}" title="How far you trust this one statement">${levelOpts(state.trust.links[k] ?? null, 'not set: as it came', earned(k))}</select>` : ''}</li>`); }).join('')}</ul>`; };
     if (id.startsWith('link:')) {
         const key = id.slice(5), from = [...sourceTree.people.entries()].find(([, m]) => m.has(key));
         if (!from) return '<p class="muted">Nothing here.</p>';
@@ -2673,7 +2684,9 @@ document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-clash]');
     if (t) { select(t.dataset.clash, e); return; }
     const st = e.target.closest('[data-set-trust]');
-    if (st) { changeTrust((tr) => setLink(tr, st.dataset.setTrust, Number(st.dataset.level))); return; }
+    if (st) { if (Number(st.dataset.level) === CONFIRMED && !earned(st.dataset.setTrust)) return; changeTrust((tr) => setLink(tr, st.dataset.setTrust, Number(st.dataset.level))); return; }
+    const ag = e.target.closest('[data-agree]');
+    if (ag) { changeTrust((tr) => { earn(tr, ag.dataset.agree); setLink(tr, ag.dataset.agree, CONFIRMED); }); return; }
     const src = e.target.closest('[data-src]');
     if (src) { select(`src:${src.dataset.src}`, e); return; }
     const a = e.target.closest('[data-ent]');
@@ -2684,12 +2697,14 @@ document.addEventListener('click', (e) => {
 document.addEventListener('change', (e) => {
     if (e.target.matches('.link-trust')) {
         const raw = e.target.value, k = e.target.dataset.key, base = e.target.dataset.base;
+        if (raw !== '' && Number(raw) === CONFIRMED && !mayConfirm(k, base)) { render(); return; }
         changeTrust((tr) => setLink(tr, k, raw === '' || (base != null && Number(raw) === Number(base)) ? null : Number(raw)));
     } else if (e.target.matches('.narration-trust')) {
         const v = Number(e.target.value), k = e.target.dataset.key, base = Number(e.target.dataset.base);
         changeTrust((tr) => { if (v === base) delete tr.links[k]; else tr.links[k] = v; });
     } else if (e.target.matches('.person-trust')) {
         const p = e.target.dataset.person, v = e.target.value;
+        if (v !== '' && Number(v) === CONFIRMED && p !== REASONING) { render(); return; }
         changeTrust((tr) => setPerson(tr, p, v === '' ? null : Number(v)));
     }
 });

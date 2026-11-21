@@ -678,7 +678,14 @@ times that certainly share a moment, with `whole.a` when all `a` covers lies ins
 out). `independent(chainsA, chainsB)`: no person and no paper, telling or word in common (a narration is shared by
 all, so a narrator's own observation is independent of everyone). The page lists a pair, under the clashes, where
 the two are independent and one short of confirmed is borne out whole; beside that one it offers "Trust as
-confirmed" where the other is confirmed or both are likely. Confirmed stays free to set by hand.
+confirmed" where the other is confirmed or both are likely.
+**Confirmed is earned** (the user's ruling of 2026-11-21; finding 115): no trust control offers it for what someone
+says. A statement becomes confirmed when a question solved rested on it (`confirmBy`) or when the player takes the
+agreement offer; its key is then kept in `trust.earned`, so that it can be lowered and put back (and "Reset
+trust" keeps it). A narrator's own link, and a doubtable narrator's statement, start at confirmed and can be set
+back to it; the limit on the reader's own reasoning offers it too (it is "no limit"). A path's move
+`{do: "trust", level: "confirmed"}` is played by pressing the offer (`#clashes [data-agree]`), unless a question
+solved since has confirmed the statement already.
 A telling is shown as an event, as trusted as the narration (that it was said stands; what it says is trusted apart).
 `resolvingLinks` gives the links and people whose ruling out alone would stop a fact counting
 (those every chain of it passes through): the page marks them when it traces a clash. "Something is missing here"

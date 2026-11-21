@@ -232,6 +232,12 @@ async function play(m) {
             break;
         }
         case 'trust': {
+            // Confirmed is earned: the path takes the offer under two sources that agree, unless a question solved
+            // since has confirmed the statement already.
+            if (m.level === 'confirmed') {
+                if (((await save()).trust?.links?.[m.link]) !== LEVELS.confirmed) { const b = `#clashes [data-agree="${esc(m.link)}"]`; if (!(await exists(b))) return fail(m, `no offer to confirm ${m.link}`); await click(b); }
+                break;
+            }
             const sel = m.link ? `#detail .link-trust[data-key="${esc(m.link)}"]` : `#detail .person-trust[data-person="${esc(m.person)}"]`;
             if (!(await exists(sel))) return fail(m, `no trust control for ${m.link ?? m.person} on ${on}`);
             await choose(sel, LEVELS[m.level]);

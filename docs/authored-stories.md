@@ -1500,6 +1500,19 @@ script that found each fact's paragraph from its quote; the data files are the s
       …"), which shows nothing, and not the statement under it; and the gate's "0 of 1" (the count for answers
       marked by hand) told it one piece was wanted when either of two pairs is.
 
+115. **Confirmed is earned; the gate and a telling say more (the user's rulings of 2026-11-21, after finding 114).**
+    - *Confirmed is earned only.* Haiku confirmed the curate by hand and never met the agreement offer. Now no
+      control offers "confirmed" for what someone says: it comes from the narrator's own observation, from a
+      question solved, or from the offer where two independent sources agree. A statement that has earned it can
+      be lowered and put back. This reverses "confirmed stays free to set by hand" of finding 113. Known cost:
+      in the older cases only one pair of statements agrees, so there confirmed comes almost only by solving.
+    - *The gate, with the answers marked from the evidence*, says what the question says ("no answer follows yet
+      from what you have linked", how many answers are ruled out), not "0 of 1": the count was of the pieces asked
+      for when answers are marked by hand, and an answer can follow more than one way.
+    - *A telling that shows nothing* says so as before, and adds that it is only that it was said: what was said
+      are entries of their own. A description of the page, the same for every telling.
+    - Left as it is: the story does not hold at an undecided clash.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

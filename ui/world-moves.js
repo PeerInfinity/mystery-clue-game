@@ -52,7 +52,8 @@ export const onOf = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 
 export function controlOf(m) {
     switch (m.do) {
         case 'circle': case 'cross': return `#q-box [data-mark-q="${esc(m.q)}"][data-mark-pick="${esc(m.pick)}"]`;
-        case 'trust': return m.link ? `#detail .link-trust[data-key="${esc(m.link)}"]` : `#detail .person-trust[data-person="${esc(m.person)}"]`;
+        // Confirmed is earned: where a path confirms a statement, it takes the offer under two sources that agree.
+        case 'trust': return m.level === 'confirmed' && m.link ? `#clashes [data-agree="${esc(m.link)}"]` : m.link ? `#detail .link-trust[data-key="${esc(m.link)}"]` : `#detail .person-trust[data-person="${esc(m.person)}"]`;
         case 'a': return `#detail [data-move-a="${esc(m.a)}"][data-with="${esc(m.b)}"]`;
         case 'b': return `#detail [data-move-b="${esc(m.of)}"]`;
         case 'c': return `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
@@ -163,6 +164,8 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
                 break;
             }
             case 'trust':
+                // Confirmed already (a question solved since confirmed it): nothing to do.
+                if (m.level === 'confirmed') { if (!made(m, saved()) && !(await press(sel))) throw new Failed('no offer to confirm'); break; }
                 if (!(await choose(sel, LEVELS[m.level]))) throw new Failed('no trust control');
                 break;
             case 'a': case 'b': case 'c': case 'm':
