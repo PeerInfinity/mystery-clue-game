@@ -1126,7 +1126,7 @@ function toggleLink(entry, q) {
     if (checkedLinks()) {
         if (isLinked(entry, q)) { if (bearsOn(entry, q)) { state.note = 'This link is evidence for the question: it stays.'; render(); return; } }
         else if (isTried(entry, q)) { state.note = 'Already tried: it shows nothing about this question.'; render(); return; }
-        else if (!bearsOn(entry, q)) { if (trying) return; markTried(entry, q); state.note = 'Tried: it shows nothing about this question.'; save(); render(); return; }
+        else if (!bearsOn(entry, q)) { if (trying) return; markTried(entry, q); state.note = `Tried: it shows nothing about this question.${factById.get(entry)?.attr === 'tells' ? ' This entry is only that it was said. What was said are entries of their own, and each can be linked.' : ''}`; save(); render(); return; }
     }
     remember();
     // To cite a statement is to hold it likely: a link that is kept trusts an entry still uncertain as likely, by its
@@ -2379,6 +2379,9 @@ function renderGate() {
     document.getElementById('next').title = state.story !== MAIN ? `Read the next paragraph of ${fileById.get(state.story)?.title ?? 'this paper'}` : qs.length ? `Before ¶${state.para + 1}: commit to an answer first` : 'Read the next paragraph';
     if (!qs.length) return;
     const count = (q) => {
+        // Marked from the evidence: no count of pieces (an answer can follow more than one way, and the count is
+        // of the pieces asked for when answers are marked by hand).
+        if (autoQ(q.id)) return unsolvedWhy(q);
         const n = circledCount(q), d = evidenceOf(q), s = gateState(q);
         if (s === 'pick') return n === 0 ? 'nothing circled yet' : `${n} circled`;
         if (s === 'evidence') {
@@ -2391,6 +2394,7 @@ function renderGate() {
     };
     const strict = strictGate() && qs.some((q) => evidenceOf(q).any), loose = qs.some((q) => !strictGate() || !evidenceOf(q).any);
     const rule = !strict ? `Commit first: circle exactly one answer${qs.length === 1 ? '' : ' for each'}. Any answer will do; the key shows at ¶${state.para + 1}.`
+        : qs.every((q) => autoQ(q.id)) ? 'The story goes on once you have shown the answer: link the evidence for it (“Link observations…”) until an answer follows from what you have linked.'
         : `The story goes on once you have shown the answer: link the evidence for it (“Link observations…”) and circle the one answer the evidence leaves${loose ? '. A question with no evidence to link takes any one answer' : ''}.`;
     // The held ending (earned papers), while the goal cannot be solved from what the reader has: the notice says what
     // the ending waits for and which questions can be solved now, not a count of the goal's evidence that no linking
