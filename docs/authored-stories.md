@@ -1560,6 +1560,18 @@ script that found each fact's paragraph from its quote; the data files are the s
       (carrying the key; at the counting-room) where it was one sentence. The table now makes its own rule: the
       cook's word alone rules Mr. Wicks out, as far as she is trusted (likely). The certain way is as before
       (the cook borne out, by the curate or by the charge disbelieved).
+    - *More questions typed (2026-11-21, the user's go-ahead: the remaining "who" questions before motives).*
+      "Taking out of a locked place" (`take_locked`: at the place, with a key to the door) went into the generic
+      table, since three stories need it: The Wages Bag, The Night Porter's Statement (the keys on his belt are a
+      key to the strongroom door) and The Watchman's Clock (the bale out by the yard gate). Both Rent Box cases
+      and Dinner at Larch House are a plain `take`. Each entry now has a `{from, to}` window. What is carried
+      counts as kept through the window unless it has an end. With every true entry shown the grids read as the
+      stories argue: the porter has opportunity and means and the clerk an alibi; the Captain was in the house;
+      Tanner has a key (his ankle, a condition, is not a typed need). Dinner at Larch House stays empty: its
+      argument is who crossed a watched hall, not who was where. No new rule came from the table. Still untyped:
+      who waited at the mill (The Telegram), who changed the word (The Lamp-Keeper's Word), who or what took the
+      ring, who let the brandy out of bond, who wrote the will; the two "who was the figure" questions are
+      identities, not acts.
     - *Not yet.* Motive has the mechanism and no data: no short case states a motive in typed form, and what a
       motive is in typed form beyond "a goal the act brings about" (gain, fear of exposure, a grudge) is the
       user's to decide. The other "who" questions are typed one case at a time.

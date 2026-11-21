@@ -306,6 +306,8 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
         const mark = markAssertions(data, { [q.id]: { [pick]: 'circled' } })[0] ?? { id: hypothesisKey(q.id, pick) };
         const w = coverOf(act.time);
         const within = (t) => { const k = coverOf(t); return !w || !k || overlaps(order, k, w); };
+        // What is carried is kept until something says otherwise: begun by the window's end, and not over before its start.
+        const kept = (t) => { const s0 = t?.at ?? t?.from; return !w || (t?.at ? within(t) : !!s0 && order.le(s0, w.end) && !(t.to && order.le(t.to, w.start))); };
         const row = { pick, opportunity: [], means: [], motive: [] };
         for (const req of (pointImplications(act, nameOf, c).entries ?? []).filter((r) => r.role === 'requires' && r.of === pick)) {
             const where = req.at ? (c.joins[req.at] ?? []) : req.place ? [req.place] : null;
@@ -317,7 +319,7 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
                 continue;
             }
             if (req.key || req.item) {
-                const fit = (e) => e.attr === 'carrying' && e.of === pick && (req.key ? e.key === req.key : (e.item ?? String(e.value).split(/[ ,]/)[0]) === req.item) && within(e.time);
+                const fit = (e) => e.attr === 'carrying' && e.of === pick && (req.key ? e.key === req.key : (e.item ?? String(e.value).split(/[ ,]/)[0]) === req.item) && kept(e.time);
                 const yes = entries.filter((e) => fit(e) && !e.neg), no = entries.filter((e) => fit(e) && e.neg);
                 if (yes.length) row.means.push({ status: 'met', req, facts: yes.map((e) => e.id) });
                 else if (no.length) row.means.push({ status: 'against', req, facts: no.map((e) => e.id) });

@@ -304,7 +304,7 @@ indirect possibility among them in its place) sit behind a "More" button, so tha
 
 **Typed states and actions** (`engine/actions.js`; the case's own types in `world/actions.json`).
 The action types are the engine's generic ones (`GENERIC_ACTIONS`: lock, unlock, open, close, go through, lead out,
-give, ask, drug, strike, keep a key, take, strike a light, hide) and the case's own, set by `setCaseActions` from
+give, ask, drug, strike, keep a key, take, take out of a locked place (`take_locked`: at the place, with a key to `via`), strike a light, hide) and the case's own, set by `setCaseActions` from
 `world/actions.json` (2026-11-07, the user's ruling: a generic core and each story's own as data). Silver Blaze's own
 are injuring (its needs, the stable door open and the guard unable to act, are the story's), laying against, and
 being cut as one falls, with the ramification that a horse injured before its race loses it. A case's type that a
