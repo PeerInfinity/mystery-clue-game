@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "change_word", "label": "changing the word carried", "requires": [], "effects": []}
+  ]
+}

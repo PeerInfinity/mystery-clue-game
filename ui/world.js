@@ -1085,7 +1085,24 @@ function restsOnHtml(q) {
     return `<div class="small rests-on" data-rests="${all.length}">By what you have linked: ${text}</div>`;
 }
 const viaStatement = (entry, q) => observations.filter((o) => o.q === q && o.from.some((f) => f?.doubted && carriedBy(f.doubted).includes(entry)));
-const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(observations, q, e) || viaStatement(entry, q).length > 0); };
+// An entry the grid of means, opportunity and motive would read for the question (alone, or beside the others it is
+// read with) is evidence for it too: nothing is written for that, the typed act and the typed entry say it.
+const gridWho = (q) => shownPossibilities(q).map((o) => o.value).filter((v) => ['person', 'animal'].includes(entityById.get(v)?.kind));
+const gridSeen = new Map();
+function gridBears(entry, qid) {
+    const q = qById.get(qid), f = factById.get(entry);
+    if (!q?.entry?.act && !q?.possibilities?.some((p) => p.action)) return false;
+    if (!f || f.attr === 'tells') return false;
+    const who = gridWho(q);
+    if (who.length < 2) return false;
+    const key = `${qid}|${who.join(',')}`, cells = (rows) => new Set((rows ?? []).flatMap((r) => [...r.opportunity, ...r.means, ...r.motive].flatMap((c) => c.facts)));
+    if (!gridSeen.has(key)) gridSeen.set(key, { all: cells(suspectGrid(data, q, who, data.facts.map((x) => x.id), nameOf, placeCtx)), one: new Map() });
+    const m = gridSeen.get(key);
+    if (m.all.has(entry)) return true;
+    if (!m.one.has(entry)) m.one.set(entry, cells(suspectGrid(data, q, who, [entry], nameOf, placeCtx)).has(entry));
+    return m.one.get(entry);
+}
+const bearsOn = (entry, q) => { const e = factOf(entry); return !!e && (bears(observations, q, e) || viaStatement(entry, q).length > 0 || gridBears(entry, q)); };
 /** A kept link that still waits: something it is evidence for is not shown yet. */
 // Evidence the player's own trust keeps from counting: an entry some observation of `q` not yet shown comes from
 // (itself, or as one of several alike), linked or not, that is below the timeline's level. Said outright, since
@@ -1216,7 +1233,7 @@ function descriptionHtml(q) {
  */
 function gridHtml(q) {
     if (givenAway(q)) return '';
-    const who = shownPossibilities(q).map((o) => o.value).filter((v) => ['person', 'animal'].includes(entityById.get(v)?.kind));
+    const who = gridWho(q);
     if (who.length < 2) return '';
     const shown = state.links.filter((l) => l.q === q.id).map((l) => factById.get(l.entry)).filter((f) => f && accepted(f)).map((f) => f.id);
     const rows = suspectGrid(data, q, who, shown, nameOf, placeCtx);

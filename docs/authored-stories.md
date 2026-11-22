@@ -1595,6 +1595,21 @@ script that found each fact's paragraph from its quote; the data files are the s
       (at the mill, with a key to it). The night book's entry is the typed act `keep_key` (drawing a key leaves
       one with it), and the grid now counts such an act of the suspect's as the means, as it counts a `carrying`
       entry with `key`. Mr. Grove: means ✓. "The only key drawn" is not typed, so nothing is against Mrs. Holt.
+    - *A tie, the third form (the user's ruling, the same day).* The Lamp-Keeper's Word gives each suspect a
+      reason that is neither gain nor loss: Pike came to blows with Wren; Elsie is to marry him. Typed: `tie: {to,
+      kind: "for" | "against"}` on an entry of the suspect's, and `helps` or `harms` on the act. For a person the
+      act helps, or against one it harms, is a motive (✓); the other way about is one against (✗). In this story
+      the act differs by suspect, so each possibility carries its own `action`: Pike's change would have put Wren
+      on the quay (`harms`), Elsie's put him at the chapel (`helps`). Both therefore read ✓, as the story says:
+      "each of the two had a reason". (The proposal put to the user had said Pike ✗; that was wrong, for his
+      change would have been the other way.) The Ring on the Bench gets no grid, by the same ruling: its argument
+      is a way into a room, which the room view carries.
+    - *What the grid reads is evidence (built with the tie; not put to the user first).* With checked links a link
+      stays only if the entry bears on the question, which until now meant a hand-written observation. The two
+      reasons in The Lamp-Keeper's Word have none, so their links would have been refused and the Motive column
+      could never fill. An entry the grid would read for the question (alone, or with every other entry shown)
+      now bears on it too (`gridBears` in `ui/world.js`). It shows nothing and decides nothing beyond its cell.
+      The alternative, an observation written per motive, is the hand-written way the user ruled against.
     - *Survey.* No other short case states a gain or a loss, so the will is the only data. The column decides
       nothing: a motive against is not a rule-out, as agreed for the grid.
 

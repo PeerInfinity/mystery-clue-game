@@ -241,5 +241,10 @@ test('suspectGrid: each suspect against what the act needs, from what is shown; 
     assert.deepEqual(motive(['f.old']), { a: '', b: '' });                                // the old will alone says nothing of the new
     assert.deepEqual(motive(['f.new']), { a: '', b: 'met:gains all:f.new' });
     assert.deepEqual(motive(['f.old', 'f.new']), { a: 'against:loses ROOM:f.old,f.new', b: 'met:gains all:f.new' });
+    // A tie: for a person the act helps, or against one it harms, is a motive; the other way about is one against.
+    const ties = { ...data, facts: [{ id: 'f.a_for', of: 'a', attr: 'role', value: 'to marry b', tie: { to: 'b', kind: 'for' }, time: { from: 't1' } }], questions: [{ id: 'q', entry: { of: '?', attr: 'action', time: { at: 't2' } }, possibilities: [{ value: 'a', action: { of: 'a', act: 'make', item: 'bag', helps: 'b' } }, { value: 'b' }] }] };
+    const tied = (action) => suspectGrid({ ...ties, questions: [{ ...ties.questions[0], possibilities: [{ value: 'a', action }, { value: 'b' }] }] }, { ...ties.questions[0], possibilities: [{ value: 'a', action }, { value: 'b' }] }, ['a', 'b'], ['f.a_for'], (id) => id.toUpperCase()).find((r) => r.pick === 'a').motive.map((c) => `${c.status}:${c.says}`).join();
+    assert.equal(tied({ of: 'a', act: 'make', item: 'bag', helps: 'b' }), 'met:for B, whom it helps');
+    assert.equal(tied({ of: 'a', act: 'make', item: 'bag', harms: 'b' }), 'against:for B, whom it harms');
     setCaseActions({});
 });

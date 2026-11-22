@@ -348,6 +348,15 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
                 row.motive.push({ status: 'against', req: { loss: g.what ?? null }, says: `loses ${what(g)}`, facts: [u.id, e.id] });
             }
         }
+        // A tie: the suspect is for or against a person (`tie: {to, kind}` on an entry of the suspect's), and the act
+        // helps or harms that person (`helps`, `harms` on the act). For and helps, or against and harms, is a motive.
+        for (const e of entries) for (const t of list(e.tie)) {
+            if (e.of !== pick) continue;
+            const does = act.helps === t.to ? 'helps' : act.harms === t.to ? 'harms' : null;
+            if (!does) continue;
+            const fits = (t.kind === 'for') === (does === 'helps');
+            row.motive.push({ status: fits ? 'met' : 'against', req: { tie: t.to }, says: `${t.kind === 'for' ? 'for' : 'against'} ${nameOf(t.to)}, whom it ${does}`, facts: [e.id] });
+        }
         rows.push(row);
     }
     return rows.length ? rows : null;

@@ -179,6 +179,7 @@ for (const f of facts) {
     // Gain and loss, for a motive: what a thing gives a person or a group, takes from one, and the thing it revokes.
     for (const g of list(f.gives)) if (!entities.has(g.to)) err(f.id, `gives: no entity ${g.to}`);
     for (const g of list(f.takes)) if (!entities.has(g.from)) err(f.id, `takes: no entity ${g.from}`);
+    for (const t of list(f.tie)) if (!entities.has(t.to) || !['for', 'against'].includes(t.kind)) err(f.id, 'a tie is {to: an entity, kind: for | against}');
     if (f.revokes != null && !entities.has(f.revokes)) err(f.id, `revokes: no entity ${f.revokes}`);
     for (const g of [f.goal, f.plan?.goal].filter(Boolean)) if (!entities.has(g.of) || !g.attr || g.value == null) err(f.id, 'a goal is {of: an entity, attr, value}');
     for (const k of ['at', 'from', 'to', 'after', 'before']) if (f.time?.[k] && !timeIds.has(f.time[k])) err(f.id, `time.${k}: no time ${f.time[k]}`);

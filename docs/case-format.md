@@ -565,7 +565,11 @@ that follows from others, shown by itself the moment they all are.
   (`what` an entity or a few words; `all: true` when it gives everything); `takes: [{from, what}]` is one against
   `from`; and `revokes: <thing>` makes one against whoever that other thing's `gives` named, unless the new thing
   gives them the same (both entries must be shown). A goal held is a fact of the suspect's with `goal` that one
-  of the act's `effects` meets, for a story that states a want outright. Only entries linked
+  of the act's `effects` meets, for a story that states a want outright. A tie (finding 117) is `tie: {to, kind:
+  "for" | "against"}` on an entry of the suspect's, read against `helps: <person>` or `harms: <person>` on the
+  act (on the question's entry, or on a possibility's own `action` where the act differs by suspect): for and
+  helps, or against and harms, is a motive; the other way about is one against. An entry the grid would read
+  counts as evidence for the question, so its link stays under checked links without an observation. Only entries linked
   to the question and trusted count, and a need is named only when one of them meets it or is against it. Nothing
   is written for it: type the act (`act`, its roles and a `{from, to}` window on the question's entry; the case's
   own act in `world/actions.json` if the generic ones do not say what it needs) and the statements it reads.
