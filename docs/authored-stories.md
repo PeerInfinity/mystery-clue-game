@@ -1653,7 +1653,23 @@ script that found each fact's paragraph from its quote; the data files are the s
       - The Rent Box (both): "the back door did not open once" rests on Ada Orme in the kitchen; "no servant" is
         everyone but the three, not living at the house. Its statements about everyone inside the rules ("nobody
         came in or went out") are the reader's conclusions from the doors, not a witness's words, and stay there.
-    - *Not yet.* Step 3, narrowing the deed's time. Without it Larch House's grid is still empty.
+    - *Step 3, when it could have been done (the same day; `deedTimes` in `engine/implications.js`).* The act
+      needs its agent at a place; for a stretch of the window the entries shown say nobody was: a statement about
+      everyone, of the place, of a place it lies in, or of the far side of its one door (`joins`), with each
+      person it excepts denied the place for the whole stretch too. The page says so above the grid ("Not from
+      the soup until the joint (…). Left: after the joint, until the guests gone") and judges Opportunity
+      against what is left: elsewhere through all of it is against; away from where one otherwise was, at a
+      moment of it, is a chance ("away from the dining-room when it could have been done"). By the user's
+      ruling it is a view and decides nothing: the hand-written rules still solve the case.
+    - *Two soft spots it showed in Dinner at Larch House, and the prose changed for them (the user's ruling).*
+      George listed who left the table and never said nobody else did, so nothing put Captain Voss in the
+      dining-room after the joint: the rule had assumed the list complete. And the notes went into the drawer at
+      the gong, with the table vouched for only from the soup. George now puts the notes away as the soup comes
+      in, and says "Nobody else left the table, and neither of our guests went out a second time" (two entries:
+      Miss Pym in the dining-room before the dessert, Captain Voss after the fish). The study door joins the
+      study and the hall; the two goings-out are typed as "not at the dining-room"; Clara's "he did not go near
+      the study door" holds for the whole of her watch. Seen on the page at ¶5 of the true path: the line as
+      above, Miss Pym ✓, George and the maid ✗, Captain Voss nothing shown (the path does not link his entry).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

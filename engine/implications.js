@@ -280,6 +280,50 @@ export function strength(support, derived, levelOfStatement = () => CONFIRMED) {
 export const certain = (support, derived, shown = () => true) => strength(support, derived, (id) => (shown(id) ? CONFIRMED : null)) === CONFIRMED;
 
 /**
+ * When a deed could have been done (2026-11-22; finding 118, step 3): the act needs its agent at a place at some
+ * moment of the window, and for a stretch of the window the entries shown say nobody was: a statement about everyone
+ * (`of: "*"`, a location denied) of the place itself, of a place it lies in, or of the far side of its one door
+ * (`joins`), with each person it excepts denied the place (or the far side) for the whole stretch too. Returns null
+ * when nothing shown closes any of the window, else `{place, closed: [{from, to, facts}], left: [{from, to,
+ * after}]}`: the stretches that are left, by the case's time points (`after`: the closed point just before).
+ */
+export function deedTimes(data, act, shown, nameOf = (id) => id, ctx = {}) {
+    const order = data.order ?? timeOrder(data.times), pl = data.places ?? places(data), joins = ctx.joins ?? data.joins ?? {};
+    const w = coverOf(act?.time);
+    if (!act || !w) return null;
+    const place = (pointImplications(act, nameOf, { joins, order, places: pl, ...ctx }).entries ?? []).find((r) => r.role === 'requires' && r.of === act.of && r.place)?.place;
+    if (!place) return null;
+    const has = new Set(shown), list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+    const told = assertions(data).filter((x) => x.kind === 'state' && x.fact != null && has.has(x.fact) && !x.mark && x.attr === 'location' && x.neg && typeof x.value === 'string' && coverOf(x.time));
+    const doors = Object.values(joins).filter((sides) => sides.includes(place));
+    const far = doors.length === 1 ? doors[0].find((p) => p !== place) : null;
+    const bars = (v) => pl.chain(place).includes(v) || (far != null && pl.chain(far).includes(v));
+    const covers = (k, s) => order.le(k.start, s.start) && order.le(s.end, k.end);
+    const closed = [];
+    for (const e of told.filter((x) => x.of === '*' && list(x.every).includes('person') && bars(x.value))) {
+        const s = coverOf(e.time);
+        const rest = list(e.but).map((b) => told.find((x) => x.of === b && bars(x.value) && covers(coverOf(x.time), s)));
+        if (rest.every(Boolean)) closed.push({ from: s.start, to: s.end, facts: [e.fact, ...rest.map((x) => x.fact)] });
+    }
+    if (!closed.length) return null;
+    const pts = (data.times ?? []).map((t) => t.id).filter((t) => order.le(w.start, t) && order.le(t, w.end)).sort((a, b) => (a === b ? 0 : order.le(a, b) ? -1 : 1));
+    const shut = (t) => closed.some((k) => order.le(k.from, t) && order.le(t, k.to));
+    const left = [];
+    pts.forEach((t, i) => {
+        if (shut(t)) return;
+        const prev = i > 0 ? pts[i - 1] : null;
+        if (prev && !shut(prev) && left.length) left.at(-1).to = t;
+        else left.push({ from: t, to: t, after: prev && shut(prev) ? prev : null });
+    });
+    return { place, closed, left };
+}
+/** `deedTimes` for a question: by the act of the first of `picks` whose answer is a typed act (the stretches are the same for each). */
+export function deedTimesOf(data, q, picks, shown, nameOf = (id) => id, ctx = {}) {
+    const kindOf = entityKinds(data);
+    for (const pick of picks) { const act = answerAction(q, pick, (id) => kindOf(id) != null); if (act && act.of === pick) return deedTimes(data, act, shown, nameOf, ctx); }
+    return null;
+}
+/**
  * Means, opportunity and motive (2026-11-21; docs/authored-stories.md, finding 116): each suspect of a "who"
  * question against what the act needs of its agent, by the action table, as far as the entries the player has
  * shown say (`shown`: the ids of the facts linked to the question and trusted). Nothing is hand-written: the act is
@@ -312,8 +356,19 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
         for (const req of (pointImplications(act, nameOf, c).entries ?? []).filter((r) => r.role === 'requires' && r.of === pick)) {
             const where = req.at ? (c.joins[req.at] ?? []) : req.place ? [req.place] : null;
             if (where) {
-                const no = w ? alibis(data, told, [{ mark, of: pick, places: where, time: act.time, label: '' }]) : [];
-                const yes = told.filter((x) => x.attr === 'location' && !x.neg && x.of === pick && typeof x.value === 'string' && where.some((p) => pl.chain(x.value).includes(p)) && within(x.time));
+                // Where the entries shown leave only part of the window (`deedTimes`), the suspect is judged against what
+                // is left: elsewhere through every stretch of it is against; away from where they otherwise were, at
+                // a moment of it, is a chance (`says`).
+                const dt = req.place ? deedTimes(data, act, shown, nameOf, c) : null;
+                const inLeft = (t) => { const k = coverOf(t); return !dt || (!!k && dt.left.some((l) => order.le(l.from, k.end) && order.le(k.start, l.to))); };
+                const elsewhere = (time) => alibis(data, told, [{ mark, of: pick, places: where, time, label: '' }]);
+                // A stretch left that is one time point: elsewhere at that point (`alibis` asks a window with two ends).
+                const at = (t) => told.filter((x) => x.attr === 'location' && !x.neg && x.of === pick && typeof x.value === 'string' && !where.some((p) => pl.chain(x.value).includes(p)) && (() => { const k = coverOf(x.time); return !!k && order.le(k.start, t) && order.le(t, k.end); })()).map((x) => ({ a: x }));
+                const parts = dt ? dt.left.map((l) => (l.from === l.to ? at(l.from) : elsewhere({ from: l.from, to: l.to }))) : [];
+                const no = !w ? [] : dt ? (dt.left.length && parts.every((p) => p.length) ? parts.flat() : []) : elsewhere(act.time);
+                const yes = told.filter((x) => x.attr === 'location' && !x.neg && x.of === pick && typeof x.value === 'string' && where.some((p) => pl.chain(x.value).includes(p)) && within(x.time) && inLeft(x.time));
+                const away = dt && !no.length && !yes.length ? told.filter((x) => x.attr === 'location' && x.neg && x.of === pick && typeof x.value === 'string' && !where.some((p) => pl.chain(p).includes(x.value)) && inLeft(x.time)) : [];
+                if (away.length) { row.opportunity.push({ status: 'met', req, says: `away from ${away.map((x) => nameOf(x.value)).join(', ')} when it could have been done`, facts: [...new Set(away.map((x) => x.fact))] }); continue; }
                 if (no.length) row.opportunity.push({ status: 'against', req, facts: [...new Set(no.map((k) => k.a.fact))] });
                 else if (yes.length) row.opportunity.push({ status: 'met', req, facts: [...new Set(yes.map((x) => x.fact))] });
                 continue;

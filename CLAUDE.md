@@ -30,7 +30,7 @@ See `docs/technical.md`. The ones used most:
 | One test file | `node --test engine/world.test.js` (a directory argument does not work) |
 | Serve the pages | `node scripts/serve.js` → http://localhost:8321/ (the full cases: `/v2/`; the earlier game: `/v1/`) |
 | Validate every short case (one: `node scripts/validate-world.js <dir>`) | `npm run validate-world` |
-| Every page check on every short case, three at a time, each with its own Chrome (about 2 min; cases as arguments for only those) | `npm run page-checks-all` |
+| Every page check on every short case, three at a time, each with its own Chrome (about 40 min, nearly all of it `cases/custom-house-fire`; the short cases take under a minute each; cases as arguments for only those) | `npm run page-checks-all` |
 | Every page check on one case (starts the server and its own Chrome if needed; `CDP_PORT` another Chrome port) | `CASE=<dir> npm run page-checks` |
 | A long story's logic: check it (references, reachability, a fill per seed), and export it as Archipelago rules | `node scripts/structure-check.mjs <dir> [seeds]`, `node scripts/export-rules.mjs <dir>` |
 | After changing a true path: the moves that trust each uncertain statement as likely before its first use | `node scripts/path-trust.mjs [<dir>...]` |

@@ -561,6 +561,11 @@ that follows from others, shown by itself the moment they all are.
   a record such as "one key drawn that evening"). It is read as a statement about each of them: in
   contradictions, and in the grid below. `seen_from: <a location entry>` on it (or on any entry that is a watch,
   "the door did not open once") names where its witness was: it is trusted no further than that entry.
+  Under a "who" question whose act needs its agent at a place, such statements shown narrow when it could have
+  been done (`deedTimes`): a stretch is closed when a statement about every person denies the place, a place it
+  lies in, or the far side of its one door (`joins` in `entities.json`), and each person it excepts is denied the
+  place for that stretch too. The page names the stretches closed and left, and the grid's Opportunity is judged
+  against what is left. Nothing is written for it, and it decides nothing.
 - **Means, opportunity and motive** (2026-11-21; `suspectGrid` in `engine/implications.js`; finding 116). Under a
   "who" question whose `entry` is a typed act, the page sets each person who may be the answer against what the
   act needs of its agent (the action table's `requires` with `of: "$agent"`): a place or a door is opportunity,

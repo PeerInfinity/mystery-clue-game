@@ -1,7 +1,7 @@
 {
   "times": [
     {"id": "t.before", "label": "Before"},
-    {"id": "t.gong", "label": "Thursday, the dinner gong", "after": "t.before", "para": 1, "quote": "As the gong went"},
+    {"id": "t.gong", "label": "Thursday, the dinner gong", "after": "t.before", "para": 1, "quote": "The gong had gone"},
     {"id": "t.soup", "label": "Thursday, the soup", "after": "t.gong", "para": 2, "quote": "with the soup"},
     {"id": "t.fish", "label": "Thursday, the fish", "after": "t.soup", "para": 2, "quote": "during the fish"},
     {"id": "t.joint", "label": "Thursday, the joint", "after": "t.fish", "para": 2, "quote": "as the joint was carried in"},

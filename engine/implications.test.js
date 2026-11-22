@@ -253,5 +253,19 @@ test('suspectGrid: each suspect against what the act needs, from what is shown; 
     assert.equal(threat({ q0: 'a' }), '');                                               // not until the act is known to remove it
     assert.equal(threat({ q0: 'a', q1: 'yes' }), 'met:threatened by BAG, which it would remove');
     assert.equal(threat({ q0: 'b', q1: 'yes' }), '');
+    // When it could have been done: nobody but b at the far side of the room's one door for t1..t2, and b not in the room
+    // then, leaves t3; a, elsewhere at t3, is against; b, away from the kitchen at t3, has the chance.
+    const { deedTimesOf } = await import('./implications.js');
+    const watch = { ...data, entities: [...data.entities, { id: 'hall', kind: 'place' }], joins: { door: ['room', 'hall'] }, facts: [
+        { id: 'f.nobody', of: '*', every: 'person', but: ['b'], attr: 'location', value: 'hall', neg: true, time: { from: 't1', to: 't2' } },
+        { id: 'f.b_not', of: 'b', attr: 'location', value: 'room', neg: true, time: { from: 't1', to: 't2' } },
+        { id: 'f.a_k3', of: 'a', attr: 'location', value: 'kitchen', time: { from: 't2', to: 't3' } },
+        { id: 'f.b_out', of: 'b', attr: 'location', value: 'kitchen', neg: true, time: { at: 't3' } },
+    ], questions: [{ id: 'q', entry: { of: '?', attr: 'action', act: 'take', item: 'bag', where: 'room', time: { from: 't1', to: 't3' } }, possibilities: [{ value: 'a' }, { value: 'b' }] }] };
+    const wq = watch.questions[0], allShown = watch.facts.map((f) => f.id);
+    assert.equal(deedTimesOf(watch, wq, ['a', 'b'], ['f.nobody']), null);                 // the one excepted is not accounted for
+    assert.deepEqual(deedTimesOf(watch, wq, ['a', 'b'], allShown).left, [{ from: 't3', to: 't3', after: 't2' }]);
+    const opp = Object.fromEntries(suspectGrid(watch, wq, ['a', 'b'], allShown).map((r) => [r.pick, r.opportunity.map((c) => `${c.status}:${c.facts}`).join()]));
+    assert.deepEqual(opp, { a: 'against:f.a_k3', b: 'met:f.b_out' });
     setCaseActions({});
 });

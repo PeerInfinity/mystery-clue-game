@@ -13,7 +13,7 @@ import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, p
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described, onPage, bears, waits } from '../engine/observations.js';
-import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, suspectGrid, LIKELY } from '../engine/implications.js';
+import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, suspectGrid, deedTimesOf, LIKELY } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
@@ -1100,9 +1100,9 @@ function gridBears(entry, qid) {
     if (who.length < 2) return false;
     const key = `${qid}|${who.join(',')}`, cells = (rows) => new Set((rows ?? []).flatMap((r) => [...r.opportunity, ...r.means, ...r.motive].flatMap((c) => c.facts)));
     // Read as if every question were solved: an entry that will fill a cell once another question is solved is kept.
-    if (!gridSeen.has(key)) gridSeen.set(key, { all: cells(suspectGrid(data, q, who, data.facts.map((x) => x.id), nameOf, { ...placeCtx, solved: Object.fromEntries(data.questions.map((x) => [x.id, x.answer])) })), one: new Map() });
+    if (!gridSeen.has(key)) gridSeen.set(key, { shut: new Set((deedTimesOf(data, q, who, data.facts.map((x) => x.id), nameOf, placeCtx)?.closed ?? []).flatMap((k) => k.facts)), all: cells(suspectGrid(data, q, who, data.facts.map((x) => x.id), nameOf, { ...placeCtx, solved: Object.fromEntries(data.questions.map((x) => [x.id, x.answer])) })), one: new Map() });
     const m = gridSeen.get(key);
-    if (m.all.has(entry)) return true;
+    if (m.all.has(entry) || m.shut.has(entry)) return true;
     if (!m.one.has(entry)) m.one.set(entry, cells(suspectGrid(data, q, who, [entry], nameOf, placeCtx)).has(entry));
     return m.one.get(entry);
 }
@@ -1242,9 +1242,13 @@ function gridHtml(q) {
     const shown = state.links.filter((l) => l.q === q.id).map((l) => factById.get(l.entry)).filter((f) => f && accepted(f)).map((f) => f.id);
     const rows = suspectGrid(data, q, who, shown, nameOf, { ...placeCtx, solved: Object.fromEntries(data.questions.filter((x) => isSolved(x.id)).map((x) => [x.id, x.answer])) });
     if (!rows) return '';
+    // When it could have been done: the stretches the entries shown close (nobody was there), and what is left.
+    const dt = deedTimesOf(data, q, who, shown, nameOf, placeCtx);
+    const span = (a, b) => (a === b ? `at ${timeLabel(a)}` : `from ${timeLabel(a)} until ${timeLabel(b)}`);
+    const whenHtml = dt ? `<p class="small deed-times" data-deed-times><b>When it could have been done.</b> Not ${dt.closed.map((k) => `${span(k.from, k.to)} <span class="muted">(${k.facts.map((id) => { const f = factById.get(id); return `${dot(levelOfFact(f))}${phrase(f)} ${paraSpan(givenAt(f))}`; }).join('; ')})</span>`).join('; nor ')}. ${dt.left.length ? `Left: ${dt.left.map((l) => (l.after ? `after ${timeLabel(l.after)}, until ${timeLabel(l.to)}` : span(l.from, l.to))).join('; ')}.` : 'Nothing is left of the time the question gives.'}</p>` : '';
     const item = (c) => `<div class="grid-${c.status}">${c.status === 'met' ? '✓' : '✗ against:'} ${c.says ? `${esc(c.says)}<br>` : c.req.id ? `${phrase(c.req)}<br>` : ''}<span class="muted">${c.facts.map((id) => { const f = factById.get(id); return `${dot(levelOfFact(f))}${phrase(f)} ${paraSpan(givenAt(f))}`; }).join('; ')}</span></div>`;
     const cell = (cs) => `<td>${cs.length ? cs.map(item).join('') : '<span class="muted">nothing shown</span>'}</td>`;
-    return `<table class="suspect-grid small" data-grid="${esc(q.id)}"><thead><tr><th></th><th title="Could they have been where it was done, when it was done?">Opportunity</th><th title="Had they what it takes: a key, a thing, a skill?">Means</th><th title="Do they gain or lose by it, or want what it brings?">Motive</th></tr></thead><tbody>${rows.map((r) => `<tr><th>${ent(r.pick)}</th>${cell(r.opportunity)}${cell(r.means)}${cell(r.motive)}</tr>`).join('')}</tbody></table>`;
+    return `${whenHtml}<table class="suspect-grid small" data-grid="${esc(q.id)}"><thead><tr><th></th><th title="Could they have been where it was done, when it was done?">Opportunity</th><th title="Had they what it takes: a key, a thing, a skill?">Means</th><th title="Do they gain or lose by it, or want what it brings?">Motive</th></tr></thead><tbody>${rows.map((r) => `<tr><th>${ent(r.pick)}</th>${cell(r.opportunity)}${cell(r.means)}${cell(r.motive)}</tr>`).join('')}</tbody></table>`;
 }
 const linkingBar = () => (linkingQ && qById.has(linkingQ) ? `<div class="linking-bar"><span>Linking to: <b>${esc(qLabel(qById.get(linkingQ)))}</b></span>${checkedLinks() ? `<label class="link-only-new" title="Hide the entries already linked to this question or tried for it"><input type="checkbox" data-link-only-new${linkOnlyNew ? ' checked' : ''}> only what is not tried yet</label>` : ''}<button type="button" data-linking-done>Done linking</button></div>` : '');
 

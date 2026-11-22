@@ -1,4 +1,5 @@
 {
+  "joins": {"study_door": ["study", "hall"]},
   "entities": [
     {"id": "george", "kind": "person", "name": "George Marlow"},
     {"id": "clara", "kind": "person", "name": "Clara Marlow"},
