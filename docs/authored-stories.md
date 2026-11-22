@@ -1610,6 +1610,15 @@ script that found each fact's paragraph from its quote; the data files are the s
       could never fill. An entry the grid would read for the question (alone, or with every other entry shown)
       now bears on it too (`gridBears` in `ui/world.js`). It shows nothing and decides nothing beyond its cell.
       The alternative, an observation written per motive, is the hand-written way the user ruled against.
+    - *Two blind runs with the grid (Haiku, 2026-11-22).* The Lamp-Keeper's Word: both answers right in 22
+      turns ($0.038); the solver never linked either reason, so the Motive column stayed empty. The Will in the
+      Bible: both right in 63 turns ($0.108); it linked the bequest late, giving "bears on motive" as its reason,
+      and the page showed "✓ gains all she had" for Mr. Pym. Neither run was misled by the grid or by the rule
+      that what the grid reads is evidence; neither needed the grid to solve the case.
+    - *The Custom-House Fire.* "Who let the brandy out of bond" is not typed: its argument is two solved
+      questions, and its act is the signing of the passes, which is typed already. The fire's motive (to destroy
+      a ledger that would expose the fire-setter) is a fourth shape, a threat removed; it is asked as a question
+      of its own ("Why was the Custom House burned?"), and whether to type it is put to the user.
     - *Survey.* No other short case states a gain or a loss, so the will is the only data. The column decides
       nothing: a motive against is not a rule-out, as agreed for the grid.
 
