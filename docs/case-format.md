@@ -565,7 +565,9 @@ that follows from others, shown by itself the moment they all are.
   been done (`deedTimes`): a stretch is closed when a statement about every person denies the place, a place it
   lies in, or the far side of its one door (`joins` in `entities.json`), and each person it excepts is denied the
   place for that stretch too. The page names the stretches closed and left, and the grid's Opportunity is judged
-  against what is left. Nothing is written for it, and it decides nothing.
+  against what is left. Nothing is written for it. As a rule (`t.when.<n>`, likely): an answer whose agent was
+  elsewhere through all that is left is ruled out, from the observations of the closing entries and of the alibi
+  (each of those entries must be what some observation of the question comes from).
 - **Means, opportunity and motive** (2026-11-21; `suspectGrid` in `engine/implications.js`; finding 116). Under a
   "who" question whose `entry` is a typed act, the page sets each person who may be the answer against what the
   act needs of its agent (the action table's `requires` with `of: "$agent"`): a place or a door is opportunity,

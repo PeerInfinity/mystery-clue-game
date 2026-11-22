@@ -1671,6 +1671,18 @@ script that found each fact's paragraph from its quote; the data files are the s
       the study door" holds for the whole of her watch. Seen on the page at ¶5 of the true path: the line as
       above, Miss Pym ✓, George and the maid ✗, Captain Voss nothing shown (the path does not link his entry).
 
+    - *The narrowing as a rule (the user's ruling, the same day).* Where the true entries close part of an act's
+      window and an answer's agent was elsewhere through all that is left, the table rules that answer out, as
+      likely only (it rests on what witnesses did not see): `t.when.<n>`, from the observations of the entries
+      that close the stretch and of the alibi. Each of those entries must be what some observation comes from;
+      an observation was written for Captain Voss not going out again. In Dinner at Larch House this replaces
+      two of the three hand-written rules (Voss ruled out; "the notes were taken from the joint onward"). The
+      third, the conclusion, stays written, now as likely: with "something else" always among the answers
+      nothing is concluded by elimination. The answer now follows at ¶4, where Clara's "nobody else crossed the
+      hall" is read, not ¶5: that nobody watched afterwards is no longer needed, only that nobody is said to
+      have. The true path ends at ¶4 with four links.
+    - *Left.* A place with more than one door (no case needs it).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

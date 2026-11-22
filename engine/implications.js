@@ -244,11 +244,32 @@ export function tableRules(data, observations) {
             else if (aims.length && sets.every((ids) => alibis(data, told.filter((x) => ids.includes(x.fact)), aims).length > 0)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: had one of the answers been the aim, something would have been done toward it`, rules_out: [p.value], strength: LIKELY, table: true });
         }
     });
+    // When it could have been done (`deedTimes`, 2026-11-22): the true entries close part of the act's window (nobody
+    // was at the place), and an answer's agent was elsewhere through all that is left. Likely only: it rests on what
+    // witnesses did not see. Each entry it rests on must be what some observation of the question comes from.
+    const trueIds = (data.facts ?? []).filter((f) => f.truth !== false).map((f) => f.id);
+    const obsOf = (qid, f) => observations.filter((o) => o.q === qid && !o.if && o.from.every((x) => typeof x === 'string') && o.from.includes(f)).sort((a, b) => a.from.length - b.from.length)[0];
+    for (const q of data.questions) (q.possibilities ?? []).forEach((p, n) => {
+        if (isRight(q, p.value)) return;
+        const act = answerAction(q, p.value, isEntity);
+        if (!act || act.of !== p.value) return;
+        const dt = deedTimes(data, act, trueIds, undefined, ctx);
+        if (!dt || !dt.left.length) return;
+        const pl = data.places ?? places(data), order = data.order ?? timeOrder(data.times);
+        const mine = told.filter((x) => x.attr === 'location' && !x.neg && x.of === p.value && typeof x.value === 'string' && !pl.chain(x.value).includes(dt.place));
+        const through = (l) => mine.find((x) => { const k = coverOf(x.time); return !!k && order.le(k.start, l.from) && order.le(l.to, k.end); });
+        const alibi = dt.left.map(through);
+        if (!alibi.every(Boolean)) return;
+        const obs = [...new Set([...dt.closed.flatMap((k) => k.facts), ...alibi.map((x) => x.fact)])].map((f) => obsOf(q.id, f));
+        if (!obs.every(Boolean)) return;
+        const from = [...new Set(obs.map((o) => o.id))];
+        out.push({ id: `t.when.${n}`, q: q.id, from, says: `${obs.map((o) => o.says).join('; ')}: one of the answers was elsewhere whenever it could have been done`, rules_out: [p.value], strength: LIKELY, table: true });
+    });
     return out;
 }
 /** A case's implications with the table's own added (those not already written by hand with the same premise and answer). */
 export function withTable(implications, data, observations) {
-    const same = (t) => implications.some((i) => i.q === t.q && i.from.length === 1 && i.from[0] === t.from[0] && (i.rules_out ?? []).includes(t.rules_out[0]));
+    const same = (t) => t.from.length === 1 && implications.some((i) => i.q === t.q && i.from.length === 1 && i.from[0] === t.from[0] && (i.rules_out ?? []).includes(t.rules_out[0]));
     return [...implications, ...tableRules(data, observations).filter((t) => !same(t))];
 }
 
