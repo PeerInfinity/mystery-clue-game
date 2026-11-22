@@ -1572,9 +1572,27 @@ script that found each fact's paragraph from its quote; the data files are the s
       who waited at the mill (The Telegram), who changed the word (The Lamp-Keeper's Word), who or what took the
       ring, who let the brandy out of bond, who wrote the will; the two "who was the figure" questions are
       identities, not acts.
-    - *Not yet.* Motive has the mechanism and no data: no short case states a motive in typed form, and what a
-      motive is in typed form beyond "a goal the act brings about" (gain, fear of exposure, a grudge) is the
-      user's to decide. The other "who" questions are typed one case at a time.
+    - *Not yet (as of that day's first batch).* Motive had the mechanism and no data; see finding 117. The other
+      "who" questions are typed one case at a time.
+117. **A motive is gain or loss (the user's ruling of 2026-11-21).** The recommendation of finding 116 was a
+    motive as a goal the suspect holds. Read against the stories it fits badly: they almost never say what a
+    person wanted, they say who gains and who loses. The user agreed to gain or loss as the main typed form,
+    with the held goal kept for a story that states a want or a fear outright, and to build it on The Will in
+    the Bible first.
+    - *The typed form.* On an entry of a thing: `gives: [{to, what}]`, `takes: [{from, what}]`, `revokes: <thing>`.
+      Where a question's typed act makes or handles that thing, the grid's Motive column reads: ✓ "gains …" for
+      whom it gives to; ✗ "loses …" for whom it takes from, or for whom a revoked thing gave something the new
+      one does not. The loss by revoking is worked out from the two entries, not written, and needs both shown.
+    - *The Will in the Bible.* "Who wrote the will" is the typed act `make` (generic: making a thing; it needs
+      nothing of its agent, so the Opportunity and Means columns stay empty here: the keys and the Bible are the
+      story's argument about a will that was, in truth, never in the Bible). The old will `gives` the house to
+      Mrs. Grice and the rest to the church; the new one `gives` all to Mr. Pym and `revokes` the old. With both
+      linked: Mr. Pym ✓ gains all she had; Mrs. Grice ✗ loses Ashcombe House.
+    - *A hand-written observation corrected by it.* "The earlier will gives Mrs. Grice the house; this one takes
+      it from her" rested on the old will alone. It now rests on both wills, and the true path links the new
+      will's bequest to the question (one move more).
+    - *Survey.* No other short case states a gain or a loss, so the will is the only data. The column decides
+      nothing: a motive against is not a rule-out, as agreed for the grid.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

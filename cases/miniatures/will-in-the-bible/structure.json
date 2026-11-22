@@ -48,12 +48,13 @@
           "c.will_font",
           "c.register",
           "c.old_will",
+          "c.will_date",
           "c.keys"
         ]
       ],
       "rules_out": {
         "Harriet Pym": "c.death, c.will_font and c.register: she died two months before the christening she writes of",
-        "Mrs. Grice": "c.old_will: the new will takes the house from her; c.keys: she was gone from the day after the funeral, and only Lionel Pym could come at the Bible"
+        "Mrs. Grice": "c.old_will and c.will_date: the new will takes the house from her; c.keys: she was gone from the day after the funeral, and only Lionel Pym could come at the Bible"
       }
     }
   ],

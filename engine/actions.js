@@ -60,6 +60,7 @@ const GENERIC = {
     keep_key: { label: 'keeping a key to', requires: [], effects: [{ of: '$agent', key: '$thing' }] },
     take: { label: 'taking up', requires: [{ of: '$agent', place: '$where' }], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
     take_locked: { label: 'taking, out of a locked place,', requires: [{ of: '$agent', place: '$where' }, { of: '$agent', key: '$via' }], effects: [{ of: '$agent', attr: 'carrying', value: '$item' }] },
+    make: { label: 'making', requires: [], effects: [{ of: '$item', attr: 'made_by', value: '$agent' }] },
     strike_light: { label: 'striking a light', requires: [], effects: [{ of: '$agent', attr: 'lit', value: 'a light' }] },
     hide: { label: 'hiding', requires: [{ of: '$agent', attr: 'knows', value: 'a hiding-place', unless: '$where' }, { of: '$agent', charge: '$where' }], effects: [{ of: '$thing', attr: 'held_by', value: '$agent' }] },
 };

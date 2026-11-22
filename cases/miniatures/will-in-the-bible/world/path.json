@@ -3,6 +3,7 @@
   "moves": [
     {"at": [2, "will:1"], "do": "link", "entry": "f.will_date", "q": "q.dated", "see": "dated the third of March", "for_q": ["q.dated"], "why": "The will says it was made on the third of March."},
     {"at": [2, "will:2"], "do": "link", "entry": "f.will_thomas", "q": "q.dated", "see": "already christened", "for_q": ["q.dated"], "why": "And it speaks of holding Thomas at the font."},
+    {"at": [2, "will:1"], "do": "link", "entry": "f.will_bequest", "q": "q.who", "see": "leaves everything to Mr. Pym", "for_q": ["q.who"], "why": "The new will revokes the old and leaves all to Mr. Pym."},
     {"at": [3], "do": "link", "entry": "f.lionel_keys", "q": "q.who", "see": "only Mr. Pym could come at the Bible", "for_q": ["q.who"], "why": "Since her death the keys were Mr. Pym's."},
     {"at": [3], "do": "link", "entry": "f.grice_gone", "q": "q.who", "see": "never came back to the Bible", "for_q": ["q.who"], "why": "Mrs. Grice was at Frome from the day after the funeral."},
     {"at": [3], "do": "link", "entry": "f.old_will", "q": "q.who", "see": "this one takes it from her", "for_q": ["q.who"], "why": "And the new will would rob her of the house."},

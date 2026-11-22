@@ -304,7 +304,7 @@ indirect possibility among them in its place) sit behind a "More" button, so tha
 
 **Typed states and actions** (`engine/actions.js`; the case's own types in `world/actions.json`).
 The action types are the engine's generic ones (`GENERIC_ACTIONS`: lock, unlock, open, close, go through, lead out,
-give, ask, drug, strike, keep a key, take, take out of a locked place (`take_locked`: at the place, with a key to `via`), strike a light, hide) and the case's own, set by `setCaseActions` from
+give, ask, drug, strike, keep a key, take, take out of a locked place (`take_locked`: at the place, with a key to `via`), make (`make`: an `item` made, a forged paper; nothing needed of its agent), strike a light, hide) and the case's own, set by `setCaseActions` from
 `world/actions.json` (2026-11-07, the user's ruling: a generic core and each story's own as data). Silver Blaze's own
 are injuring (its needs, the stable door open and the guard unable to act, are the story's), laying against, and
 being cut as one falls, with the ramification that a horse injured before its race loses it. A case's type that a
@@ -560,7 +560,12 @@ that follows from others, shown by itself the moment they all are.
   "who" question whose `entry` is a typed act, the page sets each person who may be the answer against what the
   act needs of its agent (the action table's `requires` with `of: "$agent"`): a place or a door is opportunity,
   anything else (a key: a `carrying` fact with `key: <door>`; a thing carried; a state such as `knows`) is means,
-  and a motive is a fact of the suspect's with `goal` that one of the act's `effects` meets. Only entries linked
+  and a motive is gain or loss, or a goal held. Gain or loss (2026-11-21, finding 117) is read from the thing the
+  act makes or handles (`item`, `thing`): an entry of that thing with `gives: [{to, what}]` is a motive for `to`
+  (`what` an entity or a few words; `all: true` when it gives everything); `takes: [{from, what}]` is one against
+  `from`; and `revokes: <thing>` makes one against whoever that other thing's `gives` named, unless the new thing
+  gives them the same (both entries must be shown). A goal held is a fact of the suspect's with `goal` that one
+  of the act's `effects` meets, for a story that states a want outright. Only entries linked
   to the question and trusted count, and a need is named only when one of them meets it or is against it. Nothing
   is written for it: type the act (`act`, its roles and a `{from, to}` window on the question's entry; the case's
   own act in `world/actions.json` if the generic ones do not say what it needs) and the statements it reads.

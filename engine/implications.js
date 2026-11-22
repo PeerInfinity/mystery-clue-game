@@ -333,6 +333,19 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
             if (!e.goal || e.of !== pick) continue;
             if (brings.some((p) => meets(p, { of: e.goal.of, attr: e.goal.attr, value: e.goal.value, neg: !!e.goal.neg }, c))) row.motive.push({ status: 'met', req: { of: e.goal.of, attr: e.goal.attr, value: e.goal.value, neg: !!e.goal.neg }, facts: [e.id] });
         }
+        // Gain and loss: what the thing the act makes or handles gives a person or takes from them (`gives`, `takes` on
+        // an entry of that thing), and what it takes by revoking another thing (`revokes`) that gave it.
+        const things = [act.item, act.thing].filter(Boolean), list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+        const what = (g) => (g.what == null ? 'by it' : isEntity(g.what) ? nameOf(g.what) : g.what);
+        const about = entries.filter((e) => things.includes(e.of));
+        for (const e of about) {
+            for (const g of list(e.gives)) if (g.to === pick) row.motive.push({ status: 'met', req: { gain: g.what ?? null }, says: `gains ${what(g)}`, facts: [e.id] });
+            for (const g of list(e.takes)) if (g.from === pick) row.motive.push({ status: 'against', req: { loss: g.what ?? null }, says: `loses ${what(g)}`, facts: [e.id] });
+            if (e.revokes) for (const u of entries.filter((x) => x.of === e.revokes)) for (const g of list(u.gives)) {
+                if (g.to !== pick || about.some((x) => list(x.gives).some((k) => k.to === pick && (k.what === g.what || k.all)))) continue;
+                row.motive.push({ status: 'against', req: { loss: g.what ?? null }, says: `loses ${what(g)}`, facts: [u.id, e.id] });
+            }
+        }
         rows.push(row);
     }
     return rows.length ? rows : null;

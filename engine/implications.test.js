@@ -232,5 +232,14 @@ test('suspectGrid: each suspect against what the act needs, from what is shown; 
     assert.equal(cells(['f.a_room', 'f.a_kitchen']).a, 'against:f.a_kitchen||');         // elsewhere the whole window: against
     assert.equal(cells(['f.b_room', 'f.b_key', 'f.b_wants']).b, 'met:f.b_room|met:f.b_key|met:f.b_wants');
     assert.equal(suspectGrid(data, { ...q, entry: { of: '?', attr: 'action' } }, ['a', 'b'], []), null);   // no typed act: no grid
+    // Gain and loss: what the thing made gives a person is a motive; what it revokes that gave another is one against.
+    const wills = { ...data, entities: [...data.entities, { id: 'old', kind: 'document' }, { id: 'new', kind: 'document' }], facts: [
+        { id: 'f.old', of: 'old', attr: 'condition', value: 'leaves the room to a', gives: [{ to: 'a', what: 'room' }], time: { from: 't1' } },
+        { id: 'f.new', of: 'new', attr: 'condition', value: 'revokes the old and leaves all to b', gives: [{ to: 'b', what: 'all', all: true }], revokes: 'old', time: { at: 't3' } },
+    ], questions: [{ id: 'q', entry: { of: '?', attr: 'action', act: 'make', item: 'new', time: { before: 't3' } }, possibilities: [{ value: 'a' }, { value: 'b' }] }] };
+    const motive = (shown) => Object.fromEntries(suspectGrid(wills, wills.questions[0], ['a', 'b'], shown, (id) => id.toUpperCase()).map((r) => [r.pick, r.motive.map((c) => `${c.status}:${c.says}:${c.facts}`).join(',')]));
+    assert.deepEqual(motive(['f.old']), { a: '', b: '' });                                // the old will alone says nothing of the new
+    assert.deepEqual(motive(['f.new']), { a: '', b: 'met:gains all:f.new' });
+    assert.deepEqual(motive(['f.old', 'f.new']), { a: 'against:loses ROOM:f.old,f.new', b: 'met:gains all:f.new' });
     setCaseActions({});
 });
