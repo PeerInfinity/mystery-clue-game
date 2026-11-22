@@ -556,6 +556,11 @@ that follows from others, shown by itself the moment they all are.
   the money been the aim, the chest would not be whole with the money in it. Likely only, since an aim can
   fail; and never against the right answer. A circled aim goes on the timeline as an intention only for a
   question whose entry is one (`attr: "intends"`).
+- **An absence a witness states** (2026-11-22; finding 118). "Nobody else crossed the hall" is a fact `of: "*"`
+  with `every: <kind>` and `but: [those excepted]`, usually `neg: true` (a location, or `carrying` with `key` for
+  a record such as "one key drawn that evening"). It is read as a statement about each of them: in
+  contradictions, and in the grid below. `seen_from: <a location entry>` on it (or on any entry that is a watch,
+  "the door did not open once") names where its witness was: it is trusted no further than that entry.
 - **Means, opportunity and motive** (2026-11-21; `suspectGrid` in `engine/implications.js`; finding 116). Under a
   "who" question whose `entry` is a typed act, the page sets each person who may be the answer against what the
   act needs of its agent (the action table's `requires` with `of: "$agent"`): a place or a door is opportunity,

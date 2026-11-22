@@ -400,7 +400,10 @@ function levelOfFact(f) {
         return Math.min(...ls, cap ?? CONFIRMED);
     }
     if (f.attr === 'tells') return narratorIds.has(f.to) ? narrationLevel(f.to) : Math.max(...data.narrators.map((n) => narrationLevel(n.id)));
-    return levelOf(chainsOf(f), state.trust);
+    const own = levelOf(chainsOf(f), state.trust);
+    // An absence ("nobody else crossed the hall") rests on where its witness was: no more trusted than that entry.
+    const base = f.seen_from && f.seen_from !== f.id ? factById.get(f.seen_from) : null, bl = base ? levelOfFact(base) : null;
+    return own != null && bl != null ? Math.min(own, bl) : own;
 }
 /** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
 const chainsOfAssertion = (x) => (x.mark ? [x.from ? hypothesisChain(...x.from.slice(4).split('=')) : hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? claimChains(x.fact) : chainsOf(factOf(x.fact)));
@@ -2274,6 +2277,7 @@ function renderDetail(clashing) {
         el.innerHTML = `<h2>${phrase(f)}</h2>
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.${recordNote(f) ? ` <span class="muted">(${recordNote(f).replace(/^o/, 'O')}.)</span>` : ''}</p>
+          ${f.seen_from && factById.has(f.seen_from) && visible(factById.get(f.seen_from)) ? `<p class="small" data-seen-from>Rests on where its witness was: ${dot(levelOfFact(factById.get(f.seen_from)))}<a class="link" data-fact="${esc(f.seen_from)}">${phrase(factById.get(f.seen_from))}</a>. It is trusted no further than that.</p>` : ''}
           ${f.attr === 'tells' ? toldHtml(f)
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}

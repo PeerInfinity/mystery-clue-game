@@ -15,6 +15,6 @@
     {"id": "c.tel_words", "source": "The telegram (a paper)", "says": "'Come to the mill at ten. M.'", "facts": ["f.tel_words"], "file": "telegram"},
     {"id": "c.fete", "source": "The narrator's own afternoon", "says": "Mrs. Holt was at the fête from three until five, the narrator at her side.", "facts": ["f.mary_fete"]},
     {"id": "c.train", "source": "Mr. Grove's clerk, to the narrator", "says": "Mr. Grove took the two o'clock train to Leeds.", "facts": ["f.martin_train"], "chain": ["f.clerk_tells"]},
-    {"id": "c.key", "source": "The mill's night book, read by the narrator", "says": "One key was drawn that evening, at half past nine: Mr. Grove's.", "facts": ["f.key_drawn"]}
+    {"id": "c.key", "source": "The mill's night book, read by the narrator", "says": "One key was drawn that evening, at half past nine: Mr. Grove's.", "facts": ["f.key_drawn", "f.no_other_key"]}
   ]
 }

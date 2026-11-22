@@ -1632,6 +1632,29 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Survey.* No other short case states a gain or a loss, so the will is the only data. The column decides
       nothing: a motive against is not a rule-out, as agreed for the grid.
 
+118. **Absence as evidence (item 4 of finding 110; the user's rulings of 2026-11-22).** What the reader does with
+    "nobody else crossed the hall": a watcher is placed; the watcher says who was not there; that is a statement
+    about each person; the deed's time narrows to when nobody watched; only then does opportunity decide.
+    - *Rulings.* (1) Absence is only what the witness says: the explicit "nobody but X" is typed as a statement
+      about everyone in the witness's own account, as trusted as the witness. A typed watcher from whose silence
+      the page would assume the rest was not built: it makes silence into a denial the story may not mean, and
+      every case found states the absence outright. A complete record is typed the same way. (2) The statement
+      rests on where its witness was. (3) The page narrowing the deed's time itself is the second step, to be
+      shown on Dinner at Larch House before going further. (4) Order: Larch House, The Telegram, The Rent Box.
+    - *Built, steps 1 and 2.* A fact may be `of: "*"` with `every` and `but`, as an implication's `asserts`
+      already could (the engine read them; the validator now allows them). `seen_from: <entry>` names the entry
+      that puts the witness where it could be seen from: the statement is trusted no further than that entry,
+      and the page says so under it.
+      - Dinner at Larch House: "nobody else crossed the hall" is everyone but Captain Voss, not in the hall, from
+        the soup to the joint, seen from the landing.
+      - The Telegram Signed M.: the night book's line is now two entries, Mr. Grove drawing his key and "nobody
+        but Mr. Grove: a key of the mill" (the record as complete). The grid reads the second under Means: ✗ for
+        Mrs. Holt. The hand-written observation rests on both, one link more on the true path.
+      - The Rent Box (both): "the back door did not open once" rests on Ada Orme in the kitchen; "no servant" is
+        everyone but the three, not living at the house. Its statements about everyone inside the rules ("nobody
+        came in or went out") are the reader's conclusions from the doors, not a witness's words, and stay there.
+    - *Not yet.* Step 3, narrowing the deed's time. Without it Larch House's grid is still empty.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

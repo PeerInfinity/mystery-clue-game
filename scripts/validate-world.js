@@ -147,7 +147,11 @@ for (const t of times) if (reaches(t.id, t.id)) err(t.id, 'after: cycle');
 const ENTITY_ATTRS = new Set(['location', 'lives_at', 'carrying', 'wearing', 'owner', 'identity']);
 const BASES = new Set(['stated', 'implied', 'inferable']);
 for (const f of facts) {
-    if (f.of !== '?' && !entities.has(f.of)) err(f.id, `of: no entity ${f.of}`);
+    // A statement about everyone, in a witness's own entry ("nobody else crossed the hall"): `of: "*"`, `every` a kind,
+    // `but` those excepted; `seen_from`: the entry that puts its witness where it could be seen from.
+    if (f.of === '*') { if (!list(f.every).length) err(f.id, 'of "*" needs every: a kind'); for (const b of list(f.but)) if (!entities.has(b)) err(f.id, `but: no entity ${b}`); }
+    else if (f.of !== '?' && !entities.has(f.of)) err(f.id, `of: no entity ${f.of}`);
+    if (f.seen_from != null && !(facts.find((x) => x.id === f.seen_from)?.attr === 'location')) err(f.id, `seen_from: ${f.seen_from} is not an entry of where someone was`);
     if (f.to && !entities.has(f.to)) err(f.id, `to: no entity ${f.to}`);
     if (ENTITY_ATTRS.has(f.attr)) for (const v of list(f.value)) {
         const head = String(v).split(/,| \(/)[0];

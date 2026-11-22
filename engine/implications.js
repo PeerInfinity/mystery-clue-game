@@ -307,7 +307,7 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
         const w = coverOf(act.time);
         const within = (t) => { const k = coverOf(t); return !w || !k || overlaps(order, k, w); };
         // What is carried is kept until something says otherwise: begun by the window's end, and not over before its start.
-        const kept = (t) => { const s0 = t?.at ?? t?.from; return !w || (t?.at ? within(t) : !!s0 && order.le(s0, w.end) && !(t.to && order.le(t.to, w.start))); };
+        const kept = (t) => { const s0 = t?.at ?? t?.from; return !w || (t?.at ? within(t) : !!s0 && order.le(s0, w.end) && !(t.to && order.lt(t.to, w.start))); };
         const row = { pick, opportunity: [], means: [], motive: [] };
         for (const req of (pointImplications(act, nameOf, c).entries ?? []).filter((r) => r.role === 'requires' && r.of === pick)) {
             const where = req.at ? (c.joins[req.at] ?? []) : req.place ? [req.place] : null;
@@ -319,7 +319,9 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
                 continue;
             }
             if (req.key || req.item) {
-                const fit = (e) => e.attr === 'carrying' && e.of === pick && (req.key ? e.key === req.key : (e.item ?? String(e.value).split(/[ ,]/)[0]) === req.item) && kept(e.time);
+                // A record that names everyone ("one key drawn that evening") is about each person it does not except.
+                const isOf = (e) => e.of === pick || (e.of === '*' && [e.every].flat().includes(kindOf(pick)) && ![e.but ?? []].flat().includes(pick));
+                const fit = (e) => e.attr === 'carrying' && isOf(e) && (req.key ? e.key === req.key : (e.item ?? String(e.value).split(/[ ,]/)[0]) === req.item) && kept(e.time);
                 // A typed act of the suspect's that leaves them with it (drawing a key: `keep_key`) counts as carrying it.
                 const got = entries.filter((e) => e.of === pick && e.act).flatMap((e) => productsOf(e, nameOf, c).filter((p) => !p.cond).map((p) => ({ ...p, id: e.id })));
                 const yes = [...entries, ...got].filter((e) => fit(e) && !e.neg), no = entries.filter((e) => fit(e) && e.neg);

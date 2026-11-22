@@ -6,6 +6,6 @@
     {"id": "o.hand", "q": "q.sender", "from": ["f.tel_hand"], "says": "the hand on the form is the clerk's: it tells nothing of the sender"},
     {"id": "o.asked_martin", "q": "q.waiting", "from": ["f.tel_words"], "if": {"q": "q.sender", "pick": "martin"}, "says": "read as Mr. Grove's, the telegram named the place and the hour of a meeting he meant to keep", "essential": true},
     {"id": "o.asked_mary", "q": "q.waiting", "from": ["f.tel_words"], "if": {"q": "q.sender", "pick": "mary"}, "says": "read as Mrs. Holt's, the telegram named the place and the hour of a meeting she meant to keep"},
-    {"id": "o.key", "q": "q.waiting", "from": ["f.key_drawn"], "says": "one key was drawn that evening, at half past nine: Mr. Grove's", "essential": true, "against": ["mary"]}
+    {"id": "o.key", "q": "q.waiting", "from": ["f.key_drawn", "f.no_other_key"], "says": "one key was drawn that evening, at half past nine: Mr. Grove's", "essential": true, "against": ["mary"]}
   ]
 }
