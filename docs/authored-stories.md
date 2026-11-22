@@ -1591,6 +1591,10 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *A hand-written observation corrected by it.* "The earlier will gives Mrs. Grice the house; this one takes
       it from her" rested on the old will alone. It now rests on both wills, and the true path links the new
       will's bequest to the question (one move more).
+    - *The Telegram Signed M. (the same day).* "Who was waiting at the mill" is the case's own act `wait_inside`
+      (at the mill, with a key to it). The night book's entry is the typed act `keep_key` (drawing a key leaves
+      one with it), and the grid now counts such an act of the suspect's as the means, as it counts a `carrying`
+      entry with `key`. Mr. Grove: means ✓. "The only key drawn" is not typed, so nothing is against Mrs. Holt.
     - *Survey.* No other short case states a gain or a loss, so the will is the only data. The column decides
       nothing: a motive against is not a rule-out, as agreed for the grid.
 

@@ -14,7 +14,7 @@
     {"id": "f.ellis_fete", "of": "ellis", "attr": "location", "value": "fete", "detail": "at Mrs. Holt's side in the tea tent", "time": {"from": "t.three", "to": "t.five"}, "para": 4, "quote": "I was at her side in the tea tent between"},
     {"id": "f.clerk_tells", "of": "clerk", "attr": "tells", "value": "acct.clerk", "to": "ellis", "how": "told", "time": {"after": "t.eleven", "before": "t.later"}, "para": 5, "quote": "Mr. Grove's clerk told me"},
     {"id": "f.martin_train", "of": "martin", "attr": "action", "value": "takes the two o'clock train to Leeds, and does not say why", "time": {"at": "t.two"}, "para": 5, "quote": "his master took the two o'clock train to Leeds"},
-    {"id": "f.key_drawn", "of": "martin", "attr": "action", "value": "draws his key of the mill (the only key drawn that evening)", "time": {"at": "t.half_nine"}, "para": 6, "quote": "one key drawn that evening, at half past nine: Mr. Grove's"},
+    {"id": "f.key_drawn", "of": "martin", "attr": "action", "act": "keep_key", "thing": "mill", "value": "draws his key of the mill (the only key drawn that evening)", "time": {"at": "t.half_nine"}, "para": 6, "quote": "one key drawn that evening, at half past nine: Mr. Grove's"},
     {"id": "f.grove_owns", "of": "martin", "attr": "says", "value": "he sent the telegram and waited for his partner in the dark", "to": "ellis", "time": {"at": "t.later"}, "para": 7, "quote": "owned that he had sent the telegram and waited for his partner in the dark", "asserts": [{"q": "q.sender", "pick": "martin"}, {"q": "q.waiting", "pick": "martin"}]}
   ]
 }

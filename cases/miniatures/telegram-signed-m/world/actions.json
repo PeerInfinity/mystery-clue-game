@@ -1,5 +1,6 @@
 {
   "actions": [
-    {"id": "send_telegram", "label": "handing in a telegram", "requires": [{"of": "$agent", "place": "$where"}], "effects": []}
+    {"id": "send_telegram", "label": "handing in a telegram", "requires": [{"of": "$agent", "place": "$where"}], "effects": []},
+    {"id": "wait_inside", "label": "waiting inside", "requires": [{"of": "$agent", "place": "$where"}, {"of": "$agent", "key": "$via"}], "effects": []}
   ]
 }

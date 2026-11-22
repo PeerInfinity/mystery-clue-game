@@ -559,7 +559,7 @@ that follows from others, shown by itself the moment they all are.
 - **Means, opportunity and motive** (2026-11-21; `suspectGrid` in `engine/implications.js`; finding 116). Under a
   "who" question whose `entry` is a typed act, the page sets each person who may be the answer against what the
   act needs of its agent (the action table's `requires` with `of: "$agent"`): a place or a door is opportunity,
-  anything else (a key: a `carrying` fact with `key: <door>`; a thing carried; a state such as `knows`) is means,
+  anything else (a key: a `carrying` fact with `key: <door>`, or a typed act of the suspect's that leaves them with one, `keep_key`; a thing carried; a state such as `knows`) is means,
   and a motive is gain or loss, or a goal held. Gain or loss (2026-11-21, finding 117) is read from the thing the
   act makes or handles (`item`, `thing`): an entry of that thing with `gives: [{to, what}]` is a motive for `to`
   (`what` an entity or a few words; `all: true` when it gives everything); `takes: [{from, what}]` is one against

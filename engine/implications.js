@@ -320,8 +320,10 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
             }
             if (req.key || req.item) {
                 const fit = (e) => e.attr === 'carrying' && e.of === pick && (req.key ? e.key === req.key : (e.item ?? String(e.value).split(/[ ,]/)[0]) === req.item) && kept(e.time);
-                const yes = entries.filter((e) => fit(e) && !e.neg), no = entries.filter((e) => fit(e) && e.neg);
-                if (yes.length) row.means.push({ status: 'met', req, facts: yes.map((e) => e.id) });
+                // A typed act of the suspect's that leaves them with it (drawing a key: `keep_key`) counts as carrying it.
+                const got = entries.filter((e) => e.of === pick && e.act).flatMap((e) => productsOf(e, nameOf, c).filter((p) => !p.cond).map((p) => ({ ...p, id: e.id })));
+                const yes = [...entries, ...got].filter((e) => fit(e) && !e.neg), no = entries.filter((e) => fit(e) && e.neg);
+                if (yes.length) row.means.push({ status: 'met', req, facts: [...new Set(yes.map((e) => e.id))] });
                 else if (no.length) row.means.push({ status: 'against', req, facts: no.map((e) => e.id) });
                 continue;
             }
