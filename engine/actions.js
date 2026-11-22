@@ -654,8 +654,8 @@ export function answerAction(q, pick, isEntity) {
     const own = q?.possibilities?.find((p) => p.value === pick)?.action;
     if (own) return { id, attr: 'action', ...own, time: own.time ?? t, hyp: { q: q.id, pick } };
     if (!q?.entry?.act || !isEntity(pick)) return null;
-    const { act, thing, to, item, via, where, about } = q.entry;
-    return { id, of: pick, attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), ...(where ? { where } : {}), ...(about ? { about } : {}), time: t, hyp: { q: q.id, pick } };
+    const { act, thing, to, item, via, where, about, helps, harms, removes } = q.entry;
+    return { id, of: pick, attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), ...(where ? { where } : {}), ...(about ? { about } : {}), ...(helps ? { helps } : {}), ...(harms ? { harms } : {}), ...(removes ? { removes } : {}), time: t, hyp: { q: q.id, pick } };
 }
 
 /**

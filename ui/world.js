@@ -1096,7 +1096,8 @@ function gridBears(entry, qid) {
     const who = gridWho(q);
     if (who.length < 2) return false;
     const key = `${qid}|${who.join(',')}`, cells = (rows) => new Set((rows ?? []).flatMap((r) => [...r.opportunity, ...r.means, ...r.motive].flatMap((c) => c.facts)));
-    if (!gridSeen.has(key)) gridSeen.set(key, { all: cells(suspectGrid(data, q, who, data.facts.map((x) => x.id), nameOf, placeCtx)), one: new Map() });
+    // Read as if every question were solved: an entry that will fill a cell once another question is solved is kept.
+    if (!gridSeen.has(key)) gridSeen.set(key, { all: cells(suspectGrid(data, q, who, data.facts.map((x) => x.id), nameOf, { ...placeCtx, solved: Object.fromEntries(data.questions.map((x) => [x.id, x.answer])) })), one: new Map() });
     const m = gridSeen.get(key);
     if (m.all.has(entry)) return true;
     if (!m.one.has(entry)) m.one.set(entry, cells(suspectGrid(data, q, who, [entry], nameOf, placeCtx)).has(entry));
@@ -1236,7 +1237,7 @@ function gridHtml(q) {
     const who = gridWho(q);
     if (who.length < 2) return '';
     const shown = state.links.filter((l) => l.q === q.id).map((l) => factById.get(l.entry)).filter((f) => f && accepted(f)).map((f) => f.id);
-    const rows = suspectGrid(data, q, who, shown, nameOf, placeCtx);
+    const rows = suspectGrid(data, q, who, shown, nameOf, { ...placeCtx, solved: Object.fromEntries(data.questions.filter((x) => isSolved(x.id)).map((x) => [x.id, x.answer])) });
     if (!rows) return '';
     const item = (c) => `<div class="grid-${c.status}">${c.status === 'met' ? '✓' : '✗ against:'} ${c.says ? `${esc(c.says)}<br>` : c.req.id ? `${phrase(c.req)}<br>` : ''}<span class="muted">${c.facts.map((id) => { const f = factById.get(id); return `${dot(levelOfFact(f))}${phrase(f)} ${paraSpan(givenAt(f))}`; }).join('; ')}</span></div>`;
     const cell = (cs) => `<td>${cs.length ? cs.map(item).join('') : '<span class="muted">nothing shown</span>'}</td>`;

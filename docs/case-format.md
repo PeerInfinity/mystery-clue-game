@@ -569,7 +569,10 @@ that follows from others, shown by itself the moment they all are.
   "for" | "against"}` on an entry of the suspect's, read against `helps: <person>` or `harms: <person>` on the
   act (on the question's entry, or on a possibility's own `action` where the act differs by suspect): for and
   helps, or against and harms, is a motive; the other way about is one against. An entry the grid would read
-  counts as evidence for the question, so its link stays under checked links without an observation. Only entries linked
+  counts as evidence for the question, so its link stays under checked links without an observation. A threat
+  removed is `threat: {to, by}` on any entry (`to` a person, or `{answer: <question>}`: whoever that question's
+  answer is, once solved; `by` the thing that threatens) read against `removes: <thing>` on the act (or `{thing,
+  if: {q, pick}}`: only once that question is solved so). Only entries linked
   to the question and trusted count, and a need is named only when one of them meets it or is against it. Nothing
   is written for it: type the act (`act`, its roles and a `{from, to}` window on the question's entry; the case's
   own act in `world/actions.json` if the generic ones do not say what it needs) and the statements it reads.

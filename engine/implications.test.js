@@ -246,5 +246,12 @@ test('suspectGrid: each suspect against what the act needs, from what is shown; 
     const tied = (action) => suspectGrid({ ...ties, questions: [{ ...ties.questions[0], possibilities: [{ value: 'a', action }, { value: 'b' }] }] }, { ...ties.questions[0], possibilities: [{ value: 'a', action }, { value: 'b' }] }, ['a', 'b'], ['f.a_for'], (id) => id.toUpperCase()).find((r) => r.pick === 'a').motive.map((c) => `${c.status}:${c.says}`).join();
     assert.equal(tied({ of: 'a', act: 'make', item: 'bag', helps: 'b' }), 'met:for B, whom it helps');
     assert.equal(tied({ of: 'a', act: 'make', item: 'bag', harms: 'b' }), 'against:for B, whom it harms');
+    // A threat removed: the thing threatens whoever another question's answer is, and the act removes it.
+    const fire = { ...data, facts: [{ id: 'f.audit', of: 'b', attr: 'intends', value: 'to read the bag', threat: { to: { answer: 'q0' }, by: 'bag' }, time: { from: 't1' } }], questions: [{ id: 'q', entry: { of: '?', attr: 'action', act: 'make', item: 'door', removes: { thing: 'bag', if: { q: 'q1', pick: 'yes' } }, time: { at: 't2' } }, possibilities: [{ value: 'a' }, { value: 'b' }] }] };
+    const threat = (solved) => suspectGrid(fire, fire.questions[0], ['a', 'b'], ['f.audit'], (id) => id.toUpperCase(), { solved }).find((r) => r.pick === 'a').motive.map((c) => `${c.status}:${c.says}`).join();
+    assert.equal(threat({}), '');
+    assert.equal(threat({ q0: 'a' }), '');                                               // not until the act is known to remove it
+    assert.equal(threat({ q0: 'a', q1: 'yes' }), 'met:threatened by BAG, which it would remove');
+    assert.equal(threat({ q0: 'b', q1: 'yes' }), '');
     setCaseActions({});
 });

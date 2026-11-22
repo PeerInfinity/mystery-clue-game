@@ -180,6 +180,7 @@ for (const f of facts) {
     for (const g of list(f.gives)) if (!entities.has(g.to)) err(f.id, `gives: no entity ${g.to}`);
     for (const g of list(f.takes)) if (!entities.has(g.from)) err(f.id, `takes: no entity ${g.from}`);
     for (const t of list(f.tie)) if (!entities.has(t.to) || !['for', 'against'].includes(t.kind)) err(f.id, 'a tie is {to: an entity, kind: for | against}');
+    for (const t of list(f.threat)) if (!entities.has(t.by) || !(entities.has(t.to) || questions.some((q) => q.id === t.to?.answer))) err(f.id, 'a threat is {to: an entity or {answer: a question}, by: an entity}');
     if (f.revokes != null && !entities.has(f.revokes)) err(f.id, `revokes: no entity ${f.revokes}`);
     for (const g of [f.goal, f.plan?.goal].filter(Boolean)) if (!entities.has(g.of) || !g.attr || g.value == null) err(f.id, 'a goal is {of: an entity, attr, value}');
     for (const k of ['at', 'from', 'to', 'after', 'before']) if (f.time?.[k] && !timeIds.has(f.time[k])) err(f.id, `time.${k}: no time ${f.time[k]}`);

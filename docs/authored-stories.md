@@ -1619,6 +1619,16 @@ script that found each fact's paragraph from its quote; the data files are the s
       questions, and its act is the signing of the passes, which is typed already. The fire's motive (to destroy
       a ledger that would expose the fire-setter) is a fourth shape, a threat removed; it is asked as a question
       of its own ("Why was the Custom House burned?"), and whether to type it is put to the user.
+    - *A threat removed, the fourth form (the user's ruling of 2026-11-22: add it if it is of use elsewhere).* No
+      other case here has it, but silencing a witness or destroying a record is a staple of the genre, so it was
+      built. `threat: {to, by}` on any entry: a thing (`by`) threatens a person (`to`), who may be `{answer:
+      <question>}`: whoever that question's answer is, once the player has solved it. `removes: <thing>` on the
+      act, or `{thing, if: {q, pick}}` where what the act was for is itself a question. The grid takes the solved
+      answers for this (`ctx.solved`); nothing else in it reads a solved question. In The Custom-House Fire the
+      Board's letter (the Surveyor to examine the bond ledger) is a threat to whoever let the brandy out of bond,
+      and the fire removes the ledger once "why was it burned" is solved so: with both solved and the letter
+      linked, Mr. Prout reads "✓ threatened by the bond ledger, which it would remove". Before that the cell is
+      empty, so the column says nothing ahead of the player's own answers.
     - *Survey.* No other short case states a gain or a loss, so the will is the only data. The column decides
       nothing: a motive against is not a rule-out, as agreed for the grid.
 

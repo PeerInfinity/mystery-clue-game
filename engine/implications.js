@@ -357,6 +357,16 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
             const fits = (t.kind === 'for') === (does === 'helps');
             row.motive.push({ status: fits ? 'met' : 'against', req: { tie: t.to }, says: `${t.kind === 'for' ? 'for' : 'against'} ${nameOf(t.to)}, whom it ${does}`, facts: [e.id] });
         }
+        // A threat removed: a thing threatens a person (`threat: {to, by}` on any entry; `to` a person, or `{answer:
+        // <question>}`: whoever that question's answer is, once it is solved), and the act removes the thing
+        // (`removes: <thing>`, or `{thing, if: {q, pick}}`: only once that question is solved so). `ctx.solved` is
+        // the answers solved so far, by question.
+        const solved = ctx.solved ?? {};
+        const gone = list(act.removes).filter((r) => typeof r === 'string' || solved[r.if?.q] === r.if?.pick).map((r) => (typeof r === 'string' ? r : r.thing));
+        for (const e of entries) for (const t of list(e.threat)) {
+            const to = typeof t.to === 'string' ? t.to : solved[t.to?.answer];
+            if (to === pick && gone.includes(t.by)) row.motive.push({ status: 'met', req: { threat: t.by }, says: `threatened by ${nameOf(t.by)}, which it would remove`, facts: [e.id] });
+        }
         rows.push(row);
     }
     return rows.length ? rows : null;
