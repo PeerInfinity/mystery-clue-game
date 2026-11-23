@@ -1753,8 +1753,11 @@ script that found each fact's paragraph from its quote; the data files are the s
       that such a true entry denies it, from the suspect table's means. The Cellar Door: the written rule-out
       of Ned is gone. The Last Ferry: the taking is now out of a locked place (`take_locked`), and the table
       rules out Bell. The Grey Cloak: typed, and nothing follows (all three answers hold a key).
-      Not done in the long case: its deed needs a key only once the door question is answered ("by the street
-      door with a key"), and a need that waits on another question's answer has no form yet.
+      The long case's deed needs a key only once the door question is answered "by the street door with a
+      key": a role of a question's typed entry may wait on another question's answer (`{thing, if: {q,
+      pick}}`, agreed by the user), and the rule then has that question as a premise. The written rule no
+      longer rules out the watch, Mr. Garrick and Captain Venn: the table does, and as certain, where the
+      written rule was likely and asked for Mr. Prout's word about his own key as well.
     - *Clocks in the long case.* Mrs. Rowe's quarter past one is read by the church clock, typed as half an
       hour slow; her entry is no longer flagged false, and two written rules and three path moves are gone.
     - *"The thing is gone"* is the thing not at the place (cup, bale, ring, cash-box). Nothing follows from it

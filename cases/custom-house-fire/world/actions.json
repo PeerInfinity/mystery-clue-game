@@ -2,7 +2,7 @@
   "actions": [
     {"id": "sign_pass", "label": "putting initials to", "requires": [{"of": "$agent", "place": "$where"}], "effects": []},
     {"id": "send_word", "label": "sending word about", "requires": [{"of": "$agent", "attr": "knows", "value": "$about"}, {"of": "$agent", "place": "$where"}], "effects": []},
-    {"id": "fire_house", "label": "setting fire to the Custom House, at", "requires": [{"of": "$agent", "place": "$where"}], "effects": []},
+    {"id": "fire_house", "label": "setting fire to the Custom House, at", "requires": [{"of": "$agent", "place": "$where"}, {"of": "$agent", "key": "$via"}], "effects": []},
     {"id": "ship", "label": "taking aboard for export", "requires": [{"of": "$agent", "place": "$where"}], "effects": []},
     {"id": "sail", "label": "sailing from", "requires": [{"of": "$agent", "place": "$where"}], "effects": []},
     {"id": "force", "label": "forcing", "requires": [], "effects": [{"of": "$thing", "attr": "condition", "value": "mark"}]},

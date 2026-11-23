@@ -181,7 +181,10 @@ async function readTo(at) {
             const was = readToOf(await save())(story);
             const to = WHOLE && story !== MAIN ? Infinity : was + 1;
             for (let i = was; i < to; i++) { await readOne(story); if (readToOf(await save())(story) === i) break; }
-            const now = readToOf(await save())(story);
+            let now = readToOf(await save())(story);
+            // A click the page did not take (nothing read, and no gate named): seen now and then at the very first
+            // paragraph when three Chromes run side by side. Tried once more before it counts.
+            if (now === was && !(await ev(`document.querySelector('#gate-news')?.innerText ?? ''`)).trim()) { await new Promise((r) => setTimeout(r, 500)); await readOne(story); now = readToOf(await save())(story); if (now !== was) console.log(`  (¶${was + 1} read at the second try)`); }
             const news = await ev(`(() => { const e = document.querySelector('#answer-news'); return e && !e.hidden ? [...e.querySelectorAll('li')].map((li) => ({ text: li.innerText, bad: !!li.querySelector('.bad') })) : []; })()`);
             for (const a of news) if (a.bad) { failures++; console.log(`FAIL ¶${now} answer: ${a.text}`); }
             if (news.length) { console.log(`  ¶${now} answered: ${news.map((a) => a.text.replace(/\s+/g, ' ')).join(' | ')}`); await click('[data-answers-close]'); }

@@ -578,6 +578,9 @@ that follows from others, shown by itself the moment they all are.
   else: `of: "*"`, `every: "person"`, `but: [the holders]`, `attr: "carrying"`, `value`, `key: <the door>`, `neg:
   true`. Under a "who" question whose act needs a key (`unlock`, `lock`, `take_locked` with `via`), the table
   rules out an answer the entry denies the key (`t.key.<n>`).
+  A role of a question's typed entry may wait on another question's answer: `"via": {"thing": <door>, "if":
+  {"q": <question>, "pick": <answer>}}`. It is there once that question is solved so, and a table rule that
+  rests on it has `{solved: <question>}` among its premises.
 - **A time read by a clock** (2026-11-22; finding 119). `"time": {"at": <point>, "by": <the clock>}`: the time as
   read. It is taken as the true time unless an entry of that clock that counts says how it was off,
   `"off": [{"reads": <point>, "when": <point>}]` (it read the first when the time was the second): then the

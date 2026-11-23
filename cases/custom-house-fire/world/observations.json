@@ -94,7 +94,7 @@
     {"id": "o.who_oil", "q": "q.who", "from": [{"solved": "q.oil"}], "says": "the fire-setter knew the house and its lamp room", "essential": true},
     {"id": "o.who_venn", "q": "q.who", "from": [{"solved": "q.venn"}], "says": "Captain Venn was at sea", "essential": true},
     {"id": "o.who_garrick", "q": "q.who", "from": [{"solved": "q.garrick"}], "says": "Mr. Garrick was at Tormouth", "essential": true},
-    {"id": "o.who_keys", "q": "q.who", "from": ["f.two_keys"], "says": "there are two keys to the street door", "essential": true, "against": ["crouch", "garrick", "venn"]},
+    {"id": "o.who_keys", "q": "q.who", "from": ["f.two_keys"], "says": "there are two keys to the street door", "essential": true},
     {"id": "o.who_prout_key", "q": "q.who", "from": ["f.prout_key"], "says": "Mr. Prout says his key has never been out of his pocket", "essential": true},
     {"id": "o.who_pell", "q": "q.who", "from": ["f.pell_cliff"], "says": "Mr. Pell was at Cliff House with the doctor", "essential": true, "against": ["pell"]},
     {"id": "o.who_crouch", "q": "q.who", "from": ["f.on_mole"], "says": "Crouch was on the mole", "essential": true, "against": ["crouch"]},

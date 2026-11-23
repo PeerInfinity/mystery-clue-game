@@ -647,14 +647,18 @@ export function agentNeeds(order, entries, change, agent, nameOf, ctx = {}) {
  * An answer as a typed act, for what it needs and does: the possibility's own `action` ("by forcing the door":
  * someone forcing it), or the question's typed entry with the answer as its agent (who led the horse out?). Its
  * time is the action's own or the entry's. Null when the answer is no act. `isEntity(id)`.
+ * `conditionsOf(q)`: the questions and answers its roles wait on.
  */
-export function answerAction(q, pick, isEntity) {
+export function answerAction(q, pick, isEntity, solved = null) {
     const t = q?.entry?.time && typeof q.entry.time === 'object' ? q.entry.time : typeof q?.entry?.time === 'string' ? { at: q.entry.time } : {};
     const id = `hyp:${q?.id}=${pick}`;
     const own = q?.possibilities?.find((p) => p.value === pick)?.action;
     if (own) return { id, attr: 'action', ...own, time: own.time ?? t, hyp: { q: q.id, pick } };
     if (!q?.entry?.act || !isEntity(pick)) return null;
-    const { act, thing, to, item, via, where, about, helps, harms, removes } = q.entry;
+    // A role that waits on another question's answer (`{thing, if: {q, pick}}`: the deed needs a key only once the
+    // door question says it came by the door) is there only when that question is solved so (`solved`: {q: answer}).
+    const role = (v) => (v && typeof v === 'object' && !Array.isArray(v) && v.if ? (solved?.[v.if.q] === v.if.pick ? v.thing : undefined) : v);
+    const { act, helps, harms, removes } = q.entry, [thing, to, item, via, where, about] = ['thing', 'to', 'item', 'via', 'where', 'about'].map((k) => role(q.entry[k]));
     return { id, of: pick, attr: 'action', act, ...(thing ? { thing } : {}), ...(to ? { to } : {}), ...(item ? { item } : {}), ...(via ? { via } : {}), ...(where ? { where } : {}), ...(about ? { about } : {}), ...(helps ? { helps } : {}), ...(harms ? { harms } : {}), ...(removes ? { removes } : {}), time: t, hyp: { q: q.id, pick } };
 }
 
@@ -682,3 +686,6 @@ export function actNeeds(mark, f, ctx = {}, nameOf = (id) => id, say = (r) => `$
     }
     return out;
 }
+
+/** What a question's typed entry waits on: `[{q, pick}]`, one for each role given as `{thing, if: {q, pick}}`. */
+export const conditionsOf = (q) => ['thing', 'to', 'item', 'via', 'where', 'about'].map((k) => q?.entry?.[k]).filter((v) => v && typeof v === 'object' && !Array.isArray(v) && v.if).map((v) => v.if);

@@ -12,7 +12,7 @@
 // other answer is ruled out. What is shown beyond that is support, and wanted by nothing.
 
 import { isRight, coverOf, overlaps, places, timeOrder, hypothesisKey, answerStates, DERIVED, assertions, markAssertions, contradictions, alibis, entityKinds, CONFIRMED, LIKELY_LEVEL } from './world.js';
-import { answerAction, actNeeds, pointImplications, productsOf, meets, requirementStatus } from './actions.js';
+import { answerAction, conditionsOf, actNeeds, pointImplications, productsOf, meets, requirementStatus } from './actions.js';
 
 const holds = (p, has, solved) => (typeof p === 'string' ? has(p) : p.any ? p.any.some(has) : p.solved ? !!solved?.(p.solved) : false);
 
@@ -318,13 +318,15 @@ export function tableRules(data, observations) {
     for (const q of data.questions) {
         const picks = (q.possibilities ?? []).filter((p) => !isRight(q, p.value) && isEntity(p.value));
         if (!picks.length || !answerAction(q, picks[0].value, isEntity)) continue;
-        const rows = suspectGrid(data, q, picks.map((p) => p.value), trueIds, undefined, ctx) ?? [];
+        // What the deed needs only once another question is answered so: taken as answered, and that question a premise.
+        const conds = conditionsOf(q).filter((k) => isRight(data.questions.find((x) => x.id === k.q), k.pick));
+        const rows = suspectGrid(data, q, picks.map((p) => p.value), trueIds, undefined, { ...ctx, solved: Object.fromEntries(conds.map((k) => [k.q, k.pick])) }) ?? [];
         for (const r of rows) {
             const cell = r.means.find((m) => m.status === 'against' && m.req?.key && m.facts?.length);
             const obs = cell && cell.facts.map((f) => obsOf(q.id, f));
             if (!cell || obs.some((o) => !o)) continue;
-            const from = [...new Set(obs.map((o) => o.id))], n = q.possibilities.findIndex((p) => p.value === r.pick);
-            if (out.some((t) => t.q === q.id && t.rules_out[0] === r.pick && t.from.length === from.length && t.from.every((x) => from.includes(x)))) continue;
+            const from = [...conds.map((k) => ({ solved: k.q })), ...new Set(obs.map((o) => o.id))], n = q.possibilities.findIndex((p) => p.value === r.pick);
+            if (out.some((t) => t.q === q.id && t.rules_out[0] === r.pick && JSON.stringify(t.from) === JSON.stringify(from))) continue;
             out.push({ id: `t.key.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers had no key for it`, rules_out: [r.pick], table: true });
         }
     }
@@ -432,7 +434,7 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
     const entries = data.facts.filter((f) => has.has(f.id));
     const rows = [];
     for (const pick of picks) {
-        const act = answerAction(q, pick, isEntity);
+        const act = answerAction(q, pick, isEntity, ctx.solved);
         if (!act || act.of !== pick) continue;
         const mark = markAssertions(data, { [q.id]: { [pick]: 'circled' } })[0] ?? { id: hypothesisKey(q.id, pick) };
         const w = coverOf(act.time);
