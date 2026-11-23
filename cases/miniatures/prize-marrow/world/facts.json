@@ -1,0 +1,18 @@
+{
+  "facts": [
+    {"id": "f.vane_role", "of": "vane", "attr": "role", "value": "secretary of the flower show at Combe Regis", "time": {"from": "t.before"}, "para": 1, "quote": "secretary of the flower show at Combe Regis"},
+    {"id": "f.marrow_cup", "of": "marrow", "attr": "condition", "value": "the cup's winner three years running", "time": {"from": "t.before"}, "para": 1, "quote": "It had taken the cup three years running"},
+    {"id": "f.marrow_slashed", "of": "marrow", "attr": "condition", "value": "slashed from end to end, in Abel Crouch's shed", "time": {"at": "t.saturday"}, "para": 1, "quote": "slashed his great marrow from end to end"},
+    {"id": "f.marrow_off", "of": "marrow", "attr": "condition", "value": "kept off the show bench", "gives": [{"to": "pask", "what": "the cup"}], "detail": "it could not be put on the bench at all", "time": {"at": "t.saturday"}, "para": 1, "quote": "on Saturday it could not be put on the bench at all"},
+    {"id": "f.shed_open", "of": "shed", "attr": "condition", "value": "has no lock", "time": {"from": "t.before"}, "para": 2, "quote": "The shed has no lock"},
+    {"id": "f.abel_there", "of": "abel", "attr": "location", "value": "allotments", "detail": "alone there for a time", "time": {"at": "t.fri_dark"}, "para": 2, "quote": "Abel himself"},
+    {"id": "f.martha_there", "of": "martha", "attr": "location", "value": "allotments", "detail": "come to fetch Abel Crouch to his supper; alone there for a time", "time": {"at": "t.fri_dark"}, "para": 2, "quote": "his wife Martha, who came to fetch him to his supper"},
+    {"id": "f.pask_there", "of": "pask", "attr": "location", "value": "allotments", "detail": "he has the next plot; alone there for a time", "time": {"at": "t.fri_dark"}, "para": 2, "quote": "George Pask, who has the next plot"},
+    {"id": "f.pask_second", "of": "pask_marrow", "attr": "condition", "value": "second to Abel Crouch's marrow three years running", "time": {"from": "t.before"}, "para": 2, "quote": "has been second to that marrow three years running"},
+    {"id": "f.pask_wins", "of": "pask_marrow", "attr": "condition", "value": "the cup's winner", "time": {"at": "t.saturday"}, "para": 2, "quote": "Pask's took the cup"},
+    {"id": "f.pask_wants", "of": "pask", "attr": "says", "value": "he wants to beat Abel Crouch's marrow fair, on the bench, and would not have the cup any other way", "goal": {"of": "pask_marrow", "attr": "condition", "value": "the winner over Abel Crouch's marrow on the bench"}, "to": "vane", "time": {"at": "t.monday"}, "para": 3, "quote": "I want to beat that marrow fair, on the bench, with the judges looking on"},
+    {"id": "f.martha_wants", "of": "martha", "attr": "says", "value": "she wants Abel Crouch to take the cup once more, and then give up the allotment content", "goal": {"of": "marrow", "attr": "condition", "value": "the cup's winner this year"}, "to": "vane", "time": {"at": "t.wednesday"}, "para": 4, "quote": "I want him to take the cup once more, this year"},
+    {"id": "f.abel_wants", "of": "abel", "attr": "says", "value": "he wants his marrow kept off the bench: he will not stand beside it and be second", "goal": {"of": "marrow", "attr": "condition", "value": "kept off the show bench"}, "to": "vane", "time": {"at": "t.fri_morning"}, "para": 5, "quote": "I want mine kept off that bench"},
+    {"id": "f.abel_owns", "of": "abel", "attr": "says", "value": "he slashed the marrow himself, with his own pruning-knife", "to": "vane", "time": {"at": "t.sunday"}, "para": 6, "quote": "owned that he had done it himself", "asserts": [{"q": "q.who", "pick": "abel"}]}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.monday", "label": "Monday", "after": "t.before", "para": 3, "quote": "On Monday"},
+    {"id": "t.wednesday", "label": "Wednesday", "after": "t.monday", "para": 4, "quote": "On Wednesday"},
+    {"id": "t.fri_morning", "label": "Friday morning", "after": "t.wednesday", "para": 5, "quote": "on Friday morning"},
+    {"id": "t.fri_dark", "label": "Friday, after dark", "after": "t.fri_morning", "para": 2, "quote": "after dark that Friday"},
+    {"id": "t.saturday", "label": "Saturday, the show", "after": "t.fri_dark", "para": 1, "quote": "on Saturday"},
+    {"id": "t.sunday", "label": "Sunday", "after": "t.saturday", "para": 6, "quote": "On Sunday"}
+  ]
+}

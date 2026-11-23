@@ -1,0 +1,5 @@
+{
+  "accounts": [
+    {"id": "acct.vane", "label": "What Hester Vane sees and hears herself", "origin": "vane", "how": "saw", "facts": ["f.vane_role", "f.marrow_cup", "f.marrow_slashed", "f.marrow_off", "f.shed_open", "f.abel_there", "f.martha_there", "f.pask_there", "f.pask_second", "f.pask_wins", "f.pask_wants", "f.martha_wants", "f.abel_wants", "f.abel_owns"]}
+  ]
+}

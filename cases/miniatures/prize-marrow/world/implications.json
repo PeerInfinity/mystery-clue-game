@@ -1,0 +1,6 @@
+{
+  "implications": [
+    {"id": "i.who_cost", "q": "q.who", "from": ["o.off", "o.pask_want", "o.martha_want"], "says": "a marrow kept off the bench cost Pask the fair win he wanted, and Martha the cup she wanted for Abel"},
+    {"id": "i.who_abel", "q": "q.who", "from": ["i.who_cost", "o.abel_want"], "says": "and it was the one thing Abel had said he wanted: it was Abel", "concludes": "abel", "strength": "likely"}
+  ]
+}

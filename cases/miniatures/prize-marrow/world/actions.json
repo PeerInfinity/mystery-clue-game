@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "spoil", "label": "spoiling", "requires": [{"of": "$agent", "place": "$where"}], "effects": [{"of": "$thing", "attr": "condition", "value": "kept off the show bench"}]}
+  ]
+}

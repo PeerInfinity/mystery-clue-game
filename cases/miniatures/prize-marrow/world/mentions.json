@@ -1,0 +1,13 @@
+{
+ "entities": {
+  "vane": ["Hester Vane", "Miss Vane"],
+  "abel": ["Abel Crouch", "Abel himself", "Abel"],
+  "martha": ["Martha Crouch", "his wife Martha"],
+  "pask": ["George Pask", "Pask"],
+  "allotments": ["the allotments", "the allotment"],
+  "shed": ["Abel Crouch's shed", "The shed"],
+  "marrow": ["his great marrow", "that marrow", "Abel's marrow"],
+  "pask_marrow": ["Pask's marrow"],
+  "cup": ["the cup"]
+ }
+}

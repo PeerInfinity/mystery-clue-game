@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who slashed Abel Crouch's marrow?", "entry": {"of": "?", "attr": "action", "act": "spoil", "thing": "marrow", "where": "shed", "value": "slashing the marrow", "time": {"at": "t.fri_dark"}}, "raised": 1, "quote": "Who did it?", "possibilities": [{"value": "something else", "available": 1, "via": "always"}, {"value": "abel", "available": 2, "via": "direct", "quote": "three people were at the allotments after dark that Friday"}, {"value": "martha", "available": 2, "via": "direct", "quote": "three people were at the allotments after dark that Friday"}, {"value": "pask", "available": 2, "via": "direct", "quote": "three people were at the allotments after dark that Friday"}], "answer": "abel", "answer_given_at": 6, "answer_given_quote": "owned that he had done it himself", "answer_inferable_at": 5, "answer_from": "f.abel_wants"}
+  ]
+}

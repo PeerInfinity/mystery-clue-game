@@ -118,6 +118,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
 | `cases/miniatures/garden-room` | A room with two doors, each watched by a different witness for a different stretch: neither watch closes any of the time alone, and the two together leave what neither covers (finding 124). | 5 paragraphs, 18 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
+| `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
 | `cases/miniatures/wages-bag` | A witness's record and two sources that agree (findings 112 to 114): a first tale against the narrator's own observation; a second with one statement that is needed and one against another witness's word, nothing confirmed deciding it; a third witness who shares nothing with the second and agrees. | 6 paragraphs, 26 facts, 5 accounts, 4 tellings, 2 questions, 8 observations (4 essential), 4 implications, 17 moves |
@@ -1821,6 +1822,22 @@ script that found each fact's paragraph from its quote; the data files are the s
       The Rent Box has for a watched door.
     - The answer is concluded by one written rule, as likely; the table rules the lure out
       (`t.when`, from the two doors and his place after dusk).
+
+125. **A stated want: The Prize Marrow (2026-11-23).** The second of the two miniatures, for the held goal (a
+    motive stated outright, `goal` on an entry of the suspect), a form built with the suspect table and used
+    on no case until now. A prize marrow is slashed the night before the show; the shed has no lock and three
+    were there alone, so opportunity decides nothing; each of the three has told the narrator that week what
+    they want.
+    - *Three wants, not one*: a single stated want in a short story would read as a hint; one each reads as
+      description.
+    - *What the deed did* is typed as the act's effect (the case's own act, `spoil`: the thing kept off the
+      show bench), and the owner's want is that very state: the table shows his motive from his own words.
+    - *The lure is typed too*: the rival gains the cup (`gives` on the marrow's entry), so the table shows a
+      second motive, and does not choose. He had said he would not have the cup that way.
+    - *What it showed of the form.* A motive contradicts nothing, so the page concludes nothing from it: the
+      conclusion is two written steps, likely. The miniature puts the want in the table and removes no
+      written reasoning. A want the deed denies (the rival's fair win, the wife's cup for her husband) has no
+      typed form; it is the reader's step. Put to the user as a possible addition.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
