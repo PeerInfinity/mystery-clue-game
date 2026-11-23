@@ -284,10 +284,14 @@ export function markAssertions(data, marks = {}, shown = null) {
  * event?}]`, the time the entry's unless given), or with `denied` their denial, where one state says it exactly:
  * one state only (the denial of two is neither's); at a point, the opposite at that point; over a stretch, "not for
  * the whole of it" (`whole`). A denial "at no moment of a stretch" or "at some moment between" has no denial that
- * is one state, and gives nothing. Each `{n, of, attr, value, neg, time, denied, whole?, event?}`.
+ * is one state, and gives nothing. Each `{n, of, attr, value, neg, time, denied, whole?, event?}`. An untyped "yes"
+ * or "no" beside its typed opposite is that opposite's denial.
  */
 export function answerStates(q, pick, denied = false) {
     const xs = list(q.possibilities?.find((p) => p.value === pick)?.asserts);
+    // In a yes-or-no question "no" denies what "yes" says, and "yes" what "no" says: nobody writes it (2026-11-22).
+    const other = !xs.length && (pick === 'yes' || pick === 'no') ? (pick === 'yes' ? 'no' : 'yes') : null;
+    if (other && list(q.possibilities?.find((p) => p.value === other)?.asserts).length) return answerStates(q, other, !denied);
     if (!xs.length || (denied && xs.length > 1)) return [];
     const out = [];
     xs.forEach((x, n) => {

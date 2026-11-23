@@ -564,6 +564,9 @@ that follows from others, shown by itself the moment they all are.
   value, neg?}` on the possibility (the rule is set aside when that question is solved), or a `believes` entry
   of someone who could be the doer, asserting the same, under an observation of its own on the motive question.
   A written rule may carry `unless: [premise]` too (observation ids and `{solved}` only).
+- **Yes or no** (2026-11-22; finding 120). In a question whose answers are "yes" and "no", type one of them
+  (`asserts`); the other is its denial and is not written. "Could X have been there?" types "no" (X not there
+  through the stretch); a "when" answer is typed by the state the deed leaves at a time between.
 - **A time read by a clock** (2026-11-22; finding 119). `"time": {"at": <point>, "by": <the clock>}`: the time as
   read. It is taken as the true time unless an entry of that clock that counts says how it was off,
   `"off": [{"reads": <point>, "when": <point>}]` (it read the first when the time was the second): then the

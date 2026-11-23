@@ -1718,6 +1718,24 @@ script that found each fact's paragraph from its quote; the data files are the s
       the rule. A witness's `believes` entry defeats the rule the same way, and no case has one yet. The
       threat on that case still names the motive answer (`removes … if`), which the aim could now replace.
 
+120. **The answers still sentences, surveyed (2026-11-22).** Of 50 questions 33 were fully typed and 17 not: four
+    yes-or-no questions with only "yes" typed; four "could X have been there?"; two "when"; two "was it written
+    when it says?"; five of a kind each (set or accident, where the oil came from, how long gone, what the
+    entries are, spite). The user chose the first four kinds, with no new vocabulary, and the five left as
+    sentences until a second story needs the same form.
+    - *Yes or no.* An untyped "yes" or "no" beside its typed opposite is that opposite's denial
+      (`answerStates`); nobody writes it. A circled "no" is now a statement on the page (Mr. Prout not at the
+      Anchor when the bell rang, against what he told).
+    - *Could X have been there?* "No" is typed as X not there through the stretch. The four hand-written rules
+      of the long case that asserted exactly that no longer do: the concluded answer says it.
+    - *When.* By the state the deed leaves: the cup not in the vestry when the lamp was lit, or in it (The Last
+      Ferry, where the table now rules out "before the lamp was lit" from the cup seen on its shelf); the bale
+      in the yard until five, or until half past two and gone by half past three (The Watchman's Clock, where
+      nothing follows by itself: that the gate found on the latch means the bale went then stays written).
+    - *Was it written when it says?* Not built: both cases (the ledger entry that names a berth opened later,
+      the will that speaks of a christening four months after its date) are one shape, a paper that speaks of
+      what was not yet so, and that is a new typed form, to be put to the user.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
