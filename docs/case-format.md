@@ -577,7 +577,7 @@ that follows from others, shown by itself the moment they all are.
 - **Who holds a key** (2026-11-23; finding 121). "It has two keys, X's and Y's" is an absence about everyone
   else: `of: "*"`, `every: "person"`, `but: [the holders]`, `attr: "carrying"`, `value`, `key: <the door>`, `neg:
   true`. Under a "who" question whose act needs a key (`unlock`, `lock`, `take_locked` with `via`), the table
-  rules out an answer the entry denies the key (`t.key.<n>`).
+  makes unlikely an answer the entry denies the key (`t.key.<n>`, likely: a key can be borrowed).
   A role of a question's typed entry may wait on another question's answer: `"via": {"thing": <door>, "if":
   {"q": <question>, "pick": <answer>}}`. It is there once that question is solved so, and a table rule that
   rests on it has `{solved: <question>}` among its premises.

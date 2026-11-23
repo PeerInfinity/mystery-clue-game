@@ -1265,8 +1265,15 @@ function gridHtml(q) {
     const who = gridWho(q);
     if (who.length < 2) return '';
     const shown = state.links.filter((l) => l.q === q.id).map((l) => factById.get(l.entry)).filter((f) => f && accepted(f)).map((f) => f.id);
-    const rows = suspectGrid(data, q, who, shown, nameOf, { ...placeCtx, solved: Object.fromEntries(data.questions.filter((x) => isSolved(x.id)).map((x) => [x.id, x.answer])) });
-    if (!rows) return '';
+    const all = suspectGrid(data, q, who, shown, nameOf, { ...placeCtx, solved: Object.fromEntries(data.questions.filter((x) => isSolved(x.id)).map((x) => [x.id, x.answer])) });
+    if (!all) return '';
+    // A row for each answer the story names, each the player has marked, and anyone else of whom something shown says
+    // something: not for everyone met (the narrator, the witnesses), who would be rows of "nothing shown" (2026-11-23).
+    const named = new Set(shownPossibilities(q).filter((o) => o.proposed).map((o) => o.value));
+    // (A statement about everyone, "nobody else has a key", is about each of them and singles nobody out: it gives no row.)
+    const own = (cs) => cs.some((c) => c.facts.some((id) => factById.get(id)?.of !== EVERY));
+    const rows = all.filter((r) => named.has(r.pick) || markOf(q, r.pick) || own(r.opportunity) || own(r.means) || own(r.motive));
+    if (!rows.length) return '';
     // When it could have been done: the stretches the entries shown close (nobody was there), and what is left.
     const dt = deedTimesOf(data, q, who, shown, nameOf, placeCtx);
     const span = (a, b) => (a === b ? `at ${timeLabel(a)}` : `from ${timeLabel(a)} until ${timeLabel(b)}`);
@@ -2028,7 +2035,7 @@ function leftHtml() {
     const unsure = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && levelOfFact(f) === UNCERTAIN);
     const n = (k, one, many = `${one}s`) => `${k} ${k === 1 ? one : many}`;
     const part = (title, items, none) => `<h4>${title}</h4>${items.length ? `<ul>${items.map((x) => `<li>${x}</li>`).join('')}</ul>` : `<p class="small muted">${none}</p>`}`;
-    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${n(papers.filter((p) => !p.held).length, 'paper')} to read · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}${unsure.length ? ` · ${unsure.length} uncertain` : ''}</summary>
+    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${((story, k) => (story && !k ? 'the story to read on' : `${story ? 'the story to read on · ' : ''}${n(k, 'paper')} to read`))(papers.some((p) => p.id === MAIN && !p.held), papers.filter((p) => !p.held && p.id !== MAIN).length)} · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}${unsure.length ? ` · ${unsure.length} uncertain` : ''}</summary>
       ${part('Reading', papers.map((p) => `<a class="link" data-story="${esc(p.id)}">${esc(p.title)}</a> <span class="small muted">${p.at} of ${p.last} read${p.held ? '; nothing to read now: it is held until a question is answered (see the notice), and is not counted above' : ''}</span>`), 'Everything you have is read.')}
       ${part('Reasoning moves on offer', moves, 'None on offer that you have not made.')}
       ${linkQs.length ? part('Links not tried yet', linkQs.map((q) => `<a class="link" data-left-linking="${esc(q.id)}" title="Link to this question, showing only what is not tried yet">${esc(qLabel(q))}</a> <span class="small muted" data-untried-n="${esc(q.id)}"></span>`), '') : ''}

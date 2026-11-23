@@ -1790,6 +1790,21 @@ script that found each fact's paragraph from its quote; the data files are the s
     - What testing in the browser caught: the offer's button must not carry `data-fact` (the page's own click
       on an entry takes it first).
 
+123. **Open points ruled, and two small items (2026-11-23).** Put to the user with a recommendation each, and
+    agreed:
+    - *A key denied makes an answer unlikely, not ruled out for certain* (all cases; `t.key` is `likely`):
+      "there are two keys" says who holds them, not who used one. The Telegram Signed M turns on that.
+    - Left as they stand: "Was Mr. Prout at the Anchor?" asks for the landlord and the potboy both; Dinner at
+      Larch House is solved at ¶4, as likely; the typed belief acts through its rule and is not on the
+      timeline.
+    - *The suspect table's rows.* It had a row for everyone a "who" question could be answered with, the
+      narrator and the witnesses among them. Now: the answers the story names, those the player has marked,
+      and anyone else of whom an entry shown says something.
+    - *"Left to try"* counted the story as a paper, and a blind solver read "1 paper to read" as a paper
+      blocking the story (finding 117). The story is now named apart: "the story to read on · 1 paper to read".
+    - Left for a story that needs them: the "stated want" motive (a form with no case), and a place with more
+      than one door.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

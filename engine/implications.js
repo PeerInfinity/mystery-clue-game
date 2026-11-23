@@ -312,6 +312,7 @@ export function tableRules(data, observations) {
         const from = [...new Set(obs.map((o) => o.id))];
         out.push({ id: `t.when.${n}`, q: q.id, from, says: `${obs.map((o) => o.says).join('; ')}: one of the answers was elsewhere whenever it could have been done`, rules_out: [p.value], strength: LIKELY, table: true });
     });
+    // (Likely only, by the user's ruling: who holds a key is not who used one; a key can be borrowed.)
     // A key the deed needs and an answer has not (2026-11-23; finding 121): the suspect table's means, where a true
     // entry denies the key ("it has two keys: X's and Y's", a statement about everyone else). From the observation of
     // each entry it rests on.
@@ -327,7 +328,7 @@ export function tableRules(data, observations) {
             if (!cell || obs.some((o) => !o)) continue;
             const from = [...conds.map((k) => ({ solved: k.q })), ...new Set(obs.map((o) => o.id))], n = q.possibilities.findIndex((p) => p.value === r.pick);
             if (out.some((t) => t.q === q.id && t.rules_out[0] === r.pick && JSON.stringify(t.from) === JSON.stringify(from))) continue;
-            out.push({ id: `t.${cell.req.cannot ? 'cannot' : 'key'}.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers ${cell.req.cannot ? 'could not have done it' : 'had no key for it'}`, rules_out: [r.pick], table: true });
+            out.push({ id: `t.${cell.req.cannot ? 'cannot' : 'key'}.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers ${cell.req.cannot ? 'could not have done it' : 'had no key for it'}`, rules_out: [r.pick], ...(cell.req.cannot ? {} : { strength: LIKELY }), table: true });
         }
     }
     return out;
