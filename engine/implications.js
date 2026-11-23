@@ -238,6 +238,13 @@ export function tableRules(data, observations) {
         const byEntry = observations.filter((o) => o.q === q.id && !o.if && o.from.length === 1 && typeof o.from[0] === 'string').filter((o) => { const f = factOf.get(o.from[0]); return f?.attr === 'believes' && f.truth !== false && who.has(f.of) && [f.asserts ?? []].flat().some(fits); }).map((o) => o.id);
         return [...byQ, ...byEntry];
     };
+    // In a yes-or-no question where one answer is the other's denial, what rules one out for certain concludes the
+    // other (2026-11-22; finding 120): "something else" is no third answer there.
+    const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+    const other = (q, p) => {
+        const o = p.value === 'yes' ? 'no' : p.value === 'no' ? 'yes' : null, op = o && q.possibilities.find((x) => x.value === o);
+        return op && isRight(q, o) && list(p.asserts).length > 0 !== list(op.asserts).length > 0 ? { concludes: o } : {};
+    };
     for (const q of data.questions) (q.possibilities ?? []).forEach((p, n) => {
         // A right answer is never ruled out, but for an aim that failed and a belief that explains it.
         const right = isRight(q, p.value), unless = defeaters(q, p);
@@ -258,10 +265,32 @@ export function tableRules(data, observations) {
             // Every choice among "any one of" must contradict it (one such group at most is tried one by one).
             const sets = anys.length ? anys[0].any.map((x) => [...fixed, x, ...anys.slice(1).flatMap((g) => g.any)]) : [fixed];
             if (anys.length > 1) continue;
-            if (!right && sets.every(against)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: one of the answers cannot stand with that`, rules_out: [p.value], table: true });
+            if (!right && sets.every(against)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: one of the answers cannot stand with that`, rules_out: [p.value], ...other(q, p), table: true });
             else if (aims.length && sets.every((ids) => alibis(data, told.filter((x) => ids.includes(x.fact)), aims).length > 0)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: had one of the answers been the aim, something would have been done toward it${unless.length ? ', unless its doer was mistaken about where it was' : ''}`, rules_out: [p.value], strength: LIKELY, table: true, ...(unless.length ? { unless } : {}) });
         }
     });
+    // A paper that speaks of what was not yet so on its date (2026-11-22; finding 120): an answer that has a thing made
+    // at a time (`asserts: {of, attr: 'made', time: {at}}`), an entry of the thing that gives that date (`dated`), an
+    // entry of it that speaks of something (`speaks_of: {of, attr?, value?}`), and an entry of that something which
+    // happened (an action) or began (`begins: true`) later. Each entry must be what an observation of the question
+    // comes from.
+    {
+        const order = data.order ?? timeOrder(data.times), facts = (data.facts ?? []).filter((f) => f.truth !== false);
+        const obs = (qid, f) => observations.filter((o) => o.q === qid && !o.if && o.from.every((x) => typeof x === 'string') && o.from.includes(f)).sort((a, b) => a.from.length - b.from.length)[0];
+        for (const q of data.questions) (q.possibilities ?? []).forEach((p, n) => {
+            if (isRight(q, p.value)) return;
+            for (const a of list(p.asserts)) {
+                const at = a.attr === 'made' && !a.neg && a.time?.at;
+                if (!at) continue;
+                for (const d of facts.filter((f) => f.of === a.of && f.dated === at)) for (const g of facts.filter((f) => f.of === a.of && f.speaks_of && (f.dated ?? at) === at)) {
+                    const so = g.speaks_of, h = facts.find((f) => f.of === so.of && (so.attr == null || f.attr === so.attr) && (so.value == null || f.value === so.value) && (f.begins || f.attr === 'action') && order.lt(at, f.time?.at ?? f.time?.from ?? at));
+                    const from = h && [...new Set([d, g, h].map((f) => obs(q.id, f.id)))];
+                    if (!h || from.some((o) => !o) || out.some((t) => t.id === `t.dated.${n}`)) continue;
+                    out.push({ id: `t.dated.${n}`, q: q.id, from: from.map((o) => o.id), says: `${from.map((o) => o.says).join('; ')}: it speaks of what was not yet so on its date`, rules_out: [p.value], ...other(q, p), table: true });
+                }
+            }
+        });
+    }
     // When it could have been done (`deedTimes`, 2026-11-22): the true entries close part of the act's window (nobody
     // was at the place), and an answer's agent was elsewhere through all that is left. Likely only: it rests on what
     // witnesses did not see. Each entry it rests on must be what some observation of the question comes from.
@@ -288,7 +317,10 @@ export function tableRules(data, observations) {
 /** A case's implications with the table's own added (those not already written by hand with the same premise and answer). */
 export function withTable(implications, data, observations) {
     const same = (t) => t.from.length === 1 && implications.some((i) => i.q === t.q && i.from.length === 1 && i.from[0] === t.from[0] && (i.rules_out ?? []).includes(t.rules_out[0]));
-    return [...implications, ...tableRules(data, observations).filter((t) => !same(t))];
+    // Where a written rule concludes an answer, the table does not conclude it on less (the author asks for more:
+    // two witnesses, not one); it still rules the other answer out.
+    const written = (t) => implications.some((i) => i.q === t.q && i.concludes === t.concludes);
+    return [...implications, ...tableRules(data, observations).filter((t) => !same(t)).map((t) => { if (t.concludes == null || !written(t)) return t; const { concludes, ...rest } = t; return rest; })];
 }
 
 /**

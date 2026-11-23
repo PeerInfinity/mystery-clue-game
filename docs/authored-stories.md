@@ -1732,9 +1732,17 @@ script that found each fact's paragraph from its quote; the data files are the s
       Ferry, where the table now rules out "before the lamp was lit" from the cup seen on its shelf); the bale
       in the yard until five, or until half past two and gone by half past three (The Watchman's Clock, where
       nothing follows by itself: that the gate found on the latch means the bale went then stays written).
-    - *Was it written when it says?* Not built: both cases (the ledger entry that names a berth opened later,
-      the will that speaks of a christening four months after its date) are one shape, a paper that speaks of
-      what was not yet so, and that is a new typed form, to be put to the user.
+    - *Was it written when it says?* Both cases (the ledger entry that names a berth opened later, the will
+      that speaks of a christening four months after its date) are one shape, a paper that speaks of what was
+      not yet so. A new form, agreed by the user: the paper's entry gives its date (`dated`), an entry of it
+      says what it speaks of (`speaks_of`), and that thing happened (an action) or began (`begins`) later; the
+      answer "yes" has the paper made at its date (`attr: "made"`). The table rules "yes" out from those
+      entries linked (`t.dated`). Both written rules are gone.
+    - *Yes or no, concluded.* Ruling "yes" out did not conclude "no", since nothing is concluded by elimination
+      while "something else" is an answer. In a yes-or-no question where one answer is the other's denial, a
+      certain rule-out of one now concludes the other. Where a written rule concludes the answer the table
+      does not conclude it on less: the long case asks for the landlord and the potboy both before Mr. Prout
+      is taken not to have been at the Anchor, and one of them alone would have done it.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

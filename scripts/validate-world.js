@@ -154,6 +154,9 @@ for (const f of facts) {
     // A time read by a clock (`time.by`), and how a clock was off (`off: [{reads, when}]`).
     if (f.time && typeof f.time === 'object' && f.time.by != null && !entities.has(f.time.by)) err(f.id, `time.by: no entity ${f.time.by}`);
     for (const o of list(f.off)) for (const k of ['reads', 'when']) if (!times.some((t) => t.id === o[k])) err(f.id, `off: no time ${o[k]}`);
+    // A paper's date, what it speaks of, and a state that began then (finding 120).
+    if (f.dated != null && !times.some((t) => t.id === f.dated)) err(f.id, `dated: no time ${f.dated}`);
+    if (f.speaks_of != null && !entities.has(f.speaks_of.of)) err(f.id, 'speaks_of: {of: an entity, attr?, value?}');
     if (f.seen_from != null && !(facts.find((x) => x.id === f.seen_from)?.attr === 'location')) err(f.id, `seen_from: ${f.seen_from} is not an entry of where someone was`);
     if (f.to && !entities.has(f.to)) err(f.id, `to: no entity ${f.to}`);
     if (ENTITY_ATTRS.has(f.attr)) for (const v of list(f.value)) {

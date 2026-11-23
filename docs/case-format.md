@@ -567,6 +567,13 @@ that follows from others, shown by itself the moment they all are.
 - **Yes or no** (2026-11-22; finding 120). In a question whose answers are "yes" and "no", type one of them
   (`asserts`); the other is its denial and is not written. "Could X have been there?" types "no" (X not there
   through the stretch); a "when" answer is typed by the state the deed leaves at a time between.
+- **A paper that speaks of what was not yet so** (2026-11-22; finding 120). On an entry of the paper: `dated:
+  <time>` (the date it bears) and `speaks_of: {of, attr?, value?}` (what it speaks of as so). The entry spoken of
+  is an action (it happened then) or a state with `begins: true` (not so before). An answer that has the paper
+  made at its date, `asserts: [{of: <paper>, attr: "made", value, time: {at: <the date>}}]`, is ruled out by
+  the table when the three are linked to the question and the date is before that time (`t.dated.<n>`).
+  In a yes-or-no question a certain rule-out of the typed answer concludes the other, unless a written rule
+  concludes it already.
 - **A time read by a clock** (2026-11-22; finding 119). `"time": {"at": <point>, "by": <the clock>}`: the time as
   read. It is taken as the true time unless an entry of that clock that counts says how it was off,
   `"off": [{"reads": <point>, "when": <point>}]` (it read the first when the time was the second): then the
