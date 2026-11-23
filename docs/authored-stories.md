@@ -1837,7 +1837,11 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *What it showed of the form.* A motive contradicts nothing, so the page concludes nothing from it: the
       conclusion is two written steps, likely. The miniature puts the want in the table and removes no
       written reasoning. A want the deed denies (the rival's fair win, the wife's cup for her husband) has no
-      typed form; it is the reader's step. Put to the user as a possible addition.
+      typed form; it is the reader's step. Put to the user, who agreed to add it: a want says what it
+      needs (`goal.needs`: states), and where the deed brings about the opposite the suspect table marks motive
+      against ("it undid what they said they wanted") and the table makes that answer unlikely (`t.want`).
+      The written step that set the rival and the wife aside is gone; the rival's row shows both his gain and
+      the want it undid.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

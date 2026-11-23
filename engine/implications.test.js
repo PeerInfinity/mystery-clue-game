@@ -293,3 +293,19 @@ test('a place with two doors is closed only while both are', async () => {
     assert.deepEqual(dt.closed.map((k) => [k.from, k.to]), [['t1', 't2']]);
     assert.deepEqual(dt.left.map((l) => [l.from, l.to, l.after]), [['t3', 't4', 't2']]);
 });
+
+test('a want the deed undoes is a motive against', async () => {
+    const { suspectGrid } = await import('./implications.js');
+    const { setCaseActions } = await import('./actions.js');
+    setCaseActions({ actions: [{ id: 'spoil', label: 'spoiling', requires: [], effects: [{ of: '$thing', attr: 'condition', value: 'off the bench' }] }] });
+    const want = (id, of, goal) => ({ id, of, attr: 'says', value: 'wants', goal, time: { at: 't1' }, para: 1, quote: 'x' });
+    const data = {
+        times: [{ id: 't1' }, { id: 't2', after: 't1' }], entities: [{ id: 'a', kind: 'person' }, { id: 'b', kind: 'person' }, { id: 'm', kind: 'object' }],
+        facts: [want('fa', 'a', { of: 'm', attr: 'condition', value: 'off the bench' }), want('fb', 'b', { of: 'm', attr: 'condition', value: 'the winner', needs: [{ of: 'm', attr: 'condition', value: 'off the bench', neg: true }] })],
+        accounts: [], narrators: [],
+        questions: [{ id: 'q', entry: { of: '?', attr: 'action', act: 'spoil', thing: 'm', time: { at: 't2' } }, possibilities: [{ value: 'a' }, { value: 'b' }], answer: 'a' }],
+    };
+    const rows = suspectGrid(data, data.questions[0], ['a', 'b'], ['fa', 'fb']);
+    assert.deepEqual(rows.map((r) => [r.pick, r.motive.map((c) => c.status)]), [['a', ['met']], ['b', ['against']]]);
+    setCaseActions({});
+});

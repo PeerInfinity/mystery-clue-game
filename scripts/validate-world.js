@@ -195,6 +195,7 @@ for (const f of facts) {
     for (const t of list(f.threat)) if (!entities.has(t.by) || !(entities.has(t.to) || questions.some((q) => q.id === t.to?.answer))) err(f.id, 'a threat is {to: an entity or {answer: a question}, by: an entity}');
     if (f.revokes != null && !entities.has(f.revokes)) err(f.id, `revokes: no entity ${f.revokes}`);
     for (const g of [f.goal, f.plan?.goal].filter(Boolean)) if (!entities.has(g.of) || !g.attr || g.value == null) err(f.id, 'a goal is {of: an entity, attr, value}');
+    for (const n of list(f.goal?.needs)) if (!entities.has(n.of) || !n.attr || n.value == null) err(f.id, 'what a goal needs is [{of: an entity, attr, value, neg?}]');
     for (const k of ['at', 'from', 'to', 'after', 'before']) if (f.time?.[k] && !timeIds.has(f.time[k])) err(f.id, `time.${k}: no time ${f.time[k]}`);
     if (!f.time || !Object.keys(f.time).length) err(f.id, 'no time');
     const basis = f.basis ?? 'stated';

@@ -1,8 +1,8 @@
 {
   "observations": [
     {"id": "o.off", "q": "q.who", "from": ["f.marrow_off"], "says": "what the slashing did was to keep the marrow off the bench", "essential": true},
-    {"id": "o.pask_want", "q": "q.who", "from": ["f.pask_wants"], "says": "Pask wanted to beat the marrow fair, on the bench, and no other way", "essential": true},
-    {"id": "o.martha_want", "q": "q.who", "from": ["f.martha_wants"], "says": "Martha wanted Abel to take the cup once more", "essential": true},
+    {"id": "o.pask_want", "q": "q.who", "from": ["f.pask_wants"], "says": "Pask wanted to beat the marrow fair, on the bench, and no other way"},
+    {"id": "o.martha_want", "q": "q.who", "from": ["f.martha_wants"], "says": "Martha wanted Abel to take the cup once more"},
     {"id": "o.abel_want", "q": "q.who", "from": ["f.abel_wants"], "says": "Abel wanted his marrow kept off the bench", "essential": true},
     {"id": "o.there", "q": "q.who", "from": ["f.abel_there", "f.martha_there", "f.pask_there"], "says": "all three were at the allotments after dark, each alone for a time"},
     {"id": "o.pask_wins", "q": "q.who", "from": ["f.pask_wins"], "says": "with Abel's marrow gone, Pask's took the cup"}

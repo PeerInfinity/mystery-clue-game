@@ -323,12 +323,12 @@ export function tableRules(data, observations) {
         const conds = conditionsOf(q).filter((k) => isRight(data.questions.find((x) => x.id === k.q), k.pick));
         const rows = suspectGrid(data, q, picks.map((p) => p.value), trueIds, undefined, { ...ctx, solved: Object.fromEntries(conds.map((k) => [k.q, k.pick])) }) ?? [];
         for (const r of rows) {
-            const cell = r.means.find((m) => m.status === 'against' && (m.req?.key || m.req?.cannot) && m.facts?.length);
+            const cell = r.means.find((m) => m.status === 'against' && (m.req?.key || m.req?.cannot) && m.facts?.length) ?? r.motive.find((m) => m.status === 'against' && m.req?.undone);
             const obs = cell && cell.facts.map((f) => obsOf(q.id, f));
             if (!cell || obs.some((o) => !o)) continue;
             const from = [...conds.map((k) => ({ solved: k.q })), ...new Set(obs.map((o) => o.id))], n = q.possibilities.findIndex((p) => p.value === r.pick);
             if (out.some((t) => t.q === q.id && t.rules_out[0] === r.pick && JSON.stringify(t.from) === JSON.stringify(from))) continue;
-            out.push({ id: `t.${cell.req.cannot ? 'cannot' : 'key'}.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers ${cell.req.cannot ? 'could not have done it' : 'had no key for it'}`, rules_out: [r.pick], ...(cell.req.cannot ? {} : { strength: LIKELY }), table: true });
+            out.push({ id: `t.${cell.req.cannot ? 'cannot' : cell.req.undone ? 'want' : 'key'}.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers ${cell.req.cannot ? 'could not have done it' : cell.req.undone ? 'had said they wanted what it undid' : 'had no key for it'}`, rules_out: [r.pick], ...(cell.req.cannot ? {} : { strength: LIKELY }), table: true });
         }
     }
     return out;
@@ -502,6 +502,10 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
         for (const e of entries) {
             if (!e.goal || e.of !== pick) continue;
             if (brings.some((p) => meets(p, { of: e.goal.of, attr: e.goal.attr, value: e.goal.value, neg: !!e.goal.neg }, c))) row.motive.push({ status: 'met', req: { of: e.goal.of, attr: e.goal.attr, value: e.goal.value, neg: !!e.goal.neg }, facts: [e.id] });
+            // A want the deed undoes (2026-11-23; finding 125): what the want needs (`goal.needs`: states) and the deed
+            // brings about the opposite of ("to beat it on the bench" needs it not kept off the bench).
+            const undone = [e.goal.needs ?? []].flat().find((n) => brings.some((p) => meets(p, { of: n.of, attr: n.attr, value: n.value, neg: !n.neg }, c)));
+            if (undone) row.motive.push({ status: 'against', req: { undone: true }, says: 'it undid what they said they wanted', facts: [e.id] });
         }
         // Gain and loss: what the thing the act makes or handles gives a person or takes from them (`gives`, `takes` on
         // an entry of that thing), and what it takes by revoking another thing (`revokes`) that gave it.
