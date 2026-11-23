@@ -574,6 +574,10 @@ that follows from others, shown by itself the moment they all are.
   the table when the three are linked to the question and the date is before that time (`t.dated.<n>`).
   In a yes-or-no question a certain rule-out of the typed answer concludes the other, unless a written rule
   concludes it already.
+- **Who holds a key** (2026-11-23; finding 121). "It has two keys, X's and Y's" is an absence about everyone
+  else: `of: "*"`, `every: "person"`, `but: [the holders]`, `attr: "carrying"`, `value`, `key: <the door>`, `neg:
+  true`. Under a "who" question whose act needs a key (`unlock`, `lock`, `take_locked` with `via`), the table
+  rules out an answer the entry denies the key (`t.key.<n>`).
 - **A time read by a clock** (2026-11-22; finding 119). `"time": {"at": <point>, "by": <the clock>}`: the time as
   read. It is taken as the true time unless an entry of that clock that counts says how it was off,
   `"off": [{"reads": <point>, "when": <point>}]` (it read the first when the time was the second): then the

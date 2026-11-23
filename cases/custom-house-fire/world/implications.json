@@ -17,8 +17,6 @@
     {"id": "i.crouch_mole", "q": "q.crouch", "from": ["o.crouch_mole"], "says": "Sam Tully had him in sight on the mole from soon after one until the bell: he was there", "concludes": "mole"},
     {"id": "i.crouch_not_house", "q": "q.crouch", "from": ["o.crouch_mole", "o.crouch_far"], "says": "and the pier-head is a quarter of an hour from the Custom House: he could not have been at both", "rules_out": ["custom_house"]},
     {"id": "i.bell_true", "q": "q.bell", "from": ["o.bell_log", "o.bell_office"], "says": "the log has the bell at 1.45 by a clock that is right: it was first rung at a quarter to two", "concludes": "a quarter to two"},
-    {"id": "i.bell_rowe", "q": "q.bell", "from": ["o.bell_slow"], "says": "Mrs. Rowe's quarter past one was by the church clock, half an hour slow: by true time, a quarter to two", "rules_out": ["a quarter past one"]},
-    {"id": "i.bell_honest", "q": "q.bell", "from": ["i.bell_rowe", "o.bell_mistake"], "says": "she was honest, and wrong by her clock"},
     {"id": "i.liar_no", "q": "q.liar", "from": ["o.liar_landlord", "o.liar_boy"], "says": "the landlord and the potboy both say he was not in the house when the bell rang: he was not", "concludes": "no"},
     {"id": "i.liar_lied", "q": "q.liar", "from": ["i.liar_no", "o.liar_lie"], "says": "so what Mr. Prout told me, that he was still at the table, was not so"},
     {"id": "i.gap_left", "q": "q.gap", "from": ["o.gap_left", "o.gap_clock"], "says": "he left at a quarter past one by a clock that is right", "asserts": [{"of": "prout", "attr": "location", "value": "anchor", "neg": true, "time": {"from": "t.q_past_one", "to": "t.q_to_two"}}]},

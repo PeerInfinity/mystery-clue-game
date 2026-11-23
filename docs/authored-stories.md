@@ -1744,6 +1744,26 @@ script that found each fact's paragraph from its quote; the data files are the s
       does not conclude it on less: the long case asks for the landlord and the potboy both before Mr. Prout
       is taken not to have been at the Anchor, and one of them alone would have done it.
 
+121. **Untyped condition and action entries, surveyed (2026-11-23).** Of 66 action entries 8 were typed, of 69
+    condition entries 11; most of the rest are the story's furniture and do no logical work. Those a written
+    rule rests on fall into a few shapes. Agreed with the user: the four that existing forms cover now, and
+    "could not have done it" (a foot, an ankle, a voice, a height) after a design discussion.
+    - *"It has two keys: X's and Y's"* is a statement about everyone else: no key (`of: "*"`, `but` the
+      holders, `carrying`, `key`, `neg`). A new table rule (`t.key`) rules out an answer whose deed needs a key
+      that such a true entry denies it, from the suspect table's means. The Cellar Door: the written rule-out
+      of Ned is gone. The Last Ferry: the taking is now out of a locked place (`take_locked`), and the table
+      rules out Bell. The Grey Cloak: typed, and nothing follows (all three answers hold a key).
+      Not done in the long case: its deed needs a key only once the door question is answered ("by the street
+      door with a key"), and a need that waits on another question's answer has no form yet.
+    - *Clocks in the long case.* Mrs. Rowe's quarter past one is read by the church clock, typed as half an
+      hour slow; her entry is no longer flagged false, and two written rules and three path moves are gone.
+    - *"The thing is gone"* is the thing not at the place (cup, bale, ring, cash-box). Nothing follows from it
+      by itself yet. Two more ("forced, and the takings gone"; "found open, and four hundred pounds gone") say
+      two things at once and name no thing that is an entity; left.
+    - *"Told to nobody but X": not typed.* It looked like an absence about knowing, and is not: in The Loose
+      Board the lodger knows the hiding-place though he was never told, and that gap is the story. What is
+      stated is about the telling; "so nobody else knows" is a default the reader makes, and here a wrong one.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

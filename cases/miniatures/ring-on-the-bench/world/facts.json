@@ -2,7 +2,7 @@
   "facts": [
     {"id": "f.vane_role", "of": "vane", "attr": "role", "value": "goldsmith, of Fetter Court", "time": {"from": "t.before"}, "para": 1, "quote": "goldsmith, of Fetter Court"},
     {"id": "f.ring_left", "of": "ring", "attr": "location", "value": "workroom", "detail": "on the bench", "time": {"at": "t.night"}, "para": 1, "quote": "I left a customer's ring on the bench in my workroom"},
-    {"id": "f.ring_gone", "of": "workroom", "attr": "condition", "value": "the ring is gone from the bench", "time": {"at": "t.morning"}, "para": 1, "quote": "in the morning the ring was gone"},
+    {"id": "f.ring_gone", "of": "ring", "attr": "location", "value": "workroom", "neg": true, "detail": "gone from the bench", "time": {"at": "t.morning"}, "para": 1, "quote": "in the morning the ring was gone"},
     {"id": "f.door", "of": "door", "attr": "closed_to", "value": "small", "detail": "locked all night", "time": {"at": "t.night"}, "para": 1, "quote": "The door of the workroom was locked all night"},
     {"id": "f.key_belt", "of": "vane", "attr": "carrying", "value": "key", "detail": "at her belt", "time": {"at": "t.night"}, "para": 1, "quote": "the key hung at my belt"},
     {"id": "f.tom_role", "of": "tom", "attr": "role", "value": "Esther Vane's apprentice", "time": {"from": "t.before"}, "para": 2, "quote": "My apprentice, Tom Pike"},

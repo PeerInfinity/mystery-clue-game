@@ -312,6 +312,22 @@ export function tableRules(data, observations) {
         const from = [...new Set(obs.map((o) => o.id))];
         out.push({ id: `t.when.${n}`, q: q.id, from, says: `${obs.map((o) => o.says).join('; ')}: one of the answers was elsewhere whenever it could have been done`, rules_out: [p.value], strength: LIKELY, table: true });
     });
+    // A key the deed needs and an answer has not (2026-11-23; finding 121): the suspect table's means, where a true
+    // entry denies the key ("it has two keys: X's and Y's", a statement about everyone else). From the observation of
+    // each entry it rests on.
+    for (const q of data.questions) {
+        const picks = (q.possibilities ?? []).filter((p) => !isRight(q, p.value) && isEntity(p.value));
+        if (!picks.length || !answerAction(q, picks[0].value, isEntity)) continue;
+        const rows = suspectGrid(data, q, picks.map((p) => p.value), trueIds, undefined, ctx) ?? [];
+        for (const r of rows) {
+            const cell = r.means.find((m) => m.status === 'against' && m.req?.key && m.facts?.length);
+            const obs = cell && cell.facts.map((f) => obsOf(q.id, f));
+            if (!cell || obs.some((o) => !o)) continue;
+            const from = [...new Set(obs.map((o) => o.id))], n = q.possibilities.findIndex((p) => p.value === r.pick);
+            if (out.some((t) => t.q === q.id && t.rules_out[0] === r.pick && t.from.length === from.length && t.from.every((x) => from.includes(x)))) continue;
+            out.push({ id: `t.key.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers had no key for it`, rules_out: [r.pick], table: true });
+        }
+    }
     return out;
 }
 /** A case's implications with the table's own added (those not already written by hand with the same premise and answer). */

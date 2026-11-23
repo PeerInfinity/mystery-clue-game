@@ -1,6 +1,5 @@
 {
   "implications": [
-    {"id": "i.who_not_ned_key", "q": "q.who", "from": ["o.opened", "o.keys"], "says": "the door was unlocked with a key, and Ned has neither of the two: it was not Ned", "rules_out": ["ned"]},
     {"id": "i.who_not_ned_loft", "q": "q.who", "from": ["o.opened", "o.ned_loft"], "says": "it needed a man at the door, and Ned was in the loft across the yard from ten until six: it was not Ned", "rules_out": ["ned"]},
     {"id": "i.who_jem", "q": "q.who", "from": ["o.opened", "o.keys", "o.jem_key", "o.jem_passage"], "says": "it needed a key and a man at the door: Jem carries a key, and lay all night in the passage the door opens off. It was Jem", "concludes": "jem"}
   ]
