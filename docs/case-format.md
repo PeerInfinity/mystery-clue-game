@@ -581,6 +581,9 @@ that follows from others, shown by itself the moment they all are.
   A role of a question's typed entry may wait on another question's answer: `"via": {"thing": <door>, "if":
   {"q": <question>, "pick": <answer>}}`. It is there once that question is solved so, and a table rule that
   rests on it has `{solved: <question>}` among its premises.
+- **Could not have done it** (2026-11-23; finding 121). `cannot: [<act>]` on an entry of a person: the kinds
+  of deed (acts of the table) they could not have done. Under a "who" question whose act is one of them, the
+  suspect table marks means against, and the table rules that answer out (`t.cannot.<n>`).
 - **A time read by a clock** (2026-11-22; finding 119). `"time": {"at": <point>, "by": <the clock>}`: the time as
   read. It is taken as the true time unless an entry of that clock that counts says how it was off,
   `"off": [{"reads": <point>, "when": <point>}]` (it read the first when the time was the second): then the

@@ -322,12 +322,12 @@ export function tableRules(data, observations) {
         const conds = conditionsOf(q).filter((k) => isRight(data.questions.find((x) => x.id === k.q), k.pick));
         const rows = suspectGrid(data, q, picks.map((p) => p.value), trueIds, undefined, { ...ctx, solved: Object.fromEntries(conds.map((k) => [k.q, k.pick])) }) ?? [];
         for (const r of rows) {
-            const cell = r.means.find((m) => m.status === 'against' && m.req?.key && m.facts?.length);
+            const cell = r.means.find((m) => m.status === 'against' && (m.req?.key || m.req?.cannot) && m.facts?.length);
             const obs = cell && cell.facts.map((f) => obsOf(q.id, f));
             if (!cell || obs.some((o) => !o)) continue;
             const from = [...conds.map((k) => ({ solved: k.q })), ...new Set(obs.map((o) => o.id))], n = q.possibilities.findIndex((p) => p.value === r.pick);
             if (out.some((t) => t.q === q.id && t.rules_out[0] === r.pick && JSON.stringify(t.from) === JSON.stringify(from))) continue;
-            out.push({ id: `t.key.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers had no key for it`, rules_out: [r.pick], table: true });
+            out.push({ id: `t.${cell.req.cannot ? 'cannot' : 'key'}.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers ${cell.req.cannot ? 'could not have done it' : 'had no key for it'}`, rules_out: [r.pick], table: true });
         }
     }
     return out;
@@ -476,6 +476,10 @@ export function suspectGrid(data, q, picks, shown, nameOf = (id) => id, ctx = {}
             const st = requirementStatus(order, entries, req, c);
             if (st.status !== 'unknown' && st.entry) (req.away ? row.opportunity : row.means).push({ status: st.status, req, facts: [st.entry.id] });
         }
+        // An entry of the suspect that says they could not have done a deed of this kind (`cannot: [act]`: an ankle in
+        // splints, and a bale to carry; 2026-11-23, finding 121).
+        const acts = [act.act ?? []].flat();
+        for (const e of entries) if (e.of === pick && [e.cannot ?? []].flat().some((a) => acts.includes(a))) row.means.push({ status: 'against', req: { cannot: true }, says: 'could not have done it', facts: [e.id] });
         const brings = productsOf(act, nameOf, c);
         for (const e of entries) {
             if (!e.goal || e.of !== pick) continue;

@@ -157,6 +157,8 @@ for (const f of facts) {
     // A paper's date, what it speaks of, and a state that began then (finding 120).
     if (f.dated != null && !times.some((t) => t.id === f.dated)) err(f.id, `dated: no time ${f.dated}`);
     if (f.speaks_of != null && !entities.has(f.speaks_of.of)) err(f.id, 'speaks_of: {of: an entity, attr?, value?}');
+    // `cannot`: the kinds of deed its subject could not have done (acts of the table).
+    for (const a of list(f.cannot)) if (!ACTIONS[a]) err(f.id, `cannot: no act ${a}`);
     if (f.seen_from != null && !(facts.find((x) => x.id === f.seen_from)?.attr === 'location')) err(f.id, `seen_from: ${f.seen_from} is not an entry of where someone was`);
     if (f.to && !entities.has(f.to)) err(f.id, `to: no entity ${f.to}`);
     if (ENTITY_ATTRS.has(f.attr)) for (const v of list(f.value)) {

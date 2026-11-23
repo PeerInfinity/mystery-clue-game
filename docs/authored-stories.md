@@ -1325,10 +1325,10 @@ script that found each fact's paragraph from its quote; the data files are the s
       for certain from the heap at the press. "Preventing" (the fire as a goal against the Board's audit) is not
       typed: nothing the page does would use it yet.
     - **2. Trust beside each conclusion**, as far as it could go without a ruling: each statement in a
-      question's tree has the dot of how far it is trusted, its weakest premise. Making a conclusion "likely"
-      when it rests on an uncertain statement is not built, because every witness's statement starts as
-      uncertain: every answer of every case would start as likely. Whether that is wanted is the user's to say
-      (it would make "trusted" something the player has to grant before an answer is certain).
+      question's tree has the dot of how far it is trusted, its weakest premise. (Whether a conclusion is only
+      likely when it rests on what is not confirmed was left to the user here; it was settled the same day by
+      the five trust levels below and by finding 115: an uncertain statement counts for nothing, a link trusts
+      as likely, a conclusion is as strong as its weakest step, and confirmed is earned.)
     Agreed and not built, each to be discussed before building:
     - 3. Means, opportunity and motive as a grid: each suspect against what the act needs, met, against, or
       nothing says so, from the action table; in place of hand-written likely clashes.
@@ -1766,6 +1766,14 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *"Told to nobody but X": not typed.* It looked like an absence about knowing, and is not: in The Loose
       Board the lodger knows the hiding-place though he was never told, and that gap is the story. What is
       stated is about the telling; "so nobody else knows" is a default the reader makes, and here a wrong one.
+
+    - *"Could not have done it."* Put to the user: the entry names the kind of deed it prevents; or deeds name
+      what they need of a body and people have or lack it; or leave them written. The user chose the first,
+      with Kitty's height left written (a comparison of two descriptions, not an inability). On reading the
+      cases only one fits: Tanner's ankle (`cannot: ["take_locked"]`; the suspect table's means reads it, and
+      the table rules him out, `t.cannot`; the written rule is gone). Marta's voice has no rule resting on it.
+      Mr. Pell's foot prevents no deed: it keeps him where he was, and answers "could he have been on the
+      quay?", which would need "who cannot walk stays where he was last placed", a rule with one user. Left.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

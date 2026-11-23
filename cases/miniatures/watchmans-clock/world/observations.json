@@ -5,7 +5,7 @@
     {"id": "o.gap_when", "q": "q.when", "from": [{"reasoned": "missing", "of": "f.rule", "at": "t.three"}], "says": "the one round missing from the card is the round at three, in that hour"},
     {"id": "o.gap", "q": "q.who", "from": [{"reasoned": "missing", "of": "f.rule", "at": "t.three"}], "says": "the card has no round at three: Ward was not at the station in that hour", "essential": true},
     {"id": "o.opened", "q": "q.who", "from": ["f.gate_latch"], "says": "the gate was opened with a key between half past two and half past three", "essential": true},
-    {"id": "o.ankle", "q": "q.who", "from": ["f.tanner_ankle"], "says": "Tanner, in splints since Saturday, could not have stood under a bale of silk", "essential": true, "against": ["tanner"]},
+    {"id": "o.ankle", "q": "q.who", "from": ["f.tanner_ankle"], "says": "Tanner, in splints since Saturday, could not have stood under a bale of silk", "essential": true},
     {"id": "o.keys", "q": "q.who", "from": ["f.tanner_key"], "says": "only Ward and Tanner have keys to the gate"},
     {"id": "o.lie", "q": "q.who", "from": [{"doubted": "f.ward_tells"}], "says": "Ward's statement, that he made every round, is false"}
   ]
