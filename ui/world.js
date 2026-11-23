@@ -146,7 +146,7 @@ const LAST = story.length - 1;   // the main story's last paragraph
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
 // {move: 'b', of} (what an action needs and does); the entries they give are worked out afresh (engine/actions.js).
-const state = { para: 1, log: null, story: MAIN, hideOut: false, greyClash: 'on', trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {}, linkRule: 'checked', leftList: 'on', leftOpen: false, answerRule: 'evidence' };
+const state = { para: 1, log: null, story: MAIN, hideOut: false, greyClash: 'on', autoAgree: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {}, linkRule: 'checked', leftList: 'on', leftOpen: false, answerRule: 'evidence' };
 if (AUTOPLAY === null) try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) ?? '{}')); } catch { /* a fresh start */ }
 // Saves from before the reader model (2026-11-06) capped Watson's hypothesis and reasoning under other ids.
 for (const [was, now] of [['watsons_hypothesis', HYPOTHESIS], ['watsons_reasoning', REASONING]]) if (state.trust?.people?.[was] != null) { state.trust.people[now] ??= state.trust.people[was]; delete state.trust.people[was]; }
@@ -177,9 +177,9 @@ if (EARNED) {
     const progress = (state.log?.length ?? 0) > 1 || state.links.length || Object.keys(state.marks).length;
     if (seedParam && state.seed && seedParam !== state.seed && progress && AUTOPLAY === null && !confirm(`Start a new game with seed ${seedParam}? Your timeline on this device is cleared.`)) { /* keep the game in hand */ }
     else if (seedParam && seedParam !== state.seed) {
-        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate', 'linkRule', 'leftList', 'answerRule', 'hideOut', 'greyClash'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
+        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate', 'linkRule', 'leftList', 'answerRule', 'hideOut', 'greyClash', 'autoAgree'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
         for (const k of Object.keys(state)) if (!(k in keep)) delete state[k];
-        Object.assign(state, { para: 1, log: null, story: MAIN, hideOut: false, greyClash: 'on', trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {} }, keep, { seed: seedParam });
+        Object.assign(state, { para: 1, log: null, story: MAIN, hideOut: false, greyClash: 'on', autoAgree: false, trust: { links: {}, people: {} }, marks: {}, reasoning: [], history: [], view: 'list', depth: 2, sel: null, qOpen: true, cardsOpen: false, hintWait: 30, note: null, layout: 'three', panels: ['story', 'timeline'], theme: 'system', onlyMoves: false, held: [], room: null, links: [], qOrder: null, solved: {}, tried: {} }, keep, { seed: seedParam });
         reading = Reading.fromSave(state, lengths);
         syncReading();
     }
@@ -212,14 +212,31 @@ if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, hideOut: state.hideOut, greyClash: state.greyClash, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, sourcesOpen: state.sourcesOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved, seed: state.seed, tried: state.tried, linkRule: state.linkRule, leftList: state.leftList, leftOpen: state.leftOpen, answerRule: answerParam ?? state.answerRule })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, hideOut: state.hideOut, greyClash: state.greyClash, autoAgree: state.autoAgree, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, sourcesOpen: state.sourcesOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved, seed: state.seed, tried: state.tried, linkRule: state.linkRule, leftList: state.leftList, leftOpen: state.leftOpen, answerRule: answerParam ?? state.answerRule })); } catch { /* not saved */ } };
 // `?answers=evidence` (or `hand`) sets how answers are marked, for the checks and the blind solver.
 // Not saved: the address says it for this visit only.
 let answerParam = null;
 { const a = new URLSearchParams(location.search).get('answers'); if (a === 'evidence' || a === 'hand') { answerParam = state.answerRule; state.answerRule = a; } }
 // Every change of trust or of a mark can be undone: the state before it is kept (the last 50).
 const remember = () => { state.history = [...state.history, JSON.stringify({ trust: state.trust, marks: state.marks, reasoning: state.reasoning, held: state.held, room: state.room, links: state.links })].slice(-50); };
-const changeTrust = (fn) => { remember(); fn(state.trust); save(); render(); };
+const changeTrust = (fn) => { remember(); fn(state.trust); withdrawAgreed(); save(); render(); };
+/**
+ * A statement confirmed because another bore it out (`trust.agreed`: its key → {fact, by}) is held likely again once
+ * that other is held unlikely or ruled out, unless a question solved rests on it (2026-11-23; finding 122).
+ */
+function withdrawAgreed() {
+    const tr = state.trust, back = [];
+    for (const [k, a] of Object.entries(tr.agreed ?? {})) {
+        const by = factById.get(a.by), l = by ? levelOfFact(by) : null;
+        if (tr.links[k] !== CONFIRMED) { delete tr.agreed[k]; continue; }
+        if (l == null || l >= UNCERTAIN || observed.filled.some((x) => state.solved[x.obs.q] && x.entries.some((e) => e.id === a.fact))) continue;
+        tr.links[k] = LIKELY_LEVEL; tr.earned = (tr.earned ?? []).filter((x) => x !== k); delete tr.agreed[k];
+        if (factById.has(a.fact)) back.push(a.fact);
+    }
+    if (back.length) state.note = `Held likely again, since what bore it out is no longer trusted: ${back.map((id) => phrase(factById.get(id)).replace(/<[^>]+>/g, '')).join('; ')}.`;
+}
+/** Take the offer where two independent sources agree: the statement confirmed, and what bore it out remembered. */
+const takeAgree = (tr, k, fact, by) => { earn(tr, k); setLink(tr, k, CONFIRMED); tr.agreed = { ...(tr.agreed ?? {}), [k]: { fact, by } }; };
 const MARK_NEXT = { undefined: 'circled', circled: 'crossed', crossed: undefined };
 function cycleMark(qid, pick) {
     if (autoQ(qid)) { state.note = 'The answers to this question are marked from the evidence you link: one is crossed out when what you have shown rules it out, and circled when it follows.'; render(); return; }
@@ -1315,6 +1332,7 @@ function render() {
     document.getElementById('para').min = at;
     document.getElementById('hide-out').checked = !!state.hideOut;
     document.getElementById('grey-clash').value = state.greyClash === 'off' ? 'off' : 'on';
+    document.getElementById('auto-agree').checked = !!state.autoAgree;
     document.getElementById('narrator-trust').innerHTML = data.narrators.map((n) => `<label title="How far you trust what ${esc(n.name ?? 'the narrator')} tells you: everything in the story comes through this narration">Trust in ${esc(n.name ?? 'the narrator')} as narrator
           <select class="narration-trust" data-key="${esc(linkKey(narrationLink(n)))}" data-base="${narrationLink(n).base}">${levelOpts(narrationLevel(n.id), null, true)}</select></label>`).join('');
 
@@ -1361,11 +1379,14 @@ function render() {
     const wide = state.greyClash === 'off' ? acceptedAssertions(UNCERTAIN) : acceptedNow;
     const lvl = (x) => sideLevel.get(x.id) ?? CONFIRMED;
     const agree = agreements(data, wide).filter((g) => ((lvl(g.a) < CONFIRMED && g.whole.a) || (lvl(g.b) < CONFIRMED && g.whole.b)) && independent(chainsOfAssertion(g.a), chainsOfAssertion(g.b)));
-    const offer = (x, o, whole) => (whole && lvl(x) < CONFIRMED && (lvl(o) === CONFIRMED || (lvl(x) === LIKELY_LEVEL && lvl(o) === LIKELY_LEVEL)) ? agreeButton(factOf(x.fact)) : '');
-    const agreeButton = (f) => { const k = f ? stmtKeyOf(f) : null; return k ? `<button type="button" class="quiet small" data-agree="${esc(k)}">Trust as confirmed</button>` : ''; };
+    const offer = (x, o, whole) => (whole && lvl(x) < CONFIRMED && (lvl(o) === CONFIRMED || (lvl(x) === LIKELY_LEVEL && lvl(o) === LIKELY_LEVEL)) ? agreeButton(factOf(x.fact), o.fact) : '');
+    const offers = [];
+    const agreeButton = (f, by) => { const k = f ? stmtKeyOf(f) : null; if (k) offers.push({ k, fact: f.id, by }); return k ? `<button type="button" class="quiet small" data-agree="${esc(k)}" data-agree-fact="${esc(f.id)}" data-agree-by="${esc(by ?? '')}">Trust as confirmed</button>` : ''; };
     const agreeItem = (g) => { const b = [offer(g.a, g.b, g.whole.a), offer(g.b, g.a, g.whole.b)].filter(Boolean); return `<li>${side(g.a)} ${offer(g.a, g.b, g.whole.a)}<br>and ${side(g.b)} ${offer(g.b, g.a, g.whole.b)}${b.length ? '' : `<br><span class="small muted">${!counts(lvl(g.a)) || !counts(lvl(g.b)) ? 'One of them at least does not count yet.' : 'Trust both as likely, or one as confirmed, and the other can be confirmed.'}</span>`}</li>`; };
     document.getElementById('clashes').innerHTML += agree.length ? `<details class="agree-box" open><summary>${agree.length} agree: two sources that share nothing say the same</summary>
       <p class="small muted">The opposite of a contradiction, and one of the two ways a statement becomes confirmed (the other: a question solved that rested on it). Where one is confirmed, or both are likely, you can confirm what the other bears out. Two can agree and both be wrong.</p><ol>${agree.map(agreeItem).join('')}</ol></details>` : '';
+    // The setting that takes the offer for the player: one at a time, each drawn again with what it changes.
+    if (state.autoAgree && offers.length) { const o = offers[0]; takeAgree(state.trust, o.k, o.fact, o.by); state.note = 'Confirmed, since two independent sources agree (a setting; two can agree and both be wrong).'; save(); render(); return; }
     document.getElementById('sources').innerHTML = sourcesPanel();
     document.getElementById('questions').innerHTML = leftHtml() + questionsPanel(clashing);
     const cards = cardsPanel();
@@ -2519,6 +2540,7 @@ document.getElementById('next').addEventListener('click', () => {
 });
 document.getElementById('para').addEventListener('change', (e) => readShown(Number(e.target.value)));
 document.getElementById('grey-clash').addEventListener('change', (e) => { state.greyClash = e.target.value; save(); render(); });
+document.getElementById('auto-agree').addEventListener('change', (e) => { state.autoAgree = e.target.checked; save(); render(); });
 document.getElementById('only-moves').addEventListener('change', (e) => { state.onlyMoves = e.target.value === 'moves'; save(); render(); });
 document.getElementById('view').addEventListener('change', (e) => { state.view = e.target.value; save(); render(); });
 document.getElementById('depth').addEventListener('change', (e) => { state.depth = Number(e.target.value); save(); render(); });
@@ -2575,7 +2597,7 @@ document.addEventListener('keydown', (e) => {
 document.getElementById('start-over').addEventListener('click', () => {
     if (!confirm('Start over from the first paragraph? Your trust, marks and reasoning on this device are cleared (layout, theme and the hint wait are kept). This cannot be undone.')) return;
     try {
-        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate', 'linkRule', 'leftList', 'answerRule', 'hideOut', 'greyClash'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
+        const keep = Object.fromEntries(['layout', 'panels', 'theme', 'hintWait', 'gate', 'linkRule', 'leftList', 'answerRule', 'hideOut', 'greyClash', 'autoAgree'].filter((k) => state[k] != null).map((k) => [k, state[k]]));
         localStorage.setItem(PLAYER_STORE, JSON.stringify(keep));
         localStorage.removeItem(AUTOPLAY_STORE);
     } catch { /* nothing saved to clear */ }
@@ -2744,7 +2766,7 @@ document.addEventListener('click', (e) => {
     const st = e.target.closest('[data-set-trust]');
     if (st) { if (Number(st.dataset.level) === CONFIRMED && !earned(st.dataset.setTrust)) return; changeTrust((tr) => setLink(tr, st.dataset.setTrust, Number(st.dataset.level))); return; }
     const ag = e.target.closest('[data-agree]');
-    if (ag) { changeTrust((tr) => { earn(tr, ag.dataset.agree); setLink(tr, ag.dataset.agree, CONFIRMED); }); return; }
+    if (ag) { changeTrust((tr) => takeAgree(tr, ag.dataset.agree, ag.dataset.agreeFact, ag.dataset.agreeBy)); return; }
     const src = e.target.closest('[data-src]');
     if (src) { select(`src:${src.dataset.src}`, e); return; }
     const a = e.target.closest('[data-ent]');

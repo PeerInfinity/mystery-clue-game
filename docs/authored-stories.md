@@ -1775,6 +1775,21 @@ script that found each fact's paragraph from its quote; the data files are the s
       Mr. Pell's foot prevents no deed: it keeps him where he was, and answers "could he have been on the
       quay?", which would need "who cannot walk stays where he was last placed", a rule with one user. Left.
 
+122. **Agreement taken for the player, and withdrawn (the user's rulings of 2026-11-23).** Asked whether an
+    answer should be only likely where it rests on what is uncertain, the user said yes; that was built already
+    (the five trust levels; finding 115: confirmed is earned, by a question solved or by the offer where two
+    independent sources agree). Asked whether the page should take that offer itself, the answer put to the
+    user and agreed: as a setting, off by default. An agreement is evidence and not proof, and deciding which
+    side of a clash gives way is the game; but the page already confirms what a solved question rested on, so
+    the setting is no new kind of thing.
+    - Settings, "Confirm what two independent sources agree on": the page takes each offer as it appears, and
+      says so in a note.
+    - A statement confirmed by an agreement remembers what bore it out (`trust.agreed`). When that other
+      statement is later held unlikely or ruled out, it is held likely again, with a note, unless a question
+      solved rests on it. This holds whether the offer was taken by hand or by the setting.
+    - What testing in the browser caught: the offer's button must not carry `data-fact` (the page's own click
+      on an entry takes it first).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

@@ -752,6 +752,10 @@ trust" keeps it). A narrator's own link, and a doubtable narrator's statement, s
 back to it; the limit on the reader's own reasoning offers it too (it is "no limit"). A path's move
 `{do: "trust", level: "confirmed"}` is played by pressing the offer (`#clashes [data-agree]`), unless a question
 solved since has confirmed the statement already.
+A statement confirmed by the offer is remembered with what bore it out (`trust.agreed`: its key → `{fact, by}`),
+and is held likely again once that other statement is held unlikely or ruled out, unless a solved question rests
+on it. Settings' "Confirm what two independent sources agree on" (`autoAgree`, off by default) takes each offer
+as it appears (finding 122).
 A telling is shown as an event, as trusted as the narration (that it was said stands; what it says is trusted apart).
 `resolvingLinks` gives the links and people whose ruling out alone would stop a fact counting
 (those every chain of it passes through): the page marks them when it traces a clash. "Something is missing here"
