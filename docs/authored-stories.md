@@ -1683,6 +1683,28 @@ script that found each fact's paragraph from its quote; the data files are the s
       have. The true path ends at ¶4 with four links.
     - *Left.* A place with more than one door (no case needs it).
 
+119. **Defaults that can be defeated (item 5 of finding 110; the user's rulings of 2026-11-22).** The plan's three
+    examples are three shapes, none typed before: a clock is right unless shown wrong; a state found later was so
+    before (the stove "cold, raked out and shut"); an aim was attempted, unless its holder believed otherwise (the
+    ledger that was not in the press). Put to the user: one general rule form "X, unless Y" (the rules stay
+    written); three typed forms; or typed where a second case would use it. The user chose the last: clocks first,
+    then aims by belief, the stove left as the one written rule until a second story needs it.
+    - *A clock is right unless shown wrong* (built on The Stable Clock). A time says which clock it was read by
+      (`time.by`); a clock's entry says how it was off as pairs (`off: [{reads, when}]`: it read this when the
+      time was that), since the stories' times are named points the page cannot add a quarter of an hour to.
+      Until the clock's entry counts, the reading is taken as the true time, so the gardener's quarter to nine
+      clashes with the housemaid's nine, as before. Once it counts, the reading is restated (`byClocks`, in
+      contradictions, agreements and alibis): the clash goes and the two witnesses agree. Doubt the clock's
+      entry and the clash is back.
+    - *What it replaced.* The gardener's entry is no longer flagged false (he read his clock rightly), the
+      "ruled out" trust move and the telling linked as an honest mistake are gone from the true path, and two
+      written rules are gone: "a quarter to nine" is ruled out by the table, from the reading and the slow clock
+      linked together. The conclusion stays written.
+    - *Left.* The entry stays on the timeline at the time as read; its detail says what the time was. The pair
+      for Thursday evening is the author's (the story shows the clock slow on Friday morning: that it was slow
+      the evening before is the second default, not built). The grid and the narrowing do not restate readings.
+      "The hall clock was set right that morning" confirms the default and changes nothing in the logic.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

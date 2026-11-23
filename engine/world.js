@@ -177,6 +177,31 @@ export function timeOrder(times) {
 }
 
 /**
+ * A clock is right unless shown wrong (2026-11-22; docs/authored-stories.md, finding 119). A time read by a clock
+ * (`time.by`: the clock) is taken as the true time, until an entry of that clock among the statements says how it
+ * was off (`off: [{reads, when}]`: it read `reads` when the time was `when`): then each point of the reading that has
+ * a pair is restated as the true one, and the statement carries `read: {time, by, facts}` (as it was told, and the
+ * clock's entries). Times are named points, so only a reading with a pair is shifted. A mark has no clock.
+ */
+export function byClocks(data, xs) {
+    if (!(data.facts ?? []).some((f) => f.off)) return xs;
+    const factOf = new Map(data.facts.map((f) => [f.id, f]));
+    const off = new Map();
+    for (const x of xs) {
+        const f = x.fact != null && x.id === x.fact && x.kind === 'state' && !x.neg ? factOf.get(x.fact) : null;
+        for (const p of list(f?.off)) off.set(`${f.of}|${p.reads}`, { when: p.when, fact: f.id });
+    }
+    if (!off.size) return xs;
+    return xs.map((x) => {
+        const by = x.kind === 'state' && !x.mark && x.time && typeof x.time === 'object' ? x.time.by : null;
+        if (!by) return x;
+        const time = { ...x.time }, facts = [];
+        for (const k of ['at', 'from', 'to', 'after', 'before']) { const p = time[k] && off.get(`${by}|${time[k]}`); if (p) { time[k] = p.when; facts.push(p.fact); } }
+        return facts.length ? { ...x, time, read: { time: x.time, by, facts: [...new Set(facts)] } } : x;
+    });
+}
+
+/**
  * The span of time a fact certainly covers: `{at}` its point; `{from, to}` from `from` up to, not including, `to`;
  * an open end only its start (a state lasts until the next change, which is no contradiction); `{after, before}`
  * and `{to}` alone nothing certain.
@@ -339,7 +364,7 @@ export function contradictions(data, accepted = null) {
     const unknown = new Set([...(data.questions ?? []).filter((q) => q.entry?.attr === 'identity').map((q) => q.entry.of), ...(data.facts ?? []).filter((x) => x.attr === 'identity').map((x) => x.of)]);
     // With nobody excepted it is about the unnamed too ("someone went through the door").
     const everyone = (x) => [...(data.entities ?? []).filter((e) => list(x.every).includes(e.kind) && !list(x.but).includes(e.id) && !unknown.has(e.id)).map((e) => e.id), ...(list(x.but).length ? [] : ['?'])].map((of) => ({ ...x, of, each: x }));
-    const all = (accepted ?? assertions(data)).filter((x) => !x.modal).flatMap((x) => (x.kind === 'state' && x.of === EVERY ? everyone(x) : [x]));
+    const all = byClocks(data, accepted ?? assertions(data)).filter((x) => !x.modal).flatMap((x) => (x.kind === 'state' && x.of === EVERY ? everyone(x) : [x]));
     let out = [];
 
     const byQ = new Map();
@@ -516,6 +541,7 @@ export function contradictions(data, accepted = null) {
  * a granny). `req` on a need is passed on to the mark's side, so that the act's needs can name the contradiction.
  */
 export function alibis(data, accepted, needs) {
+    accepted = byClocks(data, accepted);
     const order = data.order ?? timeOrder(data.times);
     const pl = data.places ?? places(data);
     const out = [];
@@ -642,7 +668,7 @@ export function agreements(data, accepted = null) {
     const order = data.order ?? timeOrder(data.times);
     const inside = (c, d) => order.le(d.start, c.start) && (d.incl ? order.le(c.end, d.end) : (order.lt(c.end, d.end) || (!c.incl && c.end === d.end)));
     const key = (x) => JSON.stringify([x.of, x.attr, x.value, !!x.neg, typedAct(x)]);
-    const told = (accepted ?? assertions(data)).filter((x) => x.kind === 'state' && x.fact != null && !x.mark && x.by !== DERIVED && !x.modal && x.of !== EVERY && x.value != null && !CLAIM_ATTRS.has(x.attr) && x.attr !== 'tells' && coverOf(x.time));
+    const told = byClocks(data, accepted ?? assertions(data)).filter((x) => x.kind === 'state' && x.fact != null && !x.mark && x.by !== DERIVED && !x.modal && x.of !== EVERY && x.value != null && !CLAIM_ATTRS.has(x.attr) && x.attr !== 'tells' && coverOf(x.time));
     const groups = new Map();
     for (const x of told) groups.set(key(x), [...(groups.get(key(x)) ?? []), x]);
     const out = [];

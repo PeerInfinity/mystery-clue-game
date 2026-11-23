@@ -390,3 +390,13 @@ test('independent sources: no person and no telling in common; a narrator\'s own
     assert.ok(!independent(ch('b'), ch('c')), 'one man twice');
     assert.ok(independent(ch('b'), ch('d')), 'two people, two tellings');
 });
+
+test('a clock is right unless shown wrong: a reading clashes until an entry of the clock among the statements restates it', () => {
+    const ev = (id, at, by) => ({ id, of: '?', attr: 'action', value: 'fires', event: 'e.shot', time: { at, by }, para: 1, quote: 'x' });
+    const w = world([ev('a', 't3', 'box'), ev('b', 't2', 'cart'), { id: 'slow', of: 'cart', attr: 'condition', value: 'slow', off: [{ reads: 't2', when: 't3' }], time: { at: 't4' }, para: 1, quote: 'x' }]);
+    const all = assertions(w);
+    assert.equal(contradictions(w, all.filter((x) => x.fact !== 'slow')).length, 1, 'taken as right: one event at two times');
+    assert.deepEqual(contradictions(w, all), [], 'shown slow: both at the same time');
+    assert.deepEqual(agreements(w, all).map((g) => [g.a.fact, g.b.fact]), [['a', 'b']], 'and the two agree');
+    assert.deepEqual(agreements(w, all.filter((x) => x.fact !== 'slow')), []);
+});

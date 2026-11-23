@@ -556,6 +556,12 @@ that follows from others, shown by itself the moment they all are.
   the money been the aim, the chest would not be whole with the money in it. Likely only, since an aim can
   fail; and never against the right answer. A circled aim goes on the timeline as an intention only for a
   question whose entry is one (`attr: "intends"`).
+- **A time read by a clock** (2026-11-22; finding 119). `"time": {"at": <point>, "by": <the clock>}`: the time as
+  read. It is taken as the true time unless an entry of that clock that counts says how it was off,
+  `"off": [{"reads": <point>, "when": <point>}]` (it read the first when the time was the second): then the
+  reading is restated as the true time in contradictions, agreements and alibis (`byClocks`). Only a reading
+  with a pair is restated; the author writes the pairs the story's readings need. Such an entry is true as told
+  (no `truth: false`): its witness read the clock rightly.
 - **An absence a witness states** (2026-11-22; finding 118). "Nobody else crossed the hall" is a fact `of: "*"`
   with `every: <kind>` and `but: [those excepted]`, usually `neg: true` (a location, or `carrying` with `key` for
   a record such as "one key drawn that evening"). It is read as a statement about each of them: in

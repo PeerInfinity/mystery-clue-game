@@ -1,8 +1,6 @@
 {
   "implications": [
     {"id": "i.when_nine", "q": "q.when", "from": ["o.maid", "o.hall"], "says": "the shot came as the hall clock struck nine, and the hall clock was right: it was fired at nine", "concludes": "nine o'clock"},
-    {"id": "i.when_slow", "q": "q.when", "from": ["o.slow"], "says": "the gardener's quarter to nine was the stable clock's, a quarter of an hour slow: by true time it was nine, not a quarter to", "rules_out": ["a quarter to nine"]},
-    {"id": "i.when_honest", "q": "q.when", "from": ["i.when_slow", "o.mistake"], "says": "so the gardener was honest, and wrong by his clock"},
     {"id": "i.library_no", "q": "q.library", "from": ["o.left", "o.after"], "says": "he left the library at ten to nine and the shot came at nine, by the same clock: he was not there", "concludes": "no"}
   ]
 }

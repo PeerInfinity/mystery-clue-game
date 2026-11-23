@@ -151,6 +151,9 @@ for (const f of facts) {
     // `but` those excepted; `seen_from`: the entry that puts its witness where it could be seen from.
     if (f.of === '*') { if (!list(f.every).length) err(f.id, 'of "*" needs every: a kind'); for (const b of list(f.but)) if (!entities.has(b)) err(f.id, `but: no entity ${b}`); }
     else if (f.of !== '?' && !entities.has(f.of)) err(f.id, `of: no entity ${f.of}`);
+    // A time read by a clock (`time.by`), and how a clock was off (`off: [{reads, when}]`).
+    if (f.time && typeof f.time === 'object' && f.time.by != null && !entities.has(f.time.by)) err(f.id, `time.by: no entity ${f.time.by}`);
+    for (const o of list(f.off)) for (const k of ['reads', 'when']) if (!times.some((t) => t.id === o[k])) err(f.id, `off: no time ${o[k]}`);
     if (f.seen_from != null && !(facts.find((x) => x.id === f.seen_from)?.attr === 'location')) err(f.id, `seen_from: ${f.seen_from} is not an entry of where someone was`);
     if (f.to && !entities.has(f.to)) err(f.id, `to: no entity ${f.to}`);
     if (ENTITY_ATTRS.has(f.attr)) for (const v of list(f.value)) {

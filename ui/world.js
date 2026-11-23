@@ -463,6 +463,14 @@ function presenceNeeds(accepted) {
 const levelName = (l) => (l == null ? 'unmodelled' : LEVELS[l]);
 const levelCls = (l) => levelName(l).replace(' ', '-');
 const dot = (l) => `<span class="lvl lvl-${levelCls(l)}" title="${levelName(l)}"></span>`;
+/** A time read by a clock: by which, and, once an entry that counts shows the clock was off, what the time was (engine `byClocks`). */
+const clockNote = (f) => {
+    const by = f.time && typeof f.time === 'object' ? f.time.by : null;
+    if (!by) return '';
+    const pts = ['at', 'from', 'to', 'after', 'before'].map((k) => f.time[k]).filter(Boolean);
+    const offs = data.facts.filter((c) => c.of === by && c.off && c.id !== f.id && visible(c) && counts(levelOfFact(c))).flatMap((c) => list(c.off).filter((o) => pts.includes(o.reads)).map((o) => ({ c, o })));
+    return `<p class="small" data-by-clock>Read by ${ent(by)}.${offs.map(({ c, o }) => ` ${dot(levelOfFact(c))}<a class="link" data-fact="${esc(c.id)}">${phrase(c)}</a>: it read ${timeLabel(o.reads)} when it was ${timeLabel(o.when)}. So this was at <b>${timeLabel(o.when)}</b>.`).join('')}</p>`;
+};
 /** What the player does to reach a level, in the words of the controls. */
 const LEVEL_VERB = ['Distrust as ruled out', 'Distrust as unlikely', 'Leave as uncertain', 'Trust as likely', 'Trust as confirmed'];
 /**
@@ -2282,6 +2290,7 @@ function renderDetail(clashing) {
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.${recordNote(f) ? ` <span class="muted">(${recordNote(f).replace(/^o/, 'O')}.)</span>` : ''}</p>
           ${f.seen_from && factById.has(f.seen_from) && visible(factById.get(f.seen_from)) ? `<p class="small" data-seen-from>Rests on where its witness was: ${dot(levelOfFact(factById.get(f.seen_from)))}<a class="link" data-fact="${esc(f.seen_from)}">${phrase(factById.get(f.seen_from))}</a>. It is trusted no further than that.</p>` : ''}
+          ${clockNote(f)}
           ${f.attr === 'tells' ? toldHtml(f)
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
