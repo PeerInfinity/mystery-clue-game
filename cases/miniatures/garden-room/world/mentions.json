@@ -1,0 +1,18 @@
+{
+ "entities": {
+  "ellen": ["Ellen Wray"],
+  "wray": ["Mr. Tobias Wray", "my uncle"],
+  "philip": ["Philip Wray", "my cousin Philip Wray", "Philip"],
+  "farrant": ["Mr. Farrant"],
+  "dunn": ["Dunn"],
+  "lodge": ["Holm Lodge"],
+  "garden_room": ["the garden room", "The garden room"],
+  "passage": ["the passage"],
+  "upstairs": [],
+  "terrace": ["the terrace"],
+  "pawnbroker": ["a pawnbroker's in Castle Street"],
+  "watch": ["his gold repeater", "the watch"],
+  "passage_door": ["the passage door of the garden room"],
+  "terrace_door": ["the terrace door of the garden room"]
+ }
+}

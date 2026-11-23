@@ -1,0 +1,22 @@
+{
+  "facts": [
+    {"id": "f.ellen_role", "of": "ellen", "attr": "role", "value": "keeps house for her uncle, Mr. Tobias Wray, at Holm Lodge", "time": {"from": "t.before"}, "para": 1, "quote": "I keep house for my uncle, Mr. Tobias Wray, at Holm Lodge"},
+    {"id": "f.watch_laid", "of": "watch", "attr": "location", "value": "garden_room", "detail": "on the table, laid there by Mr. Wray", "time": {"at": "t.four"}, "para": 1, "quote": "he laid his gold repeater on the table in the garden room"},
+    {"id": "f.wray_up", "of": "wray", "attr": "location", "value": "upstairs", "detail": "gone up to rest", "time": {"from": "t.four"}, "para": 1, "quote": "went up to rest"},
+    {"id": "f.watch_gone", "of": "watch", "attr": "location", "value": "garden_room", "neg": true, "detail": "gone", "time": {"at": "t.eight"}, "para": 1, "quote": "the watch was gone"},
+    {"id": "f.two_doors", "of": "garden_room", "attr": "condition", "value": "has two doors, one on the passage and one on the terrace, and no window that opens", "time": {"from": "t.before"}, "para": 2, "quote": "The garden room has two doors and no window that opens"},
+    {"id": "f.ellen_passage", "of": "ellen", "attr": "location", "value": "passage", "detail": "sewing in the window-seat, the passage door of the garden room in front of her", "time": {"from": "t.four", "to": "t.eight"}, "para": 3, "quote": "From four until the gong I sat sewing in the window-seat of the passage"},
+    {"id": "f.passage_door_shut", "of": "passage_door", "attr": "door", "value": "shut", "seen_from": "f.ellen_passage", "detail": "it did not open once", "time": {"from": "t.four", "to": "t.eight"}, "para": 3, "quote": "It did not open once in those four hours"},
+    {"id": "f.philip_passage", "of": "philip", "attr": "location", "value": "passage", "detail": "sitting by Ellen Wray, winding her wool", "time": {"from": "t.four", "to": "t.dusk"}, "para": 3, "quote": "Philip sat by me, winding my wool, until the lamps were lit at dusk"},
+    {"id": "f.philip_says", "of": "philip", "attr": "says", "value": "he will take a turn in the garden", "to": "ellen", "time": {"at": "t.dusk"}, "para": 3, "quote": "he said he would take a turn in the garden"},
+    {"id": "f.philip_out", "of": "philip", "attr": "location", "value": "passage", "neg": true, "detail": "not seen again until the gong", "time": {"from": "t.dusk", "to": "t.eight"}, "para": 3, "quote": "I did not see him again until the gong"},
+    {"id": "f.farrant_passage", "of": "farrant", "attr": "location", "value": "passage", "detail": "come in by the front door; talking with Ellen Wray", "time": {"from": "t.dusk", "to": "t.eight"}, "para": 3, "quote": "he stayed talking with me in the passage until eight"},
+    {"id": "f.dunn_tells", "of": "dunn", "attr": "tells", "value": "acct.dunn", "to": "ellen", "how": "told", "time": {"at": "t.sunday"}, "para": 4, "quote": "told me the rest on Sunday"},
+    {"id": "f.dunn_terrace", "of": "dunn", "attr": "location", "value": "terrace", "detail": "clipping the yew, the terrace door of the garden room straight before him", "time": {"from": "t.four", "to": "t.dusk"}, "para": 4, "quote": "I was clipping the yew on the terrace from four until dusk"},
+    {"id": "f.terrace_door_shut", "of": "terrace_door", "attr": "door", "value": "shut", "seen_from": "f.dunn_terrace", "detail": "shut the whole time", "time": {"from": "t.four", "to": "t.dusk"}, "para": 4, "quote": "It was shut the whole time"},
+    {"id": "f.farrant_terrace", "of": "farrant", "attr": "location", "value": "terrace", "detail": "walking with his cigar, a dozen times past the terrace door", "time": {"from": "t.five", "to": "t.dusk"}, "para": 4, "quote": "walked the terrace with his cigar until I put up my shears"},
+    {"id": "f.dunn_home", "of": "dunn", "attr": "location", "value": "terrace", "neg": true, "detail": "gone home to his tea", "time": {"from": "t.dusk", "to": "t.eight"}, "para": 4, "quote": "At dusk I went home to my tea"},
+    {"id": "f.watch_pawned", "of": "watch", "attr": "location", "value": "pawnbroker", "detail": "pledged on Saturday night in Philip Wray's name", "time": {"at": "t.monday"}, "para": 5, "quote": "the watch was found at a pawnbroker's in Castle Street"},
+    {"id": "f.philip_owns", "of": "philip", "attr": "says", "value": "he took the watch", "to": "ellen", "time": {"at": "t.monday"}, "para": 5, "quote": "he owned to it", "asserts": [{"q": "q.who", "pick": "philip"}]}
+  ]
+}

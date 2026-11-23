@@ -1272,7 +1272,8 @@ function gridHtml(q) {
     const named = new Set(shownPossibilities(q).filter((o) => o.proposed).map((o) => o.value));
     // (A statement about everyone, "nobody else has a key", is about each of them and singles nobody out: it gives no row.)
     const own = (cs) => cs.some((c) => c.facts.some((id) => factById.get(id)?.of !== EVERY));
-    const rows = all.filter((r) => named.has(r.pick) || markOf(q, r.pick) || own(r.opportunity) || own(r.means) || own(r.motive));
+    // (A mark counts when the player made it: with the answers marked from the evidence, a conclusion crosses out everyone else.)
+    const rows = all.filter((r) => named.has(r.pick) || (!autoQ(q.id) && markOf(q, r.pick)) || own(r.opportunity) || own(r.means) || own(r.motive));
     if (!rows.length) return '';
     // When it could have been done: the stretches the entries shown close (nobody was there), and what is left.
     const dt = deedTimesOf(data, q, who, shown, nameOf, placeCtx);

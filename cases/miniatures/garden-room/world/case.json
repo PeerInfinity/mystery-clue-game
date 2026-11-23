@@ -1,0 +1,11 @@
+{
+  "id": "garden_room",
+  "title": "The Garden Room",
+  "author": "written for this project (a mechanic miniature)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "ellen", "name": "Ellen Wray", "kind": "first-person"}
+  ],
+  "subtitle": "Ellen Wray's timeline",
+  "source": {"written": "2026-11-23", "word_count": 290}
+}

@@ -385,16 +385,33 @@ export function deedTimes(data, act, shown, nameOf = (id) => id, ctx = {}) {
     if (!place) return null;
     const has = new Set(shown), list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
     const told = assertions(data).filter((x) => x.kind === 'state' && x.fact != null && has.has(x.fact) && !x.mark && x.attr === 'location' && x.neg && typeof x.value === 'string' && coverOf(x.time));
-    const doors = Object.values(joins).filter((sides) => sides.includes(place));
-    const far = doors.length === 1 ? doors[0].find((p) => p !== place) : null;
-    const bars = (v) => pl.chain(place).includes(v) || (far != null && pl.chain(far).includes(v));
+    // Each way into the place (`joins`: {door: [inside, outside]}), and what closes it for a stretch: the door seen
+    // shut or locked throughout, or everyone denied its far side (when the place has that one door only, since a far
+    // side shared with another door says nothing of which was used). Everyone denied the place itself, or a place it
+    // lies in, closes every way at once. A stretch is closed when every way is (2026-11-23; finding 124: a room with
+    // two doors, each watched by a different witness, is closed only while both are).
+    const doors = Object.entries(joins).filter(([, sides]) => sides.includes(place)).map(([door, sides]) => ({ door, far: sides.find((p) => p !== place) }));
     const covers = (k, s) => order.le(k.start, s.start) && order.le(s.end, k.end);
+    const everyone = told.filter((x) => x.of === '*' && list(x.every).includes('person'));
+    const excepted = (e, bars) => { const s = coverOf(e.time); const rest = list(e.but).map((b) => told.find((x) => x.of === b && bars(x.value) && covers(coverOf(x.time), s))); return rest.every(Boolean) ? [e.fact, ...rest.map((x) => x.fact)] : null; };
+    const inPlace = (v) => pl.chain(place).includes(v);
+    const spans = [];   // {from, to, facts, door: the way it closes, or null for every way}
+    for (const e of everyone.filter((x) => inPlace(x.value))) { const facts = excepted(e, inPlace), s = coverOf(e.time); if (facts) spans.push({ from: s.start, to: s.end, facts, door: null }); }
+    if (doors.length === 1) { const far = (v) => inPlace(v) || pl.chain(doors[0].far).includes(v); for (const e of everyone.filter((x) => !inPlace(x.value) && far(x.value))) { const facts = excepted(e, far), s = coverOf(e.time); if (facts) spans.push({ from: s.start, to: s.end, facts, door: null }); } }
+    const doorStates = assertions(data).filter((x) => x.kind === 'state' && x.fact != null && has.has(x.fact) && !x.mark && x.attr === 'door' && !x.neg && (x.value === 'shut' || x.value === 'locked') && coverOf(x.time) && !coverOf(x.time).incl);
+    for (const d of doors) for (const x of doorStates.filter((y) => y.of === d.door)) { const s = coverOf(x.time); spans.push({ from: s.start, to: s.end, facts: [x.fact], door: d.door }); }
+    const at = (t, sp) => order.le(sp.from, t) && order.le(t, sp.to);
+    const closedAt = (t) => { const all = spans.find((sp) => sp.door == null && at(t, sp)); if (all) return [all]; const each = doors.map((d) => spans.find((sp) => sp.door === d.door && at(t, sp))); return doors.length && each.every(Boolean) ? each : null; };
+    const inWindow = (data.times ?? []).map((t) => t.id).filter((t) => order.le(w.start, t) && order.le(t, w.end)).sort((a, b) => (a === b ? 0 : order.le(a, b) ? -1 : 1));
     const closed = [];
-    for (const e of told.filter((x) => x.of === '*' && list(x.every).includes('person') && bars(x.value))) {
-        const s = coverOf(e.time);
-        const rest = list(e.but).map((b) => told.find((x) => x.of === b && bars(x.value) && covers(coverOf(x.time), s)));
-        if (rest.every(Boolean)) closed.push({ from: s.start, to: s.end, facts: [e.fact, ...rest.map((x) => x.fact)] });
+    for (const t of inWindow) {
+        const by = closedAt(t);
+        if (!by) continue;
+        const facts = [...new Set(by.flatMap((sp) => sp.facts))], last = closed.at(-1);
+        if (last && last.next === t && last.facts.length === facts.length && facts.every((f) => last.facts.includes(f))) { last.to = t; last.next = inWindow[inWindow.indexOf(t) + 1]; }
+        else closed.push({ from: t, to: t, facts, next: inWindow[inWindow.indexOf(t) + 1] });
     }
+    for (const k of closed) delete k.next;
     if (!closed.length) return null;
     const pts = (data.times ?? []).map((t) => t.id).filter((t) => order.le(w.start, t) && order.le(t, w.end)).sort((a, b) => (a === b ? 0 : order.le(a, b) ? -1 : 1));
     const shut = (t) => closed.some((k) => order.le(k.from, t) && order.le(t, k.to));

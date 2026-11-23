@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.passage_door", "q": "q.who", "from": ["f.passage_door_shut"], "says": "the passage door did not open from four until eight", "essential": true},
+    {"id": "o.terrace_door", "q": "q.who", "from": ["f.dunn_terrace", "f.terrace_door_shut"], "says": "Dunn was on the terrace from four until dusk, and the terrace door was shut the whole time", "essential": true},
+    {"id": "o.farrant_in", "q": "q.who", "from": ["f.farrant_passage"], "says": "from dusk until eight Mr. Farrant was in the passage with Ellen", "essential": true},
+    {"id": "o.philip_out", "q": "q.who", "from": ["f.philip_out"], "says": "from dusk until the gong Philip was out of her sight", "essential": true},
+    {"id": "o.farrant_terrace", "q": "q.who", "from": ["f.farrant_terrace"], "says": "Mr. Farrant walked the terrace from five until dusk, past the terrace door"},
+    {"id": "o.philip_in", "q": "q.who", "from": ["f.philip_passage"], "says": "Philip sat with Ellen in the passage until dusk"},
+    {"id": "o.dunn_gone", "q": "q.who", "from": ["f.dunn_home"], "says": "after dusk Dunn was gone from the terrace"}
+  ]
+}

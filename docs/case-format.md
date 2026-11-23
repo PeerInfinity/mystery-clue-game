@@ -595,6 +595,8 @@ that follows from others, shown by itself the moment they all are.
   a record such as "one key drawn that evening"). It is read as a statement about each of them: in
   contradictions, and in the grid below. `seen_from: <a location entry>` on it (or on any entry that is a watch,
   "the door did not open once") names where its witness was: it is trusted no further than that entry.
+  A door seen shut or locked through a stretch (`attr: "door"`, with `seen_from`) closes that way in; a place
+  with several doors (`joins`) is closed for a stretch only while every one of them is (finding 124).
   Under a "who" question whose act needs its agent at a place, such statements shown narrow when it could have
   been done (`deedTimes`): a stretch is closed when a statement about every person denies the place, a place it
   lies in, or the far side of its one door (`joins` in `entities.json`), and each person it excepts is denied the

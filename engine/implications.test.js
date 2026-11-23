@@ -277,3 +277,19 @@ test('a rule with `unless` holds until what defeats it is shown or solved', () =
     assert.deepEqual(got(['o.a'], ['q.k']), [], 'the other question answered');
     assert.deepEqual(got(['o.a', 'o.b'], []), [], 'the entry shown');
 });
+
+test('a place with two doors is closed only while both are', async () => {
+    const { deedTimes } = await import('./implications.js');
+    const t = (id, after) => ({ id, ...(after ? { after } : {}) });
+    const data = {
+        times: [t('t1'), t('t2', 't1'), t('t3', 't2'), t('t4', 't3')], joins: { d1: ['room', 'hall'], d2: ['room', 'yard'] },
+        entities: [{ id: 'a', kind: 'person' }, { id: 'room', kind: 'place' }, { id: 'hall', kind: 'place' }, { id: 'yard', kind: 'place' }, { id: 'd1', kind: 'object' }, { id: 'd2', kind: 'object' }, { id: 'thing', kind: 'object' }],
+        facts: [{ id: 'f1', of: 'd1', attr: 'door', value: 'shut', time: { from: 't1', to: 't4' }, para: 1, quote: 'x' }, { id: 'f2', of: 'd2', attr: 'door', value: 'shut', time: { from: 't1', to: 't2' }, para: 1, quote: 'x' }],
+        accounts: [], questions: [], narrators: [],
+    };
+    const act = { id: 'x', of: 'a', attr: 'action', act: 'take', item: 'thing', where: 'room', time: { from: 't1', to: 't4' } };
+    assert.equal(deedTimes(data, act, ['f1']), null, 'one door watched closes nothing');
+    const dt = deedTimes(data, act, ['f1', 'f2']);
+    assert.deepEqual(dt.closed.map((k) => [k.from, k.to]), [['t1', 't2']]);
+    assert.deepEqual(dt.left.map((l) => [l.from, l.to, l.after]), [['t3', 't4', 't2']]);
+});

@@ -1,0 +1,12 @@
+{
+  "description": "The true path of the miniature: a room with two doors, each watched by a different witness for a different stretch; neither watch alone closes any of the time, and together they leave the hours after dusk and the one who was out of sight in them.",
+  "moves": [
+    {"at": 4, "do": "link", "entry": "f.passage_door_shut", "q": "q.who", "see": "the passage door did not open", "for_q": ["q.who"], "why": "I had the passage door before me the whole four hours."},
+    {"at": 4, "do": "link", "entry": "f.dunn_terrace", "q": "q.who", "for_q": ["q.who"], "why": "Dunn was on the terrace from four until dusk, with the other door before him."},
+    {"at": 4, "do": "link", "entry": "f.terrace_door_shut", "q": "q.who", "see": "the terrace door was shut the whole time", "for_q": ["q.who"], "why": "And it was shut the whole time."},
+    {"at": 4, "do": "link", "entry": "f.farrant_passage", "q": "q.who", "see": "Mr. Farrant was in the passage", "for_q": ["q.who"], "why": "After dusk Mr. Farrant was with me."},
+    {"at": 4, "do": "cross", "q": "q.who", "pick": "farrant", "for_q": ["q.who"], "why": "He passed the door a dozen times while it was watched, and was with me when it was not."},
+    {"at": 4, "do": "link", "entry": "f.philip_out", "q": "q.who", "see": "Philip was out of her sight", "for_q": ["q.who"], "why": "Philip left me at dusk, when Dunn left the terrace."},
+    {"at": 4, "do": "circle", "q": "q.who", "pick": "philip", "for_q": ["q.who"], "why": "Philip, after dusk, by the terrace door."}
+  ]
+}

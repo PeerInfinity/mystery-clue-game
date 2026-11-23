@@ -1,0 +1,5 @@
+{
+  "implications": [
+    {"id": "i.who_philip", "q": "q.who", "from": ["o.passage_door", "o.terrace_door", "o.farrant_in", "o.philip_out"], "says": "neither door opened before dusk, and after it only the terrace door could have; Mr. Farrant was in the passage from then on, and Philip was not: it was Philip", "concludes": "philip", "strength": "likely"}
+  ]
+}

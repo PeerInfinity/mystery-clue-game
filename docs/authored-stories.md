@@ -117,6 +117,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/ring-on-the-bench` | A room and a route: every way in closed to a person, something that got through, the way it came, and a route only something small that climbs could take. | 9 paragraphs, 20 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/cellar-door` | One reasoning move: a door locked and then open, so someone opened it between; what that act needed, set against each suspect. | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
+| `cases/miniatures/garden-room` | A room with two doors, each watched by a different witness for a different stretch: neither watch closes any of the time alone, and the two together leave what neither covers (finding 124). | 5 paragraphs, 18 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
 | `cases/miniatures/wages-bag` | A witness's record and two sources that agree (findings 112 to 114): a first tale against the narrator's own observation; a second with one statement that is needed and one against another witness's word, nothing confirmed deciding it; a third witness who shares nothing with the second and agrees. | 6 paragraphs, 26 facts, 5 accounts, 4 tellings, 2 questions, 8 observations (4 essential), 4 implications, 17 moves |
@@ -1804,6 +1805,22 @@ script that found each fact's paragraph from its quote; the data files are the s
       blocking the story (finding 117). The story is now named apart: "the story to read on · 1 paper to read".
     - Left for a story that needs them: the "stated want" motive (a form with no case), and a place with more
       than one door.
+
+124. **A room with two doors: The Garden Room (2026-11-23).** The user asked for one or two new miniatures for
+    the two forms that waited for a story, and chose one each, this one first (it needs the engine). A watch
+    goes from a room with a passage door and a terrace door; the narrator had the first in sight from four
+    until eight, the gardener the second from four until dusk; the lure walks past the terrace door for an hour
+    while it is watched, and sits with the narrator once it is not.
+    - *The narrowing by doors* (`deedTimes`). Each way into the place (`joins`) is closed for a stretch by its
+      door seen shut or locked throughout, and every way at once by everyone denied the place; a stretch is
+      closed when every way is. Everyone denied the far side of a door still closes a place with that one
+      door only (a far side that people sit in says nothing of the door). So neither witness's watch closes
+      anything alone, and the two together close four until dusk.
+    - *"The door did not open", not "nobody went in".* With people sitting in the passage and walking on the
+      terrace, an absence about the place would be false; what each witness vouches for is the door, the form
+      The Rent Box has for a watched door.
+    - The answer is concluded by one written rule, as likely; the table rules the lure out
+      (`t.when`, from the two doors and his place after dusk).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
