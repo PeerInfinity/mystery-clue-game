@@ -26,7 +26,7 @@ export function derive(implications, shown, solved) {
     for (let more = true; more;) {
         more = false;
         for (const i of implications) {
-            if (got.includes(i) || !i.from.every((p) => holds(p, has, solved))) continue;
+            if (got.includes(i) || !i.from.every((p) => holds(p, has, solved)) || (i.unless ?? []).some((p) => holds(p, shown, solved))) continue;
             got.push(i);
             more = true;
         }
@@ -73,13 +73,14 @@ export function problems(implications, observations, questions, right, values) {
         for (const p of i.from ?? []) for (const id of typeof p === 'string' ? [p] : p.any ?? []) if (!obsIds.has(id) && !ids.has(id)) out.push(`${i.id}: no statement ${id}`);
         for (const p of i.from ?? []) if (typeof p !== 'string' && !p.any && !(p.solved && qIds.has(p.solved))) out.push(`${i.id}: no premise ${JSON.stringify(p)}`);
         const vs = values(i.q), ok = right(i.q);
-        for (const v of i.rules_out ?? []) { if (!vs.includes(v)) out.push(`${i.id}: rules out ${v}, no answer of ${i.q}`); else if (ok.includes(v)) out.push(`${i.id}: rules out ${v}, a right answer`); }
+        for (const v of i.rules_out ?? []) { if (!vs.includes(v)) out.push(`${i.id}: rules out ${v}, no answer of ${i.q}`); else if (ok.includes(v) && !(i.unless ?? []).length) out.push(`${i.id}: rules out ${v}, a right answer`); }
         if (i.concludes != null && !ok.includes(i.concludes)) out.push(`${i.id}: concludes ${i.concludes}, not a right answer of ${i.q}`);
     }
     // Everything shown and every question solved: every implication must hold (none rests on itself), and each
     // question that has implications must have its answer.
     const all = derive(implications, (id) => obsIds.has(id), () => true);
-    for (const i of implications) if (!all.includes(i)) out.push(`${i.id}: never holds (it rests on itself, or on what does not exist)`);
+    // (A rule with `unless` is set aside by what defeats it, which is then shown too.)
+    for (const i of implications) if (!all.includes(i) && !(i.unless ?? []).length) out.push(`${i.id}: never holds (it rests on itself, or on what does not exist)`);
     for (const q of new Set(implications.map((i) => i.q))) {
         if (!qIds.has(q)) continue;
         const v = verdict(q, values(q), all);
@@ -222,8 +223,25 @@ export function tableRules(data, observations) {
     const kindOf = entityKinds(data), isEntity = (id) => kindOf(id) != null;
     const ctx = { joins: data.joins ?? {}, order: data.order };
     const out = [];
+    const qById = new Map(data.questions.map((q) => [q.id, q])), factOf = new Map((data.facts ?? []).map((f) => [f.id, f])), chainOf = (v) => (data.places ?? places(data)).chain(v) ?? [];
+    // An aim is judged by what its holder believed (2026-11-22; finding 119): the rule that an aim not carried out is
+    // unlikely does not hold (`unless`) once the doer is taken to have believed the thing aimed at was where the deed
+    // was done. The deed is the question the motive question names (`entry.deed`); the belief is the right answer of
+    // a question, typed (`believes: {by: {answer: <the deed's question>}, of, attr: 'location', value}` on the
+    // possibility), or a `believes` entry of someone who could be the doer, under an observation of its own.
+    const defeaters = (q, p) => {
+        const dq = qById.get(q.entry?.deed), spots = [dq?.entry?.thing, dq?.entry?.where].filter(Boolean);
+        if (!dq || !p.goal) return [];
+        const fits = (b) => !!b && b.of === p.goal.of && b.attr === 'location' && !b.neg && spots.some((s) => b.value === s || chainOf(b.value).includes(s));
+        const byQ = data.questions.filter((k) => { const b = k.possibilities?.find((x) => x.value === k.answer)?.believes; return fits(b) && b.by?.answer === dq.id; }).map((k) => ({ solved: k.id }));
+        const who = new Set((dq.possibilities ?? []).map((x) => x.value));
+        const byEntry = observations.filter((o) => o.q === q.id && !o.if && o.from.length === 1 && typeof o.from[0] === 'string').filter((o) => { const f = factOf.get(o.from[0]); return f?.attr === 'believes' && f.truth !== false && who.has(f.of) && [f.asserts ?? []].flat().some(fits); }).map((o) => o.id);
+        return [...byQ, ...byEntry];
+    };
     for (const q of data.questions) (q.possibilities ?? []).forEach((p, n) => {
-        if (isRight(q, p.value)) return;
+        // A right answer is never ruled out, but for an aim that failed and a belief that explains it.
+        const right = isRight(q, p.value), unless = defeaters(q, p);
+        if (right && !unless.length) return;
         const marks = markAssertions(data, { [q.id]: { [p.value]: 'circled' } });
         if (!marks.length) return;
         const needs = actNeeds(marks[0], answerAction(q, p.value, isEntity), ctx);
@@ -240,8 +258,8 @@ export function tableRules(data, observations) {
             // Every choice among "any one of" must contradict it (one such group at most is tried one by one).
             const sets = anys.length ? anys[0].any.map((x) => [...fixed, x, ...anys.slice(1).flatMap((g) => g.any)]) : [fixed];
             if (anys.length > 1) continue;
-            if (sets.every(against)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: one of the answers cannot stand with that`, rules_out: [p.value], table: true });
-            else if (aims.length && sets.every((ids) => alibis(data, told.filter((x) => ids.includes(x.fact)), aims).length > 0)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: had one of the answers been the aim, something would have been done toward it`, rules_out: [p.value], strength: LIKELY, table: true });
+            if (!right && sets.every(against)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: one of the answers cannot stand with that`, rules_out: [p.value], table: true });
+            else if (aims.length && sets.every((ids) => alibis(data, told.filter((x) => ids.includes(x.fact)), aims).length > 0)) out.push({ id: `t.${o.id.replace(/^o\./, '')}.${n}`, q: q.id, from: [o.id], says: `${o.says}: had one of the answers been the aim, something would have been done toward it${unless.length ? ', unless its doer was mistaken about where it was' : ''}`, rules_out: [p.value], strength: LIKELY, table: true, ...(unless.length ? { unless } : {}) });
         }
     });
     // When it could have been done (`deedTimes`, 2026-11-22): the true entries close part of the act's window (nobody

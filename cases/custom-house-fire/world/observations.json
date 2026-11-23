@@ -85,6 +85,7 @@
     {"id": "o.why_audit", "q": "q.why", "from": ["f.audit"], "says": "the Surveyor was to compare every export entry with the vessels' papers, two days later", "essential": true},
     {"id": "o.why_chest", "q": "q.why", "from": ["f.chest"], "says": "nothing was taken from the iron chest", "essential": true, "against": ["to hide a theft of the duty money"]},
     {"id": "o.why_press", "q": "q.why", "from": ["f.press"], "says": "only the press was heaped and fired", "essential": true},
+    {"id": "o.why_whole", "q": "q.why", "from": ["f.ledger_unburnt"], "says": "the bond ledger was not burnt"},
     {"id": "o.who_why", "q": "q.who", "from": [{"solved": "q.why"}], "says": "it was burned to destroy the bond ledger", "essential": true},
     {"id": "o.who_inside", "q": "q.who", "from": [{"solved": "q.inside"}], "says": "the false entries were Mr. Prout's to hide", "essential": true},
     {"id": "o.who_sender", "q": "q.who", "from": [{"solved": "q.sender"}], "says": "Mr. Prout cleared the quay of its watch", "essential": true},

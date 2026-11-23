@@ -556,6 +556,14 @@ that follows from others, shown by itself the moment they all are.
   the money been the aim, the chest would not be whole with the money in it. Likely only, since an aim can
   fail; and never against the right answer. A circled aim goes on the timeline as an intention only for a
   question whose entry is one (`attr: "intends"`).
+- **An aim judged by what its holder believed** (2026-11-22; finding 119). The rule above holds for a right
+  answer too, and for any answer is set aside (`unless` on the rule), once the doer is taken to have believed
+  the thing aimed at (`goal.of`) was where the deed was done. The motive question names its deed
+  (`entry.deed: <the who-question>`, whose typed entry gives the place: `thing`, `where`). The belief is another
+  question's right answer in typed form, `believes: {by: {answer: <the deed's question>}, of, attr: "location",
+  value, neg?}` on the possibility (the rule is set aside when that question is solved), or a `believes` entry
+  of someone who could be the doer, asserting the same, under an observation of its own on the motive question.
+  A written rule may carry `unless: [premise]` too (observation ids and `{solved}` only).
 - **A time read by a clock** (2026-11-22; finding 119). `"time": {"at": <point>, "by": <the clock>}`: the time as
   read. It is taken as the true time unless an entry of that clock that counts says how it was off,
   `"off": [{"reads": <point>, "when": <point>}]` (it read the first when the time was the second): then the

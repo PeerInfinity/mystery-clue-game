@@ -29,7 +29,7 @@
     {"id": "fr.london", "says": "The narrator sat with Mr. Pell before the Board in London from 1 to 5 September.", "facts": ["f.london"]},
     {"id": "fr.cloak", "says": "On Thursday the narrator found a caped boat-cloak pushed under an upturned boat on the hard, reeking of lamp oil, its hem singed, the name J. Pell sewn inside the collar.", "facts": ["f.cloak_found"]},
     {"id": "fr.mole", "says": "The pier-head lamp is at the end of the mole, a quarter of an hour's walk from the watch-box.", "facts": ["f.mole_walk"]},
-    {"id": "fr.ledger", "says": "The bond ledger was put into the narrator's hands at Cliff House on Wednesday, unburnt.", "facts": ["f.ledger_whole"]},
+    {"id": "fr.ledger", "says": "The bond ledger was put into the narrator's hands at Cliff House on Wednesday, unburnt.", "facts": ["f.ledger_whole", "f.ledger_unburnt"]},
     {"id": "fr.mill_lane", "says": "The berths lie inside the quay gate; Mill Lane is in the town, outside it.", "facts": ["f.berths", "f.mill_lane"]}
   ],
   "papers": [

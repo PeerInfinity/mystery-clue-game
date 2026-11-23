@@ -363,6 +363,11 @@ for (const q of questions) {
 
 // Moving places, and the true story is consistent: no contradiction among the assertions the answer key holds true.
 for (const m of world.moves) if (!entities.has(m)) err(m, 'moves: no entity');
+// An aim judged by belief (finding 119): the deed a motive question names, and a belief typed on an answer.
+for (const q of questions) {
+    if (q.entry?.deed != null && !questions.some((k) => k.id === q.entry.deed)) err(q.id, `entry.deed: no question ${q.entry.deed}`);
+    for (const p of q.possibilities ?? []) if (p.believes && !(entities.has(p.believes.of) && p.believes.attr && (entities.has(p.believes.by) || questions.some((k) => k.id === p.believes.by?.answer)))) err(q.id, `${p.value}: believes is {by: an entity or {answer: a question}, of: an entity, attr, value}`);
+}
 const asserted = assertions(world);
 // A belief's `truth` is the truth of what it holds: false when something it asserts is false, and only then.
 for (const f of facts) if (f.attr === 'believes' && !f.modal && list(f.asserts).length) {

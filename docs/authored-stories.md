@@ -1705,6 +1705,19 @@ script that found each fact's paragraph from its quote; the data files are the s
       the evening before is the second default, not built). The grid and the narrowing do not restate readings.
       "The hall clock was set right that morning" confirms the default and changes nothing in the logic.
 
+    - *An aim judged by belief* (built on The Custom-House Fire). Put to the user: the aim names the question
+      that defeats it, or a typed belief entry. The user asked whether the question could serve as the typed
+      belief, and that was built: the answers of "did the fire-setter know the ledger was out of the house?"
+      are typed as what the doer believed (the ledger in the press, or not), the motive answer has its aim
+      (the ledger burnt), a new entry from the story's "unburnt" denies it, and the motive question names its
+      deed. Linked to the motive question, the unburnt ledger makes "to destroy the bond ledger" unlikely,
+      until the knowledge question is solved: then the rule is set aside. Rules gained `unless` for this.
+      Before, the page kept the rule off the right answer by reading the key. The true path does not change
+      (the knowledge question is solved at ¶15, the motive question raised at ¶20).
+    - *Left of it.* The belief is not put on the timeline as a statement of the doer; it acts only through
+      the rule. A witness's `believes` entry defeats the rule the same way, and no case has one yet. The
+      threat on that case still names the motive answer (`removes … if`), which the aim could now replace.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

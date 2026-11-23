@@ -269,3 +269,11 @@ test('suspectGrid: each suspect against what the act needs, from what is shown; 
     assert.deepEqual(opp, { a: 'against:f.a_k3', b: 'met:f.b_out' });
     setCaseActions({});
 });
+
+test('a rule with `unless` holds until what defeats it is shown or solved', () => {
+    const rules = [{ id: 'r', q: 'q', from: ['o.a'], unless: [{ solved: 'q.k' }, 'o.b'], says: 'x', rules_out: ['v'] }];
+    const got = (shown, solved) => derive(rules, (id) => shown.includes(id), (q) => solved.includes(q)).map((i) => i.id);
+    assert.deepEqual(got(['o.a'], []), ['r']);
+    assert.deepEqual(got(['o.a'], ['q.k']), [], 'the other question answered');
+    assert.deepEqual(got(['o.a', 'o.b'], []), [], 'the entry shown');
+});
