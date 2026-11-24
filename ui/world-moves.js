@@ -99,7 +99,7 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
     const shown = (el) => !!el && el.offsetParent !== null;
     const tabbed = () => document.body.classList.contains('tabbed');
     const twoCols = () => tabbed() && !$('#tabbed').classList.contains('one');
-    async function glide(el) {
+    async function glide(el, click = true) {
         el.scrollIntoView({ block: 'center', inline: 'nearest' });
         if (!cursor || !factor()) return;
         const r = el.getBoundingClientRect();
@@ -107,8 +107,24 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
         cursor.style.transition = `transform ${ms}ms ease-in-out`;
         cursor.style.transform = `translate(${r.left + Math.min(r.width / 2, 40)}px, ${r.top + r.height / 2}px)`;
         await sleep(ms + 30);
-        cursor.classList.remove('click'); void cursor.offsetWidth; cursor.classList.add('click');
+        cursor.classList.remove('click'); void cursor.offsetWidth; if (click) cursor.classList.add('click');
     }
+    /**
+     * Go to something without pressing it, and mark it for a moment: what the page has done by itself (an answer
+     * marked from the evidence) is pointed at, so that no step happens with the cursor somewhere else (2026-11-24).
+     */
+    async function point(sel) {
+        await gate();
+        let el = $(sel);
+        if (!el) return false;
+        if (!shown(el)) { await showPart(el); el = $(sel); }
+        if (!shown(el)) return false;
+        await glide(el, false);
+        if (!fast) { el.classList.add('ap-seen'); await sleep(900); $(sel)?.classList.remove('ap-seen'); el.classList.remove('ap-seen'); }
+        return true;
+    }
+    /** How a mark stands where the answers are marked from the evidence: 'made' by the page, 'left' by it, or null (the player's to make). */
+    const byPage = (m) => ((m.do === 'circle' || m.do === 'cross') && $(`#q-box [data-mark-q="${esc(m.q)}"][data-auto]`) ? (made(m, saved()) ? 'made' : 'left') : null);
     /** Bring a part into view, as a player would: its tab, in the panel that does not hold the detail. */
     async function showPart(el) {
         if (shown(el) || !tabbed()) return;
@@ -159,9 +175,11 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
                 // With the answers marked from the evidence (the page's default) a mark is the page's to make. A cross
                 // the evidence does not make is the reader's own judgement, which that mode has no place for: passed
                 // over. A circle must follow from what the path has linked.
-                if ($(`#q-box [data-mark-q="${esc(m.q)}"][data-auto]`) && !made(m, saved())) {
-                    if (m.do === 'cross') break;
-                    throw new Failed('the answer does not follow from what is linked');
+                if (byPage(m)) {
+                    if (byPage(m) === 'left' && m.do === 'circle') throw new Failed('the answer does not follow from what is linked');
+                    if (!$(sel)) await press(`#q-box [data-more-q="${esc(m.q)}"]`);
+                    await point(sel);
+                    break;
                 }
                 for (let i = 0; i < 3 && !made(m, saved()); i++) {
                     if (!$(sel)) await press(`#q-box [data-more-q="${esc(m.q)}"]`);
@@ -200,7 +218,7 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
             default: throw new Failed(`unknown move ${m.do}`);
         }
     }
-    return { saved, shown, showPart, press, choose, openOn, play, readOne };
+    return { saved, shown, showPart, press, choose, openOn, play, readOne, point, byPage };
 }
 
 /**

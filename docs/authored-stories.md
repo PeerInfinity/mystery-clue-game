@@ -1869,6 +1869,14 @@ script that found each fact's paragraph from its quote; the data files are the s
       stay in view start below it (`--ap`, `--head`, measured). The same at a phone's width, where it had sat
       above the header.
 
+128. **No step without the cursor (2026-11-24, the user's remark).** With the answers marked from the evidence, a
+    circle or a cross of the path is not a click: the page made the mark when the link before it was made, or
+    (a cross that is the reader's own judgement) leaves the answer open. The autoplay said "Crossing out…" and
+    nothing moved; in The Prize Marrow that was three steps of seven. Now it goes to the answer and marks it
+    for a moment without pressing it, and the caption says what happened: "The page has crossed out … : it
+    follows from what is linked", or "… stays open: the page crosses out only what the links rule out", each
+    with the path's reason.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

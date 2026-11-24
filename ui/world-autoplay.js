@@ -83,7 +83,7 @@ export async function start({ store, fast = false }) {
     };
 
     // ---------- moving through the page (ui/world-moves.js) ----------
-    const { shown, showPart, press, play: make, readOne } = makeMover({ store, fast, factor, gate, cursor: fast ? null : cursor });
+    const { shown, showPart, press, play: make, readOne, byPage } = makeMover({ store, fast, factor, gate, cursor: fast ? null : cursor });
 
     /** Highlight for a moment the smallest part of the page that shows what the move was for. */
     async function seen(pattern) {
@@ -126,7 +126,12 @@ export async function start({ store, fast = false }) {
     }
 
     async function play(m) {
-        caption(`${await words(m)}${m.why ? ` — ${m.why}` : ''}`);
+        // An answer the page marks from the evidence is not the reader's click: said as what the page has done (or
+        // has left open, where the path's cross is the reader's own judgement), and pointed at.
+        const how = byPage(m), pick = how ? String($(chipSel(m))?.innerText ?? $(`a.ent[data-ent="${esc(m.pick)}"]`)?.innerText ?? m.pick).replace(/\s*\(likely\)\s*$/, '') : null;
+        caption(how === 'made' ? `The page has ${m.do === 'cross' ? 'crossed out' : 'circled'} “${pick}” on “${qLabel(m.q)}”: it follows from what is linked${m.why ? ` — ${m.why}` : ''}`
+            : how === 'left' ? `“${pick}” on “${qLabel(m.q)}” stays open: the page crosses out only what the links rule out. The reader's own reason against it${m.why ? ` — ${m.why}` : ''}`
+            : `${await words(m)}${m.why ? ` — ${m.why}` : ''}`);
         await make(m);
         if (m.see && !(await seen(m.see))) throw new Failed(`not on the page: ${m.see}`);
         s.moves++;
