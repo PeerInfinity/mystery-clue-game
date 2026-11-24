@@ -1,5 +1,6 @@
 // The page's half of the bridge to an Archipelago (docs/archipelago-plan.md, "The Archipelago side"; docs/case-format.md,
-// "Played in an Archipelago"). The page sits in a frame of the Archipelago-CC web client (`?iframeId=<id>`), and talks
+// "Played in an Archipelago"). The page sits in a frame of the Archipelago-CC web client (`?iframeId=<id>`), or in a
+// window that client opened (`?windowId=<id>`), and talks
 // to it by that client's adapter protocol (its frontend/modules/shared/communicationProtocol.js): window messages
 // `{type, clientId, iframeId, windowId, timestamp, data}`. Over it go four events of the host's event bus:
 //   page → host   mystery:requestState   {story, version}
@@ -17,7 +18,7 @@ const message = (type, id, data) => ({ type, clientId: id, iframeId: id, windowI
  * Connect to the host. `onState(state)` and `onRefused(reason)` are called for each event that names this story.
  * Returns `{solved(questionId), request()}`. The handshake is repeated until the host answers.
  */
-export function connect({ win, target, id, origin = '*', story, version, onState, onRefused, retry = 1000 }) {
+export function connect({ win, target, id, mode = 'iframe', origin = '*', story, version, onState, onRefused, retry = 1000 }) {
     let ready = false, timer = null;
     const post = (type, data) => target.postMessage(message(type, id, data), origin);
     const publish = (eventName, eventData) => post('PUBLISH_EVENT_BUS', { eventName, eventData });
@@ -38,7 +39,8 @@ export function connect({ win, target, id, origin = '*', story, version, onState
             else if (eventName === 'mystery:state' && (eventData?.story == null || eventData.story === story)) onState(eventData ?? {});
         }
     });
-    const hello = () => post('IFRAME_READY', { clientId: id, iframeId: id, windowId: id, version: '1.0.0', capabilities: ['iframe-base'] });
+    // Framed, or opened as a window of its own by the web client's window adapter (`?windowId=`): the same but for the first word.
+    const hello = () => post(mode === 'window' ? 'WINDOW_READY' : 'IFRAME_READY', { clientId: id, iframeId: id, windowId: id, version: '1.0.0', capabilities: [mode === 'window' ? 'window-base' : 'iframe-base'] });
     hello();
     timer = win.setInterval(() => { if (!ready) hello(); }, retry);
     return { solved: (questionId) => publish('mystery:questionSolved', { story, questionId }), request };
@@ -76,7 +78,7 @@ export function stubHost({ win, target = win, id, story, version, game, start, b
         const m = e.data;
         if (!m || m.clientId !== id) return;
         onMessage?.(m);
-        if (m.type === 'IFRAME_READY') post('ADAPTER_READY', {});
+        if (m.type === 'IFRAME_READY' || m.type === 'WINDOW_READY') post('ADAPTER_READY', {});
         if (m.type !== 'PUBLISH_EVENT_BUS') return;
         const { eventName, eventData } = m.data;
         if (eventData.story !== story || eventData.version != null && eventData.version !== version) return post('EVENT_BUS_MESSAGE', { eventName: 'mystery:refused', eventData: { story: eventData.story, reason: 'another story or version' } });

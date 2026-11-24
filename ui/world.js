@@ -16,7 +16,7 @@ import { fill, described, onPage, bears, waits } from '../engine/observations.js
 import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, suspectGrid, deedTimesOf, LIKELY } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
-import { CASE, PLAYER_STORE, AUTOPLAY_STORE, BRIDGE_ID, bridgeStore, pageUrl } from './world-case.js';
+import { CASE, PLAYER_STORE, AUTOPLAY_STORE, BRIDGE_ID, BRIDGE_MODE, bridgeStore, pageUrl } from './world-case.js';
 import { connect, reconcile, caseVersion, stubHost } from './bridge.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
 // the player's timeline is kept aside, only its layout and theme borrowed. `?autoplay=fast`: no pauses (the check).
@@ -145,7 +145,8 @@ const LAST = story.length - 1;   // the main story's last paragraph
 
 const EARNED = deliveryMode(header) === 'earned';
 const logic = EARNED ? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery }) : null;
-// --- In an Archipelago (ui/bridge.js; `?iframeId=`, given by the web client that frames the page): the papers come as
+// --- In an Archipelago (ui/bridge.js; `?iframeId=`, given by the web client that frames the page, or `?windowId=`
+// where it opens the page as a window): the papers come as
 // its items and a solved question is a check. The page waits for the host's first state, which names the game (one
 // slot of one multiworld): the save is that game's own, so a timeline is never carried from one multiworld into
 // another. `ap` is null when playing alone, and in the autoplay, which plays a placement of its own.
@@ -166,7 +167,7 @@ if (BRIDGE_ID && AUTOPLAY === null) {
     waitNote('Waiting for the Archipelago connection…');
     const first = await new Promise((resolve) => {
         ap.link = connect({
-            win: window, target: params.get('bridge') === 'stub' ? window : window.parent, id: BRIDGE_ID, origin: params.get('hostOrigin') || '*', story, version,
+            win: window, target: params.get('bridge') === 'stub' ? window : BRIDGE_MODE === 'window' ? window.opener ?? window.parent : window.parent, id: BRIDGE_ID, mode: BRIDGE_MODE, origin: params.get('hostOrigin') || '*', story, version,
             onState: (st) => { if (ap.onState) ap.onState(st); else if (st.version != null && st.version !== version) resolve({ refused: `the Archipelago slot was made from another version of this case (${st.version}; this page is ${version})` }); else if (st.connected) resolve(st); },
             onRefused: (reason) => { if (ap.onState) { state.note = `The Archipelago refused this page: ${reason}.`; render(); } else resolve({ refused: reason }); },
         });

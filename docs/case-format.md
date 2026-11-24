@@ -80,7 +80,9 @@ annotated reading's thoughts, the earlier game's time windows); since 2026-11-06
 it offers no hints and no autoplay.
 
 **Played in an Archipelago** (the page's half, since 2026-11-24; `ui/bridge.js`). A case whose papers are earned can
-be played in a frame of the Archipelago-CC web client, which gives the page `?iframeId=<id>` (and `hostOrigin`). The
+be played in a frame of the Archipelago-CC web client, which gives the page `?iframeId=<id>` (and `hostOrigin`), or in
+a window that client opens (`?windowId=<id>`: the same messages, to the opener, the handshake's first word
+`WINDOW_READY`; not yet tried against the real window adapter). The
 papers then come as that multiworld's items and each solved question is a check. The page speaks the web client's
 adapter protocol and four events of its event bus:
 

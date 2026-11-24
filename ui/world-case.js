@@ -5,7 +5,9 @@ const key = CASE.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
 export const PLAYER_STORE = `${key}-world-v2`;
 export const AUTOPLAY_STORE = `${key}-world-autoplay-v2`;
 // In an Archipelago (ui/bridge.js): the id the framing web client gave the page, and the save of one game (one slot of one multiworld).
-export const BRIDGE_ID = new URLSearchParams(location.search).get('iframeId');
+const params = new URLSearchParams(location.search);
+export const BRIDGE_MODE = params.get('windowId') ? 'window' : 'iframe';   // a window the web client opened, or a frame of it
+export const BRIDGE_ID = params.get('windowId') ?? params.get('iframeId');
 export const bridgeStore = (game) => `${key}-world-ap-${String(game).replace(/[^A-Za-z0-9]+/g, '-')}`;
 /** The page's own address for this case: `./`, with `?case=` kept when it is not the default; `extra` more parameters. */
 export const pageUrl = (extra = '') => { const q = [`case=${encodeURIComponent(CASE)}`, extra].filter(Boolean).join('&'); return `./?${q}`; };

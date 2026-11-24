@@ -36,6 +36,15 @@ test('the handshake, the state, a solve and its paper', async () => {
     assert.deepEqual(states.at(-1).papers, ['a', 'b']);
 });
 
+test('opened as a window: the first word is WINDOW_READY', async () => {
+    const win = fakeWindow(), states = [];
+    stubHost({ win, id: 'w1', story: 's', version: 'v1', game: 'g', start: ['a'], brings: () => null });
+    connect({ win, target: win, id: 'w1', mode: 'window', story: 's', version: 'v1', onState: (s) => states.push(s), onRefused: (r) => assert.fail(r) });
+    await settle();
+    assert.equal(win.log[0].type, 'WINDOW_READY');
+    assert.equal(states.length, 1);
+});
+
 test('another version is refused', async () => {
     const win = fakeWindow(), refused = [];
     stubHost({ win, id: 'mystery', story: 's', version: 'v2', game: 'g', start: [], brings: () => null });
