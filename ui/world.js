@@ -2078,7 +2078,7 @@ function chip(q, p) {
     const m = markOf(q, p.value);
     const judged = givenAway(q) && m ? ((m === 'circled') === isRight(q, p.value) ? ' right' : ' wrong') : '';
     const weak = autoQ(q.id) && m && likelyMarks.has(hypothesisKey(q.id, p.value));
-    return `<button type="button" class="poss ${m ?? 'open'}${judged}${weak ? ' likely' : ''}" data-mark-q="${esc(q.id)}" data-mark-pick="${esc(p.value)}" title="${weak ? LIKELY_TITLE[m] : (autoQ(q.id) ? AUTO_TITLE : MARK_TITLE)[m]}">${pickText(q, p.value)}${weak ? ' <span class="small">(likely)</span>' : ''}</button>`;
+    return `<button type="button" class="poss ${m ?? 'open'}${judged}${weak ? ' likely' : ''}" data-mark-q="${esc(q.id)}" data-mark-pick="${esc(p.value)}"${autoQ(q.id) ? ' data-auto' : ''} title="${weak ? LIKELY_TITLE[m] : (autoQ(q.id) ? AUTO_TITLE : MARK_TITLE)[m]}">${pickText(q, p.value)}${weak ? ' <span class="small">(likely)</span>' : ''}</button>`;
 }
 // The questions whose "More" list is open (not saved).
 const moreOpen = new Set();

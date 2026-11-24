@@ -156,11 +156,18 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
             case 'circle': case 'cross': {
                 // An answer behind "More" shows by itself only while marked: on the way from crossed out to circled it
                 // goes back behind "More" when uncertain, so More is opened again where needed.
+                // With the answers marked from the evidence (the page's default) a mark is the page's to make. A cross
+                // the evidence does not make is the reader's own judgement, which that mode has no place for: passed
+                // over. A circle must follow from what the path has linked.
+                if ($(`#q-box [data-mark-q="${esc(m.q)}"][data-auto]`) && !made(m, saved())) {
+                    if (m.do === 'cross') break;
+                    throw new Failed('the answer does not follow from what is linked');
+                }
                 for (let i = 0; i < 3 && !made(m, saved()); i++) {
                     if (!$(sel)) await press(`#q-box [data-more-q="${esc(m.q)}"]`);
                     if (!(await press(sel))) break;
                 }
-                if (!made(m, saved())) throw new Failed('the mark did not take');
+                if (!made(m, saved()) && !(m.do === 'cross' && $(`#q-box [data-mark-q="${esc(m.q)}"][data-auto]`))) throw new Failed('the mark did not take');
                 break;
             }
             case 'trust':

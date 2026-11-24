@@ -1843,6 +1843,17 @@ script that found each fact's paragraph from its quote; the data files are the s
       The written step that set the rival and the wife aside is gone; the rival's row shows both his gain and
       the want it undid.
 
+126. **The autoplay stopped on a cross the evidence does not make (2026-11-23, found by the user).** Playing The
+    Prize Marrow as first published, the autoplay stopped at "Crossing out George Pask: the mark did not take".
+    With the answers marked from the evidence, the page's default, a mark is the page's to make, and nothing
+    then ruled him out. The checks had not caught it because they ran the autoplay only with the answers
+    marked by hand. Run the default way on every case, The Loose Board stopped too, at a cross of "something
+    else", and had done since the default changed (2026-11-19).
+    - The autoplay passes over a cross the evidence does not make (it is the reader's own judgement, which
+      that mode has no place for); a circle that does not follow still stops it, as a defect of the case.
+    - `page-checks` now plays the autoplay with the answers marked from the evidence too, for every case with
+      implications.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
