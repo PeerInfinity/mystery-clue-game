@@ -112,6 +112,18 @@ export async function start({ store, fast = false }) {
         stepped();
         await wait(2200);   // time to read the caption
     }
+    // The floating notices (bottom right) are not left standing over the page: what each says goes in the caption
+    // for a moment, and it is closed (2026-11-24, after the user's remark that they cover a lot of the screen).
+    async function clearNotices() {
+        for (const [box, close] of [['#solved-news', '[data-solved-close]'], ['#lapse-news', '[data-lapse-close]'], ['#answer-news', '[data-answers-close]']]) {
+            const el = $(box);
+            if (!el || el.hidden || !$(close)) continue;
+            const text = (el.querySelector('li, p') ?? el).innerText.replace(/\s+/g, ' ').replace(/ Open it$/, '').trim();
+            if (text) caption(text.length > 220 ? `${text.slice(0, 217)}…` : text);
+            await wait(2500);
+            await press(close);
+        }
+    }
     // Read on, in each story, to what `at` needs (a paragraph, or a list in several stories).
     async function readTo(at) {
         for (let story; (story = nextRead(at, files, readToOf(saved()))) != null;) {
@@ -127,6 +139,7 @@ export async function start({ store, fast = false }) {
                 await wait(3500);
                 await press('[data-answers-close]');
             }
+            await clearNotices();
             window.__autoplay = status();
             stepped();
             await wait(1000);
@@ -143,6 +156,7 @@ export async function start({ store, fast = false }) {
             if (m.do === 'trust' && made(m, saved())) return;
             await readTo(m.at);
             try { await play(m); } catch (e) { if (e instanceof Failed) throw new Failed(`¶${refList(m.at).join(', ')}, ${await words(m).catch(() => m.do)}: ${e.message}`); throw e; }
+            await clearNotices();
         };
         const delivery = window.__delivery;
         if (delivery?.earned) {

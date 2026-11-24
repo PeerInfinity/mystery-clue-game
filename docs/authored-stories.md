@@ -1854,6 +1854,12 @@ script that found each fact's paragraph from its quote; the data files are the s
     - `page-checks` now plays the autoplay with the answers marked from the evidence too, for every case with
       implications.
 
+127. **The autoplay closes the floating notices (2026-11-24, the user's remark).** Watching the autoplay, the
+    notices at the bottom right ("Solved", a link that no longer fits, answers given away) stayed up and covered
+    much of the page; only two were closed, and one of those only where papers are earned. Now after every move
+    and every paragraph read each one showing is said in the autoplay's caption for a moment and then closed.
+    The gate's notice has no close and is left: when it shows, the autoplay has stopped.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
