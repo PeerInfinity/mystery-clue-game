@@ -17,7 +17,7 @@ import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, st
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
 import { CASE, PLAYER_STORE, AUTOPLAY_STORE, BRIDGE_ID, BRIDGE_MODE, bridgeStore, pageUrl } from './world-case.js';
-import { connect, reconcile, caseVersion, stubHost } from './bridge.js';
+import { connect, reconcile, stubHost } from './bridge.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
 // the player's timeline is kept aside, only its layout and theme borrowed. `?autoplay=fast`: no pauses (the check).
 const AUTOPLAY = new URLSearchParams(location.search).get('autoplay');
@@ -155,9 +155,9 @@ let ap = null;
 if (BRIDGE_ID && AUTOPLAY === null) {
     const waitNote = (t) => { document.getElementById('timeline').innerHTML = `<p class="muted">${esc(t)}</p>`; };
     if (!EARNED) { waitNote('This case has no papers to earn, so it cannot be played in an Archipelago.'); throw new Error('bridge: not an earned case'); }
-    const structureText = await get(`${CASE}/structure.json`, 'text');
-    const story = JSON.parse(structureText).story;
-    const version = await caseVersion(structureText, await get(`${W}/implications.json`, 'text').catch(() => null));
+    // The case's name and version as its export has them (rules.json, which a test keeps the export of the case).
+    // A case with no export (the checks' fixture) has its structure's name and no version.
+    const { story, version } = await get(`${CASE}/rules.json`).then((r) => r.world[1].slot_data.mystery, async () => ({ story: (await get(`${CASE}/structure.json`)).story, version: 'unversioned' }));
     ap = { story, version, held: [...logic.start], connected: false, link: null, onState: null, sent: new Set() };
     if (params.get('bridge') === 'stub') {
         // The checks' host, in this window: the placement of `?seed=`, as when playing alone.

@@ -93,13 +93,17 @@ adapter protocol and four events of its event bus:
 | host → page | `mystery:state` | `{story, version, game, connected, papers, solved}`: the whole sets, every time |
 | host → page | `mystery:refused` | `{reason, story, version}`: the slot's story and version; `reason` is `no-mystery-world`, `other-story` or `other-version` |
 
-`story` is `structure.json`'s, and `version` the export's hash (`scripts/export-rules.mjs`), which the page works out
-from `structure.json` and `world/implications.json` (so the built site carries `structure.json` for such a case).
+`story` and `version` are the export's (`scripts/export-rules.mjs`), which the page reads from the case's `rules.json`
+(so the built site carries that file for such a case, and a test keeps it the export). The version is a hash of
+`structure.json`, `world/implications.json` and the exported logic itself: rules also come from the typed forms by
+the engine, so what a question needs can change with neither file touched.
 `papers` and `solved` are the page's own ids. `game` is any string that is the same for one slot of one multiworld
 and no other (the seed's name, the team and the slot): the save is kept per game. The rules:
 
 - The page waits for the first `mystery:state` with `connected: true` before it loads a save. A slot of another
   version, or a refusal, stops it with a line saying so.
+- A heartbeat goes to the host every half minute (it drops a client it has not heard from for a minute), and a
+  host that says the page is no longer registered is greeted again and asked for a fresh state.
 - Papers are never taken back: what a state lists is added to what is held. A new one is announced in a note.
 - A question solved here that a state does not list is sent again, so a dropped connection loses nothing.
 - A save with solved questions of which the host lists none is asked about (`confirm`): the same generated game
@@ -610,6 +614,10 @@ that follows from others, shown by itself the moment they all are.
   else: `of: "*"`, `every: "person"`, `but: [the holders]`, `attr: "carrying"`, `value`, `key: <the door>`, `neg:
   true`. Under a "who" question whose act needs a key (`unlock`, `lock`, `take_locked` with `via`), the table
   makes unlikely an answer the entry denies the key (`t.key.<n>`, likely: a key can be borrowed).
+  Such a statement also closes the list of answers (`t.closed.<question>.<n>`, likely; since 2026-11-24): where it
+  denies what the deed needs of its doer (a key, or its place through the whole window) to everyone but people who
+  are among the question's answers, "something else" is ruled out, and with every other answer ruled out the one
+  left is concluded by elimination. It needs an observation of the question that comes from that entry.
   A role of a question's typed entry may wait on another question's answer: `"via": {"thing": <door>, "if":
   {"q": <question>, "pick": <answer>}}`. It is there once that question is solved so, and a table rule that
   rests on it has `{solved: <question>}` among its premises.

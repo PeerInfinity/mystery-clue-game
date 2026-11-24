@@ -156,12 +156,19 @@ export function readStructure(file) {
     const text = fs.readFileSync(file, 'utf8');
     return [JSON.parse(text), crypto.createHash('sha256').update(text).digest('hex').slice(0, 12)];
 }
-/** A case's export: its structure (names, ids), and its own logic where its implications are written. The version covers both files. */
+/**
+ * A case's export: its structure (names, ids), and its own logic where its implications are written. The version
+ * covers both files and the exported logic itself, since rules also come from the typed forms by the engine: a
+ * change there changes what a question needs with neither file touched (2026-11-24). The page reads the version
+ * from rules.json (ui/world.js), and a test keeps that file the export of the case.
+ */
 export function exportCase(dir) {
     const [s, v] = readStructure(`${dir}/structure.json`);
     const imp = `${dir}/world/implications.json`;
     const version = fs.existsSync(imp) ? crypto.createHash('sha256').update(v + fs.readFileSync(imp, 'utf8')).digest('hex').slice(0, 12) : v;
-    return exportRules(s, version, worldLogic(dir));
+    const logic = worldLogic(dir), draft = exportRules(s, version, logic);
+    if (!logic) return draft;
+    return exportRules(s, crypto.createHash('sha256').update(version + JSON.stringify(draft.regions ?? draft)).digest('hex').slice(0, 12), logic);
 }
 
 // One section to a line where that keeps the file readable: a location, an item.

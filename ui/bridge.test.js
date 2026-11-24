@@ -1,9 +1,7 @@
 // The page's half of the bridge to an Archipelago (ui/bridge.js), against its own stand-in host, in one made-up window.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { connect, reconcile, caseVersion, stubHost } from './bridge.js';
-import { exportCase } from '../scripts/export-rules.mjs';
-import fs from 'node:fs';
+import { connect, reconcile, stubHost } from './bridge.js';
 
 /** A window that delivers a message to its listeners on a later turn, as a browser does. */
 function fakeWindow() {
@@ -12,7 +10,7 @@ function fakeWindow() {
         log,
         addEventListener: (type, fn) => listeners.push(fn),
         postMessage: (data) => { log.push(data); queueMicrotask(() => listeners.forEach((fn) => fn({ data }))); },
-        setInterval: () => 1, clearInterval: () => {},
+        timers: [], setInterval(fn, ms) { this.timers.push({ fn, ms }); return this.timers.length; }, clearInterval: () => {},
     };
 }
 const settle = () => new Promise((r) => setTimeout(r, 5));
@@ -45,6 +43,25 @@ test('opened as a window: the first word is WINDOW_READY', async () => {
     assert.equal(states.length, 1);
 });
 
+test('a heartbeat once connected, and the handshake again when the host has dropped the page', async () => {
+    const win = fakeWindow(), states = [];
+    stubHost({ win, id: 'mystery', story: 's', version: 'v1', game: 'g', start: [], brings: () => null });
+    connect({ win, target: win, id: 'mystery', story: 's', version: 'v1', onState: (s) => states.push(s), onRefused: () => {} });
+    await settle();
+    const [again, beat] = win.timers;
+    assert.equal(beat.ms, 30000);
+    beat.fn();
+    assert.equal(win.log.at(-1).type, 'HEARTBEAT');
+    again.fn();
+    assert.equal(win.log.filter((m) => m.type === 'IFRAME_READY').length, 1, 'no greeting while connected');
+    win.postMessage({ type: 'CONNECTION_ERROR', clientId: 'mystery', timestamp: 1, data: { errorType: 'NOT_REGISTERED' } });
+    await settle();
+    again.fn();
+    await settle();
+    assert.equal(win.log.filter((m) => m.type === 'IFRAME_READY').length, 2);
+    assert.equal(states.length, 2, 'a fresh state after the second handshake');
+});
+
 test('another version is refused', async () => {
     const win = fakeWindow(), refused = [];
     stubHost({ win, id: 'mystery', story: 's', version: 'v2', game: 'g', start: [], brings: () => null });
@@ -73,12 +90,4 @@ test("a refusal that names the slot's story, another one, is still taken", async
 test('reconcile: papers are never taken back, and what the host lacks is sent again once connected', () => {
     assert.deepEqual(reconcile(['a', 'b'], ['q1', 'q2'], { connected: true, papers: ['a', 'c'], solved: ['q1'] }), { held: ['a', 'b', 'c'], fresh: ['c'], resend: ['q2'] });
     assert.deepEqual(reconcile(['a'], ['q1'], { connected: false, papers: [], solved: [] }), { held: ['a'], fresh: [], resend: [] });
-});
-
-test("the page's version of a case is the export's", async () => {
-    for (const dir of ['cases/custom-house-fire']) {
-        const imp = `${dir}/world/implications.json`;
-        const v = await caseVersion(fs.readFileSync(`${dir}/structure.json`, 'utf8'), fs.existsSync(imp) ? fs.readFileSync(imp, 'utf8') : null);
-        assert.equal(v, exportCase(dir).world[1].slot_data.mystery.version, dir);
-    }
 });

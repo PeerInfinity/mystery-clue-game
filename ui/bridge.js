@@ -16,10 +16,11 @@ const message = (type, id, data) => ({ type, clientId: id, iframeId: id, windowI
 
 /**
  * Connect to the host. `onState(state)` and `onRefused(reason)` are called for each event that names this story.
- * Returns `{solved(questionId), request()}`. The handshake is repeated until the host answers.
+ * Returns `{solved(questionId), request()}`. The handshake is repeated until the host answers, a heartbeat goes
+ * every half minute after, and a host that says the page is no longer registered is greeted again.
  */
-export function connect({ win, target, id, mode = 'iframe', origin = '*', story, version, onState, onRefused, retry = 1000 }) {
-    let ready = false, timer = null;
+export function connect({ win, target, id, mode = 'iframe', origin = '*', story, version, onState, onRefused, retry = 1000, beat = 30000 }) {
+    let ready = false;
     const post = (type, data) => target.postMessage(message(type, id, data), origin);
     const publish = (eventName, eventData) => post('PUBLISH_EVENT_BUS', { eventName, eventData });
     const request = () => publish('mystery:requestState', { story, version });
@@ -28,10 +29,11 @@ export function connect({ win, target, id, mode = 'iframe', origin = '*', story,
         if (!m || typeof m !== 'object' || (m.clientId ?? m.iframeId ?? m.windowId) !== id) return;
         if (m.type === 'ADAPTER_READY' && !ready) {
             ready = true;
-            if (timer) win.clearInterval(timer);
             for (const eventName of ['mystery:state', 'mystery:refused']) post('SUBSCRIBE_EVENT_BUS', { eventName });
             post('IFRAME_APP_READY', { timestamp: Date.now() });
             request();
+        } else if (m.type === 'CONNECTION_ERROR' && JSON.stringify(m.data ?? '').includes('NOT_REGISTERED')) {
+            ready = false;   // dropped by the host (no heartbeat reached it for a minute): the handshake again, and a fresh state
         } else if (m.type === 'EVENT_BUS_MESSAGE') {
             const { eventName, eventData } = m.data ?? {};
             // A refusal names the slot's story, which may be another: it is for this page all the same.
@@ -42,7 +44,9 @@ export function connect({ win, target, id, mode = 'iframe', origin = '*', story,
     // Framed, or opened as a window of its own by the web client's window adapter (`?windowId=`): the same but for the first word.
     const hello = () => post(mode === 'window' ? 'WINDOW_READY' : 'IFRAME_READY', { clientId: id, iframeId: id, windowId: id, version: '1.0.0', capabilities: [mode === 'window' ? 'window-base' : 'iframe-base'] });
     hello();
-    timer = win.setInterval(() => { if (!ready) hello(); }, retry);
+    win.setInterval(() => { if (!ready) hello(); }, retry);
+    // The host drops a client it has not heard from for a minute (its adapter's `checkHeartbeats`).
+    win.setInterval(() => { if (ready) post('HEARTBEAT', { timestamp: Date.now() }); }, beat);
     return { solved: (questionId) => publish('mystery:questionSolved', { story, questionId }), request };
 }
 
@@ -55,13 +59,6 @@ export function reconcile(heldBefore, solvedHere, state) {
     const fresh = held.filter((p) => !heldBefore.includes(p));
     const resend = state.connected ? solvedHere.filter((q) => !(state.solved ?? []).includes(q)) : [];
     return { held, fresh, resend };
-}
-
-/** The case's version as the export has it (scripts/export-rules.mjs): a hash of structure.json, and of the written rules where there are any. */
-export async function caseVersion(structureText, implicationsText = null, subtle = globalThis.crypto.subtle) {
-    const hex = async (s) => [...new Uint8Array(await subtle.digest('SHA-256', new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
-    const v = await hex(structureText);
-    return implicationsText == null ? v : hex(v + implicationsText);
 }
 
 /**

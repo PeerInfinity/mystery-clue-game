@@ -330,6 +330,26 @@ export function tableRules(data, observations) {
             if (out.some((t) => t.q === q.id && t.rules_out[0] === r.pick && JSON.stringify(t.from) === JSON.stringify(from))) continue;
             out.push({ id: `t.${cell.req.cannot ? 'cannot' : cell.req.undone ? 'want' : 'key'}.${n}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: one of the answers ${cell.req.cannot ? 'could not have done it' : cell.req.undone ? 'had said they wanted what it undid' : 'had no key for it'}`, rules_out: [r.pick], ...(cell.req.cannot ? {} : { strength: LIKELY }), table: true });
         }
+        // The list of answers closed (2026-11-24; finding 133): a true statement about everyone ("nobody but X and Y")
+        // that denies what the deed needs of its doer, a key or its place through the whole window, to all but people
+        // who are among the answers. "Something else" (the answers always offered) is then ruled out, as likely only:
+        // it rests on what a witness or a record did not show. From the observation of that entry. With every other
+        // answer ruled out too, the one left is concluded by elimination (`verdict`).
+        const open = (q.possibilities ?? []).filter((p) => p.via === 'always' && !isRight(q, p.value)).map((p) => p.value);
+        const act = answerAction(q, picks[0].value, isEntity, Object.fromEntries(conds.map((k) => [k.q, k.pick])));
+        if (!open.length || !act || act.of !== picks[0].value) continue;
+        const pl = data.places ?? places(data), order = data.order ?? timeOrder(data.times), w = coverOf(act.time);
+        const reqs = (pointImplications(act, undefined, { ...ctx, places: pl, solved: Object.fromEntries(conds.map((k) => [k.q, k.pick])) }).entries ?? []).filter((r) => r.role === 'requires' && r.of === act.of);
+        const answers = new Set(q.possibilities.map((p) => p.value));
+        const denies = (f) => {
+            if (f.attr === 'carrying') return reqs.some((r) => r.key && f.key === r.key);
+            const k = coverOf(f.time);
+            return f.attr === 'location' && !!w && !!k && order.le(k.start, w.start) && order.le(w.end, k.end) && reqs.some((r) => r.place && pl.chain(r.place).includes(f.value));
+        };
+        (data.facts ?? []).filter((f) => f.truth !== false && f.of === '*' && f.neg && list(f.every).includes('person') && list(f.but).every((b) => answers.has(b)) && denies(f)).forEach((f, n) => {
+            const o = obsOf(q.id, f.id);
+            if (o) out.push({ id: `t.closed.${q.id.replace(/^q\./, '')}.${n}`, q: q.id, from: [...conds.map((k) => ({ solved: k.q })), o.id], says: `${o.says}: nobody else could have done it`, rules_out: open, strength: LIKELY, table: true });
+        });
     }
     return out;
 }

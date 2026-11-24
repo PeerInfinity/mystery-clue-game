@@ -1960,7 +1960,7 @@ script that found each fact's paragraph from its quote; the data files are the s
     | The 18 miniatures | 27 | 1 | 15 | 18 of 33 | 27, 19 |
     | All | 52 | 4 | 23 | 33 of 69 | 54, 35 |
 
-    - *Read as:* 4 answers follow today with nothing written; 19 more would follow by elimination if "something
+    - *Read as (before finding 133):* 4 answers follow today with nothing written; 19 more would follow by elimination if "something
       else" could be ruled out, which is what a typed "nobody but these" is for. That column is an upper bound: it
       assumes every such case states that its list is complete. Half the wrong answers (36 of 69) still need a
       written rule.
@@ -1970,6 +1970,30 @@ script that found each fact's paragraph from its quote; the data files are the s
       the written rules that carry it. That list is the work list for typing.
     - *What it does not measure:* the observations are still written (the typed rules start from an observation's
       entries), and so are the prose and the quotes.
+
+133. **The list of answers closed by "nobody but these" (the user's ruling of 2026-11-24).** Put to the user: from
+    the forms that exist (a statement about everyone that denies the deed to all but people among the answers), or
+    a mark on the question naming the entry that says its list is complete. The user chose the first, as likely
+    only, with the second kept back for a question the first cannot reach.
+    - *Built* (`t.closed` in `tableRules`): a true statement about everyone that denies what the deed needs of
+      its doer (a key, or its place through the whole window) to all but people who are among the answers rules
+      "something else" out, from the observation of that entry.
+    - *It reaches two questions today.* The Telegram Signed M. ("who was waiting at the mill": the night book's
+      "nobody but Mr. Grove: a key") and The Custom-House Fire's goal (the two keys, once the door question is
+      answered "with a key"). Both now follow by elimination with the written rules taken away: 6 of 52, from 4.
+      The other 17 that would follow with a closed list state no such thing in a typed form yet.
+    - *It changed the long case's Archipelago logic, and the version did not show it.* The goal can now be
+      reached without "What Mr. Prout told me". The version was a hash of `structure.json` and
+      `implications.json`, and neither had changed: a rule made by the engine from typed forms is in neither. The
+      version now covers the exported logic too, and the page reads it from the case's `rules.json` (now
+      `afed4c87068e`), which a test keeps the export. The world in Archipelago-CC has to be rebuilt from it.
+    - *The heartbeat* (reported by the other session, measured there): the web client drops a framed page it has
+      not heard from for a minute, so a solve after the first minute and a half would not have reached the server.
+      The page now sends one every half minute, and greets the host again if told it is no longer registered.
+    - *The window adapter* (the user: try it beside the frame): with `?windowId=` the page talks to its opener.
+      Not yet run against the real one.
+    - *Checked:* The Telegram Signed M., every page check; the long case's true path alone and against the
+      stand-in host.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
