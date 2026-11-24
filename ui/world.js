@@ -1192,7 +1192,14 @@ function toggleLink(entry, q) {
     // To cite a statement is to hold it likely: a link that is kept trusts an entry still uncertain as likely, by its
     // own setting (not one the player has distrusted, and not a speech, whose content is trusted apart).
     // Not where something else from the same source is ruled out: that one the player trusts, or not, by hand.
-    if (!isLinked(entry, q) && !(factById.has(entry) && shownFalse(factById.get(entry)).length)) trustByUse(factById.get(entry), LIKELY_LEVEL, UNCERTAIN);
+    if (!isLinked(entry, q) && !(factById.has(entry) && shownFalse(factById.get(entry)).length)) {
+        // A link trusts its entry as likely; and, where the entry rests on where its witness was (`seen_from`), that
+        // entry too, since the first is trusted no further than the second and would not count without it
+        // (2026-11-24, finding 129: a blind solver trusted the statement and its witness and was stuck for twenty turns).
+        const f = factById.get(entry), base = f?.seen_from && f.seen_from !== f.id ? factById.get(f.seen_from) : null;
+        if (base && !shownFalse(base).length) trustByUse(base, LIKELY_LEVEL, UNCERTAIN);
+        trustByUse(f, LIKELY_LEVEL, UNCERTAIN);
+    }
     state.links = isLinked(entry, q) ? state.links.filter((l) => !(l.entry === entry && l.q === q)) : [...state.links, { entry, q }];
     save(); render();
 }

@@ -1892,6 +1892,15 @@ script that found each fact's paragraph from its quote; the data files are the s
       followed, for twenty turns, until it happened to link "Dunn at the terrace": the observation needs both
       entries linked (finding 124), and nothing on the page says which other entry is wanted. The cost of the
       two links was put to the user as a question when the case was written; this is the answer.
+    - *Mended (agreed with the user).* A link trusts its entry as likely, and now also the entry that entry
+      rests on (`seen_from`), in every case: one link is enough for a witness's watch, and distrusting where
+      the witness was still lowers what they saw from there. The Garden Room's observation of the terrace door
+      is from the one entry again. And the story is reordered: the gardener speaks (¶3) before the narrator
+      says where the two men were after dusk (¶4), so that the reader meets Mr. Farrant at the terrace door
+      before anything points at Philip.
+      A second blind run after both: 11 turns, $0.017, never stuck. It read the gardener first, tried to link
+      "Dunn at the terrace" by itself (refused: it shows nothing alone), read on, and linked the four entries.
+      One run of one model: it shows the obstacle is gone, and little about whether a person is lured.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
