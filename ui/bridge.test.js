@@ -53,6 +53,14 @@ test('messages for another frame or another story are not taken', async () => {
     assert.equal(states.length, 1);
 });
 
+test("a refusal that names the slot's story, another one, is still taken", async () => {
+    const win = fakeWindow(), refused = [];
+    connect({ win, target: { postMessage() {} }, id: 'mystery', story: 's', version: 'v1', onState: () => {}, onRefused: (r) => refused.push(r) });
+    win.postMessage({ type: 'EVENT_BUS_MESSAGE', clientId: 'mystery', timestamp: 1, data: { eventName: 'mystery:refused', eventData: { reason: 'other-story', story: 't', version: 'v9' } } });
+    await settle();
+    assert.deepEqual(refused, ['the slot is for another case']);
+});
+
 test('reconcile: papers are never taken back, and what the host lacks is sent again once connected', () => {
     assert.deepEqual(reconcile(['a', 'b'], ['q1', 'q2'], { connected: true, papers: ['a', 'c'], solved: ['q1'] }), { held: ['a', 'b', 'c'], fresh: ['c'], resend: ['q2'] });
     assert.deepEqual(reconcile(['a'], ['q1'], { connected: false, papers: [], solved: [] }), { held: ['a'], fresh: [], resend: [] });

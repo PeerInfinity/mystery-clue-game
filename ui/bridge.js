@@ -5,10 +5,12 @@
 //   page → host   mystery:requestState   {story, version}
 //   page → host   mystery:questionSolved {story, questionId}
 //   host → page   mystery:state          {story, version, game, connected, papers, solved}   (the whole sets, every time)
-//   host → page   mystery:refused        {reason}
+//   host → page   mystery:refused        {reason, story, version}   (the slot's; reason: no-mystery-world, other-story, other-version)
 // The page deals only in its own ids (papers, questions); the host turns them into items and locations.
 // Nothing here touches the document: `win` is the page's window and `target` the host's, so a test can pass its own.
 
+/** The host's reasons for refusing, in the player's words. */
+const REASONS = { 'no-mystery-world': 'the game loaded there is not a mystery case', 'other-story': 'the slot is for another case', 'other-version': 'the slot was made from another version of this case' };
 const message = (type, id, data) => ({ type, clientId: id, iframeId: id, windowId: id, timestamp: Date.now(), data });
 
 /**
@@ -31,9 +33,9 @@ export function connect({ win, target, id, origin = '*', story, version, onState
             request();
         } else if (m.type === 'EVENT_BUS_MESSAGE') {
             const { eventName, eventData } = m.data ?? {};
-            if (eventData?.story != null && eventData.story !== story) return;
-            if (eventName === 'mystery:state') onState(eventData ?? {});
-            else if (eventName === 'mystery:refused') onRefused(eventData?.reason ?? 'refused');
+            // A refusal names the slot's story, which may be another: it is for this page all the same.
+            if (eventName === 'mystery:refused') onRefused(REASONS[eventData?.reason] ?? eventData?.reason ?? 'refused');
+            else if (eventName === 'mystery:state' && (eventData?.story == null || eventData.story === story)) onState(eventData ?? {});
         }
     });
     const hello = () => post('IFRAME_READY', { clientId: id, iframeId: id, windowId: id, version: '1.0.0', capabilities: ['iframe-base'] });

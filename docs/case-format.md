@@ -89,7 +89,7 @@ adapter protocol and four events of its event bus:
 | page → host | `mystery:requestState` | `{story, version}` |
 | page → host | `mystery:questionSolved` | `{story, questionId}` |
 | host → page | `mystery:state` | `{story, version, game, connected, papers, solved}`: the whole sets, every time |
-| host → page | `mystery:refused` | `{reason}` |
+| host → page | `mystery:refused` | `{reason, story, version}`: the slot's story and version; `reason` is `no-mystery-world`, `other-story` or `other-version` |
 
 `story` is `structure.json`'s, and `version` the export's hash (`scripts/export-rules.mjs`), which the page works out
 from `structure.json` and `world/implications.json` (so the built site carries `structure.json` for such a case).
