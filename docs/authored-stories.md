@@ -1877,6 +1877,22 @@ script that found each fact's paragraph from its quote; the data files are the s
     follows from what is linked", or "… stays open: the page crosses out only what the links rule out", each
     with the path's reason.
 
+129. **Blind runs of the two new miniatures (Haiku, 2026-11-24).** Both solved, both circles right.
+    - *The Prize Marrow: 15 turns, $0.018.* Read to ¶5, linked the owner's want first ("Abel's own words…"),
+      then the wife's and the rival's, saw the page cross those two out, linked what the slashing did, and was
+      done. Nothing went wrong, and nothing was hard: the answer was read off the three statements as soon as
+      they were all in view. The form works; the miniature is the easiest of the set.
+    - *The Garden Room: 39 turns, $0.073, of which 28 stuck.* Two things.
+      It had the right answer circled at turn 8, before reading the gardener's paragraph: from ¶3 alone
+      ("Philip was not seen again; Mr. Farrant was with me") it set Mr. Farrant aside by the passage door and
+      never weighed the terrace door. The lure arrives a paragraph after the reader has made up their mind,
+      so it lures nobody.
+      Then it could not get the question solved. It linked "the terrace door is shut", was told the link does
+      not count until trusted, trusted the statement, then trusted Dunn as a whole, and still nothing
+      followed, for twenty turns, until it happened to link "Dunn at the terrace": the observation needs both
+      entries linked (finding 124), and nothing on the page says which other entry is wanted. The cost of the
+      two links was put to the user as a question when the case was written; this is the answer.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
