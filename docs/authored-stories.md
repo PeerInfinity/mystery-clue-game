@@ -1938,8 +1938,16 @@ script that found each fact's paragraph from its quote; the data files are the s
       room). The only sign is a host that lists nothing solved while the save does: the page asks.
     - *A small client of its own*, not a copy of the web client's adapter: some ninety lines, with no dependency
       on the other repository, and tested against the message shape that adapter accepts.
-    - *Left, on the other side:* the world rebuilt from today's export (version `d3081189acf2`), the host module,
-      how the web client loads the page, and the merge. Left here: hints that cannot stall a multiworld are as
+    - *The round trip with the real host (the same day, reported by the Archipelago-CC session; its branch
+      `mystery-world`, tip `577ae2af55`, not merged).* The world was rebuilt from the export at version
+      `d3081189acf2`, and the host module written (`frontend/modules/mysteryArchipelago/`). With a real
+      Archipelago server, the web client and this page served from another origin: the page asked for the state,
+      was answered `connected: true` with `game` `<seed name>:<team>:<slot>`, held the four papers of the start
+      and one a stand-in page had earned in the same room, and kept its save under that game. The web client's
+      frame panel adds `iframeId` and `hostOrigin` itself, so a player's address needs only `?case=`. Not seen
+      there: a solve made through this page's own controls (that is checked here, against the stand-in host).
+    - *Left, on the other side:* how the web client loads the page for a player (a URL or a built-site
+      submodule), enabling the module without doing it by hand, and the merge. Left here: hints that cannot stall a multiworld are as
       they were (the hint check plays alone).
 
 132. **What follows from the typed data alone, measured (2026-11-24).** `node scripts/typed-check.mjs [-v] [<dir>...]`
