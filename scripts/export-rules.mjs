@@ -8,6 +8,7 @@
 // ids are in the slot data (`world[1].slot_data.mystery`). Papers are named by their titles, which name only a source.
 import { caseRules } from './case-rules.mjs';
 import fs from 'node:fs';
+import path from 'node:path';
 import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { caseLogic } from '../engine/delivery.js';
@@ -167,8 +168,10 @@ export function exportCase(dir) {
     const imp = `${dir}/world/implications.json`;
     const version = fs.existsSync(imp) ? crypto.createHash('sha256').update(v + fs.readFileSync(imp, 'utf8')).digest('hex').slice(0, 12) : v;
     const logic = worldLogic(dir), draft = exportRules(s, version, logic);
-    if (!logic) return draft;
-    return exportRules(s, crypto.createHash('sha256').update(version + JSON.stringify(draft.regions ?? draft)).digest('hex').slice(0, 12), logic);
+    const doc = logic ? exportRules(s, crypto.createHash('sha256').update(version + JSON.stringify(draft.regions ?? draft)).digest('hex').slice(0, 12), logic) : draft;
+    // `case`: the case's directory as the page's `?case=` wants it, for the web client that frames the page. Not part of the version.
+    doc.world[1].slot_data.mystery.case = path.relative(path.join(path.dirname(new URL(import.meta.url).pathname), '..'), path.resolve(dir)).split(path.sep).join('/');
+    return doc;
 }
 
 // One section to a line where that keeps the file readable: a location, an item.
