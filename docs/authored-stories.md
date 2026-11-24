@@ -1858,7 +1858,16 @@ script that found each fact's paragraph from its quote; the data files are the s
     notices at the bottom right ("Solved", a link that no longer fits, answers given away) stayed up and covered
     much of the page; only two were closed, and one of those only where papers are earned. Now after every move
     and every paragraph read each one showing is said in the autoplay's caption for a moment and then closed.
-    The gate's notice has no close and is left: when it shows, the autoplay has stopped.
+    The gate's notice is hidden too, unsaid: it says the story waits for an answer, which the autoplay is about
+    to give.
+    - *The strip under the header* (the user's design, the same day). It floated over the foot of the page.
+      The user thought of the header and saw the cost: a caption of changing length would shift everything
+      under it. So: a strip of the page's width under the header, in view as the header is; a row of the
+      controls and the caption on a row of its own, one line cut short by default. A click on the caption
+      goes between one line and all of it, and the choice is kept on the device (the user's ruling: a toggle,
+      not a passing look). The opening line and a stop are shown whole whichever is chosen. The panels that
+      stay in view start below it (`--ap`, `--head`, measured). The same at a phone's width, where it had sat
+      above the header.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

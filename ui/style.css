@@ -357,11 +357,16 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 .n-list .n-tools { float: right; }
 
 /* The autoplay: its strip over the foot of the page, its own cursor, a ring on a click. */
-.autoplay-strip { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 60; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; max-width: calc(100vw - 32px); padding: 6px 12px; background: var(--panel); color: var(--ink); border: 1.5px solid var(--accent); border-radius: 10px; box-shadow: 0 4px 16px rgb(0 0 0 / .18); font-size: 14px; }
+.autoplay-strip { position: sticky; top: var(--head, 0px); z-index: 4; padding: 4px 16px 6px; background: var(--panel); color: var(--ink); border-bottom: 1.5px solid var(--accent); font-size: 14px; }
+.autoplay-strip .ap-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .autoplay-strip .ap-title { font-weight: 600; color: var(--accent); }
-.autoplay-strip .ap-caption { flex: 1 1 18em; min-width: 0; }
-.autoplay-strip .ap-tools { display: flex; gap: 6px; align-items: center; }
+.autoplay-strip .ap-tools { display: flex; gap: 6px; align-items: center; margin-left: auto; }
 .autoplay-strip .button { background: var(--accent); color: #fff; border-radius: 6px; padding: 4px 10px; }
+/* The caption on a row of its own: one line cut short, or all of it (`full`, the viewer's choice; `must`, a line not to be missed). */
+.autoplay-strip .ap-caption { margin-top: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.autoplay-strip.full .ap-caption, .autoplay-strip.must .ap-caption { white-space: normal; overflow: visible; }
+.autoplay-strip .ap-mark::before { content: '▸ '; color: var(--accent); }
+.autoplay-strip.full .ap-mark::before, .autoplay-strip.must .ap-mark::before { content: '▾ '; }
 .autoplay-cursor { position: fixed; left: 0; top: 0; z-index: 70; pointer-events: none; transform: translate(50vw, 50vh); }
 .autoplay-cursor svg path { fill: var(--ink); stroke: var(--panel); stroke-width: 1.2; }
 .autoplay-cursor::after { content: ''; position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; }
@@ -369,8 +374,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .35); }
 @keyframes ap-ring { from { opacity: .9; transform: scale(.4); } to { opacity: 0; transform: scale(1.6); } }
 .autoplay-strip .short { display: none; }
 @media (max-width: 699px) {
-  .autoplay-strip { top: 6px; bottom: auto; width: calc(100vw - 32px); gap: 4px 8px; padding: 4px 8px; font-size: 12px; }
-  .autoplay-strip .ap-caption { flex-basis: 100%; order: 3; }
+  .autoplay-strip { padding: 4px 8px; font-size: 12px; }
   .autoplay-strip .ap-tools button, .autoplay-strip .ap-tools select { padding: 2px 6px; font-size: 12px; }
   .autoplay-strip .ap-tools { flex-wrap: wrap; gap: 4px; }
   .autoplay-strip .long { display: none; }

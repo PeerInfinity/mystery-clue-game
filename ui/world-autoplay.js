@@ -29,31 +29,53 @@ export async function start({ store, fast = false }) {
     // ---------- the strip and the cursor ----------
     const strip = document.createElement('div');
     strip.className = 'autoplay-strip';
-    strip.innerHTML = `<span class="ap-title">Autoplay · the careful reader</span> <span id="ap-para" class="small"></span> <span id="ap-caption" class="ap-caption"></span>
+    // Under the header, the page's width, and in view as the header is (2026-11-24, the user's design): a row of the
+    // controls, and the caption on a row of its own, one line cut short or all of it. A click on the caption goes
+    // between the two, and the choice is kept on this device. The opening line and a stop are shown whole whichever
+    // is chosen (`must`), since they are not to be missed.
+    strip.innerHTML = `<div class="ap-row"><span class="ap-title">Autoplay · the careful reader</span> <span id="ap-para" class="small"></span>
         <span class="ap-tools"><button id="ap-pause" class="quiet">Pause</button>
         <button id="ap-step" class="quiet" title="Make the next move or read the next paragraph, then pause">Step</button>
         <select id="ap-speed" aria-label="Speed">${SPEEDS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
-        <button id="ap-stop" class="quiet" title="Back to your own timeline">Stop</button></span>`;
-    document.body.append(strip);
-    document.body.classList.add('autoplaying');
+        <button id="ap-stop" class="quiet" title="Back to your own timeline">Stop</button></span></div>
+        <div id="ap-caption" class="ap-caption" role="button" tabindex="0" aria-expanded="false" title="Click to show all of it, or one line"><span class="ap-mark" aria-hidden="true"></span><span id="ap-text"></span></div>`;
+    const head = document.querySelector('header.top');
+    if (head) head.after(strip); else document.body.prepend(strip);
+    document.body.classList.add('autoplaying', 'has-strip');
+    const FULL = 'autoplay-caption-full';
+    const isFull = () => { try { return localStorage.getItem(FULL) === '1'; } catch { return false; } };
+    const showFull = (on) => { strip.classList.toggle('full', on); $('#ap-caption').setAttribute('aria-expanded', String(on || strip.classList.contains('must'))); };
+    showFull(isFull());
+    const toggleFull = () => { const on = !strip.classList.contains('full'); try { localStorage.setItem(FULL, on ? '1' : '0'); } catch { /* not kept */ } showFull(on); };
+    $('#ap-caption').addEventListener('click', toggleFull);
+    $('#ap-caption').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFull(); } });
+    const say = (text, must = false) => { $('#ap-text').textContent = text; strip.classList.toggle('must', must); };
+    // What stays in view below the strip is told how tall it and the header are (the header only where it sticks).
+    const measure = () => {
+        document.body.style.setProperty('--ap', `${strip.offsetHeight}px`);
+        document.body.style.setProperty('--head', `${head && getComputedStyle(head).position === 'sticky' ? head.offsetHeight : 0}px`);
+    };
+    if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(measure); ro.observe(strip); if (head) ro.observe(head); }
+    window.addEventListener('resize', measure);
+    measure();
     const cursor = document.createElement('div');
     cursor.className = 'autoplay-cursor';
     cursor.innerHTML = '<svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true"><path d="M1 1 L1 17 L5 13 L8 20 L11 19 L8 12 L14 12 Z" /></svg>';
     if (!fast) document.body.append(cursor);
     $('#ap-speed').value = '1';
     $('#ap-speed').addEventListener('change', (e) => { s.speed = Number(e.target.value); });
-    const caption = (text) => { if (!s.paused) s.lastCaption = text; $('#ap-caption').textContent = text; };
-    const setPaused = (on, why = 'Paused: the page is yours to look round; resume to go on.') => {
+    const caption = (text) => { if (!s.paused) s.lastCaption = text; say(text); };
+    const setPaused = (on, why = 'Paused: the page is yours to look round; resume to go on.', must = false) => {
         s.paused = on;
         $('#ap-pause').textContent = on ? 'Resume' : 'Pause';
-        $('#ap-caption').textContent = on ? why : s.lastCaption;
+        say(on ? why : s.lastCaption, on && must);
     };
     $('#ap-pause').addEventListener('click', () => { s.stepping = false; setPaused(!s.paused); });
     $('#ap-step').addEventListener('click', () => { s.stepping = true; if (s.paused) setPaused(false); });
     const stepped = () => { if (s.stepping) { s.stepping = false; setPaused(true, `${s.lastCaption} · paused`); } };
     $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; location.href = pageUrl(); });
     const ending = (text) => {
-        $('#ap-caption').textContent = text;
+        say(text, true);
         strip.querySelector('.ap-tools').innerHTML = `<a class="button" href="${pageUrl()}">Back to your timeline</a>`;
         cursor.remove();
         document.body.classList.remove('autoplaying');
@@ -115,6 +137,8 @@ export async function start({ store, fast = false }) {
     // The floating notices (bottom right) are not left standing over the page: what each says goes in the caption
     // for a moment, and it is closed (2026-11-24, after the user's remark that they cover a lot of the screen).
     async function clearNotices() {
+        // The gate's notice (the story waits for an answer) says what the autoplay is about to do anyway: hidden unsaid.
+        if ($('#gate-news') && !$('#gate-news').hidden && $('[data-gate-hide]')) await press('[data-gate-hide]');
         for (const [box, close] of [['#solved-news', '[data-solved-close]'], ['#lapse-news', '[data-lapse-close]'], ['#answer-news', '[data-answers-close]']]) {
             const el = $(box);
             if (!el || el.hidden || !$(close)) continue;
@@ -149,7 +173,7 @@ export async function start({ store, fast = false }) {
     // ---------- the playthrough ----------
     try {
         // It starts paused (not the check), so the viewer can choose a speed first.
-        if (!fast) { setPaused(true, 'A careful reader will read the story and fill in the timeline, move by move. Choose a speed, then press Start.'); $('#ap-pause').textContent = 'Start'; }
+        if (!fast) { setPaused(true, 'A careful reader will read the story and fill in the timeline, move by move. Choose a speed, then press Start.', true); $('#ap-pause').textContent = 'Start'; }
         await gate();
         const one = async (m) => {
             // A statement trusted already for another question's moves is not trusted again.
