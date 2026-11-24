@@ -1942,6 +1942,27 @@ script that found each fact's paragraph from its quote; the data files are the s
       how the web client loads the page, and the merge. Left here: hints that cannot stall a multiworld are as
       they were (the hint check plays alone).
 
+132. **What follows from the typed data alone, measured (2026-11-24).** `node scripts/typed-check.mjs [-v] [<dir>...]`
+    takes each case's written rules away and leaves the rules the engine makes from the typed forms, with every
+    observation shown and every other question taken as solved. It changes nothing and fails nothing.
+
+    | | Questions | The answer follows | …if the list of answers is closed | Wrong answers ruled out | Written rules (conclude, rule out) |
+    |---|---|---|---|---|---|
+    | The Custom-House Fire | 25 | 3 | 8 | 15 of 36 | 27, 16 |
+    | The 18 miniatures | 27 | 1 | 15 | 18 of 33 | 27, 19 |
+    | All | 52 | 4 | 23 | 33 of 69 | 54, 35 |
+
+    - *Read as:* 4 answers follow today with nothing written; 19 more would follow by elimination if "something
+      else" could be ruled out, which is what a typed "nobody but these" is for. That column is an upper bound: it
+      assumes every such case states that its list is complete. Half the wrong answers (36 of 69) still need a
+      written rule.
+    - *Where nothing typed bears at all:* The Grey Cloak, The Lamp-Keeper's Word, both Rent Box cases and The Ring
+      on the Bench (a comparison of descriptions, a changed word, a lie as evidence, a route). In the long case 17
+      of 25 questions do not follow even with the list closed; `-v` names, for each, the answers not ruled out and
+      the written rules that carry it. That list is the work list for typing.
+    - *What it does not measure:* the observations are still written (the typed rules start from an observation's
+      entries), and so are the prose and the quotes.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
