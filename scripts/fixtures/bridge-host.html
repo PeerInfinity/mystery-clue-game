@@ -1,0 +1,27 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>A stand-in Archipelago host</title>
+<!-- The page framed as the Archipelago-CC web client frames it, with the stand-in host of ui/bridge.js in this window:
+     to try the bridge by eye, and for a check across two windows. Not the real host: that is a module of the web
+     client. Open /scripts/fixtures/bridge-host.html?case=<dir>&seed=<n> on the server (node scripts/serve.js). -->
+<style>body{margin:0;font:14px system-ui;display:grid;grid-template-rows:auto 1fr;height:100vh}#log{max-height:6em;overflow:auto;padding:4px 8px;background:#222;color:#ddd;font:12px monospace}iframe{border:0;width:100%;height:100%}</style>
+<div id="log">A stand-in host. What the page sends:</div>
+<iframe id="game"></iframe>
+<script type="module">
+import { stubHost } from '../../ui/bridge.js';
+import { caseVersion } from '../../ui/bridge.js';
+import { caseLogic, placement } from '../../engine/delivery.js';
+const q = new URLSearchParams(location.search), CASE = q.get('case') ?? 'scripts/fixtures/vestry-cup', seed = Number(q.get('seed')) || 1;
+const root = '../../', W = `${root}${CASE}/world`;
+const json = (u) => fetch(u).then((r) => r.json()), text = (u) => fetch(u).then((r) => (r.ok ? r.text() : null));
+const [header, questions, observations, facts, structure, implications] = await Promise.all([json(`${W}/case.json`), json(`${W}/questions.json`), json(`${W}/observations.json`), json(`${W}/facts.json`), text(`${root}${CASE}/structure.json`), text(`${W}/implications.json`)]);
+const logic = caseLogic({ questions: questions.questions, observations: observations.observations, facts: facts.facts, files: header.files ?? [], delivery: header.delivery });
+const placed = placement(logic, seed) ?? new Map();
+const frame = document.getElementById('game'), log = document.getElementById('log');
+window.host = stubHost({
+    win: window, target: () => frame.contentWindow, id: 'mystery', story: JSON.parse(structure).story, version: q.get('version') ?? await caseVersion(structure, implications),
+    game: `host-${seed}`, start: logic.start, brings: (id) => placed.get(id) ?? null,
+    onMessage: (m) => { if (m.type !== 'PUBLISH_EVENT_BUS') return; log.append(document.createElement('br'), `${m.data.eventName} ${JSON.stringify(m.data.eventData)}`); log.scrollTop = 1e6; },
+});
+frame.src = `${root}?case=${encodeURIComponent(CASE)}&iframeId=mystery&hostOrigin=${encodeURIComponent(location.origin)}`;
+</script>

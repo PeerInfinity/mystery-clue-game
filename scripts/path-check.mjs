@@ -13,11 +13,13 @@
 // (engine/delivery.js) from the case's own data, and the questions are solved in an order drawn from the seed among
 // those open, each by its moves (`for_q`); before each, the papers on the page must be exactly those held, and after
 // it the question must be solved and the notice must say what it brought.
+// BRIDGE=1 (earned papers): the same, played as in an Archipelago: the papers come from the stand-in host of
+// ui/bridge.js, which places them as the seed does and must end with every solved question checked.
 // Needs the game served (node scripts/serve.js; URL, default http://localhost:8321/) and the headless Chrome
 // on port 9333 (one script at a time). Prints one line per move; exits 1 on any failure.
 import fs from 'node:fs';
 import path from 'node:path';
-import { CASE, WORLD, STORE, pageUrl, CDP } from './case-env.mjs';
+import { CASE, WORLD, STORE, BRIDGE, pageUrl, CDP } from './case-env.mjs';
 import { controlOf, made, nextRead, readToOf, needsOf } from '../ui/world-moves.js';
 import { MAIN, refList } from '../engine/refs.js';
 import { caseLogic, deliveryMode, placement, choices, rng, heldAfter } from '../engine/delivery.js';
@@ -36,7 +38,7 @@ const SEED = Number(process.env.SEED ?? 1);
 const ANSWERS = process.env.ANSWERS ?? '';
 const AQ = ANSWERS ? `answers=${ANSWERS}` : '';
 const impQs = new Set(ANSWERS === 'evidence' ? (await import('./case-rules.mjs')).caseRules(CASE).map((i) => i.q) : []);
-const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', [EARNED ? `seed=${SEED}` : '', AQ].filter(Boolean).join('&'));
+const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', [EARNED ? `seed=${SEED}` : '', BRIDGE ? 'iframeId=mystery&bridge=stub' : '', AQ].filter(Boolean).join('&'));
 const STOP = +(process.env.STOP ?? 1e9);
 const files = JSON.parse(fs.readFileSync(path.join(WORLD, 'case.json'), 'utf8')).files ?? [];
 const ORDER = process.env.ORDER ? process.env.ORDER.split(',') : null;
@@ -332,6 +334,7 @@ if (EARNED) {
     let restsSeen = false;
     for (const q of order) {
         // The papers held, and the replies to the questions solved (a reply comes with its question, whatever the seed).
+        if (BRIDGE) await sleep(150);   // the papers come by a message
         const want = [...heldAfter(logic, place, solved), ...files.filter((f) => f.reply != null && solved.has(f.reply)).map((f) => f.id)].sort();
         const tabs = (await ev(`[...document.querySelectorAll('.story-tab')].map((b) => b.dataset.story).filter((x) => x !== 'main')`)).sort();
         if (J(tabs) !== J(want)) { failures++; console.log(`FAIL before ${q}: the papers on the page are ${tabs.join(', ') || 'none'}, not ${want.join(', ') || 'none'}`); }
@@ -342,7 +345,7 @@ if (EARNED) {
         const sv = await save();
         if (!sv.solved?.[q]) { failures++; console.log(`FAIL ${q}: not solved after its moves`); break; }
         const news = (await ev(`document.querySelector('#solved-news')?.hidden ? '' : document.querySelector('#solved-news').innerText`)).replace(/\s+/g, ' ');
-        const expect = q === logic.goal ? 'The case is solved' : place.get(q) ? `It brought: ${title(place.get(q))}` : 'It brought nothing new';
+        const expect = q === logic.goal ? 'The case is solved' : BRIDGE ? 'Its check is sent to the Archipelago' : place.get(q) ? `It brought: ${title(place.get(q))}` : 'It brought nothing new';
         if (!news.includes(expect)) { failures++; console.log(`FAIL ${q}: the notice says "${news}", not "${expect}"`); }
         else console.log(`  solved ${q}: ${expect}`);
         await click('[data-solved-close]');
@@ -371,6 +374,12 @@ if (EARNED) {
         }
     }
     if (GOAL_FIRST && !failures) console.log(`  ${after} question(s) solved after the ending`);
+    if (BRIDGE) {
+        await sleep(150);
+        const got = (await ev('window.__stub.solved()')).sort(), want = [...solved].sort();
+        if (J(got) !== J(want)) { failures++; console.log(`FAIL the bridge: the host has ${got.length} question(s) checked, the page solved ${want.length}`); }
+        else console.log(`  the bridge: the host has all ${got.length} solved questions checked`);
+    }
 }
 for (const m of EARNED ? [] : moves) {
     if (!files.length) {

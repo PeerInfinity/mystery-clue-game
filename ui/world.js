@@ -16,11 +16,12 @@ import { fill, described, onPage, bears, waits } from '../engine/observations.js
 import { derive, verdict, ways, premiseIds, derivedAssertions, impliedStates, strength, supportIds, withTable, suspectGrid, deedTimesOf, LIKELY } from '../engine/implications.js';
 import { caseLogic, deliveryMode, endingOf, placement, newSeed, isOpen } from '../engine/delivery.js';
 import { roomHtml } from './world-room.js';
-import { CASE, PLAYER_STORE, AUTOPLAY_STORE, pageUrl } from './world-case.js';
+import { CASE, PLAYER_STORE, AUTOPLAY_STORE, BRIDGE_ID, bridgeStore, pageUrl } from './world-case.js';
+import { connect, reconcile, caseVersion, stubHost } from './bridge.js';
 // `?autoplay`: the true path played through the page (ui/world-autoplay.js) in a save of its own, fresh each time;
 // the player's timeline is kept aside, only its layout and theme borrowed. `?autoplay=fast`: no pauses (the check).
 const AUTOPLAY = new URLSearchParams(location.search).get('autoplay');
-const STORE = AUTOPLAY === null ? PLAYER_STORE : AUTOPLAY_STORE;
+let STORE = AUTOPLAY === null ? PLAYER_STORE : AUTOPLAY_STORE;   // in an Archipelago: a save for each game (below)
 const get = (url, as = 'json') => fetch(url, { cache: 'no-cache' }).then((r) => {
     if (!r.ok) throw new Error(`${url}: ${r.status}`);
     return as === 'json' ? r.json() : r.text();
@@ -142,6 +143,47 @@ const qById = new Map(data.questions.map((q) => [q.id, q]));
 const accountById = new Map(data.accounts.map((a) => [a.id, a]));
 const LAST = story.length - 1;   // the main story's last paragraph
 
+const EARNED = deliveryMode(header) === 'earned';
+const logic = EARNED ? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery }) : null;
+// --- In an Archipelago (ui/bridge.js; `?iframeId=`, given by the web client that frames the page): the papers come as
+// its items and a solved question is a check. The page waits for the host's first state, which names the game (one
+// slot of one multiworld): the save is that game's own, so a timeline is never carried from one multiworld into
+// another. `ap` is null when playing alone, and in the autoplay, which plays a placement of its own.
+const params = new URLSearchParams(location.search);
+let ap = null;
+if (BRIDGE_ID && AUTOPLAY === null) {
+    const waitNote = (t) => { document.getElementById('timeline').innerHTML = `<p class="muted">${esc(t)}</p>`; };
+    if (!EARNED) { waitNote('This case has no papers to earn, so it cannot be played in an Archipelago.'); throw new Error('bridge: not an earned case'); }
+    const structureText = await get(`${CASE}/structure.json`, 'text');
+    const story = JSON.parse(structureText).story;
+    const version = await caseVersion(structureText, await get(`${W}/implications.json`, 'text').catch(() => null));
+    ap = { story, version, held: [...logic.start], connected: false, link: null, onState: null, sent: new Set() };
+    if (params.get('bridge') === 'stub') {
+        // The checks' host, in this window: the placement of `?seed=`, as when playing alone.
+        const seed = Number(params.get('seed')) || 1, placed = placement(logic, seed) ?? new Map();
+        window.__stub = stubHost({ win: window, id: BRIDGE_ID, story, version: params.get('stubVersion') ?? version, game: `stub-${seed}`, start: logic.start, brings: (q) => placed.get(q) ?? null });
+    }
+    waitNote('Waiting for the Archipelago connection…');
+    const first = await new Promise((resolve) => {
+        ap.link = connect({
+            win: window, target: params.get('bridge') === 'stub' ? window : window.parent, id: BRIDGE_ID, origin: params.get('hostOrigin') || '*', story, version,
+            onState: (st) => { if (ap.onState) ap.onState(st); else if (st.version != null && st.version !== version) resolve({ refused: `the Archipelago slot was made from another version of this case (${st.version}; this page is ${version})` }); else if (st.connected) resolve(st); },
+            onRefused: (reason) => { if (ap.onState) { state.note = `The Archipelago refused this page: ${reason}.`; render(); } else resolve({ refused: reason }); },
+        });
+    });
+    if (first.refused) { waitNote(`The Archipelago refused this page: ${first.refused}.`); throw new Error(`bridge: ${first.refused}`); }
+    ap.first = first;
+    ap.held = reconcile(ap.held, [], first).held;
+    STORE = bridgeStore(first.game ?? 'game');
+    // The same generated game hosted again is the same `game` with nothing checked: a timeline saved here would send
+    // all its solved questions into the new room at once. The player says which it is.
+    try {
+        const was = Object.keys(JSON.parse(localStorage.getItem(STORE) ?? '{}').solved ?? {});
+        if (was.length && !was.some((q) => (first.solved ?? []).includes(q)) && confirm(`The Archipelago lists none of the ${was.length} question${was.length === 1 ? '' : 's'} solved in the timeline saved on this device for this game. If this is a new room, start a fresh timeline (OK). Cancel keeps the timeline and sends its solved questions.`)) localStorage.removeItem(STORE);
+    } catch { /* no save */ }
+}
+window.__ap = ap;
+
 // --- State: how far the story is read, the player's trust and marks on questions. Saved in this browser only.
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
 // `reasoning`: the player's moves on the timeline, in order: {move: 'a', a, b} (a change between two states) or
@@ -171,9 +213,8 @@ syncReading();
 // kept in the save, shown in Settings, and can be given in the address (`?seed=`) to replay. Connected to an
 // Archipelago (later), the same two questions are the bridge's to answer (its `mystery:state`: the papers held, the
 // questions checked), and `source` is replaced by one that asks it.
-const EARNED = deliveryMode(header) === 'earned';
-const seedParam = Number(new URLSearchParams(location.search).get('seed')) || null;
-if (EARNED) {
+const seedParam = Number(params.get('seed')) || null;
+if (EARNED && !ap) {
     const progress = (state.log?.length ?? 0) > 1 || state.links.length || Object.keys(state.marks).length;
     if (seedParam && state.seed && seedParam !== state.seed && progress && AUTOPLAY === null && !confirm(`Start a new game with seed ${seedParam}? Your timeline on this device is cleared.`)) { /* keep the game in hand */ }
     else if (seedParam && seedParam !== state.seed) {
@@ -185,9 +226,12 @@ if (EARNED) {
     }
     if (!state.seed) state.seed = newSeed();
 }
-const logic = EARNED ? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery }) : null;
-const place = EARNED ? placement(logic, state.seed) ?? new Map() : new Map();
-const source = {
+const place = EARNED && !ap ? placement(logic, state.seed) ?? new Map() : new Map();
+const source = ap ? {
+    held: () => new Set(ap.held),
+    /** In an Archipelago a question's check may hold anything, for anyone: what it brought is not known here. */
+    brought: () => null,
+} : {
     /** The papers held now. */
     held: () => new Set([...(logic?.start ?? []), ...Object.keys(state.solved).map((q) => place.get(q)).filter(Boolean)]),
     /** The paper a solved question brought (null: nothing new). */
@@ -201,7 +245,7 @@ const openNow = (id) => { const lq = logic?.questions.find((x) => x.id === id); 
 // For the autoplay and the checks: the delivery as the page has it.
 // While a move is only being tried (and will be taken back), nothing is solved: `window.__trying(true)` … `(false)`.
 window.__trying = (on) => { trying = !!on; };
-window.__delivery = { earned: EARNED, seed: state.seed ?? null, open: openNow, held: () => [...source.held()], solved: () => Object.keys(state.solved) };
+window.__delivery = { earned: EARNED, seed: ap ? null : state.seed ?? null, open: openNow, held: () => [...source.held()], solved: () => Object.keys(state.solved) };
 /** How a paper came: held from the start, or brought by solving a question (its id). */
 const cameBy = (id) => (fileById.get(id)?.reply != null ? fileById.get(id).reply : logic?.start.includes(id) ? 'start' : Object.keys(state.solved).find((q) => source.brought(q) === id) ?? null);
 if (!delivered(state.story)) state.story = MAIN;
@@ -2125,8 +2169,8 @@ function storyTabsHtml() {
     const waiting = files.length - shown.length;
     // Papers earned by solving questions: how each came, and nothing about how many are still out or where they are.
     if (EARNED) {
-        const how = (f) => { const by = cameBy(f.id); return by === 'start' ? 'in hand from the start' : by && qById.has(by) ? `${f.reply != null ? 'the reply to' : 'brought by solving'} <a class="link" data-q="${esc(by)}">${esc(qLabel(qById.get(by)))}</a>` : ''; };
-        return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div><details class="papers-box small"><summary>The papers (${shown.length})</summary><ul>${shown.map((f) => `<li><b>${esc(f.title)}</b>: ${how(f)}</li>`).join('')}</ul><p class="muted">More papers come as you solve questions.</p></details>`;
+        const how = (f) => { const by = cameBy(f.id); return by === 'start' ? 'in hand from the start' : by && qById.has(by) ? `${f.reply != null ? 'the reply to' : 'brought by solving'} <a class="link" data-q="${esc(by)}">${esc(qLabel(qById.get(by)))}</a>` : ap ? 'come from the Archipelago' : ''; };
+        return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div><details class="papers-box small"><summary>The papers (${shown.length})</summary><ul>${shown.map((f) => `<li><b>${esc(f.title)}</b>: ${how(f)}</li>`).join('')}</ul><p class="muted">${ap ? 'More papers come as the Archipelago sends them.' : 'More papers come as you solve questions.'}</p></details>`;
     }
     return `<div class="story-tabs" role="tablist">${tab(MAIN, 'The story')}${shown.map((f) => tab(f.id, f.title)).join('')}</div>${waiting ? `<p class="small muted story-waiting">${waiting === 1 ? 'One more paper' : `${waiting} more papers`} may come as the story goes on.</p>` : ''}`;
 }
@@ -2433,7 +2477,7 @@ function judge() {
         }
         if (more) { observed = fillNow(); follow(); }
     }
-    if (fresh) save();
+    if (fresh) { save(); if (ap) for (const q of Object.keys(state.solved)) if (!ap.sent.has(q)) { ap.sent.add(q); ap.link.solved(q); } }
 }
 function gateState(q) {
     if (isSolved(q.id)) return null;
@@ -2526,7 +2570,7 @@ function broughtHtml(qid, button = true) {
     const open = (id) => (button ? ` <button type="button" class="quiet" data-story="${esc(id)}">Open it</button>` : '');
     const stop = button ? '' : '.';
     const reply = r ? `It was answered: <b>${esc(r.title)}</b>${stop}${open(r.id)}` : '';
-    const paper = p ? `It brought: <b>${esc(fileById.get(p)?.title ?? p)}</b>${stop}${open(p)}` : EARNED ? 'It brought nothing new.' : '';
+    const paper = p ? `It brought: <b>${esc(fileById.get(p)?.title ?? p)}</b>${stop}${open(p)}` : ap ? 'Its check is sent to the Archipelago.' : EARNED ? 'It brought nothing new.' : '';
     return [reply, paper].filter(Boolean).join(button ? '<br>' : ' ');
 }
 function renderSolved() {
@@ -2923,7 +2967,11 @@ document.getElementById('hint-wait').value = String(state.hintWait);
 document.getElementById('hint-wait').addEventListener('change', (e) => { state.hintWait = Number(e.target.value); save(); });
 document.getElementById('gate-rule').value = strictGate() ? 'strict' : 'any';
 // The seed of the papers' placement (earned papers only): shown, with the address that replays it.
-if (EARNED && document.getElementById('seed-row')) {
+if (ap && document.getElementById('seed-row')) {
+    const row = document.getElementById('seed-row');
+    row.hidden = false;
+    row.textContent = 'Played in an Archipelago: the papers come as its items, and each question solved is a check.';
+} else if (EARNED && document.getElementById('seed-row')) {
     const row = document.getElementById('seed-row');
     row.hidden = false;
     row.innerHTML = `Seed of this game: <b id="seed-value">${state.seed}</b> <a class="settings-link" href="${esc(pageUrl(`seed=${state.seed}`))}" title="The address of this game's placement of the papers: a new game with it plays the same">replay it</a>`;
@@ -2941,3 +2989,17 @@ if (AUTOPLAY !== null) { save(); import('./world-autoplay.js').then((m) => m.sta
 document.getElementById('autoplay-open')?.addEventListener('click', () => {
     if (confirm('Watch a careful reader fill in the timeline, from the first paragraph to the last? Your own timeline is kept aside and comes back when you stop.')) location.href = pageUrl('autoplay');
 });
+// In an Archipelago: every later state from the host. The papers it lists are held (and announced when new), and a
+// question solved here that it does not list is sent again, so nothing is lost by a dropped connection.
+if (ap) {
+    ap.onState = (st) => {
+        if (st.version != null && st.version !== ap.version) { state.note = `The Archipelago slot was made from another version of this case (${st.version}; this page is ${ap.version}).`; render(); return; }
+        const r = reconcile(ap.held, Object.keys(state.solved), st);
+        ap.held = r.held; ap.connected = !!st.connected;
+        for (const q of r.resend) ap.link.solved(q);
+        for (const q of st.solved ?? []) ap.sent.add(q);
+        if (r.fresh.length) state.note = `From the Archipelago: ${r.fresh.map((id) => fileById.get(id)?.title ?? id).join('; ')}.`;
+        if (r.fresh.length || r.resend.length) render();
+    };
+    ap.onState(ap.first);
+}

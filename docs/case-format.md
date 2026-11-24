@@ -79,6 +79,36 @@ annotated reading's thoughts, the earlier game's time windows); since 2026-11-06
 `?case=pipeline/runs/silver-blaze-r2/case`), with saves of its own (`ui/world-case.js`); without `world/path.json`
 it offers no hints and no autoplay.
 
+**Played in an Archipelago** (the page's half, since 2026-11-24; `ui/bridge.js`). A case whose papers are earned can
+be played in a frame of the Archipelago-CC web client, which gives the page `?iframeId=<id>` (and `hostOrigin`). The
+papers then come as that multiworld's items and each solved question is a check. The page speaks the web client's
+adapter protocol and four events of its event bus:
+
+| Direction | Event | Payload |
+|---|---|---|
+| page → host | `mystery:requestState` | `{story, version}` |
+| page → host | `mystery:questionSolved` | `{story, questionId}` |
+| host → page | `mystery:state` | `{story, version, game, connected, papers, solved}`: the whole sets, every time |
+| host → page | `mystery:refused` | `{reason}` |
+
+`story` is `structure.json`'s, and `version` the export's hash (`scripts/export-rules.mjs`), which the page works out
+from `structure.json` and `world/implications.json` (so the built site carries `structure.json` for such a case).
+`papers` and `solved` are the page's own ids. `game` is any string that is the same for one slot of one multiworld
+and no other (the seed's name, the team and the slot): the save is kept per game. The rules:
+
+- The page waits for the first `mystery:state` with `connected: true` before it loads a save. A slot of another
+  version, or a refusal, stops it with a line saying so.
+- Papers are never taken back: what a state lists is added to what is held. A new one is announced in a note.
+- A question solved here that a state does not list is sent again, so a dropped connection loses nothing.
+- A save with solved questions of which the host lists none is asked about (`confirm`): the same generated game
+  hosted again is the same `game` with nothing checked. A fresh timeline, or keep it and send them.
+- What solving a question brought is not known to the page ("Its check is sent to the Archipelago"); the list of
+  papers says "come from the Archipelago". The autoplay does not use the bridge.
+
+`?bridge=stub` puts a stand-in host in the page's own window (the placement of `?seed=`), for the checks;
+`scripts/fixtures/bridge-host.html?case=<dir>&seed=<n>` frames the page with the same stand-in, across two windows,
+to try it by eye. The real host is a module of the web client and is not built yet.
+
 ## The world model as data (`world/`)
 
 The chosen direction (`docs/ideas.md` §2, "Watson fills in the world model"), Watson's timeline, the main page. It

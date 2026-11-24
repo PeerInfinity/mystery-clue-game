@@ -12,6 +12,9 @@ item is an authored case file. Accounts as items, reading stopping at give-aways
 the work listed for Silver Blaze no longer stand. The structure format and its validator, the answer rule, the shape of
 the logic and the bridge do.
 
+**The page's half of the bridge is built (2026-11-24):** `docs/case-format.md`, "Played in an Archipelago", and
+`docs/authored-stories.md`, findings 77, 78, 130 and 131. The host module in Archipelago-CC is not.
+
 This replaces the idea in `docs/ideas.md`, "Archipelago integration", of converting the earlier game to the DepGraph
 world. What that attempt showed is still recorded there. The further aim of new stories in one interconnected world is
 in `docs/interconnected-world.md`.

@@ -1902,6 +1902,46 @@ script that found each fact's paragraph from its quote; the data files are the s
       "Dunn at the terrace" by itself (refused: it shows nothing alone), read on, and linked the four entries.
       One run of one model: it shows the obstacle is gone, and little about whether a person is lured.
 
+130. **The next direction, planned with a session in Archipelago-CC (2026-11-24).** The user put three projects: a
+    story whose logic is all typed data; choices the player character makes in the present; the rest of the
+    Archipelago integration. A second session read Archipelago-CC (`origin/main` `a5f7c6caf4`; it ran nothing) and
+    the two exchanged findings.
+    - *What was measured here.* 52 answered questions in the 20 cases have 112 written rules, 54 of which conclude
+      an answer; 2 questions are concluded with no written rule; 223 observation sentences are written. The main
+      obstacle to "the answer follows from the typed data alone" is that "something else" is always an answer, so
+      nothing concludes by elimination. Condition values are free strings matched by equality.
+    - *The Prize Marrow from its typed entries alone, on paper.* The page's `phrase` already words a typed entry,
+      so a story by templates keeps the logic whole and loses the `detail`s and the voice. Dry, and playable.
+    - *What Archipelago-CC has.* The world on `mystery-world`, not merged, built from the export of 2026-11-15.
+      Pack concepts hold a kind, a name, a look and whole-sentence slots: no affordances, no grammar, no relations.
+      Action Nodes is built: a node is one action with a time cost, minimum requirements, results, a limit per
+      loop and alternative sets of nodes to be cleared first; the pool is the loop's time. A requirement can only
+      be a minimum, so "only before six" cannot be said. Its core is plain JavaScript with no DOM. Loops is
+      general, and that app's own machinery.
+    - *The user's rulings.* The Archipelago integration first. The simplest version of each project first, then
+      towards the complex ones. The concept library is to be extended with whatever the game needs, with entries
+      for the stories that are integrated. Action Nodes is to be extended so that time is the resource, with
+      actions available only in given ranges of time. At least one new case for the new mechanics. Agreed as
+      recommended: a typed "nobody but these" may let the page conclude by elimination; present-time choices begin
+      as visits on a budget of time, shown in the story panel, each bringing a paper; a reset keeps everything
+      learned, and it counts as evidence; the present does not react to the hour or to choices in the first
+      version. The order after the integration: a checker that says which answers follow with the written rules
+      taken away, present-time choices on a new miniature, then a typed miniature or prose by a model.
+131. **The page's half of the bridge (2026-11-24).** Built as `docs/case-format.md`, "Played in an Archipelago",
+    describes. Measured: The Custom-House Fire's true path plays to the end against the stand-in host
+    (`BRIDGE=1 ANSWERS=evidence CASE=cases/custom-house-fire node scripts/path-check.mjs`: 112 moves, the host
+    with all 25 solved questions checked, 68 seconds), and across two windows the page takes its papers from the
+    framing host and stops at a host of another version.
+    - *Two keys added to `mystery:state`*, agreed with the other session: `game` and `version`. Without `game` a
+      save would be carried from one multiworld into the next and send its solved questions as checks at once.
+    - *The same generated game hosted twice* has the same `game` (the seed's name identifies a generation, not a
+      room). The only sign is a host that lists nothing solved while the save does: the page asks.
+    - *A small client of its own*, not a copy of the web client's adapter: some ninety lines, with no dependency
+      on the other repository, and tested against the message shape that adapter accepts.
+    - *Left, on the other side:* the world rebuilt from today's export (version `d3081189acf2`), the host module,
+      how the web client loads the page, and the merge. Left here: hints that cannot stall a multiworld are as
+      they were (the hint check plays alone).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

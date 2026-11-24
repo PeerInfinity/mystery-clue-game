@@ -1,0 +1,85 @@
+// The page's half of the bridge to an Archipelago (docs/archipelago-plan.md, "The Archipelago side"; docs/case-format.md,
+// "Played in an Archipelago"). The page sits in a frame of the Archipelago-CC web client (`?iframeId=<id>`), and talks
+// to it by that client's adapter protocol (its frontend/modules/shared/communicationProtocol.js): window messages
+// `{type, clientId, iframeId, windowId, timestamp, data}`. Over it go four events of the host's event bus:
+//   page → host   mystery:requestState   {story, version}
+//   page → host   mystery:questionSolved {story, questionId}
+//   host → page   mystery:state          {story, version, game, connected, papers, solved}   (the whole sets, every time)
+//   host → page   mystery:refused        {reason}
+// The page deals only in its own ids (papers, questions); the host turns them into items and locations.
+// Nothing here touches the document: `win` is the page's window and `target` the host's, so a test can pass its own.
+
+const message = (type, id, data) => ({ type, clientId: id, iframeId: id, windowId: id, timestamp: Date.now(), data });
+
+/**
+ * Connect to the host. `onState(state)` and `onRefused(reason)` are called for each event that names this story.
+ * Returns `{solved(questionId), request()}`. The handshake is repeated until the host answers.
+ */
+export function connect({ win, target, id, origin = '*', story, version, onState, onRefused, retry = 1000 }) {
+    let ready = false, timer = null;
+    const post = (type, data) => target.postMessage(message(type, id, data), origin);
+    const publish = (eventName, eventData) => post('PUBLISH_EVENT_BUS', { eventName, eventData });
+    const request = () => publish('mystery:requestState', { story, version });
+    win.addEventListener('message', (e) => {
+        const m = e.data;
+        if (!m || typeof m !== 'object' || (m.clientId ?? m.iframeId ?? m.windowId) !== id) return;
+        if (m.type === 'ADAPTER_READY' && !ready) {
+            ready = true;
+            if (timer) win.clearInterval(timer);
+            for (const eventName of ['mystery:state', 'mystery:refused']) post('SUBSCRIBE_EVENT_BUS', { eventName });
+            post('IFRAME_APP_READY', { timestamp: Date.now() });
+            request();
+        } else if (m.type === 'EVENT_BUS_MESSAGE') {
+            const { eventName, eventData } = m.data ?? {};
+            if (eventData?.story != null && eventData.story !== story) return;
+            if (eventName === 'mystery:state') onState(eventData ?? {});
+            else if (eventName === 'mystery:refused') onRefused(eventData?.reason ?? 'refused');
+        }
+    });
+    const hello = () => post('IFRAME_READY', { clientId: id, iframeId: id, windowId: id, version: '1.0.0', capabilities: ['iframe-base'] });
+    hello();
+    timer = win.setInterval(() => { if (!ready) hello(); }, retry);
+    return { solved: (questionId) => publish('mystery:questionSolved', { story, questionId }), request };
+}
+
+/**
+ * What to do with a state from the host: the papers now held (never fewer than before: an item is not taken back),
+ * and the solved questions to send again because the host does not list them (a check made while not connected).
+ */
+export function reconcile(heldBefore, solvedHere, state) {
+    const held = [...new Set([...heldBefore, ...(state.papers ?? [])])];
+    const fresh = held.filter((p) => !heldBefore.includes(p));
+    const resend = state.connected ? solvedHere.filter((q) => !(state.solved ?? []).includes(q)) : [];
+    return { held, fresh, resend };
+}
+
+/** The case's version as the export has it (scripts/export-rules.mjs): a hash of structure.json, and of the written rules where there are any. */
+export async function caseVersion(structureText, implicationsText = null, subtle = globalThis.crypto.subtle) {
+    const hex = async (s) => [...new Uint8Array(await subtle.digest('SHA-256', new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
+    const v = await hex(structureText);
+    return implicationsText == null ? v : hex(v + implicationsText);
+}
+
+/**
+ * A host for the checks, in the page's own window (`?bridge=stub`): it answers the handshake and the two events as
+ * the real one would, with the papers placed on the questions by `brings` (question id → paper id or null) and those
+ * in hand from the start. `game` names the save. `target`: the page's window, when the host is the window that frames
+ * it (scripts/fixtures/bridge-host.html).
+ */
+export function stubHost({ win, target = win, id, story, version, game, start, brings, onMessage = null }) {
+    const solved = new Set();
+    const post = (type, data) => (typeof target === 'function' ? target() : target).postMessage(message(type, id, data), '*');
+    const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: true, papers: [...start, ...[...solved].map(brings).filter(Boolean)], solved: [...solved] } });
+    win.addEventListener('message', (e) => {
+        const m = e.data;
+        if (!m || m.clientId !== id) return;
+        onMessage?.(m);
+        if (m.type === 'IFRAME_READY') post('ADAPTER_READY', {});
+        if (m.type !== 'PUBLISH_EVENT_BUS') return;
+        const { eventName, eventData } = m.data;
+        if (eventData.story !== story || eventData.version != null && eventData.version !== version) return post('EVENT_BUS_MESSAGE', { eventName: 'mystery:refused', eventData: { story: eventData.story, reason: 'another story or version' } });
+        if (eventName === 'mystery:questionSolved') solved.add(eventData.questionId);
+        state();
+    });
+    return { solved: () => [...solved] };
+}

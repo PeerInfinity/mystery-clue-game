@@ -53,6 +53,8 @@ for (const dir of worlds) {
     const header = JSON.parse(fs.readFileSync(path.join(root, world, 'case.json'), 'utf8'));
     for (const f of fs.readdirSync(path.join(root, world))) if (f.endsWith('.json')) files.add(path.join(world, f));
     files.add(path.normalize(path.join(world, header.story)));
+    // Papers earned: played in an Archipelago the page works out the case's version from its structure (ui/bridge.js).
+    if (header.delivery?.mode === 'earned' && fs.existsSync(path.join(root, dir, 'structure.json'))) files.add(path.join(dir, 'structure.json'));
     // Its case files (sub-stories), each a text of its own.
     for (const f of header.files ?? []) files.add(path.normalize(path.join(world, f.text)));
 }

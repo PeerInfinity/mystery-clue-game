@@ -8,7 +8,10 @@ const DEFAULT = 'cases/miniatures/rent-box';
 export const CASE = (process.env.CASE ?? DEFAULT).replace(/\/+$/, '');
 export const WORLD = path.join(ROOT, CASE, 'world');
 const key = CASE.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
-export const STORE = `${key}-world-v2`;
+// BRIDGE=1: the page as it is played in an Archipelago, against the stand-in host of ui/bridge.js (`?bridge=stub`),
+// whose game is named after the seed; the save is that game's.
+export const BRIDGE = !!process.env.BRIDGE;
+export const STORE = BRIDGE ? `${key}-world-ap-stub-${Number(process.env.SEED ?? 1)}` : `${key}-world-v2`;
 export const AUTOPLAY_STORE = `${key}-world-autoplay-v2`;
 /** The page's address for this case on server `base`, with more parameters (`autoplay=fast`). */
 // The page marks the answers from the evidence by default (since 2026-11-19); a check that does not say plays with
