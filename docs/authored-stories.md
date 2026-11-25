@@ -2044,6 +2044,20 @@ script that found each fact's paragraph from its quote; the data files are the s
       names the harbour office in full (the timeline had "The office").
     - It asked for the Hint, which a blind solver is not given.
 
+136. **The user's rulings on time in Action Nodes (2026-11-25; given in Archipelago-CC and relayed here by its
+    sessions, so at second hand).** The design is `NewDocs/plans/actionnodes-time-design.md` in that repository.
+    - A window counts from the time spent this loop; arriving early waits, and the wait costs time; the start
+      decides whether an action is in its window. An item may lengthen the day, not start it earlier.
+    - Knowledge that gates an action across loops (this page's `needs: {read, solved}`) goes into the first slice
+      built there.
+    - The first timed world there is The Same Monday.
+    - An entry of an earlier loop carries a "loop N" or "day N" tag, as this page has it; grey stays "uncertain".
+    - History, in the user's words: "just a list of which things have been done in at least one previous loop",
+      then, as a next step, for each completed action the actions of the loop where it was first completed, and
+      "a way to indicate, on the action node, whether it has been completed before". This page has the last
+      ("done before, on day N") and keeps every day's visits in the save.
+    - Nothing beyond windows yet for a present that reacts.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
