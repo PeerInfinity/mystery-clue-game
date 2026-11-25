@@ -361,6 +361,25 @@ export function tableRules(data, observations) {
             if (o) out.push({ id: `t.closed.${q.id.replace(/^q\./, '')}.${n}`, q: q.id, from: [...conds.map((k) => ({ solved: k.q })), o.id], says: `${o.says}: nobody else could have done it`, rules_out: open, strength: LIKELY, table: true });
         });
     }
+    // The same for a question of who someone was (2026-11-26; finding 149): a typed act of the one in question that
+    // needs a key ("the figure came out by the side door"), and a true statement that nobody but people among the
+    // answers has that key. Whoever the figure was did that act, so "something else" is ruled out, as likely. From the
+    // observations of the act and of the statement.
+    {
+        const pl = data.places ?? places(data), narrators = new Set((data.narrators ?? []).map((n) => n.id));
+        for (const q of data.questions) {
+            if (q.entry?.attr !== 'identity' || !q.entry.of) continue;
+            const open = (q.possibilities ?? []).filter((p) => p.via === 'always' && !isRight(q, p.value)).map((p) => p.value), answers = new Set(q.possibilities.map((p) => p.value));
+            if (!open.length) continue;
+            for (const a of (data.facts ?? []).filter((f) => f.truth !== false && f.of === q.entry.of && f.attr === 'action' && list(f.act).length && !f.neg)) {
+                const keys = (pointImplications(a, undefined, { ...ctx, places: pl }).entries ?? []).filter((r) => r.role === 'requires' && r.of === a.of && r.key).map((r) => r.key);
+                (data.facts ?? []).filter((f) => f.truth !== false && f.of === '*' && f.neg && f.attr === 'carrying' && keys.includes(f.key) && list(f.every).includes('person') && list(f.but).every((b) => answers.has(b) || narrators.has(b))).forEach((f, n) => {
+                    const oa = obsOf(q.id, a.id), of = obsOf(q.id, f.id);
+                    if (oa && of && !out.some((t) => t.id === `t.closed.${q.id.replace(/^q\./, '')}.${n}`)) out.push({ id: `t.closed.${q.id.replace(/^q\./, '')}.${n}`, q: q.id, from: [...new Set([oa.id, of.id])], says: `${[...new Set([oa, of])].map((o) => o.says).join('; ')}: nobody else could have been the one`, rules_out: open, strength: LIKELY, table: true });
+                });
+            }
+        }
+    }
     return out;
 }
 /** A case's implications with the table's own added (those not already written by hand with the same premise and answer). */

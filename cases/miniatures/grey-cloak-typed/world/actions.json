@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "come_out", "label": "coming out by", "past": "came out by", "requires": [{"of": "$agent", "key": "$via"}], "effects": []}
+  ]
+}

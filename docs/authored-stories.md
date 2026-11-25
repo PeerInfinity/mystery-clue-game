@@ -2388,6 +2388,25 @@ script that found each fact's paragraph from its quote; the data files are the s
       ground", the rain, and the dispenser's reason ("the whole lane knew it for the doctor's").
     - *Checked:* every page check on the 26 miniatures; the long case's export unchanged.
 
+149. **The Grey Cloak's last step: the list closed for a question of who someone was (2026-11-26; the user asked
+    for it first).** Finding 148 left the answer to a written rule, because "nobody but Dr. Mott, Mr. Pell and
+    Kitty had a key of the side door" closes a list only for a deed that needs the key, and the question asks
+    who the figure was.
+    - *Built.* The figure's coming out is a typed act of the case's own that needs a key to the door it came
+      out by ("The figure at the side door came out by the side door of the surgery"). For a question of
+      identity the rule that closes a list (`t.closed`) now takes a typed act of the one in question: whoever
+      the figure was did it, so a true "nobody but these" about its key rules "something else" out, as likely,
+      from the observations of the act and of the statement.
+    - *The typed Grey Cloak now follows whole:* the doctor by where he was, the housemaid by her height,
+      "something else" by the keys, and Mr. Pell by elimination, with the written rules taken away. Over all
+      cases: 13 of 63.
+    - *The true path* gained the link of the figure's coming out, and a trust move for it: the witness's naming
+      of the doctor is ruled out, so nothing else of hers is trusted by its link alone
+      (`scripts/path-trust.mjs` wrote the move).
+    - Not done in the written Grey Cloak, where the coming out is a detail of the figure's whereabouts and not
+      an entry.
+    - *Checked:* every page check on the typed case; `npm test`; the long case's export unchanged.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

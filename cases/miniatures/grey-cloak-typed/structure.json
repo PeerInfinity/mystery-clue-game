@@ -13,7 +13,7 @@
     {"id": "c.lunn", "source": "Mrs. Lunn, who lives opposite the side door, to the narrator on Wednesday", "says": "At nine she saw a figure come out at the side door and go off down the lane; it was the doctor, she says: she knew him by his long grey cloak.", "facts": ["f.figure_door", "f.figure_cloak", "f.figure_is_mott"], "chain": ["f.lunn_tells"], "note": "One fact of the three is false and sincerely meant: her identification."},
     {"id": "c.bedside", "source": "The narrator's own evening", "says": "From eight until ten he sat with the doctor at the Squire's bedside, three miles off.", "facts": ["f.mott_bedside", "f.tull_bedside"]},
     {"id": "c.cloak", "source": "The narrator's own eyes", "says": "The doctor drove out in his greatcoat; his grey cloak was on its peg in the surgery passage on Wednesday, still damp.", "facts": ["f.mott_greatcoat", "f.cloak_peg", "f.cloak_damp", "f.cloak_damp"]},
-    {"id": "c.keys", "source": "The narrator's own knowledge of the household", "says": "Beside the doctor, the dispenser and the housemaid have keys to the side door; the housemaid is hardly five feet tall.", "facts": ["f.keys", "f.pell_role", "f.kitty_small"]},
+    {"id": "c.keys", "source": "The narrator's own knowledge of the household", "says": "Beside the doctor, the dispenser and the housemaid have keys to the side door; the housemaid is hardly five feet tall.", "facts": ["f.keys", "f.figure_out", "f.pell_role", "f.kitty_small"]},
     {"id": "c.lunn_again", "source": "Mrs. Lunn, asked again", "says": "The cloak hung on the figure as on the doctor, well clear of the ground.", "facts": ["f.figure_tall"], "chain": ["f.lunn_tells_again"]}
   ]
 }

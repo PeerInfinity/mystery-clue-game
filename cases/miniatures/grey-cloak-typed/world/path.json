@@ -9,6 +9,8 @@
     {"at": 3, "do": "cross", "q": "q.figure", "pick": "mott", "for_q": ["q.figure"], "why": "Not the doctor."},
     {"at": 4, "do": "link", "entry": "f.mott_greatcoat", "q": "q.figure", "for_q": ["q.figure"], "why": "He wore his greatcoat that night."},
     {"at": 4, "do": "link", "entry": "f.cloak_damp", "q": "q.figure", "see": "was damp", "for_q": ["q.figure"], "why": "And the cloak he left at home was damp in the morning."},
+    {"at": 5, "do": "trust", "on": "f.figure_out", "link": "stmt:f.figure_out", "level": "likely", "gen": "trust", "for_q": ["q.figure"], "why": "Something else from the same source is ruled out, so I do not take this on trust; but nothing speaks against this one, and I hold it likely."},
+    {"at": 5, "do": "link", "entry": "f.figure_out", "q": "q.figure", "for_q": ["q.figure"], "why": "The figure came out by the side door, which wants a key."},
     {"at": 5, "do": "link", "entry": "f.keys", "q": "q.figure", "see": "[Nn]obody but Dr. Mott, Mr. Pell and Kitty", "for_q": ["q.figure"], "why": "Whoever came out at the side door had a key to it."},
     {"at": 5, "do": "trust", "on": "f.figure_tall", "link": "stmt:f.figure_tall", "level": "likely", "gen": "trust", "for_q": ["q.figure"], "why": "Something else from the same source is ruled out, so I do not take this on trust; but nothing speaks against this one, and I hold it likely."},
     {"at": 5, "do": "link", "entry": "f.figure_tall", "q": "q.figure", "for_q": ["q.figure"], "why": "The cloak hung clear of the ground."},

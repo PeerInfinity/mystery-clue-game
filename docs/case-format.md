@@ -691,7 +691,9 @@ that follows from others, shown by itself the moment they all are.
   denies what the deed needs of its doer (a key, or its place through the whole window) to everyone but people who
   are among the question's answers, "something else" is ruled out, and with every other answer ruled out the one
   left is concluded by elimination. It needs an observation of the question that comes from that entry. One it
-  excepts may be a narrator, who is no listed answer (since 2026-11-25). And in a question of two answers besides
+  excepts may be a narrator, who is no listed answer (since 2026-11-25). In a question of who someone was, the deed
+  is a typed act of the one in question ("the figure came out by the side door", an act that needs a key), and the
+  rule rests on the observations of that act and of the statement (since 2026-11-26). And in a question of two answers besides
   "something else" whose typed forms are one state and its denial, a certain rule-out of one concludes the other,
   as for yes and no.
   A role of a question's typed entry may wait on another question's answer: `"via": {"thing": <door>, "if":

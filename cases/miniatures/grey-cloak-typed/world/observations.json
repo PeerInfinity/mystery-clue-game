@@ -4,7 +4,7 @@
     {"id": "o.by_cloak", "q": "q.figure", "from": ["f.figure_cloak"], "says": "at nine o'clock on Tuesday night, the figure at the side door wore the long grey cloak of Dr. Mott", "essential": true},
     {"id": "o.mistake", "q": "q.figure", "from": [{"doubted": "f.lunn_tells"}], "says": "what she saw stands; that it was the doctor was her own conclusion, and it was wrong", "essential": true},
     {"id": "o.cloak_out", "q": "q.figure", "from": ["f.mott_greatcoat", "f.cloak_damp"], "says": "from eight o'clock on Tuesday night until ten o'clock on Tuesday night, Dr. Mott wore the greatcoat of Dr. Mott; on Wednesday morning, the long grey cloak of Dr. Mott was damp", "essential": true},
-    {"id": "o.keys", "q": "q.figure", "from": ["f.keys"], "says": "nobody but Dr. Mott, Mr. Pell and Kitty had a key of the side door", "essential": true},
+    {"id": "o.keys", "q": "q.figure", "from": ["f.figure_out", "f.keys"], "says": "at nine o'clock on Tuesday night, the figure at the side door came out by the side door of the surgery; nobody but Dr. Mott, Mr. Pell and Kitty had a key of the side door", "essential": true},
     {"id": "o.tall", "q": "q.figure", "from": ["f.figure_tall", "f.kitty_small"], "says": "at nine o'clock on Tuesday night, the figure at the side door was tall; Kitty was short", "essential": true}
   ]
 }

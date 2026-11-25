@@ -5,6 +5,7 @@
     {"id": "f.lunn_lives", "of": "lunn", "attr": "lives_at", "value": "lunn_house", "time": {"from": "t.before"}, "para": 2, "quote": "Mrs. Lunn lives at the house opposite the side door of the surgery"},
     {"id": "f.lunn_tells", "of": "lunn", "attr": "tells", "value": "acct.lunn", "to": "tull", "how": "told", "time": {"at": "t.wed"}, "para": 2, "quote": "Mrs. Lunn told me"},
     {"id": "f.figure_door", "of": "figure", "attr": "location", "value": "side_door", "time": {"at": "t.nine"}, "para": 2, "quote": "the figure at the side door was at the side door of the surgery"},
+    {"id": "f.figure_out", "of": "figure", "attr": "action", "act": "come_out", "thing": "side_door", "via": "side_door", "value": "coming out by the side door of the surgery", "time": {"at": "t.nine"}, "para": 2, "quote": "The figure at the side door came out by the side door of the surgery"},
     {"id": "f.figure_cloak", "of": "figure", "attr": "wearing", "value": "cloak", "time": {"at": "t.nine"}, "para": 2, "quote": "The figure at the side door wore the long grey cloak of Dr. Mott"},
     {"id": "f.figure_is_mott", "of": "figure", "attr": "identity", "value": "mott", "known_by": "f.figure_cloak", "time": {"at": "t.nine"}, "truth": false, "q": "q.figure", "pick": "mott", "para": 2, "quote": "The figure at the side door was Dr. Mott"},
     {"id": "f.mott_bedside", "of": "mott", "attr": "location", "value": "hale_house", "time": {"from": "t.eight", "to": "t.ten"}, "para": 3, "quote": "Dr. Mott was at Squire Hale's house"},
