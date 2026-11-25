@@ -2044,7 +2044,14 @@ script that found each fact's paragraph from its quote; the data files are the s
       names the harbour office in full (the timeline had "The office").
     - It asked for the Hint, which a blind solver is not given.
     - *Mended on the user's ruling (2026-11-25):* the day's box is under whatever is being read, the story or a
-      paper; and "Left to try" and the gate's notice name the visits not made yet. To be tried by a second run.
+      paper; and "Left to try" and the gate's notice name the visits not made yet.
+    - *A second run after that (Haiku, the same day): solved, 49 turns, $0.09, never stalled.* It went from
+      scene to scene without returning to the story's tab (office, inn, pilot on the first day), ended the day
+      when "the last visit is unaffordable", and named "the unmade visits" in its own notes. It took another
+      road than the first run (the inn on the first day) and needed three days' worth of visits for it. One
+      oddity: with the watchman needing two hours and one left, it pressed "End the day" three times running,
+      so the watchman was woken on day five; a day ended with nothing done is not remarked on by the page.
+      One run each: it shows the stall is gone, and little more.
 
 136. **The user's rulings on time in Action Nodes (2026-11-25; given in Archipelago-CC and relayed here by its
     sessions, so at second hand).** The design is `NewDocs/plans/actionnodes-time-design.md` in that repository.
