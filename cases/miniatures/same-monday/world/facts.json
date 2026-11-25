@@ -1,7 +1,7 @@
 {
   "facts": [
     {"id": "f.arliss_role", "of": "arliss", "attr": "role", "value": "clerk to the harbour-master at Saltby", "time": {"from": "t.before"}, "para": 1, "quote": "clerk to the harbour-master at Saltby"},
-    {"id": "f.chart_in", "of": "chart", "attr": "location", "value": "office", "detail": "laid in the office drawer by Captain Dunmore", "time": {"at": "t.sun_six"}, "para": 1, "quote": "lay the Admiralty's chart of the new channel in the office drawer"},
+    {"id": "f.chart_in", "of": "chart", "attr": "location", "value": "office", "detail": "laid in the office drawer by Captain Dunmore", "time": {"at": "t.sun_six"}, "para": 1, "quote": "lay the Admiralty's chart of the new channel in the drawer of the harbour office"},
     {"id": "f.door_locked", "of": "office_door", "attr": "door", "value": "locked", "detail": "by Captain Dunmore, as the Marlow coach's horn sounded", "time": {"at": "t.sun_six"}, "para": 1, "quote": "lock the office door behind us both"},
     {"id": "f.chart_gone", "of": "chart", "attr": "location", "value": "office", "neg": true, "detail": "the drawer empty", "time": {"at": "t.mon_nine"}, "para": 1, "quote": "found the drawer empty"},
     {"id": "f.lock_whole", "of": "office_door", "attr": "condition", "value": "locked, and the lock not forced", "time": {"at": "t.mon_nine"}, "para": "office:1", "quote": "the lock was not forced"},

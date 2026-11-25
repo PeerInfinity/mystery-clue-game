@@ -2017,11 +2017,32 @@ script that found each fact's paragraph from its quote; the data files are the s
       page-checks`). The trying player makes each visit once, makes first what another waits for, and ends the
       day when nothing fits (three days, by its order). Where files come by visits the page checks no longer try
       every order of reading them (720 for five files): the order is the path's.
-    - *Seen by eye and mended:* "has" for a key denied to one person now reads "has not"; the line "one more
+    - *Seen by eye and mended:* "has" for a key denied to one person now reads "is without"; the line "one more
       paper may come as the story goes on" no longer counts visits.
     - *Not in this version, as ruled:* the present does not react to the hour or to what was done; no windows of
       time; nothing in an Archipelago (a visit's file is not an earned paper). Not yet done: a blind run, and the
       user's own play.
+
+135. **A blind run of The Same Monday (Haiku, 2026-11-25): solved, 112 turns, $0.22.** Two days, by the road the
+    case was written for: the office, the pilot and the chandler's on the first; the inn and the watchman on the
+    second. The answer right; the pilot crossed out by his key, the Captain by Marlow.
+    - *The mechanism was understood.* It made its first visit at turn 1, read each scene, ended the first day
+      itself once nothing fitted ("Wake again on the same morning"), and on the second day went to the inn, which
+      it had not seen. It never took the day's end for a loss.
+    - *Some 60 of the 112 turns were stalls of one kind: it did not go back to the day.* After reading the office
+      (turns 9 to 29) it re-opened the same paper and the suspects' cards with two hours of the day unspent; after
+      the inn (turns 58 to 99) it did the same with the watchman on offer. On about half of those turns the day's
+      box was not in its view at all: it is drawn under the main story only, and the solver was on a paper's tab.
+      On the rest it was in view and passed over: nothing on the page says that a visit is waiting, as it says
+      of an unread paper. Put to the user.
+    - *A false lead of its own:* the clerk's "from seven" left "six to seven" unaccounted for, and it looked for
+      that hour for forty turns. Nothing in the case speaks of it; the watchman's eight o'clock ended it.
+    - *Noise:* a "who" question offers everyone met, so the landlady, the watchman and the narrator stood as open
+      answers until the end.
+    - *Mended at once (wording only):* a key denied reads "is without a key" (it read "has not a key"); the
+      chandler's is named in the scene there, so the clerk's "in my bed" is not "at a place"; the first paragraph
+      names the harbour office in full (the timeline had "The office").
+    - It asked for the Hint, which a blind solver is not given.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

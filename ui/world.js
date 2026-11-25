@@ -449,7 +449,7 @@ function phrase(f) {
         case 'location': return f.value == null ? `${E}: ${esc(f.detail ?? 'whereabouts unknown')}` : `${E} ${f.neg ? '<b>not</b> at' : 'at'} ${v}${d}`;
         case 'lives_at': return `${E} lives at ${v}${d}`;
         case 'member_of': return `${E} is one of ${v}`;
-        case 'carrying': return `${E} ${f.neg ? 'has <b>not</b>' : 'has'} ${v}${d}`;
+        case 'carrying': return `${E} ${f.neg ? 'is <b>without</b>' : 'has'} ${v}${d}`;
         case 'wearing': return `${E} wears ${v}${d}`;
         case 'owner': return f.neg ? `${E} is <b>not</b> ${v}'s${d}` : `${E} belongs to ${v}${d}`;
         case 'identity': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
