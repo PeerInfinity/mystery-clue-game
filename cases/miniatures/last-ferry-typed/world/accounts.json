@@ -1,0 +1,7 @@
+{
+  "accounts": [
+    {"id": "acct.crane", "label": "What Josiah Crane sees and hears himself", "origin": "crane", "how": "saw", "facts": ["f.crane_role", "f.cup_set", "f.shelf_bare", "f.lock_unforced", "f.bell_role", "f.bell_leaves", "f.bell_sack", "f.lamp_unlit", "f.reed_role", "f.reed_tells", "f.bell_lives", "f.only_boat", "f.hobb_tells", "f.two_keys", "f.key_pocket", "f.amos_owns", "f.amos_when"]},
+    {"id": "acct.reed", "label": "What Tam Reed saw when he lit the gate lamp", "origin": "reed", "how": "saw", "facts": ["f.cup_seen", "f.amos_at_door", "f.amos_locks"]},
+    {"id": "acct.hobb", "label": "Old Hobb's last crossing on Sunday", "origin": "hobb", "how": "saw", "facts": ["f.bell_on_ferry", "f.bell_mid", "f.bell_lands", "f.boat_lies"]}
+  ]
+}

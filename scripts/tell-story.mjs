@@ -33,8 +33,10 @@ export function tell(dir, opts = {}) {
     const speakerOf = (id) => { const a = accounts.find((x) => x.facts.includes(id)); return a && a.origin !== N ? a.origin : null; };
     // How a sentence at a time begins: "On Monday, ", "At six o'clock on Sunday, " (`prep` on the time point), a
     // stretch "From … until …, " (a deed: "Between … and …, "); a state that held from before the story has none.
-    const first = times[0]?.id, lab = (id) => T.get(id).label;
-    const prefix = (t, deed = false) => (!t ? '' : t.at ? `${T.get(t.at).prep ?? 'On'} ${lab(t.at)}, ` : t.from && t.from !== first && t.to ? (deed ? `Between ${lab(t.from)} and ${lab(t.to)}, ` : `From ${lab(t.from)} until ${lab(t.to)}, `) : t.from && t.from !== first ? `From ${lab(t.from)}, ` : '');
+    // A time that is an event (`clause: true`: "the gate lamp was lit") is told "When …", and a stretch from it "From when …".
+    const first = times[0]?.id, lab = (id) => T.get(id).label, from = (id) => `${T.get(id).clause ? 'when ' : ''}${lab(id)}`;
+    const at = (id) => { const p = T.get(id).prep ?? (T.get(id).clause ? 'When' : 'On'); return p ? `${p} ${lab(id)}` : cap(lab(id)); };
+    const prefix = (t, deed = false) => (!t ? '' : t.at ? `${at(t.at)}, ` : t.from && t.from !== first && t.to ? (deed ? `Between ${from(t.from)} and ${from(t.to)}, ` : `From ${from(t.from)} until ${lab(t.to)}, `) : t.from && t.from !== first ? `From ${from(t.from)}, ` : '');
     for (const x of times) { delete x.para; delete x.quote; }
     const stop = (s) => (s.endsWith('"') ? s : `${s}.`);   // a sentence that ends in someone's words has its stop inside them
     const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
@@ -50,7 +52,7 @@ export function tell(dir, opts = {}) {
             let last = null, speech = null, pending = null;
             const timed = (time, deed, lastKey) => {
                 const key = time ? J(time) : null, pre = key && key !== lastKey ? prefix(time, deed) : '';
-                if (pre) for (const id of [time.at, time.from, time.to].filter((x) => x && x !== first)) { const tp = T.get(id); if (tp.para == null) { tp.para = ref; tp.quote = tp.label; } }
+                if (pre) for (const id of [time.at, time.from, time.to].filter((x) => x && x !== first)) { const tp = T.get(id); if (tp.para == null) { tp.para = ref; tp.quote = pre.includes(tp.label) ? tp.label : cap(tp.label); } }   // the label as it stands in the text
                 return { key: key ?? lastKey, pre };
             };
             const close = () => {
@@ -91,7 +93,7 @@ export function tell(dir, opts = {}) {
                         if (f.attr === 'says') f.value = third.said(f);
                         f.quote = plain(f.time, s, f.id);
                     }
-                } else if (item.deed) { const q = Q.get(item.deed); plain(q.entry.time, mainT.deed(q), `deed:${q.id}`, true); }
+                } else if (item.deed) { const q = Q.get(item.deed); plain(item.untimed ? null : q.entry.time, mainT.deed(q), `deed:${q.id}`, true); }   // `untimed`: where the deed's time is itself a question
                 else if (item.raise) { const q = Q.get(item.raise); close(); q.raised = ref; q.quote = q.label; out.push(q.label); told.push({ key: `raise:${q.id}`, text: q.label, full: q.label }); }
                 else if (item.day) { close(); const s = `I have ${units(header.delivery.day)} today, and more to do than they will hold. When they are spent I wake again on this same morning, with the day before me as it was. What I have learned I keep.`; out.push(s); told.push({ key: 'day', text: s, full: s }); }
             }
@@ -128,10 +130,12 @@ export function tell(dir, opts = {}) {
     // An answer is available where the story first names it (as an entry's subject, its value or whom it is done
     // to), by the entry that does: in the main story if it names it there, else in the first file that does. The
     // give-away is the entry that asserts the answer.
-    const inMain = (f) => typeof f.para === 'number', names = (f, id) => f.of === id || f.value === id || f.to === id;
+    const inMain = (f) => typeof f.para === 'number', names = (f, id) => f.of === id || f.value === id || f.to === id || list(f.but).includes(id);
     for (const q of questions) {
         for (const p of q.possibilities) {
             if (p.via === 'always') { p.available = q.raised; continue; }
+            // An answer that is no entity and stands in the question's own words ("before the gate lamp was lit") is there when the question is asked.
+            if (!E.has(p.value) && q.label.includes(p.value)) { delete p.from; p.available = q.raised; p.quote = p.value; continue; }
             const mine = facts.filter((f) => f.para != null && names(f, p.value) && f.attr !== 'tells' && !list(f.asserts).some((x) => x.q === q.id));   // not the give-away itself
             const f = mine.filter((x) => inMain(x) && x.para >= q.raised).sort((a, b) => a.para - b.para)[0] ?? mine.filter((x) => !inMain(x))[0] ?? mine[0];
             if (!f) continue;

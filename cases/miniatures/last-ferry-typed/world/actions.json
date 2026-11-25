@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "lock_up", "label": "locking", "past": "locked", "requires": [], "effects": []}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "facts": [
+    {"id": "f.crane_role", "of": "crane", "attr": "role", "value": "vicar of St. Olave's", "time": {"from": "t.before"}, "para": 1, "quote": "I am Josiah Crane, vicar of St. Olave's"},
+    {"id": "f.cup_set", "of": "cup", "attr": "location", "value": "vestry", "time": {"at": "t.evensong"}, "para": 1, "quote": "the christening cup was at the vestry"},
+    {"id": "f.shelf_bare", "of": "cup", "attr": "location", "value": "vestry", "neg": true, "time": {"at": "t.nine"}, "para": 1, "quote": "the christening cup was not at the vestry"},
+    {"id": "f.lock_unforced", "of": "vestry_door", "attr": "condition", "value": "locked, with its lock not forced", "time": {"at": "t.nine"}, "para": 1, "quote": "The vestry door was locked, with its lock not forced"},
+    {"id": "f.bell_role", "of": "bell", "attr": "role", "value": "the carter", "time": {"from": "t.before"}, "para": 2, "quote": "Silas Bell is the carter"},
+    {"id": "f.bell_leaves", "of": "bell", "attr": "location", "value": "lych_gate", "time": {"at": "t.evensong"}, "para": 2, "quote": "Silas Bell was at the lych-gate"},
+    {"id": "f.bell_sack", "of": "bell", "attr": "carrying", "value": "sack", "time": {"at": "t.evensong"}, "para": 2, "quote": "Silas Bell had a sack"},
+    {"id": "f.lamp_unlit", "of": "gate_lamp", "attr": "condition", "value": "not yet lit", "time": {"at": "t.evensong"}, "para": 2, "quote": "The gate lamp was not yet lit"},
+    {"id": "f.reed_role", "of": "reed", "attr": "role", "value": "the lighter of the gate lamp", "time": {"from": "t.before"}, "para": 3, "quote": "Tam Reed is the lighter of the gate lamp"},
+    {"id": "f.reed_tells", "of": "reed", "attr": "tells", "value": "acct.reed", "to": "crane", "how": "told", "time": {"at": "t.night"}, "para": 3, "quote": "Tam Reed told me"},
+    {"id": "f.cup_seen", "of": "cup", "attr": "location", "value": "vestry", "time": {"at": "t.lamp"}, "para": 3, "quote": "the christening cup was at the vestry"},
+    {"id": "f.amos_at_door", "of": "amos", "attr": "location", "value": "vestry", "time": {"at": "t.lamp"}, "para": 3, "quote": "Amos Dunn was at the vestry"},
+    {"id": "f.amos_locks", "of": "amos", "attr": "action", "act": "lock_up", "thing": "vestry_door", "value": "locking the vestry door", "time": {"at": "t.lamp"}, "para": 3, "quote": "Amos Dunn locked the vestry door"},
+    {"id": "f.bell_lives", "of": "bell", "attr": "lives_at", "value": "far_bank", "time": {"from": "t.before"}, "para": 4, "quote": "Silas Bell lives at the far bank"},
+    {"id": "f.only_boat", "of": "ferry", "attr": "condition", "value": "the only boat on the water", "time": {"from": "t.before"}, "para": 4, "quote": "The ferry was the only boat on the water"},
+    {"id": "f.hobb_tells", "of": "hobb", "attr": "tells", "value": "acct.hobb", "to": "crane", "how": "told", "time": {"at": "t.monday"}, "para": 4, "quote": "Old Hobb told me"},
+    {"id": "f.bell_on_ferry", "of": "bell", "attr": "location", "value": "ferry", "time": {"from": "t.cast_off", "to": "t.eight"}, "para": 4, "quote": "Silas Bell was at the ferry"},
+    {"id": "f.bell_mid", "of": "bell", "attr": "location", "value": "ferry", "time": {"at": "t.lamp"}, "para": 4, "quote": "Silas Bell was at the ferry"},
+    {"id": "f.bell_lands", "of": "bell", "attr": "location", "value": "far_bank", "time": {"from": "t.eight", "to": "t.monday"}, "para": 4, "quote": "Silas Bell was at the far bank"},
+    {"id": "f.boat_lies", "of": "ferry", "attr": "condition", "value": "moored at the far bank", "time": {"from": "t.eight", "to": "t.monday"}, "para": 4, "quote": "The ferry was moored at the far bank"},
+    {"id": "f.two_keys", "of": "*", "every": "person", "but": ["crane", "amos"], "attr": "carrying", "value": "a key of the vestry door", "key": "vestry_door", "neg": true, "time": {"from": "t.before"}, "para": 5, "quote": "Nobody but me and Amos Dunn had a key of the vestry door"},
+    {"id": "f.key_pocket", "of": "crane", "attr": "carrying", "value": "crane_key", "time": {"from": "t.evensong", "to": "t.nine"}, "para": 5, "quote": "I had the first key of the vestry door"},
+    {"id": "f.amos_owns", "of": "amos", "attr": "says", "to": "crane", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "amos"}], "para": 6, "value": "owns to the take_locked the christening cup", "quote": "Amos Dunn said to me: \"It was I who took the christening cup from the vestry.\""},
+    {"id": "f.amos_when", "of": "amos", "attr": "says", "to": "crane", "time": {"at": "t.later"}, "asserts": [{"q": "q.when", "pick": "after the gate lamp was lit"}], "para": 6, "value": "says it was after the gate lamp was lit", "quote": "Amos Dunn said to me: \"It was after the gate lamp was lit.\""}
+  ]
+}

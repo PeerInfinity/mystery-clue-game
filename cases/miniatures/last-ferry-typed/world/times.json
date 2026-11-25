@@ -1,0 +1,13 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.evensong", "label": "after evensong on Sunday", "prep": "", "after": "t.before", "para": 1, "quote": "After evensong on Sunday"},
+    {"id": "t.cast_off", "label": "the ferry cast off on Sunday", "clause": true, "after": "t.evensong", "para": 4, "quote": "the ferry cast off on Sunday"},
+    {"id": "t.lamp", "label": "the gate lamp was lit", "clause": true, "after": "t.cast_off", "para": 3, "quote": "the gate lamp was lit"},
+    {"id": "t.eight", "label": "eight o'clock on Sunday", "prep": "At", "after": "t.lamp", "para": 4, "quote": "eight o'clock on Sunday"},
+    {"id": "t.nine", "label": "nine o'clock on Sunday", "prep": "At", "after": "t.eight", "para": 1, "quote": "nine o'clock on Sunday"},
+    {"id": "t.night", "label": "Sunday night", "after": "t.nine"},
+    {"id": "t.monday", "label": "Monday morning", "after": "t.night", "para": 4, "quote": "Monday morning"},
+    {"id": "t.later", "label": "Monday, later", "after": "t.monday", "para": 6, "quote": "Monday, later"}
+  ]
+}

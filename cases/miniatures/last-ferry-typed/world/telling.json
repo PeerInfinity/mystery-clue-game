@@ -1,0 +1,11 @@
+{
+  "title": "THE LAST FERRY, TOLD FROM ITS DATA",
+  "paragraphs": [
+    ["f.crane_role", "f.cup_set", "f.shelf_bare", "f.lock_unforced", {"deed": "q.who", "untimed": true}, {"raise": "q.who"}],
+    ["f.bell_role", "f.bell_leaves", "f.bell_sack", "f.lamp_unlit", {"raise": "q.when"}],
+    ["f.reed_role", "f.reed_tells", "f.cup_seen", "f.amos_at_door", "f.amos_locks"],
+    ["f.bell_lives", "f.only_boat", "f.hobb_tells", "f.bell_on_ferry", "f.bell_mid", "f.bell_lands", "f.boat_lies"],
+    ["f.two_keys", "f.key_pocket"],
+    ["f.amos_owns", "f.amos_when"]
+  ]
+}

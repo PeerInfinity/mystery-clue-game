@@ -1,0 +1,19 @@
+{
+ "entities": {
+  "crane": ["Josiah Crane"],
+  "bell": ["Silas Bell"],
+  "reed": ["Tam Reed"],
+  "amos": ["Amos Dunn"],
+  "hobb": ["Old Hobb"],
+  "church": ["St. Olave's"],
+  "vestry": ["the vestry"],
+  "lych_gate": ["the lych-gate"],
+  "ferry": ["the ferry"],
+  "far_bank": ["the far bank"],
+  "cup": ["the christening cup"],
+  "sack": ["a sack"],
+  "gate_lamp": ["the gate lamp"],
+  "vestry_door": ["the vestry door"],
+  "crane_key": ["the first key of the vestry door"]
+ }
+}

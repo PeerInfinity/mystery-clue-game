@@ -9,6 +9,8 @@ const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 export const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 /** The past forms of the engine's own acts (engine/actions.js), for a deed told. */
 export const PAST = { take: 'took', take_locked: 'took', give: 'gave', make: 'made', hide: 'hid', open: 'opened', lock: 'locked', unlock: 'unlocked' };
+/** The names of several, as a list: "A", "A and B", "A, B and C". */
+const listed = (xs, and = 'and') => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${and} ${xs.at(-1)}`);
 
 /**
  * `ctx`: {speaker (who is "I"), listener (who is "you", or null), name(id), act(id): {label, past}, question(id)}.
@@ -18,11 +20,14 @@ export const PAST = { take: 'took', take_locked: 'took', give: 'gave', make: 'ma
 export function teller(ctx) {
     const me = (id) => id === ctx.speaker, you = (id) => ctx.listener != null && id === ctx.listener;
     const subj = (id) => (me(id) ? 'I' : you(id) ? 'you' : ctx.name(id));
+    // A statement about everyone (`of: "*"`, `but`): "nobody but A and B" for a denial, "everyone but …" otherwise; told without its own "not".
+    const everyone = (x) => `${x.neg ? 'nobody' : 'everyone'}${list(x.but).length ? ` but ${listed(list(x.but).map(obj))}` : ''}`;
     const obj = (id) => (me(id) ? 'me' : you(id) ? 'you' : ctx.name(id));
     // In a speaker's own words what is theirs by name is "my" ("Abel Crouch's marrow", said by Abel Crouch).
     const mine = (who, s) => s.split(`${ctx.name(who)}'s `).join('my ');
     const past = (a) => ctx.act(list(a.act)[0])?.past ?? PAST[list(a.act)[0]] ?? `did the ${ctx.act(list(a.act)[0])?.label ?? list(a.act)[0]} of`;
     const state = (x, be = 'was') => {
+        if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} at ${ctx.name(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : `${who} ${be} ${x.value}`; }
         const not = x.neg ? ' not' : '';
         if (x.attr === 'location') return `${subj(x.of)} ${be}${not} at ${ctx.name(x.value)}`;
         if (x.attr === 'lives_at') return `${subj(x.of)} ${me(x.of) ? 'live' : 'lives'} at ${ctx.name(x.value)}`;   // a standing state, as a role is
@@ -38,6 +43,8 @@ export function teller(ctx) {
         if (f.goal) return `wants ${want(f.goal)}`;
         const o = owns(f);
         if (o) { const e = ctx.question(o.q).entry; return `owns to ${ctx.act(list(e.act)[0])?.label ?? `the ${list(e.act)[0]}`} ${ctx.name(e.thing ?? e.item)}`; }
+        const a = list(f.asserts).find((x) => x.q && x.pick != null);
+        if (a) return `says it was ${a.pick}`;
         return f.value;
     }
     function sentence(f) {
@@ -48,6 +55,9 @@ export function teller(ctx) {
             if (f.goal) return `${subj(f.of)} said${to}: "I want ${mine(f.of, want(f.goal))}."`;
             const o = owns(f);
             if (o) { const e = ctx.question(o.q).entry; return `${subj(f.of)} said${to}: "It was I who ${mine(f.of, done(e, '').trim())}."`; }
+            // An answer that is not a person, asserted: "It was after the gate lamp was lit."
+            const a = list(f.asserts).find((x) => x.q && x.pick != null);
+            if (a) return `${subj(f.of)} said${to}: "It was ${a.pick}."`;
             return `${subj(f.of)} said${to}: "${f.value}."`;
         } else if (f.attr === 'action' && list(f.act).length) s = done(f, subj(f.of));
         else s = state(f) + list(f.gives).map((g) => `; by that ${obj(g.to)} gained ${g.what}`).join('');

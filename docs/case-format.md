@@ -85,7 +85,12 @@ fact's id, `{deed: <question>}` (the deed the question asks about, its doer unkn
 label) or `{day: true}` (the day and its beginning again, from `delivery.day`). A fact of an account that is not
 the narrator's is told as what its witness says, in the witness's first person (`Mrs. Pask told me: "…"`); the
 `tells` entry listed before it is the telling, and its quote the words that open the speech. A time point may have
-`prep` ("At"; default "On"), the word its label follows; a stretch is told "From … until …". `node scripts/tell-story.mjs <dir>`
+`prep` ("At"; default "On"; "" for a label that stands by itself, "after evensong on Sunday"), the word its label
+follows, or `clause: true` for a time that is an event ("the gate lamp was lit": told "When …", a stretch from it
+"From when …"); a stretch is told "From … until …". A statement about everyone is "Nobody but A and B …". A `says`
+that asserts an answer which is no person is "It was <the answer>." `{deed: <question>, untimed: true}` tells the
+deed without its time, where the time is itself a question. An answer that is no entity and stands in its
+question's label is available where the question is raised. `node scripts/tell-story.mjs <dir>`
 then writes the story's text, one sentence an entry by the templates of `engine/tell.js`, and into the data what
 follows from the text: each fact's `para` and `quote` (the quote is the sentence), a `says` entry's `value`, each
 time's `para` and `quote`, each question's `raised`, `quote`, its answers' `available` and `quote` and its

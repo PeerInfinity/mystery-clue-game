@@ -121,6 +121,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
+| `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/same-monday-typed` | The Same Monday told from its data: the story and its five scenes made by a script, witnesses' accounts as their speech (finding 139). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs, 22 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/same-monday` | Visits in the present: five places to go, a day of three hours, and the same morning beginning again with everything learned kept (finding 134). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs (main story, five visits), 19 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
@@ -2221,6 +2222,33 @@ script that found each fact's paragraph from its quote; the data files are the s
       to begin with; reading a case is free from a menu at any time, answering only in that region; what
       depends on time is Action Nodes' to handle; the page will need a read-only mode. Nothing of it is asked
       yet.
+
+142. **The missing forms, one miniature at a time: The Last Ferry told from its data (2026-11-25).** The first
+    of the forms finding 139 listed as untold. The case is `cases/miniatures/last-ferry-typed`, the same logic,
+    the same true path, two questions.
+    - *What the templates gained.* A statement about everyone ("Nobody but me and Amos Dunn had a key of the
+      vestry door"). A time that is an event and not a clock time (`clause`: "When the gate lamp was lit, the
+      christening cup was at the vestry"; "From when the ferry cast off on Sunday until eight o'clock on Sunday,
+      Silas Bell was at the ferry"). A question whose answers are no entities, offered in its own words ("Was the
+      christening cup taken before the gate lamp was lit, or after the gate lamp was lit?"), and a confession of
+      such an answer ("It was after the gate lamp was lit."). A deed told without its time, where the time is
+      the other question.
+    - *It held:* 187 words against 291; it validates, and the true path, the autoplay, the hints and the trying
+      player play it through. The engine derives what it derived for the written case.
+    - *What typing it showed about this case.* That the ferry was in mid-river when the lamp was lit was a
+      sentence of the boatman's; the typed case says it twice, as the stretch he was aboard and as where he was
+      at that moment, and the order of the two events is otherwise only the order of the time points. "Went out
+      at the lych-gate with a sack over his shoulder" became a place and a thing carried. The quarrel over the
+      pew rents, the spectacles, the coke in the boiler-house and the pawning went: none of them typed, none of
+      them logic the page checks; the quarrel is the suspect's motive and would be a `tie`.
+    - *What the checker says of it* (`typed-check.mjs -v`): both answers would follow by elimination if their
+      lists were closed, and neither is. "When" has "something else" beside its two answers though they are
+      each other's denial. "Who" has a "nobody but" that excepts the narrator, who is no listed answer, so
+      `t.closed` does not take it (finding 133). Both are candidates for the next typing step, and both are
+      rulings for the user: whether a question of two answers that deny each other needs "something else", and
+      whether a narrator excepted by "nobody but" counts as accounted for.
+    - *Still untold:* a clock that is wrong, a paper's own properties, a reasoning move's entry, a room, two
+      narrators.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

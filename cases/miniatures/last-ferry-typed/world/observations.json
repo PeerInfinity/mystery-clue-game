@@ -1,0 +1,13 @@
+{
+  "observations": [
+    {"id": "o.when_seen", "q": "q.when", "from": ["f.cup_seen"], "says": "when the gate lamp was lit, the christening cup was at the vestry", "essential": true, "against": ["before the gate lamp was lit"]},
+    {"id": "o.when_unlit", "q": "q.when", "from": ["f.lamp_unlit"], "says": "after evensong on Sunday, the gate lamp was not yet lit"},
+    {"id": "o.who_seen", "q": "q.who", "from": ["f.cup_seen"], "says": "when the gate lamp was lit, the christening cup was at the vestry", "essential": true},
+    {"id": "o.who_aboard", "q": "q.who", "from": ["f.bell_on_ferry"], "says": "from when the ferry cast off on Sunday until eight o'clock on Sunday, Silas Bell was at the ferry", "essential": true, "against": ["bell"]},
+    {"id": "o.who_no_boat", "q": "q.who", "from": ["f.boat_lies"], "says": "from eight o'clock on Sunday until Monday morning, the ferry was moored at the far bank", "essential": true, "against": ["bell"]},
+    {"id": "o.who_locked", "q": "q.who", "from": ["f.amos_locks", "f.lock_unforced"], "says": "when the gate lamp was lit, Amos Dunn locked the vestry door; at nine o'clock on Sunday, the vestry door was locked, with its lock not forced", "essential": true},
+    {"id": "o.who_keys", "q": "q.who", "from": ["f.two_keys"], "says": "nobody but Josiah Crane and Amos Dunn had a key of the vestry door", "essential": true},
+    {"id": "o.who_only_boat", "q": "q.who", "from": ["f.only_boat"], "says": "the ferry was the only boat on the water"},
+    {"id": "o.who_sack", "q": "q.who", "from": ["f.bell_leaves"], "says": "after evensong on Sunday, Silas Bell was at the lych-gate"}
+  ]
+}

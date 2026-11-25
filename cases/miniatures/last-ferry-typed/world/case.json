@@ -1,0 +1,18 @@
+{
+  "id": "last_ferry_typed",
+  "title": "The Last Ferry, told from its data",
+  "author": "written for this project (a mechanic miniature: The Last Ferry, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "crane",
+      "name": "Josiah Crane",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Josiah Crane's timeline",
+  "source": {
+    "written": "2026-11-25",
+    "word_count": 330
+  }
+}
