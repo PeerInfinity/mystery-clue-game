@@ -1,0 +1,12 @@
+{
+  "title": "THE PRIZE MARROW, WRITTEN FROM ITS DATA",
+  "style": "an English village in the 1890s, told by a careful, dry-humoured woman in plain words; short sentences; nothing flowery.",
+  "paragraphs": [
+    ["f.vane_role", "f.marrow_cup", {"deed": "q.who"}, "f.marrow_off", {"raise": "q.who"}],
+    ["f.shed_open", "f.abel_there", "f.martha_there", "f.pask_there", "f.pask_second", "f.pask_wins"],
+    ["f.pask_wants"],
+    ["f.martha_wants"],
+    ["f.abel_wants"],
+    ["f.abel_owns"]
+  ]
+}

@@ -89,6 +89,15 @@ give-away, each observation's `says` (its entries' sentences), and `mentions.jso
 written by hand; `npm test` holds the files to the script. A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 
+**Prose written from the telling** (since 2026-11-25; finding 138). `world/prose.json`, made by
+`node scripts/prose-story.mjs <dir>` (a model's work, kept as it was given; it costs money): `{model, written,
+paragraphs: [{text, quotes: {<fact id> | "deed:<q>" | "raise:<q>": <words of the text>}}], mentions: {entity:
+[forms of its name used]}, times: {time: <the words that first tell it>}, audit: {model, statements, missing,
+changed, additions}}`. Where a case has it, `tell-story.mjs` takes the story's text and each entry's quote from
+it (a quote must be in its paragraph), keeps the templates' sentences as what the observations say, and lists as
+mentions only the forms that have a word of the entity's own name. `telling.json` may have `style`, one line for the
+writer. `--audit` runs the audit alone on the prose a case has.
+
 **Visits in the present** (since 2026-11-24; `docs/authored-stories.md`, finding 134). A file may have
 `visit: {label, cost?, after?, needs?}`: its scene comes by going there, not by a paragraph. `delivery.day` is the
 length of the day and `delivery.unit` its unit's name (default `hour`); `cost` (default 1) is what the visit takes of

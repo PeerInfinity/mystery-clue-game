@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who spoiled Abel Crouch's marrow?", "entry": {"of": "?", "attr": "action", "act": "spoil", "thing": "marrow", "where": "shed", "value": "spoiling the marrow", "time": {"at": "t.fri_dark"}}, "possibilities": [{"value": "something else", "via": "always", "available": 1},{"value": "abel", "via": "direct", "available": 2, "quote": "After dark on the Friday, Abel was at the allotments."},{"value": "martha", "via": "direct", "available": 2, "quote": "Martha Crouch was there too."},{"value": "pask", "via": "direct", "available": 2, "quote": "Pask was there as well."}], "answer": "abel", "answer_inferable_at": 5, "answer_from": "f.abel_wants", "raised": 1, "quote": "Who spoiled Abel's marrow?", "answer_given_at": 6, "answer_given_quote": "On the Sunday Abel said to me, \"It was I who spoiled my marrow at my shed.\""}
+  ]
+}

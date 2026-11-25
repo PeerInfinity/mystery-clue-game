@@ -1,0 +1,12 @@
+{
+  "description": "The true path of The Prize Marrow written from its data by a model (the same moves): a thing spoiled, three who could have done it, and what each had said they wanted; the deed brought about what only one of them wanted, and it is not the one who took the cup by it.",
+  "moves": [
+    {"at": 5, "do": "link", "entry": "f.marrow_off", "q": "q.who", "see": "kept off the show bench", "for_q": ["q.who"], "why": "What the spoiling did was to keep it off the bench."},
+    {"at": 5, "do": "link", "entry": "f.pask_wants", "q": "q.who", "see": "the winner over", "for_q": ["q.who"], "why": "Pask wanted to beat it on the bench, and that he cannot do now."},
+    {"at": 5, "do": "cross", "q": "q.who", "pick": "pask", "for_q": ["q.who"], "why": "The cup came to him the one way he said he would not have it."},
+    {"at": 5, "do": "link", "entry": "f.martha_wants", "q": "q.who", "see": "winner this year", "for_q": ["q.who"], "why": "Martha wanted Abel to win once more."},
+    {"at": 5, "do": "cross", "q": "q.who", "pick": "martha", "for_q": ["q.who"], "why": "A spoiled marrow wins nothing."},
+    {"at": 5, "do": "link", "entry": "f.abel_wants", "q": "q.who", "see": "kept off the show bench", "for_q": ["q.who"], "why": "Abel said that very morning that he wanted it kept off the bench."},
+    {"at": 5, "do": "circle", "q": "q.who", "pick": "abel", "for_q": ["q.who"], "why": "He would sooner have no marrow than a second-best one."}
+  ]
+}

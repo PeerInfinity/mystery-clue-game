@@ -1,0 +1,13 @@
+{
+  "entities": [
+    {"id": "vane", "kind": "person", "name": "Hester Vane"},
+    {"id": "abel", "kind": "person", "name": "Abel Crouch"},
+    {"id": "martha", "kind": "person", "name": "Martha Crouch"},
+    {"id": "pask", "kind": "person", "name": "George Pask"},
+    {"id": "allotments", "kind": "place", "name": "the allotments"},
+    {"id": "shed", "kind": "place", "name": "Abel Crouch's shed", "within": "allotments"},
+    {"id": "marrow", "kind": "object", "name": "Abel Crouch's marrow"},
+    {"id": "pask_marrow", "kind": "object", "name": "George Pask's marrow"},
+    {"id": "cup", "kind": "object", "name": "the cup"}
+  ]
+}

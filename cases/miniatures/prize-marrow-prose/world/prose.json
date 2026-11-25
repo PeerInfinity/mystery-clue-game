@@ -1,0 +1,104 @@
+{
+ "model": "sonnet",
+ "written": "2026-11-25",
+ "paragraphs": [
+  {
+   "text": "I am Hester Vane, secretary of the flower show at Combe Regis. Abel Crouch's marrow had won the cup three years running. After dark on the Friday, somebody spoiled it at his shed. On the Saturday it was kept off the show bench, and George Pask gained the cup by that. Who spoiled Abel's marrow?",
+   "quotes": {
+    "f.vane_role": "I am Hester Vane, secretary of the flower show at Combe Regis.",
+    "f.marrow_cup": "Abel Crouch's marrow had won the cup three years running.",
+    "deed:q.who": "After dark on the Friday, somebody spoiled it at his shed.",
+    "f.marrow_off": "On the Saturday it was kept off the show bench, and George Pask gained the cup by that.",
+    "raise:q.who": "Who spoiled Abel's marrow?"
+   }
+  },
+  {
+   "text": "Abel's shed had no lock. After dark on the Friday, Abel was at the allotments. Martha Crouch was there too. Pask was there as well. His marrow had come second to Abel's three years running. On the Saturday it won the cup.",
+   "quotes": {
+    "f.shed_open": "Abel's shed had no lock.",
+    "f.abel_there": "After dark on the Friday, Abel was at the allotments.",
+    "f.martha_there": "Martha Crouch was there too.",
+    "f.pask_there": "Pask was there as well.",
+    "f.pask_second": "His marrow had come second to Abel's three years running.",
+    "f.pask_wins": "On the Saturday it won the cup."
+   }
+  },
+  {
+   "text": "On the Monday Pask said to me, \"I want my marrow to beat Abel's on the bench, and for that Abel's marrow must not be kept off the show bench.\"",
+   "quotes": {
+    "f.pask_wants": "On the Monday Pask said to me, \"I want my marrow to beat Abel's on the bench, and for that Abel's marrow must not be kept off the show bench.\""
+   }
+  },
+  {
+   "text": "On the Wednesday Mrs. Crouch said to me, \"I want Abel's marrow to win the cup this year, and for that it must not be kept off the show bench.\"",
+   "quotes": {
+    "f.martha_wants": "On the Wednesday Mrs. Crouch said to me, \"I want Abel's marrow to win the cup this year, and for that it must not be kept off the show bench.\""
+   }
+  },
+  {
+   "text": "On Friday morning Abel said to me, and plainly, \"I want my marrow to be kept off the show bench.\"",
+   "quotes": {
+    "f.abel_wants": "On Friday morning Abel said to me, and plainly, \"I want my marrow to be kept off the show bench.\""
+   }
+  },
+  {
+   "text": "On the Sunday Abel said to me, \"It was I who spoiled my marrow at my shed.\"",
+   "quotes": {
+    "f.abel_owns": "On the Sunday Abel said to me, \"It was I who spoiled my marrow at my shed.\""
+   }
+  }
+ ],
+ "mentions": {
+  "vane": [
+   "Hester Vane"
+  ],
+  "abel": [
+   "Abel Crouch",
+   "Abel"
+  ],
+  "martha": [
+   "Martha Crouch",
+   "Mrs. Crouch"
+  ],
+  "pask": [
+   "George Pask",
+   "Pask"
+  ],
+  "allotments": [
+   "the allotments"
+  ],
+  "shed": [
+   "his shed",
+   "Abel's shed",
+   "my shed"
+  ],
+  "marrow": [
+   "Abel Crouch's marrow",
+   "Abel's marrow",
+   "it",
+   "my marrow"
+  ],
+  "pask_marrow": [
+   "His marrow",
+   "my marrow"
+  ],
+  "cup": [
+   "the cup"
+  ]
+ },
+ "times": {
+  "t.monday": "On the Monday",
+  "t.wednesday": "On the Wednesday",
+  "t.fri_morning": "On Friday morning",
+  "t.fri_dark": "After dark on the Friday",
+  "t.saturday": "On the Saturday",
+  "t.sunday": "On the Sunday"
+ },
+ "audit": {
+  "model": "sonnet",
+  "statements": 19,
+  "missing": [],
+  "changed": [],
+  "additions": []
+ }
+}

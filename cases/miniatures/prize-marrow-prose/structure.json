@@ -1,0 +1,18 @@
+{
+  "story": "prize-marrow-prose",
+  "mechanic": "A stated want: something is spoiled, three could have done it, each has said outright what they want, and the deed brought about what only one of them wanted. The one who gained by it had said he would not have it so.",
+  "note": "Spoilers. The logic written before the prose. Written for finding 125: the held goal, a motive stated outright, used on a case for the first time.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.marrow", "says": "Abel Crouch's marrow, three years the cup's winner, was slashed in his unlocked shed on the Friday night and could not be shown; three people were at the allotments after dark, and George Pask's marrow took the cup.", "facts": ["f.vane_role", "f.marrow_cup", "f.shed_open", "f.abel_there", "f.martha_there", "f.pask_there", "f.pask_second"]}
+  ],
+  "questions": [
+    {"id": "q.who", "asks": "Who spoiled Abel Crouch's marrow?", "answer": "Abel Crouch", "others": ["George Pask", "Martha Crouch"], "gate": 6, "needs": [["c.off", "c.pask", "c.martha", "c.abel"]], "rules_out": {"George Pask": "c.pask: he wanted to beat the marrow on the bench and no other way", "Martha Crouch": "c.martha: she wanted Abel to take the cup once more"}}
+  ],
+  "clues": [
+    {"id": "c.off", "source": "Hester Vane, at the show", "says": "On Saturday the marrow could not be put on the bench at all, and George Pask's took the cup.", "facts": ["f.marrow_off", "f.pask_wins"]},
+    {"id": "c.pask", "source": "George Pask, to the narrator on Monday", "says": "He wants to beat that marrow fair, on the bench, and would not have the cup any other way.", "facts": ["f.pask_wants"]},
+    {"id": "c.martha", "source": "Martha Crouch, to the narrator on Wednesday", "says": "She wants Abel to take the cup once more and then give up the allotment content.", "facts": ["f.martha_wants"]},
+    {"id": "c.abel", "source": "Abel Crouch, to the narrator on Friday morning", "says": "Pask's is the bigger this year; he wants his own kept off the bench.", "facts": ["f.abel_wants"]}
+  ]
+}

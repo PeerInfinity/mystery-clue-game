@@ -120,6 +120,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/garden-room` | A room with two doors, each watched by a different witness for a different stretch: neither watch closes any of the time alone, and the two together leave what neither covers (finding 124). | 5 paragraphs, 18 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
+| `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/same-monday` | Visits in the present: five places to go, a day of three hours, and the same morning beginning again with everything learned kept (finding 134). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs (main story, five visits), 19 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
@@ -2104,6 +2105,38 @@ script that found each fact's paragraph from its quote; the data files are the s
       so nothing marks which bear on the question. One run each.
     - *Not done:* prose by a model from the same data (the next version up); a telling for a case
       with papers, tellings or false statements, whose forms the templates do not have yet.
+
+138. **Prose by a model from the typed data, and audited: The Prize Marrow a third time (2026-11-25).** The next
+    version up from finding 137, as the user asked. The case is `cases/miniatures/prize-marrow-prose`.
+    - *The process* (`scripts/prose-story.mjs`). The writer (Sonnet) is given only the templates' sentences,
+      paragraph by paragraph, each with its key and its time, and one line of style; it returns each paragraph as
+      prose and, for each entry, the words of its prose that state it. The script holds it to what a script can
+      check: every entry quoted, every quote in its paragraph word for word, every time told, the same
+      paragraphs, no paragraph copied from the notes, no name in full more than twice in a paragraph. Then two
+      readers audit it: one reads the prose alone and lists what it states; the other sets that list against the
+      typed sentences and reports what is missing, changed or added, an addition as colour or as fact.
+    - *What it wrote* (194 words; the templates' text has 190, the hand-written story 270): "Abel Crouch's marrow
+      had won the cup three years running. After dark on the Friday, somebody spoiled it at his shed." "On Friday
+      morning Abel said to me, and plainly, 'I want my marrow to be kept off the show bench.'" Pronouns, short
+      names, the days as a villager says them. The audit: 19 statements read, all 15 meant stated, none changed,
+      nothing added. The case validates and passes every page check.
+    - *The instructions mattered more than the model.* The first prompt was a list of rules, and the writer gave
+      the notes back word for word, twice; told only not to copy, it changed a word a sentence. What worked was
+      saying what it is free to do (pronouns, short names, joining and ordering, the narrator's voice, a
+      speaker's own manner), with one example pair from another story, beside what it may not.
+    - *The audit was tried on a spoiled copy:* one statement taken out and "with a pruning-knife in his belt"
+      put in. It reported that statement missing and that addition as a fact, and nothing else.
+    - *What the prose still is not:* the hand-written story. It carries exactly the typed entries, so it has no
+      "alone there for a time", no "his is the bigger this year", no button. The voice is one "and plainly". A
+      model may add only what tells nothing, and in so short a story almost everything tells something. A richer
+      story needs richer typed data (reasons, manner, what was seen), not a freer writer.
+    - *Names on the page.* The writer lists the forms of each name it used; "it", "his shed" and "my marrow" came
+      back as forms too, and would have marked every "it" as the marrow. Only a form with a word of the entity's
+      own name is kept.
+    - *Cost:* about $0.06 a run of the writer and the audit; $0.32 in all with the failed prompts and the spoiled
+      copy. One writer, one case.
+    - *Not done:* a blind run of this version; a second writer or model to compare; the observations' sentences
+      are still the templates' (they are card text, and stay exact).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
