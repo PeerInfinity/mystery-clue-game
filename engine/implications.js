@@ -241,9 +241,14 @@ export function tableRules(data, observations) {
     // In a yes-or-no question where one answer is the other's denial, what rules one out for certain concludes the
     // other (2026-11-22; finding 120): "something else" is no third answer there.
     const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+    // The same for any question of two answers whose typed forms deny each other ("before the lamp was lit": the cup
+    // not in the vestry then; "after": in it), whatever they are called (2026-11-25; finding 143).
+    const denies = (a, b) => { const x = list(a.asserts), y = list(b.asserts); return x.length === 1 && y.length === 1 && x[0].of === y[0].of && x[0].attr === y[0].attr && JSON.stringify(x[0].value) === JSON.stringify(y[0].value) && JSON.stringify(x[0].time ?? null) === JSON.stringify(y[0].time ?? null) && !!x[0].neg !== !!y[0].neg; };
     const other = (q, p) => {
         const o = p.value === 'yes' ? 'no' : p.value === 'no' ? 'yes' : null, op = o && q.possibilities.find((x) => x.value === o);
-        return op && isRight(q, o) && list(p.asserts).length > 0 !== list(op.asserts).length > 0 ? { concludes: o } : {};
+        if (op && isRight(q, o) && list(p.asserts).length > 0 !== list(op.asserts).length > 0) return { concludes: o };
+        const two = q.possibilities.filter((x) => x.via !== 'always'), twin = two.length === 2 ? two.find((x) => x !== p) : null;
+        return twin && two.includes(p) && isRight(q, twin.value) && denies(p, twin) ? { concludes: twin.value } : {};
     };
     for (const q of data.questions) (q.possibilities ?? []).forEach((p, n) => {
         // A right answer is never ruled out, but for an aim that failed and a belief that explains it.
@@ -340,13 +345,15 @@ export function tableRules(data, observations) {
         if (!open.length || !act || act.of !== picks[0].value) continue;
         const pl = data.places ?? places(data), order = data.order ?? timeOrder(data.times), w = coverOf(act.time);
         const reqs = (pointImplications(act, undefined, { ...ctx, places: pl, solved: Object.fromEntries(conds.map((k) => [k.q, k.pick])) }).entries ?? []).filter((r) => r.role === 'requires' && r.of === act.of);
-        const answers = new Set(q.possibilities.map((p) => p.value));
+        // One it excepts may be a narrator, who is no listed answer: the one telling the story is taken as accounted for
+        // (2026-11-25; finding 143; likely only, as the rule is).
+        const answers = new Set(q.possibilities.map((p) => p.value)), narrators = new Set((data.narrators ?? []).map((n) => n.id));
         const denies = (f) => {
             if (f.attr === 'carrying') return reqs.some((r) => r.key && f.key === r.key);
             const k = coverOf(f.time);
             return f.attr === 'location' && !!w && !!k && order.le(k.start, w.start) && order.le(w.end, k.end) && reqs.some((r) => r.place && pl.chain(r.place).includes(f.value));
         };
-        (data.facts ?? []).filter((f) => f.truth !== false && f.of === '*' && f.neg && list(f.every).includes('person') && list(f.but).every((b) => answers.has(b)) && denies(f)).forEach((f, n) => {
+        (data.facts ?? []).filter((f) => f.truth !== false && f.of === '*' && f.neg && list(f.every).includes('person') && list(f.but).every((b) => answers.has(b) || narrators.has(b)) && denies(f)).forEach((f, n) => {
             const o = obsOf(q.id, f.id);
             if (o) out.push({ id: `t.closed.${q.id.replace(/^q\./, '')}.${n}`, q: q.id, from: [...conds.map((k) => ({ solved: k.q })), o.id], says: `${o.says}: nobody else could have done it`, rules_out: open, strength: LIKELY, table: true });
         });

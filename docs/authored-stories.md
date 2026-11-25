@@ -2250,6 +2250,20 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Still untold:* a clock that is wrong, a paper's own properties, a reasoning move's entry, a room, two
       narrators.
 
+143. **Two more answers that follow by themselves (the user's rulings of 2026-11-25, on the two points of
+    finding 142).**
+    - *A question of two answers that deny each other.* Where a question has two answers besides "something
+      else" and their typed forms are one state and its denial, a certain rule-out of one concludes the other,
+      as it already did for yes and no (finding 120). The Last Ferry's "before or after the lamp was lit?" now
+      follows from the lamplighter's seeing the cup, with no written rule.
+    - *A narrator excepted by "nobody but".* A statement about everyone that excepts the narrator still closes
+      the list of answers (finding 133): the one telling the story is taken as accounted for. Likely only, as
+      that rule is. The Last Ferry's and The Cellar Door's "who" now follow by elimination.
+    - *Measured* (`typed-check.mjs`): 11 of 58 answers follow with the written rules taken away (6 of 52 before
+      the six new cases and these two rules); 29 would with every list closed; 43 of 79 wrong answers are ruled
+      out by the typed forms. The long case is untouched: its export, and so its version, did not change.
+    - *Checked:* every page check on the 23 miniatures.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

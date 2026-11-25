@@ -670,7 +670,10 @@ that follows from others, shown by itself the moment they all are.
   Such a statement also closes the list of answers (`t.closed.<question>.<n>`, likely; since 2026-11-24): where it
   denies what the deed needs of its doer (a key, or its place through the whole window) to everyone but people who
   are among the question's answers, "something else" is ruled out, and with every other answer ruled out the one
-  left is concluded by elimination. It needs an observation of the question that comes from that entry.
+  left is concluded by elimination. It needs an observation of the question that comes from that entry. One it
+  excepts may be a narrator, who is no listed answer (since 2026-11-25). And in a question of two answers besides
+  "something else" whose typed forms are one state and its denial, a certain rule-out of one concludes the other,
+  as for yes and no.
   A role of a question's typed entry may wait on another question's answer: `"via": {"thing": <door>, "if":
   {"q": <question>, "pick": <answer>}}`. It is there once that question is solved so, and a table rule that
   rests on it has `{solved: <question>}` among its premises.
