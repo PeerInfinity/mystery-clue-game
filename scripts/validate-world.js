@@ -160,6 +160,8 @@ for (const f of facts) {
     // `cannot`: the kinds of deed its subject could not have done (acts of the table).
     for (const a of list(f.cannot)) if (!ACTIONS[a]) err(f.id, `cannot: no act ${a}`);
     if (f.seen_from != null && !(facts.find((x) => x.id === f.seen_from)?.attr === 'location')) err(f.id, `seen_from: ${f.seen_from} is not an entry of where someone was`);
+    // `known_by`: the entry of what its witness knew the thing by (a mark, a look): trusted no further than that.
+    if (f.known_by != null && !facts.some((x) => x.id === f.known_by && x.id !== f.id)) err(f.id, `known_by: no entry ${f.known_by}`);
     if (f.to && !entities.has(f.to)) err(f.id, `to: no entity ${f.to}`);
     if (ENTITY_ATTRS.has(f.attr)) for (const v of list(f.value)) {
         const head = String(v).split(/,| \(/)[0];

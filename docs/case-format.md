@@ -90,7 +90,8 @@ then writes the story's text, one sentence an entry by the templates of `engine/
 follows from the text: each fact's `para` and `quote` (the quote is the sentence), a `says` entry's `value`, each
 time's `para` and `quote`, each question's `raised`, `quote`, its answers' `available` and `quote` and its
 give-away, each observation's `says` (its entries' sentences), and `mentions.json`. So in such a case those are not
-written by hand; `npm test` holds the files to the script. A fact there has no `detail` (free text is not told), a
+written by hand; `npm test` holds the files to the script. A statement with `known_by: <entry>` (what its witness knew the thing by: trusted no further than that entry, in
+any case, as `seen_from`) is followed in the witness's speech by "I knew it by this: …". A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 
 **Prose written from the telling** (since 2026-11-25; finding 138). `world/prose.json`, made by

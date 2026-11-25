@@ -524,9 +524,12 @@ function levelOfFact(f) {
     if (f.attr === 'tells') return narratorIds.has(f.to) ? narrationLevel(f.to) : Math.max(...data.narrators.map((n) => narrationLevel(n.id)));
     const own = levelOf(chainsOf(f), state.trust);
     // An absence ("nobody else crossed the hall") rests on where its witness was: no more trusted than that entry.
-    const base = f.seen_from && f.seen_from !== f.id ? factById.get(f.seen_from) : null, bl = base ? levelOfFact(base) : null;
+    // So does a statement that names what its witness knew a thing by (`known_by`: the key's brass tally).
+    const on = restsOn(f), base = on && on !== f.id ? factById.get(on) : null, bl = base ? levelOfFact(base) : null;
     return own != null && bl != null ? Math.min(own, bl) : own;
 }
+/** The entry a statement rests on: where its witness was (`seen_from`), or what its witness knew the thing by (`known_by`). */
+function restsOn(f) { return f.seen_from ?? f.known_by ?? null; }
 /** The chains of an assertion: a claim's own assertions travel as the claim does, with the claimant's word ahead. */
 const chainsOfAssertion = (x) => (x.mark ? [x.from ? hypothesisChain(...x.from.slice(4).split('=')) : hypothesisChain(x.q, x.pick)] : x.claim && x.claim === x.fact ? claimChains(x.fact) : chainsOf(factOf(x.fact)));
 /** How far the player trusts a narrator's narration (by default the case's trust, certain unless it says otherwise). */
@@ -1301,7 +1304,7 @@ function toggleLink(entry, q) {
         // A link trusts its entry as likely; and, where the entry rests on where its witness was (`seen_from`), that
         // entry too, since the first is trusted no further than the second and would not count without it
         // (2026-11-24, finding 129: a blind solver trusted the statement and its witness and was stuck for twenty turns).
-        const f = factById.get(entry), base = f?.seen_from && f.seen_from !== f.id ? factById.get(f.seen_from) : null;
+        const f = factById.get(entry), on = f && restsOn(f), base = on && on !== f.id ? factById.get(on) : null;
         if (base && !shownFalse(base).length) trustByUse(base, LIKELY_LEVEL, UNCERTAIN);
         trustByUse(f, LIKELY_LEVEL, UNCERTAIN);
     }
@@ -2431,7 +2434,7 @@ function renderDetail(clashing) {
         el.innerHTML = `<h2>${phrase(f)}</h2>
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.${recordNote(f) ? ` <span class="muted">(${recordNote(f).replace(/^o/, 'O')}.)</span>` : ''}</p>
-          ${f.seen_from && factById.has(f.seen_from) && visible(factById.get(f.seen_from)) ? `<p class="small" data-seen-from>Rests on where its witness was: ${dot(levelOfFact(factById.get(f.seen_from)))}<a class="link" data-fact="${esc(f.seen_from)}">${phrase(factById.get(f.seen_from))}</a>. It is trusted no further than that.</p>` : ''}
+          ${restsOn(f) && factById.has(restsOn(f)) && visible(factById.get(restsOn(f))) ? `<p class="small" data-seen-from>Rests on ${f.seen_from ? 'where its witness was' : 'what its witness knew it by'}: ${dot(levelOfFact(factById.get(restsOn(f))))}<a class="link" data-fact="${esc(restsOn(f))}">${phrase(factById.get(restsOn(f)))}</a>. It is trusted no further than that.</p>` : ''}
           ${clockNote(f)}${VISITS.length && earlierDay(f) ? `<p class="small" data-earlier-day>Learned on day ${earlierDay(f).day}, by a visit: ${esc(earlierDay(f).label)}. It is day ${state.visits.day} now; what you learned then still stands.</p>` : ''}
           ${f.attr === 'tells' ? toldHtml(f)
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}

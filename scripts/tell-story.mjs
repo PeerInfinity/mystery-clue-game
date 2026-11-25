@@ -82,6 +82,8 @@ export function tell(dir, opts = {}) {
                         const s = tellerOf(who, N).sentence(f), { key: k, pre } = timed(f.time, false, speech.last);
                         speech.last = k;
                         speech.parts.push(stop(pre ? pre + s : cap(s)));
+                        // What the witness knew it by (`known_by`), said after it, as an onlooker's sentence.
+                        if (f.known_by) speech.parts.push(`I knew it by this: ${third.sentence(F.get(f.known_by))}.`);
                         f.quote = pre ? s : cap(s);
                         told.push({ key: f.id, text: speech.parts.at(-1), full: `${name(who)} told me: "${stop(prefix(f.time) ? prefix(f.time) + s : cap(s))}"` });
                     } else {

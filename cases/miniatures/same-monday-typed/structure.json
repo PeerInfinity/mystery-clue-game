@@ -11,7 +11,7 @@
   ],
   "clues": [
     {"id": "c.locked", "source": "Ned Arliss, at the office", "says": "The office door was locked and its lock not forced.", "facts": ["f.lock_whole"]},
-    {"id": "c.keys", "source": "Ned Arliss, at the office", "says": "The door has two keys: the Captain's and the pilot's.", "facts": ["f.two_keys", "f.key_one", "f.key_two"]},
+    {"id": "c.keys", "source": "Ned Arliss, at the office", "says": "The door has two keys: the Captain's and the pilot's.", "facts": ["f.two_keys", "f.key_one", "f.key_two", "f.tally"]},
     {"id": "c.marlow", "source": "Mrs. Pask, at the Ship", "says": "The Captain took the Marlow coach at six on Sunday and came back at nine on Monday.", "facts": ["f.dunmore_marlow"]},
     {"id": "c.lent", "source": "Amos Trew, at the pilot-house", "says": "He lent his key to Silas Finch at four on Sunday and was without it until Monday.", "facts": ["f.trew_lent", "f.trew_nokey"]},
     {"id": "c.finch_key", "source": "Jem Tolley, at the ropewalk", "says": "At eight on Sunday night Finch was on the quay by the office steps with the pilot's key in his hand.", "facts": ["f.light", "f.finch_quay", "f.finch_key"]},

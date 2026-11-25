@@ -2073,6 +2073,11 @@ script that found each fact's paragraph from its quote; the data files are the s
       "a way to indicate, on the action node, whether it has been completed before". This page has the last
       ("done before, on day N") and keeps every day's visits in the save.
     - Nothing beyond windows yet for a present that reacts.
+    - *The first timed preset (ruled there 2026-11-25, and to this session the same day):* The Same Monday under
+      its own name, with its people, places and paper titles; each visit made a check, the five scenes the
+      items, shuffled across the five visits; the goal the question, which needs the office, the inn and the
+      watchman. "Shuffled now, setting later": a choice between that and each visit keeping its own scene is a
+      later slice. This page does not yet connect visits to an Archipelago.
 
 137. **A story told from its typed data: The Prize Marrow again (2026-11-25).** The simplest version of "all text
     derived from typed data", as the user asked: a script and templates, no model.
@@ -2173,6 +2178,17 @@ script that found each fact's paragraph from its quote; the data files are the s
       a paper's own properties, a reasoning move's entry, a room. Each is a form some other miniature uses.
     - Not done: a blind run; prose by a model for a case with files (`prose-story.mjs` writes the main story
       only).
+    - *What a witness knew it by, typed (the same day).* The brass tally was the one loss that was logic. A
+      statement may now name the entry of what its witness knew the thing by (`known_by`), as an absence names
+      where its witness was (`seen_from`): it is trusted no further than that entry, a link to a question
+      trusts both, and the detail says "Rests on what its witness knew it by". In the typed Same Monday the
+      narrator finds at the office that "the second key of the office door was marked with a brass tally", and
+      the watchman's sighting rests on it: "Silas Finch had the second key of the office door. I knew it by
+      this: the second key of the office door was marked with a brass tally." Put to the user as the first of
+      three next steps and not objected to; the richer form (the witness describes a key with a tally, and
+      which key that is stays the reader's step) is not built.
+    - *A check that failed once and not again:* The Garden Room's hints check ("the same hint three times
+      over" at ¶4) in one run of three side by side with other checks, with and without this change. Unexplained.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
