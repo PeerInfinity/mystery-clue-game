@@ -1,0 +1,8 @@
+{
+  "actions": [
+    {"id": "shoot", "label": "firing a shot through the window of", "past": "fired a shot through the window of", "requires": [], "effects": []},
+    {"id": "leave", "label": "leaving", "past": "left", "requires": [], "effects": []},
+    {"id": "count", "label": "counting the strokes of", "past": "counted the strokes of", "requires": [], "effects": []},
+    {"id": "look", "label": "looking at", "past": "looked at", "requires": [], "effects": []}
+  ]
+}

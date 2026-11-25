@@ -121,6 +121,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
+| `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/same-monday-typed` | The Same Monday told from its data: the story and its five scenes made by a script, witnesses' accounts as their speech (finding 139). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs, 22 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/same-monday` | Visits in the present: five places to go, a day of three hours, and the same morning beginning again with everything learned kept (finding 134). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs (main story, five visits), 19 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
@@ -2263,6 +2264,29 @@ script that found each fact's paragraph from its quote; the data files are the s
       the six new cases and these two rules); 29 would with every list closed; 43 of 79 wrong answers are ruled
       out by the typed forms. The long case is untouched: its export, and so its version, did not change.
     - *Checked:* every page check on the 23 miniatures.
+
+144. **A wrong clock told from its data: The Stable Clock (2026-11-25).** The second of the missing forms. The
+    case is `cases/miniatures/stable-clock-typed`, the same logic and true path, two questions.
+    - *What the templates gained.* A time read by a clock ("At a quarter to nine on Thursday by the stable
+      clock, somebody fired a shot through the window of Sir Giles's study"). A doer unknown inside a witness's
+      account. An answer that is the time of an event, offered where a witness tells the event at that time.
+      "Yes" and "no", offered in the question's words, and confessed as the state the answer stands for ("At
+      nine o'clock on Thursday, I was not at the library.").
+    - *It held:* 255 words against 266; it validated at the first try, and the true path, the autoplay, the
+      hints and the trying player play it through. The clock's being slow still restates the gardener's reading
+      as the page did for the written case, and the checker gives the two cases the same result.
+    - *What typing it showed.* The shot, the leaving, the counting and the looking became acts of the case's
+      own, each with a past form: four words an author supplies ("fired a shot through the window of", "left",
+      "counted the strokes of", "looked at"). The witnesses' own whereabouts had been entered at the true time
+      of the shot, which in the gardener's mouth would have contradicted his quarter to nine: he is now "at the
+      lodge from Thursday evening", and looks at the clock at the time he read by it. The data had been right
+      for the engine and wrong as speech; the telling found it.
+    - *What was lost:* the game of chess, the letter to write, the bullet above the chair where Sir Giles sits
+      (the story's reason to care), the watch carried across the yard on Friday, the garden door and the
+      revolver. And one piece of logic: the story shows the stable clock slow on Friday morning by a watch set
+      by the hall clock; the typed case only says it was slow. That it was slow the evening before is the
+      reader's step in both (finding 119).
+    - *Still untold:* a paper's own properties, a reasoning move's entry, a room, two narrators.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

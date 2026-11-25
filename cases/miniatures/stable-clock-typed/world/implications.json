@@ -1,0 +1,6 @@
+{
+  "implications": [
+    {"id": "i.when_nine", "q": "q.when", "from": ["o.maid", "o.hall"], "says": "the shot came as the hall clock struck nine, and the hall clock was right: it was fired at nine", "concludes": "nine o'clock"},
+    {"id": "i.library_no", "q": "q.library", "from": ["o.left", "o.after"], "says": "he left the library at ten to nine and the shot came at nine, by the same clock: he was not there", "concludes": "no"}
+  ]
+}

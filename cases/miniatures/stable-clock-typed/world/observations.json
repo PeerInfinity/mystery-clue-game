@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.maid", "q": "q.when", "from": ["f.susan_counted"], "says": "at nine o'clock on Thursday, Susan counted the strokes of the hall clock", "essential": true},
+    {"id": "o.hall", "q": "q.when", "from": ["f.hall_set"], "says": "from Thursday morning, the hall clock was right, set by the church clock", "essential": true, "against": ["a quarter to nine"]},
+    {"id": "o.slow", "q": "q.when", "from": ["f.shot_quarter", "f.stable_slow"], "says": "at a quarter to nine on Thursday by the stable clock, somebody fired a shot through the window of Sir Giles's study; on Friday morning, the stable clock was a quarter of an hour slow", "essential": true, "against": ["a quarter to nine"]},
+    {"id": "o.clock", "q": "q.when", "from": ["f.bowker_clock"], "says": "at a quarter to nine on Thursday by the stable clock, Bowker looked at the stable clock"},
+    {"id": "o.left", "q": "q.library", "from": ["f.edwin_leaves"], "says": "at ten minutes to nine on Thursday by the hall clock, Mr. Edwin Royle left the library", "essential": true, "against": ["yes"]},
+    {"id": "o.after", "q": "q.library", "from": ["f.shot_nine"], "says": "at nine o'clock on Thursday by the hall clock, somebody fired a shot through the window of Sir Giles's study", "essential": true, "against": ["yes"]},
+    {"id": "o.bullet", "q": "q.when", "from": ["f.bullet"], "says": "on Friday morning, the bullet was at Sir Giles's study"}
+  ]
+}

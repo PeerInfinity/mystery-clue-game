@@ -19,7 +19,7 @@ const listed = (xs, and = 'and') => (xs.length < 2 ? xs.join('') : `${xs.slice(0
  */
 export function teller(ctx) {
     const me = (id) => id === ctx.speaker, you = (id) => ctx.listener != null && id === ctx.listener;
-    const subj = (id) => (me(id) ? 'I' : you(id) ? 'you' : ctx.name(id));
+    const subj = (id) => (id === '?' ? 'somebody' : me(id) ? 'I' : you(id) ? 'you' : ctx.name(id));
     // A statement about everyone (`of: "*"`, `but`): "nobody but A and B" for a denial, "everyone but …" otherwise; told without its own "not".
     const everyone = (x) => `${x.neg ? 'nobody' : 'everyone'}${list(x.but).length ? ` but ${listed(list(x.but).map(obj))}` : ''}`;
     const obj = (id) => (me(id) ? 'me' : you(id) ? 'you' : ctx.name(id));
@@ -57,6 +57,12 @@ export function teller(ctx) {
             if (o) { const e = ctx.question(o.q).entry; return `${subj(f.of)} said${to}: "It was I who ${mine(f.of, done(e, '').trim())}."`; }
             // An answer that is not a person, asserted: "It was after the gate lamp was lit."
             const a = list(f.asserts).find((x) => x.q && x.pick != null);
+            // "Yes" or "no" asserted is the state that answer stands for (the other's, denied, where only one is typed), in the speaker's own person.
+            if (a && (a.pick === 'yes' || a.pick === 'no')) {
+                const ps = ctx.question(a.q).possibilities, own = list(ps.find((p) => p.value === a.pick)?.asserts), twin = list(ps.find((p) => p.value === (a.pick === 'yes' ? 'no' : 'yes'))?.asserts);
+                const x = own[0] ?? (twin[0] ? { ...twin[0], neg: !twin[0].neg } : null);
+                if (x) { const inner = teller({ ...ctx, speaker: f.of }); return `${subj(f.of)} said${to}: "${cap(`${ctx.prefix?.(x.time) ?? ''}${mine(f.of, inner.sentence(x))}`)}."`; }
+            }
             if (a) return `${subj(f.of)} said${to}: "It was ${a.pick}."`;
             return `${subj(f.of)} said${to}: "${f.value}."`;
         } else if (f.attr === 'action' && list(f.act).length) s = done(f, subj(f.of));

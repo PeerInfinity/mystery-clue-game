@@ -1,0 +1,24 @@
+{
+ "entities": {
+  "penrose": ["Arthur Penrose"],
+  "giles": ["Sir Giles Royle"],
+  "edwin": ["Mr. Edwin Royle"],
+  "susan": ["Susan"],
+  "bowker": ["Bowker"],
+  "inspector": ["the inspector"],
+  "hall": ["Coldharbour Hall"],
+  "library": ["the library"],
+  "study": ["Sir Giles's study"],
+  "back_stairs": ["the back stairs"],
+  "lodge": ["the lodge"],
+  "stable_yard": ["the stable yard"],
+  "hall_clock": ["the hall clock"],
+  "stable_clock": ["the stable clock"],
+  "church_clock": ["the church clock"],
+  "watch": ["Arthur Penrose's watch"],
+  "bullet": ["the bullet"],
+  "study_window": ["the window of the study"],
+  "garden_door": ["the garden door"],
+  "revolver": ["Sir Giles's revolver"]
+ }
+}

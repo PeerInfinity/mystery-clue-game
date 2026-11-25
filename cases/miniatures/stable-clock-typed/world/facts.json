@@ -1,0 +1,24 @@
+{
+  "facts": [
+    {"id": "f.penrose_guest", "of": "penrose", "attr": "role", "value": "a guest at Coldharbour Hall", "time": {"from": "t.before"}, "para": 1, "quote": "I am Arthur Penrose, a guest at Coldharbour Hall"},
+    {"id": "f.edwin_nephew", "of": "edwin", "attr": "role", "value": "the nephew of Sir Giles Royle", "time": {"from": "t.before"}, "para": 1, "quote": "Mr. Edwin Royle is the nephew of Sir Giles Royle"},
+    {"id": "f.penrose_library", "of": "penrose", "attr": "location", "value": "library", "time": {"from": "t.evening", "to": "t.ten_to"}, "para": 1, "quote": "I was at the library"},
+    {"id": "f.edwin_library", "of": "edwin", "attr": "location", "value": "library", "time": {"from": "t.evening", "to": "t.ten_to"}, "para": 1, "quote": "Mr. Edwin Royle was at the library"},
+    {"id": "f.edwin_leaves", "of": "edwin", "attr": "action", "act": "leave", "thing": "library", "value": "leaving the library", "time": {"at": "t.ten_to", "by": "hall_clock"}, "para": 1, "quote": "Mr. Edwin Royle left the library"},
+    {"id": "f.bullet", "of": "bullet", "attr": "location", "value": "study", "time": {"at": "t.friday"}, "para": 2, "quote": "the bullet was at Sir Giles's study"},
+    {"id": "f.susan_role", "of": "susan", "attr": "role", "value": "the housemaid", "time": {"from": "t.before"}, "para": 3, "quote": "Susan is the housemaid"},
+    {"id": "f.susan_tells", "of": "susan", "attr": "tells", "value": "acct.susan", "to": "penrose", "how": "told", "time": {"after": "t.nine", "before": "t.later"}, "para": 3, "quote": "Susan told me"},
+    {"id": "f.susan_stairs", "of": "susan", "attr": "location", "value": "back_stairs", "time": {"at": "t.nine"}, "para": 3, "quote": "I was at the back stairs"},
+    {"id": "f.shot_nine", "of": "?", "attr": "action", "act": "shoot", "thing": "study", "value": "fires a shot through the window of Sir Giles's study", "event": "e.shot", "time": {"at": "t.nine", "by": "hall_clock"}, "para": 3, "quote": "somebody fired a shot through the window of Sir Giles's study"},
+    {"id": "f.susan_counted", "of": "susan", "attr": "action", "act": "count", "thing": "hall_clock", "value": "counting the strokes of the hall clock", "time": {"at": "t.nine"}, "para": 3, "quote": "I counted the strokes of the hall clock"},
+    {"id": "f.bowker_role", "of": "bowker", "attr": "role", "value": "the gardener", "time": {"from": "t.before"}, "para": 4, "quote": "Bowker is the gardener"},
+    {"id": "f.bowker_tells", "of": "bowker", "attr": "tells", "value": "acct.bowker", "to": "penrose", "how": "told", "time": {"after": "t.nine", "before": "t.later"}, "para": 4, "quote": "Bowker told me"},
+    {"id": "f.bowker_lodge", "of": "bowker", "attr": "location", "value": "lodge", "time": {"from": "t.evening"}, "para": 4, "quote": "I was at the lodge"},
+    {"id": "f.shot_quarter", "of": "?", "attr": "action", "act": "shoot", "thing": "study", "value": "fires a shot through the window of Sir Giles's study", "event": "e.shot", "time": {"at": "t.quarter_to", "by": "stable_clock"}, "para": 4, "quote": "somebody fired a shot through the window of Sir Giles's study"},
+    {"id": "f.bowker_clock", "of": "bowker", "attr": "action", "act": "look", "thing": "stable_clock", "value": "looking at the stable clock", "time": {"at": "t.quarter_to", "by": "stable_clock"}, "para": 4, "quote": "I looked at the stable clock"},
+    {"id": "f.hall_set", "of": "hall_clock", "attr": "condition", "value": "right, set by the church clock", "time": {"from": "t.morning"}, "para": 5, "quote": "the hall clock was right, set by the church clock"},
+    {"id": "f.stable_slow", "of": "stable_clock", "attr": "condition", "value": "a quarter of an hour slow", "off": [{"reads": "t.quarter_to", "when": "t.nine"}], "time": {"at": "t.friday"}, "para": 6, "quote": "the stable clock was a quarter of an hour slow"},
+    {"id": "f.edwin_owns", "of": "edwin", "attr": "says", "to": "inspector", "time": {"at": "t.later"}, "asserts": [{"q": "q.when", "pick": "nine o'clock"}], "para": 7, "value": "says it was nine o'clock", "quote": "Mr. Edwin Royle said to the inspector: \"It was nine o'clock.\""},
+    {"id": "f.edwin_not", "of": "edwin", "attr": "says", "to": "inspector", "time": {"at": "t.later"}, "asserts": [{"q": "q.library", "pick": "no"}], "para": 7, "value": "says it was no", "quote": "Mr. Edwin Royle said to the inspector: \"At nine o'clock on Thursday, I was not at the library.\""}
+  ]
+}

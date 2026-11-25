@@ -28,15 +28,16 @@ export function tell(dir, opts = {}) {
     const byId = (xs) => new Map(xs.map((x) => [x.id, x]));
     const E = byId(entities), T = byId(times), F = byId(facts), Q = byId(questions), A = byId(actions);
     const N = header.narrators[0].id, name = (id) => E.get(id)?.name ?? id;
-    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id) });
-    const mainT = tellerOf(N), third = teller({ speaker: null, listener: null, name, act: (id) => A.get(id), question: (id) => Q.get(id) });
+    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t) });
+    const mainT = tellerOf(N), third = tellerOf(null);
     const speakerOf = (id) => { const a = accounts.find((x) => x.facts.includes(id)); return a && a.origin !== N ? a.origin : null; };
     // How a sentence at a time begins: "On Monday, ", "At six o'clock on Sunday, " (`prep` on the time point), a
     // stretch "From … until …, " (a deed: "Between … and …, "); a state that held from before the story has none.
     // A time that is an event (`clause: true`: "the gate lamp was lit") is told "When …", and a stretch from it "From when …".
     const first = times[0]?.id, lab = (id) => T.get(id).label, from = (id) => `${T.get(id).clause ? 'when ' : ''}${lab(id)}`;
     const at = (id) => { const p = T.get(id).prep ?? (T.get(id).clause ? 'When' : 'On'); return p ? `${p} ${lab(id)}` : cap(lab(id)); };
-    const prefix = (t, deed = false) => (!t ? '' : t.at ? `${at(t.at)}, ` : t.from && t.from !== first && t.to ? (deed ? `Between ${from(t.from)} and ${from(t.to)}, ` : `From ${from(t.from)} until ${lab(t.to)}, `) : t.from && t.from !== first ? `From ${from(t.from)}, ` : '');
+    // A time read by a clock (`time.by`) says so: "At nine o'clock on Thursday by the hall clock, ".
+    const prefix = (t, deed = false) => (!t ? '' : t.at ? `${at(t.at)}${t.by ? ` by ${name(t.by)}` : ''}, ` : t.from && t.from !== first && t.to ? (deed ? `Between ${from(t.from)} and ${from(t.to)}, ` : `From ${from(t.from)} until ${lab(t.to)}, `) : t.from && t.from !== first ? `From ${from(t.from)}, ` : '');
     for (const x of times) { delete x.para; delete x.quote; }
     const stop = (s) => (s.endsWith('"') ? s : `${s}.`);   // a sentence that ends in someone's words has its stop inside them
     const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
@@ -136,6 +137,11 @@ export function tell(dir, opts = {}) {
             if (p.via === 'always') { p.available = q.raised; continue; }
             // An answer that is no entity and stands in the question's own words ("before the gate lamp was lit") is there when the question is asked.
             if (!E.has(p.value) && q.label.includes(p.value)) { delete p.from; p.available = q.raised; p.quote = p.value; continue; }
+            // Yes and no are both offered outright, in the question's own words.
+            if (p.value === 'yes' || p.value === 'no') { delete p.from; p.available = q.raised; p.quote = q.quote; continue; }
+            // An answer that is a time of an event ("nine o'clock": the shot at that time) is there where an entry tells the event at that time.
+            const ev = list(p.asserts).find((x) => x.event && x.time?.at), told = ev && facts.find((f) => f.para != null && f.event === ev.event && f.time?.at === ev.time.at);
+            if (told) { delete p.from; p.available = told.para; p.quote = told.quote; continue; }
             const mine = facts.filter((f) => f.para != null && names(f, p.value) && f.attr !== 'tells' && !list(f.asserts).some((x) => x.q === q.id));   // not the give-away itself
             const f = mine.filter((x) => inMain(x) && x.para >= q.raised).sort((a, b) => a.para - b.para)[0] ?? mine.filter((x) => !inMain(x))[0] ?? mine[0];
             if (!f) continue;

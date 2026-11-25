@@ -90,7 +90,10 @@ follows, or `clause: true` for a time that is an event ("the gate lamp was lit":
 "From when …"); a stretch is told "From … until …". A statement about everyone is "Nobody but A and B …". A `says`
 that asserts an answer which is no person is "It was <the answer>." `{deed: <question>, untimed: true}` tells the
 deed without its time, where the time is itself a question. An answer that is no entity and stands in its
-question's label is available where the question is raised. `node scripts/tell-story.mjs <dir>`
+question's label is available where the question is raised; "yes" and "no" are, in the question's own words; an
+answer that is the time of an event is where an entry tells the event at that time. A time read by a clock
+(`time.by`) says so ("At nine o'clock on Thursday by the hall clock"). An entry whose doer is unknown (`of: "?"`)
+is "somebody …". A `says` that asserts "yes" or "no" is the state that answer stands for, in the speaker's person. `node scripts/tell-story.mjs <dir>`
 then writes the story's text, one sentence an entry by the templates of `engine/tell.js`, and into the data what
 follows from the text: each fact's `para` and `quote` (the quote is the sentence), a `says` entry's `value`, each
 time's `para` and `quote`, each question's `raised`, `quote`, its answers' `available` and `quote` and its

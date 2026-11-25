@@ -1,0 +1,12 @@
+{
+  "title": "THE STABLE CLOCK, TOLD FROM ITS DATA",
+  "paragraphs": [
+    ["f.penrose_guest", "f.edwin_nephew", "f.penrose_library", "f.edwin_library", "f.edwin_leaves"],
+    [{"deed": "q.when", "untimed": true}, "f.bullet", {"raise": "q.when"}],
+    ["f.susan_role", "f.susan_tells", "f.susan_stairs", "f.shot_nine", "f.susan_counted"],
+    ["f.bowker_role", "f.bowker_tells", "f.bowker_lodge", "f.shot_quarter", "f.bowker_clock", {"raise": "q.library"}],
+    ["f.hall_set"],
+    ["f.stable_slow"],
+    ["f.edwin_owns", "f.edwin_not"]
+  ]
+}
