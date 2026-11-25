@@ -2233,7 +2233,7 @@ script that found each fact's paragraph from its quote; the data files are the s
       christening cup taken before the gate lamp was lit, or after the gate lamp was lit?"), and a confession of
       such an answer ("It was after the gate lamp was lit."). A deed told without its time, where the time is
       the other question.
-    - *It held:* 187 words against 291; it validates, and the true path, the autoplay, the hints and the trying
+    - *It held:* 286 words against 328; it validates, and the true path, the autoplay, the hints and the trying
       player play it through. The engine derives what it derived for the written case.
     - *What typing it showed about this case.* That the ferry was in mid-river when the lamp was lit was a
       sentence of the boatman's; the typed case says it twice, as the stretch he was aboard and as where he was
