@@ -2370,7 +2370,7 @@ script that found each fact's paragraph from its quote; the data files are the s
       it carries whereabouts, with the same three sides (the other's state, the identity, the first one's
       state). A state told only from when it began lasts. The reader's part is what it was: link the two
       entries, and the page rules the answer out. No move was added.
-    - *The Grey Cloak told from its data* (`cases/miniatures/grey-cloak-typed`): 207 words against 219; it
+    - *The Grey Cloak told from its data* (`cases/miniatures/grey-cloak-typed`): 249 words against 219 (the one told case longer than its original: every name in full); it
       validates and the true path, the autoplay, the hints and the trying player play it through. The templates
       gained who someone was, what someone wore, and a confession of identity ("I was the figure at the side
       door."). The witness's mistake uses `known_by`, which now has a case: "The figure at the side door was Dr.
