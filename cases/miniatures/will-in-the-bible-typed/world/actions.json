@@ -1,0 +1,7 @@
+{
+  "actions": [
+    {"id": "die", "label": "dying", "past": "died", "requires": [], "effects": []},
+    {"id": "bring", "label": "bringing", "past": "brought", "requires": [], "effects": []},
+    {"id": "find", "label": "finding", "past": "found", "requires": [], "effects": []}
+  ]
+}

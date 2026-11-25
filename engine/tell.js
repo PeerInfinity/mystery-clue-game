@@ -13,7 +13,8 @@ export const PAST = { take: 'took', take_locked: 'took', give: 'gave', make: 'ma
 const listed = (xs, and = 'and') => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${and} ${xs.at(-1)}`);
 
 /**
- * `ctx`: {speaker (who is "I"), listener (who is "you", or null), name(id), act(id): {label, past}, question(id)}.
+ * `ctx`: {speaker (who is "I"), listener (who is "you", or null), name(id), act(id): {label, past}, question(id),
+ * and optionally kind(id), prep(id) ("in" for a thing something is in; default "at"), time(id): its label, prefix(time)}.
  * Returns `sentence(fact)`, `deed(question)` and `said(fact)` (what a `says` entry's value is, in the third person,
  * for the page's own line).
  */
@@ -26,10 +27,12 @@ export function teller(ctx) {
     // In a speaker's own words what is theirs by name is "my" ("Abel Crouch's marrow", said by Abel Crouch).
     const mine = (who, s) => s.split(`${ctx.name(who)}'s `).join('my ');
     const past = (a) => ctx.act(list(a.act)[0])?.past ?? PAST[list(a.act)[0]] ?? `did the ${ctx.act(list(a.act)[0])?.label ?? list(a.act)[0]} of`;
+    const at = (id) => `${ctx.prep?.(id) ?? 'at'} ${ctx.name(id)}`;
     const state = (x, be = 'was') => {
-        if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} at ${ctx.name(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : `${who} ${be} ${x.value}`; }
+        if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} ${at(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : `${who} ${be} ${x.value}`; }
         const not = x.neg ? ' not' : '';
-        if (x.attr === 'location') return `${subj(x.of)} ${be}${not} at ${ctx.name(x.value)}`;
+        if (x.attr === 'location') return `${subj(x.of)} ${be}${not} ${at(x.value)}`;
+        if (x.attr === 'made') return `${subj(x.of)} ${be}${not} made`;   // a paper, at the time it says
         if (x.attr === 'lives_at') return `${subj(x.of)} ${me(x.of) ? 'live' : 'lives'} at ${ctx.name(x.value)}`;   // a standing state, as a role is
         if (x.attr === 'owner') return `${subj(x.of)} ${x.neg ? 'did not belong' : 'belonged'} to ${obj(x.value)}`;
         if (x.attr === 'carrying') return x.neg ? `${subj(x.of)} ${be} without ${ctx.name(x.value)}` : `${subj(x.of)} had ${ctx.name(x.value)}`;
@@ -37,7 +40,14 @@ export function teller(ctx) {
     };
     /** What is wanted, in the wanter's words: "X to be V", and what that needs. */
     const want = (g) => `${ctx.name(g.of)} to be ${g.value}${list(g.needs).map((n) => `, and for that ${ctx.name(n.of)} must${n.neg ? ' not' : ''} be ${n.value}`).join('')}`;
-    const done = (a, who) => `${who} ${past(a)} ${ctx.name(a.thing ?? a.item)}${a.to ? ` to ${obj(a.to)}` : ''}${a.where ? ` ${list(a.act)[0].startsWith('take') ? 'from' : 'at'} ${ctx.name(a.where)}` : ''}`;
+    // An act may have nothing it is done to ("died").
+    const done = (a, who) => `${who} ${past(a)}${a.thing ?? a.item ? ` ${ctx.name(a.thing ?? a.item)}` : ''}${a.to ? ` to ${obj(a.to)}` : ''}${a.where ? ` ${list(a.act)[0].startsWith('take') ? `from ${ctx.name(a.where)}` : at(a.where)}` : ''}`;
+    // A paper's own properties (2026-11-25; finding 145): its date, what it revokes, what it gives to whom, what it speaks of.
+    const paper = (f) => {
+        if (f.dated) return `${subj(f.of)} was dated ${ctx.time(f.dated)}`;
+        const parts = [f.revokes && `revoked ${ctx.name(f.revokes)}`, list(f.gives).length && `gave ${listed(list(f.gives).map((g) => `${ctx.name(g.what)} to ${obj(g.to)}`))}`, f.speaks_of && `spoke of ${ctx.name(f.speaks_of.of)} as ${f.speaks_of.value}`].filter(Boolean);
+        return parts.length ? `${subj(f.of)} ${listed(parts)}` : null;
+    };
     const owns = (f) => list(f.asserts).find((x) => x.q && x.pick === f.of);
     function said(f) {
         if (f.goal) return `wants ${want(f.goal)}`;
@@ -66,6 +76,7 @@ export function teller(ctx) {
             if (a) return `${subj(f.of)} said${to}: "It was ${a.pick}."`;
             return `${subj(f.of)} said${to}: "${f.value}."`;
         } else if (f.attr === 'action' && list(f.act).length) s = done(f, subj(f.of));
+        else if ((f.dated || f.revokes || f.speaks_of || ctx.kind?.(f.of) === 'document') && paper(f)) s = paper(f);
         else s = state(f) + list(f.gives).map((g) => `; by that ${obj(g.to)} gained ${g.what}`).join('');
         return ctx.speaker ? mine(ctx.speaker, s) : s;
     }

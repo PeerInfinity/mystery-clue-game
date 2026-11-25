@@ -1,0 +1,23 @@
+{
+  "facts": [
+    {"id": "f.dacre_role", "of": "dacre", "attr": "role", "value": "solicitor, of Wells", "time": {"from": "t.before"}, "para": 1, "quote": "I am Henry Dacre, solicitor, of Wells"},
+    {"id": "f.harriet_died", "of": "harriet", "attr": "action", "act": "die", "value": "dying", "time": {"at": "t.may2"}, "para": 1, "quote": "Miss Harriet Pym died"},
+    {"id": "f.old_will", "of": "old_will", "attr": "condition", "value": "a will of Miss Harriet Pym", "gives": [{"to": "grice", "what": "ashcombe"},{"to": "church", "what": "the rest of the estate"}], "time": {"at": "t.past"}, "para": 1, "quote": "the earlier will gave Ashcombe House to Mrs. Grice and the rest of the estate to the church"},
+    {"id": "f.grice_housekeeper", "of": "grice", "attr": "role", "value": "the housekeeper of Miss Harriet Pym", "time": {"from": "t.before"}, "para": 1, "quote": "Mrs. Grice is the housekeeper of Miss Harriet Pym"},
+    {"id": "f.lionel_brings", "of": "lionel", "attr": "action", "act": "bring", "thing": "new_will", "to": "dacre", "value": "bringing the later will to Henry Dacre", "time": {"at": "t.august"}, "para": 2, "quote": "Mr. Lionel Pym brought the later will to me"},
+    {"id": "f.lionel_tells", "of": "lionel", "attr": "tells", "value": "acct.lionel", "to": "dacre", "how": "told", "time": {"at": "t.august"}, "para": 2, "quote": "Mr. Lionel Pym told me"},
+    {"id": "f.will_found", "of": "lionel", "attr": "action", "act": "find", "thing": "new_will", "where": "bible", "value": "finding the later will in the family Bible", "time": {"at": "t.august"}, "truth": false, "para": 2, "quote": "I found the later will in the family Bible"},
+    {"id": "f.will_date", "of": "new_will", "attr": "condition", "value": "dated the third of March", "dated": "t.march3", "time": {"at": "t.august"}, "para": "will:1", "quote": "the later will was dated the third of March"},
+    {"id": "f.will_bequest", "of": "new_will", "attr": "condition", "value": "a will that revokes the earlier and gives all to Mr. Lionel Pym", "gives": [{"to": "lionel", "what": "all she had", "all": true}], "revokes": "old_will", "time": {"at": "t.august"}, "para": "will:1", "quote": "The later will revoked the earlier will and gave all she had to Mr. Lionel Pym"},
+    {"id": "f.will_thomas", "of": "new_will", "attr": "condition", "value": "a will that speaks of Thomas Pym as christened", "gives": [{"to": "thomas", "what": "a silver watch"}], "speaks_of": {"of": "thomas", "attr": "condition", "value": "christened"}, "time": {"at": "t.august"}, "para": "will:2", "quote": "the later will gave a silver watch to Thomas Pym and spoke of Thomas Pym as christened"},
+    {"id": "f.will_hand", "of": "new_will", "attr": "condition", "value": "in a hand very like the hand of Miss Harriet Pym", "time": {"at": "t.august"}, "para": "will:3", "quote": "the later will was in a hand very like the hand of Miss Harriet Pym"},
+    {"id": "f.bible_room", "of": "bible", "attr": "location", "value": "sitting_room", "time": {"from": "t.before", "to": "t.may2"}, "para": 3, "quote": "The family Bible was in the sitting-room of Ashcombe House"},
+    {"id": "f.lionel_keys", "of": "lionel", "attr": "carrying", "value": "keys", "time": {"from": "t.may2", "to": "t.august"}, "para": 3, "quote": "Mr. Lionel Pym had the keys of Ashcombe House"},
+    {"id": "f.grice_gone", "of": "grice", "attr": "location", "value": "frome", "time": {"from": "t.may6", "to": "t.august"}, "para": 3, "quote": "Mrs. Grice was at Frome"},
+    {"id": "f.buried", "of": "harriet", "attr": "condition", "value": "buried", "time": {"at": "t.may5"}, "para": 4, "quote": "Miss Harriet Pym was buried"},
+    {"id": "f.thomas_born", "of": "thomas", "attr": "condition", "value": "born, the son of Mr. Lionel Pym", "begins": true, "time": {"at": "t.june14"}, "para": 4, "quote": "Thomas Pym was born, the son of Mr. Lionel Pym"},
+    {"id": "f.thomas_christened", "of": "thomas", "attr": "condition", "value": "christened", "begins": true, "time": {"at": "t.july1"}, "para": 4, "quote": "Thomas Pym was christened"},
+    {"id": "f.lionel_owns", "of": "lionel", "attr": "says", "to": "dacre", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "lionel"}], "para": 5, "value": "owns to the make the later will", "quote": "Mr. Lionel Pym said to me: \"It was I who made the later will.\""},
+    {"id": "f.lionel_not", "of": "lionel", "attr": "says", "to": "dacre", "time": {"at": "t.later"}, "asserts": [{"q": "q.dated", "pick": "no"}], "para": 5, "value": "says it was no", "quote": "Mr. Lionel Pym said to me: \"On the third of March, the later will was not made.\""}
+  ]
+}

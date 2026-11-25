@@ -28,7 +28,7 @@ export function tell(dir, opts = {}) {
     const byId = (xs) => new Map(xs.map((x) => [x.id, x]));
     const E = byId(entities), T = byId(times), F = byId(facts), Q = byId(questions), A = byId(actions);
     const N = header.narrators[0].id, name = (id) => E.get(id)?.name ?? id;
-    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t) });
+    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, time: (id) => T.get(id).label });
     const mainT = tellerOf(N), third = tellerOf(null);
     const speakerOf = (id) => { const a = accounts.find((x) => x.facts.includes(id)); return a && a.origin !== N ? a.origin : null; };
     // How a sentence at a time begins: "On Monday, ", "At six o'clock on Sunday, " (`prep` on the time point), a
@@ -93,6 +93,8 @@ export function tell(dir, opts = {}) {
                         const s = mainT.sentence(f);
                         if (f.attr === 'says') f.value = third.said(f);
                         f.quote = plain(f.time, s, f.id);
+                        // A paper's date is a time told there.
+                        if (f.dated && T.get(f.dated).para == null) Object.assign(T.get(f.dated), { para: ref, quote: T.get(f.dated).label });
                     }
                 } else if (item.deed) { const q = Q.get(item.deed); plain(item.untimed ? null : q.entry.time, mainT.deed(q), `deed:${q.id}`, true); }   // `untimed`: where the deed's time is itself a question
                 else if (item.raise) { const q = Q.get(item.raise); close(); q.raised = ref; q.quote = q.label; out.push(q.label); told.push({ key: `raise:${q.id}`, text: q.label, full: q.label }); }

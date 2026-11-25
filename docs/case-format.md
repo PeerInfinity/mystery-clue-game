@@ -91,7 +91,10 @@ follows, or `clause: true` for a time that is an event ("the gate lamp was lit":
 that asserts an answer which is no person is "It was <the answer>." `{deed: <question>, untimed: true}` tells the
 deed without its time, where the time is itself a question. An answer that is no entity and stands in its
 question's label is available where the question is raised; "yes" and "no" are, in the question's own words; an
-answer that is the time of an event is where an entry tells the event at that time. A time read by a clock
+answer that is the time of an event is where an entry tells the event at that time. A paper's own properties are told of it: its date (`dated`: "was dated the third of March"), what it revokes, what
+it gives to whom (`gives` on an entry of a document) and what it speaks of (`speaks_of`: "spoke of Thomas Pym as
+christened"). An act may have nothing it is done to ("died"). An entity may have `prep: "in"` ("in the family
+Bible"; default "at"). A time read by a clock
 (`time.by`) says so ("At nine o'clock on Thursday by the hall clock"). An entry whose doer is unknown (`of: "?"`)
 is "somebody …". A `says` that asserts "yes" or "no" is the state that answer stands for, in the speaker's person. `node scripts/tell-story.mjs <dir>`
 then writes the story's text, one sentence an entry by the templates of `engine/tell.js`, and into the data what

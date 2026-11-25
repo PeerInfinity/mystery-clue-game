@@ -121,6 +121,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
+| `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
 | `cases/miniatures/same-monday-typed` | The Same Monday told from its data: the story and its five scenes made by a script, witnesses' accounts as their speech (finding 139). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs, 22 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
@@ -2287,6 +2288,28 @@ script that found each fact's paragraph from its quote; the data files are the s
       by the hall clock; the typed case only says it was slow. That it was slow the evening before is the
       reader's step in both (finding 119).
     - *Still untold:* a paper's own properties, a reasoning move's entry, a room, two narrators.
+
+145. **A paper's own properties told from its data: The Will in the Bible (2026-11-25).** The third of the
+    missing forms. The case is `cases/miniatures/will-in-the-bible-typed`: a main story and one paper, the will,
+    which the narrator reads; the same logic and true path, two questions.
+    - *What the templates gained.* A paper's date, what it revokes, what it gives to whom, and what it speaks of
+      ("In August, the later will gave a silver watch to Thomas Pym and spoke of Thomas Pym as christened"). An
+      act with nothing it is done to ("died"). A thing something is in (`prep: "in"`: "in the family Bible"). A
+      "no" confessed where the "yes" is a paper made at its date ("On the third of March, the later will was not
+      made").
+    - *It held:* 272 words in the story and the will, against 288; it validated at the first try and the true
+      path, the autoplay, the hints and the trying player play it through. The rule that a paper speaks of what
+      was not yet so on its date still fires from the typed entries, and the checker gives the two cases the
+      same result.
+    - *What typing it showed.* The will as a paper is no longer the will's words: the written case quotes it
+      ("whom I held at the font"), and the reader infers that it speaks of a christening; the typed case states
+      what it speaks of. That inference was the pleasure of the case, and the typed telling gives it away in the
+      telling. A paper told from its data needs its own words kept as a quotation beside the typed reading, or
+      the reading left for the reader to make.
+    - *What was lost besides:* the font, the mother's silver watch as hers, "in her hand as near as he could make
+      it", wanting to keep the house in the family (the motive in his own words; the gain is typed), and the
+      signature.
+    - *Still untold:* a reasoning move's entry, a room, two narrators.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

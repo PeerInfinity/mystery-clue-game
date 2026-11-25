@@ -1,0 +1,18 @@
+{
+  "entities": [
+    {"id": "dacre", "kind": "person", "name": "Henry Dacre"},
+    {"id": "harriet", "kind": "person", "name": "Miss Harriet Pym"},
+    {"id": "lionel", "kind": "person", "name": "Mr. Lionel Pym"},
+    {"id": "grice", "kind": "person", "name": "Mrs. Grice"},
+    {"id": "thomas", "kind": "person", "name": "Thomas Pym"},
+    {"id": "wells", "kind": "place", "name": "Wells"},
+    {"id": "ashcombe", "kind": "place", "name": "Ashcombe House"},
+    {"id": "sitting_room", "kind": "place", "name": "the sitting-room of Ashcombe House", "within": "ashcombe", "prep": "in"},
+    {"id": "frome", "kind": "place", "name": "Frome"},
+    {"id": "church", "kind": "group", "name": "the church"},
+    {"id": "bible", "kind": "object", "name": "the family Bible", "prep": "in"},
+    {"id": "old_will", "kind": "document", "name": "the earlier will"},
+    {"id": "new_will", "kind": "document", "name": "the later will"},
+    {"id": "keys", "kind": "object", "name": "the keys of Ashcombe House"}
+  ]
+}

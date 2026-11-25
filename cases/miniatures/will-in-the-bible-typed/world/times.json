@@ -1,0 +1,14 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.past", "label": "three years before", "prep": "", "after": "t.before", "para": 1, "quote": "Three years before"},
+    {"id": "t.march3", "label": "the third of March", "after": "t.past", "para": "will:1", "quote": "the third of March"},
+    {"id": "t.may2", "label": "the second of May", "after": "t.march3", "para": 1, "quote": "the second of May"},
+    {"id": "t.may5", "label": "the fifth of May", "after": "t.may2", "para": 4, "quote": "the fifth of May"},
+    {"id": "t.may6", "label": "the sixth of May", "after": "t.may5", "para": 3, "quote": "the sixth of May"},
+    {"id": "t.june14", "label": "the fourteenth of June", "after": "t.may6", "para": 4, "quote": "the fourteenth of June"},
+    {"id": "t.july1", "label": "the first of July", "after": "t.june14", "para": 4, "quote": "the first of July"},
+    {"id": "t.august", "label": "August", "prep": "In", "after": "t.july1", "para": 2, "quote": "August"},
+    {"id": "t.later", "label": "September", "prep": "In", "after": "t.august", "para": 5, "quote": "September"}
+  ]
+}
