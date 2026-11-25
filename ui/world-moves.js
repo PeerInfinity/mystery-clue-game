@@ -13,7 +13,7 @@ export const LEVELS = { 'ruled out': 0, unlikely: 1, uncertain: 2, likely: 3, co
 export class Stopped extends Error {}
 export class Failed extends Error {}
 export const VIEWS = new Set(['plan', 'stop', 'compare', 'account']);
-export const REASONING = new Set(['a', 'b', 'c', 'm']);
+export const REASONING = new Set(['a', 'b', 'c', 'm', 's']);
 export const ROOM_MOVES = new Set(['way', 'got', 'route', 'link']);
 /** The present: a visit made (`{do: 'visit', file, day?}`), the day ended (`{do: 'day', n}`: day n begins). Made in the path's order. */
 export const DAY_MOVES = new Set(['visit', 'day']);
@@ -49,7 +49,7 @@ export function nextRead(at, files, readTo, order = null) {
 }
 
 /** What a move works on, opened in the detail first: its `on`, or its own `a`/`of` for a move or a plan. */
-export const onOf = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'm', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
+export const onOf = (m) => m.on ?? (m.do === 'link' ? m.entry : ['a', 'b', 'c', 'm', 's', 'plan'].includes(m.do) ? (m.a ?? m.of) : null);
 /** The control that makes a move, once what it works on is open. */
 export function controlOf(m) {
     switch (m.do) {
@@ -60,6 +60,7 @@ export function controlOf(m) {
         case 'b': return `#detail [data-move-b="${esc(m.of)}"]`;
         case 'c': return `#detail [data-move-c="${esc(m.of)}"][data-for="${esc(m.for)}"]`;
         case 'm': return `#detail [data-move-m="${esc(m.of)}"][data-at="${esc(m.time)}"]`;
+        case 's': return `#detail [data-move-s="${esc(m.of)}"][data-to="${esc(m.to)}"]`;
         case 'plan': return `#detail [data-move-d="${esc(m.of)}"]`;
         case 'stop': case 'compare': case 'account': return `#detail [data-${m.do}="${esc(m.key)}"]`;
         case 'hold': return `[data-hold="${esc(m.strain)}"]`;
@@ -80,7 +81,7 @@ export function openerOf(on) {
     return [`#timeline [data-fact="${esc(on)}"] .ph`, `#timeline [data-fact="${esc(on)}"]`];
 }
 export const savedOf = (store) => { try { return JSON.parse(localStorage.getItem(store) ?? '{}'); } catch { return {}; } };
-const sameMove = (x, m) => x.move === m.do && (m.do === 'a' ? ((x.a === m.a && x.b === m.b) || (x.a === m.b && x.b === m.a)) : m.do === 'b' ? x.of === m.of : m.do === 'm' ? x.of === m.of && x.at === m.time : x.of === m.of && x.for === m.for);
+const sameMove = (x, m) => x.move === m.do && (m.do === 's' ? x.of === m.of && x.to === m.to : m.do === 'a' ? ((x.a === m.a && x.b === m.b) || (x.a === m.b && x.b === m.a)) : m.do === 'b' ? x.of === m.of : m.do === 'm' ? x.of === m.of && x.at === m.time : x.of === m.of && x.for === m.for);
 /** Has the save got this move's effect? (Views have none.) */
 export function made(m, save) {
     if (m.do === 'circle' || m.do === 'cross') return save.marks?.[m.q]?.[m.pick] === (m.do === 'circle' ? 'circled' : 'crossed');
@@ -199,7 +200,7 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
                 if (m.level === 'confirmed') { if (!made(m, saved()) && !(await press(sel))) throw new Failed('no offer to confirm'); break; }
                 if (!(await choose(sel, LEVELS[m.level]))) throw new Failed('no trust control');
                 break;
-            case 'a': case 'b': case 'c': case 'm':
+            case 'a': case 'b': case 'c': case 'm': case 's':
                 if (!(await press(sel)) || (saved().reasoning?.length ?? 0) !== (before.reasoning?.length ?? 0) + 1) throw new Failed('the move did not take');
                 break;
             case 'plan':

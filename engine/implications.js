@@ -282,6 +282,9 @@ export function tableRules(data, observations) {
     {
         const order = data.order ?? timeOrder(data.times), facts = (data.facts ?? []).filter((f) => f.truth !== false);
         const obs = (qid, f) => observations.filter((o) => o.q === qid && !o.if && o.from.every((x) => typeof x === 'string') && o.from.includes(f)).sort((a, b) => a.from.length - b.from.length)[0];
+        // Where the paper's entry gives its own words (`words`), what it speaks of is the reader's to point out: the
+        // rule then rests on the observation of that reading (`{reasoned: "speaks", premises: [entry, what it speaks of]}`).
+        const read = (qid, g, h) => observations.find((o) => o.q === qid && !o.if && o.from.length === 1 && o.from[0]?.reasoned === 'speaks' && (o.from[0].premises ?? []).includes(g) && (o.from[0].premises ?? []).includes(h));
         for (const q of data.questions) (q.possibilities ?? []).forEach((p, n) => {
             if (isRight(q, p.value)) return;
             for (const a of list(p.asserts)) {
@@ -289,7 +292,7 @@ export function tableRules(data, observations) {
                 if (!at) continue;
                 for (const d of facts.filter((f) => f.of === a.of && f.dated === at)) for (const g of facts.filter((f) => f.of === a.of && f.speaks_of && (f.dated ?? at) === at)) {
                     const so = g.speaks_of, h = facts.find((f) => f.of === so.of && (so.attr == null || f.attr === so.attr) && (so.value == null || f.value === so.value) && (f.begins || f.attr === 'action') && order.lt(at, f.time?.at ?? f.time?.from ?? at));
-                    const from = h && [...new Set([d, g, h].map((f) => obs(q.id, f.id)))];
+                    const from = h && [...new Set([obs(q.id, d.id), g.words ? read(q.id, g.id, h.id) : obs(q.id, g.id), obs(q.id, h.id)])];
                     if (!h || from.some((o) => !o) || out.some((t) => t.id === `t.dated.${n}`)) continue;
                     out.push({ id: `t.dated.${n}`, q: q.id, from: from.map((o) => o.id), says: `${from.map((o) => o.says).join('; ')}: it speaks of what was not yet so on its date`, rules_out: [p.value], ...other(q, p), table: true });
                 }

@@ -45,8 +45,10 @@ export function teller(ctx) {
     // A paper's own properties (2026-11-25; finding 145): its date, what it revokes, what it gives to whom, what it speaks of.
     const paper = (f) => {
         if (f.dated) return `${subj(f.of)} was dated ${ctx.time(f.dated)}`;
-        const parts = [f.revokes && `revoked ${ctx.name(f.revokes)}`, list(f.gives).length && `gave ${listed(list(f.gives).map((g) => `${ctx.name(g.what)} to ${obj(g.to)}`))}`, f.speaks_of && `spoke of ${ctx.name(f.speaks_of.of)} as ${f.speaks_of.value}`].filter(Boolean);
-        return parts.length ? `${subj(f.of)} ${listed(parts)}` : null;
+        // Where its own words are given (`words`), they are told and what they speak of is not: that is the reader's to point out.
+        const parts = [f.revokes && `revoked ${ctx.name(f.revokes)}`, list(f.gives).length && `gave ${listed(list(f.gives).map((g) => `${ctx.name(g.what)} to ${obj(g.to)}`))}`, f.speaks_of && !f.words && `spoke of ${ctx.name(f.speaks_of.of)} as ${f.speaks_of.value}`].filter(Boolean);
+        const said = f.words ? `${parts.length ? ', in these words' : ' said'}: "${f.words}"` : '';
+        return parts.length || said ? `${subj(f.of)}${parts.length ? ` ${listed(parts)}` : ''}${said}` : null;
     };
     const owns = (f) => list(f.asserts).find((x) => x.q && x.pick === f.of);
     function said(f) {
@@ -76,7 +78,7 @@ export function teller(ctx) {
             if (a) return `${subj(f.of)} said${to}: "It was ${a.pick}."`;
             return `${subj(f.of)} said${to}: "${f.value}."`;
         } else if (f.attr === 'action' && list(f.act).length) s = done(f, subj(f.of));
-        else if ((f.dated || f.revokes || f.speaks_of || ctx.kind?.(f.of) === 'document') && paper(f)) s = paper(f);
+        else if ((f.dated || f.revokes || f.speaks_of || f.words || ctx.kind?.(f.of) === 'document') && paper(f)) s = paper(f);
         else s = state(f) + list(f.gives).map((g) => `; by that ${obj(g.to)} gained ${g.what}`).join('');
         return ctx.speaker ? mine(ctx.speaker, s) : s;
     }

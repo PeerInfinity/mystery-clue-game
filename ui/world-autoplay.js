@@ -109,7 +109,7 @@ export async function start({ store, fast = false }) {
     const chipSel = (m) => `#q-box [data-mark-q="${esc(m.q)}"][data-mark-pick="${esc(m.pick)}"]`;
     const isRight = (m) => m.do === 'circle' && !moves.some((x) => x.do === 'cross' && x.q === m.q && x.pick === m.pick);
     const WORDS = {
-        a: 'Pointing out a change', b: 'What it needs and what it does', c: 'What is this for?', plan: 'What would this need?',
+        a: 'Pointing out a change', s: 'Pointing out what its words speak of', b: 'What it needs and what it does', c: 'What is this for?', plan: 'What would this need?',
         stop: 'What stopped it?', compare: 'Comparing two plans', account: 'Does it account for this?', hold: 'I hold both',
     };
     async function words(m) {

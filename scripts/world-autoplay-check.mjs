@@ -57,7 +57,7 @@ if (!st?.done) { console.log(`${failures} failure(s) (${LAYOUT}${process.env.PHO
 const marks = {};
 for (const m of moves) if (m.do === 'circle' || m.do === 'cross') (marks[m.q] ??= {})[m.pick] = m.do === 'circle' ? 'circled' : 'crossed';
 for (const [q, picks] of Object.entries(marks)) for (const [p, v] of Object.entries(picks)) if (save.marks?.[q]?.[p] !== v) fail(`mark ${q} = ${p}: ${save.marks?.[q]?.[p]}, not ${v}`);
-const reasoned = moves.filter((m) => ['a', 'b', 'c', 'm'].includes(m.do)).length;
+const reasoned = moves.filter((m) => ['a', 'b', 'c', 'm', 's'].includes(m.do)).length;
 if ((save.reasoning?.length ?? 0) !== reasoned) fail(`${save.reasoning?.length ?? 0} reasoning moves, not ${reasoned}`);
 // (A statement trusted by a generated move may since have been set with its whole paper: its own setting is then taken back.)
 for (const m of moves.filter((x) => x.do === 'trust' && x.link && !x.gen)) if (save.trust?.links?.[m.link] !== { 'ruled out': 0, unlikely: 1, uncertain: 2, likely: 3, confirmed: 4 }[m.level]) fail(`trust ${m.link} not ${m.level}`);

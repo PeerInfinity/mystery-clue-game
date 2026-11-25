@@ -2311,6 +2311,27 @@ script that found each fact's paragraph from its quote; the data files are the s
       signature.
     - *Still untold:* a reasoning move's entry, a room, two narrators.
 
+146. **A move for what words speak of: "This speaks of…" (the user's idea and rulings, 2026-11-25).** Finding 145
+    showed the typed will giving away its own inference. Asked whether a new player move for following such an
+    implication made sense, the answer put to the user was yes, and more generally than this case: the same
+    shape, "this description refers to that thing", is a paper speaking of an event (the will; the long case's
+    ledger entry that names a berth opened later), a witness describing a thing (the key with a brass tally),
+    and two descriptions compared (The Grey Cloak). The user agreed to try it on the typed Will in the Bible, a
+    wrong pick simply refused, the reading required for the answer, and the move counted in "Left to try".
+    - *Built.* An entry may give its own words (`words`) beside what they speak of (`speaks_of`). The telling
+      gives the words ("…gave a silver watch to Thomas Pym, in these words: 'To my great-nephew Thomas, whom I
+      held at the font, I leave my mother's silver watch.'") and no longer says what they speak of. The entry's
+      detail shows the words and offers "This speaks of…" beside every other entry of the timeline; the right
+      one gives the reader's own entry ("the later will, in its own words, speaks of: Thomas Pym was
+      christened"), a wrong one the note "Its words do not speak of that". The observation and the rule for a
+      paper dated before what it speaks of rest on that reading (`docs/case-format.md`).
+    - *In "Left to try"* it is one move ("This speaks of…: the entry"), whichever of the entries it turns out to
+      be, and it goes once made.
+    - *Checked.* The true path has the move (`s`); the path check, the autoplay in every layout, the hints and
+      the player who only tries things (who tries each entry in turn) play the case to the end.
+    - *Not done:* the long case's ledger entry (it would move that case's logic and version); the two other
+      uses (a thing known by a mark, two descriptions compared).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

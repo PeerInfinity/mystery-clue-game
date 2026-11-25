@@ -9,7 +9,7 @@ import { coverOf, overlaps } from '../engine/world.js';
 import { Story } from '../engine/story.js';
 import { MAIN, Reading, parseRef, refKey, refList } from '../engine/refs.js';
 import { shownNames, timeLabelAt, questionLabelAt } from '../engine/shown.js';
-import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, actNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps, pointGap, gapsOf } from '../engine/actions.js';
+import { ACTIONS, setCaseActions, STATES, OPEN_STATES, REASONING, pointSpeaks, pointChange, pointImplications, requirementStatus, reasonedEntries, agentNeeds, actNeeds, checkFit, checkPlan, accountsFor, comparePlans, impliedSteps, stops, meets, orderSteps, pointGap, gapsOf } from '../engine/actions.js';
 
 import { waysIn, checkWayMark, pointPassage, foundBy, linksOf, checkRoute } from '../engine/arrangement.js';
 import { fill, described, onPage, bears, waits } from '../engine/observations.js';
@@ -459,6 +459,7 @@ function phrase(f) {
     const v = val(f.value);
     const d = f.detail ? ` <span class="muted">(${esc(f.detail)})</span>` : '';
     switch (f.attr) {
+        case 'reading': return `${E}, in its own words, speaks of: ${factOf(f.value) ? phrase(factOf(f.value)) : ''}`;
         case 'location': return f.value == null ? `${E}: ${esc(f.detail ?? 'whereabouts unknown')}` : `${E} ${f.neg ? '<b>not</b> at' : 'at'} ${v}${d}`;
         case 'lives_at': return `${E} lives at ${v}${d}`;
         case 'member_of': return `${E} is one of ${v}`;
@@ -653,7 +654,7 @@ function assertsHtml(f) {
  * An entry the player can reason from (its detail offers moves): a typed state, a typed action, an intention with a
  * goal, a claim with a plan. Marked on the timeline so the moves can be found.
  */
-const canReason = (f) => ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || (list(f.act).length > 0 && !f.neg) || !!f.goal || !!f.plan || !!f.series;
+const canReason = (f) => (!!f.words && !!f.speaks_of) || ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || (list(f.act).length > 0 && !f.neg) || !!f.goal || !!f.plan || !!f.series;
 const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need, what is missing)">⚙</span>';
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
@@ -1884,6 +1885,20 @@ function addMove(m, select) {
     state.sel = select;
     save(); render();
 }
+/**
+ * Move (s) on an entry that gives someone's or a paper's own words (`words`): what do they speak of? The reader points
+ * at an entry of the timeline; the page takes it when the words do speak of that. What they speak of is in the data
+ * and never shown: the candidates are everything else on the timeline, so nothing here says which.
+ */
+function speaksMoveHtml(f) {
+    if (!f.words || !f.speaks_of || f.reasoned) return '';
+    const made = state.reasoning.find((m) => m.move === 's' && m.of === f.id);
+    const words = `<p class="quote">“${esc(f.words)}”</p>`;
+    if (made) return `<h3>Its own words</h3>${words}<p class="small">You have pointed out what they speak of: ${factOf(made.to) ? phrase(factOf(made.to)) : ''}.</p>`;
+    const cands = onTimeline().filter((o) => o.id !== f.id && !o.reasoned && o.attr !== 'tells' && !o.hyp);
+    const items = cands.map((o) => `<li><button type="button" class="move" data-move-s="${esc(f.id)}" data-to="${esc(o.id)}">This speaks of…</button> ${phrase(o)}</li>`).join('');
+    return `<h3>Its own words</h3>${words}<p class="small">What do these words speak of? Point at the entry of the timeline they refer to: what follows from that is then yours to link.</p><ul class="moves">${items}</ul>`;
+}
 /** Move (a) on a typed state: the other states of the same thing on the timeline to compare it with. */
 function changeMoveHtml(f) {
     if (!isTypedState(f)) return '';
@@ -2037,7 +2052,7 @@ function lostNeedWhy(l) {
 function lapseText(l) {
     const m = l.move;
     const what = m.move === 'c' ? `${premiseText(m.of)} <b>for</b> ${premiseText(m.for)}`
-        : m.move === 'a' ? `a change between ${premiseText(m.a)} and ${premiseText(m.b)}`
+        : m.move === 's' ? `what ${premiseText(m.of)} speaks of` : m.move === 'a' ? `a change between ${premiseText(m.a)} and ${premiseText(m.b)}`
         : m.move === 'm' ? `something missing at ${timeLabel(m.at)}, by ${premiseText(m.of)}` : `what ${premiseText(m.of)} needs and does`;
     return `${what}. ${lapseWhy(l)}`;
 }
@@ -2132,15 +2147,16 @@ function movesLeft() {
     const out = new Map();
     for (const f of onTimeline()) {
         if (!canReason(f)) continue;
-        const html = changeMoveHtml(f) + gapMoveHtml(f) + implicationsHtml(f) + purposeHtml(f);
-        for (const m of html.matchAll(/<button type="button" class="move" data-move-([abcm])="([^"]*)"(?: data-(?:with|at|for)="([^"]*)")?>/g)) {
+        const html = speaksMoveHtml(f) + changeMoveHtml(f) + gapMoveHtml(f) + implicationsHtml(f) + purposeHtml(f);
+        for (const m of html.matchAll(/<button type="button" class="move" data-move-([abcms])="([^"]*)"(?: data-(?:with|at|for|to)="([^"]*)")?>/g)) {
             const [, kind, x, y] = m;
-            const key = kind === 'a' ? `a|${[x, y].sort().join('|')}` : `${kind}|${x}|${y ?? ''}`;
+            // What some words speak of is one thing left to try, whichever entry it turns out to be.
+            const key = kind === 'a' ? `a|${[x, y].sort().join('|')}` : kind === 's' ? `s|${x}` : `${kind}|${x}|${y ?? ''}`;
             if (out.has(key)) continue;
             const un = (s) => s.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
             const a = factOf(un(x)), b = y != null ? factOf(un(y)) : null;
             const at = (e) => `<a class="link" data-fact="${esc(e.id)}">${phrase(e)}</a>`;
-            out.set(key, kind === 'a' ? `<b>It changed</b>: ${at(a)} <span class="muted">and</span> ${b ? phrase(b) : ''}`
+            out.set(key, kind === 's' ? `<b>This speaks of…</b>: ${at(a)}` : kind === 'a' ? `<b>It changed</b>: ${at(a)} <span class="muted">and</span> ${b ? phrase(b) : ''}`
                 : kind === 'm' ? `<b>Something is missing here</b>, at ${timeLabel(un(y))}: ${at(f)}`
                 : kind === 'b' ? `<b>What it needs and what it does</b>: ${at(a)}`
                 : `<b>For this</b>: ${at(a)}`);
@@ -2172,11 +2188,12 @@ function movesHtml(f) {
     const q = f.reasoned?.move === 'a' && f.of === '?' ? (questionOfChange(f) ?? qById.get(`who:${f.id}`)) : null;
     const who = q ? `<h3>Who did it? <span class="small muted">(your hypothesis)</span></h3>
       <p class="small">${q.own ? 'Your own question' : 'The question'}: <a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a></p>${chipsHtml(q)}${candidatesHtml(q)}` : '';
-    return `${changeMoveHtml(f)}${gapMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${lapsedHtml(f)}${planHtml(f)}`;
+    return `${speaksMoveHtml(f)}${changeMoveHtml(f)}${gapMoveHtml(f)}${implicationsHtml(f)}${who}${purposeHtml(f)}${lapsedHtml(f)}${planHtml(f)}`;
 }
 function reasonedDetail(f) {
     const how = f.reasoned.move === 'g' ? 'Something crossed between two places, so there is a way between them.'
         : f.reasoned.move === 'r' ? 'Each link of the route is on the timeline.'
+        : f.reasoned.move === 's' ? 'Its own words speak of this: your reading of them.'
         : f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
         : f.reasoned.move === 'm' ? 'A rule names this time, and the record has nothing at it: something is missing here.'
         : f.reasoned.move === 'c' ? 'What it brings about meets the goal of an intention, or a need of a step toward it.'
@@ -2771,6 +2788,13 @@ document.addEventListener('click', (e) => {
     const tb = e.target.closest('[data-tab]');
     if (tb) { chooseTab(panelFrom(e) ?? 0, tb.dataset.tab); backs = []; save(); render(); return; }
     if (e.target.closest('[data-back]')) { chooseTab(0, backs.at(-1)); backs = backs.slice(0, -1); save(); render(); return; }
+    const ms = e.target.closest('[data-move-s]');
+    if (ms) {
+        const r = pointSpeaks(factOf(ms.dataset.moveS), factOf(ms.dataset.to));
+        if (r.why) { state.note = r.why; render(); return; }
+        addMove({ move: 's', of: ms.dataset.moveS, to: ms.dataset.to }, r.entry.id);
+        return;
+    }
     const ma = e.target.closest('[data-move-a]');
     if (ma) {
         const a = factOf(ma.dataset.moveA), b = factOf(ma.dataset.with);
@@ -2830,6 +2854,7 @@ document.addEventListener('click', (e) => {
         }
         const m = f.reasoned.move === 'a' ? (x) => x.move === 'a' && x.a === f.reasoned.premises[0] && x.b === f.reasoned.premises[1] || x.move === 'a' && x.b === f.reasoned.premises[0] && x.a === f.reasoned.premises[1]
             : f.reasoned.move === 'c' ? (x) => x.move === 'c' && x.of === f.reasoned.premises[0] && x.for === f.reasoned.premises[1]
+            : f.reasoned.move === 's' ? (x) => x.move === 's' && x.of === f.reasoned.premises[0] && x.to === f.reasoned.premises[1]
             : f.reasoned.move === 'm' ? (x) => x.move === 'm' && x.of === f.rule && x.at === f.gap
             : (x) => x.move === 'b' && x.of === f.reasoned.premises[0];
         remember();

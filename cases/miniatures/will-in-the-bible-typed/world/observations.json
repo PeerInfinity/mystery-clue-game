@@ -1,9 +1,9 @@
 {
   "observations": [
     {"id": "o.date", "q": "q.dated", "from": ["f.will_date"], "says": "in August, the later will was dated the third of March", "essential": true},
-    {"id": "o.font", "q": "q.dated", "from": ["f.will_thomas"], "says": "in August, the later will gave a silver watch to Thomas Pym and spoke of Thomas Pym as christened", "essential": true},
+    {"id": "o.font", "q": "q.dated", "from": [{"reasoned": "speaks", "premises": ["f.will_thomas", "f.thomas_christened"]}], "says": "the words of the later will speak of this: on the first of July, Thomas Pym was christened", "essential": true},
     {"id": "o.christened", "q": "q.dated", "from": ["f.thomas_christened"], "says": "on the first of July, Thomas Pym was christened", "essential": true, "against": ["yes"]},
-    {"id": "o.dead", "q": "q.who", "from": ["f.will_thomas", "f.harriet_died", "f.thomas_christened"], "says": "in August, the later will gave a silver watch to Thomas Pym and spoke of Thomas Pym as christened; on the second of May, Miss Harriet Pym died; on the first of July, Thomas Pym was christened", "essential": true, "against": ["harriet"]},
+    {"id": "o.dead", "q": "q.who", "from": [{"reasoned": "speaks", "premises": ["f.will_thomas", "f.thomas_christened"]}, "f.harriet_died", "f.thomas_christened"], "says": "the words of the later will speak of this: on the first of July, Thomas Pym was christened; on the second of May, Miss Harriet Pym died; on the first of July, Thomas Pym was christened", "essential": true, "against": ["harriet"]},
     {"id": "o.gain", "q": "q.who", "from": ["f.old_will", "f.will_bequest"], "says": "three years before, the earlier will gave Ashcombe House to Mrs. Grice and the rest of the estate to the church; in August, the later will revoked the earlier will and gave all she had to Mr. Lionel Pym", "essential": true, "against": ["grice"]},
     {"id": "o.away", "q": "q.who", "from": ["f.grice_gone"], "says": "from the sixth of May until August, Mrs. Grice was at Frome", "essential": true, "against": ["grice"]},
     {"id": "o.keys", "q": "q.who", "from": ["f.lionel_keys"], "says": "from the second of May until August, Mr. Lionel Pym had the keys of Ashcombe House", "essential": true},

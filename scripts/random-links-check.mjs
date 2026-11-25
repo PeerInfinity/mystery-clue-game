@@ -111,6 +111,13 @@ const tryEntry = (id, qs) => ev(`(() => {
         if (!m) break;
         m.click(); moves++;
     }
+    // What its own words speak of: every entry offered is tried in turn, until one is taken (a wrong one is refused).
+    for (let i = 0; i < 60; i++) {
+        document.querySelector('#timeline [data-fact=' + ${J(J(id))} + '] .ph')?.click();
+        const m = document.querySelectorAll('#detail button.move[data-move-s]')[i];
+        if (!m) break;
+        m.click(); moves++;
+    }
     return { links, moves, offered };
 })()`);
 
@@ -120,6 +127,8 @@ const entryOf = (id) => {
     if (factById.has(id)) return factById.get(id);
     let m = /^r:a:(.+)\|(.+)$/.exec(id);
     if (m) return { id, reasoned: { move: 'a', premises: [m[1], m[2]] } };
+    m = /^r:s:(.+)>(.+)$/.exec(id);
+    if (m) return { id, reasoned: { move: 's', premises: [m[1], m[2]] } };
     m = /^r:m:(.+)@(.+)$/.exec(id);
     if (m) return { id, reasoned: { move: 'm', premises: [] }, rule: m[1], gap: m[2] };
     return { id, reasoned: { move: id.split(':')[1] ?? '?', premises: [] } };

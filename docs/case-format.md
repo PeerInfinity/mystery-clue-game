@@ -91,7 +91,14 @@ follows, or `clause: true` for a time that is an event ("the gate lamp was lit":
 that asserts an answer which is no person is "It was <the answer>." `{deed: <question>, untimed: true}` tells the
 deed without its time, where the time is itself a question. An answer that is no entity and stands in its
 question's label is available where the question is raised; "yes" and "no" are, in the question's own words; an
-answer that is the time of an event is where an entry tells the event at that time. A paper's own properties are told of it: its date (`dated`: "was dated the third of March"), what it revokes, what
+answer that is the time of an event is where an entry tells the event at that time. An entry may give its own words (`words`, a quotation) beside what they speak of (`speaks_of`, typed): the words
+are told ("…, in these words: …") and shown in the entry's detail, and what they speak of is never shown. It is
+the reader's move to point it out ("This speaks of…", move `s`: `{do: "s", of: <the entry>, to: <the entry it speaks
+of>}` in a true path; `engine/actions.js` `pointSpeaks`): a pick that fits gives the reader's own entry
+`r:s:<entry>><what it speaks of>`, a pick that does not is refused. An observation comes from that reading as
+`{reasoned: "speaks", premises: [<the entry>, <what it speaks of>]}`, and the rule for a paper that speaks of what
+was not yet so on its date then rests on it.
+A paper's own properties are told of it: its date (`dated`: "was dated the third of March"), what it revokes, what
 it gives to whom (`gives` on an entry of a document) and what it speaks of (`speaks_of`: "spoke of Thomas Pym as
 christened"). An act may have nothing it is done to ("died"). An entity may have `prep: "in"` ("in the family
 Bible"; default "at"). A time read by a clock

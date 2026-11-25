@@ -586,10 +586,23 @@ export function stops(x, step, nameOf = (id) => id, ctx = {}) {
  * gives nothing, and is listed in `ctx.lapsed` (if given) as `{move, why, gone?, ruledOut?}`: `gone`, the premise no
  * longer there (a hypothesis no longer circled). A move whose premises are not yet told is not listed. The moves that
  * hold are listed in `ctx.held`, if given. `moves`:
- * `[{move: 'a', a, b} | {move: 'b', of} | {move: 'c', of, for} | {move: 'm', of: rule, at: time}]`; `lookup`: id → a fact or an earlier entry;
+ * `[{move: 'a', a, b} | {move: 'b', of} | {move: 'c', of, for} | {move: 'm', of: rule, at: time} | {move: 's', of, to}]`; `lookup`: id → a fact or an earlier entry;
  * `givenAt`: when an entry is told. A move (c) gives the link "this, in order that that": `{attr: 'purpose', for,
  * serves}`, at the time of what it links.
  */
+/**
+ * (s) What a paper's or a speaker's words speak of (2026-11-25; docs/authored-stories.md, finding 146): entry `a` has
+ * its own words (`words`) and, typed and not shown, what they speak of (`speaks_of: {of, attr?, value?}`); the reader
+ * points at the entry `b` on the timeline that they refer to. It is taken when `b` is that state or event; the
+ * reading is then an entry of the reader's own, which a rule or an observation can rest on.
+ */
+export function pointSpeaks(a, b) {
+    const so = a?.speaks_of;
+    if (!a?.words || !so) return { why: 'Its own words are not given: there is nothing to read here.' };
+    const fits = !!b && !b.neg && b.of === so.of && (so.attr == null || b.attr === so.attr) && (so.value == null || b.value === so.value);
+    if (!fits) return { why: 'Its words do not speak of that.' };
+    return { entry: { id: `r:s:${a.id}>${b.id}`, of: a.of, attr: 'reading', value: b.id, reads: a.id, time: a.time, reasoned: { move: 's', premises: [a.id, b.id] } } };
+}
 export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {}) {
     const out = new Map();
     const find = (id) => out.get(id) ?? lookup(id);
@@ -608,7 +621,7 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
             out.set(r.entry.id, { ...r.entry, given_at: given });
             continue;
         }
-        const premises = m.move === 'a' ? [m.a, m.b] : m.move === 'c' ? [m.of, m.for] : [m.of];
+        const premises = m.move === 'a' ? [m.a, m.b] : m.move === 'c' ? [m.of, m.for] : m.move === 's' ? [m.of, m.to] : [m.of];
         const ps = premises.map(find);
         const lapse = (x) => ctx.lapsed?.push({ move: m, ...x });
         const gone = premises.find((id, i) => !ps[i]);
@@ -620,6 +633,7 @@ export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {})
         const c = { ...ctx, order };
         let r;
         if (m.move === 'a') r = pointChange(order, ps[0], ps[1], [], nameOf);
+        else if (m.move === 's') r = pointSpeaks(ps[0], ps[1]);
         else if (m.move === 'b') r = pointImplications(ps[0], nameOf, c);
         else {
             const fit = checkFit(ps[0], ps[1], linkedTo(ps[1].id), nameOf, c);

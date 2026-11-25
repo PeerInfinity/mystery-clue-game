@@ -15,7 +15,7 @@
 // a `reasoned` entry can be `{any: [ids]}` in the same way: the move made from any one of them is the entry.
 
 /** The moves whose entries an observation can name, by the name it uses: the move's code in `reasoned.move`. */
-export const REASONED_MOVES = { changed: 'a', got_through: 'g', missing: 'm' };
+export const REASONED_MOVES = { changed: 'a', got_through: 'g', missing: 'm', speaks: 's' };   // `speaks`: premises [the entry with words, what it speaks of]
 // A premise named by an observation is a fact's id, or `{any: [ids]}` for any one of several alike.
 const alts = (p) => (typeof p === 'string' ? [p] : p.any);
 const samePremises = (a, b) => a.length === b.length && b.every((p) => a.some((x) => alts(p).includes(x)));

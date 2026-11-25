@@ -143,6 +143,7 @@ export async function makeHints({ store, api }) {
                 const what = m.do === 'circle' ? `Circle “${pickName(m.q, m.pick)}”.`
                     : m.do === 'cross' ? `Cross out “${pickName(m.q, m.pick)}”.`
                     : m.do === 'trust' ? `${TRUST_VERB[m.level] ?? 'Set your trust'}: ${m.person ? `everything ${api.name(m.person)} says` : m.link.startsWith('stmt:') ? 'this statement itself (its own trust, above its chains)' : `everything that came by this link of its chain, ${api.linkName(m.link)}`}.`
+                    : m.do === 's' ? `Read its own words, and point out what they speak of: ${entry(m.to)}.`
                     : m.do === 'a' ? `Point out that it changed: against ${entry(m.b)}.`
                     : m.do === 'b' ? 'Point out what it needs and what it does.'
                     : m.do === 'm' ? `Point out that something is missing here: at ${api.timeName?.(m.time) ?? m.time}.`
