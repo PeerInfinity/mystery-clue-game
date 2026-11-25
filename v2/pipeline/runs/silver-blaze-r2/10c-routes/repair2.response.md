@@ -1,5 +1,0 @@
-The reader identifies who led the horse out from what the story tells, not by linking an aim, so a `noroute` line fits:
-
-```jsonl
-{"file":"noroute","q":"q.who_took","why":"The reader names who led the horse out by inference from what is told, not by linking an aim to it. The stable dog was set on the stranger that evening, yet it made no noise when the horse was taken (¶29, ¶34, ¶181–182), so the man who came at night was someone it knew well. The door was locked after the stranger left and found open at seven (¶31, ¶33), and the master of the stable keeps a key. Straker set out alone for the stables at one (¶32) and died beside the horse in the hollow (¶35, ¶37). Holmes draws the same conclusion: 'Obviously the midnight visitor was some one whom the dog knew well' (¶219). Straker's motive for the leading-out (to lame the horse in the open air, ¶223) comes afterwards and explains the act; it is not how the reader picks out its agent."}
-```

@@ -1,1 +1,0 @@
-q.straker_reason: to do something to the horse himself: need is {act, rule}, or a list of them

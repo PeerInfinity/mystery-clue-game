@@ -1,3 +1,0 @@
-```jsonl
-{"i": 1, "verdict": "supported", "why": "Holmes says in ¶204 that he found the horse 'in the hands of a faker'; the label only names that figure without identifying him."}
-```

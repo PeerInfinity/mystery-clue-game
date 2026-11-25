@@ -1,5 +1,11 @@
 # Setting up a new story: the pipeline
 
+**The run records are not in this repository (since 2026-11-25).** `runs/` was moved to
+[mystery-clue-game-pipeline-runs](https://github.com/PeerInfinity/mystery-clue-game-pipeline-runs), so that the game
+can be taken as a submodule without some 6,500 files of records. To use the pipeline again, clone that repository
+here as `v2/pipeline/runs` (the folder is ignored by git in this tree). Their history before the move is in this
+repository's.
+
 **Spoilers:** the runs under `runs/` give away the solutions of their stories.
 
 The process that turns a story's text into a case for the timeline (`docs/case-format.md`, "A case"), step by step,

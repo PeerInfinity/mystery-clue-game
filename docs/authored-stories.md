@@ -2211,6 +2211,17 @@ script that found each fact's paragraph from its quote; the data files are the s
       loop number exists in its runtime but is not sent. All three are a follow-up slice there. Until then the
       pair is not playable together.
 
+141. **The pipeline's run records moved to a repository of their own (2026-11-25; the user's decision, given in
+    Archipelago-CC and confirmed here).** Archipelago-CC is to take this repository's `main` as a submodule, and
+    its Pages deploy uploads a submodule whole: `v2/pipeline/runs` was 6,464 tracked files that nothing in the
+    main tree reads. They are now at `PeerInfinity/mystery-clue-game-pipeline-runs` (public, one commit, a README
+    saying what they are); here the folder is ignored, and cloning the archive into it makes the archived
+    pipeline usable again. No history was rewritten. No case and no version changed.
+    - *Also ruled there, for later (relayed):* the mystery becomes a substrate of its own, one case one region
+      to begin with; reading a case is free from a menu at any time, answering only in that region; what
+      depends on time is Action Nodes' to handle; the page will need a read-only mode. Nothing of it is asked
+      yet.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

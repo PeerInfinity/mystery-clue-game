@@ -12,6 +12,11 @@ item is an authored case file. Accounts as items, reading stopping at give-aways
 the work listed for Silver Blaze no longer stand. The structure format and its validator, the answer rule, the shape of
 the logic and the bridge do.
 
+**The pipeline's run records were moved out (2026-11-25)**, to
+[mystery-clue-game-pipeline-runs](https://github.com/PeerInfinity/mystery-clue-game-pipeline-runs), on the user's
+decision: Archipelago-CC takes this repository's `main` as a submodule directly, with no built-site branch ("Hosting",
+below, said a built-site branch; that is superseded).
+
 **The page's half of the bridge is built (2026-11-24):** `docs/case-format.md`, "Played in an Archipelago", and
 `docs/authored-stories.md`, findings 77, 78, 130 and 131. The host module in Archipelago-CC is not.
 

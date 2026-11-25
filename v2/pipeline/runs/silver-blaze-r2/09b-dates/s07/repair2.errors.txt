@@ -1,2 +1,0 @@
-f.holmes_not_watching_brown: a told fact in no account
-f.brown_thinks_watched: truth false, but what it asserts is true

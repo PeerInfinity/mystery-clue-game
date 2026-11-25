@@ -1,2 +1,0 @@
-FAIL EARLY ¶114 → ¶111 c f.stranger_asks_bayard → hyp:q.simpson_intent=only to get first-hand information (the page allows it)
-FAIL EARLY ¶124 → ¶120 c hyp:q.vesta=straker → hyp:q.candle=to have a small light somewhere out on the moor (the page allows it)

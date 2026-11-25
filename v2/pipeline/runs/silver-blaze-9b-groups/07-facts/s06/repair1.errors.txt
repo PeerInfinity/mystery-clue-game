@@ -1,1 +1,0 @@
-f.long_hollow_wet: asserts and modal belong on a says or believes fact

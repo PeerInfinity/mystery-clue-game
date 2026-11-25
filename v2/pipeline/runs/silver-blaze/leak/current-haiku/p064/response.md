@@ -1,3 +1,0 @@
-```jsonl
-{"i": 1, "verdict": "supported", "why": "Inspector Gregory states in ¶64 that he has examined every stable and out-house in Tavistock and for a radius of ten miles, so the label restates a stated fact."}
-```
