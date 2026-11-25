@@ -2329,6 +2329,14 @@ script that found each fact's paragraph from its quote; the data files are the s
       be, and it goes once made.
     - *Checked.* The true path has the move (`s`); the path check, the autoplay in every layout, the hints and
       the player who only tries things (who tries each entry in turn) play the case to the end.
+    - *A blind run (Haiku, the same day): solved, 76 turns, $0.135, both answers right.* The move was made once,
+      at turn 28, and the first pick was the right one: its note reads "Its words ('whom I held at the font')
+      refer to" the christening. It came to it because the linked bequest was reported as part of something not
+      yet complete, opened the entry, read the words and chose. So here the move was found by reading and not by
+      trying. The date question was solved at once after it; the other forty-odd turns went on "who", as in
+      the written case's runs (the housekeeper's and the testatrix's rule-outs are written rules over several
+      links). One run.
+    - *All the miniatures* pass every page check after the change (25 cases).
     - *Not done:* the long case's ledger entry (it would move that case's logic and version); the two other
       uses (a thing known by a mark, two descriptions compared).
 
