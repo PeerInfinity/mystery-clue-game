@@ -62,6 +62,9 @@ if (caseHeader.delivery?.mode === 'earned') {
     const orders = (caseFiles.some((f) => f.visit) ? [caseFiles.map((f) => f.id)] : perms(caseFiles.map((f) => f.id))).flatMap((p) => [['main', ...p], [...p, 'main']]);
     checks.splice(1, 0, ...orders.map((o) => ['path-check.mjs', { ORDER: o.join(',') }]), ['path-check.mjs', { WHOLE: '1' }]);
 }
+// Played as in an Archipelago, against the stand-in host (ui/bridge.js): a case whose papers are earned (one seed),
+// and a case with visits (its scenes given by the host as its day would find them).
+if (caseHeader.delivery?.mode === 'earned' || caseFiles.some((f) => f.visit)) checks.push(['path-check.mjs', { BRIDGE: '1', ANSWERS: 'evidence' }]);
 // A case with its implications written (world/implications.json, the experiment): the true path once more with the
 // answers marked from the evidence, where a circle must follow from the path's links.
 if (fs.existsSync(path.join(caseDir, 'world', 'implications.json'))) {

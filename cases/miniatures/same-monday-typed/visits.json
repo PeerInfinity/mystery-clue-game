@@ -1,0 +1,12 @@
+{
+  "story": "same-monday-typed", "case": "cases/miniatures/same-monday-typed", "version": "d99848e583b3",
+  "unit": "hour", "day": 3,
+  "visits": [
+    {"id":"office","label":"Look over the harbour office","cost":1,"after":[],"needs":{"read":[],"solved":[]},"paper":{"id":"office","title":"The harbour office"}},
+    {"id":"inn","label":"Ask at the Ship inn","cost":1,"after":[],"needs":{"read":[],"solved":[]},"paper":{"id":"inn","title":"At the Ship inn"}},
+    {"id":"watch","label":"Wake the night watchman at the ropewalk","cost":2,"after":[["inn"]],"needs":{"read":["inn"],"solved":[]},"paper":{"id":"watch","title":"The night watchman"}},
+    {"id":"pilot","label":"Ask the pilot about his key","cost":1,"after":[],"needs":{"read":["office"],"solved":[]},"paper":{"id":"pilot","title":"The pilot"}},
+    {"id":"chandler","label":"Call on Silas Finch at the chandler's","cost":1,"after":[],"needs":{"read":["pilot"],"solved":[]},"paper":{"id":"chandler","title":"At the chandler's"}}
+  ],
+  "goal": {"question":"q.who","papers":[["inn","office","watch"]]}
+}

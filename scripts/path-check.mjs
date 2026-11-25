@@ -70,7 +70,7 @@ await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, dev
 await send('Page.navigate', { url: pageUrl(process.env.URL ?? 'http://localhost:8321/', AQ) }); await sleep(1500);
 // A fresh page in three columns: every part in view, as on a laptop.
 await ev(`localStorage.setItem(${J(STORE)}, ${J(J({ layout: 'three' }))}); 1`);
-if (EARNED) await send('Page.navigate', { url: URL_ }); else await send('Page.reload');
+if (EARNED || BRIDGE) await send('Page.navigate', { url: URL_ }); else await send('Page.reload');
 await sleep(800); await ready();
 errors.length = 0;
 
@@ -282,6 +282,13 @@ async function play(m) {
             break;
         }
         case 'visit': case 'day':   // the day's box is under whatever is being read
+            // In an Archipelago the day is played in its client: the stand-in host gives the paper the visit finds there, and counts the days.
+            if (BRIDGE) {
+                await ev(m.do === 'visit' ? `window.__stub.give(${J(m.file)})` : `window.__stub.loop(${m.n})`);
+                await sleep(150);
+                if (!made(m, await save())) return fail(m, 'the page did not take it from the host');
+                break;
+            }
         case 'way': case 'got': case 'route': case 'link': {
             const sel = controlOf(m);
             if (!(await exists(sel))) return fail(m, 'not offered');
@@ -413,6 +420,13 @@ if (LIES) {
     if (open) { failures++; console.log(`FAIL at the end: ${open}\n${await ev(`document.querySelector('#clashes').innerText`)}`); }
     const unheld = await ev(`[...document.querySelectorAll('#clashes [data-hold]')].map((b) => b.closest('li').innerText.replace(/\\s+/g, ' '))`);
     for (const s of unheld) { failures++; console.log(`FAIL at the end, a likely clash not held: ${s}`); }
+}
+// Played as in an Archipelago, a case with visits: the host must have the question solved here as a check.
+if (BRIDGE && !EARNED && !failures && STOP >= 1e9) {
+    await sleep(150);
+    const got = await ev('window.__stub.solved()'), want = Object.keys((await save()).solved ?? {});
+    if (!want.length || want.some((q) => !got.includes(q))) { failures++; console.log(`FAIL the bridge: the page solved ${want.join(', ') || 'nothing'}, the host has ${got.join(', ') || 'nothing'} checked`); }
+    else console.log(`  the bridge: the host has ${got.join(', ')} checked`);
 }
 await dump();
 if (early.length) console.log(`${early.length} move(s) allowed before their paragraph`);

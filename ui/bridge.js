@@ -5,7 +5,7 @@
 // `{type, clientId, iframeId, windowId, timestamp, data}`. Over it go four events of the host's event bus:
 //   page → host   mystery:requestState   {story, version}
 //   page → host   mystery:questionSolved {story, questionId}
-//   host → page   mystery:state          {story, version, game, connected, papers, solved}   (the whole sets, every time)
+//   host → page   mystery:state          {story, version, game, connected, papers, solved, loop?}   (the whole sets, every time)
 //   host → page   mystery:refused        {reason, story, version}   (the slot's; reason: no-mystery-world, other-story, other-version)
 // The page deals only in its own ids (papers, questions); the host turns them into items and locations.
 // Nothing here touches the document: `win` is the page's window and `target` the host's, so a test can pass its own.
@@ -68,9 +68,10 @@ export function reconcile(heldBefore, solvedHere, state) {
  * it (scripts/fixtures/bridge-host.html).
  */
 export function stubHost({ win, target = win, id, story, version, game, start, brings, onMessage = null }) {
-    const solved = new Set();
+    const solved = new Set(), given = [];
+    let loop = 1;
     const post = (type, data) => (typeof target === 'function' ? target() : target).postMessage(message(type, id, data), '*');
-    const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: true, papers: [...start, ...[...solved].map(brings).filter(Boolean)], solved: [...solved] } });
+    const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: true, papers: [...start, ...[...solved].map(brings).filter(Boolean), ...given], solved: [...solved], loop } });
     win.addEventListener('message', (e) => {
         const m = e.data;
         if (!m || m.clientId !== id) return;
@@ -82,5 +83,6 @@ export function stubHost({ win, target = win, id, story, version, game, start, b
         if (eventName === 'mystery:questionSolved') solved.add(eventData.questionId);
         state();
     });
-    return { solved: () => [...solved] };
+    // For a case with visits, whose day is played in the host: a paper found there, and the loop it is in.
+    return { solved: () => [...solved], give: (paper) => { if (!given.includes(paper)) given.push(paper); state(); }, loop: (n) => { loop = n; state(); } };
 }

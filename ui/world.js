@@ -154,15 +154,19 @@ const params = new URLSearchParams(location.search);
 let ap = null;
 if (BRIDGE_ID && AUTOPLAY === null) {
     const waitNote = (t) => { document.getElementById('timeline').innerHTML = `<p class="muted">${esc(t)}</p>`; };
-    if (!EARNED) { waitNote('This case has no papers to earn, so it cannot be played in an Archipelago.'); throw new Error('bridge: not an earned case'); }
+    // A case whose papers are earned by solving questions, or whose scenes come by visits (then the day is played
+    // in the multiworld's client, in an Action Nodes world, and what its visits find comes here as papers).
+    const byVisits = (header.files ?? []).some((f) => f.visit);
+    if (!EARNED && !byVisits) { waitNote('This case has no papers to earn and no visits, so it cannot be played in an Archipelago.'); throw new Error('bridge: nothing to earn'); }
     // The case's name and version as its export has them (rules.json, which a test keeps the export of the case).
     // A case with no export (the checks' fixture) has its structure's name and no version.
-    const { story, version } = await get(`${CASE}/rules.json`).then((r) => r.world[1].slot_data.mystery, async () => ({ story: (await get(`${CASE}/structure.json`)).story, version: 'unversioned' }));
-    ap = { story, version, held: [...logic.start], connected: false, link: null, onState: null, sent: new Set() };
+    const { story, version } = await get(`${CASE}/rules.json`).then((r) => r.world[1].slot_data.mystery, () => get(`${CASE}/visits.json`)).catch(async () => ({ story: (await get(`${CASE}/structure.json`)).story, version: 'unversioned' }));
+    ap = { story, version, held: [...(logic?.start ?? [])], connected: false, link: null, onState: null, sent: new Set(), visits: byVisits, loop: 1 };
     if (params.get('bridge') === 'stub') {
         // The checks' host, in this window: the placement of `?seed=`, as when playing alone.
-        const seed = Number(params.get('seed')) || 1, placed = placement(logic, seed) ?? new Map();
-        window.__stub = stubHost({ win: window, id: BRIDGE_ID, story, version: params.get('stubVersion') ?? version, game: `stub-${seed}`, start: logic.start, brings: (q) => placed.get(q) ?? null });
+        // (A case with visits: nothing is placed; the check gives the papers as its visits would find them, `__stub.give`.)
+        const seed = Number(params.get('seed')) || 1, placed = logic ? placement(logic, seed) ?? new Map() : new Map();
+        window.__stub = stubHost({ win: window, id: BRIDGE_ID, story, version: params.get('stubVersion') ?? version, game: `stub-${seed}`, start: logic?.start ?? [], brings: (q) => placed.get(q) ?? null });
     }
     waitNote('Waiting for the Archipelago connection…');
     const first = await new Promise((resolve) => {
@@ -240,7 +244,7 @@ const source = ap ? {
 };
 // A reply (a file with `reply: <question>`) comes when its question is solved, whatever brings the papers.
 const replyOf = new Map(files.filter((f) => f.reply != null).map((f) => [f.reply, f]));
-const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).visit ? state.visits?.first?.[id] != null : fileById.get(id).reply != null ? !!state.solved?.[fileById.get(id).reply] : EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
+const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).visit ? (ap ? source.held().has(id) : state.visits?.first?.[id] != null) : fileById.get(id).reply != null ? !!state.solved?.[fileById.get(id).reply] : EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
 /** Can this question be solved now (earned papers): not solved, its papers come, what it rests on solved. Otherwise always. */
 const openNow = (id) => { const lq = logic?.questions.find((x) => x.id === id); return !lq || isOpen(lq, source.held(), new Set(Object.keys(state.solved))); };
 // For the autoplay and the checks: the delivery as the page has it.
@@ -276,6 +280,8 @@ function visitsHtml() {
     // Under whatever is being read, the story or a paper: while a scene is open the day is still running, and a
     // blind solver that could not see the day's box did not go back to it (2026-11-25; finding 135).
     if (!VISITS.length) return '';
+    // In an Archipelago the day is played in its client (an Action Nodes world): no visits are made here.
+    if (ap) return `<div class="visits" data-day="${state.visits.day}"><p class="visits-head"><b>Day ${state.visits.day}</b></p><p class="small">The day is played in the Archipelago client: make your visits there. What they find comes here as papers, whichever visit or world it comes from.</p></div>`;
     const rows = VISITS.map((f) => ({ f, st: visitState(f) })).filter((x) => x.st.known);
     if (!rows.length) return '';
     const left = DAY - state.visits.spent;
@@ -289,16 +295,17 @@ function visitsHtml() {
       <p><button type="button" class="${stuck ? '' : 'quiet'}" data-day-end title="The same morning begins again. What you have read and everything on your timeline is kept.">${stuck ? 'Wake again on the same morning ▶' : 'End the day'}</button></p></div>`;
 }
 /** The visits known and never made, on any day. */
-const unmadeVisits = () => VISITS.filter((f) => visitState(f).known && visitedOn(f.id) == null);
+const unmadeVisits = () => (ap ? [] : VISITS).filter((f) => visitState(f).known && visitedOn(f.id) == null);
 function visit(id) {
     const f = fileById.get(id);
-    if (!f?.visit || !visitState(f).open) return;
+    if (ap || !f?.visit || !visitState(f).open) return;
     const v = state.visits;
     state.visits = { ...v, spent: v.spent + (f.visit.cost ?? 1), today: [...v.today, id], first: { [id]: v.day, ...v.first }, log: [...v.log.slice(0, -1), [...v.log.at(-1), id]] };
     state.story = id;
     save(); render();
 }
 function endDay() {
+    if (ap) return;
     const v = state.visits;
     state.visits = { ...v, day: v.day + 1, spent: 0, today: [], log: [...v.log, []] };
     // A day ended with nothing done gains nothing: said, since a blind solver ended three days running (finding 135).
@@ -307,8 +314,8 @@ function endDay() {
     save(); render();
 }
 /** The day an entry was learned on, when it came by a visit of an earlier day than today's (else null). */
-const earlierDay = (f) => { const r = parseRef(givenAt(f)), d = r && fileById.get(r.story)?.visit ? visitedOn(r.story) : null; return d != null && d < state.visits.day ? { day: d, label: fileById.get(r.story).visit.label } : null; };
-const dayTag = (f) => { const e = VISITS.length ? earlierDay(f) : null; return e ? ` <span class="day-tag" title="Learned on day ${e.day}: ${esc(e.label)}">day ${e.day}</span>` : ''; };
+const earlierDay = (f) => { const r = parseRef(givenAt(f)), d = r && fileById.get(r.story)?.visit ? visitedOn(r.story) : null; return d != null && d < state.visits.day ? { day: d, label: ap ? null : fileById.get(r.story).visit.label } : null; };
+const dayTag = (f) => { const e = VISITS.length ? earlierDay(f) : null; return e ? ` <span class="day-tag" title="Learned on day ${e.day}${e.label ? `: ${esc(e.label)}` : ''}">day ${e.day}</span>` : ''; };
 if (!delivered(state.story)) state.story = MAIN;
 /** A paragraph's reference as the player sees it: "¶3" in the main story, "Rudd ¶2" in a file. */
 const paraTag = (x) => { const p = parseRef(x); if (!p) return '¶?'; return p.story === MAIN ? `¶${p.n}` : `${fileById.get(p.story)?.short ?? p.story} ¶${p.n}`; };
@@ -2151,9 +2158,9 @@ function leftHtml() {
     const unsure = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && levelOfFact(f) === UNCERTAIN);
     const n = (k, one, many = `${one}s`) => `${k} ${k === 1 ? one : many}`;
     const part = (title, items, none) => `<h4>${title}</h4>${items.length ? `<ul>${items.map((x) => `<li>${x}</li>`).join('')}</ul>` : `<p class="small muted">${none}</p>`}`;
-    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${((story, k) => (story && !k ? 'the story to read on' : `${story ? 'the story to read on · ' : ''}${n(k, 'paper')} to read`))(papers.some((p) => p.id === MAIN && !p.held), papers.filter((p) => !p.held && p.id !== MAIN).length)}${VISITS.length ? ` · ${n(unmadeVisits().length, 'visit')} not made` : ''} · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}${unsure.length ? ` · ${unsure.length} uncertain` : ''}</summary>
+    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${((story, k) => (story && !k ? 'the story to read on' : `${story ? 'the story to read on · ' : ''}${n(k, 'paper')} to read`))(papers.some((p) => p.id === MAIN && !p.held), papers.filter((p) => !p.held && p.id !== MAIN).length)}${VISITS.length && !ap ? ` · ${n(unmadeVisits().length, 'visit')} not made` : ''} · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}${unsure.length ? ` · ${unsure.length} uncertain` : ''}</summary>
       ${part('Reading', papers.map((p) => `<a class="link" data-story="${esc(p.id)}">${esc(p.title)}</a> <span class="small muted">${p.at} of ${p.last} read${p.held ? '; nothing to read now: it is held until a question is answered (see the notice), and is not counted above' : ''}</span>`), 'Everything you have is read.')}
-      ${VISITS.length ? part('Visits not made yet', unmadeVisits().map((f) => `${esc(f.visit.label)} <span class="small muted">${units(f.visit.cost ?? 1)}; the day is under the story</span>`), 'You have been everywhere you know of.') : ''}
+      ${VISITS.length && !ap ? part('Visits not made yet', unmadeVisits().map((f) => `${esc(f.visit.label)} <span class="small muted">${units(f.visit.cost ?? 1)}; the day is under the story</span>`), 'You have been everywhere you know of.') : ''}
       ${part('Reasoning moves on offer', moves, 'None on offer that you have not made.')}
       ${linkQs.length ? part('Links not tried yet', linkQs.map((q) => `<a class="link" data-left-linking="${esc(q.id)}" title="Link to this question, showing only what is not tried yet">${esc(qLabel(q))}</a> <span class="small muted" data-untried-n="${esc(q.id)}"></span>`), '') : ''}
       ${part('Questions with no answer circled', unmarked.map((q) => `<a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>`), 'Every open question has an answer circled.')}
@@ -2435,7 +2442,7 @@ function renderDetail(clashing) {
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.${recordNote(f) ? ` <span class="muted">(${recordNote(f).replace(/^o/, 'O')}.)</span>` : ''}</p>
           ${restsOn(f) && factById.has(restsOn(f)) && visible(factById.get(restsOn(f))) ? `<p class="small" data-seen-from>Rests on ${f.seen_from ? 'where its witness was' : 'what its witness knew it by'}: ${dot(levelOfFact(factById.get(restsOn(f))))}<a class="link" data-fact="${esc(restsOn(f))}">${phrase(factById.get(restsOn(f)))}</a>. It is trusted no further than that.</p>` : ''}
-          ${clockNote(f)}${VISITS.length && earlierDay(f) ? `<p class="small" data-earlier-day>Learned on day ${earlierDay(f).day}, by a visit: ${esc(earlierDay(f).label)}. It is day ${state.visits.day} now; what you learned then still stands.</p>` : ''}
+          ${clockNote(f)}${VISITS.length && earlierDay(f) ? `<p class="small" data-earlier-day>Learned on day ${earlierDay(f).day}${earlierDay(f).label ? `, by a visit: ${esc(earlierDay(f).label)}` : ', when its paper came'}. It is day ${state.visits.day} now; what you learned then still stands.</p>` : ''}
           ${f.attr === 'tells' ? toldHtml(f)
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
@@ -3065,6 +3072,13 @@ if (ap) {
         if (st.version != null && st.version !== ap.version) { state.note = `The Archipelago slot was made from another version of this case (${st.version}; this page is ${ap.version}).`; render(); return; }
         const r = reconcile(ap.held, Object.keys(state.solved), st);
         ap.held = r.held; ap.connected = !!st.connected;
+        // A case with visits: the day is the host's loop (`loop`, from 1; without it the day stays 1), and a paper is of the day it came on.
+        if (ap.visits) {
+            const day = Number.isInteger(st.loop) && st.loop > 0 ? st.loop : state.visits.day, was = state.visits;
+            const first = { ...was.first }, log = was.log.map((d) => [...d]); while (log.length < day) log.push([]);
+            for (const id of ap.held) if (fileById.get(id)?.visit && first[id] == null) { first[id] = day; log[day - 1].push(id); }
+            if (day !== was.day || Object.keys(first).length !== Object.keys(was.first).length) { state.visits = { ...was, day, first, log }; save(); if (!r.fresh.length && !r.resend.length) render(); }
+        }
         for (const q of r.resend) ap.link.solved(q);
         for (const q of st.solved ?? []) ap.sent.add(q);
         if (r.fresh.length) state.note = `From the Archipelago: ${r.fresh.map((id) => fileById.get(id)?.title ?? id).join('; ')}.`;

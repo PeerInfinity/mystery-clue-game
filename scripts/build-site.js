@@ -55,6 +55,8 @@ for (const dir of worlds) {
     files.add(path.normalize(path.join(world, header.story)));
     // Papers earned: played in an Archipelago the page reads the case's name and version from its export (ui/world.js).
     for (const f of ['rules.json', 'structure.json']) if (header.delivery?.mode === 'earned' && fs.existsSync(path.join(root, dir, f))) { files.add(path.join(dir, f)); break; }
+    // Visits: in an Archipelago the page reads the case's name and version from its export (scripts/export-visits.mjs).
+    if ((header.files ?? []).some((f) => f.visit) && fs.existsSync(path.join(root, dir, 'visits.json'))) files.add(path.join(dir, 'visits.json'));
     // Its case files (sub-stories), each a text of its own.
     for (const f of header.files ?? []) files.add(path.normalize(path.join(world, f.text)));
 }

@@ -151,6 +151,14 @@ and no other (the seed's name, the team and the slot): the save is kept per game
 - What solving a question brought is not known to the page ("Its check is sent to the Archipelago"); the list of
   papers says "come from the Archipelago". The autoplay does not use the bridge.
 
+A case with visits can be framed too (since 2026-11-25; finding 140). The day is then played in the multiworld's
+client, in an Action Nodes world: the page makes no visits and shows no day's box of its own, a visit's scene is
+held when the host lists it among `papers` (whichever visit or world it came from), and the question solved here is
+sent as for any case. `mystery:state` may carry `loop` (the host's loop, from 1): it is the page's day, and a paper is
+of the day it came on, for the "day N" mark. The case's name and version come from `<case>/visits.json`, the export
+of `node scripts/export-visits.mjs <dir>`: `{story, case, version, unit, day, visits: [{id, label, cost, after, needs,
+paper}], goal: {question, papers}}`, a hash of the rest as its version, held to the case by a test.
+
 `?bridge=stub` puts a stand-in host in the page's own window (the placement of `?seed=`), for the checks;
 `scripts/fixtures/bridge-host.html?case=<dir>&seed=<n>` frames the page with the same stand-in, across two windows,
 to try it by eye. The real host is a module of the web client and is not built yet.

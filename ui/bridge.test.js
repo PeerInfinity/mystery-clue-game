@@ -20,7 +20,7 @@ test('the handshake, the state, a solve and its paper', async () => {
     stubHost({ win, id: 'mystery', story: 's', version: 'v1', game: 'g', start: ['a'], brings: (q) => ({ q1: 'b' })[q] ?? null });
     const link = connect({ win, target: win, id: 'mystery', story: 's', version: 'v1', onState: (s) => states.push(s), onRefused: (r) => assert.fail(r) });
     await settle();
-    assert.deepEqual(states.at(-1), { story: 's', version: 'v1', game: 'g', connected: true, papers: ['a'], solved: [] });
+    assert.deepEqual(states.at(-1), { story: 's', version: 'v1', game: 'g', connected: true, papers: ['a'], solved: [], loop: 1 });
     assert.deepEqual(win.log.filter((m) => m.type === 'SUBSCRIBE_EVENT_BUS').map((m) => m.data.eventName), ['mystery:state', 'mystery:refused']);
     assert.ok(win.log.some((m) => m.type === 'IFRAME_APP_READY'));
     // Every message has the shape the web client's adapter accepts.

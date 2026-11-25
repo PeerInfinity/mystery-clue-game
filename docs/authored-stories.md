@@ -2190,6 +2190,27 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *A check that failed once and not again:* The Garden Room's hints check ("the same hint three times
       over" at ¶4) in one run of three side by side with other checks, with and without this change. Unexplained.
 
+140. **Visits in an Archipelago: the page's half (2026-11-25; the user: this is now the priority).**
+    - *Where the day is played.* In the multiworld's client, in the Action Nodes world built there for The Same
+      Monday (each visit a check, the five scenes the items, shuffled). This page is the case's other half: the
+      story, the papers held, the timeline and the question. That is "a case does not know its spine": the
+      substrate is the spine.
+    - *Built here.* Framed, a case with visits takes its scenes from the host's `papers`, makes no visits and
+      shows a line in place of the day's box; the host's `loop` is its day; the question solved is sent as for
+      the long case. `scripts/export-visits.mjs` writes `visits.json` for a case with visits (the day, the
+      visits, the papers, what the goal's answer needs by the case's own logic, a version): the page reads its
+      name and version there, and it is the file the other side can build its graph from.
+    - *Checked.* Both versions of The Same Monday play their true paths against the stand-in host, which gives
+      each scene as its visit would find it and counts the days, and ends with the question checked; the page
+      checks now play every earned case and every case with visits once this way.
+    - *What the other side has and lacks* (its session's answers, the same day). The preset exists
+      (`action_nodes_same_monday`): the five papers as items under their titles, the five visits as checks, the
+      goal an ordinary location named by the question, its rule the office, the inn and the watchman. It carries
+      no `slot_data.mystery` (the Action Nodes compiler writes no slot data), so the bridge module there cannot
+      serve it yet; the goal is reached there by performing its node, not by a check from this page; and the
+      loop number exists in its runtime but is not sent. All three are a follow-up slice there. Until then the
+      pair is not playable together.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,
