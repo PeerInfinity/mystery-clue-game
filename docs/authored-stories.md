@@ -2095,7 +2095,14 @@ script that found each fact's paragraph from its quote; the data files are the s
       feel earned.
     - *The one piece of grammar:* in a speaker's own words what is theirs by name is "my". Everything else names
       each thing in full every time, with no pronouns: the concept library has no such slots either (finding 130).
-    - *Not done:* a blind run; prose by a model from the same data (the next version up); a telling for a case
+    - *A blind run (Haiku, 2026-11-25): solved, 20 turns, $0.027, the answer right, never stuck.* Against 15
+      turns and $0.018 for the written story. It read to the fifth paragraph, linked the rival's want and the
+      wife's first ("it bears on who gains"), saw the page cross them out, then linked the rest, the owner's want
+      and what the deed did among them, and was done. The generated sentences were read without trouble; its
+      notes restate them correctly. What differed: it linked nearly every entry (9 links, against 4), where the
+      written story's solver linked the three wants and the deed. The telling gives each entry the same weight,
+      so nothing marks which bear on the question. One run each.
+    - *Not done:* prose by a model from the same data (the next version up); a telling for a case
       with papers, tellings or false statements, whose forms the templates do not have yet.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
