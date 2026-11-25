@@ -2043,6 +2043,8 @@ script that found each fact's paragraph from its quote; the data files are the s
       chandler's is named in the scene there, so the clerk's "in my bed" is not "at a place"; the first paragraph
       names the harbour office in full (the timeline had "The office").
     - It asked for the Hint, which a blind solver is not given.
+    - *Mended on the user's ruling (2026-11-25):* the day's box is under whatever is being read, the story or a
+      paper; and "Left to try" and the gate's notice name the visits not made yet. To be tried by a second run.
 
 136. **The user's rulings on time in Action Nodes (2026-11-25; given in Archipelago-CC and relayed here by its
     sessions, so at second hand).** The design is `NewDocs/plans/actionnodes-time-design.md` in that repository.

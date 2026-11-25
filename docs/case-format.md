@@ -85,7 +85,7 @@ length of the day and `delivery.unit` its unit's name (default `hour`); `cost` (
 it. `after`: alternative sets of visits (file ids), every one of some set made earlier the same day. `needs: {read:
 [files], solved: [questions]}`: what must be known, from any day, before the visit is offered at all (a file read to
 its end, a question solved). The file's `delivered` is the paragraph of the main story from which the visit is
-offered. The day's box is under the main story: each visit known, its cost, and why it cannot be made now; and "End
+offered. The day's box is under the story and under every paper (so it is in view while a scene is read): each visit known, its cost, and why it cannot be made now; and "End
 the day", which begins the same morning again (it is all that can be done when nothing fits). Ending the day keeps
 everything read and everything on the timeline; only the day's time and its visits made start over. An entry given
 in a visit's file on an earlier day is marked "day N" on the timeline, and its detail names the visit. The save:

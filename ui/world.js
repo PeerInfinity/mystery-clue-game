@@ -273,7 +273,9 @@ function visitState(f) {
     return { known: true, open: true };
 }
 function visitsHtml() {
-    if (!VISITS.length || state.story !== MAIN) return '';
+    // Under whatever is being read, the story or a paper: while a scene is open the day is still running, and a
+    // blind solver that could not see the day's box did not go back to it (2026-11-25; finding 135).
+    if (!VISITS.length) return '';
     const rows = VISITS.map((f) => ({ f, st: visitState(f) })).filter((x) => x.st.known);
     if (!rows.length) return '';
     const left = DAY - state.visits.spent;
@@ -286,6 +288,8 @@ function visitsHtml() {
     return `<div class="visits" data-day="${state.visits.day}"><p class="visits-head"><b>Day ${state.visits.day}</b> · ${left ? `${units(left)} left of ${DAY}` : 'the day is spent'}</p><ul>${li}</ul>
       <p><button type="button" class="${stuck ? '' : 'quiet'}" data-day-end title="The same morning begins again. What you have read and everything on your timeline is kept.">${stuck ? 'Wake again on the same morning ▶' : 'End the day'}</button></p></div>`;
 }
+/** The visits known and never made, on any day. */
+const unmadeVisits = () => VISITS.filter((f) => visitState(f).known && visitedOn(f.id) == null);
 function visit(id) {
     const f = fileById.get(id);
     if (!f?.visit || !visitState(f).open) return;
@@ -2142,8 +2146,9 @@ function leftHtml() {
     const unsure = data.facts.filter((f) => f.attr !== 'tells' && visible(f) && levelOfFact(f) === UNCERTAIN);
     const n = (k, one, many = `${one}s`) => `${k} ${k === 1 ? one : many}`;
     const part = (title, items, none) => `<h4>${title}</h4>${items.length ? `<ul>${items.map((x) => `<li>${x}</li>`).join('')}</ul>` : `<p class="small muted">${none}</p>`}`;
-    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${((story, k) => (story && !k ? 'the story to read on' : `${story ? 'the story to read on · ' : ''}${n(k, 'paper')} to read`))(papers.some((p) => p.id === MAIN && !p.held), papers.filter((p) => !p.held && p.id !== MAIN).length)} · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}${unsure.length ? ` · ${unsure.length} uncertain` : ''}</summary>
+    return `<details class="q-box left-box" id="left-box"${state.leftOpen ? ' open' : ''}><summary>Left to try: ${((story, k) => (story && !k ? 'the story to read on' : `${story ? 'the story to read on · ' : ''}${n(k, 'paper')} to read`))(papers.some((p) => p.id === MAIN && !p.held), papers.filter((p) => !p.held && p.id !== MAIN).length)}${VISITS.length ? ` · ${n(unmadeVisits().length, 'visit')} not made` : ''} · ${n(moves.length, 'move')}${linkQs.length ? ' · <span data-untried-total></span> links' : ''} · ${n(unmarked.length, 'answer')}${unsure.length ? ` · ${unsure.length} uncertain` : ''}</summary>
       ${part('Reading', papers.map((p) => `<a class="link" data-story="${esc(p.id)}">${esc(p.title)}</a> <span class="small muted">${p.at} of ${p.last} read${p.held ? '; nothing to read now: it is held until a question is answered (see the notice), and is not counted above' : ''}</span>`), 'Everything you have is read.')}
+      ${VISITS.length ? part('Visits not made yet', unmadeVisits().map((f) => `${esc(f.visit.label)} <span class="small muted">${units(f.visit.cost ?? 1)}; the day is under the story</span>`), 'You have been everywhere you know of.') : ''}
       ${part('Reasoning moves on offer', moves, 'None on offer that you have not made.')}
       ${linkQs.length ? part('Links not tried yet', linkQs.map((q) => `<a class="link" data-left-linking="${esc(q.id)}" title="Link to this question, showing only what is not tried yet">${esc(qLabel(q))}</a> <span class="small muted" data-untried-n="${esc(q.id)}"></span>`), '') : ''}
       ${part('Questions with no answer circled', unmarked.map((q) => `<a class="link" data-q="${esc(q.id)}">${esc(qLabel(q))}</a>`), 'Every open question has an answer circled.')}
@@ -2613,6 +2618,7 @@ function renderGate() {
         : open.length ? `<p class="small">${open.length} question${open.length === 1 ? '' : 's'} raised so far ${open.length === 1 ? 'is' : 'are'} not solved, and none has all its evidence on the page: read the papers you have to their ends.</p>` : ''}`;
     el.innerHTML = `${rest.length ? `<p><b>Before ¶${state.para + 1}</b>, the story gives away the answer to ${rest.length === 1 ? 'this question' : `these ${rest.length} questions`}. ${rule}</p>
       <ul>${rest.map((q) => `<li>${qLink(q)} <span class="small muted">(${count(q)})</span></li>`).join('')}</ul>` : ''}${farHtml}
+      ${VISITS.length && unmadeVisits().length ? `<p class="small" data-unmade-visits>Visits you have not made: ${unmadeVisits().map((f) => esc(f.visit.label)).join('; ')}. The day is under the story.</p>` : ''}
       ${unreadPapers().length ? `<p class="small">Papers not read to their end: ${unreadPapers().map((p) => `${esc(p.title)} (${p.at} of ${p.last})`).join('; ')}. Their tabs are in the Story panel.</p>` : ''}
       ${rest.some((q) => gateState(q) === 'evidence') ? '<p class="small">One event can be evidence for more than one question: one you have linked to another question may be needed for this one too.</p>' : ''}
       <p>${AUTOPLAY === null ? '<button type="button" class="quiet" data-hint>Hint</button> ' : ''}<button type="button" class="quiet" data-gate-hide>Hide</button></p>`;

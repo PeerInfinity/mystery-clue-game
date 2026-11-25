@@ -222,8 +222,6 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
                 if (!(await press(sel)) || !made(m, saved())) throw new Failed('the page did not take it');
                 break;
             case 'visit': case 'day':
-                // The day's box is under the main story.
-                if ($('.story-tab[data-story="main"]') && !$('.story-tab[data-story="main"].on')) await press('.story-tab[data-story="main"]');
                 if (!(await press(sel)) || !made(m, saved())) throw new Failed(m.do === 'visit' ? 'the visit is not open' : 'the day did not end');
                 break;
             default: throw new Failed(`unknown move ${m.do}`);
@@ -250,8 +248,8 @@ export function allowedNow(m, store) {
         return ok;
     }
     if (m.do === 'trust' || m.do === 'hold') return !!$(controlOf(m));
-    // A visit or the day's end: its button is there (the main story's tab shows it; the caller has that in view or not: looked for in the page as drawn).
-    if (DAY_MOVES.has(m.do)) { if ($('.story-tab[data-story="main"]') && !$('.story-tab[data-story="main"].on')) $('.story-tab[data-story="main"]').click(); return !!$(controlOf(m)); }
+    // A visit or the day's end: its button is there (the day's box is under whatever is being read).
+    if (DAY_MOVES.has(m.do)) return !!$(controlOf(m));
     if (REASONING.has(m.do)) {
         const el = $(controlOf(m));
         if (!el) return false;

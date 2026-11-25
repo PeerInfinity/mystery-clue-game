@@ -69,7 +69,6 @@ const AFTER = Object.fromEntries((header.files ?? []).filter((f) => f.visit).map
 const readAll = () => ev(`(() => {
     const after = ${J(AFTER)};
     const visitNext = () => {
-        document.querySelector('#story .story-tab[data-story="main"]')?.click();
         const bs = [...document.querySelectorAll('#story [data-visit]')], fresh = bs.filter((b) => !b.dataset.visited);
         if (!fresh.length) return false;
         const open = fresh.find((b) => !b.disabled);
