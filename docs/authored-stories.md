@@ -1950,8 +1950,12 @@ script that found each fact's paragraph from its quote; the data files are the s
       and one a stand-in page had earned in the same room, and kept its save under that game. The web client's
       frame panel adds `iframeId` and `hostOrigin` itself, so a player's address needs only `?case=`. Not seen
       there: a solve made through this page's own controls (that is checked here, against the stand-in host).
-    - *Left, on the other side:* how the web client loads the page for a player (a URL or a built-site
-      submodule), enabling the module without doing it by hand, and the merge. Left here: hints that cannot stall a multiworld are as
+    - *Landed (2026-11-25, reported by that session):* the world at version `afed4c87068e`, the host module
+      (off by default) and a "Mystery Game" panel that frames this repository's Pages site are on
+      Archipelago-CC's main. From here on a push that moves a case's version makes the published page refuse the
+      committed world until it is rebuilt and landed there again: tell that side before such a push.
+    - *Left:* a frontend submodule in place of the Pages address (the user's wish, for later), and the window
+      adapter tried against the real one. Left here: hints that cannot stall a multiworld are as
       they were (the hint check plays alone).
 
 132. **What follows from the typed data alone, measured (2026-11-24).** `node scripts/typed-check.mjs [-v] [<dir>...]`
