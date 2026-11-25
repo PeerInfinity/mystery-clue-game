@@ -4,7 +4,7 @@
     {"id": "o.keys", "q": "q.who", "from": ["f.two_keys"], "says": "the office door was fitted with two keys and no more", "essential": true},
     {"id": "o.marlow", "q": "q.who", "from": ["f.dunmore_marlow"], "says": "from six o'clock on Sunday until nine o'clock on Monday, Captain Dunmore was at Marlow", "essential": true},
     {"id": "o.lent", "q": "q.who", "from": ["f.trew_nokey"], "says": "from four o'clock on Sunday until nine o'clock on Monday, Amos Trew was without the second key of the office door"},
-    {"id": "o.finch_key", "q": "q.who", "from": ["f.finch_key"], "says": "at eight o'clock on Sunday night, Silas Finch had the second key of the office door", "essential": true},
+    {"id": "o.finch_key", "q": "q.who", "from": [{"reasoned": "speaks", "premises": ["f.finch_key", "f.tally"]}], "says": "at eight o'clock on Sunday night, Silas Finch had the second key of the office door, since the second key of the office door was marked with a brass tally", "essential": true},
     {"id": "o.finch_quay", "q": "q.who", "from": ["f.finch_quay"], "says": "at eight o'clock on Sunday night, Silas Finch was at the quay"},
     {"id": "o.abed", "q": "q.who", "from": [{"doubted": "f.finch_tells"}], "says": "Finch said he never stirred out that night, and that cannot stand"}
   ]

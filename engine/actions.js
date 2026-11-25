@@ -595,13 +595,17 @@ export function stops(x, step, nameOf = (id) => id, ctx = {}) {
  * its own words (`words`) and, typed and not shown, what they speak of (`speaks_of: {of, attr?, value?}`); the reader
  * points at the entry `b` on the timeline that they refer to. It is taken when `b` is that state or event; the
  * reading is then an entry of the reader's own, which a rule or an observation can rest on.
+ * A description that names no thing outright ("a key marked with a brass tally") is read the same way, by the entry
+ * that says which thing is so marked; `reads_as` on `a` is then the typed state the reading gives ("Silas Finch had
+ * the second key of the office door"), which becomes the reader's entry in place of the bare reading.
  */
 export function pointSpeaks(a, b) {
     const so = a?.speaks_of;
-    if (!a?.words || !so) return { why: 'Its own words are not given: there is nothing to read here.' };
+    if (!so || !(a.words || a.reads_as)) return { why: 'There is nothing to read here.' };
     const fits = !!b && !b.neg && b.of === so.of && (so.attr == null || b.attr === so.attr) && (so.value == null || b.value === so.value);
     if (!fits) return { why: 'Its words do not speak of that.' };
-    return { entry: { id: `r:s:${a.id}>${b.id}`, of: a.of, attr: 'reading', value: b.id, reads: a.id, time: a.time, reasoned: { move: 's', premises: [a.id, b.id] } } };
+    const reasoned = { move: 's', premises: [a.id, b.id] }, id = `r:s:${a.id}>${b.id}`;
+    return { entry: a.reads_as ? { ...a.reads_as, id, reads: a.id, time: a.reads_as.time ?? a.time, reasoned } : { id, of: a.of, attr: 'reading', value: b.id, reads: a.id, time: a.time, reasoned } };
 }
 export function reasonedEntries(moves, lookup, order, nameOf, givenAt, ctx = {}) {
     const out = new Map();

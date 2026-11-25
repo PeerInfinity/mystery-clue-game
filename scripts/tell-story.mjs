@@ -156,7 +156,7 @@ export function tell(dir, opts = {}) {
     // What an observation says is what its entries say (one that comes from a move, a doubt or another question keeps its own words).
     const observations = fs.existsSync(path.join(W, 'observations.json')) ? R('observations.json').observations : null;
     // A reading the reader makes (`{reasoned: "speaks", premises: [the entry with words, what they speak of]}`) says whose words speak of what.
-    const saysOf = (x) => (typeof x === 'string' ? drySentence.get(x)?.replace(/\."$/, '"') : x?.reasoned === 'speaks' && F.has(x.premises?.[0]) && drySentence.has(x.premises?.[1]) ? `the words of ${name(F.get(x.premises[0]).of)} speak of this: ${drySentence.get(x.premises[1])}` : null);
+    const saysOf = (x) => (typeof x === 'string' ? drySentence.get(x)?.replace(/\."$/, '"') : x?.reasoned === 'speaks' && F.has(x.premises?.[0]) && drySentence.has(x.premises?.[1]) ? (F.get(x.premises[0]).reads_as ? `${prefix(F.get(x.premises[0]).time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence({ ...F.get(x.premises[0]).reads_as })}, since ${drySentence.get(x.premises[1])}` : `the words of ${name(F.get(x.premises[0]).of)} speak of this: ${drySentence.get(x.premises[1])}`) : null);
     for (const o of observations ?? []) if (o.from.every((x) => saysOf(x) != null)) o.says = o.from.map(saysOf).join('; ');
     // A form of a name the prose used counts as a mention only if it has a word of the name itself: "Abel", "Mrs. Crouch",
     // "Abel's shed"; not "it", "his shed" or "my marrow", which are whoever is being spoken of.

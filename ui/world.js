@@ -654,7 +654,7 @@ function assertsHtml(f) {
  * An entry the player can reason from (its detail offers moves): a typed state, a typed action, an intention with a
  * goal, a claim with a plan. Marked on the timeline so the moves can be found.
  */
-const canReason = (f) => (!!f.words && !!f.speaks_of) || ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || (list(f.act).length > 0 && !f.neg) || !!f.goal || !!f.plan || !!f.series;
+const canReason = (f) => (!!f.speaks_of && !!(f.words || f.reads_as)) || ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value != null && !f.neg) || (list(f.act).length > 0 && !f.neg) || !!f.goal || !!f.plan || !!f.series;
 const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need, what is missing)">⚙</span>';
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
@@ -1314,7 +1314,10 @@ function toggleLink(entry, q) {
         // (2026-11-24, finding 129: a blind solver trusted the statement and its witness and was stuck for twenty turns).
         const f = factById.get(entry), on = f && restsOn(f), base = on && on !== f.id ? factById.get(on) : null;
         if (base && !shownFalse(base).length) trustByUse(base, LIKELY_LEVEL, UNCERTAIN);
-        trustByUse(f, LIKELY_LEVEL, UNCERTAIN);
+        // A reading of what an entry speaks of (move s) is trusted no further than what it was read from: the link trusts those entries.
+        const read = reasonedById.get(entry)?.reasoned?.move === 's' ? reasonedById.get(entry).reasoned.premises.map((id) => factById.get(id)).filter((x) => x && !shownFalse(x).length) : [];
+        for (const x of read) trustByUse(x, LIKELY_LEVEL, UNCERTAIN);
+        if (f) trustByUse(f, LIKELY_LEVEL, UNCERTAIN);
     }
     state.links = isLinked(entry, q) ? state.links.filter((l) => !(l.entry === entry && l.q === q)) : [...state.links, { entry, q }];
     save(); render();
@@ -1891,13 +1894,14 @@ function addMove(m, select) {
  * and never shown: the candidates are everything else on the timeline, so nothing here says which.
  */
 function speaksMoveHtml(f) {
-    if (!f.words || !f.speaks_of || f.reasoned) return '';
+    if (!f.speaks_of || !(f.words || f.reads_as) || f.reasoned) return '';
     const made = state.reasoning.find((m) => m.move === 's' && m.of === f.id);
-    const words = `<p class="quote">“${esc(f.words)}”</p>`;
-    if (made) return `<h3>Its own words</h3>${words}<p class="small">You have pointed out what they speak of: ${factOf(made.to) ? phrase(factOf(made.to)) : ''}.</p>`;
+    // Its own words, or (a description that names no thing outright) the entry as it stands.
+    const words = `<p class="quote">${f.words ? `“${esc(f.words)}”` : phrase(f)}</p>`;
+    if (made) return `<h3>What it speaks of</h3>${words}<p class="small">You have pointed out what this speaks of: ${factOf(made.to) ? phrase(factOf(made.to)) : ''}.</p>`;
     const cands = onTimeline().filter((o) => o.id !== f.id && !o.reasoned && o.attr !== 'tells' && !o.hyp);
     const items = cands.map((o) => `<li><button type="button" class="move" data-move-s="${esc(f.id)}" data-to="${esc(o.id)}">This speaks of…</button> ${phrase(o)}</li>`).join('');
-    return `<h3>Its own words</h3>${words}<p class="small">What do these words speak of? Point at the entry of the timeline they refer to: what follows from that is then yours to link.</p><ul class="moves">${items}</ul>`;
+    return `<h3>What it speaks of</h3>${words}<p class="small">What does this speak of? Point at the entry of the timeline it refers to: what follows from that is then yours to link.</p><ul class="moves">${items}</ul>`;
 }
 /** Move (a) on a typed state: the other states of the same thing on the timeline to compare it with. */
 function changeMoveHtml(f) {
@@ -2193,7 +2197,7 @@ function movesHtml(f) {
 function reasonedDetail(f) {
     const how = f.reasoned.move === 'g' ? 'Something crossed between two places, so there is a way between them.'
         : f.reasoned.move === 'r' ? 'Each link of the route is on the timeline.'
-        : f.reasoned.move === 's' ? 'Its own words speak of this: your reading of them.'
+        : f.reasoned.move === 's' ? 'Your reading of what an entry speaks of, by the entry it refers to.'
         : f.reasoned.move === 'a' ? 'Two states of one thing differ, so something changed it between them.'
         : f.reasoned.move === 'm' ? 'A rule names this time, and the record has nothing at it: something is missing here.'
         : f.reasoned.move === 'c' ? 'What it brings about meets the goal of an intention, or a need of a step toward it.'

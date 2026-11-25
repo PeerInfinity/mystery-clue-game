@@ -2340,6 +2340,26 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Not done:* the long case's ledger entry (it would move that case's logic and version); the two other
       uses (a thing known by a mark, two descriptions compared).
 
+147. **The same move for a thing known by a mark: the brass tally (2026-11-25; agreed by the user as the next use
+    of finding 146).** In the typed Same Monday the watchman had said outright that the clerk held "the second
+    key of the office door", and how he knew it (`known_by`, finding 139). Now he says what he saw: "Silas Finch
+    had a key marked with a brass tally." Which key that is, is the reader's step: at the office the narrator
+    finds that the second key is so marked, and "This speaks of…" on the watchman's entry, pointed at that
+    entry, gives the reader's own "Silas Finch had the second key of the office door". The question needs it.
+    - *What the move gained.* An entry may have `reads_as`, the typed state its reading gives, beside
+      `speaks_of`; it need not have `words` (a generated sentence is its own words). The reader's entry is then
+      that state, marked as reasoning, and not a bare "speaks of".
+    - *What it showed at once:* the reading rested on a witness's word, which is uncertain until trusted, so the
+      linked reading did not count and the answer did not follow. A link of a reading now trusts what it was
+      read from as likely, as a link of a plain entry trusts that entry (finding 129).
+    - *The case is better for it.* The two days now depend on each other in the logic as well as in the plot:
+      the office (day one, by the natural road) holds the mark, the watchman (day two) the sighting, and
+      neither is evidence against the clerk without the other. `known_by` stays in the format with no case
+      using it.
+    - *Checked:* the true path (with the move), the autoplay, the hints, the trying player and the stand-in
+      Archipelago host, on the typed Same Monday; every page check on the typed Will in the Bible again.
+    - *Left of the shape:* two descriptions compared (The Grey Cloak), and the long case's ledger entry.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

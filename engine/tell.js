@@ -46,7 +46,7 @@ export function teller(ctx) {
     const paper = (f) => {
         if (f.dated) return `${subj(f.of)} was dated ${ctx.time(f.dated)}`;
         // Where its own words are given (`words`), they are told and what they speak of is not: that is the reader's to point out.
-        const parts = [f.revokes && `revoked ${ctx.name(f.revokes)}`, list(f.gives).length && `gave ${listed(list(f.gives).map((g) => `${ctx.name(g.what)} to ${obj(g.to)}`))}`, f.speaks_of && !f.words && `spoke of ${ctx.name(f.speaks_of.of)} as ${f.speaks_of.value}`].filter(Boolean);
+        const parts = [f.revokes && `revoked ${ctx.name(f.revokes)}`, list(f.gives).length && `gave ${listed(list(f.gives).map((g) => `${ctx.name(g.what)} to ${obj(g.to)}`))}`, f.speaks_of && !f.words && !f.reads_as && `spoke of ${ctx.name(f.speaks_of.of)} as ${f.speaks_of.value}`].filter(Boolean);
         const said = f.words ? `${parts.length ? ', in these words' : ' said'}: "${f.words}"` : '';
         return parts.length || said ? `${subj(f.of)}${parts.length ? ` ${listed(parts)}` : ''}${said}` : null;
     };

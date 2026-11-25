@@ -12,7 +12,8 @@
     {"at": ["inn:1"], "do": "link", "entry": "f.dunmore_marlow", "q": "q.who", "see": "at Marlow", "for_q": ["q.who"], "why": "The Captain and his key were at Marlow all night."},
     {"at": ["inn:1"], "do": "cross", "q": "q.who", "pick": "dunmore", "for_q": ["q.who"], "why": "He could not have been in the office."},
     {"at": ["inn:2"], "do": "visit", "file": "watch", "day": 2, "for_q": ["q.who"], "why": "And the watchman was on the quay that night."},
-    {"at": ["watch:2"], "do": "link", "entry": "f.finch_key", "q": "q.who", "see": "had the second key", "for_q": ["q.who"], "why": "Finch by the office steps at eight, the pilot's key in his hand: the pilot told the truth."},
+    {"at": ["watch:2", "office:2"], "do": "s", "of": "f.finch_key", "to": "f.tally", "for_q": ["q.who"], "why": "A key with a brass tally: the pilot's key carries one. It was the second key that Finch had."},
+    {"at": ["watch:2", "office:2"], "do": "link", "entry": "r:s:f.finch_key>f.tally", "q": "q.who", "see": "had the second key", "for_q": ["q.who"], "why": "So Finch had the pilot's key by the office that night: the pilot told the truth."},
     {"at": ["watch:2", "office:2"], "do": "cross", "q": "q.who", "pick": "trew", "for_q": ["q.who"], "why": "The pilot had no key that night."},
     {"at": ["watch:2", "office:2", "pilot:1", "inn:1"], "do": "circle", "q": "q.who", "pick": "finch", "for_q": ["q.who"], "why": "The one key that was in Saltby that night was in Finch's hand, at the office door."},
     {"at": ["watch:2", "chandler:1"], "do": "trust", "on": "f.finch_abed", "link": "f.finch_tells", "level": "ruled out", "for_q": ["q.who"], "why": "And he was not in his bed: the watchman met him on the quay."}
