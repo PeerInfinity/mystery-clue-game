@@ -79,6 +79,16 @@ annotated reading's thoughts, the earlier game's time windows); since 2026-11-06
 `?case=pipeline/runs/silver-blaze-r2/case`), with saves of its own (`ui/world-case.js`); without `world/path.json`
 it offers no hints and no autoplay.
 
+**A story told from its data** (since 2026-11-25; `docs/authored-stories.md`, finding 137). A case may have
+`world/telling.json`: `{title, paragraphs: [[item, ...], ...]}`, an item a fact's id, `{deed: <question>}` (the deed
+the question asks about, its doer unknown) or `{raise: <question>}` (its label). `node scripts/tell-story.mjs <dir>`
+then writes the story's text, one sentence an entry by the templates of `engine/tell.js`, and into the data what
+follows from the text: each fact's `para` and `quote` (the quote is the sentence), a `says` entry's `value`, each
+time's `para` and `quote`, each question's `raised`, `quote`, its answers' `available` and `quote` and its
+give-away, each observation's `says` (its entries' sentences), and `mentions.json`. So in such a case those are not
+written by hand; `npm test` holds the files to the script. A fact there has no `detail` (free text is not told), a
+state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
+
 **Visits in the present** (since 2026-11-24; `docs/authored-stories.md`, finding 134). A file may have
 `visit: {label, cost?, after?, needs?}`: its scene comes by going there, not by a paragraph. `delivery.day` is the
 length of the day and `delivery.unit` its unit's name (default `hour`); `cost` (default 1) is what the visit takes of

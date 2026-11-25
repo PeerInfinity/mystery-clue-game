@@ -1,0 +1,11 @@
+{
+  "id": "prize_marrow_typed",
+  "title": "The Prize Marrow, told from its data",
+  "author": "written for this project (a mechanic miniature: The Prize Marrow, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {"id": "vane", "name": "Hester Vane", "kind": "first-person"}
+  ],
+  "subtitle": "Hester Vane's timeline",
+  "source": {"written": "2026-11-25", "word_count": 190}
+}

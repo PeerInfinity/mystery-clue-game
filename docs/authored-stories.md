@@ -119,6 +119,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
 | `cases/miniatures/garden-room` | A room with two doors, each watched by a different witness for a different stretch: neither watch closes any of the time alone, and the two together leave what neither covers (finding 124). | 5 paragraphs, 18 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
+| `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/same-monday` | Visits in the present: five places to go, a day of three hours, and the same morning beginning again with everything learned kept (finding 134). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs (main story, five visits), 19 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
@@ -2066,6 +2067,36 @@ script that found each fact's paragraph from its quote; the data files are the s
       "a way to indicate, on the action node, whether it has been completed before". This page has the last
       ("done before, on day N") and keeps every day's visits in the save.
     - Nothing beyond windows yet for a present that reacts.
+
+137. **A story told from its typed data: The Prize Marrow again (2026-11-25).** The simplest version of "all text
+    derived from typed data", as the user asked: a script and templates, no model.
+    - *Built.* `engine/tell.js` gives one sentence for a typed entry by its form (a role, a state, a place, a
+      thing carried, a typed act, a stated want with what it needs, a gain, a confession, a deed with its doer
+      unknown); `scripts/tell-story.mjs <dir>` writes the story from `world/telling.json`, which says only the
+      order, and writes back what follows from the text (`docs/case-format.md`, "A story told from its data").
+      The case is `cases/miniatures/prize-marrow-typed`, a copy of The Prize Marrow with the same logic.
+    - *How it reads.* "On Friday, after dark, somebody spoiled Abel Crouch's marrow at Abel Crouch's shed. On
+      Saturday, Abel Crouch's marrow was kept off the show bench; by that George Pask gained the cup." And a want:
+      "On Friday morning, Abel Crouch said to me: 'I want my marrow to be kept off the show bench.'" Dry, exact,
+      and playable: it validates, and the true path, the autoplay, the hints and the player who only tries
+      things play it to the end. 190 words against 270.
+    - *What is no longer written by hand there:* the story's text, every quote, each `says` entry's value, what
+      each observation says, where each time, question and answer is first told, the give-away, and the list of
+      names. A test holds all of it to the script, and another that the story has no sentence that is not an
+      entry's, a deed's or a question's.
+    - *What still is:* the order of telling; the names and the time labels; each state's value as a phrase that
+      reads after "was" ("kept off the show bench", "the cup's winner three years running"), which the engine
+      still matches as a string; the question's label; the past form of the case's act; the one concluding
+      rule's sentence; the true path's reasons (`why`); and `structure.json`.
+    - *What was lost against the written story:* everything in `detail` ("alone there for a time", which is the
+      story's reason that opportunity decides nothing), the voice ("I would not give a button for the cup any
+      other way"), the slashing itself (the deed is "spoiled", the case's typed act), and why Abel wanted it
+      ("his is the bigger this year"). None of it is logic the page checks; some of it is what makes the answer
+      feel earned.
+    - *The one piece of grammar:* in a speaker's own words what is theirs by name is "my". Everything else names
+      each thing in full every time, with no pronouns: the concept library has no such slots either (finding 130).
+    - *Not done:* a blind run; prose by a model from the same data (the next version up); a telling for a case
+      with papers, tellings or false statements, whose forms the templates do not have yet.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

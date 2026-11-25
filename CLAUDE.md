@@ -34,6 +34,7 @@ See `docs/technical.md`. The ones used most:
 | Every page check on one case (starts the server and its own Chrome if needed; `CDP_PORT` another Chrome port) | `CASE=<dir> npm run page-checks` |
 | A long story's logic: check it (references, reachability, a fill per seed), and export it as Archipelago rules | `node scripts/structure-check.mjs <dir> [seeds]`, `node scripts/export-rules.mjs <dir>` |
 | What follows from the typed data alone, per question (a measure, fails nothing; `-v` for the detail) | `node scripts/typed-check.mjs [-v] [<dir>...]` |
+| After changing the typed data or the telling of a case that has `world/telling.json`: its text and what follows from it | `node scripts/tell-story.mjs <dir>` |
 | After changing a true path: the moves that trust each uncertain statement as likely before its first use | `node scripts/path-trust.mjs [<dir>...]` |
 | Play one case's true path through the page (seconds; port 9333) | `CASE=<dir> node scripts/path-check.mjs` |
 | The autoplay to the end (port 9333; a layout argument), the hints (a hint-only player to the end) | `CASE=<dir> node scripts/world-autoplay-check.mjs`, `CASE=<dir> node scripts/world-hints-check.mjs` |

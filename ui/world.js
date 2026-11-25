@@ -301,7 +301,9 @@ function visit(id) {
 function endDay() {
     const v = state.visits;
     state.visits = { ...v, day: v.day + 1, spent: 0, today: [], log: [...v.log, []] };
-    state.note = `Day ${v.day + 1}: the same morning again. What you have read and your timeline are kept.`;
+    // A day ended with nothing done gains nothing: said, since a blind solver ended three days running (finding 135).
+    state.note = v.today.length ? `Day ${v.day + 1}: the same morning again. What you have read and your timeline are kept.`
+        : `Day ${v.day + 1}: the same morning again. You went nowhere on day ${v.day}, so nothing is changed: the same visits are open, with the whole day to spend.`;
     save(); render();
 }
 /** The day an entry was learned on, when it came by a visit of an earlier day than today's (else null). */

@@ -21,6 +21,7 @@ evidence leaves.
 [The Dinner at Larch House](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/dinner-at-larch-house) (one evening, told by two people) ·
 [The Garden Room](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/garden-room) (a room with two doors, and who watched which) ·
 [The Prize Marrow](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/prize-marrow) (what each of them said they wanted) ·
+[The Prize Marrow, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/prize-marrow-typed) (the same case, its text made by a script from its data) ·
 [The Same Monday](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/same-monday) (three hours, places to go, and a morning that begins again) ·
 [The Will in the Bible](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/will-in-the-bible) (a paper that says more than it could have known) ·
 [The Telegram Signed M.](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/telegram-signed-m) (one clue that reads two ways) ·
