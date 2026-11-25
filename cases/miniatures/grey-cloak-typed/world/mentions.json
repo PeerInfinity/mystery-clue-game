@@ -1,0 +1,18 @@
+{
+ "entities": {
+  "tull": ["Sergeant Tull"],
+  "mott": ["Dr. Mott"],
+  "lunn": ["Mrs. Lunn"],
+  "pell": ["Mr. Pell"],
+  "kitty": ["Kitty"],
+  "figure": ["the figure at the side door"],
+  "surgery": ["the surgery"],
+  "passage": ["the passage of the surgery"],
+  "side_door": ["the side door of the surgery"],
+  "lunn_house": ["the house opposite the side door of the surgery"],
+  "hale_house": ["Squire Hale's house"],
+  "drawer": ["the cash drawer of the surgery"],
+  "cloak": ["the long grey cloak of Dr. Mott"],
+  "greatcoat": ["the greatcoat of Dr. Mott"]
+ }
+}

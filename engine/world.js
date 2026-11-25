@@ -11,7 +11,9 @@ export const CLAIM_ATTRS = new Set(['says', 'believes']);
 /** Attributes with one value at a time: two values at a time both certainly cover contradict each other. */
 export const SINGLE_ATTRS = new Set(['location', 'identity']);
 /** Typed states: attributes whose values exclude each other (a door is open, shut or locked). See engine/actions.js. */
-export const STATES = { door: ['open', 'shut', 'locked'] };
+// `stature` (2026-11-25; finding 148): how tall a person is, as far as a description goes, so that two descriptions can be
+// compared: a figure seen as tall is not someone short.
+export const STATES = { door: ['open', 'shut', 'locked'], stature: ['tall', 'short'] };
 /**
  * States whose values are open (any place), not a fixed list: `heading`, where someone leading a horse is making for,
  * read from his track. Two of them that differ point to a change of aim (move (a)), not an action.
@@ -512,6 +514,23 @@ export function contradictions(data, accepted = null) {
                 if (!va || !vb) continue;
                 const ka = pl.chain(va), kb = pl.chain(vb);
                 if (!ka.includes(vb) && !kb.includes(va)) out.push({ a: lb, b: id.x, via: la, why: `${id.is} in two places, if ${id.of} was ${id.is}: ${vb} and ${va}` });
+            }
+        }
+    }
+    // An identity carries a typed state as it carries whereabouts (2026-11-25; finding 148): "the figure was Kitty"
+    // gives Kitty the figure's stature, and a figure seen as tall is not someone short. Three sides, as above.
+    const typed = all.filter((x) => x.kind === 'state' && STATES[x.attr] && !x.neg && x.value != null);
+    for (const id of idents) {
+        // A state told only from when it began (`from`, no `to`) lasts: it is so at any time from then on.
+        const lasting = (t) => !!t?.from && !t.to && !t.at;
+        const share = (ta, tb) => { const ca = coverOf(ta), cb = coverOf(tb); if (!ca || !cb) return true; return lasting(ta) ? order.le(ca.start, cb.start) || lasting(tb) : lasting(tb) ? order.le(cb.start, ca.start) : overlaps(order, ca, cb); };
+        for (const sa of typed) {
+            if (sa.of !== id.of || sa.fact === id.x.fact) continue;
+            if (id.time && !share(sa.time, id.time)) continue;
+            for (const sb of typed) {
+                if (sb.of !== id.is || sb.attr !== sa.attr || sb.value === sa.value || sb.fact === sa.fact || sb.fact === id.x.fact) continue;
+                if (!share(sa.time, sb.time)) continue;
+                out.push({ a: sb, b: id.x, via: sa, why: `${id.is}: ${sb.value}, and ${sa.value} if ${id.of} was ${id.is}` });
             }
         }
     }

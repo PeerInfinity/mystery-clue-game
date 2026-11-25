@@ -32,6 +32,8 @@ export function teller(ctx) {
         if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} ${at(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : `${who} ${be} ${x.value}`; }
         const not = x.neg ? ' not' : '';
         if (x.attr === 'location') return `${subj(x.of)} ${be}${not} ${at(x.value)}`;
+        if (x.attr === 'identity') return `${subj(x.of)} ${be}${not} ${obj(x.value)}`;
+        if (x.attr === 'wearing') return `${subj(x.of)} ${x.neg ? 'did not wear' : 'wore'} ${ctx.name(x.value)}`;
         if (x.attr === 'made') return `${subj(x.of)} ${be}${not} made`;   // a paper, at the time it says
         if (x.attr === 'lives_at') return `${subj(x.of)} ${me(x.of) ? 'live' : 'lives'} at ${ctx.name(x.value)}`;   // a standing state, as a role is
         if (x.attr === 'owner') return `${subj(x.of)} ${x.neg ? 'did not belong' : 'belonged'} to ${obj(x.value)}`;
@@ -54,6 +56,7 @@ export function teller(ctx) {
     function said(f) {
         if (f.goal) return `wants ${want(f.goal)}`;
         const o = owns(f);
+        if (o && ctx.question(o.q).entry?.attr === 'identity') return `owns to being ${ctx.name(ctx.question(o.q).entry.of)}`;
         if (o) { const e = ctx.question(o.q).entry; return `owns to ${ctx.act(list(e.act)[0])?.label ?? `the ${list(e.act)[0]}`} ${ctx.name(e.thing ?? e.item)}`; }
         const a = list(f.asserts).find((x) => x.q && x.pick != null);
         if (a) return `says it was ${a.pick}`;
@@ -66,6 +69,8 @@ export function teller(ctx) {
             const to = f.to ? ` to ${obj(f.to)}` : '';
             if (f.goal) return `${subj(f.of)} said${to}: "I want ${mine(f.of, want(f.goal))}."`;
             const o = owns(f);
+            // Who someone was (a question of identity): "I was the figure at the side door."
+            if (o && ctx.question(o.q).entry?.attr === 'identity') return `${subj(f.of)} said${to}: "I was ${ctx.name(ctx.question(o.q).entry.of)}."`;
             if (o) { const e = ctx.question(o.q).entry; return `${subj(f.of)} said${to}: "It was I who ${mine(f.of, done(e, '').trim())}."`; }
             // An answer that is not a person, asserted: "It was after the gate lamp was lit."
             const a = list(f.asserts).find((x) => x.q && x.pick != null);

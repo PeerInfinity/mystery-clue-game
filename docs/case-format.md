@@ -101,6 +101,10 @@ was not yet so on its date then rests on it. A description that names no thing o
 brass tally") is read by the same move: the entry has `speaks_of` (the thing and the mark) and `reads_as` (the typed
 state the reading gives: "Silas Finch had the second key of the office door"), with or without `words`; the
 reader's entry is then that state. A link of a reading to a question trusts what it was read from as likely.
+A person's height, as far as a description goes, is the typed state `stature` (`tall` or `short`; `engine/world.js`
+`STATES`), and an identity carries a typed state as it carries whereabouts: "the figure was Kitty" clashes with a
+figure seen as tall and a Kitty who is short, so the table rules that answer out from the observation of the two
+entries. A state told only from when it began lasts from then on.
 A paper's own properties are told of it: its date (`dated`: "was dated the third of March"), what it revokes, what
 it gives to whom (`gives` on an entry of a document) and what it speaks of (`speaks_of`: "spoke of Thomas Pym as
 christened"). An act may have nothing it is done to ("died"). An entity may have `prep: "in"` ("in the family

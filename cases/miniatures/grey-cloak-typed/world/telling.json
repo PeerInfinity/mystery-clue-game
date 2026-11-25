@@ -1,0 +1,11 @@
+{
+  "title": "THE GREY CLOAK, TOLD FROM ITS DATA",
+  "paragraphs": [
+    ["f.tull_role", "f.drawer_forced"],
+    ["f.lunn_lives", "f.lunn_tells", "f.figure_door", "f.figure_cloak", "f.figure_is_mott", {"raise": "q.figure"}],
+    ["f.mott_bedside", "f.tull_bedside"],
+    ["f.mott_greatcoat", "f.cloak_peg", "f.cloak_damp"],
+    ["f.keys", "f.pell_role", "f.kitty_role", "f.kitty_small", "f.lunn_tells_again", "f.figure_tall"],
+    ["f.pell_owns"]
+  ]
+}

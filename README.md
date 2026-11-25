@@ -23,6 +23,7 @@ evidence leaves.
 [The Prize Marrow](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/prize-marrow) (what each of them said they wanted) ·
 [The Prize Marrow, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/prize-marrow-typed) (the same case, its text made by a script from its data) ·
 [The Prize Marrow, written from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/prize-marrow-prose) (the same case again, its prose written by a model from its data) ·
+[The Grey Cloak, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/grey-cloak-typed) (The Grey Cloak, its text made by a script from its data) ·
 [The Will in the Bible, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/will-in-the-bible-typed) (The Will in the Bible, its text and the will made by a script from its data) ·
 [The Stable Clock, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/stable-clock-typed) (The Stable Clock, its text made by a script from its data) ·
 [The Last Ferry, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry-typed) (The Last Ferry, its text made by a script from its data) ·

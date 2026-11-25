@@ -121,6 +121,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
+| `cases/miniatures/grey-cloak-typed` | The Grey Cloak told from its data: who someone was, what was worn, two descriptions compared as typed heights (finding 148). | 6 paragraphs, 19 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 14 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2359,6 +2360,33 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Checked:* the true path (with the move), the autoplay, the hints, the trying player and the stand-in
       Archipelago host, on the typed Same Monday; every page check on the typed Will in the Bible again.
     - *Left of the shape:* two descriptions compared (The Grey Cloak), and the long case's ledger entry.
+
+148. **Two descriptions compared: The Grey Cloak (2026-11-25).** Proposed to the user as the third use of the
+    "This speaks of…" move, and built otherwise, since on reading the case the step is not "this description
+    refers to that thing" but "this description does not fit that person": the figure was tall and the housemaid
+    is short. That is a contradiction under a hypothesis of who the figure was, which the engine already had for
+    whereabouts ("if the figure was Dr. Mott, he was in two places").
+    - *Built.* A typed state for height (`stature`: tall, short), and an identity now carries a typed state as
+      it carries whereabouts, with the same three sides (the other's state, the identity, the first one's
+      state). A state told only from when it began lasts. The reader's part is what it was: link the two
+      entries, and the page rules the answer out. No move was added.
+    - *The Grey Cloak told from its data* (`cases/miniatures/grey-cloak-typed`): 207 words against 219; it
+      validates and the true path, the autoplay, the hints and the trying player play it through. The templates
+      gained who someone was, what someone wore, and a confession of identity ("I was the figure at the side
+      door."). The witness's mistake uses `known_by`, which now has a case: "The figure at the side door was Dr.
+      Mott. I knew it by this: the figure at the side door wore the long grey cloak of Dr. Mott."
+    - *What follows by itself now.* The doctor is ruled out by being elsewhere (in the typed case the
+      observation rests on the figure's whereabouts and his together, where the written case's rested on his
+      alone) and the housemaid by her height. Before, nothing typed bore on this case's answer at all. The
+      height was typed in the written case too. Over all cases (`typed-check.mjs`): 12 of 63 answers follow with
+      the written rules taken away, 48 of 86 wrong answers are ruled out by the typed forms.
+    - *What still does not follow:* the answer. "Nobody but Dr. Mott, Mr. Pell and Kitty had a key of the side
+      door" would close the list, but the question asks who the figure was, not who did a deed that needed a
+      key, so the rule that closes a list (finding 133) does not see it. Coming out at a locked side door as a
+      typed act of the figure's would be the way.
+    - *What was lost in the telling:* "it was dark", "hardly five feet tall", the cloak "well clear of the
+      ground", the rain, and the dispenser's reason ("the whole lane knew it for the doctor's").
+    - *Checked:* every page check on the 26 miniatures; the long case's export unchanged.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

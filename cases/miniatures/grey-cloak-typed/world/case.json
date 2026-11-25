@@ -1,0 +1,18 @@
+{
+  "id": "grey_cloak_typed",
+  "title": "The Grey Cloak, told from its data",
+  "author": "written for this project (a mechanic miniature: The Grey Cloak, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "tull",
+      "name": "Sergeant Tull",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Sergeant Tull's timeline",
+  "source": {
+    "written": "2026-11-25",
+    "word_count": 300
+  }
+}

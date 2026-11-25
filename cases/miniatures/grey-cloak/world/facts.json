@@ -13,9 +13,9 @@
     {"id": "f.cloak_peg", "of": "cloak", "attr": "location", "value": "passage", "detail": "on its peg, still damp", "time": {"at": "t.wed"}, "para": 4, "quote": "I found the grey cloak on its peg in the surgery passage, and it was still damp"},
     {"id": "f.keys", "of": "*", "every": "person", "but": ["mott", "pell", "kitty"], "attr": "carrying", "value": "a key of the side door", "key": "side_door", "neg": true, "detail": "its keys: the doctor's, Mr. Pell's and Kitty's", "time": {"from": "t.before"}, "para": 5, "quote": "Two people beside the doctor have a key to the side door"},
     {"id": "f.pell_role", "of": "pell", "attr": "role", "value": "the dispenser", "time": {"from": "t.before"}, "para": 5, "quote": "Mr. Pell, the dispenser"},
-    {"id": "f.kitty_small", "of": "kitty", "attr": "condition", "value": "hardly five feet tall", "detail": "the housemaid", "time": {"from": "t.before"}, "para": 5, "quote": "who is hardly five feet tall"},
+    {"id": "f.kitty_small", "of": "kitty", "attr": "stature", "value": "short", "detail": "hardly five feet tall; the housemaid", "time": {"from": "t.before"}, "para": 5, "quote": "who is hardly five feet tall"},
     {"id": "f.lunn_tells_again", "of": "lunn", "attr": "tells", "value": "acct.lunn_again", "to": "tull", "how": "told", "time": {"at": "t.later"}, "para": 5, "quote": "I went back to Mrs. Lunn"},
-    {"id": "f.figure_tall", "of": "figure", "attr": "condition", "value": "tall: the cloak hung well clear of the ground, as on the doctor", "time": {"at": "t.nine"}, "para": 5, "quote": "The cloak hung on that figure as it hangs on the doctor"},
+    {"id": "f.figure_tall", "of": "figure", "attr": "stature", "value": "tall", "detail": "the cloak hung well clear of the ground, as on the doctor", "time": {"at": "t.nine"}, "para": 5, "quote": "The cloak hung on that figure as it hangs on the doctor"},
     {"id": "f.pell_owns", "of": "pell", "attr": "says", "value": "he put on the cloak because the whole lane knew it for the doctor's", "to": "tull", "time": {"at": "t.later"}, "para": 6, "quote": "He had put on the cloak, he said, because the whole lane knew it for the doctor's", "asserts": [{"q": "q.figure", "pick": "pell"}]}
   ]
 }

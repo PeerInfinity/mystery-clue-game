@@ -468,6 +468,7 @@ function phrase(f) {
         case 'owner': return f.neg ? `${E} is <b>not</b> ${v}'s${d}` : `${E} belongs to ${v}${d}`;
         case 'identity': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
         case 'door': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
+        case 'stature': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}${d}`;
         case 'willing': return `${E} willing to help ${v}`;
         case 'held_by': return `${E} in the hands of ${v}`;
         case 'heading': return `${E} making for ${v}${d}`;
