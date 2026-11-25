@@ -1,9 +1,9 @@
 {
   "observations": [
     {"id": "o.off", "q": "q.who", "from": ["f.marrow_off"], "says": "on Saturday, Abel Crouch's marrow was kept off the show bench; by that George Pask gained the cup", "essential": true},
-    {"id": "o.pask_want", "q": "q.who", "from": ["f.pask_wants"], "says": "on Monday, George Pask said to me: \"I want my marrow to be the winner over Abel Crouch's marrow on the bench, and for that Abel Crouch's marrow must not be kept off the show bench\""},
-    {"id": "o.martha_want", "q": "q.who", "from": ["f.martha_wants"], "says": "on Wednesday, Martha Crouch said to me: \"I want Abel Crouch's marrow to be the cup's winner this year, and for that Abel Crouch's marrow must not be kept off the show bench\""},
-    {"id": "o.abel_want", "q": "q.who", "from": ["f.abel_wants"], "says": "on Friday morning, Abel Crouch said to me: \"I want my marrow to be kept off the show bench\"", "essential": true},
+    {"id": "o.pask_want", "q": "q.who", "from": ["f.pask_wants"], "says": "on Monday, George Pask said to Hester Vane: \"I want my marrow to be the winner over Abel Crouch's marrow on the bench, and for that Abel Crouch's marrow must not be kept off the show bench\""},
+    {"id": "o.martha_want", "q": "q.who", "from": ["f.martha_wants"], "says": "on Wednesday, Martha Crouch said to Hester Vane: \"I want Abel Crouch's marrow to be the cup's winner this year, and for that Abel Crouch's marrow must not be kept off the show bench\""},
+    {"id": "o.abel_want", "q": "q.who", "from": ["f.abel_wants"], "says": "on Friday morning, Abel Crouch said to Hester Vane: \"I want my marrow to be kept off the show bench\"", "essential": true},
     {"id": "o.there", "q": "q.who", "from": ["f.abel_there", "f.martha_there", "f.pask_there"], "says": "on Friday, after dark, Abel Crouch was at the allotments; on Friday, after dark, Martha Crouch was at the allotments; on Friday, after dark, George Pask was at the allotments"},
     {"id": "o.pask_wins", "q": "q.who", "from": ["f.pask_wins"], "says": "on Saturday, George Pask's marrow was the cup's winner"}
   ]

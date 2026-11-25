@@ -12,13 +12,19 @@ for (const name of fs.readdirSync(base)) {
     test(`${name}: its text and what follows from it are the telling of its data`, () => {
         for (const [file, text] of Object.entries(tell(path.join(base, name)))) assert.equal(fs.readFileSync(file, 'utf8'), text, `run node scripts/tell-story.mjs cases/miniatures/${name}`);
     });
-    test(`${name}: every sentence of the story is an entry's, a deed's or a question's`, () => {
+    // Told by the templates (not a model's prose): nothing in the story or its scenes but what an entry, a deed, a
+    // question, a witness's "told me", a time or the day's own sentences account for.
+    if (fs.existsSync(path.join(base, name, 'world', 'prose.json'))) continue;
+    test(`${name}: every sentence of the story and its scenes is an entry's, a deed's or a question's`, () => {
         const world = (f) => JSON.parse(fs.readFileSync(path.join(base, name, 'world', f), 'utf8'));
-        const quotes = [...world('facts.json').facts.map((f) => f.quote), ...world('questions.json').questions.map((q) => q.quote)];
-        let text = fs.readFileSync(path.join(base, name, 'story.txt'), 'utf8').split('\n').slice(1).join('\n');
-        for (const q of quotes.sort((a, b) => b.length - a.length)) text = text.split(q).join('');
-        // What is left: the times' openings, the one deed's sentence for each question, and punctuation.
-        const left = text.replace(/On [A-Z][^,]*(, after dark)?, /g, '').replace(/[.\s]/g, '');
-        assert.ok(left.length < 120, `text no entry accounts for: ${left}`);
+        const header = world('case.json');
+        const quotes = [...world('facts.json').facts.map((f) => f.quote), ...world('questions.json').questions.map((q) => q.quote)].filter(Boolean);
+        const labels = world('times.json').times.map((t) => t.label);
+        let text = [header.story, ...(header.files ?? []).map((f) => f.text)].map((f) => fs.readFileSync(path.join(base, name, 'world', f), 'utf8').split('\n').slice(1).join('\n')).join('\n');
+        for (const q of [...quotes, ...labels].sort((a, b) => b.length - a.length)) text = text.split(q).join('');
+        text = text.replace(/I have \w+ \w+ today, and more to do than they will hold\. When they are spent I wake again on this same morning, with the day before me as it was\. What I have learned I keep\./g, '');
+        // What is left: the words that open a time, the one deed's sentence for each question, and punctuation.
+        const left = text.replace(/\b(On|At|From|Between|until|and)\b/g, '').replace(/[.,:"\s]/g, '');
+        assert.ok(left.length < 120 * world('questions.json').questions.length, `text no entry accounts for: ${left}`);
     });
 }

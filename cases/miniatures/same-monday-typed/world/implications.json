@@ -1,0 +1,6 @@
+{
+  "implications": [
+    {"id": "i.who_key", "q": "q.who", "from": ["o.locked"], "says": "it was taken from a locked office whose lock was never forced: by someone with a key"},
+    {"id": "i.who_finch", "q": "q.who", "from": ["i.who_key", "o.keys", "o.marlow", "o.finch_key"], "says": "of the two keys the Captain's was at Marlow with him, and the pilot's was in Finch's hand by the office that night: it was Finch", "concludes": "finch", "strength": "likely"}
+  ]
+}

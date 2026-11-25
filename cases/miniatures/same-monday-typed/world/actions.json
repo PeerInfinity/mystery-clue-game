@@ -1,0 +1,6 @@
+{
+  "actions": [
+    {"id": "lock_up", "label": "locking", "past": "locked", "requires": [], "effects": []},
+    {"id": "lend", "label": "lending", "past": "lent", "requires": [], "effects": []}
+  ]
+}

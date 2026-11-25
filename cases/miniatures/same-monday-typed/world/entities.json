@@ -1,0 +1,21 @@
+{
+  "entities": [
+    {"id": "arliss", "kind": "person", "name": "Ned Arliss"},
+    {"id": "dunmore", "kind": "person", "name": "Captain Dunmore"},
+    {"id": "trew", "kind": "person", "name": "Amos Trew"},
+    {"id": "finch", "kind": "person", "name": "Silas Finch"},
+    {"id": "pask", "kind": "person", "name": "Mrs. Pask"},
+    {"id": "tolley", "kind": "person", "name": "Jem Tolley"},
+    {"id": "saltby", "kind": "place", "name": "Saltby"},
+    {"id": "quay", "kind": "place", "name": "the quay", "within": "saltby"},
+    {"id": "office", "kind": "place", "name": "the harbour office", "within": "quay"},
+    {"id": "ship_inn", "kind": "place", "name": "the Ship inn", "within": "saltby"},
+    {"id": "ropewalk", "kind": "place", "name": "the ropewalk", "within": "saltby"},
+    {"id": "chandlers", "kind": "place", "name": "the chandler's", "within": "saltby"},
+    {"id": "marlow", "kind": "place", "name": "Marlow"},
+    {"id": "chart", "kind": "object", "name": "the chart of the new channel"},
+    {"id": "office_door", "kind": "object", "name": "the office door"},
+    {"id": "key_one", "kind": "object", "name": "the first key of the office door"},
+    {"id": "key_two", "kind": "object", "name": "the second key of the office door"}
+  ]
+}

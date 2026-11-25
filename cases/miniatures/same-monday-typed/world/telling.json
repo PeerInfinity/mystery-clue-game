@@ -1,0 +1,15 @@
+{
+  "title": "THE SAME MONDAY, TOLD FROM ITS DATA",
+  "paragraphs": [
+    ["f.arliss_role", "f.chart_in", "f.dunmore_locks", "f.chart_gone", {"deed": "q.who"}, {"raise": "q.who"}],
+    [{"day": true}],
+    ["f.finch_owns"]
+  ],
+  "files": {
+    "office": {"title": "THE HARBOUR OFFICE", "paragraphs": [["f.lock_whole"], ["f.two_keys", "f.key_one", "f.key_two"]]},
+    "inn": {"title": "AT THE SHIP INN", "paragraphs": [["f.pask_tells", "f.dunmore_marlow"], ["f.tolley_role", "f.tolley_lodges"]]},
+    "watch": {"title": "THE NIGHT WATCHMAN", "paragraphs": [["f.tolley_tells", "f.light"], ["f.finch_quay", "f.finch_key"]]},
+    "pilot": {"title": "THE PILOT", "paragraphs": [["f.trew_tells", "f.trew_lent", "f.trew_nokey"]]},
+    "chandler": {"title": "AT THE CHANDLER'S", "paragraphs": [["f.finch_tells", "f.finch_abed"]]}
+  }
+}

@@ -80,8 +80,12 @@ annotated reading's thoughts, the earlier game's time windows); since 2026-11-06
 it offers no hints and no autoplay.
 
 **A story told from its data** (since 2026-11-25; `docs/authored-stories.md`, finding 137). A case may have
-`world/telling.json`: `{title, paragraphs: [[item, ...], ...]}`, an item a fact's id, `{deed: <question>}` (the deed
-the question asks about, its doer unknown) or `{raise: <question>}` (its label). `node scripts/tell-story.mjs <dir>`
+`world/telling.json`: `{title, paragraphs: [[item, ...], ...], files?: {<file id>: {title, paragraphs}}}`, an item a
+fact's id, `{deed: <question>}` (the deed the question asks about, its doer unknown), `{raise: <question>}` (its
+label) or `{day: true}` (the day and its beginning again, from `delivery.day`). A fact of an account that is not
+the narrator's is told as what its witness says, in the witness's first person (`Mrs. Pask told me: "…"`); the
+`tells` entry listed before it is the telling, and its quote the words that open the speech. A time point may have
+`prep` ("At"; default "On"), the word its label follows; a stretch is told "From … until …". `node scripts/tell-story.mjs <dir>`
 then writes the story's text, one sentence an entry by the templates of `engine/tell.js`, and into the data what
 follows from the text: each fact's `para` and `quote` (the quote is the sentence), a `says` entry's `value`, each
 time's `para` and `quote`, each question's `raised`, `quote`, its answers' `available` and `quote` and its

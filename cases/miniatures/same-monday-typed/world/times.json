@@ -1,0 +1,11 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.sun_four", "label": "four o'clock on Sunday", "prep": "At", "after": "t.before", "para": "pilot:1", "quote": "four o'clock on Sunday"},
+    {"id": "t.sun_six", "label": "six o'clock on Sunday", "prep": "At", "after": "t.sun_four", "para": 1, "quote": "six o'clock on Sunday"},
+    {"id": "t.sun_seven", "label": "seven o'clock on Sunday", "prep": "At", "after": "t.sun_six", "para": "chandler:1", "quote": "seven o'clock on Sunday"},
+    {"id": "t.sun_eight", "label": "eight o'clock on Sunday night", "prep": "At", "after": "t.sun_seven", "para": "watch:1", "quote": "eight o'clock on Sunday night"},
+    {"id": "t.mon_nine", "label": "nine o'clock on Monday", "prep": "At", "after": "t.sun_eight", "para": 1, "quote": "nine o'clock on Monday"},
+    {"id": "t.mon_later", "label": "Monday, before noon", "after": "t.mon_nine", "para": 3, "quote": "Monday, before noon"}
+  ]
+}

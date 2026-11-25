@@ -1,0 +1,26 @@
+{
+  "facts": [
+    {"id": "f.arliss_role", "of": "arliss", "attr": "role", "value": "clerk to the harbour-master at Saltby", "time": {"from": "t.before"}, "para": 1, "quote": "I am Ned Arliss, clerk to the harbour-master at Saltby"},
+    {"id": "f.chart_in", "of": "chart", "attr": "location", "value": "office", "time": {"at": "t.sun_six"}, "para": 1, "quote": "the chart of the new channel was at the harbour office"},
+    {"id": "f.dunmore_locks", "of": "dunmore", "attr": "action", "act": "lock_up", "thing": "office_door", "value": "locking the office door", "time": {"at": "t.sun_six"}, "para": 1, "quote": "Captain Dunmore locked the office door"},
+    {"id": "f.chart_gone", "of": "chart", "attr": "location", "value": "office", "neg": true, "time": {"at": "t.mon_nine"}, "para": 1, "quote": "the chart of the new channel was not at the harbour office"},
+    {"id": "f.lock_whole", "of": "office_door", "attr": "condition", "value": "locked, with its lock not forced", "time": {"at": "t.mon_nine"}, "para": "office:1", "quote": "the office door was locked, with its lock not forced"},
+    {"id": "f.two_keys", "of": "office_door", "attr": "condition", "value": "fitted with two keys and no more", "time": {"from": "t.before"}, "para": "office:2", "quote": "The office door was fitted with two keys and no more"},
+    {"id": "f.key_one", "of": "key_one", "attr": "owner", "value": "dunmore", "time": {"from": "t.before"}, "para": "office:2", "quote": "The first key of the office door belonged to Captain Dunmore"},
+    {"id": "f.key_two", "of": "key_two", "attr": "owner", "value": "trew", "time": {"from": "t.before"}, "para": "office:2", "quote": "The second key of the office door belonged to Amos Trew"},
+    {"id": "f.pask_tells", "of": "pask", "attr": "tells", "value": "acct.pask", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "inn:1", "quote": "Mrs. Pask told me"},
+    {"id": "f.dunmore_marlow", "of": "dunmore", "attr": "location", "value": "marlow", "time": {"from": "t.sun_six", "to": "t.mon_nine"}, "para": "inn:1", "quote": "Captain Dunmore was at Marlow"},
+    {"id": "f.tolley_role", "of": "tolley", "attr": "role", "value": "the night watchman", "time": {"from": "t.before"}, "para": "inn:2", "quote": "Jem Tolley is the night watchman"},
+    {"id": "f.tolley_lodges", "of": "tolley", "attr": "lives_at", "value": "ropewalk", "time": {"from": "t.before"}, "para": "inn:2", "quote": "Jem Tolley lives at the ropewalk"},
+    {"id": "f.tolley_tells", "of": "tolley", "attr": "tells", "value": "acct.tolley", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "watch:1", "quote": "Jem Tolley told me"},
+    {"id": "f.light", "of": "office", "attr": "condition", "value": "lit within", "time": {"at": "t.sun_eight"}, "para": "watch:1", "quote": "the harbour office was lit within"},
+    {"id": "f.finch_quay", "of": "finch", "attr": "location", "value": "quay", "time": {"at": "t.sun_eight"}, "para": "watch:2", "quote": "Silas Finch was at the quay"},
+    {"id": "f.finch_key", "of": "finch", "attr": "carrying", "value": "key_two", "key": "office_door", "time": {"at": "t.sun_eight"}, "para": "watch:2", "quote": "Silas Finch had the second key of the office door"},
+    {"id": "f.trew_tells", "of": "trew", "attr": "tells", "value": "acct.trew", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "pilot:1", "quote": "Amos Trew told me"},
+    {"id": "f.trew_lent", "of": "trew", "attr": "action", "act": "lend", "thing": "key_two", "to": "finch", "value": "lending the second key of the office door to Silas Finch", "time": {"at": "t.sun_four"}, "para": "pilot:1", "quote": "I lent the second key of the office door to Silas Finch"},
+    {"id": "f.trew_nokey", "of": "trew", "attr": "carrying", "value": "key_two", "key": "office_door", "neg": true, "time": {"from": "t.sun_four", "to": "t.mon_nine"}, "para": "pilot:1", "quote": "I was without the second key of the office door"},
+    {"id": "f.finch_tells", "of": "finch", "attr": "tells", "value": "acct.finch", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "chandler:1", "quote": "Silas Finch told me"},
+    {"id": "f.finch_abed", "of": "finch", "attr": "location", "value": "chandlers", "time": {"from": "t.sun_seven", "to": "t.mon_nine"}, "truth": false, "para": "chandler:1", "quote": "I was at the chandler's"},
+    {"id": "f.finch_owns", "of": "finch", "attr": "says", "to": "arliss", "time": {"at": "t.mon_later"}, "asserts": [{"q": "q.who", "pick": "finch"}], "para": 3, "value": "owns to the take_locked the chart of the new channel", "quote": "Silas Finch said to me: \"It was I who took the chart of the new channel from the harbour office.\""}
+  ]
+}

@@ -121,6 +121,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
+| `cases/miniatures/same-monday-typed` | The Same Monday told from its data: the story and its five scenes made by a script, witnesses' accounts as their speech (finding 139). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs, 22 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/same-monday` | Visits in the present: five places to go, a day of three hours, and the same morning beginning again with everything learned kept (finding 134). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs (main story, five visits), 19 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
@@ -2137,6 +2138,37 @@ script that found each fact's paragraph from its quote; the data files are the s
       copy. One writer, one case.
     - *Not done:* a blind run of this version; a second writer or model to compare; the observations' sentences
       are still the templates' (they are card text, and stay exact).
+
+139. **A larger case told from its data: The Same Monday (2026-11-25).** The test the user agreed to: does the
+    typed route hold beyond the easiest case? The Same Monday has what The Prize Marrow lacked: five scenes that
+    come by visits, four witnesses, a false statement, two sources that agree, stretches of time, a deed with a
+    key. The case is `cases/miniatures/same-monday-typed`, the same logic and the same true path.
+    - *What the templates gained* (`engine/tell.js`, `scripts/tell-story.mjs`). A telling for each file. What a
+      witness's account holds is told as that witness's speech, in the first person ("Amos Trew told me: 'At four
+      o'clock on Sunday, I lent the second key of the office door to Silas Finch.'"), and the `tells` entry is
+      the telling. A stretch of time ("From … until …"; for a deed "Between … and …"), and the word a time's
+      label follows (`prep`). Belonging, lodging, a typed act done to someone, the past forms of the engine's
+      own acts. The day and its beginning again, from `delivery.day`. An answer first named by an entry's value
+      or by whom a thing is done to.
+    - *It held.* 352 words in the story and five scenes, against 464 written by hand. The case validates; the
+      true path, the autoplay, the hints and the trying player play it through two days; the engine derives the
+      same two rule-outs (the alibi, the key denied).
+    - *What typing it forced, and each is a gain.* The two keys became things with owners ("the first key of
+      the office door belonged to Captain Dunmore"), so the pilot lends and the clerk is seen with "the second
+      key", where the written story had "the pilot's key", a phrase. The Captain locking the door became his
+      act. The watchman's being the watchman became an entry. The clerk's confession became a `says` that
+      asserts the answer.
+    - *What was lost:* the coach's horn, the brass tally by which the watchman knows the key, the lead-line the
+      key was lent for, "in my bed over the shop", the sea-chest and the Marlow shipowner. The tally is the one
+      that is logic of a kind: it is why the watchman's word about the key can be believed.
+    - *Still written by hand in this case:* the order of telling; the names and the time labels with their
+      `prep`; three state phrases ("locked, with its lock not forced", "fitted with two keys and no more", "lit
+      within"); the question's label; the sentence of the one observation that comes from a lie disbelieved,
+      and of the two written rules; the true path's reasons; the visits' labels; `structure.json`.
+    - *What the templates still cannot tell:* a statement about everyone ("nobody but"), a clock that is wrong,
+      a paper's own properties, a reasoning move's entry, a room. Each is a form some other miniature uses.
+    - Not done: a blind run; prose by a model for a case with files (`prose-story.mjs` writes the main story
+      only).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

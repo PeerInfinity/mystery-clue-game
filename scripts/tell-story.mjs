@@ -1,100 +1,158 @@
-// A case's story written from its typed data (engine/tell.js; docs/authored-stories.md, finding 137):
+// A case's story written from its typed data (engine/tell.js; docs/authored-stories.md, findings 137 and 139):
 //   node scripts/tell-story.mjs <dir>        writes; --check: writes nothing, exits 1 if anything would change
-// The case's world/telling.json says only the order: `{title, paragraphs: [[item, ...], ...]}`, an item a fact's id,
-// `{deed: <question>}` (the deed the question asks about, its doer unknown) or `{raise: <question>}` (its label, as
-// a question). From it and the typed entries this writes the story's text, and into the data what follows from
-// the text: each fact's `para` and `quote` (and a `says` entry's `value`), each time's `para` and `quote` (where it
-// is first told), each question's `raised`, `quote`, its answers' `available` and `quote` (where the answer is
-// first named) and its give-away, what each observation says (its entries' sentences), and world/mentions.json.
-// With world/prose.json (scripts/prose-story.mjs) the text and the quotes are that prose's, and the rest as above. Files are rewritten one object a line, as they are kept.
+// The case's world/telling.json says only the order: `{title, style?, paragraphs: [[item, ...], ...], files?: {<file
+// id>: {title, paragraphs}}}`, an item a fact's id, `{deed: <question>}` (the deed the question asks about, its doer
+// unknown), `{raise: <question>}` (its label, as a question) or `{day: true}` (the day and its beginning again, from
+// `delivery.day`: a case with visits). A fact of an account that is not the narrator's is told as what its witness
+// says, in the witness's own first person; the `tells` entry before it is the telling itself. From this and the
+// typed entries the script writes the story's text and each file's, and into the data what follows from the text:
+// each fact's `para` and `quote` (and a `says` entry's `value`), each time's `para` and `quote` (where it is first
+// told), each question's `raised`, `quote`, its answers' `available` and `quote` (where the answer is first named)
+// and its give-away, what each observation says (its entries' sentences), and world/mentions.json. Files are
+// rewritten one object a line, as they are kept.
+// With world/prose.json (scripts/prose-story.mjs) the text and the quotes are that prose's, and the rest as above.
 import fs from 'node:fs';
 import path from 'node:path';
-import { teller } from '../engine/tell.js';
+import { teller, cap } from '../engine/tell.js';
 
 const J = JSON.stringify;
+const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 /** A data file as it is kept: one object a line under its one key. */
-const lines = (key, rows) => `{\n  ${J(key)}: [\n${rows.map((r) => `    ${J(r).replace(/^\{/, '{').replace(/","/g, '", "').replace(/":/g, '": ').replace(/,"/g, ', "')}`).join(',\n')}\n  ]\n}\n`;
+const lines = (key, rows) => `{\n  ${J(key)}: [\n${rows.map((r) => `    ${J(r).replace(/","/g, '", "').replace(/":/g, '": ').replace(/,"/g, ', "')}`).join(',\n')}\n  ]\n}\n`;
 
 export function tell(dir, opts = {}) {
     const W = path.join(dir, 'world'), R = (f) => JSON.parse(fs.readFileSync(path.join(W, f), 'utf8'));
     const header = R('case.json'), telling = R('telling.json');
-    const entities = R('entities.json').entities, times = R('times.json').times, facts = R('facts.json').facts, questions = R('questions.json').questions;
+    const entities = R('entities.json').entities, times = R('times.json').times, facts = R('facts.json').facts, questions = R('questions.json').questions, accounts = R('accounts.json').accounts;
     const actions = fs.existsSync(path.join(W, 'actions.json')) ? R('actions.json').actions : [];
     const byId = (xs) => new Map(xs.map((x) => [x.id, x]));
     const E = byId(entities), T = byId(times), F = byId(facts), Q = byId(questions), A = byId(actions);
-    const t = teller({ narrator: header.narrators[0].id, name: (id) => E.get(id)?.name ?? id, time: (id) => T.get(id).label, act: (id) => A.get(id), question: (id) => Q.get(id) });
+    const N = header.narrators[0].id, name = (id) => E.get(id)?.name ?? id;
+    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id) });
+    const mainT = tellerOf(N), third = teller({ speaker: null, listener: null, name, act: (id) => A.get(id), question: (id) => Q.get(id) });
+    const speakerOf = (id) => { const a = accounts.find((x) => x.facts.includes(id)); return a && a.origin !== N ? a.origin : null; };
+    // How a sentence at a time begins: "On Monday, ", "At six o'clock on Sunday, " (`prep` on the time point), a
+    // stretch "From … until …, " (a deed: "Between … and …, "); a state that held from before the story has none.
+    const first = times[0]?.id, lab = (id) => T.get(id).label;
+    const prefix = (t, deed = false) => (!t ? '' : t.at ? `${T.get(t.at).prep ?? 'On'} ${lab(t.at)}, ` : t.from && t.from !== first && t.to ? (deed ? `Between ${lab(t.from)} and ${lab(t.to)}, ` : `From ${lab(t.from)} until ${lab(t.to)}, `) : t.from && t.from !== first ? `From ${lab(t.from)}, ` : '');
     for (const x of times) { delete x.para; delete x.quote; }
-    const paras = [], dry = [];   // `dry`: each paragraph's items as the templates tell them, for a writer (scripts/prose-story.mjs)
-    telling.paragraphs.forEach((items, i) => {
-        const n = i + 1, out = [], told = [];
-        dry.push(told);
-        let last = null, full = '';
-        const at = (time, body) => {
-            const key = time?.at ?? null, pre = key && key !== last ? t.prefix(time) : '';
-            if (key && key !== last) { const tp = T.get(key); if (tp.para == null) { tp.para = n; tp.quote = pre.replace(/, $/, ''); } }
-            last = key ?? last;
-            out.push(`${pre ? pre + body : t.cap(body)}${body.endsWith('"') ? '' : '.'}`);
-            full = `${t.prefix(time) ? t.prefix(time) + body : t.cap(body)}${body.endsWith('"') ? '' : '.'}`;   // with its time said, whatever came before it   // a sentence that ends in someone's words has its stop inside them
-        };
-        for (const item of items) {
-            if (typeof item === 'string') {
-                const f = F.get(item);
-                if (!f) throw new Error(`telling: no fact ${item}`);
-                const s = t.sentence(f);
-                if (f.attr === 'says') f.value = t.said(f);
-                f.para = n; f.quote = s;
-                at(f.time, s);
-                told.push({ key: f.id, text: out.at(-1), full });
-            } else if (item.deed) { const q = Q.get(item.deed); q.deed_quote = t.deed(q); at(q.entry.time, q.deed_quote); told.push({ key: `deed:${q.id}`, text: out.at(-1), full }); }
-            else if (item.raise) { const q = Q.get(item.raise); q.raised = n; q.quote = q.label; out.push(q.label); told.push({ key: `raise:${q.id}`, text: q.label, full: q.label }); }
-        }
-        paras.push(out.join(' '));
-    });
+    const stop = (s) => (s.endsWith('"') ? s : `${s}.`);   // a sentence that ends in someone's words has its stop inside them
+    const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+    const units = (n) => `${WORDS[n] ?? n} ${header.delivery?.unit ?? 'hour'}${n === 1 ? '' : 's'}`;
+    const drySentence = new Map();   // each fact's sentence as an onlooker would say it, for what an observation says
+    const stories = [{ id: 'main', title: telling.title, paragraphs: telling.paragraphs, file: path.join(dir, header.story.replace(/^\.\.\//, '')) },
+        ...(header.files ?? []).filter((f) => telling.files?.[f.id]).map((f) => ({ id: f.id, title: telling.files[f.id].title, paragraphs: telling.files[f.id].paragraphs, file: path.join(dir, f.text.replace(/^\.\.\//, '')) }))];
+    for (const st of stories) {
+        st.paras = []; st.dry = [];
+        st.paragraphs.forEach((items, i) => {
+            const n = i + 1, ref = st.id === 'main' ? n : `${st.id}:${n}`, out = [], told = [];
+            st.dry.push(told);
+            let last = null, speech = null, pending = null;
+            const timed = (time, deed, lastKey) => {
+                const key = time ? J(time) : null, pre = key && key !== lastKey ? prefix(time, deed) : '';
+                if (pre) for (const id of [time.at, time.from, time.to].filter((x) => x && x !== first)) { const tp = T.get(id); if (tp.para == null) { tp.para = ref; tp.quote = tp.label; } }
+                return { key: key ?? lastKey, pre };
+            };
+            const close = () => {
+                if (!speech) return;
+                const frame = `${name(speech.speaker)} told me`;
+                out.push(`${frame}: "${speech.parts.join(' ')}"`);
+                if (pending && pending.of === speech.speaker) { pending.quote = frame; pending = null; }
+                speech = null;
+            };
+            const plain = (time, body, key, deed = false) => {
+                close();
+                const { key: k, pre } = timed(time, deed, last);
+                last = k;
+                out.push(stop(pre ? pre + body : cap(body)));
+                const as = pre ? body : cap(body);   // the words as they stand in the text, for the quote
+                told.push({ key, text: out.at(-1), full: stop(prefix(time, deed) ? prefix(time, deed) + body : cap(body)) });
+                return as;
+            };
+            for (const item of items) {
+                if (typeof item === 'string') {
+                    const f = F.get(item);
+                    if (!f) throw new Error(`telling: no fact ${item}`);
+                    f.para = ref;
+                    if (f.attr === 'tells') { close(); pending = f; told.push({ key: f.id, text: `${name(f.of)} told me`, full: `(${name(f.of)} speaks to the narrator here: the statements marked as said by ${name(f.of)} are what is said.)` }); continue; }
+                    const who = speakerOf(f.id);
+                    drySentence.set(f.id, `${prefix(f.time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence(f)}`);
+                    if (who) {
+                        if (speech?.speaker !== who) { close(); speech = { speaker: who, parts: [], last: null }; }
+                        const s = tellerOf(who, N).sentence(f), { key: k, pre } = timed(f.time, false, speech.last);
+                        speech.last = k;
+                        speech.parts.push(stop(pre ? pre + s : cap(s)));
+                        f.quote = pre ? s : cap(s);
+                        told.push({ key: f.id, text: speech.parts.at(-1), full: `${name(who)} told me: "${stop(prefix(f.time) ? prefix(f.time) + s : cap(s))}"` });
+                    } else {
+                        const s = mainT.sentence(f);
+                        if (f.attr === 'says') f.value = third.said(f);
+                        f.quote = plain(f.time, s, f.id);
+                    }
+                } else if (item.deed) { const q = Q.get(item.deed); plain(q.entry.time, mainT.deed(q), `deed:${q.id}`, true); }
+                else if (item.raise) { const q = Q.get(item.raise); close(); q.raised = ref; q.quote = q.label; out.push(q.label); told.push({ key: `raise:${q.id}`, text: q.label, full: q.label }); }
+                else if (item.day) { close(); const s = `I have ${units(header.delivery.day)} today, and more to do than they will hold. When they are spent I wake again on this same morning, with the day before me as it was. What I have learned I keep.`; out.push(s); told.push({ key: 'day', text: s, full: s }); }
+            }
+            close();
+            if (pending) throw new Error(`telling ${ref}: ${pending.id} is a telling with nothing told after it`);
+            st.paras.push(out.join(' '));
+        });
+    }
+    const main = stories[0];
+    if (opts.dry) return { dry: main.dry, files: Object.fromEntries(stories.slice(1).map((s) => [s.id, { title: s.title, dry: s.dry }])), title: telling.title, style: telling.style ?? null, entities, times, narrator: header.narrators[0] };
     // Prose written from the telling (world/prose.json, by scripts/prose-story.mjs: a model's, kept as it was given):
     // its paragraphs are the story's, and each entry's quote is the words of the prose that state it. The sentences
     // of the templates stay as what the observations say. Every quote must be in its paragraph.
-    const prosePath = path.join(W, 'prose.json'), prose = !opts.dry && fs.existsSync(prosePath) ? JSON.parse(fs.readFileSync(prosePath, 'utf8')) : null;
-    const drySentence = new Map(facts.map((f) => [f.id, f.quote]));
+    const prosePath = path.join(W, 'prose.json'), prose = fs.existsSync(prosePath) ? JSON.parse(fs.readFileSync(prosePath, 'utf8')) : null;
     if (prose) {
-        if (prose.paragraphs.length !== paras.length) throw new Error('prose.json: not the telling\'s paragraphs');
-        prose.paragraphs.forEach((p, i) => {
-            paras[i] = p.text;
-            for (const { key } of dry[i]) {
-                const quote = p.quotes?.[key];
-                if (!quote || !p.text.includes(quote)) throw new Error(`prose.json ¶${i + 1}: no quote of ${key} in its paragraph`);
-                if (key.startsWith('raise:')) Q.get(key.slice(6)).quote = quote;
-                else if (!key.startsWith('deed:')) F.get(key).quote = quote;
-            }
-        });
+        for (const st of stories) {
+            const written = st.id === 'main' ? prose.paragraphs : prose.files?.[st.id]?.paragraphs;
+            if (!written || written.length !== st.paras.length) throw new Error(`prose.json: not the telling's paragraphs (${st.id})`);
+            written.forEach((p, i) => {
+                st.paras[i] = p.text;
+                for (const { key } of st.dry[i]) {
+                    if (key === 'day') continue;
+                    const quote = p.quotes?.[key];
+                    if (!quote || !p.text.includes(quote)) throw new Error(`prose.json ${st.id} ¶${i + 1}: no quote of ${key} in its paragraph`);
+                    if (key.startsWith('raise:')) Q.get(key.slice(6)).quote = quote;
+                    else if (!key.startsWith('deed:')) F.get(key).quote = quote;
+                }
+            });
+        }
+        const where = (quote) => { for (const st of stories) { const i = st.paras.findIndex((p) => p.includes(quote)); if (i >= 0) return st.id === 'main' ? i + 1 : `${st.id}:${i + 1}`; } return null; };
         for (const x of times) { delete x.para; delete x.quote; }
-        for (const [id, quote] of Object.entries(prose.times ?? {})) { const n = prose.paragraphs.findIndex((p) => p.text.includes(quote)) + 1; if (!n || !T.has(id)) throw new Error(`prose.json: time ${id}: "${quote}" is in no paragraph`); Object.assign(T.get(id), { para: n, quote }); }
+        for (const [id, quote] of Object.entries(prose.times ?? {})) { const at = where(quote); if (!at || !T.has(id)) throw new Error(`prose.json: time ${id}: "${quote}" is in no paragraph`); Object.assign(T.get(id), { para: at, quote }); }
     }
-    // An answer is available where the story first names it, by the entry that does; the give-away is the entry that asserts it.
+    // An answer is available where the story first names it (as an entry's subject, its value or whom it is done
+    // to), by the entry that does: in the main story if it names it there, else in the first file that does. The
+    // give-away is the entry that asserts the answer.
+    const inMain = (f) => typeof f.para === 'number', names = (f, id) => f.of === id || f.value === id || f.to === id;
     for (const q of questions) {
         for (const p of q.possibilities) {
             if (p.via === 'always') { p.available = q.raised; continue; }
-            const f = facts.filter((x) => x.of === p.value && x.para >= q.raised).sort((a, b) => a.para - b.para)[0] ?? facts.filter((x) => x.of === p.value).sort((a, b) => a.para - b.para)[0];
-            if (f) { p.available = Math.max(f.para, q.raised); p.quote = f.para >= q.raised ? f.quote : undefined; if (p.quote === undefined) { delete p.quote; p.from = f.id; } else delete p.from; }
+            const mine = facts.filter((f) => f.para != null && names(f, p.value) && f.attr !== 'tells' && !list(f.asserts).some((x) => x.q === q.id));   // not the give-away itself
+            const f = mine.filter((x) => inMain(x) && x.para >= q.raised).sort((a, b) => a.para - b.para)[0] ?? mine.filter((x) => !inMain(x))[0] ?? mine[0];
+            if (!f) continue;
+            delete p.from; delete p.quote;
+            if (inMain(f) && f.para < q.raised) { p.available = q.raised; p.from = f.id; } else { p.available = f.para; p.quote = f.quote; }
         }
-        const give = facts.find((f) => [f.asserts ?? []].flat().some((x) => x.q === q.id && x.pick === q.answer));
+        const give = facts.find((f) => list(f.asserts).some((x) => x.q === q.id && x.pick === q.answer) && inMain(f));
         if (give) { q.answer_given_at = give.para; q.answer_given_quote = give.quote; }
-        delete q.deed_quote;
     }
     // What an observation says is what its entries say (one that comes from a move, a doubt or another question keeps its own words).
     const observations = fs.existsSync(path.join(W, 'observations.json')) ? R('observations.json').observations : null;
-    for (const o of observations ?? []) if (o.from.every((x) => typeof x === 'string' && F.has(x))) o.says = o.from.map((x) => { const f = F.get(x); return `${t.prefix(f.time).replace(/^On /, 'on ')}${drySentence.get(x)}`.replace(/\."$/, '"'); }).join('; ');
+    for (const o of observations ?? []) if (o.from.every((x) => typeof x === 'string' && drySentence.has(x))) o.says = o.from.map((x) => drySentence.get(x).replace(/\."$/, '"')).join('; ');
     // A form of a name the prose used counts as a mention only if it has a word of the name itself: "Abel", "Mrs. Crouch",
     // "Abel's shed"; not "it", "his shed" or "my marrow", which are whoever is being spoken of.
     const named = (e, m) => !/^(my|his|her|its|their|our|your)\b/i.test(m) && m.split(/[^A-Za-z]+/).some((w) => /^[A-Z]/.test(w) && w.length > 2 && e.name.split(/[^A-Za-z]+/).includes(w));
     const files = {
-        [path.join(dir, header.story.replace(/^\.\.\//, ''))]: `${telling.title}\n\n${paras.join('\n\n')}\n`,
+        ...Object.fromEntries(stories.map((st) => [st.file, `${st.title}\n\n${st.paras.join('\n\n')}\n`])),
         [path.join(W, 'facts.json')]: lines('facts', facts),
         [path.join(W, 'times.json')]: lines('times', times),
         [path.join(W, 'questions.json')]: lines('questions', questions),
         ...(observations ? { [path.join(W, 'observations.json')]: lines('observations', observations) } : {}),
         [path.join(W, 'mentions.json')]: `{\n "entities": {\n${entities.map((e) => `  ${J(e.id)}: ${J([...new Set([e.name, ...(prose?.mentions?.[e.id] ?? []).filter((m) => named(e, m))])]).replace(/","/g, '", "')}`).join(',\n')}\n }\n}\n`,
     };
-    if (opts.dry) return { dry, title: telling.title, style: telling.style ?? null, entities, times, narrator: header.narrators[0] };
     return files;
 }
 

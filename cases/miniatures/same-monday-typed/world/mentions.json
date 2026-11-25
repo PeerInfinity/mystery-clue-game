@@ -1,0 +1,21 @@
+{
+ "entities": {
+  "arliss": ["Ned Arliss"],
+  "dunmore": ["Captain Dunmore"],
+  "trew": ["Amos Trew"],
+  "finch": ["Silas Finch"],
+  "pask": ["Mrs. Pask"],
+  "tolley": ["Jem Tolley"],
+  "saltby": ["Saltby"],
+  "quay": ["the quay"],
+  "office": ["the harbour office"],
+  "ship_inn": ["the Ship inn"],
+  "ropewalk": ["the ropewalk"],
+  "chandlers": ["the chandler's"],
+  "marlow": ["Marlow"],
+  "chart": ["the chart of the new channel"],
+  "office_door": ["the office door"],
+  "key_one": ["the first key of the office door"],
+  "key_two": ["the second key of the office door"]
+ }
+}
