@@ -79,6 +79,22 @@ annotated reading's thoughts, the earlier game's time windows); since 2026-11-06
 `?case=pipeline/runs/silver-blaze-r2/case`), with saves of its own (`ui/world-case.js`); without `world/path.json`
 it offers no hints and no autoplay.
 
+**Visits in the present** (since 2026-11-24; `docs/authored-stories.md`, finding 134). A file may have
+`visit: {label, cost?, after?, needs?}`: its scene comes by going there, not by a paragraph. `delivery.day` is the
+length of the day and `delivery.unit` its unit's name (default `hour`); `cost` (default 1) is what the visit takes of
+it. `after`: alternative sets of visits (file ids), every one of some set made earlier the same day. `needs: {read:
+[files], solved: [questions]}`: what must be known, from any day, before the visit is offered at all (a file read to
+its end, a question solved). The file's `delivered` is the paragraph of the main story from which the visit is
+offered. The day's box is under the main story: each visit known, its cost, and why it cannot be made now; and "End
+the day", which begins the same morning again (it is all that can be done when nothing fits). Ending the day keeps
+everything read and everything on the timeline; only the day's time and its visits made start over. An entry given
+in a visit's file on an earlier day is marked "day N" on the timeline, and its detail names the visit. The save:
+`visits: {day, spent, today, first: {file: day}, log: [[files] per day]}`. Neither a visit nor the day's end can be
+undone, as reading cannot. In the true path: `{do: "visit", file, day?}` (`day`: made on that day, where a visit is
+made again) and `{do: "day", n}` (day n begins); the hints give these in the path's order. The shape follows an
+Action Nodes node of Archipelago-CC (a time cost, alternative sets of prior actions, once a day), so that a case can
+later be given to that substrate; windows of time are not in it yet.
+
 **Played in an Archipelago** (the page's half, since 2026-11-24; `ui/bridge.js`). A case whose papers are earned can
 be played in a frame of the Archipelago-CC web client, which gives the page `?iframeId=<id>` (and `hostOrigin`), or in
 a window that client opens (`?windowId=<id>`: the same messages, to the opener, the handshake's first word

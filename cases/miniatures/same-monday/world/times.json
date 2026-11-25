@@ -1,0 +1,10 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.sun_four", "label": "Sunday, four o'clock", "after": "t.before", "para": "pilot:1", "quote": "at four on Sunday"},
+    {"id": "t.sun_six", "label": "Sunday, six o'clock", "after": "t.sun_four", "para": 1, "quote": "On Sunday at six"},
+    {"id": "t.sun_seven", "label": "Sunday, seven o'clock", "after": "t.sun_six", "para": "chandler:1", "quote": "from seven on Sunday"},
+    {"id": "t.sun_eight", "label": "Sunday, eight at night", "after": "t.sun_seven", "para": "watch:1", "quote": "At eight on Sunday night"},
+    {"id": "t.mon_nine", "label": "Monday, nine o'clock", "after": "t.sun_eight", "para": 1, "quote": "On Monday at nine"}
+  ]
+}

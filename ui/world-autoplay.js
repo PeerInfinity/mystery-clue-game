@@ -122,6 +122,8 @@ export async function start({ store, fast = false }) {
         if (m.do === 'got') return 'Something got through';
         if (m.do === 'route') return 'Adding a link to the route';
         if (m.do === 'link') return `Pointing this out as relevant to “${qLabel(m.q)}”`;
+        if (m.do === 'visit') return `Going: ${files.find((f) => f.id === m.file)?.visit?.label ?? m.file}`;
+        if (m.do === 'day') return 'Ending the day: the same morning begins again';
         return WORDS[m.do] ?? 'A move';
     }
 

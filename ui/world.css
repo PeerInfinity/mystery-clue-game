@@ -290,3 +290,11 @@ body.link-only-new #timeline .event.link-done { display: none; }
 .suspect-grid thead th { font-weight: bold; }
 .suspect-grid .grid-against { color: var(--bad, #a33); }
 .suspect-grid .grid-met { color: var(--good, #2a6); }
+
+/* Visits in the present: the day's box under the main story, and entries learned on an earlier day. */
+.visits { font-family: var(--sans); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; margin: 12px 0; }
+.visits ul { list-style: none; margin: 4px 0; padding: 0; }
+.visits li { margin: 4px 0; }
+.visits-head { margin: 2px 0; }
+.event.earlier-day .ph { color: var(--muted, #777); }
+.day-tag { font-family: var(--sans); font-size: 0.75em; color: var(--muted, #777); border: 1px solid var(--line); border-radius: 8px; padding: 0 5px; white-space: nowrap; }

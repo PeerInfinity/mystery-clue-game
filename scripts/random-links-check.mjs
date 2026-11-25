@@ -62,7 +62,26 @@ let failures = 0;
 const fail = (why) => { failures++; console.log(`FAIL ${why}`); };
 
 // Read everything that can be read: each story's tab in turn, Read on until it reads no more.
+// Where there are visits (the present): after reading, the first visit never made that is open is made, and all is
+// read again; where one never made waits for another the same day, that one is made first; where nothing more fits
+// in the day, the day is ended. Until every visit known has been made once.
+const AFTER = Object.fromEntries((header.files ?? []).filter((f) => f.visit).map((f) => [f.id, (f.visit.after ?? [])[0] ?? []]));
 const readAll = () => ev(`(() => {
+    const after = ${J(AFTER)};
+    const visitNext = () => {
+        document.querySelector('#story .story-tab[data-story="main"]')?.click();
+        const bs = [...document.querySelectorAll('#story [data-visit]')], fresh = bs.filter((b) => !b.dataset.visited);
+        if (!fresh.length) return false;
+        const open = fresh.find((b) => !b.disabled);
+        if (open) { open.click(); return true; }
+        for (const b of fresh) for (const id of after[b.dataset.visit] ?? []) { const p = bs.find((x) => x.dataset.visit === id && !x.disabled); if (p) { p.click(); return true; } }
+        document.querySelector('#story [data-day-end]').click();
+        return true;
+    };
+    let total = 0;
+    for (let step = 0; step < 60; step++) { total += readOnce(); if (!visitNext()) break; }
+    return total + readOnce();
+    function readOnce() {
     const at = () => { const s = JSON.parse(localStorage.getItem(${J(STORE)}) ?? '{}'); return s.para + '|' + (s.log ?? []).length; };
     let read = 0;
     for (let round = 0; round < 3; round++) for (let i = 0; i < document.querySelectorAll('#story .story-tab, #story [data-story]').length; i++) {
@@ -71,6 +90,7 @@ const readAll = () => ev(`(() => {
     }
     if (!document.querySelector('#story [data-story]')) for (let k = 0; k < 80; k++) { const b = at(); document.getElementById('next').click(); if (at() === b) break; read++; }
     return read;
+    }
 })()`);
 const entriesNow = () => ev(`[...new Set([...document.querySelectorAll('#timeline [data-fact]')].map((e) => e.dataset.fact))]`);
 // One entry: opened, linked to each question in this order where the page offers the link, and its moves made.

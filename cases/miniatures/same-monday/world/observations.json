@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.locked", "q": "q.who", "from": ["f.lock_whole"], "says": "the office door was locked and its lock not forced", "essential": true},
+    {"id": "o.keys", "q": "q.who", "from": ["f.two_keys"], "says": "the door has two keys: the Captain's and the pilot's", "essential": true},
+    {"id": "o.marlow", "q": "q.who", "from": ["f.dunmore_marlow"], "says": "the Captain was at Marlow from six on Sunday until nine on Monday", "essential": true},
+    {"id": "o.lent", "q": "q.who", "from": ["f.trew_nokey"], "says": "the pilot was without his key from four on Sunday: he had lent it to Finch"},
+    {"id": "o.finch_key", "q": "q.who", "from": ["f.finch_key"], "says": "Finch had the pilot's key in his hand on the quay at eight on Sunday night", "essential": true},
+    {"id": "o.finch_quay", "q": "q.who", "from": ["f.finch_quay"], "says": "Finch was on the quay by the office steps at eight on Sunday night"},
+    {"id": "o.abed", "q": "q.who", "from": [{"doubted": "f.finch_tells"}], "says": "Finch said he never stirred out that night, and that cannot stand"}
+  ]
+}

@@ -58,7 +58,8 @@ if (caseHeader.delivery?.mode === 'earned') {
         ['world-autoplay-check.mjs', 'one', { PHONE: '1', SEED: at(1) }],
         ...seeds.map((SEED) => ['world-hints-check.mjs', { SEED }]));
 } else if (caseFiles.length) {
-    const orders = perms(caseFiles.map((f) => f.id)).flatMap((p) => [['main', ...p], [...p, 'main']]);
+    // Where the files come by visits (the present), the order of reading them is the path's own: no orders to try.
+    const orders = (caseFiles.some((f) => f.visit) ? [caseFiles.map((f) => f.id)] : perms(caseFiles.map((f) => f.id))).flatMap((p) => [['main', ...p], [...p, 'main']]);
     checks.splice(1, 0, ...orders.map((o) => ['path-check.mjs', { ORDER: o.join(',') }]), ['path-check.mjs', { WHOLE: '1' }]);
 }
 // A case with its implications written (world/implications.json, the experiment): the true path once more with the

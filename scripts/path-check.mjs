@@ -281,6 +281,10 @@ async function play(m) {
             if (!(await save()).held?.includes(m.strain)) return fail(m, 'not held');
             break;
         }
+        case 'visit': case 'day':
+            // The day's box is under the main story.
+            if (files.length && !(await exists(`.story-tab[data-story="${MAIN}"].on`))) await click(`.story-tab[data-story="${MAIN}"]`);
+            // falls through
         case 'way': case 'got': case 'route': case 'link': {
             const sel = controlOf(m);
             if (!(await exists(sel))) return fail(m, 'not offered');

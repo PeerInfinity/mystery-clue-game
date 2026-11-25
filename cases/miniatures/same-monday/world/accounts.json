@@ -1,0 +1,9 @@
+{
+  "accounts": [
+    {"id": "acct.arliss", "label": "What Ned Arliss sees and hears himself", "origin": "arliss", "how": "saw", "facts": ["f.arliss_role", "f.chart_in", "f.door_locked", "f.chart_gone", "f.lock_whole", "f.two_keys", "f.pask_tells", "f.tolley_tells", "f.trew_tells", "f.finch_tells", "f.finch_owns"]},
+    {"id": "acct.pask", "label": "What Mrs. Pask says of the Captain and the watchman", "origin": "pask", "how": "saw", "facts": ["f.dunmore_marlow", "f.tolley_lodges"]},
+    {"id": "acct.tolley", "label": "What Jem Tolley says he saw on his rounds", "origin": "tolley", "how": "saw", "facts": ["f.light", "f.finch_quay", "f.finch_key"]},
+    {"id": "acct.trew", "label": "What Amos Trew says of his key", "origin": "trew", "how": "saw", "facts": ["f.trew_lent", "f.trew_nokey"]},
+    {"id": "acct.finch", "label": "Where Silas Finch says he was", "origin": "finch", "how": "saw", "facts": ["f.finch_abed"]}
+  ]
+}

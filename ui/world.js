@@ -240,7 +240,7 @@ const source = ap ? {
 };
 // A reply (a file with `reply: <question>`) comes when its question is solved, whatever brings the papers.
 const replyOf = new Map(files.filter((f) => f.reply != null).map((f) => [f.reply, f]));
-const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).reply != null ? !!state.solved?.[fileById.get(id).reply] : EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
+const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).visit ? state.visits?.first?.[id] != null : fileById.get(id).reply != null ? !!state.solved?.[fileById.get(id).reply] : EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
 /** Can this question be solved now (earned papers): not solved, its papers come, what it rests on solved. Otherwise always. */
 const openNow = (id) => { const lq = logic?.questions.find((x) => x.id === id); return !lq || isOpen(lq, source.held(), new Set(Object.keys(state.solved))); };
 // For the autoplay and the checks: the delivery as the page has it.
@@ -249,6 +249,60 @@ window.__trying = (on) => { trying = !!on; };
 window.__delivery = { earned: EARNED, seed: ap ? null : state.seed ?? null, open: openNow, held: () => [...source.held()], solved: () => Object.keys(state.solved) };
 /** How a paper came: held from the start, or brought by solving a question (its id). */
 const cameBy = (id) => (fileById.get(id)?.reply != null ? fileById.get(id).reply : logic?.start.includes(id) ? 'start' : Object.keys(state.solved).find((q) => source.brought(q) === id) ?? null);
+// --- Visits (2026-11-24; docs/case-format.md, "Visits in the present"): what the narrator can do today. A file with
+// `visit: {label, cost, after?, needs?}` is a scene that comes by going there, not by a paragraph: the visit costs
+// part of the day (`delivery.day` units), and when the day is spent, or ended, the same morning begins again. What
+// was read and everything on the timeline is kept; only the day starts over. `after`: alternative sets of visits that
+// must have been made earlier the same day; `needs: {read: [files], solved: [questions]}`: what must be known, from
+// any day, before the visit is thought of at all. `delivered` on such a file is the paragraph of the main story from
+// which the visit is offered. `state.visits`: {day, spent, today: [ids], first: {id: day}, log: [[ids] per day]}.
+const VISITS = files.filter((f) => f.visit);
+const DAY = Number(header.delivery?.day) || 0;
+const UNIT = header.delivery?.unit ?? 'hour';
+const units = (n) => `${n} ${UNIT}${n === 1 ? '' : 's'}`;
+if (!state.visits || typeof state.visits !== 'object') state.visits = { day: 1, spent: 0, today: [], first: {}, log: [[]] };
+const visitedOn = (id) => state.visits.first[id] ?? null;
+function visitState(f) {
+    const v = f.visit, cost = v.cost ?? 1;
+    const known = (f.delivered == null || seen(f.delivered)) && list(v.needs?.read).every((id) => reading.readTo(id) >= lastOf(id)) && list(v.needs?.solved).every((q) => isSolved(q));
+    if (!known) return { known: false };
+    if (state.visits.today.includes(f.id)) return { known: true, done: true };
+    const sets = list(v.after), unmet = sets.length && !sets.some((set) => list(set).every((id) => state.visits.today.includes(id)));
+    if (unmet) return { known: true, why: `first, today: ${sets.map((set) => list(set).map((id) => fileById.get(id)?.visit?.label ?? id).join(' and ')).join(', or ')}` };
+    if (state.visits.spent + cost > DAY) return { known: true, why: DAY === state.visits.spent ? 'the day is spent' : `it takes ${units(cost)}, and ${units(DAY - state.visits.spent)} of the day ${DAY - state.visits.spent === 1 ? 'is' : 'are'} left` };
+    return { known: true, open: true };
+}
+function visitsHtml() {
+    if (!VISITS.length || state.story !== MAIN) return '';
+    const rows = VISITS.map((f) => ({ f, st: visitState(f) })).filter((x) => x.st.known);
+    if (!rows.length) return '';
+    const left = DAY - state.visits.spent;
+    const li = rows.map(({ f, st }) => {
+        const cost = f.visit.cost ?? 1, was = visitedOn(f.id);
+        const note = st.done ? 'done today' : st.open ? (was ? `done before, on day ${was}` : '') : st.why;
+        return `<li><button type="button" data-visit="${esc(f.id)}"${was ? ` data-visited="${was}"` : ''}${st.open ? '' : ' disabled'}>${esc(f.visit.label)}</button> <span class="small muted">${units(cost)}${note ? ` · ${esc(note)}` : ''}</span></li>`;
+    }).join('');
+    const stuck = !rows.some((x) => x.st.open);
+    return `<div class="visits" data-day="${state.visits.day}"><p class="visits-head"><b>Day ${state.visits.day}</b> · ${left ? `${units(left)} left of ${DAY}` : 'the day is spent'}</p><ul>${li}</ul>
+      <p><button type="button" class="${stuck ? '' : 'quiet'}" data-day-end title="The same morning begins again. What you have read and everything on your timeline is kept.">${stuck ? 'Wake again on the same morning ▶' : 'End the day'}</button></p></div>`;
+}
+function visit(id) {
+    const f = fileById.get(id);
+    if (!f?.visit || !visitState(f).open) return;
+    const v = state.visits;
+    state.visits = { ...v, spent: v.spent + (f.visit.cost ?? 1), today: [...v.today, id], first: { [id]: v.day, ...v.first }, log: [...v.log.slice(0, -1), [...v.log.at(-1), id]] };
+    state.story = id;
+    save(); render();
+}
+function endDay() {
+    const v = state.visits;
+    state.visits = { ...v, day: v.day + 1, spent: 0, today: [], log: [...v.log, []] };
+    state.note = `Day ${v.day + 1}: the same morning again. What you have read and your timeline are kept.`;
+    save(); render();
+}
+/** The day an entry was learned on, when it came by a visit of an earlier day than today's (else null). */
+const earlierDay = (f) => { const r = parseRef(givenAt(f)), d = r && fileById.get(r.story)?.visit ? visitedOn(r.story) : null; return d != null && d < state.visits.day ? { day: d, label: fileById.get(r.story).visit.label } : null; };
+const dayTag = (f) => { const e = VISITS.length ? earlierDay(f) : null; return e ? ` <span class="day-tag" title="Learned on day ${e.day}: ${esc(e.label)}">day ${e.day}</span>` : ''; };
 if (!delivered(state.story)) state.story = MAIN;
 /** A paragraph's reference as the player sees it: "¶3" in the main story, "Rudd ¶2" in a file. */
 const paraTag = (x) => { const p = parseRef(x); if (!p) return '¶?'; return p.story === MAIN ? `¶${p.n}` : `${fileById.get(p.story)?.short ?? p.story} ¶${p.n}`; };
@@ -257,7 +311,7 @@ if (!Array.isArray(state.held)) state.held = [];
 const freshRoom = () => ({ ways: {}, got: [], route: [] });
 if (!Array.isArray(state.links)) state.links = [];
 state.room = { ...freshRoom(), ...(state.room ?? {}) };
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, hideOut: state.hideOut, greyClash: state.greyClash, autoAgree: state.autoAgree, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, sourcesOpen: state.sourcesOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved, seed: state.seed, tried: state.tried, linkRule: state.linkRule, leftList: state.leftList, leftOpen: state.leftOpen, answerRule: answerParam ?? state.answerRule })); } catch { /* not saved */ } };
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ para: state.para, log: state.log, story: state.story, hideOut: state.hideOut, greyClash: state.greyClash, autoAgree: state.autoAgree, trust: state.trust, marks: state.marks, reasoning: state.reasoning, room: state.room, links: state.links, qOrder: state.qOrder, history: state.history, view: state.view, depth: state.depth, qOpen: state.qOpen, cardsOpen: state.cardsOpen, sourcesOpen: state.sourcesOpen, hintWait: state.hintWait, gate: state.gate, layout: state.layout, panels: state.panels, theme: state.theme, onlyMoves: state.onlyMoves, held: state.held, solved: state.solved, seed: state.seed, tried: state.tried, visits: state.visits, linkRule: state.linkRule, leftList: state.leftList, leftOpen: state.leftOpen, answerRule: answerParam ?? state.answerRule })); } catch { /* not saved */ } };
 // `?answers=evidence` (or `hand`) sets how answers are marked, for the checks and the blind solver.
 // Not saved: the address says it for this visit only.
 let answerParam = null;
@@ -395,7 +449,7 @@ function phrase(f) {
         case 'location': return f.value == null ? `${E}: ${esc(f.detail ?? 'whereabouts unknown')}` : `${E} ${f.neg ? '<b>not</b> at' : 'at'} ${v}${d}`;
         case 'lives_at': return `${E} lives at ${v}${d}`;
         case 'member_of': return `${E} is one of ${v}`;
-        case 'carrying': return `${E} has ${v}${d}`;
+        case 'carrying': return `${E} ${f.neg ? 'has <b>not</b>' : 'has'} ${v}${d}`;
         case 'wearing': return `${E} wears ${v}${d}`;
         case 'owner': return f.neg ? `${E} is <b>not</b> ${v}'s${d}` : `${E} belongs to ${v}${d}`;
         case 'identity': return `${E} ${f.neg ? 'is <b>not</b>' : 'is'} ${v}`;
@@ -587,8 +641,8 @@ const canReason = (f) => ((STATES[f.attr] || OPEN_STATES.has(f.attr)) && f.value
 const REASON_MARK = '<span class="can-reason" title="You can reason from this: open it for the moves (what it needs, what changed, what it is for, what a plan would need, what is missing)">⚙</span>';
 function eventRow(f, clashing, tag = 'li') {
     const lvl = levelOfFact(f);
-    const cls = ['event', `t-${levelCls(lvl)}`, linkingQ && (isLinked(f.id, linkingQ) || isTried(f.id, linkingQ)) ? 'link-done' : '', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
-    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}${f.likely ? ' <span class="small muted">(likely)</span>' : ''}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} ${paraSpan(givenAt(f))}${linkingQ ? ` ${linkButton('link-row', f.id, linkingQ, '+ relevant', 'linked ✓', 'tried ✗')}` : ''}${assertsHtml(f)}</${tag}>`;
+    const cls = ['event', `t-${levelCls(lvl)}`, VISITS.length && earlierDay(f) ? 'earlier-day' : '', linkingQ && (isLinked(f.id, linkingQ) || isTried(f.id, linkingQ)) ? 'link-done' : '', f.reasoned ? 'reasoned' : '', isTimeEvent(f) ? 'time-event' : '', clashing.has(f.id) ? 'clash' : '', state.sel === f.id ? 'sel' : ''].filter(Boolean).join(' ');
+    return `<${tag} class="${cls}" data-fact="${esc(f.id)}"${f.reasoned ? ' title="Your reasoning"' : ''}>${dot(lvl)}<span class="ph">${phrase(f)}${whenNote(f.time ?? {})}${f.likely ? ' <span class="small muted">(likely)</span>' : ''}</span>${canReason(f) ? ` ${REASON_MARK}` : ''} ${paraSpan(givenAt(f))}${dayTag(f)}${linkingQ ? ` ${linkButton('link-row', f.id, linkingQ, '+ relevant', 'linked ✓', 'tried ✗')}` : ''}${assertsHtml(f)}</${tag}>`;
 }
 
 /** A circled possibility as an entry of the world model: the question's entry with the possibility filled in. */
@@ -1399,7 +1453,7 @@ function render() {
     // The story so far, the newest paragraph last and in view.
     const st = document.getElementById('story');
     st.innerHTML = storyTabsHtml() + (at ? stories.get(sid).slice(1, at + 1).map((p, i) => `<p class="sp${i + 1 === at && reading.log.at(-1) === `${sid}:${at}` ? ' now' : ''}" data-sp="${esc(`${sid}:${i + 1}`)}">${paraSpan(sid === MAIN ? i + 1 : `${sid}:${i + 1}`)} ${paraHtml(sid, i + 1)}</p>`).join('')
-        : `<p class="muted small">${esc(fileById.get(sid)?.title ?? '')}: this paper is open, and nothing of it is read yet. <button type="button" class="read-first" data-read-first>Read its first paragraph ▶</button> <span class="muted">(<b>Read on ▶</b>, above, does the same.)</span></p>`) + paperNotes();
+        : `<p class="muted small">${esc(fileById.get(sid)?.title ?? '')}: this paper is open, and nothing of it is read yet. <button type="button" class="read-first" data-read-first>Read its first paragraph ▶</button> <span class="muted">(<b>Read on ▶</b>, above, does the same.)</span></p>`) + paperNotes() + visitsHtml();
     // Only a new paragraph scrolls the story to its end: a click elsewhere leaves it where the player put it.
     const shownKey = `${sid}:${at}`;
     if (shownPara !== shownKey && visibleEl(st)) { shownPara = shownKey; st.lastElementChild?.scrollIntoView({ block: 'nearest' }); }
@@ -2167,7 +2221,7 @@ function storyTabsHtml() {
         return `<button type="button" class="story-tab${state.story === id ? ' on' : ''}${!at ? ' unread' : ''}" data-story="${esc(id)}" title="${at ? `Read to ¶${at} of ${last}` : 'Not read yet'}">${esc(title)} <span class="small muted">${at}/${last}</span></button>`;
     };
     const shown = files.filter((f) => delivered(f.id));
-    const waiting = files.length - shown.length;
+    const waiting = files.filter((f) => !f.visit).length - shown.filter((f) => !f.visit).length;   // a visit's scene comes by going there
     // Papers earned by solving questions: how each came, and nothing about how many are still out or where they are.
     if (EARNED) {
         const how = (f) => { const by = cameBy(f.id); return by === 'start' ? 'in hand from the start' : by && qById.has(by) ? `${f.reply != null ? 'the reply to' : 'brought by solving'} <a class="link" data-q="${esc(by)}">${esc(qLabel(qById.get(by)))}</a>` : ap ? 'come from the Archipelago' : ''; };
@@ -2371,7 +2425,7 @@ function renderDetail(clashing) {
           <p class="quote">“${esc(f.given_quote ?? f.quote)}” ${paraSpan(givenAt(f))}</p>
           <p class="small">When: ${timeLabel(anchorOf(f.time ?? {}))}${whenNote(f.time ?? {})}. Trusted: <b>${levelName(levelOfFact(f))}</b>.${recordNote(f) ? ` <span class="muted">(${recordNote(f).replace(/^o/, 'O')}.)</span>` : ''}</p>
           ${f.seen_from && factById.has(f.seen_from) && visible(factById.get(f.seen_from)) ? `<p class="small" data-seen-from>Rests on where its witness was: ${dot(levelOfFact(factById.get(f.seen_from)))}<a class="link" data-fact="${esc(f.seen_from)}">${phrase(factById.get(f.seen_from))}</a>. It is trusted no further than that.</p>` : ''}
-          ${clockNote(f)}
+          ${clockNote(f)}${VISITS.length && earlierDay(f) ? `<p class="small" data-earlier-day>Learned on day ${earlierDay(f).day}, by a visit: ${esc(earlierDay(f).label)}. It is day ${state.visits.day} now; what you learned then still stands.</p>` : ''}
           ${f.attr === 'tells' ? toldHtml(f)
             : `<h3>How it reaches you</h3>${stmtHtml(chains)}<ul class="chains">${chains.map((c) => chainHtml(c)).join('')}</ul>`}
           ${content.length ? `<h3>What it asserts reaches you</h3>${stmtHtml(content)}<ul class="chains">${content.map((c) => chainHtml(c)).join('')}</ul>${assertsHtml(f)}` : ''}
@@ -2798,6 +2852,9 @@ document.addEventListener('click', (e) => {
         if (again) (again.closest('#tabbed .panel-body') ?? window).scrollBy(0, again.getBoundingClientRect().top - top);
         return;
     }
+    const vb = e.target.closest('[data-visit]');
+    if (vb) { visit(vb.dataset.visit); return; }
+    if (e.target.closest('[data-day-end]')) { endDay(); return; }
     const tab = e.target.closest('[data-story]');
     if (tab) { state.story = tab.dataset.story; save(); render(); return; }
     const pa = e.target.closest('.para');
@@ -2926,7 +2983,7 @@ const hintApi = {
     // Papers earned by solving questions: a question is open when its papers have come and what it rests on is solved.
     earned: EARNED, open: (id) => !EARNED || openNow(id),
     // The files: how far each is read, whether it has come, and its title; and whether references are all read.
-    files: () => files.map((f) => ({ id: f.id, title: f.title, delivered: delivered(f.id), read: reading.readTo(f.id), last: lastOf(f.id) })),
+    files: () => files.map((f) => ({ id: f.id, title: f.title, visit: f.visit?.label ?? null, delivered: delivered(f.id), read: reading.readTo(f.id), last: lastOf(f.id) })),
     seenAll: (at) => reading.seenAll(at), readTo: (id) => reading.readTo(id),
     // The gate holds the reader here: reading on is not possible yet.
     gateHolds: () => state.para < LAST && gateAt(state.para + 1).length > 0,

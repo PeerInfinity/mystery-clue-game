@@ -15,7 +15,7 @@
 //  (d) nothing: read on.
 // A move is offered from its `hint_at` (or `at`): never before the page can support it.
 
-import { $, esc, LEVELS, Failed, makeMover, allowedNow, made, onOf, VIEWS, nextRead } from './world-moves.js';
+import { $, esc, LEVELS, Failed, makeMover, allowedNow, made, onOf, VIEWS, DAY_MOVES, nextRead } from './world-moves.js';
 
 import { CASE } from './world-case.js';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -81,7 +81,9 @@ export async function makeHints({ store, api }) {
         const done = (m) => m.do === 'trust' && (LEVELS[m.level] <= LEVELS.unlikely ? api.lowered(m.link ? { link: m.link } : { person: m.person }) : api.countsNow(m.on));
         // Papers earned by solving questions: only the moves of a question open now (its papers come, what it rests on solved).
         const forOpen = (m) => !api.earned || !(m.for_q ?? []).length || m.for_q.some((q) => api.open(q));
-        const open = moves.filter((m) => !VIEWS.has(m.do) && forOpen(m) && api.seenAll(from(m)) && !tried(m) && !made(m, save) && !done(m)
+        // The present (a visit, the day's end) goes in the path's order: a day is not ended before its visits are made.
+        const inTurn = (m) => !DAY_MOVES.has(m.do) || !moves.some((x) => DAY_MOVES.has(x.do) && x.i < m.i && !made(x, save));
+        const open = moves.filter((m) => !VIEWS.has(m.do) && forOpen(m) && inTurn(m) && api.seenAll(from(m)) && !tried(m) && !made(m, save) && !done(m)
             && !((m.do === 'circle' || m.do === 'cross') && rightCircled(m.q, save)))
             .sort((a, b) => deadline(a) - deadline(b) || a.i - b.i);
         if (open.length) {
@@ -132,6 +134,7 @@ export async function makeHints({ store, api }) {
             case 'move': {
                 const m = t.m;
                 const where = m.do === 'circle' || m.do === 'cross' ? look(qLink(m.q))
+                    : DAY_MOVES.has(m.do) ? 'Look at the day, under the story.'
                     : m.do === 'hold' ? 'Look at the likely clashes.'
                     : m.do === 'way' || m.do === 'got' ? 'Look at the ways in.'
                     : m.do === 'route' ? 'Look at the route.'
@@ -148,6 +151,8 @@ export async function makeHints({ store, api }) {
                     : m.do === 'way' ? `Mark ${api.name(m.way.split('|')[0]) ?? m.way.split('|')[0]} ${m.mark} to ${m.way.split('|')[1] === 'person' ? 'a person' : 'something small'}.`
                     : m.do === 'got' ? `Point out that something got through: ${entry(m.of)}.`
                     : m.do === 'route' ? `Add ${api.name(m.node) ?? m.node} to the route.`
+                    : m.do === 'visit' ? `Go: ${api.files().find((f) => f.id === m.file)?.visit ?? m.file}.`
+                    : m.do === 'day' ? 'End the day: the same morning begins again, and what you know is kept.'
                     : m.do === 'link' ? `Point it out under “Relevant to…”: ${qName(m.q)}.` : 'Make the move.';
                 return [where, m.why, what];
             }

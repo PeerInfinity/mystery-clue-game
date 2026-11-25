@@ -1,0 +1,23 @@
+{
+  "facts": [
+    {"id": "f.arliss_role", "of": "arliss", "attr": "role", "value": "clerk to the harbour-master at Saltby", "time": {"from": "t.before"}, "para": 1, "quote": "clerk to the harbour-master at Saltby"},
+    {"id": "f.chart_in", "of": "chart", "attr": "location", "value": "office", "detail": "laid in the office drawer by Captain Dunmore", "time": {"at": "t.sun_six"}, "para": 1, "quote": "lay the Admiralty's chart of the new channel in the office drawer"},
+    {"id": "f.door_locked", "of": "office_door", "attr": "door", "value": "locked", "detail": "by Captain Dunmore, as the Marlow coach's horn sounded", "time": {"at": "t.sun_six"}, "para": 1, "quote": "lock the office door behind us both"},
+    {"id": "f.chart_gone", "of": "chart", "attr": "location", "value": "office", "neg": true, "detail": "the drawer empty", "time": {"at": "t.mon_nine"}, "para": 1, "quote": "found the drawer empty"},
+    {"id": "f.lock_whole", "of": "office_door", "attr": "condition", "value": "locked, and the lock not forced", "time": {"at": "t.mon_nine"}, "para": "office:1", "quote": "the lock was not forced"},
+    {"id": "f.two_keys", "of": "office_door", "attr": "condition", "value": "has two keys and no more: Captain Dunmore's and the one Amos Trew carries", "time": {"from": "t.before"}, "para": "office:2", "quote": "That door has two keys and no more"},
+    {"id": "f.pask_tells", "of": "pask", "attr": "tells", "value": "acct.pask", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "inn:1", "quote": "The Captain took the Marlow coach from my door at six on Sunday"},
+    {"id": "f.dunmore_marlow", "of": "dunmore", "attr": "location", "value": "marlow", "detail": "gone by the six o'clock coach, back by the first coach on Monday", "time": {"from": "t.sun_six", "to": "t.mon_nine"}, "para": "inn:1", "quote": "he was at Marlow until the first coach brought him back at nine this morning"},
+    {"id": "f.tolley_lodges", "of": "tolley", "attr": "lives_at", "value": "ropewalk", "detail": "the night watchman", "time": {"from": "t.before"}, "para": "inn:2", "quote": "He lodges at the ropewalk"},
+    {"id": "f.tolley_tells", "of": "tolley", "attr": "tells", "value": "acct.tolley", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "watch:1", "quote": "At eight on Sunday night there was a light in the harbour office"},
+    {"id": "f.light", "of": "office", "attr": "condition", "value": "a light in it", "time": {"at": "t.sun_eight"}, "para": "watch:1", "quote": "there was a light in the harbour office"},
+    {"id": "f.finch_quay", "of": "finch", "attr": "location", "value": "quay", "detail": "by the office steps", "time": {"at": "t.sun_eight"}, "para": "watch:2", "quote": "I met Silas Finch, the chandler's clerk, on the quay by the office steps"},
+    {"id": "f.finch_key", "of": "finch", "attr": "carrying", "value": "the pilot's key of the office door", "key": "office_door", "detail": "in his hand, known by its brass tally", "time": {"at": "t.sun_eight"}, "para": "watch:2", "quote": "he had the pilot's key in his hand"},
+    {"id": "f.trew_tells", "of": "trew", "attr": "tells", "value": "acct.trew", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "pilot:1", "quote": "I lent it to Silas Finch at four on Sunday"},
+    {"id": "f.trew_lent", "of": "trew", "attr": "action", "value": "lends his key of the office door to Silas Finch, to fetch the lead-line", "time": {"at": "t.sun_four"}, "para": "pilot:1", "quote": "I lent it to Silas Finch at four on Sunday, to fetch the lead-line from the office"},
+    {"id": "f.trew_nokey", "of": "trew", "attr": "carrying", "value": "a key of the office door", "key": "office_door", "neg": true, "detail": "until Silas Finch brought it back", "time": {"from": "t.sun_four", "to": "t.mon_nine"}, "para": "pilot:1", "quote": "I was without it from then until he brought it back at nine this morning"},
+    {"id": "f.finch_tells", "of": "finch", "attr": "tells", "value": "acct.finch", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "chandler:1", "quote": "I was here, in my bed over the shop"},
+    {"id": "f.finch_abed", "of": "finch", "attr": "location", "value": "chandlers", "detail": "in his bed over the shop, never stirring out", "time": {"from": "t.sun_seven", "to": "t.mon_nine"}, "para": "chandler:1", "quote": "from seven on Sunday until this morning", "truth": false},
+    {"id": "f.finch_owns", "of": "finch", "attr": "location", "value": "chandlers", "detail": "with the chart in his sea-chest", "time": {"at": "t.mon_nine"}, "para": 3, "quote": "Silas Finch had the chart in his sea-chest at the chandler's", "q": "q.who", "pick": "finch"}
+  ]
+}

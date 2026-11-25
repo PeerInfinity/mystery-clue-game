@@ -119,6 +119,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/dinner-at-larch-house` | Two narrators: each certain of their own part of an evening, neither account answering alone. | 6 paragraphs, 16 facts, 2 accounts (one for each narrator), 1 question, 6 observations (4 essential), 6 moves |
 | `cases/miniatures/garden-room` | A room with two doors, each watched by a different witness for a different stretch: neither watch closes any of the time alone, and the two together leave what neither covers (finding 124). | 5 paragraphs, 18 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/prize-marrow` | A stated want: something spoiled, three who could have done it, what each said outright they wanted, and a deed that brought about what only one of them wanted; the one who gained by it had said he would not have it so (finding 125). | 6 paragraphs, 14 facts, 1 account, 1 question, 6 observations (4 essential), 7 moves |
+| `cases/miniatures/same-monday` | Visits in the present: five places to go, a day of three hours, and the same morning beginning again with everything learned kept (finding 134). | 3 + 2 + 2 + 2 + 1 + 1 paragraphs (main story, five visits), 19 facts, 5 accounts, 4 tellings, 1 question, 7 observations (4 essential), 15 moves |
 | `cases/miniatures/grey-cloak` | A mistaken witness: what she saw is kept, her identification of it set aside, and the mistake is evidence. | 6 paragraphs, 17 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 12 moves |
 | `cases/miniatures/night-porters-statement` | An unreliable narrator: one of his statements is against the other narrator's own knowledge and is set aside; another is kept. | 6 paragraphs, 12 facts, 2 accounts (one for each narrator), 1 question, 4 observations (3 essential), 6 moves |
 | `cases/miniatures/wages-bag` | A witness's record and two sources that agree (findings 112 to 114): a first tale against the narrator's own observation; a second with one statement that is needed and one against another witness's word, nothing confirmed deciding it; a third witness who shares nothing with the second and agrees. | 6 paragraphs, 26 facts, 5 accounts, 4 tellings, 2 questions, 8 observations (4 essential), 4 implications, 17 moves |
@@ -1994,6 +1995,33 @@ script that found each fact's paragraph from its quote; the data files are the s
       Not yet run against the real one.
     - *Checked:* The Telegram Signed M., every page check; the long case's true path alone and against the
       stand-in host.
+
+134. **Visits in the present, and a day that begins again: The Same Monday (2026-11-24).** The first version of
+    choices the player character makes, as ruled (finding 130) and with the user's three further rulings: a time
+    loop stated plainly in the story; a visit may wait on something known from any day; a miniature of five visits,
+    a day that fits three hours of them, one pair in order, one question.
+    - *Built* (`docs/case-format.md`, "Visits in the present"; `guide.html`, "Visits, and a day that begins
+      again"). A visit is a file that comes by going there. The day's box is under the main story. Ending the day
+      keeps everything; an entry of an earlier day is marked "day N" and its detail names the visit. Not grey: on
+      this page grey already means uncertain, so the mark is a small tag and a muted phrase.
+    - *The case* (`cases/miniatures/same-monday`): a chart gone from a locked office; the office (1 hour), the inn
+      (1), the watchman (2, after the inn the same day), the pilot (1, once the office is read), the chandler's (1,
+      once the pilot is read): six hours of visits in a day of three, so two days at least. The first day's
+      natural road (office, pilot, chandler's) ends on one man's word against another's; the second day's (inn,
+      watchman) settles it with what the first day found.
+    - *What the typed data did unasked:* the Captain's stay at Marlow rules him out (an alibi through the window),
+      the pilot's "I was without it" makes him unlikely (a key denied), the clerk's "in my bed" clashes with the
+      watchman, and the pilot and the watchman are two sources that agree. One concluding rule is written.
+    - *Checks.* The true path has `visit` and `day` moves; the path check, the autoplay in every layout, the hints
+      and the player who only tries things all play it to the end (`CASE=cases/miniatures/same-monday npm run
+      page-checks`). The trying player makes each visit once, makes first what another waits for, and ends the
+      day when nothing fits (three days, by its order). Where files come by visits the page checks no longer try
+      every order of reading them (720 for five files): the order is the path's.
+    - *Seen by eye and mended:* "has" for a key denied to one person now reads "has not"; the line "one more
+      paper may come as the story goes on" no longer counts visits.
+    - *Not in this version, as ruled:* the present does not react to the hour or to what was done; no windows of
+      time; nothing in an Archipelago (a visit's file is not an earned paper). Not yet done: a blind run, and the
+      user's own play.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

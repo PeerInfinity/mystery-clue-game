@@ -15,6 +15,8 @@ export class Failed extends Error {}
 export const VIEWS = new Set(['plan', 'stop', 'compare', 'account']);
 export const REASONING = new Set(['a', 'b', 'c', 'm']);
 export const ROOM_MOVES = new Set(['way', 'got', 'route', 'link']);
+/** The present: a visit made (`{do: 'visit', file, day?}`), the day ended (`{do: 'day', n}`: day n begins). Made in the path's order. */
+export const DAY_MOVES = new Set(['visit', 'day']);
 /** `entry: "route"` in a link move: the route the player has built, whatever its id. */
 const ROUTE_ENTRY = 'r:r:';
 
@@ -64,6 +66,8 @@ export function controlOf(m) {
         case 'way': return `[data-way="${esc(`${m.way}|${m.mark}`)}"]`;
         case 'got': return `[data-got="${esc(m.of)}"]`;
         case 'route': return `[data-route-add="${esc(m.node)}"]`;
+        case 'visit': return `#story [data-visit="${esc(m.file)}"]:not([disabled])`;
+        case 'day': return '#story [data-day-end]';
         case 'link': return `#detail [data-link-entry${m.entry === 'route' ? `^="${ROUTE_ENTRY}"` : `="${esc(m.entry)}"`}][data-link-q="${esc(m.q)}"]`;
         default: return null;
     }
@@ -86,6 +90,8 @@ export function made(m, save) {
     if (m.do === 'way') return save.room?.ways?.[m.way] === m.mark;
     if (m.do === 'got') return (save.room?.got ?? []).includes(m.of);
     if (m.do === 'route') return (save.room?.route ?? []).includes(m.node);
+    if (m.do === 'visit') return m.day ? (save.visits?.log?.[m.day - 1] ?? []).includes(m.file) : save.visits?.first?.[m.file] != null;
+    if (m.do === 'day') return (save.visits?.day ?? 1) >= m.n;
     if (m.do === 'link') return (save.links ?? []).some((l) => l.q === m.q && (m.entry === 'route' ? l.entry.startsWith(ROUTE_ENTRY) : l.entry === m.entry));
     return false;
 }
@@ -215,6 +221,11 @@ export function makeMover({ store, fast = false, factor = () => 0, gate = async 
             case 'way': case 'got': case 'route':
                 if (!(await press(sel)) || !made(m, saved())) throw new Failed('the page did not take it');
                 break;
+            case 'visit': case 'day':
+                // The day's box is under the main story.
+                if ($('.story-tab[data-story="main"]') && !$('.story-tab[data-story="main"].on')) await press('.story-tab[data-story="main"]');
+                if (!(await press(sel)) || !made(m, saved())) throw new Failed(m.do === 'visit' ? 'the visit is not open' : 'the day did not end');
+                break;
             default: throw new Failed(`unknown move ${m.do}`);
         }
     }
@@ -239,6 +250,8 @@ export function allowedNow(m, store) {
         return ok;
     }
     if (m.do === 'trust' || m.do === 'hold') return !!$(controlOf(m));
+    // A visit or the day's end: its button is there (the main story's tab shows it; the caller has that in view or not: looked for in the page as drawn).
+    if (DAY_MOVES.has(m.do)) { if ($('.story-tab[data-story="main"]') && !$('.story-tab[data-story="main"].on')) $('.story-tab[data-story="main"]').click(); return !!$(controlOf(m)); }
     if (REASONING.has(m.do)) {
         const el = $(controlOf(m));
         if (!el) return false;

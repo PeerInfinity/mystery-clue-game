@@ -1,0 +1,19 @@
+{
+  "id": "same_monday",
+  "title": "The Same Monday",
+  "author": "written for this project (a mechanic miniature: visits in the present, and a day that begins again)",
+  "story": "../story.txt",
+  "delivery": {"day": 3, "unit": "hour"},
+  "files": [
+    {"id": "office", "title": "The harbour office", "short": "Office", "text": "../files/office.txt", "delivered": 2, "visit": {"label": "Look over the harbour office", "cost": 1}},
+    {"id": "inn", "title": "At the Ship inn", "short": "Inn", "text": "../files/inn.txt", "delivered": 2, "visit": {"label": "Ask at the Ship inn", "cost": 1}},
+    {"id": "watch", "title": "The night watchman", "short": "Watchman", "text": "../files/watch.txt", "delivered": 2, "visit": {"label": "Wake the night watchman at the ropewalk", "cost": 2, "after": [["inn"]], "needs": {"read": ["inn"]}}},
+    {"id": "pilot", "title": "The pilot", "short": "Pilot", "text": "../files/pilot.txt", "delivered": 2, "visit": {"label": "Ask the pilot about his key", "cost": 1, "needs": {"read": ["office"]}}},
+    {"id": "chandler", "title": "At the chandler's", "short": "Chandler", "text": "../files/chandler.txt", "delivered": 2, "visit": {"label": "Call on Silas Finch at the chandler's", "cost": 1, "needs": {"read": ["pilot"]}}}
+  ],
+  "narrators": [
+    {"id": "arliss", "name": "Ned Arliss", "kind": "first-person"}
+  ],
+  "subtitle": "Ned Arliss's timeline",
+  "source": {"written": "2026-11-24", "word_count": 430}
+}
