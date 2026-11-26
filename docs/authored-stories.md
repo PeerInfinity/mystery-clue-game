@@ -122,8 +122,8 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/grey-cloak-typed` | The Grey Cloak told from its data: who someone was, what was worn, two descriptions compared as typed heights (finding 148). | 6 paragraphs, 19 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 14 moves |
-| `cases/miniatures/ring-on-the-bench-typed` | The Ring on the Bench told from its data: the arrangement of a room, a route's observation, a thing that knows nothing named by its keeper (finding 150). | 9 paragraphs, 25 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
-| `cases/miniatures/dinner-at-larch-house-typed` | The Dinner at Larch House told from its data: two narrators, each "I" in their own account; what was seen from where (finding 151). | 6 paragraphs, 21 facts, 2 accounts, 1 question, 7 observations (4 essential), 6 moves |
+| `cases/miniatures/ring-on-the-bench-typed` | The Ring on the Bench told from its data: the arrangement of a room, a route's observation, a thing that knows nothing named by its keeper (finding 150). | 9 paragraphs, 25 facts, 1 account, 1 question, 8 observations (5 essential), 17 moves |
+| `cases/miniatures/dinner-at-larch-house-typed` | The Dinner at Larch House told from its data: two narrators, each "I" in their own account; what was seen from where (finding 151). | 6 paragraphs, 21 facts, 2 accounts, 1 question, 8 observations (4 essential), 6 moves |
 | `cases/miniatures/night-porters-statement-typed` | The Night Porter's Statement told from its data: a narrator who may be doubted, his statement in his own voice (finding 152). | 6 paragraphs, 12 facts, 2 accounts, 1 question, 4 observations (3 essential), 6 moves |
 | `cases/miniatures/cellar-door-typed` | The Cellar Door told from its data: the reader's own entry of a change, its sentence made from the engine's acts and their needs (finding 153). | 6 paragraphs, 20 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/watchmans-clock-typed` | The Watchman's Clock told from its data: a rule told from its series, the card as its record, the reader's entry of a gap (finding 154). | 6 paragraphs and a paper of 1, 23 facts, 3 accounts, 2 tellings, 2 questions, 8 observations (5 essential), 13 moves |
@@ -2591,6 +2591,32 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Four things are put to the user by these findings:* a rule for a room closed to a person on every way in
       (150); whether "everyone but these was elsewhere" closes a list as "nobody but these was there" does
       (151); a rule for who held the key through the whole window (152); and the watchman's keys, above.
+
+155. **Two rules from the points of findings 150 and 151 (the user's rulings of 2026-11-26: "I agree with your
+    recommendations").** Four points were put to the user. Two carried a recommendation to build and are built;
+    the watchman's keys stay as typed (finding 154); the fourth, who held the key through the whole window
+    (finding 152), carried no recommendation and is not built.
+    - *A room closed to a person on every way in* (`t.sealed`). Where a case has a sealed place and the deed
+      needs its doer there, and the true entries make every way in told of closed to a person, every answer that
+      is a person is ruled out. Certain, as the entries are. It rests on the observations of those entries
+      together, so each way in must be something the reader can link; a way the story never tells of is no row,
+      as in the room's own table. In the typed Ring on the Bench the apprentice is now ruled out with no written
+      rule, from the door, the window, the walls and the pane; the pane's being closed to a person gained an
+      observation for it. The rules had not read `room.json` before: it is now part of the case's data.
+    - *"Everyone but these was elsewhere"* closes the list of answers as "nobody but these was there" does:
+      a statement about everyone, through the whole window, at a place that neither holds the deed's place nor
+      lies in it. Likely only, as that rule is. In the typed Dinner at Larch House the answer now follows whole
+      from the typed forms: the Captain by where he was when it could have been done, "something else" by the
+      table, Miss Pym by elimination.
+    - *What still does not follow in the room:* the monkey. With the apprentice out, the answer would follow if
+      the list were closed, and nothing closes it: what would is the route's requirements set against each
+      candidate's typed traits ("small enough for the pane", "able to travel by the cord"), which the format has
+      for general knowledge (`room.json` `categories`) and this case does not use.
+    - *Measured* (`typed-check.mjs`): 16 of 69 answers follow with the written rules taken away (15 before), 53
+      of 92 wrong answers are ruled out (52). Only the two typed twins changed; the written Ring on the Bench
+      does not (its pane is not typed as closed to a person, and its taking is no typed act).
+    - *Checked:* a unit test of both rules; `npm test`; every page check on the two cases; every short case
+      validates; the long case's export, and so its version, unchanged.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
