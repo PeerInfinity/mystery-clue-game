@@ -1,0 +1,45 @@
+{
+ "title": "THE LOOSE BOARD, TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.ann_role",
+   "f.box_hidden",
+   "f.jane_role",
+   "f.ann_writes",
+   "f.jane_knows",
+   "f.told_one"
+  ],
+  [
+   "f.ann_funeral",
+   "f.jane_funeral",
+   "f.box_gone",
+   {
+    "deed": "q.who"
+   },
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.untouched"
+  ],
+  [
+   "f.dick_role",
+   "f.dick_round"
+  ],
+  [
+   "f.jane_tells",
+   "f.jane_read",
+   "f.voss_role",
+   "f.voss_table",
+   {
+    "implied": "f.voss_knows",
+    "by": "f.voss_table"
+   }
+  ],
+  [
+   "f.box_found",
+   "f.voss_owns"
+  ]
+ ]
+}

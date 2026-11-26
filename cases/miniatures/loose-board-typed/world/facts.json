@@ -1,0 +1,23 @@
+{
+  "facts": [
+    {"id": "f.ann_role", "of": "ann", "attr": "role", "value": "the keeper of the draper's shop in Fore Street", "time": {"from": "t.before"}, "para": 1, "quote": "I am Ann Tolley, the keeper of the draper's shop in Fore Street"},
+    {"id": "f.box_hidden", "of": "cash_box", "attr": "location", "value": "hiding_place", "time": {"from": "t.before", "to": "t.three"}, "para": 1, "quote": "The cash-box was in the hiding-place under the loose board"},
+    {"id": "f.ann_writes", "of": "ann", "attr": "action", "act": "send", "thing": "letter", "to": "jane", "time": {"at": "t.last_month"}, "para": 1, "quote": "I sent the letter about the hiding-place to Jane Marsh"},
+    {"id": "f.jane_role", "of": "jane", "attr": "role", "value": "Ann Tolley's sister", "time": {"from": "t.before"}, "para": 1, "quote": "Jane Marsh is my sister"},
+    {"id": "f.jane_knows", "of": "jane", "attr": "knows", "value": "hiding_place", "time": {"from": "t.last_month"}, "para": 1, "quote": "Jane Marsh knew the hiding-place under the loose board"},
+    {"id": "f.told_one", "of": "hiding_place", "attr": "condition", "value": "a secret told to one person only", "time": {"from": "t.last_month"}, "para": 1, "quote": "The hiding-place under the loose board was a secret told to one person only"},
+    {"id": "f.ann_funeral", "of": "ann", "attr": "location", "value": "st_marys", "time": {"from": "t.two", "to": "t.three"}, "para": 2, "quote": "I was at St. Mary's"},
+    {"id": "f.jane_funeral", "of": "jane", "attr": "location", "value": "st_marys", "time": {"from": "t.two", "to": "t.three"}, "para": 2, "quote": "Jane Marsh was at St. Mary's"},
+    {"id": "f.box_gone", "of": "cash_box", "attr": "location", "value": "hiding_place", "neg": true, "time": {"at": "t.three"}, "para": 2, "quote": "the cash-box was not in the hiding-place under the loose board"},
+    {"id": "f.untouched", "of": "shop", "attr": "condition", "value": "untouched but for the loose board, the till with two pounds of silver as it was left", "time": {"at": "t.three"}, "para": 3, "quote": "the draper's shop in Fore Street was untouched but for the loose board, the till with two pounds of silver as it was left"},
+    {"id": "f.dick_role", "of": "dick", "attr": "role", "value": "Ann Tolley's errand boy", "time": {"from": "t.before"}, "para": 4, "quote": "Dick is my errand boy"},
+    {"id": "f.dick_round", "of": "dick", "attr": "location", "value": "hilltop", "time": {"from": "t.one", "to": "t.four"}, "para": 4, "quote": "Dick was at Hilltop"},
+    {"id": "f.jane_tells", "of": "jane", "attr": "tells", "value": "acct.jane", "to": "ann", "how": "told", "time": {"after": "t.three", "before": "t.later"}, "para": 5, "quote": "Jane Marsh told me"},
+    {"id": "f.jane_read", "of": "jane", "attr": "action", "act": "read_aloud", "thing": "letter", "where": "jane_house", "time": {"at": "t.breakfast"}, "para": 5, "quote": "I read aloud the letter about the hiding-place at my house"},
+    {"id": "f.voss_role", "of": "voss", "attr": "role", "value": "Jane Marsh's lodger", "time": {"from": "t.before"}, "para": 5, "quote": "Mr. Voss is my lodger"},
+    {"id": "f.voss_table", "of": "voss", "attr": "location", "value": "jane_house", "time": {"at": "t.breakfast"}, "para": 5, "quote": "Mr. Voss was at my house"},
+    {"id": "f.voss_knows", "of": "voss", "attr": "knows", "value": "hiding_place", "basis": "implied", "time": {"from": "t.breakfast"}, "para": 5, "quote": "Mr. Voss was at my house"},
+    {"id": "f.box_found", "of": "cash_box", "attr": "location", "value": "trunk", "time": {"at": "t.later"}, "para": 6, "quote": "the cash-box was in Mr. Voss's trunk"},
+    {"id": "f.voss_owns", "of": "voss", "attr": "says", "to": "ann", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "voss"}], "para": 6, "value": "owns to taking from its hiding-place the cash-box", "quote": "Mr. Voss said to me: \"It was I who took the cash-box from the draper's shop in Fore Street.\""}
+  ]
+}

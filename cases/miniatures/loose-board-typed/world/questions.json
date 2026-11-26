@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who took the cash-box?", "entry": {"of": "?", "attr": "action", "act": ["take_hidden"], "thing": "cash_box", "about": "hiding_place", "where": "shop", "time": {"from": "t.two", "to": "t.three"}}, "possibilities": [{"value": "something else", "via": "always", "available": 2},{"value": "jane", "via": "direct", "available": 2, "quote": "Jane Marsh was at St. Mary's"},{"value": "dick", "via": "direct", "available": 4, "quote": "Dick is my errand boy"},{"value": "voss", "via": "direct", "available": 5, "quote": "Mr. Voss is my lodger"}], "answer": "voss", "answer_inferable_at": 5, "answer_from": "f.voss_knows", "raised": 2, "quote": "Who took the cash-box?", "answer_given_at": 6, "answer_given_quote": "Mr. Voss said to me: \"It was I who took the cash-box from the draper's shop in Fore Street.\""}
+  ]
+}

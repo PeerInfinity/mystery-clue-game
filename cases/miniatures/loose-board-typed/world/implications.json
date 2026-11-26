@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.who_knew", "q": "q.who", "from": ["o.straight"], "says": "the thief went straight to the board: whoever it was had been told, or had heard, where the box was"},
+    {"id": "i.who_not_jane", "q": "q.who", "from": ["o.jane_away"], "says": "Jane was at the funeral beside Ann Tolley the whole hour: it was not Jane", "rules_out": ["jane"]},
+    {"id": "i.who_not_dick", "q": "q.who", "from": ["o.dick_away"], "says": "Dick was two miles off the whole hour, and was never told: it was not Dick", "rules_out": ["dick"]},
+    {"id": "i.who_voss", "q": "q.who", "from": ["i.who_knew", "o.told_one", "o.heard", "i.who_not_jane"], "says": "only her sister was told, and the one other who learned of it from her was Mr. Voss, who heard the letter read: it was Mr. Voss", "concludes": "voss"}
+  ]
+}

@@ -2,7 +2,8 @@
 //   node scripts/tell-story.mjs <dir>        writes; --check: writes nothing, exits 1 if anything would change
 // The case's world/telling.json says only the order: `{title, style?, paragraphs: [[item, ...], ...], files?: {<file
 // id>: {title, paragraphs}}}`, an item a fact's id, `{deed: <question>}` (the deed the question asks about, its doer
-// unknown), `{raise: <question>}` (its label, as a question) or `{day: true}` (the day and its beginning again, from
+// unknown), `{raise: <question>}` (its label, as a question), `{implied: <fact>, by: <fact>}` (an entry no sentence
+// says, on the timeline by the words of the entry that implies it) or `{day: true}` (the day and its beginning again, from
 // `delivery.day`: a case with visits). A fact of an account that is not the narrator's is told as what its witness
 // says, in the witness's own first person; the `tells` entry before it is the telling itself. From this and the
 // typed entries the script writes the story's text and each file's, and into the data what follows from the text:
@@ -115,6 +116,13 @@ export function tell(dir, opts = {}) {
                         // A paper's date is a time told there.
                         if (f.dated && T.get(f.dated).para == null) Object.assign(T.get(f.dated), { para: ref, quote: T.get(f.dated).label });
                     }
+                } else if (item.implied) {
+                    // What an entry implies and no sentence says (`{implied: <fact>, by: <the entry told>}`: he was at the
+                    // table, so he heard): on the timeline where that entry is told, by its words.
+                    const f = F.get(item.implied), b = F.get(item.by);
+                    if (!f || b?.quote == null) throw new Error(`telling ${ref}: implied ${item.implied} by ${item.by}: the entry it is implied by must be told first`);
+                    Object.assign(f, { para: b.para, quote: b.quote });
+                    drySentence.set(f.id, `${prefix(f.time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence(f)}`);
                 } else if (item.deed) { const q = Q.get(item.deed); plain(item.untimed ? null : q.entry.time, tellerOf(cur ?? N).deed(q), `deed:${q.id}`, true); }   // `untimed`: where the deed's time is itself a question
                 else if (item.raise) { const q = Q.get(item.raise); close(); q.raised = ref; q.quote = q.label; out.push(q.label); told.push({ key: `raise:${q.id}`, text: q.label, full: q.label }); }
                 else if (item.day) { close(); const s = `I have ${units(header.delivery.day)} today, and more to do than they will hold. When they are spent I wake again on this same morning, with the day before me as it was. What I have learned I keep.`; out.push(s); told.push({ key: 'day', text: s, full: s }); }

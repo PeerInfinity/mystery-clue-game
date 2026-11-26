@@ -1,0 +1,9 @@
+{
+  "observations": [
+    {"id": "o.straight", "q": "q.who", "from": ["f.untouched"], "essential": true, "against": ["something else"], "says": "at three o'clock on Wednesday, the draper's shop in Fore Street was untouched but for the loose board, the till with two pounds of silver as it was left"},
+    {"id": "o.told_one", "q": "q.who", "from": ["f.told_one"], "essential": true, "says": "from last month, the hiding-place under the loose board was a secret told to one person only"},
+    {"id": "o.jane_away", "q": "q.who", "from": ["f.jane_funeral"], "essential": true, "against": ["jane"], "says": "from two o'clock on Wednesday until three o'clock on Wednesday, Jane Marsh was at St. Mary's"},
+    {"id": "o.dick_away", "q": "q.who", "from": ["f.dick_round"], "essential": true, "against": ["dick"], "says": "from one o'clock on Wednesday until four o'clock on Wednesday, Dick was at Hilltop"},
+    {"id": "o.heard", "q": "q.who", "from": ["f.jane_read", "f.voss_knows"], "essential": true, "says": "when the letter came, Jane Marsh read aloud the letter about the hiding-place at Jane Marsh's house; from when the letter came, Mr. Voss knew the hiding-place under the loose board"}
+  ]
+}

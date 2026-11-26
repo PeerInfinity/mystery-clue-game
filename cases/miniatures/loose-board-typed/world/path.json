@@ -1,0 +1,15 @@
+{
+  "description": "The true path of the miniature: a theft that needed its thief to know the hiding-place; the one person told, at the funeral with the narrator; the errand boy away and never told; the letter read aloud, and the lodger who heard it.",
+  "moves": [
+    {"at": 2, "do": "link", "entry": "f.told_one", "q": "q.who", "see": "a secret told to one person only", "for_q": ["q.who"], "why": "I told nobody but Jane where the box was."},
+    {"at": 2, "do": "link", "entry": "f.jane_funeral", "q": "q.who", "see": "Jane Marsh was at St. Mary's", "for_q": ["q.who"], "why": "And Jane was with me the whole time the shop was shut."},
+    {"at": 2, "do": "cross", "q": "q.who", "pick": "jane", "for_q": ["q.who"], "why": "Not Jane: she was beside me."},
+    {"at": 3, "do": "link", "entry": "f.untouched", "q": "q.who", "see": "untouched but for the loose board", "for_q": ["q.who"], "why": "Whoever it was went straight to the board."},
+    {"at": 3, "do": "cross", "q": "q.who", "pick": "something else", "for_q": ["q.who"], "why": "No chance thief would leave the till."},
+    {"at": 4, "do": "link", "entry": "f.dick_round", "q": "q.who", "see": "Dick was at Hilltop", "for_q": ["q.who"], "why": "Dick was on his round all that hour."},
+    {"at": 4, "do": "cross", "q": "q.who", "pick": "dick", "for_q": ["q.who"], "why": "Away, and never told."},
+    {"at": 5, "do": "link", "entry": "f.jane_read", "q": "q.who", "for_q": ["q.who"], "why": "Jane read my letter out at her table."},
+    {"at": 5, "do": "link", "entry": "f.voss_knows", "q": "q.who", "see": "Mr. Voss knew the hiding-place", "for_q": ["q.who"], "why": "And her lodger heard it."},
+    {"at": 5, "do": "circle", "q": "q.who", "pick": "voss", "for_q": ["q.who"], "why": "The one who knew, and was not with me."}
+  ]
+}

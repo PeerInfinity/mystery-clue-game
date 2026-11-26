@@ -139,6 +139,9 @@ A rule of a regular series is told from the series ("By rule, Abel Ward was to b
 of, at}`) says the rule at that time and the series' state denied then ("the record has nothing then: Abel Ward was
 not on the round"). What a state leaves someone unable to do (`cannot: [acts]`) is the deed of the question that
 asks about such an act ("…, and in no state to be the one who took the bale of China silk from the yard").
+A thing known is "knew the carrick bend" (`knows` with an entity), and `reputed` "was held to be …". A telling's
+item `{implied: <fact>, by: <fact>}` puts an entry no sentence says on the timeline, by the words of the entry that
+implies it and where that is told (he was at the table when the letter was read: he knew the hiding-place).
 A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 

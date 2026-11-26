@@ -1,0 +1,16 @@
+{
+ "entities": {
+  "ann": ["Ann Tolley"],
+  "jane": ["Jane Marsh"],
+  "voss": ["Mr. Voss"],
+  "dick": ["Dick"],
+  "shop": ["the draper's shop in Fore Street"],
+  "hiding_place": ["the hiding-place under the loose board"],
+  "st_marys": ["St. Mary's"],
+  "hilltop": ["Hilltop"],
+  "jane_house": ["Jane Marsh's house"],
+  "cash_box": ["the cash-box"],
+  "letter": ["the letter about the hiding-place"],
+  "trunk": ["Mr. Voss's trunk"]
+ }
+}

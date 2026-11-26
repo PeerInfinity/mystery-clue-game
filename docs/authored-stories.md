@@ -129,6 +129,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/watchmans-clock-typed` | The Watchman's Clock told from its data: a rule told from its series, the card as its record, the reader's entry of a gap (finding 154). | 6 paragraphs and a paper of 1, 23 facts, 3 accounts, 2 tellings, 2 questions, 8 observations (5 essential), 13 moves |
 | `cases/miniatures/garden-room-typed` | The Garden Room told from its data: two doors, each watched from somewhere for a stretch (finding 156). | 5 paragraphs, 21 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/sailors-knot-typed` | The Sailor's Knot told from its data: a thing known and not known, what a thing is held to be (finding 157). | 7 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (4 essential), 7 moves |
+| `cases/miniatures/loose-board-typed` | The Loose Board told from its data: an entry that is implied and not said (finding 158). | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 5 observations (all essential), 10 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2656,6 +2657,28 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Still written by hand:* the order; names and time labels; seven phrases (four roles, "tied with the
       carrick bend", the knot's repute, the fishing fleet); the question's label; the past form of the one act
       ("tied"); three written rules' sentences; the true path's reasons; `structure.json`.
+
+158. **The Loose Board told from its data (2026-11-26).** The case is `cases/miniatures/loose-board-typed`, the
+    same logic and true path.
+    - *An entry that is implied and not said.* The lodger's knowing the hiding-place is an entry of the case
+      (`basis: implied`): the story says only that he was at the table when the letter was read. A telling that
+      gave it a sentence would say the reader's inference for them. The telling now has an item for it,
+      `{implied: <the entry>, by: <the entry told>}`: it comes on the timeline where "Mr. Voss was at my house"
+      is told, by those words, and no sentence says it. It is the first thing of a telling that is not order.
+    - *It held:* it validated at the first try and every page check passes. 244 words against 204.
+    - *What typing forced or found.* The letter is a thing sent and a thing read aloud (two acts of the case's
+      own). "My errand boy" and "her lodger" are roles by name, which a speaker's own words turn into "my"; the
+      page's card has the name. The cash-box found in the lodger's trunk is its whereabouts, and he owns to it.
+      "I have never told anyone else" stays a phrase ("a secret told to one person only"): typed as "nobody but
+      these knew it", it would be false, and that it is false is the case.
+    - *What was lost:* "in case anything should happen to me", the aunt's funeral, "she was beside me the whole
+      hour", the names signed at three houses (why the errand boy's round can be believed), "not thinking what
+      was in it", the lock broken open.
+    - *Still written by hand:* the order and the one implied entry; names and time labels; six phrases (four
+      roles, the secret, the shop untouched); the question's label; the past forms of three acts; four written
+      rules' sentences; the true path's reasons; `structure.json`.
+    - *A role in the narrator's own words mended:* The Ring on the Bench had "my apprentice" as the role's
+      value, so the card said "my"; it is "Esther Vane's apprentice", told as "my" by the template.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

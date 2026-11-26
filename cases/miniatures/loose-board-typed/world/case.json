@@ -1,0 +1,18 @@
+{
+  "id": "loose_board_typed",
+  "title": "The Loose Board, told from its data",
+  "author": "written for this project (a mechanic miniature: The Loose Board, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "ann",
+      "name": "Ann Tolley",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Ann Tolley's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 220
+  }
+}

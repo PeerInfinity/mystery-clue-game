@@ -1,0 +1,12 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.last_month", "label": "last month", "prep": "", "after": "t.before", "para": 1, "quote": "Last month"},
+    {"id": "t.breakfast", "label": "the letter came", "clause": true, "after": "t.last_month", "para": 5, "quote": "the letter came"},
+    {"id": "t.one", "label": "one o'clock on Wednesday", "prep": "At", "after": "t.breakfast", "para": 4, "quote": "one o'clock on Wednesday"},
+    {"id": "t.two", "label": "two o'clock on Wednesday", "prep": "At", "after": "t.one", "para": 2, "quote": "two o'clock on Wednesday"},
+    {"id": "t.three", "label": "three o'clock on Wednesday", "prep": "At", "after": "t.two", "para": 2, "quote": "three o'clock on Wednesday"},
+    {"id": "t.four", "label": "four o'clock on Wednesday", "prep": "At", "after": "t.three", "para": 4, "quote": "four o'clock on Wednesday"},
+    {"id": "t.later", "label": "afterwards", "prep": "", "after": "t.four", "para": 6, "quote": "Afterwards"}
+  ]
+}

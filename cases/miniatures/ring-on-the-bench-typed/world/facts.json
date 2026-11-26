@@ -6,7 +6,7 @@
     {"id": "f.ring_gone", "of": "ring", "attr": "location", "value": "bench", "neg": true, "time": {"at": "t.morning"}, "para": 1, "quote": "the customer's ring was not on the bench"},
     {"id": "f.door", "of": "door", "attr": "closed_to", "value": "small", "time": {"at": "t.night"}, "para": 1, "quote": "the door of the workroom was closed to a person and to anything small"},
     {"id": "f.key_belt", "of": "vane", "attr": "carrying", "value": "key", "time": {"at": "t.night"}, "para": 1, "quote": "I had the key of the workroom"},
-    {"id": "f.tom_role", "of": "tom", "attr": "role", "value": "my apprentice", "time": {"from": "t.before"}, "para": 2, "quote": "Tom Pike is my apprentice"},
+    {"id": "f.tom_role", "of": "tom", "attr": "role", "value": "Esther Vane's apprentice", "time": {"from": "t.before"}, "para": 2, "quote": "Tom Pike is my apprentice"},
     {"id": "f.tom_knew", "of": "tom", "attr": "knows", "what": "f.ring_left", "time": {"at": "t.night"}, "para": 2, "value": "that the customer's ring was on the bench", "quote": "Tom Pike knew that the customer's ring was on the bench"},
     {"id": "f.window", "of": "window", "attr": "closed_to", "value": "person", "time": {"at": "t.night"}, "para": 2, "quote": "The window of the workroom was closed to a person"},
     {"id": "f.walls", "of": "walls", "attr": "closed_to", "value": "small", "time": {"at": "t.night"}, "para": 3, "quote": "the walls of the workroom were closed to a person and to anything small"},
