@@ -1,0 +1,20 @@
+{
+  "joins": {"cellar_door": ["cellar", "passage"]},
+  "entities": [
+    {"id": "coyle", "kind": "person", "name": "Martha Coyle"},
+    {"id": "ned", "kind": "person", "name": "Ned Sharp"},
+    {"id": "jem", "kind": "person", "name": "Jem Tully"},
+    {"id": "carrier", "kind": "person", "name": "the carrier's man"},
+    {"id": "anchor", "kind": "place", "name": "the Anchor"},
+    {"id": "cellar", "kind": "place", "name": "the cellar", "within": "anchor", "prep": "in"},
+    {"id": "passage", "kind": "place", "name": "the passage behind the taproom", "within": "anchor", "prep": "in"},
+    {"id": "yard", "kind": "place", "name": "the yard", "prep": "in"},
+    {"id": "loft", "kind": "place", "name": "the loft over the stable", "prep": "in"},
+    {"id": "cellar_door", "kind": "object", "name": "the cellar door"},
+    {"id": "cask", "kind": "object", "name": "the best brandy cask"},
+    {"id": "coyle_key", "kind": "object", "name": "the first key of the cellar door"},
+    {"id": "jem_key", "kind": "object", "name": "the second key of the cellar door"},
+    {"id": "gallon", "kind": "object", "name": "a gallon of the brandy"},
+    {"id": "mug", "kind": "object", "name": "a mug of the brandy"}
+  ]
+}

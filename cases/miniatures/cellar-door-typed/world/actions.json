@@ -1,0 +1,5 @@
+{
+  "actions": [
+    {"id": "sell", "label": "selling", "past": "sold", "requires": [], "effects": []}
+  ]
+}

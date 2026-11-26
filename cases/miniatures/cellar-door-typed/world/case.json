@@ -1,0 +1,18 @@
+{
+  "id": "cellar_door_typed",
+  "title": "The Cellar Door, told from its data",
+  "author": "written for this project (a mechanic miniature: The Cellar Door, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "coyle",
+      "name": "Martha Coyle",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Martha Coyle's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 250
+  }
+}

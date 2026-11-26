@@ -125,6 +125,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/ring-on-the-bench-typed` | The Ring on the Bench told from its data: the arrangement of a room, a route's observation, a thing that knows nothing named by its keeper (finding 150). | 9 paragraphs, 25 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/dinner-at-larch-house-typed` | The Dinner at Larch House told from its data: two narrators, each "I" in their own account; what was seen from where (finding 151). | 6 paragraphs, 21 facts, 2 accounts, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/night-porters-statement-typed` | The Night Porter's Statement told from its data: a narrator who may be doubted, his statement in his own voice (finding 152). | 6 paragraphs, 12 facts, 2 accounts, 1 question, 4 observations (3 essential), 6 moves |
+| `cases/miniatures/cellar-door-typed` | The Cellar Door told from its data: the reader's own entry of a change, its sentence made from the engine's acts and their needs (finding 153). | 6 paragraphs, 20 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2508,6 +2509,36 @@ script that found each fact's paragraph from its quote; the data files are the s
       needs the key of the strongroom door, and the porter held it through the whole window. A rule from that
       ("who held the key throughout, if it left nobody's hands") would be likely only. Put to the user.
     - *Still untold of the list:* a reasoning move's entry (The Watchman's Clock, The Cellar Door).
+
+153. **A reasoning move's entry told from its data: The Cellar Door (2026-11-26).** The third of the three forms,
+    its simpler case first ("It changed"). The case is `cases/miniatures/cellar-door-typed`, the same logic and
+    true path of 8 moves.
+    - *The one sentence that was the case's own.* The reader points out that the door was locked and then open;
+      what that shows was written ("someone unlocked and opened it in the night, and that needed a key and a man
+      at the door"). It is now made: the two states' sentences, the acts the engine says turn the one into the
+      other, and what those acts require of their doer in the engine's action table. "From ten o'clock on Friday
+      night, the cellar door was locked; at six o'clock on Saturday morning, the cellar door was open: between
+      the two, somebody unlocked and opened the cellar door, which needs a key of the cellar door and being at
+      the cellar door." Nothing in it is the author's.
+    - *What the templates gained besides:* several acts told as one ("It was I who unlocked and opened the cellar
+      door"); a witness who has no proper name begins a sentence with a capital ("The carrier's man told me").
+    - *A defect found in passing:* the page's own line for a confession of an engine act had the act's id in it
+      ("owns to the take_locked the christening cup"), in The Last Ferry and The Same Monday as told. It now
+      has the act's label; five told cases were written again and pass every page check.
+    - *It held:* it validated at the first try, the answer still follows whole from the typed forms (as in the
+      written case: the loft, the two keys, the list closed), and the true path, the autoplay, the hints and the
+      trying player play it through. 251 words against 219.
+    - *What typing forced or found.* The two keys are things, the first and the second, as in The Same Monday.
+      "Opens off the passage" was a condition in free text: it is where the door is. "Dead drunk in the yard" is
+      a state and a whereabouts. The sale and the mugful are acts; the answer was given away by the key and the
+      money handed over, and is now owned to.
+    - *What was lost:* "as I do every night", "for the morning's barrels", the settle, "I had to climb over him
+      to get out" (why the carrier's man can speak for the whole night), and the reason for the mugful ("so
+      that I should look no further than the yard"), which is the whole of the false trail's design.
+    - *Still written by hand:* the order; names and time labels; six phrases (three roles, "a gallon lighter",
+      "drunk", "sober"); the question's label; the two written rules' sentences; the true path's reasons; the
+      past form of the one act of the case's own ("sold"); `structure.json`.
+    - *Still untold of the list:* The Watchman's Clock ("Something is missing here").
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

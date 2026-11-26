@@ -24,6 +24,6 @@
     {"id": "f.fixed", "of": "bench", "attr": "fixed", "value": "floor", "time": {"at": "t.night"}, "para": 8, "quote": "The bench was fixed to the floor"},
     {"id": "f.ring_found", "of": "ring", "attr": "location", "value": "bedding", "time": {"at": "t.later"}, "para": 9, "quote": "the customer's ring was in the bedding of Signor Belli's monkey"},
     {"id": "f.belli_says", "of": "belli", "attr": "says", "to": "vane", "time": {"at": "t.later"}, "asserts": [{"q": "q.what", "pick": "monkey"}], "para": 9, "value": "says it was Signor Belli's monkey", "quote": "Signor Belli said to me: \"It was my monkey who took the customer's ring from the workroom.\""},
-    {"id": "f.belli_brings", "of": "belli", "attr": "action", "act": "give", "thing": "ring", "to": "vane", "time": {"at": "t.later"}, "para": 9, "quote": "Signor Belli gave the customer's ring to me"}
+    {"id": "f.belli_brings", "of": "belli", "attr": "action", "act": "give", "item": "ring", "to": "vane", "time": {"at": "t.later"}, "para": 9, "quote": "Signor Belli gave the customer's ring to me"}
   ]
 }

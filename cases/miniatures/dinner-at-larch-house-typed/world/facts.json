@@ -19,7 +19,7 @@
     {"id": "f.hall_empty", "of": "*", "every": "person", "but": ["voss"], "attr": "location", "value": "hall", "neg": true, "seen_from": "f.clara_landing", "time": {"from": "t.soup", "to": "t.joint"}, "para": 4, "quote": "Nobody but Captain Voss was in the hall"},
     {"id": "f.clara_down", "of": "clara", "attr": "location", "value": "dining_room", "time": {"from": "t.joint", "to": "t.gone"}, "para": 5, "quote": "I was in the dining-room"},
     {"id": "f.unwatched", "of": "hall", "attr": "condition", "value": "watched by nobody", "time": {"from": "t.joint", "to": "t.gone"}, "para": 5, "quote": "The hall was watched by nobody"},
-    {"id": "f.pym_owns", "of": "pym", "attr": "says", "to": "george", "time": {"at": "t.friday"}, "asserts": [{"q": "q.who", "pick": "pym"}], "para": 6, "value": "owns to the take George Marlow's notes", "quote": "Miss Pym said to me: \"It was I who took your notes from the study.\""},
-    {"id": "f.notes_back", "of": "pym", "attr": "action", "act": "give", "thing": "notes", "to": "george", "time": {"at": "t.friday"}, "para": 6, "quote": "Miss Pym gave my notes to me"}
+    {"id": "f.pym_owns", "of": "pym", "attr": "says", "to": "george", "time": {"at": "t.friday"}, "asserts": [{"q": "q.who", "pick": "pym"}], "para": 6, "value": "owns to taking up George Marlow's notes", "quote": "Miss Pym said to me: \"It was I who took your notes from the study.\""},
+    {"id": "f.notes_back", "of": "pym", "attr": "action", "act": "give", "item": "notes", "to": "george", "time": {"at": "t.friday"}, "para": 6, "quote": "Miss Pym gave my notes to me"}
   ]
 }

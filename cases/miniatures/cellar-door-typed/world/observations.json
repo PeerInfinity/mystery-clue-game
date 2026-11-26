@@ -1,0 +1,10 @@
+{
+  "observations": [
+    {"id": "o.opened", "q": "q.who", "from": [{"reasoned": "changed", "premises": ["f.locked", "f.open"]}], "essential": true, "says": "from ten o'clock on Friday night, the cellar door was locked; at six o'clock on Saturday morning, the cellar door was open: between the two, somebody unlocked and opened the cellar door, which needs a key of the cellar door and being at the cellar door"},
+    {"id": "o.keys", "q": "q.who", "from": ["f.two_keys"], "essential": true, "says": "nobody but Martha Coyle and Jem Tully had a key of the cellar door"},
+    {"id": "o.jem_key", "q": "q.who", "from": ["f.jem_key"], "essential": true, "says": "from ten o'clock on Friday night until six o'clock on Saturday morning, Jem Tully had the second key of the cellar door"},
+    {"id": "o.ned_loft", "q": "q.who", "from": ["f.ned_loft"], "essential": true, "against": ["ned"], "says": "from ten o'clock on Friday night until six o'clock on Saturday morning, Ned Sharp was in the loft over the stable"},
+    {"id": "o.jem_passage", "q": "q.who", "from": ["f.jem_sleeps"], "essential": true, "says": "from ten o'clock on Friday night until six o'clock on Saturday morning, Jem Tully was in the passage behind the taproom"},
+    {"id": "o.drunk", "q": "q.who", "from": ["f.ned_drunk"], "says": "at six o'clock on Saturday morning, Ned Sharp was drunk"}
+  ]
+}

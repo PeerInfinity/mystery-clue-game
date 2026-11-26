@@ -29,7 +29,8 @@ export function teller(ctx) {
     const mine = (who, s) => s.split(`${ctx.name(who)}'s `).join('my ');
     // And in words said to someone, what is theirs by name is "your" ("George Marlow's notes", said to George Marlow).
     const yours = (who, s) => (who ? s.split(`${ctx.name(who)}'s `).join('your ') : s);
-    const past = (a) => ctx.act(list(a.act)[0])?.past ?? PAST[list(a.act)[0]] ?? `did the ${ctx.act(list(a.act)[0])?.label ?? list(a.act)[0]} of`;
+    // Several acts done as one ("unlocked and opened") are told together.
+    const past = (a) => list(a.act).map((t) => ctx.act(t)?.past ?? PAST[t] ?? `did the ${ctx.act(t)?.label ?? t} of`).join(' and ');
     const at = (id) => `${ctx.prep?.(id) ?? 'at'} ${ctx.name(id)}`;
     // The arrangement of a room (2026-11-26; finding 150), in the page's own words: what a way in is closed to and lets
     // through (`closed_to: v` stops v and anything larger, so "small" is a person too), what crossed, and a route's links.
@@ -73,7 +74,7 @@ export function teller(ctx) {
         if (f.goal) return `wants ${want(f.goal)}`;
         const o = owns(f);
         if (o && ctx.question(o.q).entry?.attr === 'identity') return `owns to being ${ctx.name(ctx.question(o.q).entry.of)}`;
-        if (o) { const e = ctx.question(o.q).entry; return `owns to ${ctx.act(list(e.act)[0])?.label ?? `the ${list(e.act)[0]}`} ${ctx.name(e.thing ?? e.item)}`; }
+        if (o) { const e = ctx.question(o.q).entry; return `owns to ${list(e.act).map((t) => ctx.act(t)?.label ?? ctx.label?.(t) ?? `the ${t}`).join(' and ')} ${ctx.name(e.thing ?? e.item)}`; }
         const a = list(f.asserts).find((x) => x.q && x.pick != null);
         if (a && ctx.kind?.(a.pick)) return `says it was ${ctx.name(a.pick)}`;
         if (a) return `says it was ${a.pick}`;

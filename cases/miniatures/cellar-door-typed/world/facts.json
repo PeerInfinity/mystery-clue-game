@@ -1,0 +1,24 @@
+{
+  "facts": [
+    {"id": "f.coyle_role", "of": "coyle", "attr": "role", "value": "the keeper of the Anchor at Saltby", "time": {"from": "t.before"}, "para": 1, "quote": "I am Martha Coyle, the keeper of the Anchor at Saltby"},
+    {"id": "f.locked", "of": "cellar_door", "attr": "door", "value": "locked", "time": {"from": "t.ten"}, "para": 1, "quote": "the cellar door was locked"},
+    {"id": "f.open", "of": "cellar_door", "attr": "door", "value": "open", "time": {"at": "t.six"}, "q": "q.who", "para": 1, "quote": "the cellar door was open"},
+    {"id": "f.cask", "of": "cask", "attr": "condition", "value": "a gallon lighter", "time": {"at": "t.six"}, "para": 1, "quote": "The best brandy cask was a gallon lighter"},
+    {"id": "f.ned_role", "of": "ned", "attr": "role", "value": "the ostler", "time": {"from": "t.before"}, "para": 2, "quote": "Ned Sharp is the ostler"},
+    {"id": "f.ned_drunk", "of": "ned", "attr": "condition", "value": "drunk", "time": {"at": "t.six"}, "para": 2, "quote": "Ned Sharp was drunk"},
+    {"id": "f.ned_yard", "of": "ned", "attr": "location", "value": "yard", "time": {"at": "t.six"}, "para": 2, "quote": "Ned Sharp was in the yard"},
+    {"id": "f.jem_role", "of": "jem", "attr": "role", "value": "the potman", "time": {"from": "t.before"}, "para": 2, "quote": "Jem Tully is the potman"},
+    {"id": "f.jem_sober", "of": "jem", "attr": "condition", "value": "sober", "time": {"at": "t.six"}, "para": 2, "quote": "Jem Tully was sober"},
+    {"id": "f.door_where", "of": "cellar_door", "attr": "location", "value": "passage", "time": {"from": "t.before"}, "para": 3, "quote": "The cellar door was in the passage behind the taproom"},
+    {"id": "f.two_keys", "of": "*", "every": "person", "but": ["coyle", "jem"], "attr": "carrying", "value": "a key of the cellar door", "key": "cellar_door", "neg": true, "time": {"from": "t.before"}, "para": 3, "quote": "Nobody but me and Jem Tully had a key of the cellar door"},
+    {"id": "f.coyle_key", "of": "coyle", "attr": "carrying", "value": "coyle_key", "key": "cellar_door", "time": {"from": "t.ten", "to": "t.six"}, "para": 3, "quote": "I had the first key of the cellar door"},
+    {"id": "f.jem_key", "of": "jem", "attr": "carrying", "value": "jem_key", "key": "cellar_door", "time": {"from": "t.ten", "to": "t.six"}, "para": 3, "quote": "Jem Tully had the second key of the cellar door"},
+    {"id": "f.ned_sleeps", "of": "ned", "attr": "lives_at", "value": "loft", "time": {"from": "t.before"}, "para": 4, "quote": "Ned Sharp lives in the loft over the stable"},
+    {"id": "f.carrier_tells", "of": "carrier", "attr": "tells", "value": "acct.carrier", "to": "coyle", "how": "told", "time": {"at": "t.later"}, "para": 4, "quote": "The carrier's man told me"},
+    {"id": "f.ned_loft", "of": "ned", "attr": "location", "value": "loft", "time": {"from": "t.ten", "to": "t.six"}, "para": 4, "quote": "Ned Sharp was in the loft over the stable"},
+    {"id": "f.jem_sleeps", "of": "jem", "attr": "location", "value": "passage", "time": {"from": "t.ten", "to": "t.six"}, "para": 5, "quote": "Jem Tully was in the passage behind the taproom"},
+    {"id": "f.jem_owns", "of": "jem", "attr": "says", "to": "coyle", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "jem"}], "para": 6, "value": "owns to unlocking and opening the cellar door", "quote": "Jem Tully said to me: \"It was I who unlocked and opened the cellar door.\""},
+    {"id": "f.jem_sold", "of": "jem", "attr": "action", "act": "sell", "thing": "gallon", "to": "carrier", "time": {"at": "t.midnight"}, "para": 6, "quote": "Jem Tully sold a gallon of the brandy to the carrier's man"},
+    {"id": "f.jem_stood", "of": "jem", "attr": "action", "act": "give", "item": "mug", "to": "ned", "time": {"at": "t.dawn"}, "para": 6, "quote": "Jem Tully gave a mug of the brandy to Ned Sharp"}
+  ]
+}

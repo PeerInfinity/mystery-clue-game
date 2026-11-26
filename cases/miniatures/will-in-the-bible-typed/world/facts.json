@@ -17,7 +17,7 @@
     {"id": "f.buried", "of": "harriet", "attr": "condition", "value": "buried", "time": {"at": "t.may5"}, "para": 4, "quote": "Miss Harriet Pym was buried"},
     {"id": "f.thomas_born", "of": "thomas", "attr": "condition", "value": "born, the son of Mr. Lionel Pym", "begins": true, "time": {"at": "t.june14"}, "para": 4, "quote": "Thomas Pym was born, the son of Mr. Lionel Pym"},
     {"id": "f.thomas_christened", "of": "thomas", "attr": "condition", "value": "christened", "begins": true, "time": {"at": "t.july1"}, "para": 4, "quote": "Thomas Pym was christened"},
-    {"id": "f.lionel_owns", "of": "lionel", "attr": "says", "to": "dacre", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "lionel"}], "para": 5, "value": "owns to the make the later will", "quote": "Mr. Lionel Pym said to me: \"It was I who made the later will.\""},
+    {"id": "f.lionel_owns", "of": "lionel", "attr": "says", "to": "dacre", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "lionel"}], "para": 5, "value": "owns to making the later will", "quote": "Mr. Lionel Pym said to me: \"It was I who made the later will.\""},
     {"id": "f.lionel_not", "of": "lionel", "attr": "says", "to": "dacre", "time": {"at": "t.later"}, "asserts": [{"q": "q.dated", "pick": "no"}], "para": 5, "value": "says it was no", "quote": "Mr. Lionel Pym said to me: \"On the third of March, the later will was not made.\""}
   ]
 }

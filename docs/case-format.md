@@ -129,6 +129,10 @@ must have been, from the entries of those things: "small enough for" a way in (t
 line says whose account begins wherever the voice changes ("Clara Marlow's account."; a narrator's `account` in
 `case.json` names another word for it); the telling does not say who is "I". A statement with `seen_from` is
 followed by "I saw this from <where its witness was>." In words said to someone, what is theirs by name is "your".
+Several acts done as one are told together ("unlocked and opened the cellar door"). An observation that comes from a
+change the reader points out (`{reasoned: "changed", premises}`) says the two states, the acts that turn the one into
+the other (the engine's `changePath`) and what those acts need of their doer ("which needs a key of the cellar door
+and being at the cellar door").
 A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 

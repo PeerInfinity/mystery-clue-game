@@ -1,0 +1,40 @@
+{
+ "title": "THE CELLAR DOOR, TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.coyle_role",
+   "f.locked",
+   "f.open",
+   "f.cask",
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.ned_role",
+   "f.ned_drunk",
+   "f.ned_yard",
+   "f.jem_role",
+   "f.jem_sober"
+  ],
+  [
+   "f.door_where",
+   "f.two_keys",
+   "f.coyle_key",
+   "f.jem_key"
+  ],
+  [
+   "f.ned_sleeps",
+   "f.carrier_tells",
+   "f.ned_loft"
+  ],
+  [
+   "f.jem_sleeps"
+  ],
+  [
+   "f.jem_owns",
+   "f.jem_sold",
+   "f.jem_stood"
+  ]
+ ]
+}

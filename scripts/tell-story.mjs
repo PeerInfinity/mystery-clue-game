@@ -13,7 +13,8 @@
 // With world/prose.json (scripts/prose-story.mjs) the text and the quotes are that prose's, and the rest as above.
 import fs from 'node:fs';
 import path from 'node:path';
-import { teller, cap } from '../engine/tell.js';
+import { teller, cap, PAST } from '../engine/tell.js';
+import { ACTIONS, changePath } from '../engine/actions.js';
 
 const J = JSON.stringify;
 const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
@@ -28,7 +29,7 @@ export function tell(dir, opts = {}) {
     const byId = (xs) => new Map(xs.map((x) => [x.id, x]));
     const E = byId(entities), T = byId(times), F = byId(facts), Q = byId(questions), A = byId(actions);
     const N = header.narrators[0].id, name = (id) => E.get(id)?.name ?? id;
-    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, plural: (id) => E.get(id)?.plural, fact: (id) => F.get(id), time: (id) => T.get(id).label });
+    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, plural: (id) => E.get(id)?.plural, fact: (id) => F.get(id), time: (id) => T.get(id).label, label: (t) => ACTIONS[t]?.label });
     const third = tellerOf(null);
     // Several narrators (finding 151): an entry is told in the voice of the narrator whose account holds it, and a
     // line says whose account begins where the voice changes ("Clara Marlow's account."; `account` on a narrator
@@ -66,7 +67,7 @@ export function tell(dir, opts = {}) {
             };
             const close = () => {
                 if (!speech) return;
-                const frame = `${name(speech.speaker)} told me`;
+                const frame = cap(`${name(speech.speaker)} told me`);
                 out.push(`${frame}: "${speech.parts.join(' ')}"`);
                 if (pending && pending.of === speech.speaker) { pending.quote = frame; pending = null; }
                 speech = null;
@@ -88,7 +89,7 @@ export function tell(dir, opts = {}) {
                     const voice = NARR.has(originOf(f.id)) ? originOf(f.id) : cur ?? N;
                     if (NARR.size > 1 && voice !== cur) { close(); out.push(heading(voice)); told.push({ key: `narrator:${voice}`, text: out.at(-1), full: out.at(-1) }); last = null; }
                     cur = voice;
-                    if (f.attr === 'tells') { close(); pending = f; told.push({ key: f.id, text: `${name(f.of)} told me`, full: `(${name(f.of)} speaks to the narrator here: the statements marked as said by ${name(f.of)} are what is said.)` }); continue; }
+                    if (f.attr === 'tells') { close(); pending = f; told.push({ key: f.id, text: cap(`${name(f.of)} told me`), full: `(${name(f.of)} speaks to the narrator here: the statements marked as said by ${name(f.of)} are what is said.)` }); continue; }
                     const who = speakerOf(f.id);
                     drySentence.set(f.id, `${prefix(f.time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence(f)}`);
                     if (who) {
@@ -185,7 +186,18 @@ export function tell(dir, opts = {}) {
         });
         return parts.length ? `whatever came by this route was ${parts.join(' and ')}` : null;
     };
-    const saysAny = (x) => (Array.isArray(x?.route_through) ? routeSays(x.route_through) : saysOf(x));
+    // A change the reader points out (`{reasoned: "changed", premises: [two states of one thing]}`) says the two
+    // states, the acts that turn the one into the other (the engine's: `changePath`), and what those acts need of
+    // whoever did them (a key of the thing, being at it).
+    const changeSays = (x) => {
+        const [a, b] = x.premises.map((id) => F.get(id));
+        if (!a || !b || !drySentence.has(a.id) || !drySentence.has(b.id)) return null;
+        const [from, to] = changePath(a.attr, a.value, b.value) ? [a, b] : [b, a], acts = changePath(from.attr, from.value, to.value);
+        if (!acts) return null;
+        const needs = [...new Set(acts.flatMap((t) => ACTIONS[t].requires).filter((r) => r.of === '$agent').map((r) => (r.key ? `a key of ${name(from.of)}` : r.at ? `being at ${name(from.of)}` : null)).filter(Boolean))];
+        return `${drySentence.get(from.id)}; ${drySentence.get(to.id)}: between the two, somebody ${acts.map((t) => PAST[t] ?? A.get(t)?.past).join(' and ')} ${name(from.of)}${needs.length ? `, which needs ${needs.join(' and ')}` : ''}`;
+    };
+    const saysAny = (x) => (Array.isArray(x?.route_through) ? routeSays(x.route_through) : x?.reasoned === 'changed' ? changeSays(x) : saysOf(x));
     for (const o of observations ?? []) if (o.from.every((x) => saysAny(x) != null)) o.says = o.from.map(saysAny).join('; ');
     // A form of a name the prose used counts as a mention only if it has a word of the name itself: "Abel", "Mrs. Crouch",
     // "Abel's shed"; not "it", "his shed" or "my marrow", which are whoever is being spoken of.

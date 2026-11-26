@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who opened the cellar door in the night?", "entry": {"of": "?", "attr": "action", "act": ["unlock", "open"], "thing": "cellar_door", "time": {"from": "t.ten", "to": "t.six"}}, "possibilities": [{"value": "something else", "via": "always", "available": 1},{"value": "ned", "via": "direct", "available": 2, "quote": "Ned Sharp is the ostler"},{"value": "jem", "via": "direct", "available": 2, "quote": "Jem Tully is the potman"}], "answer": "jem", "answer_inferable_at": 5, "answer_from": "f.jem_sleeps", "raised": 1, "quote": "Who opened the cellar door in the night?", "answer_given_at": 6, "answer_given_quote": "Jem Tully said to me: \"It was I who unlocked and opened the cellar door.\""}
+  ]
+}

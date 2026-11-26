@@ -1,0 +1,19 @@
+{
+ "entities": {
+  "coyle": ["Martha Coyle"],
+  "ned": ["Ned Sharp"],
+  "jem": ["Jem Tully"],
+  "carrier": ["the carrier's man"],
+  "anchor": ["the Anchor"],
+  "cellar": ["the cellar"],
+  "passage": ["the passage behind the taproom"],
+  "yard": ["the yard"],
+  "loft": ["the loft over the stable"],
+  "cellar_door": ["the cellar door"],
+  "cask": ["the best brandy cask"],
+  "coyle_key": ["the first key of the cellar door"],
+  "jem_key": ["the second key of the cellar door"],
+  "gallon": ["a gallon of the brandy"],
+  "mug": ["a mug of the brandy"]
+ }
+}

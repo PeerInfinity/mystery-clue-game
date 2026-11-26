@@ -22,6 +22,6 @@
     {"id": "f.trew_nokey", "of": "trew", "attr": "carrying", "value": "key_two", "key": "office_door", "neg": true, "time": {"from": "t.sun_four", "to": "t.mon_nine"}, "para": "pilot:1", "quote": "I was without the second key of the office door"},
     {"id": "f.finch_tells", "of": "finch", "attr": "tells", "value": "acct.finch", "to": "arliss", "how": "told", "time": {"at": "t.mon_nine"}, "para": "chandler:1", "quote": "Silas Finch told me"},
     {"id": "f.finch_abed", "of": "finch", "attr": "location", "value": "chandlers", "time": {"from": "t.sun_seven", "to": "t.mon_nine"}, "truth": false, "para": "chandler:1", "quote": "I was at the chandler's"},
-    {"id": "f.finch_owns", "of": "finch", "attr": "says", "to": "arliss", "time": {"at": "t.mon_later"}, "asserts": [{"q": "q.who", "pick": "finch"}], "para": 3, "value": "owns to the take_locked the chart of the new channel", "quote": "Silas Finch said to me: \"It was I who took the chart of the new channel from the harbour office.\""}
+    {"id": "f.finch_owns", "of": "finch", "attr": "says", "to": "arliss", "time": {"at": "t.mon_later"}, "asserts": [{"q": "q.who", "pick": "finch"}], "para": 3, "value": "owns to taking, out of a locked place, the chart of the new channel", "quote": "Silas Finch said to me: \"It was I who took the chart of the new channel from the harbour office.\""}
   ]
 }
