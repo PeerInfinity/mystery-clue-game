@@ -122,6 +122,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow-typed` | A story told from its data: The Prize Marrow with its text, quotes and observation sentences made by a script from its typed entries (finding 137). | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/grey-cloak-typed` | The Grey Cloak told from its data: who someone was, what was worn, two descriptions compared as typed heights (finding 148). | 6 paragraphs, 19 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 14 moves |
+| `cases/miniatures/ring-on-the-bench-typed` | The Ring on the Bench told from its data: the arrangement of a room, a route's observation, a thing that knows nothing named by its keeper (finding 150). | 9 paragraphs, 25 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2406,6 +2407,46 @@ script that found each fact's paragraph from its quote; the data files are the s
     - Not done in the written Grey Cloak, where the coming out is a detail of the figure's whereabouts and not
       an entry.
     - *Checked:* every page check on the typed case; `npm test`; the long case's export unchanged.
+
+150. **A room and a route told from its data: The Ring on the Bench (2026-11-26).** The first of the three forms
+    the user asked to have worked through (a room, two narrators, a reasoning move's entry). The case is
+    `cases/miniatures/ring-on-the-bench-typed`: the same logic, the same true path of 17 moves, the room panel,
+    "Something got through" and the route as they were.
+    - *What the templates gained.* The room's forms, in the words the page already uses for them: "the door of
+      the workroom was closed to a person and to anything small", "the ventilating pane let anything small
+      through", "a draught crossed from the yard to the workroom", "the cord of the blind was fastened to the
+      roller of the blind", "was beside", "reached", "was fixed to". A plural thing ("the walls … were"). A thing
+      something is on (`prep: "on"`). What someone knows as an entry ("Tom Pike knew that the customer's ring was
+      on the bench"). A doer named by another, where the doer cannot speak ("Signor Belli said to me: 'It was my
+      monkey who took the customer's ring from the workroom.'"). And the one sentence of the reader's own entry:
+      the observation of a route is now made from what the route's things say ("whatever came by this route was
+      small enough for the ventilating pane and able to travel by the cord of the blind"), where "able to climb
+      down a cord" was written.
+    - *It held:* it validated at the first try, and the true path, the autoplay in every layout, the hints, the
+      trying player and the room check play it through. 276 words against 211: the second told case longer than
+      its original, every thing named in full each time ("the customer's ring" seven times).
+    - *What typing forced or found.* "Keeps a monkey, and lets it run in the yard after dark" had been entered
+      as the organ-grinder carrying the monkey, with the rest in `detail`: it is now where the monkey was that
+      night, which is what the answer rests on. "On the bench" was a detail of the ring's being in the workroom:
+      the bench is now where the ring was, and the route ends at it. The pane said only that something small
+      passes, and the table left a person "unsaid" there: it is now also closed to a person ("no wider than my
+      hand"), so the room is sealed to a person by its data and not by the reader's good will. "Closed to
+      something small" reads oddly alone, and the template says what the engine means by it: a person too. The
+      taking became a typed act of the question, which the confession needed.
+    - *What was lost:* the bars a hand's breadth apart and the brick (why each way is closed: "closed to a
+      person" is the conclusion, not the sight), the blind that hid the pane, the heap of filings as hers, the
+      two shirt-studs, the apologies. The first is the loss that matters: a room told from its data states its
+      ways in as already judged, where the written story shows bars and lets the reader judge. It is the will's
+      loss over again (finding 145), and "This speaks of…" does not mend it: the step is from a look to a size.
+    - *Still written by hand:* the order of telling; the names and time labels; three phrases ("my apprentice",
+      "in a heap", "scattered"); the question's label and the room panel's question; the sentences of the two
+      written rules; the true path's reasons; `structure.json`.
+    - *What the checker says* (`typed-check.mjs -v`): nothing typed bears on the answer, in either version (0 of
+      1, Tom not ruled out). The engine reads the ways-in table for the panel only. Put to the user: a typed rule
+      that a deed in a place whose every way in is closed to a person rules every person out; and, further, that
+      a candidate's typed traits against a route's requirements conclude the answer.
+      Over all cases now: 13 of 64 answers follow, 48 of 87 wrong answers are ruled out.
+    - *Still untold:* two narrators, a reasoning move's entry.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

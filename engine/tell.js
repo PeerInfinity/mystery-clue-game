@@ -1,4 +1,4 @@
-// A story told from its typed data (2026-11-25; docs/authored-stories.md, findings 137 and 139): one plain sentence
+// A story told from its typed data (2026-11-25; docs/authored-stories.md, findings 137, 139 and 150): one plain sentence
 // for each typed entry, by a template for its form, in the order a telling gives. Nothing here is written for a
 // case: what a sentence says is the entry's subject, attribute, value and time, the names of the entities, the
 // labels of the times and, for a deed, the past form of its act (`past` in the case's action table, or below for the
@@ -14,7 +14,8 @@ const listed = (xs, and = 'and') => (xs.length < 2 ? xs.join('') : `${xs.slice(0
 
 /**
  * `ctx`: {speaker (who is "I"), listener (who is "you", or null), name(id), act(id): {label, past}, question(id),
- * and optionally kind(id), prep(id) ("in" for a thing something is in; default "at"), time(id): its label, prefix(time)}.
+ * and optionally kind(id), prep(id) ("in" for a thing something is in; default "at"), plural(id) ("the walls": "were"),
+ * fact(id) (for what someone knows), time(id): its label, prefix(time)}.
  * Returns `sentence(fact)`, `deed(question)` and `said(fact)` (what a `says` entry's value is, in the third person,
  * for the page's own line).
  */
@@ -28,14 +29,27 @@ export function teller(ctx) {
     const mine = (who, s) => s.split(`${ctx.name(who)}'s `).join('my ');
     const past = (a) => ctx.act(list(a.act)[0])?.past ?? PAST[list(a.act)[0]] ?? `did the ${ctx.act(list(a.act)[0])?.label ?? list(a.act)[0]} of`;
     const at = (id) => `${ctx.prep?.(id) ?? 'at'} ${ctx.name(id)}`;
-    const state = (x, be = 'was') => {
+    // The arrangement of a room (2026-11-26; finding 150), in the page's own words: what a way in is closed to and lets
+    // through (`closed_to: v` stops v and anything larger, so "small" is a person too), what crossed, and a route's links.
+    const CLOSED = { person: 'a person', small: 'a person and to anything small', air: 'everything, even air' };
+    const PASSES = { person: 'a person', small: 'anything small', air: 'air' };
+    const state = (x, be = ctx.plural?.(x.of) ? 'were' : 'was') => {
+        if (x.attr === 'closed_to') return `${subj(x.of)} ${be}${x.neg ? ' not' : ''} closed to ${CLOSED[x.value] ?? x.value}`;
+        if (x.attr === 'passes') return `${subj(x.of)} ${x.neg ? 'did not let' : 'let'} ${PASSES[x.value] ?? x.value} through`;
+        if (x.attr === 'passed') return `${subj(x.of)} crossed ${x.between ? `from ${ctx.name(x.between[0])} to ${ctx.name(x.between[1])}` : `into ${ctx.name(x.value)}`}`;
+        if (x.attr === 'attached') return `${subj(x.of)} ${be}${x.neg ? ' not' : ''} fastened to ${ctx.name(x.value)}`;
+        if (x.attr === 'near') return `${subj(x.of)} ${be}${x.neg ? ' not' : ''} beside ${ctx.name(x.value)}`;
+        if (x.attr === 'reaches') return `${subj(x.of)} ${x.neg ? 'did not reach' : 'reached'} ${ctx.name(x.value)}`;
+        if (x.attr === 'fixed') return `${subj(x.of)} ${be}${x.neg ? ' not' : ''} fixed to ${ctx.name(x.value)}`;
+        // What someone knows, where it is an entry (`what`): "knew that …", the entry as an onlooker would say it.
+        if (x.attr === 'knows' && x.what && ctx.fact?.(x.what)) return `${subj(x.of)} ${x.neg ? 'did not know' : 'knew'} that ${teller({ ...ctx, speaker: null, listener: null }).sentence(ctx.fact(x.what))}`;
         if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} ${at(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : `${who} ${be} ${x.value}`; }
         const not = x.neg ? ' not' : '';
         if (x.attr === 'location') return `${subj(x.of)} ${be}${not} ${at(x.value)}`;
         if (x.attr === 'identity') return `${subj(x.of)} ${be}${not} ${obj(x.value)}`;
         if (x.attr === 'wearing') return `${subj(x.of)} ${x.neg ? 'did not wear' : 'wore'} ${ctx.name(x.value)}`;
         if (x.attr === 'made') return `${subj(x.of)} ${be}${not} made`;   // a paper, at the time it says
-        if (x.attr === 'lives_at') return `${subj(x.of)} ${me(x.of) ? 'live' : 'lives'} at ${ctx.name(x.value)}`;   // a standing state, as a role is
+        if (x.attr === 'lives_at') return `${subj(x.of)} ${me(x.of) ? 'live' : 'lives'} ${at(x.value)}`;   // a standing state, as a role is
         if (x.attr === 'owner') return `${subj(x.of)} ${x.neg ? 'did not belong' : 'belonged'} to ${obj(x.value)}`;
         if (x.attr === 'carrying') return x.neg ? `${subj(x.of)} ${be} without ${ctx.name(x.value)}` : `${subj(x.of)} had ${ctx.name(x.value)}`;
         return `${subj(x.of)} ${be}${not} ${x.value}`;   // a condition, a door's state, or any state whose value reads after "was"
@@ -59,6 +73,7 @@ export function teller(ctx) {
         if (o && ctx.question(o.q).entry?.attr === 'identity') return `owns to being ${ctx.name(ctx.question(o.q).entry.of)}`;
         if (o) { const e = ctx.question(o.q).entry; return `owns to ${ctx.act(list(e.act)[0])?.label ?? `the ${list(e.act)[0]}`} ${ctx.name(e.thing ?? e.item)}`; }
         const a = list(f.asserts).find((x) => x.q && x.pick != null);
+        if (a && ctx.kind?.(a.pick)) return `says it was ${ctx.name(a.pick)}`;
         if (a) return `says it was ${a.pick}`;
         return f.value;
     }
@@ -80,6 +95,8 @@ export function teller(ctx) {
                 const x = own[0] ?? (twin[0] ? { ...twin[0], neg: !twin[0].neg } : null);
                 if (x) { const inner = teller({ ...ctx, speaker: f.of }); return `${subj(f.of)} said${to}: "${cap(`${ctx.prefix?.(x.time) ?? ''}${mine(f.of, inner.sentence(x))}`)}."`; }
             }
+            // Another named as the doer, by one who can speak for it (a keeper of his monkey): "It was my monkey who took …".
+            if (a && ctx.kind?.(a.pick) && list(ctx.question(a.q).entry?.act).length) return `${subj(f.of)} said${to}: "It was ${mine(f.of, `${obj(a.pick)} who ${done(ctx.question(a.q).entry, '').trim()}`)}."`;
             if (a) return `${subj(f.of)} said${to}: "It was ${a.pick}."`;
             return `${subj(f.of)} said${to}: "${f.value}."`;
         } else if (f.attr === 'action' && list(f.act).length) s = done(f, subj(f.of));

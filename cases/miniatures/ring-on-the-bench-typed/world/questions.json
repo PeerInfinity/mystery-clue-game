@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.what", "label": "Who or what took the customer's ring?", "entry": {"of": "?", "attr": "action", "act": "take", "item": "ring", "where": "workroom", "time": {"from": "t.night", "to": "t.morning"}}, "possibilities": [{"value": "something else", "via": "always", "available": 1},{"value": "tom", "via": "direct", "available": 2, "quote": "Tom Pike is my apprentice"},{"value": "monkey", "via": "direct", "available": 5, "quote": "Signor Belli's monkey was in the yard"}], "answer": "monkey", "answer_inferable_at": 8, "answer_from": "f.reach", "raised": 1, "quote": "Who or what took the customer's ring?", "answer_given_at": 9, "answer_given_quote": "Signor Belli said to me: \"It was my monkey who took the customer's ring from the workroom.\""}
+  ]
+}

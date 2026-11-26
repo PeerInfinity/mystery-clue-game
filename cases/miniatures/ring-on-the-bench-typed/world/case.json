@@ -1,0 +1,18 @@
+{
+  "id": "ring_on_the_bench_typed",
+  "title": "The Ring on the Bench, told from its data",
+  "author": "written for this project (a mechanic miniature: The Ring on the Bench, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "vane",
+      "name": "Esther Vane",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Esther Vane's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 250
+  }
+}

@@ -1,0 +1,8 @@
+{
+ "sealed": {"place": "workroom", "surfaces": ["walls"], "time": "t.night", "question": "How could anything have reached the ring?"},
+ "openings": {
+  "door": {"kind": "door", "sides": ["workroom", "yard"]},
+  "window": {"kind": "window", "sides": ["workroom", "yard"]},
+  "pane": {"kind": "vent", "sides": ["workroom", "yard"]}
+ }
+}

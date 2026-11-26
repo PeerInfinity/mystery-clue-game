@@ -28,7 +28,7 @@ export function tell(dir, opts = {}) {
     const byId = (xs) => new Map(xs.map((x) => [x.id, x]));
     const E = byId(entities), T = byId(times), F = byId(facts), Q = byId(questions), A = byId(actions);
     const N = header.narrators[0].id, name = (id) => E.get(id)?.name ?? id;
-    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, time: (id) => T.get(id).label });
+    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, plural: (id) => E.get(id)?.plural, fact: (id) => F.get(id), time: (id) => T.get(id).label });
     const mainT = tellerOf(N), third = tellerOf(null);
     const speakerOf = (id) => { const a = accounts.find((x) => x.facts.includes(id)); return a && a.origin !== N ? a.origin : null; };
     // How a sentence at a time begins: "On Monday, ", "At six o'clock on Sunday, " (`prep` on the time point), a
@@ -92,6 +92,8 @@ export function tell(dir, opts = {}) {
                     } else {
                         const s = mainT.sentence(f);
                         if (f.attr === 'says') f.value = third.said(f);
+                        // What someone knows, where it is an entry (`what`): the page's line is that entry's sentence.
+                        if (f.attr === 'knows' && f.what) f.value = `that ${third.sentence(F.get(f.what))}`;
                         f.quote = plain(f.time, s, f.id);
                         // A paper's date is a time told there.
                         if (f.dated && T.get(f.dated).para == null) Object.assign(T.get(f.dated), { para: ref, quote: T.get(f.dated).label });
@@ -157,7 +159,20 @@ export function tell(dir, opts = {}) {
     const observations = fs.existsSync(path.join(W, 'observations.json')) ? R('observations.json').observations : null;
     // A reading the reader makes (`{reasoned: "speaks", premises: [the entry with words, what they speak of]}`) says whose words speak of what.
     const saysOf = (x) => (typeof x === 'string' ? drySentence.get(x)?.replace(/\."$/, '"') : x?.reasoned === 'speaks' && F.has(x.premises?.[0]) && drySentence.has(x.premises?.[1]) ? (F.get(x.premises[0]).reads_as ? `${prefix(F.get(x.premises[0]).time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence({ ...F.get(x.premises[0]).reads_as })}, since ${drySentence.get(x.premises[1])}` : `the words of ${name(F.get(x.premises[0]).of)} speak of this: ${drySentence.get(x.premises[1])}`) : null);
-    for (const o of observations ?? []) if (o.from.every((x) => saysOf(x) != null)) o.says = o.from.map(saysOf).join('; ');
+    // A route the reader builds (`{route_through: [things]}`) says what anything that came by it must have been: small
+    // enough for a way in it passes (the largest that way lets through), and able to travel by what hangs or reaches.
+    const room = fs.existsSync(path.join(W, 'room.json')) ? R('room.json') : null;
+    const FIT = { person: (n) => `able to pass ${n}`, small: (n) => `small enough for ${n}`, air: (n) => `no more than air, to pass ${n}` }, SIZES = ['person', 'small', 'air'];
+    const routeSays = (nodes) => {
+        const parts = nodes.flatMap((n) => {
+            const sizes = facts.filter((f) => f.of === n && f.attr === 'passes' && f.para != null).map((f) => f.value).sort((a, b) => SIZES.indexOf(a) - SIZES.indexOf(b));
+            if (room?.openings?.[n] && sizes.length) return [FIT[sizes[0]](name(n))];
+            return facts.some((f) => f.of === n && (f.attr === 'attached' || f.attr === 'reaches') && f.para != null) ? [`able to travel by ${name(n)}`] : [];
+        });
+        return parts.length ? `whatever came by this route was ${parts.join(' and ')}` : null;
+    };
+    const saysAny = (x) => (Array.isArray(x?.route_through) ? routeSays(x.route_through) : saysOf(x));
+    for (const o of observations ?? []) if (o.from.every((x) => saysAny(x) != null)) o.says = o.from.map(saysAny).join('; ');
     // A form of a name the prose used counts as a mention only if it has a word of the name itself: "Abel", "Mrs. Crouch",
     // "Abel's shed"; not "it", "his shed" or "my marrow", which are whoever is being spoken of.
     const named = (e, m) => !/^(my|his|her|its|their|our|your)\b/i.test(m) && m.split(/[^A-Za-z]+/).some((w) => /^[A-Z]/.test(w) && w.length > 2 && e.name.split(/[^A-Za-z]+/).includes(w));

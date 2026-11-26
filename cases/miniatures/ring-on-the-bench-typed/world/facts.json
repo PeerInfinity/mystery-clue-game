@@ -1,0 +1,29 @@
+{
+  "facts": [
+    {"id": "f.vane_role", "of": "vane", "attr": "role", "value": "goldsmith, of Fetter Court", "time": {"from": "t.before"}, "para": 1, "quote": "I am Esther Vane, goldsmith, of Fetter Court"},
+    {"id": "f.bench_in", "of": "bench", "attr": "location", "value": "workroom", "time": {"from": "t.before"}, "para": 1, "quote": "The bench was in the workroom"},
+    {"id": "f.ring_left", "of": "ring", "attr": "location", "value": "bench", "time": {"at": "t.night"}, "para": 1, "quote": "the customer's ring was on the bench"},
+    {"id": "f.ring_gone", "of": "ring", "attr": "location", "value": "bench", "neg": true, "time": {"at": "t.morning"}, "para": 1, "quote": "the customer's ring was not on the bench"},
+    {"id": "f.door", "of": "door", "attr": "closed_to", "value": "small", "time": {"at": "t.night"}, "para": 1, "quote": "the door of the workroom was closed to a person and to anything small"},
+    {"id": "f.key_belt", "of": "vane", "attr": "carrying", "value": "key", "time": {"at": "t.night"}, "para": 1, "quote": "I had the key of the workroom"},
+    {"id": "f.tom_role", "of": "tom", "attr": "role", "value": "my apprentice", "time": {"from": "t.before"}, "para": 2, "quote": "Tom Pike is my apprentice"},
+    {"id": "f.tom_knew", "of": "tom", "attr": "knows", "what": "f.ring_left", "time": {"at": "t.night"}, "para": 2, "value": "that the customer's ring was on the bench", "quote": "Tom Pike knew that the customer's ring was on the bench"},
+    {"id": "f.window", "of": "window", "attr": "closed_to", "value": "person", "time": {"at": "t.night"}, "para": 2, "quote": "The window of the workroom was closed to a person"},
+    {"id": "f.walls", "of": "walls", "attr": "closed_to", "value": "small", "time": {"at": "t.night"}, "para": 3, "quote": "the walls of the workroom were closed to a person and to anything small"},
+    {"id": "f.filings_heap", "of": "filings", "attr": "condition", "value": "in a heap", "time": {"at": "t.night"}, "para": 4, "quote": "the gold filings were in a heap"},
+    {"id": "f.filings", "of": "filings", "attr": "condition", "value": "scattered", "time": {"at": "t.morning"}, "para": 4, "quote": "the gold filings were scattered"},
+    {"id": "f.draught", "of": "draught", "attr": "passed", "value": "workroom", "between": ["yard", "workroom"], "passes": "air", "time": {"at": "t.night"}, "para": 4, "quote": "a draught crossed from the yard to the workroom"},
+    {"id": "f.belli_role", "of": "belli", "attr": "role", "value": "the organ-grinder", "time": {"from": "t.before"}, "para": 5, "quote": "Signor Belli is the organ-grinder"},
+    {"id": "f.belli_lodges", "of": "belli", "attr": "lives_at", "value": "belli_house", "time": {"from": "t.before"}, "para": 5, "quote": "Signor Belli lives at the house across the yard"},
+    {"id": "f.monkey_yard", "of": "monkey", "attr": "location", "value": "yard", "time": {"at": "t.night"}, "para": 5, "quote": "Signor Belli's monkey was in the yard"},
+    {"id": "f.pane", "of": "pane", "attr": "passes", "value": "small", "time": {"at": "t.night"}, "para": 6, "quote": "the ventilating pane let anything small through"},
+    {"id": "f.pane_narrow", "of": "pane", "attr": "closed_to", "value": "person", "time": {"at": "t.night"}, "para": 6, "quote": "The ventilating pane was closed to a person"},
+    {"id": "f.cord", "of": "cord", "attr": "attached", "value": "roller", "time": {"at": "t.night"}, "para": 7, "quote": "the cord of the blind was fastened to the roller of the blind"},
+    {"id": "f.roller", "of": "roller", "attr": "near", "value": "pane", "time": {"at": "t.night"}, "para": 7, "quote": "The roller of the blind was beside the ventilating pane"},
+    {"id": "f.reach", "of": "cord", "attr": "reaches", "value": "bench", "time": {"at": "t.night"}, "para": 8, "quote": "the cord of the blind reached the bench"},
+    {"id": "f.fixed", "of": "bench", "attr": "fixed", "value": "floor", "time": {"at": "t.night"}, "para": 8, "quote": "The bench was fixed to the floor"},
+    {"id": "f.ring_found", "of": "ring", "attr": "location", "value": "bedding", "time": {"at": "t.later"}, "para": 9, "quote": "the customer's ring was in the bedding of Signor Belli's monkey"},
+    {"id": "f.belli_says", "of": "belli", "attr": "says", "to": "vane", "time": {"at": "t.later"}, "asserts": [{"q": "q.what", "pick": "monkey"}], "para": 9, "value": "says it was Signor Belli's monkey", "quote": "Signor Belli said to me: \"It was my monkey who took the customer's ring from the workroom.\""},
+    {"id": "f.belli_brings", "of": "belli", "attr": "action", "act": "give", "thing": "ring", "to": "vane", "time": {"at": "t.later"}, "para": 9, "quote": "Signor Belli gave the customer's ring to me"}
+  ]
+}

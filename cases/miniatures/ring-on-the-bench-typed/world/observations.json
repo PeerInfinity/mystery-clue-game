@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.door", "q": "q.what", "from": ["f.door"], "essential": true, "against": ["tom"], "says": "on Thursday night, the door of the workroom was closed to a person and to anything small"},
+    {"id": "o.window", "q": "q.what", "from": ["f.window"], "essential": true, "against": ["tom"], "says": "on Thursday night, the window of the workroom was closed to a person"},
+    {"id": "o.size", "q": "q.what", "from": ["f.pane"], "essential": true, "says": "on Thursday night, the ventilating pane let anything small through"},
+    {"id": "o.climb", "q": "q.what", "from": [{"route_through": ["pane", "cord"]}], "essential": true, "says": "whatever came by this route was small enough for the ventilating pane and able to travel by the cord of the blind"},
+    {"id": "o.kept", "q": "q.what", "from": ["f.monkey_yard"], "essential": true, "says": "on Thursday night, Signor Belli's monkey was in the yard"},
+    {"id": "o.draught", "q": "q.what", "from": ["f.draught"], "says": "on Thursday night, a draught crossed from the yard to the workroom"},
+    {"id": "o.walls", "q": "q.what", "from": ["f.walls"], "says": "on Thursday night, the walls of the workroom were closed to a person and to anything small"}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.night", "label": "Thursday night", "after": "t.before", "para": 1, "quote": "Thursday night"},
+    {"id": "t.morning", "label": "Friday morning", "after": "t.night", "para": 1, "quote": "Friday morning"},
+    {"id": "t.later", "label": "Friday afternoon", "after": "t.morning", "para": 9, "quote": "Friday afternoon"}
+  ]
+}

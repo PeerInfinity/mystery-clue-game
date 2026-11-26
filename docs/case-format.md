@@ -116,7 +116,16 @@ follows from the text: each fact's `para` and `quote` (the quote is the sentence
 time's `para` and `quote`, each question's `raised`, `quote`, its answers' `available` and `quote` and its
 give-away, each observation's `says` (its entries' sentences), and `mentions.json`. So in such a case those are not
 written by hand; `npm test` holds the files to the script. A statement with `known_by: <entry>` (what its witness knew the thing by: trusted no further than that entry, in
-any case, as `seen_from`) is followed in the witness's speech by "I knew it by this: …". A fact there has no `detail` (free text is not told), a
+any case, as `seen_from`) is followed in the witness's speech by "I knew it by this: …". The arrangement of a room is told in the page's own words: `closed_to` ("was closed to a person"; `small`: "to a
+person and to anything small", since it stops both), `passes` ("let anything small through"), `passed` ("a draught
+crossed from the yard to the workroom"), `attached` ("was fastened to"), `near` ("was beside"), `reaches`
+("reached") and `fixed` ("was fixed to"). An entity may be `plural: true` ("the walls … were") and have `prep: "on"`
+("on the bench"). A `knows` entry may name the entry known (`what`): "Tom Pike knew that the customer's ring was on
+the bench", and its `value` is written from it. A `says` that asserts an answer which is another entity, where the
+question's entry is a typed act, names it as the doer ("It was my monkey who took the customer's ring from the
+workroom"). An observation that comes from a route (`{route_through: [things]}`) says what anything that came by it
+must have been, from the entries of those things: "small enough for" a way in (the largest it lets through) and
+"able to travel by" what is fastened or reaches. A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 
 **Prose written from the telling** (since 2026-11-25; finding 138). `world/prose.json`, made by

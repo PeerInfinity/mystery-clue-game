@@ -1,0 +1,24 @@
+{
+ "entities": {
+  "vane": ["Esther Vane"],
+  "tom": ["Tom Pike"],
+  "belli": ["Signor Belli"],
+  "monkey": ["Signor Belli's monkey"],
+  "workroom": ["the workroom"],
+  "yard": ["the yard"],
+  "belli_house": ["the house across the yard"],
+  "ring": ["the customer's ring"],
+  "door": ["the door of the workroom"],
+  "key": ["the key of the workroom"],
+  "window": ["the window of the workroom"],
+  "walls": ["the walls of the workroom"],
+  "filings": ["the gold filings"],
+  "draught": ["a draught"],
+  "pane": ["the ventilating pane"],
+  "roller": ["the roller of the blind"],
+  "cord": ["the cord of the blind"],
+  "bench": ["the bench"],
+  "floor": ["the floor"],
+  "bedding": ["the bedding of Signor Belli's monkey"]
+ }
+}
