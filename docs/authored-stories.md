@@ -2785,7 +2785,7 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *What was lost:* the milk money, the back parlour that looks on the yard (where the Captain says he saw
       it from), "all the afternoon", the hat, the broken latch, the baking with the back door at her elbow,
       "the only way in from the yard" (which is what makes the back door decide it), the four pounds as a sum.
-    - *Every miniature now has a twin told from its data* (21 told cases, and the one in a model's prose). Over
+    - *Every miniature now has a twin told from its data* (19 told by the templates, one for each of the 19 written miniatures, and one more in a model's prose). Over
       all cases (`typed-check.mjs`): 17 of 82 answers follow with the written rules taken away, 61 of 108 wrong
       answers are ruled out by the typed forms.
     - *What recurred across findings 150 to 162, for whoever takes this further.*
