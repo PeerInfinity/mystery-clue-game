@@ -50,7 +50,7 @@ const writtenRules = await get(`${W}/implications.json`).then((x) => x.implicati
 let implications = writtenRules;   // with the rules from the answers' typed forms, once the world is read (below)
 const data = {
     entities: w.entities, moves: w.moves ?? [], joins: w.joins ?? {}, times: times.times, facts: facts.facts,
-    accounts: accounts.accounts, questions: questions.questions, narrators: header.narrators,
+    accounts: accounts.accounts, questions: questions.questions, narrators: header.narrators, room,
 };
 // The narrators (world/case.json): each by name, and its narration link, which the player may trust less.
 const narratorIds = new Set(data.narrators.map((n) => n.id));

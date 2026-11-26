@@ -30,6 +30,7 @@ export function loadWorld(dir) {
         accounts: read('world/accounts.json').accounts,
         questions: read('world/questions.json').questions,
         narrators: read('world/case.json').narrators,
+        room: fs.existsSync(path.join(dir, 'world/room.json')) ? read('world/room.json') : null,
     };
 }
 

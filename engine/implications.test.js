@@ -309,3 +309,30 @@ test('a want the deed undoes is a motive against', async () => {
     assert.deepEqual(rows.map((r) => [r.pick, r.motive.map((c) => c.status)]), [['a', ['met']], ['b', ['against']]]);
     setCaseActions({});
 });
+
+test('a room closed to a person on every way in rules every person out; "everyone but these was elsewhere" closes the list', async () => {
+    const { tableRules } = await import('./implications.js');
+    const { setCaseActions } = await import('./actions.js');
+    setCaseActions({});
+    const t = (id, after) => ({ id, ...(after ? { after } : {}) });
+    const base = {
+        times: [t('t0'), t('t1', 't0'), t('t2', 't1')], joins: {}, moves: [], accounts: [], narrators: [{ id: 'n' }],
+        entities: [{ id: 'n', kind: 'person' }, { id: 'a', kind: 'person' }, { id: 'b', kind: 'person' }, { id: 'pet', kind: 'animal' }, { id: 'room', kind: 'place' }, { id: 'out', kind: 'place' }, { id: 'hall', kind: 'place' }, { id: 'door', kind: 'object' }, { id: 'vent', kind: 'object' }, { id: 'thing', kind: 'object' }],
+        questions: [{ id: 'q', label: 'Who?', entry: { of: '?', attr: 'action', act: 'take', item: 'thing', where: 'room', time: { from: 't1', to: 't2' } }, possibilities: [{ value: 'something else', via: 'always' }, { value: 'a' }, { value: 'b' }, { value: 'pet' }], answer: 'pet' }],
+    };
+    const f = (id, x) => ({ id, time: { at: 't1' }, para: 1, quote: 'x', ...x }), o = (id, from) => ({ id, q: 'q', from: [from], says: id });
+    // The room: a door and a vent, each closed to a person.
+    const room = { sealed: { place: 'room' }, openings: { door: { kind: 'door', sides: ['room', 'out'] }, vent: { kind: 'vent', sides: ['room', 'out'] } } };
+    const closed = [f('f.door', { of: 'door', attr: 'closed_to', value: 'small' }), f('f.vent', { of: 'vent', attr: 'closed_to', value: 'person' }), f('f.vent_open', { of: 'vent', attr: 'passes', value: 'small' })];
+    const sealed = (facts, obs) => tableRules({ ...base, facts, room }, obs).filter((r) => r.id.startsWith('t.sealed'));
+    assert.deepEqual(sealed(closed, [o('o.door', 'f.door'), o('o.vent', 'f.vent')]).map((r) => [r.from, r.rules_out, r.strength]), [[['o.door', 'o.vent'], ['a', 'b'], undefined]]);
+    assert.deepEqual(sealed(closed, [o('o.door', 'f.door')]), [], 'every way in must be what an observation comes from');
+    assert.deepEqual(sealed(closed.slice(0, 1).concat(closed[2]), [o('o.door', 'f.door')]), [], 'a way not said to be closed to a person leaves the room open');
+    // Everyone but a and b was in the hall through the whole window: nobody else was in the room.
+    {
+        const pet = { ...base, questions: [{ ...base.questions[0], possibilities: base.questions[0].possibilities.slice(0, 3), answer: 'a' }] };
+        const else_ = (time) => tableRules({ ...pet, facts: [f('f.all', { of: '*', every: 'person', but: ['a', 'b', 'n'], attr: 'location', value: 'hall', time })] }, [o('o.all', 'f.all')]).filter((r) => r.id.startsWith('t.closed'));
+        assert.deepEqual(else_({ from: 't1', to: 't2' }).map((r) => [r.rules_out, r.strength]), [[['something else'], 'likely']]);
+        assert.deepEqual(else_({ at: 't1' }), [], 'only through the whole window');
+    }
+});

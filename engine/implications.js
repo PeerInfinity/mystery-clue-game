@@ -13,6 +13,7 @@
 
 import { isRight, coverOf, overlaps, places, timeOrder, hypothesisKey, answerStates, DERIVED, assertions, markAssertions, contradictions, alibis, entityKinds, CONFIRMED, LIKELY_LEVEL } from './world.js';
 import { answerAction, conditionsOf, actNeeds, pointImplications, productsOf, meets, requirementStatus } from './actions.js';
+import { waysIn, sealedFor } from './arrangement.js';
 
 const holds = (p, has, solved) => (typeof p === 'string' ? has(p) : p.any ? p.any.some(has) : p.solved ? !!solved?.(p.solved) : false);
 
@@ -352,14 +353,36 @@ export function tableRules(data, observations) {
         // (2026-11-25; finding 143; likely only, as the rule is).
         const answers = new Set(q.possibilities.map((p) => p.value)), narrators = new Set((data.narrators ?? []).map((n) => n.id));
         const denies = (f) => {
-            if (f.attr === 'carrying') return reqs.some((r) => r.key && f.key === r.key);
-            const k = coverOf(f.time);
-            return f.attr === 'location' && !!w && !!k && order.le(k.start, w.start) && order.le(w.end, k.end) && reqs.some((r) => r.place && pl.chain(r.place).includes(f.value));
+            if (f.attr === 'carrying') return !!f.neg && reqs.some((r) => r.key && f.key === r.key);
+            const k = coverOf(f.time), through = f.attr === 'location' && typeof f.value === 'string' && !!w && !!k && order.le(k.start, w.start) && order.le(w.end, k.end);
+            // "Everyone but these was elsewhere" through the whole window says the same as "nobody but these was
+            // there" (2026-11-26; finding 155): a place that neither holds the deed's place nor lies in it.
+            if (through && !f.neg) return reqs.some((r) => r.place && !pl.chain(r.place).includes(f.value) && !pl.chain(f.value).includes(r.place));
+            return through && reqs.some((r) => r.place && pl.chain(r.place).includes(f.value));
         };
-        (data.facts ?? []).filter((f) => f.truth !== false && f.of === '*' && f.neg && list(f.every).includes('person') && list(f.but).every((b) => answers.has(b) || narrators.has(b)) && denies(f)).forEach((f, n) => {
+        (data.facts ?? []).filter((f) => f.truth !== false && f.of === '*' && list(f.every).includes('person') && list(f.but).every((b) => answers.has(b) || narrators.has(b)) && denies(f)).forEach((f, n) => {
             const o = obsOf(q.id, f.id);
             if (o) out.push({ id: `t.closed.${q.id.replace(/^q\./, '')}.${n}`, q: q.id, from: [...conds.map((k) => ({ solved: k.q })), o.id], says: `${o.says}: nobody else could have done it`, rules_out: open, strength: LIKELY, table: true });
         });
+    }
+    // A room closed to a person on every way in (2026-11-26; finding 155; world/room.json `sealed`): where the deed
+    // needs its doer at that place, and the true entries make every way in told of closed to a person, no person did
+    // it. Certain, as the entries are: each must be what an observation of the question comes from, and those
+    // observations together are the premise. A way the story never tells of is no row, as in the room's own table.
+    if (data.room?.sealed) {
+        const pl = data.places ?? places(data), sealed = data.room.sealed, known = (data.facts ?? []).filter((f) => f.truth !== false);
+        const rows = waysIn(sealed, known, data.room.openings ?? {}, { within: (a, b) => pl.chain(a).includes(b) });
+        for (const q of data.questions) {
+            const picks = (q.possibilities ?? []).filter((p) => !isRight(q, p.value) && kindOf(p.value) === 'person');
+            const act = picks.length && answerAction(q, picks[0].value, isEntity);
+            if (!act || act.of !== picks[0].value || !sealedFor(rows, 'person').sealed) continue;
+            const reqs = (pointImplications(act, undefined, { ...ctx, places: pl }).entries ?? []).filter((r) => r.role === 'requires' && r.of === act.of && r.place);
+            if (!reqs.some((r) => pl.chain(r.place).includes(sealed.place))) continue;
+            const obs = rows.map((r) => r.cells.person.by.map((f) => obsOf(q.id, f.id)).find(Boolean));
+            if (obs.some((o) => !o)) continue;
+            const from = [...new Set(obs.map((o) => o.id))];
+            out.push({ id: `t.sealed.${q.id.replace(/^q\./, '')}`, q: q.id, from, says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: no person could have come in`, rules_out: picks.map((p) => p.value), table: true });
+        }
     }
     // The same for a question of who someone was (2026-11-26; finding 149): a typed act of the one in question that
     // needs a key ("the figure came out by the side door"), and a true statement that nobody but people among the
