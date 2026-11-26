@@ -1,0 +1,22 @@
+{
+  "facts": [
+    {"id": "f.ellis_role", "of": "ellis", "attr": "role", "value": "a doctor, of Thornby", "time": {"from": "t.before"}, "para": 1, "quote": "I am Dr. Ellis, a doctor, of Thornby"},
+    {"id": "f.holt_owner", "of": "holt", "attr": "role", "value": "the owner of Dyer's Mill", "time": {"from": "t.before"}, "para": 1, "quote": "Mr. Joseph Holt is the owner of Dyer's Mill"},
+    {"id": "f.holt_went", "of": "holt", "attr": "location", "value": "mill", "time": {"at": "t.ten"}, "para": 1, "quote": "Mr. Joseph Holt was at Dyer's Mill"},
+    {"id": "f.holt_struck", "of": "holt", "attr": "condition", "value": "struck down", "time": {"at": "t.eleven"}, "para": 1, "quote": "Mr. Joseph Holt was struck down"},
+    {"id": "f.tel_pocket", "of": "holt", "attr": "carrying", "value": "telegram", "time": {"at": "t.eleven"}, "para": 2, "quote": "Mr. Joseph Holt had the telegram"},
+    {"id": "f.tel_sent", "of": "?", "attr": "action", "act": "send_telegram", "thing": "telegram", "where": "leeds_office", "time": {"at": "t.four"}, "para": "tel:1", "quote": "somebody handed in the telegram at the post office at Leeds"},
+    {"id": "f.tel_words", "of": "telegram", "attr": "condition", "value": "a telegram in words of its own", "words": "Come to the mill at ten. M.", "time": {"at": "t.eleven"}, "para": "tel:2", "quote": "the telegram said: \"Come to the mill at ten. M.\""},
+    {"id": "f.tel_hand", "of": "telegram", "attr": "condition", "value": "written out in the post office clerk's hand, not the sender's", "time": {"at": "t.eleven"}, "para": "tel:3", "quote": "the telegram was written out in the post office clerk's hand, not the sender's"},
+    {"id": "f.mary_wife", "of": "mary", "attr": "role", "value": "Mr. Joseph Holt's wife", "time": {"from": "t.before"}, "para": 3, "quote": "Mary Holt is Mr. Joseph Holt's wife"},
+    {"id": "f.martin_partner", "of": "martin", "attr": "role", "value": "Mr. Joseph Holt's partner in Dyer's Mill", "time": {"from": "t.before"}, "para": 3, "quote": "Mr. Martin Grove is Mr. Joseph Holt's partner in Dyer's Mill"},
+    {"id": "f.mary_fete", "of": "mary", "attr": "location", "value": "fete", "time": {"from": "t.three", "to": "t.five"}, "para": 4, "quote": "Mary Holt was at the church fête"},
+    {"id": "f.ellis_fete", "of": "ellis", "attr": "location", "value": "fete", "time": {"from": "t.three", "to": "t.five"}, "para": 4, "quote": "I was at the church fête"},
+    {"id": "f.clerk_tells", "of": "clerk", "attr": "tells", "value": "acct.clerk", "to": "ellis", "how": "told", "time": {"after": "t.eleven", "before": "t.later"}, "para": 5, "quote": "Mr. Grove's clerk told me"},
+    {"id": "f.martin_train", "of": "martin", "attr": "action", "act": "take_train", "thing": "leeds", "time": {"at": "t.two"}, "para": 5, "quote": "Mr. Martin Grove took the train to Leeds"},
+    {"id": "f.key_drawn", "of": "martin", "attr": "action", "act": "draw_key", "thing": "mill", "time": {"at": "t.half_nine"}, "para": 6, "quote": "Mr. Martin Grove drew the key of Dyer's Mill"},
+    {"id": "f.no_other_key", "of": "*", "every": "person", "but": ["martin"], "attr": "carrying", "value": "a key of Dyer's Mill", "key": "mill", "neg": true, "time": {"from": "t.half_nine", "to": "t.ten"}, "para": 6, "quote": "nobody but Mr. Martin Grove had a key of Dyer's Mill"},
+    {"id": "f.grove_owns", "of": "martin", "attr": "says", "to": "ellis", "time": {"at": "t.later"}, "asserts": [{"q": "q.sender", "pick": "martin"}], "para": 7, "value": "owns to handing in the telegram", "quote": "Mr. Martin Grove said to me: \"It was I who handed in the telegram at the post office at Leeds.\""},
+    {"id": "f.grove_waited", "of": "martin", "attr": "says", "to": "ellis", "time": {"at": "t.later"}, "asserts": [{"q": "q.waiting", "pick": "martin"}], "para": 7, "value": "owns to waiting undefined", "quote": "Mr. Martin Grove said to me: \"It was I who waited at Dyer's Mill.\""}
+  ]
+}

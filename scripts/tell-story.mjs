@@ -216,7 +216,10 @@ export function tell(dir, opts = {}) {
         return `by rule, ${name(who)} was to be ${r.series.value} ${when}; the record has nothing then: ${third.sentence({ of: who, attr: r.series.attr, value: r.series.value, neg: true, time: { at: x.at } })}`;
     };
     const saysAny = (x) => (Array.isArray(x?.route_through) ? routeSays(x.route_through) : x?.reasoned === 'changed' ? changeSays(x) : x?.reasoned === 'missing' ? gapSays(x) : saysOf(x));
-    for (const o of observations ?? []) if (o.from.every((x) => saysAny(x) != null)) o.says = o.from.map(saysAny).join('; ');
+    // An observation that holds only under an answer to another question (`if: {q, pick}`) says so first: "taking it
+    // that Mr. Martin Grove handed in the telegram …: ".
+    const taking = (o) => { const e = o.if && Q.get(o.if.q)?.entry; return e && list(e.act).length && E.has(o.if.pick) ? `taking it that ${third.sentence({ ...e, of: o.if.pick })}: ` : ''; };
+    for (const o of observations ?? []) if (o.from.every((x) => saysAny(x) != null)) o.says = taking(o) + o.from.map(saysAny).join('; ');
     // A form of a name the prose used counts as a mention only if it has a word of the name itself: "Abel", "Mrs. Crouch",
     // "Abel's shed"; not "it", "his shed" or "my marrow", which are whoever is being spoken of.
     const named = (e, m) => !/^(my|his|her|its|their|our|your)\b/i.test(m) && m.split(/[^A-Za-z]+/).some((w) => /^[A-Z]/.test(w) && w.length > 2 && e.name.split(/[^A-Za-z]+/).includes(w));

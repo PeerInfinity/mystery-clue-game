@@ -130,6 +130,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/garden-room-typed` | The Garden Room told from its data: two doors, each watched from somewhere for a stretch (finding 156). | 5 paragraphs, 21 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/sailors-knot-typed` | The Sailor's Knot told from its data: a thing known and not known, what a thing is held to be (finding 157). | 7 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/loose-board-typed` | The Loose Board told from its data: an entry that is implied and not said (finding 158). | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 5 observations (all essential), 10 moves |
+| `cases/miniatures/telegram-signed-m-typed` | The Telegram Signed M. told from its data: a paper with words of its own, an observation that holds under another question's answer (finding 159). | 7 paragraphs and a paper of 3, 18 facts, 2 accounts, 1 telling, 2 questions, 7 observations (5 essential), 10 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2679,6 +2680,30 @@ script that found each fact's paragraph from its quote; the data files are the s
       rules' sentences; the true path's reasons; `structure.json`.
     - *A role in the narrator's own words mended:* The Ring on the Bench had "my apprentice" as the role's
       value, so the card said "my"; it is "Esther Vane's apprentice", told as "my" by the template.
+
+159. **The Telegram Signed M. told from its data (2026-11-26).** The case is
+    `cases/miniatures/telegram-signed-m-typed`: a main story and one paper (the telegram), two questions, the
+    same logic and true path.
+    - *What the templates gained:* an observation that holds only under an answer to another question says so
+      first, from that question's typed act: "taking it that Mr. Martin Grove handed in the telegram at the
+      post office at Leeds: … the telegram said: 'Come to the mill at ten. M'". The written case had a sentence
+      for each reading ("read as Mr. Grove's, the telegram named … a meeting he meant to keep").
+    - *It held:* it validated at the first try, the checker gives the two versions the same result (who was
+      waiting follows by elimination; who sent it would with the list closed), and every page check passes. 273
+      words in the story and the telegram, against 226.
+    - *What typing forced or found.* The telegram in his pocket is a thing he had. Its handing in is the typed
+      act of the question, done by somebody, in the paper itself. Its words are kept as words, as the will's are
+      (finding 146), with nothing they speak of typed: "M." is the reader's to read. The train to Leeds and the
+      key drawn are acts of the case's own; the confession is two sayings, one a question.
+    - *What was lost:* "he had gone to the mill because of it, and whoever sent it had brought him there" (what
+      ties the telegram to the deed; the typed case has only the man at the mill at ten with the telegram on
+      him), the copy the narrator made, the prizes and the tea tent, "and did not say why", the night book as
+      the source of the key drawn, "in the dark". And what "a meeting he meant to keep" said: that the sender
+      of such words would be the one waiting. The generated sentence gives the condition and the words, and
+      leaves that step unsaid.
+    - *Still written by hand:* the order; names and time labels; seven phrases (four roles, "struck down", the
+      clerk's hand, the entry's own line for its words); the telegram's words; two labels; four past forms; four
+      written rules' sentences; the true path's reasons; `structure.json`.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.office", "q": "q.sender", "from": ["f.tel_sent"], "essential": true, "says": "at four o'clock on Saturday, somebody handed in the telegram at the post office at Leeds"},
+    {"id": "o.fete", "q": "q.sender", "from": ["f.mary_fete"], "essential": true, "against": ["mary"], "says": "from three o'clock on Saturday until five o'clock on Saturday, Mary Holt was at the church fête"},
+    {"id": "o.train", "q": "q.sender", "from": ["f.martin_train"], "essential": true, "says": "at two o'clock on Saturday, Mr. Martin Grove took the train to Leeds"},
+    {"id": "o.hand", "q": "q.sender", "from": ["f.tel_hand"], "says": "at eleven o'clock on Saturday night, the telegram was written out in the post office clerk's hand, not the sender's"},
+    {"id": "o.asked_martin", "q": "q.waiting", "from": ["f.tel_words"], "if": {"q": "q.sender", "pick": "martin"}, "essential": true, "says": "taking it that Mr. Martin Grove handed in the telegram at the post office at Leeds: at eleven o'clock on Saturday night, the telegram said: \"Come to the mill at ten. M\""},
+    {"id": "o.asked_mary", "q": "q.waiting", "from": ["f.tel_words"], "if": {"q": "q.sender", "pick": "mary"}, "says": "taking it that Mary Holt handed in the telegram at the post office at Leeds: at eleven o'clock on Saturday night, the telegram said: \"Come to the mill at ten. M\""},
+    {"id": "o.key", "q": "q.waiting", "from": ["f.key_drawn", "f.no_other_key"], "essential": true, "against": ["mary"], "says": "at half past nine on Saturday night, Mr. Martin Grove drew the key of Dyer's Mill; from half past nine on Saturday night until ten o'clock on Saturday night, nobody but Mr. Martin Grove had a key of Dyer's Mill"}
+  ]
+}

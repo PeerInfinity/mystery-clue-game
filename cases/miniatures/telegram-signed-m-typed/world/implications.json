@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.sender_not_mary", "q": "q.sender", "from": ["o.office", "o.fete"], "says": "the sender was at the Leeds office at four, and Mrs. Holt was at the fête in Thornby from three until five: it was not she", "rules_out": ["mary"]},
+    {"id": "i.sender_martin", "q": "q.sender", "from": ["o.office", "o.train", "i.sender_not_mary"], "says": "Mr. Grove went to Leeds by the two o'clock train, and Mrs. Holt was not there: it was Mr. Grove", "concludes": "martin"},
+    {"id": "i.waiting_not_mary", "q": "q.waiting", "from": ["o.key"], "says": "one key to the mill was drawn that evening, and it was Mr. Grove's: it was not Mrs. Holt who waited there", "rules_out": ["mary"]},
+    {"id": "i.waiting_martin", "q": "q.waiting", "from": ["o.asked_martin", "o.key"], "says": "the telegram was his, naming the mill at ten, and he drew his key at half past nine: it was Mr. Grove who waited", "concludes": "martin"}
+  ]
+}

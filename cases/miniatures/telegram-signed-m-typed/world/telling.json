@@ -1,0 +1,56 @@
+{
+ "title": "THE TELEGRAM SIGNED M., TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.ellis_role",
+   "f.holt_owner",
+   "f.holt_went",
+   "f.holt_struck"
+  ],
+  [
+   "f.tel_pocket",
+   {
+    "raise": "q.sender"
+   },
+   {
+    "raise": "q.waiting"
+   }
+  ],
+  [
+   "f.mary_wife",
+   "f.martin_partner"
+  ],
+  [
+   "f.mary_fete",
+   "f.ellis_fete"
+  ],
+  [
+   "f.clerk_tells",
+   "f.martin_train"
+  ],
+  [
+   "f.key_drawn",
+   "f.no_other_key"
+  ],
+  [
+   "f.grove_owns",
+   "f.grove_waited"
+  ]
+ ],
+ "files": {
+  "tel": {
+   "title": "THE TELEGRAM IN MR. HOLT'S POCKET, TOLD FROM ITS DATA",
+   "paragraphs": [
+    [
+     "f.tel_sent"
+    ],
+    [
+     "f.tel_words"
+    ],
+    [
+     "f.tel_hand"
+    ]
+   ]
+  }
+ }
+}

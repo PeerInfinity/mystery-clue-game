@@ -1,0 +1,14 @@
+{
+ "entities": {
+  "ellis": ["Dr. Ellis"],
+  "holt": ["Mr. Joseph Holt"],
+  "mary": ["Mary Holt"],
+  "martin": ["Mr. Martin Grove"],
+  "clerk": ["Mr. Grove's clerk"],
+  "mill": ["Dyer's Mill"],
+  "fete": ["the church fête"],
+  "leeds": ["Leeds"],
+  "leeds_office": ["the post office at Leeds"],
+  "telegram": ["the telegram"]
+ }
+}

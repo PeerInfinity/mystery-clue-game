@@ -1,0 +1,27 @@
+{
+  "id": "telegram_signed_m_typed",
+  "title": "The Telegram Signed M., told from its data",
+  "author": "written for this project (a mechanic miniature: The Telegram Signed M., its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "files": [
+    {
+      "id": "tel",
+      "title": "The telegram in Mr. Holt's pocket",
+      "short": "Telegram",
+      "text": "../files/telegram.txt",
+      "delivered": 2
+    }
+  ],
+  "narrators": [
+    {
+      "id": "ellis",
+      "name": "Dr. Ellis",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Dr. Ellis's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 220
+  }
+}

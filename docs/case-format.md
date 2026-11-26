@@ -139,6 +139,8 @@ A rule of a regular series is told from the series ("By rule, Abel Ward was to b
 of, at}`) says the rule at that time and the series' state denied then ("the record has nothing then: Abel Ward was
 not on the round"). What a state leaves someone unable to do (`cannot: [acts]`) is the deed of the question that
 asks about such an act ("…, and in no state to be the one who took the bale of China silk from the yard").
+An observation that holds only under an answer to another question (`if: {q, pick}`) says so first ("taking it
+that Mr. Martin Grove handed in the telegram at the post office at Leeds: …").
 A thing known is "knew the carrick bend" (`knows` with an entity), and `reputed` "was held to be …". A telling's
 item `{implied: <fact>, by: <fact>}` puts an entry no sentence says on the timeline, by the words of the entry that
 implies it and where that is told (he was at the table when the letter was read: he knew the hiding-place).

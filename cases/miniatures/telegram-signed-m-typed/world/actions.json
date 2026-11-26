@@ -1,0 +1,8 @@
+{
+  "actions": [
+    {"id": "send_telegram", "label": "handing in", "requires": [{"of": "$agent", "place": "$where"}], "effects": [], "past": "handed in"},
+    {"id": "wait_inside", "label": "waiting", "requires": [{"of": "$agent", "place": "$where"}, {"of": "$agent", "key": "$via"}], "effects": [], "past": "waited"},
+    {"id": "take_train", "label": "taking the train to", "past": "took the train to", "requires": [], "effects": []},
+    {"id": "draw_key", "label": "drawing the key of", "past": "drew the key of", "requires": [], "effects": [{"of": "$agent", "key": "$thing"}]}
+  ]
+}

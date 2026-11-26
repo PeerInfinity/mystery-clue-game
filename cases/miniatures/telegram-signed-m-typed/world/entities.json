@@ -1,0 +1,14 @@
+{
+  "entities": [
+    {"id": "ellis", "kind": "person", "name": "Dr. Ellis"},
+    {"id": "holt", "kind": "person", "name": "Mr. Joseph Holt"},
+    {"id": "mary", "kind": "person", "name": "Mary Holt"},
+    {"id": "martin", "kind": "person", "name": "Mr. Martin Grove"},
+    {"id": "clerk", "kind": "person", "name": "Mr. Grove's clerk"},
+    {"id": "mill", "kind": "place", "name": "Dyer's Mill"},
+    {"id": "fete", "kind": "place", "name": "the church fête"},
+    {"id": "leeds", "kind": "place", "name": "Leeds"},
+    {"id": "leeds_office", "kind": "place", "name": "the post office at Leeds", "within": "leeds"},
+    {"id": "telegram", "kind": "document", "name": "the telegram"}
+  ]
+}
