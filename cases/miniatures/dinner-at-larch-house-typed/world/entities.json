@@ -1,0 +1,19 @@
+{
+  "joins": {"study_door": ["study", "hall"]},
+  "entities": [
+    {"id": "george", "kind": "person", "name": "George Marlow"},
+    {"id": "clara", "kind": "person", "name": "Clara Marlow"},
+    {"id": "voss", "kind": "person", "name": "Captain Voss"},
+    {"id": "pym", "kind": "person", "name": "Miss Pym"},
+    {"id": "hannah", "kind": "person", "name": "Hannah"},
+    {"id": "house", "kind": "place", "name": "Larch House"},
+    {"id": "dining_room", "kind": "place", "name": "the dining-room", "within": "house", "prep": "in"},
+    {"id": "hall", "kind": "place", "name": "the hall", "within": "house", "prep": "in"},
+    {"id": "study", "kind": "place", "name": "the study", "within": "house", "prep": "in"},
+    {"id": "upstairs", "kind": "place", "name": "the upper floor", "within": "house", "prep": "on"},
+    {"id": "landing", "kind": "place", "name": "the nursery landing", "within": "upstairs", "prep": "on"},
+    {"id": "notes", "kind": "object", "name": "George Marlow's notes", "plural": true},
+    {"id": "drawer", "kind": "object", "name": "the drawer of the study desk", "prep": "in"},
+    {"id": "study_door", "kind": "object", "name": "the study door"}
+  ]
+}

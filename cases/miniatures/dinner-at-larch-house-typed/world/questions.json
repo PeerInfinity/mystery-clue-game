@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who took George Marlow's notes from the study?", "entry": {"of": "?", "attr": "action", "act": "take", "item": "notes", "where": "study", "time": {"from": "t.soup", "to": "t.gone"}}, "possibilities": [{"value": "something else", "via": "always", "available": 1},{"value": "voss", "via": "direct", "available": 2, "quote": "Everyone but Clara Marlow, Captain Voss and Miss Pym was in the dining-room"},{"value": "pym", "via": "direct", "available": 2, "quote": "Everyone but Clara Marlow, Captain Voss and Miss Pym was in the dining-room"}], "answer": "pym", "answer_inferable_at": 4, "answer_from": "f.hall_empty", "raised": 1, "quote": "Who took George Marlow's notes from the study?", "answer_given_at": 6, "answer_given_quote": "Miss Pym said to me: \"It was I who took your notes from the study.\""}
+  ]
+}

@@ -29,8 +29,14 @@ export function tell(dir, opts = {}) {
     const E = byId(entities), T = byId(times), F = byId(facts), Q = byId(questions), A = byId(actions);
     const N = header.narrators[0].id, name = (id) => E.get(id)?.name ?? id;
     const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, plural: (id) => E.get(id)?.plural, fact: (id) => F.get(id), time: (id) => T.get(id).label });
-    const mainT = tellerOf(N), third = tellerOf(null);
-    const speakerOf = (id) => { const a = accounts.find((x) => x.facts.includes(id)); return a && a.origin !== N ? a.origin : null; };
+    const third = tellerOf(null);
+    // Several narrators (finding 151): an entry is told in the voice of the narrator whose account holds it, and a
+    // line says whose account begins where the voice changes ("Clara Marlow's account."; `account` on a narrator
+    // names another word for it, "statement"). Who is "I" is so no part of the telling: it follows from the accounts.
+    const NARR = new Map(header.narrators.filter((n) => E.has(n.id)).map((n) => [n.id, n]));
+    const originOf = (id) => accounts.find((x) => x.facts.includes(id))?.origin ?? null;
+    const speakerOf = (id) => { const o = originOf(id); return o && !NARR.has(o) ? o : null; };
+    const heading = (id) => `${name(id)}'s ${NARR.get(id).account ?? 'account'}.`;
     // How a sentence at a time begins: "On Monday, ", "At six o'clock on Sunday, " (`prep` on the time point), a
     // stretch "From … until …, " (a deed: "Between … and …, "); a state that held from before the story has none.
     // A time that is an event (`clause: true`: "the gate lamp was lit") is told "When …", and a stretch from it "From when …".
@@ -39,6 +45,7 @@ export function tell(dir, opts = {}) {
     // A time read by a clock (`time.by`) says so: "At nine o'clock on Thursday by the hall clock, ".
     const prefix = (t, deed = false) => (!t ? '' : t.at ? `${at(t.at)}${t.by ? ` by ${name(t.by)}` : ''}, ` : t.from && t.from !== first && t.to ? (deed ? `Between ${from(t.from)} and ${from(t.to)}, ` : `From ${from(t.from)} until ${lab(t.to)}, `) : t.from && t.from !== first ? `From ${from(t.from)}, ` : '');
     for (const x of times) { delete x.para; delete x.quote; }
+    const sawFrom = (f) => `I saw this from ${name(F.get(f.seen_from).value)}.`;
     const stop = (s) => (s.endsWith('"') ? s : `${s}.`);   // a sentence that ends in someone's words has its stop inside them
     const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
     const units = (n) => `${WORDS[n] ?? n} ${header.delivery?.unit ?? 'hour'}${n === 1 ? '' : 's'}`;
@@ -47,6 +54,7 @@ export function tell(dir, opts = {}) {
         ...(header.files ?? []).filter((f) => telling.files?.[f.id]).map((f) => ({ id: f.id, title: telling.files[f.id].title, paragraphs: telling.files[f.id].paragraphs, file: path.join(dir, f.text.replace(/^\.\.\//, '')) }))];
     for (const st of stories) {
         st.paras = []; st.dry = [];
+        let cur = null;   // whose voice the story is in
         st.paragraphs.forEach((items, i) => {
             const n = i + 1, ref = st.id === 'main' ? n : `${st.id}:${n}`, out = [], told = [];
             st.dry.push(told);
@@ -77,28 +85,34 @@ export function tell(dir, opts = {}) {
                     const f = F.get(item);
                     if (!f) throw new Error(`telling: no fact ${item}`);
                     f.para = ref;
+                    const voice = NARR.has(originOf(f.id)) ? originOf(f.id) : cur ?? N;
+                    if (NARR.size > 1 && voice !== cur) { close(); out.push(heading(voice)); told.push({ key: `narrator:${voice}`, text: out.at(-1), full: out.at(-1) }); last = null; }
+                    cur = voice;
                     if (f.attr === 'tells') { close(); pending = f; told.push({ key: f.id, text: `${name(f.of)} told me`, full: `(${name(f.of)} speaks to the narrator here: the statements marked as said by ${name(f.of)} are what is said.)` }); continue; }
                     const who = speakerOf(f.id);
                     drySentence.set(f.id, `${prefix(f.time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence(f)}`);
                     if (who) {
                         if (speech?.speaker !== who) { close(); speech = { speaker: who, parts: [], last: null }; }
-                        const s = tellerOf(who, N).sentence(f), { key: k, pre } = timed(f.time, false, speech.last);
+                        const s = tellerOf(who, cur).sentence(f), { key: k, pre } = timed(f.time, false, speech.last);
                         speech.last = k;
                         speech.parts.push(stop(pre ? pre + s : cap(s)));
                         // What the witness knew it by (`known_by`), said after it, as an onlooker's sentence.
                         if (f.known_by) speech.parts.push(`I knew it by this: ${third.sentence(F.get(f.known_by))}.`);
+                        if (f.seen_from) speech.parts.push(sawFrom(f));
                         f.quote = pre ? s : cap(s);
                         told.push({ key: f.id, text: speech.parts.at(-1), full: `${name(who)} told me: "${stop(prefix(f.time) ? prefix(f.time) + s : cap(s))}"` });
                     } else {
-                        const s = mainT.sentence(f);
+                        const s = tellerOf(cur).sentence(f);
                         if (f.attr === 'says') f.value = third.said(f);
                         // What someone knows, where it is an entry (`what`): the page's line is that entry's sentence.
                         if (f.attr === 'knows' && f.what) f.value = `that ${third.sentence(F.get(f.what))}`;
                         f.quote = plain(f.time, s, f.id);
+                        // Where its witness was (`seen_from`), said after it.
+                        if (f.seen_from) { out.push(sawFrom(f)); told.at(-1).text += ` ${out.at(-1)}`; told.at(-1).full += ` ${out.at(-1)}`; }
                         // A paper's date is a time told there.
                         if (f.dated && T.get(f.dated).para == null) Object.assign(T.get(f.dated), { para: ref, quote: T.get(f.dated).label });
                     }
-                } else if (item.deed) { const q = Q.get(item.deed); plain(item.untimed ? null : q.entry.time, mainT.deed(q), `deed:${q.id}`, true); }   // `untimed`: where the deed's time is itself a question
+                } else if (item.deed) { const q = Q.get(item.deed); plain(item.untimed ? null : q.entry.time, tellerOf(cur ?? N).deed(q), `deed:${q.id}`, true); }   // `untimed`: where the deed's time is itself a question
                 else if (item.raise) { const q = Q.get(item.raise); close(); q.raised = ref; q.quote = q.label; out.push(q.label); told.push({ key: `raise:${q.id}`, text: q.label, full: q.label }); }
                 else if (item.day) { close(); const s = `I have ${units(header.delivery.day)} today, and more to do than they will hold. When they are spent I wake again on this same morning, with the day before me as it was. What I have learned I keep.`; out.push(s); told.push({ key: 'day', text: s, full: s }); }
             }
@@ -120,7 +134,7 @@ export function tell(dir, opts = {}) {
             written.forEach((p, i) => {
                 st.paras[i] = p.text;
                 for (const { key } of st.dry[i]) {
-                    if (key === 'day') continue;
+                    if (key === 'day' || key.startsWith('narrator:')) continue;
                     const quote = p.quotes?.[key];
                     if (!quote || !p.text.includes(quote)) throw new Error(`prose.json ${st.id} ¶${i + 1}: no quote of ${key} in its paragraph`);
                     if (key.startsWith('raise:')) Q.get(key.slice(6)).quote = quote;

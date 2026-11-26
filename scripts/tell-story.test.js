@@ -23,6 +23,9 @@ for (const name of fs.readdirSync(base)) {
         let text = [header.story, ...(header.files ?? []).map((f) => f.text)].map((f) => fs.readFileSync(path.join(base, name, 'world', f), 'utf8').split('\n').slice(1).join('\n')).join('\n');
         for (const q of [...quotes, ...labels].sort((a, b) => b.length - a.length)) text = text.split(q).join('');
         text = text.replace(/I have \w+ \w+ today, and more to do than they will hold\. When they are spent I wake again on this same morning, with the day before me as it was\. What I have learned I keep\./g, '');
+        // Where the voice changes (several narrators), and where a witness saw a thing from.
+        for (const n of header.narrators) text = text.split(`${n.name}'s ${n.account ?? 'account'}.`).join('');
+        text = text.replace(/I saw this from [^.]+\./g, '');
         // What is left: the words that open a time, the one deed's sentence for each question, and punctuation.
         const left = text.replace(/\b(On|At|From|Between|until|and)\b/g, '').replace(/[.,:"\s]/g, '');
         assert.ok(left.length < 120 * world('questions.json').questions.length, `text no entry accounts for: ${left}`);

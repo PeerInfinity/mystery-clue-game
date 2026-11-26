@@ -123,6 +123,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/prize-marrow-prose` | Prose written by a model from the typed entries and audited against them (finding 138): the same logic a third time. | 6 paragraphs, 13 facts, 1 account, 1 question, 6 observations (2 essential), 7 moves |
 | `cases/miniatures/grey-cloak-typed` | The Grey Cloak told from its data: who someone was, what was worn, two descriptions compared as typed heights (finding 148). | 6 paragraphs, 19 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 14 moves |
 | `cases/miniatures/ring-on-the-bench-typed` | The Ring on the Bench told from its data: the arrangement of a room, a route's observation, a thing that knows nothing named by its keeper (finding 150). | 9 paragraphs, 25 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
+| `cases/miniatures/dinner-at-larch-house-typed` | The Dinner at Larch House told from its data: two narrators, each "I" in their own account; what was seen from where (finding 151). | 6 paragraphs, 21 facts, 2 accounts, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2447,6 +2448,39 @@ script that found each fact's paragraph from its quote; the data files are the s
       a candidate's typed traits against a route's requirements conclude the answer.
       Over all cases now: 13 of 64 answers follow, 48 of 87 wrong answers are ruled out.
     - *Still untold:* two narrators, a reasoning move's entry.
+
+151. **Two narrators told from their data: The Dinner at Larch House (2026-11-26).** The second of the three
+    forms. The case is `cases/miniatures/dinner-at-larch-house-typed`: the same logic, the same true path of 6
+    moves.
+    - *Who is "I" is not written.* An entry is told in the voice of the narrator whose account holds it, and a
+      line says whose account begins where the voice changes ("Clara Marlow's account."). So the telling still
+      says only the order, and the accounts, which the trust in each narrator already rests on, decide the voice.
+      The alternative, a narrator marked on each paragraph of the telling, would have been one more thing kept by
+      hand and one more thing that could disagree with the accounts.
+    - *What the templates gained besides.* Where a thing was seen from (`seen_from`): "Nobody but Captain Voss
+      was in the hall. I saw this from the nursery landing." What is the listener's by name is "your" ("It was I
+      who took your notes from the study", said to George Marlow), as what is the speaker's is "my".
+    - *It held:* it validated at the first try, and the true path, the autoplay, the hints and the trying player
+      play it through. 354 words against 301: the courses of the dinner are times that are events, and a stretch
+      between two of them is long each time it is said ("From when the soup was served on Thursday until the
+      joint was carried in").
+    - *What typing forced or found.* "Nobody else left the table" was prose only, and it is what makes the two
+      guests the answers: it is now a statement about everyone ("Everyone but Clara Marlow, Captain Voss and Miss
+      Pym was in the dining-room", seen from the table). The notes are in the drawer and the drawer in the
+      study, where the notes had been "in the study" with the drawer a detail. The letter that gave the answer
+      away is Miss Pym's saying it, and the notes coming back a typed act.
+    - *What was lost:* the cigar-case and the coachman (each guest's reason for going out), the overcoat on the
+      hall stand, the baby, and that the landing looks down on the hall and on the study door. The last is logic
+      of a kind: it is why what Clara saw from there can be believed, and the typed case only says she saw it
+      from there.
+    - *Still written by hand:* the order; the names and time labels; three phrases ("the master of Larch House",
+      "the maid", "watched by nobody"); the question's label; the one written rule's sentence; the true path's
+      reasons; `structure.json`.
+    - *What the checker says:* as for the written case, Captain Voss is ruled out by the typed forms and the
+      answer would follow if the list were closed. The new statement about everyone does not close it: the rule
+      (finding 133) takes "nobody but these had the key" or "nobody but these was there", and this says the
+      reverse, that everyone but these was elsewhere through the whole window. Put to the user.
+    - *Still untold:* The Night Porter's Statement (a narrator who may be doubted), a reasoning move's entry.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

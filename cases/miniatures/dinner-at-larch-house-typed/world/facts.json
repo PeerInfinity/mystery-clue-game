@@ -1,0 +1,25 @@
+{
+  "facts": [
+    {"id": "f.george_role", "of": "george", "attr": "role", "value": "the master of Larch House", "time": {"from": "t.before"}, "para": 1, "quote": "I am George Marlow, the master of Larch House"},
+    {"id": "f.drawer_in", "of": "drawer", "attr": "location", "value": "study", "time": {"from": "t.before"}, "para": 1, "quote": "The drawer of the study desk was in the study"},
+    {"id": "f.notes_put", "of": "notes", "attr": "location", "value": "drawer", "time": {"at": "t.soup"}, "para": 1, "quote": "my notes were in the drawer of the study desk"},
+    {"id": "f.drawer_empty", "of": "notes", "attr": "location", "value": "drawer", "neg": true, "time": {"at": "t.gone"}, "para": 1, "quote": "my notes were not in the drawer of the study desk"},
+    {"id": "f.george_stays", "of": "george", "attr": "location", "value": "dining_room", "time": {"from": "t.soup", "to": "t.gone"}, "para": 2, "quote": "I was in the dining-room"},
+    {"id": "f.hannah_role", "of": "hannah", "attr": "role", "value": "the maid", "time": {"from": "t.before"}, "para": 2, "quote": "Hannah is the maid"},
+    {"id": "f.hannah_stays", "of": "hannah", "attr": "location", "value": "dining_room", "time": {"from": "t.soup", "to": "t.gone"}, "para": 2, "quote": "Hannah was in the dining-room"},
+    {"id": "f.table", "of": "*", "every": "person", "but": ["clara", "voss", "pym"], "attr": "location", "value": "dining_room", "seen_from": "f.george_stays", "time": {"from": "t.soup", "to": "t.gone"}, "para": 2, "quote": "Everyone but Clara Marlow, Captain Voss and Miss Pym was in the dining-room"},
+    {"id": "f.clara_called", "of": "clara", "attr": "location", "value": "upstairs", "time": {"from": "t.soup", "to": "t.joint"}, "para": 2, "quote": "Clara Marlow was on the upper floor"},
+    {"id": "f.voss_out", "of": "voss", "attr": "location", "value": "dining_room", "neg": true, "time": {"at": "t.fish"}, "para": 2, "quote": "Captain Voss was not in the dining-room"},
+    {"id": "f.pym_out", "of": "pym", "attr": "location", "value": "dining_room", "neg": true, "time": {"at": "t.dessert"}, "para": 2, "quote": "Miss Pym was not in the dining-room"},
+    {"id": "f.pym_stays", "of": "pym", "attr": "location", "value": "dining_room", "seen_from": "f.george_stays", "time": {"from": "t.soup", "to": "t.joint"}, "para": 2, "quote": "Miss Pym was in the dining-room"},
+    {"id": "f.voss_stays", "of": "voss", "attr": "location", "value": "dining_room", "seen_from": "f.george_stays", "time": {"from": "t.joint", "to": "t.gone"}, "para": 2, "quote": "Captain Voss was in the dining-room"},
+    {"id": "f.clara_landing", "of": "clara", "attr": "location", "value": "landing", "time": {"from": "t.soup", "to": "t.joint"}, "para": 3, "quote": "I was on the nursery landing"},
+    {"id": "f.voss_hall", "of": "voss", "attr": "location", "value": "hall", "time": {"at": "t.fish"}, "para": 4, "quote": "Captain Voss was in the hall"},
+    {"id": "f.voss_watched", "of": "voss", "attr": "location", "value": "study", "neg": true, "seen_from": "f.clara_landing", "time": {"from": "t.soup", "to": "t.joint"}, "para": 4, "quote": "Captain Voss was not in the study"},
+    {"id": "f.hall_empty", "of": "*", "every": "person", "but": ["voss"], "attr": "location", "value": "hall", "neg": true, "seen_from": "f.clara_landing", "time": {"from": "t.soup", "to": "t.joint"}, "para": 4, "quote": "Nobody but Captain Voss was in the hall"},
+    {"id": "f.clara_down", "of": "clara", "attr": "location", "value": "dining_room", "time": {"from": "t.joint", "to": "t.gone"}, "para": 5, "quote": "I was in the dining-room"},
+    {"id": "f.unwatched", "of": "hall", "attr": "condition", "value": "watched by nobody", "time": {"from": "t.joint", "to": "t.gone"}, "para": 5, "quote": "The hall was watched by nobody"},
+    {"id": "f.pym_owns", "of": "pym", "attr": "says", "to": "george", "time": {"at": "t.friday"}, "asserts": [{"q": "q.who", "pick": "pym"}], "para": 6, "value": "owns to the take George Marlow's notes", "quote": "Miss Pym said to me: \"It was I who took your notes from the study.\""},
+    {"id": "f.notes_back", "of": "pym", "attr": "action", "act": "give", "thing": "notes", "to": "george", "time": {"at": "t.friday"}, "para": 6, "quote": "Miss Pym gave my notes to me"}
+  ]
+}

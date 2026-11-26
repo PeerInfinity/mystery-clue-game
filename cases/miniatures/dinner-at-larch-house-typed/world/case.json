@@ -1,0 +1,23 @@
+{
+  "id": "dinner_at_larch_house_typed",
+  "title": "The Dinner at Larch House, told from its data",
+  "author": "written for this project (a mechanic miniature: The Dinner at Larch House, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "george",
+      "name": "George Marlow",
+      "kind": "first-person"
+    },
+    {
+      "id": "clara",
+      "name": "Clara Marlow",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "the Marlows' timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 300
+  }
+}

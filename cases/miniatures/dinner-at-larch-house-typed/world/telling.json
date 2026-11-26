@@ -1,0 +1,41 @@
+{
+ "title": "THE DINNER AT LARCH HOUSE, TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.george_role",
+   "f.drawer_in",
+   "f.notes_put",
+   "f.drawer_empty",
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.george_stays",
+   "f.hannah_role",
+   "f.hannah_stays",
+   "f.table",
+   "f.clara_called",
+   "f.voss_out",
+   "f.pym_out",
+   "f.pym_stays",
+   "f.voss_stays"
+  ],
+  [
+   "f.clara_landing"
+  ],
+  [
+   "f.voss_hall",
+   "f.voss_watched",
+   "f.hall_empty"
+  ],
+  [
+   "f.clara_down",
+   "f.unwatched"
+  ],
+  [
+   "f.pym_owns",
+   "f.notes_back"
+  ]
+ ]
+}

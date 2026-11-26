@@ -1,0 +1,5 @@
+{
+  "implications": [
+    {"id": "i.who_pym", "q": "q.who", "from": ["o.voss_watched", "o.hall_empty", "o.voss_stays", "o.pym_out"], "says": "nobody reached the study while the hall was watched; after that Captain Voss did not leave the table, and Miss Pym did: it was she", "concludes": "pym", "strength": "likely"}
+  ]
+}

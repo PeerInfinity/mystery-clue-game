@@ -1,0 +1,18 @@
+{
+ "entities": {
+  "george": ["George Marlow"],
+  "clara": ["Clara Marlow"],
+  "voss": ["Captain Voss"],
+  "pym": ["Miss Pym"],
+  "hannah": ["Hannah"],
+  "house": ["Larch House"],
+  "dining_room": ["the dining-room"],
+  "hall": ["the hall"],
+  "study": ["the study"],
+  "upstairs": ["the upper floor"],
+  "landing": ["the nursery landing"],
+  "notes": ["George Marlow's notes"],
+  "drawer": ["the drawer of the study desk"],
+  "study_door": ["the study door"]
+ }
+}

@@ -125,7 +125,11 @@ the bench", and its `value` is written from it. A `says` that asserts an answer 
 question's entry is a typed act, names it as the doer ("It was my monkey who took the customer's ring from the
 workroom"). An observation that comes from a route (`{route_through: [things]}`) says what anything that came by it
 must have been, from the entries of those things: "small enough for" a way in (the largest it lets through) and
-"able to travel by" what is fastened or reaches. A fact there has no `detail` (free text is not told), a
+"able to travel by" what is fastened or reaches. Where a case has several narrators, an entry is told in the voice of the narrator whose account holds it, and a
+line says whose account begins wherever the voice changes ("Clara Marlow's account."; a narrator's `account` in
+`case.json` names another word for it); the telling does not say who is "I". A statement with `seen_from` is
+followed by "I saw this from <where its witness was>." In words said to someone, what is theirs by name is "your".
+A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 
 **Prose written from the telling** (since 2026-11-25; finding 138). `world/prose.json`, made by

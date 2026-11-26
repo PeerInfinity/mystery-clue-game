@@ -27,6 +27,8 @@ export function teller(ctx) {
     const obj = (id) => (me(id) ? 'me' : you(id) ? 'you' : ctx.name(id));
     // In a speaker's own words what is theirs by name is "my" ("Abel Crouch's marrow", said by Abel Crouch).
     const mine = (who, s) => s.split(`${ctx.name(who)}'s `).join('my ');
+    // And in words said to someone, what is theirs by name is "your" ("George Marlow's notes", said to George Marlow).
+    const yours = (who, s) => (who ? s.split(`${ctx.name(who)}'s `).join('your ') : s);
     const past = (a) => ctx.act(list(a.act)[0])?.past ?? PAST[list(a.act)[0]] ?? `did the ${ctx.act(list(a.act)[0])?.label ?? list(a.act)[0]} of`;
     const at = (id) => `${ctx.prep?.(id) ?? 'at'} ${ctx.name(id)}`;
     // The arrangement of a room (2026-11-26; finding 150), in the page's own words: what a way in is closed to and lets
@@ -86,7 +88,7 @@ export function teller(ctx) {
             const o = owns(f);
             // Who someone was (a question of identity): "I was the figure at the side door."
             if (o && ctx.question(o.q).entry?.attr === 'identity') return `${subj(f.of)} said${to}: "I was ${ctx.name(ctx.question(o.q).entry.of)}."`;
-            if (o) { const e = ctx.question(o.q).entry; return `${subj(f.of)} said${to}: "It was I who ${mine(f.of, done(e, '').trim())}."`; }
+            if (o) { const e = ctx.question(o.q).entry; return `${subj(f.of)} said${to}: "It was I who ${yours(f.to, mine(f.of, done(e, '').trim()))}."`; }
             // An answer that is not a person, asserted: "It was after the gate lamp was lit."
             const a = list(f.asserts).find((x) => x.q && x.pick != null);
             // "Yes" or "no" asserted is the state that answer stands for (the other's, denied, where only one is typed), in the speaker's own person.
@@ -96,7 +98,7 @@ export function teller(ctx) {
                 if (x) { const inner = teller({ ...ctx, speaker: f.of }); return `${subj(f.of)} said${to}: "${cap(`${ctx.prefix?.(x.time) ?? ''}${mine(f.of, inner.sentence(x))}`)}."`; }
             }
             // Another named as the doer, by one who can speak for it (a keeper of his monkey): "It was my monkey who took …".
-            if (a && ctx.kind?.(a.pick) && list(ctx.question(a.q).entry?.act).length) return `${subj(f.of)} said${to}: "It was ${mine(f.of, `${obj(a.pick)} who ${done(ctx.question(a.q).entry, '').trim()}`)}."`;
+            if (a && ctx.kind?.(a.pick) && list(ctx.question(a.q).entry?.act).length) return `${subj(f.of)} said${to}: "It was ${yours(f.to, mine(f.of, `${obj(a.pick)} who ${done(ctx.question(a.q).entry, '').trim()}`))}."`;
             if (a) return `${subj(f.of)} said${to}: "It was ${a.pick}."`;
             return `${subj(f.of)} said${to}: "${f.value}."`;
         } else if (f.attr === 'action' && list(f.act).length) s = done(f, subj(f.of));

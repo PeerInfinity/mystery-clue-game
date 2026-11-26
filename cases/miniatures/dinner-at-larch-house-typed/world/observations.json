@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.voss_watched", "q": "q.who", "from": ["f.voss_watched"], "essential": true, "against": ["voss"], "says": "from when the soup was served on Thursday until the joint was carried in, Captain Voss was not in the study"},
+    {"id": "o.hall_empty", "q": "q.who", "from": ["f.hall_empty"], "essential": true, "says": "from when the soup was served on Thursday until the joint was carried in, nobody but Captain Voss was in the hall"},
+    {"id": "o.unwatched", "q": "q.who", "from": ["f.unwatched"], "says": "from when the joint was carried in until the guests had gone, the hall was watched by nobody"},
+    {"id": "o.pym_out", "q": "q.who", "from": ["f.pym_out"], "essential": true, "says": "when the dessert was served, Miss Pym was not in the dining-room"},
+    {"id": "o.rest", "q": "q.who", "from": ["f.george_stays", "f.hannah_stays"], "says": "from when the soup was served on Thursday until the guests had gone, George Marlow was in the dining-room; from when the soup was served on Thursday until the guests had gone, Hannah was in the dining-room"},
+    {"id": "o.voss_stays", "q": "q.who", "from": ["f.voss_stays"], "essential": true, "says": "from when the joint was carried in until the guests had gone, Captain Voss was in the dining-room"},
+    {"id": "o.voss_out", "q": "q.who", "from": ["f.voss_out"], "says": "when the fish was served, Captain Voss was not in the dining-room"}
+  ]
+}
