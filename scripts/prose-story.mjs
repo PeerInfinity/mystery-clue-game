@@ -41,7 +41,12 @@ async function call(model, system, prompt) {
 const jsonOf = (text) => { const a = text.indexOf('{'), b = text.lastIndexOf('}'); if (a < 0 || b < a) throw new Error('no JSON object in the reply'); return JSON.parse(text.slice(a, b + 1)); };
 
 const src = tell(dir, { dry: true });
-const listing = src.dry.map((items, i) => `Paragraph ${i + 1}\n${items.map((x) => `  [${x.key}] ${x.full}`).join('\n')}`).join('\n\n');
+// The story and each of its papers (finding 164): a paper is a part of its own, with its own paragraphs.
+const sections = [{ id: 'main', title: src.title, dry: src.dry }, ...Object.entries(src.files ?? {}).map(([id, f]) => ({ id, title: f.title, dry: f.dry }))];
+const parasOf = (a, sec) => (sec.id === 'main' ? a.paragraphs : a.files?.[sec.id]?.paragraphs);
+const allDry = sections.flatMap((sec) => sec.dry.flat());
+const part = (sec) => (sec.id === 'main' ? 'The story' : `The paper "${sec.id}" (titled "${sec.title}"; a paper the narrator wrote or read, which the reader opens by itself)`);
+const listing = sections.map((sec) => `${part(sec)}\n${sec.dry.map((items, i) => `Paragraph ${i + 1}\n${items.map((x) => `  [${x.key}] ${x.full}`).join('\n')}`).join('\n\n')}`).join('\n\n\n');
 
 // --- The writer.
 const WRITER = `You write the prose of a short detective story from a fixed list of statements. You answer with one JSON object and nothing else.`;
@@ -56,7 +61,7 @@ What you are free to do:
 - Put what someone said in their own manner of speech, so long as it is direct speech in the first person and says the same want, with what they say it needs, and nothing more.
 
 What you must not do:
-- Change the paragraphs: there are as many as in the notes, in the same order, each carrying its own statements.
+- Change the paragraphs: there are as many as in the notes, in the same order, each carrying its own statements.${sections.length > 1 ? '\n- Move anything between the story and a paper, or between papers: each part is read by itself, so a paper must name whoever it speaks of in full the first time, and may not lean on what another part said.' : ''}
 - Leave a statement out, or weaken it, or make it stronger.
 - Add a fact: a new person, place, thing or time; a reason for what anyone did or wanted; how anyone looked or felt, where that tells the reader something about what happened; any hint at the answer.
 - Change a time, or leave one unsaid: say each time where the notes say it, though you may word it as reads best ("after dark on the Friday").
@@ -69,7 +74,7 @@ Prose: "Mary Holt was at the mill on the Tuesday. 'That ledger of John's,' she s
 Quotes: f.a = "Mary Holt was at the mill on the Tuesday"; f.b = "'That ledger of John's,' she said to me, 'I want it burnt, and there's an end.'"
 
 Answer with this JSON object only:
-{"paragraphs": [{"text": "<the paragraph>", "quotes": {"<key>": "<words copied exactly from your paragraph that state this statement>", ...}}, ...],
+{"paragraphs": [{"text": "<the paragraph>", "quotes": {"<key>": "<words copied exactly from your paragraph that state this statement>", ...}}, ...],${sections.length > 1 ? `\n "files": {${sections.slice(1).map((sec) => `"${sec.id}": {"paragraphs": [<the same shape, this paper's paragraphs>]}`).join(', ')}},` : ''}
  "mentions": {"<entity id>": ["<every form of its name you used, exactly as written>", ...], ...},
  "times": {"<time id>": "<the words, copied exactly, that first tell this time>", ...}}
 Every key of a paragraph must have its quote, a quote must be one unbroken run of your own words in that paragraph, and it must be enough to state the statement by itself.
@@ -83,22 +88,23 @@ ${problems?.length ? `\nYour last answer had these faults; mend them and answer 
 /** What is wrong with a writer's answer, by the script's own checks. */
 function faults(a) {
     const out = [];
-    if (!Array.isArray(a.paragraphs) || a.paragraphs.length !== src.dry.length) return [`there must be exactly ${src.dry.length} paragraphs`];
-    a.paragraphs.forEach((p, i) => {
-        if (typeof p.text !== 'string' || !p.text.trim()) { out.push(`paragraph ${i + 1} has no text`); return; }
-        if (/\n/.test(p.text.trim())) out.push(`paragraph ${i + 1} must be one paragraph, with no line break`);
-        const copied = src.dry[i].filter((x) => !x.key.startsWith('raise:') && p.text.includes(x.text.replace(/^On [^,]+(, after dark)?, /, ''))).length;
-        for (const e of src.entities) { const k = p.text.split(e.name).length - 1; if (k > 2) out.push(`paragraph ${i + 1} names "${e.name}" in full ${k} times: after the first, a shorter name or a pronoun`); }
+    for (const sec of sections) { const ps = parasOf(a, sec); if (!Array.isArray(ps) || ps.length !== sec.dry.length) return [`${part(sec)} must have exactly ${sec.dry.length} paragraph(s)`]; }
+    for (const sec of sections) parasOf(a, sec).forEach((p, i) => {
+        const dry = sec.dry, at = sec.id === 'main' ? '' : `${sec.id}, `;
+        if (typeof p.text !== 'string' || !p.text.trim()) { out.push(`${at}paragraph ${i + 1} has no text`); return; }
+        if (/\n/.test(p.text.trim())) out.push(`${at}paragraph ${i + 1} must be one paragraph, with no line break`);
+        const copied = dry[i].filter((x) => !x.key.startsWith('raise:') && p.text.includes(x.text.replace(/^On [^,]+(, after dark)?, /, ''))).length;
+        for (const e of src.entities) { const k = p.text.split(e.name).length - 1; if (k > 2) out.push(`${at}paragraph ${i + 1} names "${e.name}" in full ${k} times: after the first, a shorter name or a pronoun`); }
         // Copied outright: every statement of a paragraph of two or more, word for word (a name and a role, or a want in someone's own words, may well come out the same).
-        if (copied >= 2 && copied >= src.dry[i].filter((x) => !x.key.startsWith('raise:')).length) out.push(`paragraph ${i + 1} copies the notes' own wording (${copied} of its statements word for word): tell it in your own sentences`);
-        for (const { key } of src.dry[i]) {
+        if (copied >= 2 && copied >= dry[i].filter((x) => !x.key.startsWith('raise:')).length) out.push(`${at}paragraph ${i + 1} copies the notes' own wording (${copied} of its statements word for word): tell it in your own sentences`);
+        for (const { key } of dry[i]) {
             const q = p.quotes?.[key];
-            if (!q) out.push(`paragraph ${i + 1}: no quote for [${key}]`);
-            else if (!p.text.includes(q)) out.push(`paragraph ${i + 1}: the quote for [${key}] is not in the paragraph word for word: "${q}"`);
+            if (!q) out.push(`${at}paragraph ${i + 1}: no quote for [${key}]`);
+            else if (!p.text.includes(q)) out.push(`${at}paragraph ${i + 1}: the quote for [${key}] is not in the paragraph word for word: "${q}"`);
         }
-        for (const { key } of src.dry[i]) if (key.startsWith('raise:') && !/\?\s*$/.test(p.quotes?.[key] ?? '?')) out.push(`paragraph ${i + 1}: [${key}] must stay a question`);
+        for (const { key } of dry[i]) if (key.startsWith('raise:') && !/\?\s*$/.test(p.quotes?.[key] ?? '?')) out.push(`${at}paragraph ${i + 1}: [${key}] must stay a question`);
     });
-    const all = a.paragraphs.map((p) => p.text ?? '').join('\n');
+    const all = sections.flatMap((sec) => parasOf(a, sec)).map((p) => p.text ?? '').join('\n');
     for (const e of src.entities) for (const m of a.mentions?.[e.id] ?? []) if (!all.includes(m)) out.push(`mentions: "${m}" (${e.id}) is not in the text`);
     for (const x of src.times.filter((t) => t.para != null)) { const q = a.times?.[x.id]; if (!q) out.push(`times: nothing for ${x.id} (${x.label})`); else if (!all.includes(q)) out.push(`times: "${q}" (${x.id}) is not in the text`); }
     return out;
@@ -112,23 +118,23 @@ if (!prose) {
         problems = faults(answer);
         console.log(`the writer (${MODEL}), try ${n}: ${problems.length ? `${problems.length} fault(s)` : 'kept to the rules the script can check'}`);
         for (const p of problems) console.log(`  ${p}`);
-        if (!problems.length) { prose = { model: MODEL, written: new Date().toISOString().slice(0, 10), paragraphs: answer.paragraphs.map((p) => ({ text: p.text.trim(), quotes: p.quotes })), mentions: answer.mentions ?? {}, times: answer.times ?? {} }; break; }
+        if (!problems.length) { const tidy = (ps) => ps.map((p) => ({ text: p.text.trim(), quotes: p.quotes })); prose = { model: MODEL, written: new Date().toISOString().slice(0, 10), paragraphs: tidy(answer.paragraphs), ...(sections.length > 1 ? { files: Object.fromEntries(sections.slice(1).map((sec) => [sec.id, { paragraphs: tidy(parasOf(answer, sec)) }])) } : {}), mentions: answer.mentions ?? {}, times: answer.times ?? {} }; break; }
     }
     if (!prose) { console.error(`no answer without faults in ${TRIES} tries ($${spent.toFixed(3)})`); process.exit(1); }
 }
 
 // --- The audit: a reader of the prose alone, then a comparer.
-const text = prose.paragraphs.map((p, i) => `¶${i + 1} ${p.text}`).join('\n\n');
+const text = sections.map((sec) => `${sections.length > 1 ? `${sec.id === 'main' ? 'THE STORY' : `A PAPER: ${sec.title}`}\n\n` : ''}${parasOf(prose, sec).map((p, i) => `¶${sec.id === 'main' ? '' : `${sec.id}:`}${i + 1} ${p.text}`).join('\n\n')}`).join('\n\n\n');
 const read = await call(AUDIT, 'You read a short story closely and list what it states. You answer with one JSON object and nothing else.',
-    `Read this story. List every statement of fact it makes: who is who, what was where and when, what was done, what was so, what anyone said and what they said they wanted or needed. One plain sentence each, with the paragraph it is in, the names in full. Leave nothing out, and add nothing the text does not say; where the text only suggests something, list it with "suggests:" in front.\n\nAnswer with this JSON object only: {"statements": [{"para": <n>, "says": "<sentence>"}, ...]}\n\n${text}`);
+    `Read this story. List every statement of fact it makes: who is who, what was where and when, what was done, what was so, what anyone said and what they said they wanted or needed. One plain sentence each, with the paragraph it is in, the names in full. Leave nothing out, and add nothing the text does not say; where the text only suggests something, list it with "suggests:" in front.\n\nAnswer with this JSON object only: {"statements": [{"para": "<the mark after ¶>", "says": "<sentence>"}, ...]}\n\n${text}`);
 const statements = jsonOf(read).statements;
 const compared = jsonOf(await call(AUDIT, 'You compare two lists of statements about the same story, strictly. You answer with one JSON object and nothing else.',
-    `List A is what a story was meant to state, each with its key. List B is what a careful reader found the written story to state.\n\nFor each statement of A say whether B has it: "stated" (the same people, things, places, times and sense), "changed" (B has it weaker, stronger or otherwise different: say how) or "missing". Then list every statement of B that no statement of A covers, leaving out only B's restatements of A and the bare fact that the narrator asks the reader a question. For each such addition say whether it is "colour" (voice or description that tells nothing about what happened or who did it) or "fact" (it tells the reader something A does not).\n\nAnswer with this JSON object only: {"a": [{"key": "<key>", "verdict": "stated" | "changed" | "missing", "how": "<only when changed>"}, ...], "additions": [{"para": <n>, "says": "<B's statement>", "kind": "colour" | "fact"}, ...]}\n\nList A:\n${src.dry.flat().map((x) => `[${x.key}] ${x.full}`).join('\n')}\n\nList B:\n${statements.map((s) => `(¶${s.para}) ${s.says}`).join('\n')}`));
+    `List A is what a story was meant to state, each with its key. List B is what a careful reader found the written story to state.\n\nFor each statement of A say whether B has it: "stated" (the same people, things, places, times and sense), "changed" (B has it weaker, stronger or otherwise different: say how) or "missing". Then list every statement of B that no statement of A covers, leaving out only B's restatements of A and the bare fact that the narrator asks the reader a question. For each such addition say whether it is "colour" (voice or description that tells nothing about what happened or who did it) or "fact" (it tells the reader something A does not).\n\nAnswer with this JSON object only: {"a": [{"key": "<key>", "verdict": "stated" | "changed" | "missing", "how": "<only when changed>"}, ...], "additions": [{"para": <n>, "says": "<B's statement>", "kind": "colour" | "fact"}, ...]}\n\nList A:\n${allDry.map((x) => `[${x.key}] ${x.full}`).join('\n')}\n\nList B:\n${statements.map((s) => `(¶${s.para}) ${s.says}`).join('\n')}`));
 prose.audit = { model: AUDIT, statements: statements.length, missing: compared.a.filter((x) => x.verdict === 'missing').map((x) => x.key), changed: compared.a.filter((x) => x.verdict === 'changed').map((x) => ({ key: x.key, how: x.how ?? '' })), additions: compared.additions ?? [] };
 fs.writeFileSync(OUT, `${JSON.stringify(prose, null, 1)}\n`);
 for (const [file, t] of Object.entries(tell(dir))) if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== t) { fs.writeFileSync(file, t); console.log(`written: ${file}`); }
-const words = prose.paragraphs.reduce((n, p) => n + p.text.split(/\s+/).length, 0);
-console.log(`\n${prose.paragraphs.map((p) => p.text).join('\n\n')}\n`);
+const words = sections.flatMap((sec) => parasOf(prose, sec)).reduce((n, p) => n + p.text.split(/\s+/).length, 0);
+console.log(`\n${text}\n`);
 console.log(`${words} words. The audit (${AUDIT}): the reader found ${statements.length} statements; of the ${compared.a.length} meant, ${prose.audit.missing.length} missing, ${prose.audit.changed.length} changed; ${prose.audit.additions.filter((x) => x.kind === 'fact').length} addition(s) of fact, ${prose.audit.additions.filter((x) => x.kind !== 'fact').length} of colour. $${spent.toFixed(3)}`);
 for (const k of prose.audit.missing) console.log(`  missing: ${k}`);
 for (const c of prose.audit.changed) console.log(`  changed: ${c.key}: ${c.how}`);

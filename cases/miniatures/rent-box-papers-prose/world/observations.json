@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.untrue_back", "q": "q.untrue", "from": ["f.back_shut"], "essential": true, "against": ["fenn"], "says": "from one o'clock on Tuesday until three o'clock on Tuesday, the back door was shut"},
+    {"id": "o.untrue_said", "q": "q.untrue", "from": [{"doubted": "f.rudd_tells"}], "says": "it was the Captain who said somebody did, and what he said cannot stand", "essential": true},
+    {"id": "o.who_front", "q": "q.who", "from": ["f.front_locked"], "essential": true, "says": "from one o'clock on Tuesday until four o'clock on Tuesday, the front door was locked"},
+    {"id": "o.who_back", "q": "q.who", "from": ["f.back_shut"], "essential": true, "says": "from one o'clock on Tuesday until three o'clock on Tuesday, the back door was shut"},
+    {"id": "o.who_fenn", "q": "q.who", "from": ["f.fenn_let_out"], "essential": true, "against": ["fenn"], "says": "at one o'clock on Tuesday, Mr. Fenn went out by the front door"},
+    {"id": "o.who_rudd", "q": "q.who", "from": ["f.rudd_in_house"], "essential": true, "says": "from one o'clock on Tuesday until four o'clock on Tuesday, Captain Rudd was at 9 Tanner's Row"},
+    {"id": "o.who_house", "q": "q.who", "from": ["f.no_servant"], "says": "nobody but Ada Orme, Mr. Fenn and Captain Rudd lived at 9 Tanner's Row"}
+  ]
+}

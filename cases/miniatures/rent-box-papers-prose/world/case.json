@@ -1,0 +1,41 @@
+{
+  "id": "rent_box_papers_prose",
+  "title": "The Rent Box Papers, written from their data",
+  "author": "written for this project (a mechanic miniature: The Rent Box Papers, its prose and its papers written by a model from its typed entries, scripts/prose-story.mjs)",
+  "story": "../story.txt",
+  "files": [
+    {
+      "id": "rudd",
+      "title": "What Captain Rudd told me",
+      "short": "Rudd",
+      "text": "../files/rudd.txt",
+      "delivered": 2
+    },
+    {
+      "id": "fenn",
+      "title": "What Mr. Fenn told me",
+      "short": "Fenn",
+      "text": "../files/fenn.txt",
+      "delivered": 3
+    },
+    {
+      "id": "self",
+      "title": "My own afternoon",
+      "short": "Afternoon",
+      "text": "../files/self.txt",
+      "delivered": 4
+    }
+  ],
+  "narrators": [
+    {
+      "id": "ada",
+      "name": "Ada Orme",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Ada Orme's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 300
+  }
+}

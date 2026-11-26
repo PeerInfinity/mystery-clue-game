@@ -155,7 +155,8 @@ A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 
 **Prose written from the telling** (since 2026-11-25; finding 138). `world/prose.json`, made by
-`node scripts/prose-story.mjs <dir>` (a model's work, kept as it was given; it costs money): `{model, written,
+`node scripts/prose-story.mjs <dir>` (a model's work, kept as it was given; it costs money; a case's papers are written
+with its story since 2026-11-26, each a part of its own under `files: {<file id>: {paragraphs}}`): `{model, written,
 paragraphs: [{text, quotes: {<fact id> | "deed:<q>" | "raise:<q>": <words of the text>}}], mentions: {entity:
 [forms of its name used]}, times: {time: <the words that first tell it>}, audit: {model, statements, missing,
 changed, additions}}`. Where a case has it, `tell-story.mjs` takes the story's text and each entry's quote from

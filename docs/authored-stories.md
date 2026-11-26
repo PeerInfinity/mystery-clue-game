@@ -135,6 +135,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/lamp-keepers-word-typed` | The Lamp-Keeper's Word told from its data: a word passed on, as speech within speech; a paper's own words (finding 161). | 8 paragraphs, 26 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
 | `cases/miniatures/rent-box-typed` | The Rent Box told from its data: a statement about who lives somewhere, a question of which statement was untrue (finding 162). | 6 paragraphs, 22 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
 | `cases/miniatures/rent-box-papers-typed` | The Rent Box Papers told from the same data as papers: three papers, one of them a single sentence (finding 162). | 5 paragraphs and three papers of 1, 1 and 2, 22 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
+| `cases/miniatures/rent-box-papers-prose` | The Rent Box Papers a third time: the story and its three papers written by a model from the typed entries, and audited (finding 164). | 5 paragraphs and three papers of 1, 1 and 2, 22 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2816,6 +2817,29 @@ script that found each fact's paragraph from its quote; the data files are the s
       lent), The Watchman's Clock and The Grey Cloak (their keys are phrases).
     - *Measured:* 19 of 82 answers follow with the written rules taken away (17 before). No other case changed;
       the long case's export, and so its version, is the same. A unit test; every page check on the two cases.
+
+164. **Prose by a model for a case with papers: The Rent Box Papers (2026-11-26; one of the open tasks the user
+    asked to have done).** `scripts/prose-story.mjs` wrote the main story only. It now writes each paper as a
+    part of its own: the writer is given the story and every paper, told that each is read by itself and that
+    nothing may move between them, and answers with the papers under `files`; the script's checks, the reader
+    and the comparer go over every part. The case is `cases/miniatures/rent-box-papers-prose`.
+    - *One run* (Sonnet for the writer and both readers): the second try kept to the script's rules (the first
+      named "the week's rents" in full four times in a paragraph). 291 words against the templates' 321 and the
+      hand-written 362. The case validates and passes every page check. $0.18.
+    - *What it wrote is the templates' text, lightly joined.* "Mr. Fenn lives there, and Captain Rudd too. Nobody
+      but me and those two lived there." "Captain Rudd told me this, and told it plainly: …" It kept every time
+      in full, to the point of "In those same hours, from one o'clock on Tuesday until three o'clock on Tuesday,
+      the back door was shut." Nothing of the landlady the style line asked for. Finding 138's conclusion holds
+      with more force here: a paper that is one typed statement leaves a writer nothing to write, and the rule
+      against adding facts forbids exactly what a paper's prose is made of (where it was written, who stood
+      where, how it was said).
+    - *The audit gave two false alarms, and nothing true.* It reported the question "Who took the rents?" as
+      missing: the reader is told to leave out the bare fact that a question is asked, and the comparer then
+      does not find it. And it reported one "added fact" in the narrator's own afternoon: that the Captain's
+      statement about the back door was not so. No paragraph says that; the reader, given the whole case in one
+      sitting, drew the case's own conclusion and listed it. With papers the reader should be given each part
+      by itself, as a player meets them. Not mended: a second run costs as much again.
+    - *Not done:* a blind run of this version; a richer telling for the writer to work from.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
