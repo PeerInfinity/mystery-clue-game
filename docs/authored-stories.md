@@ -2841,6 +2841,26 @@ script that found each fact's paragraph from its quote; the data files are the s
       by itself, as a player meets them. Not mended: a second run costs as much again.
     - *Not done:* a blind run of this version; a richer telling for the writer to work from.
 
+165. **A blind run of the typed Same Monday with the tally move (Haiku, 2026-11-26): solved, 75 turns, $0.164,
+    the answer right.** One of the open tasks the user asked to have done.
+    - *The days.* The office, the pilot and the chandler's on the first; the inn and the watchman on the
+      second; a third day begun for nothing (it looked over the office again, which it had read).
+    - *The move was made once, at turn 50, and the first pick was the right one:* of fifteen entries it chose
+      "the second key of the office door: marked with a brass tally", and its note before it says why ("to tie
+      Tolley's brass-tally key sighting to the office's brass-tally key"). Its own notes had the two together
+      from turn 26, when it read the watchman ("Keys: Dunmore's and Amos Trew's (brass tally)").
+    - *But it came to the move by the list, not by the reading.* For 24 turns after the watchman it linked,
+      trusted and ended a day; at turn 48 it opened "Left to try", saw "2 moves", and went to the entry. So here,
+      unlike the will (finding 146), the move was found because the page said a move was left. The idea was in
+      its notes; that the page had a way to say it was not.
+    - *Twenty turns more after the move:* the answer needed one further link ("the office door was fitted with
+      two keys and no more"), and it tried the remaining entries one by one until that one. Nothing told it
+      which of sixteen links was wanting.
+    - *A fault of the harness, mended:* in the solver's numbered list the fifteen picks were all named "This
+      speaks of…", with the entries only in the page's text above. It counted to the right one. Each is now
+      named with its entry. The earlier run of the will (finding 146) had the same list.
+    - One run.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

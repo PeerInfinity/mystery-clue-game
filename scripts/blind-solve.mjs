@@ -112,6 +112,7 @@ const VIEW = `(() => {
             : e.matches('input[type=checkbox]') ? 'checkbox: ' + (e.closest('label')?.innerText || e.title || 'a setting') + (e.checked ? ' [now: on]' : ' [now: off]')
             // A button on an entry's line of the timeline (the link button, while linking) names its entry: a reader sees it
             // beside the entry, and a bare "+ relevant" among hundreds sent a solver to click the entry's line instead.
+            : e.matches('[data-move-s]') ? (e.closest('li')?.innerText ?? e.innerText)   // "This speaks of…" with the entry it is offered beside
             : e.tagName === 'BUTTON' && e.closest('#timeline [data-fact]')?.querySelector('.ph') ? e.innerText + ' ← for the entry: ' + e.closest('#timeline [data-fact]').querySelector('.ph').innerText : e.innerText)).replace(/\\s+/g, ' ').trim().slice(0, 170);
         return (i + 1) + '. [' + where(e) + '] ' + (e.tagName === 'SELECT' ? 'select ' : '') + t;
     });
