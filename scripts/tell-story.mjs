@@ -178,8 +178,9 @@ export function tell(dir, opts = {}) {
             // An answer that is a time of an event ("nine o'clock": the shot at that time) is there where an entry tells the event at that time.
             const ev = list(p.asserts).find((x) => x.event && x.time?.at), told = ev && facts.find((f) => f.para != null && f.event === ev.event && f.time?.at === ev.time.at);
             if (told) { delete p.from; p.available = told.para; p.quote = told.quote; continue; }
-            const mine = facts.filter((f) => f.para != null && names(f, p.value) && f.attr !== 'tells' && !list(f.asserts).some((x) => x.q === q.id));   // not the give-away itself
-            const f = mine.filter((x) => inMain(x) && x.para >= q.raised).sort((a, b) => a.para - b.para)[0] ?? mine.filter((x) => !inMain(x))[0] ?? mine[0];
+            const mine = facts.filter((f) => f.para != null && names(f, p.value) && f.attr !== 'tells' && !list(f.asserts).some((x) => x.q));   // not a give-away, this question's or another's
+            // (named in the main story only before the question is asked: an answer from when it is asked, before any paper's naming)
+            const f = mine.filter((x) => inMain(x) && x.para >= q.raised).sort((a, b) => a.para - b.para)[0] ?? mine.filter((x) => inMain(x))[0] ?? mine[0];
             if (!f) continue;
             delete p.from; delete p.quote;
             if (inMain(f) && f.para < q.raised) { p.available = q.raised; p.from = f.id; } else { p.available = f.para; p.quote = f.quote; }

@@ -1,0 +1,7 @@
+{
+  "actions": [
+    {"id": "knock", "label": "knocking at", "past": "knocked at", "requires": [], "effects": []},
+    {"id": "leave_by", "label": "going out by", "past": "went out by", "requires": [], "effects": []},
+    {"id": "tell_untruth", "label": "telling Ada Orme a thing that was not so", "past": "told Ada Orme a thing that was not so", "requires": [], "effects": []}
+  ]
+}

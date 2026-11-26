@@ -133,6 +133,8 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/telegram-signed-m-typed` | The Telegram Signed M. told from its data: a paper with words of its own, an observation that holds under another question's answer (finding 159). | 7 paragraphs and a paper of 3, 18 facts, 2 accounts, 1 telling, 2 questions, 7 observations (5 essential), 10 moves |
 | `cases/miniatures/wages-bag-typed` | The Wages Bag told from its data: a witness told twice, two sources that agree, an answer that is where someone was (finding 160). | 6 paragraphs, 28 facts, 5 accounts, 4 tellings, 2 questions, 8 observations (4 essential), 19 moves |
 | `cases/miniatures/lamp-keepers-word-typed` | The Lamp-Keeper's Word told from its data: a word passed on, as speech within speech; a paper's own words (finding 161). | 8 paragraphs, 26 facts, 3 accounts, 4 tellings, 2 questions, 7 observations (4 essential), 11 moves |
+| `cases/miniatures/rent-box-typed` | The Rent Box told from its data: a statement about who lives somewhere, a question of which statement was untrue (finding 162). | 6 paragraphs, 22 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
+| `cases/miniatures/rent-box-papers-typed` | The Rent Box Papers told from the same data as papers: three papers, one of them a single sentence (finding 162). | 5 paragraphs and three papers of 1, 1 and 2, 22 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 12 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2756,6 +2758,46 @@ script that found each fact's paragraph from its quote; the data files are the s
       open, the town's name for him, her having no voice, the paper's hand, the entry's own line for its
       words); the paper's words; two labels; two past forms; the sentence of the observation that comes from a
       telling disbelieved, and of four written rules; the true path's reasons; `structure.json`.
+
+162. **Both Rent Box cases told from one set of typed data, and the list of miniatures done (2026-11-26).** The
+    cases are `cases/miniatures/rent-box-typed` and `cases/miniatures/rent-box-papers-typed`: the same typed
+    entries, told once as one story and once as a story with three papers. Only `telling.json` differs between
+    them (which entries go in which paper), with the paragraphs it gives the true path.
+    - *What the templates gained:* a statement about everyone of where they live ("Nobody but me, Mr. Fenn and
+      Captain Rudd lived at 9 Tanner's Row").
+    - *They held:* each validates, the checker gives each the result of its written case (nothing typed bears
+      on either answer), and every page check passes on both. 295 words against 307; with papers 321 against 362.
+    - *What the papers version showed.* A paper told from its data may be one sentence ("Mr. Fenn told me: 'At
+      half past two on Tuesday, I was at the reading room in Cable Street.'"). And a main-story paragraph cannot
+      be empty: the written version's "I went straight up to the Captain, and when he had told me where he had
+      been, I wrote it down" holds no entry, so the paragraph that brings each paper needed an entry moved into
+      it (the Captain at home all day; Mr. Fenn's knock).
+    - *What typing forced or found.* The box's contents were free text ("the week's rents, four pounds and some
+      silver", then "nothing"): the rents are now a thing, in the box and then not, and the question's deed is
+      taking them. Mr. Fenn "stood by while I counted" could not be typed as his being in the dining-room at
+      one: the written rule's "he was not in the house from one" then contradicts it at that very point. The
+      story means two moments at one o'clock, and the time points have one. It was left out. "Which lodger told
+      me a thing that was not so?" has no typed deed, so each answer names an act of the case's own for the
+      confession to use.
+    - *Two faults of the script found by these cases, and mended:* an answer named early in the main story was
+      taken as first named where a confession to another question named it again, or in a paper; it is now
+      available from when its question is asked. No other told case changed.
+    - *What was lost:* the milk money, the back parlour that looks on the yard (where the Captain says he saw
+      it from), "all the afternoon", the hat, the broken latch, the baking with the back door at her elbow,
+      "the only way in from the yard" (which is what makes the back door decide it), the four pounds as a sum.
+    - *Every miniature now has a twin told from its data* (21 told cases, and the one in a model's prose). Over
+      all cases (`typed-check.mjs`): 17 of 82 answers follow with the written rules taken away, 61 of 108 wrong
+      answers are ruled out by the typed forms.
+    - *What recurred across findings 150 to 162, for whoever takes this further.*
+      - The templates never failed for want of a form that could not be added in a few lines. What they cannot
+        carry is the reason a statement is to be believed (the window-seat before the door, the names signed
+        at three houses, the church clock) and the reason a thing was done.
+      - Typing found faults in the written cases four times: a monkey "carried", a narrator's key overlooked, an
+        uncle passed over, two moments given one time.
+      - Still written by hand in every case: the order, the names, the time labels, the roles and a handful of
+        state phrases, the questions' labels, the written rules' sentences and the true path's reasons.
+
+
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

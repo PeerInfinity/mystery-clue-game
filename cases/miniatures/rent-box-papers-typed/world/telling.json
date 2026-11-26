@@ -1,0 +1,71 @@
+{
+ "title": "THE RENT BOX PAPERS, TOLD FROM THEIR DATA",
+ "paragraphs": [
+  [
+   "f.ada_role",
+   "f.fenn_lodger",
+   "f.rudd_lodger",
+   "f.no_servant",
+   "f.box_place",
+   "f.box_full",
+   "f.box_empty",
+   {
+    "deed": "q.who"
+   },
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.rudd_in_house"
+  ],
+  [
+   "f.fenn_knocks"
+  ],
+  [
+   {
+    "raise": "q.untrue"
+   }
+  ],
+  [
+   "f.money_found",
+   "f.rudd_took",
+   "f.rudd_owns"
+  ]
+ ],
+ "files": {
+  "rudd": {
+   "title": "WHAT CAPTAIN RUDD TOLD ME, TOLD FROM ITS DATA",
+   "paragraphs": [
+    [
+     "f.rudd_tells",
+     "f.rudd_fenn_yard",
+     "f.rudd_back_open"
+    ]
+   ]
+  },
+  "fenn": {
+   "title": "WHAT MR. FENN TOLD ME, TOLD FROM ITS DATA",
+   "paragraphs": [
+    [
+     "f.fenn_tells",
+     "f.fenn_reading"
+    ]
+   ]
+  },
+  "self": {
+   "title": "MY OWN AFTERNOON, TOLD FROM ITS DATA",
+   "paragraphs": [
+    [
+     "f.fenn_let_out",
+     "f.front_locked",
+     "f.key_pocket"
+    ],
+    [
+     "f.ada_kitchen",
+     "f.back_shut"
+    ]
+   ]
+  }
+ }
+}

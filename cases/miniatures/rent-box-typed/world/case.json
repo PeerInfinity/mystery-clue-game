@@ -1,0 +1,18 @@
+{
+  "id": "rent_box_typed",
+  "title": "The Rent Box, told from its data",
+  "author": "written for this project (a mechanic miniature: The Rent Box, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "ada",
+      "name": "Ada Orme",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Ada Orme's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 300
+  }
+}

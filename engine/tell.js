@@ -49,7 +49,7 @@ export function teller(ctx) {
         // A thing known (a knot, a hiding-place), and what a thing is held to be.
         if (x.attr === 'knows' && ctx.kind?.(x.value)) return `${subj(x.of)} ${x.neg ? 'did not know' : 'knew'} ${ctx.name(x.value)}`;
         if (x.attr === 'reputed') return `${subj(x.of)} ${be}${x.neg ? ' not' : ''} held to be ${x.value}`;
-        if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} ${at(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : `${who} ${be} ${x.value}`; }
+        if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} ${at(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : x.attr === 'lives_at' ? `${who} lived ${at(x.value)}` : `${who} ${be} ${x.value}`; }
         const not = x.neg ? ' not' : '';
         if (x.attr === 'location') return `${subj(x.of)} ${be}${not} ${at(x.value)}`;
         if (x.attr === 'identity') return `${subj(x.of)} ${be}${not} ${obj(x.value)}`;
