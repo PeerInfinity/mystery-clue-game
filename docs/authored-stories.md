@@ -2893,6 +2893,19 @@ script that found each fact's paragraph from its quote; the data files are the s
       as before), every page check on the long case (the trying player run again alone after its fix), and every
       page check on the two miniatures that use the move, the typed Will in the Bible and the typed Same Monday.
 
+167. **The visits export carries every question's ways (2026-11-26; asked by the Action Nodes side, the user:
+    "Yes, I want to set up the mystery game export logic", relayed from another session).** `visits.json` gave
+    only the goal's alternative sets of papers. It now also gives `questions: [{id, ways: [{papers, requires}]}]`
+    for every question the case's logic covers, and `goal.ways`: each way the papers held and the questions
+    solved first, as `caseLogic` already reckoned them. `goal.papers` stays, so a host reading the earlier shape
+    need not change in step. The version is a hash of the body, so it moved: The Same Monday `c37eaf43730f` to
+    `f778f1b06ee9`, its typed twin `9b35a9f80bf3` to `d99848e583b3`. A slot made from the old version is refused
+    by the page of this commit; Archipelago-CC pins this repository, and moves its pin with the slice that reads
+    the new shape. In The Same Monday there is one question and one way, so the new part says nothing new yet;
+    it is there for a case where questions rest on one another. A test holds the ways to the visits' papers and
+    the exported questions. Agreed with that side and not built: the solver started by a bridge request without
+    a reload (`mystery:autoSolve`, `mystery:autoSolveStatus`), which waits for the user's word.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

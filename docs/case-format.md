@@ -218,7 +218,10 @@ held when the host lists it among `papers` (whichever visit or world it came fro
 sent as for any case. `mystery:state` may carry `loop` (the host's loop, from 1): it is the page's day, and a paper is
 of the day it came on, for the "day N" mark. The case's name and version come from `<case>/visits.json`, the export
 of `node scripts/export-visits.mjs <dir>`: `{story, case, version, unit, day, visits: [{id, label, cost, after, needs,
-paper}], goal: {question, papers}}`, a hash of the rest as its version, held to the case by a test.
+paper}], questions: [{id, ways}], goal: {question, papers, ways}}`, a hash of the rest as its version, held to the case
+by a test. `ways` are a question's alternative ways to its answer, `[{papers, requires}]`: the papers a way needs held
+and the questions it needs solved first, by the case's own logic (`engine/delivery.js` `caseLogic`); `goal.papers` is
+the earlier, flat form of the goal's, kept for a host that reads it.
 
 `?bridge=stub` puts a stand-in host in the page's own window (the placement of `?seed=`), for the checks;
 `scripts/fixtures/bridge-host.html?case=<dir>&seed=<n>` frames the page with the same stand-in, across two windows,

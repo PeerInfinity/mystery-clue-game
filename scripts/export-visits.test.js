@@ -16,6 +16,10 @@ for (const name of fs.readdirSync(base)) {
     test(`${name}: the goal's papers are visits' papers, and what a visit waits for exists`, () => {
         const d = exportVisits(path.join(base, name)), ids = new Set(d.visits.map((v) => v.id));
         assert.ok(d.goal.papers.length > 0 && d.goal.papers.flat().every((p) => ids.has(p)));
+        // Every question's ways name visits' papers and questions exported; the goal is among them, with the same ways.
+        const qs = new Set(d.questions.map((q) => q.id));
+        for (const q of d.questions) { assert.ok(q.ways.length > 0, q.id); for (const w of q.ways) assert.ok(w.papers.every((p) => ids.has(p)) && w.requires.every((r) => qs.has(r) && r !== q.id), q.id); }
+        assert.deepEqual(d.questions.find((q) => q.id === d.goal.question).ways, d.goal.ways);
         for (const v of d.visits) assert.ok([...v.after.flat(), ...v.needs.read].every((x) => ids.has(x)), v.id);
         assert.ok(d.visits.every((v) => v.cost <= d.day));
     });

@@ -1,5 +1,5 @@
 {
-  "story": "same-monday", "case": "cases/miniatures/same-monday", "version": "c37eaf43730f",
+  "story": "same-monday", "case": "cases/miniatures/same-monday", "version": "f778f1b06ee9",
   "unit": "hour", "day": 3,
   "visits": [
     {"id":"office","label":"Look over the harbour office","cost":1,"after":[],"needs":{"read":[],"solved":[]},"paper":{"id":"office","title":"The harbour office"}},
@@ -8,5 +8,8 @@
     {"id":"pilot","label":"Ask the pilot about his key","cost":1,"after":[],"needs":{"read":["office"],"solved":[]},"paper":{"id":"pilot","title":"The pilot"}},
     {"id":"chandler","label":"Call on Silas Finch at the chandler's","cost":1,"after":[],"needs":{"read":["pilot"],"solved":[]},"paper":{"id":"chandler","title":"At the chandler's"}}
   ],
-  "goal": {"question":"q.who","papers":[["inn","office","watch"]]}
+  "questions": [
+    {"id":"q.who","ways":[{"papers":["inn","office","watch"],"requires":[]}]}
+  ],
+  "goal": {"question":"q.who","papers":[["inn","office","watch"]],"ways":[{"papers":["inn","office","watch"],"requires":[]}]}
 }
