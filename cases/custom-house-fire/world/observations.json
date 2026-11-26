@@ -33,7 +33,7 @@
     {"id": "o.sep3_cardiff", "q": "q.sep3", "from": ["f.cardiff"], "says": "by her own log she lay at Cardiff from the first to the sixth, loading coal", "essential": true, "against": ["yes"]},
     {"id": "o.sep24_low", "q": "q.sep24", "from": ["f.tide_sep24"], "says": "low water that day was at 10.50 in the morning, and high water not until 5.05", "essential": true, "against": ["yes"]},
     {"id": "o.sep24_bar", "q": "q.sep24", "from": ["f.bar_rule"], "says": "the bar carries water only within two hours of high water", "essential": true, "against": ["yes"]},
-    {"id": "o.dated_names", "q": "q.dated", "from": ["f.entry_names"], "says": "the entry names the New Quay berth", "essential": true},
+    {"id": "o.dated_names", "q": "q.dated", "from": [{"reasoned": "speaks", "premises": ["f.entry_names", "f.new_quay"]}], "says": "the words of the entry speak of the New Quay berth", "essential": true},
     {"id": "o.dated_opened", "q": "q.dated", "from": ["f.new_quay"], "says": "there was no New Quay berth before the first of October", "essential": true, "against": ["yes"]},
     {"id": "o.passes_first", "q": "q.passes", "from": ["f.pass1"], "says": "the first pass was signed at the Custom House, Saltmere, on the third of September", "essential": true},
     {"id": "o.passes_hand", "q": "q.passes", "from": ["f.one_hand"], "says": "all three are in one hand", "essential": true},

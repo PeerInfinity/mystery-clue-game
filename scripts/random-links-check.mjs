@@ -111,12 +111,14 @@ const tryEntry = (id, qs) => ev(`(() => {
         if (!m) break;
         m.click(); moves++;
     }
-    // What its own words speak of: every entry offered is tried in turn, until one is taken (a wrong one is refused).
-    for (let i = 0; i < 60; i++) {
+    // What its own words speak of: every entry offered is tried in turn, until one is taken (a wrong one is refused,
+    // and is no move: a long case offers some hundreds, and a round of refusals alone must not keep this player going).
+    for (let i = 0; i < 1000; i++) {
         document.querySelector('#timeline [data-fact=' + ${J(J(id))} + '] .ph')?.click();
         const m = document.querySelectorAll('#detail button.move[data-move-s]')[i];
         if (!m) break;
-        m.click(); moves++;
+        m.click();
+        if (!document.querySelector('#detail button.move[data-move-s]')) { moves++; break; }
     }
     return { links, moves, offered };
 })()`);

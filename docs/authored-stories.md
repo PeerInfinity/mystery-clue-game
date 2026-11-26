@@ -2861,6 +2861,38 @@ script that found each fact's paragraph from its quote; the data files are the s
       named with its entry. The earlier run of the will (finding 146) had the same list.
     - One run.
 
+166. **"This speaks of…" on the long case's ledger entry (2026-11-26; the last of the open tasks).** In The Fire
+    at the Custom House the ledger's entry of 3 September "names the New Quay berth", and the harbour notice
+    opens that berth on the first of October. The entry's own line said what it names; the reader linked it and
+    the notice. Now the entry gives its words ("12 casks delivered for export, per brig Marigold, Venn master,
+    lying at the New Quay berth.") and its line says only that it has words of its own. The reader points out
+    what they speak of, among the entries on the timeline, and the reading is what the question rests on.
+    - *The version did not move,* which had been the reason to leave this (finding 146): "was the entry written
+      on that day?" already needed both papers, the ledger and the notice, so the exported logic is the same,
+      `rules.json` is the same file, and nothing has to be rebuilt in Archipelago-CC. The worry was right in kind
+      and wrong in this instance; it was settled by making the change and running the export.
+    - *One thing the rule did not allow for:* in the will the date and the words are two entries; in the ledger
+      one entry has both. The rule for a paper that speaks of what was not yet so asked for an observation of
+      the dated entry by itself, found none (it is now reached only by its reading), and fell silent: the
+      question no longer followed. Found by the checker, not by the validator or the tests. Where one entry
+      gives both, its reading now stands for it.
+    - *The true path* has the move and the link of the reading in place of the link of the entry (113 moves).
+    - *The page did not offer the move at first.* The first full run of the page checks failed: "move not
+      offered". The notice's entry is still uncertain when the reader gets there (a printed notice, not yet
+      trusted), and the move offered only entries accepted on the timeline, so the one entry the words speak of
+      could not be picked. An entry that is visible and still uncertain is now offered too, and the link of the
+      reading trusts it as likely, as a link of the entry itself always did.
+    - *The player who only tries things could not finish* on the second run: it tried the first 60 entries
+      offered under the move, the long case offers far more, and it counted each refusal as a move, so it never
+      reached the right one and never stopped. It now tries every entry offered and counts only a move taken
+      (2090 links, 4 moves, 25 of 25 questions). A fault of the check, not of the page.
+    - *Open:* on a long case the move lists every entry of the timeline as a pick, some hundreds. Nothing in the
+      list may say which is meant, so it cannot simply be shortened; a search box, or picking the entry on the
+      timeline itself, would be the way. Not built.
+    - *Checked:* `npm test` (the export held to `rules.json`), the validator, the checker (the question follows,
+      as before), every page check on the long case (the trying player run again alone after its fix), and every
+      page check on the two miniatures that use the move, the typed Will in the Bible and the typed Same Monday.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

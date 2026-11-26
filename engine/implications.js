@@ -293,7 +293,9 @@ export function tableRules(data, observations) {
                 if (!at) continue;
                 for (const d of facts.filter((f) => f.of === a.of && f.dated === at)) for (const g of facts.filter((f) => f.of === a.of && f.speaks_of && (f.dated ?? at) === at)) {
                     const so = g.speaks_of, h = facts.find((f) => f.of === so.of && (so.attr == null || f.attr === so.attr) && (so.value == null || f.value === so.value) && (f.begins || f.attr === 'action') && order.lt(at, f.time?.at ?? f.time?.from ?? at));
-                    const from = h && [...new Set([obs(q.id, d.id), g.words || g.reads_as ? read(q.id, g.id, h.id) : obs(q.id, g.id), obs(q.id, h.id)])];
+                    // (one entry may give both the date and the words: its reading then stands for it)
+                    const reading = g.words || g.reads_as ? read(q.id, g.id, h.id) : null;
+                    const from = h && [...new Set([d.id === g.id && reading ? reading : obs(q.id, d.id), reading ?? (g.words || g.reads_as ? null : obs(q.id, g.id)), obs(q.id, h.id)])];
                     if (!h || from.some((o) => !o) || out.some((t) => t.id === `t.dated.${n}`)) continue;
                     out.push({ id: `t.dated.${n}`, q: q.id, from: from.map((o) => o.id), says: `${from.map((o) => o.says).join('; ')}: it speaks of what was not yet so on its date`, rules_out: [p.value], ...other(q, p), table: true });
                 }

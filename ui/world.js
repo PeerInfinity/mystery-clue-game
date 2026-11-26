@@ -1900,7 +1900,9 @@ function speaksMoveHtml(f) {
     // Its own words, or (a description that names no thing outright) the entry as it stands.
     const words = `<p class="quote">${f.words ? `“${esc(f.words)}”` : phrase(f)}</p>`;
     if (made) return `<h3>What it speaks of</h3>${words}<p class="small">You have pointed out what this speaks of: ${factOf(made.to) ? phrase(factOf(made.to)) : ''}.</p>`;
-    const cands = onTimeline().filter((o) => o.id !== f.id && !o.reasoned && o.attr !== 'tells' && !o.hyp);
+    // An entry still uncertain can be what the words speak of (a printed notice, not yet trusted): it is offered too,
+    // and the link of the reading then trusts it as likely, as a link of the entry would (finding 166).
+    const cands = [...onTimeline(), ...data.facts.filter((o) => o.attr !== 'tells' && visible(o) && !accepted(o) && levelOfFact(o) === UNCERTAIN)].filter((o) => o.id !== f.id && !o.reasoned && o.attr !== 'tells' && !o.hyp);
     const items = cands.map((o) => `<li><button type="button" class="move" data-move-s="${esc(f.id)}" data-to="${esc(o.id)}">This speaks of…</button> ${phrase(o)}</li>`).join('');
     return `<h3>What it speaks of</h3>${words}<p class="small">What does this speak of? Point at the entry of the timeline it refers to: what follows from that is then yours to link.</p><ul class="moves">${items}</ul>`;
 }
