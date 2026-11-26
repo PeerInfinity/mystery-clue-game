@@ -731,7 +731,10 @@ that follows from others, shown by itself the moment they all are.
   rule rests on the observations of that act and of the statement (since 2026-11-26). A statement that everyone but
   these was at some other place through the whole window ("Everyone but … was in the dining-room": a place that
   neither holds the deed's place nor lies in it) closes the list as "nobody but these was there" does (since
-  2026-11-26). Where the case has a sealed place (`world/room.json`) and the deed needs its doer there, true
+  2026-11-26). Where the deed needs a key, every key of that lock the entries name is a thing (not the phrase "a key of …"),
+  and each was carried through the whole window by one person with nobody else said to have had it, every answer
+  who is not one of those is ruled out (`t.held.<question>`, likely: a key can be copied, or lent and not told of);
+  those who held one must be among the answers, or a narrator (since 2026-11-26). Where the case has a sealed place (`world/room.json`) and the deed needs its doer there, true
   entries that make every way in told of closed to a person rule every answer that is a person out
   (`t.sealed.<question>`, certain), from the observations of those entries together; the rules read the room from
   the case's data (`data.room`). And in a question of two answers besides

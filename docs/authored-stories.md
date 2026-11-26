@@ -2799,6 +2799,24 @@ script that found each fact's paragraph from its quote; the data files are the s
 
 
 
+163. **The key in one hand throughout (2026-11-26; the user: "I want to do all of the remaining open tasks").**
+    The fourth point of finding 154, left unbuilt in finding 155 for want of a recommendation.
+    - *The worry was that nothing says nobody else had a key.* So the rule asks for what does say it, as far as
+      typed data can: every key of that lock the entries name is a thing ("the keys of the bank and of the
+      strongroom", "the second key of the cellar door") and not the phrase "a key of …"; each such thing was
+      carried through the whole window by one person; and no entry has anyone else with it at any time. Then
+      every answer who held none is ruled out, "something else" with them. Likely only: a key can be copied,
+      or lent and not told of. Those who held one must be among the answers, or a narrator.
+    - *What it reaches:* The Night Porter's Statement, both versions. The porter's own "from ten until seven I
+      had the keys" now rules the clerk and "something else" out as likely, and with the lock-up the answer
+      follows by elimination with the written rules taken away. It is his own statement turned on him, which is
+      what the written rule said in a sentence.
+    - *What it does not reach, by its own conditions:* The Cellar Door (the narrator's key has no observation to
+      rest on, and the statement about everyone closes that list already), The Same Monday (the second key was
+      lent), The Watchman's Clock and The Grey Cloak (their keys are phrases).
+    - *Measured:* 19 of 82 answers follow with the written rules taken away (17 before). No other case changed;
+      the long case's export, and so its version, is the same. A unit test; every page check on the two cases.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

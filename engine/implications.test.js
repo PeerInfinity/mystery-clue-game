@@ -336,3 +336,22 @@ test('a room closed to a person on every way in rules every person out; "everyon
         assert.deepEqual(else_({ at: 't1' }), [], 'only through the whole window');
     }
 });
+
+test('the key in one hand throughout rules the others out as likely; a key lent, or a key that is only a phrase, does not', async () => {
+    const { tableRules } = await import('./implications.js');
+    const { setCaseActions } = await import('./actions.js');
+    setCaseActions({});
+    const t = (id, after) => ({ id, ...(after ? { after } : {}) });
+    const base = {
+        times: [t('t0'), t('t1', 't0'), t('t2', 't1')], joins: {}, moves: [], accounts: [], narrators: [{ id: 'n' }],
+        entities: [{ id: 'n', kind: 'person' }, { id: 'a', kind: 'person' }, { id: 'b', kind: 'person' }, { id: 'room', kind: 'place' }, { id: 'door', kind: 'object' }, { id: 'key', kind: 'object' }, { id: 'thing', kind: 'object' }],
+        questions: [{ id: 'q', label: 'Who?', entry: { of: '?', attr: 'action', act: 'take_locked', item: 'thing', where: 'room', via: 'door', time: { from: 't1', to: 't2' } }, possibilities: [{ value: 'something else', via: 'always' }, { value: 'a' }, { value: 'b' }], answer: 'a' }],
+    };
+    const f = (id, x) => ({ id, para: 1, quote: 'x', ...x }), obs = [{ id: 'o.key', q: 'q', from: ['f.key'], says: 'o.key' }];
+    const held = (facts) => tableRules({ ...base, facts }, obs).filter((r) => r.id.startsWith('t.held')).map((r) => [r.rules_out, r.strength]);
+    const has = f('f.key', { of: 'a', attr: 'carrying', value: 'key', key: 'door', time: { from: 't1', to: 't2' } });
+    assert.deepEqual(held([has]), [[['something else', 'b'], 'likely']]);
+    assert.deepEqual(held([{ ...has, time: { at: 't1' } }]), [], 'only through the whole window');
+    assert.deepEqual(held([has, f('f.lent', { of: 'b', attr: 'carrying', value: 'key', key: 'door', time: { at: 't2' } })]), [], 'somebody else had it too');
+    assert.deepEqual(held([{ ...has, value: 'a key of the door' }]), [], 'a key that is no thing may be one of several');
+});

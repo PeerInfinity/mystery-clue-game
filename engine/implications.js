@@ -364,6 +364,23 @@ export function tableRules(data, observations) {
             const o = obsOf(q.id, f.id);
             if (o) out.push({ id: `t.closed.${q.id.replace(/^q\./, '')}.${n}`, q: q.id, from: [...conds.map((k) => ({ solved: k.q })), o.id], says: `${o.says}: nobody else could have done it`, rules_out: open, strength: LIKELY, table: true });
         });
+        // The key in one hand throughout (2026-11-26; finding 163): the deed needs a key, every key of that lock the
+        // entries name is a thing (not "a key of …"), and each was carried through the whole window by one person, with
+        // nobody else said to have had it. Then whoever did it was one of those who held one: every other answer is
+        // ruled out, as likely only (a key can be copied, or lent and not told of). Those who held one must be among
+        // the answers, or a narrator; from the observations of the entries.
+        for (const K of new Set(reqs.filter((r) => r.key).map((r) => r.key))) {
+            const held = (data.facts ?? []).filter((f) => f.truth !== false && f.attr === 'carrying' && !f.neg && f.of !== '*' && f.key === K);
+            const things = [...new Set(held.map((f) => f.value))];
+            if (!w || !things.length || things.some((v) => !isEntity(v))) continue;
+            const through = things.map((v) => held.find((f) => { const k = f.value === v && coverOf(f.time); return !!k && order.le(k.start, w.start) && order.le(w.end, k.end); }));
+            if (through.some((f) => !f)) continue;
+            const holders = new Set(through.map((f) => f.of));
+            if (held.some((f) => !holders.has(f.of)) || ![...holders].every((h) => answers.has(h) || narrators.has(h))) continue;
+            const others = (q.possibilities ?? []).filter((p) => !isRight(q, p.value) && !holders.has(p.value)).map((p) => p.value), obs = through.map((f) => obsOf(q.id, f.id));
+            if (!others.length || obs.some((o) => !o)) continue;
+            out.push({ id: `t.held.${q.id.replace(/^q\./, '')}`, q: q.id, from: [...conds.map((k) => ({ solved: k.q })), ...new Set(obs.map((o) => o.id))], says: `${[...new Set(obs)].map((o) => o.says).join('; ')}: the key it needed was in that hand throughout`, rules_out: others, strength: LIKELY, table: true });
+        }
     }
     // A room closed to a person on every way in (2026-11-26; finding 155; world/room.json `sealed`): where the deed
     // needs its doer at that place, and the true entries make every way in told of closed to a person, no person did
