@@ -1,0 +1,14 @@
+{
+ "entities": {
+  "marsh": ["Edwin Marsh"],
+  "ward": ["Abel Ward"],
+  "tanner": ["Joe Tanner"],
+  "bright": ["Constable Bright"],
+  "warehouse": ["Lowther's warehouse"],
+  "yard": ["the yard"],
+  "gate": ["the yard gate"],
+  "bale": ["the bale of China silk"],
+  "clock": ["the tell-tale clock"],
+  "card": ["Tuesday's card"]
+ }
+}

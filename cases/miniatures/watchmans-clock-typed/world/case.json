@@ -1,0 +1,27 @@
+{
+  "id": "watchmans_clock_typed",
+  "title": "The Watchman's Clock, told from its data",
+  "author": "written for this project (a mechanic miniature: The Watchman's Clock, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "files": [
+    {
+      "id": "card",
+      "title": "Tuesday's card from the watchman's clock",
+      "short": "Card",
+      "text": "../files/card.txt",
+      "delivered": 2
+    }
+  ],
+  "narrators": [
+    {
+      "id": "marsh",
+      "name": "Edwin Marsh",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Edwin Marsh's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 300
+  }
+}

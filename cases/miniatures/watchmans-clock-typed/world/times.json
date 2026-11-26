@@ -1,0 +1,17 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.saturday", "label": "Saturday", "after": "t.before", "para": 5, "quote": "Saturday"},
+    {"id": "t.eight", "label": "eight o'clock on Monday night", "prep": "At", "after": "t.saturday", "para": 1, "quote": "eight o'clock on Monday night"},
+    {"id": "t.twelve", "label": "twelve o'clock on Monday night", "prep": "At", "after": "t.eight", "para": 3, "quote": "twelve o'clock on Monday night"},
+    {"id": "t.one", "label": "one o'clock on Tuesday morning", "prep": "At", "after": "t.twelve", "para": "card:1", "quote": "one o'clock on Tuesday morning"},
+    {"id": "t.two", "label": "two o'clock on Tuesday morning", "prep": "At", "after": "t.one", "para": "card:1", "quote": "two o'clock on Tuesday morning"},
+    {"id": "t.half_two", "label": "half past two on Tuesday morning", "prep": "At", "after": "t.two", "para": 4, "quote": "half past two on Tuesday morning"},
+    {"id": "t.three", "label": "three o'clock on Tuesday morning", "prep": "At", "after": "t.half_two"},
+    {"id": "t.half_three", "label": "half past three on Tuesday morning", "prep": "At", "after": "t.three", "para": 4, "quote": "half past three on Tuesday morning"},
+    {"id": "t.four", "label": "four o'clock on Tuesday morning", "prep": "At", "after": "t.half_three", "para": "card:1", "quote": "four o'clock on Tuesday morning"},
+    {"id": "t.five", "label": "five o'clock on Tuesday morning", "prep": "At", "after": "t.four", "para": "card:1", "quote": "five o'clock on Tuesday morning"},
+    {"id": "t.six", "label": "six o'clock on Tuesday morning", "prep": "At", "after": "t.five", "para": 1, "quote": "six o'clock on Tuesday morning"},
+    {"id": "t.later", "label": "later on Tuesday", "prep": "", "after": "t.six", "para": 6, "quote": "Later on Tuesday"}
+  ]
+}

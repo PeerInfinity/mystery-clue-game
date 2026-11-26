@@ -126,6 +126,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/dinner-at-larch-house-typed` | The Dinner at Larch House told from its data: two narrators, each "I" in their own account; what was seen from where (finding 151). | 6 paragraphs, 21 facts, 2 accounts, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/night-porters-statement-typed` | The Night Porter's Statement told from its data: a narrator who may be doubted, his statement in his own voice (finding 152). | 6 paragraphs, 12 facts, 2 accounts, 1 question, 4 observations (3 essential), 6 moves |
 | `cases/miniatures/cellar-door-typed` | The Cellar Door told from its data: the reader's own entry of a change, its sentence made from the engine's acts and their needs (finding 153). | 6 paragraphs, 20 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
+| `cases/miniatures/watchmans-clock-typed` | The Watchman's Clock told from its data: a rule told from its series, the card as its record, the reader's entry of a gap (finding 154). | 6 paragraphs and a paper of 1, 23 facts, 3 accounts, 2 tellings, 2 questions, 8 observations (5 essential), 13 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2539,6 +2540,57 @@ script that found each fact's paragraph from its quote; the data files are the s
       "drunk", "sober"); the question's label; the two written rules' sentences; the true path's reasons; the
       past form of the one act of the case's own ("sold"); `structure.json`.
     - *Still untold of the list:* The Watchman's Clock ("Something is missing here").
+
+154. **A rule, its record and a gap told from their data: The Watchman's Clock (2026-11-26).** The last of the
+    three forms, and of the list the user asked to have worked through. The case is
+    `cases/miniatures/watchmans-clock-typed`: a main story and one paper (the card), two questions, the same
+    true path of 13 moves.
+    - *What the templates gained.* A rule told from its series ("By rule, Abel Ward was to be on the round at
+      twelve o'clock on Monday night, one o'clock on Tuesday morning, … and five o'clock on Tuesday morning"). Its
+      record, one sentence a punch, as the card's text. The reader's own entry of a gap, its sentence made from
+      the rule, the time and the series' state ("by rule, Abel Ward was to be on the round at three o'clock on
+      Tuesday morning; the record has nothing then: Abel Ward was not on the round"). A state of the series
+      claimed over a stretch ("I was on the round at every time the rule names"). What a state leaves someone
+      unable to do, from `cannot` and the question's deed ("in bed with an ankle in splints, and in no state to
+      be the one who took the bale of China silk from the yard"). A door that is shut is "shut, and not locked".
+    - *It held:* it validated at the first try, and the true path, the autoplay, the hints and the trying player
+      play it through. 397 words in the story and the card against 274: the hours are named in full each time,
+      and the rule alone names six.
+    - *What typing forced or found.*
+      - "Only Joe Tanner has a key to the gate besides me" was entered as the carter having a key, with "the
+        only one" in a detail. It is now "Nobody but me, Joe Tanner and you had a key of the yard gate": the
+        narrator locks the yard at eight and unlocks it at six, so he has one too, which the written story's
+        sentence overlooks.
+      - *And that statement, typed, makes the gap unnecessary to the answer.* With the written rules taken away
+        the typed twin's "who" follows by elimination (the carter cannot, the list is closed, the narrator is
+        accounted for), where the written case's does not. The written rule still asks for the gap, and the true
+        path still makes the move; but a player with the answers marked from the evidence can have the watchman
+        without ever pointing at the card. The case's own mechanic, absence as evidence, has become
+        corroboration. Put to the user: leave it so (it is what the data says, and the statement is the
+        culprit's own word, likely at most), or type the keys no further than the written case did.
+      - "When" could not be asked in the story's first paragraph as "When was it taken?": the two answers have
+        to stand somewhere, and the watchman's "if it went, it went after five" is not typed. The question is
+        asked after the constable, in its own words with both answers, as The Last Ferry's is; and the
+        watchman's owning to it is two sayings, one for each question.
+      - The card "that only I can unlock" is the card's whereabouts, in the clock from eight until six, and
+        the narrator's taking it out an act.
+    - *What was lost:* the card's own figures ("12.0, 1.0, 2.0, 4.0, 5.0"): the typed card says the watchman
+      was on the round, where the written one shows punches and leaves that reading to the reader. The clock
+      that marks each punch and the key only the narrator holds (why the card can be believed against the man).
+      "If the bale went, it went after five." "On the latch." The surgeon, the cart in the lane, the card laid
+      in front of him.
+    - *Still written by hand:* the order; names and time labels; five phrases (three roles, "on the round",
+      "aware of nothing amiss", "in bed with an ankle in splints"); the two questions' labels; the sentence of
+      the observation that comes from a lie disbelieved; the two written rules' sentences; the true path's
+      reasons; `structure.json`.
+    - *The list is done.* Told from their data now: twelve cases (the seven before, and the five of findings 150 to 154).
+      Not told: The Sailor's Knot, The Loose Board, The Telegram Signed M., The Garden Room, The Wages Bag, The
+      Lamp-Keeper's Word and both Rent Box cases, none of which is known to need a form the templates lack.
+      Over all cases (`typed-check.mjs`): 15 of 69 answers follow with the written rules taken away, 52 of 92
+      wrong answers are ruled out by the typed forms.
+    - *Four things are put to the user by these findings:* a rule for a room closed to a person on every way in
+      (150); whether "everyone but these was elsewhere" closes a list as "nobody but these was there" does
+      (151); a rule for who held the key through the whole window (152); and the watchman's keys, above.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

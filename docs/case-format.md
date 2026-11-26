@@ -133,6 +133,13 @@ Several acts done as one are told together ("unlocked and opened the cellar door
 change the reader points out (`{reasoned: "changed", premises}`) says the two states, the acts that turn the one into
 the other (the engine's `changePath`) and what those acts need of their doer ("which needs a key of the cellar door
 and being at the cellar door").
+A rule of a regular series is told from the series ("By rule, Abel Ward was to be on the round at twelve o'clock …,
+… and five o'clock …"), and its `value` is written from it; a state of that series claimed over a stretch is claimed
+"at every time the rule names". An observation that comes from a gap the reader points out (`{reasoned: "missing",
+of, at}`) says the rule at that time and the series' state denied then ("the record has nothing then: Abel Ward was
+not on the round"). What a state leaves someone unable to do (`cannot: [acts]`) is the deed of the question that
+asks about such an act ("…, and in no state to be the one who took the bale of China silk from the yard"). A door
+that is `shut` is "shut, and not locked".
 A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 

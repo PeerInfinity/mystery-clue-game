@@ -29,7 +29,8 @@ export function tell(dir, opts = {}) {
     const byId = (xs) => new Map(xs.map((x) => [x.id, x]));
     const E = byId(entities), T = byId(times), F = byId(facts), Q = byId(questions), A = byId(actions);
     const N = header.narrators[0].id, name = (id) => E.get(id)?.name ?? id;
-    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, plural: (id) => E.get(id)?.plural, fact: (id) => F.get(id), time: (id) => T.get(id).label, label: (t) => ACTIONS[t]?.label });
+    const tellerOf = (speaker, listener = null) => teller({ speaker, listener, name, act: (id) => A.get(id), question: (id) => Q.get(id), prefix: (t) => prefix(t), kind: (id) => E.get(id)?.kind, prep: (id) => E.get(id)?.prep, plural: (id) => E.get(id)?.plural, fact: (id) => F.get(id), time: (id) => T.get(id).label, label: (t) => ACTIONS[t]?.label,
+        ruled: (x) => facts.some((r) => r.series?.at && r.series.attr === x.attr && (r.series.of ?? r.of) === x.of), deedOf: (t) => questions.find((q) => list(q.entry?.act).includes(t))?.entry });
     const third = tellerOf(null);
     // Several narrators (finding 151): an entry is told in the voice of the narrator whose account holds it, and a
     // line says whose account begins where the voice changes ("Clara Marlow's account."; `account` on a narrator
@@ -106,6 +107,7 @@ export function tell(dir, opts = {}) {
                         const s = tellerOf(cur).sentence(f);
                         if (f.attr === 'says') f.value = third.said(f);
                         // What someone knows, where it is an entry (`what`): the page's line is that entry's sentence.
+                        if (f.attr === 'rule' && f.series?.at) f.value = third.sentence(f).replace(/^by rule, .*? was (to be )/, '$1');
                         if (f.attr === 'knows' && f.what) f.value = `that ${third.sentence(F.get(f.what))}`;
                         f.quote = plain(f.time, s, f.id);
                         // Where its witness was (`seen_from`), said after it.
@@ -197,7 +199,15 @@ export function tell(dir, opts = {}) {
         const needs = [...new Set(acts.flatMap((t) => ACTIONS[t].requires).filter((r) => r.of === '$agent').map((r) => (r.key ? `a key of ${name(from.of)}` : r.at ? `being at ${name(from.of)}` : null)).filter(Boolean))];
         return `${drySentence.get(from.id)}; ${drySentence.get(to.id)}: between the two, somebody ${acts.map((t) => PAST[t] ?? A.get(t)?.past).join(' and ')} ${name(from.of)}${needs.length ? `, which needs ${needs.join(' and ')}` : ''}`;
     };
-    const saysAny = (x) => (Array.isArray(x?.route_through) ? routeSays(x.route_through) : x?.reasoned === 'changed' ? changeSays(x) : saysOf(x));
+    // A gap the reader points out in a rule's record (`{reasoned: "missing", of: <the rule>, at: <a time>}`) says the
+    // rule, and what the record's silence at that time means: the series' state, denied then.
+    const gapSays = (x) => {
+        const r = F.get(x.of);
+        if (!r?.series || !drySentence.has(r.id)) return null;
+        const who = r.series.of ?? r.of, when = prefix({ at: x.at }).replace(/^[A-Z]/, (c) => c.toLowerCase()).replace(/, $/, '');
+        return `by rule, ${name(who)} was to be ${r.series.value} ${when}; the record has nothing then: ${third.sentence({ of: who, attr: r.series.attr, value: r.series.value, neg: true, time: { at: x.at } })}`;
+    };
+    const saysAny = (x) => (Array.isArray(x?.route_through) ? routeSays(x.route_through) : x?.reasoned === 'changed' ? changeSays(x) : x?.reasoned === 'missing' ? gapSays(x) : saysOf(x));
     for (const o of observations ?? []) if (o.from.every((x) => saysAny(x) != null)) o.says = o.from.map(saysAny).join('; ');
     // A form of a name the prose used counts as a mention only if it has a word of the name itself: "Abel", "Mrs. Crouch",
     // "Abel's shed"; not "it", "his shed" or "my marrow", which are whoever is being spoken of.

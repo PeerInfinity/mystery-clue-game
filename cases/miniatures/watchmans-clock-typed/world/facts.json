@@ -1,0 +1,27 @@
+{
+  "facts": [
+    {"id": "f.marsh_role", "of": "marsh", "attr": "role", "value": "chief clerk at Lowther's warehouse", "time": {"from": "t.before"}, "para": 1, "quote": "I am Edwin Marsh, chief clerk at Lowther's warehouse"},
+    {"id": "f.bale_there", "of": "bale", "attr": "location", "value": "yard", "time": {"at": "t.eight"}, "para": 1, "quote": "the bale of China silk was in the yard"},
+    {"id": "f.bale_gone", "of": "bale", "attr": "location", "value": "yard", "neg": true, "time": {"at": "t.six"}, "para": 1, "quote": "the bale of China silk was not in the yard"},
+    {"id": "f.ward_role", "of": "ward", "attr": "role", "value": "the night watchman at Lowther's warehouse", "time": {"from": "t.before"}, "para": 2, "quote": "Abel Ward is the night watchman at Lowther's warehouse"},
+    {"id": "f.rule", "of": "ward", "attr": "rule", "series": {"attr": "round", "value": "on the round", "at": ["t.twelve", "t.one", "t.two", "t.three", "t.four", "t.five"]}, "time": {"from": "t.before"}, "para": 2, "value": "to be on the round at twelve o'clock on Monday night, one o'clock on Tuesday morning, two o'clock on Tuesday morning, three o'clock on Tuesday morning, four o'clock on Tuesday morning and five o'clock on Tuesday morning", "quote": "By rule, Abel Ward was to be on the round at twelve o'clock on Monday night, one o'clock on Tuesday morning, two o'clock on Tuesday morning, three o'clock on Tuesday morning, four o'clock on Tuesday morning and five o'clock on Tuesday morning"},
+    {"id": "f.card_locked", "of": "card", "attr": "location", "value": "clock", "time": {"from": "t.eight", "to": "t.six"}, "para": 2, "quote": "Tuesday's card was in the tell-tale clock"},
+    {"id": "f.card_taken", "of": "marsh", "attr": "action", "act": "take", "item": "card", "where": "clock", "time": {"at": "t.six"}, "para": 2, "quote": "I took Tuesday's card from the tell-tale clock"},
+    {"id": "f.p12", "of": "ward", "attr": "round", "value": "on the round", "series": "f.rule", "time": {"at": "t.twelve"}, "para": "card:1", "quote": "Abel Ward was on the round"},
+    {"id": "f.p1", "of": "ward", "attr": "round", "value": "on the round", "series": "f.rule", "time": {"at": "t.one"}, "para": "card:1", "quote": "Abel Ward was on the round"},
+    {"id": "f.p2", "of": "ward", "attr": "round", "value": "on the round", "series": "f.rule", "time": {"at": "t.two"}, "para": "card:1", "quote": "Abel Ward was on the round"},
+    {"id": "f.p4", "of": "ward", "attr": "round", "value": "on the round", "series": "f.rule", "time": {"at": "t.four"}, "para": "card:1", "quote": "Abel Ward was on the round"},
+    {"id": "f.p5", "of": "ward", "attr": "round", "value": "on the round", "series": "f.rule", "time": {"at": "t.five"}, "para": "card:1", "quote": "Abel Ward was on the round"},
+    {"id": "f.ward_tells", "of": "ward", "attr": "tells", "value": "acct.ward", "to": "marsh", "how": "told", "time": {"at": "t.later"}, "para": 3, "quote": "Abel Ward told me"},
+    {"id": "f.ward_rounds", "of": "ward", "attr": "round", "value": "on the round", "time": {"from": "t.twelve", "to": "t.six"}, "truth": false, "para": 3, "quote": "I was on the round at every time the rule names"},
+    {"id": "f.ward_nothing", "of": "ward", "attr": "condition", "value": "aware of nothing amiss", "time": {"from": "t.twelve", "to": "t.six"}, "truth": false, "para": 3, "quote": "I was aware of nothing amiss"},
+    {"id": "f.tanner_role", "of": "tanner", "attr": "role", "value": "the carter", "time": {"from": "t.before"}, "para": 3, "quote": "Joe Tanner is the carter"},
+    {"id": "f.tanner_key", "of": "*", "every": "person", "but": ["ward", "tanner", "marsh"], "attr": "carrying", "value": "a key of the yard gate", "key": "gate", "neg": true, "time": {"from": "t.before"}, "para": 3, "quote": "Nobody but me, Joe Tanner and you had a key of the yard gate"},
+    {"id": "f.bright_tells", "of": "bright", "attr": "tells", "value": "acct.bright", "to": "marsh", "how": "told", "time": {"at": "t.later"}, "para": 4, "quote": "Constable Bright told me"},
+    {"id": "f.gate_fast", "of": "gate", "attr": "door", "value": "locked", "time": {"at": "t.half_two"}, "para": 4, "quote": "the yard gate was locked"},
+    {"id": "f.gate_latch", "of": "gate", "attr": "door", "value": "shut", "time": {"at": "t.half_three"}, "para": 4, "quote": "the yard gate was shut, and not locked"},
+    {"id": "f.tanner_ankle", "of": "tanner", "attr": "condition", "value": "in bed with an ankle in splints", "cannot": ["take_locked"], "time": {"from": "t.saturday"}, "para": 5, "quote": "Joe Tanner was in bed with an ankle in splints, and in no state to be the one who took the bale of China silk from the yard"},
+    {"id": "f.ward_owns", "of": "ward", "attr": "says", "to": "marsh", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "ward"}], "para": 6, "value": "owns to taking, out of a locked place, the bale of China silk", "quote": "Abel Ward said to me: \"It was I who took the bale of China silk from the yard.\""},
+    {"id": "f.ward_when", "of": "ward", "attr": "says", "to": "marsh", "time": {"at": "t.later"}, "asserts": [{"q": "q.when", "pick": "between half past two and half past three"}], "para": 6, "value": "says it was between half past two and half past three", "quote": "Abel Ward said to me: \"It was between half past two and half past three.\""}
+  ]
+}

@@ -1,0 +1,58 @@
+{
+ "title": "THE WATCHMAN'S CLOCK, TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.marsh_role",
+   "f.bale_there",
+   "f.bale_gone",
+   {
+    "deed": "q.who"
+   },
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.ward_role",
+   "f.rule",
+   "f.card_locked",
+   "f.card_taken"
+  ],
+  [
+   "f.ward_tells",
+   "f.ward_rounds",
+   "f.ward_nothing",
+   "f.tanner_role",
+   "f.tanner_key"
+  ],
+  [
+   "f.bright_tells",
+   "f.gate_fast",
+   "f.gate_latch",
+   {
+    "raise": "q.when"
+   }
+  ],
+  [
+   "f.tanner_ankle"
+  ],
+  [
+   "f.ward_owns",
+   "f.ward_when"
+  ]
+ ],
+ "files": {
+  "card": {
+   "title": "TUESDAY'S CARD FROM THE WATCHMAN'S CLOCK, TOLD FROM ITS DATA",
+   "paragraphs": [
+    [
+     "f.p12",
+     "f.p1",
+     "f.p2",
+     "f.p4",
+     "f.p5"
+    ]
+   ]
+  }
+ }
+}
