@@ -1,0 +1,10 @@
+{
+  "observations": [
+    {"id": "o.knot", "q": "q.who", "from": ["f.knot"], "essential": true, "says": "at half past ten on Thursday, the bundle was tied with the carrick bend"},
+    {"id": "o.taproom", "q": "q.who", "from": ["f.pike_bell"], "essential": true, "against": ["pike"], "says": "from seven o'clock on Thursday until eleven o'clock on Thursday, Tom Pike was at the Bell"},
+    {"id": "o.fleet", "q": "q.who", "from": ["f.rudd_knows"], "essential": true, "says": "Sam Rudd knew the carrick bend"},
+    {"id": "o.granny", "q": "q.who", "from": ["f.ellen_granny"], "essential": true, "against": ["ellen"], "says": "Ellen did not know the carrick bend"},
+    {"id": "o.seaman", "q": "q.who", "from": ["f.bend_seaman"], "says": "the carrick bend was held to be a seaman's knot, which a landsman does not tie"},
+    {"id": "o.home", "q": "q.who", "from": ["f.rudd_home"], "says": "from seven o'clock on Thursday until eleven o'clock on Thursday, Sam Rudd was at Fernleigh"}
+  ]
+}

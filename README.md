@@ -30,6 +30,7 @@ evidence leaves.
 [The Cellar Door, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/cellar-door-typed) (The Cellar Door, its text made by a script from its data) ·
 [The Watchman's Clock, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/watchmans-clock-typed) (The Watchman's Clock, its text made by a script from its data) ·
 [The Garden Room, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/garden-room-typed) (The Garden Room, its text made by a script from its data) ·
+[The Sailor's Knot, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/sailors-knot-typed) (The Sailor's Knot, its text made by a script from its data) ·
 [The Will in the Bible, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/will-in-the-bible-typed) (The Will in the Bible, its text and the will made by a script from its data) ·
 [The Stable Clock, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/stable-clock-typed) (The Stable Clock, its text made by a script from its data) ·
 [The Last Ferry, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry-typed) (The Last Ferry, its text made by a script from its data) ·

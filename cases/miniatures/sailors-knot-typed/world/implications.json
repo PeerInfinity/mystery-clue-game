@@ -1,0 +1,7 @@
+{
+  "implications": [
+    {"id": "i.who_not_pike", "q": "q.who", "from": ["o.taproom"], "says": "Pike sat in the Bell's taproom from seven until eleven: it was not Pike", "rules_out": ["pike"]},
+    {"id": "i.who_not_ellen", "q": "q.who", "from": ["o.knot", "o.granny"], "says": "whoever tied it knew the carrick bend, and Ellen knows no knot but a granny: it was not Ellen", "rules_out": ["ellen"]},
+    {"id": "i.who_rudd", "q": "q.who", "from": ["o.knot", "o.fleet", "i.who_not_pike", "i.who_not_ellen"], "says": "Rudd learned the carrick bend in the fishing fleet, and of the others one was away and one does not know it: it was Rudd", "concludes": "rudd"}
+  ]
+}

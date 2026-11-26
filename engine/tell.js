@@ -46,6 +46,9 @@ export function teller(ctx) {
         if (x.attr === 'fixed') return `${subj(x.of)} ${be}${x.neg ? ' not' : ''} fixed to ${ctx.name(x.value)}`;
         // What someone knows, where it is an entry (`what`): "knew that …", the entry as an onlooker would say it.
         if (x.attr === 'knows' && x.what && ctx.fact?.(x.what)) return `${subj(x.of)} ${x.neg ? 'did not know' : 'knew'} that ${teller({ ...ctx, speaker: null, listener: null }).sentence(ctx.fact(x.what))}`;
+        // A thing known (a knot, a hiding-place), and what a thing is held to be.
+        if (x.attr === 'knows' && ctx.kind?.(x.value)) return `${subj(x.of)} ${x.neg ? 'did not know' : 'knew'} ${ctx.name(x.value)}`;
+        if (x.attr === 'reputed') return `${subj(x.of)} ${be}${x.neg ? ' not' : ''} held to be ${x.value}`;
         if (x.of === '*') { const who = everyone(x); return x.attr === 'location' ? `${who} ${be} ${at(x.value)}` : x.attr === 'carrying' ? `${who} had ${ctx.name(x.value)}` : `${who} ${be} ${x.value}`; }
         const not = x.neg ? ' not' : '';
         if (x.attr === 'location') return `${subj(x.of)} ${be}${not} ${at(x.value)}`;

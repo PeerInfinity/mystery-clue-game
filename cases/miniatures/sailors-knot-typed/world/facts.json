@@ -1,0 +1,23 @@
+{
+  "facts": [
+    {"id": "f.hale_role", "of": "hale", "attr": "role", "value": "a guest at Fernleigh, twenty years at sea", "time": {"from": "t.before"}, "para": 1, "quote": "I am John Hale, a guest at Fernleigh, twenty years at sea"},
+    {"id": "f.plate_sideboard", "of": "plate", "attr": "location", "value": "dining_room", "time": {"at": "t.nine"}, "para": 1, "quote": "the silver plate was in the dining-room"},
+    {"id": "f.plate_shrubbery", "of": "plate", "attr": "location", "value": "bundle", "time": {"at": "t.half_ten"}, "para": 1, "quote": "the silver plate was in the bundle"},
+    {"id": "f.bundle_shrubbery", "of": "bundle", "attr": "location", "value": "shrubbery", "time": {"at": "t.half_ten"}, "para": 1, "quote": "The bundle was in the shrubbery"},
+    {"id": "f.knot", "of": "bundle", "attr": "condition", "value": "tied with the carrick bend", "time": {"at": "t.half_ten"}, "para": 2, "quote": "the bundle was tied with the carrick bend"},
+    {"id": "f.bend_seaman", "of": "carrick_bend", "attr": "reputed", "value": "a seaman's knot, which a landsman does not tie", "time": {"from": "t.before"}, "para": 2, "quote": "The carrick bend was held to be a seaman's knot, which a landsman does not tie"},
+    {"id": "f.pike_role", "of": "pike", "attr": "role", "value": "the cook's brother, an able seaman home on leave", "time": {"from": "t.before"}, "para": 3, "quote": "Tom Pike is the cook's brother, an able seaman home on leave"},
+    {"id": "f.pike_knows", "of": "pike", "attr": "knows", "value": "carrick_bend", "time": {"from": "t.before"}, "para": 3, "quote": "Tom Pike knew the carrick bend"},
+    {"id": "f.pike_kitchen", "of": "pike", "attr": "location", "value": "kitchen", "time": {"from": "t.afternoon", "to": "t.seven"}, "para": 3, "quote": "Tom Pike was in the kitchen"},
+    {"id": "f.rudd_role", "of": "rudd", "attr": "role", "value": "the groom at Fernleigh", "time": {"from": "t.before"}, "para": 3, "quote": "Sam Rudd is the groom at Fernleigh"},
+    {"id": "f.ellen_role", "of": "ellen", "attr": "role", "value": "the parlourmaid at Fernleigh", "time": {"from": "t.before"}, "para": 3, "quote": "Ellen is the parlourmaid at Fernleigh"},
+    {"id": "f.rudd_home", "of": "rudd", "attr": "location", "value": "fernleigh", "time": {"from": "t.seven", "to": "t.eleven"}, "para": 3, "quote": "Sam Rudd was at Fernleigh"},
+    {"id": "f.ellen_home", "of": "ellen", "attr": "location", "value": "fernleigh", "time": {"from": "t.seven", "to": "t.eleven"}, "para": 3, "quote": "Ellen was at Fernleigh"},
+    {"id": "f.landlord_tells", "of": "landlord", "attr": "tells", "value": "acct.landlord", "to": "hale", "how": "told", "time": {"at": "t.later"}, "para": 4, "quote": "The landlord of the Bell told me"},
+    {"id": "f.pike_bell", "of": "pike", "attr": "location", "value": "bell", "time": {"from": "t.seven", "to": "t.eleven"}, "para": 4, "quote": "Tom Pike was at the Bell"},
+    {"id": "f.rudd_fleet", "of": "rudd", "attr": "condition", "value": "in the Grimsby fishing fleet for four years as a boy", "time": {"from": "t.before"}, "para": 5, "quote": "Sam Rudd was in the Grimsby fishing fleet for four years as a boy"},
+    {"id": "f.rudd_knows", "of": "rudd", "attr": "knows", "value": "carrick_bend", "time": {"from": "t.before"}, "para": 5, "quote": "Sam Rudd knew the carrick bend"},
+    {"id": "f.ellen_granny", "of": "ellen", "attr": "knows", "value": "carrick_bend", "neg": true, "time": {"from": "t.before"}, "para": 6, "quote": "Ellen did not know the carrick bend"},
+    {"id": "f.rudd_owns", "of": "rudd", "attr": "says", "to": "hale", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "rudd"}], "para": 7, "value": "owns to tying the bundle", "quote": "Sam Rudd said to me: \"It was I who tied the bundle at Fernleigh.\""}
+  ]
+}

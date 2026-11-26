@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who tied the bundle?", "entry": {"of": "?", "attr": "action", "act": ["tie_bundle"], "thing": "bundle", "about": "carrick_bend", "where": "fernleigh", "time": {"from": "t.nine", "to": "t.half_ten"}}, "possibilities": [{"value": "something else", "via": "always", "available": 1},{"value": "pike", "via": "direct", "available": 3, "quote": "Tom Pike is the cook's brother, an able seaman home on leave"},{"value": "rudd", "via": "direct", "available": 3, "quote": "Sam Rudd is the groom at Fernleigh"},{"value": "ellen", "via": "direct", "available": 3, "quote": "Ellen is the parlourmaid at Fernleigh"}], "answer": "rudd", "answer_inferable_at": 6, "answer_from": "f.ellen_granny", "raised": 1, "quote": "Who tied the bundle?", "answer_given_at": 7, "answer_given_quote": "Sam Rudd said to me: \"It was I who tied the bundle at Fernleigh.\""}
+  ]
+}

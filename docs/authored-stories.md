@@ -128,6 +128,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/cellar-door-typed` | The Cellar Door told from its data: the reader's own entry of a change, its sentence made from the engine's acts and their needs (finding 153). | 6 paragraphs, 20 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/watchmans-clock-typed` | The Watchman's Clock told from its data: a rule told from its series, the card as its record, the reader's entry of a gap (finding 154). | 6 paragraphs and a paper of 1, 23 facts, 3 accounts, 2 tellings, 2 questions, 8 observations (5 essential), 13 moves |
 | `cases/miniatures/garden-room-typed` | The Garden Room told from its data: two doors, each watched from somewhere for a stretch (finding 156). | 5 paragraphs, 21 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
+| `cases/miniatures/sailors-knot-typed` | The Sailor's Knot told from its data: a thing known and not known, what a thing is held to be (finding 157). | 7 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2637,6 +2638,24 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Still written by hand:* the order; names and time labels; six phrases (five roles, "fitted with two doors
       and no window that opens"); the question's label; the one written rule's sentence; the true path's reasons;
       `structure.json`.
+
+157. **The Sailor's Knot told from its data (2026-11-26).** The case is `cases/miniatures/sailors-knot-typed`,
+    the same logic and true path.
+    - *What the templates gained:* a thing known ("Tom Pike knew the carrick bend", "Ellen did not know the
+      carrick bend") and what a thing is held to be ("The carrick bend was held to be a seaman's knot, which a
+      landsman does not tie").
+    - *It held:* it validated at the first try, the engine derives what it derived for the written case (the
+      parlourmaid ruled out by the knot she does not know), and every page check passes. 230 words against 250.
+    - *What typing forced or found.* The plate is in the bundle and the bundle in the shrubbery, where the
+      bundle had been a detail of the plate. The groom's four years in the fishing fleet were a second role:
+      they are a state. The parlourmaid's parcel went: an act in free text that asserted nothing.
+    - *What was lost:* that the narrator knows the knot "as I know my own hand" (why his naming of it is to be
+      believed), "every eye in the house went at once to Tom Pike" (the false trail said aloud), the discharge
+      book, "every lad in that fleet learns" (the step from the fleet to the knot is now the narrator's plain
+      statement), the granny knot tied before him, and what the groom meant to do with the plate.
+    - *Still written by hand:* the order; names and time labels; seven phrases (four roles, "tied with the
+      carrick bend", the knot's repute, the fishing fleet); the question's label; the past form of the one act
+      ("tied"); three written rules' sentences; the true path's reasons; `structure.json`.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
