@@ -138,8 +138,7 @@ A rule of a regular series is told from the series ("By rule, Abel Ward was to b
 "at every time the rule names". An observation that comes from a gap the reader points out (`{reasoned: "missing",
 of, at}`) says the rule at that time and the series' state denied then ("the record has nothing then: Abel Ward was
 not on the round"). What a state leaves someone unable to do (`cannot: [acts]`) is the deed of the question that
-asks about such an act ("…, and in no state to be the one who took the bale of China silk from the yard"). A door
-that is `shut` is "shut, and not locked".
+asks about such an act ("…, and in no state to be the one who took the bale of China silk from the yard").
 A fact there has no `detail` (free text is not told), a
 state's `value` reads after "was", and an act of the case's own has `past` ("spoiled") beside its `label`.
 

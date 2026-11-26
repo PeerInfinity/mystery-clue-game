@@ -1,0 +1,18 @@
+{
+  "id": "garden_room_typed",
+  "title": "The Garden Room, told from its data",
+  "author": "written for this project (a mechanic miniature: The Garden Room, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "ellen",
+      "name": "Ellen Wray",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Ellen Wray's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 300
+  }
+}

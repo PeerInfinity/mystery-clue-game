@@ -1,0 +1,25 @@
+{
+  "facts": [
+    {"id": "f.ellen_role", "of": "ellen", "attr": "role", "value": "the housekeeper of Holm Lodge", "time": {"from": "t.before"}, "para": 1, "quote": "I am Ellen Wray, the housekeeper of Holm Lodge"},
+    {"id": "f.watch_laid", "of": "watch", "attr": "location", "value": "garden_room", "time": {"at": "t.four"}, "para": 1, "quote": "Mr. Tobias Wray's gold repeater was in the garden room"},
+    {"id": "f.wray_up", "of": "wray", "attr": "location", "value": "upstairs", "time": {"from": "t.four", "to": "t.eight"}, "para": 1, "quote": "Mr. Tobias Wray was on the upper floor"},
+    {"id": "f.watch_gone", "of": "watch", "attr": "location", "value": "garden_room", "neg": true, "time": {"at": "t.eight"}, "para": 1, "quote": "Mr. Tobias Wray's gold repeater was not in the garden room"},
+    {"id": "f.two_doors", "of": "garden_room", "attr": "condition", "value": "fitted with two doors and no window that opens", "time": {"from": "t.before"}, "para": 2, "quote": "The garden room was fitted with two doors and no window that opens"},
+    {"id": "f.philip_role", "of": "philip", "attr": "role", "value": "the nephew of Mr. Tobias Wray", "time": {"from": "t.before"}, "para": 2, "quote": "Philip Wray is the nephew of Mr. Tobias Wray"},
+    {"id": "f.farrant_role", "of": "farrant", "attr": "role", "value": "a neighbour", "time": {"from": "t.before"}, "para": 2, "quote": "Mr. Farrant is a neighbour"},
+    {"id": "f.house", "of": "*", "every": "person", "but": ["ellen", "wray", "philip", "farrant"], "attr": "location", "value": "lodge", "neg": true, "time": {"from": "t.four", "to": "t.eight"}, "para": 2, "quote": "nobody but me, Mr. Tobias Wray, Philip Wray and Mr. Farrant was at Holm Lodge"},
+    {"id": "f.dunn_role", "of": "dunn", "attr": "role", "value": "the gardener", "time": {"from": "t.before"}, "para": 3, "quote": "Dunn is the gardener"},
+    {"id": "f.dunn_tells", "of": "dunn", "attr": "tells", "value": "acct.dunn", "to": "ellen", "how": "told", "time": {"at": "t.sunday"}, "para": 3, "quote": "Dunn told me"},
+    {"id": "f.dunn_terrace", "of": "dunn", "attr": "location", "value": "terrace", "time": {"from": "t.four", "to": "t.dusk"}, "para": 3, "quote": "I was on the terrace"},
+    {"id": "f.terrace_door_shut", "of": "terrace_door", "attr": "door", "value": "shut", "seen_from": "f.dunn_terrace", "time": {"from": "t.four", "to": "t.dusk"}, "para": 3, "quote": "The terrace door of the garden room was shut"},
+    {"id": "f.farrant_terrace", "of": "farrant", "attr": "location", "value": "terrace", "time": {"from": "t.five", "to": "t.dusk"}, "para": 3, "quote": "Mr. Farrant was on the terrace"},
+    {"id": "f.dunn_home", "of": "dunn", "attr": "location", "value": "terrace", "neg": true, "time": {"from": "t.dusk", "to": "t.eight"}, "para": 3, "quote": "I was not on the terrace"},
+    {"id": "f.ellen_passage", "of": "ellen", "attr": "location", "value": "passage", "time": {"from": "t.four", "to": "t.eight"}, "para": 4, "quote": "I was in the passage"},
+    {"id": "f.passage_door_shut", "of": "passage_door", "attr": "door", "value": "shut", "seen_from": "f.ellen_passage", "time": {"from": "t.four", "to": "t.eight"}, "para": 4, "quote": "The passage door of the garden room was shut"},
+    {"id": "f.philip_passage", "of": "philip", "attr": "location", "value": "passage", "time": {"from": "t.four", "to": "t.dusk"}, "para": 4, "quote": "Philip Wray was in the passage"},
+    {"id": "f.philip_out", "of": "philip", "attr": "location", "value": "passage", "neg": true, "time": {"from": "t.dusk", "to": "t.eight"}, "para": 4, "quote": "Philip Wray was not in the passage"},
+    {"id": "f.farrant_passage", "of": "farrant", "attr": "location", "value": "passage", "time": {"from": "t.dusk", "to": "t.eight"}, "para": 4, "quote": "Mr. Farrant was in the passage"},
+    {"id": "f.watch_pawned", "of": "watch", "attr": "location", "value": "pawnbroker", "time": {"at": "t.monday"}, "para": 5, "quote": "Mr. Tobias Wray's gold repeater was at the pawnbroker's in Castle Street"},
+    {"id": "f.philip_owns", "of": "philip", "attr": "says", "to": "ellen", "time": {"at": "t.monday"}, "asserts": [{"q": "q.who", "pick": "philip"}], "para": 5, "value": "owns to taking up Mr. Tobias Wray's gold repeater", "quote": "Philip Wray said to me: \"It was I who took Mr. Tobias Wray's gold repeater from the garden room.\""}
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who took Mr. Tobias Wray's gold repeater from the garden room?", "entry": {"of": "?", "attr": "action", "act": "take", "item": "watch", "where": "garden_room", "time": {"from": "t.four", "to": "t.eight"}}, "possibilities": [{"value": "something else", "via": "always", "available": 1},{"value": "philip", "via": "direct", "available": 2, "quote": "Philip Wray is the nephew of Mr. Tobias Wray"},{"value": "farrant", "via": "direct", "available": 2, "quote": "Mr. Farrant is a neighbour"}], "answer": "philip", "answer_inferable_at": 4, "answer_from": "f.philip_out", "raised": 1, "quote": "Who took Mr. Tobias Wray's gold repeater from the garden room?", "answer_given_at": 5, "answer_given_quote": "Philip Wray said to me: \"It was I who took Mr. Tobias Wray's gold repeater from the garden room.\""}
+  ]
+}

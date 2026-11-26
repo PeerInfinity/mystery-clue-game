@@ -1,0 +1,42 @@
+{
+ "title": "THE GARDEN ROOM, TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.ellen_role",
+   "f.watch_laid",
+   "f.wray_up",
+   "f.watch_gone",
+   {
+    "deed": "q.who"
+   },
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.two_doors",
+   "f.philip_role",
+   "f.farrant_role",
+   "f.house"
+  ],
+  [
+   "f.dunn_role",
+   "f.dunn_tells",
+   "f.dunn_terrace",
+   "f.terrace_door_shut",
+   "f.farrant_terrace",
+   "f.dunn_home"
+  ],
+  [
+   "f.ellen_passage",
+   "f.passage_door_shut",
+   "f.philip_passage",
+   "f.philip_out",
+   "f.farrant_passage"
+  ],
+  [
+   "f.watch_pawned",
+   "f.philip_owns"
+  ]
+ ]
+}

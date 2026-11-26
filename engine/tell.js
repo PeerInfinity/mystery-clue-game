@@ -55,13 +55,12 @@ export function teller(ctx) {
         if (x.attr === 'lives_at') return `${subj(x.of)} ${me(x.of) ? 'live' : 'lives'} ${at(x.value)}`;   // a standing state, as a role is
         if (x.attr === 'owner') return `${subj(x.of)} ${x.neg ? 'did not belong' : 'belonged'} to ${obj(x.value)}`;
         if (x.attr === 'carrying') return x.neg ? `${subj(x.of)} ${be} without ${ctx.name(x.value)}` : `${subj(x.of)} had ${ctx.name(x.value)}`;
-        // A door that is shut is not locked (the engine's three states of a door); a state of a rule's series claimed
+        // A state of a rule's series claimed
         // over a stretch is claimed of every time the rule names; what a state leaves someone unable to do (`cannot`)
         // is the deed of the question that asks about such an act.
-        const value = x.attr === 'door' && x.value === 'shut' ? 'shut, and not locked' : x.value;
         const every = ctx.ruled?.(x) && !x.time?.at ? ' at every time the rule names' : '';
         const deed = list(x.cannot).map((t) => ctx.deedOf?.(t)).find(Boolean);
-        return `${subj(x.of)} ${be}${not} ${value}${every}${deed ? `, and in no state to be the one who ${done(deed, '').trim()}` : ''}`;   // a condition, a door's state, or any state whose value reads after "was"
+        return `${subj(x.of)} ${be}${not} ${x.value}${every}${deed ? `, and in no state to be the one who ${done(deed, '').trim()}` : ''}`;   // a condition, a door's state, or any state whose value reads after "was"
     };
     /** What is wanted, in the wanter's words: "X to be V", and what that needs. */
     const want = (g) => `${ctx.name(g.of)} to be ${g.value}${list(g.needs).map((n) => `, and for that ${ctx.name(n.of)} must${n.neg ? ' not' : ''} be ${n.value}`).join('')}`;

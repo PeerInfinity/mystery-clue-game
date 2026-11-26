@@ -1,0 +1,19 @@
+{
+  "joins": {"passage_door": ["garden_room", "passage"], "terrace_door": ["garden_room", "terrace"]},
+  "entities": [
+    {"id": "ellen", "kind": "person", "name": "Ellen Wray"},
+    {"id": "wray", "kind": "person", "name": "Mr. Tobias Wray"},
+    {"id": "philip", "kind": "person", "name": "Philip Wray"},
+    {"id": "farrant", "kind": "person", "name": "Mr. Farrant"},
+    {"id": "dunn", "kind": "person", "name": "Dunn"},
+    {"id": "lodge", "kind": "place", "name": "Holm Lodge"},
+    {"id": "garden_room", "kind": "place", "name": "the garden room", "within": "lodge", "prep": "in"},
+    {"id": "passage", "kind": "place", "name": "the passage", "within": "lodge", "prep": "in"},
+    {"id": "upstairs", "kind": "place", "name": "the upper floor", "within": "lodge", "prep": "on"},
+    {"id": "terrace", "kind": "place", "name": "the terrace", "prep": "on"},
+    {"id": "pawnbroker", "kind": "place", "name": "the pawnbroker's in Castle Street"},
+    {"id": "watch", "kind": "object", "name": "Mr. Tobias Wray's gold repeater"},
+    {"id": "passage_door", "kind": "object", "name": "the passage door of the garden room"},
+    {"id": "terrace_door", "kind": "object", "name": "the terrace door of the garden room"}
+  ]
+}

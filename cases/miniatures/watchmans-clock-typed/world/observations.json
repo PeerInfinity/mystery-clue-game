@@ -1,10 +1,10 @@
 {
   "observations": [
     {"id": "o.fast", "q": "q.when", "from": ["f.gate_fast"], "essential": true, "says": "at half past two on Tuesday morning, the yard gate was locked"},
-    {"id": "o.latch", "q": "q.when", "from": ["f.gate_latch"], "essential": true, "against": ["after five"], "says": "at half past three on Tuesday morning, the yard gate was shut, and not locked"},
+    {"id": "o.latch", "q": "q.when", "from": ["f.gate_latch"], "essential": true, "against": ["after five"], "says": "at half past three on Tuesday morning, the yard gate was shut"},
     {"id": "o.gap_when", "q": "q.when", "from": [{"reasoned": "missing", "of": "f.rule", "at": "t.three"}], "says": "by rule, Abel Ward was to be on the round at three o'clock on Tuesday morning; the record has nothing then: Abel Ward was not on the round"},
     {"id": "o.gap", "q": "q.who", "from": [{"reasoned": "missing", "of": "f.rule", "at": "t.three"}], "essential": true, "says": "by rule, Abel Ward was to be on the round at three o'clock on Tuesday morning; the record has nothing then: Abel Ward was not on the round"},
-    {"id": "o.opened", "q": "q.who", "from": ["f.gate_latch"], "essential": true, "says": "at half past three on Tuesday morning, the yard gate was shut, and not locked"},
+    {"id": "o.opened", "q": "q.who", "from": ["f.gate_latch"], "essential": true, "says": "at half past three on Tuesday morning, the yard gate was shut"},
     {"id": "o.ankle", "q": "q.who", "from": ["f.tanner_ankle"], "essential": true, "says": "from Saturday, Joe Tanner was in bed with an ankle in splints, and in no state to be the one who took the bale of China silk from the yard"},
     {"id": "o.keys", "q": "q.who", "from": ["f.tanner_key"], "says": "nobody but Abel Ward, Joe Tanner and Edwin Marsh had a key of the yard gate"},
     {"id": "o.lie", "q": "q.who", "from": [{"doubted": "f.ward_tells"}], "says": "Ward's statement, that he made every round, is false"}

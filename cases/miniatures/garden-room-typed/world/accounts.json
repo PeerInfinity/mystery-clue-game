@@ -1,0 +1,6 @@
+{
+  "accounts": [
+    {"id": "acct.ellen", "label": "What Ellen Wray sees and hears herself", "origin": "ellen", "how": "saw", "facts": ["f.ellen_role", "f.watch_laid", "f.wray_up", "f.watch_gone", "f.two_doors", "f.philip_role", "f.farrant_role", "f.house", "f.dunn_role", "f.dunn_tells", "f.ellen_passage", "f.passage_door_shut", "f.philip_passage", "f.philip_out", "f.farrant_passage", "f.watch_pawned", "f.philip_owns"]},
+    {"id": "acct.dunn", "label": "What Dunn saw from the terrace", "origin": "dunn", "how": "saw", "facts": ["f.dunn_terrace", "f.terrace_door_shut", "f.farrant_terrace", "f.dunn_home"]}
+  ]
+}

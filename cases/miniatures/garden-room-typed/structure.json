@@ -1,0 +1,16 @@
+{
+  "story": "garden-room-typed",
+  "mechanic": "A room with two doors, each watched by a different witness for a different stretch: neither watch alone closes any of the time, and the two together leave what neither covers.",
+  "note": "Spoilers. The logic written before the prose. Written for finding 124: the narrowing of when a deed could have been done, for a place with more than one door.",
+  "goal": "q.who",
+  "frame": [
+    {"id": "fr.watch", "says": "A gold repeater laid on the table of the garden room at four was gone at eight; the room has two doors, one on the passage and one on the terrace.", "facts": ["f.watch_laid", "f.watch_gone", "f.two_doors", "f.ellen_role", "f.wray_up"]}
+  ],
+  "questions": [
+    {"id": "q.who", "asks": "Who took the watch from the garden room?", "answer": "Philip Wray", "others": ["Mr. Farrant"], "gate": 5, "needs": [["c.passage", "c.terrace"]], "rules_out": {"Mr. Farrant": "c.terrace and c.passage: the terrace door was shut while he walked past it, and after dusk he was in the passage", "anyone before dusk": "c.passage and c.terrace together: neither door opened"}}
+  ],
+  "clues": [
+    {"id": "c.passage", "source": "Ellen Wray, in the passage from four until eight", "says": "The passage door did not open once; Philip sat by her until dusk and was not seen again until the gong; Mr. Farrant was with her from dusk until eight.", "facts": ["f.ellen_passage", "f.passage_door_shut", "f.philip_passage", "f.philip_out", "f.farrant_passage"]},
+    {"id": "c.terrace", "source": "Dunn, the gardener, on the terrace from four until dusk", "says": "The terrace door was shut the whole time; Mr. Farrant walked the terrace from five and never touched it; at dusk Dunn went home.", "facts": ["f.dunn_terrace", "f.terrace_door_shut", "f.farrant_terrace", "f.dunn_home"], "chain": ["f.dunn_tells"]}
+  ]
+}

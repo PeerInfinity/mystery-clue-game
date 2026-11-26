@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.passage_door", "q": "q.who", "from": ["f.passage_door_shut"], "essential": true, "says": "from four o'clock on Saturday until eight o'clock on Saturday, the passage door of the garden room was shut"},
+    {"id": "o.terrace_door", "q": "q.who", "from": ["f.terrace_door_shut"], "essential": true, "says": "from four o'clock on Saturday until dusk on Saturday, the terrace door of the garden room was shut"},
+    {"id": "o.farrant_in", "q": "q.who", "from": ["f.farrant_passage"], "essential": true, "says": "from dusk on Saturday until eight o'clock on Saturday, Mr. Farrant was in the passage"},
+    {"id": "o.philip_out", "q": "q.who", "from": ["f.philip_out"], "essential": true, "says": "from dusk on Saturday until eight o'clock on Saturday, Philip Wray was not in the passage"},
+    {"id": "o.farrant_terrace", "q": "q.who", "from": ["f.farrant_terrace"], "says": "from five o'clock on Saturday until dusk on Saturday, Mr. Farrant was on the terrace"},
+    {"id": "o.philip_in", "q": "q.who", "from": ["f.philip_passage"], "says": "from four o'clock on Saturday until dusk on Saturday, Philip Wray was in the passage"},
+    {"id": "o.dunn_gone", "q": "q.who", "from": ["f.dunn_home"], "says": "from dusk on Saturday until eight o'clock on Saturday, Dunn was not on the terrace"}
+  ]
+}

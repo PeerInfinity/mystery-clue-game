@@ -127,6 +127,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/night-porters-statement-typed` | The Night Porter's Statement told from its data: a narrator who may be doubted, his statement in his own voice (finding 152). | 6 paragraphs, 12 facts, 2 accounts, 1 question, 4 observations (3 essential), 6 moves |
 | `cases/miniatures/cellar-door-typed` | The Cellar Door told from its data: the reader's own entry of a change, its sentence made from the engine's acts and their needs (finding 153). | 6 paragraphs, 20 facts, 2 accounts, 1 telling, 1 question, 6 observations (5 essential), 8 moves |
 | `cases/miniatures/watchmans-clock-typed` | The Watchman's Clock told from its data: a rule told from its series, the card as its record, the reader's entry of a gap (finding 154). | 6 paragraphs and a paper of 1, 23 facts, 3 accounts, 2 tellings, 2 questions, 8 observations (5 essential), 13 moves |
+| `cases/miniatures/garden-room-typed` | The Garden Room told from its data: two doors, each watched from somewhere for a stretch (finding 156). | 5 paragraphs, 21 facts, 2 accounts, 1 telling, 1 question, 7 observations (4 essential), 6 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2552,7 +2553,7 @@ script that found each fact's paragraph from its quote; the data files are the s
       Tuesday morning; the record has nothing then: Abel Ward was not on the round"). A state of the series
       claimed over a stretch ("I was on the round at every time the rule names"). What a state leaves someone
       unable to do, from `cannot` and the question's deed ("in bed with an ankle in splints, and in no state to
-      be the one who took the bale of China silk from the yard"). A door that is shut is "shut, and not locked".
+      be the one who took the bale of China silk from the yard").
     - *It held:* it validated at the first try, and the true path, the autoplay, the hints and the trying player
       play it through. 397 words in the story and the card against 274: the hours are named in full each time,
       and the rule alone names six.
@@ -2617,6 +2618,25 @@ script that found each fact's paragraph from its quote; the data files are the s
       does not (its pane is not typed as closed to a person, and its taking is no typed act).
     - *Checked:* a unit test of both rules; `npm test`; every page check on the two cases; every short case
       validates; the long case's export, and so its version, unchanged.
+
+156. **The cases that needed little, one at a time: The Garden Room told from its data (2026-11-26; the user:
+    "Please continue").** The first of the eight not on the list of forms. The case is
+    `cases/miniatures/garden-room-typed`, the same logic and true path. It needed nothing new of the templates.
+    - *It held:* it validated at the first try, the engine derives what it derived for the written case (Mr.
+      Farrant unlikely by when it could have been done), and every page check passes. 315 words against 311.
+    - *What typing forced or found.* "Only two others were about the house that evening" is a statement about
+      everyone ("Nobody but me, Mr. Tobias Wray, Philip Wray and Mr. Farrant was at Holm Lodge"). It does not
+      close the list of answers: the uncle, upstairs, is excepted and is no answer. The written story's "one of
+      those two took the watch" passed over him without a word. The gardener, the nephew and the neighbour
+      gained roles. Philip's "he said he would take a turn in the garden" went: it asserts nothing typed.
+    - *One wording taken back:* a door that is shut was told "shut, and not locked" (finding 154). A witness who
+      watches a door cannot say that; it is "shut" again, in The Watchman's Clock too.
+    - *What was lost:* the yew and the shears, the cigar and the dozen passes of the door, the wool, the lamps,
+      the window-seat with the door in front of it (why each watcher's word covers the door: the typed case has
+      "I saw this from the passage"), and the watch pledged in Philip's name.
+    - *Still written by hand:* the order; names and time labels; six phrases (five roles, "fitted with two doors
+      and no window that opens"); the question's label; the one written rule's sentence; the true path's reasons;
+      `structure.json`.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
