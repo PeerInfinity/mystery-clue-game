@@ -1,0 +1,16 @@
+{
+  "facts": [
+    {"id": "f.kemp_role", "of": "kemp", "attr": "role", "value": "the night porter of Bly's Bank", "time": {"from": "t.before"}, "para": 1, "quote": "Josiah Kemp is the night porter of Bly's Bank"},
+    {"id": "f.open", "of": "strongroom", "attr": "condition", "value": "open", "time": {"at": "t.found"}, "para": 1, "quote": "the strongroom of Bly's Bank was open"},
+    {"id": "f.money_gone", "of": "money", "attr": "location", "value": "strongroom", "neg": true, "time": {"at": "t.found"}, "para": 1, "quote": "The four hundred pounds was not in the strongroom of Bly's Bank"},
+    {"id": "f.kemp_on", "of": "kemp", "attr": "location", "value": "bank", "time": {"from": "t.ten", "to": "t.seven"}, "para": 2, "quote": "I was at Bly's Bank"},
+    {"id": "f.bly_gives", "of": "bly", "attr": "action", "act": "give", "thing": "keys", "to": "kemp", "time": {"at": "t.ten"}, "para": 2, "quote": "Mr. Bly gave the keys of the bank and of the strongroom to me"},
+    {"id": "f.keys_belt", "of": "kemp", "attr": "carrying", "value": "keys", "key": "strongroom_door", "time": {"from": "t.ten", "to": "t.seven"}, "para": 2, "quote": "I had the keys of the bank and of the strongroom"},
+    {"id": "f.finch_role", "of": "finch", "attr": "role", "value": "a clerk turned off from Bly's Bank last month", "time": {"from": "t.before"}, "para": 3, "quote": "Tobias Finch is a clerk turned off from Bly's Bank last month"},
+    {"id": "f.finch_window", "of": "finch", "attr": "location", "value": "bank", "time": {"at": "t.one"}, "truth": false, "para": 3, "quote": "Tobias Finch was at Bly's Bank"},
+    {"id": "f.unforced", "of": "strongroom_door", "attr": "condition", "value": "opened with its key, and not forced", "time": {"at": "t.found"}, "para": 4, "quote": "the strongroom door was opened with its key, and not forced"},
+    {"id": "f.finch_lockup", "of": "finch", "attr": "location", "value": "lockup", "time": {"from": "t.wed", "to": "t.seven"}, "para": 5, "quote": "Tobias Finch was in the lock-up at Cross Street"},
+    {"id": "f.money_found", "of": "money", "attr": "location", "value": "porters_box", "time": {"at": "t.later"}, "para": 6, "quote": "the four hundred pounds was in the porter's box"},
+    {"id": "f.kemp_owns", "of": "kemp", "attr": "says", "to": "reeve", "time": {"at": "t.later"}, "asserts": [{"q": "q.who", "pick": "kemp"}], "para": 6, "value": "owns to the take_locked the four hundred pounds", "quote": "Josiah Kemp said to me: \"It was I who took the four hundred pounds from Bly's Bank.\""}
+  ]
+}

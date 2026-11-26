@@ -1,0 +1,35 @@
+{
+ "title": "THE NIGHT PORTER'S STATEMENT, TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.kemp_role",
+   "f.open",
+   "f.money_gone",
+   {
+    "deed": "q.who"
+   },
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.kemp_on",
+   "f.bly_gives",
+   "f.keys_belt"
+  ],
+  [
+   "f.finch_role",
+   "f.finch_window"
+  ],
+  [
+   "f.unforced"
+  ],
+  [
+   "f.finch_lockup"
+  ],
+  [
+   "f.money_found",
+   "f.kemp_owns"
+  ]
+ ]
+}

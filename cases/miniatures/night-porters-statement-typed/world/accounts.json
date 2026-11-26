@@ -1,0 +1,6 @@
+{
+  "accounts": [
+    {"id": "acct.reeve", "label": "What Inspector Reeve knows himself", "origin": "reeve", "how": "saw", "facts": ["f.kemp_role", "f.open", "f.money_gone", "f.unforced", "f.finch_lockup", "f.money_found", "f.kemp_owns"]},
+    {"id": "acct.kemp", "label": "Josiah Kemp's statement of his night", "origin": "kemp", "how": "saw", "facts": ["f.kemp_on", "f.bly_gives", "f.keys_belt", "f.finch_role", "f.finch_window"]}
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "implications": [
+    {"id": "i.who_not_finch", "q": "q.who", "from": ["o.lockup"], "says": "Finch was under lock and key from ten until seven: it was not Finch", "rules_out": ["finch"], "asserts": [{"of": "finch", "attr": "location", "value": "bank", "neg": true, "time": {"from": "t.ten", "to": "t.seven"}}]},
+    {"id": "i.who_kemp", "q": "q.who", "from": ["o.unforced", "o.keys"], "says": "it was done with the keys, and by his own statement the keys never left Kemp's belt: it was Kemp", "concludes": "kemp"}
+  ]
+}

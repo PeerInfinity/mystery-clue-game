@@ -124,6 +124,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/grey-cloak-typed` | The Grey Cloak told from its data: who someone was, what was worn, two descriptions compared as typed heights (finding 148). | 6 paragraphs, 19 facts, 3 accounts, 2 tellings, 1 question, 6 observations (all essential), 14 moves |
 | `cases/miniatures/ring-on-the-bench-typed` | The Ring on the Bench told from its data: the arrangement of a room, a route's observation, a thing that knows nothing named by its keeper (finding 150). | 9 paragraphs, 25 facts, 1 account, 1 question, 7 observations (5 essential), 17 moves |
 | `cases/miniatures/dinner-at-larch-house-typed` | The Dinner at Larch House told from its data: two narrators, each "I" in their own account; what was seen from where (finding 151). | 6 paragraphs, 21 facts, 2 accounts, 1 question, 7 observations (4 essential), 6 moves |
+| `cases/miniatures/night-porters-statement-typed` | The Night Porter's Statement told from its data: a narrator who may be doubted, his statement in his own voice (finding 152). | 6 paragraphs, 12 facts, 2 accounts, 1 question, 4 observations (3 essential), 6 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2481,6 +2482,32 @@ script that found each fact's paragraph from its quote; the data files are the s
       (finding 133) takes "nobody but these had the key" or "nobody but these was there", and this says the
       reverse, that everyone but these was elsewhere through the whole window. Put to the user.
     - *Still untold:* The Night Porter's Statement (a narrator who may be doubted), a reasoning move's entry.
+
+152. **A narrator who may be doubted, told from his data: The Night Porter's Statement (2026-11-26).** The other
+    case of two narrators, and it needed nothing new of the templates but a word: a narrator may name what his
+    part is called (`account` in `case.json`: "Inspector Reeve's note.", "Josiah Kemp's statement."). The case is
+    `cases/miniatures/night-porters-statement-typed`, the same logic and true path.
+    - *It held:* it validated at the first try, the false statement is still one the reader may rule out by
+      itself, and the true path, the autoplay, the hints and the trying player play it through. 219 words against
+      211.
+    - *The lie reads as flatly as the truth,* which suits it: "At one o'clock on Friday morning, Tobias Finch
+      was at Bly's Bank", in the porter's voice, and two paragraphs on, in the Inspector's, "From Wednesday until
+      seven o'clock on Friday morning, Tobias Finch was in the lock-up at Cross Street."
+    - *What typing forced or found.* Mr. Bly's handing over the keys became his act. The clerk's being held
+      since Wednesday and his being locked in from ten were two entries: they are one stretch now. The strongroom
+      "found open, and four hundred pounds gone" is a state and a whereabouts denied. The answer was given away
+      by where the money was found, which asserts nothing typed: the porter now owns to it as well.
+    - *What was lost:* "they never left my belt" (he "had" them), the step outside and the lamp, the clerk
+      looking in at the window and running, "I think it right to say so" (the voice of a man laying blame), the
+      Inspector turning the key himself, the lock-up book, the coals.
+    - *Still written by hand:* the order; names and time labels; four phrases (the two roles, "open", "opened
+      with its key, and not forced"); the question's label; the two written rules' sentences; the true path's
+      reasons; `structure.json`.
+    - *What the checker says:* the clerk is ruled out by the typed forms; the answer would follow with the list
+      closed. Nothing in the story says nobody else had the keys. What it does say is typed already: the deed
+      needs the key of the strongroom door, and the porter held it through the whole window. A rule from that
+      ("who held the key throughout, if it left nobody's hands") would be likely only. Put to the user.
+    - *Still untold of the list:* a reasoning move's entry (The Watchman's Clock, The Cellar Door).
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

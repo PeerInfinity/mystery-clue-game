@@ -1,0 +1,8 @@
+{
+  "observations": [
+    {"id": "o.unforced", "q": "q.who", "from": ["f.unforced"], "essential": true, "says": "on Friday morning, the strongroom door was opened with its key, and not forced"},
+    {"id": "o.keys", "q": "q.who", "from": ["f.keys_belt"], "essential": true, "says": "from ten o'clock on Thursday night until seven o'clock on Friday morning, Josiah Kemp had the keys of the bank and of the strongroom"},
+    {"id": "o.lockup", "q": "q.who", "from": ["f.finch_lockup"], "essential": true, "against": ["finch"], "says": "from Wednesday until seven o'clock on Friday morning, Tobias Finch was in the lock-up at Cross Street"},
+    {"id": "o.on_duty", "q": "q.who", "from": ["f.kemp_on"], "says": "from ten o'clock on Thursday night until seven o'clock on Friday morning, Josiah Kemp was at Bly's Bank"}
+  ]
+}

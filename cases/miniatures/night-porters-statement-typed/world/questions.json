@@ -1,0 +1,5 @@
+{
+  "questions": [
+    {"id": "q.who", "label": "Who took the four hundred pounds?", "entry": {"of": "?", "attr": "action", "act": "take_locked", "item": "money", "where": "bank", "via": "strongroom_door", "time": {"from": "t.ten", "to": "t.seven"}}, "possibilities": [{"value": "something else", "via": "always", "available": 1},{"value": "finch", "via": "direct", "available": 3, "quote": "Tobias Finch is a clerk turned off from Bly's Bank last month"},{"value": "kemp", "via": "direct", "available": 1, "quote": "Josiah Kemp is the night porter of Bly's Bank"}], "answer": "kemp", "answer_inferable_at": 5, "answer_from": "f.finch_lockup", "raised": 1, "quote": "Who took the four hundred pounds?", "answer_given_at": 6, "answer_given_quote": "Josiah Kemp said to me: \"It was I who took the four hundred pounds from Bly's Bank.\""}
+  ]
+}

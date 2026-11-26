@@ -1,0 +1,26 @@
+{
+  "id": "night_porters_statement_typed",
+  "title": "The Night Porter's Statement, told from its data",
+  "author": "written for this project (a mechanic miniature: The Night Porter's Statement, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "reeve",
+      "name": "Inspector Reeve",
+      "kind": "first-person",
+      "account": "note"
+    },
+    {
+      "id": "kemp",
+      "name": "Josiah Kemp",
+      "kind": "first-person",
+      "doubtable": true,
+      "account": "statement"
+    }
+  ],
+  "subtitle": "Inspector Reeve's file",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 200
+  }
+}
