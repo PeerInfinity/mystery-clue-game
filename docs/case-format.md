@@ -141,6 +141,9 @@ not on the round"). What a state leaves someone unable to do (`cannot: [acts]`) 
 asks about such an act ("…, and in no state to be the one who took the bale of China silk from the yard").
 An observation that holds only under an answer to another question (`if: {q, pick}`) says so first ("taking it
 that Mr. Martin Grove handed in the telegram at the post office at Leeds: …").
+A `says` that asserts an answer which is the state the question asks of someone ("Where was Mr. Wicks at half past
+eight?") is that state, with its time ("At half past eight on Friday evening, Mr. Wicks was in Mrs. Dabney's
+kitchen.").
 A thing known is "knew the carrick bend" (`knows` with an entity), and `reputed` "was held to be …". A telling's
 item `{implied: <fact>, by: <fact>}` puts an entry no sentence says on the timeline, by the words of the entry that
 implies it and where that is told (he was at the table when the letter was read: he knew the hiding-place).

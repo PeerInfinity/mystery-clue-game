@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.where_judged", "q": "q.where", "from": ["o.cook", "o.accused"], "says": "the cook has him in her kitchen, and the carter's word against hers is not to be believed: at half past eight he was in the kitchen", "concludes": "kitchen"},
+    {"id": "i.where_two", "q": "q.where", "from": ["o.cook", "o.curate"], "says": "the cook and the curate, who share nothing, both have him in the kitchen at half past eight: he was there", "concludes": "kitchen"},
+    {"id": "i.who_not_wicks", "q": "q.who", "from": ["o.supper", {"solved": "q.where"}], "says": "the foreman was in the kitchen across the yard from eight till nine: he did not go into the counting-room", "rules_out": ["wicks"]},
+    {"id": "i.who_tarrant", "q": "q.who", "from": ["o.locked", "o.admits", "i.who_not_wicks"], "says": "the bag went by the key, in the hour; the carter had the key in that hour and the foreman did not leave the kitchen: the carter took it", "concludes": "tarrant"}
+  ]
+}

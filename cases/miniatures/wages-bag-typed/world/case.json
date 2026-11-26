@@ -1,0 +1,18 @@
+{
+  "id": "wages_bag_typed",
+  "title": "The Wages Bag, told from its data",
+  "author": "written for this project (a mechanic miniature: The Wages Bag, its text made from its typed entries by scripts/tell-story.mjs)",
+  "story": "../story.txt",
+  "narrators": [
+    {
+      "id": "orchard",
+      "name": "Samuel Orchard",
+      "kind": "first-person"
+    }
+  ],
+  "subtitle": "Samuel Orchard's timeline",
+  "source": {
+    "written": "2026-11-26",
+    "word_count": 400
+  }
+}

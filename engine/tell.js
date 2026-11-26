@@ -78,12 +78,15 @@ export function teller(ctx) {
         return parts.length || said ? `${subj(f.of)}${parts.length ? ` ${listed(parts)}` : ''}${said}` : null;
     };
     const owns = (f) => list(f.asserts).find((x) => x.q && x.pick === f.of);
+    const stateAsked = (a) => { const e = ctx.question(a.q)?.entry; return e && e.of !== '?' && !list(e.act).length && e.attr !== 'identity' && e.attr !== 'action' ? e : null; };
     function said(f) {
         if (f.goal) return `wants ${want(f.goal)}`;
         const o = owns(f);
         if (o && ctx.question(o.q).entry?.attr === 'identity') return `owns to being ${ctx.name(ctx.question(o.q).entry.of)}`;
         if (o) { const e = ctx.question(o.q).entry; return `owns to ${list(e.act).map((t) => ctx.act(t)?.label ?? ctx.label?.(t) ?? `the ${t}`).join(' and ')} ${ctx.name(e.thing ?? e.item)}`; }
         const a = list(f.asserts).find((x) => x.q && x.pick != null);
+        // An answer that is the state the question asks of someone (where he was): the state itself.
+        if (a && ctx.kind?.(a.pick) && stateAsked(a)) return `says ${teller({ ...ctx, speaker: null, listener: null }).sentence({ ...stateAsked(a), value: a.pick })}`;
         if (a && ctx.kind?.(a.pick)) return `says it was ${ctx.name(a.pick)}`;
         if (a) return `says it was ${a.pick}`;
         return f.value;
@@ -108,6 +111,7 @@ export function teller(ctx) {
                 const x = own[0] ?? (twin[0] ? { ...twin[0], neg: !twin[0].neg } : null);
                 if (x) { const inner = teller({ ...ctx, speaker: f.of }); return `${subj(f.of)} said${to}: "${cap(`${ctx.prefix?.(x.time) ?? ''}${mine(f.of, inner.sentence(x))}`)}."`; }
             }
+            if (a && ctx.kind?.(a.pick) && stateAsked(a)) { const e = stateAsked(a), inner = teller({ ...ctx, speaker: f.of, listener: f.to ?? null }); return `${subj(f.of)} said${to}: "${cap(`${ctx.prefix?.(e.time) ?? ''}${inner.sentence({ ...e, value: a.pick })}`)}."`; }
             // Another named as the doer, by one who can speak for it (a keeper of his monkey): "It was my monkey who took …".
             if (a && ctx.kind?.(a.pick) && list(ctx.question(a.q).entry?.act).length) return `${subj(f.of)} said${to}: "It was ${yours(f.to, mine(f.of, `${obj(a.pick)} who ${done(ctx.question(a.q).entry, '').trim()}`))}."`;
             if (a) return `${subj(f.of)} said${to}: "It was ${a.pick}."`;

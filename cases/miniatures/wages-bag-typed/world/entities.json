@@ -1,0 +1,24 @@
+{
+  "entities": [
+    {"id": "orchard", "kind": "person", "name": "Samuel Orchard"},
+    {"id": "wicks", "kind": "person", "name": "Mr. Wicks"},
+    {"id": "tarrant", "kind": "person", "name": "Job Tarrant"},
+    {"id": "dabney", "kind": "person", "name": "Mrs. Dabney"},
+    {"id": "lisle", "kind": "person", "name": "Mr. Lisle"},
+    {"id": "constable", "kind": "person", "name": "the constable"},
+    {"id": "mill", "kind": "place", "name": "Garth's Mill"},
+    {"id": "counting_room", "kind": "place", "name": "the counting-room", "within": "mill", "prep": "in"},
+    {"id": "passage", "kind": "place", "name": "the passage", "within": "mill", "prep": "in"},
+    {"id": "forge", "kind": "place", "name": "the forge"},
+    {"id": "cart_shed", "kind": "place", "name": "the cart-shed", "prep": "in"},
+    {"id": "mill_house", "kind": "place", "name": "the mill house"},
+    {"id": "kitchen", "kind": "place", "name": "Mrs. Dabney's kitchen", "within": "mill_house", "prep": "in"},
+    {"id": "village", "kind": "place", "name": "the village"},
+    {"id": "mill_lane", "kind": "place", "name": "the mill lane", "prep": "in"},
+    {"id": "cart", "kind": "place", "name": "Job Tarrant's cart", "prep": "in"},
+    {"id": "bag", "kind": "object", "name": "the wages bag"},
+    {"id": "key", "kind": "object", "name": "the counting-room key"},
+    {"id": "counting_door", "kind": "object", "name": "the counting-room door"},
+    {"id": "lantern", "kind": "object", "name": "the counting-room lantern"}
+  ]
+}

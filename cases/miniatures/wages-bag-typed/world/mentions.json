@@ -1,0 +1,24 @@
+{
+ "entities": {
+  "orchard": ["Samuel Orchard"],
+  "wicks": ["Mr. Wicks"],
+  "tarrant": ["Job Tarrant"],
+  "dabney": ["Mrs. Dabney"],
+  "lisle": ["Mr. Lisle"],
+  "constable": ["the constable"],
+  "mill": ["Garth's Mill"],
+  "counting_room": ["the counting-room"],
+  "passage": ["the passage"],
+  "forge": ["the forge"],
+  "cart_shed": ["the cart-shed"],
+  "mill_house": ["the mill house"],
+  "kitchen": ["Mrs. Dabney's kitchen"],
+  "village": ["the village"],
+  "mill_lane": ["the mill lane"],
+  "cart": ["Job Tarrant's cart"],
+  "bag": ["the wages bag"],
+  "key": ["the counting-room key"],
+  "counting_door": ["the counting-room door"],
+  "lantern": ["the counting-room lantern"]
+ }
+}

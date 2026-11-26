@@ -1,0 +1,12 @@
+{
+  "times": [
+    {"id": "t.before", "label": "Before"},
+    {"id": "t.eight", "label": "eight o'clock on Friday evening", "prep": "At", "after": "t.before", "para": 1, "quote": "eight o'clock on Friday evening"},
+    {"id": "t.after_eight", "label": "a little after eight on Friday evening", "prep": "", "after": "t.eight", "para": 1, "quote": "a little after eight on Friday evening"},
+    {"id": "t.half_past", "label": "half past eight on Friday evening", "prep": "At", "after": "t.after_eight", "para": 3, "quote": "half past eight on Friday evening"},
+    {"id": "t.ten_to", "label": "ten to nine on Friday evening", "prep": "At", "after": "t.half_past", "para": 1, "quote": "ten to nine on Friday evening"},
+    {"id": "t.nine", "label": "nine o'clock on Friday evening", "prep": "At", "after": "t.ten_to", "para": 1, "quote": "nine o'clock on Friday evening"},
+    {"id": "t.saturday", "label": "Saturday morning", "after": "t.nine", "para": 3, "quote": "Saturday morning"},
+    {"id": "t.later", "label": "Saturday afternoon", "after": "t.saturday", "para": 6, "quote": "Saturday afternoon"}
+  ]
+}

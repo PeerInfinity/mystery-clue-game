@@ -1,0 +1,54 @@
+{
+ "title": "THE WAGES BAG, TOLD FROM ITS DATA",
+ "paragraphs": [
+  [
+   "f.orchard_role",
+   "f.bag_locked",
+   "f.door_locked_eight",
+   "f.key_nail_eight",
+   "f.orchard_village",
+   "f.door_locked_nine",
+   "f.key_nail_nine",
+   "f.bag_gone",
+   {
+    "deed": "q.who"
+   },
+   {
+    "raise": "q.who"
+   }
+  ],
+  [
+   "f.wicks_role",
+   "f.tarrant_role",
+   "f.tarrant_tells_first",
+   "f.tarrant_forge",
+   "f.forge_empty"
+  ],
+  [
+   "f.lantern_shed",
+   "f.tarrant_tells_second",
+   "f.tarrant_key",
+   "f.tarrant_in",
+   "f.wicks_counting",
+   {
+    "raise": "q.where"
+   }
+  ],
+  [
+   "f.dabney_role",
+   "f.dabney_tells",
+   "f.wicks_kitchen"
+  ],
+  [
+   "f.lisle_role",
+   "f.lisle_tells",
+   "f.lisle_lane",
+   "f.wicks_window"
+  ],
+  [
+   "f.bag_found",
+   "f.tarrant_owns",
+   "f.tarrant_where"
+  ]
+ ]
+}

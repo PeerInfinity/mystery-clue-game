@@ -131,6 +131,7 @@ model, its true path and its logic (`structure.json`, beside the case):
 | `cases/miniatures/sailors-knot-typed` | The Sailor's Knot told from its data: a thing known and not known, what a thing is held to be (finding 157). | 7 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 6 observations (4 essential), 7 moves |
 | `cases/miniatures/loose-board-typed` | The Loose Board told from its data: an entry that is implied and not said (finding 158). | 6 paragraphs, 19 facts, 2 accounts, 1 telling, 1 question, 5 observations (all essential), 10 moves |
 | `cases/miniatures/telegram-signed-m-typed` | The Telegram Signed M. told from its data: a paper with words of its own, an observation that holds under another question's answer (finding 159). | 7 paragraphs and a paper of 3, 18 facts, 2 accounts, 1 telling, 2 questions, 7 observations (5 essential), 10 moves |
+| `cases/miniatures/wages-bag-typed` | The Wages Bag told from its data: a witness told twice, two sources that agree, an answer that is where someone was (finding 160). | 6 paragraphs, 28 facts, 5 accounts, 4 tellings, 2 questions, 8 observations (4 essential), 19 moves |
 | `cases/miniatures/will-in-the-bible-typed` | The Will in the Bible told from its data: a paper's date, what it gives and revokes, what it speaks of (finding 145). | 5 + 3 paragraphs, 19 facts, 2 accounts, 1 telling, 2 questions, 9 observations (7 essential), 15 moves |
 | `cases/miniatures/stable-clock-typed` | The Stable Clock told from its data: times read by a clock, a doer unknown, yes or no confessed (finding 144). | 7 paragraphs, 20 facts, 3 accounts, 2 tellings, 2 questions, 7 observations (6 essential), 10 moves |
 | `cases/miniatures/last-ferry-typed` | The Last Ferry told from its data: a statement about everyone, times that are events, a question of two worded answers (finding 142). | 6 paragraphs, 24 facts, 3 accounts, 2 tellings, 2 questions, 9 observations (6 essential), 11 moves |
@@ -2704,6 +2705,27 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Still written by hand:* the order; names and time labels; seven phrases (four roles, "struck down", the
       clerk's hand, the entry's own line for its words); the telegram's words; two labels; four past forms; four
       written rules' sentences; the true path's reasons; `structure.json`.
+
+160. **The Wages Bag told from its data (2026-11-26).** The case is `cases/miniatures/wages-bag-typed`, two
+    questions, the same logic and true path (19 moves, the trust moves written again by `path-trust.mjs`).
+    - *What the templates gained:* a saying that asserts an answer which is the state asked of someone ("Job
+      Tarrant said to the constable: 'At half past eight on Friday evening, Mr. Wicks was in Mrs. Dabney's
+      kitchen.'"). Before, such an answer would have been told by its id.
+    - *It held:* it validated at the first try, the checker gives the two versions the same result, and every
+      page check passes. 328 words against 341: the one case of today's shorter than its original by more than
+      a little, since nearly all of it was typed already (whereabouts, a door, a key).
+    - *What typing forced or found.* Little. Five roles lost their free text; the carter's owning to it became
+      two sayings, one a question. A witness told twice (the carter's two tales) is two speeches, as it is two
+      accounts.
+    - *What was lost:* "on its nail", the trace to mend and "I never left it", the forge dark and the ashes cold
+      to the hand (why the narrator's "he was not at the forge" is more than a glance), the lantern as the reason
+      he went in, "and I will tell you more", the church clock striking the half hour (how the curate knows the
+      time), the kitchen window. And the difference in kind between the two true witnesses: the cook has him
+      "from eight till nine", the curate "at half past eight" by a clock, and the typed telling keeps the times
+      and loses that one is a stretch remembered and the other a moment fixed.
+    - *Still written by hand:* the order; names and time labels; five roles; two labels; the sentences of the
+      two observations that come from a tale disbelieved, and of four written rules; the true path's reasons;
+      `structure.json`.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

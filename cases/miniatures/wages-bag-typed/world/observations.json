@@ -1,0 +1,12 @@
+{
+  "observations": [
+    {"id": "o.cook", "q": "q.where", "from": ["f.wicks_kitchen"], "essential": true, "against": ["counting_room"], "says": "from eight o'clock on Friday evening until nine o'clock on Friday evening, Mr. Wicks was in Mrs. Dabney's kitchen"},
+    {"id": "o.curate", "q": "q.where", "from": ["f.wicks_window"], "says": "at half past eight on Friday evening, Mr. Wicks was in Mrs. Dabney's kitchen"},
+    {"id": "o.accused", "q": "q.where", "from": [{"doubted": "f.tarrant_tells_second"}], "says": "it was the carter who put him in the counting-room, and that cannot stand"},
+    {"id": "o.locked", "q": "q.who", "from": ["f.door_locked_nine", "f.key_nail_nine"], "essential": true, "says": "at nine o'clock on Friday evening, the counting-room door was locked; at nine o'clock on Friday evening, the counting-room key was in the passage"},
+    {"id": "o.admits", "q": "q.who", "from": ["f.tarrant_key", "f.tarrant_in"], "essential": true, "says": "a little after eight on Friday evening, Job Tarrant had the counting-room key; a little after eight on Friday evening, Job Tarrant was in the counting-room"},
+    {"id": "o.supper", "q": "q.who", "from": ["f.wicks_kitchen"], "essential": true, "against": ["wicks"], "says": "from eight o'clock on Friday evening until nine o'clock on Friday evening, Mr. Wicks was in Mrs. Dabney's kitchen"},
+    {"id": "o.lantern", "q": "q.who", "from": ["f.lantern_shed"], "says": "on Saturday morning, the counting-room lantern was in the cart-shed"},
+    {"id": "o.forge", "q": "q.who", "from": [{"doubted": "f.tarrant_tells_first"}], "says": "the carter's first tale, that he never left the forge, cannot stand"}
+  ]
+}
