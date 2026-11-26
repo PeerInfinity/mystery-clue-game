@@ -34,6 +34,7 @@ evidence leaves.
 [The Loose Board, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/loose-board-typed) (The Loose Board, its text made by a script from its data) ·
 [The Telegram Signed M., told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/telegram-signed-m-typed) (The Telegram Signed M., its text made by a script from its data) ·
 [The Wages Bag, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/wages-bag-typed) (The Wages Bag, its text made by a script from its data) ·
+[The Lamp-Keeper's Word, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/lamp-keepers-word-typed) (The Lamp-Keeper's Word, its text made by a script from its data) ·
 [The Will in the Bible, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/will-in-the-bible-typed) (The Will in the Bible, its text and the will made by a script from its data) ·
 [The Stable Clock, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/stable-clock-typed) (The Stable Clock, its text made by a script from its data) ·
 [The Last Ferry, told from its data](https://peerinfinity.github.io/mystery-clue-game/?case=cases/miniatures/last-ferry-typed) (The Last Ferry, its text made by a script from its data) ·

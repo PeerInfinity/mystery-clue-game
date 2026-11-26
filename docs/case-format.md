@@ -144,6 +144,10 @@ that Mr. Martin Grove handed in the telegram at the post office at Leeds: …").
 A `says` that asserts an answer which is the state the question asks of someone ("Where was Mr. Wicks at half past
 eight?") is that state, with its time ("At half past eight on Friday evening, Mr. Wicks was in Mrs. Dabney's
 kitchen.").
+A word passed on is speech within speech: the `tells` entries listed before what is said, outermost first, each
+frame the next one's ("Pike told me: \"Marta Quill wrote to me: '…'\""; `how: letter` is "wrote to me", any other
+"told me"); the last of them is the telling of the one whose account it is. A deed owned to is the question's typed
+act, or, where its entry has none, the act the answer names (a possibility's `action`).
 A thing known is "knew the carrick bend" (`knows` with an entity), and `reputed` "was held to be …". A telling's
 item `{implied: <fact>, by: <fact>}` puts an entry no sentence says on the timeline, by the words of the entry that
 implies it and where that is told (he was at the table when the letter was read: he knew the hiding-place).

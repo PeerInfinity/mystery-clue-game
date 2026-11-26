@@ -1,0 +1,6 @@
+{
+  "actions": [
+    {"id": "change_word", "label": "changing the word of Marta Quill", "past": "changed the word of Marta Quill", "requires": [], "effects": []},
+    {"id": "fight", "label": "coming to blows with", "past": "came to blows with", "requires": [], "effects": []}
+  ]
+}

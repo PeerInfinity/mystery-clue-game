@@ -1,0 +1,18 @@
+{
+  "entities": [
+    {"id": "hale", "kind": "person", "name": "Hale"},
+    {"id": "marta", "kind": "person", "name": "Marta Quill"},
+    {"id": "pike", "kind": "person", "name": "Pike"},
+    {"id": "elsie", "kind": "person", "name": "Elsie Quill"},
+    {"id": "wren", "kind": "person", "name": "Tobias Wren"},
+    {"id": "saltmarsh", "kind": "place", "name": "Saltmarsh"},
+    {"id": "quay", "kind": "place", "name": "the quay", "within": "saltmarsh", "prep": "on"},
+    {"id": "chapel", "kind": "place", "name": "the chapel", "within": "saltmarsh"},
+    {"id": "lamp", "kind": "place", "name": "the harbour lamp", "within": "saltmarsh"},
+    {"id": "hales_door", "kind": "place", "name": "Hale's door", "within": "saltmarsh"},
+    {"id": "store", "kind": "object", "name": "the bonded store"},
+    {"id": "hand", "kind": "object", "name": "Marta Quill's hand"},
+    {"id": "basket", "kind": "object", "name": "the basket", "prep": "in"},
+    {"id": "paper", "kind": "document", "name": "the folded paper"}
+  ]
+}

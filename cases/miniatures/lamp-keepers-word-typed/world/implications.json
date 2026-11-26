@@ -1,0 +1,8 @@
+{
+  "implications": [
+    {"id": "i.word_quay", "q": "q.word", "from": ["o.word_paper"], "says": "Marta's own hand says the quay: that is where she saw him", "concludes": "quay"},
+    {"id": "i.changed_not_marta", "q": "q.changed", "from": ["o.changed_paper"], "says": "what Marta wrote was the quay: she did not change her own word", "rules_out": ["marta"]},
+    {"id": "i.changed_not_pike", "q": "q.changed", "from": ["o.changed_pike"], "says": "Pike gives the quay, as the paper does: he changed nothing", "rules_out": ["pike"]},
+    {"id": "i.changed_elsie", "q": "q.changed", "from": ["o.changed_kept", "o.changed_paper", "o.changed_told"], "says": "the paper that reached Elsie said the quay, and what Elsie told was the chapel: it was Elsie who changed it", "concludes": "elsie"}
+  ]
+}

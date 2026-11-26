@@ -48,6 +48,7 @@ export function tell(dir, opts = {}) {
     // A time read by a clock (`time.by`) says so: "At nine o'clock on Thursday by the hall clock, ".
     const prefix = (t, deed = false) => (!t ? '' : t.at ? `${at(t.at)}${t.by ? ` by ${name(t.by)}` : ''}, ` : t.from && t.from !== first && t.to ? (deed ? `Between ${from(t.from)} and ${from(t.to)}, ` : `From ${from(t.from)} until ${lab(t.to)}, `) : t.from && t.from !== first ? `From ${from(t.from)}, ` : '');
     for (const x of times) { delete x.para; delete x.quote; }
+    const TOLD = { told: 'told me', letter: 'wrote to me' };   // how a telling was made (`how` on a `tells` entry)
     const sawFrom = (f) => `I saw this from ${name(F.get(f.seen_from).value)}.`;
     const stop = (s) => (s.endsWith('"') ? s : `${s}.`);   // a sentence that ends in someone's words has its stop inside them
     const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
@@ -61,17 +62,23 @@ export function tell(dir, opts = {}) {
         st.paragraphs.forEach((items, i) => {
             const n = i + 1, ref = st.id === 'main' ? n : `${st.id}:${n}`, out = [], told = [];
             st.dry.push(told);
-            let last = null, speech = null, pending = null;
+            let last = null, speech = null, pending = [];
             const timed = (time, deed, lastKey) => {
                 const key = time ? J(time) : null, pre = key && key !== lastKey ? prefix(time, deed) : '';
                 if (pre) for (const id of [time.at, time.from, time.to].filter((x) => x && x !== first)) { const tp = T.get(id); if (tp.para == null) { tp.para = ref; tp.quote = pre.includes(tp.label) ? tp.label : cap(tp.label); } }   // the label as it stands in the text
                 return { key: key ?? lastKey, pre };
             };
+            // A word passed on (finding 161): the tellings listed before what is said, outermost first, are speech
+            // within speech ('Pike told me: "Marta Quill wrote to me: \'…\'"'), each "me" whoever was told. The last
+            // of them must be the telling of whoever's account it is; with none listed, that one "told me".
             const close = () => {
                 if (!speech) return;
-                const frame = cap(`${name(speech.speaker)} told me`);
-                out.push(`${frame}: "${speech.parts.join(' ')}"`);
-                if (pending && pending.of === speech.speaker) { pending.quote = frame; pending = null; }
+                const chain = pending.length && pending.at(-1).of === speech.speaker ? pending : [{ of: speech.speaker }];
+                const frames = chain.map((t, k) => { const fr = `${name(t.of)} ${TOLD[t.how] ?? 'told me'}`; return k ? fr : cap(fr); });
+                const marks = ['"', "'"], body = speech.parts.join(' ');
+                out.push(frames.reduceRight((inner, fr, k) => `${fr}: ${marks[k % 2]}${inner}${marks[k % 2]}`, body));
+                chain.forEach((t, k) => { if (t.id) t.quote = frames[k]; });
+                if (chain === pending) pending = [];
                 speech = null;
             };
             const plain = (time, body, key, deed = false) => {
@@ -91,7 +98,7 @@ export function tell(dir, opts = {}) {
                     const voice = NARR.has(originOf(f.id)) ? originOf(f.id) : cur ?? N;
                     if (NARR.size > 1 && voice !== cur) { close(); out.push(heading(voice)); told.push({ key: `narrator:${voice}`, text: out.at(-1), full: out.at(-1) }); last = null; }
                     cur = voice;
-                    if (f.attr === 'tells') { close(); pending = f; told.push({ key: f.id, text: cap(`${name(f.of)} told me`), full: `(${name(f.of)} speaks to the narrator here: the statements marked as said by ${name(f.of)} are what is said.)` }); continue; }
+                    if (f.attr === 'tells') { close(); pending.push(f); told.push({ key: f.id, text: cap(`${name(f.of)} ${TOLD[f.how] ?? 'told me'}`), full: `(${name(f.of)} speaks to the narrator here: the statements marked as said by ${name(f.of)} are what is said.)` }); continue; }
                     const who = speakerOf(f.id);
                     drySentence.set(f.id, `${prefix(f.time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence(f)}`);
                     if (who) {
@@ -128,7 +135,7 @@ export function tell(dir, opts = {}) {
                 else if (item.day) { close(); const s = `I have ${units(header.delivery.day)} today, and more to do than they will hold. When they are spent I wake again on this same morning, with the day before me as it was. What I have learned I keep.`; out.push(s); told.push({ key: 'day', text: s, full: s }); }
             }
             close();
-            if (pending) throw new Error(`telling ${ref}: ${pending.id} is a telling with nothing told after it`);
+            if (pending.length) throw new Error(`telling ${ref}: ${pending[0].id} is a telling with nothing told after it`);
             st.paras.push(out.join(' '));
         });
     }
@@ -183,7 +190,7 @@ export function tell(dir, opts = {}) {
     // What an observation says is what its entries say (one that comes from a move, a doubt or another question keeps its own words).
     const observations = fs.existsSync(path.join(W, 'observations.json')) ? R('observations.json').observations : null;
     // A reading the reader makes (`{reasoned: "speaks", premises: [the entry with words, what they speak of]}`) says whose words speak of what.
-    const saysOf = (x) => (typeof x === 'string' ? drySentence.get(x)?.replace(/\."$/, '"') : x?.reasoned === 'speaks' && F.has(x.premises?.[0]) && drySentence.has(x.premises?.[1]) ? (F.get(x.premises[0]).reads_as ? `${prefix(F.get(x.premises[0]).time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence({ ...F.get(x.premises[0]).reads_as })}, since ${drySentence.get(x.premises[1])}` : `the words of ${name(F.get(x.premises[0]).of)} speak of this: ${drySentence.get(x.premises[1])}`) : null);
+    const saysOf = (x) => (typeof x === 'string' ? (F.get(x)?.words ? drySentence.get(x) : drySentence.get(x)?.replace(/\."$/, '"')) : x?.reasoned === 'speaks' && F.has(x.premises?.[0]) && drySentence.has(x.premises?.[1]) ? (F.get(x.premises[0]).reads_as ? `${prefix(F.get(x.premises[0]).time).replace(/^[A-Z]/, (c) => c.toLowerCase())}${third.sentence({ ...F.get(x.premises[0]).reads_as })}, since ${drySentence.get(x.premises[1])}` : `the words of ${name(F.get(x.premises[0]).of)} speak of this: ${drySentence.get(x.premises[1])}`) : null);
     // A route the reader builds (`{route_through: [things]}`) says what anything that came by it must have been: small
     // enough for a way in it passes (the largest that way lets through), and able to travel by what hangs or reaches.
     const room = fs.existsSync(path.join(W, 'room.json')) ? R('room.json') : null;

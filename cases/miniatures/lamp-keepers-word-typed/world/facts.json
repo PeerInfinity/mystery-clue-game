@@ -1,0 +1,30 @@
+{
+  "facts": [
+    {"id": "f.hale_role", "of": "hale", "attr": "role", "value": "the constable at Saltmarsh", "time": {"from": "t.past"}, "para": 1, "quote": "I am Hale, the constable at Saltmarsh"},
+    {"id": "f.store_place", "of": "store", "attr": "location", "value": "quay", "time": {"from": "t.past"}, "para": 1, "quote": "The bonded store was on the quay"},
+    {"id": "f.store_broken", "of": "store", "attr": "condition", "value": "broken open", "time": {"at": "t.tue_ten"}, "para": 1, "quote": "the bonded store was broken open"},
+    {"id": "f.wren_role", "of": "wren", "attr": "role", "value": "a boatman", "time": {"from": "t.past"}, "para": 1, "quote": "Tobias Wren is a boatman"},
+    {"id": "f.wren_named", "of": "wren", "attr": "reputed", "value": "the one who broke open the bonded store", "time": {"at": "t.wed_morning"}, "para": 1, "quote": "Tobias Wren was held to be the one who broke open the bonded store"},
+    {"id": "f.marta_role", "of": "marta", "attr": "role", "value": "the keeper of the harbour lamp", "time": {"from": "t.past"}, "para": 1, "quote": "Marta Quill is the keeper of the harbour lamp"},
+    {"id": "f.marta_at_lamp", "of": "marta", "attr": "location", "value": "lamp", "time": {"at": "t.tue_ten"}, "para": 1, "quote": "Marta Quill was at the harbour lamp"},
+    {"id": "f.marta_mute", "of": "marta", "attr": "condition", "value": "without a voice, and wrote what she had to say", "time": {"from": "t.past"}, "para": 2, "quote": "Marta Quill was without a voice, and wrote what she had to say"},
+    {"id": "f.hale_knows_hand", "of": "hale", "attr": "knows", "value": "hand", "time": {"from": "t.past"}, "para": 2, "quote": "I knew Marta Quill's hand"},
+    {"id": "f.pike_role", "of": "pike", "attr": "role", "value": "the harbourmaster", "time": {"from": "t.past"}, "para": 3, "quote": "Pike is the harbourmaster"},
+    {"id": "f.pike_tells", "of": "pike", "attr": "tells", "value": "acct.marta", "to": "hale", "how": "report", "time": {"at": "t.wed_morning"}, "para": 3, "quote": "Pike told me"},
+    {"id": "f.marta_tells_pike", "of": "marta", "attr": "tells", "value": "acct.marta", "to": "pike", "how": "letter", "time": {"at": "t.wed_first_light"}, "para": 3, "quote": "Marta Quill wrote to me"},
+    {"id": "f.wren_quay", "of": "wren", "attr": "location", "value": "quay", "time": {"at": "t.tue_ten"}, "para": 3, "quote": "Tobias Wren was on the quay"},
+    {"id": "f.elsie_role", "of": "elsie", "attr": "role", "value": "Marta Quill's niece", "time": {"from": "t.past"}, "para": 4, "quote": "Elsie Quill is Marta Quill's niece"},
+    {"id": "f.elsie_basket", "of": "elsie", "attr": "carrying", "value": "basket", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "Elsie Quill had the basket"},
+    {"id": "f.elsie_tells", "of": "elsie", "attr": "tells", "value": "acct.marta_by_elsie", "to": "hale", "how": "told", "time": {"at": "t.wed_noon"}, "para": 4, "quote": "Elsie Quill told me"},
+    {"id": "f.marta_tells_elsie", "of": "marta", "attr": "tells", "value": "acct.marta_by_elsie", "to": "elsie", "how": "letter", "time": {"after": "t.tue_ten", "before": "t.wed_noon"}, "para": 4, "quote": "Marta Quill wrote to me"},
+    {"id": "f.wren_chapel", "of": "wren", "attr": "location", "value": "chapel", "time": {"at": "t.tue_ten"}, "truth": false, "para": 4, "quote": "Tobias Wren was at the chapel"},
+    {"id": "f.pike_quarrel", "of": "pike", "attr": "action", "act": "fight", "thing": "wren", "tie": {"to": "wren", "kind": "against"}, "time": {"at": "t.spring"}, "para": 6, "quote": "Pike came to blows with Tobias Wren"},
+    {"id": "f.elsie_betrothed", "of": "elsie", "attr": "role", "value": "to be married to Tobias Wren at Michaelmas", "tie": {"to": "wren", "kind": "for"}, "time": {"from": "t.past"}, "para": 6, "quote": "Elsie Quill is to be married to Tobias Wren at Michaelmas"},
+    {"id": "f.basket_left", "of": "basket", "attr": "location", "value": "hales_door", "time": {"from": "t.wed_noon", "to": "t.thu_later"}, "para": 7, "quote": "the basket was at my door"},
+    {"id": "f.paper_in_basket", "of": "paper", "attr": "location", "value": "basket", "time": {"at": "t.thu_morning"}, "para": 7, "quote": "the folded paper was in the basket"},
+    {"id": "f.paper_hand", "of": "paper", "attr": "condition", "value": "in Marta Quill's hand, with the name of Elsie Quill on it", "time": {"at": "t.thu_morning"}, "para": 7, "quote": "The folded paper was in Marta Quill's hand, with the name of Elsie Quill on it"},
+    {"id": "f.paper_reads", "of": "paper", "attr": "contents", "value": "words of its own, in Marta Quill's hand", "words": "Take this to the constable. At ten Wren was on the quay, under my lamp. M. Q.", "time": {"at": "t.thu_morning"}, "para": 7, "quote": "The folded paper said: \"Take this to the constable. At ten Wren was on the quay, under my lamp. M. Q.\""},
+    {"id": "f.elsie_admits", "of": "elsie", "attr": "says", "to": "hale", "time": {"at": "t.thu_later"}, "asserts": [{"q": "q.word", "pick": "quay"}], "para": 8, "value": "says Tobias Wren was on the quay", "quote": "Elsie Quill said to me: \"At about ten o'clock on Tuesday night, Tobias Wren was on the quay.\""},
+    {"id": "f.elsie_changed", "of": "elsie", "attr": "says", "to": "hale", "time": {"at": "t.thu_later"}, "asserts": [{"q": "q.changed", "pick": "elsie"}], "para": 8, "value": "owns to changing the word of Marta Quill", "quote": "Elsie Quill said to me: \"It was I who changed the word of Marta Quill.\""}
+  ]
+}

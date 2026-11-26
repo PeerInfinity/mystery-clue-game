@@ -1,0 +1,12 @@
+{
+  "times": [
+    {"id": "t.past", "label": "Before"},
+    {"id": "t.spring", "label": "last spring", "prep": "", "after": "t.past", "para": 6, "quote": "Last spring"},
+    {"id": "t.tue_ten", "label": "about ten o'clock on Tuesday night", "prep": "At", "after": "t.spring", "para": 1, "quote": "about ten o'clock on Tuesday night"},
+    {"id": "t.wed_first_light", "label": "first light on Wednesday", "prep": "At", "after": "t.tue_ten"},
+    {"id": "t.wed_morning", "label": "Wednesday morning", "after": "t.wed_first_light", "para": 1, "quote": "Wednesday morning"},
+    {"id": "t.wed_noon", "label": "noon on Wednesday", "prep": "At", "after": "t.wed_morning", "para": 4, "quote": "noon on Wednesday"},
+    {"id": "t.thu_morning", "label": "Thursday morning", "after": "t.wed_noon", "para": 7, "quote": "Thursday morning"},
+    {"id": "t.thu_later", "label": "later on Thursday", "prep": "", "after": "t.thu_morning", "para": 7, "quote": "later on Thursday"}
+  ]
+}

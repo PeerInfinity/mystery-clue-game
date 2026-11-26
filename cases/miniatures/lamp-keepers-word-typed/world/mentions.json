@@ -1,0 +1,18 @@
+{
+ "entities": {
+  "hale": ["Hale"],
+  "marta": ["Marta Quill"],
+  "pike": ["Pike"],
+  "elsie": ["Elsie Quill"],
+  "wren": ["Tobias Wren"],
+  "saltmarsh": ["Saltmarsh"],
+  "quay": ["the quay"],
+  "chapel": ["the chapel"],
+  "lamp": ["the harbour lamp"],
+  "hales_door": ["Hale's door"],
+  "store": ["the bonded store"],
+  "hand": ["Marta Quill's hand"],
+  "basket": ["the basket"],
+  "paper": ["the folded paper"]
+ }
+}

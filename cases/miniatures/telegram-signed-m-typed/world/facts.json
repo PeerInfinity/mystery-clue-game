@@ -17,6 +17,6 @@
     {"id": "f.key_drawn", "of": "martin", "attr": "action", "act": "draw_key", "thing": "mill", "time": {"at": "t.half_nine"}, "para": 6, "quote": "Mr. Martin Grove drew the key of Dyer's Mill"},
     {"id": "f.no_other_key", "of": "*", "every": "person", "but": ["martin"], "attr": "carrying", "value": "a key of Dyer's Mill", "key": "mill", "neg": true, "time": {"from": "t.half_nine", "to": "t.ten"}, "para": 6, "quote": "nobody but Mr. Martin Grove had a key of Dyer's Mill"},
     {"id": "f.grove_owns", "of": "martin", "attr": "says", "to": "ellis", "time": {"at": "t.later"}, "asserts": [{"q": "q.sender", "pick": "martin"}], "para": 7, "value": "owns to handing in the telegram", "quote": "Mr. Martin Grove said to me: \"It was I who handed in the telegram at the post office at Leeds.\""},
-    {"id": "f.grove_waited", "of": "martin", "attr": "says", "to": "ellis", "time": {"at": "t.later"}, "asserts": [{"q": "q.waiting", "pick": "martin"}], "para": 7, "value": "owns to waiting undefined", "quote": "Mr. Martin Grove said to me: \"It was I who waited at Dyer's Mill.\""}
+    {"id": "f.grove_waited", "of": "martin", "attr": "says", "to": "ellis", "time": {"at": "t.later"}, "asserts": [{"q": "q.waiting", "pick": "martin"}], "para": 7, "value": "owns to waiting", "quote": "Mr. Martin Grove said to me: \"It was I who waited at Dyer's Mill.\""}
   ]
 }

@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {"id": "o.word_paper", "q": "q.word", "from": ["f.paper_reads"], "essential": true, "against": ["chapel"], "says": "on Thursday morning, the folded paper said: \"Take this to the constable. At ten Wren was on the quay, under my lamp. M. Q.\""},
+    {"id": "o.word_pike", "q": "q.word", "from": ["f.wren_quay"], "says": "at about ten o'clock on Tuesday night, Tobias Wren was on the quay"},
+    {"id": "o.changed_kept", "q": "q.changed", "from": ["f.paper_in_basket"], "essential": true, "says": "on Thursday morning, the folded paper was in the basket"},
+    {"id": "o.changed_paper", "q": "q.changed", "from": ["f.paper_reads"], "essential": true, "against": ["marta"], "says": "on Thursday morning, the folded paper said: \"Take this to the constable. At ten Wren was on the quay, under my lamp. M. Q.\""},
+    {"id": "o.changed_told", "q": "q.changed", "from": [{"doubted": "f.elsie_tells"}], "says": "what Elsie told was the chapel, and that was not Marta's word", "essential": true},
+    {"id": "o.changed_pike", "q": "q.changed", "from": ["f.wren_quay"], "against": ["pike"], "says": "at about ten o'clock on Tuesday night, Tobias Wren was on the quay"},
+    {"id": "o.changed_mute", "q": "q.changed", "from": ["f.marta_mute"], "says": "Marta Quill was without a voice, and wrote what she had to say"}
+  ]
+}

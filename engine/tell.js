@@ -78,12 +78,14 @@ export function teller(ctx) {
         return parts.length || said ? `${subj(f.of)}${parts.length ? ` ${listed(parts)}` : ''}${said}` : null;
     };
     const owns = (f) => list(f.asserts).find((x) => x.q && x.pick === f.of);
+    // The deed owned to: the question's typed act, or, where the question's entry has none, the act its answer names.
+    const deedOf = (o) => { const q = ctx.question(o.q), e = q.entry; return list(e.act).length ? e : { ...e, ...(q.possibilities?.find((p) => p.value === o.pick)?.action ?? {}) }; };
     const stateAsked = (a) => { const e = ctx.question(a.q)?.entry; return e && e.of !== '?' && !list(e.act).length && e.attr !== 'identity' && e.attr !== 'action' ? e : null; };
     function said(f) {
         if (f.goal) return `wants ${want(f.goal)}`;
         const o = owns(f);
         if (o && ctx.question(o.q).entry?.attr === 'identity') return `owns to being ${ctx.name(ctx.question(o.q).entry.of)}`;
-        if (o) { const e = ctx.question(o.q).entry; return `owns to ${list(e.act).map((t) => ctx.act(t)?.label ?? ctx.label?.(t) ?? `the ${t}`).join(' and ')} ${ctx.name(e.thing ?? e.item)}`; }
+        if (o) { const e = deedOf(o); return `owns to ${list(e.act).map((t) => ctx.act(t)?.label ?? ctx.label?.(t) ?? `the ${t}`).join(' and ')}${e.thing ?? e.item ? ` ${ctx.name(e.thing ?? e.item)}` : ''}`; }
         const a = list(f.asserts).find((x) => x.q && x.pick != null);
         // An answer that is the state the question asks of someone (where he was): the state itself.
         if (a && ctx.kind?.(a.pick) && stateAsked(a)) return `says ${teller({ ...ctx, speaker: null, listener: null }).sentence({ ...stateAsked(a), value: a.pick })}`;
@@ -102,7 +104,7 @@ export function teller(ctx) {
             const o = owns(f);
             // Who someone was (a question of identity): "I was the figure at the side door."
             if (o && ctx.question(o.q).entry?.attr === 'identity') return `${subj(f.of)} said${to}: "I was ${ctx.name(ctx.question(o.q).entry.of)}."`;
-            if (o) { const e = ctx.question(o.q).entry; return `${subj(f.of)} said${to}: "It was I who ${yours(f.to, mine(f.of, done(e, '').trim()))}."`; }
+            if (o) { const e = deedOf(o); return `${subj(f.of)} said${to}: "It was I who ${yours(f.to, mine(f.of, done(e, '').trim()))}."`; }
             // An answer that is not a person, asserted: "It was after the gate lamp was lit."
             const a = list(f.asserts).find((x) => x.q && x.pick != null);
             // "Yes" or "no" asserted is the state that answer stands for (the other's, denied, where only one is typed), in the speaker's own person.
