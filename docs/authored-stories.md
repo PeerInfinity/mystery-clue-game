@@ -2906,6 +2906,21 @@ script that found each fact's paragraph from its quote; the data files are the s
     the exported questions. Agreed with that side and not built: the solver started by a bridge request without
     a reload (`mystery:autoSolve`, `mystery:autoSolveStatus`), which waits for the user's word.
 
+168. **The hints asked for marks the page makes itself (2026-11-26; the user, of The Same Monday: the hints
+    "assume that the game is in manual answer circling mode, not marked from evidence mode").** Right, and in
+    every case, not only that one. The true path holds a careful reader's circles and crossings; with the answers
+    marked from the evidence (the page's default) a mark is the page's to make and the
+    player cannot click one. The hints still said "Cross out Captain Dunmore", "Cross out Amos Trew", "Circle
+    Silas Finch": the first two crossings the evidence never makes (the case's rules conclude Finch and rule no
+    one out singly), the last one the page had made or was about to. Do it only pointed at the answer, so the
+    hints check passed all the while: it checked that the end was reached, not what was asked of the player.
+    - *Now:* on a question marked from the evidence no hint is to circle, cross out or take a mark off. The
+      links bring the answer; a crossing the evidence does not make is the reader's own judgement, which that
+      mode has no place for (as the autoplay already held, 2026-11-23). By hand, the hints are as before.
+    - *The check* fails on any hint to mark an answer where the answers are marked from the evidence.
+    - *Lost:* the reasoning of a crossing ("He could not have been in the office") is no longer said by a hint
+      in that mode. It could be said on the link that brings it; not done.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

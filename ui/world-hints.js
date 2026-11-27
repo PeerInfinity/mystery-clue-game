@@ -12,6 +12,9 @@
 //      those for the soonest answer given away first (with papers earned by solving questions, only the moves of a
 //      question open now); a circle or a crossing counts as done once the question has a
 //      right answer circled (any right one: the light as well as the noise);
+//      Where the answers are marked from the evidence (the page's default) a mark is the page's to make, not the
+//      player's: no hint is ever to circle or cross out there, in (a) or in (c). The links bring the answer; a cross
+//      the evidence does not make is the reader's own judgement, which that mode has no place for;
 //  (d) nothing: read on.
 // A move is offered from its `hint_at` (or `at`): never before the page can support it.
 
@@ -22,7 +25,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const TRUST_VERB = { confirmed: 'Trust as confirmed', likely: 'Trust as likely', uncertain: 'Leave as uncertain', unlikely: 'Distrust as unlikely', 'ruled out': 'Distrust as ruled out' };
 
 /**
- * `api` (ui/world.js): para(), last, question(id), qListed(id), isRight(id, pick), statementFalse(id), name(id),
+ * `api` (ui/world.js): para(), last, question(id), qListed(id), byEvidence(id), isRight(id, pick), statementFalse(id), name(id),
  * setTrust({link | person}, level), view() and restore(view), wait() (seconds between hints).
  */
 export async function makeHints({ store, api }) {
@@ -51,7 +54,7 @@ export async function makeHints({ store, api }) {
         const trial = (m) => { window.__trying?.(true); try { return allowedNow(m, store); } finally { window.__trying?.(false); } };
         const listed = (q, pick) => { try { return trial({ do: 'cross', q, pick }); } finally { api.restore(view); } };
         for (const q of [...new Set(moves.filter((m) => m.q).map((m) => m.q))]) {
-            if (!api.qListed(q)) continue;
+            if (!api.qListed(q) || api.byEvidence(q)) continue;   // marked from the evidence: its marks are the page's, not the player's
             const right = rightOf(q);
             for (const [pick, v] of Object.entries(save.marks?.[q] ?? {})) {
                 if (!(v === 'circled' && !api.isRight(q, pick)) && !(v === 'crossed' && api.isRight(q, pick))) continue;
@@ -84,7 +87,7 @@ export async function makeHints({ store, api }) {
         // The present (a visit, the day's end) goes in the path's order: a day is not ended before its visits are made.
         const inTurn = (m) => !DAY_MOVES.has(m.do) || !moves.some((x) => DAY_MOVES.has(x.do) && x.i < m.i && !made(x, save));
         const open = moves.filter((m) => !VIEWS.has(m.do) && forOpen(m) && inTurn(m) && api.seenAll(from(m)) && !tried(m) && !made(m, save) && !done(m)
-            && !((m.do === 'circle' || m.do === 'cross') && rightCircled(m.q, save)))
+            && !((m.do === 'circle' || m.do === 'cross') && (rightCircled(m.q, save) || api.byEvidence(m.q))))
             .sort((a, b) => deadline(a) - deadline(b) || a.i - b.i);
         if (open.length) {
             try { for (const m of open) if (trial(m)) return { kind: 'move', m }; } finally { api.restore(view); }

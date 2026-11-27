@@ -3037,7 +3037,7 @@ const hintApi = {
     seenAll: (at) => reading.seenAll(at), readTo: (id) => reading.readTo(id),
     // The gate holds the reader here: reading on is not possible yet.
     gateHolds: () => state.para < LAST && gateAt(state.para + 1).length > 0,
-    question: (id) => (qById.has(id) ? { ...qById.get(id), label: qLabel(qById.get(id)) } : undefined), qListed: (id) => qListed(qById.get(id)), isRight: (id, pick) => isRight(qById.get(id), pick),
+    question: (id) => (qById.has(id) ? { ...qById.get(id), label: qLabel(qById.get(id)) } : undefined), qListed: (id) => qListed(qById.get(id)), byEvidence: (id) => autoQ(id), isRight: (id, pick) => isRight(qById.get(id), pick),
     name: (id) => (entityById.has(id) ? nameOf(id) : null), timeName: (id) => timeLabel(id).replace(/<[^>]+>/g, ''),
     // A link of a chain in words: a telling as the timeline says it, a speech as who said it to whom.
     linkName: (key) => linkName(key),

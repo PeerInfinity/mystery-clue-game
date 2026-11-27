@@ -63,6 +63,8 @@ async function run(name, start, expect = []) {
         if (EARNED && t.kind === 'move') {
             for (const q of PATH[t.i]?.for_q ?? []) if (!(await ev(`window.__delivery.open(${J(q)})`))) { fail(`${name}: a hint for ${q}, which is not open: ${t.rungs.at(-1)}`); }
         }
+        // With the answers marked from the evidence a mark is the page's: no hint may ask the player for one.
+        if (/^(Circle|Cross out|Take your circle off) /.test(t.rungs.at(-1) ?? '') && await ev(`!!document.querySelector('#q-box [data-mark-q][data-auto]') && document.getElementById('answer-rule').value === 'evidence'`)) fail(`${name}: a hint to mark an answer, where the answers are marked from the evidence: ${t.rungs.at(-1)}`);
         if (t.kind !== 'read') { hints++; kinds[t.kind] = (kinds[t.kind] ?? 0) + 1; seen.add(t.kind); }
         // Hint to the last rung, then Do it.
         for (let r = 0; r < t.rungs.length; r++) { await ev(`window.__hint.press()`); presses++; }
