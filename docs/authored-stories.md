@@ -3045,6 +3045,8 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *This changes the page for a player too,* not only for the bot: with answers from the evidence, the
       long case's goal can be concluded a way sooner. No case's path, hints or version moved (every page
       check on all 42 cases passed with it).
+      It was built on the Archipelago side's report; the user ruled the same day: keep it as built (the
+      other way, an export that does not count elimination, would have moved the long case's version).
     - *A check for the next one of this kind:* `scripts/bridge-solve-check.mjs` now asks for every question
       from a fresh page with only one set of its exported rule in hand, for every set (28 on the long case,
       both ways of the three questions that have two). All end `done`.
