@@ -103,7 +103,10 @@ export function made(m, save) {
  */
 export function makeMover({ store, fast = false, factor = () => 0, gate = async () => {}, cursor = null }) {
     const saved = () => savedOf(store);
-    const shown = (el) => !!el && el.offsetParent !== null;
+    // (A page not drawn at all, its frame hidden by the host: nothing has a place, and a control is pressed where it
+    // is in the document; else what is not in view is brought into view first, as a player would.)
+    const drawn = () => document.documentElement.getClientRects().length > 0;
+    const shown = (el) => !!el && (el.offsetParent !== null || !drawn());
     const tabbed = () => document.body.classList.contains('tabbed');
     const twoCols = () => tabbed() && !$('#tabbed').classList.contains('one');
     async function glide(el, click = true) {

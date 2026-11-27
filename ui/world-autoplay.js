@@ -14,8 +14,10 @@
 // `live`: {skipDay, delivered(story id), allSolved(), report(state, extra), states() (how many have come),
 // nextState(n) → a promise of one after the nth}. Returns {stop(), running, done (a promise)}.
 // `live.question` (with `live.solved(id)`, `live.open(id)`): only that question, by the moves the path makes for it
-// (`for_q`); it ends when the question is solved, reads no further, and takes its strip away. It solves nothing else
-// on purpose: a question that rests on one not solved, or lacks a paper, waits. `instant`: as `fast`, and no strip.
+// (`for_q`); it ends when the question is solved, reads no further, and takes its strip away. A question that rests on
+// one not solved, or lacks a paper, waits. One thing it solves on the way: a question the story is about to answer
+// holds the reading until it is answered (the gate; `live.gate()`), and the reader answers it, since reading past it
+// is the only way on and would give it away. `instant`: as `fast`, and no strip.
 
 import { $, sleep, esc, Stopped, Failed, makeMover, nextRead, readToOf, made, needsOf, DAY_MOVES } from './world-moves.js';
 import { refList } from '../engine/refs.js';
@@ -194,7 +196,7 @@ async function run({ store, fast = false, instant = false, live = null }, handle
             caption(`Reading ${tag}`);
             await readOne(story);
             const after = readToOf(saved())(story);
-            if (after === now) throw new Failed(story === 'main' ? `the gate held before ¶${now + 1}` : `${tag} could not be read`);
+            if (after === now) throw new Failed(story === 'main' ? `¶${now + 1} could not be read (a question holds the story there, or the page did not take the press)` : `${tag} could not be read`);
             $('#ap-para').textContent = story === 'main' ? `¶${after}` : `${files.find((f) => f.id === story)?.short} ¶${after}`;
             if (!$('#answer-news').hidden) {
                 caption('The story gives answers away: each with the circle made for it.');
@@ -227,12 +229,16 @@ async function run({ store, fast = false, instant = false, live = null }, handle
             // next round. A round that makes nothing: all made is the end; else it waits for a paper, unless a move was
             // refused with nothing before it waiting, which is a fault.
             const played = new Set();
-            const todo = () => moves.map((m, i) => ({ m, i })).filter(({ m, i }) => !(live.skipDay && DAY_MOVES.has(m.do)) && !(target && m.for_q && !m.for_q.includes(target)) && !played.has(i) && !made(m, saved()));
+            // (One question asked for: its moves, and those of each question found holding the reading on the way.)
+            const wanted = new Set(target ? [target] : []);
+            const mine = (m) => !target || !m.for_q || m.for_q.some((q) => wanted.has(q));
+            const shutQ = (m) => !!target && !!m.for_q && !m.for_q.some((q) => wanted.has(q) && (live.solved(q) || live.open(q)));
+            const todo = () => moves.map((m, i) => ({ m, i })).filter(({ m, i }) => !(live.skipDay && DAY_MOVES.has(m.do)) && mine(m) && !played.has(i) && !made(m, saved()));
             const over = () => (target ? live.solved(target) : live.allSolved());
             const held = (m) => Object.keys(needsOf(m.at, files)).every((id) => live.delivered(id));
             // Said to the host only when it changes: a state that brings nothing is not answered with the same again.
             let said = null;
-            const report = (st, extra) => { const r = live.report(st, extra, said === st); said = st; return r; };
+            const report = (st, extra) => { const r = live.report(st, extra, said === st, [...wanted]); said = st; return r; };
             report('running');
             for (;;) {
                 let did = 0, lacking = false, refused = null;
@@ -241,13 +247,15 @@ async function run({ store, fast = false, instant = false, live = null }, handle
                 for (const { m, i } of target && !over() && !live.open(target) ? [] : todo()) {
                     if (over()) break;
                     if (made(m, saved())) continue;
-                    if (!held(m)) { lacking = true; continue; }
+                    if (!held(m) || shutQ(m)) { lacking = true; continue; }
                     try { if (said !== 'running') report('running'); await one(m); played.add(i); did++; } catch (e) {
                         if (!(e instanceof Failed)) throw e;
                         if (!lacking && !refused) refused = { move: i, why: e.message };
                     }
                 }
                 if (over()) break;
+                // The reading held by a question the story is about to answer: that one is answered too, and first.
+                if (target) { const more = live.gate().filter((q) => !wanted.has(q)); if (more.length) { for (const q of more) wanted.add(q); continue; } }
                 if (!todo().length && (!target || live.open(target))) { if (!target) break; refused ??= { move: null, why: `every move the path makes for ${target} is made, and it is not solved` }; }
                 if (did) continue;
                 if (refused) { s.failed = refused.why; ending(`The solving stopped: ${refused.why}.`); report('failed', { failed: refused }); return; }

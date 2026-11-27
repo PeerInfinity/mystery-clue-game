@@ -220,7 +220,11 @@ a time). With `question` the reader makes only the moves the path makes for that
 question that lacks a paper or rests on one not solved says `waiting`, with what that one question lacks, and
 goes on at the state that brings it. Solved already: `done` at once, sent again if the host does not list it. A
 question the case has not, or a request while another runs: `failed`, with why. `instant` (with or without
-`question`) is `fast` with no strip shown; the moves are still made through the page's own controls, one
+`question`) is `fast` with no strip shown. Two things on the way (found with the host's bot, the same day): a
+question the story is about to answer holds the reading until it is answered, and the reader answers that one
+too, first (it is sent like any other; if it cannot be solved yet, `waiting` names it with the one asked for);
+and the reader works on a page that is not drawn at all (the host's app with another panel in front of the
+frame): a control is then pressed where it is in the document. As for the time, the moves are still made through the page's own controls, one
 drawing each, so it takes the page's time: on the long case about a second a question (the longest under five),
 and under a minute for the whole case.
 

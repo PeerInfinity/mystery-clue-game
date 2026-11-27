@@ -2999,6 +2999,17 @@ script that found each fact's paragraph from its quote; the data files are the s
       on the long case, a median of one second a question, the longest 4.6, 37 seconds for all 25. Making
       the moves without drawing would be another reader, with its own faults to find; not built.
     - *Checked* in `scripts/bridge-solve-check.mjs`. No case's version moves.
+    - *Found with the host's own bot, the same day:* asked for a fourth question it failed with "the gate
+      held before ¶16", and in the host's loop mode with "cannot open f.oilcan". The long case has no gate
+      there and the same requests passed here. The cause was the frame: the reader looks for each control
+      where it is shown, and the host's app had another panel in front, so nothing was shown and no press
+      was made; the reading did not move and the message blamed a gate. With the page hidden here the same
+      message came at the first paragraph. Now a page not drawn at all is pressed where its controls are in
+      the document, and the message no longer names a gate it has not seen. Checked: the second order of
+      the check is played with the page not drawn.
+    - *The gate, as that side first read it,* is real in other cases (a question the story answers holds
+      the reading): the one-question reader now answers such a question on the way. No case played in an
+      Archipelago today has one with more than one question, so this is built and not exercised by a check.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

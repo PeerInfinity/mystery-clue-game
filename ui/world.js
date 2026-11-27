@@ -3165,9 +3165,9 @@ if (ap) {
     ap.waiters = []; ap.states = 0; ap.listed = new Set();
     let solver = null;
     const allLogic = logic ?? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery });
-    const lacking = (only = null) => {
+    const lacking = (only = []) => {
         const held = source.held(), solved = new Set(Object.keys(state.solved));
-        return allLogic.questions.filter((q) => !solved.has(q.id) && (!only || q.id === only)).map((q) => ({ question: q.id, ways: (q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] })))
+        return allLogic.questions.filter((q) => !solved.has(q.id) && (!only.length || only.includes(q.id))).map((q) => ({ question: q.id, ways: (q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] })))
             .map((w) => ({ papers: [...w.papers].filter((p) => !held.has(p)).sort(), requires: [...w.requires].filter((r) => !solved.has(r)).sort() })) }));
     };
     ap.onAutoSolve = async (d) => {
@@ -3188,8 +3188,10 @@ if (ap) {
             allSolved: () => allLogic.questions.every((q) => state.solved[q.id]),
             states: () => ap.states,
             nextState: (n) => (ap.states > n ? Promise.resolve() : new Promise((r) => ap.waiters.push(r))),
-            report: (st, extra = {}, again = false) => {
-                const waiting = st === 'waiting' ? lacking(question) : undefined;
+            // The questions that hold the story where it is read to (each must be answered before the next paragraph).
+            gate: () => (state.para < LAST ? gateAt(state.para + 1).map((q) => q.id) : []),
+            report: (st, extra = {}, again = false, wanted = []) => {
+                const waiting = st === 'waiting' ? lacking(wanted) : undefined;
                 // The same again (a state came that brought nothing) is said only if what is lacking has changed.
                 const key = JSON.stringify([st, waiting, extra]);
                 if (!again || key !== ap.said) ap.link.status({ ...tag, state: st, solved: Object.keys(state.solved), ...(waiting ? { waiting } : {}), ...(extra ?? {}) });

@@ -127,6 +127,30 @@ if (VISITS) {
         if (await ev(`!!document.querySelector('.autoplay-strip') || document.body.classList.contains('autoplaying')`)) fail(`${q} is done and the strip is still there`);
         left = left.filter((x) => x !== q);
     }
+    // Afresh, in another order (the last open question first, as a bot that walks a world's own order may): a
+    // question the story is about to answer holds the reading, and the reader answers it on the way. Every request
+    // must still end `done`; what else it solved is counted, and the host must have a check for each.
+    await fresh();
+    // (Every paper in hand, so that the order is held back by nothing but what a question rests on.)
+    for (const f of header.files ?? []) if (f.reply == null) await ev(`window.__stub.give(${J(f.id)}); 1`);
+    await sleep(300);
+    // And with the page not drawn at all, as when the host's app has another panel in front of its frame.
+    await ev(`document.documentElement.style.display = 'none'; 1`);
+    let extra = 0, asked = 0;
+    for (let left = [...ids]; left.length;) {
+        const done = Object.keys((await save()).solved ?? {});
+        left = left.filter((x) => !done.includes(x));
+        if (!left.length) break;
+        const q = await ev(`${J(left)}.filter((q) => window.__delivery.open(q)).at(-1) ?? null`);
+        if (!q) { fail(`the other order: no question left is open: ${left.join(', ')}`); break; }
+        const b = await ask(q), s = await answer(q, b, ['done']); asked++;
+        if (s.state !== 'done') { fail(`the other order: ${q} asked for by itself: the page says ${s.state}${s.failed ? `: ${s.failed.why}` : ''}${s.waiting ? ` ${J(s.waiting)}` : ''}`); break; }
+        const now = Object.keys((await save()).solved ?? {}), host = await ev('window.__stub.solved()');
+        extra += now.length - done.length - 1;
+        for (const x of now) if (!host.includes(x)) fail(`the other order: ${x} is solved and the host has no check for it`);
+    }
+    await ev(`document.documentElement.style.display = ''; 1`);
+    console.log(`  the other order, the page not drawn: ${asked} asked for, ${extra} more solved on the way (each held the reading)`);
     // Asked again when solved: done at once.
     { const q = ids[0], b = await ask(q), s = await answer(q, b, ['done'], 5000); if (s.state !== 'done') fail(`${q} asked for again when solved: ${s.state}`); }
     { const b = await ask('q.no-such'), s = await answer('q.no-such', b, ['done'], 5000); if (s.state !== 'failed') fail(`a question the case has not: ${s.state}`); }
