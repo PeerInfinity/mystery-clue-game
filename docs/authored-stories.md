@@ -2983,6 +2983,23 @@ script that found each fact's paragraph from its quote; the data files are the s
       that way too: The Same Monday, and the long case to its end (25 questions, 41 seconds, fast).
     - No case's version moves.
 
+172. **One question at a time, and at once (2026-11-27; the user, to the Archipelago side: "support instant mode
+    for the playback bot for the mystery game", and of the two ways offered there chose the bot driving this
+    page).** The host's bot walks a world one check at a time, so it asks for one question: `mystery:autoSolve`
+    with `question`, and `instant`.
+    - *Can one question be solved alone?* Yes. Every move of a path names the question it is for (`for_q`),
+      and the autoplay of a case with earned papers already plays question by question in whatever order the
+      seed opens them. On the long case all 25 were asked for one at a time, in the order they came open, and
+      each request solved that question and no other.
+    - *Nothing else on purpose.* A question that rests on one not solved waits and says so; the reader does
+      not solve the other on the way. In the host's loop mode each check has a cost, and the bot asks in an
+      order that needs nothing solved on the way.
+    - *"Instant" is not one step.* The reader makes its moves with the page's own controls, and each is a
+      drawing of the page. `instant` takes the pauses, the cursor and the strip away, and no more: measured
+      on the long case, a median of one second a question, the longest 4.6, 37 seconds for all 25. Making
+      the moves without drawing would be another reader, with its own faults to find; not built.
+    - *Checked* in `scripts/bridge-solve-check.mjs`. No case's version moves.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

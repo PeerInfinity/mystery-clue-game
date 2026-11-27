@@ -3151,6 +3151,7 @@ if (ap) {
         }
         for (const q of r.resend) ap.link.solved(q);
         for (const q of st.solved ?? []) ap.sent.add(q);
+        ap.listed = new Set(st.solved ?? []);
         if (r.fresh.length) state.note = `From the Archipelago: ${r.fresh.map((id) => fileById.get(id)?.title ?? id).join('; ')}.`;
         // Back in the office: what the links already show is judged now (a paper read while away may have settled a question).
         if (wasLocked && !locked()) judge();
@@ -3161,30 +3162,37 @@ if (ap) {
     // The careful reader, asked for by the host (`mystery:autoSolve`; ui/world-autoplay.js, `live`): in this save, with
     // no reload. One at a time: a request while it runs is passed over, `stop` ends it. What it says goes to the host
     // (`mystery:autoSolveStatus`), with every question solved and, when it waits, what each open question still lacks.
-    ap.waiters = []; ap.states = 0;
+    ap.waiters = []; ap.states = 0; ap.listed = new Set();
     let solver = null;
     const allLogic = logic ?? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery });
-    const lacking = () => {
+    const lacking = (only = null) => {
         const held = source.held(), solved = new Set(Object.keys(state.solved));
-        return allLogic.questions.filter((q) => !solved.has(q.id)).map((q) => ({ question: q.id, ways: (q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] })))
+        return allLogic.questions.filter((q) => !solved.has(q.id) && (!only || q.id === only)).map((q) => ({ question: q.id, ways: (q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] })))
             .map((w) => ({ papers: [...w.papers].filter((p) => !held.has(p)).sort(), requires: [...w.requires].filter((r) => !solved.has(r)).sort() })) }));
     };
     ap.onAutoSolve = async (d) => {
         if (d.stop) { solver?.stop(); return; }
-        if (locked()) { ap.link.status({ state: 'stopped', locked: true, solved: Object.keys(state.solved) }); return; }
-        if (solver?.running) return;
+        // `question`: only that one (echoed in every status of the request). `instant`: no pacing and no strip.
+        const question = d.question ?? null, tag = question ? { question } : {}, solvedNow = () => Object.keys(state.solved);
+        if (locked()) { ap.link.status({ ...tag, state: 'stopped', locked: true, solved: solvedNow() }); return; }
+        if (question && !qById.has(question)) { ap.link.status({ ...tag, state: 'failed', solved: solvedNow(), failed: { move: null, why: `no question ${question} in this case` } }); return; }
+        if (solver?.running) { if (question) ap.link.status({ ...tag, state: 'failed', solved: solvedNow(), failed: { move: null, why: 'the careful reader is at work on another request' } }); return; }
+        // Solved already: sent again if the host does not list it, and done.
+        if (question && state.solved[question]) { if (!ap.listed.has(question)) ap.link.solved(question); ap.link.status({ ...tag, state: 'done', solved: solvedNow() }); return; }
         const { start } = await import('./world-autoplay.js');
         if (solver?.running) return;
-        solver = start({ store: STORE, fast: !!d.fast, live: {
+        ap.said = null;
+        solver = start({ store: STORE, fast: !!d.fast, instant: !!d.instant, live: {
+            question, solved: (id) => !!state.solved[id], open: openNow,
             skipDay: ap.visits, delivered,
             allSolved: () => allLogic.questions.every((q) => state.solved[q.id]),
             states: () => ap.states,
             nextState: (n) => (ap.states > n ? Promise.resolve() : new Promise((r) => ap.waiters.push(r))),
             report: (st, extra = {}, again = false) => {
-                const waiting = st === 'waiting' ? lacking() : undefined;
+                const waiting = st === 'waiting' ? lacking(question) : undefined;
                 // The same again (a state came that brought nothing) is said only if what is lacking has changed.
                 const key = JSON.stringify([st, waiting, extra]);
-                if (!again || key !== ap.said) ap.link.status({ state: st, solved: Object.keys(state.solved), ...(waiting ? { waiting } : {}), ...(extra ?? {}) });
+                if (!again || key !== ap.said) ap.link.status({ ...tag, state: st, solved: Object.keys(state.solved), ...(waiting ? { waiting } : {}), ...(extra ?? {}) });
                 ap.said = key;
                 // For its caption: the papers of the way that lacks fewest.
                 return waiting ? { papers: waiting.flatMap((w) => w.ways).filter((w) => w.papers.length).sort((a, b) => a.papers.length - b.papers.length)[0]?.papers ?? [] } : null;

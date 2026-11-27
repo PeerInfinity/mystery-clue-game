@@ -13,6 +13,9 @@
 // It ends when every question is solved (moves of the path may be left: those of a paper the answers did not need).
 // `live`: {skipDay, delivered(story id), allSolved(), report(state, extra), states() (how many have come),
 // nextState(n) → a promise of one after the nth}. Returns {stop(), running, done (a promise)}.
+// `live.question` (with `live.solved(id)`, `live.open(id)`): only that question, by the moves the path makes for it
+// (`for_q`); it ends when the question is solved, reads no further, and takes its strip away. It solves nothing else
+// on purpose: a question that rests on one not solved, or lacks a paper, waits. `instant`: as `fast`, and no strip.
 
 import { $, sleep, esc, Stopped, Failed, makeMover, nextRead, readToOf, made, needsOf, DAY_MOVES } from './world-moves.js';
 import { refList } from '../engine/refs.js';
@@ -21,7 +24,9 @@ import { CASE, pageUrl } from './world-case.js';
 const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], ['4', '4×']];
 
 export function start(opts) { const h = { stop: () => {}, running: true }; h.done = run(opts, h).finally(() => { h.running = false; }); return h; }
-async function run({ store, fast = false, live = null }, handle) {
+async function run({ store, fast = false, instant = false, live = null }, handle) {
+    if (instant) fast = true;
+    const target = live?.question ?? null;
     const path = await fetch(`${CASE}/world/path.json`, { cache: 'no-cache' }).then((r) => r.json());
     const moves = path.moves;
     // The case's files (sub-stories), read as each move needs them (world/case.json).
@@ -50,7 +55,8 @@ async function run({ store, fast = false, live = null }, handle) {
         <div id="ap-caption" class="ap-caption" role="button" tabindex="0" aria-expanded="false" title="Click to show all of it, or one line"><span class="ap-mark" aria-hidden="true"></span><span id="ap-text"></span></div>`;
     const head = document.querySelector('header.top');
     if (head) head.after(strip); else document.body.prepend(strip);
-    document.body.classList.add('autoplaying', 'has-strip');
+    if (instant) strip.hidden = true;
+    document.body.classList.add('autoplaying', ...(instant ? [] : ['has-strip']));
     const FULL = 'autoplay-caption-full';
     const isFull = () => { try { return localStorage.getItem(FULL) === '1'; } catch { return false; } };
     const showFull = (on) => { strip.classList.toggle('full', on); $('#ap-caption').setAttribute('aria-expanded', String(on || strip.classList.contains('must'))); };
@@ -103,6 +109,7 @@ async function run({ store, fast = false, live = null }, handle) {
         document.removeEventListener('click', byPlayer, true);
         cursor.remove();
         document.body.classList.remove('autoplaying');
+        if (instant || target) clear();   // nobody to read it: the host is told
         window.__autoplay = status();
     };
 
@@ -220,7 +227,8 @@ async function run({ store, fast = false, live = null }, handle) {
             // next round. A round that makes nothing: all made is the end; else it waits for a paper, unless a move was
             // refused with nothing before it waiting, which is a fault.
             const played = new Set();
-            const todo = () => moves.map((m, i) => ({ m, i })).filter(({ m, i }) => !(live.skipDay && DAY_MOVES.has(m.do)) && !played.has(i) && !made(m, saved()));
+            const todo = () => moves.map((m, i) => ({ m, i })).filter(({ m, i }) => !(live.skipDay && DAY_MOVES.has(m.do)) && !(target && m.for_q && !m.for_q.includes(target)) && !played.has(i) && !made(m, saved()));
+            const over = () => (target ? live.solved(target) : live.allSolved());
             const held = (m) => Object.keys(needsOf(m.at, files)).every((id) => live.delivered(id));
             // Said to the host only when it changes: a state that brings nothing is not answered with the same again.
             let said = null;
@@ -229,8 +237,9 @@ async function run({ store, fast = false, live = null }, handle) {
             for (;;) {
                 let did = 0, lacking = false, refused = null;
                 const n = live.states();
-                for (const { m, i } of todo()) {
-                    if (live.allSolved()) break;
+                // A question asked for by itself is not begun while it cannot be solved (a paper, or one it rests on).
+                for (const { m, i } of target && !over() && !live.open(target) ? [] : todo()) {
+                    if (over()) break;
                     if (made(m, saved())) continue;
                     if (!held(m)) { lacking = true; continue; }
                     try { if (said !== 'running') report('running'); await one(m); played.add(i); did++; } catch (e) {
@@ -238,7 +247,8 @@ async function run({ store, fast = false, live = null }, handle) {
                         if (!lacking && !refused) refused = { move: i, why: e.message };
                     }
                 }
-                if (live.allSolved() || !todo().length) break;
+                if (over()) break;
+                if (!todo().length && (!target || live.open(target))) { if (!target) break; refused ??= { move: null, why: `every move the path makes for ${target} is made, and it is not solved` }; }
                 if (did) continue;
                 if (refused) { s.failed = refused.why; ending(`The solving stopped: ${refused.why}.`); report('failed', { failed: refused }); return; }
                 const w = report('waiting');
@@ -264,6 +274,8 @@ async function run({ store, fast = false, live = null }, handle) {
                 }
             }
         } else for (const m of moves) await one(m);
+        // One question asked for: solved, and that is all.
+        if (target) { s.done = true; clear(); window.__autoplay = status(); live.report('done'); return; }
         // The main story to its end: its last paragraph, as its tab shows it.
         if ($('.story-tab[data-story]') && !$('.story-tab[data-story="main"].on')) await press('.story-tab[data-story="main"]');
         await readTo(Number($('#para').max));

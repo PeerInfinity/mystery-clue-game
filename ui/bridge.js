@@ -9,8 +9,9 @@
 //                 `lock` 'actions' | 'new-reading' | 'everything' and `inOffice` for a case that is one region of a world: away from
 //                 its office the page takes no move and sends no solved question; both absent: never locked)
 //   host → page   mystery:refused        {reason, story, version}   (the slot's; reason: no-mystery-world, other-story, other-version)
-//   host → page   mystery:autoSolve      {story, fast?, stop?}   (the careful reader plays in the player's save; `stop` ends it)
-//   page → host   mystery:autoSolveStatus {story, state, solved, waiting?, failed?}   (state: running, waiting, done, stopped, failed;
+//   host → page   mystery:autoSolve      {story, question?, fast?, instant?, stop?}   (the careful reader plays in the player's save;
+//                 `question`: only that one; `instant`: no pacing and no strip; `stop` ends it)
+//   page → host   mystery:autoSolveStatus {story, question?, state, solved, waiting?, failed?}   (state: running, waiting, done, stopped, failed;
 //                 `solved` every solved question; `waiting` [{question, ways: [{papers, requires}]}], what each open question still
 //                 lacks, way by way; `failed` {move, why})
 // A host with no server says `connected: false` and a `game` that begins `offline:`: the page starts on that too, and plays as if connected.

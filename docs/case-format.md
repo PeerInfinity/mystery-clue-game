@@ -193,8 +193,8 @@ adapter protocol and six events of its event bus:
 | page → host | `mystery:questionSolved` | `{story, questionId}` |
 | host → page | `mystery:state` | `{story, version, game, connected, papers, solved, loop?, lock?, inOffice?}`: the whole sets, every time; `loop` the day of a case with visits; `lock` (`actions`, `new-reading` or `everything`) and `inOffice` for a case that is one region of a generated world (below) |
 | host → page | `mystery:refused` | `{reason, story, version}`: the slot's story and version; `reason` is `no-mystery-world`, `other-story` or `other-version` |
-| host → page | `mystery:autoSolve` | `{story, fast?, stop?}`: the careful reader plays in the player's save; `fast` with no pauses and no cursor; `stop` ends it |
-| page → host | `mystery:autoSolveStatus` | `{story, state, solved, waiting?, failed?}`: `state` is `running`, `waiting`, `done`, `stopped` or `failed`; `solved` every solved question; `waiting` (when waiting) `[{question, ways: [{papers, requires}]}]`, what each open question still lacks, way by way; `failed` `{move, why}` |
+| host → page | `mystery:autoSolve` | `{story, question?, fast?, instant?, stop?}`: the careful reader plays in the player's save; `question` only that one; `fast` with no pauses and no cursor; `instant` the same and no strip; `stop` ends it |
+| page → host | `mystery:autoSolveStatus` | `{story, question?, state, solved, waiting?, failed?}`: `question` echoed from the request; `state` is `running`, `waiting`, `done`, `stopped` or `failed`; `solved` every solved question; `waiting` (when waiting) `[{question, ways: [{papers, requires}]}]`, what each open question still lacks, way by way; `failed` `{move, why}` |
 
 **With no server** (since 2026-11-27). The host's app can play a generated game locally: it then says `connected:
 false` in every state and names the game `offline:<seed name>:<player>`, keeps the checks itself and grants the
@@ -213,6 +213,16 @@ listed and announced and does not open. Under `everything` the host does not sho
 does there what it does under `actions`. The careful reader is stopped by a lock and refused under one (`stopped`
 with `locked: true`). Back in the office the note goes, what the links already show is judged, and what is owed
 is sent.
+
+**One question, and at once** (since 2026-11-27, for the host's playback bot, which walks a world one check at
+a time). With `question` the reader makes only the moves the path makes for that question (`for_q`), ends
+`done` when it is solved, reads no further and takes its strip away. It solves nothing else on purpose: a
+question that lacks a paper or rests on one not solved says `waiting`, with what that one question lacks, and
+goes on at the state that brings it. Solved already: `done` at once, sent again if the host does not list it. A
+question the case has not, or a request while another runs: `failed`, with why. `instant` (with or without
+`question`) is `fast` with no strip shown; the moves are still made through the page's own controls, one
+drawing each, so it takes the page's time: on the long case about a second a question (the longest under five),
+and under a minute for the whole case.
 
 **The careful reader, asked for by the host** (`mystery:autoSolve`, since 2026-11-26; `ui/world-autoplay.js`, `live`).
 The true path is played in the player's own save, with no reload: each move of the path not made yet whose papers

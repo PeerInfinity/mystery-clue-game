@@ -98,6 +98,44 @@ if (VISITS) {
     console.log(`  ${(await statuses()).map((x) => x.state).join(' → ').replace(/(running → waiting → )+/g, (m) => `(running → waiting)×${m.length / 20} → `)}; ${solved.length} question(s) solved in ${Math.round((Date.now() - t0) / 1000)} s`);
 }
 
+// ---------- one question at a time, at once (the host's bot) ----------
+{
+    await fresh();
+    const ids = questions.map((q) => q.id);
+    if (VISITS) for (const p of [...new Set(moves.filter((m) => m.do === 'visit').map((m) => m.file))]) await ev(`window.__stub.give(${J(p)}); 1`);
+    await sleep(300);
+    const ask = async (q, opts = { instant: true }) => { const before = (await statuses()).length; await ev(`window.__stub.autoSolve(${J({ question: q, ...opts })}); 1`); return before; };
+    const answer = async (q, before, states, ms = 120000) => { for (const t = Date.now(); Date.now() - t < ms;) { const s = (await statuses()).slice(before).filter((x) => x.question === q).at(-1); if (s && [...states, 'failed'].includes(s.state)) return s; await sleep(50); } return { state: 'timeout' }; };
+    // One that cannot be solved yet (if there is one): it waits, says what that question lacks, and solves nothing.
+    const shut = await ev(`${J(ids)}.find((q) => !window.__delivery.open(q)) ?? null`);
+    if (shut) {
+        const b = await ask(shut), s = await answer(shut, b, ['waiting', 'done'], 20000);
+        if (s.state !== 'waiting' || s.waiting?.length !== 1 || s.waiting[0].question !== shut) fail(`${shut} cannot be solved yet, and asked for by itself the page says ${J(s)}`);
+        if (Object.keys((await save()).solved ?? {}).length) fail(`${shut} asked for while it waits, and something was solved`);
+        await ev('window.__stub.autoSolve({ stop: true }); 1'); await answer(shut, b, ['stopped'], 10000);
+    }
+    const times = [];
+    for (let left = [...ids]; left.length;) {
+        const q = await ev(`${J(left)}.find((q) => window.__delivery.open(q)) ?? null`);
+        if (!q) { fail(`no question left is open: ${left.join(', ')}`); break; }
+        const was = Object.keys((await save()).solved ?? {}), t = Date.now(), b = await ask(q), s = await answer(q, b, ['done']);
+        times.push(Date.now() - t);
+        if (s.state !== 'done') { fail(`${q} asked for by itself: the page says ${s.state}${s.failed ? `: ${s.failed.why}` : ''}`); break; }
+        const now = Object.keys((await save()).solved ?? {}), more = now.filter((x) => !was.includes(x));
+        if (J(more) !== J([q])) fail(`${q} asked for by itself, and solved: ${more.join(', ') || 'nothing'}`);
+        if (!(await ev('window.__stub.solved()')).includes(q)) fail(`${q} is done and the host has no check for it`);
+        if (await ev(`!!document.querySelector('.autoplay-strip') || document.body.classList.contains('autoplaying')`)) fail(`${q} is done and the strip is still there`);
+        left = left.filter((x) => x !== q);
+    }
+    // Asked again when solved: done at once.
+    { const q = ids[0], b = await ask(q), s = await answer(q, b, ['done'], 5000); if (s.state !== 'done') fail(`${q} asked for again when solved: ${s.state}`); }
+    { const b = await ask('q.no-such'), s = await answer('q.no-such', b, ['done'], 5000); if (s.state !== 'failed') fail(`a question the case has not: ${s.state}`); }
+    if (!(await ev('window.__sameLoad === true'))) fail('one question at a time: the page was reloaded');
+    if (errors.length) fail(`one question at a time: page error: ${errors.splice(0).join(' | ')}`);
+    times.sort((a, b) => a - b);
+    console.log(`  one question at a time, instant: ${times.length} of ${ids.length} solved, each alone; ${(times.reduce((a, b) => a + b, 0) / 1000).toFixed(1)} s in all, median ${times[times.length >> 1]} ms, longest ${times.at(-1)} ms`);
+}
+
 // ---------- stopped by the host, and by the player ----------
 for (const [who, stop] of [['the host', () => ev('window.__stub.autoSolve({ stop: true }); 1')], ['the player', async () => {
     for (const type of ['mousePressed', 'mouseReleased']) await send('Input.dispatchMouseEvent', { type, x: 700, y: 880, button: 'left', clickCount: 1 });
