@@ -3010,6 +3010,16 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *The gate, as that side first read it,* is real in other cases (a question the story answers holds
       the reading): the one-question reader now answers such a question on the way. No case played in an
       Archipelago today has one with more than one question, so this is built and not exercised by a check.
+    - *Open by the export's logic.* Next the bot stopped at the fire bell's question: the page said it
+      waited for Mrs. Rowe's paper, and the exported rule asks only for the harbour log. The export is
+      right. It reads the logic with the case's implications, where a question has every way the evidence
+      settles it, and the bell's time follows from the log and the office clock alone; her statement is set
+      aside, not needed. The page's own test of "can this be solved yet" read the logic without the
+      implications (one list of papers a question, the path's), and the reader would not begin. In an
+      Archipelago the page now reads it as the export does. Asked with the log and the watch book only,
+      the bell's question and the rounds' are both solved: the reader makes the path's moves whose papers
+      are held, and the page judges the answer from those links. (With answers marked by hand the path's
+      own circle still waits for the second paper; the bot plays with answers from the evidence.)
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 

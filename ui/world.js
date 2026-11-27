@@ -258,7 +258,10 @@ const source = ap ? {
 const replyOf = new Map(files.filter((f) => f.reply != null).map((f) => [f.reply, f]));
 const delivered = (id) => id === MAIN || (fileById.has(id) && (fileById.get(id).visit ? (ap ? source.held().has(id) : state.visits?.first?.[id] != null) : fileById.get(id).reply != null ? !!state.solved?.[fileById.get(id).reply] : EARNED ? source.held().has(id) : fileById.get(id).delivered == null || seen(fileById.get(id).delivered)));
 /** Can this question be solved now (earned papers): not solved, its papers come, what it rests on solved. Otherwise always. */
-const openNow = (id) => { const lq = logic?.questions.find((x) => x.id === id); return !lq || isOpen(lq, source.held(), new Set(Object.keys(state.solved))); };
+// In an Archipelago the question is the host's, whose rules are the export's (scripts/export-rules.mjs): the logic read
+// with the case's implications, where a question has every way the evidence can settle it, not only the path's.
+const apLogic = ap ? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery, ...(implications.length ? { implications } : {}) }) : null;
+const openNow = (id) => { const lq = (apLogic ?? logic)?.questions.find((x) => x.id === id); return !lq || isOpen(lq, source.held(), new Set(Object.keys(state.solved))); };
 // For the autoplay and the checks: the delivery as the page has it.
 // While a move is only being tried (and will be taken back), nothing is solved: `window.__trying(true)` … `(false)`.
 window.__trying = (on) => { trying = !!on; };
@@ -3164,7 +3167,7 @@ if (ap) {
     // (`mystery:autoSolveStatus`), with every question solved and, when it waits, what each open question still lacks.
     ap.waiters = []; ap.states = 0; ap.listed = new Set();
     let solver = null;
-    const allLogic = logic ?? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery });
+    const allLogic = apLogic;
     const lacking = (only = []) => {
         const held = source.held(), solved = new Set(Object.keys(state.solved));
         return allLogic.questions.filter((q) => !solved.has(q.id) && (!only.length || only.includes(q.id))).map((q) => ({ question: q.id, ways: (q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] })))
