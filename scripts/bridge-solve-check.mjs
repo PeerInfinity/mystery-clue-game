@@ -1,6 +1,6 @@
 // The careful reader asked for by the host of an Archipelago (`mystery:autoSolve`; ui/world-autoplay.js `live`,
 // ui/bridge.js), against the stand-in host (`?bridge=stub`): in the page's own save, with no reload.
-//   CASE=<dir> [SEED=<n>] node scripts/bridge-solve-check.mjs
+//   CASE=<dir> [SEED=<n>] [OFFLINE=1] node scripts/bridge-solve-check.mjs   (OFFLINE: the host has no server; the same must hold)
 // A case with visits: asked with no paper held, it must wait and say what each question lacks; the papers are then
 // given one at a time, in the reverse of the path's order, and after each it must go on by itself and never fail; it
 // makes no visit and ends no day; it ends `done` with the goal solved and checked by the host. A case whose papers
@@ -35,7 +35,7 @@ await send('Page.enable'); await send('Runtime.enable');
 await send('Emulation.setDeviceMetricsOverride', { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
 let failures = 0;
 const fail = (why) => { failures++; console.log(`FAIL ${why}`); };
-const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', [`seed=${SEED}`, 'iframeId=mystery&bridge=stub', 'answers=evidence'].join('&'));
+const URL_ = pageUrl(process.env.URL ?? 'http://localhost:8321/', [`seed=${SEED}`, 'iframeId=mystery&bridge=stub', ...(process.env.OFFLINE ? ['stubOffline=1'] : []), 'answers=evidence'].join('&'));
 const marker = `window.__sameLoad = true; 1`;
 async function fresh() {
     await send('Page.navigate', { url: URL_ }); await sleep(800);

@@ -2973,6 +2973,16 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Checked* by `scripts/bridge-lock-check.mjs`, one of the page checks of a case with visits or earned
       papers. No case's version moves: the page changed, not what a question needs.
 
+171. **Played with no server (2026-11-27; the user, to the Archipelago side: "I also want a tutorial, or maybe
+    just a feature check, that plays through a mystery game preset locally, without an Archipelago server").**
+    The page waited for a state that said `connected: true`, and a host with no server never says it, so the
+    page stayed on "Waiting for the Archipelago connection…". The host already plays a game locally and names
+    it `offline:…`; the page now starts on that name and treats the state as a connected one. The name was
+    taken, as that side suggested, and no new field: the host says it only when there is no server.
+    - *Checked:* the stand-in host can be offline (`?stubOffline=1`), and the careful reader's check is run
+      that way too: The Same Monday, and the long case to its end (25 questions, 41 seconds, fast).
+    - No case's version moves.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

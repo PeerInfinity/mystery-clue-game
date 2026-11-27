@@ -169,13 +169,17 @@ if (BRIDGE_ID && AUTOPLAY === null) {
         // The checks' host, in this window: the placement of `?seed=`, as when playing alone.
         // (A case with visits: nothing is placed; the check gives the papers as its visits would find them, `__stub.give`.)
         const seed = Number(params.get('seed')) || 1, placed = logic ? placement(logic, seed) ?? new Map() : new Map();
-        window.__stub = stubHost({ win: window, id: BRIDGE_ID, story, version: params.get('stubVersion') ?? version, game: `stub-${seed}`, start: logic?.start ?? [], brings: (q) => placed.get(q) ?? null });
+        window.__stub = stubHost({ win: window, id: BRIDGE_ID, story, version: params.get('stubVersion') ?? version, game: `${params.get('stubOffline') ? 'offline:' : ''}stub-${seed}`, offline: !!params.get('stubOffline'), start: logic?.start ?? [], brings: (q) => placed.get(q) ?? null });
     }
+    // The host's app with no server (a generated game played locally): it says `connected: false` and names the game
+    // `offline:…`, a save of its own. It keeps the checks itself and grants the papers, so the page plays as if connected.
+    const offline = (st) => typeof st.game === 'string' && st.game.startsWith('offline:');
+    ap.live = (st) => (offline(st) ? { ...st, connected: true } : st);
     waitNote('Waiting for the Archipelago connection…');
     const first = await new Promise((resolve) => {
         ap.link = connect({
             win: window, target: params.get('bridge') === 'stub' ? window : BRIDGE_MODE === 'window' ? window.opener ?? window.parent : window.parent, id: BRIDGE_ID, mode: BRIDGE_MODE, origin: params.get('hostOrigin') || '*', story, version,
-            onState: (st) => { if (ap.onState) ap.onState(st); else if (st.version != null && st.version !== version) resolve({ refused: `the Archipelago slot was made from another version of this case (${st.version}; this page is ${version})` }); else if (st.connected) resolve(st); },
+            onState: (st) => { if (ap.onState) ap.onState(st); else if (st.version != null && st.version !== version) resolve({ refused: `the Archipelago slot was made from another version of this case (${st.version}; this page is ${version})` }); else if (st.connected || offline(st)) resolve(st); },
             onAutoSolve: (d) => ap.onAutoSolve?.(d),
             onRefused: (reason) => { if (ap.onState) { state.note = `The Archipelago refused this page: ${reason}.`; render(); } else resolve({ refused: reason }); },
         });
@@ -183,7 +187,7 @@ if (BRIDGE_ID && AUTOPLAY === null) {
     if (first.refused) { waitNote(`The Archipelago refused this page: ${first.refused}.`); throw new Error(`bridge: ${first.refused}`); }
     ap.first = first;
     ap.setLock(first);
-    ap.held = reconcile(ap.held, [], first).held;
+    ap.held = reconcile(ap.held, [], ap.live(first)).held;
     STORE = bridgeStore(first.game ?? 'game');
     // The same generated game hosted again is the same `game` with nothing checked: a timeline saved here would send
     // all its solved questions into the new room at once. The player says which it is.
@@ -3131,6 +3135,7 @@ if (ap) {
     ap.onState = (st) => {
         if (st.version != null && st.version !== ap.version) { state.note = `The Archipelago slot was made from another version of this case (${st.version}; this page is ${ap.version}).`; render(); return; }
         const wasLocked = locked();
+        st = ap.live(st);
         ap.setLock(st);
         const r = reconcile(ap.held, Object.keys(state.solved), st);
         if (locked()) r.resend = [];   // nothing is sent from outside the office: it goes when the player is back

@@ -13,6 +13,7 @@
 //   page → host   mystery:autoSolveStatus {story, state, solved, waiting?, failed?}   (state: running, waiting, done, stopped, failed;
 //                 `solved` every solved question; `waiting` [{question, ways: [{papers, requires}]}], what each open question still
 //                 lacks, way by way; `failed` {move, why})
+// A host with no server says `connected: false` and a `game` that begins `offline:`: the page starts on that too, and plays as if connected.
 // The page deals only in its own ids (papers, questions); the host turns them into items and locations.
 // Nothing here touches the document: `win` is the page's window and `target` the host's, so a test can pass its own.
 
@@ -74,11 +75,11 @@ export function reconcile(heldBefore, solvedHere, state) {
  * in hand from the start. `game` names the save. `target`: the page's window, when the host is the window that frames
  * it (scripts/fixtures/bridge-host.html).
  */
-export function stubHost({ win, target = win, id, story, version, game, start, brings, onMessage = null }) {
+export function stubHost({ win, target = win, id, story, version, game, start, brings, onMessage = null, offline = false }) {
     const solved = new Set(), given = [], statuses = [];
     let loop = 1, lock = null;
     const post = (type, data) => (typeof target === 'function' ? target() : target).postMessage(message(type, id, data), '*');
-    const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: true, papers: [...start, ...[...solved].map(brings).filter(Boolean), ...given], solved: [...solved], loop, ...(lock ?? {}) } });
+    const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: !offline, papers: [...start, ...[...solved].map(brings).filter(Boolean), ...given], solved: [...solved], loop, ...(lock ?? {}) } });
     win.addEventListener('message', (e) => {
         const m = e.data;
         if (!m || m.clientId !== id) return;

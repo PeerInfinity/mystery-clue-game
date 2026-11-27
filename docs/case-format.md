@@ -196,6 +196,12 @@ adapter protocol and six events of its event bus:
 | host → page | `mystery:autoSolve` | `{story, fast?, stop?}`: the careful reader plays in the player's save; `fast` with no pauses and no cursor; `stop` ends it |
 | page → host | `mystery:autoSolveStatus` | `{story, state, solved, waiting?, failed?}`: `state` is `running`, `waiting`, `done`, `stopped` or `failed`; `solved` every solved question; `waiting` (when waiting) `[{question, ways: [{papers, requires}]}]`, what each open question still lacks, way by way; `failed` `{move, why}` |
 
+**With no server** (since 2026-11-27). The host's app can play a generated game locally: it then says `connected:
+false` in every state and names the game `offline:<seed name>:<player>`, keeps the checks itself and grants the
+papers. The page starts on such a state as on a connected one and plays the same (a solved question is sent, and
+sent again if the host does not list it); the save is that game's own. Any other state with `connected: false`
+is still waited out, so a page opened a moment before the client connects does not start in the wrong save.
+
 **The lock** (since 2026-11-27; `locked` in `ui/world.js`). A case can be one region of a generated world, its
 "office": the host then sends `lock` and `inOffice` in every state, and a new state when the player enters or
 leaves the region. Both absent (a case that is the whole slot): never locked. Under any lock with `inOffice`
