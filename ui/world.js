@@ -1077,9 +1077,16 @@ const autoQ = (qid) => state.answerRule === 'evidence' && implications.some((i) 
 const shownStatement = (id) => observed.filled.some((x) => x.obs.id === id);
 /** What the statements shown say of a question's answers (an answer not yet offered is not concluded). */
 function verdictOf(q) {
-    const values = shownPossibilities(q).map((o) => o.value);
+    const all = shownPossibilities(q).map((o) => o.value);
+    // The people and places met so far, offered behind "More" so that no list points at one, are cases of "something
+    // else" (the answer always offered): they stand and fall with it. Left as answers of their own they would never
+    // be ruled out, and nothing could follow by elimination on a "who" question (2026-11-27; finding 173).
+    const own = new Set((q.possibilities ?? []).map((p) => p.value)), other = (q.possibilities ?? []).filter((p) => p.via === 'always').map((p) => p.value).filter((x) => all.includes(x));
+    const extra = other.length ? all.filter((x) => !own.has(x)) : [], values = all.filter((x) => !extra.includes(x));
     const v = verdict(q.id, values, derivedNow);
-    return values.includes(v.concluded) ? v : { ...v, concluded: null, by: null, ruled: new Set(derivedNow.filter((i) => i.q === q.id).flatMap((i) => i.rules_out ?? []).filter((x) => values.includes(x))) };
+    const said = derivedNow.filter((i) => i.q === q.id).flatMap((i) => i.rules_out ?? []);
+    for (const x of extra) if (said.includes(x) || other.every((o) => v.ruled.has(o))) v.ruled.add(x);
+    return values.includes(v.concluded) ? v : { ...v, concluded: null, by: null, ruled: new Set(said.filter((x) => all.includes(x))) };
 }
 // A lie as evidence is linked by its telling, or by any statement the telling carried that the player has linked and
 // holds unlikely or ruled out: to rule out what was said and link it is the natural move (a blind run of 2026-11-21
@@ -3189,6 +3196,8 @@ if (ap) {
             question, solved: (id) => !!state.solved[id], open: openNow,
             // The unsolved questions this one rests on, by the way that lacks fewest papers.
             rests: (id) => (lacking([id])[0]?.ways ?? []).slice().sort((a, b) => a.papers.length - b.papers.length)[0]?.requires ?? [],
+            // By a way of the rule, nothing is lacking for it (no paper, no question).
+            free: (id) => (lacking([id])[0]?.ways ?? []).some((w) => !w.papers.length && !w.requires.length),
             skipDay: ap.visits, delivered,
             allSolved: () => allLogic.questions.every((q) => state.solved[q.id]),
             states: () => ap.states,

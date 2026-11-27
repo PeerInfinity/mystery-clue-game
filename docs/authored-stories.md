@@ -3029,6 +3029,29 @@ script that found each fact's paragraph from its quote; the data files are the s
       for the motive with the papers of its rule only, it solved four others on the way and then it. With
       every paper held and the questions asked from the last, 13 requests solved all 25.
 
+173. **The answers behind "More" in an elimination (2026-11-27; found by the host's bot at the long case's
+    goal, reported by the Archipelago side).** Asked for the goal with only its rule's papers held, the page
+    waited though nothing was lacking.
+    - *The rule is right.* The goal follows by elimination: with the door's question and "who knew" solved,
+      the two-keys statement rules out three of the named people and "someone else", a fourth is ruled out
+      by what he knew, and one is left. The engine and the export count over the question's own answers.
+    - *The page counted more.* For a "who" question it also offers everyone met so far behind "More" (here
+      the narrator and one witness). Nothing ever rules those out by name, so nobody was ever the one left.
+      The same held for a player marking from the evidence: the goal needed its other way.
+    - *Now* such an extra answer stands and falls with the question's own "something else" answer (the one
+      given `via: always`): ruled out when that is, or when a statement names it. A question without such an
+      answer is judged as before (the extras are counted, as answers nothing has spoken of). If the one left
+      is not one of the question's own answers, nothing is concluded.
+    - *This changes the page for a player too,* not only for the bot: with answers from the evidence, the
+      long case's goal can be concluded a way sooner. No case's path, hints or version moved (every page
+      check on all 42 cases passed with it).
+    - *A check for the next one of this kind:* `scripts/bridge-solve-check.mjs` now asks for every question
+      from a fresh page with only one set of its exported rule in hand, for every set (28 on the long case,
+      both ways of the three questions that have two). All end `done`.
+    - *Said as a fault:* a question asked for that lacks nothing by its rule, and that the path cannot
+      solve, now ends `failed` with that reason. Before, it said `waiting`, and no paper would have ended
+      the wait.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 process.env.BRIDGE = '1';
 const { CASE, CDP, WORLD, STORE, pageUrl } = await import('./case-env.mjs');
+const { worldLogic, logicPaperSets } = await import('./export-rules.mjs');
 
 const R = (f) => JSON.parse(fs.readFileSync(path.join(WORLD, f), 'utf8'));
 const header = R('case.json'), moves = R('path.json').moves, questions = R('questions.json').questions;
@@ -158,6 +159,22 @@ if (VISITS) {
     }
     await ev(`document.documentElement.style.display = ''; 1`);
     console.log(`  the other order, the page not drawn: ${asked} asked for, ${extra} more solved on the way (what the asked one rests on)`);
+    // The host's own rule (the export's: scripts/export-rules.mjs): each question asked for first of all, with only the
+    // papers of one set of its rule in hand, and so for every set. It must end `done`: a rule that the page cannot
+    // play is a check the host's bot stops at.
+    const logic = VISITS ? null : worldLogic(CASE);
+    if (logic) {
+        let sets = 0;
+        for (const [q, list] of logicPaperSets(logic)) for (const set of list) {
+            await fresh();
+            for (const p of set) await ev(`window.__stub.give(${J(p)}); 1`);
+            await sleep(300);
+            const b = await ask(q), s = await answer(q, b, ['done', 'waiting'], 120000); sets++;
+            if (s.state !== 'done') { fail(`by its rule ${q} needs only ${[...set].join(', ') || 'no paper'}: asked for with those, the page says ${s.state}${s.failed ? `: ${s.failed.why}` : ''}${s.waiting ? ` ${J(s.waiting.filter((w) => w.question === q))}` : ''}`); if (s.state === 'waiting') await ev('window.__stub.autoSolve({ stop: true }); 1'); }
+        }
+        console.log(`  by the host's rule: ${sets} set(s) of papers, each enough for its question from a fresh page`);
+        await fresh();
+    }
     // Asked again when solved: done at once.
     { const q = ids[0], b = await ask(q), s = await answer(q, b, ['done'], 5000); if (s.state !== 'done') fail(`${q} asked for again when solved: ${s.state}`); }
     { const b = await ask('q.no-such'), s = await answer('q.no-such', b, ['done'], 5000); if (s.state !== 'failed') fail(`a question the case has not: ${s.state}`); }

@@ -228,6 +228,11 @@ and the reader works on a page that is not drawn at all (the host's app with ano
 frame): a control is then pressed where it is in the document. As for the time, the moves are still made through the page's own controls, one
 drawing each, so it takes the page's time: on the long case about a second a question (the longest under five),
 and under a minute for the whole case.
+A question that by its rule lacks nothing (no paper, no question) and that the path's moves still cannot solve
+ends `failed`, with that as its reason: no paper to come would end a wait. (An answer offered only behind "More",
+a person met who is not one of the question's own answers, counts in an elimination with the question's
+"something else" answer: ruled out when that is. The export counts the question's own answers only, and the
+page must agree with it.)
 
 **The careful reader, asked for by the host** (`mystery:autoSolve`, since 2026-11-26; `ui/world-autoplay.js`, `live`).
 The true path is played in the player's own save, with no reload: each move of the path not made yet whose papers

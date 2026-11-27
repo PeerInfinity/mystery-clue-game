@@ -262,6 +262,9 @@ async function run({ store, fast = false, instant = false, live = null }, handle
                 if (target) { const more = live.gate().filter((q) => !wanted.has(q)); if (more.length) { for (const q of more) wanted.add(q); continue; } }
                 if (!todo().length && (!target || live.open(target))) { if (!target) break; refused ??= { move: null, why: `every move the path makes for ${target} is made, and it is not solved` }; }
                 if (did) continue;
+                // Asked for one question that, by the host's rule, lacks nothing, and the path cannot solve it: a fault of
+                // the page or of the rule, said as one (no paper to come would end the wait).
+                if (!refused && target && live.free?.(target)) refused = { move: null, why: `nothing listed is lacking for ${target}, and the path's moves for it cannot be made` };
                 if (refused) { s.failed = refused.why; ending(`The solving stopped: ${refused.why}.`); report('failed', { failed: refused }); return; }
                 const w = report('waiting');
                 say(`Waiting for ${w?.papers?.length ? `a paper: ${w.papers.map((id) => title(id) ?? id).join(', ')}` : 'what the Archipelago brings next'}.`, true);
