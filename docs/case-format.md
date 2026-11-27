@@ -191,10 +191,22 @@ adapter protocol and six events of its event bus:
 |---|---|---|
 | page → host | `mystery:requestState` | `{story, version}` |
 | page → host | `mystery:questionSolved` | `{story, questionId}` |
-| host → page | `mystery:state` | `{story, version, game, connected, papers, solved}`: the whole sets, every time |
+| host → page | `mystery:state` | `{story, version, game, connected, papers, solved, loop?, lock?, inOffice?}`: the whole sets, every time; `loop` the day of a case with visits; `lock` (`actions`, `new-reading` or `everything`) and `inOffice` for a case that is one region of a generated world (below) |
 | host → page | `mystery:refused` | `{reason, story, version}`: the slot's story and version; `reason` is `no-mystery-world`, `other-story` or `other-version` |
 | host → page | `mystery:autoSolve` | `{story, fast?, stop?}`: the careful reader plays in the player's save; `fast` with no pauses and no cursor; `stop` ends it |
 | page → host | `mystery:autoSolveStatus` | `{story, state, solved, waiting?, failed?}`: `state` is `running`, `waiting`, `done`, `stopped` or `failed`; `solved` every solved question; `waiting` (when waiting) `[{question, ways: [{papers, requires}]}]`, what each open question still lacks, way by way; `failed` `{move, why}` |
+
+**The lock** (since 2026-11-27; `locked` in `ui/world.js`). A case can be one region of a generated world, its
+"office": the host then sends `lock` and `inOffice` in every state, and a new state when the player enters or
+leaves the region. Both absent (a case that is the whole slot): never locked. Under any lock with `inOffice`
+false the page takes no move of the player's (an answer's mark, a link, a level of trust, a reasoning move or
+its withdrawal, a thing held, the room's marks, a check, Undo: greyed, and a click says why), judges nothing
+solved and sends no `mystery:questionSolved`, not even one owed from before; a line above the page says so for
+as long as it lasts. Reading, the views and the settings stay free. Under `new-reading` a paper not yet begun is
+listed and announced and does not open. Under `everything` the host does not show the page at all, so the page
+does there what it does under `actions`. The careful reader is stopped by a lock and refused under one (`stopped`
+with `locked: true`). Back in the office the note goes, what the links already show is judged, and what is owed
+is sent.
 
 **The careful reader, asked for by the host** (`mystery:autoSolve`, since 2026-11-26; `ui/world-autoplay.js`, `live`).
 The true path is played in the player's own save, with no reload: each move of the path not made yet whose papers

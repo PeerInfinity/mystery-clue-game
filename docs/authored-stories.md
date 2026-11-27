@@ -2952,6 +2952,27 @@ script that found each fact's paragraph from its quote; the data files are the s
       written for circling by hand should not be copied there; if more reasoning is wanted, it could come from
       the inferences the links produce (the "What follows from it" lines).
 
+170. **The lock: a case worked on in its office (2026-11-27; the user, to the Archipelago side: "I want to continue
+    with all of the remaining tasks you listed", the page's side of the lock among them).** The host side was
+    built first: a case can be one region of a generated world, and `mystery:state` then carries `lock`
+    (`actions`, `new-reading`, `everything`) and `inOffice`. The rules were agreed there with the user, who
+    ruled that linking is locked too: "it would be confusing for the player to be able to link, but for the
+    effects of the link to not happen".
+    - *What the page does* away from the office: takes no move, judges nothing solved, sends nothing, says so
+      in a line above the page and greys the moves; reading stays free. Under `new-reading` a paper not begun
+      does not open.
+    - *How the moves are locked:* one listener ahead of the page's own, by a list of what is a move, and the
+      same list greys them. The moves have no single place they all pass through, so a list was the smaller
+      change; a move added later must be added to it (the check clicks whatever it finds by its own list, so
+      it does not catch a move missing from both).
+    - *A choice made here:* "a paper that arrives while locked" is taken as "a paper not yet begun". The page
+      keeps no record of when a paper came, and a reload while away would lose one; a paper that came in the
+      office and was never opened is therefore shut as well until the player is back.
+    - *Nothing judged while away:* with answers marked from the evidence, reading a paper can settle a question
+      with no click. That too waits: it is judged, and sent, at the first state back in the office.
+    - *Checked* by `scripts/bridge-lock-check.mjs`, one of the page checks of a case with visits or earned
+      papers. No case's version moves: the page changed, not what a question needs.
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

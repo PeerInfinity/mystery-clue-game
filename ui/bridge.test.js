@@ -107,3 +107,17 @@ test('the host asks for the careful reader, and hears what the page says of it',
     assert.deepEqual(host.statuses(), [{ story: 's', state: 'waiting', solved: [], waiting: [{ question: 'q1', ways: [{ papers: ['a'], requires: [] }] }] }]);
     assert.equal(win.log.filter((m) => m.type === 'EVENT_BUS_MESSAGE' && m.data.eventName === 'mystery:state').length, states, 'a status is not answered with a state');
 });
+
+test('the lock: the stand-in host says where the player is, and says nothing of it for a case that is the whole slot', async () => {
+    const win = fakeWindow(), states = [];
+    const host = stubHost({ win, id: 'mystery', story: 's', version: 'v1', game: 'g', start: [], brings: () => null });
+    connect({ win, target: win, id: 'mystery', story: 's', version: 'v1', onState: (st) => states.push(st), onRefused: (r) => assert.fail(r) });
+    await settle();
+    assert.ok(!('lock' in states.at(-1)) && !('inOffice' in states.at(-1)));
+    host.lock('new-reading', false);
+    await settle();
+    assert.deepEqual([states.at(-1).lock, states.at(-1).inOffice], ['new-reading', false]);
+    host.lock(null);
+    await settle();
+    assert.ok(!('lock' in states.at(-1)));
+});

@@ -5,7 +5,9 @@
 // `{type, clientId, iframeId, windowId, timestamp, data}`. Over it go six events of the host's event bus:
 //   page → host   mystery:requestState   {story, version}
 //   page → host   mystery:questionSolved {story, questionId}
-//   host → page   mystery:state          {story, version, game, connected, papers, solved, loop?}   (the whole sets, every time)
+//   host → page   mystery:state          {story, version, game, connected, papers, solved, loop?, lock?, inOffice?}   (the whole sets, every time;
+//                 `lock` 'actions' | 'new-reading' | 'everything' and `inOffice` for a case that is one region of a world: away from
+//                 its office the page takes no move and sends no solved question; both absent: never locked)
 //   host → page   mystery:refused        {reason, story, version}   (the slot's; reason: no-mystery-world, other-story, other-version)
 //   host → page   mystery:autoSolve      {story, fast?, stop?}   (the careful reader plays in the player's save; `stop` ends it)
 //   page → host   mystery:autoSolveStatus {story, state, solved, waiting?, failed?}   (state: running, waiting, done, stopped, failed;
@@ -74,9 +76,9 @@ export function reconcile(heldBefore, solvedHere, state) {
  */
 export function stubHost({ win, target = win, id, story, version, game, start, brings, onMessage = null }) {
     const solved = new Set(), given = [], statuses = [];
-    let loop = 1;
+    let loop = 1, lock = null;
     const post = (type, data) => (typeof target === 'function' ? target() : target).postMessage(message(type, id, data), '*');
-    const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: true, papers: [...start, ...[...solved].map(brings).filter(Boolean), ...given], solved: [...solved], loop } });
+    const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: true, papers: [...start, ...[...solved].map(brings).filter(Boolean), ...given], solved: [...solved], loop, ...(lock ?? {}) } });
     win.addEventListener('message', (e) => {
         const m = e.data;
         if (!m || m.clientId !== id) return;
@@ -91,5 +93,5 @@ export function stubHost({ win, target = win, id, story, version, game, start, b
     });
     // For a case with visits, whose day is played in the host: a paper found there, and the loop it is in.
     // `autoSolve`: the host's request for the careful reader, and what the page has said of it since (`statuses`).
-    return { autoSolve: (opts = {}) => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:autoSolve', eventData: { story, ...opts } }), statuses: () => [...statuses], solved: () => [...solved], give: (paper) => { if (!given.includes(paper)) given.push(paper); state(); }, loop: (n) => { loop = n; state(); } };
+    return { autoSolve: (opts = {}) => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:autoSolve', eventData: { story, ...opts } }), statuses: () => [...statuses], solved: () => [...solved], give: (paper) => { if (!given.includes(paper)) given.push(paper); state(); }, loop: (n) => { loop = n; state(); }, lock: (kind, inOffice) => { lock = kind ? { lock: kind, inOffice } : null; state(); } };
 }

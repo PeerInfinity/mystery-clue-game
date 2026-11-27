@@ -161,7 +161,10 @@ if (BRIDGE_ID && AUTOPLAY === null) {
     // The case's name and version as its export has them (rules.json, which a test keeps the export of the case).
     // A case with no export (the checks' fixture) has its structure's name and no version.
     const { story, version } = await get(`${CASE}/rules.json`).then((r) => r.world[1].slot_data.mystery, () => get(`${CASE}/visits.json`)).catch(async () => ({ story: (await get(`${CASE}/structure.json`)).story, version: 'unversioned' }));
-    ap = { story, version, held: [...(logic?.start ?? [])], connected: false, link: null, onState: null, sent: new Set(), visits: byVisits, loop: 1 };
+    ap = { story, version, held: [...(logic?.start ?? [])], connected: false, link: null, onState: null, sent: new Set(), visits: byVisits, loop: 1, lock: null, inOffice: true };
+    // The lock (a case that is one region of a generated world): `lock` and `inOffice` come in every state, and are
+    // absent for a case that is the whole slot (then nothing is ever locked).
+    ap.setLock = (st) => { ap.lock = ['actions', 'new-reading', 'everything'].includes(st.lock) ? st.lock : null; ap.inOffice = st.inOffice !== false; };
     if (params.get('bridge') === 'stub') {
         // The checks' host, in this window: the placement of `?seed=`, as when playing alone.
         // (A case with visits: nothing is placed; the check gives the papers as its visits would find them, `__stub.give`.)
@@ -179,6 +182,7 @@ if (BRIDGE_ID && AUTOPLAY === null) {
     });
     if (first.refused) { waitNote(`The Archipelago refused this page: ${first.refused}.`); throw new Error(`bridge: ${first.refused}`); }
     ap.first = first;
+    ap.setLock(first);
     ap.held = reconcile(ap.held, [], first).held;
     STORE = bridgeStore(first.game ?? 'game');
     // The same generated game hosted again is the same `game` with nothing checked: a timeline saved here would send
@@ -189,6 +193,9 @@ if (BRIDGE_ID && AUTOPLAY === null) {
     } catch { /* no save */ }
 }
 window.__ap = ap;
+/** Away from the case's office in a world that locks it: no move of the player's is taken, and no solved question is sent. */
+const locked = () => !!ap?.lock && !ap.inOffice;
+const LOCK_NOTE = 'This case is worked on in its office. You are away from it: you can read, and nothing on the timeline can be changed until you are back.';
 
 // --- State: how far the story is read, the player's trust and marks on questions. Saved in this browser only.
 // `marks`: {question id: {possibility: 'circled' | 'crossed'}}; a possibility not in it is uncertain.
@@ -1430,6 +1437,12 @@ function untriedCounts() {
     if (t) t.textContent = String(total);
 }
 function render() {
+    document.body.classList.toggle('ap-locked', locked());
+    if (locked() && shut(state.story)) state.story = MAIN;
+    // Said for as long as it lasts, above everything.
+    let bar = document.getElementById('ap-lock');
+    if (locked() && !bar) { bar = document.createElement('p'); bar.id = 'ap-lock'; bar.className = 'small'; bar.setAttribute('role', 'status'); document.body.prepend(bar); }
+    if (bar) { bar.hidden = !locked(); bar.textContent = LOCK_NOTE; }
     mountLayout();
     applyTheme();
     document.getElementById('layout').value = state.layout;
@@ -2256,11 +2269,13 @@ function paperNotes() {
     if (state.story !== MAIN) return '';
     return unreadPapers().map((p) => `<p class="paper-note small">${p.at ? 'A paper not read to its end' : 'A paper has come'}: <b>${esc(p.title)}</b> (${p.at} of ${p.last} read). <button type="button" class="quiet" data-story="${esc(p.id)}">Open it</button></p>`).join('');
 }
+/** Under the lock `new-reading`, away from the office: a paper not yet begun is listed and not opened. */
+const shut = (id) => locked() && ap.lock === 'new-reading' && id !== MAIN && reading.readTo(id) === 0;
 function storyTabsHtml() {
     if (!files.length) return '';
     const tab = (id, title) => {
         const at = reading.readTo(id), last = lastOf(id);
-        return `<button type="button" class="story-tab${state.story === id ? ' on' : ''}${!at ? ' unread' : ''}" data-story="${esc(id)}" title="${at ? `Read to ¶${at} of ${last}` : 'Not read yet'}">${esc(title)} <span class="small muted">${at}/${last}</span></button>`;
+        return `<button type="button" class="story-tab${state.story === id ? ' on' : ''}${!at ? ' unread' : ''}${shut(id) ? ' shut' : ''}" data-story="${esc(id)}" title="${shut(id) ? 'Opened in the office of the case' : at ? `Read to ¶${at} of ${last}` : 'Not read yet'}">${esc(title)} <span class="small muted">${at}/${last}</span></button>`;
     };
     const shown = files.filter((f) => delivered(f.id));
     const waiting = files.filter((f) => !f.visit).length - shown.filter((f) => !f.visit).length;   // a visit's scene comes by going there
@@ -2556,7 +2571,7 @@ const confirmed = {};     // how many statements each of them confirmed, for the
  */
 let trying = false;       // a move only tried and taken back (the hints, the checks): nothing is judged meanwhile
 function judge() {
-    if (!observations || trying) return;
+    if (!observations || trying || locked()) return;
     let fresh = false;
     for (let more = true; more;) {
         more = false;
@@ -2778,6 +2793,18 @@ document.getElementById('undo').addEventListener('click', () => {
 });
 document.getElementById('layout').addEventListener('change', (e) => { state.layout = e.target.value; backs = []; save(); render(); });
 document.getElementById('theme').addEventListener('change', (e) => { state.theme = e.target.value; save(); render(); });
+// Away from the office (the lock, in an Archipelago): the player's moves are not taken. What is a move: an answer's
+// mark, a link, a level of trust, a reasoning move or its withdrawal, a thing held, the room's marks, a check, Undo.
+const LOCKED_MOVES = '[data-link-entry], [data-linking], [data-left-linking], [data-move-s], [data-move-a], [data-move-m], [data-move-c], [data-move-b], [data-hold], [data-unhold], [data-drop], [data-withdraw], [data-way], [data-way-clear], [data-got], [data-route-add], [data-route-back], [data-mark-q], [data-set-trust], [data-agree], [data-stop], [data-compare], [data-account], #undo, .link-trust, .narration-trust, .person-trust';
+for (const type of ['click', 'change']) document.addEventListener(type, (e) => {
+    if (!locked()) return;
+    const paper = type === 'click' && e.target.closest?.('[data-story]');
+    const isShut = paper && shut(paper.dataset.story);
+    if (!isShut && !e.target.closest?.(LOCKED_MOVES)) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    state.note = isShut ? `${fileById.get(paper.dataset.story)?.title ?? 'This paper'} has come while you are away from the office of the case: it is opened there.` : LOCK_NOTE;
+    render();   // (a select is drawn again with the level it had)
+}, true);
 // The settings menu closes on a click outside it.
 document.addEventListener('click', (e) => { const st = document.getElementById('settings'); if (st.open && !e.target.closest('#settings')) st.open = false; });
 document.addEventListener('click', (e) => {
@@ -3103,8 +3130,13 @@ document.getElementById('autoplay-open')?.addEventListener('click', () => {
 if (ap) {
     ap.onState = (st) => {
         if (st.version != null && st.version !== ap.version) { state.note = `The Archipelago slot was made from another version of this case (${st.version}; this page is ${ap.version}).`; render(); return; }
+        const wasLocked = locked();
+        ap.setLock(st);
         const r = reconcile(ap.held, Object.keys(state.solved), st);
+        if (locked()) r.resend = [];   // nothing is sent from outside the office: it goes when the player is back
         ap.held = r.held; ap.connected = !!st.connected;
+        if (locked() && !wasLocked) solver?.stop();
+        if (wasLocked && !locked()) state.note = null;
         // A case with visits: the day is the host's loop (`loop`, from 1; without it the day stays 1), and a paper is of the day it came on.
         if (ap.visits) {
             const day = Number.isInteger(st.loop) && st.loop > 0 ? st.loop : state.visits.day, was = state.visits;
@@ -3115,7 +3147,9 @@ if (ap) {
         for (const q of r.resend) ap.link.solved(q);
         for (const q of st.solved ?? []) ap.sent.add(q);
         if (r.fresh.length) state.note = `From the Archipelago: ${r.fresh.map((id) => fileById.get(id)?.title ?? id).join('; ')}.`;
-        if (r.fresh.length || r.resend.length) render();
+        // Back in the office: what the links already show is judged now (a paper read while away may have settled a question).
+        if (wasLocked && !locked()) judge();
+        if (r.fresh.length || r.resend.length || wasLocked !== locked()) render();
         ap.states++;
         for (const w of ap.waiters.splice(0)) w();
     };
@@ -3123,15 +3157,16 @@ if (ap) {
     // no reload. One at a time: a request while it runs is passed over, `stop` ends it. What it says goes to the host
     // (`mystery:autoSolveStatus`), with every question solved and, when it waits, what each open question still lacks.
     ap.waiters = []; ap.states = 0;
+    let solver = null;
     const allLogic = logic ?? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery });
     const lacking = () => {
         const held = source.held(), solved = new Set(Object.keys(state.solved));
         return allLogic.questions.filter((q) => !solved.has(q.id)).map((q) => ({ question: q.id, ways: (q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] })))
             .map((w) => ({ papers: [...w.papers].filter((p) => !held.has(p)).sort(), requires: [...w.requires].filter((r) => !solved.has(r)).sort() })) }));
     };
-    let solver = null;
     ap.onAutoSolve = async (d) => {
         if (d.stop) { solver?.stop(); return; }
+        if (locked()) { ap.link.status({ state: 'stopped', locked: true, solved: Object.keys(state.solved) }); return; }
         if (solver?.running) return;
         const { start } = await import('./world-autoplay.js');
         if (solver?.running) return;

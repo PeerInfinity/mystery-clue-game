@@ -68,6 +68,7 @@ if (caseHeader.delivery?.mode === 'earned' || caseFiles.some((f) => f.visit)) {
     checks.push(['path-check.mjs', { BRIDGE: '1', ANSWERS: 'evidence' }]);
     // And the careful reader asked for by the host (`mystery:autoSolve`): in the live save, waiting for papers.
     checks.push(['bridge-solve-check.mjs']);
+    checks.push(['bridge-lock-check.mjs']);
 }
 // A case with its implications written (world/implications.json, the experiment): the true path once more with the
 // answers marked from the evidence, where a circle must follow from the path's links.

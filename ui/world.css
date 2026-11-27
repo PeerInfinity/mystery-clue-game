@@ -298,3 +298,6 @@ body.link-only-new #timeline .event.link-done { display: none; }
 .visits-head { margin: 2px 0; }
 .event.earlier-day .ph { color: var(--muted, #777); }
 .day-tag { font-family: var(--sans); font-size: 0.75em; color: var(--muted, #777); border: 1px solid var(--line); border-radius: 8px; padding: 0 5px; white-space: nowrap; }
+/* In an Archipelago, away from the office of the case (the lock): the moves are greyed, the reading is not. */
+#ap-lock { position: sticky; top: 0; z-index: 30; margin: 0; padding: 5px 12px; background: var(--chip); border-bottom: 2px solid var(--accent); font-family: var(--sans); }
+body.ap-locked :is([data-link-entry], [data-linking], [data-left-linking], [data-move-s], [data-move-a], [data-move-m], [data-move-c], [data-move-b], [data-hold], [data-unhold], [data-drop], [data-withdraw], [data-way], [data-way-clear], [data-got], [data-route-add], [data-route-back], [data-mark-q], [data-set-trust], [data-agree], [data-stop], [data-compare], [data-account], #undo, .link-trust, .narration-trust, .person-trust, .story-tab.shut) { opacity: 0.45; cursor: not-allowed; }
