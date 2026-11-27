@@ -216,9 +216,10 @@ is sent.
 
 **One question, and at once** (since 2026-11-27, for the host's playback bot, which walks a world one check at
 a time). With `question` the reader makes only the moves the path makes for that question (`for_q`), ends
-`done` when it is solved, reads no further and takes its strip away. It solves nothing else on purpose: a
-question that lacks a paper or rests on one not solved says `waiting`, with what that one question lacks, and
-goes on at the state that brings it. Solved already: `done` at once, sent again if the host does not list it. A
+`done` when it is solved, reads no further and takes its strip away. The questions it rests on (and theirs) are
+answered on the way, first, each sent like any other: the host's rule for a question names papers only, with
+those of what it rests on folded in, so the host asks as soon as the papers are held. A question that lacks a
+paper says `waiting`, with what it and those it rests on lack, and goes on at the state that brings it. Solved already: `done` at once, sent again if the host does not list it. A
 question the case has not, or a request while another runs: `failed`, with why. `instant` (with or without
 `question`) is `fast` with no strip shown. Two things on the way (found with the host's bot, the same day): a
 question the story is about to answer holds the reading until it is answered, and the reader answers that one

@@ -14,8 +14,8 @@
 // `live`: {skipDay, delivered(story id), allSolved(), report(state, extra), states() (how many have come),
 // nextState(n) → a promise of one after the nth}. Returns {stop(), running, done (a promise)}.
 // `live.question` (with `live.solved(id)`, `live.open(id)`): only that question, by the moves the path makes for it
-// (`for_q`); it ends when the question is solved, reads no further, and takes its strip away. A question that rests on
-// one not solved, or lacks a paper, waits. One thing it solves on the way: a question the story is about to answer
+// (`for_q`); it ends when the question is solved, reads no further, and takes its strip away. A question that lacks a
+// paper waits. What it solves on the way: the questions the asked one rests on (`live.rests`), and a question the story is about to answer
 // holds the reading until it is answered (the gate; `live.gate()`), and the reader answers it, since reading past it
 // is the only way on and would give it away. `instant`: as `fast`, and no strip.
 
@@ -243,8 +243,12 @@ async function run({ store, fast = false, instant = false, live = null }, handle
             for (;;) {
                 let did = 0, lacking = false, refused = null;
                 const n = live.states();
-                // A question asked for by itself is not begun while it cannot be solved (a paper, or one it rests on).
-                for (const { m, i } of target && !over() && !live.open(target) ? [] : todo()) {
+                // One question asked for: the questions it rests on are answered too, and first (`live.rests`: those of
+                // the way whose papers are held), and theirs. The host's rule for a question names papers only, with
+                // those of what it rests on folded in, so it asks for a question as soon as the papers are held.
+                for (let grew = !!target; grew;) { grew = false; for (const q of [...wanted]) if (!live.solved(q)) for (const r of live.rests(q)) if (!wanted.has(r)) { wanted.add(r); grew = true; } }
+                // A question is not begun while it cannot be solved (a paper, or one it rests on: `shutQ`).
+                for (const { m, i } of todo()) {
                     if (over()) break;
                     if (made(m, saved())) continue;
                     if (!held(m) || shutQ(m)) { lacking = true; continue; }

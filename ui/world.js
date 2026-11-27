@@ -3187,6 +3187,8 @@ if (ap) {
         ap.said = null;
         solver = start({ store: STORE, fast: !!d.fast, instant: !!d.instant, live: {
             question, solved: (id) => !!state.solved[id], open: openNow,
+            // The unsolved questions this one rests on, by the way that lacks fewest papers.
+            rests: (id) => (lacking([id])[0]?.ways ?? []).slice().sort((a, b) => a.papers.length - b.papers.length)[0]?.requires ?? [],
             skipDay: ap.visits, delivered,
             allSolved: () => allLogic.questions.every((q) => state.solved[q.id]),
             states: () => ap.states,

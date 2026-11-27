@@ -3020,6 +3020,14 @@ script that found each fact's paragraph from its quote; the data files are the s
       the bell's question and the rounds' are both solved: the reader makes the path's moves whose papers
       are held, and the page judges the answer from those links. (With answers marked by hand the path's
       own circle still waits for the second paper; the bot plays with answers from the evidence.)
+    - *What it rests on is answered on the way* (a correction of "nothing else on purpose" above, the same
+      day). I had taken the host to ask in an order where what a question rests on is solved already. It
+      does not: the exported rule of a question names papers only, with the papers of what it rests on
+      folded in, and a question whose check holds nothing of use is never asked for by the bot at all (five
+      of the long case's 25 in the world tried). So the reader now answers what the asked question rests
+      on, and what that rests on, first, by the way whose papers are held; each is sent as solved. Asked
+      for the motive with the papers of its rule only, it solved four others on the way and then it. With
+      every paper held and the questions asked from the last, 13 requests solved all 25.
 
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
