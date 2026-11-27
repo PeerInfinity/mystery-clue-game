@@ -64,7 +64,11 @@ if (caseHeader.delivery?.mode === 'earned') {
 }
 // Played as in an Archipelago, against the stand-in host (ui/bridge.js): a case whose papers are earned (one seed),
 // and a case with visits (its scenes given by the host as its day would find them).
-if (caseHeader.delivery?.mode === 'earned' || caseFiles.some((f) => f.visit)) checks.push(['path-check.mjs', { BRIDGE: '1', ANSWERS: 'evidence' }]);
+if (caseHeader.delivery?.mode === 'earned' || caseFiles.some((f) => f.visit)) {
+    checks.push(['path-check.mjs', { BRIDGE: '1', ANSWERS: 'evidence' }]);
+    // And the careful reader asked for by the host (`mystery:autoSolve`): in the live save, waiting for papers.
+    checks.push(['bridge-solve-check.mjs']);
+}
 // A case with its implications written (world/implications.json, the experiment): the true path once more with the
 // answers marked from the evidence, where a circle must follow from the path's links.
 if (fs.existsSync(path.join(caseDir, 'world', 'implications.json'))) {
@@ -75,6 +79,9 @@ if (fs.existsSync(path.join(caseDir, 'world', 'implications.json'))) {
     // And the autoplay as the page plays it by default, with the answers marked from the evidence (2026-11-23: it had
     // only been checked with the answers marked by hand, and stopped on a cross the evidence does not make).
     checks.push(['world-autoplay-check.mjs', 'one', { ...env, ANSWERS: 'evidence' }]);
+    // And the hints with the answers marked from the evidence (2026-11-26: they had only been checked with the
+    // answers marked by hand, and asked the player for marks that are the page's to make there).
+    checks.push(['world-hints-check.mjs', 'fresh', { ...env, ANSWERS: 'evidence' }]);
     checks.splice(checks.indexOf(first) + 1, 0, ['path-check.mjs', { ...env, ANSWERS: 'evidence' }], ['path-check.mjs', { ...env, ANSWERS: 'evidence', LIES: '1' }], ['random-links-check.mjs', { ...env }]);
 }
 const failed = [];

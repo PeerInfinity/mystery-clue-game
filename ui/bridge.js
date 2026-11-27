@@ -2,11 +2,15 @@
 // "Played in an Archipelago"). The page sits in a frame of the Archipelago-CC web client (`?iframeId=<id>`), or in a
 // window that client opened (`?windowId=<id>`), and talks
 // to it by that client's adapter protocol (its frontend/modules/shared/communicationProtocol.js): window messages
-// `{type, clientId, iframeId, windowId, timestamp, data}`. Over it go four events of the host's event bus:
+// `{type, clientId, iframeId, windowId, timestamp, data}`. Over it go six events of the host's event bus:
 //   page → host   mystery:requestState   {story, version}
 //   page → host   mystery:questionSolved {story, questionId}
 //   host → page   mystery:state          {story, version, game, connected, papers, solved, loop?}   (the whole sets, every time)
 //   host → page   mystery:refused        {reason, story, version}   (the slot's; reason: no-mystery-world, other-story, other-version)
+//   host → page   mystery:autoSolve      {story, fast?, stop?}   (the careful reader plays in the player's save; `stop` ends it)
+//   page → host   mystery:autoSolveStatus {story, state, solved, waiting?, failed?}   (state: running, waiting, done, stopped, failed;
+//                 `solved` every solved question; `waiting` [{question, ways: [{papers, requires}]}], what each open question still
+//                 lacks, way by way; `failed` {move, why})
 // The page deals only in its own ids (papers, questions); the host turns them into items and locations.
 // Nothing here touches the document: `win` is the page's window and `target` the host's, so a test can pass its own.
 
@@ -19,7 +23,7 @@ const message = (type, id, data) => ({ type, clientId: id, iframeId: id, windowI
  * Returns `{solved(questionId), request()}`. The handshake is repeated until the host answers, a heartbeat goes
  * every half minute after, and a host that says the page is no longer registered is greeted again.
  */
-export function connect({ win, target, id, mode = 'iframe', origin = '*', story, version, onState, onRefused, retry = 1000, beat = 30000 }) {
+export function connect({ win, target, id, mode = 'iframe', origin = '*', story, version, onState, onRefused, onAutoSolve = null, retry = 1000, beat = 30000 }) {
     let ready = false;
     const post = (type, data) => target.postMessage(message(type, id, data), origin);
     const publish = (eventName, eventData) => post('PUBLISH_EVENT_BUS', { eventName, eventData });
@@ -29,7 +33,7 @@ export function connect({ win, target, id, mode = 'iframe', origin = '*', story,
         if (!m || typeof m !== 'object' || (m.clientId ?? m.iframeId ?? m.windowId) !== id) return;
         if (m.type === 'ADAPTER_READY' && !ready) {
             ready = true;
-            for (const eventName of ['mystery:state', 'mystery:refused']) post('SUBSCRIBE_EVENT_BUS', { eventName });
+            for (const eventName of ['mystery:state', 'mystery:refused', 'mystery:autoSolve']) post('SUBSCRIBE_EVENT_BUS', { eventName });
             post('IFRAME_APP_READY', { timestamp: Date.now() });
             request();
         } else if (m.type === 'CONNECTION_ERROR' && JSON.stringify(m.data ?? '').includes('NOT_REGISTERED')) {
@@ -39,6 +43,7 @@ export function connect({ win, target, id, mode = 'iframe', origin = '*', story,
             // A refusal names the slot's story, which may be another: it is for this page all the same.
             if (eventName === 'mystery:refused') onRefused(REASONS[eventData?.reason] ?? eventData?.reason ?? 'refused');
             else if (eventName === 'mystery:state' && (eventData?.story == null || eventData.story === story)) onState(eventData ?? {});
+            else if (eventName === 'mystery:autoSolve' && (eventData?.story == null || eventData.story === story)) onAutoSolve?.(eventData ?? {});
         }
     });
     // Framed, or opened as a window of its own by the web client's window adapter (`?windowId=`): the same but for the first word.
@@ -47,7 +52,7 @@ export function connect({ win, target, id, mode = 'iframe', origin = '*', story,
     win.setInterval(() => { if (!ready) hello(); }, retry);
     // The host drops a client it has not heard from for a minute (its adapter's `checkHeartbeats`).
     win.setInterval(() => { if (ready) post('HEARTBEAT', { timestamp: Date.now() }); }, beat);
-    return { solved: (questionId) => publish('mystery:questionSolved', { story, questionId }), request };
+    return { solved: (questionId) => publish('mystery:questionSolved', { story, questionId }), request, status: (data) => publish('mystery:autoSolveStatus', { story, ...data }) };
 }
 
 /**
@@ -68,7 +73,7 @@ export function reconcile(heldBefore, solvedHere, state) {
  * it (scripts/fixtures/bridge-host.html).
  */
 export function stubHost({ win, target = win, id, story, version, game, start, brings, onMessage = null }) {
-    const solved = new Set(), given = [];
+    const solved = new Set(), given = [], statuses = [];
     let loop = 1;
     const post = (type, data) => (typeof target === 'function' ? target() : target).postMessage(message(type, id, data), '*');
     const state = () => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:state', eventData: { story, version, game, connected: true, papers: [...start, ...[...solved].map(brings).filter(Boolean), ...given], solved: [...solved], loop } });
@@ -80,9 +85,11 @@ export function stubHost({ win, target = win, id, story, version, game, start, b
         if (m.type !== 'PUBLISH_EVENT_BUS') return;
         const { eventName, eventData } = m.data;
         if (eventData.story !== story || eventData.version != null && eventData.version !== version) return post('EVENT_BUS_MESSAGE', { eventName: 'mystery:refused', eventData: { story: eventData.story, reason: 'another story or version' } });
+        if (eventName === 'mystery:autoSolveStatus') { statuses.push(eventData); return; }   // heard, and not answered
         if (eventName === 'mystery:questionSolved') solved.add(eventData.questionId);
         state();
     });
     // For a case with visits, whose day is played in the host: a paper found there, and the loop it is in.
-    return { solved: () => [...solved], give: (paper) => { if (!given.includes(paper)) given.push(paper); state(); }, loop: (n) => { loop = n; state(); } };
+    // `autoSolve`: the host's request for the careful reader, and what the page has said of it since (`statuses`).
+    return { autoSolve: (opts = {}) => post('EVENT_BUS_MESSAGE', { eventName: 'mystery:autoSolve', eventData: { story, ...opts } }), statuses: () => [...statuses], solved: () => [...solved], give: (paper) => { if (!given.includes(paper)) given.push(paper); state(); }, loop: (n) => { loop = n; state(); } };
 }

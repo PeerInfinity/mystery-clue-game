@@ -185,7 +185,7 @@ be played in a frame of the Archipelago-CC web client, which gives the page `?if
 a window that client opens (`?windowId=<id>`: the same messages, to the opener, the handshake's first word
 `WINDOW_READY`; not yet tried against the real window adapter). The
 papers then come as that multiworld's items and each solved question is a check. The page speaks the web client's
-adapter protocol and four events of its event bus:
+adapter protocol and six events of its event bus:
 
 | Direction | Event | Payload |
 |---|---|---|
@@ -193,6 +193,20 @@ adapter protocol and four events of its event bus:
 | page → host | `mystery:questionSolved` | `{story, questionId}` |
 | host → page | `mystery:state` | `{story, version, game, connected, papers, solved}`: the whole sets, every time |
 | host → page | `mystery:refused` | `{reason, story, version}`: the slot's story and version; `reason` is `no-mystery-world`, `other-story` or `other-version` |
+| host → page | `mystery:autoSolve` | `{story, fast?, stop?}`: the careful reader plays in the player's save; `fast` with no pauses and no cursor; `stop` ends it |
+| page → host | `mystery:autoSolveStatus` | `{story, state, solved, waiting?, failed?}`: `state` is `running`, `waiting`, `done`, `stopped` or `failed`; `solved` every solved question; `waiting` (when waiting) `[{question, ways: [{papers, requires}]}]`, what each open question still lacks, way by way; `failed` `{move, why}` |
+
+**The careful reader, asked for by the host** (`mystery:autoSolve`, since 2026-11-26; `ui/world-autoplay.js`, `live`).
+The true path is played in the player's own save, with no reload: each move of the path not made yet whose papers
+are held, in the path's order, with the autoplay's cursor, captions and speed strip (`fast`: none of them, for a
+check). A visit and the day's end are the host's and are passed over. When what is left waits for a paper the page
+says `waiting`, with what each open question lacks, and goes on by itself at the next `mystery:state` that brings
+something; a `waiting` may be brief where a solve has just earned a paper that is still on its way. It ends `done`
+when every question the case's logic covers is solved (moves of a paper the answers did not need may be left). A
+click of the player's anywhere outside the strip stops it (`stopped`), as does `stop` from the host or the strip's
+Stop; the page is left as it stands, and a new request starts it again. A request while it runs is passed over. A
+status is sent when it changes, not for every state that brings nothing. `failed` is a move the page would not
+take with nothing before it waiting for a paper: the player's own earlier moves stand in its way, or a defect.
 
 `story` and `version` are the export's (`scripts/export-rules.mjs`), which the page reads from the case's `rules.json`
 (so the built site carries that file for such a case, and a test keeps it the export). The version is a hash of

@@ -21,7 +21,7 @@ test('the handshake, the state, a solve and its paper', async () => {
     const link = connect({ win, target: win, id: 'mystery', story: 's', version: 'v1', onState: (s) => states.push(s), onRefused: (r) => assert.fail(r) });
     await settle();
     assert.deepEqual(states.at(-1), { story: 's', version: 'v1', game: 'g', connected: true, papers: ['a'], solved: [], loop: 1 });
-    assert.deepEqual(win.log.filter((m) => m.type === 'SUBSCRIBE_EVENT_BUS').map((m) => m.data.eventName), ['mystery:state', 'mystery:refused']);
+    assert.deepEqual(win.log.filter((m) => m.type === 'SUBSCRIBE_EVENT_BUS').map((m) => m.data.eventName), ['mystery:state', 'mystery:refused', 'mystery:autoSolve']);
     assert.ok(win.log.some((m) => m.type === 'IFRAME_APP_READY'));
     // Every message has the shape the web client's adapter accepts.
     for (const m of win.log) assert.ok(m.type && m.clientId === 'mystery' && m.iframeId === 'mystery' && typeof m.timestamp === 'number');
@@ -90,4 +90,20 @@ test("a refusal that names the slot's story, another one, is still taken", async
 test('reconcile: papers are never taken back, and what the host lacks is sent again once connected', () => {
     assert.deepEqual(reconcile(['a', 'b'], ['q1', 'q2'], { connected: true, papers: ['a', 'c'], solved: ['q1'] }), { held: ['a', 'b', 'c'], fresh: ['c'], resend: ['q2'] });
     assert.deepEqual(reconcile(['a'], ['q1'], { connected: false, papers: [], solved: [] }), { held: ['a'], fresh: [], resend: [] });
+});
+
+test('the host asks for the careful reader, and hears what the page says of it', async () => {
+    const win = fakeWindow(), asked = [];
+    const host = stubHost({ win, id: 'mystery', story: 's', version: 'v1', game: 'g', start: [], brings: () => null });
+    const link = connect({ win, target: win, id: 'mystery', story: 's', version: 'v1', onState: () => {}, onRefused: (r) => assert.fail(r), onAutoSolve: (d) => asked.push(d) });
+    await settle();
+    host.autoSolve({ fast: true });
+    host.autoSolve({ stop: true });
+    await settle();
+    assert.deepEqual(asked, [{ story: 's', fast: true }, { story: 's', stop: true }]);
+    const states = win.log.filter((m) => m.type === 'EVENT_BUS_MESSAGE' && m.data.eventName === 'mystery:state').length;
+    link.status({ state: 'waiting', solved: [], waiting: [{ question: 'q1', ways: [{ papers: ['a'], requires: [] }] }] });
+    await settle();
+    assert.deepEqual(host.statuses(), [{ story: 's', state: 'waiting', solved: [], waiting: [{ question: 'q1', ways: [{ papers: ['a'], requires: [] }] }] }]);
+    assert.equal(win.log.filter((m) => m.type === 'EVENT_BUS_MESSAGE' && m.data.eventName === 'mystery:state').length, states, 'a status is not answered with a state');
 });

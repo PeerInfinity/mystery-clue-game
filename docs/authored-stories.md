@@ -2921,6 +2921,37 @@ script that found each fact's paragraph from its quote; the data files are the s
     - *Lost:* the reasoning of a crossing ("He could not have been in the office") is no longer said by a hint
       in that mode. It could be said on the link that brings it; not done.
 
+169. **The careful reader in the live save, asked for by the host (2026-11-26; the user: "I want to implement
+    the features requested by the Archipelago session").** The Action Nodes side wants a bot to be able to solve
+    the mystery through this page: started by a bridge request, with no reload, in the save being played,
+    visible with its controls, waiting where a paper is lacking. Agreed with that side before building: the
+    request `mystery:autoSolve {story, fast?, stop?}`, the answer `mystery:autoSolveStatus {story, state, solved,
+    waiting?, failed?}`, a click of the player's stops it, it goes on by itself when a paper comes.
+    - *What it is:* the autoplay's own reader (`ui/world-autoplay.js`), given a second way to run. The autoplay
+      plays the whole path in a save of its own after a reload. This one takes the moves of the path not made
+      yet whose papers are held, in the path's order, round after round, in the player's save; it passes over
+      visits and the day's end, which are the host's; it stops by taking its strip away, not by reloading.
+    - *When it ends:* when every question the logic covers is solved, not when the path is used up. In The Same
+      Monday the path also calls on the pilot and the chandler, whose papers the answer does not need; a host
+      that never sends them must not leave the reader waiting for ever.
+    - *A move the page will not take* is left for the next round when a move before it still waits for its
+      paper (it may rest on that one); with nothing before it waiting, it is a failure and is said (`failed`).
+    - *Found on the way:* (1) a paper earned by a solve is still on its way when the round ends, so the reader
+      would have waited for a state that had already come: it now counts the states and waits only for one
+      after the round began. (2) A state that brings nothing made it say `running`, `waiting` again each
+      time: a status is now sent only when it changes. (3) The check hung on the page's own question "is this
+      a new room?" (a save left by an earlier run): the check answers it.
+    - *Also found, of finding 168:* the page checks play with the answers marked by hand unless told otherwise,
+      so the hints had still not been checked with the answers marked from the evidence. They pass when they
+      are; that run is now one of the page checks of every case with rules.
+    - *Checked* by `scripts/bridge-solve-check.mjs`, one of the page checks of a case with visits or earned
+      papers: The Same Monday with its papers given one at a time in the reverse of the path's order (waiting
+      and going on five times, then done, no day ended by the page), the long case to its end (25 questions,
+      48 seconds), stopped by the host and by a click, asked again, never reloaded.
+    - *Not done:* the reasoning said in a hint where the answers are marked from the evidence. The user: lines
+      written for circling by hand should not be copied there; if more reasoning is wanted, it could come from
+      the inferences the links produce (the "What follows from it" lines).
+
 ### On whether a miniature is any fun (experiment 2, before the user has played)
 
 Each is about two minutes: read five to eight paragraphs, then make every move at the last paragraph before the end,

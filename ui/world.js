@@ -173,6 +173,7 @@ if (BRIDGE_ID && AUTOPLAY === null) {
         ap.link = connect({
             win: window, target: params.get('bridge') === 'stub' ? window : BRIDGE_MODE === 'window' ? window.opener ?? window.parent : window.parent, id: BRIDGE_ID, mode: BRIDGE_MODE, origin: params.get('hostOrigin') || '*', story, version,
             onState: (st) => { if (ap.onState) ap.onState(st); else if (st.version != null && st.version !== version) resolve({ refused: `the Archipelago slot was made from another version of this case (${st.version}; this page is ${version})` }); else if (st.connected) resolve(st); },
+            onAutoSolve: (d) => ap.onAutoSolve?.(d),
             onRefused: (reason) => { if (ap.onState) { state.note = `The Archipelago refused this page: ${reason}.`; render(); } else resolve({ refused: reason }); },
         });
     });
@@ -3115,6 +3116,40 @@ if (ap) {
         for (const q of st.solved ?? []) ap.sent.add(q);
         if (r.fresh.length) state.note = `From the Archipelago: ${r.fresh.map((id) => fileById.get(id)?.title ?? id).join('; ')}.`;
         if (r.fresh.length || r.resend.length) render();
+        ap.states++;
+        for (const w of ap.waiters.splice(0)) w();
+    };
+    // The careful reader, asked for by the host (`mystery:autoSolve`; ui/world-autoplay.js, `live`): in this save, with
+    // no reload. One at a time: a request while it runs is passed over, `stop` ends it. What it says goes to the host
+    // (`mystery:autoSolveStatus`), with every question solved and, when it waits, what each open question still lacks.
+    ap.waiters = []; ap.states = 0;
+    const allLogic = logic ?? caseLogic({ questions: questions.questions, observations: observations ?? [], facts: data.facts, files, delivery: header.delivery });
+    const lacking = () => {
+        const held = source.held(), solved = new Set(Object.keys(state.solved));
+        return allLogic.questions.filter((q) => !solved.has(q.id)).map((q) => ({ question: q.id, ways: (q.ways ?? q.sets.map((set) => ({ papers: [...set], requires: q.requires ?? [] })))
+            .map((w) => ({ papers: [...w.papers].filter((p) => !held.has(p)).sort(), requires: [...w.requires].filter((r) => !solved.has(r)).sort() })) }));
+    };
+    let solver = null;
+    ap.onAutoSolve = async (d) => {
+        if (d.stop) { solver?.stop(); return; }
+        if (solver?.running) return;
+        const { start } = await import('./world-autoplay.js');
+        if (solver?.running) return;
+        solver = start({ store: STORE, fast: !!d.fast, live: {
+            skipDay: ap.visits, delivered,
+            allSolved: () => allLogic.questions.every((q) => state.solved[q.id]),
+            states: () => ap.states,
+            nextState: (n) => (ap.states > n ? Promise.resolve() : new Promise((r) => ap.waiters.push(r))),
+            report: (st, extra = {}, again = false) => {
+                const waiting = st === 'waiting' ? lacking() : undefined;
+                // The same again (a state came that brought nothing) is said only if what is lacking has changed.
+                const key = JSON.stringify([st, waiting, extra]);
+                if (!again || key !== ap.said) ap.link.status({ state: st, solved: Object.keys(state.solved), ...(waiting ? { waiting } : {}), ...(extra ?? {}) });
+                ap.said = key;
+                // For its caption: the papers of the way that lacks fewest.
+                return waiting ? { papers: waiting.flatMap((w) => w.ways).filter((w) => w.papers.length).sort((a, b) => a.papers.length - b.papers.length)[0]?.papers ?? [] } : null;
+            },
+        } });
     };
     ap.onState(ap.first);
 }

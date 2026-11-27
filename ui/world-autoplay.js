@@ -5,14 +5,23 @@
 // Loaded by ui/world.js only on `?autoplay`, in a save of its own (the player's timeline is kept aside); it plays in
 // the viewer's layout, choosing tabs as a player would. `?autoplay=fast` plays with no pauses and no cursor (the check,
 // scripts/world-autoplay-check.mjs). The same moves are checked by scripts/path-check.mjs from outside the page.
+//
+// `live` (in an Archipelago, asked for by the host: `mystery:autoSolve`, ui/bridge.js): the same reader in the player's
+// own save, with no reload. It makes each move of the path not made yet whose papers are held, in the path's order;
+// the visits and the day's end are the host's and are passed over; when what is left waits for a paper it says so
+// (`live.report('waiting')`) and goes on by itself at the host's next state; a click by the player stops it.
+// It ends when every question is solved (moves of the path may be left: those of a paper the answers did not need).
+// `live`: {skipDay, delivered(story id), allSolved(), report(state, extra), states() (how many have come),
+// nextState(n) → a promise of one after the nth}. Returns {stop(), running, done (a promise)}.
 
-import { $, sleep, esc, Stopped, Failed, makeMover, nextRead, readToOf, made } from './world-moves.js';
+import { $, sleep, esc, Stopped, Failed, makeMover, nextRead, readToOf, made, needsOf, DAY_MOVES } from './world-moves.js';
 import { refList } from '../engine/refs.js';
 
 import { CASE, pageUrl } from './world-case.js';
 const SPEEDS = [['0.25', '¼×'], ['0.5', '½×'], ['1', '1×'], ['2', '2×'], ['4', '4×']];
 
-export async function start({ store, fast = false }) {
+export function start(opts) { const h = { stop: () => {}, running: true }; h.done = run(opts, h).finally(() => { h.running = false; }); return h; }
+async function run({ store, fast = false, live = null }, handle) {
     const path = await fetch(`${CASE}/world/path.json`, { cache: 'no-cache' }).then((r) => r.json());
     const moves = path.moves;
     // The case's files (sub-stories), read as each move needs them (world/case.json).
@@ -33,11 +42,11 @@ export async function start({ store, fast = false }) {
     // controls, and the caption on a row of its own, one line cut short or all of it. A click on the caption goes
     // between the two, and the choice is kept on this device. The opening line and a stop are shown whole whichever
     // is chosen (`must`), since they are not to be missed.
-    strip.innerHTML = `<div class="ap-row"><span class="ap-title">Autoplay · the careful reader</span> <span id="ap-para" class="small"></span>
+    strip.innerHTML = `<div class="ap-row"><span class="ap-title">${live ? 'Solving' : 'Autoplay'} · the careful reader</span> <span id="ap-para" class="small"></span>
         <span class="ap-tools"><button id="ap-pause" class="quiet">Pause</button>
         <button id="ap-step" class="quiet" title="Make the next move or read the next paragraph, then pause">Step</button>
         <select id="ap-speed" aria-label="Speed">${SPEEDS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
-        <button id="ap-stop" class="quiet" title="Back to your own timeline">Stop</button></span></div>
+        <button id="ap-stop" class="quiet" title="${live ? 'Stop: the timeline is yours again' : 'Back to your own timeline'}">Stop</button></span></div>
         <div id="ap-caption" class="ap-caption" role="button" tabindex="0" aria-expanded="false" title="Click to show all of it, or one line"><span class="ap-mark" aria-hidden="true"></span><span id="ap-text"></span></div>`;
     const head = document.querySelector('header.top');
     if (head) head.after(strip); else document.body.prepend(strip);
@@ -51,10 +60,10 @@ export async function start({ store, fast = false }) {
     $('#ap-caption').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFull(); } });
     const say = (text, must = false) => { $('#ap-text').textContent = text; strip.classList.toggle('must', must); };
     // What stays in view below the strip is told how tall it and the header are (the header only where it sticks).
-    const measure = () => {
+    function measure() {
         document.body.style.setProperty('--ap', `${strip.offsetHeight}px`);
         document.body.style.setProperty('--head', `${head && getComputedStyle(head).position === 'sticky' ? head.offsetHeight : 0}px`);
-    };
+    }
     if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(measure); ro.observe(strip); if (head) ro.observe(head); }
     window.addEventListener('resize', measure);
     measure();
@@ -73,10 +82,25 @@ export async function start({ store, fast = false }) {
     $('#ap-pause').addEventListener('click', () => { s.stepping = false; setPaused(!s.paused); });
     $('#ap-step').addEventListener('click', () => { s.stepping = true; if (s.paused) setPaused(false); });
     const stepped = () => { if (s.stepping) { s.stepping = false; setPaused(true, `${s.lastCaption} · paused`); } };
-    $('#ap-stop').addEventListener('click', () => { s.stopped = true; s.paused = false; location.href = pageUrl(); });
+    // Live: a stop takes the strip away and leaves the page as it is; nothing is reloaded. A click of the player's own
+    // anywhere else on the page is a stop too (the save is one, and two hands on it are one too many).
+    let wake = () => {};
+    const stop = () => { s.stopped = true; s.paused = false; wake(); };
+    const byPlayer = (e) => { if (e.isTrusted && !strip.contains(e.target)) stop(); };
+    const clear = () => {
+        document.removeEventListener('click', byPlayer, true);
+        window.removeEventListener('resize', measure);
+        strip.remove(); cursor.remove();
+        document.body.classList.remove('autoplaying', 'has-strip');
+        document.body.style.removeProperty('--ap');
+    };
+    if (live) { document.addEventListener('click', byPlayer, true); handle.stop = stop; }
+    $('#ap-stop').addEventListener('click', () => { if (live) return stop(); s.stopped = true; s.paused = false; location.href = pageUrl(); });
     const ending = (text) => {
         say(text, true);
-        strip.querySelector('.ap-tools').innerHTML = `<a class="button" href="${pageUrl()}">Back to your timeline</a>`;
+        strip.querySelector('.ap-tools').innerHTML = live ? '<button id="ap-close" class="quiet">Close</button>' : `<a class="button" href="${pageUrl()}">Back to your timeline</a>`;
+        $('#ap-close')?.addEventListener('click', clear);
+        document.removeEventListener('click', byPlayer, true);
         cursor.remove();
         document.body.classList.remove('autoplaying');
         window.__autoplay = status();
@@ -180,7 +204,7 @@ export async function start({ store, fast = false }) {
     // ---------- the playthrough ----------
     try {
         // It starts paused (not the check), so the viewer can choose a speed first.
-        if (!fast) { setPaused(true, 'A careful reader will read the story and fill in the timeline, move by move. Choose a speed, then press Start.', true); $('#ap-pause').textContent = 'Start'; }
+        if (!fast && !live) { setPaused(true, 'A careful reader will read the story and fill in the timeline, move by move. Choose a speed, then press Start.', true); $('#ap-pause').textContent = 'Start'; }
         await gate();
         const one = async (m) => {
             // A statement trusted already for another question's moves is not trusted again.
@@ -190,7 +214,39 @@ export async function start({ store, fast = false }) {
             await clearNotices();
         };
         const delivery = window.__delivery;
-        if (delivery?.earned) {
+        if (live) {
+            // What is left of the path, in its order, round after round: a move is tried when every paper it is told in
+            // is held. One the page will not take yet (it rests on a move still waiting for its paper) is left for the
+            // next round. A round that makes nothing: all made is the end; else it waits for a paper, unless a move was
+            // refused with nothing before it waiting, which is a fault.
+            const played = new Set();
+            const todo = () => moves.map((m, i) => ({ m, i })).filter(({ m, i }) => !(live.skipDay && DAY_MOVES.has(m.do)) && !played.has(i) && !made(m, saved()));
+            const held = (m) => Object.keys(needsOf(m.at, files)).every((id) => live.delivered(id));
+            // Said to the host only when it changes: a state that brings nothing is not answered with the same again.
+            let said = null;
+            const report = (st, extra) => { const r = live.report(st, extra, said === st); said = st; return r; };
+            report('running');
+            for (;;) {
+                let did = 0, lacking = false, refused = null;
+                const n = live.states();
+                for (const { m, i } of todo()) {
+                    if (live.allSolved()) break;
+                    if (made(m, saved())) continue;
+                    if (!held(m)) { lacking = true; continue; }
+                    try { if (said !== 'running') report('running'); await one(m); played.add(i); did++; } catch (e) {
+                        if (!(e instanceof Failed)) throw e;
+                        if (!lacking && !refused) refused = { move: i, why: e.message };
+                    }
+                }
+                if (live.allSolved() || !todo().length) break;
+                if (did) continue;
+                if (refused) { s.failed = refused.why; ending(`The solving stopped: ${refused.why}.`); report('failed', { failed: refused }); return; }
+                const w = report('waiting');
+                say(`Waiting for ${w?.papers?.length ? `a paper: ${w.papers.map((id) => title(id) ?? id).join(', ')}` : 'what the Archipelago brings next'}.`, true);
+                await new Promise((r) => { wake = r; live.nextState(n).then(r); });
+                await gate();
+            }
+        } else if (delivery?.earned) {
             // Papers earned by solving questions: question by question (each move's `for_q`), the first in the path's
             // order that is open now; what solving it brought is shown a moment.
             const byQ = new Map();
@@ -213,9 +269,11 @@ export async function start({ store, fast = false }) {
         await readTo(Number($('#para').max));
         s.done = true;
         ending(`The end of the story: ${s.moves} moves, every question answered.`);
+        live?.report('done');
     } catch (e) {
-        if (e instanceof Stopped) return;
+        if (e instanceof Stopped) { if (live) { clear(); window.__autoplay = status(); live.report('stopped'); } return; }
         s.failed = e.message;
-        ending(`The autoplay stopped: ${e.message}. This is a defect to fix.`);
+        ending(live ? `The solving stopped: ${e.message}.` : `The autoplay stopped: ${e.message}. This is a defect to fix.`);
+        live?.report('failed', { failed: { move: null, why: e.message } });
     }
 }
